@@ -1,0 +1,7 @@
+{:node :R14,
+ :run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+ :via "futon2.report.war-machine/invoke-strategic-selection",
+ :basis "record :route R6->R14",
+ :status :present,
+ :field [:decision :tau],
+ :value 1.0}

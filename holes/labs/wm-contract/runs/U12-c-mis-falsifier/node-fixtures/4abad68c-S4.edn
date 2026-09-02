@@ -1,0 +1,11 @@
+{:node :S4,
+ :run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+ :via "futon2.report.war-machine/carry-active-mission",
+ :basis "war_machine.clj:1524-1526",
+ :status :present,
+ :field [:active-mission],
+ :value
+ {:endpoint "futon2-d/mission/wm-aif-policy-grain-compliance",
+  :mission-id "M-wm-aif-policy-grain-compliance",
+  :clocked-at-ms 1788356843859,
+  :witness-rule "selection-decision"}}

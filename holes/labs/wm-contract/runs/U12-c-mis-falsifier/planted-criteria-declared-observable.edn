@@ -1,0 +1,50 @@
+{:ingest/source
+ "futon2/holes/missions/M-zaif-harness-v1.md IDENTIFY (futon2 6362cb4 and successors)",
+ :preferences/c
+ [{:criterion :u-rows-green,
+   :statement "U6-U9 acceptances green",
+   :carrier "zaif-harness + wm-contract worklists",
+   :observable :support-coverage}
+  {:criterion :reporting-gate-holds,
+   :statement
+   "every report claim re-derivable from Z1 queries and typed records on one real zaif decision",
+   :carrier "U8's gate test",
+   :observable :mission-health}
+  {:criterion :honest-gap-list-published,
+   :statement
+   "which R nodes zaif exercises vs stubs, recorded where the registry points",
+   :carrier "aif-equations.edn + U6 artifact",
+   :observable :annotation-health}],
+ :ingest/by
+ "claude-1 (hand ingest; the code path is S4's remaining build)",
+ :ingest/note
+ "U12 PLANT -- not an authority. Copy of /home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn with one declared :observable added per criterion (the repair U11 named for :unresolved-observable). Channel choice is arbitrary; see u12_c_mis_falsifier.clj plant-bindings.",
+ :context/punch-in
+ {:run/id "0a18c4f7-758e-400a-8223-9c52edf07450",
+  :note
+  "First witnessed WM clock-in (2026-09-02 tick, both S4 halves flag-on). CORRECTED READING (same day): the trace does NOT elide the ranking -- :controller-ranking persists all 146 candidates and :decision-explanation carries the winner per term. Under the full law M-zaif-harness-v1 is CONTROLLER RANK 1 (score 5.335); the clocked M-wm-aif-policy-grain-compliance is controller rank 124 (5.486). The stub selector took the head of a third channel (scheduler-habit-ranking) and the trace then stamped :selection-law controller-head-rank 1 / chosen-rank 1 / moved-from-controller-head? false -- a false record. Fix dispatched; see worklist."},
+ :ingest/at "2026-09-02T13:50Z",
+ :gap/r8
+ [{:mismatch :zaif-decides-but-is-not-live,
+   :ideal
+   "zaif v0's four-arm G-scored controller makes live decisions in interactive loops",
+   :actual
+   "built, wired opt-in, replay-calibrated; no live decisions yet (app-zaif Z2)",
+   :measurable-by
+   "count of live zaif decisions with typed evidence records"}
+  {:mismatch :theory-aligned-score-off-by-default,
+   :ideal
+   "the selection law the registry cites sources for is the law that runs",
+   :actual
+   "ln E - G/tau - F_pi exists behind four coupled flags; no selection path consults the F_pi posterior (U10)",
+   :measurable-by
+   "flags' default state + the U10 selector-consult attribution tests"}
+  {:mismatch :no-per-component-tests,
+   :ideal
+   "each R node's behaviour independently verifiable as ready-to-bring-online",
+   :actual
+   "U1 readiness suite exists for R6/R8 seam; per-tool R2/R16 pairs (U7), reporting gate (U8), R7 table (U9) not built",
+   :measurable-by "the U-row acceptances, green or not"}],
+ :candidates/r6
+ "holes/labs/zaif-harness/worklist.edn open rows: S4-remainder, S5, S6, U7, U9 (U8 blocked on U7)",
+ :ingest/mission "M-zaif-harness-v1"}

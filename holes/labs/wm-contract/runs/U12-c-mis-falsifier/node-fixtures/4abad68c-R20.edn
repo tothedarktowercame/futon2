@@ -1,0 +1,6 @@
+{:node :R20,
+ :run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+ :via "the apparatus scan's input",
+ :basis "record :route R20->R12",
+ :status :absent,
+ :reason :no-record-field}

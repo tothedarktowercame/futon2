@@ -1,0 +1,73 @@
+{:plant
+ {:path
+  "holes/labs/wm-contract/runs/U12-c-mis-falsifier/planted-criteria-declared-observable.edn",
+  :bindings
+  {:u-rows-green :support-coverage,
+   :reporting-gate-holds :mission-health,
+   :honest-gap-list-published :annotation-health}},
+ :unmodified-corpus
+ [{:run/id "0a18c4f7-758e-400a-8223-9c52edf07450",
+   :mission nil,
+   :status :absent,
+   :reason :no-active-clock,
+   :criterion-count nil,
+   :measurable-count nil}
+  {:run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+   :mission "M-wm-aif-policy-grain-compliance",
+   :status :absent,
+   :reason :no-measurable-criteria,
+   :criterion-count 0,
+   :measurable-count 0}
+  {:run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+   :mission "M-zaif-harness-v1",
+   :status :absent,
+   :reason :no-measurable-criteria,
+   :criterion-count 3,
+   :measurable-count 0}],
+ :corpus
+ {:files ["data/wm-trace/wm-trace-2026-09-02.edn"],
+  :record-count 3,
+  :run-ids
+  ["0a18c4f7-758e-400a-8223-9c52edf07450"
+   "4abad68c-5481-4402-8f0e-252add62c54b"
+   "801976e7-01c6-4e39-aada-27f620f7c2f1"]},
+ :clause-c
+ {:verdict :fail,
+  :satisfied 4.539889921682063E-5,
+  :unsatisfied-long-0 10.000045398900184,
+  :unsatisfied-double-0.0 4.539889921682063E-5,
+  :pole-ratio 220270.65791046963,
+  :reasons
+  [:satisfied-is-a-temperature-floor-not-zero
+   :unsatisfied-pole-unreachable-from-double-observables]},
+ :defect
+ {:where "src/futon2/aif/preferences.clj:242-244",
+  :what
+  "log-preference's Bernoulli branch selects the non-target outcome with (= 0 x), true for the long 0 and false for the double 0.0",
+  :effect
+  "every R2 observation value, 0.0 and negatives included, and nil, read as the target outcome",
+  :production-callers
+  ["src/futon2/aif/mission_c.clj:333"
+   "src/futon2/aif/mission_c.clj:370"],
+  :not-exposed
+  "C_int and the c-vector lane use pref/kl with an explicit {:kind :bernoulli :p q} (src/futon2/aif/c_vector.clj:682-684)",
+  :test-gap
+  "test/futon2/aif/mission_c_test.clj:197-205 pins the branch with the long 0",
+  :owner :not-fixed-by-U12},
+ :clause-b
+ {:verdict :fail,
+  :reasons
+  [:non-mission-actions-carry-no-risk-mis
+   :constant-across-mission-actions
+   :clocked-and-other-mission-scopes-identical
+   :constant-across-the-world-too-see-defect]},
+ :design "DESIGN-c-vector.md §7",
+ :clause-a
+ {:verdict :pass-as-stated,
+  :qualification :criteria-source-is-an-unhashed-path},
+ :criteria-source-sha256
+ {"/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md"
+  "51f6de53d7e95d42a42bb3a599e8430d35c29c34c692e27e239884541fa0c846",
+  "/home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn"
+  "b85cb1dade5acecccfcb5188106a82908aa61a70f60b1f4b9f6af46873a5f2a9"},
+ :row :U12}

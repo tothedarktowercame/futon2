@@ -1,0 +1,11 @@
+{:node :S4,
+ :run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+ :via "futon2.report.war-machine/carry-active-mission",
+ :basis "war_machine.clj:1524-1526",
+ :status :present,
+ :field [:active-mission],
+ :value
+ {:endpoint "futon2-d/mission/zaif-harness-v1",
+  :mission-id "M-zaif-harness-v1",
+  :clocked-at-ms 1788357629629,
+  :witness-rule "selection-decision"}}

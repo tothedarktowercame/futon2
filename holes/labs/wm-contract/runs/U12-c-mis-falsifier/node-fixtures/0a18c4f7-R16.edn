@@ -1,0 +1,6 @@
+{:node :R16,
+ :run/id "0a18c4f7-758e-400a-8223-9c52edf07450",
+ :via "enactment",
+ :basis "S7: R16 enactment data does not exist until a flight flies",
+ :status :absent,
+ :reason :no-enactment-yet}

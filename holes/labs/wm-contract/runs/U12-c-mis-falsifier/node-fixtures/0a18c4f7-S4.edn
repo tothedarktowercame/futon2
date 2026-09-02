@@ -1,0 +1,7 @@
+{:node :S4,
+ :run/id "0a18c4f7-758e-400a-8223-9c52edf07450",
+ :via "futon2.report.war-machine/carry-active-mission",
+ :basis "war_machine.clj:1524-1526",
+ :status :present,
+ :field [:active-mission],
+ :value {:ok false, :reason :no-active-clock}}

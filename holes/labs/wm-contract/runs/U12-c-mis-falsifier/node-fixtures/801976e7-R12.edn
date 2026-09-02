@@ -1,0 +1,6 @@
+{:node :R12,
+ :run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+ :via "futon2.report.war-machine/scan-r12-apparatus",
+ :basis "record :route R20->R12",
+ :status :absent,
+ :reason :no-record-field}

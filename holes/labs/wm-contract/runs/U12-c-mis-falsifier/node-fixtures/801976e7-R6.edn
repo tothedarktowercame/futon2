@@ -1,0 +1,1764 @@
+{:node :R6,
+ :run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+ :via "futon2.aif.policy/select-action",
+ :basis "record :route R5->R6",
+ :status :present,
+ :field [:decision],
+ :value
+ {:recommendation-authority :live,
+  :habit-prior-applied? false,
+  :selected-mission-ids ["M-expressions-of-interest"],
+  :tau-source :selection-gain-only,
+  :actuation-authorized? true,
+  :tau-spread 25.067342387121677,
+  :actuation-status :machine-authorized-bounded-autonomy,
+  :strategic-memory
+  {:blockers [],
+   :hard-support [],
+   :counterfactuals
+   {:scheduler-habit
+    ["M-aif-policy-conditioned-eig"
+     "M-wm-aif-policy-grain-compliance"
+     "M-shared-memory-control-build-test"]},
+   :influenced? true,
+   :predicted-g-s nil,
+   :demonstrated-better-selection? false,
+   :e-s nil,
+   :authority :live,
+   :basis :chain-integrity-and-auditability,
+   :relation-contributions [],
+   :actuation
+   {:status :machine-authorized-bounded-autonomy,
+    :authorized? true,
+    :executed? false},
+   :provenance {:selector-seam :stub},
+   :path-diversity nil,
+   :budget nil,
+   :memory-ids [],
+   :calibration {:status :stub},
+   :serving-cache-gate {:status :stub}},
+  :counterfactual
+  {:kind :scheduler-habit-authoritative,
+   :winner
+   {:rank 1,
+    :action {:type :advance-mission, :target "M-learning-loop"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -2.073471374693332,
+    :selection-score -7.663986693857771}},
+  :rank 1,
+  :habit-adjusted-ranking
+  [{:rank 1,
+    :action {:type :advance-mission, :target "M-learning-loop"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -2.073471374693332,
+    :selection-score -7.663986693857771}
+   {:rank 2,
+    :action
+    {:type :advance-mission, :target "M-expressions-of-interest"},
+    :controller-score 5.417013376781114,
+    :habit-prior-bias -4.42484663185681,
+    :selection-score -9.841860008637923}
+   {:rank 3,
+    :action
+    {:type :advance-mission, :target "M-distributed-frontiermath"},
+    :controller-score 5.464967615647737,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.582961428064493}
+   {:rank 4,
+    :action {:type :advance-mission, :target "M-symbol-grounding"},
+    :controller-score 5.478272067250828,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.596265879667584}
+   {:rank 5,
+    :action {:type :advance-mission, :target "M-superpod-mark2"},
+    :controller-score 5.48149483188854,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.599488644305296}
+   {:rank 6,
+    :action {:type :advance-mission, :target "M-zaif-harness-v1"},
+    :controller-score 5.503002405465367,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.620996217882123}
+   {:rank 7,
+    :action
+    {:type :advance-mission, :target "M-eoi-outbox-management"},
+    :controller-score 5.504506572226973,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.622500384643729}
+   {:rank 8,
+    :action
+    {:type :advance-mission, :target "M-typed-holes-lean-handoffs"},
+    :controller-score 5.504506572226973,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.622500384643729}
+   {:rank 9,
+    :action
+    {:type :advance-mission, :target "M-typed-holes-mathlib-handoff"},
+    :controller-score 5.504506572226973,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.622500384643729}
+   {:rank 10,
+    :action {:type :advance-mission, :target "M-futon-enrichment"},
+    :controller-score 5.511604777430449,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.629598589847205}
+   {:rank 11,
+    :action {:type :advance-mission, :target "M-a-sorry-enterprise"},
+    :controller-score 5.512084369433495,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.630078181850251}
+   {:rank 12,
+    :action {:type :advance-mission, :target "M-categorical-code"},
+    :controller-score 5.512605581615361,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.630599394032117}
+   {:rank 13,
+    :action {:type :advance-mission, :target "M-war-machine-pilot"},
+    :controller-score 5.513272606325444,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.6312664187422}
+   {:rank 14,
+    :action {:type :advance-mission, :target "M-single-locus"},
+    :controller-score 5.513585225115463,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63157903753222}
+   {:rank 15,
+    :action {:type :advance-mission, :target "M-futonzero-mvp"},
+    :controller-score 5.514314547218618,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.632308359635374}
+   {:rank 16,
+    :action {:type :advance-mission, :target "M-patterns-done-right"},
+    :controller-score 5.5150020376637485,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.632995850080505}
+   {:rank 17,
+    :action {:type :advance-mission, :target "M-the-futon-stack"},
+    :controller-score 5.515168679195483,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63316249161224}
+   {:rank 18,
+    :action {:type :advance-mission, :target "M-landing-practice"},
+    :controller-score 5.515376968587617,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.633370781004373}
+   {:rank 19,
+    :action
+    {:type :advance-mission, :target "M-recommendation-bindings"},
+    :controller-score 5.515606070848207,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.633599883264964}
+   {:rank 20,
+    :action
+    {:type :advance-mission, :target "M-mission-coherence-patterns"},
+    :controller-score 5.516709691207666,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.634703503624422}
+   {:rank 21,
+    :action
+    {:type :advance-mission, :target "M-self-improvement-loop"},
+    :controller-score 5.516772148596374,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63476596101313}
+   {:rank 22,
+    :action {:type :advance-mission, :target "M-diagramprover"},
+    :controller-score 5.517396653604749,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.635390466021505}
+   {:rank 23,
+    :action {:type :advance-mission, :target "M-single-entry-point"},
+    :controller-score 5.518416409123574,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63641022154033}
+   {:rank 24,
+    :action
+    {:type :advance-mission, :target "M-state-snapshot-witness"},
+    :controller-score 5.519165404351554,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63715921676831}
+   {:rank 25,
+    :action {:type :advance-mission, :target "M-trip-journal"},
+    :controller-score 5.520018207030347,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.638012019447103}
+   {:rank 26,
+    :action {:type :advance-mission, :target "M-pattern-ingest"},
+    :controller-score 5.520704439267519,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.638698251684275}
+   {:rank 27,
+    :action
+    {:type :advance-mission,
+     :target "M-vsatarcs-invariants-integration"},
+    :controller-score 5.520829192482694,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63882300489945}
+   {:rank 28,
+    :action
+    {:type :advance-mission, :target "M-paper-reverse-morphogenesis"},
+    :controller-score 5.5209955223095335,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63898933472629}
+   {:rank 29,
+    :action
+    {:type :advance-mission, :target "M-war-machine-vsatarcs-interop"},
+    :controller-score 5.521203422067913,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63919723448467}
+   {:rank 30,
+    :action {:type :advance-mission, :target "M-stack-geometry"},
+    :controller-score 5.521328155242799,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.639321967659555}
+   {:rank 31,
+    :action {:type :advance-mission, :target "M-pattern-mining"},
+    :controller-score 5.521619179833664,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.63961299225042}
+   {:rank 32,
+    :action {:type :advance-mission, :target "M-superpod-mark3"},
+    :controller-score 5.522637551088565,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.640631363505321}
+   {:rank 33,
+    :action
+    {:type :advance-mission,
+     :target "M-the-futon-stack-Q6-r12-design-choices"},
+    :controller-score 5.522658330696032,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.640652143112789}
+   {:rank 34,
+    :action {:type :advance-mission, :target "M-daily-scan"},
+    :controller-score 5.524071017490968,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.642064829907724}
+   {:rank 35,
+    :action {:type :advance-mission, :target "M-differentiable-code"},
+    :controller-score 5.524444856269298,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.642438668686054}
+   {:rank 36,
+    :action
+    {:type :advance-mission,
+     :target "M-hyperreal-dictionary-planning"},
+    :controller-score 5.524901709090557,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.642895521507313}
+   {:rank 37,
+    :action {:type :advance-mission, :target "M-archaeology-control"},
+    :controller-score 5.5253792559202,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.643373068336956}
+   {:rank 38,
+    :action
+    {:type :advance-mission, :target "M-tpg-coupling-evolution"},
+    :controller-score 5.525545341905996,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.643539154322752}
+   {:rank 39,
+    :action
+    {:type :advance-mission,
+     :target "M-pattern-application-diagnostic"},
+    :controller-score 5.526375638212613,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.64436945062937}
+   {:rank 40,
+    :action
+    {:type :advance-mission, :target "M-structure-seed-promotion"},
+    :controller-score 5.52716421342069,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.645158025837446}
+   {:rank 41,
+    :action
+    {:type :advance-mission,
+     :target "M-pattern-retrieval-calibration"},
+    :controller-score 5.52735095179338,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.645344764210137}
+   {:rank 42,
+    :action
+    {:type :advance-mission, :target "M-futonzero-prelim-practice"},
+    :controller-score 5.527765885587854,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.64575969800461}
+   {:rank 43,
+    :action
+    {:type :advance-mission, :target "M-artificial-stack-exchange"},
+    :controller-score 5.528077049394227,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.646070861810983}
+   {:rank 44,
+    :action {:type :advance-mission, :target "M-editorial-assistant"},
+    :controller-score 5.528471145254201,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.646464957670958}
+   {:rank 45,
+    :action {:type :advance-mission, :target "M-webarxana"},
+    :controller-score 5.528595586138351,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.646589398555108}
+   {:rank 46,
+    :action {:type :advance-mission, :target "M-prior-mathematics"},
+    :controller-score 5.528927403996562,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.646921216413318}
+   {:rank 47,
+    :action {:type :advance-mission, :target "M-bounded-disposition"},
+    :controller-score 5.528927403996562,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.646921216413318}
+   {:rank 48,
+    :action
+    {:type :advance-mission, :target "M-reflective-discipline"},
+    :controller-score 5.529155508102491,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.647149320519247}
+   {:rank 49,
+    :action
+    {:type :advance-mission, :target "M-action-cost-modelling"},
+    :controller-score 5.531041905106719,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.649035717523475}
+   {:rank 50,
+    :action {:type :advance-mission, :target "M-stack-hud-refactor"},
+    :controller-score 5.5320157466081525,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.650009559024909}
+   {:rank 51,
+    :action {:type :advance-mission, :target "M-weird-modernism"},
+    :controller-score 5.532160760520469,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.650154572937225}
+   {:rank 52,
+    :action
+    {:type :advance-mission, :target "M-coupling-as-constraint"},
+    :controller-score 5.532782171451572,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.650775983868328}
+   {:rank 53,
+    :action
+    {:type :advance-mission,
+     :target "M-or-training-as-learning-system"},
+    :controller-score 5.532885727758639,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.650879540175396}
+   {:rank 54,
+    :action {:type :advance-mission, :target "M-reachable-from-boot"},
+    :controller-score 5.533527699178933,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.65152151159569}
+   {:rank 55,
+    :action
+    {:type :advance-mission, :target "M-stack-stereolithography"},
+    :controller-score 5.533672641951256,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.651666454368012}
+   {:rank 56,
+    :action
+    {:type :advance-mission, :target "M-essay-corpus-substrate"},
+    :controller-score 5.53472844767029,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.652722260087046}
+   {:rank 57,
+    :action
+    {:type :advance-mission, :target "M-canon-fingerprint-store"},
+    :controller-score 5.535183781478594,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.65317759389535}
+   {:rank 58,
+    :action {:type :advance-mission, :target "M-hypergraph-operator"},
+    :controller-score 5.535287257037368,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.653281069454124}
+   {:rank 59,
+    :action
+    {:type :advance-mission,
+     :target "M-simulating-or-training-as-learning-system"},
+    :controller-score 5.535825273834945,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.653819086251701}
+   {:rank 60,
+    :action {:type :advance-mission, :target "M-vsatarcs-writer"},
+    :controller-score 5.53625975715525,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.654253569572006}
+   {:rank 61,
+    :action
+    {:type :advance-mission,
+     :target "M-symbol-grounding-scaling-plan"},
+    :controller-score 5.537190586086609,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.655184398503366}
+   {:rank 62,
+    :action
+    {:type :advance-mission, :target "M-essays-retraction-visibility"},
+    :controller-score 5.537955723105398,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.655949535522154}
+   {:rank 63,
+    :action {:type :advance-mission, :target "M-essays-edit-cycle"},
+    :controller-score 5.5383072086384,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.656301021055157}
+   {:rank 64,
+    :action {:type :advance-mission, :target "M-xor-coupling-probe"},
+    :controller-score 5.538389905268929,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.656383717685685}
+   {:rank 65,
+    :action
+    {:type :advance-mission, :target "M-bounded-in-flight-state"},
+    :controller-score 5.539030728620219,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.657024541036975}
+   {:rank 66,
+    :action {:type :advance-mission, :target "M-differentiable-math"},
+    :controller-score 5.540105357639021,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.658099170055777}
+   {:rank 67,
+    :action {:type :advance-mission, :target "M-fulab-wiring-survey"},
+    :controller-score 5.540270651763052,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.658264464179808}
+   {:rank 68,
+    :action {:type :advance-mission, :target "M-peeragogy-rewrite"},
+    :controller-score 5.5412002651659975,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.659194077582754}
+   {:rank 69,
+    :action {:type :advance-mission, :target "M-war-machine-wiring"},
+    :controller-score 5.541613336171025,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.659607148587781}
+   {:rank 70,
+    :action
+    {:type :advance-mission, :target "M-web-arxana-ui-improvements"},
+    :controller-score 5.543966777344025,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.661960589760781}
+   {:rank 71,
+    :action
+    {:type :advance-mission, :target "M-emacs-cursor-peripheral"},
+    :controller-score 5.54503967583031,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.663033488247066}
+   {:rank 72,
+    :action {:type :advance-mission, :target "M-arxana-roundtrip"},
+    :controller-score 5.546483367647539,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.664477180064296}
+   {:rank 73,
+    :action {:type :advance-mission, :target "M-substrate-metric"},
+    :controller-score 5.550604441480715,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.668598253897471}
+   {:rank 74,
+    :action {:type :advance-mission, :target "M-the-perfect-crime"},
+    :controller-score 5.551695592372454,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.66968940478921}
+   {:rank 75,
+    :action {:type :advance-mission, :target "M-kangaroo"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 76,
+    :action {:type :advance-mission, :target "M-librarian"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 77,
+    :action {:type :advance-mission, :target "M-aif-tokamak"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 78,
+    :action {:type :advance-mission, :target "M-propagators"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 79,
+    :action {:type :advance-mission, :target "M-wm-tripwires"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 80,
+    :action {:type :advance-mission, :target "M-lab-standard"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 81,
+    :action {:type :advance-mission, :target "M-live-efe-map"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 82,
+    :action {:type :advance-mission, :target "M-usage-hacking"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 83,
+    :action {:type :advance-mission, :target "M-agents-queue"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 84,
+    :action {:type :advance-mission, :target "M-autoclock-in"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 85,
+    :action {:type :advance-mission, :target "M-case-studies"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 86,
+    :action {:type :advance-mission, :target "M-xenotype-its"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 87,
+    :action {:type :advance-mission, :target "M-metaca-search"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 88,
+    :action {:type :advance-mission, :target "M-latex-wysiwyg"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 89,
+    :action {:type :advance-mission, :target "M-metric-harness"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 90,
+    :action {:type :advance-mission, :target "M-becoming-nomad"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 91,
+    :action {:type :advance-mission, :target "M-chipwitz-corps"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 92,
+    :action {:type :advance-mission, :target "M-omni-wm-runner"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 93,
+    :action {:type :advance-mission, :target "M-typed-memories"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 94,
+    :action {:type :advance-mission, :target "M-pheromone-field"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 95,
+    :action {:type :advance-mission, :target "M-capability-zones"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 96,
+    :action {:type :advance-mission, :target "M-arxana-hardening"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 97,
+    :action {:type :advance-mission, :target "M-sci-reproduction"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 98,
+    :action {:type :advance-mission, :target "M-codex-sorry-loop"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 99,
+    :action {:type :advance-mission, :target "M-intent-curvature"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 100,
+    :action {:type :advance-mission, :target "M-memory-retrieval"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 101,
+    :action {:type :advance-mission, :target "M-formal-war-machine"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 102,
+    :action {:type :advance-mission, :target "M-zai-learning-loop"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 103,
+    :action {:type :advance-mission, :target "M-pattern-posteriors"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 104,
+    :action {:type :advance-mission, :target "M-smart-emacs-cursor"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 105,
+    :action {:type :advance-mission, :target "M-web-arxana-missions"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 106,
+    :action {:type :advance-mission, :target "M-futonzero-grounding"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 107,
+    :action {:type :advance-mission, :target "M-value-creation-loop"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 108,
+    :action {:type :advance-mission, :target "M-futonzero-generative"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 109,
+    :action {:type :advance-mission, :target "M-sigils-reconsidered"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 110,
+    :action {:type :advance-mission, :target "M-exotype-xenotype-eoc"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 111,
+    :action {:type :advance-mission, :target "M-populate-substrate-2"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 112,
+    :action
+    {:type :advance-mission, :target "M-apm-capability-ratchet"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 113,
+    :action
+    {:type :advance-mission, :target "M-differentiable-substrate"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 114,
+    :action
+    {:type :advance-mission, :target "M-distributed-proofreaders"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 115,
+    :action
+    {:type :advance-mission, :target "M-efe-bge-followon-actions"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 116,
+    :action
+    {:type :advance-mission, :target "M-aif-a-matrix-faithfulness"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 117,
+    :action
+    {:type :advance-mission, :target "M-aif-policy-conditioned-eig"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 118,
+    :action
+    {:type :advance-mission, :target "M-run-produces-its-own-brief"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 119,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S1-handoff"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 120,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S3-handoff"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 121,
+    :action
+    {:type :advance-mission, :target "M-federated-agency-hardening"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 122,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S1-coverage"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 123,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S2a-handoff"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 124,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S2b-handoff"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 125,
+    :action
+    {:type :advance-mission, :target "M-aif-gap-epistemic-affordance"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 126,
+    :action
+    {:type :advance-mission,
+     :target "M-wm-aif-policy-grain-compliance"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 127,
+    :action
+    {:type :advance-mission,
+     :target "M-wm-strategic-mission-selection"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 128,
+    :action
+    {:type :advance-mission,
+     :target "M-sci-reproduction-replay-ledger"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 129,
+    :action
+    {:type :advance-mission,
+     :target "M-mission-scopes-into-substrate-2"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 130,
+    :action
+    {:type :advance-mission,
+     :target "M-shared-memory-control-build-test"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.682076274509853}
+   {:rank 131,
+    :action {:type :advance-mission, :target "M-futon-problems"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.708509131581195}
+   {:rank 132,
+    :action {:type :advance-mission, :target "M-apm-demonstration"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.708509131581195}
+   {:rank 133,
+    :action {:type :advance-mission, :target "M-dionysus-winddown"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.708509131581195}
+   {:rank 134,
+    :action
+    {:type :address-sorry,
+     :target :sorry/pattern-measure-never-target},
+    :controller-score 5.7341878171310725,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.852181629547829}
+   {:rank 135,
+    :action
+    {:type :address-sorry,
+     :target :sorry/pattern-typed-theme-liberates-the-solo},
+    :controller-score 5.7341878171310725,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.852181629547829}
+   {:rank 136,
+    :action
+    {:type :address-sorry,
+     :target :sorry/wm-realised-on-merge-binding},
+    :controller-score 5.804386902392736,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.922380714809492}
+   {:rank 137,
+    :action {:type :no-op},
+    :controller-score 5.806003918629997,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -10.923997731046754}
+   {:rank 138,
+    :action
+    {:type :fire-pattern,
+     :target "futon-theory/mission-interface-signature"},
+    :controller-score 6.9768224986324725,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -12.094816311049229}
+   {:rank 139,
+    :action {:type :fire-pattern, :target "musn/plan-before-tool"},
+    :controller-score 6.986017084116625,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -12.104010896533381}
+   {:rank 140,
+    :action
+    {:type :fire-pattern, :target "aif/interoceptive-tripwires"},
+    :controller-score 6.996100435293485,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -12.114094247710241}
+   {:rank 141,
+    :action {:type :learn-action-class, :target-class :apply-cascade},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -135.87171912480625}
+   {:rank 142,
+    :action {:type :learn-action-class, :target-class :close-hole},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -135.87171912480625}
+   {:rank 143,
+    :action {:type :learn-action-class, :target-class :close-mission},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -135.87171912480625}
+   {:rank 144,
+    :action {:type :learn-action-class, :target-class :close},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -135.87171912480625}
+   {:rank 145,
+    :action {:type :learn-action-class, :target-class :survey},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -135.87171912480625}
+   {:rank 146,
+    :action {:type :learn-action-class, :target-class :survey-mission},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -135.87171912480625}],
+  :controller-score 5.417013376781114,
+  :selection-boundary :reason-bearing-strategic-policy,
+  :controller-ranking
+  [{:rank 1,
+    :action
+    {:type :advance-mission, :target "M-expressions-of-interest"},
+    :controller-score 5.417013376781114,
+    :habit-prior-bias -4.42484663185681,
+    :selection-score -5.417013376781114}
+   {:rank 2,
+    :action
+    {:type :advance-mission, :target "M-distributed-frontiermath"},
+    :controller-score 5.464967615647737,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.464967615647737}
+   {:rank 3,
+    :action {:type :advance-mission, :target "M-symbol-grounding"},
+    :controller-score 5.478272067250828,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.478272067250828}
+   {:rank 4,
+    :action {:type :advance-mission, :target "M-superpod-mark2"},
+    :controller-score 5.48149483188854,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.48149483188854}
+   {:rank 5,
+    :action {:type :advance-mission, :target "M-zaif-harness-v1"},
+    :controller-score 5.503002405465367,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.503002405465367}
+   {:rank 6,
+    :action
+    {:type :advance-mission, :target "M-eoi-outbox-management"},
+    :controller-score 5.504506572226973,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.504506572226973}
+   {:rank 7,
+    :action
+    {:type :advance-mission, :target "M-typed-holes-lean-handoffs"},
+    :controller-score 5.504506572226973,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.504506572226973}
+   {:rank 8,
+    :action
+    {:type :advance-mission, :target "M-typed-holes-mathlib-handoff"},
+    :controller-score 5.504506572226973,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.504506572226973}
+   {:rank 9,
+    :action {:type :advance-mission, :target "M-futon-enrichment"},
+    :controller-score 5.511604777430449,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.511604777430449}
+   {:rank 10,
+    :action {:type :advance-mission, :target "M-a-sorry-enterprise"},
+    :controller-score 5.512084369433495,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.512084369433495}
+   {:rank 11,
+    :action {:type :advance-mission, :target "M-categorical-code"},
+    :controller-score 5.512605581615361,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.512605581615361}
+   {:rank 12,
+    :action {:type :advance-mission, :target "M-war-machine-pilot"},
+    :controller-score 5.513272606325444,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.513272606325444}
+   {:rank 13,
+    :action {:type :advance-mission, :target "M-single-locus"},
+    :controller-score 5.513585225115463,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.513585225115463}
+   {:rank 14,
+    :action {:type :advance-mission, :target "M-futonzero-mvp"},
+    :controller-score 5.514314547218618,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.514314547218618}
+   {:rank 15,
+    :action {:type :advance-mission, :target "M-patterns-done-right"},
+    :controller-score 5.5150020376637485,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.5150020376637485}
+   {:rank 16,
+    :action {:type :advance-mission, :target "M-the-futon-stack"},
+    :controller-score 5.515168679195483,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.515168679195483}
+   {:rank 17,
+    :action {:type :advance-mission, :target "M-landing-practice"},
+    :controller-score 5.515376968587617,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.515376968587617}
+   {:rank 18,
+    :action
+    {:type :advance-mission, :target "M-recommendation-bindings"},
+    :controller-score 5.515606070848207,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.515606070848207}
+   {:rank 19,
+    :action
+    {:type :advance-mission, :target "M-mission-coherence-patterns"},
+    :controller-score 5.516709691207666,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.516709691207666}
+   {:rank 20,
+    :action
+    {:type :advance-mission, :target "M-self-improvement-loop"},
+    :controller-score 5.516772148596374,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.516772148596374}
+   {:rank 21,
+    :action {:type :advance-mission, :target "M-diagramprover"},
+    :controller-score 5.517396653604749,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.517396653604749}
+   {:rank 22,
+    :action {:type :advance-mission, :target "M-single-entry-point"},
+    :controller-score 5.518416409123574,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.518416409123574}
+   {:rank 23,
+    :action
+    {:type :advance-mission, :target "M-state-snapshot-witness"},
+    :controller-score 5.519165404351554,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.519165404351554}
+   {:rank 24,
+    :action {:type :advance-mission, :target "M-trip-journal"},
+    :controller-score 5.520018207030347,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.520018207030347}
+   {:rank 25,
+    :action {:type :advance-mission, :target "M-pattern-ingest"},
+    :controller-score 5.520704439267519,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.520704439267519}
+   {:rank 26,
+    :action
+    {:type :advance-mission,
+     :target "M-vsatarcs-invariants-integration"},
+    :controller-score 5.520829192482694,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.520829192482694}
+   {:rank 27,
+    :action
+    {:type :advance-mission, :target "M-paper-reverse-morphogenesis"},
+    :controller-score 5.5209955223095335,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.5209955223095335}
+   {:rank 28,
+    :action
+    {:type :advance-mission, :target "M-war-machine-vsatarcs-interop"},
+    :controller-score 5.521203422067913,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.521203422067913}
+   {:rank 29,
+    :action {:type :advance-mission, :target "M-stack-geometry"},
+    :controller-score 5.521328155242799,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.521328155242799}
+   {:rank 30,
+    :action {:type :advance-mission, :target "M-pattern-mining"},
+    :controller-score 5.521619179833664,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.521619179833664}
+   {:rank 31,
+    :action {:type :advance-mission, :target "M-superpod-mark3"},
+    :controller-score 5.522637551088565,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.522637551088565}
+   {:rank 32,
+    :action
+    {:type :advance-mission,
+     :target "M-the-futon-stack-Q6-r12-design-choices"},
+    :controller-score 5.522658330696032,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.522658330696032}
+   {:rank 33,
+    :action {:type :advance-mission, :target "M-daily-scan"},
+    :controller-score 5.524071017490968,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.524071017490968}
+   {:rank 34,
+    :action {:type :advance-mission, :target "M-differentiable-code"},
+    :controller-score 5.524444856269298,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.524444856269298}
+   {:rank 35,
+    :action
+    {:type :advance-mission,
+     :target "M-hyperreal-dictionary-planning"},
+    :controller-score 5.524901709090557,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.524901709090557}
+   {:rank 36,
+    :action {:type :advance-mission, :target "M-archaeology-control"},
+    :controller-score 5.5253792559202,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.5253792559202}
+   {:rank 37,
+    :action
+    {:type :advance-mission, :target "M-tpg-coupling-evolution"},
+    :controller-score 5.525545341905996,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.525545341905996}
+   {:rank 38,
+    :action
+    {:type :advance-mission,
+     :target "M-pattern-application-diagnostic"},
+    :controller-score 5.526375638212613,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.526375638212613}
+   {:rank 39,
+    :action
+    {:type :advance-mission, :target "M-structure-seed-promotion"},
+    :controller-score 5.52716421342069,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.52716421342069}
+   {:rank 40,
+    :action
+    {:type :advance-mission,
+     :target "M-pattern-retrieval-calibration"},
+    :controller-score 5.52735095179338,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.52735095179338}
+   {:rank 41,
+    :action
+    {:type :advance-mission, :target "M-futonzero-prelim-practice"},
+    :controller-score 5.527765885587854,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.527765885587854}
+   {:rank 42,
+    :action
+    {:type :advance-mission, :target "M-artificial-stack-exchange"},
+    :controller-score 5.528077049394227,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.528077049394227}
+   {:rank 43,
+    :action {:type :advance-mission, :target "M-editorial-assistant"},
+    :controller-score 5.528471145254201,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.528471145254201}
+   {:rank 44,
+    :action {:type :advance-mission, :target "M-webarxana"},
+    :controller-score 5.528595586138351,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.528595586138351}
+   {:rank 45,
+    :action {:type :advance-mission, :target "M-prior-mathematics"},
+    :controller-score 5.528927403996562,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.528927403996562}
+   {:rank 46,
+    :action {:type :advance-mission, :target "M-bounded-disposition"},
+    :controller-score 5.528927403996562,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.528927403996562}
+   {:rank 47,
+    :action
+    {:type :advance-mission, :target "M-reflective-discipline"},
+    :controller-score 5.529155508102491,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.529155508102491}
+   {:rank 48,
+    :action
+    {:type :advance-mission, :target "M-action-cost-modelling"},
+    :controller-score 5.531041905106719,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.531041905106719}
+   {:rank 49,
+    :action {:type :advance-mission, :target "M-stack-hud-refactor"},
+    :controller-score 5.5320157466081525,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.5320157466081525}
+   {:rank 50,
+    :action {:type :advance-mission, :target "M-weird-modernism"},
+    :controller-score 5.532160760520469,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.532160760520469}
+   {:rank 51,
+    :action
+    {:type :advance-mission, :target "M-coupling-as-constraint"},
+    :controller-score 5.532782171451572,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.532782171451572}
+   {:rank 52,
+    :action
+    {:type :advance-mission,
+     :target "M-or-training-as-learning-system"},
+    :controller-score 5.532885727758639,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.532885727758639}
+   {:rank 53,
+    :action {:type :advance-mission, :target "M-reachable-from-boot"},
+    :controller-score 5.533527699178933,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.533527699178933}
+   {:rank 54,
+    :action
+    {:type :advance-mission, :target "M-stack-stereolithography"},
+    :controller-score 5.533672641951256,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.533672641951256}
+   {:rank 55,
+    :action
+    {:type :advance-mission, :target "M-essay-corpus-substrate"},
+    :controller-score 5.53472844767029,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.53472844767029}
+   {:rank 56,
+    :action
+    {:type :advance-mission, :target "M-canon-fingerprint-store"},
+    :controller-score 5.535183781478594,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.535183781478594}
+   {:rank 57,
+    :action {:type :advance-mission, :target "M-hypergraph-operator"},
+    :controller-score 5.535287257037368,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.535287257037368}
+   {:rank 58,
+    :action
+    {:type :advance-mission,
+     :target "M-simulating-or-training-as-learning-system"},
+    :controller-score 5.535825273834945,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.535825273834945}
+   {:rank 59,
+    :action {:type :advance-mission, :target "M-vsatarcs-writer"},
+    :controller-score 5.53625975715525,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.53625975715525}
+   {:rank 60,
+    :action
+    {:type :advance-mission,
+     :target "M-symbol-grounding-scaling-plan"},
+    :controller-score 5.537190586086609,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.537190586086609}
+   {:rank 61,
+    :action
+    {:type :advance-mission, :target "M-essays-retraction-visibility"},
+    :controller-score 5.537955723105398,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.537955723105398}
+   {:rank 62,
+    :action {:type :advance-mission, :target "M-essays-edit-cycle"},
+    :controller-score 5.5383072086384,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.5383072086384}
+   {:rank 63,
+    :action {:type :advance-mission, :target "M-xor-coupling-probe"},
+    :controller-score 5.538389905268929,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.538389905268929}
+   {:rank 64,
+    :action
+    {:type :advance-mission, :target "M-bounded-in-flight-state"},
+    :controller-score 5.539030728620219,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.539030728620219}
+   {:rank 65,
+    :action {:type :advance-mission, :target "M-differentiable-math"},
+    :controller-score 5.540105357639021,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.540105357639021}
+   {:rank 66,
+    :action {:type :advance-mission, :target "M-fulab-wiring-survey"},
+    :controller-score 5.540270651763052,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.540270651763052}
+   {:rank 67,
+    :action {:type :advance-mission, :target "M-peeragogy-rewrite"},
+    :controller-score 5.5412002651659975,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.5412002651659975}
+   {:rank 68,
+    :action {:type :advance-mission, :target "M-war-machine-wiring"},
+    :controller-score 5.541613336171025,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.541613336171025}
+   {:rank 69,
+    :action
+    {:type :advance-mission, :target "M-web-arxana-ui-improvements"},
+    :controller-score 5.543966777344025,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.543966777344025}
+   {:rank 70,
+    :action
+    {:type :advance-mission, :target "M-emacs-cursor-peripheral"},
+    :controller-score 5.54503967583031,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.54503967583031}
+   {:rank 71,
+    :action {:type :advance-mission, :target "M-arxana-roundtrip"},
+    :controller-score 5.546483367647539,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.546483367647539}
+   {:rank 72,
+    :action {:type :advance-mission, :target "M-substrate-metric"},
+    :controller-score 5.550604441480715,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.550604441480715}
+   {:rank 73,
+    :action {:type :advance-mission, :target "M-the-perfect-crime"},
+    :controller-score 5.551695592372454,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.551695592372454}
+   {:rank 74,
+    :action {:type :advance-mission, :target "M-kangaroo"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 75,
+    :action {:type :advance-mission, :target "M-librarian"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 76,
+    :action {:type :advance-mission, :target "M-aif-tokamak"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 77,
+    :action {:type :advance-mission, :target "M-propagators"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 78,
+    :action {:type :advance-mission, :target "M-wm-tripwires"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 79,
+    :action {:type :advance-mission, :target "M-lab-standard"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 80,
+    :action {:type :advance-mission, :target "M-live-efe-map"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 81,
+    :action {:type :advance-mission, :target "M-usage-hacking"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 82,
+    :action {:type :advance-mission, :target "M-agents-queue"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 83,
+    :action {:type :advance-mission, :target "M-autoclock-in"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 84,
+    :action {:type :advance-mission, :target "M-case-studies"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 85,
+    :action {:type :advance-mission, :target "M-xenotype-its"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 86,
+    :action {:type :advance-mission, :target "M-metaca-search"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 87,
+    :action {:type :advance-mission, :target "M-latex-wysiwyg"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 88,
+    :action {:type :advance-mission, :target "M-metric-harness"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 89,
+    :action {:type :advance-mission, :target "M-becoming-nomad"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 90,
+    :action {:type :advance-mission, :target "M-chipwitz-corps"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 91,
+    :action {:type :advance-mission, :target "M-omni-wm-runner"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 92,
+    :action {:type :advance-mission, :target "M-typed-memories"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 93,
+    :action {:type :advance-mission, :target "M-pheromone-field"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 94,
+    :action {:type :advance-mission, :target "M-capability-zones"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 95,
+    :action {:type :advance-mission, :target "M-arxana-hardening"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 96,
+    :action {:type :advance-mission, :target "M-sci-reproduction"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 97,
+    :action {:type :advance-mission, :target "M-codex-sorry-loop"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 98,
+    :action {:type :advance-mission, :target "M-intent-curvature"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 99,
+    :action {:type :advance-mission, :target "M-memory-retrieval"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 100,
+    :action {:type :advance-mission, :target "M-formal-war-machine"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 101,
+    :action {:type :advance-mission, :target "M-zai-learning-loop"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 102,
+    :action {:type :advance-mission, :target "M-pattern-posteriors"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 103,
+    :action {:type :advance-mission, :target "M-smart-emacs-cursor"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 104,
+    :action {:type :advance-mission, :target "M-web-arxana-missions"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 105,
+    :action {:type :advance-mission, :target "M-futonzero-grounding"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 106,
+    :action {:type :advance-mission, :target "M-value-creation-loop"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 107,
+    :action {:type :advance-mission, :target "M-futonzero-generative"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 108,
+    :action {:type :advance-mission, :target "M-sigils-reconsidered"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 109,
+    :action {:type :advance-mission, :target "M-exotype-xenotype-eoc"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 110,
+    :action {:type :advance-mission, :target "M-populate-substrate-2"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 111,
+    :action
+    {:type :advance-mission, :target "M-apm-capability-ratchet"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 112,
+    :action
+    {:type :advance-mission, :target "M-differentiable-substrate"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 113,
+    :action
+    {:type :advance-mission, :target "M-distributed-proofreaders"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 114,
+    :action
+    {:type :advance-mission, :target "M-efe-bge-followon-actions"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 115,
+    :action
+    {:type :advance-mission, :target "M-aif-a-matrix-faithfulness"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 116,
+    :action
+    {:type :advance-mission, :target "M-aif-policy-conditioned-eig"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 117,
+    :action
+    {:type :advance-mission, :target "M-run-produces-its-own-brief"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 118,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S1-handoff"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 119,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S3-handoff"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 120,
+    :action
+    {:type :advance-mission, :target "M-federated-agency-hardening"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 121,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S1-coverage"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 122,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S2a-handoff"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 123,
+    :action
+    {:type :advance-mission, :target "M-capability-zones-S2b-handoff"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 124,
+    :action
+    {:type :advance-mission, :target "M-aif-gap-epistemic-affordance"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 125,
+    :action
+    {:type :advance-mission,
+     :target "M-wm-aif-policy-grain-compliance"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 126,
+    :action
+    {:type :advance-mission,
+     :target "M-wm-strategic-mission-selection"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 127,
+    :action
+    {:type :advance-mission,
+     :target "M-sci-reproduction-replay-ledger"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 128,
+    :action
+    {:type :advance-mission,
+     :target "M-mission-scopes-into-substrate-2"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 129,
+    :action
+    {:type :advance-mission,
+     :target "M-shared-memory-control-build-test"},
+    :controller-score 5.564082462093097,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.564082462093097}
+   {:rank 130,
+    :action {:type :advance-mission, :target "M-futon-problems"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.590515319164439}
+   {:rank 131,
+    :action {:type :advance-mission, :target "M-learning-loop"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -2.073471374693332,
+    :selection-score -5.590515319164439}
+   {:rank 132,
+    :action {:type :advance-mission, :target "M-apm-demonstration"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.590515319164439}
+   {:rank 133,
+    :action {:type :advance-mission, :target "M-dionysus-winddown"},
+    :controller-score 5.590515319164439,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.590515319164439}
+   {:rank 134,
+    :action
+    {:type :address-sorry,
+     :target :sorry/pattern-measure-never-target},
+    :controller-score 5.7341878171310725,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.7341878171310725}
+   {:rank 135,
+    :action
+    {:type :address-sorry,
+     :target :sorry/pattern-typed-theme-liberates-the-solo},
+    :controller-score 5.7341878171310725,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.7341878171310725}
+   {:rank 136,
+    :action
+    {:type :address-sorry,
+     :target :sorry/wm-realised-on-merge-binding},
+    :controller-score 5.804386902392736,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.804386902392736}
+   {:rank 137,
+    :action {:type :no-op},
+    :controller-score 5.806003918629997,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -5.806003918629997}
+   {:rank 138,
+    :action
+    {:type :fire-pattern,
+     :target "futon-theory/mission-interface-signature"},
+    :controller-score 6.9768224986324725,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -6.9768224986324725}
+   {:rank 139,
+    :action {:type :fire-pattern, :target "musn/plan-before-tool"},
+    :controller-score 6.986017084116625,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -6.986017084116625}
+   {:rank 140,
+    :action
+    {:type :fire-pattern, :target "aif/interoceptive-tripwires"},
+    :controller-score 6.996100435293485,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -6.996100435293485}
+   {:rank 141,
+    :action {:type :learn-action-class, :target-class :apply-cascade},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -130.7537253123895}
+   {:rank 142,
+    :action {:type :learn-action-class, :target-class :close-hole},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -130.7537253123895}
+   {:rank 143,
+    :action {:type :learn-action-class, :target-class :close-mission},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -130.7537253123895}
+   {:rank 144,
+    :action {:type :learn-action-class, :target-class :close},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -130.7537253123895}
+   {:rank 145,
+    :action {:type :learn-action-class, :target-class :survey},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -130.7537253123895}
+   {:rank 146,
+    :action {:type :learn-action-class, :target-class :survey-mission},
+    :controller-score 130.7537253123895,
+    :habit-prior-bias -5.117993812416755,
+    :selection-score -130.7537253123895}],
+  :decision-explanation
+  {:top-G
+   {:central 0.6848505906879777,
+    :habit-prior-bias -4.42484663185681,
+    :total-score -9.841860008637923,
+    :rank 1,
+    :lnE -4.42484663185681,
+    :G 5.417013376781114,
+    :neg-G-over-tau -5.417013376781114,
+    :action
+    {:type :advance-mission, :target "M-expressions-of-interest"},
+    :strategic 0.7,
+    :mission-value-factor 0.5769701181375955,
+    :doable 0.3},
+   :governed-by :G,
+   :tau-source :selection-gain-only,
+   :span-diagnostics
+   {:G
+    {:min 5.417013376781114,
+     :max 130.7537253123895,
+     :range 125.33671193560838},
+    :lnE
+    {:min -5.117993812416755,
+     :max -2.073471374693332,
+     :range 3.0445224377234235},
+    :neg-G-over-tau
+    {:min -130.7537253123895,
+     :max -5.417013376781114,
+     :range 125.33671193560838},
+    :range-G 125.33671193560838,
+    :range-lnE 3.0445224377234235},
+   :winner
+   {:central 0.6848505906879777,
+    :habit-prior-bias -4.42484663185681,
+    :total-score -9.841860008637923,
+    :rank 1,
+    :lnE -4.42484663185681,
+    :G 5.417013376781114,
+    :neg-G-over-tau -5.417013376781114,
+    :action
+    {:type :advance-mission, :target "M-expressions-of-interest"},
+    :strategic 0.7,
+    :mission-value-factor 0.5769701181375955,
+    :doable 0.3},
+   :tau-mode :selection-gain-only,
+   :habit-prior-stats
+   {:class-count 14, :samples 791, :alpha 1.0, :recency-decay :none},
+   :habit-counterfactual-winner
+   {:type :advance-mission, :target "M-learning-loop"},
+   :selection-gain 1.0,
+   :tau-effective 1.0,
+   :top-mission-value-factor
+   {:action
+    {:type :fire-pattern, :target "aif/interoceptive-tripwires"},
+    :rank 140,
+    :G 6.996100435293485,
+    :neg-G-over-tau -6.996100435293485,
+    :lnE -5.117993812416755,
+    :habit-prior-bias -5.117993812416755,
+    :total-score -12.114094247710241,
+    :mission-value-factor 1.0}},
+  :reason :reviewed-live-reason-bearing-policy,
+  :habit-authority :counterfactual-only,
+  :f-pi-posterior
+  {:status :absent,
+   :reason :flag-off,
+   :candidate-count 146,
+   :applied? false},
+  :requires-operator-override? false,
+  :selection-law
+  {:requested :controller-head,
+   :applied :controller-head,
+   :refusal nil,
+   :controller-head-rank 1,
+   :chosen-rank 1,
+   :moved-from-controller-head? false,
+   :consulted-ranking :controller},
+  :no-op-comparison
+  {:controller-score 5.806003918629997,
+   :controller-margin 0.3889905418488837,
+   :blocks-recommendation? false},
+  :action
+  {:central 0.6848505906879777,
+   :open-hole-count 6,
+   :structural-pressure-per-action 0.0,
+   :non-progress-decay 1.0,
+   :phase nil,
+   :type :advance-mission,
+   :operator-gate-factor 1.0,
+   :rationale
+   "mission substrate: Mission: Expressions of Interest [active; advance open holes]",
+   :non-progress-count 0,
+   :weight 1.0,
+   :completion-gate-factor 1.0,
+   :non-progress? false,
+   :mission-path
+   "/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md",
+   :strategic 0.7,
+   :target "M-expressions-of-interest",
+   :mission-value-factor 0.5769701181375955,
+   :doable 0.3},
+  :tau 1.0,
+  :selection-gain 1.0,
+  :selected-policy-id "stub:controller-head"}}

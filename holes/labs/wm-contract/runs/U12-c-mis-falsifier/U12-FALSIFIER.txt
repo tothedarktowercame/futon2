@@ -1,0 +1,307 @@
+U12 -- the C_mis falsifier (DESIGN-c-vector.md §7), replay only.
+
+Corpus: data/wm-trace/wm-trace-2026-09-02.edn
+        3 records: 0a18c4f7 4abad68c 801976e7
+Shipped path under test: war-machine/mission-c-readback (war_machine.clj:1557-1613),
+composing futon2.aif.mission-c (mission_c.clj:270-376). No live tick, no run lock,
+nothing written under data/.
+
+=== 1. PER-NODE EXTRACTOR (U12 :statement, zaif S7's shape) ===
+
+One fixture per node per tick, written to node-fixtures/. Every node below is a
+node the record's OWN :route names (or a record field), and a node the record
+cannot answer is a typed absence with the reason, never an omitted row.
+
+  run      node  record field           value
+  0a18c4f7 R2    [:observation]         map, 14 keys
+  0a18c4f7 R7    [:precision-state]     map, 8 keys
+  0a18c4f7 R3    [:mu-post]             map, 417 keys
+  0a18c4f7 R1    [:mu-pre]              map, 417 keys
+  0a18c4f7 R8    [:prediction-errors]   map, 7 keys
+  0a18c4f7 R5    [:ranked-actions]      seq, 146 entries
+  0a18c4f7 R6    [:decision]            map, 25 keys
+  0a18c4f7 R14   [:decision :tau]       1.0
+  0a18c4f7 R9    [:preference-stack]    map, 4 keys
+  0a18c4f7 S4    [:active-mission]      map, 2 keys
+  0a18c4f7 R12   --                     absent :no-record-field
+  0a18c4f7 R20   --                     absent :no-record-field
+  0a18c4f7 R16   --                     absent :no-enactment-yet
+  4abad68c R2    [:observation]         map, 14 keys
+  4abad68c R7    [:precision-state]     map, 8 keys
+  4abad68c R3    [:mu-post]             map, 417 keys
+  4abad68c R1    [:mu-pre]              map, 417 keys
+  4abad68c R8    [:prediction-errors]   map, 7 keys
+  4abad68c R5    [:ranked-actions]      seq, 146 entries
+  4abad68c R6    [:decision]            map, 25 keys
+  4abad68c R14   [:decision :tau]       1.0
+  4abad68c R9    [:preference-stack]    map, 4 keys
+  4abad68c S4    [:active-mission]      map, 4 keys
+  4abad68c R12   --                     absent :no-record-field
+  4abad68c R20   --                     absent :no-record-field
+  4abad68c R16   --                     absent :no-enactment-yet
+  801976e7 R2    [:observation]         map, 14 keys
+  801976e7 R7    [:precision-state]     map, 8 keys
+  801976e7 R3    [:mu-post]             map, 417 keys
+  801976e7 R1    [:mu-pre]              map, 417 keys
+  801976e7 R8    [:prediction-errors]   map, 7 keys
+  801976e7 R5    [:ranked-actions]      seq, 146 entries
+  801976e7 R6    [:decision]            map, 25 keys
+  801976e7 R14   [:decision :tau]       1.0
+  801976e7 R9    [:preference-stack]    map, 4 keys
+  801976e7 S4    [:active-mission]      map, 4 keys
+  801976e7 R12   --                     absent :no-record-field
+  801976e7 R20   --                     absent :no-record-field
+  801976e7 R16   --                     absent :no-enactment-yet
+
+  39 fixtures (30 present, 9 typed absence).
+
+R7's location, which U12's :statement asks for by name. zaif S7 carried it as a
+named gap -- ":precision has no top-level key on the record". FOUND, not absent:
+  0a18c4f7  precision-state  8 precision channels of 14 observed; observed-without-precision: [:consulting-pct :depositing-signal :loop-health :mathematics-pct :portfolio-pct :stack-pct]
+  4abad68c  precision-state  8 precision channels of 14 observed; observed-without-precision: [:consulting-pct :depositing-signal :loop-health :mathematics-pct :portfolio-pct :stack-pct]
+  801976e7  precision-state  8 precision channels of 14 observed; observed-without-precision: [:consulting-pct :depositing-signal :loop-health :mathematics-pct :portfolio-pct :stack-pct]
+
+So the gap S7 records is not that R7 is unlocated but that R7 covers 8 of the 14
+channels R2 observes -- update-precision-state carries an error history only for
+channels with one, and the six without are absent from R7 rather than at precision 0.
+
+=== 2. THE UNMODIFIED CORPUS: WHAT risk_mis IS ON IT ===
+
+  0a18c4f7  --                                     :absent :no-active-clock
+  4abad68c  M-wm-aif-policy-grain-compliance       :absent :no-measurable-criteria
+            source /home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md
+            shape :markdown; 0 criteria, 0 measurable; :criteria-reason :no-completion-criteria-section
+            133 mission actions, 13 non-mission
+  801976e7  M-zaif-harness-v1                      :absent :no-measurable-criteria
+            source /home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn
+            shape :ingest-edn; 3 criteria, 0 measurable
+            133 mission actions, 13 non-mission
+            :u-rows-green              :unresolved-observable   /home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn:30
+            :reporting-gate-holds      :unresolved-observable   /home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn:31
+            :honest-gap-list-published :unresolved-observable   /home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn:32
+
+  0 of 3 records carry a risk_mis NUMBER: 0.
+  0 of 9 criteria measurable is U11's finding, reproduced here from the same
+  files; this row's job is what follows from it.
+
+=== 3. CLAUSE (a): DETERMINISM -- reproduces from record fields alone ===
+
+  Two passes of mission-c-readback over the same 3 records, called with
+  (:active-mission, :ranked-actions, :observation) and nothing else:
+    identical: YES (all fields, =)
+
+  BUT THE READBACK IS NOT A FUNCTION OF RECORD FIELDS ALONE, and that is the
+  finding of this clause. The criteria arrive from a FILE on disk, named by
+  war_machine.clj:1532-1541 or by the candidate's :action :mission-path. The
+  record carries the PATH (:criteria-source) and no content hash, so a replay
+  after that file is edited returns different numbers with no way to tell.
+  The sources this replay actually read, hashed here so the run is pinnable:
+    51f6de53d7e95d42  /home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md
+    b85cb1dade5acecc  /home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn
+
+  VERDICT (a): PASSES as stated for the shipped code -- the readback is a pure
+  function of its three arguments and reproduces exactly. It does NOT pass the
+  stronger reading a replay needs: 'from record fields alone' is false while the
+  criteria source is a mutable path with no recorded digest. The repair is one
+  field, :criteria-source-sha256, on the readback map.
+
+=== 4. CLAUSE (b): DISCRIMINATION ===
+
+  §7 asks: do the clocked mission's advance actions carry LOWER risk_mis than
+  non-mission actions on at least one recorded tick, with named numbers?
+
+  ON THE CORPUS AS IT STANDS: unanswerable, and typed as such. Every record's
+  risk_mis is :absent :no-measurable-criteria (§2 above), so there is no number
+  on either side of the comparison. That is a typed absence, not a low score.
+
+  SO THE ROW PLANTS the repair U11 named -- a declared :observable per criterion
+  -- and asks the question again where a number exists.
+
+  Plant: holes/labs/wm-contract/runs/U12-c-mis-falsifier/planted-criteria-declared-observable.edn
+         /home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn + one :observable per criterion: {:u-rows-green :support-coverage, :reporting-gate-holds :mission-health, :honest-gap-list-published :annotation-health}
+         BOTH clocked records are pointed at this ONE file, including the one
+         whose own mission has no criteria section. The mission's identity is
+         therefore held fixed on purpose: what varies between the two rows
+         below is the tick, not the criteria, so a difference in risk_mis
+         could only come from the tick's observation or its candidates.
+
+  4abad68c  clocked M-wm-aif-policy-grain-compliance
+        status :measured; 3 criteria, 3 measurable; weights :uniform-over-measurable
+          :u-rows-green              :support-coverage    value 0.6                    surprisal 4.539889921682063E-5   w 0.333333  contrib 0.0000151330
+          :reporting-gate-holds      :mission-health      value 0.023376623376623377   surprisal 4.539889921682063E-5   w 0.333333  contrib 0.0000151330
+          :honest-gap-list-published :annotation-health   value 0.9951690821256038     surprisal 4.539889921682063E-5   w 0.333333  contrib 0.0000151330
+        risk_mis over 133 mission actions: 1 distinct value(s) [4.539889921682063E-5]
+          clocked-mission actions 1, other-mission actions 132,
+          non-mission actions 13 -- and non-mission actions carry NO
+          risk_mis field at all (war_machine.clj:1584-1592 maps only
+          mission-action? entries).
+          clocked set [4.539889921682063E-5] vs other-mission set [4.539889921682063E-5] -- IDENTICAL
+
+  801976e7  clocked M-zaif-harness-v1
+        status :measured; 3 criteria, 3 measurable; weights :uniform-over-measurable
+          :u-rows-green              :support-coverage    value 0.6                    surprisal 4.539889921682063E-5   w 0.333333  contrib 0.0000151330
+          :reporting-gate-holds      :mission-health      value 0.023376623376623377   surprisal 4.539889921682063E-5   w 0.333333  contrib 0.0000151330
+          :honest-gap-list-published :annotation-health   value 0.9951690821256038     surprisal 4.539889921682063E-5   w 0.333333  contrib 0.0000151330
+        risk_mis over 133 mission actions: 1 distinct value(s) [4.539889921682063E-5]
+          clocked-mission actions 1, other-mission actions 132,
+          non-mission actions 13 -- and non-mission actions carry NO
+          risk_mis field at all (war_machine.clj:1584-1592 maps only
+          mission-action? entries).
+          clocked set [4.539889921682063E-5] vs other-mission set [4.539889921682063E-5] -- IDENTICAL
+
+  VERDICT (b): FAILS, and fails STRUCTURALLY rather than numerically.
+  Three separate reasons, each measurable above; the sweep below adds a fourth.
+   1. Non-mission actions have no risk_mis to compare against. The comparison
+      §7 names is between a number and an absent field.
+   2. Among mission actions the number is CONSTANT -- 1 distinct value over all
+      of them -- because v0's forward model is Q(o|π) = status quo for every π
+      (mission_c.clj:337-342), so no candidate moves any observable.
+   3. It does not even separate the CLOCKED mission's actions from other
+      missions' actions: both scopes carry the same single value. :scope
+      records the difference; the number does not.
+  §7's revert condition is met: 'Failure of (b) on all fields = the status-quo
+  forward model is too weak, and the row that flips anything on reverts.'
+  NOTHING IS FLIPPED ON TODAY -- FUTON_WM_MISSION_C defaults off
+  (war_machine.clj:1615-1621), so the revert is a no-op and the finding is a
+  gate on U13 rather than a rollback.
+
+  IS ONLY THE FORWARD MODEL DEAD, OR THE MEASUREMENT TOO? The plant's channel
+  choice is arbitrary, so the constancy above could be an artefact of it. The
+  sweep below asks the weaker question -- does risk_mis vary with the WORLD at
+  all? -- one criterion at a time over every channel R2 observes, same
+  composition the readback uses (mission_c.clj:317-376):
+
+    record 801976e7
+      :active-repo-ratio     value 0.75                     risk_mis 4.539889921682063E-5
+      :annotation-health     value 0.9951690821256038       risk_mis 4.539889921682063E-5
+      :attack-coverage       value 0.5                      risk_mis 4.539889921682063E-5
+      :consulting-pct        value 0.0                      risk_mis 4.539889921682063E-5
+      :coupling-density      value 0.4666666666666667       risk_mis 4.539889921682063E-5
+      :depositing-signal     value 0.0                      risk_mis 4.539889921682063E-5
+      :loop-health           value 0.5173603175429513       risk_mis 4.539889921682063E-5
+      :mathematics-pct       value 9.430996541967935E-4     risk_mis 4.539889921682063E-5
+      :mission-health        value 0.023376623376623377     risk_mis 4.539889921682063E-5
+      :portfolio-pct         value 0.0022005658597925182    risk_mis 4.539889921682063E-5
+      :sorry-count-norm      value 0.0                      risk_mis 4.539889921682063E-5
+      :stack-pct             value 0.9968563344860107       risk_mis 4.539889921682063E-5
+      :support-coverage      value 0.6                      risk_mis 4.539889921682063E-5
+      :ticks-firing-ratio    value 0.0                      risk_mis 4.539889921682063E-5
+
+    1 distinct risk_mis value(s) over 14 channels: [4.539889921682063E-5]
+
+    THIS IS THE SECOND FINDING OF THE ROW AND IT IS INDEPENDENT OF THE
+    FORWARD MODEL. risk_mis does not vary with the world either, and the
+    cause is a type comparison rather than a modelling choice. Every
+    undeclared criterion takes `{:becomes 1}` (mission_c.clj:57-65, and no
+    criterion in the corpus declares a :spec), so the term goes through
+    log-preference's Bernoulli branch (preferences.clj:242-244):
+
+        (if (or (= 0 x) (false? x)) (- 1.0 p1) p1)
+
+    `(= 0 x)` is Clojure value equality, which is FALSE across number classes:
+    it holds for the long 0 and not for the double 0.0. R2's observation
+    vector is doubles throughout
+    (:consulting-pct 0.0, :sorry-count-norm 0.0, :ticks-firing-ratio 0.0 on
+    this record), so no observed value can select the non-target branch.
+    Measured on the shipped fn:
+      log-preference {:becomes 1} 0        (java.lang.Long   ) = -10.000045398900186
+      log-preference {:becomes 1} 0.0      (java.lang.Double ) = -4.539889921682063E-5
+      log-preference {:becomes 1} 1.0      (java.lang.Double ) = -4.539889921682063E-5
+      log-preference {:becomes 1} 0.5      (java.lang.Double ) = -4.539889921682063E-5
+      log-preference {:becomes 1} -3.0     (java.lang.Double ) = -4.539889921682063E-5
+      log-preference {:becomes 1} false    (java.lang.Boolean) = -10.000045398900186
+      log-preference {:becomes 1} nil      (nil              ) = -4.539889921682063E-5
+
+    So under the default spec a criterion bound to any R2 channel reads
+    SATISFIED at every value the machine can observe, 0.0 and a negative one
+    included. `nil` -- an absent channel -- also reads satisfied, which is
+    the C130 discipline inverted: an unread observable scores as a met
+    criterion rather than as a typed absence.
+
+    SCOPE, so this is not read wider than it is: grepped across every .clj
+    under ~/code, log-preference has exactly two production callers,
+    mission_c.clj:333 and mission_c.clj:370, plus this script and tests.
+    C_int and the c-vector lane score Bernoulli outcomes through `pref/kl`
+    with an explicit `{:kind :bernoulli :p q}` (c_vector.clj:681-684,
+    preferences.clj:297-299) and
+    never take this path. The exposure is U11's new code and nothing older.
+    mission_c_test.clj:197-205 pins the branch with the LONG 0, so it passes
+    while the live vocabulary cannot reach the value it pins -- the test and
+    the corpus disagree about what an outcome is.
+
+    A range :spec goes through the other branch, gives a real gradient (§5
+    has the numbers) and is not affected. None of the corpus's criteria
+    declare one.
+
+=== 5. CLAUSE (c): THE SATISFIED-CRITERIA ZERO ===
+
+  §7 asks that risk_mis 'go to zero as criteria are met on a planted field where
+  all criteria read satisfied'. Planted field: every planted observable at its
+  {:becomes 1} target, built from the bindings so it cannot drift from them.
+  The unsatisfied field is shown twice, once at the long 0 and once at the
+  double 0.0, because §4's type finding says those are not the same outcome.
+
+    all criteria SATISFIED     ({:support-coverage 1, :mission-health 1, :annotation-health 1})  risk_mis = 4.539889921682063E-5
+    UNSATISFIED, long 0        ({:support-coverage 0, :mission-health 0, :annotation-health 0})  risk_mis = 10.000045398900184
+    UNSATISFIED, double 0.0    ({:support-coverage 0.0, :mission-health 0.0, :annotation-health 0.0})  risk_mis = 4.539889921682063E-5
+    the live observation of 801976e7                                   risk_mis = 4.539889921682063E-5
+
+    zero? NO. The satisfied value is a FLOOR set by temperature alone,
+    −ln c* where c* = 1/(1+e^(−1/T)) = 0.9999546021312976 at T = 0.1
+    (preferences.clj:216-221). The literal zero needs T → 0.
+
+    AND THE UNSATISFIED POLE IS NOT REACHABLE FROM THE MACHINE'S OWN
+    OBSERVATION VOCABULARY: at the double 0.0 the same field scores 4.539889921682063E-5,
+    identical to the satisfied field, for §4's reason. The 10.0 above needs a
+    long or a boolean, and no R2 channel produces one. So the ratio below is
+    what the two POLES are worth in principle, not a spread the live path can
+    produce.
+
+    A RANGE SPEC IS A DIFFERENT PROBLEM AND IT IS REACHABLE. For :spec [lo hi]
+    the term is −ln C(x) = gap/T + ln Z, and inside the range that is ln Z,
+    which is NEGATIVE for any range narrower than [0,1]:
+      spec [0.0 1.0]    at x = 0.5     risk_mis = 0.0
+      spec [0.5 1.0]    at x = 0.75    risk_mis = -0.5119492459595545
+      spec [0.4 0.6]    at x = 0.5     risk_mis = -0.9254907419272016
+      spec [0.8 1.0]    at x = 0.9     risk_mis = -1.2040846314543239
+
+    No criterion in the corpus declares a range :spec, so this is reachable
+    and unexercised rather than a live wrong number. It matters for U13
+    because C_int's risk is a KL (≥ 0, preferences.clj:277-299) while
+    risk_mis is a surprisal: summing them in one G would let a satisfied
+    range criterion pay a BONUS, which is not what a cost term may do.
+
+    VERDICT (c): FAILS AS STATED, AND THE FAILURE IS BIGGER THAN THE FLOOR.
+    Satisfied is 4.539889921682063E-5, not 0 -- that part is a temperature floor and would
+    be a nit on its own, 220271× below the long-0 unsatisfied value 10.000045398900184.
+    What defeats the clause is that on the machine's own doubles the
+    satisfied and unsatisfied fields score the SAME number, so 'goes to zero
+    as criteria are met' is not measurable on the live path at all: nothing
+    there is ever unmet. The completion gate §3 argues for does not exist yet.
+
+=== 6. VERDICT, one line per §7 clause ===
+
+  (a) determinism    PASS with a named qualification -- mission-c-readback is a
+                     pure function of the three record fields and reproduces
+                     exactly, but the criteria arrive from an unhashed path, so
+                     'from record fields alone' is not yet true of a replay.
+  (b) discrimination FAIL on every field, for four independent reasons (§4):
+                     non-mission actions carry no risk_mis at all; among
+                     mission actions it is one constant value; clocked and
+                     other-mission scopes carry the SAME value; and the
+                     Bernoulli type defect makes it constant in the world too.
+  (c) satisfied zero FAIL. Satisfied is 4.539889921682063E-5, not 0; and on the
+                     machine's double-valued observables the unsatisfied field
+                     scores the same number, so the gate is not measurable.
+
+  §7's revert condition is MET by (b). Nothing is flipped on -- FUTON_WM_MISSION_C
+  defaults off (war_machine.clj:1615-1621) -- so the revert is a no-op today,
+  and what it binds is U13: the :choices :c-grain entry must record the v0
+  binding as MEASURED NON-DISCRIMINATING rather than as an untested limitation.
+
+  ONE DEFECT FOUND AND NOT FIXED HERE (U12 measures; it does not repair src):
+  preferences.clj:242-244's `(= 0 x)`. Two production callers, both in U11's
+  new code (mission_c.clj:333, :370). The repair is a decision about what an
+  outcome IS for a Bernoulli criterion -- `==`, a threshold, or a refusal to
+  score a continuous observable against a Bernoulli C at all -- and that is a
+  design choice, not a typo to patch inside a measurement row.
