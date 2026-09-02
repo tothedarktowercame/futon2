@@ -15,6 +15,7 @@
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.observation :as observation]
             [futon2.aif.policy :as policy]
+            [futon2.aif.sorry-registry :as sorry-registry]
             [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm])
   (:import (java.io PushbackReader StringReader)))
@@ -1476,3 +1477,67 @@
              {:consulted-ranking :scheduler-habit})]
     (is (= :not-in-controller-ranking (:chosen-rank law)))
     (is (true? (:moved-from-controller-head? law)))))
+
+;; ---------------------------------------------------------------------------
+;; I6 (harvested refusal class prediction-error-v1--source-field-missing):
+;; `:sorry-count-norm`'s source. The producer's refusal was correct — nothing
+;; wrote `[:graph :summary :total-sorrys]`, the path `observation.clj:59`
+;; requires — so the caller (the graph scan) is what changed. The census comes
+;; from the same registry that already supplies `:address-sorry` candidates.
+;; ---------------------------------------------------------------------------
+
+(deftest open-sorry-census-counts-the-live-registry-test
+  (testing "the census is the registry's own open count, not a constant"
+    (let [n (#'wm/open-sorry-census)]
+      (is (nat-int? n))
+      (is (= (count (sorry-registry/open-sorrys)) n)
+          "same population the :address-sorry proposer enumerates")))
+  (testing "an unreadable registry is nil, never a measured zero"
+    (with-redefs [sorry-registry/open-sorrys
+                  (fn [& _] (throw (ex-info "registry unreadable" {})))]
+      (is (nil? (#'wm/open-sorry-census))))))
+
+(deftest graph-summary-total-sorrys-is-present-only-test
+  (testing "a census present puts the key in, including a measured zero"
+    (is (= 3 (:total-sorrys (#'wm/graph-summary [] [] [] 3))))
+    (is (= 0 (:total-sorrys (#'wm/graph-summary [] [] [] 0)))
+        "a registry that read and holds no open sorrys is a reading"))
+  (testing "a nil census omits the key rather than writing 0"
+    (let [s (#'wm/graph-summary [] [] [] nil)]
+      (is (not (contains? s :total-sorrys)))
+      (is (= #{:total-repos :active-repos :coupling-edges :ticks-firing}
+             (set (keys s)))
+          "the other four summary keys are unchanged")))
+  (testing "the other four keys still count what they counted"
+    (let [s (#'wm/graph-summary [{:active? true} {:active? false}]
+                                [:e1 :e2 :e3]
+                                [{:fired? true} {:fired? false}]
+                                1)]
+      (is (= 2 (:total-repos s)))
+      (is (= 1 (:active-repos s)))
+      (is (= 3 (:coupling-edges s)))
+      (is (= 1 (:ticks-firing s))))))
+
+(deftest sorry-count-norm-observed-when-the-census-lands-test
+  (testing "the harvested refusal is gone once the scan supplies the path"
+    (let [scan {:graph {:summary (#'wm/graph-summary [] [] [] 3)}}
+          obs (observation/observe scan)
+          triple (free-energy/channel-prediction-error
+                  obs :sorry-count-norm {:mean 0.25 :variance 0.04})]
+      (is (= :observed (:variant (observation/observation-status
+                                  obs :sorry-count-norm))))
+      (is (= 0.3 (:sorry-count-norm obs)) "3 open sorrys / 10")
+      (is (= :present (:status triple)))
+      (is (= 0.3 (:observed triple)))
+      (is (not (contains? triple :reason)))))
+  (testing "a nil census reproduces sweep 132's record exactly"
+    (let [scan {:graph {:summary (#'wm/graph-summary [] [] [] nil)}}
+          obs (observation/observe scan)
+          triple (free-energy/channel-prediction-error
+                  obs :sorry-count-norm {:mean 0.25 :variance 0.04})]
+      (is (= :absent (:status triple)))
+      (is (= :observed (:absent-member triple)))
+      (is (= :source-field-missing (:reason triple)))
+      (is (= [[:graph :summary :total-sorrys]] (:paths triple)))
+      (is (not (contains? triple :observed))
+          "no fabricated observation for an unreadable registry"))))

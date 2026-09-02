@@ -2923,6 +2923,49 @@
          (filter #(pos? (:count %)))
          vec)))
 
+(defn- open-sorry-census
+  "Count of open sorrys from the live registry (`futon2.aif.sorry-registry`,
+   `resources/sorrys.edn`), or nil when that registry cannot be read.
+
+   This is the source `observation/observe` has always named for
+   `:sorry-count-norm` (\"open sorrys / 10\", observation.clj:27; the same
+   sentence is in `belief/predict-sorry-count-norm`). Its earlier source,
+   `sorry-nodes` above, was superseded
+   (holes/problems/P-supersede-stack-logic-model.md) and returns [], and the
+   summary below stopped carrying `:total-sorrys` at all — so the required
+   path `[:graph :summary :total-sorrys]` (observation.clj:59) was missing on
+   every tick and the channel was absent on every persisted envelope. The
+   registry is already the authority for `:address-sorry` candidates (`judge`
+   reads it through `sorry-registry/open-sorrys`), so the pressure and the
+   candidates now count one population instead of two.
+
+   nil rather than 0 on a failed read: a registry nobody could read is not a
+   registry with no open sorrys."
+  []
+  (try (count (sorry-registry/open-sorrys))
+       (catch Exception _ nil)))
+
+(defn- graph-summary
+  "The graph scan's `:summary` map.
+
+   `:total-sorrys` is PRESENT-ONLY: when `open-sorry-census` returns nil the
+   key is omitted, so `observation/channel-statuses` keeps reporting
+   `:sorry-count-norm` `{:variant :absent :reason :source-field-missing}` with
+   its own paths rather than reading a fabricated zero. A registry that reads
+   and holds no open sorrys is a measured 0 and lands in the map.
+
+   It is NOT the same population as `:nodes :sorrys` above, which
+   `sorry-nodes` still returns empty since the supersession — the node list
+   feeds the visualiser's layout and re-populating it renders new nodes, so
+   it is left to its own change. A reader comparing the two will see 3 and 0
+   today; this docstring is why."
+  [repos coupling tick-results sorry-count]
+  (cond-> {:total-repos (count repos)
+           :active-repos (count (filter :active? repos))
+           :coupling-edges (count coupling)
+           :ticks-firing (count (filter :fired? tick-results))}
+    (some? sorry-count) (assoc :total-sorrys sorry-count)))
+
 (defn scan-graph
   "Build the strategic state graph.
 
@@ -2974,10 +3017,8 @@
                                      :consulting consulting-pct
                                      :portfolio portfolio-pct
                                      :mathematics math-pct}}
-     :summary {:total-repos (count repos)
-               :active-repos (count (filter :active? repos))
-               :coupling-edges (count coupling)
-               :ticks-firing (count (filter :fired? tick-results))}})))
+     :summary (graph-summary repos coupling tick-results
+                             (open-sorry-census))})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 9: Pattern Library
