@@ -101,7 +101,7 @@ never consulted" one level down: read into a product with a structurally
 absent factor. Fix direction is the hydrator (supply the belief), not the
 controller.
 
-### 9. 83 of 114 live zaif decisions were settled by tie order, not by a score — VERDICT: DEFECT-shaped design gap (review-confirmed)
+### 9. 83 of 114 live zaif decisions were settled by tie order, not by a score — VERDICT: DEFECT-shaped design gap (review-confirmed; POPULATION CORRECTED 2026-09-02 evening, see below)
 
 With :act and :yield both structurally 0.0, they tie at the maximum whenever
 :retrieve and :ask score <= 0, and choose-arm's case order takes :act. Only
@@ -109,6 +109,16 @@ the 31 :retrieve choices were settled by arithmetic. The crew's shipped
 controller mostly decides by accident of ordering — same family as ZU-2's
 ":ask is structurally unreachable", now with the denominator. Feeds U7/U9
 and the harness-v1 R7/R4 work.
+
+CORRECTION (2026-09-02 evening, D9's byte-identical replay, futon2 2bd8e5e):
+the 114 sessions are the CALIBRATION corpus, and the tie pathology is a
+property of that corpus's session distribution — the 56 PERSISTED live
+decisions replay 0% tie-settled (all 56 score-settled :retrieve). This
+entry's headline should read "calibration sessions settled by accident",
+not "live decisions". The standing gap is unchanged and sharper for it:
+:act is structurally 0.0 everywhere and cannot compete anywhere; what
+changed is only which population exhibits the tie. D9's regenerate script
+(sha'd corpus) is the BEFORE row for U11's per-arm comparison.
 
 ### Process surprises (the loops, briefly, for completeness)
 
