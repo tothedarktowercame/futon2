@@ -1,0 +1,194 @@
+{:row :U10
+ :scope [:R1 :R2 :R3 :R4 :R5 :R6 :R7 :R8 :R9 :R13 :R14 :R16 :R17]
+ :as-of "2026-09-02"
+ :provenance-note "real means a recorded operator/WM datum; planted means a test-authored value or stub. U6's R4 predictions and R8 realised observation are plants, and test/futon2/aif/zaif_full_loop_test.clj:539 proves their orderings change with the plant."
+ :search-trail
+ ["holes/labs/wm-contract/SPEC-zaif-harness-v1.md:18-30"
+  "holes/labs/zaif-harness/worklist.edn:51-91"
+  "holes/labs/wm-contract/worklist.edn:721-728"
+  "test/futon2/aif/zaif_full_loop_test.clj:94-620"
+  "../futon3c/test/futon3c/agents/zaif_controller_test.clj:7-309"
+  "../futon3c/test/futon3c/agents/zaif_inputs_test.clj:5-88"
+  "../futon3c/test/futon3c/agents/zai_api_test.clj:276-394"
+  "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj:103-148"
+  "src/futon2/aif/{belief,observation,forward_model,efe,habit_prior,policy_free_energy,policy,bmr,a4a}.clj"
+  "../futon3c/src/futon3c/agents/{zaif_controller,zaif_inputs}.clj"]
+ :nodes
+ [{:node :R1
+   :spec-test :missing
+   :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 310
+            :substrate :zaif :provenance :real}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/belief.clj:62" "src/futon2/aif/belief.clj:423"
+               "../futon3c/src/futon3c/agents/zaif_inputs.clj:177"
+               "../futon3c/src/futon3c/agents/zaif_inputs.clj:192"]
+    :note "U6 diagnoses the recorded empty zaif task-belief; it does not test persistence. WM belief state and zaif hydration are separate paths."}
+   :gap "No two-turn persistence/reconstruction test; all 114 recorded zaif sessions had an empty task belief. S7 identifies real WM mu-pre/mu-post fields but has not extracted fixtures."
+   :blocked-by [:D8 :S7]}
+
+  {:node :R2
+   :spec-test :partial
+   :tests [{:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 105
+            :substrate :zaif :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 125
+            :substrate :zaif :provenance :planted}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/observation.clj:103"
+               "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj:103"]
+    :note "The zaif runner tests typed memory-tool envelopes; WM builds observations through futon2.aif.observation. They share the R2 mapping, not a function."}
+   :gap "The six memory tools and mission-context tool have generated planted pairs; the spec's every-tool/operator-turn/declared-mark coverage and WM fixtures are not complete. S7 records 14 real WM channels but no extractor yet."
+   :blocked-by [:S7]}
+
+  {:node :R3
+   :spec-test :missing
+   :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 310
+            :substrate :zaif :provenance :real}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/belief.clj:423"
+               "../futon3c/src/futon3c/agents/zaif_inputs.clj:177"]
+    :note "The U6 assertion exposes an absent update input. It does not execute the same update path in zaif and WM."}
+   :gap "No planted directional update and no typed-empty unchanged test; S7's real WM mu-pre/mu-post has not become a fixture."
+   :blocked-by [:D8 :S7]}
+
+  {:node :R4
+   :spec-test :partial
+   :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 332
+            :substrate :fixture-only :provenance :planted}
+           {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 343
+            :substrate :fixture-only :provenance :planted}
+           {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 539
+            :substrate :fixture-only :provenance :planted}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/forward_model.clj:25"
+               "test/futon2/aif/zaif_full_loop_test.clj:152"
+               "../futon3c/src/futon3c/agents/zaif_controller.clj:105"]
+    :note "WM's forward model rejects zaif arms. U6 alone maps zaif scalar arm values into planted WM predictions."}
+   :gap "No real zaif observation model exists. R4 and its ordering are explicitly planted; the negative control at line 539 changes the ordering with the plant."
+   :blocked-by [:D8 :S7]}
+
+  {:node :R5
+   :spec-test :partial
+   :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 363
+            :substrate :fixture-only :provenance :planted}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/efe.clj:659" "src/futon2/aif/efe.clj:679"
+               "test/futon2/aif/zaif_full_loop_test.clj:169"
+               "../futon3c/src/futon3c/agents/zaif_controller.clj:105"]
+    :note "U6 calls WM risk and ambiguity functions, but shipped zaif computes its own scalar arm terms. The mapping is exercised only after U6 plants Q."}
+   :gap "The U6 mission C and Q are planted, so its G ranking is not a real zaif outcome. Live decisions also lack mission attribution, preventing a real mission-risk test."
+   :blocked-by [:D10 :S7]}
+
+  {:node :R6
+   :spec-test :partial
+   :tests [{:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 7
+            :substrate :zaif :provenance :planted}
+           {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 401
+            :substrate :zaif :provenance :real}
+           {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 441
+            :substrate :fixture-only :provenance :planted}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/habit_prior.clj:100" "src/futon2/aif/policy.clj:157"
+               "../futon3c/src/futon3c/agents/zaif_controller.clj:124"]
+    :note "U6 feeds real zaif arm history to WM habit-prior, then WM posterior machinery; the shipped zaif controller selects by its own arm-value ordering."}
+   :gap "No shared posterior serves both live uptakes. In the recorded corpus 83/114 choices were settled by zaif case order rather than a score; D9 owns the after-D8 replay."
+   :blocked-by [:D9 :S7]}
+
+  {:node :R7
+   :spec-test :missing
+   :tests []
+   :shared-machinery
+   {:status :none
+    :evidence ["holes/labs/zaif-harness/worklist.edn:89"
+               "holes/labs/zaif-harness/worklist.edn:51"]
+    :note "No precision-table implementation or ordering assertion exists; S7 also records that the WM trace has no top-level precision field."}
+   :gap "No declared-mark versus lexical-guess precision test and no identified WM trace field."
+   :blocked-by [:U9 :S7]}
+
+  {:node :R8
+   :spec-test :partial
+   :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 418
+            :substrate :fixture-only :provenance :planted}
+           {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 539
+            :substrate :fixture-only :provenance :planted}]
+   :shared-machinery
+   {:status :mapped-through-plant
+    :evidence ["src/futon2/aif/policy_free_energy.clj:41"
+               "test/futon2/aif/zaif_full_loop_test.clj:152"
+               "test/futon2/aif/zaif_full_loop_test.clj:433"]
+    :note "U6 uses WM F-pi machinery, but the realised observation and predictions are planted; lines 433-440 state that the ordering is forced by the plant."}
+   :gap "No replay-delta-zero test from a real zaif observation, because zaif v0 declares none."
+   :blocked-by [:S7]}
+
+  {:node :R9
+   :spec-test :missing
+   :tests []
+   :shared-machinery
+   {:status :none
+    :evidence ["holes/labs/wm-contract/SPEC-zaif-harness-v1.md:26"
+               "../futon3c/test/futon3c/agents/zai_api_test.clj:309"]
+    :note "The API has refusal tests, but none pins worker-authored verdict refusal versus an adjudicator rerun; that adjacent test is not counted as R9 coverage."}
+   :gap "No authorship/type-error test for independent witness minting."
+   :blocked-by []}
+
+  {:node :R13
+   :spec-test :missing
+   :tests []
+   :shared-machinery
+   {:status :none
+    :evidence ["holes/labs/wm-contract/SPEC-zaif-harness-v1.md:27"]
+    :note "The table declares T=1, but no test pins the per-turn horizon or names the mission-horizon entry point."}
+   :gap "No horizon pin test."
+   :blocked-by []}
+
+  {:node :R14
+   :spec-test :partial
+   :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 389
+            :substrate :fixture-only :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 22
+            :substrate :zaif :provenance :planted}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/policy.clj:33"
+               "../futon3c/src/futon3c/agents/zaif_controller.clj:34"]
+    :note "WM effective temperature tau and zaif mission gamma are distinct computations related by the table. U6 tau comes from planted G spread; zaif tests only gamma lookup/default."}
+   :gap "No planted verdict-stream direction/typed-empty test. S7 has a real WM tau field but no fixture extractor."
+   :blocked-by [:S7]}
+
+  {:node :R16
+   :spec-test :partial
+   :tests [{:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 106
+            :substrate :zaif :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 117
+            :substrate :zaif :provenance :planted}
+           {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 463
+            :substrate :fixture-only :provenance :planted}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/policy.clj:503"
+               "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj:103"]
+    :note "Zaif tool execution witnesses and WM action selection are separate. U6 compares their selected arm names through the mapping but does not enact a WM flight."}
+   :gap "Memory-family tools have planted R16 witness pairs; not every runner tool/ask/yield is covered, and no real WM enactment datum exists before a flight."
+   :blocked-by [:S7]}
+
+  {:node :R17
+   :spec-test :partial
+   :tests [{:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 181
+            :substrate :zaif :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 197
+            :substrate :zaif :provenance :planted}
+           {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 514
+            :substrate :fixture-only :provenance :planted}]
+   :shared-machinery
+   {:status :mapped-separate
+    :evidence ["src/futon2/aif/bmr.clj:108" "src/futon2/aif/a4a.clj:85"
+               "../futon3c/src/futon3c/agents/zaif_controller.clj:11"
+               "../futon3c/src/futon3c/agents/zaif_controller.clj:151"]
+    :note "Zaif pins fixed constants and sanctioned A/B overrides. WM has receipt-fed BMR/A4A code, but zaif does not call it."}
+   :gap "The fixed-constant stub and A/B vector are tested; no receipt-fed zaif learning test or shared learning path exists."
+   :blocked-by [:S7]}]}
