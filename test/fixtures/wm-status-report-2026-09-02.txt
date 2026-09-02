@@ -1,0 +1,130 @@
+WAR MACHINE STATUS — 2026-09-02T17:55:06.087604+00:00
+
+WORKSPACE GATE
+verdict=FAIL exit=1
+wm-workspace-gate: SUMMARY {:verdict-qualification :repository-basis-moved, :event-claim {:claim :event-free, :interval {:started-at "2026-09-02T17:55:08.086247815Z", :finished-at "2026-09-02T18:05:31.167795327Z"}, :writer-fence {:status :absent, :reason :not-declared}, :event-free? false, :distinguishable-cause? true}, :basis-status :moved, :checks 163, :basis-repositories [{:repository :futon2, :status :moved, :changed-fields [:git-sha :tree-sha]} {:repository :futon3, :status :stable, :changed-fields []} {:repository :futon3c, :status :stable, :changed-fields []} {:repository :mathlib4, :status :stable, :changed-fields []} {:repository :p4ng, :status :moved, :changed-fields [:git-sha :tree-sha]}], :manual-exclusions [:lane-registry :current-live-operational-certificate :production-click-resource-observer :mutable-read-set-library], :manual-exclusion-reasons {:lane-registry :dispatcher-discipline-not-repository-validity, :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt, :production-click-resource-observer :joe-only-command-that-performs-production-click, :mutable-read-set-library :support-namespace-exercised-by-consumer-controls-and-unit-tests}, :failures [{:name :contract-authority-current, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :q-interface-completeness, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :organization, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :lean-sorry-categories, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :reload-click-certificate-rehearsal, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :pinned-operational-certificate, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :p4ng-referent-drift, :exit 1, :observed-exit 1, :expected-exits #{0}}], :executable-checks 161}
+wm-workspace-gate: PROVENANCE [{"repository":"futon2","path":"/home/joe/code/futon2","git-sha":"a1cd0cfd5e602d17fcaecdd18a788ff5baeb160d","tree-sha":"14dfef6dc24a9f884a4b34201ac96b1b154f4bcf","dirty?":true,"tracked-diff-sha256":"56e28e2cc3edf272c1251b35a8653e349a68f8552607949e9c34c8c432d68f77","readable?":true},{"repository":"mathlib4","path":"/home/joe/code/mathlib4","git-sha":"6de47bd0503dd4e6090c420ca32d8e7474438d7e","tree-sha":"5cc882ec8966dcf2e5d4998a7d5cb868088698bd","dirty?":false,"tracked-diff-sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","readable?":true},{"repository":"p4ng","path":"/home/joe/code/p4ng","git-sha":"200e4c984634277f1474ccc9f97659f15ab4e4b0","tree-sha":"fe8310087ea0892bf33c87f908b96ddafa832261","dirty?":false,"tracked-diff-sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","readable?":true},{"repository":"futon3","path":"/home/joe/code/futon3","git-sha":"bfa8a9c45ef2989114de4f35ecfe748b5eeb761f","tree-sha":"e79cf6c62d5eb48c39da8a72545ac5b58b6f4765","dirty?":false,"tracked-diff-sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","readable?":true},{"repository":"futon3c","path":"/home/joe/code/futon3c","git-sha":"94671228ef5b675d7e7c5957c9a1d76623255d09","tree-sha":"57d35991cbf6591f8a10574bb16f63bd8e281c75","dirty?":true,"tracked-diff-sha256":"e3ba1309dd80b34ad11f1915eec5f53b3a772956fad028b0615b007d06c51c1c","readable?":true}]
+
+CONTRACT
+declarations=119 closed=108 holes=11 source=contract_lint-live-report
+contract-hole-judgement={"implementation-refused": 3, "shape-conformant": 8} source=contract_lint-live-report
+binding-passed-shape-unchecked-declarations=[]
+:=sorry-terms=10 sorry-classification={"deliberate-implementation-refusal": 3, "permanent-external-attestation": 7} source=lean_sorry_category_check
+lean-declaration-labels={"deliberate-implementation-refusal": 3, "permanent-external-attestation": 7, "witnessed-instance-obligation": 5} source=lean_sorry_category_check
+all-classifications={"closed-by-record": 108, "conformant": 8, "refused-implementation": 3}
+contract-pin={"fresh?": false, "json-sha": "f812795ca68c4edd8b9c9668f5cd8b24832b688a", "module-last-commit-sha": "6de47bd0503dd4e6090c420ca32d8e7474438d7e"}
+
+STRICT LINT
+verdict=PASS exit=0 stale=0 uninspectable=0 bound-to-false=0 conformant=8
+
+ABSENCE LINT
+verdict=PASS exit=0 absence lint: PASS findings= 0 counts= {:futon2 0, :futon3 0, :p4ng 0} exit-convention=0-pass/1-fail
+dispositions={"blocked": 0, "exempt-with-reason": 1, "fix-now": 16, "retired": 1} source=HAND-MAINTAINED checks/absence-coercion-dispositions.edn; validated by running lint
+
+SUITES (bounded substrate receipts)
+futon2: tests=3 assertions=12 failures=0 errors=0 resource-verdict=pass outer-exit=0 pids-peak=120 receipt=/tmp/futon-bounded-tests/bounded-1788371706766-status-1788371706-futon2.receipt.json
+futon3: tests=263 assertions=1701 failures=8 errors=4 resource-verdict=fail outer-exit=125 pids-peak=1280 receipt=/tmp/futon-bounded-tests/bounded-1788371707757-status-1788371706-futon3.receipt.json
+
+OBLIGATIONS
+verdict=PASS exit=0 current-table={"closure-verified": 24, "current-rows": 24, "failures": 0, "obligations": 24, "pass?": true}
+
+LANES
+verdict=PASS exit=0 lane-registry-check: PASS exit-convention=0-pass/1-fail/2-mutation-slipped
+{:lane :wm-evidence, :state :idle, :holding nil, :job-id nil, :job-state nil, :expected-by nil}
+{:lane :wm-nouns, :state :idle, :holding nil, :job-id nil, :job-state nil, :expected-by nil}
+{:lane :wm-organization, :state :idle, :holding nil, :job-id nil, :job-state nil, :expected-by nil}
+{:lane :wm-verbs, :state :idle, :holding nil, :job-id nil, :job-state nil, :expected-by nil}
+
+REFERENT DRIFT
+verdict=FAIL exit=1 findings=11 source=p4ng/detect_drift.py
+
+BOUNDED TESTING RETIREMENT WINDOW
+runs=18 passes=16 test-failures=2 containment-failures=0 eligible=false retire=false configuration=9331cca1818f5e185e85163f6e7f790f727e7254976b236aec1ce417cbc8d35e source=bg.py/test-health
+clears-when=Joe records keep/retire and begins a new evaluation window or changes configuration
+
+MORNING BRIEF DECISIONS
+state=DECISION-DUE pending-attempts=72 belief-blocked=15 source=data/wm-morning-brief/items+reviews
+attempt=attempt-001 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-002 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-003 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-004 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-005 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-006 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-007 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-008 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-009 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-010 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-011 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-012 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-013 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-014 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-015 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-016 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-017 outstanding=["evidence-sufficiency", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-018 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-019 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-020 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-021 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-022 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-023 outstanding=["evidence-sufficiency", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-024 outstanding=["evidence-sufficiency", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-025 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-026 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-027 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-028 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-029 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-030 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-031 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-032 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-033 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-034 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-035 outstanding=["evidence-sufficiency", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-036 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-037 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-039 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-041 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-043 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-044 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-045 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-046 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-047 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-048 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-049 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-050 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-051 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-052 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-054 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-055 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-056 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-057 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-058 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=attempt-059 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-060 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=attempt-061 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=belief-learning-blocked
+attempt=canary-1ddada48-538c-4748-ab1a-f2efe906184e outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-2298bdfc-bdc1-4e73-8795-19fec216e9e4 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-24507c04-d35b-45f4-abc3-4e331bebc438 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-353c846d-211e-4deb-b7bf-56c55205b12e outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-5696b790-0ffd-44b8-9577-1328dd416ccc outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-76c0d5df-0485-4479-a81e-57890c2463cb outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-79086952-c5dc-4444-b34c-8fbcf5ff78b2 outstanding=["evidence-sufficiency", "feature-verdict", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-7da795f1-cce3-4fd9-8aba-8ed3e0613c97 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-7fc89833-d948-428a-99bb-f323b35aceed outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-8bf1bbe7-01a0-429d-b07a-df4e3b01c2bf outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-9e88061e-eb57-478a-b5fb-46ebd114757c outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-a29dbaba-c6d0-4be2-af8e-e819f7e82765 outstanding=["evidence-sufficiency", "feature-verdict", "machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=canary-f25be272-d7fb-46b8-a788-befa551bfced outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=initialization-1b5a24df-8561-4dfa-b283-f4ed50572384 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+attempt=initialization-6d5da36a-04f0-42ee-ba91-55bee5801a01 outstanding=["machine-response", "selection-quality", "substantive-achievement"] cost=audit-only
+
+ACCEPTED RED (enumerated; exact signatures only)
+active=0 unused-or-superseded=2
+UNUSED id=C152-absence-decisions component=absence-lint review-by=2026-09-01T12:00:00Z clears-when=Joe resolves the C130 decisions or the exact finding count/disposition changes.
+UNUSED id=C152-single-stale-holding component=lane-registry review-by=2026-09-01T00:00:00Z clears-when=The commissioner records or redispatches the completed holding; any additional error class is new red.
+NEW component=workspace-gate signature={"exit": 1} reason=no exact active acceptance
+NEW component=sorry-category signature={"exit": 1} reason=no exact active acceptance
+NEW component=referent-drift signature={"exit": 1, "findings": 11} reason=no exact active acceptance
+NEW component=futon3-suite signature={"exit": 125} reason=no exact active acceptance
+
+OVERALL
+DEGRADED-NEW exit=1 convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1/DECISION-DUE-3

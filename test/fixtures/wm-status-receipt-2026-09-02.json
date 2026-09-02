@@ -1,0 +1,1021 @@
+{
+  "absence-lint": {
+    "dispositions": {
+      "blocked": 0,
+      "exempt-with-reason": 1,
+      "fix-now": 16,
+      "retired": 1
+    },
+    "exit": 0,
+    "findings": 0,
+    "summary": "absence lint: PASS findings= 0 counts= {:futon2 0, :futon3 0, :p4ng 0} exit-convention=0-pass/1-fail",
+    "verdict": "PASS"
+  },
+  "accepted-red": {
+    "accepted": [],
+    "new-red": [
+      {
+        "component": "workspace-gate",
+        "reason": "no exact active acceptance",
+        "red": true,
+        "signature": {
+          "exit": 1
+        }
+      },
+      {
+        "component": "sorry-category",
+        "reason": "no exact active acceptance",
+        "red": true,
+        "signature": {
+          "exit": 1
+        }
+      },
+      {
+        "component": "referent-drift",
+        "reason": "no exact active acceptance",
+        "red": true,
+        "signature": {
+          "exit": 1,
+          "findings": 11
+        }
+      },
+      {
+        "component": "futon3-suite",
+        "reason": "no exact active acceptance",
+        "red": true,
+        "signature": {
+          "exit": 125
+        }
+      }
+    ],
+    "stale-acceptances": [
+      {
+        "clears-when": "Joe resolves the C130 decisions or the exact finding count/disposition changes.",
+        "component": "absence-lint",
+        "id": "C152-absence-decisions",
+        "reason": "Seven action-affecting absence repairs require operator decisions; they remain findings, not defects silently cleared.",
+        "reference": "holes/labs/wm-contract/C130-absence-decisions.md",
+        "review-by": "2026-09-01T12:00:00Z",
+        "signature": {
+          "dispositions": [
+            "blocked"
+          ],
+          "exit": 1,
+          "findings": 7
+        }
+      },
+      {
+        "clears-when": "The commissioner records or redispatches the completed holding; any additional error class is new red.",
+        "component": "lane-registry",
+        "id": "C152-single-stale-holding",
+        "reason": "One completed lane is awaiting commissioner redispatch; this measures dispatcher discipline rather than repository validity.",
+        "reference": "holes/labs/wm-contract/C152-accepted-red-status.md",
+        "review-by": "2026-09-01T00:00:00Z",
+        "signature": {
+          "errors": [
+            ":stale-holding"
+          ],
+          "exit": 1
+        }
+      }
+    ]
+  },
+  "components": [
+    {
+      "classification": "new-red",
+      "component": "workspace-gate",
+      "red": true,
+      "signature": {
+        "exit": 1
+      }
+    },
+    {
+      "classification": "green",
+      "component": "strict-lint",
+      "red": false,
+      "signature": {
+        "exit": 0
+      }
+    },
+    {
+      "classification": "new-red",
+      "component": "sorry-category",
+      "red": true,
+      "signature": {
+        "exit": 1
+      }
+    },
+    {
+      "classification": "green",
+      "component": "absence-lint",
+      "red": false,
+      "signature": {
+        "dispositions": [],
+        "exit": 0,
+        "findings": 0
+      }
+    },
+    {
+      "classification": "green",
+      "component": "obligations",
+      "red": false,
+      "signature": {
+        "exit": 0
+      }
+    },
+    {
+      "classification": "green",
+      "component": "lane-registry",
+      "red": false,
+      "signature": {
+        "errors": [],
+        "exit": 0
+      }
+    },
+    {
+      "classification": "new-red",
+      "component": "referent-drift",
+      "red": true,
+      "signature": {
+        "exit": 1,
+        "findings": 11
+      }
+    },
+    {
+      "classification": "green",
+      "component": "bounded-test-health",
+      "red": false,
+      "signature": {
+        "exit": 0,
+        "readable": true
+      }
+    },
+    {
+      "classification": "green",
+      "component": "morning-brief-state",
+      "red": false,
+      "signature": {
+        "exit": 0,
+        "readable": true
+      }
+    },
+    {
+      "classification": "green",
+      "component": "futon2-suite",
+      "red": false,
+      "signature": {
+        "exit": 0
+      }
+    },
+    {
+      "classification": "new-red",
+      "component": "futon3-suite",
+      "red": true,
+      "signature": {
+        "exit": 125
+      }
+    }
+  ],
+  "contract": {
+    "all-classifications": {
+      "closed-by-record": 108,
+      "conformant": 8,
+      "refused-implementation": 3
+    },
+    "closed": 108,
+    "declaration-count": 119,
+    "hole": 11,
+    "hole-population": {
+      "classification": {
+        "implementation-refused": 3,
+        "shape-conformant": 8
+      },
+      "count": 11,
+      "shape-unchecked": [],
+      "source": "contract_lint-live-report"
+    }
+  },
+  "contract-pin": {
+    "fresh?": false,
+    "json-sha": "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+    "module-last-commit-sha": "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+  },
+  "lanes": {
+    "errors": [],
+    "exit": 0,
+    "rows": [
+      "{:lane :wm-evidence, :state :idle, :holding nil, :job-id nil, :job-state nil, :expected-by nil}",
+      "{:lane :wm-nouns, :state :idle, :holding nil, :job-id nil, :job-state nil, :expected-by nil}",
+      "{:lane :wm-organization, :state :idle, :holding nil, :job-id nil, :job-state nil, :expected-by nil}",
+      "{:lane :wm-verbs, :state :idle, :holding nil, :job-id nil, :job-state nil, :expected-by nil}"
+    ],
+    "summary": "lane-registry-check: PASS exit-convention=0-pass/1-fail/2-mutation-slipped",
+    "verdict": "PASS"
+  },
+  "lean-sorry": {
+    "classification": {
+      "deliberate-implementation-refusal": 3,
+      "permanent-external-attestation": 7
+    },
+    "count": 10,
+    "declaration-labels": {
+      "deliberate-implementation-refusal": 3,
+      "permanent-external-attestation": 7,
+      "witnessed-instance-obligation": 5
+    },
+    "source": "lean_sorry_category_check"
+  },
+  "morning-brief": {
+    "attempts": [
+      {
+        "attempt-id": "attempt-001",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-002",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-003",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-004",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-005",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-006",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-007",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-008",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-009",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-010",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-011",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-012",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-013",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-014",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-015",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-016",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-017",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-018",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-019",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-020",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-021",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-022",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-023",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-024",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-025",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-026",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-027",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-028",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-029",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-030",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-031",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-032",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-033",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-034",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-035",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-036",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-037",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-039",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-041",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-043",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-044",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-045",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-046",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-047",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-048",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-049",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-050",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-051",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-052",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-054",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-055",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-056",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-057",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-058",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-059",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-060",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "attempt-061",
+        "belief-target?": true,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-1ddada48-538c-4748-ab1a-f2efe906184e",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-2298bdfc-bdc1-4e73-8795-19fec216e9e4",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-24507c04-d35b-45f4-abc3-4e331bebc438",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-353c846d-211e-4deb-b7bf-56c55205b12e",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-5696b790-0ffd-44b8-9577-1328dd416ccc",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-76c0d5df-0485-4479-a81e-57890c2463cb",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-79086952-c5dc-4444-b34c-8fbcf5ff78b2",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-7da795f1-cce3-4fd9-8aba-8ed3e0613c97",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-7fc89833-d948-428a-99bb-f323b35aceed",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-8bf1bbe7-01a0-429d-b07a-df4e3b01c2bf",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-9e88061e-eb57-478a-b5fb-46ebd114757c",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-a29dbaba-c6d0-4be2-af8e-e819f7e82765",
+        "belief-target?": false,
+        "pending-objectives": [
+          "evidence-sufficiency",
+          "feature-verdict",
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "canary-f25be272-d7fb-46b8-a788-befa551bfced",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "initialization-1b5a24df-8561-4dfa-b283-f4ed50572384",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      },
+      {
+        "attempt-id": "initialization-6d5da36a-04f0-42ee-ba91-55bee5801a01",
+        "belief-target?": false,
+        "pending-objectives": [
+          "machine-response",
+          "selection-quality",
+          "substantive-achievement"
+        ]
+      }
+    ],
+    "belief-blocked-attempt-ids": [
+      "attempt-007",
+      "attempt-016",
+      "attempt-017",
+      "attempt-022",
+      "attempt-023",
+      "attempt-031",
+      "attempt-032",
+      "attempt-033",
+      "attempt-034",
+      "attempt-035",
+      "attempt-046",
+      "attempt-056",
+      "attempt-059",
+      "attempt-060",
+      "attempt-061"
+    ],
+    "belief-blocked-count": 15,
+    "count": 72
+  },
+  "obligations": {
+    "current-table": {
+      "closure-verified": 24,
+      "current-rows": 24,
+      "failures": 0,
+      "obligations": 24,
+      "pass?": true
+    },
+    "exit": 0,
+    "verdict": "PASS"
+  },
+  "overall": {
+    "exit": 1,
+    "verdict": "DEGRADED-NEW"
+  },
+  "referent-drift": {
+    "exit": 1,
+    "findings": 11,
+    "source": "p4ng/detect_drift.py",
+    "verdict": "FAIL"
+  },
+  "retirement-window": {
+    "containment-failures": 0,
+    "eligible": false,
+    "minimum-window": 30,
+    "passes": 16,
+    "retire": false,
+    "runs": 18,
+    "test-failures": 2
+  },
+  "strict-lint": {
+    "bound-to-false": 0,
+    "conformant": 8,
+    "exit": 0,
+    "stale": 0,
+    "uninspectable": 0,
+    "verdict": "PASS"
+  },
+  "suites": [
+    {
+      "assertions": "12",
+      "errors": "0",
+      "exit": 0,
+      "failures": "0",
+      "name": "futon2",
+      "pids-peak": 120,
+      "receipt": "/tmp/futon-bounded-tests/bounded-1788371706766-status-1788371706-futon2.receipt.json",
+      "tests": "3",
+      "verdict": "pass"
+    },
+    {
+      "assertions": "1701",
+      "errors": "4",
+      "exit": 125,
+      "failures": "8",
+      "name": "futon3",
+      "pids-peak": 1280,
+      "receipt": "/tmp/futon-bounded-tests/bounded-1788371707757-status-1788371706-futon3.receipt.json",
+      "tests": "263",
+      "verdict": "fail"
+    }
+  ],
+  "timestamp": "2026-09-02T17:55:06.087604+00:00",
+  "workspace-gate": {
+    "exit": 1,
+    "provenance": "wm-workspace-gate: PROVENANCE [{\"repository\":\"futon2\",\"path\":\"/home/joe/code/futon2\",\"git-sha\":\"a1cd0cfd5e602d17fcaecdd18a788ff5baeb160d\",\"tree-sha\":\"14dfef6dc24a9f884a4b34201ac96b1b154f4bcf\",\"dirty?\":true,\"tracked-diff-sha256\":\"56e28e2cc3edf272c1251b35a8653e349a68f8552607949e9c34c8c432d68f77\",\"readable?\":true},{\"repository\":\"mathlib4\",\"path\":\"/home/joe/code/mathlib4\",\"git-sha\":\"6de47bd0503dd4e6090c420ca32d8e7474438d7e\",\"tree-sha\":\"5cc882ec8966dcf2e5d4998a7d5cb868088698bd\",\"dirty?\":false,\"tracked-diff-sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"readable?\":true},{\"repository\":\"p4ng\",\"path\":\"/home/joe/code/p4ng\",\"git-sha\":\"200e4c984634277f1474ccc9f97659f15ab4e4b0\",\"tree-sha\":\"fe8310087ea0892bf33c87f908b96ddafa832261\",\"dirty?\":false,\"tracked-diff-sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"readable?\":true},{\"repository\":\"futon3\",\"path\":\"/home/joe/code/futon3\",\"git-sha\":\"bfa8a9c45ef2989114de4f35ecfe748b5eeb761f\",\"tree-sha\":\"e79cf6c62d5eb48c39da8a72545ac5b58b6f4765\",\"dirty?\":false,\"tracked-diff-sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"readable?\":true},{\"repository\":\"futon3c\",\"path\":\"/home/joe/code/futon3c\",\"git-sha\":\"94671228ef5b675d7e7c5957c9a1d76623255d09\",\"tree-sha\":\"57d35991cbf6591f8a10574bb16f63bd8e281c75\",\"dirty?\":true,\"tracked-diff-sha256\":\"e3ba1309dd80b34ad11f1915eec5f53b3a772956fad028b0615b007d06c51c1c\",\"readable?\":true}]",
+    "summary": "wm-workspace-gate: SUMMARY {:verdict-qualification :repository-basis-moved, :event-claim {:claim :event-free, :interval {:started-at \"2026-09-02T17:55:08.086247815Z\", :finished-at \"2026-09-02T18:05:31.167795327Z\"}, :writer-fence {:status :absent, :reason :not-declared}, :event-free? false, :distinguishable-cause? true}, :basis-status :moved, :checks 163, :basis-repositories [{:repository :futon2, :status :moved, :changed-fields [:git-sha :tree-sha]} {:repository :futon3, :status :stable, :changed-fields []} {:repository :futon3c, :status :stable, :changed-fields []} {:repository :mathlib4, :status :stable, :changed-fields []} {:repository :p4ng, :status :moved, :changed-fields [:git-sha :tree-sha]}], :manual-exclusions [:lane-registry :current-live-operational-certificate :production-click-resource-observer :mutable-read-set-library], :manual-exclusion-reasons {:lane-registry :dispatcher-discipline-not-repository-validity, :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt, :production-click-resource-observer :joe-only-command-that-performs-production-click, :mutable-read-set-library :support-namespace-exercised-by-consumer-controls-and-unit-tests}, :failures [{:name :contract-authority-current, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :q-interface-completeness, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :organization, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :lean-sorry-categories, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :reload-click-certificate-rehearsal, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :pinned-operational-certificate, :exit 1, :observed-exit 1, :expected-exits #{0}} {:name :p4ng-referent-drift, :exit 1, :observed-exit 1, :expected-exits #{0}}], :executable-checks 161}",
+    "verdict": "FAIL"
+  }
+}
