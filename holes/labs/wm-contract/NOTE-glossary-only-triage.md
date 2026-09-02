@@ -103,3 +103,12 @@ from the preregistered population, against the preregistration at
 `futon2/holes/labs/M-aif-full-loop-46/cohort.edn`. Joe's call: (a) close on the
 cohort witness, (b) name the paragraph disposition 5 meant, or (c) leave it
 `:named-only`.
+
+**RULED (a) by Joe, 2026-09-02 ~20:15 ("a makes sense"), presented by
+claude-1 with the recommendation for (a).** Close "Revision boundary" on the
+cohort witness above — the paragraph stands as written (cancellation
+boundary), and the machinery honoring it is the witness. Execution: U14
+flips :needs-joe -> :open at the loop's next pause (this note is the ruling
+record until the row's own evidence carries it); disposition 5's valid-time
+material is NOT re-attached anywhere — it was referent drift, and the
+db-revision machinery already witnesses other rows.
