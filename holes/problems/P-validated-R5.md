@@ -700,3 +700,17 @@ not to work on them, but only to see whether policies could be constructed
 that would plausibly allow working on them. Construction-only trials over real
 work items; the dark-mode discipline (construct, persist, judge — do not
 enact), applied to the constructor itself.
+
+**§1b addendum 5 (Joe, 2026-09-02, sixth exchange, reported):** another domain —
+the Zaif runners. The original idea (M-zaif-harness) was an AIF harness for zai
+agents, underdetermined then; G-over-policies sharpens it: a zaif could be
+GIVEN a policy cascade and make decisions, use tools, etc., from what is in it.
+Joe's stated provenance: ChipWits — program the robot from a finite board of
+operation chips, then watch it run. Read against the artifact: zaif v0
+(futon3c zaif_controller.clj, 270 lines) chooses retrieve/act/ask arms
+per-decision with fixed uncalibrated constants — the individual-action-ranking
+shape. The cascade version replaces that with a program the runner carries:
+constructed per-task by the constructor, bounded like the chip board (the
+stopping rule made physical), inspectable and reviewable BEFORE the run, with
+the seat's persisted transcripts (U1) and gate receipts as the playout oracle —
+and existing zai transcripts as retrodiction material.
