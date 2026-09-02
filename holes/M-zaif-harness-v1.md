@@ -136,8 +136,13 @@ moves.
 
 ## 6. INSTANTIATE — feeding the build
 
-Runs as wm-contract rows, in order: U2/U4 (record-only, in flight), U1 (seam
-tests), U6 (end-to-end fitting), then U7/U8/U9 on Joe's mint. Each row's
+The mission has its own board: `holes/labs/zaif-harness/worklist.edn`
+(2026-09-02). Its S rows recover the outer loop's early steps — S1 map the old
+mission selector, S2 step through one selection manually as the test case for
+getting the WM to run, S3 the honest prejudice (this mission wins through
+declared inputs only), S4 selection→clocking — and U7/U8/U9 live there now.
+On the wm-contract board, in order: U2/U4 (record-only, in flight), U1 (seam
+tests), U6 (end-to-end fitting). Each row's
 delivery feeds the node its phase-fixture already typed: tool pairs → R2/R16,
 precision table → R7, fold consumption → R14, reporting gate → the Z1 edge.
 Default flips and Z3 remain J-gated acts, not row side-effects.
