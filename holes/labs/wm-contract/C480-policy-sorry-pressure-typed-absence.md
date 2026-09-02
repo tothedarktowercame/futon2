@@ -211,8 +211,9 @@ repaired / 7 open / 1 partial → **54 / 6 / 1**.
 `bb p4ng/empirics-futon/pointer_check.bb` reports the same two unresolved
 pointers AC1, AC2 and AC3 all recorded: one pointer, quoted twice, in AC7's
 worklist row, naming a file under `src/futon2/aif/adapters/`, which the checker
-cannot resolve because that directory is not on its root allowlist. 570
-pointers in 3 files, 2 unresolved, both the same one.
+cannot resolve because that directory is not on its root allowlist. With this
+row's ledger evidence landed: 580 pointers in 3 files, 2 unresolved, both the
+same one (570 before it, so all ten pointers this row added resolve).
 `negative_controls.sh` fails on that pointer and on nothing this row added.
 (Named here without the `file:line` form on purpose: `pointer_check` reads
 `worklist.edn` as one of its three registries, so writing the pointer verbatim
