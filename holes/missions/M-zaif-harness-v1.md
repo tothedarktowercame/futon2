@@ -72,6 +72,26 @@ fixture. (Carried tension 3 applies: treat as fertile until a row cashes it.)
 **Completion criteria:** U6–U9 acceptances green; the reporting gate holds on one
 real zaif decision; the honest gap list (which R nodes zaif exercises vs stubs)
 published in the registry.
+
+## Completion criteria
+
+Ported verbatim from the operator punch-in IDENTIFY session, 2026-09-02
+(holes/labs/zaif-harness/runs/S4-identify-ingest.edn `:preferences/c`), on
+Joe's word ("add the criteria to the doc"). Each observable is declared
+BINARY — the condition holds or it does not — per Joe's J6 ruling
+(declared-binarization; a binary observable needs no threshold). No channel
+bindings are declared here: U12's channel assignments were a stated plant
+and do not enter this document.
+
+1. U6–U9 acceptances green — measurable by the worklist rows' acceptance
+   state (carrier: zaif-harness + wm-contract worklists; observable kind:
+   binary).
+2. The reporting gate holds on one real zaif decision — every report claim
+   re-derivable from Z1 queries and typed records (carrier: U8's gate test;
+   observable kind: binary).
+3. The honest gap list published — which R nodes zaif exercises vs stubs,
+   recorded where the registry points (carrier: aif-equations.edn + the U6
+   artifact; observable kind: binary).
 **Depends on / enables:** depends on WM edge facilities (landed) and U1's test
 harness (queued); enables the Z3 A/B and, later, cascade-grain arms (LA2/LA3).
 **Owner/repos:** futon2 (WM, this doc), futon3c (zaif code), p4ng (paper).
