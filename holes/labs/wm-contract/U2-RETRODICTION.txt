@@ -1,0 +1,423 @@
+;; U2 -- tau arm adjudication by retrodiction. Replay only; no live run.
+
+
+;; ==================== FIELD S2 ====================
+;; records 20, usable aligned fields 20
+;; CONTROL 1 solver: local 1.002646072744  src converge-beta 1.002646072744  delta 0.00e+00
+;; CONTROL 2 alignment: 19 of 19 transitions have F_pi(t+1) scored against tick t's own prediction
+;; scorable transitions 19
+
+;; --- L_mix = ln SUM_i pi_i exp(-F_pi(t+1)_i), per transition (HIGHER IS BETTER)
+arm \ transition t->t+1            1->2     2->3     3->4     4->5     5->6     6->7     7->8     8->9    9->10   10->11   11->12   12->13   13->14   14->15   15->16   16->17   17->18   18->19   19->20
+ORACLE argmin F(t+1)            19.7153  19.7154  19.7160  19.7159  19.7160  19.7159  19.7160  19.7160  19.7160  19.7160  19.7159  19.7159  19.7149  19.7159  19.7160  19.7160  19.7159  19.7159  19.7160
+none/carried                    19.1886  19.1882  19.1888  19.1887  19.1888  19.1887  19.1888  19.1888  19.1888  19.1888  19.1888  19.1887  19.1877  19.1887  19.1889  19.1889  19.1887  19.1888  19.1889
+none/fixed                      19.1886  19.1882  19.1888  19.1886  19.1888  19.1887  19.1888  19.1888  19.1888  19.1888  19.1887  19.1887  19.1877  19.1886  19.1888  19.1888  19.1886  19.1887  19.1888
+pi-only/carried                 19.1858  19.1855  19.1861  19.1860  19.1861  19.1861  19.1862  19.1862  19.1862  19.1862  19.1862  19.1862  19.1852  19.1862  19.1863  19.1863  19.1862  19.1863  19.1863
+pi-only/fixed                   19.1858  19.1855  19.1861  19.1859  19.1861  19.1860  19.1861  19.1861  19.1861  19.1861  19.1860  19.1860  19.1850  19.1859  19.1861  19.1861  19.1859  19.1860  19.1861
+both/carried                    19.1858  19.1855  19.1861  19.1859  19.1861  19.1860  19.1861  19.1861  19.1861  19.1861  19.1860  19.1860  19.1850  19.1860  19.1861  19.1861  19.1860  19.1861  19.1861
+both/fixed                      19.1858  19.1854  19.1861  19.1859  19.1861  19.1860  19.1861  19.1861  19.1861  19.1861  19.1860  19.1860  19.1850  19.1859  19.1861  19.1861  19.1859  19.1860  19.1860
+none/carried/one-step           19.1886  19.1882  19.1888  19.1887  19.1888  19.1887  19.1888  19.1888  19.1888  19.1888  19.1888  19.1887  19.1877  19.1887  19.1889  19.1889  19.1887  19.1888  19.1889
+pi-only/carried/one-step        19.1858  19.1855  19.1861  19.1860  19.1861  19.1861  19.1862  19.1862  19.1862  19.1862  19.1862  19.1862  19.1852  19.1862  19.1863  19.1863  19.1862  19.1863  19.1863
+both/carried/one-step           19.1858  19.1855  19.1861  19.1859  19.1861  19.1860  19.1861  19.1861  19.1861  19.1861  19.1860  19.1860  19.1850  19.1860  19.1861  19.1861  19.1860  19.1861  19.1861
+CONTROL default-law             19.1792  19.1787  19.1793  19.1792  19.1793  19.1792  19.1793  19.1793  19.1793  19.1793  19.1792  19.1792  19.1782  19.1792  19.1793  19.1793  19.1792  19.1792  19.1793
+CONTROL uniform                 19.1903  19.1877  19.1883  19.1881  19.1882  19.1882  19.1883  19.1883  19.1883  19.1883  19.1881  19.1881  19.1871  19.1881  19.1882  19.1882  19.1881  19.1882  19.1882
+CONTROL machine-choice          19.1672  19.1673  19.1679  19.1677  19.1679  19.1678  19.1679  19.1679  19.1679  19.1679  19.1678  19.1678  19.1668  19.1678  19.1679  19.1679  19.1678  19.1678  19.1679
+ANTI-ORACLE argmax F(t+1)       18.9613  18.9614  18.9620  18.9618  18.9620  18.9619  18.9620  18.9620  18.9620  18.9620  18.9619  18.9619  18.9609  18.9618  18.9620  18.9620  18.9618  18.9619  18.9620
+
+;; --- E_F = SUM_i pi_i F_pi(t+1)_i, per transition (LOWER IS BETTER)
+ORACLE argmin F(t+1)           -19.7153 -19.7154 -19.7160 -19.7159 -19.7160 -19.7159 -19.7160 -19.7160 -19.7160 -19.7160 -19.7159 -19.7159 -19.7149 -19.7159 -19.7160 -19.7160 -19.7159 -19.7159 -19.7160
+none/carried                   -19.1832 -19.1827 -19.1833 -19.1832 -19.1833 -19.1832 -19.1833 -19.1833 -19.1833 -19.1833 -19.1832 -19.1832 -19.1822 -19.1832 -19.1833 -19.1833 -19.1832 -19.1833 -19.1833
+none/fixed                     -19.1832 -19.1827 -19.1833 -19.1831 -19.1833 -19.1832 -19.1833 -19.1833 -19.1833 -19.1833 -19.1832 -19.1832 -19.1822 -19.1831 -19.1833 -19.1833 -19.1831 -19.1832 -19.1833
+pi-only/carried                -19.1811 -19.1807 -19.1813 -19.1811 -19.1813 -19.1812 -19.1813 -19.1813 -19.1813 -19.1814 -19.1813 -19.1813 -19.1803 -19.1813 -19.1814 -19.1814 -19.1813 -19.1813 -19.1814
+pi-only/fixed                  -19.1811 -19.1806 -19.1813 -19.1811 -19.1812 -19.1812 -19.1812 -19.1813 -19.1812 -19.1813 -19.1812 -19.1812 -19.1801 -19.1811 -19.1813 -19.1813 -19.1811 -19.1812 -19.1812
+both/carried                   -19.1811 -19.1806 -19.1813 -19.1811 -19.1813 -19.1812 -19.1813 -19.1813 -19.1813 -19.1813 -19.1812 -19.1812 -19.1802 -19.1812 -19.1813 -19.1813 -19.1812 -19.1812 -19.1813
+both/fixed                     -19.1811 -19.1806 -19.1812 -19.1811 -19.1812 -19.1812 -19.1812 -19.1813 -19.1812 -19.1812 -19.1812 -19.1811 -19.1801 -19.1811 -19.1812 -19.1812 -19.1811 -19.1812 -19.1812
+none/carried/one-step          -19.1832 -19.1827 -19.1833 -19.1832 -19.1833 -19.1832 -19.1833 -19.1833 -19.1833 -19.1833 -19.1832 -19.1832 -19.1822 -19.1832 -19.1833 -19.1833 -19.1832 -19.1833 -19.1833
+pi-only/carried/one-step       -19.1811 -19.1807 -19.1813 -19.1811 -19.1813 -19.1812 -19.1813 -19.1813 -19.1813 -19.1814 -19.1813 -19.1813 -19.1803 -19.1813 -19.1814 -19.1814 -19.1813 -19.1813 -19.1814
+both/carried/one-step          -19.1811 -19.1806 -19.1813 -19.1811 -19.1813 -19.1812 -19.1813 -19.1813 -19.1813 -19.1813 -19.1812 -19.1812 -19.1802 -19.1812 -19.1813 -19.1813 -19.1812 -19.1812 -19.1813
+CONTROL default-law            -19.1759 -19.1753 -19.1759 -19.1758 -19.1759 -19.1758 -19.1759 -19.1760 -19.1759 -19.1759 -19.1758 -19.1758 -19.1748 -19.1758 -19.1759 -19.1759 -19.1758 -19.1758 -19.1759
+CONTROL uniform                -19.1855 -19.1827 -19.1833 -19.1831 -19.1832 -19.1832 -19.1833 -19.1833 -19.1833 -19.1833 -19.1831 -19.1831 -19.1822 -19.1831 -19.1832 -19.1832 -19.1831 -19.1832 -19.1832
+CONTROL machine-choice         -19.1672 -19.1673 -19.1679 -19.1677 -19.1679 -19.1678 -19.1679 -19.1679 -19.1679 -19.1679 -19.1678 -19.1678 -19.1668 -19.1678 -19.1679 -19.1679 -19.1678 -19.1678 -19.1679
+ANTI-ORACLE argmax F(t+1)      -18.9613 -18.9614 -18.9620 -18.9618 -18.9620 -18.9619 -18.9620 -18.9620 -18.9620 -18.9620 -18.9619 -18.9619 -18.9609 -18.9618 -18.9620 -18.9620 -18.9618 -18.9619 -18.9620
+
+;; --- F_pi(t+1) at the arm's argmax (LOWER IS BETTER)
+ORACLE argmin F(t+1)           -19.7153 -19.7154 -19.7160 -19.7159 -19.7160 -19.7159 -19.7160 -19.7160 -19.7160 -19.7160 -19.7159 -19.7159 -19.7149 -19.7159 -19.7160 -19.7160 -19.7159 -19.7159 -19.7160
+none/carried                   -19.7133 -19.7134 -19.7140 -19.7139 -19.7140 -19.7139 -19.7140 -19.7140 -19.7140 -19.7140 -19.7139 -19.7139 -19.7129 -19.7139 -19.7140 -19.7140 -19.7139 -19.7139 -19.7140
+none/fixed                     -19.7133 -19.7134 -19.7140 -19.7139 -19.7140 -19.7139 -19.7140 -19.7140 -19.7140 -19.7140 -19.7139 -19.7139 -19.7129 -19.7139 -19.7140 -19.7140 -19.7139 -19.7139 -19.7140
+pi-only/carried                -19.1676 -19.1677 -19.1683 -19.1682 -19.1683 -19.1682 -19.1683 -19.1683 -19.1683 -19.1683 -19.1682 -19.1682 -19.1672 -19.1682 -19.1683 -19.1683 -19.1682 -19.1682 -19.1683
+pi-only/fixed                  -19.1676 -19.1677 -19.1683 -19.1682 -19.1683 -19.1682 -19.1683 -19.1683 -19.1683 -19.1683 -19.1682 -19.1682 -19.1672 -19.1682 -19.1683 -19.1683 -19.1682 -19.1682 -19.1683
+both/carried                   -19.1676 -19.1677 -19.1683 -19.1682 -19.1683 -19.1682 -19.1683 -19.1683 -19.1683 -19.1683 -19.1682 -19.1682 -19.1672 -19.1682 -19.1683 -19.1683 -19.1682 -19.1682 -19.1683
+both/fixed                     -19.1676 -19.1677 -19.1683 -19.1682 -19.1683 -19.1682 -19.1683 -19.1683 -19.1683 -19.1683 -19.1682 -19.1682 -19.1672 -19.1682 -19.1683 -19.1683 -19.1682 -19.1682 -19.1683
+none/carried/one-step          -19.7133 -19.7134 -19.7140 -19.7139 -19.7140 -19.7139 -19.7140 -19.7140 -19.7140 -19.7140 -19.7139 -19.7139 -19.7129 -19.7139 -19.7140 -19.7140 -19.7139 -19.7139 -19.7140
+pi-only/carried/one-step       -19.1676 -19.1677 -19.1683 -19.1682 -19.1683 -19.1682 -19.1683 -19.1683 -19.1683 -19.1683 -19.1682 -19.1682 -19.1672 -19.1682 -19.1683 -19.1683 -19.1682 -19.1682 -19.1683
+both/carried/one-step          -19.1676 -19.1677 -19.1683 -19.1682 -19.1683 -19.1682 -19.1683 -19.1683 -19.1683 -19.1683 -19.1682 -19.1682 -19.1672 -19.1682 -19.1683 -19.1683 -19.1682 -19.1682 -19.1683
+CONTROL default-law            -19.1499 -19.1500 -19.1506 -19.1505 -19.1506 -19.1505 -19.1506 -19.1506 -19.1506 -19.1506 -19.1505 -19.1505 -19.1495 -19.1505 -19.1506 -19.1506 -19.1505 -19.1505 -19.1506
+CONTROL uniform                -19.1672 -19.1673 -19.1679 -19.1677 -19.1679 -19.1678 -19.1679 -19.1679 -19.1679 -19.1679 -19.1678 -19.1678 -19.1668 -19.1678 -19.1679 -19.1679 -19.1678 -19.1678 -19.1679
+CONTROL machine-choice         -19.1672 -19.1673 -19.1679 -19.1677 -19.1679 -19.1678 -19.1679 -19.1679 -19.1679 -19.1679 -19.1678 -19.1678 -19.1668 -19.1678 -19.1679 -19.1679 -19.1678 -19.1678 -19.1679
+ANTI-ORACLE argmax F(t+1)      -18.9613 -18.9614 -18.9620 -18.9618 -18.9620 -18.9619 -18.9620 -18.9620 -18.9620 -18.9620 -18.9619 -18.9619 -18.9609 -18.9618 -18.9620 -18.9620 -18.9618 -18.9619 -18.9620
+
+;; --- SUMMARY over 19 transitions
+arm                              mean L_mix     mean E_F   mean F@top  mean maxw     mean H
+ORACLE argmin F(t+1)              19.715855   -19.715855   -19.715855   1.000000     0.0000
+none/carried                      19.188693   -19.183180   -19.713855   0.010360     4.9217
+none/fixed                        19.188634   -19.183139   -19.713855   0.010331     4.9216
+pi-only/carried                   19.186082   -19.181211   -19.168149   0.126772     4.6685
+pi-only/fixed                     19.185934   -19.181110   -19.168149   0.126574     4.6687
+both/carried                      19.185966   -19.181132   -19.168149   0.126616     4.6686
+both/fixed                        19.185921   -19.181101   -19.168149   0.126557     4.6687
+none/carried/one-step             19.188693   -19.183180   -19.713855   0.010360     4.9217
+pi-only/carried/one-step          19.186083   -19.181211   -19.168149   0.126773     4.6685
+both/carried/one-step             19.185966   -19.181132   -19.168149   0.126616     4.6686
+CONTROL default-law               19.179171   -19.175804   -19.150441   0.008305     4.9238
+CONTROL uniform                   19.188231   -19.183245   -19.167717   0.006902     4.9760
+CONTROL machine-choice            19.167717   -19.167717   -19.167717   1.000000    -0.0000
+ANTI-ORACLE argmax F(t+1)         18.961808   -18.961808   -18.961808   1.000000     0.0000
+
+;; --- COUNTERFACTUAL: the same arms scored against observation(t), not observation(t+1)
+arm                                mean L_mix counterfactual     difference
+none/carried                        19.188693      19.188863     -1.701e-04
+none/fixed                          19.188634      19.188804     -1.701e-04
+pi-only/carried                     19.186082      19.186252     -1.701e-04
+pi-only/fixed                       19.185934      19.186104     -1.701e-04
+both/carried                        19.185966      19.186136     -1.701e-04
+both/fixed                          19.185921      19.186091     -1.701e-04
+none/carried/one-step               19.188693      19.188863     -1.701e-04
+pi-only/carried/one-step            19.186083      19.186253     -1.701e-04
+both/carried/one-step               19.185966      19.186136     -1.701e-04
+CONTROL default-law                 19.179171      19.179341     -1.701e-04
+CONTROL uniform                     19.188231      19.188401     -1.701e-04
+CONTROL machine-choice              19.167717      19.167887     -1.701e-04
+;; largest outcome-dependent movement of any arm's mean score: 1.701e-04
+;; for comparison, the largest gap BETWEEN arms on the realised score: 2.098e-02
+;; spread of that movement ACROSS arms: 1.066e-14 (a common shift changes no comparison)
+;; largest change in ANY arm-against-arm gap when the outcome is swapped: 1.066e-14
+
+;; --- SEPARATION among the three ln E arms (carried prior)
+none/carried           vs pi-only/carried         max |dL_mix| 2.767e-03   ticks with a different argmax: 19 of 19
+none/carried           vs both/carried            max |dL_mix| 2.785e-03   ticks with a different argmax: 19 of 19
+pi-only/carried        vs both/carried            max |dL_mix| 2.083e-04   ticks with a different argmax: 0 of 19
+
+;; --- CARRIED vs FIXED prior (the gamma-fixed-point across-tick question)
+none       carried - fixed:  mean dL_mix +5.939e-05  max |dL_mix| 1.137e-04  ticks with a different argmax: 0 of 19
+pi-only    carried - fixed:  mean dL_mix +1.478e-04  max |dL_mix| 2.805e-04  ticks with a different argmax: 0 of 19
+both       carried - fixed:  mean dL_mix +4.429e-05  max |dL_mix| 8.498e-05  ticks with a different argmax: 0 of 19
+
+;; --- ITERATED fixed point vs ONE-STEP update (the within-tick question)
+none       iterated - one-step:  mean dL_mix -7.895e-08  max |dL_mix| 1.530e-07  ticks with a different argmax: 0 of 19
+pi-only    iterated - one-step:  mean dL_mix -3.495e-07  max |dL_mix| 6.358e-07  ticks with a different argmax: 0 of 19
+both       iterated - one-step:  mean dL_mix -5.167e-08  max |dL_mix| 1.004e-07  ticks with a different argmax: 0 of 19
+
+;; CONTROL 3 bracket: 0 arm-tick scores outside [anti-oracle, oracle] (none)
+
+;; --- what each arm puts on top, as the machine's own rank at tick t
+none/carried                   machine-rank of argmax per tick: 134 134 134 134 134 134 134 134 134 134 134 134 134 134 134 134 134 134 134
+                               |prediction - observation(t)| there: 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060 0.0060
+                               channels that candidate predicts:    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+pi-only/carried                machine-rank of argmax per tick: 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130
+                               |prediction - observation(t)| there: 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000
+                               channels that candidate predicts:    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+both/carried                   machine-rank of argmax per tick: 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130 130
+                               |prediction - observation(t)| there: 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000
+                               channels that candidate predicts:    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+CONTROL default-law            machine-rank of argmax per tick: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+                               |prediction - observation(t)| there: 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230 0.0230
+                               channels that candidate predicts:    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+CONTROL machine-choice         machine-rank of argmax per tick: 115 123 115 123 115 123 115 123 115 123 115 123 115 123 115 123 115 123 115
+                               |prediction - observation(t)| there: 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036 0.0036
+                               channels that candidate predicts:    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+
+;; --- CARRIED vs FIXED over a beta_0 sweep
+beta_0 0.5  none       carried - fixed:  mean dL_mix +2.930e-04  max |dL_mix| 5.702e-04  ticks with a different argmax: 0 of 19
+beta_0 0.5  pi-only    carried - fixed:  mean dL_mix +6.620e-04  max |dL_mix| 1.240e-03  ticks with a different argmax: 0 of 19
+beta_0 0.5  both       carried - fixed:  mean dL_mix +2.220e-04  max |dL_mix| 4.331e-04  ticks with a different argmax: 0 of 19
+beta_0 1.0  none       carried - fixed:  mean dL_mix +5.939e-05  max |dL_mix| 1.137e-04  ticks with a different argmax: 0 of 19
+beta_0 1.0  pi-only    carried - fixed:  mean dL_mix +1.478e-04  max |dL_mix| 2.805e-04  ticks with a different argmax: 0 of 19
+beta_0 1.0  both       carried - fixed:  mean dL_mix +4.429e-05  max |dL_mix| 8.498e-05  ticks with a different argmax: 0 of 19
+beta_0 2.0  none       carried - fixed:  mean dL_mix +4.853e-06  max |dL_mix| 8.252e-06  ticks with a different argmax: 0 of 19
+beta_0 2.0  pi-only    carried - fixed:  mean dL_mix +2.058e-05  max |dL_mix| 3.879e-05  ticks with a different argmax: 0 of 19
+beta_0 2.0  both       carried - fixed:  mean dL_mix +3.563e-06  max |dL_mix| 6.052e-06  ticks with a different argmax: 0 of 19
+beta_0 5.0  none       carried - fixed:  mean dL_mix -3.855e-07  max |dL_mix| 1.007e-06  ticks with a different argmax: 0 of 19
+beta_0 5.0  pi-only    carried - fixed:  mean dL_mix +9.575e-07  max |dL_mix| 1.614e-06  ticks with a different argmax: 0 of 19
+beta_0 5.0  both       carried - fixed:  mean dL_mix -2.919e-07  max |dL_mix| 7.591e-07  ticks with a different argmax: 0 of 19
+
+;; --- DIAGNOSTIC: F_pi decomposed into A (log-variance) and B (residual)
+t  1-> 2  A spread 0.693147  B spread 0.062500  B mean 0.003837 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 7.154e-04
+t  2-> 3  A spread 0.693147  B spread 0.062500  B mean 0.003805 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 6.194e-04
+t  3-> 4  A spread 0.693147  B spread 0.062500  B mean 0.003193 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 9.357e-11
+t  4-> 5  A spread 0.693147  B spread 0.062500  B mean 0.003359 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 1.451e-04
+t  5-> 6  A spread 0.693147  B spread 0.062500  B mean 0.003255 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 0.000e+00
+t  6-> 7  A spread 0.693147  B spread 0.062500  B mean 0.003324 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 9.008e-05
+t  7-> 8  A spread 0.693147  B spread 0.062500  B mean 0.003243 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 2.899e-06
+t  8-> 9  A spread 0.693147  B spread 0.062500  B mean 0.003162 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 2.709e-06
+t  9->10  A spread 0.693147  B spread 0.062500  B mean 0.003239 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 9.344e-11
+t 10->11  A spread 0.693147  B spread 0.062500  B mean 0.003239 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 9.331e-11
+t 11->12  A spread 0.693147  B spread 0.062500  B mean 0.003373 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 7.713e-05
+t 12->13  A spread 0.693147  B spread 0.062500  B mean 0.003379 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 9.487e-05
+t 13->14  A spread 0.693147  B spread 0.062500  B mean 0.004344 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 1.107e-03
+t 14->15  A spread 0.693147  B spread 0.062500  B mean 0.003395 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 1.326e-04
+t 15->16  A spread 0.693147  B spread 0.062500  B mean 0.003254 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 9.318e-11
+t 16->17  A spread 0.693147  B spread 0.062500  B mean 0.003254 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 0.000e+00
+t 17->18  A spread 0.693147  B spread 0.062500  B mean 0.003388 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 1.343e-04
+t 18->19  A spread 0.693147  B spread 0.062500  B mean 0.003329 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 8.968e-05
+t 19->20  A spread 0.693147  B spread 0.062500  B mean 0.003259 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 1.964e-05
+
+;; --- CONTROL 4: recomputed F_pi(t+1) vs the value the run recorded
+t  1-> 2  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  2-> 3  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  3-> 4  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  4-> 5  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  5-> 6  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  6-> 7  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  7-> 8  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  8-> 9  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  9->10  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 10->11  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 11->12  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 12->13  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 13->14  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 14->15  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 15->16  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 16->17  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 17->18  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 18->19  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t 19->20  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+
+;; --- observed change on the channels the action model predicts
+t  1-> 2  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  2-> 3  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  3-> 4  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  4-> 5  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  5-> 6  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  6-> 7  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  7-> 8  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  8-> 9  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  9->10  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 10->11  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 11->12  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 12->13  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 13->14  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 14->15  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 15->16  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 16->17  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 17->18  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 18->19  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t 19->20  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+
+;; --- OBSERVATION CHANNELS: what moves over the field, and what is predicted
+;; channels ANY candidate predicts: [:mission-health :sorry-count-norm :ticks-firing-ratio]
+  active-repo-ratio    predicted? no   distinct  1  range 0.000000000
+  annotation-health    predicted? no   distinct  1  range 0.000000000
+  attack-coverage      predicted? no   distinct  1  range 0.000000000
+  consulting-pct       predicted? no   distinct  1  range 0.000000000
+  coupling-density     predicted? no   distinct  1  range 0.000000000
+  depositing-signal    predicted? no   distinct  1  range 0.000000000
+  loop-health          predicted? no   distinct 14  range 0.023381090
+  mathematics-pct      predicted? no   distinct  8  range 0.000003281
+  mission-health       predicted? YES  distinct  1  range 0.000000000
+  portfolio-pct        predicted? no   distinct  8  range 0.000006563
+  sorry-count-norm     predicted? YES  distinct  1  range 0.000000000
+  stack-pct            predicted? no   distinct  8  range 0.000009844
+  support-coverage     predicted? no   distinct  1  range 0.000000000
+  ticks-firing-ratio   predicted? YES  distinct  1  range 0.000000000
+
+;; --- the range the score can move in, per transition
+t  1-> 2  n 143  F(t+1) min -19.715310  max -18.961263  spread 0.754047  mean -19.185541
+t  2-> 3  n 145  F(t+1) min -19.715406  max -18.961359  spread 0.754047  mean -19.182691
+t  3-> 4  n 145  F(t+1) min -19.716025  max -18.961978  spread 0.754047  mean -19.183302
+t  4-> 5  n 145  F(t+1) min -19.715880  max -18.961833  spread 0.754047  mean -19.183136
+t  5-> 6  n 145  F(t+1) min -19.716025  max -18.961978  spread 0.754047  mean -19.183241
+t  6-> 7  n 145  F(t+1) min -19.715935  max -18.961888  spread 0.754047  mean -19.183171
+t  7-> 8  n 145  F(t+1) min -19.716023  max -18.961975  spread 0.754047  mean -19.183253
+t  8-> 9  n 145  F(t+1) min -19.716023  max -18.961976  spread 0.754047  mean -19.183333
+t  9->10  n 145  F(t+1) min -19.716025  max -18.961978  spread 0.754047  mean -19.183256
+t 10->11  n 145  F(t+1) min -19.716025  max -18.961978  spread 0.754047  mean -19.183256
+t 11->12  n 145  F(t+1) min -19.715948  max -18.961901  spread 0.754047  mean -19.183123
+t 12->13  n 145  F(t+1) min -19.715931  max -18.961883  spread 0.754047  mean -19.183116
+t 13->14  n 145  F(t+1) min -19.714918  max -18.960871  spread 0.754047  mean -19.182151
+t 14->15  n 145  F(t+1) min -19.715893  max -18.961846  spread 0.754047  mean -19.183100
+t 15->16  n 145  F(t+1) min -19.716025  max -18.961978  spread 0.754047  mean -19.183241
+t 16->17  n 145  F(t+1) min -19.716025  max -18.961978  spread 0.754047  mean -19.183241
+t 17->18  n 145  F(t+1) min -19.715891  max -18.961844  spread 0.754047  mean -19.183107
+t 18->19  n 145  F(t+1) min -19.715936  max -18.961889  spread 0.754047  mean -19.183167
+t 19->20  n 145  F(t+1) min -19.716006  max -18.961959  spread 0.754047  mean -19.183237
+
+;; ==================== FIELD S3 ====================
+;; NOT FOUND: stage S3 recorded no trace of its own. runs/2026-09-01-s3/ holds ARMS.txt and README.md only (README.md:1-6: "This directory holds a REPLAY, not a 20-tick stage run"); RUN8's two live ticks are pre-flight ticks in the shared per-date trace and are not a consecutive pair, so no S3 transition can be scored. S3 contributes 0 transitions to every table below.
+
+;; ==================== FIELD S4 ====================
+;; records 4, usable aligned fields 4
+;; CONTROL 1 solver: local 1.001666905774  src converge-beta 1.001666905774  delta 0.00e+00
+;; CONTROL 2 alignment: 3 of 3 transitions have F_pi(t+1) scored against tick t's own prediction
+;; scorable transitions 3
+
+;; --- L_mix = ln SUM_i pi_i exp(-F_pi(t+1)_i), per transition (HIGHER IS BETTER)
+arm \ transition t->t+1            1->2     2->3     3->4
+ORACLE argmin F(t+1)            19.7160  19.7160  19.7160
+none/carried                    19.1891  19.1891  19.1888
+none/fixed                      19.1891  19.1891  19.1888
+pi-only/carried                 19.1863  19.1864  19.1862
+pi-only/fixed                   19.1863  19.1863  19.1861
+both/carried                    19.1863  19.1863  19.1861
+both/fixed                      19.1863  19.1863  19.1861
+none/carried/one-step           19.1891  19.1891  19.1888
+pi-only/carried/one-step        19.1863  19.1864  19.1862
+both/carried/one-step           19.1863  19.1863  19.1861
+CONTROL default-law             19.1797  19.1797  19.1794
+CONTROL uniform                 19.1898  19.1898  19.1886
+CONTROL machine-choice          19.1679  19.1679  19.1679
+ANTI-ORACLE argmax F(t+1)       18.9620  18.9620  18.9620
+
+;; --- E_F = SUM_i pi_i F_pi(t+1)_i, per transition (LOWER IS BETTER)
+ORACLE argmin F(t+1)           -19.7160 -19.7160 -19.7160
+none/carried                   -19.1836 -19.1836 -19.1833
+none/fixed                     -19.1836 -19.1836 -19.1833
+pi-only/carried                -19.1815 -19.1816 -19.1813
+pi-only/fixed                  -19.1815 -19.1815 -19.1813
+both/carried                   -19.1815 -19.1815 -19.1813
+both/fixed                     -19.1815 -19.1815 -19.1813
+none/carried/one-step          -19.1836 -19.1836 -19.1833
+pi-only/carried/one-step       -19.1815 -19.1816 -19.1813
+both/carried/one-step          -19.1815 -19.1815 -19.1813
+CONTROL default-law            -19.1763 -19.1763 -19.1760
+CONTROL uniform                -19.1849 -19.1850 -19.1837
+CONTROL machine-choice         -19.1679 -19.1679 -19.1679
+ANTI-ORACLE argmax F(t+1)      -18.9620 -18.9620 -18.9620
+
+;; --- F_pi(t+1) at the arm's argmax (LOWER IS BETTER)
+ORACLE argmin F(t+1)           -19.7160 -19.7160 -19.7160
+none/carried                   -19.7140 -19.7140 -19.7140
+none/fixed                     -19.7140 -19.7140 -19.7140
+pi-only/carried                -19.1683 -19.1683 -19.1683
+pi-only/fixed                  -19.1683 -19.1683 -19.1683
+both/carried                   -19.1683 -19.1683 -19.1683
+both/fixed                     -19.1683 -19.1683 -19.1683
+none/carried/one-step          -19.7140 -19.7140 -19.7140
+pi-only/carried/one-step       -19.1683 -19.1683 -19.1683
+both/carried/one-step          -19.1683 -19.1683 -19.1683
+CONTROL default-law            -19.1506 -19.1506 -19.1506
+CONTROL uniform                -19.1679 -19.1679 -19.1679
+CONTROL machine-choice         -19.1679 -19.1679 -19.1679
+ANTI-ORACLE argmax F(t+1)      -18.9620 -18.9620 -18.9620
+
+;; --- SUMMARY over 3 transitions
+arm                              mean L_mix     mean E_F   mean F@top  mean maxw     mean H
+ORACLE argmin F(t+1)              19.716023   -19.716023   -19.716023   1.000000     0.0000
+none/carried                      19.188996   -19.183522   -19.714023   0.010342     4.9196
+none/fixed                        19.188989   -19.183517   -19.714023   0.010338     4.9196
+pi-only/carried                   19.186284   -19.181475   -19.168317   0.126677     4.6667
+pi-only/fixed                     19.186266   -19.181462   -19.168317   0.126652     4.6667
+both/carried                      19.186257   -19.181455   -19.168317   0.126641     4.6668
+both/fixed                        19.186251   -19.181451   -19.168317   0.126634     4.6668
+none/carried/one-step             19.188996   -19.183522   -19.714023   0.010342     4.9196
+pi-only/carried/one-step          19.186284   -19.181475   -19.168317   0.126677     4.6667
+both/carried/one-step             19.186257   -19.181455   -19.168317   0.126641     4.6668
+CONTROL default-law               19.179572   -19.176234   -19.150609   0.008313     4.9215
+CONTROL uniform                   19.189400   -19.184536   -19.167885   0.006928     4.9721
+CONTROL machine-choice            19.167885   -19.167885   -19.167885   1.000000    -0.0000
+ANTI-ORACLE argmax F(t+1)         18.961976   -18.961976   -18.961976   1.000000     0.0000
+
+;; --- COUNTERFACTUAL: the same arms scored against observation(t), not observation(t+1)
+arm                                mean L_mix counterfactual     difference
+none/carried                        19.188996      19.188919     +7.730e-05
+none/fixed                          19.188989      19.188911     +7.730e-05
+pi-only/carried                     19.186284      19.186218     +6.652e-05
+pi-only/fixed                       19.186266      19.186199     +6.652e-05
+both/carried                        19.186257      19.186191     +6.613e-05
+both/fixed                          19.186251      19.186185     +6.613e-05
+none/carried/one-step               19.188996      19.188919     +7.730e-05
+pi-only/carried/one-step            19.186284      19.186218     +6.652e-05
+both/carried/one-step               19.186257      19.186191     +6.613e-05
+CONTROL default-law                 19.179572      19.179480     +9.182e-05
+CONTROL uniform                     19.189400      19.189015     +3.848e-04
+CONTROL machine-choice              19.167885      19.167887     -2.599e-06
+;; largest outcome-dependent movement of any arm's mean score: 3.848e-04
+;; for comparison, the largest gap BETWEEN arms on the realised score: 2.152e-02
+;; spread of that movement ACROSS arms: 3.874e-04 (a common shift changes no comparison)
+;; largest change in ANY arm-against-arm gap when the outcome is swapped: 3.874e-04
+
+;; --- SEPARATION among the three ln E arms (carried prior)
+none/carried           vs pi-only/carried         max |dL_mix| 2.735e-03   ticks with a different argmax: 3 of 3
+none/carried           vs both/carried            max |dL_mix| 2.751e-03   ticks with a different argmax: 3 of 3
+pi-only/carried        vs both/carried            max |dL_mix| 3.932e-05   ticks with a different argmax: 0 of 3
+
+;; --- CARRIED vs FIXED prior (the gamma-fixed-point across-tick question)
+none       carried - fixed:  mean dL_mix +7.336e-06  max |dL_mix| 1.498e-05  ticks with a different argmax: 0 of 3
+pi-only    carried - fixed:  mean dL_mix +1.887e-05  max |dL_mix| 3.747e-05  ticks with a different argmax: 0 of 3
+both       carried - fixed:  mean dL_mix +5.452e-06  max |dL_mix| 1.114e-05  ticks with a different argmax: 0 of 3
+
+;; --- ITERATED fixed point vs ONE-STEP update (the within-tick question)
+none       iterated - one-step:  mean dL_mix -1.690e-08  max |dL_mix| 2.378e-08  ticks with a different argmax: 0 of 3
+pi-only    iterated - one-step:  mean dL_mix -8.307e-08  max |dL_mix| 1.165e-07  ticks with a different argmax: 0 of 3
+both       iterated - one-step:  mean dL_mix -1.099e-08  max |dL_mix| 1.549e-08  ticks with a different argmax: 0 of 3
+
+;; CONTROL 3 bracket: 0 arm-tick scores outside [anti-oracle, oracle] (none)
+
+;; --- what each arm puts on top, as the machine's own rank at tick t
+none/carried                   machine-rank of argmax per tick: 134 134 134
+                               |prediction - observation(t)| there: 0.0060 0.0060 0.0060
+                               channels that candidate predicts:    2 2 2
+pi-only/carried                machine-rank of argmax per tick: 130 130 130
+                               |prediction - observation(t)| there: 0.0000 0.0000 0.0000
+                               channels that candidate predicts:    2 2 2
+both/carried                   machine-rank of argmax per tick: 130 130 130
+                               |prediction - observation(t)| there: 0.0000 0.0000 0.0000
+                               channels that candidate predicts:    2 2 2
+CONTROL default-law            machine-rank of argmax per tick: 1 1 1
+                               |prediction - observation(t)| there: 0.0230 0.0230 0.0230
+                               channels that candidate predicts:    2 2 2
+CONTROL machine-choice         machine-rank of argmax per tick: 115 123 115
+                               |prediction - observation(t)| there: 0.0036 0.0036 0.0036
+                               channels that candidate predicts:    2 2 2
+
+;; --- CARRIED vs FIXED over a beta_0 sweep
+beta_0 0.5  none       carried - fixed:  mean dL_mix +3.445e-05  max |dL_mix| 6.899e-05  ticks with a different argmax: 0 of 3
+beta_0 0.5  pi-only    carried - fixed:  mean dL_mix +8.410e-05  max |dL_mix| 1.671e-04  ticks with a different argmax: 0 of 3
+beta_0 0.5  both       carried - fixed:  mean dL_mix +2.597e-05  max |dL_mix| 5.202e-05  ticks with a different argmax: 0 of 3
+beta_0 1.0  none       carried - fixed:  mean dL_mix +7.336e-06  max |dL_mix| 1.498e-05  ticks with a different argmax: 0 of 3
+beta_0 1.0  pi-only    carried - fixed:  mean dL_mix +1.887e-05  max |dL_mix| 3.747e-05  ticks with a different argmax: 0 of 3
+beta_0 1.0  both       carried - fixed:  mean dL_mix +5.452e-06  max |dL_mix| 1.114e-05  ticks with a different argmax: 0 of 3
+beta_0 2.0  none       carried - fixed:  mean dL_mix +7.097e-07  max |dL_mix| 1.661e-06  ticks with a different argmax: 0 of 3
+beta_0 2.0  pi-only    carried - fixed:  mean dL_mix +2.805e-06  max |dL_mix| 5.639e-06  ticks with a different argmax: 0 of 3
+beta_0 2.0  both       carried - fixed:  mean dL_mix +5.217e-07  max |dL_mix| 1.224e-06  ticks with a different argmax: 0 of 3
+beta_0 5.0  none       carried - fixed:  mean dL_mix -4.233e-08  max |dL_mix| 1.202e-07  ticks with a different argmax: 0 of 3
+beta_0 5.0  pi-only    carried - fixed:  mean dL_mix +1.623e-07  max |dL_mix| 3.634e-07  ticks with a different argmax: 0 of 3
+beta_0 5.0  both       carried - fixed:  mean dL_mix -3.220e-08  max |dL_mix| 9.021e-08  ticks with a different argmax: 0 of 3
+
+;; --- DIAGNOSTIC: F_pi decomposed into A (log-variance) and B (residual)
+t  1-> 2  A spread 0.693147  B spread 0.062500  B mean 0.002784 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 1.847e-06
+t  2-> 3  A spread 0.693147  B spread 0.062500  B mean 0.002774 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 0.000e+00
+t  3-> 4  A spread 0.693147  B spread 0.062500  B mean 0.002789 | counterfactual (score against observation at t instead): B spread 0.062500  max |B - B_cf| 5.949e-06
+
+;; --- CONTROL 4: recomputed F_pi(t+1) vs the value the run recorded
+t  1-> 2  144 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  2-> 3  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+t  3-> 4  145 candidates re-scored, max |recomputed - recorded| = 0.000e+00
+
+;; --- observed change on the channels the action model predicts
+t  1-> 2  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  2-> 3  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+t  3-> 4  channels [:mission-health :sorry-count-norm :ticks-firing-ratio]  |delta| ["0.000000" "0.000000" "0.000000"]
+
+;; --- OBSERVATION CHANNELS: what moves over the field, and what is predicted
+;; channels ANY candidate predicts: [:mission-health :sorry-count-norm :ticks-firing-ratio]
+  active-repo-ratio    predicted? no   distinct  1  range 0.000000000
+  annotation-health    predicted? no   distinct  1  range 0.000000000
+  attack-coverage      predicted? no   distinct  1  range 0.000000000
+  consulting-pct       predicted? no   distinct  1  range 0.000000000
+  coupling-density     predicted? no   distinct  1  range 0.000000000
+  depositing-signal    predicted? no   distinct  1  range 0.000000000
+  loop-health          predicted? no   distinct  3  range 0.000344924
+  mathematics-pct      predicted? no   distinct  3  range 0.000001049
+  mission-health       predicted? YES  distinct  1  range 0.000000000
+  portfolio-pct        predicted? no   distinct  3  range 0.000002097
+  sorry-count-norm     predicted? YES  distinct  1  range 0.000000000
+  stack-pct            predicted? no   distinct  3  range 0.000003146
+  support-coverage     predicted? no   distinct  1  range 0.000000000
+  ticks-firing-ratio   predicted? YES  distinct  1  range 0.000000000
+
+;; --- the range the score can move in, per transition
+t  1-> 2  n 144  F(t+1) min -19.716024  max -18.961976  spread 0.754047  mean -19.184950
+t  2-> 3  n 144  F(t+1) min -19.716025  max -18.961978  spread 0.754047  mean -19.184952
+t  3-> 4  n 145  F(t+1) min -19.716019  max -18.961972  spread 0.754047  mean -19.183707
+
+;; end.
