@@ -21,10 +21,11 @@
            :J "needs Joe; no loop takes these"}
  :statuses #{:open :blocked :done :done-unreviewed :needs-joe}
  :items
- [{:id :S1 :class :M :status :open :owner :any :covers-key :none
+ [{:id :S1 :class :M :status :done-unreviewed,
+   :evidence "futon2 (this commit): runs/S1-selection-map.md" :owner :any :covers-key :none
    :statement "Reconstruct the old outer-loop mission-selection path, as facts with pointers. Joe's recollection: an outer loop enumerated missions, gave them weights, selected the best. Candidate machinery found on a first look, to be confirmed or refuted: the ranked-actions path over the mission gap view with EFE weights (scripts/futon2/report/war_machine.clj:1087 roi-map-for-missions, :1116-1118 live-weights, :1122 rollout-snapshot-under-weights, :1250-1286 live-open-mission-ranked-*), src/futon2/aif/mission_control_graph.clj, and wm_scheduled_run; NOTE scripts/wm_outer_loop.clj is the R12 Beta-hyperparameter loop, probably NOT the selector -- say so explicitly if confirmed. Establish: (a) where missions become candidates (the scan; FUTON_REPO_ROOTS mission-doc additions?), (b) where each weight comes from (EFE weights, ROI map, gap view, anamnesis tiebreak), (c) where 'best' is chosen, (d) which stages still run today vs have rotted, each with a pointer and a tried command."
    :acceptance "A stage-by-stage account in holes/labs/zaif-harness/runs/S1-selection-map.md: candidate enumeration -> weighting -> ranking -> selection, every stage with file:line and an executed probe (output shown), rotted stages named as rotted. Facts only; no repair in this row."}
-  {:id :S2 :class :RUN :status :blocked :depends-on [:S1] :owner :any :covers-key :none
+  {:id :S2 :class :RUN :status :open :depends-on [:S1] :owner :any :covers-key :none
    :statement "Manual step-through of one selection, as the test case for getting the WM to run (Joe: 'step through that process basically manually'). On the real current mission set with M-zaif-harness-v1 among the candidates: enumerate, weight, rank, select -- BY HAND, one stage at a time, persisting every intermediate (candidate list, weight table, ranking, selection) as a typed artifact under runs/. Where a stage's machinery is rotted (per S1), do what it would have done manually and record that substitution explicitly."
    :acceptance "runs/S2-step-through-1/ holding the four intermediates plus a narrative README that names, for every number, where it came from. The selected mission is whatever the recovered weights actually select -- S2 does NOT prejudice; it measures the baseline."}
   {:id :S3 :class :I :status :blocked :depends-on [:S2] :owner :any :covers-key :none
