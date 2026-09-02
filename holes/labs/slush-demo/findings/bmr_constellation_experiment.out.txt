@@ -80,5 +80,56 @@ Least-mergeable WITHIN pairs (least negative ΔF):
   dF=  -6.45  P4  scope-chain-tracking + shared-kernel-predictive-forward-model
 
 ========================================================================
-DONE — exploratory findings, not a committed artifact
+ACCEPTANCE (D61a): stated population, null baselines, failable checks
+========================================================================
+
+POPULATION UNDER TEST
+  subjects   : unordered pairs of patterns occupying >= 2 of the 94
+               missions in mission-pattern-scopes.edn (560 edges,
+               118 such patterns, 6903 pairs)
+  instrument : score_pair_delta_f, prior 0.1, accept iff dF <= -3
+  claim      : the accept COUNT is dimension-driven and carries no
+               similarity signal; the ΔF MEAN and the within/across
+               gap do carry one.
+
+  [PASS] population-nonempty-and-enumerated
+         118 patterns -> 6903 pairs (= n(n-1)/2)
+  [PASS] population-predicate-holds
+         members occupying < 2 DISTINCT missions: 0 (selection counts edges; this recounts missions)
+  [PASS] constellation-coverage-complete
+         members with no constellation: 0
+  [PASS] scorer-accepts-identical-rows
+         aif-as-environment-not-instruction merged with a copy of itself: dF = -20.37
+  [PASS] scorer-rejects-evidence-free-rows
+         two all-prior rows in 94-dim: dF = 0.00 (a scorer that accepted these would accept anything)
+  [PASS] least-mergeable-accepted-pair-is-disjoint
+         dF = -6.45, shared missions = 0: append-only-semantic-audit + argue-empirically-not-persuasively
+
+  dimension control (same pairs, top-k missions by edge count):
+    k=  2  accepted     0/6903 = 0.0000
+    k=  4  accepted    97/6903 = 0.0141
+    k=  8  accepted  1380/6903 = 0.1999
+    k= 16  accepted  4449/6903 = 0.6445
+    k= 32  accepted  6707/6903 = 0.9716
+    k= 94  accepted  6903/6903 = 1.0000
+  [PASS] dimension-drives-acceptance
+         accept rate 0.0000 at k=2 rising to 1.0000 at k=94, monotone=True; a flat 1.0000 here would refute the 'collapses in 94-dim' reading
+
+  expected-if-null (20 degree-preserving shuffles, seed 20260902):
+    accept rate  observed 1.0000   null [1.0000, 1.0000]
+    mean ΔF      observed -11.41      null [-11.28, -11.17]
+  [PASS] accept-count-is-not-evidence
+         the null reproduces 6903/6903 in 20/20 replicates, so the accept count separates nothing; red here would mean the observed rate IS informative and the interpretation above needs rewriting
+  [PASS] mean-delta-f-is-evidence
+         observed mean ΔF -11.41 < every null replicate (null min -11.28); the corpus is more mergeable than its degree-matched null by 0.12 nats
+
+  expected-if-null (200 constellation-label shuffles, seed 20260902):
+    within-across gap  observed -1.5454   null mean 0.0368   null 5th pct -0.5618
+  [PASS] within-across-gap-beats-its-null
+         p = 0.0000 (0/200 shuffles at or below the observed gap); red would leave experiment 3's 'PARTIALLY validates' unsupported
+
+  10/10 checks green, 0 red
+
+========================================================================
+DONE — all acceptance checks green (exit 0)
 ========================================================================
