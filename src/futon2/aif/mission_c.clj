@@ -42,11 +42,19 @@
 
    THE FORWARD-MODEL HOLE IS NAMED, NOT PAPERED (design §3). Q(o_k|π) at
    mission grain does not exist. v0 therefore scores CRITERION DISTANCE: the
-   surprisal of the CURRENT measured value under C_k, i.e. Q(o|π) = status quo
-   for every π. Consequence, stated here so no reader has to infer it from a
-   record: **risk_mis is constant across the candidates of one tick.** It
-   discriminates mission from non-mission actions and nothing finer. U12 is
-   the row that measures whether that is enough."
+   point-mass divergence of the CURRENT measured value under C_k, i.e.
+   Q(o|π) = status quo for every π. Consequence, stated here so no reader has
+   to infer it from a record: **risk_mis is constant across the candidates of
+   one tick.** It discriminates mission from non-mission actions and nothing
+   finer. U12 is the row that measures whether that is enough.
+
+   THE TERM IS A DIVERGENCE, NOT A BARE SURPRISAL (U17). For a Bernoulli C the
+   two are the same thing and no number moves. For a range C the surprisal is a
+   cross-entropy that goes NEGATIVE inside the declared band whenever the band
+   is narrower than one unit, so a satisfied criterion summed into one G beside
+   C_int's KL ≥ 0 would be paid a bonus; `risk-mis` subtracts
+   `divergence-shift` and keeps the unshifted number on the record as
+   `:cross-entropy`."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -313,7 +321,17 @@
         weights (if criterion-weights
                   (reduce (fn [acc {:keys [criterion]}]
                             (if-let [w (get criterion-weights criterion)]
-                              (assoc acc criterion (double w))
+                              (let [w (double w)]
+                                ;; U17: risk_mis >= 0 is a weighted sum of terms
+                                ;; that are each >= 0, so it needs the weights to
+                                ;; be non-negative and finite. Uniform weights are
+                                ;; 1/n; a declared set is whatever a caller hands
+                                ;; in, and a negative one would make the >= 0
+                                ;; claim false without touching a spec shape.
+                                (when-not (and (Double/isFinite w) (<= 0.0 w))
+                                  (throw (ex-info "c-mis: :criterion-weights must be finite and non-negative"
+                                                  {:criterion criterion :weight w})))
+                                (assoc acc criterion w))
                               (throw (ex-info "c-mis: :criterion-weights covers no weight for a measurable criterion"
                                               {:criterion criterion
                                                :declared (set (keys criterion-weights))}))))
@@ -343,11 +361,21 @@
    shipped call to `pref/log-preference` wrapped in a `:present` map and cannot
    refuse; with an arm named it is `pref/log-preference-under`, which refuses on
    a value the arm declines to read (U16). Keeping both on one shape means the
-   composition below has one code path, not two."
+   composition below has one code path, not two.
+
+   A read term also carries `:shift` (U17) — `pref/point-mass-divergence-shift`
+   for this criterion's own C — so the composition can subtract it without
+   reaching back into the factor map."
   [factors observable value outcome-semantics]
-  (if outcome-semantics
-    (pref/log-preference-under (get factors observable) value outcome-semantics)
-    {:status :present :log-c (pref/log-preference (get factors observable) value)}))
+  (let [dist (get factors observable)
+        t (if outcome-semantics
+            (pref/log-preference-under dist value outcome-semantics)
+            {:status :present :log-c (pref/log-preference dist value)})]
+    ;; U17: the constant that makes -ln C_k a divergence rather than a
+    ;; cross-entropy. Present only where a term was read, so a refusal still
+    ;; carries no numbers.
+    (cond-> t
+      (= :present (:status t)) (assoc :shift (pref/point-mass-divergence-shift dist)))))
 
 (defn log-c-mis
   "ln C_mis(o) in nats — the weighted log-sum composition of design §2:
@@ -388,29 +416,62 @@
                      :unmeasurable unmeasurable}
               outcome-semantics (assoc :outcome-semantics outcome-semantics))))))))
 
+(defn divergence-shift
+  "Σ_k w_k · `pref/point-mass-divergence-shift`(C_k) over the measurable
+   criteria (U17) — the constant subtracted from the composed cross-entropy
+   −ln C_mis(o) to make risk_mis a divergence that cannot go below zero.
+
+   It is 0.0 for a C_mis whose criteria are all Bernoulli, which is every
+   criterion in the live corpus: `default-spec` is `{:becomes 1}` and no mission
+   document in the corpus declares a `:spec` (U16). So this constant changes no
+   number the U12 or U16 artifacts record; it moves range criteria only, and
+   range criteria are so far only reached from tests."
+  [{:keys [factors weights observable-of]}]
+  (reduce + 0.0
+          (map (fn [[criterion observable]]
+                 (* (get weights criterion)
+                    (pref/point-mass-divergence-shift (get factors observable))))
+               observable-of)))
+
 (defn risk-mis
   "risk_mis under the v0 status-quo forward model (design §3).
 
    Q(o_k|π) = δ at the CURRENT measured value of o_k for every π, so the
-   per-criterion term is the SURPRISAL −ln C_k(o_k) and
-   risk_mis = Σ_k w_k · (−ln C_k(o_k)) = −(log-c-mis).
+   per-criterion term is the point-mass divergence of design §3 read as
+   `pref/point-mass-divergence`, and
+   risk_mis = Σ_k w_k · (−ln C_k(o_k) − shift_k) = −(log-c-mis) − `divergence-shift`.
 
-   WHY SURPRISAL AND NOT `pref/kl`: for a Bernoulli C, KL(δ_b ‖ C) = −ln C(b)
-   exactly — the two agree, and `mission_c_test/surprisal-is-the-point-mass-kl`
-   pins that against `pref/kl` numerically. For a range C the point mass has no
-   density, so KL is the cross-entropy −ln C(x) with the point mass's
-   (divergent) differential entropy dropped. Named here rather than hidden
-   behind a σ² small enough to look like a KL.
+   WHY A SHIFT AND NOT PLAIN SURPRISAL (U17). For a Bernoulli C the surprisal IS
+   the KL: KL(δ_b ‖ C) = −ln C(b) ≥ 0, pinned against `pref/kl` numerically by
+   `mission_c_test/surprisal-is-the-point-mass-kl`, and its shift is 0.0 — the
+   number does not move. For a range C the point mass has no density, so the
+   surprisal is a CROSS-ENTROPY, gap/T + ln Z, fixed only up to an additive
+   constant; with a band narrower than one unit ln Z < 0 and a criterion read
+   INSIDE its own band scored NEGATIVE (−0.5119 for [0.5 1.0] at T = 0.1), which
+   summed into one G beside C_int's KL ≥ 0 would pay a satisfied criterion a
+   bonus. Fixing the constant at the best attainable value leaves gap/T: ≥ 0
+   everywhere, exactly 0 in band, and still gradient-bearing just outside it
+   where a clamp would flatten. See the U17 block above `pref/point-mass-divergence`.
+
+   WHAT THE RECORD CARRIES, so the pre-U17 number stays derivable rather than
+   overwritten: `:risk` is the divergence, `:cross-entropy` is the unshifted
+   Σ w_k · (−ln C_k) the code returned before, and `:divergence-shift` is the
+   constant between them. Per criterion, `:surprisal` is unchanged and
+   `:divergence` and `:shift` are new; `:contribution` is w_k · divergence_k, so
+   the recorded contributions still sum to `:risk`.
 
    Refuses rather than partially scores: any measurable criterion whose
    observable the reading does not cover makes the whole number absent. The
    typed `:unmeasurable` records ride on every return.
 
    `:outcome-semantics` (U16) is passed through to `log-c-mis`; nil — what every
-   caller supplies today — is the shipped path unchanged."
+   caller supplies today — is the shipped path. The shift depends on the spec
+   kind alone, so it is the same under every arm and under no arm, which is why
+   this row does not wait on J6."
   [c reading & {:keys [outcome-semantics]}]
   (let [{:keys [factors weights observable-of unmeasurable mission] :as _c} c
-        composed (log-c-mis c reading :outcome-semantics outcome-semantics)]
+        composed (log-c-mis c reading :outcome-semantics outcome-semantics)
+        shift (divergence-shift c)]
     (merge
      {:version version
       :forward-model :status-quo-v0
@@ -420,16 +481,21 @@
      (when outcome-semantics {:outcome-semantics outcome-semantics})
      (if (= :present (:status composed))
        {:status :measured
-        :risk (- (:log-c composed))
+        :risk (- (- (:log-c composed)) shift)
+        :cross-entropy (- (:log-c composed))
+        :divergence-shift shift
         :per-criterion
         (mapv (fn [[criterion observable]]
                 (let [value (get reading observable)
                       t (term factors observable value outcome-semantics)
                       log-c (:log-c t)
+                      shift-k (:shift t)
+                      divergence (- (- log-c) shift-k)
                       w (get weights criterion)]
                   (cond-> {:criterion criterion :observable observable :value value
                            :log-c log-c :surprisal (- log-c)
-                           :weight w :contribution (* w (- log-c))}
+                           :shift shift-k :divergence divergence
+                           :weight w :contribution (* w divergence)}
                     (contains? t :outcome) (assoc :outcome (:outcome t)))))
               observable-of)}
        (select-keys composed [:status :reason :missing :refused])))))

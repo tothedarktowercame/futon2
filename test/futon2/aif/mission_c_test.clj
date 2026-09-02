@@ -256,15 +256,24 @@
         (is (close? (- (pref/log-preference d 0)) (:surprisal e)))
         (is (close? 0.5 (:weight e)))
         (is (close? (* 0.5 (- (pref/log-preference d 0))) (:contribution e)))))
-    (testing "criterion :b — a range C read outside its band"
+    (testing "criterion :b — a range C read outside its band. U17: the recorded
+              contribution is the DIVERGENCE, w · gap/T, not w · the unshifted
+              cross-entropy, which for this band carries ln Z = -0.9165"
       (let [e (:b by-criterion)
             d (pref/c-distribution [0.0 0.3])]
         (is (close? (pref/log-preference d 0.9) (:log-c e)))
-        (is (close? (* 0.5 (- (pref/log-preference d 0.9))) (:contribution e)))))
+        (is (close? (- (pref/log-preference d 0.9)) (:surprisal e)))
+        (is (close? (Math/log 0.39990881180344456) (:shift e)))
+        (is (close? (/ (- 0.9 0.3) pref/default-c-temperature) (:divergence e))
+            "gap/T = 0.6/0.1 = 6.0")
+        (is (close? (* 0.5 (pref/point-mass-divergence d 0.9)) (:contribution e)))))
     (testing "the total is exactly the sum of the recorded contributions"
       (is (close? (reduce + (map :contribution (:per-criterion r))) (:risk r))))
-    (testing "and it is minus the weighted log-sum composition"
-      (is (close? (- (:log-c (mc/log-c-mis c reading))) (:risk r))))))
+    (testing "and the pre-U17 number is still on the record, minus the weighted
+              log-sum composition, with the shift between the two named"
+      (is (close? (- (:log-c (mc/log-c-mis c reading))) (:cross-entropy r)))
+      (is (close? (mc/divergence-shift c) (:divergence-shift r)))
+      (is (close? (- (:cross-entropy r) (:divergence-shift r)) (:risk r))))))
 
 (deftest a-met-criterion-stops-pulling
   (testing "design §3's completion gate from first principles: risk falls as
@@ -370,3 +379,119 @@
           base (:risk (mc/risk-mis (c) reading))]
       (doseq [arm pref/bernoulli-outcome-arms]
         (is (close? base (:risk (mc/risk-mis (c) reading :outcome-semantics arm))) (str arm))))))
+
+;; ---------------------------------------------------------------------------
+;; U17 — risk_mis >= 0 on every spec shape, at the COMPOSITION. The density-level
+;; tests are in preferences_cdist_test; these are about what `risk-mis` returns,
+;; which is what a G would sum.
+
+(defn- risk-of
+  "risk_mis for a single criterion with `spec`, read at `value`, under `arm`
+   (nil = the shipped no-arm path). `:absent` when the arm refuses to read it."
+  [spec value arm & {:keys [temperature] :or {temperature pref/default-c-temperature}}]
+  (let [c (mc/c-mis {:criteria [(mc/criterion-row {:criterion :a :observable :x :spec spec}
+                                                  {:x value} "f:1")]}
+                    :temperature temperature)]
+    (if arm
+      (mc/risk-mis c {:x value} :outcome-semantics arm)
+      (mc/risk-mis c {:x value}))))
+
+(def ^:private u17-specs
+  [[0.5 1.0] [0.0 0.3] [0.0 1.0] [0.25 0.75] [0.2 0.2]
+   {:becomes 1} {:becomes 0} {:p1 0.9} {:p1 0.5}])
+
+(def ^:private u17-values [0 1 0.0 1.0 0.25 0.5 0.6 0.75 0.999])
+
+(def ^:private u17-arms (cons nil (sort pref/bernoulli-outcome-arms)))
+
+(deftest risk-mis-is-nonnegative-on-every-spec-shape
+  (testing "U17's acceptance: over range and Bernoulli specs, every value
+            INCLUDING in-band ones, three temperatures and all four readings of
+            an outcome (no arm, plus each U16 arm), a measured risk_mis is never
+            below zero — so summing it into one G beside C_int's KL >= 0 cannot
+            pay a satisfied criterion a bonus"
+    (doseq [spec u17-specs
+            t [0.05 pref/default-c-temperature 0.5]
+            value u17-values
+            arm u17-arms]
+      (let [r (risk-of spec value arm :temperature t)]
+        (when (= :measured (:status r))
+          (is (<= 0.0 (:risk r))
+              (str "spec " spec " T " t " value " value " arm " arm
+                   " -> risk " (:risk r)))
+          (is (every? #(<= 0.0 (:divergence %)) (:per-criterion r))
+              "and no single criterion contributes a negative term either")
+          (is (close? (reduce + (map :contribution (:per-criterion r))) (:risk r))
+              "the recorded contributions still sum to the recorded risk"))))))
+
+(deftest a-satisfied-range-criterion-no-longer-scores-below-zero
+  (testing "the hazard U17 names, measured at the composition. Before the shift
+            a criterion read INSIDE its declared band scored ln Z = -0.5119"
+    (let [r (risk-of [0.5 1.0] 0.75 nil)]
+      (is (= :measured (:status r)))
+      (is (close? -0.5119492459595545 (:cross-entropy r))
+          "the pre-U17 number, kept on the record rather than overwritten")
+      (is (close? 0.0 (:risk r)) "and the divergence it becomes")))
+  (testing "outside the band the gradient survives, which is what separates the
+            excess form from a clamp: 0.45 misses [0.5 1.0] by 0.05, which is
+            less than the -T ln Z = 0.0512 a clamp would swallow"
+    (let [r (risk-of [0.5 1.0] 0.45 nil)]
+      (is (close? 0.5 (:risk r)) "gap/T = 0.05/0.1")
+      (is (neg? (:cross-entropy r))
+          "the unshifted form is still negative here — a clamp would read 0")))
+  (testing "and a wider band, whose Z >= 1, is untouched by the repair"
+    (let [r (risk-of [0.0 1.0] 0.5 nil)]
+      (is (close? 0.0 (:divergence-shift r)))
+      (is (close? (:cross-entropy r) (:risk r))))))
+
+(deftest satisfied-never-costs-more-than-unsatisfied-on-the-same-channel
+  ;; U17's third limb reads "no satisfied criterion scores below an unsatisfied
+  ;; one on the same channel". risk_mis is a COST, so that wording is tested two
+  ;; ways rather than one reading being assumed: as an ordering (a satisfied
+  ;; reading never costs MORE than an unsatisfied one -- this test), and as a
+  ;; floor (no reading, satisfied or not, goes below the zero unsatisfied ones
+  ;; respect -- `risk-mis-is-nonnegative-on-every-spec-shape`).
+  (testing "for a range spec every in-band value must cost at or below every
+            out-of-band value on the same channel"
+    (doseq [[spec in-band out-of-band] [[[0.5 1.0] [0.5 0.75 1.0] [0.0 0.25 0.45 0.49]]
+                                        [[0.0 0.3] [0.0 0.25 0.3] [0.5 0.75 1.0]]
+                                        [[0.25 0.75] [0.25 0.5 0.75] [0.0 0.1 0.9 1.0]]]]
+      (doseq [sat in-band unsat out-of-band]
+        (let [rs (:risk (risk-of spec sat nil))
+              ru (:risk (risk-of spec unsat nil))]
+          (is (<= rs ru) (str "spec " spec " satisfied " sat " (" rs
+                              ") vs unsatisfied " unsat " (" ru ")"))))))
+  (testing "and for a Bernoulli spec, under every arm that reads both poles"
+    (doseq [[spec sat unsat] [[{:becomes 1} 1 0] [{:becomes 0} 0 1]
+                              [{:p1 0.9} 1 0] [{:p1 0.1} 0 1]]
+            arm u17-arms]
+      (let [rs (risk-of spec sat arm)
+            ru (risk-of spec unsat arm)]
+        (when (and (= :measured (:status rs)) (= :measured (:status ru)))
+          (is (<= (:risk rs) (:risk ru))
+              (str "spec " spec " arm " arm)))))))
+
+(deftest declared-weights-that-could-make-the-sum-negative-are-refused
+  (testing "risk_mis >= 0 is a weighted sum of nonnegative terms, so it needs the
+            weights nonnegative — a negative one would break the claim without
+            touching a spec shape"
+    (let [rows [(mc/criterion-row {:criterion :a :observable :x} {:x 0 :y 0} "f:1")
+                (mc/criterion-row {:criterion :b :observable :y} {:x 0 :y 0} "f:2")]]
+      (doseq [w [-0.5 ##NaN ##Inf]]
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo #"finite and non-negative"
+                              (mc/c-mis {:criteria rows}
+                                        :criterion-weights {:a w :b 0.5}))
+            (str "weight " w))))))
+
+(deftest the-shift-is-the-same-under-every-arm
+  (testing "why U17 does not wait on J6: the constant depends on the SPEC KIND
+            and never on which outcome an arm reads"
+    (doseq [spec u17-specs]
+      (let [c (mc/c-mis {:criteria [(mc/criterion-row {:criterion :a :observable :x :spec spec}
+                                                      {:x 0.5} "f:1")]})
+            shift (mc/divergence-shift c)]
+        (doseq [arm u17-arms]
+          (let [r (if arm (mc/risk-mis c {:x 0.5} :outcome-semantics arm)
+                      (mc/risk-mis c {:x 0.5}))]
+            (when (= :measured (:status r))
+              (is (close? shift (:divergence-shift r)) (str "spec " spec " arm " arm)))))))))

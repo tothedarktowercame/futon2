@@ -371,6 +371,73 @@
                     :outcome (:outcome o)}
                    o))))
 
+;; ---------------------------------------------------------------------------
+;; U17 — the point-mass term as a DIVERGENCE, so it cannot go below zero.
+;;
+;; THE HAZARD. Under the v0 status-quo forward model (mission_c §3) Q(o|π) is a
+;; point mass at the current reading, so the per-criterion term is −ln C(x).
+;; For a `:bernoulli` C that IS the KL exactly — KL(δ_b ‖ C) = −ln C(b) ≥ 0
+;; because C(b) ≤ 1, pinned numerically against `kl` by
+;; `mission_c_test/surprisal-is-the-point-mass-kl`. For a `:range` C it is NOT:
+;; a point mass has no density on a continuous support, KL(δ_x ‖ C) is +∞ at
+;; every x, and what the code carries is the CROSS-ENTROPY gap/T + ln Z, fixed
+;; only up to an additive constant. When the declared band is narrower than one
+;; unit, Z < 1 and ln Z < 0, so that term is NEGATIVE everywhere inside the band
+;; (−0.5119492459595545 for [0.5 1.0] at T = 0.1) and a satisfied criterion
+;; summed into one G beside C_int's KL ≥ 0 would be paid a BONUS.
+;;
+;; THE FORM, and it is a choice between two that both clear zero. Fix the
+;; constant at the best attainable value — score the EXCESS
+;;     KL(δ_x ‖ C) − inf_y KL(δ_y ‖ C)  =  gap/T,
+;; the divergent point-mass entropy cancelling between the two terms and ln Z
+;; with it. That is exactly 0 on the declared band and grows linearly in
+;; temperature units outside it. The alternative U17 names, a clamp
+;; `(max 0.0 (+ (/ gap t) log-z))`, also clears zero but flattens the gradient
+;; for a further −T·ln Z outside the band (0.0512 for [0.5 1.0] at T = 0.1),
+;; reading a value that misses the band by 0.05 as fully satisfied; the excess
+;; form keeps that gradient. Same repair class as `kl-gaussian-range` below,
+;; which exists because "the untruncated form was a divergence score that could
+;; dip below 0".
+;;
+;; THE BERNOULLI BRANCH IS NOT SHIFTED. Its term is an exact KL and already
+;; ≥ 0, so there is no missing constant to fix. Subtracting ITS minimum
+;; −ln max(p1, 1−p1) — the 4.539889921682063E-5 that U12 and U16 measured as
+;; the T = 0.1 satisfied floor — would be a different change: it would move
+;; numbers two committed replay artifacts pin, and the floor it removes is a
+;; real property of a soft target, not the missing-constant artefact the range
+;; branch has. U12 clause (c)'s "satisfied ⇒ zero" therefore stays unreached for
+;; Bernoulli criteria, exactly as U16 recorded it.
+;;
+;; ORTHOGONAL TO J6. The shift is a function of the SPEC KIND alone and never of
+;; which outcome an arm reads, so every arm in `bernoulli-outcome-arms` and the
+;; shipped no-arm path take the same constant.
+
+(defn point-mass-divergence-shift
+  "The constant subtracted from the point-mass cross-entropy −ln C(x) to make it
+   a divergence ≥ 0: `log-z` for `:range`, so the term becomes gap/T; 0.0 for
+   `:bernoulli`, whose term is already an exact KL. See the U17 block above for
+   why the two branches differ. Throws on an unknown kind rather than defaulting
+   to 0.0, because a new spec shape silently taking no shift is the defect this
+   exists to remove."
+  [{:keys [kind log-z] :as dist}]
+  (case kind
+    :bernoulli 0.0
+    :range (double log-z)
+    (throw (ex-info "point-mass-divergence-shift: unsupported preference kind"
+                    {:kind kind :dist dist}))))
+
+(defn point-mass-divergence
+  "KL(δ_x ‖ C) in nats under the point-mass forward model — exact for
+   `:bernoulli`, and for `:range` the excess over the best attainable value,
+   gap/T. ≥ 0 on every spec shape, and 0 exactly where x is the target outcome
+   (Bernoulli, up to the temperature floor) or inside the declared band (range).
+
+   `x` is the outcome as already read; reading a raw observation under a
+   declared arm is `bernoulli-outcome`'s job, and the shift does not depend on
+   which arm did it."
+  [dist x]
+  (- (- (log-preference dist x)) (point-mass-divergence-shift dist)))
+
 (defn- kl-gaussian-range
   "Item 1 (E-KL-refinements): KL(Q~ ‖ C) for Q~ = N(mu,sigma2) TRUNCATED and
    renormalised to [0,1], against a `:range` preference density C on [0,1]. A true

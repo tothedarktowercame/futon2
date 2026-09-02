@@ -1701,7 +1701,12 @@
             (is (= value (:value e)))
             (is (< (Math/abs (- (pref/log-preference d value) (:log-c e))) 1e-9))
             (is (< (Math/abs (- 0.5 (:weight e))) 1e-9))
-            (is (< (Math/abs (- (* 0.5 (- (pref/log-preference d value)))
+            ;; U17: the recorded contribution is w times the point-mass
+            ;; DIVERGENCE, which for :mission-healthy's [0.5 1.0] band differs
+            ;; from w times the surprisal by ln Z = -0.5119. :surprisal keeps the
+            ;; unshifted per-criterion number on the record.
+            (is (< (Math/abs (- (- (pref/log-preference d value)) (:surprisal e))) 1e-9))
+            (is (< (Math/abs (- (* 0.5 (pref/point-mass-divergence d value))
                                 (:contribution e)))
                    1e-9)))))
       (testing "one record per MISSION action, scoped, and no record for the others"

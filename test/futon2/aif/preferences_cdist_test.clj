@@ -208,3 +208,62 @@
                         (pref/bernoulli-outcome :whatever-i-like 0.0)))
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"arm keyword or a map"
                         (pref/bernoulli-outcome "numeric-equality" 0.0))))
+
+;; ---------------------------------------------------------------------------
+;; U17 — the point-mass term as a divergence >= 0. These are the DENSITY-level
+;; tests; the composition-level property test is in mission_c_test.
+
+(deftest the-unshifted-range-term-is-the-negative-U17-names
+  (testing "the hazard itself, pinned before the repair that removes it: the
+            pre-U17 term for a satisfied range criterion is ln Z < 0"
+    (let [d (pref/c-distribution [0.5 1.0])]
+      (is (< (Math/abs (- -0.5119492459595545 (- (pref/log-preference d 0.75)))) 1e-12)
+          "U17's -0.512, to the digit")
+      (is (neg? (- (pref/log-preference d 0.75))))))
+  (testing "and it is the band being narrower than one unit that does it"
+    (is (neg? (pref/point-mass-divergence-shift (pref/c-distribution [0.5 1.0]))))
+    (is (< (Math/abs (pref/point-mass-divergence-shift
+                      (pref/c-distribution [0.0 1.0] :temperature 1e-9)))
+           1e-8)
+        "a band covering the whole support normalises to Z = 1, so no shift")))
+
+(deftest point-mass-divergence-is-nonnegative-on-every-spec-shape
+  (doseq [spec [[0.5 1.0] [0.0 0.3] [0.0 1.0] [0.25 0.75] [0.2 0.2]
+                {:becomes 1} {:becomes 0} {:p1 0.9} {:p1 0.5} {:p1 1.0} {:p1 0.0}]
+          t [0.05 pref/default-c-temperature 0.5 2.0]
+          x [0 1 0.0 1.0 0.25 0.5 0.75 0.2 0.999]]
+    (let [d (pref/c-distribution spec :temperature t)
+          v (pref/point-mass-divergence d x)]
+      (is (<= 0.0 v) (str "spec " spec " T " t " x " x " -> " v)))))
+
+(deftest a-satisfied-range-criterion-scores-exactly-zero
+  (doseq [spec [[0.5 1.0] [0.0 0.3] [0.25 0.75]]
+          t [0.05 pref/default-c-temperature 0.5]]
+    (let [d (pref/c-distribution spec :temperature t)
+          [lo hi] spec]
+      (doseq [x [lo hi (/ (+ lo hi) 2.0)]]
+        (is (< (Math/abs (pref/point-mass-divergence d x)) 1e-12)
+            (str "in band: spec " spec " T " t " x " x)))
+      (testing "and outside the band it is the gap in temperature units, so the
+                gradient a clamp would flatten is still there"
+        (let [x (max 0.0 (- lo 0.02))]
+          (when (< x lo)
+            (is (< (Math/abs (- (/ (- lo x) t) (pref/point-mass-divergence d x))) 1e-9))
+            (is (pos? (pref/point-mass-divergence d x))
+                "0.02 outside a band whose -T ln Z margin exceeds it would clamp to 0")))))))
+
+(deftest the-bernoulli-branch-is-not-shifted
+  (testing "its term is already an exact KL, so U17 leaves the numbers U12 and
+            U16 recorded exactly where they were"
+    (doseq [spec [{:becomes 1} {:becomes 0} {:p1 0.9}]]
+      (let [d (pref/c-distribution spec)]
+        (is (zero? (pref/point-mass-divergence-shift d)))
+        (doseq [x [0 1]]
+          (is (= (- (pref/log-preference d x)) (pref/point-mass-divergence d x)))))))
+  (testing "including the T=0.1 satisfied floor U16 named"
+    (let [d (pref/c-distribution {:becomes 1})]
+      (is (< (Math/abs (- 4.539889921682063E-5 (pref/point-mass-divergence d 1))) 1e-12)))))
+
+(deftest an-unknown-spec-kind-refuses-rather-than-taking-no-shift
+  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"unsupported preference kind"
+                        (pref/point-mass-divergence-shift {:kind :something-new}))))
