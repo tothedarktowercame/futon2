@@ -30,12 +30,18 @@
           (> v hi) (- v hi)
           :else 0.0)))
 
-(defn- channel-source-status
+(defn channel-source-status
   "Whether CHANNEL of OBS carries an observed value, and why not when it does
    not. The value is returned RAW: callers that must tell a non-numeric value
    from an absent one cannot be handed a coerced double. Plain explicit maps
    are a supported legacy boundary; metadata-bearing observations retain
-   absence."
+   absence.
+
+   Public since AC4: `futon2.aif.policy/sorry-pressure-record` reads
+   `:sorry-count-norm` through this same reader, so the fallback selector and
+   the diagnostics cannot disagree about what counts as observed — including
+   the legacy plain-map allowance, which a second implementation would be free
+   to drift from."
   [obs channel]
   (let [source-status (observation/observation-status obs channel)
         explicit-legacy-value? (and (= :status-metadata-missing

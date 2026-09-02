@@ -552,6 +552,16 @@
     ;; carries every offending feature, so this is a vector of at most one.
     (seq (:strategic-mode-events judge-output))
     (assoc :strategic-mode-events (:strategic-mode-events judge-output))
+    ;; AC4 (same ruling, same condition): the fallback selector's
+    ;; sorry-pressure record, kept only when the I6 fallback actually ran and
+    ;; then could not read `:sorry-count-norm` -- absent (`:unknown`) or
+    ;; malformed (`:refused`). Present-only, and doubly so here: no key means
+    ;; either that `select-action` succeeded and the fallback was never
+    ;; consulted, or that it was consulted and read a real pressure. Both are
+    ;; different claims from "the selector did not report", and the two are
+    ;; told apart by the decision's own `:source`.
+    (seq (:default-mode-events judge-output))
+    (assoc :default-mode-events (:default-mode-events judge-output))
     ;; RUN11 run identity. The per-date trace file is shared by every run on
     ;; the day, so without this key the only discriminator between two runs'
     ;; records is the timestamp and a reader has to select by range. `:run/id`

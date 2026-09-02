@@ -5188,6 +5188,13 @@
                (variational-temperature-opts wm-tau-mode beta-dark-fields)})
              (catch Exception _
                (policy/default-mode-select wm-state wm-admissible)))
+        ;; AC4 (Joe's 2026-09-02 ruling on C130 §3): when the fallback ran and
+        ;; could not read sorry pressure, it abstains instead of selecting as
+        ;; though pressure were 0.0. Present-only: a tick whose fallback read a
+        ;; real pressure -- and every tick on which `select-action` succeeded,
+        ;; whose decision carries no `:sorry-pressure` key at all -- writes no
+        ;; event.
+        default-mode-events (policy/default-mode-events controller-decision)
         route5 (route-tag route4 :R6 "futon2.aif.policy/select-action")
         strategic-candidate-ids
         #{"M-aif-policy-conditioned-eig"
@@ -5354,6 +5361,10 @@
                  ;; an absent key means the mode was inferred from six observed
                  ;; features, not that nobody looked.
                  :strategic-mode-events strategic-mode-events
+                 ;; AC4: the fallback selector's sorry-pressure record, kept
+                 ;; only when the fallback ran AND could not read the channel.
+                 ;; Same present-only discipline at the trace boundary.
+                 :default-mode-events default-mode-events
                  :precision-state precision-state
                  ;; R14 precision-over-policies (γ): the learned, bounded inverse
                  ;; selection temperature this tick used (τ_eff = τ_spread / γ).

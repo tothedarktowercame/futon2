@@ -17,7 +17,8 @@
    not meaningfully below `:no-op`'s controller-score, the WM declines to act
    and surfaces a gap-report enumerating the `:learn-action-class`
    recommendations the bootstrap proposer detected."
-  (:require [futon2.aif.hierarchical-budget :as hierarchical-budget]))
+  (:require [futon2.aif.free-energy :as fe]
+            [futon2.aif.hierarchical-budget :as hierarchical-budget]))
 
 (defn select-budgeted-actions
   "R11 policy boundary for collective, hierarchical action selection.
@@ -218,6 +219,86 @@
        (filter #(= :learn-action-class (-> % :action :type)))
        (mapv :action)))
 
+;; ---------------------------------------------------------------------------
+;; AC4 (Joe's 2026-09-02 ruling on C130 §3): sorry pressure in the fallback
+;; selector.
+;; ---------------------------------------------------------------------------
+
+(def default-mode-contract
+  "Producer contract stamped on every sorry-pressure record
+   `sorry-pressure-record` emits, whether it read a value, found none, or
+   refused a malformed one."
+  :default-mode-pressure/v1)
+
+(def default-mode-pressure-channel
+  "The one observation channel `default-mode-select` branches on. Named as a
+   var because the census, the lint and the tests all have to agree on which
+   channel this row is about."
+  :sorry-count-norm)
+
+(defn- finite-double
+  "X as a double when it is a finite number, else nil. Distinguishes a
+   measured 0.0 (a real pressure reading) from a value that cannot be
+   compared to a threshold at all."
+  [x]
+  (when (number? x)
+    (let [d (double x)]
+      (when-not (or (Double/isNaN d) (Double/isInfinite d)) d))))
+
+(defn sorry-pressure-record
+  "Read `:sorry-count-norm` out of OBSERVATION through its observation
+   envelope, as a typed record. AC4 (Joe's 2026-09-02 ruling on C130 §3)
+   removed the `0.0` this value used to be defaulted to.
+
+   `:present` — the channel was observed and carries a finite number:
+     {:status :present :value <double> :channel :sorry-count-norm
+      :producer-contract :default-mode-pressure/v1}
+   A measured `0.0` lands here. Zero pressure is a reading, not an absence.
+
+   `:unknown` — the channel was NOT OBSERVED. No `:value` key is written, and
+   `:absent` carries the envelope's own `:reason` and `:paths`.
+
+   `:refused` — the channel is present but is not a finite number (a string, a
+   keyword, nil, NaN, an infinity). `:offending` names the value it was given.
+   Absence and malformation are separated here exactly as they are in
+   `free-energy/compute-prediction-error`: a channel nobody measured is a gap
+   in the scan; a channel that arrived as a string is a producer defect and
+   has to stay loud.
+
+   Plain explicit maps remain a supported legacy boundary, through
+   `fe/channel-source-status`: `{:sorry-count-norm 0.7}` with no observation
+   metadata still reads as present."
+  [observation]
+  (let [source (fe/channel-source-status observation default-mode-pressure-channel)
+        stamp {:producer-contract default-mode-contract
+               :channel default-mode-pressure-channel}]
+    (if (= :present (:status source))
+      (if-let [v (finite-double (:value source))]
+        (merge stamp {:status :present :value v})
+        (merge stamp {:status :refused
+                      :reason :malformed-sorry-pressure
+                      :offending {:channel default-mode-pressure-channel
+                                  :status :not-finite
+                                  :value (:value source)}}))
+      (merge stamp {:status :unknown
+                    :reason :sorry-pressure-not-observed
+                    :absent (merge {:channel default-mode-pressure-channel}
+                                   (select-keys source [:reason :paths]))}))))
+
+(defn default-mode-events
+  "The present-only typed records a `default-mode-select` DECISION carries out
+   for persistence — a vector of at most one. Empty when the fallback read a
+   real pressure value, and empty when the fallback did not run at all (a
+   `select-action` decision carries no `:sorry-pressure` key). Emitting the
+   record only when the read was not clean is the AC1–AC3 discipline: no key
+   means the pressure was observed, which is a different claim from \"the
+   selector did not report\"."
+  [decision]
+  (let [record (:sorry-pressure decision)]
+    (if (and (map? record) (not= :present (:status record)))
+      [record]
+      [])))
+
 (defn default-mode-select
   "Pre-deliberative tropism-based action selection from observation +
    ranked candidates. Used as I6 compositional closure when the
@@ -238,35 +319,88 @@
       (even at low sorry pressure, addressable work is better than no-op).
    4. Else `:no-op`.
 
+   AC4: rule 1 used to read `(get observation :sorry-count-norm 0.0)`, so a
+   tick that never measured sorry pressure was selected as though it had
+   measured NO pressure — the rule-1 test `> 0.3` failed on a number nobody
+   observed, and `:address-sorry` work was skipped for that reason. The
+   channel is now read through `sorry-pressure-record`, and when it does not
+   come back `:present` the selector ABSTAINS and returns control, rather
+   than choosing under a fabricated reading:
+
+     {:action :abstain
+      :reason :sorry-pressure-unknown | :sorry-pressure-malformed
+      :gap-report <the :learn-action-class candidates, as elsewhere>
+      :sorry-pressure <the typed record>
+      :source :default-mode}
+
+   WHEN THE PRESSURE IS REQUIRED, precisely: exactly when at least one
+   `:address-sorry` candidate is admitted. Rules 1 and 3 are the only two that
+   rest on the reading, and both are unreachable with an empty `addr-sorrys`
+   — with no `:address-sorry` candidate the outcome is decided by rules 2 and
+   4 alone, and the pressure is not read at all. Choosing there is not
+   choosing under a substituted value, so it is not blocked. This is narrower
+   than AC3's all-six requirement because the branch structure is narrower,
+   not because the standard is: what neither may do is *assert* a pressure.
+   With an `:address-sorry` candidate present the two live rules make opposite
+   claims about the same unobserved number — rule 1 asserts `> 0.3`, rule 3
+   asserts `<= 0.3` — so neither can be taken and the selector abstains.
+
+   The decision always carries `:sorry-pressure` (the record, with
+   `:required?` and `:abstained?` added at the decision) so a reader can tell
+   an inconsequential unknown from the one that stopped a selection.
+   `default-mode-events` is the present-only projection for the trace.
+
    Returns the same chosen-action shape as `select-action` (with
-   `:source :default-mode`), or an abstain branch if there are
-   genuinely no candidates."
+   `:source :default-mode`), an abstain branch when the pressure it needs is
+   unknown or malformed, or an abstain branch if there are genuinely no
+   candidates."
   [state ranked-actions]
   (let [observation (:observation state {})
-        sorry-pressure (double (get observation :sorry-count-norm 0.0))
+        pressure (sorry-pressure-record observation)
         actions-by-type (group-by #(-> % :action :type) ranked-actions)
         addr-sorrys (get actions-by-type :address-sorry [])
         learns (get actions-by-type :learn-action-class [])
         no-ops (get actions-by-type :no-op [])
-        chosen (cond
-                 (and (> sorry-pressure 0.3) (seq addr-sorrys))
-                 (first addr-sorrys)
+        ;; Rules 1 and 3 are the only readers of the pressure, and both need
+        ;; an :address-sorry candidate to fire.
+        required? (boolean (seq addr-sorrys))
+        usable? (= :present (:status pressure))
+        abstained? (and required? (not usable?))
+        record (assoc pressure :required? required? :abstained? abstained?)
+        chosen (when-not abstained?
+                 (cond
+                   (and usable? (> (:value pressure) 0.3) (seq addr-sorrys))
+                   (first addr-sorrys)
 
-                 (seq learns)
-                 (apply max-key #(double (or (-> % :action :intrinsic-value) 0))
-                        learns)
+                   (seq learns)
+                   (apply max-key #(double (or (-> % :action :intrinsic-value) 0))
+                          learns)
 
-                 (seq addr-sorrys) (first addr-sorrys)
-                 (seq no-ops) (first no-ops)
-                 :else nil)]
-    (if chosen
+                   (seq addr-sorrys) (first addr-sorrys)
+                   (seq no-ops) (first no-ops)
+                   :else nil))]
+    (cond
+      abstained?
+      {:action :abstain
+       :reason (if (= :refused (:status pressure))
+                 :sorry-pressure-malformed
+                 :sorry-pressure-unknown)
+       :gap-report (gap-report ranked-actions)
+       :sorry-pressure record
+       :source :default-mode}
+
+      chosen
       {:action (:action chosen)
        :rank (:rank chosen)
        :controller-score (:controller-score chosen)
+       :sorry-pressure record
        :source :default-mode}
+
+      :else
       {:action :abstain
        :reason :no-candidates
        :gap-report []
+       :sorry-pressure record
        :source :default-mode})))
 
 (defn- numeric-range [xs]

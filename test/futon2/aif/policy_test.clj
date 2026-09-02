@@ -1,6 +1,7 @@
 (ns futon2.aif.policy-test
   "Tests for R6: action selection policy (softmax + abstain)."
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.observation :as obs]
             [futon2.aif.policy :as policy]))
 
 ;; ---------------------------------------------------------------------------
@@ -338,6 +339,182 @@
           out (policy/default-mode-select state candidates)]
       (is (= :address-sorry (-> out :action :type))
           "even at low pressure, addressable work beats no-op"))))
+
+;; ---------------------------------------------------------------------------
+;; AC4 (Joe's 2026-09-02 ruling on C130 §3): the fallback selector stops
+;; substituting 0.0 for an unmeasured :sorry-count-norm.
+;; ---------------------------------------------------------------------------
+
+(defn- scan-with-sorrys
+  "A minimal scan that sources :sorry-count-norm and nothing else the rules
+   read, so `obs/observe` tags that one channel :observed. `:total-repos` is
+   present only because `observe` divides by it."
+  [n]
+  {:graph {:summary {:total-sorrys n :total-repos 1}}})
+
+(def ^:private addr-only
+  (ranked-with-actions [[{:type :no-op} 0.9]
+                        [{:type :address-sorry :target :sorry/x} 0.4]
+                        [{:type :address-sorry :target :sorry/y} 0.5]]))
+
+(deftest ac4-absent-pressure-abstains-test
+  (testing "unobserved :sorry-count-norm with :address-sorry candidates → abstain"
+    (let [out (policy/default-mode-select {:observation (obs/observe {})} addr-only)
+          record (:sorry-pressure out)]
+      (is (= :abstain (:action out)))
+      (is (= :sorry-pressure-unknown (:reason out)))
+      (is (= :default-mode (:source out)))
+      ;; The defect, measured in the other direction: the pre-AC4 rule set read
+      ;; 0.0 here, failed rule 1's `> 0.3` test, and fell through to rule 3.
+      (is (not= :address-sorry (-> out :action :type))
+          "an unmeasured pressure must not select address-sorry work")
+      (is (= :unknown (:status record)))
+      (is (= :sorry-pressure-not-observed (:reason record)))
+      (is (not (contains? record :value))
+          "no value key: nothing was read, so nothing is offered")
+      (is (true? (:required? record)))
+      (is (true? (:abstained? record)))
+      (is (= :sorry-count-norm (-> record :absent :channel)))
+      (is (= :source-field-missing (-> record :absent :reason))
+          "the envelope's own reason is carried, not a locally invented one")
+      (is (seq (-> record :absent :paths))
+          "and the path the scan would have had to supply")
+      (is (= :default-mode-pressure/v1 (:producer-contract record))))))
+
+(deftest ac4-absent-pressure-legacy-plain-map-test
+  (testing "a plain map with no observation metadata is a supported boundary"
+    (let [out (policy/default-mode-select {:observation {}} addr-only)
+          record (:sorry-pressure out)]
+      (is (= :abstain (:action out)))
+      (is (= :sorry-pressure-unknown (:reason out)))
+      (is (= :status-metadata-missing (-> record :absent :reason))))))
+
+(deftest ac4-abstention-returns-control-loudly-test
+  (testing "the abstention surfaces the capability gaps, as select-action does"
+    (let [candidates (ranked-with-actions
+                      [[{:type :address-sorry :target :sorry/x} 0.4]
+                       [{:type :learn-action-class :target-class :a
+                         :intrinsic-value 0.9} 0.5]])
+          out (policy/default-mode-select {:observation (obs/observe {})} candidates)]
+      (is (= :abstain (:action out)))
+      (is (= [{:type :learn-action-class :target-class :a :intrinsic-value 0.9}]
+             (:gap-report out))
+          "the learn-action-class recommendations reach the operator")
+      ;; Rules 1 and 3 make OPPOSITE claims about the same unobserved number,
+      ;; so rule 2 cannot be reached by declaring rule 1 false.
+      (is (not= :learn-action-class (-> out :action :type))))))
+
+(deftest ac4-pressure-not-required-without-address-sorry-test
+  (testing "with no :address-sorry candidate the pressure is never read, so
+            selection is not blocked — but the unknown is still reported"
+    (let [learn-out (policy/default-mode-select
+                     {:observation (obs/observe {})}
+                     (ranked-with-actions
+                      [[{:type :no-op} 0.9]
+                       [{:type :learn-action-class :target-class :a
+                         :intrinsic-value 0.1} 0.5]
+                       [{:type :learn-action-class :target-class :b
+                         :intrinsic-value 0.3} 0.4]]))
+          no-op-out (policy/default-mode-select
+                     {:observation (obs/observe {})}
+                     (ranked-with-actions [[{:type :no-op} 0.5]]))]
+      (is (= :learn-action-class (-> learn-out :action :type)))
+      (is (= :b (-> learn-out :action :target-class)))
+      (is (false? (:required? (:sorry-pressure learn-out))))
+      (is (false? (:abstained? (:sorry-pressure learn-out))))
+      (is (= :unknown (:status (:sorry-pressure learn-out)))
+          "the read is still reported; it just did not decide anything")
+      (is (= :no-op (-> no-op-out :action :type)))
+      (is (false? (:required? (:sorry-pressure no-op-out)))))))
+
+(deftest ac4-measured-zero-is-a-reading-test
+  (testing "a MEASURED 0.0 selects; the same channel unsourced does not"
+    (let [measured (policy/default-mode-select
+                    {:observation (obs/observe (scan-with-sorrys 0))}
+                    addr-only)
+          unsourced (policy/default-mode-select
+                     {:observation (obs/observe {})}
+                     addr-only)]
+      (is (= :address-sorry (-> measured :action :type))
+          "zero pressure is a reading, and rule 3 still prefers real work")
+      (is (= :present (:status (:sorry-pressure measured))))
+      (is (= 0.0 (:value (:sorry-pressure measured))))
+      (is (= :abstain (:action unsourced))
+          "the discriminating control: same numeric 0.0, different provenance"))))
+
+(deftest ac4-measured-high-pressure-still-dominates-test
+  (testing "rule 1 is unchanged when the channel is observed"
+    (let [out (policy/default-mode-select
+               {:observation (obs/observe (scan-with-sorrys 7))}
+               addr-only)]
+      (is (= :address-sorry (-> out :action :type)))
+      (is (= :sorry/x (-> out :action :target))
+          "first address-sorry candidate, as before")
+      (is (= 0.7 (:value (:sorry-pressure out)))))))
+
+(deftest ac4-malformed-pressure-refuses-test
+  (testing "present but not a finite number → refused, loudly, one at a time"
+    (doseq [bad ["x" :keyword true [] (/ 0.0 0.0) (/ 1.0 0.0) (/ -1.0 0.0)]]
+      (let [out (policy/default-mode-select
+                 {:observation {:sorry-count-norm bad}} addr-only)
+            record (:sorry-pressure out)]
+        (is (= :abstain (:action out)) (str "refused for " (pr-str bad)))
+        (is (= :sorry-pressure-malformed (:reason out)))
+        (is (= :refused (:status record)))
+        (is (= :malformed-sorry-pressure (:reason record)))
+        (is (= :not-finite (-> record :offending :status)))
+        (is (= :sorry-count-norm (-> record :offending :channel)))
+        (is (= bad (-> record :offending :value))
+            "the record names the value it was given")
+        (is (not (contains? record :value)))))))
+
+(deftest ac4-absence-and-malformation-are-separated-test
+  (testing "nil and \"x\" in the same channel give different statuses"
+    (let [nil-record (:sorry-pressure
+                      (policy/default-mode-select
+                       {:observation {:sorry-count-norm nil}} addr-only))
+          str-record (:sorry-pressure
+                      (policy/default-mode-select
+                       {:observation {:sorry-count-norm "x"}} addr-only))]
+      (is (= :unknown (:status nil-record))
+          "nil is nothing measured, not a malformed measurement")
+      (is (= :refused (:status str-record)))
+      (is (not= (:reason nil-record) (:reason str-record))))))
+
+(deftest ac4-no-candidates-keeps-its-own-reason-test
+  (testing "an empty candidate set still abstains as :no-candidates"
+    (let [out (policy/default-mode-select {:observation (obs/observe {})} [])]
+      (is (= :abstain (:action out)))
+      (is (= :no-candidates (:reason out))
+          "no candidate set is a different fault from no pressure reading")
+      (is (false? (:required? (:sorry-pressure out)))))))
+
+(deftest ac4-default-mode-events-are-present-only-test
+  (testing "the trace projection carries a record only when the read was not clean"
+    (let [abstained (policy/default-mode-select
+                     {:observation (obs/observe {})} addr-only)
+          selected (policy/default-mode-select
+                    {:observation (obs/observe (scan-with-sorrys 7))} addr-only)
+          deliberative (policy/select-action
+                        (ranked-with-actions [[{:type :address-sorry :target :x} 0.1]
+                                              [{:type :no-op} 0.9]]))]
+      (is (= [(:sorry-pressure abstained)] (policy/default-mode-events abstained)))
+      (is (= [] (policy/default-mode-events selected))
+          "a clean read writes no event")
+      (is (= [] (policy/default-mode-events deliberative))
+          "a select-action decision carries no :sorry-pressure key at all")
+      (is (= [] (policy/default-mode-events nil))))))
+
+(deftest ac4-record-is-readable-alone-test
+  (testing "sorry-pressure-record is usable without the selector"
+    (is (= :present (:status (policy/sorry-pressure-record
+                              (obs/observe (scan-with-sorrys 3))))))
+    (is (= 0.3 (:value (policy/sorry-pressure-record
+                        (obs/observe (scan-with-sorrys 3))))))
+    (is (= :unknown (:status (policy/sorry-pressure-record (obs/observe {})))))
+    (is (= :refused (:status (policy/sorry-pressure-record
+                              {:sorry-count-norm "x"}))))
+    (is (= :sorry-count-norm policy/default-mode-pressure-channel))))
 
 ;; ---------------------------------------------------------------------------
 ;; B-2d: τ-layer separation (M-aif-faithfulness §2.2) — dark build.
