@@ -90,6 +90,26 @@ resolution error is persisted nowhere (codex-20's part-3 finding). Every
 on-demand selection to date has been stub-selected. Should be a row when we
 next touch the tick machinery.
 
+### 8. zaif's gamma is read on every decision and enters none of them — VERDICT: DEFECT in the caller (unrowed on the zaif board; U6 finding, review-confirmed)
+
+Expected: the burned-in B1 gamma cell (0.7071 for M-futon-forward-model)
+shapes act-value. Observed, measured over all 114 recorded sessions and
+reproduced byte-identically by the U6 reviewer: the live hydrator sets
+:task-belief {} unconditionally (zaif_inputs.clj L190-L194), so act-value's
+belief term is 0.0 on every session and gamma multiplies zero. "Recorded but
+never consulted" one level down: read into a product with a structurally
+absent factor. Fix direction is the hydrator (supply the belief), not the
+controller.
+
+### 9. 83 of 114 live zaif decisions were settled by tie order, not by a score — VERDICT: DEFECT-shaped design gap (review-confirmed)
+
+With :act and :yield both structurally 0.0, they tie at the maximum whenever
+:retrieve and :ask score <= 0, and choose-arm's case order takes :act. Only
+the 31 :retrieve choices were settled by arithmetic. The crew's shipped
+controller mostly decides by accident of ordering — same family as ZU-2's
+":ask is structurally unreachable", now with the denominator. Feeds U7/U9
+and the harness-v1 R7/R4 work.
+
 ### Process surprises (the loops, briefly, for completeness)
 
 The three loop stops today were all the pre-flight discipline working:
