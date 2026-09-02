@@ -638,3 +638,25 @@ different things with stated types — and that every previous attempt to
 "define G over cascades" substituted a measurement (recall, curvature,
 aliveness) for the definition, which is the facade this record exists to
 refuse.
+
+## 1b. Joe's response to the §1 gate (2026-09-02) — not confirm/rewrite but a small architecture project
+
+> *"LJ1 points to more recent thinking about cascades, developed, indeed, with
+> Snatch as an example, but it is not yet complete. This isn't necessarily a
+> 'decision', but a small architecture project. In Snatch, there were 2 layers
+> of policy: one defined by player temperament that built a cascade, and one
+> defined by the cascade itself that organized play. If we included
+> 'temperament' as a design pattern, it would all unify, and G would be defined
+> over policy."* (Joe, 2026-09-02, morning)
+
+Read against §"Row 0 answered" (:228-257) and the :347-363 exchange: the Aug-30
+record keeps the levels stratified (an operation ON cascades is a different
+kind of thing from a cascade). Today's direction reifies the top level into the
+library: a temperament is itself a pattern — one whose THEN operates on
+cascades and precedence, not on turkeys — so both of Snatch's policy layers
+(temperament builds the cascade; the cascade organises play) are pattern-made,
+and G(π) is defined over policy rather than over a bag of pattern ids.
+The §1 problem statement is therefore to be RESTATED through this
+unification, not confirmed as it stands. Worked as library-contract row LA1
+(futon3/holes/labs/library-contract/worklist.edn); §5 packets stay gated on
+Joe confirming the restated §1 (row LJ1).
