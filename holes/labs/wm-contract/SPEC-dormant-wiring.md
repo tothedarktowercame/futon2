@@ -51,6 +51,63 @@ adjudicated. U1 does not claim the new law selects better — it claims the law
 the registry cites sources for is the one that runs. Whether it selects
 better is U2/U3's question, measurable only after U1.
 
+### READINESS (worklist :U1, 2026-09-02) — what the falsifier run still needs
+
+The readiness suite is `test/futon2/aif/selection_score_readiness_test.clj`
+(8 deftests, 193 assertions). It pins the four properties against the recorded
+fields S2 (20 ticks) and S4 (4 ticks) plus planted synthetic fields, and it
+does not flip anything. What it establishes:
+
+- **(a) replay determinism holds, at delta exactly 0.0, on all 24 recorded
+  ticks** — every recorded `:softmax-weights-by-candidate-id` is reproduced by
+  `policy/softmax-weights` (src/futon2/aif/policy.clj:148) from that record's
+  own `:controller-score`, `:habit-prior-bias`, `:tau` and F_π readback.
+- **(b) the attribution is total and, on these fields, unique.** Every one of
+  the 24 ticks changes argmax against the default law, and each names one
+  minimal set: S2's 20 ticks and S4's declining tick move on `{ln E}`; S4's
+  three applied ticks move on `{ln E, F_π}` together. The per-candidate
+  identity `full − default = ln E + τ + F_π` is checked exactly (< 1e-9).
+- **(c)/(d)** the precondition refusal and the S4 coverage decline are pinned
+  as declared behaviour, including that the declining tick's recorded posterior
+  is the old law's and *not* what a zero-filled F_π would have produced.
+
+Five things the falsifier run still needs, none of them supplied by any
+committed field:
+
+1. **A field where τ ≠ 1.** τ = 1.0 on every one of the 24 recorded ticks
+   (`:tau-source :selection-gain-only`, g = 1.0), so no recorded tick can
+   attribute anything to τ; the τ arm of the attribution is exercised only by a
+   planted field. A τ-attributable argmax change is measurable only under
+   `FUTON_WM_TAU_MODE=variational-beta-gamma`.
+2. **Sixteen more default-on ticks.** The falsifier is stated over the first 20;
+   S4 supplies 4 (3 applied, 1 declined).
+3. **S3 is NOT FOUND.** `runs/2026-09-01-s3` holds `ARMS.txt` and `README.md`
+   only, and `README.md:3` says the directory is a replay, not a 20-tick stage
+   run. The live-τ field the falsifier presumes does not exist yet.
+4. **The flip as specified changes the recorded posterior, not the chosen
+   action.** S2/S4 ran on `:selection-boundary :strategic-recommendation`, where
+   the choice is the head of the G-ordered list (policy.clj:499) and the
+   F_π-bearing posterior at `:softmax-weights` (policy.clj:551) is recorded and
+   never read. The other boundary (`:actuation`) *does* select by
+   `ln E − G/τ` (policy.clj:696), but `f-pi-opts` reaches only
+   `strategic-recommendation` (policy.clj:491), so F_π never enters a selection
+   on either path. "The score IS the live selection law" therefore needs a
+   selector change that no row has yet minted; U1's flip alone would make the
+   falsifier's "argmax change" a statement about a recorded posterior.
+5. **A decline rate.** 1 of 4 S4 ticks declined on 1 uncovered candidate of 145.
+   Over 20 ticks the rate is unmeasured, and the falsifier should state it
+   before the flip rather than read it after.
+
+One defect found while building (a), recorded here because it is a trap for
+anything that reads these records: **the `rank/N` keys of
+`:f-pi-by-candidate-id` are the PRODUCING tick's ranks, not the current
+tick's.** Joining F_π by that key instead of by `:candidate-identity`
+transposes it between candidates whose ordering moved — on S4 tick 0, 12 of
+145 entries sit under a key whose current action has a different identity, and
+the replay leaves delta 0 (max weight error 5.3e-6, which reads as a
+floating-point wobble rather than as the misalignment it is). Pinned as a
+negative control in `rank-key-join-breaks-the-replay-test`.
+
 ## U2. tau: adjudicate the three arms, then retire the dead fold
 
 Current: three arms run and separate on S2 (three different gammas, all
