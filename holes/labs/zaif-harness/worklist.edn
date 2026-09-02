@@ -65,10 +65,12 @@
    :acceptance "The gate as a test; one real (or exactly-shaped fixture) decision passing it; the failure mode demonstrated on a planted unbacked claim."}
   {:id :U12 :class :I :status :open :owner :any :covers-key :none
    :lane "claude-2"
+   :dispatch "2026-09-02 ~18:24: to codex-17, job invoke-1788373479226-7553-2ebcf185, park park-509e79b8."
    :statement "R9 strict test (U10 gap, unblocked, blocked-by []): the spec's R9 row -- a verdict event authored by the worker seat is REFUSED as a type error; only the adjudicator's rerun mints it. U8's gate adjudicates externally but nothing pins the refusal itself. One packet: LOCATE the checked-handoff/verdict-minting machinery (search futon3c first); if a refusal path exists, pin it with a worker-authored-verdict test; if none exists, that is the finding (typed, with pointers to where the verdict events are minted today) -- do not build the refusal machinery in this packet. NOTE: distinct from wm-contract's :U12 (C_mis measurement); same-name different boards."
    :acceptance "Either a test proving worker-authored verdicts are refused as a type error (green, gates clean), or a typed finding that no refusal path exists, with pointers to every site that mints verdict events and which seat authors each."}
   {:id :U13 :class :I :status :open :owner :any :covers-key :none
    :lane "claude-2"
+   :dispatch "2026-09-02 ~18:24: to codex-22, job invoke-1788373470756-7552-6872ff83, park park-29c8646c."
    :statement "R13 pin (U10 gap, unblocked): the spec's R13 row -- the zaif controller never plans past the turn (T=1); the pin names where mission-horizon planning would enter. Small test in futon3c zaif_controller_test: decide/dual-decide consume no multi-turn state and emit no plan beyond the turn; docstring or comment names the seam where a mission-supplied horizon would attach (per app-zaif: the mission supplies the longer horizon). NOTE: distinct from wm-contract's :U13; same-name different boards."
    :acceptance "The pin test green against the live controller; gates clean; the horizon-entry seam named in the test itself so a future R13 change fails it."}
   {:id :U11 :class :I :status :open :owner :any :covers-key :none
