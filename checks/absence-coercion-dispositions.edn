@@ -28,7 +28,7 @@
    :control ":avoided-active contains measured violations only; unknown is retained in :avoidance-by-channel"
    :implemented-by "6b4df8f"}
   {:at "src/futon2/aif/free_energy.clj:98-100" :disposition :fix-now
-   :control "compute-prediction-error emits one of three typed records and coerces none of the triple: :present only when all three members are finite; :absent (no :observed, no :error, no :weighted-error) when the observation was not taken; :refused when a model parameter is missing or any member is not finite. Absence omits, malformation refuses -- the split C130 2 decided. Code: src/futon2/aif/free_energy.clj:197-272, envelope reader src/futon2/aif/free_energy.clj:274-289; caller omits/refuses at scripts/futon2/report/war_machine.clj:4838-4862; the typed records persist present-only at src/futon2/aif/trace.clj:530-538."
+   :control "compute-prediction-error emits one of three typed records and coerces none of the triple: :present only when all three members are finite; :absent (no :observed, no :error, no :weighted-error) when the observation was not taken; :refused when a model parameter is missing or any member is not finite. Absence omits, malformation refuses -- the split C130 2 decided. Code: src/futon2/aif/free_energy.clj:197-272, envelope reader src/futon2/aif/free_energy.clj:274-289; caller omits/refuses at scripts/futon2/report/war_machine.clj:4839-4860; the typed records persist present-only at src/futon2/aif/trace.clj:530-538."
    :decided-by "Joe 2026-09-02 ruling, futon2 2f34c26"
    :implemented-by :AC1}
   {:at "src/futon2/aif/free_energy.clj:138-143" :disposition :blocked :blocked-on :infer-mode-tagged-envelope}
