@@ -1540,6 +1540,52 @@
    (str (System/getProperty "user.home")
         "/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn")})
 
+(def ^:private zaif-harness-v1-gauges
+  "The three criteria of M-zaif-harness-v1, each bound to the observable it is
+   read from. ONE ENTRY PER CRITERION, LISTED UNDER BOTH IDS IT HAS: the
+   IDENTIFY ingest NAMES its criteria (`:u-rows-green` ...), a mission document
+   does not and the reader gives it positional ids (`:criterion-1` ...), and
+   these are the same three criteria under both — futon2 161ac09 ported the
+   ingest's three into the document verbatim, in order, on Joe's word.
+
+   The `:observable`s are NOT R2 channels and nothing produces them today, which
+   is the honest state: the gauge says where the value would have to come from,
+   and until something supplies it the criterion reads `:undeclared-observable`
+   — a typed absence naming a missing producer, where before J6 it read
+   `:unresolved-observable`, a criterion measurable only by a human."
+  [[:u-rows-green :criterion-1
+    {:observable :worklist-acceptance-state
+     :gauge "the U6-U9 worklist rows' acceptance state; worklist_check's output is machine-readable"}]
+   [:reporting-gate-holds :criterion-2
+    {:observable :reporting-gate-test-result
+     :gauge "U8's gate test result on one real zaif decision"}]
+   [:honest-gap-list-published :criterion-3
+    {:observable :registry-gap-list-present
+     :gauge "presence of the gap-list artifact where aif-equations.edn points"}]])
+
+(def mission-c-declared-gauges
+  "DECLARED gauges, mission-id -> criterion-id -> gauge
+   (`mission-c/apply-gauge`). A gauge binds a completion criterion written in
+   prose to an observable and carries the Bernoulli declaration J6's ruling asks
+   for: every one of these observables is DECLARED `:binary`, because each
+   criterion is a condition that holds or does not, and under
+   `:declared-binarization` a binary observable needs no threshold.
+
+   DECLARED, NOT PLANTED, and the distinction is the point. U12's channel
+   assignments were a stated plant — a criterion pointed at whatever channel
+   made the falsifier run — and the criteria's own reading was never bound to
+   anything. These bindings are written down here, once, where the observables
+   map is supplied; each row the reader builds from one carries
+   `:observable-source :declared-gauge` and the pointer back to this var, so a
+   gauge-supplied binding can never be mistaken on the record for a declaration
+   the mission document made itself."
+  {"M-zaif-harness-v1"
+   (into {} (for [[ingest-id doc-id g] zaif-harness-v1-gauges
+                  id [ingest-id doc-id]]
+              [id (assoc g
+                         :spec {:becomes 1 :observable-kind :binary}
+                         :declared-in "scripts/futon2/report/war_machine.clj mission-c-declared-gauges")]))})
+
 (defn- mission-action?
   [entry]
   (= :advance-mission (get-in entry [:action :type])))
@@ -1571,6 +1617,16 @@
    comparable. Present exactly when bytes were read — a source that is not
    there or that threw carries the typed `:criteria-reason` and no digest.
 
+   U18 (from J6): `:outcome-semantics` records WHICH reading of a Bernoulli
+   outcome produced the number, because after the ruling the risk can be absent
+   for a reason the arm gives rather than only for a missing observable —
+   `:refused-outcomes` names the criteria the arm declined and why, the same way
+   `:missing-observables` names the ones the reading did not cover. A refusal
+   with neither field would say only that there is no number.
+   `:declared-gauges` records the criterion -> observable bindings this mission
+   was read under (`mission-c-declared-gauges`), so a reader can tell a binding
+   this seam supplied from one the mission document declared itself.
+
    `:action-sensitivity` is on the record because v0's forward model is the
    status quo for every candidate, so risk_mis is expected CONSTANT across
    this tick's mission actions. Recording the distinct-value count means U12
@@ -1582,9 +1638,11 @@
       {:version mission-c/version :status :absent
        :reason (or (:reason active-mission) :no-clocked-mission)}
       (if-let [path (mission-c-criteria-path mission-id ranked)]
-        (let [read-result (mission-c/read-criteria path
+        (let [gauges (get mission-c-declared-gauges mission-id)
+              read-result (mission-c/read-criteria path
                                                    :observables observation
-                                                   :mission mission-id)
+                                                   :mission mission-id
+                                                   :gauges gauges)
               c (mission-c/c-mis read-result)
               risk (mission-c/risk-mis c observation)
               actions (filterv mission-action? ranked)
@@ -1608,12 +1666,18 @@
                    :unmeasurable (:unmeasurable c)
                    :mission-action-count (count actions)
                    :non-mission-action-count (- (count ranked) (count actions))
+                   :outcome-semantics mission-c/default-outcome-semantics
                    :status (:status risk)}
             (:source-sha256 read-result)
             (assoc :criteria-source-sha256 (:source-sha256 read-result))
+            gauges (assoc :declared-gauges
+                          (into (sorted-map)
+                                (map (fn [[id g]] [id (:observable g)]))
+                                gauges))
             (:per-criterion risk) (assoc :risk-mis-per-criterion (:per-criterion risk))
             (:reason risk) (assoc :reason (:reason risk))
             (:missing risk) (assoc :missing-observables (:missing risk))
+            (:refused risk) (assoc :refused-outcomes (:refused risk))
             (:criteria-reason c) (assoc :criteria-reason (:criteria-reason c))
             per-action (assoc :per-mission-action per-action
                               :action-sensitivity

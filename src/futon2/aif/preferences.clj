@@ -190,6 +190,48 @@
 
 (defn- std-normal-pdf [z] (* 0.3989422804014327 (Math/exp (* -0.5 (sq z)))))
 
+(def observable-kinds
+  "The kinds a criterion may declare its observable to be. Closed, because an
+   undeclared kind and a misspelt one want different answers: the first is a
+   typed absence the arms already have a reason for, the second is a caller
+   error and throws."
+  #{:binary :continuous})
+
+(def bernoulli-declaration-fields
+  "The DECLARATION a Bernoulli criterion may carry on its own `spec`, and the
+   home J6's ruling gives it (Joe, 2026-09-02, arm 2 `:declared-binarization`):
+   `:observable-kind` says what the observable IS, `:threshold` says where a
+   continuous one is cut. U16 put both on the per-call selector, which was the
+   right shape for COMPARING unshipped arms and is the wrong one for shipping —
+   a mission's declaration belongs to the mission's criterion, not to whoever
+   calls the scorer. The selector keeps them so the other arms stay runnable;
+   where both speak, the spec wins (`log-preference-under`)."
+  [:observable-kind :threshold])
+
+(defn- bernoulli-declaration
+  "The declaration keys `spec` carries, validated, present-only — so a spec that
+   declares nothing builds the same map it built before J6 and
+   `mission_c_test/c-distribution-is-the-pinned-constructor` still holds."
+  [spec]
+  (let [d (select-keys spec bernoulli-declaration-fields)]
+    (when-let [k (:observable-kind d)]
+      (when-not (contains? observable-kinds k)
+        (throw (ex-info "c-distribution: unknown :observable-kind"
+                        {:observable-kind k :known observable-kinds}))))
+    (when (contains? d :threshold)
+      (let [t (:threshold d)]
+        (when-not (and (number? t) (Double/isFinite (double t)))
+          (throw (ex-info "c-distribution: :threshold must be a finite number"
+                          {:threshold t})))))
+    d))
+
+(defn declaration-of
+  "The declaration a built distribution carries because its SPEC declared it.
+   Present-only, so `(merge selector (declaration-of dist))` leaves a selector
+   untouched where nothing was declared."
+  [dist]
+  (select-keys dist bernoulli-declaration-fields))
+
 (defn c-distribution
   "Build a normalised preference density for one channel.
 
@@ -202,6 +244,12 @@
    - `{:p1 p}`        → `{:kind :bernoulli}` — explicit preference mass on
                         outcome 1. Used when C itself is empirically measured.
 
+   A `:bernoulli` spec may also DECLARE `:observable-kind` and/or `:threshold`
+   (`bernoulli-declaration-fields`); the built distribution carries them, so the
+   criterion's own declaration reaches the scorer without a caller passing it.
+   Present-only: a spec that declares neither builds exactly the map it built
+   before J6.
+
    Opts: `:temperature` (default `default-c-temperature`)."
   [spec & {:keys [temperature] :or {temperature default-c-temperature}}]
   (let [t (double temperature)]
@@ -211,14 +259,16 @@
         (when-not (<= 0.0 p1 1.0)
           (throw (ex-info "c-distribution: :p1 must be in [0,1]"
                           {:spec spec})))
-        {:kind :bernoulli :temperature t :p1 p1})
+        (merge {:kind :bernoulli :temperature t :p1 p1}
+               (bernoulli-declaration spec)))
 
       (and (map? spec) (contains? spec :becomes))
       (let [target (if (or (= 0 (:becomes spec)) (false? (:becomes spec))) 0 1)
             c* (/ 1.0 (+ 1.0 (Math/exp (- (/ 1.0 (max t 1e-9))))))]
-        {:kind :bernoulli :target target :temperature t
-         ;; mass assigned to outcome 1
-         :p1 (if (= 1 target) c* (- 1.0 c*))})
+        (merge {:kind :bernoulli :target target :temperature t
+                ;; mass assigned to outcome 1
+                :p1 (if (= 1 target) c* (- 1.0 c*))}
+               (bernoulli-declaration spec)))
 
       (sequential? spec)
       (let [[lo hi] spec
@@ -339,6 +389,13 @@
         (exactly-binary? x)
         {:status :present :outcome (if (== 0 x) 0 1) :arm arm}
 
+        ;; J6: an observable DECLARED binary needs no threshold, so a value that
+        ;; is not one of the two outcomes is not a missing declaration — the
+        ;; declaration is there and the value contradicts it. Same reason
+        ;; `:typed-binary-only` gives, because it is the same failure.
+        (= :binary observable-kind)
+        {:status :absent :reason :non-binary-value-on-binary-observable :arm arm}
+
         :else {:status :absent :reason :no-declared-threshold :arm arm})
 
       (= :typed-binary-only arm)
@@ -354,17 +411,25 @@
   "`log-preference` with the Bernoulli outcome read under a declared arm, and
    with a typed return so a refusal is not a number.
 
+   THE DECLARATION COMES OFF THE DISTRIBUTION FIRST (J6). Whatever
+   `:observable-kind` / `:threshold` the criterion's own spec declared is merged
+   OVER the selector's, so a per-call selector can fill a declaration the spec
+   omits but cannot silently overrule one the mission wrote down. That is the
+   whole point of moving the declaration's home into the spec, and it is why
+   U16's comparison columns still run: nothing in that corpus declares a spec.
+
    Returns `{:status :present :log-c <nats>}` or
    `{:status :absent :reason <keyword>}`. The `:range` branch is arithmetically
    unchanged — it already has a gradient and U12's finding does not touch it —
    but it too refuses on `nil` rather than throwing on `(double nil)`."
-  [{:keys [kind lo hi temperature log-z p1] :as _dist} x selector]
+  [{:keys [kind lo hi temperature log-z p1] :as dist} x selector]
   (case kind
     :range (if (nil? x)
              {:status :absent :reason :no-outcome-observed}
              (let [gap (max 0.0 (- lo (double x)) (- (double x) hi))]
                {:status :present :log-c (- (- (/ gap temperature)) log-z)}))
-    :bernoulli (let [o (bernoulli-outcome selector x)]
+    :bernoulli (let [o (bernoulli-outcome
+                        (merge (selector-map selector) (declaration-of dist)) x)]
                  (if (= :present (:status o))
                    {:status :present
                     :log-c (Math/log (max 1e-12 (if (= 0 (:outcome o)) (- 1.0 p1) p1)))

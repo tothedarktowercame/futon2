@@ -60,13 +60,30 @@
           (is (= 6 (count (distinct srcs))))
           (is (every? #(re-matches #".*M-expressions-of-interest\.md:\d+" %) srcs)))))))
 
-(deftest reads-the-inline-completion-criteria-shape
-  (testing "the second markdown shape in the live corpus: a bold paragraph"
+(deftest reads-both-markdown-shapes-and-prefers-the-section
+  ;; This fixture pinned :markdown-inline-paragraph until 2026-09-02: the only
+  ;; completion criteria M-zaif-harness-v1.md had were the bold paragraph at
+  ;; :72. futon2 161ac09 added the `## Completion criteria` SECTION J6's ruling
+  ;; asked for, and the reader tries shape 1 first, so the section is what
+  ;; answers now. The paragraph is still in the file; the shapes are pinned
+  ;; apart rather than one of them being dropped.
+  (testing "shape 1 on the live doc, and it is the ported section that answers"
     (let [r (mc/read-criteria "holes/missions/M-zaif-harness-v1.md"
                               :observables {} :mission "M-zaif-harness-v1")]
-      (is (= :markdown-inline-paragraph (:shape r)))
+      (is (= :markdown-numbered-list (:shape r)))
       (is (= 3 (count (:criteria r)))
-          "and it agrees with the hand ingest's count for the same mission"))))
+          "and it agrees with the hand ingest's count for the same mission")
+      (is (every? #(< 76 (Long/parseLong (second (str/split (:source %) #":"))))
+                  (:criteria r))
+          "the pointers are into the section, not the paragraph above it")))
+  (testing "shape 2 on text, because the live corpus no longer has an instance
+            of it — a shape the reader supports and nothing exercises would be
+            a claim with no witness"
+    (let [r (mc/criteria-from-markdown "**Completion criteria:** a; b; c.\n"
+                                       {:observables {} :path "fixture.md"
+                                        :mission "M-fixture"})]
+      (is (= :markdown-inline-paragraph (:shape r)))
+      (is (= ["a" "b" "c"] (mapv :statement (:criteria r)))))))
 
 (deftest missing-and-absent-sources-are-typed-not-empty
   (testing "a doc with no completion-criteria section"
@@ -238,7 +255,7 @@
               (str "outcome " x ": surprisal " surprisal " vs pref/kl " kl)))))))
 
 (deftest risk-mis-numbers-are-reproducible-from-the-record
-  (let [reading {:x 0 :y 0.9}
+  (let [reading {:x 0.0 :y 0.9}
         c (mc/c-mis {:mission "M-planted"
                      :criteria [(mc/criterion-row {:criterion :a :observable :x} reading "f:1")
                                 (mc/criterion-row {:criterion :b :observable :y :spec [0.0 0.3]}
@@ -247,15 +264,19 @@
         by-criterion (into {} (map (juxt :criterion identity)) (:per-criterion r))]
     (is (= :measured (:status r)))
     (is (= :status-quo-v0 (:forward-model r)))
-    (testing "criterion :a — {:becomes 1} read at 0, the unmet Bernoulli"
+    (testing "criterion :a — {:becomes 1} read at the DOUBLE 0.0 R2 emits, the
+              unmet Bernoulli. Under J6's ruled arm 0.0 is exactly binary, so it
+              reaches the unsatisfied pole; before the ruling it scored as met"
       (let [e (:a by-criterion)
-            d (pref/c-distribution {:becomes 1})]
+            d (pref/c-distribution {:becomes 1})
+            log-c (:log-c (pref/log-preference-under d 0.0 mc/default-outcome-semantics))]
         (is (= :x (:observable e)))
-        (is (= 0 (:value e)))
-        (is (close? (pref/log-preference d 0) (:log-c e)))
-        (is (close? (- (pref/log-preference d 0)) (:surprisal e)))
+        (is (= 0.0 (:value e)))
+        (is (= 0 (:outcome e)) "the record says which pole")
+        (is (close? log-c (:log-c e)))
+        (is (close? (- log-c) (:surprisal e)))
         (is (close? 0.5 (:weight e)))
-        (is (close? (* 0.5 (- (pref/log-preference d 0))) (:contribution e)))))
+        (is (close? (* 0.5 (- log-c)) (:contribution e)))))
     (testing "criterion :b — a range C read outside its band. U17: the recorded
               contribution is the DIVERGENCE, w · gap/T, not w · the unshifted
               cross-entropy, which for this band carries ln Z = -0.9165"
@@ -280,10 +301,10 @@
             criteria read satisfied, and the met Bernoulli is the floor"
     (let [c-of (fn [] (mc/c-mis {:criteria [(mc/criterion-row {:criterion :a :observable :x}
                                                               {:x 0} "f:1")]}))
-          unmet (:risk (mc/risk-mis (c-of) {:x 0}))
-          met (:risk (mc/risk-mis (c-of) {:x 1}))]
+          unmet (:risk (mc/risk-mis (c-of) {:x 0.0}))
+          met (:risk (mc/risk-mis (c-of) {:x 1.0}))]
       (is (> unmet met))
-      (is (close? (- (pref/log-preference (pref/c-distribution {:becomes 1}) 1)) met))
+      (is (close? (- (pref/log-preference (pref/c-distribution {:becomes 1}) 1.0)) met))
       (is (< met 1.0e-4) "T=0.1 puts ~all the mass on the target, so met ≈ 0"))))
 
 ;; ---------------------------------------------------------------------------
@@ -297,24 +318,48 @@
 (defn- one-criterion-c []
   (mc/c-mis {:criteria [(mc/criterion-row {:criterion :a :observable :x} {:x 0} "f:1")]}))
 
-(deftest the-shipped-path-still-reads-a-double-zero-as-met
-  (testing "U12's defect, pinned as the BASELINE the arms are compared against —
-            this is what does not move until a semantics is chosen"
-    (let [unmet-long (:risk (mc/risk-mis (one-criterion-c) {:x (long 0)}))
-          zero-double (:risk (mc/risk-mis (one-criterion-c) {:x 0.0}))
-          met (:risk (mc/risk-mis (one-criterion-c) {:x 1}))]
-      (is (> unmet-long 9.0))
-      (is (close? met zero-double)
-          "the double 0.0 scores as the MET criterion, not the unmet one")
-      (is (close? met (:risk (mc/risk-mis (one-criterion-c) {:x nil})))
-          "and so does an unread channel")))
-  (testing "no arm named ⇒ no :outcome-semantics key on the record either"
-    (is (not (contains? (mc/risk-mis (one-criterion-c) {:x 0.0}) :outcome-semantics)))))
+(def ^:private unmet-bernoulli
+  "-ln C(0) for the default {:becomes 1} C at the default temperature, computed
+   from `pref` directly so the composition tests below do not check `mission-c`
+   against itself."
+  (- (pref/log-preference (pref/c-distribution {:becomes 1}) (long 0))))
+
+(deftest the-ruled-arm-is-the-default-and-an-explicit-nil-is-the-old-path
+  ;; U18 (J6). What this replaces: until the ruling this fixture pinned the
+  ;; DEFECT as the shipped baseline -- the double 0.0 and an unread nil both
+  ;; scoring as the MET criterion, and the long 0 the only value that could
+  ;; reach the unsatisfied pole. The long-0 pin is gone with it: R2's
+  ;; observation vector is doubles throughout, so it pinned a vocabulary the
+  ;; live path cannot speak.
+  (testing "omitting :outcome-semantics takes J6's ruled arm, and the double 0.0
+            R2 actually emits now reaches the unsatisfied pole"
+    (let [r (mc/risk-mis (one-criterion-c) {:x 0.0})]
+      (is (= :measured (:status r)))
+      (is (= :declared-binarization (:outcome-semantics r))
+          "the record names the reading that produced the number")
+      (is (close? unmet-bernoulli (:risk r)))
+      (is (> (:risk r) 9.0))))
+  (testing "and an unread channel is a typed absence rather than a met criterion"
+    (let [r (mc/risk-mis (one-criterion-c) {:x nil})]
+      (is (= :absent (:status r)))
+      (is (= :unread-outcome (:reason r)))
+      (is (not (contains? r :risk)))))
+  (testing "an EXPLICIT nil still names the pre-ruling raw pref/log-preference
+            path -- kept reachable so U16's :v0-shipped comparison column
+            (u16_outcome_semantics.clj:101) still reproduces what it measured"
+    (let [r (mc/risk-mis (one-criterion-c) {:x 0.0} :outcome-semantics nil)]
+      (is (= :measured (:status r)))
+      (is (not (contains? r :outcome-semantics)))
+      (is (close? 4.539889921682063E-5 (:risk r))
+          "U12's satisfied floor: the defect, on the value that triggers it")
+      (is (close? (:risk r) (:risk (mc/risk-mis (one-criterion-c) {:x nil}
+                                                :outcome-semantics nil)))
+          "including nil reading as the target"))))
 
 (deftest arms-read-the-double-zero-each-in-their-own-way
   (let [risk-at (fn [arm v] (mc/risk-mis (one-criterion-c) {:x v} :outcome-semantics arm))
-        long-0-unmet (:risk (mc/risk-mis (one-criterion-c) {:x (long 0)}))]
-    (testing ":numeric-equality — the double 0.0 now scores as the long 0 does"
+        long-0-unmet unmet-bernoulli]
+    (testing ":numeric-equality — the double 0.0 scores as the long 0 does"
       (let [r (risk-at :numeric-equality 0.0)]
         (is (= :measured (:status r)))
         (is (close? long-0-unmet (:risk r)))
@@ -387,14 +432,15 @@
 
 (defn- risk-of
   "risk_mis for a single criterion with `spec`, read at `value`, under `arm`
-   (nil = the shipped no-arm path). `:absent` when the arm refuses to read it."
+   (nil = the pre-ruling raw path). `:absent` when the arm refuses to read it."
   [spec value arm & {:keys [temperature] :or {temperature pref/default-c-temperature}}]
   (let [c (mc/c-mis {:criteria [(mc/criterion-row {:criterion :a :observable :x :spec spec}
                                                   {:x value} "f:1")]}
                     :temperature temperature)]
-    (if arm
-      (mc/risk-mis c {:x value} :outcome-semantics arm)
-      (mc/risk-mis c {:x value}))))
+    ;; nil is passed EXPLICITLY, which names the pre-ruling raw path rather than
+    ;; J6's default arm -- so this sweep still covers the reading U17 measured
+    ;; and the ruled arm is covered as a named member of `u17-arms`.
+    (mc/risk-mis c {:x value} :outcome-semantics arm)))
 
 (def ^:private u17-specs
   [[0.5 1.0] [0.0 0.3] [0.0 1.0] [0.25 0.75] [0.2 0.2]
@@ -407,7 +453,8 @@
 (deftest risk-mis-is-nonnegative-on-every-spec-shape
   (testing "U17's acceptance: over range and Bernoulli specs, every value
             INCLUDING in-band ones, three temperatures and all four readings of
-            an outcome (no arm, plus each U16 arm), a measured risk_mis is never
+            an outcome (the raw path, plus each U16 arm — one of which is J6's
+            ruled default), a measured risk_mis is never
             below zero — so summing it into one G beside C_int's KL >= 0 cannot
             pay a satisfied criterion a bonus"
     (doseq [spec u17-specs
@@ -495,3 +542,109 @@
                       (mc/risk-mis c {:x 0.5}))]
             (when (= :measured (:status r))
               (is (close? shift (:divergence-shift r)) (str "spec " spec " arm " arm)))))))))
+
+;; ---------------------------------------------------------------------------
+;; U18 — the declaration on the criterion's own :spec, and DECLARED GAUGES: the
+;; binding of a criterion written in prose to an observable this machine can
+;; read. What makes these gauges rather than plants is that each row says where
+;; its binding came from, so a supplied one can never read as the mission
+;; document's own declaration.
+
+(deftest a-spec-declared-binary-criterion-is-read-with-no-threshold
+  (testing "J6's ruling reaching the composition: the declaration rides from the
+            criterion's :spec through c-distribution to the arm"
+    (let [c (mc/c-mis {:criteria [(mc/criterion-row
+                                   {:criterion :a :observable :x
+                                    :spec {:becomes 1 :observable-kind :binary}}
+                                   {:x 0.0} "f:1")]})]
+      (is (= :binary (get-in c [:factors :x :observable-kind]))
+          "the factor map carries what the criterion declared")
+      (is (= :measured (:status (mc/risk-mis c {:x 0.0}))))
+      (is (close? unmet-bernoulli (:risk (mc/risk-mis c {:x 0.0}))))
+      (testing "and a reading that contradicts the declaration refuses, naming
+                the declaration rather than a missing threshold"
+        (let [r (mc/risk-mis c {:x 0.75})]
+          (is (= :absent (:status r)))
+          (is (= [:non-binary-value-on-binary-observable] (mapv :reason (:refused r)))))))))
+
+(def ^:private fixture-gauges
+  {:criterion-1 {:observable :worklist-acceptance-state
+                 :spec {:becomes 1 :observable-kind :binary}
+                 :gauge "the worklist rows' acceptance state"
+                 :declared-in "fixture-gauges"}})
+
+(deftest a-declared-gauge-binds-a-prose-criterion-and-says-so
+  (testing "without the gauge the criterion is unmeasurable, and the reason is
+            that it names a measurement only a human can take"
+    (let [row (mc/criterion-row {:criterion :criterion-1 :statement "U-rows green"
+                                 :carrier "the worklists"}
+                                {:worklist-acceptance-state 1.0} "f:1")]
+      (is (= :unmeasurable (:status row)))
+      (is (= :unresolved-observable (:reason row)))))
+  (testing "with it the criterion resolves, and every field says where it came from"
+    (let [row (mc/criterion-row (mc/apply-gauge {:criterion :criterion-1
+                                                 :statement "U-rows green"}
+                                                (:criterion-1 fixture-gauges))
+                                {:worklist-acceptance-state 1.0} "f:1")]
+      (is (= :measurable (:status row)))
+      (is (= :worklist-acceptance-state (:observable row)))
+      (is (= :declared-gauge (:observable-source row)))
+      (is (= :declared-gauge (:spec-source row))
+          "and the spec came from the gauge too, not from the document")
+      (is (= "fixture-gauges" (:gauge-source row)) "the pointer back to the declaration")
+      (is (string? (:gauge row)) "and the prose saying what is being read")))
+  (testing "a gauge whose observable nothing supplies is a typed absence naming a
+            MISSING PRODUCER, which is a different repair from prose-only"
+    (let [row (mc/criterion-row (mc/apply-gauge {:criterion :criterion-1}
+                                                (:criterion-1 fixture-gauges))
+                                {} "f:1")]
+      (is (= :unmeasurable (:status row)))
+      (is (= :undeclared-observable (:reason row))))))
+
+(deftest a-gauge-cannot-overwrite-what-the-document-declared
+  (let [entry {:criterion :criterion-1 :observable :its-own-channel :spec [0.5 1.0]}
+        row (mc/criterion-row (mc/apply-gauge entry (:criterion-1 fixture-gauges))
+                              {:its-own-channel 0.6} "f:1")]
+    (is (= :its-own-channel (:observable row)))
+    (is (= [0.5 1.0] (:spec row)))
+    (is (= :declared (:spec-source row)))
+    (is (not (contains? row :observable-source))
+        "nothing came from the gauge, so nothing claims to have")
+    (is (not (contains? row :gauge-source)))))
+
+(deftest gauges-reach-the-reader-and-make-the-zaif-criteria-measurable
+  (testing "J6 (d): the three criteria of M-zaif-harness-v1, read from the doc
+            with the declared gauges supplied, are 3/3 measurable"
+    (let [observation {:worklist-acceptance-state 0.0
+                       :reporting-gate-test-result 0.0
+                       :registry-gap-list-present 1.0}
+          gauges (into {} (map (fn [[i o]]
+                                 [(keyword (str "criterion-" i))
+                                  {:observable o :spec {:becomes 1 :observable-kind :binary}
+                                   :declared-in "mission_c_test/gauges"}]))
+                       [[1 :worklist-acceptance-state]
+                        [2 :reporting-gate-test-result]
+                        [3 :registry-gap-list-present]])
+          r (mc/read-criteria "holes/missions/M-zaif-harness-v1.md"
+                              :observables observation
+                              :mission "M-zaif-harness-v1"
+                              :gauges gauges)
+          c (mc/c-mis r)]
+      (is (= 3 (:criterion-count c)))
+      (is (= 3 (:measurable-count c)))
+      (is (= [] (:unmeasurable c)))
+      (testing "and it scores: two criteria unmet, one met, under the ruled arm"
+        (let [risk (mc/risk-mis c observation)]
+          (is (= :measured (:status risk)))
+          (is (= :declared-binarization (:outcome-semantics risk)))
+          (is (= [0 0 1] (mapv :outcome (:per-criterion risk))))
+          (is (close? (+ (* (/ 2.0 3.0) unmet-bernoulli)
+                         (/ (- (pref/log-preference (pref/c-distribution {:becomes 1}) 1)) 3.0))
+                      (:risk risk))
+              "two unmet poles at -ln C(0) and the met one at its temperature floor")))))
+  (testing "supplying no gauges leaves the same doc exactly as it was written —
+            0/3, prose only"
+    (let [c (mc/c-mis (mc/read-criteria "holes/missions/M-zaif-harness-v1.md"
+                                        :observables {} :mission "M-zaif-harness-v1"))]
+      (is (= 0 (:measurable-count c)))
+      (is (= #{:no-declared-measurement} (set (map :reason (:unmeasurable c))))))))

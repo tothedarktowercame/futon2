@@ -48,6 +48,16 @@
    one tick.** It discriminates mission from non-mission actions and nothing
    finer. U12 is the row that measures whether that is enough.
 
+   WHAT A BERNOULLI OUTCOME IS, RULED (J6, U18). Since 2026-09-02 this ns reads
+   one under `default-outcome-semantics` — `:declared-binarization` — rather
+   than under `pref/log-preference`'s `(= 0 x)`, which was false for the double
+   0.0 R2 emits and made an unread channel score as the target. A criterion the
+   arm cannot interpret is REFUSED, not scored; the other two arms U16 built
+   stay selectable, and the declaration the arm asks for lives on the
+   criterion's own `:spec`. The bindings from a criterion in prose to an
+   observable this machine reads are DECLARED GAUGES (`apply-gauge`), supplied
+   where the observables map is.
+
    THE TERM IS A DIVERGENCE, NOT A BARE SURPRISAL (U17). For a Bernoulli C the
    two are the same thing and no number moves. For a range C the surprisal is a
    cross-entropy that goes NEGATIVE inside the declared band whenever the band
@@ -72,6 +82,31 @@
    built from this carries `:spec-source :default-becomes-1`, so a declared
    spec and an assumed one are distinguishable on the record."
   {:becomes 1})
+
+(def default-outcome-semantics
+  "WHAT A BERNOULLI OUTCOME IS, ruled by Joe on 2026-09-02 (J6): arm 2,
+   `:declared-binarization` — a Bernoulli spec on a continuous observable must
+   carry a `:threshold`, an observable DECLARED binary needs none, and anything
+   else is refused rather than scored. U16 built and ran the three candidate
+   readings and none was preferable on any number; the ruling is what settles
+   it, and the grounds are in `aif-equations.edn :choices :c-grain
+   :outcome-semantics-ruled`.
+
+   WHAT THIS CHANGES AND WHAT IT DOES NOT. `log-c-mis` and `risk-mis` take this
+   when `:outcome-semantics` is OMITTED, so the mission-grain C now refuses a
+   reading it cannot interpret instead of quietly calling it satisfied — the
+   defect U12 measured (`pref/log-preference`'s `(= 0 x)`, false for the double
+   0.0 R2 emits). It moves no live judgement: FUTON_WM_MISSION_C is still off
+   and the readback is still attached after selection is final.
+
+   PASSING `:outcome-semantics nil` EXPLICITLY still names the pre-ruling raw
+   `pref/log-preference` path, and that is deliberate rather than an accident of
+   destructuring: U16's comparison script names its baseline column that way
+   (`u16_outcome_semantics.clj:101`, `:v0-shipped :selector nil`), so its
+   committed measurements still reproduce after the ruling. Omitted and
+   explicit-nil are pinned apart by
+   `mission_c_test/the-ruled-arm-is-the-default-and-an-explicit-nil-is-the-old-path`."
+  :declared-binarization)
 
 (def measurement-fields
   "Where a criterion may declare how it is measured, in precedence order.
@@ -133,16 +168,56 @@
     {:status :unmeasurable :reason :unresolved-observable
      :measurement-field field :measurement value}))
 
+(defn apply-gauge
+  "Merge a DECLARED GAUGE into a criterion entry, and record that it came from
+   one.
+
+   A gauge is the binding of a criterion written in prose to an observable this
+   machine can read a current value of, plus the Bernoulli declaration J6's
+   ruling asks the criterion to carry. It is DECLARED where the observables map
+   is supplied (`war_machine/mission-c-declared-gauges`), not written into the
+   mission document by this code and not planted in the reading: U12's channel
+   assignments were a stated plant and the reason a gauge's provenance is on the
+   row rather than implied. `gauge` is
+   `{:observable <kw> :spec <spec> :gauge <prose> :declared-in <pointer>}`.
+
+   THE DOCUMENT WINS. A key the entry already declares is left alone, so a
+   gauge can supply a binding the mission never wrote down but cannot overwrite
+   one it did; `:gauge-supplied` names exactly which keys the gauge answered
+   for."
+  [entry gauge]
+  (if (nil? gauge)
+    entry
+    (let [supplied (select-keys gauge [:observable :spec])
+          from-gauge (into #{} (remove #(contains? entry %)) (keys supplied))]
+      (cond-> (merge supplied entry)
+        (seq from-gauge) (assoc :gauge-supplied from-gauge
+                                :gauge (:gauge gauge)
+                                :gauge-source (:declared-in gauge))))))
+
 (defn criterion-row
   "One typed criterion. `entry` is `{:criterion :statement :observable
-   :measurable-by :carrier :spec}` with everything but `:criterion` optional."
+   :measurable-by :carrier :spec}` with everything but `:criterion` optional,
+   possibly with a declared gauge already merged in by `apply-gauge`.
+
+   `:spec-source` and `:observable-source` keep the three provenances apart,
+   because a spec the mission declared, a spec a gauge declared for it and the
+   assumed `default-spec` are three different claims about the same field."
   [entry observables source]
-  (let [spec-declared? (contains? entry :spec)
-        base {:criterion (:criterion entry)
-              :statement (:statement entry)
-              :spec (if spec-declared? (:spec entry) default-spec)
-              :spec-source (if spec-declared? :declared :default-becomes-1)
-              :source source}]
+  (let [gauge-supplied (:gauge-supplied entry #{})
+        spec-declared? (contains? entry :spec)
+        base (cond-> {:criterion (:criterion entry)
+                      :statement (:statement entry)
+                      :spec (if spec-declared? (:spec entry) default-spec)
+                      :spec-source (cond (not spec-declared?) :default-becomes-1
+                                         (contains? gauge-supplied :spec) :declared-gauge
+                                         :else :declared)
+                      :source source}
+               (contains? gauge-supplied :observable)
+               (assoc :observable-source :declared-gauge)
+
+               (seq gauge-supplied)
+               (assoc :gauge (:gauge entry) :gauge-source (:gauge-source entry)))]
     (merge base (resolve-measurement (declared-measurement entry) observables))))
 
 ;; ---------------------------------------------------------------------------
@@ -150,8 +225,11 @@
 
 (defn criteria-from-ingest
   "Criteria from an IDENTIFY ingest map's `:preferences/c` (the hand exemplar's
-   shape, S4-identify-ingest.edn). A missing key is a typed absence, not []."
-  [ingest {:keys [observables path text]}]
+   shape, S4-identify-ingest.edn). A missing key is a typed absence, not [].
+
+   `:gauges` is criterion-id -> gauge (see `apply-gauge`); the ingest names its
+   criteria, so a gauge for this shape is keyed by the name the ingest gave."
+  [ingest {:keys [observables path text gauges]}]
   (let [entries (:preferences/c ingest)]
     (cond
       (nil? entries)
@@ -169,7 +247,8 @@
        :shape :ingest-edn :status :present
        :criteria (mapv (fn [e]
                          (criterion-row
-                          e observables
+                          (apply-gauge e (get gauges (:criterion e)))
+                          observables
                           (pointer path (line-of text (str (:criterion e))))))
                        entries)})))
 
@@ -235,7 +314,7 @@
    first, then shape 2 (inline bold paragraph). Neither present is a typed
    absence — a mission with no stated completion criteria has NO C_mis, and
    that must not read as a mission whose criteria are all met."
-  [text {:keys [observables path mission]}]
+  [text {:keys [observables path mission gauges]}]
   (let [lines (str/split-lines text)
         [shape items] (if-let [xs (seq (section-items lines))]
                         [:markdown-numbered-list xs]
@@ -248,9 +327,10 @@
       {:version version :mission mission :source path :shape shape :status :present
        :criteria (vec (map-indexed
                        (fn [i [ln t]]
-                         (criterion-row {:criterion (positional-criterion i)
-                                         :statement t}
-                                        observables (pointer path ln)))
+                         (let [id (positional-criterion i)]
+                           (criterion-row (apply-gauge {:criterion id :statement t}
+                                                       (get gauges id))
+                                          observables (pointer path ln))))
                        items))})))
 
 (defn- sha256-hex
@@ -273,8 +353,13 @@
    changes every number with nothing on the record to show it did. The field
    is present exactly when bytes were read: a path that is not there
    (`:source-not-found`) or that threw (`:source-unreadable`) carries no
-   digest rather than a nil standing in for one."
-  [path & {:keys [observables mission]}]
+   digest rather than a nil standing in for one.
+
+   U18 (from J6): `:gauges` is criterion-id -> declared gauge (`apply-gauge`) —
+   the bindings that say WHICH observable a criterion written in prose is read
+   from. Supplying none leaves every criterion exactly as its source wrote it,
+   which is what every caller but the war-machine seam does."
+  [path & {:keys [observables mission gauges]}]
   (let [f (io/file path)]
     (if-not (.exists f)
       {:version version :mission mission :source (str path) :criteria []
@@ -287,10 +372,11 @@
               text (String. ^bytes bytes "UTF-8")]
           (assoc (if (str/ends-with? (str path) ".edn")
                    (criteria-from-ingest (edn/read-string text)
-                                         {:observables observables :path (str path) :text text})
+                                         {:observables observables :path (str path)
+                                          :text text :gauges gauges})
                    (criteria-from-markdown text
                                            {:observables observables :path (str path)
-                                            :mission mission}))
+                                            :mission mission :gauges gauges}))
                  :source-sha256 (sha256-hex bytes)))
         (catch Exception e
           {:version version :mission mission :source (str path) :criteria []
@@ -383,15 +469,17 @@
    absence rather than a number when C_mis has no measurable factor or the
    reading does not cover one.
 
-   `:outcome-semantics` (U16, DEFAULT NIL AND NOTHING SUPPLIES IT) names one of
-   `pref/bernoulli-outcome-arms` for the Bernoulli branch. Nil is the shipped
-   path, byte for byte. Under an arm, a criterion whose value the arm refuses to
-   read makes the WHOLE number absent (`:unread-outcome`, with the refusals
-   listed) — the same discipline `:unreadable-observable` already applies, since
-   a partial sum over the criteria the arm happened to accept would be a
-   different mission's risk wearing this one's name."
+   `:outcome-semantics` names one of `pref/bernoulli-outcome-arms` for the
+   Bernoulli branch. OMITTED, it is `default-outcome-semantics` —
+   `:declared-binarization`, J6's ruling — and an explicit nil is the pre-ruling
+   raw `pref/log-preference` path U16's baseline column measures. Under an arm,
+   a criterion whose value the arm refuses to read makes the WHOLE number absent
+   (`:unread-outcome`, with the refusals listed) — the same discipline
+   `:unreadable-observable` already applies, since a partial sum over the
+   criteria the arm happened to accept would be a different mission's risk
+   wearing this one's name."
   [{:keys [factors weights observable-of unmeasurable]} outcomes
-   & {:keys [outcome-semantics]}]
+   & {:keys [outcome-semantics] :or {outcome-semantics default-outcome-semantics}}]
   (if (empty? factors)
     {:status :absent :reason :no-measurable-criteria :unmeasurable unmeasurable}
     (let [missing (vec (remove #(contains? outcomes %) (vals observable-of)))]
@@ -464,11 +552,11 @@
    observable the reading does not cover makes the whole number absent. The
    typed `:unmeasurable` records ride on every return.
 
-   `:outcome-semantics` (U16) is passed through to `log-c-mis`; nil — what every
-   caller supplies today — is the shipped path. The shift depends on the spec
-   kind alone, so it is the same under every arm and under no arm, which is why
-   this row does not wait on J6."
-  [c reading & {:keys [outcome-semantics]}]
+   `:outcome-semantics` is passed through to `log-c-mis`. Omitted it is
+   `default-outcome-semantics` (J6's ruled arm); an explicit nil is the
+   pre-ruling raw path. The shift U17 subtracts depends on the spec kind alone,
+   so it is the same under every arm and under none."
+  [c reading & {:keys [outcome-semantics] :or {outcome-semantics default-outcome-semantics}}]
   (let [{:keys [factors weights observable-of unmeasurable mission] :as _c} c
         composed (log-c-mis c reading :outcome-semantics outcome-semantics)
         shift (divergence-shift c)]

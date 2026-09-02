@@ -13,6 +13,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
             [futon2.aif.free-energy :as free-energy]
+            [futon2.aif.mission-c :as mc]
             [futon2.aif.observation :as observation]
             [futon2.aif.policy :as policy]
             [futon2.aif.preferences :as pref]
@@ -1612,10 +1613,15 @@
   (let [r (#'wm/mission-c-readback u11-clocked u11-ranked {})]
     (is (= "holes/missions/M-zaif-harness-v1.md" (:criteria-source r))
         "no declared ingest for M-clocked, so the clocked candidate's path answers")
-    (is (= :markdown-inline-paragraph (:criteria-shape r)))
+    ;; :markdown-inline-paragraph until futon2 161ac09, which added the
+    ;; `## Completion criteria` section J6's ruling asked for; the reader tries
+    ;; the section shape first. Same three criteria either way.
+    (is (= :markdown-numbered-list (:criteria-shape r)))
     (is (= 3 (:criterion-count r)))
     (is (= 2 (:mission-action-count r)))
-    (is (= 2 (:non-mission-action-count r)))))
+    (is (= 2 (:non-mission-action-count r)))
+    (is (not (contains? r :declared-gauges))
+        "gauges are declared per mission id, and M-clocked has none")))
 
 (def ^:private u12-recorded-source-sha256
   "The two criteria sources U12's replay read, with the digests it recorded:
@@ -1679,7 +1685,11 @@
                           {:criterion :mission-healthy :observable :mission-health
                            :spec [0.5 1.0]}
                           {:criterion :prose-only :carrier "a human reads the worklist"}]}))
-          observation {:sorry-count-norm 0 :mission-health 0.0234}
+          ;; DOUBLES throughout, which is what R2's observation vector is.
+          ;; Under J6's ruled arm the double 0.0 reaches the unsatisfied pole;
+          ;; before the ruling it read as the target, so this fixture had to use
+          ;; the long 0 to score an unmet criterion at all.
+          observation {:sorry-count-norm 0.0 :mission-health 0.0234}
           r (with-redefs-fn {#'wm/mission-c-criteria-sources {"M-clocked" path}}
               (fn [] (#'wm/mission-c-readback u11-clocked u11-ranked observation)))
           per-criterion (into {} (map (juxt :criterion identity))
@@ -1699,16 +1709,26 @@
                 value (get observation observable)]
             (is (= observable (:observable e)))
             (is (= value (:value e)))
-            (is (< (Math/abs (- (pref/log-preference d value) (:log-c e))) 1e-9))
+            (is (< (Math/abs (- (:log-c (pref/log-preference-under
+                                         d value mc/default-outcome-semantics))
+                                (:log-c e)))
+                   1e-9))
             (is (< (Math/abs (- 0.5 (:weight e))) 1e-9))
             ;; U17: the recorded contribution is w times the point-mass
             ;; DIVERGENCE, which for :mission-healthy's [0.5 1.0] band differs
             ;; from w times the surprisal by ln Z = -0.5119. :surprisal keeps the
             ;; unshifted per-criterion number on the record.
-            (is (< (Math/abs (- (- (pref/log-preference d value)) (:surprisal e))) 1e-9))
-            (is (< (Math/abs (- (* 0.5 (pref/point-mass-divergence d value))
+            (is (< (Math/abs (- (- (:log-c (pref/log-preference-under
+                                            d value mc/default-outcome-semantics)))
+                                (:surprisal e)))
+                   1e-9))
+            (is (< (Math/abs (- (* 0.5 (- (- (:log-c (pref/log-preference-under
+                                                      d value mc/default-outcome-semantics)))
+                                          (pref/point-mass-divergence-shift d)))
                                 (:contribution e)))
                    1e-9)))))
+      (testing "and the record names the reading that produced the numbers"
+        (is (= :declared-binarization (:outcome-semantics r))))
       (testing "one record per MISSION action, scoped, and no record for the others"
         (is (= 2 (count (:per-mission-action r))))
         (is (= 2 (:mission-action-count r)))
@@ -1726,3 +1746,104 @@
                       (:per-mission-action r)))))
       (io/delete-file path true)
       (io/delete-file dir true))))
+
+;; ---------------------------------------------------------------------------
+;; U18 (from J6) — the DECLARED GAUGES, and the readback record after the ruling.
+
+(deftest mission-c-declared-gauges-are-one-binding-per-criterion-test
+  (testing "the same three criteria under both ids they have: the ingest names
+            them, the mission document does not and the reader numbers them"
+    (let [g (get wm/mission-c-declared-gauges "M-zaif-harness-v1")]
+      (is (= #{:u-rows-green :reporting-gate-holds :honest-gap-list-published
+               :criterion-1 :criterion-2 :criterion-3}
+             (set (keys g))))
+      (is (= 3 (count (distinct (map :observable (vals g)))))
+          "six keys, three observables — the pairs are the same criterion twice")
+      (is (= [(:observable (:u-rows-green g))
+              (:observable (:reporting-gate-holds g))
+              (:observable (:honest-gap-list-published g))]
+             [(:observable (:criterion-1 g))
+              (:observable (:criterion-2 g))
+              (:observable (:criterion-3 g))])
+          "and the doc's positional order is the ingest's order, which is what
+           futon2 161ac09 ported")
+      (testing "every gauge declares its observable BINARY, which is what J6's
+                arm needs instead of a threshold, and says where it was declared"
+        (is (every? #(= {:becomes 1 :observable-kind :binary} (:spec %)) (vals g)))
+        (is (every? #(str/includes? (:declared-in %) "mission-c-declared-gauges")
+                    (vals g)))
+        (is (every? #(string? (:gauge %)) (vals g))))
+      (testing "and nothing in the live observation vocabulary supplies them yet,
+                which is why they read as a missing PRODUCER and not as prose"
+        (let [r (#'wm/mission-c-readback
+                 (assoc u11-clocked :mission-id "M-zaif-harness-v1")
+                 (assoc-in u11-ranked [0 :action :target] "M-zaif-harness-v1")
+                 {:sorry-count-norm 0.0})]
+          (is (= 0 (:measurable-count r)))
+          (is (= #{:undeclared-observable} (set (map :reason (:unmeasurable r)))))
+          (is (= 6 (count (:declared-gauges r)))
+              "and the record says which bindings it was read under -- all six
+               keys, because the record should show the table as declared and
+               not a subset filtered to whichever id vocabulary answered"))))))
+
+(deftest mission-c-reads-the-zaif-criteria-3-of-3-with-the-gauges-supplied-test
+  (testing "J6 (d): with the declared gauge observables supplied, the mission
+            document's three criteria are measurable and the mission scores"
+    (let [observation {:worklist-acceptance-state 0.0
+                       :reporting-gate-test-result 0.0
+                       :registry-gap-list-present 1.0}
+          clocked (assoc u11-clocked :mission-id "M-zaif-harness-v1")
+          ranked (-> u11-ranked
+                     (assoc-in [0 :action :target] "M-zaif-harness-v1")
+                     (assoc-in [0 :action :mission-path]
+                               "holes/missions/M-zaif-harness-v1.md"))
+          ;; the DOC route: the declared ingest is the criteria authority for
+          ;; this mission on a live tick, and it is the doc that carries the
+          ;; criteria Joe ported, so this reads the fallback path deliberately.
+          r (with-redefs-fn {#'wm/mission-c-criteria-sources {}}
+              (fn [] (#'wm/mission-c-readback clocked ranked observation)))]
+      (is (= "holes/missions/M-zaif-harness-v1.md" (:criteria-source r)))
+      (is (= 3 (:criterion-count r)))
+      (is (= 3 (:measurable-count r)))
+      (is (= :measured (:status r)))
+      (is (= :declared-binarization (:outcome-semantics r)))
+      (is (= [] (:unmeasurable r)))
+      (is (= [0 0 1] (mapv :outcome (:risk-mis-per-criterion r)))
+          "two criteria unmet, the third met — the first mission-grain C reading
+           on this machine that is not a typed absence")
+      (testing "PROVENANCE is on the record: the bindings these numbers were read
+                under are the declared gauges, named on the readback, and not
+                anything the mission document itself declared"
+        (is (= #{:worklist-acceptance-state :reporting-gate-test-result
+                 :registry-gap-list-present}
+               (set (vals (:declared-gauges r)))))
+        (is (= (set (map :observable (:risk-mis-per-criterion r)))
+               (set (vals (:declared-gauges r)))))
+        (is (= #{:declared-gauge}
+               (set (map :observable-source
+                         (:criteria (mc/read-criteria
+                                     "holes/missions/M-zaif-harness-v1.md"
+                                     :observables observation
+                                     :mission "M-zaif-harness-v1"
+                                     :gauges (get wm/mission-c-declared-gauges
+                                                  "M-zaif-harness-v1"))))))
+            "and every criterion row the reader built says so per criterion"))))
+  (testing "a reading the ruled arm cannot interpret refuses, and the record
+            names which criterion refused rather than only that there is no
+            number"
+    (let [observation {:worklist-acceptance-state 0.75
+                       :reporting-gate-test-result 0.0
+                       :registry-gap-list-present 1.0}
+          clocked (assoc u11-clocked :mission-id "M-zaif-harness-v1")
+          ranked (-> u11-ranked
+                     (assoc-in [0 :action :target] "M-zaif-harness-v1")
+                     (assoc-in [0 :action :mission-path]
+                               "holes/missions/M-zaif-harness-v1.md"))
+          r (with-redefs-fn {#'wm/mission-c-criteria-sources {}}
+              (fn [] (#'wm/mission-c-readback clocked ranked observation)))]
+      (is (= :absent (:status r)))
+      (is (= :unread-outcome (:reason r)))
+      (is (not (contains? r :risk-mis-per-criterion)))
+      (is (= [:criterion-1] (mapv :criterion (:refused-outcomes r))))
+      (is (= [:non-binary-value-on-binary-observable]
+             (mapv :reason (:refused-outcomes r)))))))

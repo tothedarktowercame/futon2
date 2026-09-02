@@ -267,3 +267,73 @@
 (deftest an-unknown-spec-kind-refuses-rather-than-taking-no-shift
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"unsupported preference kind"
                         (pref/point-mass-divergence-shift {:kind :something-new}))))
+
+;; ---------------------------------------------------------------------------
+;; U18 — J6's ruling: the declaration's home moves from U16's per-call selector
+;; into the criterion's own :spec, so c-distribution carries it.
+
+(deftest a-spec-that-declares-nothing-builds-the-map-it-built-before
+  (testing "the declaration is present-only, which is what keeps
+            mission_c_test/c-distribution-is-the-pinned-constructor true"
+    (doseq [spec [{:becomes 1} {:becomes 0} {:p1 0.9} [0.5 1.0]]]
+      (let [d (pref/c-distribution spec)]
+        (is (= {} (pref/declaration-of d)) (str spec))
+        (is (not (contains? d :observable-kind)) (str spec))
+        (is (not (contains? d :threshold)) (str spec))))))
+
+(deftest a-declared-binary-observable-needs-no-threshold
+  (testing "J6's ruling as the mission documents write it: the criterion says
+            its observable IS binary, and the arm reads it with no threshold"
+    (let [d (pref/c-distribution {:becomes 1 :observable-kind :binary})]
+      (is (= :binary (:observable-kind d)) "the spec's declaration rides on the dist")
+      (is (= 0 (:outcome (pref/log-preference-under d 0.0 :declared-binarization))))
+      (is (= 1 (:outcome (pref/log-preference-under d 1.0 :declared-binarization))))
+      (testing "and a value that contradicts the declaration refuses under the
+                declaration's own reason, not :no-declared-threshold"
+        (let [r (pref/log-preference-under d 0.75 :declared-binarization)]
+          (is (= :absent (:status r)))
+          (is (= :non-binary-value-on-binary-observable (:reason r)))))))
+  (testing "the same declaration is what :typed-binary-only was refusing for"
+    (let [d (pref/c-distribution {:becomes 1 :observable-kind :binary})]
+      (is (= 0 (:outcome (pref/log-preference-under d 0.0 :typed-binary-only)))
+          "0/14 becomes readable once the criterion declares its kind"))))
+
+(deftest a-spec-declared-threshold-cuts-a-continuous-observable
+  (let [d (pref/c-distribution {:becomes 1 :observable-kind :continuous :threshold 0.8})]
+    (is (= 0 (:outcome (pref/log-preference-under d 0.75 :declared-binarization))))
+    (is (= 1 (:outcome (pref/log-preference-under d 0.85 :declared-binarization))))
+    (testing "and a continuous observable with no threshold is still refused"
+      (let [r (pref/log-preference-under
+               (pref/c-distribution {:becomes 1 :observable-kind :continuous})
+               0.75 :declared-binarization)]
+        (is (= :absent (:status r)))
+        (is (= :no-declared-threshold (:reason r)))))))
+
+(deftest the-specs-declaration-wins-over-the-selectors
+  (testing "a per-call selector may fill a declaration the spec omits — that is
+            how U16's comparison columns still run — but may not overrule one
+            the mission wrote down, which is the whole point of moving the home"
+    (let [declared (pref/c-distribution {:becomes 1 :threshold 0.8})
+          bare (pref/c-distribution {:becomes 1})]
+      (is (= 0 (:outcome (pref/log-preference-under
+                          declared 0.75 {:arm :declared-binarization :threshold 0.1})))
+          "the spec's 0.8 decides, not the caller's 0.1")
+      (is (= 1 (:outcome (pref/log-preference-under
+                          bare 0.75 {:arm :declared-binarization :threshold 0.1})))
+          "with nothing declared on the spec the selector's threshold answers")))
+  (testing "and a selector naming no arm at all is still an error, declaration
+            or not — the arm is never inferred from the spec"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"unknown arm"
+                          (pref/log-preference-under
+                           (pref/c-distribution {:becomes 1 :observable-kind :binary})
+                           0.0 {:threshold 0.5})))))
+
+(deftest a-malformed-declaration-throws-at-construction
+  (testing "an unknown kind is a caller error, not a typed absence: a typed
+            absence would read as 'this criterion declared nothing'"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"unknown :observable-kind"
+                          (pref/c-distribution {:becomes 1 :observable-kind :binry}))))
+  (doseq [t [##NaN ##Inf "0.5"]]
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #":threshold must be a finite number"
+                          (pref/c-distribution {:becomes 1 :threshold t}))
+        (str "threshold " t))))
