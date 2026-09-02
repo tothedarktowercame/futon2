@@ -1,5 +1,14 @@
 {:schema :zaif-harness/r7-precision-table-v1
  :registry-target "holes/labs/wm-contract/SPEC-zaif-harness-v1.md:24"
+ :comparability-note
+ "Reviewer caveat (claude-2, 2026-09-02): two unit families in one table.
+  :declared-operator-mark and :lexical-probe are [0,1] classification-like
+  precisions; :war-machine-observation's :precision-state values are
+  inverse-variance-scale channel precisions (1.0-21.0). The ordering
+  assertion is WITHIN-KIND (declared vs lexical) and correct; a cross-kind
+  numeric comparison (e.g. ticks-firing-ratio 21.0 'above' the operator
+  mark 1.0) is meaningless and any belief update consuming this table must
+  normalise per kind first."
  :rows
  [{:channel-class :declared-operator-mark
    :precision 1.0
