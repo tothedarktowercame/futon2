@@ -1,0 +1,605 @@
+[{:id "M-kangaroo",
+  :status-class :active,
+  :path "/home/joe/code/futon3c/holes/missions/M-kangaroo.md",
+  :open-hole-count 6}
+ {:id "M-librarian",
+  :status-class :unknown,
+  :path "/home/joe/code/futon4/holes/missions/M-librarian.md",
+  :open-hole-count 1}
+ {:id "M-webarxana",
+  :status-class :active,
+  :path "/home/joe/code/futon4/holes/missions/M-webarxana.md",
+  :open-hole-count 3}
+ {:id "M-daily-scan",
+  :status-class :identify,
+  :path "/home/joe/code/futon7/holes/missions/M-daily-scan.md",
+  :open-hole-count 2}
+ {:id "M-aif-tokamak",
+  :status-class :unknown,
+  :path "/home/joe/code/futon5/holes/missions/M-aif-tokamak.md",
+  :open-hole-count 0}
+ {:id "M-propagators",
+  :status-class :identify,
+  :path "/home/joe/code/futon5/holes/missions/M-propagators.md",
+  :open-hole-count 1}
+ {:id "M-wm-tripwires",
+  :status-class :active,
+  :path "/home/joe/code/futon2/holes/missions/M-wm-tripwires.md",
+  :open-hole-count 0}
+ {:id "M-lab-standard",
+  :status-class :active,
+  :path "/home/joe/code/futon5/holes/missions/M-lab-standard.md",
+  :open-hole-count 0}
+ {:id "M-live-efe-map",
+  :status-class :active,
+  :path "/home/joe/code/futon6/holes/missions/M-live-efe-map.md",
+  :open-hole-count 4}
+ {:id "M-futonzero-mvp",
+  :status-class :identify,
+  :path "/home/joe/code/futon0/holes/missions/M-futonzero-mvp.md",
+  :open-hole-count 8}
+ {:id "M-usage-hacking",
+  :status-class :identify,
+  :path "/home/joe/code/futon0/holes/missions/M-usage-hacking.md",
+  :open-hole-count 8}
+ {:id "M-agents-queue",
+  :status-class :identify,
+  :path "/home/joe/code/futon3c/holes/missions/M-agents-queue.md",
+  :open-hole-count 0}
+ {:id "M-autoclock-in",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-autoclock-in.md",
+  :open-hole-count 4}
+ {:id "M-case-studies",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-case-studies.md",
+  :open-hole-count 0}
+ {:id "M-single-locus",
+  :status-class :active,
+  :path "/home/joe/code/futon3c/holes/missions/M-single-locus.md",
+  :open-hole-count 1}
+ {:id "M-xenotype-its",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-xenotype-its.md",
+  :open-hole-count 1}
+ {:id "M-metaca-search",
+  :status-class :unknown,
+  :path "/home/joe/code/futon5/holes/missions/M-metaca-search.md",
+  :open-hole-count 0}
+ {:id "M-trip-journal",
+  :status-class :identify,
+  :path "/home/joe/code/futon5a/holes/missions/M-trip-journal.md",
+  :open-hole-count 1}
+ {:id "M-futon-problems",
+  :status-class :open,
+  :path "/home/joe/code/futon0/holes/missions/M-futon-problems.md",
+  :open-hole-count 2}
+ {:id "M-pattern-ingest",
+  :status-class :identify,
+  :path "/home/joe/code/futon3/holes/missions/M-pattern-ingest.md",
+  :open-hole-count 1}
+ {:id "M-pattern-mining",
+  :status-class :active,
+  :path "/home/joe/code/futon3/holes/missions/M-pattern-mining.md",
+  :open-hole-count 7}
+ {:id "M-diagramprover",
+  :status-class :active,
+  :path "/home/joe/code/futon3c/holes/missions/M-diagramprover.md",
+  :open-hole-count 0}
+ {:id "M-latex-wysiwyg",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-latex-wysiwyg.md",
+  :open-hole-count 0}
+ {:id "M-learning-loop",
+  :status-class :active,
+  :path "/home/joe/code/futon5a/holes/missions/M-learning-loop.md",
+  :open-hole-count 9}
+ {:id "M-metric-harness",
+  :status-class :open,
+  :path "/home/joe/code/futon6/holes/missions/M-metric-harness.md",
+  :open-hole-count 6}
+ {:id "M-superpod-mark2",
+  :status-class :active,
+  :path "/home/joe/code/futon6/holes/missions/M-superpod-mark2.md",
+  :open-hole-count 0}
+ {:id "M-superpod-mark3",
+  :status-class :identify,
+  :path "/home/joe/code/futon6/holes/missions/M-superpod-mark3.md",
+  :open-hole-count 7}
+ {:id "M-becoming-nomad",
+  :status-class :identify,
+  :path "/home/joe/code/futon7/holes/missions/M-becoming-nomad.md",
+  :open-hole-count 0}
+ {:id "M-the-futon-stack",
+  :status-class :active,
+  :path "/home/joe/code/futon0/holes/missions/M-the-futon-stack.md",
+  :open-hole-count 2}
+ {:id "M-zaif-harness-v1",
+  :status-class :open,
+  :path "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+  :open-hole-count 1}
+ {:id "M-weird-modernism",
+  :status-class :identify,
+  :path "/home/joe/code/futon3/holes/missions/M-weird-modernism.md",
+  :open-hole-count 1}
+ {:id "M-chipwitz-corps",
+  :status-class :identify,
+  :path "/home/joe/code/futon3c/holes/missions/M-chipwitz-corps.md",
+  :open-hole-count 12}
+ {:id "M-omni-wm-runner",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-omni-wm-runner.md",
+  :open-hole-count 0}
+ {:id "M-typed-memories",
+  :status-class :active,
+  :path "/home/joe/code/futon3c/holes/missions/M-typed-memories.md",
+  :open-hole-count 10}
+ {:id "M-vsatarcs-writer",
+  :status-class :active,
+  :path "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+  :open-hole-count 7}
+ {:id "M-stack-geometry",
+  :status-class :identify,
+  :path "/home/joe/code/futon5a/holes/missions/M-stack-geometry.md",
+  :open-hole-count 24}
+ {:id "M-pheromone-field",
+  :status-class :identify,
+  :path "/home/joe/code/futon6/holes/missions/M-pheromone-field.md",
+  :open-hole-count 1}
+ {:id "M-capability-zones",
+  :status-class :active,
+  :path "/home/joe/code/futon0/holes/missions/M-capability-zones.md",
+  :open-hole-count 2}
+ {:id "M-arxana-hardening",
+  :status-class :unknown,
+  :path "/home/joe/code/futon4/holes/missions/M-arxana-hardening.md",
+  :open-hole-count 0}
+ {:id "M-arxana-roundtrip",
+  :status-class :identify,
+  :path "/home/joe/code/futon4/holes/missions/M-arxana-roundtrip.md",
+  :open-hole-count 0}
+ {:id "M-futon-enrichment",
+  :status-class :active,
+  :path "/home/joe/code/futon4/holes/missions/M-futon-enrichment.md",
+  :open-hole-count 5}
+ {:id "M-categorical-code",
+  :status-class :identify,
+  :path "/home/joe/code/futon5/holes/missions/M-categorical-code.md",
+  :open-hole-count 5}
+ {:id "M-sci-reproduction",
+  :status-class :active,
+  :path "/home/joe/code/futon5/holes/missions/M-sci-reproduction.md",
+  :open-hole-count 0}
+ {:id "M-symbol-grounding",
+  :status-class :identify,
+  :path "/home/joe/code/futon6/holes/missions/M-symbol-grounding.md",
+  :open-hole-count 1}
+ {:id "M-codex-sorry-loop",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-codex-sorry-loop.md",
+  :open-hole-count 0}
+ {:id "M-intent-curvature",
+  :status-class :identify,
+  :path "/home/joe/code/futon3c/holes/missions/M-intent-curvature.md",
+  :open-hole-count 0}
+ {:id "M-memory-retrieval",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-memory-retrieval.md",
+  :open-hole-count 0}
+ {:id "M-substrate-metric",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-substrate-metric.md",
+  :open-hole-count 1}
+ {:id "M-essays-edit-cycle",
+  :status-class :active,
+  :path "/home/joe/code/futon4/holes/missions/M-essays-edit-cycle.md",
+  :open-hole-count 2}
+ {:id "M-peeragogy-rewrite",
+  :status-class :unknown,
+  :path "/home/joe/code/futon4/holes/missions/M-peeragogy-rewrite.md",
+  :open-hole-count 7}
+ {:id "M-landing-practice",
+  :status-class :identify,
+  :path "/home/joe/code/futon5a/holes/missions/M-landing-practice.md",
+  :open-hole-count 0}
+ {:id "M-prior-mathematics",
+  :status-class :unknown,
+  :path "/home/joe/code/futon6/holes/missions/M-prior-mathematics.md",
+  :open-hole-count 0}
+ {:id "M-stack-hud-refactor",
+  :status-class :partial,
+  :path "/home/joe/code/futon0/holes/missions/M-stack-hud-refactor.md",
+  :open-hole-count 0}
+ {:id "M-formal-war-machine",
+  :status-class :unknown,
+  :path "/home/joe/code/futon2/holes/missions/M-formal-war-machine.md",
+  :open-hole-count 2}
+ {:id "M-apm-demonstration",
+  :status-class :open,
+  :path "/home/joe/code/futon3c/holes/missions/M-apm-demonstration.md",
+  :open-hole-count 20}
+ {:id "M-dionysus-winddown",
+  :status-class :open,
+  :path "/home/joe/code/futon3c/holes/missions/M-dionysus-winddown.md",
+  :open-hole-count 8}
+ {:id "M-the-perfect-crime",
+  :status-class :open,
+  :path "/home/joe/code/futon3c/holes/missions/M-the-perfect-crime.md",
+  :open-hole-count 4}
+ {:id "M-war-machine-pilot",
+  :status-class :open,
+  :path "/home/joe/code/futon3c/holes/missions/M-war-machine-pilot.md",
+  :open-hole-count 9}
+ {:id "M-zai-learning-loop",
+  :status-class :unknown,
+  :path "/home/joe/code/futon3c/holes/missions/M-zai-learning-loop.md",
+  :open-hole-count 8}
+ {:id "M-xor-coupling-probe",
+  :status-class :active,
+  :path "/home/joe/code/futon5/holes/missions/M-xor-coupling-probe.md",
+  :open-hole-count 0}
+ {:id "M-patterns-done-right",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-patterns-done-right.md",
+  :open-hole-count 0}
+ {:id "M-pattern-posteriors",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon3a/holes/missions/M-pattern-posteriors.md",
+  :open-hole-count 0}
+ {:id "M-single-entry-point",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-single-entry-point.md",
+  :open-hole-count 5}
+ {:id "M-smart-emacs-cursor",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-smart-emacs-cursor.md",
+  :open-hole-count 1}
+ {:id "M-editorial-assistant",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-editorial-assistant.md",
+  :open-hole-count 0}
+ {:id "M-web-arxana-missions",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-web-arxana-missions.md",
+  :open-hole-count 5}
+ {:id "M-differentiable-code",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon5/holes/missions/M-differentiable-code.md",
+  :open-hole-count 3}
+ {:id "M-fulab-wiring-survey",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon5/holes/missions/M-fulab-wiring-survey.md",
+  :open-hole-count 0}
+ {:id "M-a-sorry-enterprise",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon5a/holes/missions/M-a-sorry-enterprise.md",
+  :open-hole-count 4}
+ {:id "M-war-machine-wiring",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon5a/holes/missions/M-war-machine-wiring.md",
+  :open-hole-count 10}
+ {:id "M-differentiable-math",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-differentiable-math.md",
+  :open-hole-count 0}
+ {:id "M-futonzero-grounding",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-futonzero-grounding.md",
+  :open-hole-count 0}
+ {:id "M-value-creation-loop",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon7/holes/missions/M-value-creation-loop.md",
+  :open-hole-count 4}
+ {:id "M-futonzero-generative",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-futonzero-generative.md",
+  :open-hole-count 9}
+ {:id "M-archaeology-control",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-archaeology-control.md",
+  :open-hole-count 3}
+ {:id "M-bounded-disposition",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-bounded-disposition.md",
+  :open-hole-count 0}
+ {:id "M-reachable-from-boot",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-reachable-from-boot.md",
+  :open-hole-count 1}
+ {:id "M-sigils-reconsidered",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-sigils-reconsidered.md",
+  :open-hole-count 0}
+ {:id "M-exotype-xenotype-eoc",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon5/holes/missions/M-exotype-xenotype-eoc.md",
+  :open-hole-count 0}
+ {:id "M-hypergraph-operator",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon5a/holes/missions/M-hypergraph-operator.md",
+  :open-hole-count 2}
+ {:id "M-reflective-discipline",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon2/holes/missions/M-reflective-discipline.md",
+  :open-hole-count 5}
+ {:id "M-populate-substrate-2",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-populate-substrate-2.md",
+  :open-hole-count 0}
+ {:id "M-apm-capability-ratchet",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-apm-capability-ratchet.md",
+  :open-hole-count 24}
+ {:id "M-action-cost-modelling",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-action-cost-modelling.md",
+  :open-hole-count 23}
+ {:id "M-essay-corpus-substrate",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-essay-corpus-substrate.md",
+  :open-hole-count 1}
+ {:id "M-coupling-as-constraint",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon5/holes/missions/M-coupling-as-constraint.md",
+  :open-hole-count 0}
+ {:id "M-tpg-coupling-evolution",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon5/holes/missions/M-tpg-coupling-evolution.md",
+  :open-hole-count 0}
+ {:id "M-eoi-outbox-management",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon5a/holes/missions/M-eoi-outbox-management.md",
+  :open-hole-count 6}
+ {:id "M-self-improvement-loop",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon5a/holes/missions/M-self-improvement-loop.md",
+  :open-hole-count 0}
+ {:id "M-emacs-cursor-peripheral",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon3/holes/missions/M-emacs-cursor-peripheral.md",
+  :open-hole-count 1}
+ {:id "M-state-snapshot-witness",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-state-snapshot-witness.md",
+  :open-hole-count 2}
+ {:id "M-canon-fingerprint-store",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-canon-fingerprint-store.md",
+  :open-hole-count 7}
+ {:id "M-bounded-in-flight-state",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-bounded-in-flight-state.md",
+  :open-hole-count 22}
+ {:id "M-expressions-of-interest",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md",
+  :open-hole-count 6}
+ {:id "M-recommendation-bindings",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon5a/holes/missions/M-recommendation-bindings.md",
+  :open-hole-count 2}
+ {:id "M-stack-stereolithography",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon5a/holes/missions/M-stack-stereolithography.md",
+  :open-hole-count 4}
+ {:id "M-differentiable-substrate",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-differentiable-substrate.md",
+  :open-hole-count 0}
+ {:id "M-distributed-frontiermath",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-distributed-frontiermath.md",
+  :open-hole-count 4}
+ {:id "M-distributed-proofreaders",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-distributed-proofreaders.md",
+  :open-hole-count 0}
+ {:id "M-efe-bge-followon-actions",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-efe-bge-followon-actions.md",
+  :open-hole-count 1}
+ {:id "M-structure-seed-promotion",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-structure-seed-promotion.md",
+  :open-hole-count 1}
+ {:id "M-futonzero-prelim-practice",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-futonzero-prelim-practice.md",
+  :open-hole-count 1}
+ {:id "M-aif-a-matrix-faithfulness",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon2/holes/missions/M-aif-a-matrix-faithfulness.md",
+  :open-hole-count 0}
+ {:id "M-artificial-stack-exchange",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-artificial-stack-exchange.md",
+  :open-hole-count 0}
+ {:id "M-aif-policy-conditioned-eig",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+  :open-hole-count 0}
+ {:id "M-run-produces-its-own-brief",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon2/holes/missions/M-run-produces-its-own-brief.md",
+  :open-hole-count 0}
+ {:id "M-mission-coherence-patterns",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon3/holes/missions/M-mission-coherence-patterns.md",
+  :open-hole-count 1}
+ {:id "M-typed-holes-lean-handoffs",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-typed-holes-lean-handoffs.md",
+  :open-hole-count 2}
+ {:id "M-web-arxana-ui-improvements",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-web-arxana-ui-improvements.md",
+  :open-hole-count 4}
+ {:id "M-capability-zones-S1-handoff",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-capability-zones-S1-handoff.md",
+  :open-hole-count 0}
+ {:id "M-capability-zones-S3-handoff",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-capability-zones-S3-handoff.md",
+  :open-hole-count 0}
+ {:id "M-federated-agency-hardening",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-federated-agency-hardening.md",
+  :open-hole-count 7}
+ {:id "M-paper-reverse-morphogenesis",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-paper-reverse-morphogenesis.md",
+  :open-hole-count 5}
+ {:id "M-capability-zones-S1-coverage",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-capability-zones-S1-coverage.md",
+  :open-hole-count 0}
+ {:id "M-capability-zones-S2a-handoff",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-capability-zones-S2a-handoff.md",
+  :open-hole-count 0}
+ {:id "M-capability-zones-S2b-handoff",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-capability-zones-S2b-handoff.md",
+  :open-hole-count 0}
+ {:id "M-aif-gap-epistemic-affordance",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon2/holes/missions/M-aif-gap-epistemic-affordance.md",
+  :open-hole-count 0}
+ {:id "M-typed-holes-mathlib-handoff",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-typed-holes-mathlib-handoff.md",
+  :open-hole-count 0}
+ {:id "M-essays-retraction-visibility",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-essays-retraction-visibility.md",
+  :open-hole-count 3}
+ {:id "M-war-machine-vsatarcs-interop",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-war-machine-vsatarcs-interop.md",
+  :open-hole-count 1}
+ {:id "M-pattern-retrieval-calibration",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon3/holes/missions/M-pattern-retrieval-calibration.md",
+  :open-hole-count 1}
+ {:id "M-hyperreal-dictionary-planning",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+  :open-hole-count 0}
+ {:id "M-symbol-grounding-scaling-plan",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon6/holes/missions/M-symbol-grounding-scaling-plan.md",
+  :open-hole-count 0}
+ {:id "M-wm-aif-policy-grain-compliance",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+  :open-hole-count 0}
+ {:id "M-wm-strategic-mission-selection",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon2/holes/missions/M-wm-strategic-mission-selection.md",
+  :open-hole-count 0}
+ {:id "M-pattern-application-diagnostic",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon3/holes/missions/M-pattern-application-diagnostic.md",
+  :open-hole-count 9}
+ {:id "M-or-training-as-learning-system",
+  :status-class :identify,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-or-training-as-learning-system.md",
+  :open-hole-count 8}
+ {:id "M-sci-reproduction-replay-ledger",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon5/holes/missions/M-sci-reproduction-replay-ledger.md",
+  :open-hole-count 0}
+ {:id "M-vsatarcs-invariants-integration",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-vsatarcs-invariants-integration.md",
+  :open-hole-count 4}
+ {:id "M-mission-scopes-into-substrate-2",
+  :status-class :open,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+  :open-hole-count 2}
+ {:id "M-shared-memory-control-build-test",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md",
+  :open-hole-count 0}
+ {:id "M-the-futon-stack-Q6-r12-design-choices",
+  :status-class :active,
+  :path
+  "/home/joe/code/futon0/holes/missions/M-the-futon-stack-Q6-r12-design-choices.md",
+  :open-hole-count 2}
+ {:id "M-simulating-or-training-as-learning-system",
+  :status-class :unknown,
+  :path
+  "/home/joe/code/futon4/holes/missions/M-simulating-or-training-as-learning-system.md",
+  :open-hole-count 9}]

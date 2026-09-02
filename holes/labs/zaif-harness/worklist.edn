@@ -13,7 +13,7 @@
 ;; finding about the selector, not a license to cheat it.
 {:schema :wm/worklist-v1
  :as-of "2026-09-02"
- :mission "futon2/holes/M-zaif-harness-v1.md"
+ :mission "futon2/holes/missions/M-zaif-harness-v1.md"
  :classes {:M "map/discovery -- facts with pointers, no decisions (lifecycle MAP discipline)"
            :I "implement -- build the thing a ruling or a spec already decided"
            :V "verify against source or code and record the result"
@@ -25,13 +25,14 @@
    :evidence "futon2 (this commit): runs/S1-selection-map.md" :owner :any :covers-key :none
    :statement "Reconstruct the old outer-loop mission-selection path, as facts with pointers. Joe's recollection: an outer loop enumerated missions, gave them weights, selected the best. Candidate machinery found on a first look, to be confirmed or refuted: the ranked-actions path over the mission gap view with EFE weights (scripts/futon2/report/war_machine.clj:1087 roi-map-for-missions, :1116-1118 live-weights, :1122 rollout-snapshot-under-weights, :1250-1286 live-open-mission-ranked-*), src/futon2/aif/mission_control_graph.clj, and wm_scheduled_run; NOTE scripts/wm_outer_loop.clj is the R12 Beta-hyperparameter loop, probably NOT the selector -- say so explicitly if confirmed. Establish: (a) where missions become candidates (the scan; FUTON_REPO_ROOTS mission-doc additions?), (b) where each weight comes from (EFE weights, ROI map, gap view, anamnesis tiebreak), (c) where 'best' is chosen, (d) which stages still run today vs have rotted, each with a pointer and a tried command."
    :acceptance "A stage-by-stage account in holes/labs/zaif-harness/runs/S1-selection-map.md: candidate enumeration -> weighting -> ranking -> selection, every stage with file:line and an executed probe (output shown), rotted stages named as rotted. Facts only; no repair in this row."}
-  {:id :S2 :class :RUN :status :open :depends-on [:S1] :owner :any :covers-key :none
+  {:id :S2 :class :RUN :status :done-unreviewed,
+   :evidence "futon2 (this commit): runs/S2-step-through-1/ -- baseline selects M-expressions-of-interest 0.5762; M-zaif-harness-v1 rank 91/133 at 0.09" :depends-on [:S1] :owner :any :covers-key :none
    :statement "Manual step-through of one selection, as the test case for getting the WM to run (Joe: 'step through that process basically manually'). On the real current mission set with M-zaif-harness-v1 among the candidates: enumerate, weight, rank, select -- BY HAND, one stage at a time, persisting every intermediate (candidate list, weight table, ranking, selection) as a typed artifact under runs/. Where a stage's machinery is rotted (per S1), do what it would have done manually and record that substitution explicitly."
    :acceptance "runs/S2-step-through-1/ holding the four intermediates plus a narrative README that names, for every number, where it came from. The selected mission is whatever the recovered weights actually select -- S2 does NOT prejudice; it measures the baseline."}
-  {:id :S3 :class :I :status :blocked :depends-on [:S2] :owner :any :covers-key :none
+  {:id :S3 :class :I :status :open :depends-on [:S2] :owner :any :covers-key :none
    :statement "The honest prejudice: make M-zaif-harness-v1 win selection through declared channels only. Route an operator-authored priority (Joe's declared mark -- his one authored input to this row) into whichever weight input S1 shows the selector legitimately reads; re-run the S2 step-through with it present."
    :acceptance "A second step-through record where M-zaif-harness-v1 is selected AND the delta table shows exactly which declared input moved it and by how much. If no declared input can move the selector, the row closes as that finding (selector defect row minted) rather than by editing a rank."}
-  {:id :S4 :class :I :status :blocked :depends-on [:S2] :owner :any :covers-key :none
+  {:id :S4 :class :I :status :open :depends-on [:S2] :owner :any :covers-key :none
    :statement "Selection -> clocking: what happens after a mission is selected. Document (and where trivial, wire) the seam by which the selected mission becomes the clocked mission that parameterizes G (app-zaif commitment 1: strategy received, not computed) -- i.e. where the U-row work would receive its mission when the WM, not the operator, is doing the selecting."
    :acceptance "The seam named with pointers; a one-tick demonstration (manual acceptable) where the selected mission's preferences reach the risk term; gaps named as rows, not filled silently."}
   {:id :S5 :class :I :status :open :owner :any :covers-key :none
