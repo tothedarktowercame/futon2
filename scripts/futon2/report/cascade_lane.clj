@@ -359,24 +359,42 @@
                           :props {:capability/frontier? true :capability/status :held}}]))))
 (defonce ^:private !rollout-g-cache (atom {}))
 
+(defn- policy-rollout-result
+  "The memoized rollout for one mission stem: {:score <double or nil>
+   :events <AC5 typed move-score records>}. Split out of `policy-rollout` so
+   the ΔG leg and the AC5 records come from the SAME rollout rather than two,
+   which is also why the cache now holds a map."
+  [mission-target]
+  (let [stem (-> (str mission-target) (str/replace #"^M-" ""))]
+    (if (contains? @!rollout-g-cache stem)
+      (get @!rollout-g-cache stem)
+      (let [result (try
+                     (let [pat (re-pattern (java.util.regex.Pattern/quote stem))
+                           mv  (filter #(re-find pat (str (:have %) (:want %))) @!rollout-moves)]
+                       (when (seq mv)
+                         (let [seed (rollout/seed-roots {:arrows {} :cap-overlay @!rollout-cap-overlay :reachable #{}} mv)
+                               best (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9)]
+                           {:score (some-> (:policy-rollout-score best) double)
+                            :events (vec (:move-score-events best))})))
+                     (catch Throwable _ nil))
+            result (or result {:score nil :events []})]
+        (swap! !rollout-g-cache assoc stem result)
+        result))))
+
 (defn policy-rollout
   "grain-3 ΔG: best-rollout G(π) over the v2 move-set restricted to this mission's moves.
    Returns the (negative-better) G as a double, or nil if the mission has no moves in the
    set (no rollout path — ΔG genuinely unavailable, not zero). Memoized per stem."
   [mission-target]
-  (let [stem (-> (str mission-target) (str/replace #"^M-" ""))]
-    (if (contains? @!rollout-g-cache stem)
-      (get @!rollout-g-cache stem)
-      (let [g (try
-                (let [pat (re-pattern (java.util.regex.Pattern/quote stem))
-                      mv  (filter #(re-find pat (str (:have %) (:want %))) @!rollout-moves)]
-                  (when (seq mv)
-                    (let [seed (rollout/seed-roots {:arrows {} :cap-overlay @!rollout-cap-overlay :reachable #{}} mv)
-                          best (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9)]
-                      (some-> (:policy-rollout-score best) double))))
-                (catch Throwable _ nil))]
-        (swap! !rollout-g-cache assoc stem g)
-        g))))
+  (:score (policy-rollout-result mission-target)))
+
+(defn policy-rollout-events
+  "AC5 self-repair condition: the typed `:unscored`/`:refused` records the
+   rollout's move-score validation emitted for this mission, or [] when every
+   move in its slice of the v2 set carried a finite score. Same memoized
+   rollout as `policy-rollout`, so reading both costs one search."
+  [mission-target]
+  (vec (:events (policy-rollout-result mission-target))))
 
 (def ^:dynamic *gate-decision-target?*
   "When true (DEFAULT, operator ruling 2026-07-06: \"Yes, we should accept
@@ -421,20 +439,26 @@
                                  seated? (boolean stuck-n)
                                  shown (if seated?
                                          (vec (cons "agent/sense-deliberate-act" base-shown))
-                                         base-shown)]
-                             {:mission m :psi psi
-                              :size (if seated? (inc (:size c)) (:size c))
-                              :wholeness (:wholeness c) :budget (:budget c)
-                              :truncated (:truncated c)
-                              :cascade-score (:cascade-score c)
-                              :policy-rollout-score (policy-rollout m)
-                              :shown shown
-                              :semilattice (:semilattice c)
-                              :seat-injection (when seated?
-                                                {:pattern "agent/sense-deliberate-act"
-                                                 :stuck-n stuck-n
-                                                 :mechanism :construction-not-retrieval
-                                                 :card-3 "W-constructor-df-last-inch"})}))))
+                                         base-shown)
+                                 rollout-events (policy-rollout-events m)]
+                             (cond-> {:mission m :psi psi
+                                      :size (if seated? (inc (:size c)) (:size c))
+                                      :wholeness (:wholeness c) :budget (:budget c)
+                                      :truncated (:truncated c)
+                                      :cascade-score (:cascade-score c)
+                                      :policy-rollout-score (policy-rollout m)
+                                      :shown shown
+                                      :semilattice (:semilattice c)
+                                      :seat-injection (when seated?
+                                                        {:pattern "agent/sense-deliberate-act"
+                                                         :stuck-n stuck-n
+                                                         :mechanism :construction-not-retrieval
+                                                         :card-3 "W-constructor-df-last-inch"})}
+                               ;; AC5, present-only: no key means every move in
+                               ;; this mission's rollout slice carried a finite
+                               ;; score.
+                               (seq rollout-events)
+                               (assoc :policy-rollout-events rollout-events))))))
          om-entries (->> ranked-actions
                          ;; live-judgement comes through the JSON API -> :type is the STRING "open-mission";
                          ;; the in-process path uses the keyword. Accept both.
@@ -481,21 +505,25 @@
                      c   (cascade-policy-for psi budget)
                      cascade-score (:cascade-score c)
                      gap? (or (nil? c) (nil? cascade-score)
-                              (<= cascade-score gap-cascade-score-threshold))]
-                 {:mission m :psi psi :cascade-score cascade-score
-                  :policy-rollout-score (policy-rollout m)
-                  :coverage-reward (:coverage-reward c) :prior-cost (:prior-cost c)
-                  :wholeness (:wholeness c) :size (:size c) :gap? gap?
-                  :note (cond
-                          (nil? c)
-                          "no cascade constructed (constructor unavailable or no patterns — foothold needed)"
-                          gap?
-                          (format "cascade-score=%.2f ≤ 0 (coverage %.2f < λ·prior-cost) — seed here"
-                                  (double (or cascade-score 0.0))
-                                  (double (or (:coverage-reward c) 0.0)))
-                          :else
-                          (format "cascade-score=%.2f > 0 (coverage %.2f vs λ·prior-cost)"
-                                  (double cascade-score)
-                                  (double (or (:coverage-reward c) 0.0))))})))
+                              (<= cascade-score gap-cascade-score-threshold))
+                     rollout-events (policy-rollout-events m)]
+                 (cond-> {:mission m :psi psi :cascade-score cascade-score
+                          :policy-rollout-score (policy-rollout m)
+                          :coverage-reward (:coverage-reward c) :prior-cost (:prior-cost c)
+                          :wholeness (:wholeness c) :size (:size c) :gap? gap?
+                          :note (cond
+                                  (nil? c)
+                                  "no cascade constructed (constructor unavailable or no patterns — foothold needed)"
+                                  gap?
+                                  (format "cascade-score=%.2f ≤ 0 (coverage %.2f < λ·prior-cost) — seed here"
+                                          (double (or cascade-score 0.0))
+                                          (double (or (:coverage-reward c) 0.0)))
+                                  :else
+                                  (format "cascade-score=%.2f > 0 (coverage %.2f vs λ·prior-cost)"
+                                          (double cascade-score)
+                                          (double (or (:coverage-reward c) 0.0))))}
+                   ;; AC5, present-only (as in `cascade-lane`).
+                   (seq rollout-events)
+                   (assoc :policy-rollout-events rollout-events)))))
         (sort-by (fn [r] [(if (:gap? r) 0 1) (or (:cascade-score r) 0.0)]))
         vec)))

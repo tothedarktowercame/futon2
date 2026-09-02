@@ -114,34 +114,186 @@
          (filter #(reachable? state %))
          vec)))
 
+;; ---------------------------------------------------------------------------
+;; AC5 (Joe's 2026-09-02 ruling on C130 §5): the validated rollout step
+;; producer. Every proposed move is classified before its numbers are used, so
+;; a move that carries no score can no longer be exponentiated as though it had
+;; scored zero.
+;; ---------------------------------------------------------------------------
+
+(def move-score-contract
+  "Producer contract stamped on every record `move-score-record` emits, whether
+   it read a score, found none, or refused a malformed one."
+  :rollout-move-score/v1)
+
+(def move-score-field
+  "The move field the prior renormalizer reads. Named as a var because the
+   census row, the lint and the tests all have to agree on which field this row
+   is about."
+  :score)
+
+(def move-prior-field
+  "The other numeric field the same expression reads. A non-number here used to
+   throw out of `have-prior?` (`(double \"x\")`); it is now refused with the
+   offending value named."
+  :prior)
+
+(defn- finite-double
+  "X as a double when it is a finite number, else nil. Distinguishes a measured
+   0.0 (a real score) from a value that cannot enter arithmetic at all."
+  [x]
+  (when (number? x)
+    (let [d (double x)]
+      (when-not (or (Double/isNaN d) (Double/isInfinite d)) d))))
+
+(defn move-score-record
+  "Classify one proposed MOVE as a typed record. AC5 (Joe's 2026-09-02 ruling
+   on C130 §5) removed the `0.0` `:score` used to be defaulted to.
+
+   `:scored` — the move supplies a finite `:score`:
+     {:status :scored :value <double> :move/id <id>
+      :producer-contract :rollout-move-score/v1}
+   A supplied `0.0` lands here. A move that scored zero is scored.
+
+   `:unscored` — the move supplies NO `:score` (key absent, or present as nil).
+   No `:value` key is written; `:absent` names the field and records whether
+   the key was there at all, so a nil-valued key and a missing key stay apart.
+
+   `:unscored` is the honest reading of an absent score, not a verdict on what
+   ranking should do with it: excluding it is this row's ranking rule (below),
+   and what the ROLLOUT COST does with an unscored move is AC6's separate site
+   at `move-cost`.
+
+   `:refused` — a partial map with a numeric fallback: `:score` or `:prior` is
+   present but is not a finite number (a string, a keyword, NaN, an infinity),
+   or the move is not a map at all. `:offending` names the field and the value
+   it was given. Absence and malformation are separated here exactly as they
+   are in AC1's `free-energy/compute-prediction-error`: a producer that emitted
+   no score has a gap; a producer that emitted \"0.4\" has a defect, and that
+   has to stay loud."
+  [move]
+  (if-not (map? move)
+    {:producer-contract move-score-contract
+     :status :refused
+     :reason :malformed-move-record
+     :offending {:field nil :status :not-a-map :value move}}
+    (let [stamp {:producer-contract move-score-contract
+                 :move/id (:move/id move)}
+          prior (get move move-prior-field)
+          score (get move move-score-field)]
+      (cond
+        (and (some? prior) (nil? (finite-double prior)))
+        (merge stamp {:status :refused
+                      :reason :malformed-move-score
+                      :offending {:field move-prior-field
+                                  :status :not-finite
+                                  :value prior}})
+
+        (nil? score)
+        (merge stamp {:status :unscored
+                      :reason :score-not-supplied
+                      :absent {:field move-score-field
+                               :key-present? (contains? move move-score-field)}})
+
+        :else
+        (if-let [v (finite-double score)]
+          (merge stamp {:status :scored :value v})
+          (merge stamp {:status :refused
+                        :reason :malformed-move-score
+                        :offending {:field move-score-field
+                                    :status :not-finite
+                                    :value score}}))))))
+
+(defn move-score-events
+  "The present-only projection over a collection of RECORDS: the ones that are
+   not `:scored`. Empty when every proposed move carried a finite score, which
+   is the AC1–AC4 discipline — no key means the population validated, a
+   different claim from \"the producer did not report\"."
+  [records]
+  (into [] (remove #(= :scored (:status %))) records))
+
+(defn validated-priors
+  "R1 prior renormalization over a VALIDATED move population.
+
+   Returns {:population <moves with :prior>, :records <one per input move>,
+            :score-required? <bool>, :move-score-events <present-only>}.
+
+   The score is REQUIRED exactly when the sharpened-`:prior` path is
+   unavailable — that is, when some move does not carry a positive finite
+   `:prior` and the weights therefore fall back to softmax(`:score`). On the
+   prior path no `:score` is read at all, so an unscored move is not a defect
+   there and still ranks; its record still reports the absence, with
+   `:score-required?` false.
+
+   When the score IS required, only `:scored` moves enter the renormalized
+   population. This is the ranking-population change C130 §5 predicted
+   (\"validation changes which moves can enter ranking\"): the alternative is
+   the fabricated `exp(0.0) = 1.0` weight the old expression gave a move nobody
+   scored, which is indistinguishable from a move that scored exactly zero."
+  [moves]
+  (let [pairs (mapv (fn [m] [m (move-score-record m)]) moves)
+        have-prior? (and (seq pairs)
+                         (every? (fn [[m r]]
+                                   (and (not= :refused (:status r))
+                                        (when-let [p (finite-double (get m move-prior-field))]
+                                          (pos? p))))
+                                 pairs))
+        required? (not have-prior?)
+        kept (if required?
+               (filterv (fn [[_ r]] (= :scored (:status r))) pairs)
+               pairs)
+        weight (fn [[m r]]
+                 (if required?
+                   (Math/exp (double (:value r)))
+                   (double (get m move-prior-field))))
+        weights (mapv weight kept)
+        total (reduce + 0.0 weights)
+        records (mapv (fn [[_ r]]
+                        (cond-> (assoc r :score-required? required?)
+                          (and required? (not= :scored (:status r)))
+                          (assoc :excluded-from-ranking? true)))
+                      pairs)]
+    {:population (mapv (fn [[m _] w]
+                         (assoc m :prior (if (pos? total) (/ w total) 0.0)))
+                       kept
+                       weights)
+     :records records
+     :score-required? required?
+     :move-score-events (move-score-events records)}))
+
 (defn renormalize-priors
   "R1: per-node PUCT branching weights, renormalized over THIS node's reachable
    survivors. Consumes the producer's sharpened :prior field (the policy-head
    output) when every survivor carries a positive one, falling back to
    softmax(:score) otherwise. (Originally this always recomputed softmax(:score),
    which silently discarded a sharpened :prior whenever :score was flat — as it
-   is at scope-grain — re-flattening the policy head to uniform.)"
+   is at scope-grain — re-flattening the policy head to uniform.)
+
+   AC5: the softmax fallback no longer reads `(or (:score move) 0.0)`. The
+   population is validated first (`validated-priors`), and a move with no
+   finite score is not weighted. Use `validated-priors` directly when the typed
+   records are wanted; this arity keeps the older vector-in/vector-out shape."
   [moves]
-  (let [have-prior? (and (seq moves)
-                         (every? #(let [p (:prior %)] (and p (pos? (double p)))) moves))
-        weight (if have-prior?
-                 #(double (:prior %))
-                 #(Math/exp (double (or (:score %) 0.0))))
-        weights (mapv weight moves)
-        total (reduce + 0.0 weights)]
-    (mapv (fn [move w]
-            (assoc move :prior (if (pos? total) (/ w total) 0.0)))
-          moves
-          weights)))
+  (:population (validated-priors moves)))
+
+(defn ranked-survivors-with-records
+  "`ranked-survivors` plus the AC5 typed records the validation produced.
+   Returns {:survivors [...] :move-score-events [...]}; the events vector is
+   present-only, so it is empty whenever every reachable move validated."
+  [state moves & {:keys [top-k]
+                  :or {top-k 5}}]
+  (let [{:keys [population move-score-events]}
+        (validated-priors (reachable-moves state moves))]
+    {:survivors (->> population
+                     (sort-by (juxt (comp - double :prior) :rank :move/id))
+                     (take top-k)
+                     vec)
+     :move-score-events move-score-events}))
 
 (defn ranked-survivors
   [state moves & {:keys [top-k]
                   :or {top-k 5}}]
-  (->> (reachable-moves state moves)
-       renormalize-priors
-       (sort-by (juxt (comp - double :prior) :rank :move/id))
-       (take top-k)
-       vec))
+  (:survivors (ranked-survivors-with-records state moves :top-k top-k)))
 
 (defn move-cost
   "Local g(s_t) proxy from the locked stub.
@@ -209,14 +361,22 @@
                               :prior (:prior move)
                               :truncated? (:truncated? state')})))))))
 
-(defn expand-policies
-  [state moves & {:as opts :keys [top-k]
-                  :or {top-k 5}}]
-  (let [horizon (rollout-horizon opts)]
+(defn expand-policies-with-records
+  "`expand-policies` plus the AC5 records the per-node validation produced,
+   collected across the whole expansion and deduplicated. Returns
+   {:nodes [...] :move-score-events [...]}. The events are a property of the
+   SEARCH, not of any one node: the same unscored move can be reached from
+   several prefixes, and it is the producer that has to be repaired either way."
+  [state moves {:keys [top-k] :or {top-k 5} :as opts}]
+  (let [horizon (rollout-horizon opts)
+        !events (volatile! [])]
     (letfn [(expand [state prefix remaining-depth]
               (if (zero? remaining-depth)
                 [{:state state :policy prefix}]
-                (let [survivors (ranked-survivors state moves :top-k top-k)]
+                (let [{:keys [survivors move-score-events]}
+                      (ranked-survivors-with-records state moves :top-k top-k)]
+                  (when (seq move-score-events)
+                    (vswap! !events into move-score-events))
                   (if (empty? survivors)
                     [{:state state :policy prefix}]
                     (mapcat
@@ -227,16 +387,30 @@
                            [{:state state' :policy prefix'}]
                            (expand state' prefix' (dec remaining-depth)))))
                      survivors)))))]
-      (vec (expand (normalize-state state) [] horizon)))))
+      {:nodes (vec (expand (normalize-state state) [] horizon))
+       :move-score-events (vec (distinct @!events))})))
+
+(defn expand-policies
+  [state moves & {:as opts :keys [top-k]
+                  :or {top-k 5}}]
+  (:nodes (expand-policies-with-records state moves (assoc opts :top-k top-k))))
 
 (defn score-policies
+  "AC5 self-repair condition: when the expansion validated a move as `:unscored`
+   or `:refused`, every returned policy carries the search's typed records under
+   `:move-score-events`. PRESENT-ONLY — with a fully scored population no key is
+   written and the returned maps are byte-identical to the pre-AC5 ones."
   [state moves & {:as opts :keys [top-k]
                   :or {top-k 5}}]
   (let [horizon (rollout-horizon opts)
-        gamma (rollout-discount opts)]
-    (->> (expand-policies state moves :horizon horizon :top-k top-k)
+        gamma (rollout-discount opts)
+        {:keys [nodes move-score-events]}
+        (expand-policies-with-records state moves {:horizon horizon :top-k top-k})]
+    (->> nodes
        (mapv (fn [{:keys [policy]}]
-               (project-policy state policy :gamma gamma)))
+               (cond-> (project-policy state policy :gamma gamma)
+                 (seq move-score-events)
+                 (assoc :move-score-events move-score-events))))
        (sort-by :policy-rollout-score)
        vec)))
 

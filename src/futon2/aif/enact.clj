@@ -204,10 +204,17 @@
                                                  (:mission entry) " — " (:message error))))
                                  :absent nil))
                              ag)))]
-              {:mission (:mission entry)
-               :shown (vec (:shown entry))
-               :act-gate ag
-               :verdict (cl/preview-verdict ag)}))
+              (cond-> {:mission (:mission entry)
+                       :shown (vec (:shown entry))
+                       :act-gate ag
+                       :verdict (cl/preview-verdict ag)}
+                ;; AC5 (Joe's 2026-09-02 C130 ruling, the self-repair
+                ;; condition): carry the rollout's typed move-score records
+                ;; through to the verdict, which `close-loop!` persists as
+                ;; :act-gate-verdicts. Present-only: no key means every move in
+                ;; the ΔG rollout carried a finite score.
+                (seq (:policy-rollout-events entry))
+                (assoc :policy-rollout-events (vec (:policy-rollout-events entry))))))
           lane)))
 
 (def ^:dynamic *selection-gain-escrow-feed?*
@@ -298,11 +305,17 @@
       (let [gates (act-gates-with-shown (:ranked-actions judgement))
             _ (vreset! phase :verdict-recording)
             verdicts (mapv (fn [g]
-                             {:mission (:mission g)
-                              :verdict (:verdict g)
-                              :cascade-score (get-in g [:act-gate :cascade-score])
-                              :coverage-score-delta (get-in g [:act-gate :coverage-score-delta])
-                              :coverage-score-source (get-in g [:act-gate :coverage-score/source])})
+                             (cond-> {:mission (:mission g)
+                                      :verdict (:verdict g)
+                                      :cascade-score (get-in g [:act-gate :cascade-score])
+                                      :coverage-score-delta (get-in g [:act-gate :coverage-score-delta])
+                                      :coverage-score-source (get-in g [:act-gate :coverage-score/source])}
+                               ;; AC5, present-only: the rollout's typed
+                               ;; :unscored/:refused move records, so a
+                               ;; producer defect in the ΔG leg reaches the
+                               ;; trace instead of dying in the search.
+                               (seq (:policy-rollout-events g))
+                               (assoc :policy-rollout-events (:policy-rollout-events g))))
                            gates)
             passed (first (filter #(= :pass (:verdict %)) gates))
             _ (vreset! record (assoc judgement :act-gate-verdicts verdicts))

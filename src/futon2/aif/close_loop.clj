@@ -124,5 +124,10 @@
   (let [lane ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane) ranked-actions)]
     (mapv (fn [entry]
             (let [ag (act-gate-from-lane-entry entry)]
-              {:mission (:mission entry) :act-gate ag :verdict (preview-verdict ag)}))
+              (cond-> {:mission (:mission entry) :act-gate ag :verdict (preview-verdict ag)}
+                ;; AC5 (Joe's 2026-09-02 C130 ruling, the self-repair
+                ;; condition): present-only passthrough of the rollout's typed
+                ;; move-score records. No key means the ΔG rollout validated.
+                (seq (:policy-rollout-events entry))
+                (assoc :policy-rollout-events (vec (:policy-rollout-events entry))))))
           lane)))

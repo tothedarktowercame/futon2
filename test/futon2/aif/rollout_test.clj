@@ -149,3 +149,160 @@
     (is (every? :move/id ms))
     (is (= ["scope/interim-director-proxy-metric-inventory/pattern#open->scope/interim-director-proxy-metric-inventory/pattern#closed"]
            (mapv :move/id (rollout/reachable-moves state ms))))))
+
+;; ---------------------------------------------------------------------------
+;; AC5 (Joe's 2026-09-02 ruling on C130 §5): the validated rollout step
+;; producer. Before this row `renormalize-priors` read `(or (:score m) 0.0)`,
+;; so a move nobody scored got `exp(0.0) = 1.0` — the same branching weight as
+;; a move that scored exactly zero.
+;; ---------------------------------------------------------------------------
+
+(def ^:private ac5-state
+  {:arrows {} :cap-overlay {} :reachable #{"root"}})
+
+(defn- ac5-move
+  "A reachable move with no :prior, so the softmax(:score) fallback — the
+   branch that held the fabricated zero — is the branch under test."
+  [id & {:as extra}]
+  (merge {:move/id id :move/class :close-hole
+          :have "root" :want (str "w-" id)
+          :rank 1 :move/terminal? false}
+         extra))
+
+(deftest ac5-unsupplied-score-is-unscored-not-zero
+  ;; ABSENT: the key is not there at all.
+  (let [record (rollout/move-score-record (ac5-move "u"))]
+    (is (= :unscored (:status record)))
+    (is (= :score-not-supplied (:reason record)))
+    (is (not (contains? record :value))
+        "an unscored move must carry no numeric value at all")
+    (is (= :score (get-in record [:absent :field])))
+    (is (false? (get-in record [:absent :key-present?])))
+    (is (= :rollout-move-score/v1 (:producer-contract record))))
+  ;; ABSENT: the key is there and nil. Same status, and the record says which.
+  (let [record (rollout/move-score-record (ac5-move "n" :score nil))]
+    (is (= :unscored (:status record)))
+    (is (true? (get-in record [:absent :key-present?])))))
+
+(deftest ac5-measured-zero-is-scored
+  ;; THE CONTROL the row turns on: same number, different provenance. A move
+  ;; that scored 0.0 is scored; a move nobody scored is not, and the old
+  ;; expression could not tell them apart because it produced 0.0 for both.
+  (let [measured (rollout/move-score-record (ac5-move "z" :score 0.0))
+        unsupplied (rollout/move-score-record (ac5-move "u"))]
+    (is (= :scored (:status measured)))
+    (is (= 0.0 (:value measured)))
+    (is (= :unscored (:status unsupplied)))
+    (is (not= (:status measured) (:status unsupplied)))
+    ;; and the pre-AC5 expression collapsed exactly this distinction
+    (is (= (Math/exp (double (or (:score (ac5-move "z" :score 0.0)) 0.0)))
+           (Math/exp (double (or (:score (ac5-move "u")) 0.0)))))))
+
+(deftest ac5-malformed-score-is-refused-loudly
+  ;; MALFORMED: present but not a finite number. Each is refused, not omitted,
+  ;; and :offending names the field and the value it was given.
+  (doseq [bad ["0.4" :zero true [] {} Double/NaN Double/POSITIVE_INFINITY
+               Double/NEGATIVE_INFINITY]]
+    (let [record (rollout/move-score-record (ac5-move "m" :score bad))]
+      (is (= :refused (:status record)) (str "score " (pr-str bad)))
+      (is (= :malformed-move-score (:reason record)))
+      (is (not (contains? record :value)))
+      (is (= :score (get-in record [:offending :field])))
+      (is (= bad (get-in record [:offending :value])))))
+  ;; The other numeric field the same expression reads. `(double "x")` used to
+  ;; throw out of have-prior?; it is now a named refusal.
+  (let [record (rollout/move-score-record (ac5-move "p" :score 1.0 :prior "x"))]
+    (is (= :refused (:status record)))
+    (is (= :prior (get-in record [:offending :field]))))
+  ;; Not a map at all.
+  (let [record (rollout/move-score-record "not-a-move")]
+    (is (= :refused (:status record)))
+    (is (= :malformed-move-record (:reason record)))))
+
+(deftest ac5-separation-of-absent-and-malformed
+  ;; nil and "x" in the same field give different statuses and different
+  ;; reasons -- the AC1 boundary, restated at this site.
+  (let [absent (rollout/move-score-record (ac5-move "a" :score nil))
+        refused (rollout/move-score-record (ac5-move "a" :score "x"))]
+    (is (= :unscored (:status absent)))
+    (is (= :refused (:status refused)))
+    (is (not= (:reason absent) (:reason refused)))))
+
+(deftest ac5-unscored-move-cannot-enter-ranking-when-score-is-required
+  ;; THE DEFECT, MEASURED BOTH DIRECTIONS. With no priors the weights come from
+  ;; softmax(:score), so the score IS required: the unscored move used to be
+  ;; weighted exp(0.0)=1.0 and now does not enter the population at all.
+  (let [moves [(ac5-move "u") (ac5-move "s" :score 0.0)]
+        {:keys [population score-required? move-score-events]}
+        (rollout/validated-priors moves)]
+    (is (true? score-required?))
+    (is (= ["s"] (mapv :move/id population)))
+    (is (= 1.0 (:prior (first population)))
+        "the surviving move takes the whole renormalized mass")
+    (is (= ["u"] (mapv :move/id move-score-events)))
+    (is (true? (:excluded-from-ranking? (first move-score-events))))
+    ;; and the same population through the ranking entry point
+    (is (= ["s"] (mapv :move/id (rollout/ranked-survivors ac5-state moves :top-k 5))))))
+
+(deftest ac5-score-is-not-required-on-the-prior-path
+  ;; REQUIREMENT CONDITION, the AC4 discipline at this site: when every move
+  ;; carries a positive finite :prior the softmax fallback is not taken, no
+  ;; :score is read, and an unscored move is not excluded -- but its record
+  ;; still reports the absence, with :score-required? false.
+  (let [moves [(ac5-move "u" :prior 0.25) (ac5-move "s" :score 3.0 :prior 0.75)]
+        {:keys [population score-required? move-score-events]}
+        (rollout/validated-priors moves)]
+    (is (false? score-required?))
+    (is (= #{"u" "s"} (set (mapv :move/id population))))
+    (is (= ["u"] (mapv :move/id move-score-events)))
+    (is (= :unscored (:status (first move-score-events))))
+    (is (false? (:score-required? (first move-score-events))))
+    (is (not (contains? (first move-score-events) :excluded-from-ranking?)))))
+
+(deftest ac5-fully-scored-population-is-byte-identical
+  ;; The regression floor: on a population where every move carries a finite
+  ;; score the renormalization is unchanged and NO events key is written --
+  ;; present-only, as in AC1-AC4. This is the case the real v2 move-sets are
+  ;; in (every move there carries both a finite :score and a positive :prior).
+  (let [moves [(ac5-move "a" :score 1.0) (ac5-move "b" :score 2.0)]
+        {:keys [population move-score-events]} (rollout/validated-priors moves)
+        priors (mapv :prior population)]
+    (is (empty? move-score-events))
+    (is (= 2 (count population)))
+    (is (< (Math/abs (- 1.0 (reduce + 0.0 priors))) 1.0e-12))
+    ;; softmax(1,2) -- the pre-AC5 weights, unchanged
+    (is (< (Math/abs (- (/ (Math/exp 1.0) (+ (Math/exp 1.0) (Math/exp 2.0)))
+                        (first priors)))
+           1.0e-12))
+    ;; and the rollout result carries no key at all
+    (is (not (contains? (rollout/best-rollout ac5-state moves :depth 1 :top-k 5)
+                        :move-score-events)))))
+
+(deftest ac5-records-ride-out-on-the-rollout-result
+  ;; SELF-REPAIR CONDITION: the records have to LEAVE the search, or a refusal
+  ;; is just a silently smaller candidate set. best-rollout carries them
+  ;; present-only, which is what cascade-lane projects onto its entry and
+  ;; close-loop! persists as :act-gate-verdicts.
+  (let [moves [(ac5-move "u") (ac5-move "bad" :score "x") (ac5-move "s" :score 1.0)]
+        best (rollout/best-rollout ac5-state moves :depth 1 :top-k 5)
+        events (:move-score-events best)]
+    (is (= 2 (count events)))
+    (is (= #{:unscored :refused} (set (map :status events))))
+    (is (= ["s"] (mapv :move/id (:policy best)))))
+  ;; The projection is present-only over a record collection.
+  (is (= [] (rollout/move-score-events
+             [(rollout/move-score-record (ac5-move "s" :score 1.0))]))))
+
+(deftest ac5-exclusion-can-empty-the-candidate-set
+  ;; NOT DONE HERE, asserted so the boundary is visible rather than assumed:
+  ;; when every move is unscored the ranking population is empty and the
+  ;; expansion stops with the prefix it had -- the SAME shape it already had
+  ;; for a state with no reachable moves. Telling those two apart is AC6's
+  ;; refuse floor ("refuse when exclusion empties the candidate set"), and it
+  ;; is deliberately not implemented at this row.
+  (let [moves [(ac5-move "u") (ac5-move "v")]
+        best (rollout/best-rollout ac5-state moves :depth 1 :top-k 5)]
+    (is (empty? (rollout/ranked-survivors ac5-state moves :top-k 5)))
+    (is (= [] (:policy best)))
+    (is (= 2 (count (:move-score-events best)))
+        "the records still ride out, so the empty set is explicable")))
