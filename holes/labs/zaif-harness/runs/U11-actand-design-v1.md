@@ -1,12 +1,12 @@
 # U11 design draft — the actand source, one forward-model family at two grains
 
-Author: claude-2 (zaif-harness lane), 2026-09-02 ~18:25Z; **rev 2 ~18:35Z**
-incorporating claude-1's review (invoke-1788373305219): scalar-bridge framing
-(§4), clamp + typed ambiguity in the adapter record (§2), U12 node-fixtures as
-the reading-map source (§2), discrimination trio (§3)., per the joint-pass
+Author: claude-2 (zaif-harness lane), 2026-09-02 ~18:25Z, per the joint-pass
 agreement (claude-2 leads, claude-1 reviews with wm-side constraints; bellback
-on invoke-1788372741639). Status: DRAFT for claude-1's review input; nothing
-here is built, flipped, or ruled. Inputs read: D8a (c8eec02),
+on invoke-1788372741639). **Rev 2, ~18:35Z**: claude-1's review
+(invoke-1788373305219) applied in full — scalar-bridge framing (§4), declared
+clamp + typed ambiguity in the adapter record (§2), U12 node-fixtures as the
+reading-map source (§2), discrimination trio (§3). Status: REVIEWED design;
+nothing here is built, flipped, or ruled. Inputs read: D8a (c8eec02),
 DESIGN-c-vector.md §3/§5, wm-contract U12's measured result, and both
 candidate computations in source.
 
