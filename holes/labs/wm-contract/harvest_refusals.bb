@@ -547,14 +547,23 @@
                            :finding-keys (:finding-keys lint-sweep)}
                     :classes classes}]
     (fs/create-dirs (fs/parent proposals-path))
-    (spit proposals-path md)
-    (fs/create-dirs (fs/parent state-path))
-    (spit state-path (str (with-out-str (clojure.pprint/pprint next-state))))
-    {:new-findings (count findings)
-     :classes (count (remove #(zero? (:count %)) (vals classes)))
-     :drafts (count drafted)
-     :lint-ok? (:ok? lint-sweep)
-     :empty? (zero? (count (remove #(zero? (:count %)) (vals classes))))}))
+    ;; A sweep that found nothing new and minted nothing leaves the tracked
+    ;; proposals file alone: rewriting only its sweep-number/timestamp header
+    ;; dirties the tree every publish and trips the build loop's mid-edit
+    ;; pre-flight (2026-09-02, wm loop iterations 1-60). The state file below
+    ;; still advances, so the watermark is kept.
+    (let [wrote? (or (not (fs/exists? proposals-path))
+                     (pos? (count findings))
+                     (seq drafted))]
+      (when wrote? (spit proposals-path md))
+      (fs/create-dirs (fs/parent state-path))
+      (spit state-path (str (with-out-str (clojure.pprint/pprint next-state))))
+      {:new-findings (count findings)
+       :classes (count (remove #(zero? (:count %)) (vals classes)))
+       :drafts (count drafted)
+       :lint-ok? (:ok? lint-sweep)
+       :wrote-proposals? (boolean wrote?)
+       :empty? (zero? (count (remove #(zero? (:count %)) (vals classes))))})))
 
 ;; ---------------------------------------------------------------------------
 ;; Controls. Both run before the real sweep, in a temp directory, on every
@@ -643,7 +652,7 @@
       (println "     WM_HARVEST_DRAFTS_DIR WM_HARVEST_LINT_EDN WM_HARVEST_THRESHOLD")
       (System/exit 0))
     (when-not (contains? args "--no-controls") (run-controls!))
-    (let [{:keys [new-findings classes drafts lint-ok? empty?]}
+    (let [{:keys [new-findings classes drafts lint-ok? wrote-proposals? empty?]}
           (sweep! {:write-drafts? (not (contains? args "--no-drafts"))})]
       (when-not lint-ok?
         (binding [*out* *err*]
@@ -652,12 +661,16 @@
         (binding [*out* *err*]
           (println "harvest_refusals: ================ EMPTY SWEEP ================")
           (println "harvest_refusals: zero refusal/abstention/:unknown/:unscored records.")
-          (println (str "harvest_refusals: written in full to " proposals-path
+          (println (str "harvest_refusals: "
+                        (if wrote-proposals? "written in full to " "unchanged at ")
+                        proposals-path
                         " -- read it before believing the zero."))))
       (println (str "harvest_refusals: " new-findings " new record(s), "
                     classes " class(es) with occurrences, "
                     drafts " draft pattern(s), threshold " threshold))
-      (println (str "harvest_refusals: proposals -> " proposals-path))
+      (println (str "harvest_refusals: proposals "
+                    (if wrote-proposals? "-> " "unchanged: ")
+                    proposals-path))
       (System/exit 0))))
 
 (when (= *file* (System/getProperty "babashka.file"))
