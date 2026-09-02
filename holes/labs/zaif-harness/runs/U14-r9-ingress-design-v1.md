@@ -121,6 +121,12 @@ with witness pointers on each upgraded receipt, never by inference (§7(f)).
   keyword) and refuses a bare boolean after the migration window — the
   requirement becomes explicit instead of vacuous. It must NOT silently
   weaken: a receipt with the field absent still fails, exactly as today.
+  REV-2 BUILD REFINEMENT (claude-2, at packet (c) dispatch): the window is
+  implemented additively — writers add the typed field ALONGSIDE the
+  boolean, the gate keeps requiring the boolean and additionally validates
+  the typed field's vocabulary when present; the boolean's retirement is a
+  separate later dated flip. Reason: every intermediate state (any reload
+  order of writer vs gate) stays safe mid-campaign.
 
 ## 5. Decisions in DERIVE form
 
