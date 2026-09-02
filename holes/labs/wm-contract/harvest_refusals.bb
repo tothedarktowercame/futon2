@@ -511,11 +511,18 @@
    "\n"))
 
 (defn mint-drafts! [classes now]
+  ;; Write-once: a draft is a one-time mint an AUTHOR then owns. Re-spitting
+  ;; an existing draft every sweep both churns its harvest timestamp (dirtying
+  ;; the library tree every publish -- it stopped the library loop's reviews
+  ;; on 2026-09-02) and would clobber any edits the author has made. An
+  ;; existing file is still REPORTED as this class's draft; it is just not
+  ;; rewritten.
   (let [recurring (filter #(>= (:count %) threshold) (vals classes))]
     (when (seq recurring) (fs/create-dirs drafts-dir))
     (into {} (for [c recurring
                    :let [path (draft-path c)]]
-               (do (spit path (draft-text c now))
+               (do (when-not (fs/exists? path)
+                     (spit path (draft-text c now)))
                    [(:id c) (str (fs/relativize (fs/parent (fs/parent drafts-dir)) path))])))))
 
 ;; ---------------------------------------------------------------------------
