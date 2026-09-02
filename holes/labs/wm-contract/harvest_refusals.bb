@@ -547,14 +547,18 @@
                            :finding-keys (:finding-keys lint-sweep)}
                     :classes classes}]
     (fs/create-dirs (fs/parent proposals-path))
-    ;; A sweep that found nothing new and minted nothing leaves the tracked
-    ;; proposals file alone: rewriting only its sweep-number/timestamp header
-    ;; dirties the tree every publish and trips the build loop's mid-edit
-    ;; pre-flight (2026-09-02, wm loop iterations 1-60). The state file below
-    ;; still advances, so the watermark is kept.
-    (let [wrote? (or (not (fs/exists? proposals-path))
-                     (pos? (count findings))
-                     (seq drafted))]
+    ;; A sweep whose CONTENT is unchanged leaves the tracked proposals file
+    ;; alone: rewriting only its sweep-number/timestamp header dirties the
+    ;; tree every publish and trips the build loop's mid-edit pre-flight
+    ;; (2026-09-02, wm loop iterations 1-60 — twice: first on empty sweeps,
+    ;; then again once a class stood at threshold, because mint-drafts!
+    ;; returns the standing class every sweep so a findings/drafted test
+    ;; stays truthy forever). Compare bodies with the volatile header
+    ;; normalised; the state file below still advances the watermark.
+    (let [strip-header #(str/replace % #"(?m)^## Sweep \d+ -- \S+$" "## Sweep")
+          wrote? (or (not (fs/exists? proposals-path))
+                     (not= (strip-header md)
+                           (strip-header (slurp (str proposals-path)))))]
       (when wrote? (spit proposals-path md))
       (fs/create-dirs (fs/parent state-path))
       (spit state-path (str (with-out-str (clojure.pprint/pprint next-state))))
