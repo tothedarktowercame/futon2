@@ -1,0 +1,251 @@
+U3 -- pi_0 placement (:choices :pi-zero-form): does the arm change what the machine SELECTS?
+
+Arms: :none (src default, and what S2 recorded) | :pi-only (friston2017.txt:684 as printed)
+      | :both (spm_MDP_VB_X.m:963-964, the authors' own code; the entry's :interim)
+Chain: arm -> beta (eq. 2.7 root, carried) -> tau = beta (policy.clj:135-137,
+       :tau-mode :variational-beta-gamma) -> softmax(ln E - G/tau - F_pi) (policy.clj:148)
+argmax column is none/pi-only/both, as indices into the aligned field.
+
+The four score expressions, and where each one is in the code:
+  G      policy.clj:678 (posterior only; choice is tau-free)
+  E+G    policy.clj:693-696 (the one site where tau DECIDES)
+  G+F    NOT REACHABLE: F_pi and ln E arrive at one call site together
+  E+G+F  policy.clj:553-556 (recorded posterior; U1's flip target)
+
+=== S2 -- holes/labs/wm-contract/runs/2026-09-01-s2/wm-trace-s2.edn
+20 records; 20 with a usable aligned field; candidates per tick 143,145,145,145,145,145,145,145,145,145,145,145,145,145,145,145,145,145,145,145
+dropped from the aligned field (F_pi absent or identity not unique): 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+FIELD ln E over the aligned candidates: distinct values 3; spread 3.0445224377..3.0445224377; candidates with ln E = 0: 0 over 20 ticks
+FIELD the record's own :decision -- :selection-boundary {:reason-bearing-strategic-policy 20}; its :action equals the argmax of ln E - G/tau on 0 of 20 ticks
+CONTROL 1 solver: local :none arm vs src converge-beta, beta_prior 1.0 -- max |delta| 0.000e+00 over 20 ticks
+CONTROL 2 recorded beta: run's own :beta-posterior reproduced from its own :beta-prior -- max |delta| 0.000e+00 over 20 ticks
+CONTROL 3 enactment: records carrying :act-gate-verdicts 0 of 20; :realized-outcome 0 of 20 -- NOT FOUND means the H1b bracket cannot be evaluated on this field
+CONTROL 4 tau-invariance of the :G law: argmax equals argmin G at every tau in {1e-3..1e3} on 20 of 20 ticks (the arithmetic says all)
+CONTROL 5 detector teeth, law G     : a tau stepped across the closed-form window edge changes the argmax on 0 of 0 ticks that HAVE an edge (no tick has a finite edge -- the law's argmax is tau-invariant)
+CONTROL 5 detector teeth, law E+G   : a tau stepped across the closed-form window edge changes the argmax on 0 of 0 ticks that HAVE an edge (no tick has a finite edge -- the law's argmax is tau-invariant)
+CONTROL 5 detector teeth, law G+F   : a tau stepped across the closed-form window edge changes the argmax on 20 of 20 ticks that HAVE an edge
+CONTROL 5 detector teeth, law E+G+F : a tau stepped across the closed-form window edge changes the argmax on 0 of 0 ticks that HAVE an edge (no tick has a finite edge -- the law's argmax is tau-invariant)
+
+--- beta_0 = 0.5, carried
+  arm none     beta first 0.5024450402 last 0.5446058981 | gamma first 1.9902674324 last 1.8361901763 | converged 20/20 bracketed 20/20
+  arm pi-only  beta first 0.5068318848 last 0.6283411319 | gamma first 1.9730408247 last 1.5914921835 | converged 20/20 bracketed 20/20
+  arm both     beta first 0.5021224822 last 0.5387191616 | gamma first 1.9915459584 last 1.8562547450 | converged 20/20 bracketed 20/20
+  tau spread across arms (max/min): mean 1.090114308  max 1.166361208  (1.0 = the arms hand selection the same temperature)
+  law G      argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 3.235e-04 pi-only-vs-both 4.344e-03
+         margin: NO finite window edge on any tick -- this law's argmax is tau-invariant, so no beta can move it
+  law E+G    argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 3.472e-04 pi-only-vs-both 4.635e-03
+         margin: lambda_break min 6.813187 mean 7.061656 (the factor tau must move to change the choice) against rho max 1.166361208 (the factor the arms differ by) -- headroom 34.94x
+  law G+F    argmax DIFFERS between arms on 11 of 20 ticks | rank moves none-vs-both total 77 (max displacement 10) | pi-only-vs-both total 543 (max 39) | max TV none-vs-both 3.427e-04 pi-only-vs-both 4.591e-03
+         margin: lambda_break min 1.043728 mean 1.080890 (the factor tau must move to change the choice) against rho max 1.166361208 (the factor the arms differ by) -- headroom 0.26x  <-- the arms move tau FURTHER than the choice can survive
+  law E+G+F  argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 77 (max displacement 10) | pi-only-vs-both total 510 (max 39) | max TV none-vs-both 3.612e-04 pi-only-vs-both 4.816e-03
+         margin: lambda_break min 6.864495 mean 7.114836 (the factor tau must move to change the choice) against rho max 1.166361208 (the factor the arms differ by) -- headroom 35.25x
+
+--- beta_0 = 1.0, carried
+  arm none     beta first 1.0026460727 last 1.0343423166 | gamma first 0.9973609105 last 0.9667979198 | converged 20/20 bracketed 20/20
+  arm pi-only  beta first 1.0068493292 last 1.1061211857 | gamma first 0.9931972650 last 0.9040600731 | converged 20/20 bracketed 20/20
+  arm both     beta first 1.0022782940 last 1.0296143457 | gamma first 0.9977268848 last 0.9712374387 | converged 20/20 bracketed 20/20
+  tau spread across arms (max/min): mean 1.040052145  max 1.074306307  (1.0 = the arms hand selection the same temperature)
+  law G      argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 8.625e-05 pi-only-vs-both 1.319e-03
+         margin: NO finite window edge on any tick -- this law's argmax is tau-invariant, so no beta can move it
+         t1   argmax 0/0/0 | machine rank of winner   1 | rho 1.004560645 | tau window [        inf ,         inf] lambda_break inf
+         t2   argmax 0/0/0 | machine rank of winner   1 | rho 1.008431105 | tau window [        inf ,         inf] lambda_break inf
+         t3   argmax 0/0/0 | machine rank of winner   1 | rho 1.012278327 | tau window [        inf ,         inf] lambda_break inf
+         t4   argmax 0/0/0 | machine rank of winner   1 | rho 1.016102706 | tau window [        inf ,         inf] lambda_break inf
+         t5   argmax 0/0/0 | machine rank of winner   1 | rho 1.019904570 | tau window [        inf ,         inf] lambda_break inf
+         t6   argmax 0/0/0 | machine rank of winner   1 | rho 1.023683490 | tau window [        inf ,         inf] lambda_break inf
+         t7   argmax 0/0/0 | machine rank of winner   1 | rho 1.027440051 | tau window [        inf ,         inf] lambda_break inf
+         t8   argmax 0/0/0 | machine rank of winner   1 | rho 1.031173606 | tau window [        inf ,         inf] lambda_break inf
+         t9   argmax 0/0/0 | machine rank of winner   1 | rho 1.034885962 | tau window [        inf ,         inf] lambda_break inf
+         t10  argmax 0/0/0 | machine rank of winner   1 | rho 1.038575994 | tau window [        inf ,         inf] lambda_break inf
+         t11  argmax 0/0/0 | machine rank of winner   1 | rho 1.042244655 | tau window [        inf ,         inf] lambda_break inf
+         t12  argmax 0/0/0 | machine rank of winner   1 | rho 1.045891347 | tau window [        inf ,         inf] lambda_break inf
+         t13  argmax 0/0/0 | machine rank of winner   1 | rho 1.049516326 | tau window [        inf ,         inf] lambda_break inf
+         t14  argmax 0/0/0 | machine rank of winner   1 | rho 1.053120449 | tau window [        inf ,         inf] lambda_break inf
+         t15  argmax 0/0/0 | machine rank of winner   1 | rho 1.056703230 | tau window [        inf ,         inf] lambda_break inf
+         t16  argmax 0/0/0 | machine rank of winner   1 | rho 1.060265095 | tau window [        inf ,         inf] lambda_break inf
+         t17  argmax 0/0/0 | machine rank of winner   1 | rho 1.063806153 | tau window [        inf ,         inf] lambda_break inf
+         t18  argmax 0/0/0 | machine rank of winner   1 | rho 1.067326476 | tau window [        inf ,         inf] lambda_break inf
+         t19  argmax 0/0/0 | machine rank of winner   1 | rho 1.070826403 | tau window [        inf ,         inf] lambda_break inf
+         t20  argmax 0/0/0 | machine rank of winner   1 | rho 1.074306307 | tau window [        inf ,         inf] lambda_break inf
+  law E+G    argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 8.764e-05 pi-only-vs-both 1.336e-03
+         margin: lambda_break min 13.599688 mean 13.786276 (the factor tau must move to change the choice) against rho max 1.074306307 (the factor the arms differ by) -- headroom 169.56x
+         t1   argmax 35/35/35 | machine rank of winner 130 | rho 1.004560645 | tau window [   0.073699 ,         inf] lambda_break 13.599688
+         t2   argmax 35/35/35 | machine rank of winner 130 | rho 1.008431105 | tau window [   0.073699 ,         inf] lambda_break 13.619804
+         t3   argmax 35/35/35 | machine rank of winner 130 | rho 1.012278327 | tau window [   0.073699 ,         inf] lambda_break 13.639677
+         t4   argmax 35/35/35 | machine rank of winner 130 | rho 1.016102706 | tau window [   0.073699 ,         inf] lambda_break 13.659500
+         t5   argmax 35/35/35 | machine rank of winner 130 | rho 1.019904570 | tau window [   0.073699 ,         inf] lambda_break 13.679234
+         t6   argmax 35/35/35 | machine rank of winner 130 | rho 1.023683490 | tau window [   0.073699 ,         inf] lambda_break 13.698798
+         t7   argmax 35/35/35 | machine rank of winner 130 | rho 1.027440051 | tau window [   0.073699 ,         inf] lambda_break 13.718410
+         t8   argmax 35/35/35 | machine rank of winner 130 | rho 1.031173606 | tau window [   0.073699 ,         inf] lambda_break 13.737963
+         t9   argmax 35/35/35 | machine rank of winner 130 | rho 1.034885962 | tau window [   0.073699 ,         inf] lambda_break 13.757787
+         t10  argmax 35/35/35 | machine rank of winner 130 | rho 1.038575994 | tau window [   0.073699 ,         inf] lambda_break 13.777307
+         t11  argmax 35/35/35 | machine rank of winner 130 | rho 1.042244655 | tau window [   0.073699 ,         inf] lambda_break 13.796811
+         t12  argmax 35/35/35 | machine rank of winner 130 | rho 1.045891347 | tau window [   0.073699 ,         inf] lambda_break 13.816090
+         t13  argmax 35/35/35 | machine rank of winner 130 | rho 1.049516326 | tau window [   0.073699 ,         inf] lambda_break 13.835377
+         t14  argmax 35/35/35 | machine rank of winner 130 | rho 1.053120449 | tau window [   0.073699 ,         inf] lambda_break 13.854811
+         t15  argmax 35/35/35 | machine rank of winner 130 | rho 1.056703230 | tau window [   0.073699 ,         inf] lambda_break 13.874127
+         t16  argmax 35/35/35 | machine rank of winner 130 | rho 1.060265095 | tau window [   0.073699 ,         inf] lambda_break 13.893450
+         t17  argmax 35/35/35 | machine rank of winner 130 | rho 1.063806153 | tau window [   0.073699 ,         inf] lambda_break 13.912748
+         t18  argmax 35/35/35 | machine rank of winner 130 | rho 1.067326476 | tau window [   0.073699 ,         inf] lambda_break 13.932019
+         t19  argmax 35/35/35 | machine rank of winner 130 | rho 1.070826403 | tau window [   0.073699 ,         inf] lambda_break 13.951319
+         t20  argmax 35/35/35 | machine rank of winner 130 | rho 1.074306307 | tau window [   0.073699 ,         inf] lambda_break 13.970605
+  law G+F    argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 45 (max 4) | max TV none-vs-both 8.879e-05 pi-only-vs-both 1.355e-03
+         margin: lambda_break min 1.782538 mean 1.806994 (the factor tau must move to change the choice) against rho max 1.074306307 (the factor the arms differ by) -- headroom 10.53x
+         t1   argmax 38/38/38 | machine rank of winner 133 | rho 1.004560645 | tau window [   0.562276 ,   35.101156] lambda_break 1.782538
+         t2   argmax 38/38/38 | machine rank of winner 133 | rho 1.008431105 | tau window [   0.562276 ,   35.101156] lambda_break 1.785174
+         t3   argmax 38/38/38 | machine rank of winner 133 | rho 1.012278327 | tau window [   0.562276 ,   35.101156] lambda_break 1.787779
+         t4   argmax 38/38/38 | machine rank of winner 133 | rho 1.016102706 | tau window [   0.562276 ,   35.101156] lambda_break 1.790377
+         t5   argmax 38/38/38 | machine rank of winner 133 | rho 1.019904570 | tau window [   0.562276 ,   35.101156] lambda_break 1.792964
+         t6   argmax 38/38/38 | machine rank of winner 133 | rho 1.023683490 | tau window [   0.562276 ,   35.101156] lambda_break 1.795528
+         t7   argmax 38/38/38 | machine rank of winner 133 | rho 1.027440051 | tau window [   0.562276 ,   35.101156] lambda_break 1.798099
+         t8   argmax 38/38/38 | machine rank of winner 133 | rho 1.031173606 | tau window [   0.562276 ,   35.101156] lambda_break 1.800662
+         t9   argmax 38/38/38 | machine rank of winner 133 | rho 1.034885962 | tau window [   0.562276 ,   35.101156] lambda_break 1.803260
+         t10  argmax 38/38/38 | machine rank of winner 133 | rho 1.038575994 | tau window [   0.562276 ,   35.101156] lambda_break 1.805818
+         t11  argmax 38/38/38 | machine rank of winner 133 | rho 1.042244655 | tau window [   0.562276 ,   35.101156] lambda_break 1.808375
+         t12  argmax 38/38/38 | machine rank of winner 133 | rho 1.045891347 | tau window [   0.562276 ,   35.101156] lambda_break 1.810902
+         t13  argmax 38/38/38 | machine rank of winner 133 | rho 1.049516326 | tau window [   0.562276 ,   35.101156] lambda_break 1.813430
+         t14  argmax 38/38/38 | machine rank of winner 133 | rho 1.053120449 | tau window [   0.562276 ,   35.101156] lambda_break 1.815977
+         t15  argmax 38/38/38 | machine rank of winner 133 | rho 1.056703230 | tau window [   0.562276 ,   35.101156] lambda_break 1.818509
+         t16  argmax 38/38/38 | machine rank of winner 133 | rho 1.060265095 | tau window [   0.562276 ,   35.101156] lambda_break 1.821042
+         t17  argmax 38/38/38 | machine rank of winner 133 | rho 1.063806153 | tau window [   0.562276 ,   35.101156] lambda_break 1.823571
+         t18  argmax 38/38/38 | machine rank of winner 133 | rho 1.067326476 | tau window [   0.562276 ,   35.101156] lambda_break 1.826097
+         t19  argmax 38/38/38 | machine rank of winner 133 | rho 1.070826403 | tau window [   0.562276 ,   35.101156] lambda_break 1.828627
+         t20  argmax 38/38/38 | machine rank of winner 133 | rho 1.074306307 | tau window [   0.562276 ,   35.101156] lambda_break 1.831154
+  law E+G+F  argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 36 (max 3) | max TV none-vs-both 8.932e-05 pi-only-vs-both 1.360e-03
+         margin: lambda_break min 13.702105 mean 13.890098 (the factor tau must move to change the choice) against rho max 1.074306307 (the factor the arms differ by) -- headroom 170.94x
+         t1   argmax 35/35/35 | machine rank of winner 130 | rho 1.004560645 | tau window [   0.073148 ,         inf] lambda_break 13.702105
+         t2   argmax 35/35/35 | machine rank of winner 130 | rho 1.008431105 | tau window [   0.073148 ,         inf] lambda_break 13.722372
+         t3   argmax 35/35/35 | machine rank of winner 130 | rho 1.012278327 | tau window [   0.073148 ,         inf] lambda_break 13.742395
+         t4   argmax 35/35/35 | machine rank of winner 130 | rho 1.016102706 | tau window [   0.073148 ,         inf] lambda_break 13.762368
+         t5   argmax 35/35/35 | machine rank of winner 130 | rho 1.019904570 | tau window [   0.073148 ,         inf] lambda_break 13.782250
+         t6   argmax 35/35/35 | machine rank of winner 130 | rho 1.023683490 | tau window [   0.073148 ,         inf] lambda_break 13.801962
+         t7   argmax 35/35/35 | machine rank of winner 130 | rho 1.027440051 | tau window [   0.073148 ,         inf] lambda_break 13.821720
+         t8   argmax 35/35/35 | machine rank of winner 130 | rho 1.031173606 | tau window [   0.073148 ,         inf] lambda_break 13.841421
+         t9   argmax 35/35/35 | machine rank of winner 130 | rho 1.034885962 | tau window [   0.073148 ,         inf] lambda_break 13.861394
+         t10  argmax 35/35/35 | machine rank of winner 130 | rho 1.038575994 | tau window [   0.073148 ,         inf] lambda_break 13.881061
+         t11  argmax 35/35/35 | machine rank of winner 130 | rho 1.042244655 | tau window [   0.073148 ,         inf] lambda_break 13.900712
+         t12  argmax 35/35/35 | machine rank of winner 130 | rho 1.045891347 | tau window [   0.073148 ,         inf] lambda_break 13.920137
+         t13  argmax 35/35/35 | machine rank of winner 130 | rho 1.049516326 | tau window [   0.073148 ,         inf] lambda_break 13.939568
+         t14  argmax 35/35/35 | machine rank of winner 130 | rho 1.053120449 | tau window [   0.073148 ,         inf] lambda_break 13.959149
+         t15  argmax 35/35/35 | machine rank of winner 130 | rho 1.056703230 | tau window [   0.073148 ,         inf] lambda_break 13.978611
+         t16  argmax 35/35/35 | machine rank of winner 130 | rho 1.060265095 | tau window [   0.073148 ,         inf] lambda_break 13.998079
+         t17  argmax 35/35/35 | machine rank of winner 130 | rho 1.063806153 | tau window [   0.073148 ,         inf] lambda_break 14.017522
+         t18  argmax 35/35/35 | machine rank of winner 130 | rho 1.067326476 | tau window [   0.073148 ,         inf] lambda_break 14.036939
+         t19  argmax 35/35/35 | machine rank of winner 130 | rho 1.070826403 | tau window [   0.073148 ,         inf] lambda_break 14.056384
+         t20  argmax 35/35/35 | machine rank of winner 130 | rho 1.074306307 | tau window [   0.073148 ,         inf] lambda_break 14.075815
+
+--- beta_0 = 2.0, carried
+  arm none     beta first 2.0024541970 last 2.0119692400 | gamma first 0.4993872027 last 0.4970254913 | converged 20/20 bracketed 20/20
+  arm pi-only  beta first 2.0063545953 last 2.0684988761 | gamma first 0.4984163828 last 0.4834423705 | converged 20/20 bracketed 20/20
+  arm both     beta first 2.0021045869 last 2.0101799158 | gamma first 0.4994744063 last 0.4974679093 | converged 20/20 bracketed 20/20
+  tau spread across arms (max/min): mean 1.015647934  max 1.029011811  (1.0 = the arms hand selection the same temperature)
+  law G      argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.042e-05 pi-only-vs-both 3.314e-04
+         margin: NO finite window edge on any tick -- this law's argmax is tau-invariant, so no beta can move it
+  law E+G    argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.008e-05 pi-only-vs-both 3.205e-04
+         margin: lambda_break min 27.166105 mean 27.221936 (the factor tau must move to change the choice) against rho max 1.029011811 (the factor the arms differ by) -- headroom 901.91x
+  law G+F    argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.037e-05 pi-only-vs-both 3.296e-04
+         margin: lambda_break min 3.560714 mean 3.568032 (the factor tau must move to change the choice) against rho max 1.029011811 (the factor the arms differ by) -- headroom 88.26x
+  law E+G+F  argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.002e-05 pi-only-vs-both 3.183e-04
+         margin: lambda_break min 27.370688 mean 27.426940 (the factor tau must move to change the choice) against rho max 1.029011811 (the factor the arms differ by) -- headroom 908.96x
+
+--- beta_0 = 5.0, carried
+  arm none     beta first 5.0021140473 last 4.9857335397 | gamma first 0.1999154738 last 0.2005722913 | converged 20/20 bracketed 20/20
+  arm pi-only  beta first 5.0056913120 last 5.0255763656 | gamma first 0.1997726064 last 0.1989821519 | converged 20/20 bracketed 20/20
+  arm both     beta first 5.0018079810 last 4.9875300351 | gamma first 0.1999277069 last 0.2005000457 | converged 20/20 bracketed 20/20
+  tau spread across arms (max/min): mean 1.004356795  max 1.007991367  (1.0 = the arms hand selection the same temperature)
+  law G      argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 2.125e-06 pi-only-vs-both 4.469e-05
+         margin: NO finite window edge on any tick -- this law's argmax is tau-invariant, so no beta can move it
+  law E+G    argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 2.022e-06 pi-only-vs-both 4.251e-05
+         margin: lambda_break min 67.674669 mean 67.772935 (the factor tau must move to change the choice) against rho max 1.007991367 (the factor the arms differ by) -- headroom 8343.34x
+  law G+F    argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 2.035e-06 pi-only-vs-both 4.278e-05
+         margin: lambda_break min 7.017694 mean 7.027585 (the factor tau must move to change the choice) against rho max 1.007991367 (the factor the arms differ by) -- headroom 753.02x
+  law E+G+F  argmax DIFFERS between arms on 0 of 20 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.949e-06 pi-only-vs-both 4.098e-05
+         margin: lambda_break min 68.184315 mean 68.283321 (the factor tau must move to change the choice) against rho max 1.007991367 (the factor the arms differ by) -- headroom 8407.11x
+
+=== S4 -- holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn
+4 records; 4 with a usable aligned field; candidates per tick 145,144,145,145
+dropped from the aligned field (F_pi absent or identity not unique): 0,1,0,0
+FIELD ln E over the aligned candidates: distinct values 3; spread 3.0445224377..3.0445224377; candidates with ln E = 0: 0 over 4 ticks
+FIELD the record's own :decision -- :selection-boundary {:reason-bearing-strategic-policy 4}; its :action equals the argmax of ln E - G/tau on 0 of 4 ticks
+CONTROL 1 solver: local :none arm vs src converge-beta, beta_prior 1.0 -- max |delta| 0.000e+00 over 4 ticks
+CONTROL 2 recorded beta: NOT APPLICABLE -- this field recorded no :policy-precision-state, so there is no beta to reproduce
+CONTROL 3 enactment: records carrying :act-gate-verdicts 0 of 4; :realized-outcome 0 of 4 -- NOT FOUND means the H1b bracket cannot be evaluated on this field
+CONTROL 4 tau-invariance of the :G law: argmax equals argmin G at every tau in {1e-3..1e3} on 4 of 4 ticks (the arithmetic says all)
+CONTROL 5 detector teeth, law G     : a tau stepped across the closed-form window edge changes the argmax on 0 of 0 ticks that HAVE an edge (no tick has a finite edge -- the law's argmax is tau-invariant)
+CONTROL 5 detector teeth, law E+G   : a tau stepped across the closed-form window edge changes the argmax on 0 of 0 ticks that HAVE an edge (no tick has a finite edge -- the law's argmax is tau-invariant)
+CONTROL 5 detector teeth, law G+F   : a tau stepped across the closed-form window edge changes the argmax on 4 of 4 ticks that HAVE an edge
+CONTROL 5 detector teeth, law E+G+F : a tau stepped across the closed-form window edge changes the argmax on 0 of 0 ticks that HAVE an edge (no tick has a finite edge -- the law's argmax is tau-invariant)
+
+--- beta_0 = 0.5, carried
+  arm none     beta first 0.5022070083 last 0.5090456358 | gamma first 1.9912107625 last 1.9644604132 | converged 4/4 bracketed 4/4
+  arm pi-only  beta first 0.5064590328 last 0.5260844399 | gamma first 1.9744933650 last 1.9008355392 | converged 4/4 bracketed 4/4
+  arm both     beta first 0.5019165971 last 0.5078540076 | gamma first 1.9923628862 last 1.9690698211 | converged 4/4 bracketed 4/4
+  tau spread across arms (max/min): mean 1.022557038  max 1.035896994  (1.0 = the arms hand selection the same temperature)
+  law G      argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 7.336e-05 pi-only-vs-both 1.090e-03
+         margin: NO finite window edge on any tick -- this law's argmax is tau-invariant, so no beta can move it
+  law E+G    argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 7.908e-05 pi-only-vs-both 1.173e-03
+         margin: lambda_break min 6.810393 mean 6.850965 (the factor tau must move to change the choice) against rho max 1.035896994 (the factor the arms differ by) -- headroom 161.86x
+  law G+F    argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 6 (max displacement 1) | pi-only-vs-both total 47 (max 17) | max TV none-vs-both 7.788e-05 pi-only-vs-both 1.157e-03
+         margin: lambda_break min 1.107161 mean 1.113645 (the factor tau must move to change the choice) against rho max 1.035896994 (the factor the arms differ by) -- headroom 2.99x
+  law E+G+F  argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 6 (max displacement 1) | pi-only-vs-both total 47 (max 17) | max TV none-vs-both 8.239e-05 pi-only-vs-both 1.222e-03
+         margin: lambda_break min 6.861681 mean 6.902558 (the factor tau must move to change the choice) against rho max 1.035896994 (the factor the arms differ by) -- headroom 163.29x
+
+--- beta_0 = 1.0, carried
+  arm none     beta first 1.0016669058 last 1.0075225950 | gamma first 0.9983358682 last 0.9925335719 | converged 4/4 bracketed 4/4
+  arm pi-only  beta first 1.0053364469 last 1.0223551906 | gamma first 0.9946918796 last 0.9781336361 | converged 4/4 bracketed 4/4
+  arm both     beta first 1.0014346329 last 1.0064799997 | gamma first 0.9985674223 last 0.9935617204 | converged 4/4 bracketed 4/4
+  tau spread across arms (max/min): mean 1.009930506  max 1.015772982  (1.0 = the arms hand selection the same temperature)
+  law G      argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.984e-05 pi-only-vs-both 2.984e-04
+         margin: NO finite window edge on any tick -- this law's argmax is tau-invariant, so no beta can move it
+         t1   argmax 0/0/0 | machine rank of winner   1 | rho 1.003896224 | tau window [        inf ,         inf] lambda_break inf
+         t2   argmax 0/0/0 | machine rank of winner   1 | rho 1.008103070 | tau window [        inf ,         inf] lambda_break inf
+         t3   argmax 0/0/0 | machine rank of winner   1 | rho 1.011949747 | tau window [        inf ,         inf] lambda_break inf
+         t4   argmax 0/0/0 | machine rank of winner   1 | rho 1.015772982 | tau window [        inf ,         inf] lambda_break inf
+  law E+G    argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 2.020e-05 pi-only-vs-both 3.036e-04
+         margin: lambda_break min 13.588240 mean 13.623666 (the factor tau must move to change the choice) against rho max 1.015772982 (the factor the arms differ by) -- headroom 798.09x
+         t1   argmax 35/35/35 | machine rank of winner 130 | rho 1.003896224 | tau window [   0.073699 ,         inf] lambda_break 13.588240
+         t2   argmax 35/35/35 | machine rank of winner 130 | rho 1.008103070 | tau window [   0.073699 ,         inf] lambda_break 13.614229
+         t3   argmax 35/35/35 | machine rank of winner 130 | rho 1.011949747 | tau window [   0.073699 ,         inf] lambda_break 13.635493
+         t4   argmax 35/35/35 | machine rank of winner 130 | rho 1.015772982 | tau window [   0.073699 ,         inf] lambda_break 13.656700
+  law G+F    argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 2.052e-05 pi-only-vs-both 3.086e-04
+         margin: lambda_break min 1.781037 mean 1.785680 (the factor tau must move to change the choice) against rho max 1.015772982 (the factor the arms differ by) -- headroom 49.52x
+         t1   argmax 38/38/38 | machine rank of winner 133 | rho 1.003896224 | tau window [   0.562276 ,   35.101156] lambda_break 1.781037
+         t2   argmax 38/38/38 | machine rank of winner 133 | rho 1.008103070 | tau window [   0.562276 ,   35.101156] lambda_break 1.784444
+         t3   argmax 38/38/38 | machine rank of winner 133 | rho 1.011949747 | tau window [   0.562276 ,   35.101156] lambda_break 1.787231
+         t4   argmax 38/38/38 | machine rank of winner 133 | rho 1.015772982 | tau window [   0.562276 ,   35.101156] lambda_break 1.790010
+  law E+G+F  argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 2.066e-05 pi-only-vs-both 3.104e-04
+         margin: lambda_break min 13.690571 mean 13.726263 (the factor tau must move to change the choice) against rho max 1.015772982 (the factor the arms differ by) -- headroom 804.58x
+         t1   argmax 35/35/35 | machine rank of winner 130 | rho 1.003896224 | tau window [   0.073148 ,         inf] lambda_break 13.690571
+         t2   argmax 35/35/35 | machine rank of winner 130 | rho 1.008103070 | tau window [   0.073148 ,         inf] lambda_break 13.716756
+         t3   argmax 35/35/35 | machine rank of winner 130 | rho 1.011949747 | tau window [   0.073148 ,         inf] lambda_break 13.738179
+         t4   argmax 35/35/35 | machine rank of winner 130 | rho 1.015772982 | tau window [   0.073148 ,         inf] lambda_break 13.759546
+
+--- beta_0 = 2.0, carried
+  arm none     beta first 2.0004775453 last 2.0036508896 | gamma first 0.4998806422 last 0.4990889407 | converged 4/4 bracketed 4/4
+  arm pi-only  beta first 2.0033047771 last 2.0153667587 | gamma first 0.4991751687 last 0.4961876024 | converged 4/4 bracketed 4/4
+  arm both     beta first 2.0004039615 last 2.0031214997 | gamma first 0.4998990300 last 0.4992208411 | converged 4/4 bracketed 4/4
+  tau spread across arms (max/min): mean 1.003867002  max 1.006113089  (1.0 = the arms hand selection the same temperature)
+  law G      argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 3.099e-06 pi-only-vs-both 7.132e-05
+         margin: NO finite window edge on any tick -- this law's argmax is tau-invariant, so no beta can move it
+  law E+G    argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 3.001e-06 pi-only-vs-both 6.904e-05
+         margin: lambda_break min 27.143030 mean 27.163841 (the factor tau must move to change the choice) against rho max 1.006113089 (the factor the arms differ by) -- headroom 4276.57x
+  law G+F    argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 3.103e-06 pi-only-vs-both 7.140e-05
+         margin: lambda_break min 3.557690 mean 3.560418 (the factor tau must move to change the choice) against rho max 1.006113089 (the factor the arms differ by) -- headroom 418.40x
+  law E+G+F  argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 2.996e-06 pi-only-vs-both 6.894e-05
+         margin: lambda_break min 27.347439 mean 27.368407 (the factor tau must move to change the choice) against rho max 1.006113089 (the factor the arms differ by) -- headroom 4310.00x
+
+--- beta_0 = 5.0, carried
+  arm none     beta first 4.9991148677 last 4.9991002110 | gamma first 0.2000354116 last 0.2000359980 | converged 4/4 bracketed 4/4
+  arm pi-only  beta first 5.0010592520 last 5.0075310262 | gamma first 0.1999576389 last 0.1996992120 | converged 4/4 bracketed 4/4
+  arm both     beta first 4.9992284604 last 4.9991971166 | gamma first 0.2000308663 last 0.2000321205 | converged 4/4 bracketed 4/4
+  tau spread across arms (max/min): mean 1.001080110  max 1.001686467  (1.0 = the arms hand selection the same temperature)
+  law G      argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.328e-07 pi-only-vs-both 9.729e-06
+         margin: NO finite window edge on any tick -- this law's argmax is tau-invariant, so no beta can move it
+  law E+G    argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.266e-07 pi-only-vs-both 9.269e-06
+         margin: lambda_break min 67.832977 mean 67.836769 (the factor tau must move to change the choice) against rho max 1.001686467 (the factor the arms differ by) -- headroom 39629.00x
+  law G+F    argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.271e-07 pi-only-vs-both 9.448e-06
+         margin: lambda_break min 7.020344 mean 7.020966 (the factor tau must move to change the choice) against rho max 1.001686467 (the factor the arms differ by) -- headroom 3569.80x
+  law E+G+F  argmax DIFFERS between arms on 0 of 4 ticks | rank moves none-vs-both total 0 (max displacement 0) | pi-only-vs-both total 0 (max 0) | max TV none-vs-both 1.219e-07 pi-only-vs-both 9.037e-06
+         margin: lambda_break min 68.343815 mean 68.347636 (the factor tau must move to change the choice) against rho max 1.001686467 (the factor the arms differ by) -- headroom 39931.90x
+
+TOTAL scorable ticks: 24
