@@ -811,7 +811,7 @@
                 {:field "S4" :tick 3 :movers [#{:ln-e :f-pi}]
                  :head-rank 1 :chosen-rank 130}]
                @moved)
-            "3 of 3 applied ticks: the full score chooses the rank-6 candidate
+            "3 of 3 applied ticks: the full score chooses the rank-130 candidate
              where the old law took the G-ordered head at rank 1, and the
              minimal mover set is {ln E, F_π} TOGETHER on each — the same set
              (b) attributes the recorded posterior's argmax change to. So the
