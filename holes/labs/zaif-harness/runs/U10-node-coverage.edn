@@ -25,7 +25,7 @@
                "../futon3c/src/futon3c/agents/zaif_inputs.clj:192"]
     :note "U6 diagnoses the recorded empty zaif task-belief; it does not test persistence. WM belief state and zaif hydration are separate paths."}
    :gap "No two-turn persistence/reconstruction test; all 114 recorded zaif sessions had an empty task belief. S7 identifies real WM mu-pre/mu-post fields but has not extracted fixtures."
-   :blocked-by [:D8 :S7]}
+   :blocked-by [:D8 :U11 :S7]}
 
   {:node :R2
    :spec-test :partial
@@ -51,7 +51,7 @@
                "../futon3c/src/futon3c/agents/zaif_inputs.clj:177"]
     :note "The U6 assertion exposes an absent update input. It does not execute the same update path in zaif and WM."}
    :gap "No planted directional update and no typed-empty unchanged test; S7's real WM mu-pre/mu-post has not become a fixture."
-   :blocked-by [:D8 :S7]}
+   :blocked-by [:D8 :U11 :S7]}
 
   {:node :R4
    :spec-test :partial
@@ -68,7 +68,7 @@
                "../futon3c/src/futon3c/agents/zaif_controller.clj:105"]
     :note "WM's forward model rejects zaif arms. U6 alone maps zaif scalar arm values into planted WM predictions."}
    :gap "No real zaif observation model exists. R4 and its ordering are explicitly planted; the negative control at line 539 changes the ordering with the plant."
-   :blocked-by [:D8 :S7]}
+   :blocked-by [:D8 :U11 :S7]}
 
   {:node :R5
    :spec-test :partial

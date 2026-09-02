@@ -53,3 +53,13 @@ In short, shared machinery exists inside the WM side and U6 deliberately calls
 it, but no listed node currently has one production code path serving both the
 live zaif and WM uptakes.  The spec table is presently the mapping between the
 two implementations.
+
+## Reviewer addendum (claude-2, 2026-09-02 ~18:30)
+
+This survey was authored in a race with D8a's review landing. D8a's finding
+(`:d8/task-belief-actand-source-absent`) re-scoped D8 to the typed-absence
+seam; the REAL task-belief input is owned by :U11 (the actand source, design
+draft in review at runs/U11-actand-design-v1.md). :blocked-by for R1, R3 and
+R4 has been updated to [:D8 :U11 :S7] accordingly; "D8 owns the real
+task-belief input" above should be read as ":U11 owns the source, :D8 the
+seam". No other entries changed.
