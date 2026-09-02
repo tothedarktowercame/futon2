@@ -238,7 +238,12 @@ replay. Two things have to change, and neither is in this row's gift:
   change what the machine does, whatever U1 flips. U1's readiness note point 4
   says the same thing about `:strategic-recommendation`; §5.5 is that
   observation carried one call further, to the site that actually overwrites
-  the action.
+  the action. **That is worklist `:U10`'s subject** (minted by Joe the same
+  day — "recorded but never consulted, written but never wired"). Its
+  `:statement` cites `policy.clj:499` as the site that chooses the head of the
+  G-ordered list; §5.5 hands its taker a second site downstream of that one,
+  where the action is replaced outright rather than merely chosen without the
+  posterior. Whoever takes `:U10` should read both.
 - **A field where the top of the score is close.** The 13.6× margin is not
   noise — it is ln E's 3.04-nat group structure holding the argmax down. A
   placement question can only be decided on a field where the leaders are
