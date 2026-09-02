@@ -453,3 +453,388 @@
                                                           (:f-pi f))))))
             "and the posterior it recorded is NOT the one a zero-filled F_π
              would have produced — the decline is visible in the numbers")))))
+
+;; ---------------------------------------------------------------------------
+;; (e) U10 — THE MISSING HALF: attribution over the CHOSEN ACTION.
+;;
+;; (a)–(d) above are statements about the RECORDED POSTERIOR. U1 readiness
+;; point 4 (SPEC-dormant-wiring.md:87-96) found that the posterior is not what
+;; chooses: on `:selection-boundary :strategic-recommendation` the chosen action
+;; is the head of the G-ordered list and the F_π-bearing posterior is recorded
+;; and never read, while `:actuation` selects by ln E − G/τ but F_π cannot
+;; reach it. So "the argmax changed" was, on every field above, a claim about a
+;; number nothing consulted.
+;;
+;; U10 adds the law that consults it: `:selection-law :full-score-posterior`,
+;; under which the chosen action IS the argmax of `policy/selection-scores` —
+;; the same vector `:softmax-weights` normalises. These tests are the
+;; attribution over the CHOICE: which action each law picks, whether they
+;; differ, and which term moved it when they do.
+;;
+;; The law is OFF BY DEFAULT and these tests do not flip it. What they do is
+;; measure what the flip would do on the recorded fields, so the prediction in
+;; SPEC-dormant-wiring.md U10 is stated before the flip rather than read after.
+
+(def ^:private strategic-base
+  {:selection-boundary :strategic-recommendation
+   :selection-gain 1.0
+   :temperature-opts {:tau-mode :selection-gain-only}})
+
+(defn- decide
+  "One `select-action` call at the strategic boundary. `law` nil means the
+   caller passes no `:selection-law` at all — the production default path."
+  [ranked law f-pi-opts]
+  (policy/select-action
+   ranked
+   (cond-> strategic-base
+     law (assoc :selection-law law)
+     f-pi-opts (assoc :f-pi-opts f-pi-opts))))
+
+(defn- ranked-of
+  "A ranked-action field from parallel G / ln E vectors, with distinguishable
+   actions and no :no-op (both laws range over the same candidates)."
+  [g ln-e]
+  (mapv (fn [idx gi li]
+          {:action {:type :advance-mission :target (str "M-" idx)}
+           :rank (inc idx)
+           :controller-score gi
+           :habit-prior-bias li})
+        (range) g ln-e))
+
+(defn- applied-f-pi [values]
+  {:f-pi-policy-posterior? true
+   :f-pi-values values
+   :f-pi-scaling :unscaled
+   :f-pi-posterior {:status :present :coverage :complete :scaling :unscaled
+                    :candidate-count (count values) :uncovered-count 0}})
+
+;; --- the default is off, and off means structurally off ---------------------
+
+(deftest full-score-law-is-off-by-default-test
+  (testing "a caller that says nothing gets the controller head, even on a
+            field where the full score would choose something else — the
+            default is not a value that happens to agree"
+    (let [ranked (ranked-of [1.0 2.0] [0.0 0.0])
+          f-pi (applied-f-pi [0.0 -5.0])
+          silent (decide ranked nil f-pi)
+          explicit (decide ranked :controller-head f-pi)
+          full (decide ranked :full-score-posterior f-pi)]
+      (is (= "M-0" (get-in silent [:action :target])) "the G-ordered head")
+      (is (= :controller-head (get-in silent [:selection-law :requested]))
+          "the default is DECLARED on the record, not left to be inferred")
+      (is (= :controller-head (get-in silent [:selection-law :applied])))
+      (is (nil? (get-in silent [:selection-law :refusal])))
+      (is (false? (get-in silent [:selection-law :moved-from-controller-head?])))
+      (is (= (dissoc silent :selection-law) (dissoc explicit :selection-law))
+          "naming the default explicitly changes nothing else about the decision")
+      (is (= "M-1" (get-in full [:action :target]))
+          "and the law, when asked for, really does choose differently here")
+      (is (= policy/default-selection-law :controller-head)
+          "the default is the historical law, stated as a var so the J-gated
+           flip is one edit and not a search"))))
+
+(deftest default-law-leaves-the-habit-keys-counterfactual-test
+  (testing "under the default law ln E is not in the expression that chose, and
+            the record says so; under the full-score law it is, and the record
+            moves with it rather than contradicting itself"
+    (let [ranked (ranked-of [1.0 2.0] [0.0 3.0])
+          f-pi (applied-f-pi [0.0 0.0])
+          head (decide ranked :controller-head f-pi)
+          full (decide ranked :full-score-posterior f-pi)]
+      (is (false? (:habit-prior-applied? head)))
+      (is (= :counterfactual-only (:habit-authority head)))
+      (is (= :G (get-in head [:decision-explanation :governed-by])))
+      (is (true? (:habit-prior-applied? full)))
+      (is (= :live-in-selection-score (:habit-authority full)))
+      (is (= :full-score-posterior
+             (get-in full [:decision-explanation :governed-by]))))))
+
+;; --- the law consults the posterior it records ------------------------------
+
+(deftest full-score-law-chooses-the-argmax-of-its-own-recorded-posterior-test
+  (testing "U10's whole claim: the chosen action is the argmax of the posterior
+            the same decision records. Checked against the decision's OWN
+            :softmax-weights map, not against a recomputation"
+    (doseq [[g ln-e f-pi] [[[1.0 2.0 3.0] [0.0 0.0 0.0] [0.0 0.0 0.0]]
+                           [[1.0 2.0 3.0] [0.0 4.0 0.0] [0.0 0.0 0.0]]
+                           [[1.0 2.0 3.0] [0.0 0.0 0.0] [0.0 0.0 -9.0]]
+                           [[3.0 2.0 1.0] [1.0 0.5 0.0] [-2.0 -1.0 0.0]]]]
+      (let [out (decide (ranked-of g ln-e) :full-score-posterior (applied-f-pi f-pi))
+            weights (:softmax-weights out)
+            top (key (apply max-key val weights))]
+        (is (= top (:action out))
+            (str "chosen action is the posterior's argmax on " (pr-str [g ln-e f-pi])))
+        (is (= :full-score-posterior (get-in out [:selection-law :applied])))))))
+
+(deftest full-score-law-selects-on-terms-not-on-candidate-internals-test
+  (testing "U5's invariant: the candidate is OPAQUE at this seam. The law reads
+            (G, ln E, F_π) and nothing inside the action, so the same test
+            survives the action → cascade candidate change"
+    (let [g [1.0 2.0 3.0] ln-e [0.0 0.0 0.0] f-pi [0.0 0.0 -9.0]
+          plain (decide (ranked-of g ln-e) :full-score-posterior (applied-f-pi f-pi))
+          opaque (decide (mapv (fn [idx gi li fi]
+                                 {:action {:type :apply-cascade
+                                           :target (str "cascade-" idx)
+                                           :cascade {:shown [fi] :wholeness 0.5}}
+                                  :rank (inc idx)
+                                  :controller-score gi
+                                  :habit-prior-bias li})
+                               (range) g ln-e f-pi)
+                        :full-score-posterior (applied-f-pi f-pi))]
+      (is (= 3 (get-in plain [:selection-law :chosen-rank])))
+      (is (= (get-in plain [:selection-law :chosen-rank])
+             (get-in opaque [:selection-law :chosen-rank]))
+          "same scores, same rank chosen, entirely different action payloads")
+      (is (= :apply-cascade (get-in opaque [:action :type]))))))
+
+(deftest ties-break-to-the-controller-head-test
+  (testing "a tie must not read as a law change: the first maximum wins, so the
+            better G-rank keeps the choice"
+    (let [out (decide (ranked-of [1.0 1.0] [0.0 0.0]) :full-score-posterior
+                      (applied-f-pi [0.0 0.0]))]
+      (is (= "M-0" (get-in out [:action :target])))
+      (is (false? (get-in out [:selection-law :moved-from-controller-head?]))))))
+
+;; --- the planted field the acceptance asks for ------------------------------
+
+(deftest planted-field-where-the-two-laws-choose-differently-test
+  (testing "ONE PLANTED FIELD, per U10's acceptance: the old law and the full
+            score choose DIFFERENT actions, and the moving term is named by the
+            same `minimal-mover-sets` attribution the recorded fields use.
+
+            The field is planted so F_π alone is the mover: three candidates at
+            equal ln E, G ordered 1.0 < 2.0 < 3.0 so the old law takes M-0, and
+            an F_π of −9 on the worst-G candidate — well inside the −19.7..−19.0
+            band RUN9 measured on the live 145-candidate field — which carries
+            it past a G gap of 2.0 at τ = 1."
+    (let [g [1.0 2.0 3.0]
+          ln-e [0.0 0.0 0.0]
+          f-pi [0.0 0.0 -9.0]
+          ranked (ranked-of g ln-e)
+          opts (applied-f-pi f-pi)
+          head (decide ranked :controller-head opts)
+          full (decide ranked :full-score-posterior opts)
+          planted {:g g :ln-e ln-e :f-pi f-pi :tau 1.0
+                   :applied? true :scaling :unscaled}]
+      (testing "the two laws choose differently"
+        (is (= "M-0" (get-in head [:action :target])) "old law: the G-ordered head")
+        (is (= "M-2" (get-in full [:action :target])) "full score: the posterior's argmax")
+        (is (not= (:action head) (:action full)))
+        (is (true? (get-in full [:selection-law :moved-from-controller-head?])))
+        (is (= 1 (get-in full [:selection-law :controller-head-rank])))
+        (is (= 3 (get-in full [:selection-law :chosen-rank]))))
+      (testing "the moving term is NAMED, by the attribution (b) already uses"
+        (is (= [#{:f-pi}] (minimal-mover-sets planted))
+            "F_π alone moves it: dropping ln E or τ does not restore the head")
+        (is (= 2 (argmax (ablate planted #{}))))
+        (is (= 0 (argmax (ablate planted #{:f-pi}))))
+        (is (= 2 (argmax (ablate planted #{:ln-e}))))
+        (is (= 2 (argmax (ablate planted #{:tau})))))
+      (testing "and the choice is the attribution's argmax, not a parallel rule"
+        (is (= (argmax (ablate planted #{}))
+               (dec (get-in full [:selection-law :chosen-rank])))))
+      (testing "a second planted field, moving on ln E instead"
+        (let [f {:g [1.0 2.0] :ln-e [0.0 3.0] :f-pi [0.0 0.0] :tau 1.0
+                 :applied? true :scaling :unscaled}
+              out (decide (ranked-of (:g f) (:ln-e f)) :full-score-posterior
+                          (applied-f-pi (:f-pi f)))]
+          (is (= "M-1" (get-in out [:action :target])))
+          (is (= [#{:ln-e}] (minimal-mover-sets f))))))))
+
+;; --- fail-closed ------------------------------------------------------------
+
+(deftest full-score-law-falls-back-when-f-pi-did-not-enter-test
+  (testing "coverage is complete-or-off per tick, so on a declining tick there
+            is no F_π to select by. Selecting on ln E − G/τ and calling it the
+            full score would be the substitution `f-pi-posterior-opts` refuses
+            one seam earlier — so the law takes the head it would have taken
+            and the record names the reason"
+    (let [ranked (ranked-of [1.0 2.0 3.0] [0.0 0.0 0.0])]
+      (doseq [[label f-pi-opts expected-reason]
+              [["incomplete coverage"
+                {:f-pi-policy-posterior? false
+                 :f-pi-posterior {:status :absent :reason :incomplete-coverage
+                                  :uncovered-count 1 :candidate-count 3}}
+                :incomplete-coverage]
+               ["flag off"
+                {:f-pi-policy-posterior? false
+                 :f-pi-posterior {:status :absent :reason :flag-off
+                                  :candidate-count 3}}
+                :flag-off]
+               ["no opts at all" nil :no-f-pi-opts]]]
+        (let [out (decide ranked :full-score-posterior f-pi-opts)]
+          (is (= "M-0" (get-in out [:action :target]))
+              (str label ": the controller head, not a degraded new law"))
+          (is (= :full-score-posterior (get-in out [:selection-law :requested])))
+          (is (= :controller-head (get-in out [:selection-law :applied]))
+              (str label ": the record says which law RAN"))
+          (is (= {:reason expected-reason :effect :fell-back-to-controller-head}
+                 (get-in out [:selection-law :refusal]))
+              (str label ": with the envelope's own reason"))
+          (is (false? (:habit-prior-applied? out))
+              (str label ": and the habit keys fall back with it")))))))
+
+(deftest selection-law-preconditions-refuse-a-law-that-can-never-apply-test
+  (testing "U10, and the reason it is a top-of-tick throw rather than a per-tick
+            one: with FUTON_WM_FPI_POSTERIOR unset, `f-pi-posterior-opts`
+            answers :flag-off on EVERY tick, so the run would record a law it
+            never once ran"
+    (with-redefs-fn {#'wm/*f-pi-posterior?* false}
+      (fn []
+        (let [thrown (try (wm/selection-law-preconditions! :full-score-posterior)
+                          nil
+                          (catch clojure.lang.ExceptionInfo e e))]
+          (is (some? thrown))
+          (is (= ["FUTON_WM_FPI_POSTERIOR=1"] (:missing (ex-data thrown)))
+              "the refusal names the flag that is missing, not just that it failed")
+          (is (nil? (wm/selection-law-preconditions! :controller-head))
+              "the default law needs nothing and refuses nothing"))))
+    (with-redefs-fn {#'wm/*f-pi-posterior?* true}
+      (fn []
+        (is (nil? (wm/selection-law-preconditions! :full-score-posterior))
+            "the coherent set does not complain")))
+    (testing "a per-tick coverage decline is NOT refused here — it is a declared
+              case (1 of S4's 4 ticks) and the selector records the fallback"
+      (with-redefs-fn {#'wm/*f-pi-posterior?* true}
+        (fn [] (is (nil? (wm/selection-law-preconditions! :full-score-posterior))))))))
+
+(deftest selection-law-parser-admits-exactly-what-select-action-accepts-test
+  (testing "the env parser and the closed set change together, as
+            `tau-mode-of` and `effective-temperature`'s dispatch do"
+    (is (= :full-score-posterior (wm/selection-law-of "full-score-posterior")))
+    (is (= :controller-head (wm/selection-law-of "controller-head")))
+    (doseq [junk [nil "" "FULL-SCORE-POSTERIOR" "full_score_posterior" "typo"]]
+      (is (= :controller-head (wm/selection-law-of junk))
+          (str (pr-str junk) " falls to the default law")))
+    (doseq [law [:full-score-posterior :controller-head]]
+      (is (contains? policy/selection-laws law)
+          "every value the parser returns is one select-action accepts"))
+    (is (= 2 (count policy/selection-laws))
+        "and the set is closed: a third law needs a parser arm and this count")))
+
+(deftest an-unknown-law-or-the-wrong-boundary-refuses-at-the-seam-test
+  (testing "a typo must not run the old law under the new name"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo #"unknown :selection-law"
+         (decide (ranked-of [1.0 2.0] [0.0 0.0]) :full-score-postrior nil))))
+  (testing "and the law is a strategic-boundary law, because F_π reaches no
+            other boundary — on :actuation the argmax would be of ln E − G/τ,
+            the old habit law wearing the new law's name"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo #"strategic-recommendation"
+         (policy/select-action (ranked-of [1.0 2.0] [0.0 0.0])
+                               {:selection-boundary :actuation
+                                :selection-law :full-score-posterior})))
+    (is (map? (policy/select-action (ranked-of [1.0 2.0] [0.0 0.0])
+                                    {:selection-boundary :actuation
+                                     :selection-law :controller-head}))
+        "the default law on the actuation boundary is not an error")))
+
+;; --- what the flip would do on the recorded fields --------------------------
+
+(deftest chosen-action-attribution-on-the-recorded-fields-test
+  (testing "the measurement SPEC-dormant-wiring.md U10 states as its prediction
+            before the flip: replay each recorded tick's own components through
+            `select-action` under BOTH laws and count where the CHOSEN action
+            differs, naming the term that moved it.
+
+            This is the half (b) could not supply. (b) counts argmax changes in
+            the RECORDED POSTERIOR, which on every one of these ticks nothing
+            consulted; this counts changes in what the tick would have CHOSEN,
+            which until U10 was a quantity the code could not produce."
+    (let [moved (atom [])
+          held (atom [])
+          fallbacks (atom [])
+          overwritten (atom [])]
+      (doseq [{:keys [label records]} (present-fields)
+              [idx record] (map-indexed vector records)]
+        (let [f (field record)
+              ranked (mapv (fn [entry]
+                             (select-keys entry [:action :rank :controller-score
+                                                 :habit-prior-bias]))
+                           (:ranked-actions record))
+              f-pi-opts (if (:applied? f)
+                          {:f-pi-policy-posterior? true
+                           :f-pi-values (:f-pi f)
+                           :f-pi-scaling (:scaling f)
+                           :f-pi-posterior (:envelope f)}
+                          {:f-pi-policy-posterior? false
+                           :f-pi-posterior (:envelope f)})
+              opts (assoc strategic-base :f-pi-opts f-pi-opts)
+              head (policy/select-action ranked opts)
+              full (policy/select-action
+                    ranked (assoc opts :selection-law :full-score-posterior))]
+          (is (= (:tau f) (:tau head))
+              (str label " tick " idx ": the replay reproduces the recorded τ, so
+                   the two laws are compared at the tick's own temperature"))
+          (when (not= (:action head) (:action (:decision record)))
+            (swap! overwritten conj [label (:selection-boundary (:decision record))]))
+          (if (:applied? f)
+            (do (is (= :full-score-posterior
+                       (get-in full [:selection-law :applied]))
+                    (str label " tick " idx ": an applied tick runs the law"))
+                (when (not= (:action head) (:action full))
+                  (swap! moved conj
+                         {:field label :tick idx
+                          :movers (minimal-mover-sets f)
+                          :head-rank (get-in full [:selection-law
+                                                   :controller-head-rank])
+                          :chosen-rank (get-in full [:selection-law
+                                                     :chosen-rank])})))
+            (do (is (= :controller-head (get-in full [:selection-law :applied]))
+                    (str label " tick " idx ": a tick with no F_π falls back"))
+                (is (= (:action head) (:action full))
+                    (str label " tick " idx ": and chooses what the old law chose"))
+                (swap! fallbacks conj
+                       [label (get-in full [:selection-law :refusal :reason])])
+                (swap! held conj [label idx])))))
+      (testing "the fallbacks, bucketed by the reason the record itself carries —
+                a dark field and a declining tick are NOT the same absence"
+        (is (= {["S2" :no-f-pi-opts] 20
+                ["S4" :incomplete-coverage] 1}
+               (frequencies @fallbacks))
+            "S2's 20 ticks ran RUN7's DARK carry: F_π was computed and never put
+             in the posterior, so those records carry no :f-pi-posterior envelope
+             at all and the law has nothing to select by. S4's single declining
+             tick is the different case — the envelope is present and says
+             :incomplete-coverage, 1 uncovered candidate of 145. Both fall back
+             to the controller head; only the second is the per-tick refusal U10
+             built, and reporting them as one number would hide that.")
+        (is (= 21 (count @held))))
+      (testing "AND ON THE THREE TICKS WHERE THE LAW CAN RUN, IT MOVES THE
+                CHOICE — all three of them. This is the number the flip is to
+                be judged against, stated before the flip."
+        (is (= [{:field "S4" :tick 0 :movers [#{:ln-e :f-pi}]
+                 :head-rank 1 :chosen-rank 130}
+                {:field "S4" :tick 2 :movers [#{:ln-e :f-pi}]
+                 :head-rank 1 :chosen-rank 130}
+                {:field "S4" :tick 3 :movers [#{:ln-e :f-pi}]
+                 :head-rank 1 :chosen-rank 130}]
+               @moved)
+            "3 of 3 applied ticks: the full score chooses the rank-6 candidate
+             where the old law took the G-ordered head at rank 1, and the
+             minimal mover set is {ln E, F_π} TOGETHER on each — the same set
+             (b) attributes the recorded posterior's argmax change to. So the
+             posterior and the choice now agree about what moved, which is
+             exactly what U1 readiness point 4 said they did not.
+
+             THIS LITERAL IS THE FALSIFIER'S TRIPWIRE. A field that moves a
+             different rank, or moves on a different term, or stops moving,
+             fails here rather than being read off a run afterwards."))
+      (testing "AND WHAT THE MODE STILL DOES NOT REACH, measured rather than
+                asserted: the action the RECORD carries is not this selector's
+                output on any tick"
+        (is (= {["S2" :reason-bearing-strategic-policy] 20
+                ["S4" :reason-bearing-strategic-policy] 4}
+               (frequencies @overwritten))
+            "24 of 24. war_machine.clj:5241-5244 replaces the controller
+             decision's :action with the mission the R14 strategic selector
+             returned, and that selector is handed three mission-id strings and
+             a trace id (war_machine.clj:5211-5214) — no τ, no posterior, no
+             score crosses that call. U3 found this and recorded it at
+             aif-equations.edn :choices :temperature-update
+             :sharper-than-the-headroom. U10 wires the R6 seam so that the
+             posterior it records is the score it chooses by; it does NOT touch
+             the overwrite, which is out of this row's acceptance. Anyone
+             reading 'the mode exists' as 'the machine now acts on the full
+             score' should read this count first.")))))

@@ -120,6 +120,72 @@ Priority within this list: ahead of U3 (the pi_0 comparison reads selection
 behaviour) and behind nothing — every claim U1 makes about "the live selection
 law" is conditional on it.
 
+### U10 BUILT (2026-09-02) — the selection law, and the prediction it is judged against
+
+The mode exists and is **off by default**. `:selection-law` is a declared option
+on `policy/select-action` (`policy.clj:749,754`) with a closed two-member set
+(`policy/selection-laws`, `policy.clj:503-519`); on the live path it is read
+from `FUTON_WM_SELECTION_LAW` (`war_machine.clj:165-196`) and threaded to the
+one call site (`war_machine.clj:5311,5378`). Under `:full-score-posterior` the
+chosen action is the argmax of the SAME `policy/selection-scores` vector the
+decision's `:softmax-weights` normalises (`policy.clj:157-213, 563-567, 593,
+668-670`), so "the score is the selection law" is a fact about one expression
+rather than a claim about two that agree. Ties break to the first maximum
+(`policy.clj:525-536`) so a tie cannot read as a law change, and the candidate
+stays opaque at the seam (U5): the law reads (G, ln E, F_pi) and nothing inside
+the action, pinned by
+`full-score-law-selects-on-terms-not-on-candidate-internals-test`.
+
+**Two failures, two answers.** Asking for the law when the flag chain can never
+produce F_pi throws at the top of the tick (`selection-law-preconditions!`,
+`war_machine.clj:198-228`, called at `:5311-5312` **outside** the
+`default-mode-select` try/catch) — otherwise every tick records a law it never
+ran. A per-tick coverage decline is not that: coverage is complete-or-off by
+design, so the selector takes the head it would have taken and records
+`:selection-law :refusal` with the envelope's own reason. Throwing there would
+kill the tick, and — because the call is wrapped in a fallback — kill it
+silently.
+
+**THE PREDICTION, stated before the flip.** Replaying every recorded tick's own
+components through `select-action` under both laws
+(`chosen-action-attribution-on-the-recorded-fields-test`):
+
+1. **The flip moves the chosen action on 3 of the 3 ticks where the law can
+   run** — S4 ticks 0, 2 and 3 choose the **rank-130** candidate where
+   `:controller-head` takes the rank-1 head. A live flipped run is predicted to
+   move the choice at a comparable rate; a run that moves none is the falsifier
+   firing.
+2. **The mover set is {ln E, F_pi} together on each**, which is the same
+   minimal set (b) attributes the recorded posterior's argmax change to. So the
+   posterior and the choice now agree about what moved — the thing point 4
+   above said they did not. A field where the choice moves on a set the
+   posterior does not is the second way this fails.
+3. **21 of 24 ticks fall back, for two different reasons, and they are not one
+   number.** S2's 20 carry no `:f-pi-posterior` envelope at all (RUN7's dark
+   carry, `:no-f-pi-opts`); S4's remaining tick declines on
+   `:incomplete-coverage`, 1 uncovered candidate of 145. Prediction for a live
+   flipped run: the decline turns the term off on the first tick of the run and
+   leaves it on afterwards (`f-pi-posterior-opts`' own measured cost on S2 —
+   19 of 20 ticks at `:unmatched-current-count` 0, tick 1 at 2).
+
+All three numbers are literals in the test, so a field that breaks them fails
+the suite rather than being read off a run afterwards.
+
+**What U10 did NOT reach, measured rather than hedged.** On **24 of 24**
+recorded ticks the action the record carries is not this selector's output at
+all: `war_machine.clj:5438` replaces the controller decision's `:action` with
+the mission the R14 strategic selector returned, and that selector is handed
+three mission-id strings and a trace id (`war_machine.clj:5406-5410`) — no tau,
+no posterior, no score crosses the call. U3 found this and recorded it at
+`aif-equations.edn :choices :temperature-update :sharper-than-the-headroom`.
+U10 wires the R6 seam and leaves the overwrite untouched, because the overwrite
+was outside its acceptance. **The mode existing is not the machine acting on
+the full score**; that is one more call away and needs its own row.
+
+**Still J-gated.** No flip is made and no ruling is written. What is now
+available to rule on is a mode that runs, a prediction with numbers, and a
+suite that fails if the numbers move.
+
 ## U2. tau: adjudicate the three arms, then retire the dead fold
 
 Current: three arms run and separate on S2 (three different gammas, all

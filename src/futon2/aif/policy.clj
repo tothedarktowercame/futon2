@@ -145,31 +145,42 @@
                             "or :variational-beta-gamma)")
                        {:tau-mode tau-mode}))))))
 
-(defn softmax-weights
-  "P(a) ∝ exp(ln E(a) − G(a) / τ), optionally including horizon-one
-   observed-data free energy F_pi at this same posterior seam. Normalised to
-   sum to 1.0 and numerically stable via the standard log-sum-exp trick.
+(defn- normalise-scores
+  "exp/normalise a score vector, numerically stable via the standard
+   log-sum-exp trick. The one place the softmax is written."
+  [scores]
+  (let [max-x (apply max scores)
+        exps (mapv #(Math/exp (- % max-x)) scores)
+        z (reduce + exps)]
+    (mapv #(/ % z) exps)))
 
-   The four-arity opts are:
+(defn selection-scores
+  "The per-candidate selection score ln E(a) − G(a)/τ [− F_pi(a)], aligned
+   with `g-totals`. THE ONE PLACE THE SCORE EXPRESSION IS WRITTEN.
+
+   `softmax-weights` normalises this and `strategic-recommendation` takes its
+   argmax under `:selection-law :full-score-posterior` (U10). Both read the
+   same vector, so the posterior a tick RECORDS and the score a tick may CHOOSE
+   by cannot drift into two expressions — which is the failure U1 readiness
+   point 4 found on the other side of the seam, where the recorded posterior
+   carried F_pi and the choice was made by a different rule entirely.
+
+   The opts are the ones `softmax-weights` takes:
      :f-pi-policy-posterior?  flag, DEFAULT false
      :f-pi-values             values aligned with g-totals when enabled
      :f-pi-scaling            :unscaled (DEFAULT, score subtracts F_pi) or
                               :by-tau (score subtracts F_pi / tau)
 
-   Disabled means the old score expression is evaluated without inspecting
-   any F_pi option. Enabled input must be numeric and exactly aligned.
+   Disabled means the old score expression is evaluated without inspecting any
+   F_pi option. Enabled input must be numeric and exactly aligned; a misaligned,
+   non-numeric or unknown-scaling input throws here rather than scoring one
+   candidate against another candidate's fit.
 
-   The 2-arity form is the historical σ(−G/τ) — equivalently ln E ≡ 0 — and
-   is byte-identical to its pre-D-1d behaviour. The 3-arity form is the R12
-   HABIT-PRIOR SEAM (M-aif-faithfulness D-1d): `log-priors` aligns with
-   `g-totals` and enters the score UNSCALED by τ. The semantic point is that
-   controller temperature modulates G, never the habit prior. This seam is
-   THE place a future real ln E(π) (R12 per-action-class posteriors) enters —
-   do not add a second prior site."
-  ([g-totals tau]
-   (softmax-weights g-totals tau nil))
-  ([g-totals tau log-priors]
-   (softmax-weights g-totals tau log-priors {}))
+   `log-priors` nil means ln E ≡ 0. ln E enters UNSCALED by τ: controller
+   temperature modulates G, never the habit prior.
+
+   Returns nil for an empty candidate list, as `softmax-weights` always has."
+  ([g-totals tau log-priors] (selection-scores g-totals tau log-priors {}))
   ([g-totals tau log-priors {:keys [f-pi-policy-posterior? f-pi-values
                                     f-pi-scaling]
                              :or {f-pi-policy-posterior? false
@@ -193,17 +204,35 @@
                              (case f-pi-scaling
                                :unscaled (double f-pi)
                                :by-tau (/ (double f-pi) (double tau))))
-                           f-pi-values))
-           scores (mapv (fn [idx g lp]
-                          (cond-> (+ (/ (- (double g)) (double tau))
-                                     (double lp))
-                            f-pi-policy-posterior?
-                            (- (nth f-terms idx))))
-                        (range n) g-totals lps)
-           max-x (apply max scores)
-           exps (mapv #(Math/exp (- % max-x)) scores)
-           z (reduce + exps)]
-       (mapv #(/ % z) exps)))))
+                           f-pi-values))]
+       (mapv (fn [idx g lp]
+               (cond-> (+ (/ (- (double g)) (double tau))
+                          (double lp))
+                 f-pi-policy-posterior?
+                 (- (nth f-terms idx))))
+             (range n) g-totals lps)))))
+
+(defn softmax-weights
+  "P(a) ∝ exp(ln E(a) − G(a) / τ), optionally including horizon-one
+   observed-data free energy F_pi at this same posterior seam. Normalised to
+   sum to 1.0 and numerically stable via the standard log-sum-exp trick.
+
+   The score itself is `selection-scores`; this is that vector normalised, and
+   the four-arity opts are passed straight through to it.
+
+   The 2-arity form is the historical σ(−G/τ) — equivalently ln E ≡ 0 — and
+   is byte-identical to its pre-D-1d behaviour. The 3-arity form is the R12
+   HABIT-PRIOR SEAM (M-aif-faithfulness D-1d): `log-priors` aligns with
+   `g-totals` and enters the score UNSCALED by τ. The semantic point is that
+   controller temperature modulates G, never the habit prior. This seam is
+   THE place a future real ln E(π) (R12 per-action-class posteriors) enters —
+   do not add a second prior site."
+  ([g-totals tau]
+   (softmax-weights g-totals tau nil))
+  ([g-totals tau log-priors]
+   (softmax-weights g-totals tau log-priors {}))
+  ([g-totals tau log-priors opts]
+   (some-> (selection-scores g-totals tau log-priors opts) normalise-scores)))
 
 (defn- find-no-op
   "Locate the :no-op entry in a ranked-action list, or nil."
@@ -471,6 +500,41 @@
    :habit-prior-bias (double (or (:habit-prior-bias entry) 0.0))
    :selection-score (double score)})
 
+(def selection-laws
+  "The two laws the strategic boundary can choose by (U10). A closed set: an
+   unrecognised value throws in `select-action` rather than falling through to
+   a default, because a typo that silently ran the old law would be exactly the
+   \"recorded but never consulted\" failure this row exists to remove.
+
+     :controller-head       the DEFAULT and the historical behaviour — the
+                            chosen action is the head of the G-ordered list
+                            (the first non-:no-op entry), and the F_pi-bearing
+                            posterior at `:softmax-weights` is RECORDED and
+                            never read.
+     :full-score-posterior  the chosen action IS the argmax of the posterior
+                            the tick records: argmax over candidates of
+                            ln E − G/τ_eff − F_pi (`selection-scores`, the
+                            same vector `:softmax-weights` normalises)."
+  #{:controller-head :full-score-posterior})
+
+(def default-selection-law
+  "OFF BY DEFAULT. Flipping this is a J-gated act with a prediction stated
+   first (SPEC-dormant-wiring.md U10), not an implementation-side rebalance."
+  :controller-head)
+
+(defn- first-argmax
+  "The index of the FIRST maximal score. Deterministic, and it breaks ties to
+   the better G-rank, so a tie can never move the choice away from the head
+   the old law would have taken. (`max-key` would keep the LAST maximum, which
+   would make a tie look like a law change.)"
+  [scores idxs]
+  (reduce (fn [best idx]
+            (if (> (double (nth scores idx)) (double (nth scores best)))
+              idx
+              best))
+          (first idxs)
+          (rest idxs)))
+
 (defn- strategic-recommendation
   "Select the controller head at the strategic mission grain while retaining
    the scheduler-grain habit calculation as an inspectable counterfactual.
@@ -488,16 +552,46 @@
    ln E - G/tau, and the difference between the two is a datum RUN9 measures
    rather than a discrepancy to paper over."
   [ranked-actions g-totals log-priors selection-gain temperature-opts
-   habit-prior-stats no-op-entry f-pi-opts]
+   habit-prior-stats no-op-entry f-pi-opts selection-law]
   (let [tau-spread (adaptive-temperature g-totals temperature-opts)
         tau (effective-temperature g-totals selection-gain temperature-opts)
-        scores (mapv (fn [g lp] (+ (/ (- (double g)) (double tau))
-                                    (double lp)))
-                     g-totals log-priors)
+        scores (selection-scores g-totals tau log-priors)
+        ;; U10. The FULL score — the same vector `:softmax-weights` below
+        ;; normalises, taken from `selection-scores` rather than recomputed, so
+        ;; the posterior this tick records and the score it may choose by
+        ;; cannot be two expressions.
+        full-scores (selection-scores g-totals tau log-priors
+                                      (select-keys f-pi-opts
+                                                   [:f-pi-policy-posterior?
+                                                    :f-pi-values :f-pi-scaling]))
         controller-entries (filterv #(not= :no-op (get-in % [:action :type]))
                                     ranked-actions)
-        chosen (or (first controller-entries) (first ranked-actions))
-        chosen-idx (.indexOf ranked-actions chosen)
+        head (or (first controller-entries) (first ranked-actions))
+        head-idx (.indexOf ranked-actions head)
+        ;; U10 FAIL-CLOSED, per tick. `f-pi-posterior-opts` is complete-or-off,
+        ;; so on a tick whose coverage declined there is no F_pi to select by.
+        ;; Selecting on ln E − G/τ and calling it the full score would be the
+        ;; same substitution `f-pi-posterior-opts` refuses one seam earlier, so
+        ;; the law falls back to the head it would otherwise have taken and the
+        ;; record says which law ran and why. The case that CANNOT be handled
+        ;; this way — a law asked for when the flag chain can never produce
+        ;; F_pi at all, so every tick would silently record this fallback — is
+        ;; refused loudly at the top of the tick by
+        ;; `war-machine/selection-law-preconditions!`.
+        f-pi-entered? (boolean (:f-pi-policy-posterior? f-pi-opts))
+        full-score? (and (= :full-score-posterior selection-law) f-pi-entered?)
+        ;; The two laws range over the SAME candidates. :no-op is excluded from
+        ;; both (this boundary is declared non-abstaining), so the laws differ
+        ;; in the ordering they impose and in nothing else.
+        selectable (if (seq controller-entries)
+                     (vec (keep-indexed
+                           (fn [idx entry]
+                             (when (not= :no-op (get-in entry [:action :type]))
+                               idx))
+                           ranked-actions))
+                     (vec (range (count ranked-actions))))
+        chosen-idx (if full-score? (first-argmax full-scores selectable) head-idx)
+        chosen (nth ranked-actions chosen-idx)
         habit-order (sort-by (fn [idx] (- (nth scores idx)))
                              (range (count ranked-actions)))
         counterfactual-idx (first habit-order)
@@ -518,8 +612,27 @@
      :requires-operator-override? false
      :actuation-status :pending-downstream-gates
      :actuation-authorized? false
-     :habit-prior-applied? false
-     :habit-authority :counterfactual-only
+     ;; U10. Under :full-score-posterior ln E is IN the expression that chose,
+     ;; so the habit prior is no longer counterfactual-only and these two keys
+     ;; must move with the law or the record contradicts itself.
+     :habit-prior-applied? full-score?
+     :habit-authority (if full-score?
+                        :live-in-selection-score
+                        :counterfactual-only)
+     ;; U10. Which law was ASKED FOR, which law RAN, and — when they differ —
+     ;; why. Recorded rather than inferable: on the default law the absence of
+     ;; a refusal and the absence of a request read alike from the outside.
+     :selection-law
+     {:requested selection-law
+      :applied (if full-score? :full-score-posterior :controller-head)
+      :refusal (when (and (= :full-score-posterior selection-law)
+                          (not f-pi-entered?))
+                 {:reason (or (:reason (:f-pi-posterior f-pi-opts))
+                              :no-f-pi-opts)
+                  :effect :fell-back-to-controller-head})
+      :controller-head-rank (:rank head)
+      :chosen-rank (:rank chosen)
+      :moved-from-controller-head? (not= chosen-idx head-idx)}
      :controller-ranking
      (mapv (fn [idx entry]
              (ranking-entry entry idx (/ (- (double (:controller-score entry)))
@@ -539,7 +652,7 @@
       :blocks-recommendation? false}
      :decision-explanation
      (assoc explanation
-            :governed-by :G
+            :governed-by (if full-score? :full-score-posterior :G)
             :habit-counterfactual-winner
             (get-in (ranking-entry (nth ranked-actions counterfactual-idx)
                                    0 (nth scores counterfactual-idx))
@@ -548,12 +661,13 @@
      (assoc (or (:f-pi-posterior f-pi-opts)
                 {:status :absent :reason :no-f-pi-opts})
             :applied? (boolean (:f-pi-policy-posterior? f-pi-opts)))
+     ;; The posterior. Normalised `full-scores` -- literally the vector the
+     ;; :full-score-posterior law takes its argmax of, so "the score IS the
+     ;; selection law" is a fact about one expression rather than a claim about
+     ;; two that happen to agree.
      :softmax-weights
      (zipmap (mapv :action ranked-actions)
-             (softmax-weights g-totals tau log-priors
-                              (select-keys f-pi-opts
-                                           [:f-pi-policy-posterior?
-                                            :f-pi-values :f-pi-scaling])))}))
+             (normalise-scores full-scores))}))
 
 (defn select-action
   "Top-level action selection.
@@ -587,6 +701,16 @@
                            treats the current scheduler-grain habit as an
                            inspectable counterfactual, and leaves enactment to
                            downstream act gates.
+     :selection-law — U10, `:strategic-recommendation` only. `:controller-head`
+                           (DEFAULT, historical: the chosen action is the
+                           G-ordered head and the recorded posterior is not
+                           read) or `:full-score-posterior` (the chosen action
+                           IS the argmax of the recorded posterior,
+                           ln E − G/τ_eff − F_pi). Off by default; the flip is
+                           J-gated (SPEC-dormant-wiring.md U10). An
+                           unrecognised value throws, and so does
+                           `:full-score-posterior` on the `:actuation`
+                           boundary, which F_pi cannot reach.
 
    Capability-gap preemption policy: a `:learn-action-class` repair may
    preempt mission work only when the proposal/admissibility layers establish
@@ -621,11 +745,13 @@
      (i.e. the best action isn't meaningfully better than doing nothing)."
   ([ranked-actions] (select-action ranked-actions {}))
   ([ranked-actions {:keys [abstain-epsilon temperature-opts selection-gain
-                           habit-prior-stats selection-boundary f-pi-opts]
+                           habit-prior-stats selection-boundary f-pi-opts
+                           selection-law]
                     :or {abstain-epsilon 0.01
                          temperature-opts {}
                          selection-gain 1.0
-                         selection-boundary :actuation}}]
+                         selection-boundary :actuation
+                         selection-law default-selection-law}}]
    ;; RUN9 / stage S4. F_pi enters the posterior at the strategic boundary and
    ;; nowhere else. The :actuation branches below have their own softmax call
    ;; sites, and quietly ignoring the option there would let a caller believe
@@ -636,6 +762,22 @@
      (throw (ex-info (str ":f-pi-opts with :f-pi-policy-posterior? true requires "
                           ":selection-boundary :strategic-recommendation")
                      {:selection-boundary selection-boundary})))
+   ;; U10. The law is a closed set for the same reason `:tau-mode` is: a value
+   ;; that falls through to the default would run the old law under the new
+   ;; name, and the record would say the new law had been asked for.
+   (when-not (contains? selection-laws selection-law)
+     (throw (ex-info (str "unknown :selection-law (expected one of "
+                          (pr-str (sort selection-laws)) ")")
+                     {:selection-law selection-law})))
+   ;; And it is a strategic-boundary law, because F_pi reaches no other
+   ;; boundary: on :actuation the argmax would be of ln E − G/τ, which is the
+   ;; old habit law wearing the new law's name.
+   (when (and (= :full-score-posterior selection-law)
+              (not= :strategic-recommendation selection-boundary))
+     (throw (ex-info (str ":selection-law :full-score-posterior requires "
+                          ":selection-boundary :strategic-recommendation")
+                     {:selection-law selection-law
+                      :selection-boundary selection-boundary})))
    (cond
      (empty? ranked-actions)
      {:action :abstain
@@ -662,7 +804,7 @@
        (if (= :strategic-recommendation selection-boundary)
          (strategic-recommendation
           ranked-actions g-totals log-priors selection-gain temperature-opts
-          habit-prior-stats no-op-entry f-pi-opts)
+          habit-prior-stats no-op-entry f-pi-opts selection-law)
          (if-not priors?
          (let [best (first ranked-actions)
                best-g (:controller-score best)

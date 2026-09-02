@@ -162,6 +162,71 @@
                              ":no-f-pi-readback and the posterior is unchanged")
                         {:missing missing :tau-mode tau-mode}))))))
 
+(defn selection-law-of
+  "The FUTON_WM_SELECTION_LAW string -> law keyword mapping, as a pure function
+   so the parser can be driven from a test with strings rather than by mutating
+   the process environment. `arena-selection-law` is this applied to the env
+   read, and nothing else, so the two cannot diverge.
+
+   EVERY value this returns must be one `policy/selection-laws` contains: that
+   set is closed and `policy/select-action` throws on anything else, so the
+   pair changes together. An unrecognised string falls to the DEFAULT law, as
+   `tau-mode-of` does -- the coupling that can silently produce a useless run
+   is checked separately and loudly by `selection-law-preconditions!`.
+
+   Pinned by
+   selection-score-readiness-test/selection-law-parser-admits-exactly-what-select-action-accepts-test."
+  [env-value]
+  (case env-value
+    "full-score-posterior" :full-score-posterior
+    :controller-head))
+
+(defn- arena-selection-law
+  "U10. `:controller-head` is the live default and the historical behaviour:
+   the chosen action is the head of the G-ordered list and the F_pi-bearing
+   posterior is recorded and never read.
+
+   `FUTON_WM_SELECTION_LAW=full-score-posterior` makes the chosen action the
+   argmax of that posterior -- ln E - G/tau_eff - F_pi, the same
+   `policy/selection-scores` vector `:softmax-weights` normalises. It is off by
+   default and stays behind the flag until Joe rules on the flip
+   (SPEC-dormant-wiring.md U10 states the prediction the flip is to be judged
+   against, before the flip)."
+  []
+  (selection-law-of (System/getenv "FUTON_WM_SELECTION_LAW")))
+
+(defn selection-law-preconditions!
+  "U10. `FUTON_WM_SELECTION_LAW=full-score-posterior` needs an F_pi to select
+   by, and F_pi enters the posterior only under `FUTON_WM_FPI_POSTERIOR=1`
+   (whose own chain `f-pi-posterior-preconditions!` checks).
+
+   With the law on and that flag off, `f-pi-posterior-opts` returns
+   `:reason :flag-off` on EVERY tick, the selector falls back to the controller
+   head on every tick, and the run records a law it never once ran. Same shape
+   and same reason as `f-pi-posterior-preconditions!` and
+   `variational-tau-preconditions!`: a loud config error at the top of the tick
+   beats a run nobody can read.
+
+   IT DOES NOT REFUSE A PER-TICK COVERAGE DECLINE, and the distinction is the
+   point. Coverage is complete-or-off per tick by design (`f-pi-posterior-opts`
+   :measured cost: 1 of 4 S4 ticks, expected on the first tick of a run), so a
+   decline is a declared case, not a config error; the selector falls back to
+   the head for that tick and records `:selection-law :refusal` with the
+   envelope's own reason. Throwing there would kill the tick -- and, because
+   the `select-action` call is wrapped in a `default-mode-select` fallback,
+   would kill it silently.
+
+   Throws or returns nil."
+  [selection-law]
+  (when (= :full-score-posterior selection-law)
+    (when-not *f-pi-posterior?*
+      (throw (ex-info (str "FUTON_WM_SELECTION_LAW=full-score-posterior requires "
+                           "FUTON_WM_FPI_POSTERIOR=1 -- without it F_pi enters no "
+                           "posterior, every tick falls back to the controller "
+                           "head, and the run records a law it never ran")
+                      {:selection-law selection-law
+                       :missing ["FUTON_WM_FPI_POSTERIOR=1"]})))))
+
 (defn variational-tau-preconditions!
   "RUN8 / stage S3. `:variational-beta-gamma` needs a β to use as τ, and β is
    produced by the same three-flag chain the S2 dark carry runs on:
@@ -5238,6 +5303,13 @@
         wm-tau-mode (arena-tau-mode)
         _ (variational-tau-preconditions! wm-tau-mode)
         _ (f-pi-posterior-preconditions! wm-tau-mode)
+        ;; U10 / the selector consult. Resolved ONCE and threaded, for the same
+        ;; reason the tau mode is: the law the precondition checks and the law
+        ;; `select-action` is handed cannot drift apart. Checked HERE, outside
+        ;; the try/catch below, so a config error is a stopped tick and not a
+        ;; silent fall to `default-mode-select`.
+        wm-selection-law (arena-selection-law)
+        _ (selection-law-preconditions! wm-selection-law)
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
         ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
         ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
@@ -5303,6 +5375,7 @@
               wm-admissible
               {:selection-gain selection-gain-value
                :selection-boundary :strategic-recommendation
+               :selection-law wm-selection-law
                :habit-prior-stats
                (when habit-prior-pre
                  (habit-prior/state-stats habit-prior-pre))

@@ -244,8 +244,18 @@
           realised and consumed; :selection-gain and the controller-map
           free-energy shape are unchanged, which is why the R8 era needed a
           third member rather than a bumped version string (I5 slice (c),
-          C473, 2026-09-01)."
-  21)
+          C473, 2026-09-01).
+    22 — adds the decision's :selection-law map: which selection law was
+         requested, which one ran, and — when they differ — the refusal
+         reason (U10, 2026-09-02). Additive, and present on the
+         :strategic-recommendation boundary only, which is the one the live
+         path takes. Bumped because a reader must be able to tell “no
+         :selection-law key because the producer predates the law” from
+         “no key because the law was absent”; the decision's
+         :f-pi-posterior (RUN9, 9867157) was added inside era 21 without a
+         bump, so 22 is the first version that declares anything about the
+         decision's selection law at all."
+  22)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the
