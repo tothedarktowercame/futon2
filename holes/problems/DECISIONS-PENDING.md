@@ -352,3 +352,11 @@ So every refusal, abstention, :unknown, and :unscored emission is persisted as
 a typed record, and a harvester sweeps them into a reviewed queue of proposed
 work items. Implementation: wm-contract rows :AC1-:AC7 (one per site) and
 :AC8 (the tail-eater v0). The seven tally instances flip as the rows land.
+
+**Ruling extension (Joe, 2026-09-02, reported):** the fed-back tension "could
+be recorded as a new design pattern (even if just partial or in draft) which
+would turn the refusals into the source of new design knowledge." AC8 extended
+accordingly: recurring refusal classes mint draft patterns in
+`library/problems/` — IF/HOWEVER from the refusal records, THEN honestly
+absent until someone resolves it — quarantined from the authored graph until
+attested, exactly as `@why-posthoc` edges are.
