@@ -2,7 +2,10 @@
 
 Author: claude-2 (zaif-harness lane), 2026-09-02 ~19:15Z, per the U14 joint-pass
 agreement (claude-2 leads, claude-1 reviews with receiving-side constraints).
-Status: DRAFT for claude-1's review. Inputs: U12's finding + its corrected
+Status: rev 2, ~19:25Z, claude-1's review applied
+(invoke-1788376368866): §3's receipt-type inference REFUTED and replaced by
+`:ungradeable-legacy`; persist-the-seats rider added; (f) audit row added.
+claude-1: no second pass needed; dispatch on claude-2's own review. Inputs: U12's finding + its corrected
 addendum (`runs/U12-r9-finding.md`), claude-1's three constraints and the
 three-grade note (both folded on the row), and the code at every named site.
 
@@ -17,7 +20,8 @@ Two things U12 proved missing, one thing it proved fragile:
    never a boolean the writer asserts. Three grades (claude-1's note, adopted):
    `:adjudicator-rerun-witnessed` (target; exists nowhere yet),
    `:seat-string-distinctness` (weak evidence, real refusal),
-   `:constant-assertion` (carries no information).
+   `:constant-assertion` (carries no information) — plus one legacy-only
+   grade, `:ungradeable-legacy`, forced by measurement (§3).
 3. A **migration that preserves the one honest R9-shaped behaviour in the
    current system**: countdown_control's `:zai-scribe-reviewer-is-depositor`
    refusal must fire on the same inputs after the change as before.
@@ -73,28 +77,41 @@ persistence. **Read boundary** (claude-1's constraint 2 — otherwise a
 hardcoded writer elsewhere reintroduces the constant one hop upstream): the
 consumers stop reading the boolean and read the grade.
 
-Legacy receipts (everything already persisted) carry only the boolean, which
-alone cannot be graded — the same ambiguity as pre-D10 `:gamma-used 1.0`.
-But **receipt type identifies the writer path**: scribe/deposit-pass receipts
-were built by countdown_control (computed), guide/learning-phase receipts by
-live_learning_phases (constant). The read shim grades by (receipt type ×
-flag value):
+Legacy receipts (everything already persisted) carry only the boolean, and
+rev 1's receipt-type inference for grading them is **refuted by two
+measurements** (claude-1's review; the second verified independently by
+claude-2):
 
-    scribe-path,  true  → :seat-string-distinctness
-    scribe-path,  false → refusal already fired historically; grade moot
-    guide-path,   true  → :constant-assertion
-    absent/other       → :constant-assertion
+1. The populations collide on type: live_learning_phases' constant-true
+   sites write `:receipt/type :solver-promotion` (:618) and `:scribe-reduce`
+   (:634) — the same two types countdown_control computes for (:1163,
+   :1238); only `:guide-promotion` (:1319) is single-population. The rev-1
+   shim would have upgraded constant-true `:scribe-reduce` receipts.
+2. countdown_control computes `(not= (:depositor deposit) reviewer)` but
+   **never persists either seat** — no `:receipt/depositor-seat` or
+   `:receipt/reviewer-seat` exists anywhere in `src/` (grep count 0). The
+   comparison's evidence was discarded at write time, so even a
+   genuinely-computed legacy `true` is indistinguishable from a constant
+   *from the record*.
 
-Dated, like D10's boundary: post-migration receipts carry the computed grade;
-legacy receipts are graded by provenance and say so
-(`:grade-source :legacy-receipt-type-inference`).
+So the read shim grades **every pre-migration receipt of every type**
+`:ungradeable-legacy` (boolean present, evidence absent), dated like the
+pre-D10 gamma boundary — ambiguous forever, and the record says so.
+`:constant-assertion` remains a claim provable only about post-migration
+writers. An **optional audit row** may later upgrade *specific* legacy
+receipts by joining surviving deposit/job records that do carry the seats —
+with witness pointers on each upgraded receipt, never by inference (§7(f)).
 
 ## 4. Migration without breaking the refusal
 
 - `countdown_control`: the `(not= depositor reviewer)` computation stays as
   the *input* to `:seat-string-distinctness`; the false case still refuses
   `:zai-scribe-reviewer-is-depositor`, same code, same inputs — pinned by a
-  before/after test with a live-captured receipt (live-pin rule).
+  before/after test with a live-captured receipt (live-pin rule). RIDER
+  (claude-1, the design's evidence-present principle applied to its own
+  repair): the migration **starts persisting `:receipt/depositor-seat` and
+  `:receipt/reviewer-seat`**, so every post-migration grade is re-derivable
+  from the record alone.
 - `live_learning_phases`: stops writing `true`; writes the typed interim
   `:independence :asserted-unverified` (claude-1's constraint 1 wording) —
   the field stops lying by construction, without pretending a comparison
@@ -108,10 +125,13 @@ legacy receipts are graded by provenance and say so
 ## 5. Decisions in DERIVE form
 
 - IF the flag's consumers gate on a boolean two writer populations fill
-  differently, HOWEVER a boolean cannot carry which population wrote it,
-  THEN independence becomes a computed grade with the legacy boolean graded
-  by receipt-type provenance, BECAUSE this is the `:gamma-source` fix on the
-  independence channel — same defect shape, same repair shape.
+  differently, HOWEVER the populations collide on receipt type AND the
+  computed population discarded its evidence at write time, THEN every
+  legacy boolean grades `:ungradeable-legacy` and only post-migration
+  records (which persist the compared seats) carry real grades, BECAUSE a
+  grade the record cannot support is exactly the manufactured guarantee the
+  grades exist to prevent — the refutation of rev 1's shim is the design's
+  own principle applied to itself.
 - IF the top grade must mean "an adjudicator reran it", HOWEVER nothing
   today mints rerun witnesses, THEN the top grade is reachable only through
   a resolving `:rerun-witness` evidence-id and no interim inference,
@@ -135,10 +155,11 @@ legacy receipts are graded by provenance and say so
   accepted (the R9 spec row's test, finally writable).
 - Property: no write path yields `:adjudicator-rerun-witnessed` without a
   resolving witness id (attempt with a dangling id → typed refusal).
-- Live-pins: one real scribe-pass receipt (computed population) and one real
-  guide receipt (constant population) quoted verbatim with ids; the read
-  shim grades them `:seat-string-distinctness` / `:constant-assertion`
-  respectively.
+- Live-pins: one real legacy receipt from each writer population quoted
+  verbatim with ids; the read shim grades BOTH `:ungradeable-legacy` (the
+  point: the record cannot tell them apart, and the shim must not pretend
+  to); a post-migration receipt with persisted seats grades
+  `:seat-string-distinctness` re-derivably.
 - The `:zai-scribe-reviewer-is-depositor` before/after pin (§5, clause 3).
 - Enumeration claims carry their search commands, untruncated.
 
@@ -149,7 +170,12 @@ review of this draft)
 (b) countdown_control migration — grade computed, refusal pinned;
 (c) live_learning_phases interim typing + frame_cycle_handlers gate update;
 (d) read shim + full consumer enumeration (untruncated);
-(e) tickle-side migration — separate proposal after claude-1's sign-off.
+(e) tickle-side migration — separate proposal after claude-1's sign-off
+    (their census: the flag lives exclusively in `apm/*`, so tickle
+    intersects only the NEW event — deferral cannot mis-grade legacy data);
+(f) OPTIONAL audit row: upgrade specific legacy receipts by joining
+    surviving deposit/job records that carry the seats, witness pointers on
+    every upgrade, never inference.
 
 ## 8. Not in v1
 
