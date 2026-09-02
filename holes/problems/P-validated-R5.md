@@ -714,3 +714,36 @@ constructed per-task by the constructor, bounded like the chip board (the
 stopping rule made physical), inspectable and reviewable BEFORE the run, with
 the seat's persisted transcripts (U1) and gate receipts as the playout oracle —
 and existing zai transcripts as retrodiction material.
+
+## 1c. Joe's ruling on the restated §1 (2026-09-02, seventh exchange, reported) — CONFIRMED, with a unification gloss
+
+> *"I agree with the statement, policy is a cascade at the policy grain. But we
+> need to understand that design patterns are themselves policies. So the
+> cascade of the policy grain includes... policies for building policies. It
+> includes policies for how to act in a given situation, and those are design
+> patterns."* (Joe, 2026-09-02, dictated)
+
+The gate of this file's header is hereby passed: LA1c-restatement.md §11 (the
+candidate restated §1, futon3 e44c6a3) is CONFIRMED. The recorded §1's
+three-way choice at :53-54 is answered by the restatement's fourth option, and
+Joe's gloss extends it in one direction the restatement stated only as a type
+(Rule INDEXED BY GRAIN):
+
+- **Pattern ≡ policy at every grain.** "Design pattern" and "policy" are not
+  two kinds of thing. A library pattern for acting in a situation is a policy
+  whose operand is the situation; a temperament is a policy whose operand is
+  the cascade. Grains differ by operand, never by type.
+- **The policy grain is recursive.** The policy-grain cascade includes
+  policies for building policies — a cascade-edit rule may itself have been
+  admitted, promoted or dropped by another policy-grain rule. LA2/LA3 must not
+  build a type in which the constructor's rules are a distinguished kind that
+  cannot appear as an operand.
+- Vocabulary note, so the grains do not drift: Joe's "design patterns" here
+  means the library's patterns generally (the classic sense) — in the
+  restatement's three-valued grain these are the play/design-grain rules, the
+  "policies for how to act in a given situation". Recorded verbatim above
+  rather than silently mapped.
+
+Consequence: §5 packets are ungated (this file's header gate), and
+library-contract rows L6 and LA2–LA9 unblock (worklist rows updated with this
+date; LJ1 closes against this section).
