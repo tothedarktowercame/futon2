@@ -588,6 +588,11 @@
     ;; run, NOT that the record belongs to an unnamed one.
     (:run/id judge-output)
     (assoc :run/id (:run/id judge-output))
+    ;; S4 durable mission focus. Present only behind FUTON_WM_CLOCK_FOCUS=1;
+    ;; the enabled record always carries either the typed focus or its typed
+    ;; absence, while default-OFF trace bytes remain unchanged.
+    (contains? judge-output :active-mission)
+    (assoc :active-mission (:active-mission judge-output))
     ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
     ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
     ;; tick (see `selection-gain/fold-realized-outcome`). Present-only —

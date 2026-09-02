@@ -28,7 +28,8 @@
 
    Invariant: WM-I1 (scan/observation remains read-only). The sole optional
    post-selection write is the default-off mission-clock witness immediately
-   after a successful trace append; it is never read by this namespace.
+   after a successful trace append. Its separate default-off read is carried
+   only as report/trace evidence; selection never consumes it.
    Pattern:   war-machine/operational-not-decorative"
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
@@ -74,6 +75,11 @@
   (delay (trace/reduce-traces habit-prior/fold-record
                               (habit-prior/initial-state)
                               :dir default-wm-trace-dir)))
+
+(def ^:dynamic *clock-focus?*
+  "S4 durable active-focus read, resolved once when this namespace loads.
+   Default OFF preserves the historical tick without an HTTP read or field."
+  (= "1" (System/getenv "FUTON_WM_CLOCK_FOCUS")))
 
 (def ^:dynamic *f-pi-dark?*
   "I2(c) dark readback switch, read once when this namespace loads.
@@ -1431,6 +1437,76 @@
        (mapcat #(remove #{agent-endpoint} (real-endpoints %)))
        distinct
        vec))
+
+(declare mission-id-for-clock-witness)
+
+(defn- active-clock-edge->mission
+  [agent-endpoint hx]
+  (let [endpoints (real-endpoints hx)
+        endpoint (first (remove #{agent-endpoint} endpoints))
+        clocked-at-ms (hx-prop hx :clocked-at-ms)
+        witness (hx-prop hx :witness)
+        witness-rule (or (get witness :rule) (get witness "rule"))]
+    (when (and (some #{agent-endpoint} endpoints) endpoint)
+      {:endpoint endpoint
+       :mission-id (or (hx-prop hx :mission-id)
+                       (mission-id-for-clock-witness endpoint))
+       :clocked-at-ms clocked-at-ms
+       :witness-rule witness-rule})))
+
+(defn- read-active-mission-clock
+  "Read `agent:war-machine`'s current durable clock. The substrate type query is
+   a db-as-of-now query: as `clock-lineage/query-edges-of-type` documents,
+   edges ended by an `hx/op \"retract\"` write are excluded by the server. If a
+   malformed historical state nevertheless exposes several current edges, use
+   the greatest recorded `clocked-at-ms`; the writer repairs that state on its
+   next switch. Returns a typed absence, and distinguishes an unreadable store
+   from a successful empty now-read."
+  []
+  (let [agent-endpoint (str "agent:" wm-clock-agent-id)
+        url (str futon1a-url "/api/alpha/hyperedges?type="
+                 (url-encode wm-clock-type)
+                 "&limit=500&include-total=false")]
+    (try
+      (let [response (http/get url {:headers {"Accept" "application/edn"
+                                               "X-Penholder" futon1a-penholder}
+                                    :timeout 20000
+                                    :throw false})]
+        (if (not= 200 (:status response))
+          (do
+            (binding [*out* *err*]
+              (println "War Machine mission clock unreadable: HTTP" (:status response)))
+            {:ok false :reason :clock-unreadable})
+          (let [body (parse-substrate-edn (:body response))
+                edges (when (map? body) (:hyperedges body))]
+            (if-not (sequential? edges)
+              (do
+                (binding [*out* *err*]
+                  (println "War Machine mission clock unreadable: malformed response"))
+                {:ok false :reason :clock-unreadable})
+              (if-let [active (->> edges
+                                   (keep #(active-clock-edge->mission
+                                           agent-endpoint (normalize-hyperedge %)))
+                                   (sort-by #(or (:clocked-at-ms %) 0) >)
+                                   first)]
+                active
+                {:ok false :reason :no-active-clock})))))
+      (catch Throwable e
+        (binding [*out* *err*]
+          (println "War Machine mission clock unreadable:" (ex-message e)))
+        {:ok false :reason :clock-unreadable}))))
+
+(defn- load-active-mission
+  []
+  (when *clock-focus?*
+    (read-active-mission-clock)))
+
+(defn- carry-active-mission
+  "Add the already-read focus only after decision/ranking. Keeping this as a
+   terminal projection makes the non-consumption boundary directly testable."
+  [result active-mission]
+  (cond-> result
+    *clock-focus?* (assoc :active-mission active-mission)))
 
 (defn- mission-id-for-clock-witness
   [target]
@@ -3476,6 +3552,16 @@
       :else
       (str "GET " target " did not return usable evidence data"))))
 
+(defn- render-active-mission-line
+  [active-mission]
+  (if (:endpoint active-mission)
+    (str "**Active mission:** " (:endpoint active-mission)
+         " (" (:mission-id active-mission) ", clocked "
+         (:clocked-at-ms active-mission) ", witness "
+         (:witness-rule active-mission) ")\n\n")
+    (str "**Active mission:** unavailable ("
+         (name (:reason active-mission)) ")\n\n")))
+
 (defn render-war-machine
   "Render the War Machine strategic synthesis as markdown."
   [{:keys [self-watch loop-health support-attack mission-triage graph
@@ -3483,6 +3569,10 @@
   (let [sb (StringBuilder.)]
     (.append sb "# War Machine — Strategic Synthesis\n\n")
     (.append sb (str "**" now "** | " days "-day window\n\n"))
+
+    (when (contains? (:judgement data) :active-mission)
+      (.append sb (render-active-mission-line
+                   (get-in data [:judgement :active-mission]))))
 
     ;; --- Input Status ---
     (when input-status
@@ -4924,6 +5014,10 @@
         (try (trace/recent-trace-records 12 :dir wm-trace-dir)
              (catch Exception _ []))
         prev-trace-record (peek recent-trace-records)
+        ;; S4 READ: durable focus is evidence only. It is loaded beside the
+        ;; previous trace, then carried after ranking/selection are complete.
+        ;; No observation, G, weight, admissibility, or selector receives it.
+        active-mission (load-active-mission)
         structural-pressure-mode (arena-structural-pressure-mode)
         habit-prior-source (arena-habit-prior-source)
         habit-prior-span-ratio-cap (arena-habit-prior-span-ratio-cap)
@@ -5510,7 +5604,8 @@
         ;; Losses: avoided states that are currently active
         losses (avoidance-losses mode free-energy)
         result0
-        (cond-> (cond-> {:mode mode
+        (carry-active-mission
+         (cond-> (cond-> {:mode mode
                  :mode-prior (get pref/mode-prior mode 0.0)
                  ;; INV (2026-05-27 staleness-gate): when the metabolic
                  ;; snapshot was stale, the :stop-the-line override is
@@ -5611,6 +5706,7 @@
           ;; the key off the record entirely.
           run-id
           (assoc :run/id run-id))
+         active-mission)
         result
         (if trace?
           (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]

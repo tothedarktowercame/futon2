@@ -403,6 +403,18 @@
         "the returned identity fields come from the record actually appended")
     (is (= "run-clock-1" (:run/id record)))))
 
+(deftest trace-record-carries-typed-active-mission-test
+  (let [active {:endpoint "futon4-d/mission/next"
+                :mission-id "M-next"
+                :clocked-at-ms 42
+                :witness-rule "selection-decision"}]
+    (is (= active (:active-mission
+                   (trace/trace-record
+                    (assoc sample-judge-output :active-mission active)))))
+    (is (not (contains? (trace/trace-record sample-judge-output)
+                        :active-mission))
+        "flag-off producer shape remains unchanged")))
+
 (deftest write-trace-appends-test
   (testing "two writes produce two records in the file"
     (trace/write-trace! sample-judge-output :dir *tmpdir* :date-str "2026-05-17")

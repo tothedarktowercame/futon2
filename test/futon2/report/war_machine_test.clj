@@ -1369,3 +1369,62 @@
              @(#'wm/record-selection-clock!
                 {:timestamp "2026-09-02T13:30:00Z"}
                 {:action {:type :open-mission :target "M-next"}}))))))
+
+(deftest mission-clock-focus-flag-off-does-no-http-test
+  (with-redefs-fn {#'wm/*clock-focus?* false
+                   #'wm/read-active-mission-clock
+                   (fn [] (throw (ex-info "clock read must not run" {})))}
+    (fn []
+      (is (nil? (#'wm/load-active-mission))))))
+
+(deftest mission-clock-focus-active-edge-is-typed-and-rendered-test
+  (let [body (pr-str
+              {:hyperedges
+               [{:hx/endpoints ["agent:war-machine" "futon4-d/mission/next"]
+                 :hx/props {:agent-id "war-machine"
+                            :mission-id "M-next"
+                            :clocked-at-ms 1700
+                            :witness {:rule "selection-decision"}}}]})]
+    (with-redefs-fn {#'wm/*clock-focus?* true
+                     #'http/get (fn [_ _] {:status 200 :body body})}
+      (fn []
+        (let [active (#'wm/load-active-mission)
+              markdown (#'wm/render-active-mission-line active)]
+          (is (= {:endpoint "futon4-d/mission/next"
+                  :mission-id "M-next"
+                  :clocked-at-ms 1700
+                  :witness-rule "selection-decision"}
+                 active))
+          (is (str/includes?
+               markdown
+               "**Active mission:** futon4-d/mission/next (M-next, clocked 1700, witness selection-decision)")))))))
+
+(deftest mission-clock-focus-successful-empty-read-is-typed-absence-test
+  (with-redefs-fn {#'wm/*clock-focus?* true
+                   #'http/get (fn [_ _]
+                                {:status 200 :body (pr-str {:hyperedges []})})}
+    (fn []
+      (is (= {:ok false :reason :no-active-clock}
+             (#'wm/load-active-mission))))))
+
+(deftest mission-clock-focus-unreachable-is-typed-and-nonfatal-test
+  (with-redefs-fn {#'wm/*clock-focus?* true
+                   #'http/get (fn [& _] (throw (ex-info "offline" {})))}
+    (fn []
+      (is (= {:ok false :reason :clock-unreadable}
+             (#'wm/load-active-mission))))))
+
+(deftest mission-clock-focus-cannot-change-ranked-output-test
+  (let [ranked [{:rank 1 :action {:type :fire-pattern :target :pattern/a}}
+                {:rank 2 :action {:type :advance-mission :target "M-next"}}]
+        selected {:ranked-actions ranked :decision {:action (:action (first ranked))}}
+        active {:endpoint "futon4-d/mission/next" :mission-id "M-next"
+                :clocked-at-ms 1700 :witness-rule "selection-decision"}
+        off (with-redefs-fn {#'wm/*clock-focus?* false}
+              (fn [] (#'wm/carry-active-mission selected active)))
+        on (with-redefs-fn {#'wm/*clock-focus?* true}
+             (fn [] (#'wm/carry-active-mission selected active)))]
+    (is (= (:ranked-actions off) (:ranked-actions on)))
+    (is (= (:decision off) (:decision on)))
+    (is (not (contains? off :active-mission)))
+    (is (= active (:active-mission on)))))
