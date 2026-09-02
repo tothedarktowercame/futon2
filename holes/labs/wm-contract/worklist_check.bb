@@ -1,7 +1,8 @@
 #!/usr/bin/env bb
 ;; worklist_check.bb -- prove the ledger before anyone acts on it (class 6a).
 (require '[clojure.edn :as edn]
-         '[clojure.string])
+         '[clojure.string :as str]
+         '[cheshire.core :as json])
 (def w (edn/read-string (slurp (or (first *command-line-args*)
                                     (str (.getParent (.getAbsoluteFile (java.io.File. *file*))) "/worklist.edn")))))
 (defn die [& m] (binding [*out* *err*] (apply println "worklist_check:" m)) (System/exit 1))
@@ -61,8 +62,7 @@
 ;; Rows without :covers-key are not checked, and the count of unchecked rows is
 ;; printed rather than passed over -- an absence should be visible, not implied.
 
-(require '[clojure.java.shell :as shell]
-         '[clojure.string :as str])
+(require '[clojure.java.shell :as shell])
 
 (require '[clojure.java.io :as io])
 ;; Resolve every path against the REPO ROOT, found from this script's own
@@ -106,11 +106,17 @@
   [covers-key]
   (if (vector? (first covers-key)) covers-key [covers-key]))
 
+(defn- read-registry
+  [path text]
+  (if (str/ends-with? path ".json")
+    (json/parse-string text)
+    (edn/read-string text)))
+
 (defn- registry-at
   "The registry map as of SHA, or nil when the file did not exist there."
   [registry-root sha path]
   (let [{:keys [exit out]} (shell/sh "git" "show" (str sha ":" path) :dir registry-root)]
-    (when (zero? exit) (edn/read-string out))))
+    (when (zero? exit) (read-registry path out))))
 
 (def superseded-rows
   ;; TN 9a: an entry changed after signature gets a NEW row naming the row it
@@ -163,7 +169,7 @@
     (let [then (registry-at registry-root sha path)]
       (when-not then
         (die (:id i) "cannot read" path "at" sha "-- the signed sha is not in this history"))
-      (let [now-file (edn/read-string (slurp (io/file registry-root path)))]
+      (let [now-file (read-registry path (slurp (io/file registry-root path)))]
         (doseq [kp (key-paths key-path)]
           (let [was (resolve-path then kp)
                 now (resolve-path now-file kp)]
