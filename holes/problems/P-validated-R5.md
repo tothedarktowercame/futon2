@@ -670,3 +670,14 @@ Snatch are interesting; some temperaments learn in a war-room-like way, and
 such outside patterns could set (hyper)parameters in the policy playout.
 Reactive play seems policy-grained; where it sits among the current Snatch
 patterns is not remembered — a discovery question, worked as LA1 slice (a).
+
+**§1b addendum 2 (Joe, 2026-09-02, third exchange, reported):** cascade
+construction needs a stopping rule — a temperament alone selects too little,
+"all patterns" too much. Because there is a policy for building policies, G
+should update *iteratively during construction* until the correct policy is
+selected — very different from ranking individual actions. There may be a
+preferential-attachment method for deciding whether a given pattern enters the
+cascade and where it fits. The standing idea: the how/why landscape gives a
+prior that can be subselected to quickly assemble a suitable local policy, and
+the same landscape is a substrate for learning over multiple runs. Not built
+yet.
