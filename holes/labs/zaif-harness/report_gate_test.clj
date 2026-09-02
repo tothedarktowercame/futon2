@@ -89,16 +89,27 @@
         result (adjudicate [{:claim/type :status :value :complete}] sources)]
     (is (= [:u8/mission-status-signal-overbroad] (:failures result)))))
 
-(deftest real-recorded-decision-exposes-both-known-findings
+(deftest real-recorded-decision-exposes-known-findings
+  ;; History of this expectation: at U8b delivery (33f7a46's predecessors) the
+  ;; live store derived a false :complete from chat prose, so this test pinned
+  ;; BOTH :u8/decision-mission-attribution-absent AND
+  ;; :u8/mission-status-signal-overbroad. D11 (33f7a46) tightened the oracle's
+  ;; chat predicate; the store now derives a typed absence (nil, 0 signals),
+  ;; which the gate treats as backed. The overbroad path stays pinned by
+  ;; chat-derived-status-fails-despite-older-commit-signal above. What remains
+  ;; live-exposed is the mission-attribution gap, until D10 lands.
   (let [{:keys [report sources decision round]}
         (real-case "M-zaif-harness-v1")
-        result (adjudicate report sources)]
+        result (adjudicate report sources)
+        status-row (first (filter #(= :status (get-in % [:claim :claim/type]))
+                                  (:results result)))]
     (is (= :zaif-arm-choice (get-in decision [:evidence/body :event])))
     (is (= :turn-round (get-in round [:evidence/body :event])))
-    (is (= #{:u8/decision-mission-attribution-absent
-             :u8/mission-status-signal-overbroad}
+    (is (= #{:u8/decision-mission-attribution-absent}
            (set (:failures result))))
-    (is (= 2 (count (filter #(= :failed (:verdict %)) (:results result)))))))
+    (is (= 1 (count (filter #(= :failed (:verdict %)) (:results result)))))
+    (is (= :backed (:verdict status-row))
+        "typed absence from the oracle backs an absence-reporting claim")))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (let [result (t/run-tests 'report-gate-test)]

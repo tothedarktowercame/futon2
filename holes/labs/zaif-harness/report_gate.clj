@@ -103,6 +103,13 @@
                  (not= (:value claim) derived)
                  (query-result claim (:query oracle) :failed :u8/claim-unbacked)
 
+                 ;; Post-D11: the oracle can return a typed absence (nil
+                 ;; derived, empty signal list). A claim that reports exactly
+                 ;; that absence is backed by the query — there is no signal
+                 ;; to be overbroad about.
+                 (and (nil? derived) (empty? evidence))
+                 (query-result claim (:query oracle) :backed)
+
                  (not declared?)
                  (query-result claim (:query oracle) :failed
                                :u8/mission-status-signal-overbroad)
