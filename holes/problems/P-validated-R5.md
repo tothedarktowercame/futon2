@@ -660,3 +660,13 @@ The §1 problem statement is therefore to be RESTATED through this
 unification, not confirmed as it stands. Worked as library-contract row LA1
 (futon3/holes/labs/library-contract/worklist.edn); §5 packets stay gated on
 Joe confirming the restated §1 (row LJ1).
+
+**§1b addendum (Joe, 2026-09-02, second exchange, reported):** a *family* of
+temperaments — plausibly all five as `@how` of one have-a-temperament pattern,
+one pattern each, each corresponding to a policy for building a cascade and
+thence a style of play. The production-rule interpretation of patterns is
+important to this thinking and must be kept at every level. Pointers outside
+Snatch are interesting; some temperaments learn in a war-room-like way, and
+such outside patterns could set (hyper)parameters in the policy playout.
+Reactive play seems policy-grained; where it sits among the current Snatch
+patterns is not remembered — a discovery question, worked as LA1 slice (a).
