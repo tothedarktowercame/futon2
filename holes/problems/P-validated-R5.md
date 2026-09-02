@@ -692,3 +692,11 @@ as oracle, and the untested @aif-delta channel lives there) and one external
 benchmark (ALFWorld) named as a stretch row. Ants has a useful property as a
 control: its authority gate FAILED every real pattern on held-out yield
 (2026-07-16), so a constructor that only ever confirms would be caught there.
+
+**§1b addendum 4 (Joe, 2026-09-02, fifth exchange, reported):** after the
+snatch/ants/ALFWorld pilots, a GENERALISATION step: focused tests and trials at
+the R5 node itself — running through a list of missions, excursions, tickets,
+not to work on them, but only to see whether policies could be constructed
+that would plausibly allow working on them. Construction-only trials over real
+work items; the dark-mode discipline (construct, persist, judge — do not
+enact), applied to the constructor itself.
