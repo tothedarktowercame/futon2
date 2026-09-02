@@ -65,3 +65,41 @@ each with its witness pointer (Class A/B) or owner (Class C #8);
 gen_model_coverage.py re-run; the generated Box-2 total row shows
 glossary-only count 0 (or the honest residual, named); paper rebuilds clean;
 any contested typing comes back as :needs-joe instead of being forced.
+
+## Execution (U14, 2026-09-02) — two divergences from the plan above
+
+Executed by the wm-edge loop. Seven of the nine rows were re-typed exactly as
+dispositioned. Two were not, and both reasons are findings rather than
+preferences.
+
+**1. "Observation vector o" is not an uncovered paragraph.** It already has an
+owning contract declaration: `ObservationVector` in
+`mathlib4/DarkTower/WarMachine/holes-contract.json`, owner
+`"sec-glossary.tex paragraph:Observation vector o · P-glossary-mathematics"`,
+decided 2026-08-31, already `:closed-by-record-with-witness` in
+`variable-situation-accounting.edn`. The drift note's uncovered list was
+compiled the same day and does not reflect it. The glossary row is therefore a
+*duplicate* of a declaration, and adding it to the coverage table's closed
+column would count one paragraph twice. This is why the registry now carries
+`:row-source` and the coverage generator counts the two populations apart. The
+formal residue in disposition 1 holds and is now pinned: the literal `Obs v`
+occurs in the Lean corpus only at `Holes.lean:153`, C's signature (`:6556` and
+`:6577` are prose quoting it).
+
+**2. "Revision boundary" was NOT re-typed — it is contested on its referent,
+and U14's acceptance sends a contested typing to Joe rather than forcing it.**
+Disposition 5 witnesses the row with valid-time retract+put and db-as-of-now
+queries — bitemporal store revision. The row's owner resolves to
+`sec-glossary.tex:84`, `\paragraph{Revision (2026-08-31; cancellation
+boundary)}`, which is about cohort 46's outcome taxonomy: a cancelled attempt
+stays durably visible but begins a new semantic stratum unless a cohort
+preregisters it. Nothing in that paragraph is about valid time. Closing it on
+the note's witness would assert a witness for a claim the paragraph does not
+make — the referent-drift defect class this registry exists to catch. A witness
+that *does* match the paragraph as written exists:
+`futon2/src/futon2/aif/full_loop_cohort.clj:397` emits
+`:stratum/id :post-preregistration/cancelled` and `:173` excludes `:cancelled`
+from the preregistered population, against the preregistration at
+`futon2/holes/labs/M-aif-full-loop-46/cohort.edn`. Joe's call: (a) close on the
+cohort witness, (b) name the paragraph disposition 5 meant, or (c) leave it
+`:named-only`.
