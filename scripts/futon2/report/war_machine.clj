@@ -4823,7 +4823,8 @@
          prev-selection-gain-state (:realized-outcome prev-trace-record))
         selection-gain-value (selection-gain/selection-gain-for selection-gain-state)
         ;; Inner loop result
-        {:keys [belief precision-state prediction-errors micro-step-trace]}
+        {:keys [belief precision-state prediction-errors micro-step-trace
+                prediction-triple-events]}
         (loop [step 0
                belief wm-belief-after-brief
                prec-state prev-precision-state
@@ -4835,11 +4836,28 @@
                               :coupling-edges (get-in scan-data [:graph :edges :temporal-coupling])
                               :entity-ticks wm-entity-ticks
                               :tick-results (get-in scan-data [:graph :dynamics :ticks])})
-                raw-errors (into {}
-                                 (for [ch belief/channels-with-likelihood]
-                                   [ch (fe/compute-prediction-error
-                                        (get observation ch 0.0)
-                                        (get predictions ch))]))
+                ;; AC1 (Joe's 2026-09-02 ruling on C130 2): read each channel
+                ;; through the observation envelope instead of substituting 0.0
+                ;; for a channel this tick never observed. The producer returns
+                ;; one of three typed records per channel.
+                triples (into {}
+                              (for [ch belief/channels-with-likelihood]
+                                [ch (fe/channel-prediction-error
+                                     observation ch (get predictions ch))]))
+                triple-omissions (vec (for [[_ r] triples
+                                            :when (= :absent (:status r))] r))
+                triple-refusals (vec (for [[_ r] triples
+                                           :when (= :refused (:status r))] r))
+                ;; Omit the absent channels; refuse the WHOLE update when any
+                ;; channel is refused, so no channel is scored against a
+                ;; likelihood the model failed to produce. An empty errors map
+                ;; passes precision state through unchanged and drives no
+                ;; belief event, which is what refusing the update means here.
+                raw-errors (if (seq triple-refusals)
+                             {}
+                             (into {} (for [[ch r] triples
+                                            :when (= :present (:status r))]
+                                        [ch r])))
                 ;; R7: the same resolver feeds behaviour and the provenance
                 ;; stamp. Precision is variance-only; need remains :salience.
                 prec-state' (precision/update-precision-state
@@ -4892,19 +4910,31 @@
                 belief' (if (seq events)
                           (apply-arena-belief-events belief events)
                           belief)
-                step-entry {:step step
-                            :error-magnitude error-mag
-                            :aggregated-signed-error aggregated-signed-error
-                            :anneal-factor anneal-factor
-                            :events-applied (count events)
-                            :event-weight event-weight}
+                ;; Present-only: a tick with nothing absent and nothing
+                ;; refused writes the same step entry it wrote before AC1.
+                step-entry (cond-> {:step step
+                                    :error-magnitude error-mag
+                                    :aggregated-signed-error aggregated-signed-error
+                                    :anneal-factor anneal-factor
+                                    :events-applied (count events)
+                                    :event-weight event-weight}
+                             (seq triple-omissions)
+                             (assoc :prediction-triple-omitted
+                                    (count triple-omissions))
+                             (seq triple-refusals)
+                             (assoc :prediction-triple-refused
+                                    (count triple-refusals)))
                 micro-trace' (conj micro-trace step-entry)]
-            (if (or (>= (inc step) r3-max-steps)
+            (if (or (seq triple-refusals)
+                    (>= (inc step) r3-max-steps)
                     (< error-mag r3-error-eps))
               {:belief belief'
                :precision-state prec-state'
                :prediction-errors weighted-errors
-               :micro-step-trace micro-trace'}
+               :micro-step-trace micro-trace'
+               ;; The typed absence/refusal records themselves, carried out of
+               ;; the loop so the trace can persist them (AC8 sweeps them).
+               :prediction-triple-events (into triple-omissions triple-refusals)}
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
         route2 (-> route1
@@ -5262,6 +5292,11 @@
                  :belief wm-belief
                  :belief-pre wm-belief-pre
                  :prediction-errors prediction-errors
+                 ;; AC1: the tick's typed prediction-triple omissions and
+                 ;; refusals. Present-only at the trace boundary (trace.clj) --
+                 ;; an absent key means the triple was complete on every
+                 ;; channel, not that nobody looked.
+                 :prediction-triple-events prediction-triple-events
                  :precision-state precision-state
                  ;; R14 precision-over-policies (γ): the learned, bounded inverse
                  ;; selection temperature this tick used (τ_eff = τ_spread / γ).

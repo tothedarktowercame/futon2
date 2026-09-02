@@ -30,9 +30,12 @@
           (> v hi) (- v hi)
           :else 0.0)))
 
-(defn- channel-reading
-  "Return a reason-bearing reading for CHANNEL. Plain explicit maps are a
-   supported legacy boundary; metadata-bearing observations retain absence."
+(defn- channel-source-status
+  "Whether CHANNEL of OBS carries an observed value, and why not when it does
+   not. The value is returned RAW: callers that must tell a non-numeric value
+   from an absent one cannot be handed a coerced double. Plain explicit maps
+   are a supported legacy boundary; metadata-bearing observations retain
+   absence."
   [obs channel]
   (let [source-status (observation/observation-status obs channel)
         explicit-legacy-value? (and (= :status-metadata-missing
@@ -40,9 +43,18 @@
                                     (contains? obs channel)
                                     (some? (get obs channel)))]
     (if (or (= :observed (:variant source-status)) explicit-legacy-value?)
-      {:status :present :value (double (get obs channel))}
+      {:status :present :value (get obs channel)}
       (merge {:status :absent}
              (select-keys source-status [:reason :paths])))))
+
+(defn- channel-reading
+  "Return a reason-bearing reading for CHANNEL. Plain explicit maps are a
+   supported legacy boundary; metadata-bearing observations retain absence."
+  [obs channel]
+  (let [source (channel-source-status obs channel)]
+    (if (= :present (:status source))
+      {:status :present :value (double (:value source))}
+      source)))
 
 (defn- avoidance-verdict
   "Tri-state avoided-range diagnostic. An absent source is unknown; it is
@@ -156,34 +168,125 @@
 ;; v0.10: R3a prediction-error computation against a likelihood model.
 ;; ---------------------------------------------------------------------------
 
+(def prediction-error-contract
+  "Producer contract stamped on every prediction-triple record the producer
+   emits, whether it scored, omitted, or refused."
+  :prediction-error/v1)
+
+(defn- finite-double
+  "X as a double when it is a finite number; nil otherwise. A string, a
+   keyword, NaN, or an infinity is a value the producer was GIVEN and cannot
+   use — that is malformed, not absent."
+  [x]
+  (when (number? x)
+    (let [d (double x)]
+      (when-not (or (Double/isNaN d) (Double/isInfinite d)) d))))
+
+(defn- prediction-member
+  "Classify one likelihood-model member (`:mean` or `:variance`) of
+   PREDICTION. Missing and non-finite are separate verdicts because the
+   refusal record has to say which one happened."
+  [prediction k]
+  (let [raw (get prediction k)]
+    (cond
+      (not (contains? prediction k)) {:member k :status :missing}
+      (nil? raw) {:member k :status :missing}
+      (nil? (finite-double raw)) {:member k :status :not-finite :value raw}
+      :else {:member k :status :present :value (finite-double raw)})))
+
 (defn compute-prediction-error
   "R3a + R3b: prediction error (and precision-weighted error) for one channel
    given the observed value and a likelihood-model output `{:mean :variance}`.
 
-   Returns:
-     {:observed         <number>
-      :predicted-mean   <number>
-      :predicted-variance <number>
-      :error            <observed − predicted-mean>      ; R3a
-      :weighted-error   <error * precision>              ; R3b (precision = 1 / max(variance, ε))
-      :precision        <1 / max(variance, ε)>}
+   AC1 (Joe's 2026-09-02 ruling on C130 §2) removed the three zero
+   substitutions that used to stand in for the members of this triple. The
+   producer now emits one of three typed records, and which one it emits is
+   the decision:
+
+   `:present` — all three members are finite numbers:
+     {:status :present
+      :observed <number> :predicted-mean <number> :predicted-variance <number>
+      :error <observed − predicted-mean>          ; R3a
+      :precision <1 / max(variance, ε)>
+      :weighted-error <error * precision>          ; R3b
+      :producer-contract :prediction-error/v1}
+
+   `:absent` — the OBSERVATION was not taken. The channel carries no numbers
+   at all and the caller omits it from the update; the reason travels with the
+   record (`:reason`, `:paths` from the observation envelope when the caller
+   read it through `channel-prediction-error`). An observation nobody made is
+   not an observation of zero.
+
+   `:refused` — a MODEL parameter is missing, or any member is present but not
+   a finite number. C130 §2 splits the triple deliberately: absence of an
+   observation omits, absence or corruption of model output refuses, because a
+   likelihood that produced no mean is a producer defect and must stay loud.
+   The record names every offending member under `:offending`.
 
    The ε floor (`min-variance`) prevents division by zero when the
-   likelihood reports certainty (variance ≈ 0). Default min-variance 0.01."
+   likelihood reports certainty (variance ≈ 0). Default min-variance 0.01.
+
+   Opts: `:min-variance`, plus `:observation-status` and `:channel`, which a
+   caller reading through an observation envelope supplies so the emitted
+   record can name what was missing and where."
   ([observed prediction] (compute-prediction-error observed prediction {}))
-  ([observed prediction {:keys [min-variance] :or {min-variance 0.01}}]
-   (let [pm (double (:mean prediction 0.0))
-         pv (double (:variance prediction 0.0))
-         o (double (or observed 0.0))
-         err (- o pm)
-         precision (/ 1.0 (max pv min-variance))]
-     {:observed o
-      :predicted-mean pm
-      :predicted-variance pv
-      :error err
-      :producer-contract :prediction-error/v1
-      :precision precision
-      :weighted-error (* err precision)})))
+  ([observed prediction {:keys [min-variance observation-status channel]
+                         :or {min-variance 0.01}}]
+   (let [stamp (cond-> {:producer-contract prediction-error-contract}
+                 channel (assoc :channel channel))
+         mean-member (prediction-member prediction :mean)
+         var-member (prediction-member prediction :variance)
+         observed-malformed? (and (some? observed) (nil? (finite-double observed)))
+         offending (cond-> (vec (remove #(= :present (:status %))
+                                        [mean-member var-member]))
+                     observed-malformed?
+                     (conj {:member :observed :status :not-finite :value observed}))]
+     (cond
+       ;; Malformed or missing model output, or a non-numeric observation:
+       ;; refuse loudly rather than score a substituted value.
+       (seq offending)
+       (merge stamp {:status :refused
+                     :reason :malformed-prediction-triple
+                     :offending offending})
+
+       ;; Honestly absent observation: omit the channel, keep the reason.
+       (nil? observed)
+       (merge stamp
+              {:status :absent :absent-member :observed}
+              (or (not-empty (select-keys observation-status [:reason :paths]))
+                  {:reason :observation-absent}))
+
+       :else
+       (let [pm (:value mean-member)
+             pv (:value var-member)
+             o (double observed)
+             err (- o pm)
+             precision (/ 1.0 (max pv min-variance))]
+         (merge stamp
+                {:status :present
+                 :observed o
+                 :predicted-mean pm
+                 :predicted-variance pv
+                 :error err
+                 :precision precision
+                 :weighted-error (* err precision)}))))))
+
+(defn channel-prediction-error
+  "`compute-prediction-error` for CHANNEL read through OBS's observation
+   envelope, so an absent channel carries the envelope's own reason and paths
+   instead of the 0.0 the caller used to substitute for it. This is the form
+   the war-machine inner loop calls; the two-argument producer above stays
+   available to callers that already hold a scalar."
+  ([obs channel prediction] (channel-prediction-error obs channel prediction {}))
+  ([obs channel prediction opts]
+   (let [source (channel-source-status obs channel)
+         present? (= :present (:status source))]
+     (compute-prediction-error
+      (when present? (:value source))
+      prediction
+      (cond-> (assoc opts :channel channel)
+        (not present?)
+        (assoc :observation-status (select-keys source [:reason :paths])))))))
 
 (defn infer-mode
   "Infer strategic mode from observation vector.

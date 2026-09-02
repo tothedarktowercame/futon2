@@ -527,6 +527,15 @@
     ;; claim, and therefore no :wm/route key.
     (seq (:wm/route judge-output))
     (assoc :wm/route (:wm/route judge-output))
+    ;; AC1 (Joe's 2026-09-02 C130 ruling, the self-repair condition): the
+    ;; typed records the prediction-triple producer emitted instead of a
+    ;; fabricated zero -- one per omitted-because-unobserved channel, one per
+    ;; refused-because-malformed channel. Persisting them is what lets the
+    ;; harvester turn a refusal into a work item rather than a standing red.
+    ;; Present-only: no key means every channel's triple was complete, which
+    ;; is a different claim from "the producer did not report".
+    (seq (:prediction-triple-events judge-output))
+    (assoc :prediction-triple-events (:prediction-triple-events judge-output))
     ;; RUN11 run identity. The per-date trace file is shared by every run on
     ;; the day, so without this key the only discriminator between two runs'
     ;; records is the timestamp and a reader has to select by range. `:run/id`

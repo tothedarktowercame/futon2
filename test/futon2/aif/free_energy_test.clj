@@ -204,10 +204,80 @@
                                           {:min-variance 0.5})]
       (is (= 2.0 (:precision e)) "precision = 1 / custom min-variance"))))
 
-(deftest compute-prediction-error-defaults-test
-  (testing "missing observed defaults to 0.0"
+;; ---------------------------------------------------------------------------
+;; AC1 (Joe's 2026-09-02 ruling on C130 2): the prediction triple no longer
+;; substitutes 0.0 for any of its three members. Absent and malformed are
+;; different verdicts and these tests are what hold them apart -- an absent
+;; observation omits the channel, a malformed or missing model parameter
+;; refuses the update.
+;; ---------------------------------------------------------------------------
+
+(deftest compute-prediction-error-present-status-test
+  (testing "a complete triple is typed :present and scores as before"
+    (let [e (fe/compute-prediction-error 0.6 {:mean 0.4 :variance 0.04})]
+      (is (= :present (:status e)))
+      (is (= :prediction-error/v1 (:producer-contract e)))
+      (is (< (Math/abs (- 0.2 (:error e))) 1e-9)))))
+
+(deftest compute-prediction-error-absent-observation-test
+  (testing "an unobserved channel is omitted with a reason, never scored as 0.0"
     (let [e (fe/compute-prediction-error nil {:mean 0.5 :variance 0.04})]
-      (is (= 0.0 (:observed e))))))
+      (is (= :absent (:status e)))
+      (is (= :observed (:absent-member e)))
+      (is (= :observation-absent (:reason e)))
+      (is (not (contains? e :observed)) "no fabricated observation")
+      (is (not (contains? e :error)) "no fabricated error")
+      (is (not (contains? e :weighted-error)) "no fabricated weighted error"))))
+
+(deftest channel-prediction-error-carries-envelope-reason-test
+  (testing "an absent channel carries the observation envelope's own reason"
+    (let [obs (obs/observe {})
+          e (fe/channel-prediction-error obs :annotation-health
+                                         {:mean 0.5 :variance 0.04})]
+      (is (= :absent (:status e)))
+      (is (= :annotation-health (:channel e)))
+      (is (= :source-field-missing (:reason e)))
+      (is (seq (:paths e)) "the missing source paths travel with the record")
+      (is (not (contains? e :observed))))))
+
+(deftest channel-prediction-error-observed-channel-scores-test
+  (testing "an observed channel still scores, and a measured zero is present"
+    (let [obs (obs/observe {:annotation-graph {:health 0.0}})
+          e (fe/channel-prediction-error obs :annotation-health
+                                         {:mean 0.4 :variance 0.04})]
+      (is (= :present (:status e)))
+      (is (= 0.0 (:observed e)) "a measured zero is an observation, not an absence")
+      (is (< (Math/abs (- -0.4 (:error e))) 1e-9)))))
+
+(deftest compute-prediction-error-missing-model-parameter-refuses-test
+  (testing "a missing likelihood member refuses the update (C130 2 option B)"
+    (doseq [prediction [{:variance 0.04} {:mean 0.5} {} nil]]
+      (let [e (fe/compute-prediction-error 0.6 prediction)]
+        (is (= :refused (:status e))
+            (str "expected refusal for prediction " (pr-str prediction)))
+        (is (= :malformed-prediction-triple (:reason e)))
+        (is (seq (:offending e)))
+        (is (not (contains? e :error)) "a refusal fabricates no error")))))
+
+(deftest compute-prediction-error-malformed-members-refuse-test
+  (testing "a present-but-not-finite member refuses and names itself"
+    (let [e (fe/compute-prediction-error 0.6 {:mean "0.4" :variance 0.04})]
+      (is (= :refused (:status e)))
+      (is (= [:mean] (mapv :member (:offending e)))))
+    (let [e (fe/compute-prediction-error 0.6 {:mean 0.4 :variance ##NaN})]
+      (is (= :refused (:status e)))
+      (is (= [:variance] (mapv :member (:offending e)))))
+    (let [e (fe/compute-prediction-error ##Inf {:mean 0.4 :variance 0.04})]
+      (is (= :refused (:status e)) "a non-finite OBSERVATION is malformed, not absent")
+      (is (= [:observed] (mapv :member (:offending e)))))))
+
+(deftest compute-prediction-error-absent-is-not-malformed-test
+  (testing "absent and malformed are different verdicts on the same channel"
+    (let [absent (fe/compute-prediction-error nil {:mean 0.5 :variance 0.04})
+          malformed (fe/compute-prediction-error 0.5 {:mean nil :variance 0.04})]
+      (is (not= (:status absent) (:status malformed)))
+      (is (= :absent (:status absent)))
+      (is (= :refused (:status malformed))))))
 
 ;; I5 slice (c) removed `compute-variational-free-energy`. What its tests
 ;; covered that nothing else does is the ABSENCE itself: a later reader who
