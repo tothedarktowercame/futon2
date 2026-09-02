@@ -4896,15 +4896,22 @@
   [controller-decision strategic-action strategic-selection]
   (let [controller-ranking (:controller-ranking controller-decision)
         chosen-action (:action strategic-action)
+        ;; Compare by durable action identity (type + target via policy-key),
+        ;; never by full map equality: the selector returns a minimal action
+        ;; map while the ranking carries the enriched one, so map equality
+        ;; reported the controller head itself as moved (chosen-rank nil,
+        ;; moved? true on run 2 of 2026-09-02). Same trap as rank/N joins.
+        chosen-key (habit-prior/policy-key chosen-action)
         head (first controller-ranking)
-        chosen (some #(when (= chosen-action (:action %)) %) controller-ranking)]
+        chosen (some #(when (= chosen-key (candidate-identity %)) %)
+                     controller-ranking)]
     (assoc (:selection-law controller-decision)
            :consulted-ranking (or (:consulted-ranking strategic-selection)
                                   :live-selector-id)
            :controller-head-rank (:rank head)
-           :chosen-rank (:rank chosen)
+           :chosen-rank (or (:rank chosen) :not-in-controller-ranking)
            :moved-from-controller-head?
-           (not= chosen-action (:action head)))))
+           (not= chosen-key (candidate-identity head)))))
 
 (defn- route-tag
   [route node via]

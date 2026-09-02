@@ -1445,15 +1445,34 @@
     (is (true? (:moved-from-controller-head? law)))))
 
 (deftest strategic-selection-law-records-controller-head-honestly-test
-  (let [head-action {:type :advance-mission :target "M-controller-head"}
+  ;; The ranking carries the ENRICHED action map; the selector returns a
+  ;; MINIMAL one. Identity is type+target (policy-key), never map equality —
+  ;; run 2 of 2026-09-02 stamped the controller head itself as moved because
+  ;; the maps differed on enrichment keys.
+  (let [enriched-head {:type :advance-mission :target "M-controller-head"
+                       :rationale "enriched by the judge" :weight 1.0
+                       :mission-value-factor 0.59}
+        minimal-head {:type :advance-mission :target "M-controller-head"}
         controller-decision
         {:selection-law {:requested :controller-head :applied :controller-head}
-         :controller-ranking [{:rank 1 :action head-action}
+         :controller-ranking [{:rank 1 :action enriched-head}
                               {:rank 2 :action {:type :advance-mission
                                                :target "M-other"}}]}
         law (#'wm/strategic-selection-law
-             controller-decision {:action head-action}
+             controller-decision {:action minimal-head}
              {:consulted-ranking :controller})]
     (is (= :controller (:consulted-ranking law)))
     (is (= 1 (:chosen-rank law)))
     (is (false? (:moved-from-controller-head? law)))))
+
+(deftest strategic-selection-law-types-a-choice-outside-the-ranking-test
+  (let [controller-decision
+        {:selection-law {}
+         :controller-ranking [{:rank 1 :action {:type :advance-mission
+                                                :target "M-head"}}]}
+        law (#'wm/strategic-selection-law
+             controller-decision
+             {:action {:type :repair-machine-failure :target "R-x"}}
+             {:consulted-ranking :scheduler-habit})]
+    (is (= :not-in-controller-ranking (:chosen-rank law)))
+    (is (true? (:moved-from-controller-head? law)))))
