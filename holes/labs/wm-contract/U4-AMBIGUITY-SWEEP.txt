@@ -1,0 +1,266 @@
+;; U4 -- ambiguity discrimination sweep. Replay of committed records only;
+;; no live run, no run lock, nothing written under data/.
+;; Lower score = more preferred (efe.clj:904-919), so arg-best = argmin.
+;; STRICT = the with-term winner is strictly worse without the term, so the
+;; term overturned a strict preference rather than breaking an exact tie.
+
+;; ---------------------------------------------------------------
+;; FIELDS AND DENOMINATORS
+;;   ARCHIVE  data/wm-trace/wm-trace-YYYY-MM-DD.edn, 55 files, 882 records, 882 usable ticks
+;;   S2       holes/labs/wm-contract/runs/2026-09-01-s2/wm-trace-s2.edn -- 20 ticks
+;;   S3       NOT FOUND. runs/2026-09-01-s3/ holds ARMS.txt and README.md only;
+;;            its README's first line says it is a REPLAY, not a 20-tick stage
+;;            run. S3 contributes 0 ticks (the same absence C486 §3 recorded).
+;;   S4       holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn -- 4 ticks
+;;   OVERLAP: S2 timestamps also present in ARCHIVE 20/20; S4 4/4 -- S2 and S4 are
+;;            copies of ticks the per-date archive already holds, so ALL FIELDS
+;;            double-counts them and the per-field rows are the honest denominators.
+
+;; ---------------------------------------------------------------
+;; C2  SRC REPRODUCTION -- recompute :G-ambiguity from the record's own
+;;     :prediction-variance with efe.clj's OWN ambiguity fn, split by class.
+;;     entropy-carrying (other)   candidates  13622   max |delta| 0.0000e+00   recorded values (-125.1977213937595 -116.79209997800035 -109.42619933308113 -108.87689318874708)
+;;     :learn-action-class        candidates    588   max |delta| 1.2545e+02   recorded values (0.25)
+;;     efe.clj:680-682 is why: for :learn-action-class, g-ambig is
+;;     (:predictive-variance zone-evidence) -- the capability zone's Beta
+;;     predictive variance -- and ambiguity-terms is {} (efe.clj:678-679).
+
+;; ---------------------------------------------------------------
+;; MEASUREMENTS
+;; The era boundary below is 2026-07-03, the first archived date whose
+;; recorded :G-ambiguity is on the gaussian-entropy scale (per-file table:
+;; max entropy-only range 0.03 on 2026-07-02, 16.4647 on 2026-07-03). The
+;; :ambiguity-mode KEY only appears from 2026-07-14, so splitting on the key
+;; would misfile 2026-07-03..07-09.
+
+ARCHIVE (all)              ticks   882   candidates  116570  (entropy-carrying  114972, learn-action-class   1598)
+  A   arg-best(risk+amb) vs arg-best(risk), ALL candidates      changed   371 / 882   (42.06%)   STRICT   371 (42.06%)   ranks moved 63984
+  A'  same, ENTROPY-CARRYING candidates only                   changed    51 / 882   (5.78%)   STRICT    51 (5.78%)   ranks moved 62478
+  C4  POSITIVE CONTROL, drop RISK instead of ambiguity        changed   461 / 882   (52.27%)   STRICT   461 (52.27%)
+  B   live rule (first non-:no-op) with amb dropped            changed     9 / 122   (7.38%)   STRICT     9   ranks moved 3536
+  B'  recorded :decision candidate OVERTAKEN (upper bound)        18 / 122     [decision located on 122 ticks; live rule reproduces it on 1]
+  C1  max |G-core - (G-risk + G-ambiguity)| over those ticks  0.000e+00
+  B?  ticks measurable at grain B                                122 / 882  
+  M4  ambiguity within-tick, ALL cands:      max sd 23.7000  max range 125.448  max distinct 10  constant on 0/882 ticks
+      ambiguity within-tick, ENTROPY only:   max sd 2.00747  max range 16.4647  max distinct 5  constant on 0/882 ticks
+      risk within-tick range: min 0.0998755  max 18.9027   |   ticks whose risk argmin is TIED 642 / 882
+  M6  HEADROOM lambda_break (scale ambiguity by this to move the entropy-set winner):
+      min 1.0109   median 16.9167   ticks where NO scale can move it 45 / 882
+  M7  when ambiguity DID move the winner: risk gap it overturned  min 0.00750000  max 7.82084  median 0.00750000
+
+ARCHIVE .. 2026-07-02      ticks   662   candidates   88463  (entropy-carrying   87860, learn-action-class    603)
+  A   arg-best(risk+amb) vs arg-best(risk), ALL candidates      changed   345 / 662   (52.11%)   STRICT   345 (52.11%)   ranks moved 54406
+  A'  same, ENTROPY-CARRYING candidates only                   changed    43 / 662   (6.50%)   STRICT    43 (6.50%)   ranks moved 53189
+  C4  POSITIVE CONTROL, drop RISK instead of ambiguity        changed   261 / 662   (39.43%)   STRICT   261 (39.43%)
+  B   NOT MEASURABLE on this group: no record carries :G-core beside :controller-score
+  B?  ticks measurable at grain B                                  0 / 662  
+  M4  ambiguity within-tick, ALL cands:      max sd 0.00734847  max range 0.0300000  max distinct 5  constant on 0/662 ticks
+      ambiguity within-tick, ENTROPY only:   max sd 0.00750000  max range 0.0300000  max distinct 5  constant on 0/662 ticks
+      risk within-tick range: min 0.0998755  max 1.07427   |   ticks whose risk argmin is TIED 524 / 662
+  M6  HEADROOM lambda_break (scale ambiguity by this to move the entropy-set winner):
+      min 1.5454   median 16.9167   ticks where NO scale can move it 43 / 662
+  M7  when ambiguity DID move the winner: risk gap it overturned  min 0.00750000  max 0.0130000  median 0.00750000
+
+ARCHIVE 2026-07-03 ..      ticks   220   candidates   28107  (entropy-carrying   27112, learn-action-class    995)
+  A   arg-best(risk+amb) vs arg-best(risk), ALL candidates      changed    26 / 220   (11.82%)   STRICT    26 (11.82%)   ranks moved 9578
+  A'  same, ENTROPY-CARRYING candidates only                   changed     8 / 220   (3.64%)   STRICT     8 (3.64%)   ranks moved 9289
+  C4  POSITIVE CONTROL, drop RISK instead of ambiguity        changed   200 / 220   (90.91%)   STRICT   200 (90.91%)
+  B   live rule (first non-:no-op) with amb dropped            changed     9 / 122   (7.38%)   STRICT     9   ranks moved 3536
+  B'  recorded :decision candidate OVERTAKEN (upper bound)        18 / 122     [decision located on 122 ticks; live rule reproduces it on 1]
+  C1  max |G-core - (G-risk + G-ambiguity)| over those ticks  0.000e+00
+  B?  ticks measurable at grain B                                122 / 220  
+  M4  ambiguity within-tick, ALL cands:      max sd 23.7000  max range 125.448  max distinct 10  constant on 0/220 ticks
+      ambiguity within-tick, ENTROPY only:   max sd 2.00747  max range 16.4647  max distinct 5  constant on 0/220 ticks
+      risk within-tick range: min 0.507500  max 18.9027   |   ticks whose risk argmin is TIED 118 / 220
+  M6  HEADROOM lambda_break (scale ambiguity by this to move the entropy-set winner):
+      min 1.0109   median 1.1001   ticks where NO scale can move it 2 / 220
+  M7  when ambiguity DID move the winner: risk gap it overturned  min 0.507500  max 7.82084  median 7.82084
+
+ARCHIVE 2026-09-01 only    ticks    79   candidates   11455  (entropy-carrying   10981, learn-action-class    474)
+  A   arg-best(risk+amb) vs arg-best(risk), ALL candidates      changed     0 / 79    (0.00%)   STRICT     0 (0.00%)   ranks moved 553
+  A'  same, ENTROPY-CARRYING candidates only                   changed     0 / 79    (0.00%)   STRICT     0 (0.00%)   ranks moved 553
+  C4  POSITIVE CONTROL, drop RISK instead of ambiguity        changed    79 / 79    (100.00%)   STRICT    79 (100.00%)
+  B   live rule (first non-:no-op) with amb dropped            changed     0 / 79    (0.00%)   STRICT     0   ranks moved 790
+  B'  recorded :decision candidate OVERTAKEN (upper bound)         0 / 79      [decision located on 79 ticks; live rule reproduces it on 0]
+  C1  max |G-core - (G-risk + G-ambiguity)| over those ticks  0.000e+00
+  B?  ticks measurable at grain B                                 79 / 79   
+  M4  ambiguity within-tick, ALL cands:      max sd 21.8641  max range 125.448  max distinct 5  constant on 0/79 ticks
+      ambiguity within-tick, ENTROPY only:   max sd 1.78464  max range 16.3208  max distinct 4  constant on 0/79 ticks
+      risk within-tick range: min 16.7094  max 16.7094   |   ticks whose risk argmin is TIED 0 / 79
+  M6  HEADROOM lambda_break (scale ambiguity by this to move the entropy-set winner):
+      min 1.0238   median 1.0238   ticks where NO scale can move it 0 / 79
+
+S2                         ticks    20   candidates    2900  (entropy-carrying    2780, learn-action-class    120)
+  A   arg-best(risk+amb) vs arg-best(risk), ALL candidates      changed     0 / 20    (0.00%)   STRICT     0 (0.00%)   ranks moved 140
+  A'  same, ENTROPY-CARRYING candidates only                   changed     0 / 20    (0.00%)   STRICT     0 (0.00%)   ranks moved 140
+  C4  POSITIVE CONTROL, drop RISK instead of ambiguity        changed    20 / 20    (100.00%)   STRICT    20 (100.00%)
+  B   live rule (first non-:no-op) with amb dropped            changed     0 / 20    (0.00%)   STRICT     0   ranks moved 200
+  B'  recorded :decision candidate OVERTAKEN (upper bound)         0 / 20      [decision located on 20 ticks; live rule reproduces it on 0]
+  C1  max |G-core - (G-risk + G-ambiguity)| over those ticks  0.000e+00
+  B?  ticks measurable at grain B                                 20 / 20   
+  M4  ambiguity within-tick, ALL cands:      max sd 21.8641  max range 125.448  max distinct 5  constant on 0/20 ticks
+      ambiguity within-tick, ENTROPY only:   max sd 1.78464  max range 16.3208  max distinct 4  constant on 0/20 ticks
+      risk within-tick range: min 16.7094  max 16.7094   |   ticks whose risk argmin is TIED 0 / 20
+  M6  HEADROOM lambda_break (scale ambiguity by this to move the entropy-set winner):
+      min 1.0238   median 1.0238   ticks where NO scale can move it 0 / 20
+
+S4                         ticks     4   candidates     580  (entropy-carrying     556, learn-action-class     24)
+  A   arg-best(risk+amb) vs arg-best(risk), ALL candidates      changed     0 / 4     (0.00%)   STRICT     0 (0.00%)   ranks moved 28
+  A'  same, ENTROPY-CARRYING candidates only                   changed     0 / 4     (0.00%)   STRICT     0 (0.00%)   ranks moved 28
+  C4  POSITIVE CONTROL, drop RISK instead of ambiguity        changed     4 / 4     (100.00%)   STRICT     4 (100.00%)
+  B   live rule (first non-:no-op) with amb dropped            changed     0 / 4     (0.00%)   STRICT     0   ranks moved 40
+  B'  recorded :decision candidate OVERTAKEN (upper bound)         0 / 4       [decision located on 4 ticks; live rule reproduces it on 0]
+  C1  max |G-core - (G-risk + G-ambiguity)| over those ticks  0.000e+00
+  B?  ticks measurable at grain B                                  4 / 4    
+  M4  ambiguity within-tick, ALL cands:      max sd 21.8641  max range 125.448  max distinct 5  constant on 0/4 ticks
+      ambiguity within-tick, ENTROPY only:   max sd 1.78464  max range 16.3208  max distinct 4  constant on 0/4 ticks
+      risk within-tick range: min 16.7094  max 16.7094   |   ticks whose risk argmin is TIED 0 / 4
+  M6  HEADROOM lambda_break (scale ambiguity by this to move the entropy-set winner):
+      min 1.0238   median 1.0238   ticks where NO scale can move it 0 / 4
+
+ALL FIELDS (double-counts) ticks   906   candidates  120050  (entropy-carrying  118308, learn-action-class   1742)
+  A   arg-best(risk+amb) vs arg-best(risk), ALL candidates      changed   371 / 906   (40.95%)   STRICT   371 (40.95%)   ranks moved 64152
+  A'  same, ENTROPY-CARRYING candidates only                   changed    51 / 906   (5.63%)   STRICT    51 (5.63%)   ranks moved 62646
+  C4  POSITIVE CONTROL, drop RISK instead of ambiguity        changed   485 / 906   (53.53%)   STRICT   485 (53.53%)
+  B   live rule (first non-:no-op) with amb dropped            changed     9 / 146   (6.16%)   STRICT     9   ranks moved 3776
+  B'  recorded :decision candidate OVERTAKEN (upper bound)        18 / 146     [decision located on 146 ticks; live rule reproduces it on 1]
+  C1  max |G-core - (G-risk + G-ambiguity)| over those ticks  0.000e+00
+  B?  ticks measurable at grain B                                146 / 906  
+  M4  ambiguity within-tick, ALL cands:      max sd 23.7000  max range 125.448  max distinct 10  constant on 0/906 ticks
+      ambiguity within-tick, ENTROPY only:   max sd 2.00747  max range 16.4647  max distinct 5  constant on 0/906 ticks
+      risk within-tick range: min 0.0998755  max 18.9027   |   ticks whose risk argmin is TIED 642 / 906
+  M6  HEADROOM lambda_break (scale ambiguity by this to move the entropy-set winner):
+      min 1.0109   median 16.9167   ticks where NO scale can move it 45 / 906
+  M7  when ambiguity DID move the winner: risk gap it overturned  min 0.00750000  max 7.82084  median 0.00750000
+
+;; ---------------------------------------------------------------
+;; ARCHIVE per file: ticks | A changed | A STRICT | A' STRICT | B changed | C4 STRICT | max amb range (entropy only)
+;;   wm-trace-2026-05-18.edn     7     0     0     7   n/a     0   0.0150000
+;;   wm-trace-2026-05-19.edn     9     0     0     5   n/a     0   0.0150000
+;;   wm-trace-2026-05-21.edn    13     0     0     0   n/a    13   0.0300000
+;;   wm-trace-2026-05-22.edn    24     0     0     0   n/a    24   0.0300000
+;;   wm-trace-2026-05-23.edn    24     0     0     0   n/a    24   0.0300000
+;;   wm-trace-2026-05-24.edn    24     0     0     0   n/a    24   0.0300000
+;;   wm-trace-2026-05-25.edn    21     0     0     0   n/a    20   0.0300000
+;;   wm-trace-2026-05-26.edn    17     0     0     0   n/a     9   0.0300000
+;;   wm-trace-2026-05-27.edn     9     0     0     0   n/a     9   0.0300000
+;;   wm-trace-2026-05-30.edn     2     0     0     1   n/a     1   0.0300000
+;;   wm-trace-2026-05-31.edn    19     0     0    19   n/a     0   0.0300000
+;;   wm-trace-2026-06-01.edn    12     1     1    11   n/a     0   0.0300000
+;;   wm-trace-2026-06-02.edn    14    14    14     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-03.edn    24    24    24     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-04.edn    24    24    24     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-05.edn    15     6     6     0   n/a     9   0.0300000
+;;   wm-trace-2026-06-06.edn    24     0     0     0   n/a    24   0.0300000
+;;   wm-trace-2026-06-07.edn    23     0     0     0   n/a    23   0.0300000
+;;   wm-trace-2026-06-08.edn    24     1     1     0   n/a    23   0.0300000
+;;   wm-trace-2026-06-09.edn    23    23    23     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-10.edn    22    22    22     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-12.edn     7     7     7     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-13.edn    24    21    21     0   n/a     3   0.0300000
+;;   wm-trace-2026-06-14.edn    20    20    20     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-15.edn     8     8     8     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-16.edn    14    11    11     0   n/a     3   0.0300000
+;;   wm-trace-2026-06-17.edn    15    10    10     0   n/a     5   0.0300000
+;;   wm-trace-2026-06-18.edn    12    12    12     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-21.edn     3     3     3     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-22.edn    17     7     7     0   n/a    10   0.0300000
+;;   wm-trace-2026-06-23.edn    13     4     4     0   n/a     9   0.0300000
+;;   wm-trace-2026-06-24.edn    10     8     8     0   n/a     2   0.0300000
+;;   wm-trace-2026-06-25.edn    15     9     9     0   n/a     6   0.0300000
+;;   wm-trace-2026-06-26.edn    12    10    10     0   n/a     2   0.0300000
+;;   wm-trace-2026-06-27.edn    11     8     8     0   n/a     3   0.0300000
+;;   wm-trace-2026-06-28.edn    14    14    14     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-29.edn    18    18    18     0   n/a     0   0.0300000
+;;   wm-trace-2026-06-30.edn    18    18    18     0   n/a     0   0.0300000
+;;   wm-trace-2026-07-01.edn    23    17    17     0   n/a     6   0.0300000
+;;   wm-trace-2026-07-02.edn    34    25    25     0   n/a     9   0.0300000
+;;   wm-trace-2026-07-03.edn    20    20    20     2   n/a     0   16.4647
+;;   wm-trace-2026-07-04.edn    38     0     0     0   n/a    38   16.4647
+;;   wm-trace-2026-07-05.edn    18     0     0     0   n/a    18   16.4647
+;;   wm-trace-2026-07-06.edn    21     0     0     0   n/a    21   16.4647
+;;   wm-trace-2026-07-09.edn     1     0     0     0   n/a     1   16.4647
+;;   wm-trace-2026-07-14.edn    14     0     0     0     0    14   16.3208
+;;   wm-trace-2026-07-15.edn     6     0     0     0     0     6   16.3208
+;;   wm-trace-2026-07-16.edn     6     6     6     6     6     6   16.3208
+;;   wm-trace-2026-07-17.edn     1     0     0     0     0     1   16.3208
+;;   wm-trace-2026-07-18.edn     1     0     0     0     0     1   16.3208
+;;   wm-trace-2026-07-19.edn     1     0     0     0     0     1   16.3208
+;;   wm-trace-2026-07-21.edn     2     0     0     0     1     2   16.3208
+;;   wm-trace-2026-08-30.edn     7     0     0     0     0     7   16.3208
+;;   wm-trace-2026-08-31.edn     5     0     0     0     2     5   16.3208
+;;   wm-trace-2026-09-01.edn    79     0     0     0     0    79   16.3208
+
+;; ---------------------------------------------------------------
+;; TYPE-(c) TEST -- is C flat over the outcomes ambiguity distinguishes?
+;; C is the channel-grain [lo hi] floor at preferences.clj:9-23, read
+;; through pref/current-C (preferences.clj:60-71). For each channel:
+;; whether C names it, and how much the OBSERVATION moved across the
+;; ticks of each field -- the second half is what an outcome carrier
+;; would have to vary for ambiguity's distinctions to be about anything.
+;;   -- ARCHIVE (882 ticks with an :observation)
+;;      active-repo-ratio      C [0.5 1.0]      observed distinct   10  range 0.341912
+;;      attack-coverage        C [0.8 1.0]      observed distinct    5  range 1.00000
+;;      consulting-pct         C [0.2 0.35]     observed distinct  251  range 0.222222
+;;      coupling-density       C [0.1 0.3]      observed distinct   45  range 0.375000
+;;      depositing-signal      C ABSENT         observed distinct    1  range 0.00000
+;;      loop-health            C [0.8 1.0]      observed distinct  610  range 0.908987
+;;      mathematics-pct        C [0.15 0.25]    observed distinct  447  range 0.619405
+;;      mission-health         C [0.5 1.0]      observed distinct  104  range 0.393939
+;;      portfolio-pct          C [0.2 0.35]     observed distinct  412  range 0.563638
+;;      sorry-count-norm       C [0.0 0.3]      observed distinct    2  range 0.800000
+;;      stack-pct              C [0.15 0.25]    observed distinct  452  range 0.846176
+;;      support-coverage       C [0.8 1.0]      observed distinct    6  range 1.00000
+;;      ticks-firing-ratio     C [0.0 0.0]      observed distinct    5  range 1.00000
+;;   -- S2 (20 ticks with an :observation)
+;;      active-repo-ratio      C [0.5 1.0]      observed distinct    1  range 0.00000
+;;      annotation-health      C [0.7 1.0]      observed distinct    1  range 0.00000
+;;      attack-coverage        C [0.8 1.0]      observed distinct    1  range 0.00000
+;;      consulting-pct         C [0.2 0.35]     observed distinct    1  range 0.00000
+;;      coupling-density       C [0.1 0.3]      observed distinct    1  range 0.00000
+;;      depositing-signal      C ABSENT         observed distinct    1  range 0.00000
+;;      loop-health            C [0.8 1.0]      observed distinct   14  range 0.0233811
+;;      mathematics-pct        C [0.15 0.25]    observed distinct    8  range 3.28137e-06
+;;      mission-health         C [0.5 1.0]      observed distinct    1  range 0.00000
+;;      portfolio-pct          C [0.2 0.35]     observed distinct    8  range 6.56274e-06
+;;      sorry-count-norm       C [0.0 0.3]      observed distinct    1  range 0.00000
+;;      stack-pct              C [0.15 0.25]    observed distinct    8  range 9.84411e-06
+;;      support-coverage       C [0.8 1.0]      observed distinct    1  range 0.00000
+;;      ticks-firing-ratio     C [0.0 0.0]      observed distinct    1  range 0.00000
+;;   -- S4 (4 ticks with an :observation)
+;;      active-repo-ratio      C [0.5 1.0]      observed distinct    1  range 0.00000
+;;      annotation-health      C [0.7 1.0]      observed distinct    1  range 0.00000
+;;      attack-coverage        C [0.8 1.0]      observed distinct    1  range 0.00000
+;;      consulting-pct         C [0.2 0.35]     observed distinct    1  range 0.00000
+;;      coupling-density       C [0.1 0.3]      observed distinct    1  range 0.00000
+;;      depositing-signal      C ABSENT         observed distinct    1  range 0.00000
+;;      loop-health            C [0.8 1.0]      observed distinct    3  range 0.000344924
+;;      mathematics-pct        C [0.15 0.25]    observed distinct    3  range 1.04871e-06
+;;      mission-health         C [0.5 1.0]      observed distinct    1  range 0.00000
+;;      portfolio-pct          C [0.2 0.35]     observed distinct    3  range 2.09742e-06
+;;      sorry-count-norm       C [0.0 0.3]      observed distinct    1  range 0.00000
+;;      stack-pct              C [0.15 0.25]    observed distinct    3  range 3.14613e-06
+;;      support-coverage       C [0.8 1.0]      observed distinct    1  range 0.00000
+;;      ticks-firing-ratio     C [0.0 0.0]      observed distinct    1  range 0.00000
+
+;; ---------------------------------------------------------------
+;; CHANNEL DECOMPOSITION -- ambiguity = SUM_ch 1/2 ln(2 pi e sigma^2_ch).
+;; Over ENTROPY-CARRYING candidates only. Per channel: on how many ticks
+;; does that channel's contribution differ across candidates at all?
+;;   decomposable ticks (records carrying :prediction-variance): 98
+;;   active-repo-ratio      varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   annotation-health      varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   attack-coverage        varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   consulting-pct         varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   coupling-density       varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   depositing-signal      varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   loop-health            varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   mathematics-pct        varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   mission-health         varies on   98 / 98   ticks   max spread 8.261780380   max distinct 3
+;;   portfolio-pct          varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   sorry-count-norm       varies on   98 / 98   ticks   max spread 8.059047825   max distinct 2
+;;   stack-pct              varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   support-coverage       varies on    0 / 98   ticks   max spread 0.000000000   max distinct 1
+;;   ticks-firing-ratio     varies on   98 / 98   ticks   max spread 8.405621416   max distinct 2
+
+;; end
