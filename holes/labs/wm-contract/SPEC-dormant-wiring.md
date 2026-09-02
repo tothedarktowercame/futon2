@@ -108,6 +108,18 @@ the replay leaves delta 0 (max weight error 5.3e-6, which reads as a
 floating-point wobble rather than as the misalignment it is). Pinned as a
 negative control in `rank-key-join-breaks-the-replay-test`.
 
+## U1'. The selector consult — pushed onto this list 2026-09-02
+
+Found by U1's own readiness work (point 4 above) and named by Joe as another
+instance of this spec's class: the F_pi-bearing posterior is recorded on every
+flagged tick and consulted by no selection path. U1's flip alone would wire the
+score into the RECORD, not the CHOICE. The build is worklist row :U10 — a
+selection mode whose chosen action is the argmax of the full-score posterior,
+off by default, J-gated flip, attribution extended to the chosen action.
+Priority within this list: ahead of U3 (the pi_0 comparison reads selection
+behaviour) and behind nothing — every claim U1 makes about "the live selection
+law" is conditional on it.
+
 ## U2. tau: adjudicate the three arms, then retire the dead fold
 
 Current: three arms run and separate on S2 (three different gammas, all
