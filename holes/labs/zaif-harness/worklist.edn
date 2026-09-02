@@ -6,7 +6,17 @@
 ;; things so that this particular mission gets selected").
 ;;
 ;; Conventions follow holes/labs/wm-contract/worklist.edn; worklist_check.bb is
-;; the same checker. The prejudice discipline, stated once: the mission wins
+;; the same checker.
+;;
+;; LIVE-PIN RULE (adopted 2026-09-02, claude-1/claude-2, after both lanes hit
+;; the same class in one evening): a test that agrees with a vocabulary the
+;; live path doesn't speak stays green while meaning something false (the U8
+;; gate's overbroad finding firing on a typed absence; mission_c_test's long-0
+;; Bernoulli pin that live all-doubles observations can never produce). So
+;; every test packet on this board requires at least one pin whose values are
+;; CAPTURED FROM A LIVE RECORD (quoted verbatim, id cited) rather than
+;; authored constants. D11's negative tests -- real false-positive prose,
+;; verbatim -- are the reference pattern. The prejudice discipline, stated once: the mission wins
 ;; selection through DECLARED inputs (an operator-authored priority mark, a
 ;; mission doc the scan can read) — never by editing a rank or a weight by hand.
 ;; If the recovered selector cannot be moved by declared inputs, that is a
