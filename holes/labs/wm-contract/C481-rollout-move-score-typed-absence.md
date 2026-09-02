@@ -109,7 +109,7 @@ The records leave the search present-only:
   for the two entry builders). The memo cache now holds
   `{:score … :events …}` so the ΔG leg and the records come from the *same*
   rollout rather than two.
-- `close_loop/act-gate-for` (`src/futon2/aif/close_loop.clj:118-135`) and
+- `close_loop/act-gate-for` (`src/futon2/aif/close_loop.clj:118-133`) and
   `enact/act-gates-with-shown` (`src/futon2/aif/enact.clj:207-217`) carry them
   onto the act-gate, and `close-loop!` onto the verdict
   (`src/futon2/aif/enact.clj:307-319`), which
