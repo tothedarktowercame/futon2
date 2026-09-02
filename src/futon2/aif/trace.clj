@@ -632,18 +632,26 @@
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to
    the daily trace file. Creates the trace directory if absent. Returns
-   the path written.
+   the path written. With `:return-record? true`, return
+   `{:path <path> :record <exact-record-written>}`; the default return value and
+   persisted bytes are unchanged. This lets a post-write witness cite the
+   record's own timestamp/run id without constructing a second record.
 
    Opts:
      :dir       — directory to write under (default `default-trace-dir`)
-     :date-str  — override date string for the filename (default today UTC)"
-  [judge-output & {:keys [dir date-str]
+     :date-str  — override date string for the filename (default today UTC)
+     :return-record? — return the exact record alongside the path (default false)"
+  [judge-output & {:keys [dir date-str return-record?]
                    :or {dir default-trace-dir
                         date-str (today-date-string)}}]
   (let [record (trace-record judge-output)
-        path (daily-path dir date-str)]
-    (io/make-parents path)
-    (lane-futility/append-indexed-trace! dir path record)))
+        path (daily-path dir date-str)
+        written-path (do
+                       (io/make-parents path)
+                       (lane-futility/append-indexed-trace! dir path record))]
+    (if return-record?
+      {:path written-path :record record}
+      written-path)))
 
 (def ^:private default-tag-reader
   "Tolerant default-tag reader: any unknown EDN tag becomes

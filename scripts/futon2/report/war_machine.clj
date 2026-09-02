@@ -26,7 +26,9 @@
    Babashka text entrypoint:
      cd ~/code/futon2 && bb -Sdeps '{:paths [\"src\" \"scripts\" \"resources\" \".\" \"/home/joe/code/futon3c/src\"] :deps {metosin/malli {:mvn/version \"0.16.3\"}}}' -m futon2.report.war-machine
 
-   Invariant: WM-I1 (read-only observer — no writes to stack).
+   Invariant: WM-I1 (scan/observation remains read-only). The sole optional
+   post-selection write is the default-off mission-clock witness immediately
+   after a successful trace append; it is never read by this namespace.
    Pattern:   war-machine/operational-not-decorative"
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
@@ -79,6 +81,13 @@
    changing ranking, softmax weights, effective temperature, or selection.
    Dynamic binding exists only for isolated tests."
   (= "1" (System/getenv "FUTON_WM_FPI_DARK")))
+
+(def ^:dynamic *clock-selection?*
+  "When `FUTON_WM_CLOCK_SELECTION=1`, a successfully persisted mission
+   selection clocks the War Machine's own durable identity onto that mission.
+   Read once when this namespace loads; dynamic binding exists only for
+   isolated tests. Default OFF preserves the historical trace-write path."
+  (= "1" (System/getenv "FUTON_WM_CLOCK_SELECTION")))
 
 (def ^:dynamic *beta-dark?*
   "RUN7 / stage S2 dark beta switch, read once when this namespace loads.
@@ -1314,6 +1323,120 @@
 
 (defn- mission-index-operator-gates [entry]
   (if (map? entry) (vec (:operator-gates entry)) []))
+
+;; S4: write-only mission clocking. This deliberately does not feed the clock
+;; back into observation, ranking, weights, or selection; the read side is a
+;; separate packet.
+(def ^:private wm-clock-agent-id "war-machine")
+(def ^:private wm-clock-type "clock/clocked-on")
+
+(defn- canonical-mission-endpoint?
+  [target]
+  (boolean (and (string? target)
+                (re-matches #"[^/]+-d/mission/[^/]+" target))))
+
+(defn- selected-mission-endpoint
+  [action]
+  (when (and (mission-action-types (:type action))
+             (some? (:target action)))
+    (let [target (action-target-key (:target action))]
+      (if (canonical-mission-endpoint? target)
+        target
+        (some-> (get (mission-doc-index) (normalize-mission-id target))
+                mission-index-endpoint)))))
+
+(defn- post-clock-hyperedge!
+  [{:keys [endpoints props valid-time-ms op]}]
+  (let [payload (cond-> {"hx/type" wm-clock-type
+                         "hx/endpoints" endpoints}
+                  props (assoc "hx/props" props)
+                  valid-time-ms (assoc "hx/valid-time" valid-time-ms)
+                  op (assoc "hx/op" op))
+        response (http/post (str futon1a-url "/api/alpha/hyperedge")
+                            {:headers {"Content-Type" "application/json"
+                                       "X-Penholder" futon1a-penholder}
+                             :body (json/generate-string payload)
+                             :throw false})]
+    {:ok? (= 200 (:status response)) :status (:status response)}))
+
+(defn- current-clock-targets
+  [agent-endpoint]
+  (->> (fetch-hyperedges-by-type wm-clock-type)
+       (filter #(some #{agent-endpoint} (real-endpoints %)))
+       (mapcat #(remove #{agent-endpoint} (real-endpoints %)))
+       distinct
+       vec))
+
+(defn- mission-id-for-clock-witness
+  [target]
+  (let [target (str target)]
+    (if-let [[_ slug] (re-matches #"[^/]+-d/mission/([^/]+)" target)]
+      (str "M-" slug)
+      target)))
+
+(defn- clock-source
+  "Use the exact identifying value persisted on the trace record: RUN11's run
+   id when present, otherwise that record's own timestamp."
+  [trace-record]
+  (or (:run/id trace-record) (:timestamp trace-record)))
+
+(defn- record-selection-clock!
+  "Fire-and-forget durable clock write for a selected mission. The asynchronous
+   task resolves the existing canonical mission endpoint, retracts every other
+   current target for `agent:war-machine`, then puts the new edge. Returns the
+   future for tests, or nil when the flag/action/target does not qualify.
+   Substrate failures are reported to stderr and never fail the tick."
+  [trace-record decision]
+  (let [action (:action decision)]
+    (when (and *clock-selection?*
+               (mission-action-types (:type action))
+               (some? (:target action)))
+      (future
+        (try
+          (if-let [mission-endpoint (selected-mission-endpoint action)]
+            (let [now-ms (System/currentTimeMillis)
+                  agent-endpoint (str "agent:" wm-clock-agent-id)
+                  old-targets (current-clock-targets agent-endpoint)
+                  source (clock-source trace-record)
+                  props {"agent-id" wm-clock-agent-id
+                         "mission-id" (mission-id-for-clock-witness (:target action))
+                         "clocked-at-ms" now-ms
+                         "witness" {"rule" "selection-decision"
+                                    "source" source
+                                    "old-target" (if-let [old-target (first old-targets)]
+                                                   (mission-id-for-clock-witness old-target)
+                                                   "no mission")
+                                    "new-target"
+                                    (mission-id-for-clock-witness mission-endpoint)}}]
+              (doseq [old-target old-targets
+                      :when (not= old-target mission-endpoint)]
+                (post-clock-hyperedge! {:endpoints [agent-endpoint old-target]
+                                        :valid-time-ms now-ms
+                                        :op "retract"}))
+              (post-clock-hyperedge! {:endpoints [agent-endpoint mission-endpoint]
+                                      :props props
+                                      :valid-time-ms now-ms}))
+            {:ok? false :reason :mission-endpoint-not-found})
+          (catch Throwable e
+            (binding [*out* *err*]
+              (println "War Machine selection clock write failed:" (ex-message e)))
+            {:ok? false :reason :substrate-failure}))))))
+
+(defn- write-trace-and-clock!
+  "Persist RESULT, then (only when enabled) launch the clock witness from the
+   exact record that was written. The flag-off call and return are the historical
+   `trace/write-trace!` invocation byte-for-byte."
+  [result trace-dir]
+  (if *clock-selection?*
+    (let [{:keys [path record]}
+          (if trace-dir
+            (trace/write-trace! result :dir trace-dir :return-record? true)
+            (trace/write-trace! result :return-record? true))]
+      (record-selection-clock! record (:decision result))
+      path)
+    (if trace-dir
+      (trace/write-trace! result :dir trace-dir)
+      (trace/write-trace! result))))
 
 (defn- compute-delta-t-mission
   [mission-endpoint]
@@ -5420,9 +5543,7 @@
           (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]
             (if-let [trace-write-failed
                      (try
-                       (if trace-dir
-                         (trace/write-trace! result :dir trace-dir)
-                         (trace/write-trace! result))
+                       (write-trace-and-clock! result trace-dir)
                        nil
                        (catch Exception e
                          (binding [*out* *err*]

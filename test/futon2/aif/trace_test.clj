@@ -392,6 +392,17 @@
       (is (str/ends-with? path "wm-trace-2026-05-17.edn"))
       (is (.exists (io/file path))))))
 
+(deftest write-trace-can-return-the-exact-record-written-test
+  (let [{:keys [path record]}
+        (trace/write-trace! (assoc sample-judge-output :run/id "run-clock-1")
+                            :dir *tmpdir* :date-str "2026-05-18"
+                            :return-record? true)
+        [persisted] (trace/read-trace :dir *tmpdir* :date-str "2026-05-18")]
+    (is (str/ends-with? path "wm-trace-2026-05-18.edn"))
+    (is (= record persisted)
+        "the returned identity fields come from the record actually appended")
+    (is (= "run-clock-1" (:run/id record)))))
+
 (deftest write-trace-appends-test
   (testing "two writes produce two records in the file"
     (trace/write-trace! sample-judge-output :dir *tmpdir* :date-str "2026-05-17")

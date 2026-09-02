@@ -5,6 +5,7 @@
    observation vector, and data shape contracts — without requiring
    live APIs or git repos."
   (:require [babashka.http-client :as http]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
@@ -1278,3 +1279,93 @@
       (fn []
         (is (nil? (wm/f-pi-posterior-preconditions! :selection-gain-only))
             "flag off: no complaint about anything")))))
+
+(deftest selection-clock-flag-off-preserves-the-trace-write-call-test
+  (let [calls (atom [])
+        result {:decision {:action {:type :advance-mission :target "M-next"}}}]
+    (with-redefs-fn {#'wm/*clock-selection?* false
+                     #'trace/write-trace!
+                     (fn [& args]
+                       (swap! calls conj args)
+                       "/tmp/historical-trace.edn")
+                     #'wm/record-selection-clock!
+                     (fn [& _] (throw (ex-info "must not clock" {})))}
+      (fn []
+        (is (= "/tmp/historical-trace.edn"
+               (#'wm/write-trace-and-clock! result "/tmp/traces")))
+        (is (= [[result :dir "/tmp/traces"]] @calls)
+            "default OFF makes the exact historical trace/write-trace! call")))))
+
+(deftest selection-clock-mission-decision-retracts-old-and-puts-one-new-edge-test
+  (let [posts (atom [])
+        trace-record {:timestamp "2026-09-02T13:30:00Z" :run/id "run-selection-73"}
+        decision {:action {:type :advance-mission :target "M-next"}}
+        old-endpoint "futon3c-d/mission/old"
+        new-endpoint "futon4-d/mission/next"
+        get-stub
+        (fn [url _opts]
+          (cond
+            (str/includes? url "code%2Fv05%2Fmission-doc")
+            {:status 200
+             :body (pr-str {:hyperedges
+                            [{:hx/endpoints [new-endpoint]
+                              :hx/props {:mission/id "M-next"}}]})}
+
+            (str/includes? url "clock%2Fclocked-on")
+            {:status 200
+             :body (pr-str {:hyperedges
+                            [{:hx/endpoints ["agent:war-machine" old-endpoint]
+                              :hx/props {:agent-id "war-machine"}}]})}
+
+            :else (throw (ex-info "unexpected GET" {:url url}))))
+        post-stub
+        (fn [url opts]
+          (swap! posts conj {:url url :payload (json/parse-string (:body opts))})
+          {:status 200 :body "{}"})]
+    (with-redefs-fn {#'wm/*clock-selection?* true
+                     #'http/get get-stub
+                     #'http/post post-stub}
+      (fn []
+        (is (= {:ok? true :status 200}
+               @(#'wm/record-selection-clock! trace-record decision)))
+        (is (= 2 (count @posts)) "one retract followed by one put")
+        (let [[retract put] (map :payload @posts)
+              props (get put "hx/props")
+              witness (get props "witness")]
+          (is (= "retract" (get retract "hx/op")))
+          (is (= ["agent:war-machine" old-endpoint]
+                 (get retract "hx/endpoints")))
+          (is (= "clock/clocked-on" (get put "hx/type")))
+          (is (= ["agent:war-machine" new-endpoint]
+                 (get put "hx/endpoints")))
+          (is (= "war-machine" (get props "agent-id")))
+          (is (integer? (get props "clocked-at-ms")))
+          (is (= "selection-decision" (get witness "rule")))
+          (is (= "run-selection-73" (get witness "source")))
+          (is (= "M-old" (get witness "old-target")))
+          (is (= "M-next" (get witness "new-target")))
+          (is (= (get put "hx/valid-time")
+                 (get props "clocked-at-ms"))))))))
+
+(deftest selection-clock-non-mission-decisions-never-touch-http-test
+  (with-redefs-fn {#'wm/*clock-selection?* true
+                   #'http/get (fn [& _] (throw (ex-info "GET must not run" {})))
+                   #'http/post (fn [& _] (throw (ex-info "POST must not run" {})))}
+    (fn []
+      (doseq [decision [{:action {:type :fire-pattern :target :pattern/x}}
+                        {:action {:type :no-op}}
+                        {:action {:type :open-mission}}]]
+        (is (nil? (#'wm/record-selection-clock!
+                   {:timestamp "2026-09-02T13:30:00Z"} decision)))))))
+
+(deftest selection-clock-substrate-failure-does-not-escape-the-async-task-test
+  (with-redefs-fn {#'wm/*clock-selection?* true
+                   #'wm/selected-mission-endpoint
+                   (constantly "futon4-d/mission/next")
+                   #'wm/current-clock-targets (constantly [])
+                   #'http/post (fn [& _] (throw (ex-info "substrate down" {})))}
+    (fn []
+      (is (= {:ok? false :reason :substrate-failure}
+             @(#'wm/record-selection-clock!
+                {:timestamp "2026-09-02T13:30:00Z"}
+                {:action {:type :open-mission :target "M-next"}}))))))
