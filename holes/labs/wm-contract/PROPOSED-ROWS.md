@@ -14,12 +14,12 @@ the machine can become self repairing" (`holes/problems/DECISIONS-PENDING.md:343
 
 ---
 
-## Sweep 55 -- 2026-09-02T10:57:22.160076263Z
+## Sweep 132 -- 2026-09-02T15:26:46.632435328Z
 
-- trace: `/home/joe/code/futon2/data/wm-trace`, 55 file(s) read, 0 new record(s) past the watermark
+- trace: `/home/joe/code/futon2/data/wm-trace`, 56 file(s) read, 0 new record(s) past the watermark
 - lint: `/home/joe/code/futon2/checks/preemptive_absence_coercion_lint.clj` -- 0 finding(s), 0 new since last sweep
 - recurrence threshold: **3** cumulative occurrences of one (site, reason)
-- classes: 0 with occurrences, 0 new record(s) this sweep
+- classes: 1 with occurrences, 0 new record(s) this sweep
 
 ### Declared event keys and what this sweep found
 
@@ -37,23 +37,29 @@ the machine can become self repairing" (`holes/problems/DECISIONS-PENDING.md:343
 Collection is by record SHAPE (`:producer-contract` + `:status`), so a
 producer not listed above is still swept; the table is coverage, not scope.
 
-## EMPTY SWEEP -- nothing found, and that is the finding
+## Proposals (1 class(es))
 
-This sweep found **zero** refusal, abstention, `:unknown` or `:unscored`
-records. An empty result is written out in full rather than left as an
-absent file, because a harvester that writes nothing when it finds nothing
-cannot be told apart from one that did not run.
+### prediction-error-v1--source-field-missing
 
-What was read, so the zero is a measurement and not a silence:
+- **site** `:prediction-error/v1` &nbsp; **reason** `:source-field-missing`
+- statuses seen: `:absent`
+- sources: `:trace`
+- cumulative occurrences: **3** (new this sweep: 0)
+- first seen 2026-09-02T13:47:22.082297526Z, last seen 2026-09-02T14:03:09.647517345Z
+- recurring at threshold 3? **YES** -> draft pattern `library/problems/refusal-prediction-error-v1--source-field-missing.flexiarg`
+- evidence (first 3 of 3):
+    - `/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-02.edn:1` @ 2026-09-02T13:47:22.082297526Z run 0a18c4f7-758e-400a-8223-9c52edf07450 {:channel :sorry-count-norm, :absent-member :observed}
+    - `/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-02.edn:2` @ 2026-09-02T14:00:29.357627605Z run 4abad68c-5481-4402-8f0e-252add62c54b {:channel :sorry-count-norm, :absent-member :observed}
+    - `/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-02.edn:3` @ 2026-09-02T14:03:09.647517345Z run 801976e7-01c6-4e39-aada-27f620f7c2f1 {:channel :sorry-count-norm, :absent-member :observed}
 
-- 55 trace file(s) under `/home/joe/code/futon2/data/wm-trace`, 882 line(s) total, 882 already swept before this run
-- the C130 absence-coercion lint at `/home/joe/code/futon2/checks/preemptive_absence_coercion_lint.clj`: 0 finding(s)
-- every map in those records carrying a `:producer-contract` and a
-  `:status`, at any depth -- see the coverage table above for the 8 declared producers
+- proposed ledger row (COPY BY HAND after reading; this file writes no ledger):
 
-The standing caveat on this zero: 1 declared producer(s) have no path to the trace at
-all (`:fulab-temperature/v1` -- the adapter has no caller, C226), so their
-refusals are invisible here by construction, not by absence.
+```clojure
+  {:id :TBD :class :I :status :open :owner :any
+   :covers-key :none
+   :statement "Harvested refusal class prediction-error-v1--source-field-missing: `:prediction-error/v1` emitted `:source-field-missing` 3 time(s). Decide whether the producer's refusal is correct and the CALLER must change, or the refusal is the defect."
+   :acceptance "State which of the two it is with a file:line pointer, and either repair the caller or repair the producer. Gates: clj-kondo, check-parens, tests."}
+```
 
 ---
 
