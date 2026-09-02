@@ -1,0 +1,94 @@
+{:finding/type :d9/tie-order-count,
+ :controller
+ {:declaration "futon3c.agents.zaif-controller/decide",
+  :repository "/home/joe/code/futon3c",
+  :code-sha "b4604c0c8f7f465a46ec49f6fc51d9477a129109"},
+ :replay-command
+ "bb holes/labs/zaif-harness/runs/regenerate-D9-tie-order-count.bb",
+ :populations
+ {:calibration
+  {:path "holes/labs/M-zaif-harness/calibration-sessions.edn",
+   :sha256
+   "d012fbbc2d21c4249fb0f7007e88ed76c8e922f4cfa76951d3de76fc74978e93",
+   :sessions 114,
+   :input-reconstruction
+   "current zaif-inputs/hydrate-inputs with each session's :context; D8b typed-empty task-belief fallback retained"},
+  :live
+  {:query
+   "http://127.0.0.1:7073/api/alpha/evidence/text-search?tags=zaif&limit=100",
+   :records 56,
+   :input-reconstruction
+   "each persisted :zaif-arm-choice :inputs-snapshot, normalized only by EDN-reading its wire-string :gamma field"}},
+ :classification
+ {:tie-settled
+  "chosen arm shares the exact maximum g-term with another arm",
+  :score-settled "chosen arm is the unique exact maximum",
+  :tie-class-order [:retrieve :act :ask :yield]},
+ :calibration
+ {:count 114,
+  :settlement-counts {:score-settled 31, :tie-settled 83},
+  :per-arm
+  {:act {:tie-settled 83},
+   :ask {},
+   :retrieve {:score-settled 31},
+   :yield {}},
+  :per-tie-class {[:act :yield] 83},
+  :live-pin
+  {:id "e-0cae94f2-9ca8-4863-9251-44278445a5f7",
+   :inputs
+   {:mission nil,
+    :mission-source :d10/unclocked,
+    :gamma {nil {:policy-precision 1.0}},
+    :gamma-source :default-no-mission,
+    :task-belief {:absence :d8/task-belief-actand-source-absent},
+    :c-belief {:operator-c-uncertainty 0.3},
+    :observations
+    {:posting-stats
+     {:total-docs 93,
+      :dfs [1 1 1 1 1 1 1 1 1 1],
+      :estimated-tokens 186}}},
+   :decision
+   {:arm :retrieve,
+    :g-terms
+    {:retrieve 0.7544351293988408,
+     :act 0.0,
+     :ask -0.35000000000000003,
+     :yield 0.0},
+    :gamma-used 1.0,
+    :mission nil,
+    :operator-attention-cost 0.65,
+    :why
+    "zaif v0 chose retrieve: retrieve 0.754, act 0.000, ask -0.350, yield 0.000"},
+   :classification
+   {:settlement :score-settled, :tie-class [:retrieve]}}},
+ :live
+ {:count 56,
+  :settlement-counts {:score-settled 56},
+  :per-arm
+  {:act {}, :ask {}, :retrieve {:score-settled 56}, :yield {}},
+  :per-tie-class {},
+  :live-pin
+  {:id "e-0f2f9aec-6240-40e9-a25a-e45d9452076f",
+   :inputs
+   {:task-belief {},
+    :c-belief {:operator-c-uncertainty 0.3},
+    :gamma {nil {:policy-precision 1.0}},
+    :observations
+    {:posting-stats
+     {:total-docs 106,
+      :dfs [1 1 1 1 1 1 1 1 1 1],
+      :estimated-tokens 212}}},
+   :decision
+   {:arm :retrieve,
+    :g-terms
+    {:retrieve 0.7456643332946383,
+     :act 0.0,
+     :ask -0.35000000000000003,
+     :yield 0.0},
+    :gamma-used 1.0,
+    :mission nil,
+    :operator-attention-cost 0.65,
+    :why
+    "zaif v0 chose retrieve: retrieve 0.746, act 0.000, ask -0.350, yield 0.000"},
+   :classification
+   {:settlement :score-settled, :tie-class [:retrieve]}}}}
