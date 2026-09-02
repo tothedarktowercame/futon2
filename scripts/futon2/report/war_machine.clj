@@ -1563,6 +1563,14 @@
    because they want five different repairs. A flat 0.0 for any of them would
    read as `this mission's criteria are met`.
 
+   U15 (from U12 clause (a)): `:criteria-source` is a PATH into a mutable
+   file, so on its own it does not pin what was read. `:criteria-source-sha256`
+   is the digest `mission-c/read-criteria` took of the bytes it decoded on THIS
+   call, and it is what makes a replay checkable: same path plus same digest
+   means the same criteria, a different digest says the numbers are not
+   comparable. Present exactly when bytes were read — a source that is not
+   there or that threw carries the typed `:criteria-reason` and no digest.
+
    `:action-sensitivity` is on the record because v0's forward model is the
    status quo for every candidate, so risk_mis is expected CONSTANT across
    this tick's mission actions. Recording the distinct-value count means U12
@@ -1601,6 +1609,8 @@
                    :mission-action-count (count actions)
                    :non-mission-action-count (- (count ranked) (count actions))
                    :status (:status risk)}
+            (:source-sha256 read-result)
+            (assoc :criteria-source-sha256 (:source-sha256 read-result))
             (:per-criterion risk) (assoc :risk-mis-per-criterion (:per-criterion risk))
             (:reason risk) (assoc :reason (:reason risk))
             (:missing risk) (assoc :missing-observables (:missing risk))

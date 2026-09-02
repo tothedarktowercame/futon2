@@ -6,7 +6,9 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.mission-c :as mc]
-            [futon2.aif.preferences :as pref]))
+            [futon2.aif.preferences :as pref])
+  (:import [java.nio.file Files]
+           [java.security MessageDigest]))
 
 (def zaif-ingest
   "Fixture 1 — the hand exemplar DESIGN-c-vector.md §2 names."
@@ -82,6 +84,62 @@
                                      {:observables {} :path "x.edn" :text ""})]
       (is (= :absent (:status r)))
       (is (= :no-preferences-c-key (:reason r))))))
+
+;; ---------------------------------------------------------------------------
+;; U15 -- the criteria source is hashed, so a replay can tell content apart
+;; from a path. U12 clause (a) passed determinism only "as stated": the
+;; readback reproduces from its arguments, but the criteria arrive from a
+;; mutable file named by a path, and an edit to that file moves every number
+;; with nothing on the record to show it moved.
+
+(defn- expected-sha256
+  "The digest computed OUTSIDE the code under test, so the test does not check
+   read-criteria against itself."
+  [path]
+  (apply str (map #(format "%02x" (bit-and 0xff %))
+                  (.digest (MessageDigest/getInstance "SHA-256")
+                           (Files/readAllBytes (.toPath (io/file path)))))))
+
+(deftest source-sha256-is-the-digest-of-the-bytes-read
+  (testing "an ingest read: the field matches an independently computed digest"
+    (let [r (mc/read-criteria zaif-ingest :observables {})]
+      (is (= (expected-sha256 zaif-ingest) (:source-sha256 r)))))
+  (testing "and a markdown read, including one whose PARSE is a typed absence:
+            the digest records what was read even when no criteria came out"
+    (let [doc "holes/missions/M-wm-aif-policy-grain-compliance.md"
+          r (mc/read-criteria doc :observables {} :mission "M-x")]
+      (is (= :absent (:status r)))
+      (is (= :no-completion-criteria-section (:reason r)))
+      (is (= (expected-sha256 doc) (:source-sha256 r)))))
+  (testing "a path with no bytes behind it carries NO digest -- typed absence
+            rather than a nil sitting where a hash goes"
+    (let [r (mc/read-criteria "holes/missions/M-does-not-exist.md" :observables {})]
+      (is (= :source-not-found (:reason r)))
+      (is (not (contains? r :source-sha256))))))
+
+(deftest source-sha256-changes-when-the-criteria-file-changes
+  (testing "the property the field exists for: edit the source and the digest
+            differs, so a replay can refuse instead of returning new numbers
+            under the same path"
+    (let [dir (str (System/getProperty "java.io.tmpdir") "/u15-" (System/nanoTime))
+          _ (.mkdirs (io/file dir))
+          path (str dir "/S4-identify-ingest.edn")
+          ingest (fn [observable]
+                   (pr-str {:ingest/mission "M-planted"
+                            :preferences/c
+                            [{:criterion :sorries-cleared :observable observable}]}))
+          _ (spit path (ingest :sorry-count-norm))
+          before (mc/read-criteria path :observables {:sorry-count-norm 0.0})
+          _ (spit path (ingest :mission-health))
+          after (mc/read-criteria path :observables {:mission-health 0.0})]
+      (is (= (expected-sha256 path) (:source-sha256 after)))
+      (is (not= (:source-sha256 before) (:source-sha256 after))
+          "same path, different bytes, different digest")
+      (testing "and re-reading unchanged bytes reproduces the digest"
+        (is (= (:source-sha256 after)
+               (:source-sha256 (mc/read-criteria path :observables {:mission-health 0.0})))))
+      (io/delete-file path true)
+      (io/delete-file dir true))))
 
 ;; ---------------------------------------------------------------------------
 ;; (b) C_mis is built by the SAME constructor, not a copy

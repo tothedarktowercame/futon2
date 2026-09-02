@@ -50,7 +50,9 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.preferences :as pref]))
+            [futon2.aif.preferences :as pref])
+  (:import [java.nio.file Files]
+           [java.security MessageDigest]))
 
 (def ^:const version 1)
 
@@ -243,23 +245,45 @@
                                         observables (pointer path ln)))
                        items))})))
 
+(defn- sha256-hex
+  "Hex SHA-256 of the bytes handed in. Same shape the tripwire's source digest
+   uses, so a recorded hash here and one recorded there compare directly."
+  [^bytes bytes]
+  (apply str (map #(format "%02x" (bit-and 0xff %))
+                  (.digest (MessageDigest/getInstance "SHA-256") bytes))))
+
 (defn read-criteria
   "Read a mission's completion criteria from `path`. `.edn` is read as an
    IDENTIFY ingest, anything else as a mission doc. An unreadable path is a
-   typed absence with the exception message, never an empty criteria list."
+   typed absence with the exception message, never an empty criteria list.
+
+   U15 (from U12 clause (a)): the result carries `:source-sha256`, the digest
+   of THE BYTES THIS CALL DECODED — one read, hashed and parsed, so there is
+   no window in which the hash and the criteria come from different content.
+   Without it a record naming only the PATH cannot be replayed: the criteria
+   arrive from a mutable file, and an edit between the run and the replay
+   changes every number with nothing on the record to show it did. The field
+   is present exactly when bytes were read: a path that is not there
+   (`:source-not-found`) or that threw (`:source-unreadable`) carries no
+   digest rather than a nil standing in for one."
   [path & {:keys [observables mission]}]
   (let [f (io/file path)]
     (if-not (.exists f)
       {:version version :mission mission :source (str path) :criteria []
        :status :absent :reason :source-not-found}
       (try
-        (let [text (slurp f)]
-          (if (str/ends-with? (str path) ".edn")
-            (criteria-from-ingest (edn/read-string text)
-                                  {:observables observables :path (str path) :text text})
-            (criteria-from-markdown text
-                                    {:observables observables :path (str path)
-                                     :mission mission})))
+        (let [bytes (Files/readAllBytes (.toPath f))
+              ;; UTF-8 rather than the platform charset because that is what
+              ;; `slurp` (clojure.java.io's default encoding) decoded with
+              ;; before this read was split into bytes-then-decode.
+              text (String. ^bytes bytes "UTF-8")]
+          (assoc (if (str/ends-with? (str path) ".edn")
+                   (criteria-from-ingest (edn/read-string text)
+                                         {:observables observables :path (str path) :text text})
+                   (criteria-from-markdown text
+                                           {:observables observables :path (str path)
+                                            :mission mission}))
+                 :source-sha256 (sha256-hex bytes)))
         (catch Exception e
           {:version version :mission mission :source (str path) :criteria []
            :status :absent :reason :source-unreadable :message (ex-message e)})))))

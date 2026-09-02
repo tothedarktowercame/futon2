@@ -1617,11 +1617,54 @@
     (is (= 2 (:mission-action-count r)))
     (is (= 2 (:non-mission-action-count r)))))
 
+(def ^:private u12-recorded-source-sha256
+  "The two criteria sources U12's replay read, with the digests it recorded:
+   `holes/labs/wm-contract/runs/U12-c-mis-falsifier/measurements.edn`
+   `:criteria-source-sha256`. These are the expected values U15's :statement
+   names. A FAILURE HERE IS NOT A CODE FAULT: it says the criteria file has
+   been edited since U12 measured it, so U12's numbers no longer describe the
+   file at that path. The repair is to re-measure and update both the artifact
+   and this pin together, never this pin alone."
+  {"holes/labs/zaif-harness/runs/S4-identify-ingest.edn"
+   "b85cb1dade5acecccfcb5188106a82908aa61a70f60b1f4b9f6af46873a5f2a9"
+   "holes/missions/M-wm-aif-policy-grain-compliance.md"
+   "51f6de53d7e95d42a42bb3a599e8430d35c29c34c692e27e239884541fa0c846"})
+
+(deftest mission-c-readback-hashes-the-criteria-source-test
+  (testing "U15. U12 clause (a) passed determinism only as stated: the readback
+            reproduces from its arguments, but :criteria-source is a PATH into
+            a mutable file. The digest is what a replay compares."
+    (testing "the declared ingest, replayed against U12's recorded digest"
+      (let [clocked (assoc u11-clocked :mission-id "M-zaif-harness-v1")
+            ranked (assoc-in u11-ranked [0 :action :target] "M-zaif-harness-v1")
+            r (#'wm/mission-c-readback clocked ranked {:sorry-count-norm 0.0})]
+        (is (str/ends-with? (:criteria-source r) "S4-identify-ingest.edn"))
+        (is (= (get u12-recorded-source-sha256
+                    "holes/labs/zaif-harness/runs/S4-identify-ingest.edn")
+               (:criteria-source-sha256 r)))))
+    (testing "the mission-path fallback, the other source U12 read, and a parse
+              that produces NO criteria still records what it read"
+      (let [doc "holes/missions/M-wm-aif-policy-grain-compliance.md"
+            ranked (assoc-in u11-ranked [0 :action :mission-path] doc)
+            r (#'wm/mission-c-readback u11-clocked ranked {})]
+        (is (= doc (:criteria-source r)))
+        (is (= :no-completion-criteria-section (:criteria-reason r)))
+        (is (= (get u12-recorded-source-sha256 doc) (:criteria-source-sha256 r)))))
+    (testing "a source that is not there is a typed absence with NO digest --
+              the field never carries a nil where a hash belongs"
+      (let [ranked (assoc-in u11-ranked [0 :action :mission-path]
+                             "holes/missions/M-does-not-exist.md")
+            r (#'wm/mission-c-readback u11-clocked ranked {})]
+        (is (= :source-not-found (:criteria-reason r)))
+        (is (not (contains? r :criteria-source-sha256)))))))
+
 (deftest mission-c-with-no-criteria-source-is-typed-test
   (let [r (#'wm/mission-c-readback u11-clocked
                                    [{:rank 1 :action {:type :no-op}}] {})]
     (is (= :absent (:status r)))
-    (is (= :no-criteria-source (:reason r)))))
+    (is (= :no-criteria-source (:reason r)))
+    (is (not (contains? r :criteria-source-sha256))
+        "no path was resolved, so there are no bytes to have hashed")))
 
 (deftest mission-c-records-risk-per-mission-action-with-traceable-numbers-test
   (testing "a mission whose criteria DO declare observables: the numeric path,
