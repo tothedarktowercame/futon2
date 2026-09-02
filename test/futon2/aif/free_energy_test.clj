@@ -126,31 +126,42 @@
              (get-in g [:avoidance-by-channel :consulting-pct :status])))
       (is (some #{:consulting-pct} (:avoided-active g))))))
 
-(defn- with-alive-defaults
-  "Avoid the :dark branch (active < 0.2 AND loop-health < 0.3) for cases
-   that want to test other mode classifications."
+(defn- with-mode-features
+  "All six required mode features present, as a plain explicit map — the legacy
+   boundary `channel-source-status` still supports for callers that predate
+   observation metadata. Since AC3 every one of the six must be present for a
+   classification to be offered at all, so a branch case supplies the whole set
+   and overrides only the features it is testing. The defaults classify as
+   :multiplied, so any other verdict below is produced by the override."
   [m]
-  (merge {:active-repo-ratio 0.5 :loop-health 0.5} m))
+  (merge {:stack-pct 0.2 :consulting-pct 0.0 :loop-health 0.5
+          :active-repo-ratio 0.5 :ticks-firing-ratio 0.0 :depositing-signal 0.0}
+         m))
 
 (deftest infer-mode-test
   (testing "dark mode: nothing happening"
-    (is (= :dark (fe/infer-mode {:active-repo-ratio 0.1 :loop-health 0.2}))))
+    (is (= :dark (fe/infer-mode (with-mode-features {:active-repo-ratio 0.1
+                                                     :loop-health 0.2})))))
   (testing "depositing: consulting activity"
     (is (= :depositing
-           (fe/infer-mode (with-alive-defaults {:consulting-pct 0.3 :stack-pct 0.4})))))
+           (fe/infer-mode (with-mode-features {:consulting-pct 0.3 :stack-pct 0.4})))))
   (testing "hermit: stack-dominated, no consulting, no depositing"
     (is (= :hermit
-           (fe/infer-mode (with-alive-defaults
+           (fe/infer-mode (with-mode-features
                             {:stack-pct 0.85 :consulting-pct 0.0 :depositing-signal 0.0})))))
   (testing "scanning: stack-dominated but daily scans active"
     (is (= :scanning
-           (fe/infer-mode (with-alive-defaults
+           (fe/infer-mode (with-mode-features
                             {:stack-pct 0.8 :consulting-pct 0.0 :depositing-signal 0.05})))))
   (testing "foraging-trapped: stack + ticks firing"
     (is (= :foraging-trapped
-           (fe/infer-mode (with-alive-defaults
+           (fe/infer-mode (with-mode-features
                             {:stack-pct 0.6 :consulting-pct 0.05 :ticks-firing-ratio 0.6
                              :depositing-signal 0.0})))))
+  (testing "stagnant: surfaces used but not improving"
+    (is (= :stagnant
+           (fe/infer-mode (with-mode-features {:active-repo-ratio 0.5
+                                               :loop-health 0.4})))))
   (testing "multiplied: catch-all when no other branch fires"
     (is (= :multiplied
            (fe/infer-mode {:stack-pct 0.2 :consulting-pct 0.2 :portfolio-pct 0.3
@@ -288,3 +299,128 @@
     (is (nil? (resolve 'futon2.aif.free-energy/compute-variational-free-energy)))
     (is (nil? (ns-resolve 'futon2.aif.free-energy
                           'compute-variational-free-energy)))))
+
+;; ---------------------------------------------------------------------------
+;; AC3 (Joe's 2026-09-02 ruling on C130 §3): strategic-mode inference no longer
+;; reads its six features through a 0.0 default. These are the planted cases
+;; that hold the three verdicts apart -- an unobserved feature must produce
+;; :unknown and NOT the :dark that six substituted zeros used to produce, and a
+;; feature that arrived as a string must refuse rather than classify around it.
+;; ---------------------------------------------------------------------------
+
+(def ^:private full-mode-scan
+  "Raw scan data every one of whose six mode features is sourced, so
+   `obs/observe` tags all six :observed. Measured zeros throughout: this is the
+   control that separates 'measured 0.0' from 'no source field'."
+  {:loop-health {:overall 0.2}
+   :support-attack {:support-coverage 0.0 :attack-coverage 0.0}
+   :mission-triage {:health 0.0}
+   :graph {:dynamics {:commit-percentages {:stack 0.0 :consulting 0.0
+                                           :portfolio 0.0 :mathematics 0.0}
+                      :ticks []}
+           :summary {:active-repos 0 :total-repos 4 :total-sorrys 0
+                     :coupling-edges 0 :ticks-firing 0}}
+   :frames {:depositing-signal 0.0}
+   :annotation-graph {:health 0.0}})
+
+(deftest strategic-mode-present-record-test
+  (testing "all six features observed: a classification with its features"
+    (let [r (fe/infer-mode-record (obs/observe full-mode-scan))]
+      (is (= :present (:status r)))
+      (is (= :strategic-mode/v1 (:producer-contract r)))
+      (is (= :dark (:mode r))
+          "active-repo-ratio 0.0 and loop-health 0.2 are MEASURED, so :dark here is a real verdict")
+      (is (= (set fe/strategic-mode-features) (set (keys (:features r))))
+          "every feature the classification rests on is reported")
+      (is (every? double? (vals (:features r))))
+      (is (not (contains? r :absent)))
+      (is (not (contains? r :offending))))))
+
+(deftest strategic-mode-absent-is-unknown-not-dark-test
+  (testing "an empty scan is :unknown, not the :dark six zeros used to fabricate"
+    (let [r (fe/infer-mode-record (obs/observe {}))]
+      (is (= :unknown (:status r)))
+      (is (= :unknown (:mode r)))
+      (is (= :required-feature-absent (:reason r)))
+      (is (= (set fe/strategic-mode-features)
+             (set (map :feature (:absent r))))
+          "all six are named, not just the first one found")
+      (is (every? #(= :source-field-missing (:reason %)) (:absent r)))
+      (is (every? #(seq (:paths %)) (:absent r))
+          "the envelope's own paths travel with the record")
+      (is (not (contains? r :features))
+          "no classification is offered, so no features are claimed")))
+  (testing "the bare-keyword form agrees"
+    (is (= :unknown (fe/infer-mode (obs/observe {}))))))
+
+(deftest strategic-mode-single-absent-feature-is-unknown-test
+  (testing "one missing feature is enough: there is no partial rule"
+    (doseq [[feature strip] [[:loop-health #(dissoc % :loop-health)]
+                             [:stack-pct #(update-in % [:graph :dynamics :commit-percentages]
+                                                     dissoc :stack)]
+                             [:consulting-pct #(update-in % [:graph :dynamics :commit-percentages]
+                                                          dissoc :consulting)]
+                             [:active-repo-ratio #(update-in % [:graph :summary]
+                                                             dissoc :active-repos)]
+                             [:ticks-firing-ratio #(update-in % [:graph :summary]
+                                                              dissoc :ticks-firing)]
+                             [:depositing-signal #(dissoc % :frames)]]]
+      (let [r (fe/infer-mode-record (obs/observe (strip full-mode-scan)))]
+        (is (= :unknown (:status r)) (str "absent " feature))
+        (is (= [feature] (mapv :feature (:absent r)))
+            (str "only " feature " is reported absent"))))))
+
+(deftest strategic-mode-legacy-map-absence-test
+  (testing "a plain explicit map keeps its present features and loses no absence"
+    (let [r (fe/infer-mode-record {:stack-pct 0.2 :consulting-pct 0.0
+                                   :loop-health 0.5 :active-repo-ratio 0.5})]
+      (is (= :unknown (:status r)))
+      (is (= [:ticks-firing-ratio :depositing-signal]
+             (mapv :feature (:absent r))))
+      (is (every? #(= :status-metadata-missing (:reason %)) (:absent r)))))
+  (testing "a plain explicit map carrying all six still classifies"
+    (is (= :present (:status (fe/infer-mode-record (with-mode-features {})))))))
+
+(deftest strategic-mode-malformed-is-refused-test
+  (testing "a non-finite feature refuses; it does not classify and is not absent"
+    (doseq [[label bad] [[:string "0.9"] [:keyword :high]
+                         [:nan ##NaN] [:pos-inf ##Inf] [:neg-inf ##-Inf]]]
+      (let [r (fe/infer-mode-record (with-mode-features {:stack-pct bad}))]
+        (is (= :refused (:status r)) (str label))
+        (is (= :unknown (:mode r)) (str label " still refuses to name a mode"))
+        (is (= :malformed-mode-feature (:reason r)) (str label))
+        (is (= [{:feature :stack-pct :status :not-finite :value bad}]
+               (:offending r))
+            (str label " names the offending feature and what it was given"))
+        (is (not (contains? r :features)) (str label)))))
+  (testing "every malformed feature is named, not just the first"
+    (let [r (fe/infer-mode-record (with-mode-features {:stack-pct "0.9"
+                                                       :loop-health ##NaN}))]
+      (is (= [:stack-pct :loop-health] (mapv :feature (:offending r)))))))
+
+(deftest strategic-mode-refusal-keeps-absence-test
+  (testing "malformed AND absent together: refuse loudly, lose neither fault"
+    (let [r (fe/infer-mode-record {:stack-pct "0.9" :consulting-pct 0.0
+                                   :loop-health 0.5 :active-repo-ratio 0.5
+                                   :ticks-firing-ratio 0.0})]
+      (is (= :refused (:status r)))
+      (is (= [:stack-pct] (mapv :feature (:offending r))))
+      (is (= [:depositing-signal] (mapv :feature (:absent r)))
+          "the absent feature is still reported under a refusal"))))
+
+(deftest strategic-mode-absent-is-not-malformed-test
+  (testing "absent and malformed are different verdicts on the same feature"
+    (let [absent (fe/infer-mode-record (with-mode-features {:stack-pct nil}))
+          malformed (fe/infer-mode-record (with-mode-features {:stack-pct "x"}))]
+      (is (= :unknown (:status absent)))
+      (is (= :refused (:status malformed)))
+      (is (not= (:reason absent) (:reason malformed))))))
+
+(deftest strategic-mode-measured-zero-is-not-absence-test
+  (testing "a measured zero classifies; the same channel unsourced does not"
+    (let [measured (fe/infer-mode-record (obs/observe full-mode-scan))
+          unsourced (fe/infer-mode-record
+                     (obs/observe (dissoc full-mode-scan :frames)))]
+      (is (= :present (:status measured)))
+      (is (= 0.0 (get-in measured [:features :depositing-signal])))
+      (is (= :unknown (:status unsourced))))))

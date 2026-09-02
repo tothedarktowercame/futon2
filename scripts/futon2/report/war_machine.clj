@@ -4685,7 +4685,20 @@
         route1 (route-tag route0 :R2 "futon2.aif.observation/observe")
         free-energy (fe/compute-controller-diagnostics observation)
         ;; Base mode from equilibrium-classification of observations.
-        base-mode (fe/infer-mode observation)
+        ;; AC3 (Joe's 2026-09-02 ruling on C130 3): the classifier reads its
+        ;; six features through the observation envelope and returns a typed
+        ;; record instead of branching on substituted zeros. `:unknown` means a
+        ;; required feature was absent or malformed -- on an empty scan the old
+        ;; code read six zeros and returned `:dark`, which is a claim about the
+        ;; system, not a report that nothing was observed.
+        strategic-mode-record (fe/infer-mode-record observation)
+        base-mode (:mode strategic-mode-record)
+        ;; Present-only: a tick that classified writes no event. Persisted so
+        ;; the harvester can turn an unclassifiable tick into a work item
+        ;; (the ruling's self-repair condition) rather than a standing red.
+        strategic-mode-events (if (= :present (:status strategic-mode-record))
+                                []
+                                [strategic-mode-record])
         ;; OVERRIDE-MODE check: when any metabolic-balance channel hits
         ;; tier :stop-the-line, set mode to :stop-the-line regardless
         ;; of base-mode.  See :μ/override-modes in
@@ -5336,6 +5349,11 @@
                  ;; rejections, same present-only discipline at the trace
                  ;; boundary.
                  :belief-aggregation-events belief-aggregation-events
+                 ;; AC3: the strategic-mode record, kept only when the
+                 ;; classifier could NOT classify. Same present-only discipline:
+                 ;; an absent key means the mode was inferred from six observed
+                 ;; features, not that nobody looked.
+                 :strategic-mode-events strategic-mode-events
                  :precision-state precision-state
                  ;; R14 precision-over-policies (γ): the learned, bounded inverse
                  ;; selection temperature this tick used (τ_eff = τ_spread / γ).

@@ -288,41 +288,149 @@
         (not present?)
         (assoc :observation-status (select-keys source [:reason :paths])))))))
 
-(defn infer-mode
-  "Infer strategic mode from observation vector.
-   Returns keyword: :multiplied, :depositing, :foraging-trapped, :hermit, :stagnant, :dark."
+;; ---------------------------------------------------------------------------
+;; AC3 (Joe's 2026-09-02 ruling on C130 §3): strategic-mode inference.
+;; ---------------------------------------------------------------------------
+
+(def strategic-mode-contract
+  "Producer contract stamped on every strategic-mode record `infer-mode-record`
+   emits, whether it classified, reported `:unknown`, or refused."
+  :strategic-mode/v1)
+
+(def strategic-mode-features
+  "The six observation channels the mode classifier branches on, in the order
+   the branches read them.
+
+   EVERY ONE IS REQUIRED, and that is the substance of C130 §3 option A. The
+   classifier's last branch is `:else :multiplied`, so returning `:multiplied`
+   asserts that none of the six other conditions held — a claim about all six
+   features at once. There is no subset of these on which a partial
+   classification is sound, and no prior/stale rule is specified here: a single
+   absent feature makes the whole classification unsupported."
+  [:stack-pct :consulting-pct :loop-health :active-repo-ratio
+   :ticks-firing-ratio :depositing-signal])
+
+(defn- classify-strategic-mode
+  "The equilibrium classification itself, over six features every one of which
+   the caller has already established is a finite number. Unchanged from the
+   pre-AC3 branch structure; what changed is that it is no longer reachable
+   with a substituted zero."
+  [{:keys [stack-pct consulting-pct loop-health active-repo-ratio
+           ticks-firing-ratio depositing-signal]}]
+  (cond
+    ;; Dark: nothing happening
+    (and (< active-repo-ratio 0.2) (< loop-health 0.3))
+    :dark
+
+    ;; Depositing: consulting active (commit-based or frame-based)
+    (or (> consulting-pct 0.2) (> depositing-signal 0.15))
+    :depositing
+
+    ;; Hermit: stack-dominated, no consulting AND no depositing signal
+    (and (> stack-pct 0.7) (< consulting-pct 0.05) (< depositing-signal 0.05))
+    :hermit
+
+    ;; Scanning: stack-dominated but daily scans active (transitional)
+    (and (> stack-pct 0.7) (> depositing-signal 0.0))
+    :scanning
+
+    ;; Foraging-trapped: stuck on stack under math/portfolio pressure
+    (and (> stack-pct 0.5) (> ticks-firing-ratio 0.5))
+    :foraging-trapped
+
+    ;; Stagnant: surfaces used but not improving
+    (and (> active-repo-ratio 0.3) (< loop-health 0.5))
+    :stagnant
+
+    ;; Multiplied: healthy balance
+    :else
+    :multiplied))
+
+(defn infer-mode-record
+  "Infer strategic mode from an observation vector, as a typed record.
+
+   AC3 (Joe's 2026-09-02 ruling on C130 §3) removed the six zero substitutions
+   this classifier used to read its features through. Each of
+   `strategic-mode-features` is read through the observation envelope
+   (`channel-source-status`), and which record comes back is the decision:
+
+   `:present` — all six features are finite numbers:
+     {:status :present :mode <one of the seven mode keywords>
+      :features {<feature> <double> …}
+      :producer-contract :strategic-mode/v1}
+
+   `:unknown` — at least one required feature was NOT OBSERVED. `:mode` is
+   `:unknown`, `:absent` names every missing feature with the envelope's own
+   `:reason` and `:paths`, and no classification is offered. Six absences used
+   to arrive as six zeros, which could fabricate `:dark` (active 0.0 < 0.2 and
+   loop-health 0.0 < 0.3 — the branch an EMPTY scan reached), suppress
+   `:depositing`, or help satisfy `:hermit`. A mode nobody could observe is not
+   the mode `:dark`.
+
+   `:refused` — a feature is present but is NOT A FINITE NUMBER (a string, a
+   keyword, NaN, an infinity). `:mode` is `:unknown` and `:offending` names
+   every such feature. Absence and malformation are separated here exactly as
+   they are in `compute-prediction-error`: a feature nobody measured is a gap
+   in the scan, a feature that arrived as a string is a producer defect and has
+   to stay loud. When both occur the record refuses and still carries `:absent`,
+   so neither fault is lost.
+
+   Whether anything may ACT on `:unknown` is a separate question and is NOT
+   decided here — it is the hard-guard decision (DECISIONS-PENDING §3). This
+   producer's contract is only that it never invents a mode.
+
+   Plain explicit maps remain a supported legacy boundary, through
+   `channel-source-status`: a caller that hands over `{:stack-pct 0.2 …}`
+   without observation metadata still gets its six features read, and the keys
+   it left out are absent rather than zero."
   [obs]
-  (let [stack (get obs :stack-pct 0.0)
-        consulting (get obs :consulting-pct 0.0)
-        loop-h (get obs :loop-health 0.0)
-        active (get obs :active-repo-ratio 0.0)
-        ticks (get obs :ticks-firing-ratio 0.0)
-        depositing (get obs :depositing-signal 0.0)]
+  (let [stamp {:producer-contract strategic-mode-contract}
+        readings (into {} (map (juxt identity #(channel-source-status obs %)))
+                       strategic-mode-features)
+        absent (vec (for [f strategic-mode-features
+                          :let [r (get readings f)]
+                          :when (= :absent (:status r))]
+                      (merge {:feature f} (select-keys r [:reason :paths]))))
+        offending (vec (for [f strategic-mode-features
+                             :let [r (get readings f)]
+                             :when (and (= :present (:status r))
+                                        (nil? (finite-double (:value r))))]
+                         {:feature f :status :not-finite :value (:value r)}))]
     (cond
-      ;; Dark: nothing happening
-      (and (< active 0.2) (< loop-h 0.3))
-      :dark
+      ;; Malformed feature: refuse loudly rather than classify around it.
+      (seq offending)
+      (merge stamp
+             {:status :refused :mode :unknown
+              :reason :malformed-mode-feature
+              :offending offending}
+             (when (seq absent) {:absent absent}))
 
-      ;; Depositing: consulting active (commit-based or frame-based)
-      (or (> consulting 0.2) (> depositing 0.15))
-      :depositing
+      ;; Honestly absent feature: no classification, reason carried.
+      (seq absent)
+      (merge stamp
+             {:status :unknown :mode :unknown
+              :reason :required-feature-absent
+              :absent absent})
 
-      ;; Hermit: stack-dominated, no consulting AND no depositing signal
-      (and (> stack 0.7) (< consulting 0.05) (< depositing 0.05))
-      :hermit
-
-      ;; Scanning: stack-dominated but daily scans active (transitional)
-      (and (> stack 0.7) (> depositing 0.0))
-      :scanning
-
-      ;; Foraging-trapped: stuck on stack under math/portfolio pressure
-      (and (> stack 0.5) (> ticks 0.5))
-      :foraging-trapped
-
-      ;; Stagnant: surfaces used but not improving
-      (and (> active 0.3) (< loop-h 0.5))
-      :stagnant
-
-      ;; Multiplied: healthy balance
       :else
-      :multiplied)))
+      (let [features (into {} (map (fn [f]
+                                     [f (finite-double
+                                         (:value (get readings f)))]))
+                           strategic-mode-features)]
+        (merge stamp
+               {:status :present
+                :mode (classify-strategic-mode features)
+                :features features})))))
+
+(defn infer-mode
+  "Strategic mode from an observation vector, as the bare keyword callers that
+   only render or key off the mode still want. Exactly `(:mode
+   (infer-mode-record obs))`.
+
+   Returns one of :multiplied, :depositing, :foraging-trapped, :hermit,
+   :scanning, :stagnant, :dark — or `:unknown` when a required feature was
+   absent or malformed. `:unknown` carries no reason on its own; the reason
+   lives on `infer-mode-record`, which is the form the war machine calls and
+   persists."
+  [obs]
+  (:mode (infer-mode-record obs)))

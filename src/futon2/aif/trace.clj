@@ -544,6 +544,14 @@
     ;; aggregator did not report".
     (seq (:belief-aggregation-events judge-output))
     (assoc :belief-aggregation-events (:belief-aggregation-events judge-output))
+    ;; AC3 (same ruling, same condition): the strategic-mode record, kept only
+    ;; when mode inference could not classify -- a required feature absent
+    ;; (`:unknown`) or malformed (`:refused`). Present-only: no key means the
+    ;; tick's `:mode` was inferred from six observed features, which is a
+    ;; different claim from "the classifier did not report". The single record
+    ;; carries every offending feature, so this is a vector of at most one.
+    (seq (:strategic-mode-events judge-output))
+    (assoc :strategic-mode-events (:strategic-mode-events judge-output))
     ;; RUN11 run identity. The per-date trace file is shared by every run on
     ;; the day, so without this key the only discriminator between two runs'
     ;; records is the timestamp and a reader has to select by range. `:run/id`
