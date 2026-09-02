@@ -1,6 +1,9 @@
 # U11 design draft — the actand source, one forward-model family at two grains
 
-Author: claude-2 (zaif-harness lane), 2026-09-02 ~18:25Z, per the joint-pass
+Author: claude-2 (zaif-harness lane), 2026-09-02 ~18:25Z; **rev 2 ~18:35Z**
+incorporating claude-1's review (invoke-1788373305219): scalar-bridge framing
+(§4), clamp + typed ambiguity in the adapter record (§2), U12 node-fixtures as
+the reading-map source (§2), discrimination trio (§3)., per the joint-pass
 agreement (claude-2 leads, claude-1 reviews with wm-side constraints; bellback
 on invoke-1788372741639). Status: DRAFT for claude-1's review input; nothing
 here is built, flipped, or ruled. Inputs read: D8a (c8eec02),
@@ -61,12 +64,26 @@ Arm B `:advance-phase` (the "do the work this turn" action in each
 vocabulary). The adapter evaluates the arm against the session's actual
 channel readings and emits exactly what D8b's acceptance seam propagates:
 
-    {:act-value  <double>            ; the arm's scalar, clamped [0,1]
+    {:act-value  <double>            ; the arm's scalar
+     :ambiguity  :not-modeled-degenerate-q  ; TYPED, never numeric 0.0 -- a
+                                            ; degenerate Q has zero entropy, so
+                                            ; the ambiguity half of G is
+                                            ; structurally absent for arms A/B;
+                                            ; a numeric 0.0 would rebuild the
+                                            ; U4 problem (a term always zero
+                                            ; with no way to tell if meaningful)
      :source     {:query   :q-actand/v1
                   :arm     :portfolio-policy | :mission-head-channels | :cascade-catalog-playout
                   :grain   :arm-session
+                  :transform :clamp-0-1     ; the clamp is a DECLARED transform;
+                                            ; silent, it would turn section 6's
+                                            ; "affine image" into "clamped
+                                            ; affine image" unannounced
                   :inputs-digest <sha of the channel readings used>
                   :at      <instant>}}
+
+    Digest stability is an ASSERTION, not just provenance: same
+    :inputs-digest => same :act-value, replay-checked.
 
 No source ⇒ D8b's typed absence stands. Numeric without provenance ⇒ D8b's
 refusal (`:d8/unprovenanced-task-belief`). A predicted outcome with no typed
@@ -78,8 +95,11 @@ exist at zaif session grain.** Arm A wants gap/stall/review channels; a zai
 session has posting-stats, turn-round records, and (post-D10) a clocked
 mission whose registry/C_mis fields carry obligation-shaped readings. The
 design pass deliberately leaves the reading-map as the first build question,
-because it is answerable from records (U10's matrix and S7's channel
-inventory), not from taste.
+because it is answerable from records, not from taste. Concretely (claude-1
+review): answer it against `wm-contract/runs/U12-c-mis-falsifier/node-fixtures/`
+— 40 per-node fixtures (run-id × node, typed absences included, R7 located as
+`:precision-state` covering 8/14 channels) — plus U10's matrix; do not
+re-extract the tick records.
 
 ## 3. The comparison run — designed into the row (Joe's 2026-09-01 rule)
 
@@ -92,8 +112,14 @@ can veto. One replay harness, three measurements:
    (claude-1's constraint 1, U12's negative result): wm status-quo forward
    model = **exactly 1 distinct risk value (4.5399e-5) over 133 actions
    across all 14 channels**; zaif shipped = **1 distinct act value (0.0) on
-   114/114 sessions**. An arm that cannot beat "constant" is not a forward
-   model, whatever its equations say.
+   114/114 sessions**. Distinct-count is necessary, not sufficient — a
+   continuous-channel arm produces distinct values from noise alone. So the
+   headline is a trio (claude-1 review): (a) beats both constant baselines;
+   (b) a DIRECTION probe in U12's style — two planted sessions differing
+   only in one gap channel (maximal vs minimal), the arm must order them
+   correctly; (c) digest stability — same `:inputs-digest` ⇒ same value, as
+   an assertion. "Beats constant + ordered plants + digest-stable" is a
+   discrimination claim noise cannot fake.
 2. **D9 re-run per arm**: tie-settled vs score-settled counts over the same
    recorded corpus (D9's harness, already specified on its row).
 3. **Provenance completeness**: every emitted value resolves to its
@@ -119,9 +145,19 @@ flip J-gated.
   ruled on (Joe 2026-09-01; the shared checker enforces it).
 - IF the arms are scalar heuristics, HOWEVER the family's type says Density,
   THEN v1 records them as declared point-predictions (degenerate densities)
-  with `:arm` in provenance, BECAUSE understating ("a point estimate from a
-  hand-weighted heuristic") is repairable while dressing a scalar as a
-  distribution is the facade class this mission refuses.
+  with `:arm` and `:transform` in provenance, BECAUSE for a point-prediction
+  Q, KL(Q‖C) collapses to −log C(o*) — which is DESIGN-c-vector.md §6's
+  scalar bridge verbatim ("a scalar payoff is an affine image of log-C at
+  the outcome the action targets"). This is not a weakening of the §5 type
+  but its instantiation, and it gives the tally's `:c-cost-vs-distribution`
+  row (closed `:partial` because no source yet carries
+  `:scalar-awaiting-density`) its first genuine repair path: these scalars
+  become typed point-predictions whose log-C evaluation IS the payoff.
+  RIDER, inherited by name: the moment any arm's output meets a C in one G,
+  wm-contract U17's ≥0 property applies at this seam (−log C can go
+  negative in-band against a range C — U12 clause (c)'s negative-term
+  problem); the composition must not happen unguarded. (Both points:
+  claude-1 review, invoke-1788373305219.)
 - IF a session lacks the channel readings an arm wants, HOWEVER inventing
   readings would smuggle a model in as data, THEN the adapter emits the D8b
   typed absence for that session and the replay counts coverage, BECAUSE
