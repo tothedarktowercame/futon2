@@ -4888,6 +4888,24 @@
        :selection-boundary :reviewed-reason-bearing-policy})))
   (selector request))
 
+(defn- strategic-selection-law
+  "Rewrite the policy selector's law record after the reason-bearing selector
+   has made the final choice. `controller-ranking` is the ranking emitted by
+   the controller decision itself, so chosen rank and movement cannot be
+   confused with scheduler-habit order or a selector-local rank."
+  [controller-decision strategic-action strategic-selection]
+  (let [controller-ranking (:controller-ranking controller-decision)
+        chosen-action (:action strategic-action)
+        head (first controller-ranking)
+        chosen (some #(when (= chosen-action (:action %)) %) controller-ranking)]
+    (assoc (:selection-law controller-decision)
+           :consulted-ranking (or (:consulted-ranking strategic-selection)
+                                  :live-selector-id)
+           :controller-head-rank (:rank head)
+           :chosen-rank (:rank chosen)
+           :moved-from-controller-head?
+           (not= chosen-action (:action head)))))
+
 (defn- route-tag
   [route node via]
   (conj (or route [])
@@ -5501,6 +5519,7 @@
         (invoke-strategic-selection
          strategic-selection-fn
          {:scheduler-habit-ranking scheduler-habit-ranking
+          :controller-ranking (:controller-ranking controller-decision)
           :trace-id (str "wm-live-selection-" wm-as-of)})
         route6 (route-tag route5 :R14 "futon2.report.war-machine/invoke-strategic-selection")
         selected-mission-ids (:selected-mission-ids strategic-selection)
@@ -5530,6 +5549,9 @@
         wm-decision
         (assoc controller-decision
                :action (:action strategic-action)
+               :selection-law
+               (strategic-selection-law controller-decision strategic-action
+                                        strategic-selection)
                :reason :reviewed-live-reason-bearing-policy
                :selection-boundary :reason-bearing-strategic-policy
                :requires-operator-override? false

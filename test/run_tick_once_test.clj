@@ -55,6 +55,17 @@
     (is (false? (:step-mission-detail-portfolio? opts)))
     (is (false? (:eval-invariant-fallback? opts)))))
 
+(deftest diagnostic-stub-consults-controller-head-test
+  (let [controller-head {:type :advance-mission :target "M-controller"}
+        result (#'tick/stub-selection
+                {:controller-ranking [{:rank 1 :action controller-head}
+                                      {:rank 2 :action {:type :advance-mission
+                                                       :target "M-habit"}}]
+                 :scheduler-habit-ranking ["M-habit" "M-controller"]})]
+    (is (= :controller (:consulted-ranking result)))
+    (is (= ["M-controller"] (:selected-mission-ids result)))
+    (is (= "stub:controller-head" (:selected-policy-id result)))))
+
 (deftest full-diagnostic-tick-issues-no-http-post-test
   ;; The generator seam keeps the test hermetic while exercising the complete
   ;; run-tick-once lifecycle. Its body deliberately invokes both formerly

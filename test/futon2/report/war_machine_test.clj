@@ -1428,3 +1428,32 @@
     (is (= (:decision off) (:decision on)))
     (is (not (contains? off :active-mission)))
     (is (= active (:active-mission on)))))
+
+(deftest strategic-selection-law-records-controller-rank-of-divergent-choice-test
+  (let [head-action {:type :advance-mission :target "M-controller-head"}
+        chosen-action {:type :advance-mission :target "M-live-choice"}
+        controller-decision
+        {:selection-law {:requested :controller-head :applied :controller-head}
+         :controller-ranking [{:rank 1 :action head-action}
+                              {:rank 124 :action chosen-action}]}
+        law (#'wm/strategic-selection-law
+             controller-decision {:action chosen-action}
+             {:consulted-ranking :scheduler-habit})]
+    (is (= :scheduler-habit (:consulted-ranking law)))
+    (is (= 124 (:chosen-rank law)))
+    (is (= 1 (:controller-head-rank law)))
+    (is (true? (:moved-from-controller-head? law)))))
+
+(deftest strategic-selection-law-records-controller-head-honestly-test
+  (let [head-action {:type :advance-mission :target "M-controller-head"}
+        controller-decision
+        {:selection-law {:requested :controller-head :applied :controller-head}
+         :controller-ranking [{:rank 1 :action head-action}
+                              {:rank 2 :action {:type :advance-mission
+                                               :target "M-other"}}]}
+        law (#'wm/strategic-selection-law
+             controller-decision {:action head-action}
+             {:consulted-ranking :controller})]
+    (is (= :controller (:consulted-ranking law)))
+    (is (= 1 (:chosen-rank law)))
+    (is (false? (:moved-from-controller-head? law)))))

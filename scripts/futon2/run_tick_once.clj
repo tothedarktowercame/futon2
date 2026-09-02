@@ -19,7 +19,7 @@
   'futon3c.peripheral.live-wm-selection/validated-selection)
 
 (def ^:private stub-selector-name
-  "first-ranked-authorized-mission")
+  "controller-head")
 
 (defn- today-date-string []
   (str (LocalDate/now utc-zone)))
@@ -69,9 +69,13 @@
       {:selector nil
        :resolution-error (str (.getClass e) ": " (.getMessage e))})))
 
-(defn- stub-selection [{:keys [scheduler-habit-ranking]}]
-  (let [mission-id (first scheduler-habit-ranking)]
+(defn- stub-selection [{:keys [controller-ranking scheduler-habit-ranking]}]
+  ;; A diagnostic stub has no independent evidence model. Consult the ranking
+  ;; the tick actually chose under its controller law; using habit-head here
+  ;; silently introduced a third selector while naming it "first-ranked".
+  (let [mission-id (get-in controller-ranking [0 :action :target])]
     {:status :verified-live-selection
+     :consulted-ranking :controller
      :selected-policy-id (str "stub:" stub-selector-name)
      :selected-policy
      {:policy-id (str "stub:" stub-selector-name)
