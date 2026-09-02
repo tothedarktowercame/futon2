@@ -681,3 +681,14 @@ cascade and where it fits. The standing idea: the how/why landscape gives a
 prior that can be subselected to quickly assemble a suitable local policy, and
 the same landscape is a substrate for learning over multiple runs. Not built
 yet.
+
+**§1b addendum 3 (Joe, 2026-09-02, fourth exchange, reported):** at least a few
+comparison domains from the start — Ants? ALFWorld? more later — "it would be a
+pity if we built something that could only play one economics game." So the
+restated architecture must be stated over an abstract domain interface
+(Repository, Tension, playout oracle), with Snatch and Ants instantiated on
+paper (Ants is nearly free: library/ants 5 patterns, pattern_authority_gate.clj
+as oracle, and the untested @aif-delta channel lives there) and one external
+benchmark (ALFWorld) named as a stretch row. Ants has a useful property as a
+control: its authority gate FAILED every real pattern on held-out yield
+(2026-07-16), so a constructor that only ever confirms would be caught there.
