@@ -59,8 +59,8 @@
   "The futon3 library id of a pattern (`:ants/white-space-scout`, the id
    `checks/find_organise.clj` keys the repository by) -> the `:cyber/*` key the
    two consumers in this repository dispatch on
-   (`ants.aif.pattern-sense/constraint-satisfied?:78`,
-   `ants.aif.pattern-efe/pattern-action-risk:117`).
+   (`ants.aif.pattern-sense/constraint-satisfied?:75`,
+   `ants.aif.pattern-efe/pattern-action-risk:113`).
 
    Derived from `pattern-key->filename` read backwards through the filename, NOT
    written out a second time by hand: the two names denote the same five files,
@@ -252,7 +252,7 @@
 (defn ordered-members
   "The cascade's members in precedence order, MOST PRECEDENT FIRST.
 
-   This recomputes futon3/checks/find_organise.clj:376 `ordered` from the two
+   This recomputes futon3/checks/find_organise.clj:382 `ordered` from the two
    fields the cascade carries -- sort the members by the cascade's own
    `:precedence`, least number first, ties broken by `:authored-order` (the sort
    is stable).  It is recomputed rather than read off the artefact's own
@@ -272,7 +272,7 @@
    most-precedent-FIRST, so this fold runs that list BACKWARDS: the least
    precedent member writes first and the most precedent member writes last and
    therefore takes any contended key.  That matches how precedence is read
-   everywhere else in this line of work -- find_organise.clj:396 `fire` consults
+   everywhere else in this line of work -- find_organise.clj:398 `fire` consults
    the rules in `ordered` order and takes the FIRST one that yields, so the most
    precedent rule is the one that decides.  A fold that let the least precedent
    member win would make `attach` and `fire` disagree about what precedence means.
