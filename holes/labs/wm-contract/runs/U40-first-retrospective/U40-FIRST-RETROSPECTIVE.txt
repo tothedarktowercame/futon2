@@ -1,0 +1,66 @@
+U40 -- the first retrospective, replayed over recorded history
+=============================================================
+
+corpus: 56 files, 885 records; ranking era 2026-08-30, 2026-08-31, 2026-09-01, 2026-09-02 (94 records)
+
+0. THE ENACTMENT PATH
+   selectors:                     {"pi-s-9dbc2ceb3317bc38050c41ce" 4, "stub:first-ranked-authorized-mission" 88, "stub:controller-head" 2}
+   chosen == controller head:     {false 92, true 2}
+   chosen in the hardcoded three: {true 92, false 2}
+   scheduler-habit list == controller order restricted to the three: {true 94}
+   chosen == head of that list:   {false 6, true 88}
+   set: scripts/futon2/report/war_machine.clj:6235-6238 strategic-candidate-ids
+
+1. CASE 1 -- rc-0a18c4f7-758e-400a-8223-9c52edf07450
+   controller head: M-zaif-harness-v1 | rank 2: M-expressions-of-interest
+   enacted: M-wm-aif-policy-grain-compliance at controller rank 124 | selector "stub:first-ranked-authorized-mission"
+   recorded scheduler-habit list: ["M-wm-aif-policy-grain-compliance" "M-shared-memory-control-build-test" "M-aif-policy-conditioned-eig"]
+   soundness at mint: {:status :unsound, :reason :law-field-contradicts-ranking, :law-says {:chosen-rank 1, :moved-from-controller-head? false}, :ranking-says {:chosen-controller-rank 124}}
+   VERDICT: :rationale-untestable :claim-unsound-at-mint -- mint: none
+
+1b. THE 14:00 RECORD -- rc-4abad68c-5481-4402-8f0e-252add62c54b (U39's worked example, re-derived and pinned)
+   rejected rank 2 {:type :advance-mission, :target "M-expressions-of-interest"} margin 0.00402868 lost-on G-risk
+   rejected rank 3 {:type :advance-mission, :target "M-distributed-frontiermath"} margin 0.05198292 lost-on G-risk
+   rejected rank 4 {:type :advance-mission, :target "M-symbol-grounding"} margin 0.06528737 lost-on G-risk
+   VERDICT: :rationale-refuted :a-rejected-candidate-closed-the-recorded-margin-on-its-own-movement
+
+2. CASE 2 -- rc-801976e7-01c6-4e39-aada-27f620f7c2f1
+   chosen {:type :advance-mission, :target "M-expressions-of-interest"} at controller rank 1
+   rejected rank 2 {:type :advance-mission, :target "M-distributed-frontiermath"} margin 0.04795424 lost-on G-risk
+   rejected rank 3 {:type :advance-mission, :target "M-symbol-grounding"} margin 0.06125869 lost-on G-risk
+   rejected rank 4 {:type :advance-mission, :target "M-superpod-mark2"} margin 0.06448146 lost-on G-risk
+   rejected rank 5 {:type :advance-mission, :target "M-zaif-harness-v1"} margin 0.08598903 lost-on G-risk
+   rejected rank 6 {:type :advance-mission, :target "M-eoi-outbox-management"} margin 0.08749320 lost-on G-risk
+   VERDICT: :rationale-untestable :no-later-ranking-record-in-corpus -- mint: none
+   receipts, declared carrier only: futon2/holes/missions/M-zaif-harness-v1.md -> 27 rows reviewed-done, 27 minted, 109 ledger commits
+   receipts, M-expressions-of-interest: no declared board; its document's repository took 0 commits in the window (last commit e1a8c5252f45b8b7e7008943a397657ce80d8911 2026-08-26T17:10:22+00:00)
+   the row's '30+': 27 declared, 45 declared+lexical
+
+3. CASE 3 -- rc-decay-family-2026-08-30..2026-09-02
+   94 decay events over 94 ticks; {false 1, true 93} of them on the previous selection
+   93 events have a next tick; 85 were followed by the decayed mission being re-selected
+   of those, 85 changed nothing but the decay mechanism's own fields
+   the assertion's own test: 0 of 94 era records carry any trace-outcome
+   VERDICT: :rationale-refuted :every-recorded-reversal-is-the-decays-own-expiry-and-nothing-else
+
+4. RECEIPTS (24h window 2026-09-02T14:03:09.647517345Z -> 2026-09-03T14:03:09.647517345Z )
+   holes/labs/zaif-harness/worklist.edn          declares "futon2/holes/missions/M-zaif-harness-v1.md" | minted 27, reviewed-done 27, terminal 25, commits 109
+   holes/labs/wm-contract/worklist.edn           declares nil | minted 34, reviewed-done 21, terminal 22, commits 68
+   lexical (NOT a declared carrier) on holes/labs/wm-contract/worklist.edn: zaif 18 rows, eoi 4 rows, eoi-without-zaif 0
+
+5. TENSION RECORDS MINTED: 2
+  - M-zaif-harness-v1 was preferred over M-expressions-of-interest at 2026-09-02T14:00:29.357627605Z on a G-risk margin of 0.004028677703587391 nats; one tick later M-expressions-of-interest out-ranked it, and its own G-core had fallen by 0.005237160997353385 -- enough to close that margin without any help from the chosen candidate's non-progress decay.
+  - Over the 94 ranking-era ticks the machine recorded 94 non-progress decay events, one per tick, 93 of them on the mission it had selected on the previous tick. Of the 93 events with a next tick, 85 were followed by the machine re-selecting the decayed mission, and on 85 of those 85 the only recorded fields that changed on the mission in between were the decay mechanism's own (mission-value-factor, non-progress-count, non-progress-decay, non-progress?). The decay expresses a one-tick rotation, not a durable judgement, and its own test -- :grounded-change via trace-outcome -- has no readable input on any of the 94 records.
+
+6. WHAT THE MACHINE WOULD HAVE HAD TO KNOW
+   case-1           :nothing-about-the-missions
+   case-2           :one-more-tick
+   case-3           :whether-anything-had-happened
+   across-all-three :the-enactment-path
+
+CONTROLS
+   c1-u39-shape-pin                 PASS
+   c2-margin-identity               PASS
+   c3-fabricated-subject            PASS
+   c4-decay-rule-negative           PASS
+   c5-enacted-is-not-the-rationale  PASS

@@ -1,0 +1,3908 @@
+{:section-7-what-this-row-did-not-do
+ ["no ruling: aif-equations.edn :choices and control-map-edges.edn :decisions are untouched"
+  "no live tick, no run lock, no substrate call, no network"
+  "nothing under src/ or scripts/futon2/ changed; no weight, threshold or decay constant moved"
+  "no tension record written to futon3/library -- the mint names the home and stops there"
+  "no gen_aif_dag.bb run into a publish (TN section 9a)"],
+ :section-6-summary-for-joe
+ [{:case :case-1,
+   :subject "rc-0a18c4f7-758e-400a-8223-9c52edf07450",
+   :the-rationale-as-recorded
+   "[:decision :selection-law] says :chosen-rank 1, :moved-from-controller-head? false",
+   :what-the-record-says
+   "the chosen action sits at controller rank 124 of 146",
+   :verdict :rationale-untestable,
+   :what-would-have-had-to-be-known
+   {:answer :nothing-about-the-missions,
+    :because
+    :the-preferred-candidate-was-not-in-the-selectors-candidate-set,
+    :measured
+    {:selector "stub:first-ranked-authorized-mission",
+     :candidate-set
+     ["M-aif-policy-conditioned-eig"
+      "M-shared-memory-control-build-test"
+      "M-wm-aif-policy-grain-compliance"],
+     :controller-head "M-zaif-harness-v1",
+     :controller-head-in-candidate-set? false,
+     :enacted "M-wm-aif-policy-grain-compliance",
+     :enacted-is-the-head-of-the-recorded-scheduler-habit-list? true},
+    :pointer "scripts/futon2/report/war_machine.clj:6235-6238",
+    :what-would-have-had-to-change
+    :the-candidate-set-or-the-selector-and-both-are-code}}
+  {:case :case-2,
+   :subject "rc-801976e7-01c6-4e39-aada-27f620f7c2f1",
+   :the-rationale-as-recorded
+   "M-expressions-of-interest at controller rank 1, M-zaif-harness-v1 rejected at rank 5",
+   :verdict :rationale-untestable,
+   :verdict-reason :no-later-ranking-record-in-corpus,
+   :what-would-have-had-to-be-known
+   {:answer :one-more-tick,
+    :because
+    :the-declared-rule-scores-a-claim-against-the-next-ranking-record-and-the-machine-has-not-ticked-since,
+    :measured
+    {:claim-at "2026-09-02T14:03:09.647517345Z",
+     :later-ranking-records-in-corpus 0,
+     :last-trace-file "2026-09-02"}},
+   :the-leg-that-is-measurable
+   {:leg :receipts,
+    :rule :declared-carrier-only,
+    :zaif
+    {:declared-board "holes/labs/zaif-harness/worklist.edn",
+     :declares "futon2/holes/missions/M-zaif-harness-v1.md",
+     :rows-reaching-reviewed-done 27,
+     :rows-minted 27,
+     :ledger-commits 109},
+    :eoi
+    {:declared-board :none-found,
+     :repository-commits-in-window 0,
+     :last-commit-in-that-repository
+     "e1a8c5252f45b8b7e7008943a397657ce80d8911 2026-08-26T17:10:22+00:00"},
+    :status :measured-not-ruled,
+    :free-hand
+    "whether a receipts asymmetry may decide a verdict is not decided here; U39's rule has no receipts leg and this row writes no ruling. The choice-set lives at aif-equations.edn :choices :selection-retrospective (:status :observed-not-decided) and is left as U39 registered it."}}
+  {:case :case-3,
+   :subject "rc-decay-family-2026-08-30..2026-09-02",
+   :the-rationale-as-recorded
+   "the mission selected on the previous tick made no grounded change",
+   :verdict :rationale-refuted,
+   :verdict-reason
+   :every-recorded-reversal-is-the-decays-own-expiry-and-nothing-else,
+   :what-would-have-had-to-be-known
+   {:answer :whether-anything-had-happened,
+    :because :the-assertions-own-test-reads-a-field-no-record-carries,
+    :measured
+    {:events 94,
+     :ticks 94,
+     :records-with-any-trace-outcome 0,
+     :re-selected-on-the-next-tick 85,
+     :of-those-only-the-decay-mechanism-changed 85},
+    :pointer
+    "scripts/futon2/report/war_machine.clj:2312-2326, :2328-2332",
+    :what-would-have-had-to-change
+    :a-producer-writing-an-outcome-onto-the-tick-record}}
+  {:case :across-all-three,
+   :subject :the-enactment-path,
+   :measured
+   {:ticks 94,
+    :chosen-is-controller-head {false 92, true 2},
+    :chosen-is-in-the-hardcoded-three {true 92, false 2},
+    :selectors
+    {"pi-s-9dbc2ceb3317bc38050c41ce" 4,
+     "stub:first-ranked-authorized-mission" 88,
+     "stub:controller-head" 2}},
+   :statement
+   "on 92 of the 94 ranking-era ticks the controller's ranking was computed in full, recorded in full, and not consulted: the enacted mission is one of three hardcoded ids and is not the controller head. The two exceptions are the 14:00 and 14:03 records of 2026-09-02, after the selector id changes from stub:first-ranked-authorized-mission to stub:controller-head. A rationale recorded on any of the other 92 ticks is a rationale for a choice that was not made.",
+   :pointer
+   "scripts/futon2/report/war_machine.clj:6236-6262; [:decision :selected-policy-id] on every record"}],
+ :controls
+ {:c1-u39-shape-pin
+  {:asks
+   "this file's (a) and (b) projections reproduce U39's committed worked claim, its measured legs and its verdict exactly, and differ from it only where this row declares it changes them",
+   :against "runs/U39-selection-retrospective/u39-measurements.edn",
+   :claim-equal? true,
+   :measured-legs-equal
+   {:overtake true, :c-mis true, :non-progress true},
+   :scored-fields-equal
+   #:verdict{:claim-id true,
+             :evaluated-against true,
+             :window true,
+             :overtake-readings true,
+             :verdict true,
+             :verdict-reason true},
+   :keys-that-differ
+   [:verdict/basis :verdict/legs :verdict/verdict-rule],
+   :differences-declared
+   #:verdict{:legs
+             "the :receipts leg: U39 typed it :no-mission-to-receipt-carrier at trace grain; U40 types it :measured-outside-the-trace and points at section 4. The three measured legs are byte-equal.",
+             :verdict-rule
+             "an :owner key naming U39 as the rule's author; the :name, :status, :scalars, :statement and :alternatives-not-taken are unchanged",
+             :basis
+             "U40 splits U39's 'of both records' into a claim-record entry and an evaluation-record entry, because U40 also scores a claim that has no evaluation record"},
+   :passes? true},
+  :c2-margin-identity
+  {:asks
+   "every :margin/total equals the recorded controller-score difference on the claim's own record",
+   :claims
+   ["rc-0a18c4f7-758e-400a-8223-9c52edf07450"
+    "rc-4abad68c-5481-4402-8f0e-252add62c54b"
+    "rc-801976e7-01c6-4e39-aada-27f620f7c2f1"],
+   :margins-checked 11,
+   :max-abs-delta 0.0,
+   :passes? true},
+  :c3-fabricated-subject
+  {:asks
+   "a mission id that appears in no record yields no claim, no verdict and no decay event",
+   :subject "M-not-a-mission-u40-control",
+   :appearances-in-era 0,
+   :appearances-in-claims 0,
+   :appearances-in-decay-events 0,
+   :passes? true},
+  :c4-decay-rule-negative
+  {:asks
+   "the reversal leg counts only events where the decayed mission is re-selected on the very next tick",
+   :events-not-re-selected 8,
+   :any-counted? false,
+   :passes? true},
+  :c5-enacted-is-not-the-rationale
+  {:asks "case 1's record contradicts itself on its own ranking",
+   :law-says 1,
+   :ranking-says 124,
+   :soundness :unsound,
+   :verdict :rationale-untestable,
+   :passes? true}},
+ :section-1b-the-14-00-record
+ {:note
+  "the middle of the three 2026-09-02 rationales. This is U39's worked example; it is re-derived here, pinned by C1, and scored because the row asks for the 2026-09-02 rationales.",
+  :claim
+  #:claim{:rejected
+          [{:margin/total 0.004028677703587391,
+            :margin/by-term {:G-risk 0.004028677703587391},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :rejected,
+             :by 0.6931471805599454,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.422250537778467,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.59, :rejected 0.5769701181375955},
+              :central {:chosen 0.0, :rejected 0.6848505906879777},
+              :strategic {:chosen 1.0, :rejected 0.7},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission,
+             :target "M-expressions-of-interest"},
+            :ranking-position 1,
+            :controller-rank 2}
+           {:margin/total 0.05198291657021059,
+            :margin/by-term {:G-risk 0.05198291657021059},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :neither,
+             :by 0.0,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.47020477664509,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.59, :rejected 0.42064628214037525},
+              :central {:chosen 0.0, :rejected 0.6532314107018763},
+              :strategic {:chosen 1.0, :rejected 0.4},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission,
+             :target "M-distributed-frontiermath"},
+            :ranking-position 2,
+            :controller-rank 3}
+           {:margin/total 0.06528736817330127,
+            :margin/by-term {:G-risk 0.06528736817330127},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :neither,
+             :by 0.0,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.483509228248181,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.59, :rejected 0.3768658790826963},
+              :central {:chosen 0.0, :rejected 0.4343293954134816},
+              :strategic {:chosen 1.0, :rejected 0.4},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission, :target "M-symbol-grounding"},
+            :ranking-position 3,
+            :controller-rank 4}],
+          :derived-from
+          ["[:decision :action]"
+           "[:decision :controller-ranking]"
+           "[:decision :selection-law]"
+           "[:ranked-actions]"
+           "[:policy-support-exclusions]"
+           "[:timestamp]"
+           "[:run/id]"],
+          :law
+          {:requested :controller-head,
+           :applied :controller-head,
+           :refusal nil,
+           :controller-head-rank 1,
+           :chosen-rank nil,
+           :moved-from-controller-head? true,
+           :consulted-ranking :controller},
+          :at "2026-09-02T14:00:29.357627605Z",
+          :new-logging-required :none,
+          :soundness-at-mint
+          {:status :sound, :chosen-controller-rank 1},
+          :refused
+          [{:action
+            {:type :open-mission,
+             :target "futon4-d/mission/essays-diachronic-model"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target
+             "futon4-d/mission/or-training-as-learning-system.v1"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target "futon6-d/mission/canon-fingerprint-store"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target "futon6-d/mission/bayesian-structure-learning"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}],
+          :source
+          {:file "data/wm-trace/wm-trace-2026-09-02.edn",
+           :line 2,
+           :run-id "4abad68c-5481-4402-8f0e-252add62c54b"},
+          :id "rc-4abad68c-5481-4402-8f0e-252add62c54b",
+          :assertion
+          "the chosen action's G-core is below each listed rejected candidate's by :margin/total, and that margin is accounted for by :margin/by-term; :lost-on names the term carrying most of it",
+          :chosen
+          {:action
+           {:type :advance-mission, :target "M-zaif-harness-v1"},
+           :controller-rank 1,
+           :G-core 5.41822186007488,
+           :terms
+           {:G-risk 114.29511504882196,
+            :G-ambiguity -108.87689318874708,
+            :G-goal-outcome 0.0,
+            :controller-augmentation 0.0,
+            :structural-pressure 0.0,
+            :graph-feasibility-penalty 0.0,
+            :gap-exploration-bonus 0.0},
+           :mission-value-factor 0.59}},
+  :verdict
+  #:verdict{:basis
+            ["[:ranked-actions] of the claim record"
+             "[:decision :controller-ranking] of the claim record"
+             "runs/U42-producers/measurements.edn"
+             "runs/U23-cascade-catalog/carrier-population.edn"
+             "[:ranked-actions] and [:decision :controller-ranking] of the evaluation record"],
+            :claim-id "rc-4abad68c-5481-4402-8f0e-252add62c54b",
+            :window
+            {:from "2026-09-02T14:00:29.357627605Z",
+             :to "2026-09-02T14:03:09.647517345Z",
+             :ticks-between 1},
+            :legs
+            {:overtake
+             {:chosen [:advance-mission "M-zaif-harness-v1"],
+              :chosen-rank-at-claim 1,
+              :chosen-rank-later 5,
+              :overtaken-by
+              [{:action
+                {:type :advance-mission,
+                 :target "M-expressions-of-interest"},
+                :rank-at-claim 2,
+                :rank-later 1,
+                :margin-at-claim 0.004028677703587391,
+                :margin-later -0.08598902868425284,
+                :attribution
+                {:swing 0.09001770638784024,
+                 :chosen-delta-G 0.08478054539048685,
+                 :rival-delta-G 0.005237160997353385,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? true,
+                 :reading :rival-improved-enough-on-its-own},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.59 0.295],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor
+                  [0.5769701181375955 0.5769701181375955],
+                  :non-progress-decay [1.0 1.0]}}}
+               {:action
+                {:type :advance-mission,
+                 :target "M-distributed-frontiermath"},
+                :rank-at-claim 3,
+                :rank-later 2,
+                :margin-at-claim 0.05198291657021059,
+                :margin-later -0.038034789817629644,
+                :attribution
+                {:swing 0.09001770638784024,
+                 :chosen-delta-G 0.08478054539048685,
+                 :rival-delta-G 0.005237160997353385,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? false,
+                 :reading :chosen-decayed},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.59 0.295],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor
+                  [0.42064628214037525 0.42064628214037525],
+                  :non-progress-decay [1.0 1.0]}}}
+               {:action
+                {:type :advance-mission, :target "M-symbol-grounding"},
+                :rank-at-claim 4,
+                :rank-later 3,
+                :margin-at-claim 0.06528736817330127,
+                :margin-later -0.02473033821453896,
+                :attribution
+                {:swing 0.09001770638784024,
+                 :chosen-delta-G 0.08478054539048685,
+                 :rival-delta-G 0.005237160997353385,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? false,
+                 :reading :chosen-decayed},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.59 0.295],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor
+                  [0.3768658790826963 0.3768658790826963],
+                  :non-progress-decay [1.0 1.0]}}}
+               {:action
+                {:type :advance-mission, :target "M-superpod-mark2"},
+                :rank-at-claim 5,
+                :rank-later 4,
+                :margin-at-claim 0.06851013281104201,
+                :margin-later -0.021507573576826644,
+                :attribution
+                {:swing 0.09001770638786866,
+                 :chosen-delta-G 0.08478054539048685,
+                 :rival-delta-G 0.005237160997381807,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? false,
+                 :reading :chosen-decayed},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.59 0.295],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor
+                  [0.36623349548297435 0.36623349548297435],
+                  :non-progress-decay [1.0 1.0]}}}],
+              :status :measured,
+              :fired? true},
+             :c-mis
+             {:at-claim
+              {:status :measured,
+               :mission "M-zaif-harness-v1",
+               :criterion-count 3,
+               :measurable-count 3,
+               :risk-mis [6.666712065566529],
+               :action-sensitivity
+               {:distinct-risk-values 1, :constant? true},
+               :source "runs/U42-producers/measurements.edn"},
+              :at-evaluation
+              {:status :absent,
+               :reason :no-measurable-criteria,
+               :mission "M-expressions-of-interest",
+               :criterion-count 6,
+               :source "runs/U42-producers/measurements.edn"},
+              :movement
+              {:status :untestable,
+               :reason :c-mis-reads-the-selected-mission-only,
+               :detail
+               "the readback is keyed to the tick's SELECTED mission, so two ticks that select different missions produce two different subjects and no movement"}},
+             :non-progress
+             {:status :measured,
+              :non-progress? true,
+              :non-progress-count 1,
+              :non-progress-decay 0.5,
+              :basis
+              "war_machine.clj:2312-2326 previous-selection-non-progress?, :2339-2356 recent-non-progress-count, :2290 non-progress-decay-k"},
+             :receipts
+             {:status :measured-outside-the-trace,
+              :reason :carrier-is-a-board-ledger-not-a-trace-field,
+              :see :section-4-receipts,
+              :basis
+              "U39 typed this leg :no-mission-to-receipt-carrier at trace grain; section 4 of this artifact measures it on the one carrier that DECLARES the mission it serves"}},
+            :verdict-rule
+            {:name :declared-attributed-overtake,
+             :status :declared-not-ruled,
+             :scalars :none,
+             :statement
+             "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake that only happens because the chosen candidate was decayed for having been chosen measures the decay, not the rationale, and is UNTESTABLE. UPHELD requires an outcome leg, which no record in this corpus carries.",
+             :alternatives-not-taken
+             {:overtake-dominant
+              "any overtake refutes -- rejected here because on the recorded 09-02 pair it refutes every claim after one tick, since the chosen mission's mission-value-factor halves by construction",
+              :weighted-legs
+              "combine the four legs with declared weights -- rejected here because three of the four legs are typed absences on this corpus, so the weights would be unmeasurable"},
+             :owner
+             "U39 section 4 -- declared there, used verbatim here"},
+            :verdict :rationale-refuted,
+            :overtake-readings
+            {:rival-improved-enough-on-its-own 1, :chosen-decayed 3},
+            :evaluated-against
+            {:run-id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+             :at "2026-09-02T14:03:09.647517345Z"},
+            :verdict-reason
+            :a-rejected-candidate-closed-the-recorded-margin-on-its-own-movement},
+  :mint
+  {:mint/library-home
+   {:carrier :flexiarg,
+    :root "futon3/library (pattern_registry.clj:48-53)",
+    :addressed-by
+    "pattern_registry.clj:158-161 candidate-pattern-path",
+    :status :named-not-written,
+    :note
+    "no flexiarg is written by this row; the birth rule in DESIGN-tensions-as-patterns.md section 2 requires >=2 typed receipts and a person"},
+   :tension/status :carried,
+   :tension/provenance
+   {:claim "rc-4abad68c-5481-4402-8f0e-252add62c54b",
+    :verdict-against "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :records
+    ["4abad68c-5481-4402-8f0e-252add62c54b"
+     "801976e7-01c6-4e39-aada-27f620f7c2f1"],
+    :minted-by :u40-first-retrospective,
+    :written-to :nothing},
+   :tension/carried-by "M-wm-aif-policy-grain-compliance",
+   :mint/record-shape-owner
+   "DESIGN-tensions-as-patterns.md section 3 (U41 implements)",
+   :tension/resolution-path :none-named-at-mint,
+   :tension/born-of :refuted-rationale,
+   :tension/poles
+   ["select by the G-risk margin as scored this tick"
+    "select by a preference that survives to the next tick"],
+   :mint/from :refuted-rationale,
+   :tension/statement
+   "M-zaif-harness-v1 was preferred over M-expressions-of-interest at 2026-09-02T14:00:29.357627605Z on a G-risk margin of 0.004028677703587391 nats; one tick later M-expressions-of-interest out-ranked it, and its own G-core had fallen by 0.005237160997353385 -- enough to close that margin without any help from the chosen candidate's non-progress decay.",
+   :mint/verdict-id "rc-4abad68c-5481-4402-8f0e-252add62c54b"}},
+ :section-1-case-1
+ {:row-says
+  "the controller preferred M-eoi/M-zaif variants while the stub took the scheduler-habit head (run 0a18c4f7, a FALSE selection-law stamp already documented)",
+  :corroborated
+  {:selector "stub:first-ranked-authorized-mission",
+   :enacted "M-wm-aif-policy-grain-compliance",
+   :recorded-scheduler-habit-list
+   ["M-wm-aif-policy-grain-compliance"
+    "M-shared-memory-control-build-test"
+    "M-aif-policy-conditioned-eig"],
+   :pointer
+   "[:decision :strategic-memory :counterfactuals :scheduler-habit] of run 0a18c4f7; the list is produced at war_machine.clj:6239-6245 from the hardcoded set at :6235-6238",
+   :controller-head "M-zaif-harness-v1",
+   :controller-rank-2 "M-expressions-of-interest",
+   :enacted-is-its-head? true,
+   :selector-seam {:selector-seam :stub},
+   :enacted-controller-rank 124},
+  :corrected
+  {:finding
+   :two-different-channels-are-called-scheduler-habit-on-this-record,
+   :channel-a
+   {:field "[:decision :counterfactual]",
+    :kind :scheduler-habit-authoritative,
+    :winner "M-learning-loop",
+    :produced-by "src/futon2/aif/policy.clj:646",
+    :basis :habit-prior-bias},
+   :channel-b
+   {:field
+    "[:decision :strategic-memory :counterfactuals :scheduler-habit]",
+    :head "M-wm-aif-policy-grain-compliance",
+    :produced-by "scripts/futon2/report/war_machine.clj:6239-6245",
+    :basis :controller-order-restricted-to-a-hardcoded-three},
+   :note
+   "the row's phrase 'the scheduler-habit head' is true of channel B and false of channel A; the enacted mission is rank 125 of the habit-adjusted ranking that channel A orders. Recorded as a measured collision of one name over two channels, not as a ruling."},
+  :claim
+  #:claim{:rejected
+          [{:margin/total -0.15109776301559918,
+            :margin/by-term {:G-risk -0.15109776301559918},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :neither,
+             :by 0.0,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.3350082331730135,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor {:chosen 0.09, :rejected 0.59},
+              :central {:chosen 0.0, :rejected 0.0},
+              :strategic {:chosen 0.0, :rejected 1.0},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission, :target "M-zaif-harness-v1"},
+            :ranking-position 1,
+            :controller-rank 1}
+           {:margin/total -0.1470690853120118,
+            :margin/by-term {:G-risk -0.1470690853120118},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :rejected,
+             :by 0.6931471805599454,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.339036910876601,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.09, :rejected 0.5769701181375955},
+              :central {:chosen 0.0, :rejected 0.6848505906879777},
+              :strategic {:chosen 0.0, :rejected 0.7},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission,
+             :target "M-expressions-of-interest"},
+            :ranking-position 2,
+            :controller-rank 2}
+           {:margin/total -0.09911484644536017,
+            :margin/by-term {:G-risk -0.09911484644536017},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :neither,
+             :by 0.0,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.3869911497432525,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.09, :rejected 0.42064628214037525},
+              :central {:chosen 0.0, :rejected 0.6532314107018763},
+              :strategic {:chosen 0.0, :rejected 0.4},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission,
+             :target "M-distributed-frontiermath"},
+            :ranking-position 3,
+            :controller-rank 3}],
+          :derived-from
+          ["[:decision :action]"
+           "[:decision :controller-ranking]"
+           "[:decision :selection-law]"
+           "[:ranked-actions]"
+           "[:policy-support-exclusions]"
+           "[:timestamp]"
+           "[:run/id]"],
+          :law
+          {:requested :controller-head,
+           :applied :controller-head,
+           :refusal nil,
+           :controller-head-rank 1,
+           :chosen-rank 1,
+           :moved-from-controller-head? false},
+          :at "2026-09-02T13:47:22.082297526Z",
+          :new-logging-required :none,
+          :soundness-at-mint
+          {:status :unsound,
+           :reason :law-field-contradicts-ranking,
+           :law-says
+           {:chosen-rank 1, :moved-from-controller-head? false},
+           :ranking-says {:chosen-controller-rank 124}},
+          :refused
+          [{:action
+            {:type :open-mission,
+             :target "futon4-d/mission/essays-diachronic-model"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target
+             "futon4-d/mission/or-training-as-learning-system.v1"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target "futon6-d/mission/canon-fingerprint-store"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target "futon6-d/mission/bayesian-structure-learning"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}],
+          :source
+          {:file "data/wm-trace/wm-trace-2026-09-02.edn",
+           :line 1,
+           :run-id "0a18c4f7-758e-400a-8223-9c52edf07450"},
+          :id "rc-0a18c4f7-758e-400a-8223-9c52edf07450",
+          :assertion
+          "the chosen action's G-core is below each listed rejected candidate's by :margin/total, and that margin is accounted for by :margin/by-term; :lost-on names the term carrying most of it",
+          :chosen
+          {:action
+           {:type :advance-mission,
+            :target "M-wm-aif-policy-grain-compliance"},
+           :controller-rank 124,
+           :G-core 5.486105996188613,
+           :terms
+           {:G-risk 114.36299918493569,
+            :G-ambiguity -108.87689318874708,
+            :G-goal-outcome 0.0,
+            :controller-augmentation 0.0,
+            :structural-pressure 0.0,
+            :graph-feasibility-penalty 0.0,
+            :gap-exploration-bonus 0.0},
+           :mission-value-factor 0.09}},
+  :verdict
+  #:verdict{:basis
+            ["[:ranked-actions] of the claim record"
+             "[:decision :controller-ranking] of the claim record"
+             "runs/U42-producers/measurements.edn"
+             "runs/U23-cascade-catalog/carrier-population.edn"
+             "[:ranked-actions] and [:decision :controller-ranking] of the evaluation record"],
+            :claim-id "rc-0a18c4f7-758e-400a-8223-9c52edf07450",
+            :window
+            {:from "2026-09-02T13:47:22.082297526Z",
+             :to "2026-09-02T14:00:29.357627605Z",
+             :ticks-between 1},
+            :legs
+            {:overtake
+             {:chosen
+              [:advance-mission "M-wm-aif-policy-grain-compliance"],
+              :chosen-rank-at-claim 124,
+              :chosen-rank-later 129,
+              :overtaken-by
+              [{:action
+                {:type :advance-mission, :target "M-zaif-harness-v1"},
+                :rank-at-claim 1,
+                :rank-later 1,
+                :margin-at-claim -0.15109776301559918,
+                :margin-later -0.16434339052219116,
+                :attribution
+                {:swing 0.013245627506591973,
+                 :chosen-delta-G 0.09645925440845815,
+                 :rival-delta-G -0.08321362690186618,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? true,
+                 :reading :rival-improved-enough-on-its-own},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.09 0.045],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor [0.59 0.59],
+                  :non-progress-decay [1.0 1.0]}}}
+               {:action
+                {:type :advance-mission,
+                 :target "M-expressions-of-interest"},
+                :rank-at-claim 2,
+                :rank-later 2,
+                :margin-at-claim -0.1470690853120118,
+                :margin-later -0.16031471281860377,
+                :attribution
+                {:swing 0.013245627506591973,
+                 :chosen-delta-G 0.09645925440845815,
+                 :rival-delta-G -0.08321362690186618,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? true,
+                 :reading :rival-improved-enough-on-its-own},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.09 0.045],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor
+                  [0.5769701181375955 0.5769701181375955],
+                  :non-progress-decay [1.0 1.0]}}}
+               {:action
+                {:type :advance-mission,
+                 :target "M-distributed-frontiermath"},
+                :rank-at-claim 3,
+                :rank-later 3,
+                :margin-at-claim -0.09911484644536017,
+                :margin-later -0.11236047395198057,
+                :attribution
+                {:swing 0.013245627506620394,
+                 :chosen-delta-G 0.09645925440845815,
+                 :rival-delta-G -0.08321362690183776,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? true,
+                 :reading :rival-improved-enough-on-its-own},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.09 0.045],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor
+                  [0.42064628214037525 0.42064628214037525],
+                  :non-progress-decay [1.0 1.0]}}}
+               {:action
+                {:type :advance-mission, :target "M-symbol-grounding"},
+                :rank-at-claim 4,
+                :rank-later 4,
+                :margin-at-claim -0.08581039484229791,
+                :margin-later -0.09905602234888988,
+                :attribution
+                {:swing 0.013245627506591973,
+                 :chosen-delta-G 0.09645925440845815,
+                 :rival-delta-G -0.08321362690186618,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? true,
+                 :reading :rival-improved-enough-on-its-own},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.09 0.045],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor
+                  [0.3768658790826963 0.3768658790826963],
+                  :non-progress-decay [1.0 1.0]}}}
+               {:action
+                {:type :advance-mission, :target "M-superpod-mark2"},
+                :rank-at-claim 5,
+                :rank-later 5,
+                :margin-at-claim -0.08258763020455717,
+                :margin-later -0.09583325771114914,
+                :attribution
+                {:swing 0.013245627506591973,
+                 :chosen-delta-G 0.09645925440845815,
+                 :rival-delta-G -0.08321362690186618,
+                 :chosen-non-progress-decay-fell? true,
+                 :rival-alone-suffices? false,
+                 :reading :chosen-decayed},
+                :what-moved
+                {:chosen
+                 {:mission-value-factor [0.09 0.045],
+                  :non-progress-decay [1.0 0.5],
+                  :non-progress-count [0 1]},
+                 :rival
+                 {:mission-value-factor
+                  [0.36623349548297435 0.36623349548297435],
+                  :non-progress-decay [1.0 1.0]}}}],
+              :status :measured,
+              :fired? true},
+             :c-mis
+             {:at-claim
+              {:status :absent,
+               :reason :no-measurable-criteria,
+               :mission "M-wm-aif-policy-grain-compliance",
+               :criterion-count 0,
+               :source "runs/U42-producers/measurements.edn"},
+              :at-evaluation
+              {:status :measured,
+               :mission "M-zaif-harness-v1",
+               :criterion-count 3,
+               :measurable-count 3,
+               :risk-mis [6.666712065566529],
+               :action-sensitivity
+               {:distinct-risk-values 1, :constant? true},
+               :source "runs/U42-producers/measurements.edn"},
+              :movement
+              {:status :untestable,
+               :reason :c-mis-reads-the-selected-mission-only,
+               :detail
+               "the readback is keyed to the tick's SELECTED mission, so two ticks that select different missions produce two different subjects and no movement"}},
+             :non-progress
+             {:status :measured,
+              :non-progress? true,
+              :non-progress-count 1,
+              :non-progress-decay 0.5,
+              :basis
+              "war_machine.clj:2312-2326 previous-selection-non-progress?, :2339-2356 recent-non-progress-count, :2290 non-progress-decay-k"},
+             :receipts
+             {:status :measured-outside-the-trace,
+              :reason :carrier-is-a-board-ledger-not-a-trace-field,
+              :see :section-4-receipts,
+              :basis
+              "U39 typed this leg :no-mission-to-receipt-carrier at trace grain; section 4 of this artifact measures it on the one carrier that DECLARES the mission it serves"}},
+            :verdict-rule
+            {:name :declared-attributed-overtake,
+             :status :declared-not-ruled,
+             :scalars :none,
+             :statement
+             "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake that only happens because the chosen candidate was decayed for having been chosen measures the decay, not the rationale, and is UNTESTABLE. UPHELD requires an outcome leg, which no record in this corpus carries.",
+             :alternatives-not-taken
+             {:overtake-dominant
+              "any overtake refutes -- rejected here because on the recorded 09-02 pair it refutes every claim after one tick, since the chosen mission's mission-value-factor halves by construction",
+              :weighted-legs
+              "combine the four legs with declared weights -- rejected here because three of the four legs are typed absences on this corpus, so the weights would be unmeasurable"},
+             :owner
+             "U39 section 4 -- declared there, used verbatim here"},
+            :verdict :rationale-untestable,
+            :overtake-readings
+            {:rival-improved-enough-on-its-own 4, :chosen-decayed 1},
+            :evaluated-against
+            {:run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+             :at "2026-09-02T14:00:29.357627605Z"},
+            :verdict-reason :claim-unsound-at-mint},
+  :mint :none,
+  :mint-reason
+  "U39 section 3: a claim whose record contradicts its own ranking is refused at mint, and a refused claim is not scored and does not mint"},
+ :section-3-case-3
+ {:row-says "the non-progress decay events on record",
+  :claim
+  #:claim{:at "2026-08-30T10:54:44.860119595Z",
+          :new-logging-required :none,
+          :events 94,
+          :soundness-at-mint
+          {:status :sound-but-unobservable,
+           :reason :the-assertions-own-test-has-no-readable-input,
+           :detail
+           "the :grounded-change test reads trace-outcome, and 0 of the era's records reach any of the three places it looks (war_machine.clj:2328-2332)",
+           :records-with-any-trace-outcome 0},
+          :source
+          {:producer
+           "scripts/futon2/report/war_machine.clj:2312-2326 previous-selection-non-progress?",
+           :count-walk
+           "war_machine.clj:2339-2356 recent-non-progress-count",
+           :multiplier "war_machine.clj:2290 non-progress-decay-k",
+           :corpus "data/wm-trace, the 94 ranking-era records"},
+          :ticks 94,
+          :one-event-per-tick? true,
+          :id "rc-decay-family-2026-08-30..2026-09-02",
+          :assertion
+          "the mission selected on the previous tick made no grounded change, and is worth :non-progress-decay times its mission value for it",
+          :events-with-a-next-tick 93,
+          :non-progress-counts {2 2, 1 91, 3 1},
+          :re-selected-on-the-next-tick 85,
+          :decayed-is-the-previous-selection {false 1, true 93},
+          :decay-values {0.3333333333333333 2, 0.5 91, 0.25 1}},
+  :verdict
+  #:verdict{:claim-id "rc-decay-family-2026-08-30..2026-09-02",
+            :evaluated-against
+            {:corpus "data/wm-trace",
+             :ticks 94,
+             :window
+             {:from "2026-08-30T10:54:44.860119595Z",
+              :to "2026-09-02T14:03:09.647517345Z"}},
+            :legs
+            {:reversal
+             {:status :measured,
+              :events-with-a-next-tick 93,
+              :re-selected-on-the-next-tick 85,
+              :of-those-only-the-decay-mechanism-changed 85,
+              :changed-field-sets
+              {[:mission-value-factor
+                :non-progress-count
+                :non-progress-decay
+                :non-progress?]
+               84,
+               [:mission-value-factor
+                :non-progress-count
+                :non-progress-decay]
+               1},
+              :not-re-selected
+              [{:at "2026-08-30T10:54:44.860119595Z",
+                :decayed "M-learning-loop",
+                :chosen-this-tick "M-shared-memory-control-build-test"}
+               {:at "2026-08-30T20:15:26.066788324Z",
+                :decayed "M-shared-memory-control-build-test",
+                :chosen-this-tick "M-aif-policy-conditioned-eig"}
+               {:at "2026-08-30T20:41:52.797464315Z",
+                :decayed "M-aif-policy-conditioned-eig",
+                :chosen-this-tick "M-wm-aif-policy-grain-compliance"}
+               {:at "2026-08-31T12:58:02.858451893Z",
+                :decayed "M-wm-aif-policy-grain-compliance",
+                :chosen-this-tick "M-shared-memory-control-build-test"}
+               {:at "2026-08-31T14:30:41.399004095Z",
+                :decayed "M-shared-memory-control-build-test",
+                :chosen-this-tick "M-shared-memory-control-build-test"}
+               {:at "2026-08-31T20:32:24.972954701Z",
+                :decayed "M-shared-memory-control-build-test",
+                :chosen-this-tick "M-aif-policy-conditioned-eig"}
+               {:at "2026-09-02T13:47:22.082297526Z",
+                :decayed "M-aif-policy-conditioned-eig",
+                :chosen-this-tick "M-wm-aif-policy-grain-compliance"}
+               {:at "2026-09-02T14:00:29.357627605Z",
+                :decayed "M-wm-aif-policy-grain-compliance",
+                :chosen-this-tick "M-zaif-harness-v1"}]},
+             :own-test
+             {:status :absent,
+              :reason :the-assertions-own-test-has-no-readable-input,
+              :records-with-any-trace-outcome 0,
+              :basis
+              "war_machine.clj:2328-2332 trace-outcome; U39 section 1 counted the same 0 over the whole 885-record corpus"},
+             :c-mis
+             {:status :absent,
+              :reason :c-mis-reads-the-selected-mission-only,
+              :measured-runs 1,
+              :basis "runs/U42-producers/measurements.edn"},
+             :receipts
+             {:status :measured-outside-the-trace,
+              :see :section-4-receipts}},
+            :verdict :rationale-refuted,
+            :verdict-reason
+            :every-recorded-reversal-is-the-decays-own-expiry-and-nothing-else,
+            :verdict-rule
+            {:name :declared-next-tick-reversal,
+             :status :declared-not-ruled,
+             :scalars :none,
+             :statement
+             "A decay event asserts that the mission selected on the previous tick made no grounded change and is worth less for it. REFUTED iff the machine itself re-selects that mission on the very next tick AND every recorded field that changed on the mission in between belongs to the decay mechanism -- so the reversal is the decay's own expiry and nothing learned about the mission. UNTESTABLE where the corpus carries no reading of the mission's grounded change either way. UPHELD requires a receipt showing no change in the decay window on a declared carrier.",
+             :alternatives-not-taken
+             {:decay-is-a-rotation-schedule
+              "read the decay as a rotation policy that asserts nothing about progress, in which case nothing can refute it -- not taken here because the field is named :non-progress? and is computed by previous-selection-non-progress? (war_machine.clj:2312-2326), which is a predicate about change",
+              :receipts-decide
+              "let board-ledger receipts inside each decay window decide -- not taken here because the recorded windows are 3 and 13 minutes wide and only one of the three missions the corpus selects has a declared carrier"}},
+            :basis
+            ["[:ranked-actions <candidate> :action] of every era record"
+             "[:decision :action :target] of every era record"
+             "scripts/futon2/report/war_machine.clj:2290,2312-2326,2328-2332,2339-2356"]},
+  :events
+  [{:fields-that-changed-before-re-selection
+    [:non-progress-count :non-progress-decay :non-progress?],
+    :re-selected-next-tick? false,
+    :previous-selection nil,
+    :chosen-this-tick "M-shared-memory-control-build-test",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? false,
+    :non-progress-count 2,
+    :at "2026-08-30T10:54:44.860119595Z",
+    :decay 0.3333333333333333,
+    :run-id nil,
+    :tick-index 0,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-30T20:15:26.066788324Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-learning-loop"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? false,
+    :previous-selection "M-shared-memory-control-build-test",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-30T20:15:26.066788324Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 1,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-30T20:17:48.509203906Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-shared-memory-control-build-test"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-30T20:17:48.509203906Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 2,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-30T20:25:04.680315775Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-30T20:25:04.680315775Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 3,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-30T20:33:56.026290728Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-30T20:33:56.026290728Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 4,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-30T20:36:35.667070255Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-30T20:36:35.667070255Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 5,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-30T20:41:52.797464315Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? false,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-30T20:41:52.797464315Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 6,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-31T12:58:02.858451893Z",
+     :chosen "M-shared-memory-control-build-test"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? false,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-shared-memory-control-build-test",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-31T12:58:02.858451893Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 7,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-31T14:08:21.402547618Z",
+     :chosen "M-shared-memory-control-build-test"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor :non-progress-count :non-progress-decay],
+    :re-selected-next-tick? true,
+    :previous-selection "M-shared-memory-control-build-test",
+    :chosen-this-tick "M-shared-memory-control-build-test",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-31T14:08:21.402547618Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 8,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-31T14:30:41.399004095Z",
+     :chosen "M-shared-memory-control-build-test"},
+    :decayed "M-shared-memory-control-build-test"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor :non-progress-count :non-progress-decay],
+    :re-selected-next-tick? false,
+    :previous-selection "M-shared-memory-control-build-test",
+    :chosen-this-tick "M-shared-memory-control-build-test",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 2,
+    :at "2026-08-31T14:30:41.399004095Z",
+    :decay 0.3333333333333333,
+    :run-id nil,
+    :tick-index 9,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-31T20:32:24.972954701Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-shared-memory-control-build-test"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? false,
+    :previous-selection "M-shared-memory-control-build-test",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 3,
+    :at "2026-08-31T20:32:24.972954701Z",
+    :decay 0.25,
+    :run-id nil,
+    :tick-index 10,
+    :next-tick
+    {:run-id nil,
+     :at "2026-08-31T20:35:51.187865882Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-shared-memory-control-build-test"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-08-31T20:35:51.187865882Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 11,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:00:45.725336789Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:00:45.725336789Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 12,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:02:03.726336568Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:02:03.726336568Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 13,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:03:29.398161909Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:03:29.398161909Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 14,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:04:52.495898571Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:04:52.495898571Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 15,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:06:14.608233559Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:06:14.608233559Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 16,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:08:19.473833370Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:08:19.473833370Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 17,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:09:42.760203987Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:09:42.760203987Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 18,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:11:01.608093683Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:11:01.608093683Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 19,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:12:22.228366495Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:12:22.228366495Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 20,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:13:47.124107500Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:13:47.124107500Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 21,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:15:00.695098415Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:15:00.695098415Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 22,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:16:20.631294958Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:16:20.631294958Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 23,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:17:38.966251080Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:17:38.966251080Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 24,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:18:58.825568178Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:18:58.825568178Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 25,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:20:15.857365620Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:20:15.857365620Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 26,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:21:35.422181750Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:21:35.422181750Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 27,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:22:53.453363323Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:22:53.453363323Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 28,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:24:18.152884008Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:24:18.152884008Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 29,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:25:39.077874931Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:25:39.077874931Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 30,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T15:27:00.229092007Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T15:27:00.229092007Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 31,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:33:00.394288715Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:33:00.394288715Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 32,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:34:22.375923180Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:34:22.375923180Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 33,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:35:40.043712875Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:35:40.043712875Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 34,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:37:00.034480101Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:37:00.034480101Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 35,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:38:19.793535421Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:38:19.793535421Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 36,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:39:40.482755403Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:39:40.482755403Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 37,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:40:59.710860840Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:40:59.710860840Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 38,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:42:21.982296254Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:42:21.982296254Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 39,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:43:39.778272417Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:43:39.778272417Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 40,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:46:14.523647861Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:46:14.523647861Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 41,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:48:30.852381791Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:48:30.852381791Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 42,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:49:49.786509242Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:49:49.786509242Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 43,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:51:06.899463078Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:51:06.899463078Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 44,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:52:24.930647528Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:52:24.930647528Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 45,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:53:45.706796972Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:53:45.706796972Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 46,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:55:04.183846737Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:55:04.183846737Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 47,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:56:24.754190514Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:56:24.754190514Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 48,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:57:41.811552249Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:57:41.811552249Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 49,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T16:58:59.526877756Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T16:58:59.526877756Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 50,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:00:17.864947248Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:00:17.864947248Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 51,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:01:34.717651998Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:01:34.717651998Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 52,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:02:53.788518220Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:02:53.788518220Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 53,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:04:11.057679242Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:04:11.057679242Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 54,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:05:28.972350368Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:05:28.972350368Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 55,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:06:46.165448792Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:06:46.165448792Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 56,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:08:06.316088557Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:08:06.316088557Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 57,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:09:23.281254434Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:09:23.281254434Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 58,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:10:41.115340232Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:10:41.115340232Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 59,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:11:59.316805577Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:11:59.316805577Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 60,
+    :next-tick
+    {:run-id nil,
+     :at "2026-09-01T17:13:17.340443687Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T17:13:17.340443687Z",
+    :decay 0.5,
+    :run-id nil,
+    :tick-index 61,
+    :next-tick
+    {:run-id "6763baee-1f2b-4d5e-aa60-3580e77dc270",
+     :at "2026-09-01T18:39:57.441876045Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:39:57.441876045Z",
+    :decay 0.5,
+    :run-id "6763baee-1f2b-4d5e-aa60-3580e77dc270",
+    :tick-index 62,
+    :next-tick
+    {:run-id "38743801-e7b1-48cd-b6bd-ab70fbab1471",
+     :at "2026-09-01T18:41:17.673842025Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:41:17.673842025Z",
+    :decay 0.5,
+    :run-id "38743801-e7b1-48cd-b6bd-ab70fbab1471",
+    :tick-index 63,
+    :next-tick
+    {:run-id "aa70c2cc-992f-4b2b-b36d-7af33675b17d",
+     :at "2026-09-01T18:42:44.308772615Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:42:44.308772615Z",
+    :decay 0.5,
+    :run-id "aa70c2cc-992f-4b2b-b36d-7af33675b17d",
+    :tick-index 64,
+    :next-tick
+    {:run-id "f135821a-c51c-4b21-be6e-d340ff562305",
+     :at "2026-09-01T18:44:02.116009268Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:44:02.116009268Z",
+    :decay 0.5,
+    :run-id "f135821a-c51c-4b21-be6e-d340ff562305",
+    :tick-index 65,
+    :next-tick
+    {:run-id "cc0a0703-e9a5-4ee0-9a8e-b098a6a2b929",
+     :at "2026-09-01T18:45:21.699083224Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:45:21.699083224Z",
+    :decay 0.5,
+    :run-id "cc0a0703-e9a5-4ee0-9a8e-b098a6a2b929",
+    :tick-index 66,
+    :next-tick
+    {:run-id "1772dc01-bdd4-4ffb-8433-a20d828e61aa",
+     :at "2026-09-01T18:46:42.192036549Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:46:42.192036549Z",
+    :decay 0.5,
+    :run-id "1772dc01-bdd4-4ffb-8433-a20d828e61aa",
+    :tick-index 67,
+    :next-tick
+    {:run-id "1cfa12ba-0108-4cea-b75f-7f72bf6b0242",
+     :at "2026-09-01T18:48:06.102484692Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:48:06.102484692Z",
+    :decay 0.5,
+    :run-id "1cfa12ba-0108-4cea-b75f-7f72bf6b0242",
+    :tick-index 68,
+    :next-tick
+    {:run-id "85125689-18fc-4894-9193-8b3ca9eb2cdd",
+     :at "2026-09-01T18:49:29.000443159Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:49:29.000443159Z",
+    :decay 0.5,
+    :run-id "85125689-18fc-4894-9193-8b3ca9eb2cdd",
+    :tick-index 69,
+    :next-tick
+    {:run-id "e2ba54bd-a4eb-4583-a54a-99d44f1d9fb8",
+     :at "2026-09-01T18:50:49.722240111Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:50:49.722240111Z",
+    :decay 0.5,
+    :run-id "e2ba54bd-a4eb-4583-a54a-99d44f1d9fb8",
+    :tick-index 70,
+    :next-tick
+    {:run-id "0d9b3025-ce3c-43f3-ab91-7d88f1509daf",
+     :at "2026-09-01T18:52:06.660826546Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:52:06.660826546Z",
+    :decay 0.5,
+    :run-id "0d9b3025-ce3c-43f3-ab91-7d88f1509daf",
+    :tick-index 71,
+    :next-tick
+    {:run-id "fac6d798-4389-4104-a8ff-74e755ad821b",
+     :at "2026-09-01T18:53:42.508820253Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:53:42.508820253Z",
+    :decay 0.5,
+    :run-id "fac6d798-4389-4104-a8ff-74e755ad821b",
+    :tick-index 72,
+    :next-tick
+    {:run-id "4ef287e1-ef8e-4101-91e1-5d7c4032ebc8",
+     :at "2026-09-01T18:55:10.063339417Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:55:10.063339417Z",
+    :decay 0.5,
+    :run-id "4ef287e1-ef8e-4101-91e1-5d7c4032ebc8",
+    :tick-index 73,
+    :next-tick
+    {:run-id "49001423-81d6-4915-b6e9-c377ef3de41e",
+     :at "2026-09-01T18:56:38.237872177Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:56:38.237872177Z",
+    :decay 0.5,
+    :run-id "49001423-81d6-4915-b6e9-c377ef3de41e",
+    :tick-index 74,
+    :next-tick
+    {:run-id "4ff6effd-05dd-44eb-b7ea-862f8084df5a",
+     :at "2026-09-01T18:58:00.441023885Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:58:00.441023885Z",
+    :decay 0.5,
+    :run-id "4ff6effd-05dd-44eb-b7ea-862f8084df5a",
+    :tick-index 75,
+    :next-tick
+    {:run-id "2d84e9a8-4f19-4080-82f7-5d2ff2899fca",
+     :at "2026-09-01T18:59:24.217804513Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T18:59:24.217804513Z",
+    :decay 0.5,
+    :run-id "2d84e9a8-4f19-4080-82f7-5d2ff2899fca",
+    :tick-index 76,
+    :next-tick
+    {:run-id "b5bd631f-445e-46a7-8fe1-88f0c95e3d09",
+     :at "2026-09-01T19:00:53.002942157Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T19:00:53.002942157Z",
+    :decay 0.5,
+    :run-id "b5bd631f-445e-46a7-8fe1-88f0c95e3d09",
+    :tick-index 77,
+    :next-tick
+    {:run-id "4f486ddc-ecf1-4af3-9315-b6484c81a39b",
+     :at "2026-09-01T19:02:23.880997306Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T19:02:23.880997306Z",
+    :decay 0.5,
+    :run-id "4f486ddc-ecf1-4af3-9315-b6484c81a39b",
+    :tick-index 78,
+    :next-tick
+    {:run-id "826c6cee-aa7e-4092-b430-053da84cd1af",
+     :at "2026-09-01T19:03:47.733626368Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T19:03:47.733626368Z",
+    :decay 0.5,
+    :run-id "826c6cee-aa7e-4092-b430-053da84cd1af",
+    :tick-index 79,
+    :next-tick
+    {:run-id "8dbf0aca-92d6-4f65-8083-1cdce77407bd",
+     :at "2026-09-01T19:05:05.636608579Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T19:05:05.636608579Z",
+    :decay 0.5,
+    :run-id "8dbf0aca-92d6-4f65-8083-1cdce77407bd",
+    :tick-index 80,
+    :next-tick
+    {:run-id "1b6fa012-204f-4ddd-b6ae-28aaea3a6d7e",
+     :at "2026-09-01T19:06:25.174660123Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T19:06:25.174660123Z",
+    :decay 0.5,
+    :run-id "1b6fa012-204f-4ddd-b6ae-28aaea3a6d7e",
+    :tick-index 81,
+    :next-tick
+    {:run-id "dd00675b-9672-4b4e-9b5c-1cb4ff17deb3",
+     :at "2026-09-01T20:36:03.800627763Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T20:36:03.800627763Z",
+    :decay 0.5,
+    :run-id "dd00675b-9672-4b4e-9b5c-1cb4ff17deb3",
+    :tick-index 82,
+    :next-tick
+    {:run-id "73282cf8-3eb7-42f2-b055-b45b0322dde3",
+     :at "2026-09-01T20:37:20.458200407Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T20:37:20.458200407Z",
+    :decay 0.5,
+    :run-id "73282cf8-3eb7-42f2-b055-b45b0322dde3",
+    :tick-index 83,
+    :next-tick
+    {:run-id "200b894f-04c4-47a7-9c6c-a488571f3dd5",
+     :at "2026-09-01T20:38:39.644885551Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T20:38:39.644885551Z",
+    :decay 0.5,
+    :run-id "200b894f-04c4-47a7-9c6c-a488571f3dd5",
+    :tick-index 84,
+    :next-tick
+    {:run-id "5bd37efe-5a32-4097-a315-08fa61f86340",
+     :at "2026-09-01T20:40:00.843332453Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T20:40:00.843332453Z",
+    :decay 0.5,
+    :run-id "5bd37efe-5a32-4097-a315-08fa61f86340",
+    :tick-index 85,
+    :next-tick
+    {:run-id "84ca8231-53c7-4d6a-93d3-ecfb5b19a5f7",
+     :at "2026-09-01T22:48:41.419048498Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T22:48:41.419048498Z",
+    :decay 0.5,
+    :run-id "84ca8231-53c7-4d6a-93d3-ecfb5b19a5f7",
+    :tick-index 86,
+    :next-tick
+    {:run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+     :at "2026-09-01T22:50:42.709079837Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T22:50:42.709079837Z",
+    :decay 0.5,
+    :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+    :tick-index 87,
+    :next-tick
+    {:run-id "c51a8da3-883e-4038-b493-1b268d5d8357",
+     :at "2026-09-01T22:52:07.418144767Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T22:52:07.418144767Z",
+    :decay 0.5,
+    :run-id "c51a8da3-883e-4038-b493-1b268d5d8357",
+    :tick-index 88,
+    :next-tick
+    {:run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+     :at "2026-09-01T22:53:32.871991661Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T22:53:32.871991661Z",
+    :decay 0.5,
+    :run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+    :tick-index 89,
+    :next-tick
+    {:run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+     :at "2026-09-01T22:54:48.942309598Z",
+     :chosen "M-aif-policy-conditioned-eig"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? true,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-aif-policy-conditioned-eig",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-01T22:54:48.942309598Z",
+    :decay 0.5,
+    :run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+    :tick-index 90,
+    :next-tick
+    {:run-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+     :at "2026-09-02T13:47:22.082297526Z",
+     :chosen "M-wm-aif-policy-grain-compliance"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? false,
+    :previous-selection "M-aif-policy-conditioned-eig",
+    :chosen-this-tick "M-wm-aif-policy-grain-compliance",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-02T13:47:22.082297526Z",
+    :decay 0.5,
+    :run-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :tick-index 91,
+    :next-tick
+    {:run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+     :at "2026-09-02T14:00:29.357627605Z",
+     :chosen "M-zaif-harness-v1"},
+    :decayed "M-aif-policy-conditioned-eig"}
+   {:fields-that-changed-before-re-selection
+    [:mission-value-factor
+     :non-progress-count
+     :non-progress-decay
+     :non-progress?],
+    :re-selected-next-tick? false,
+    :previous-selection "M-wm-aif-policy-grain-compliance",
+    :chosen-this-tick "M-zaif-harness-v1",
+    :only-the-decay-mechanism-changed? true,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-02T14:00:29.357627605Z",
+    :decay 0.5,
+    :run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :tick-index 92,
+    :next-tick
+    {:run-id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+     :at "2026-09-02T14:03:09.647517345Z",
+     :chosen "M-expressions-of-interest"},
+    :decayed "M-wm-aif-policy-grain-compliance"}
+   {:fields-that-changed-before-re-selection nil,
+    :re-selected-next-tick? false,
+    :previous-selection "M-zaif-harness-v1",
+    :chosen-this-tick "M-expressions-of-interest",
+    :only-the-decay-mechanism-changed? nil,
+    :decayed-is-the-previous-selection? true,
+    :non-progress-count 1,
+    :at "2026-09-02T14:03:09.647517345Z",
+    :decay 0.5,
+    :run-id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :tick-index 93,
+    :next-tick nil,
+    :decayed "M-zaif-harness-v1"}],
+  :mint
+  {:mint/library-home
+   {:carrier :flexiarg,
+    :root "futon3/library (pattern_registry.clj:48-53)",
+    :addressed-by
+    "pattern_registry.clj:158-161 candidate-pattern-path",
+    :status :named-not-written,
+    :note
+    "no flexiarg is written by this row; the birth rule in DESIGN-tensions-as-patterns.md section 2 requires >=2 typed receipts and a person"},
+   :tension/status :carried,
+   :tension/provenance
+   {:claim "rc-decay-family-2026-08-30..2026-09-02",
+    :verdict-against
+    "the 94-record ranking era, data/wm-trace 2026-08-30..2026-09-02",
+    :records ["data/wm-trace, the 94 ranking-era records"],
+    :minted-by :u40-first-retrospective,
+    :written-to :nothing},
+   :tension/carried-by :the-selection-mechanism-itself,
+   :mint/record-shape-owner
+   "DESIGN-tensions-as-patterns.md section 3 (U41 implements)",
+   :tension/resolution-path :none-named-at-mint,
+   :tension/born-of :refuted-rationale,
+   :tension/poles
+   ["penalise the mission just selected, so attention rotates off it"
+    "return to the mission just selected, because nothing recorded about it changed"],
+   :mint/from :refuted-rationale,
+   :tension/statement
+   "Over the 94 ranking-era ticks the machine recorded 94 non-progress decay events, one per tick, 93 of them on the mission it had selected on the previous tick. Of the 93 events with a next tick, 85 were followed by the machine re-selecting the decayed mission, and on 85 of those 85 the only recorded fields that changed on the mission in between were the decay mechanism's own (mission-value-factor, non-progress-count, non-progress-decay, non-progress?). The decay expresses a one-tick rotation, not a durable judgement, and its own test -- :grounded-change via trace-outcome -- has no readable input on any of the 94 records.",
+   :mint/verdict-id "rc-decay-family-2026-08-30..2026-09-02",
+   :mint/one-record-for-the-family
+   "U39 section 6: only a REFUTED verdict mints, and a decay refutation is one fact, not 94 -- so the family mints one record and the per-event table stays in the measurements artifact"}},
+ :corpus
+ {:dir "data/wm-trace",
+  :files 56,
+  :records 885,
+  :ranking-era-days
+  ["2026-08-30" "2026-08-31" "2026-09-01" "2026-09-02"],
+  :ranking-era-records 94},
+ :section-4-receipts
+ {:window
+  {:from "2026-09-02T14:03:09.647517345Z",
+   :to "2026-09-03T14:03:09.647517345Z",
+   :hours 24},
+  :carrier-rule
+  {:declared
+   "a board ledger is a declared receipt carrier for a mission iff the ledger's own :mission key names that mission's document",
+   :read-from
+   "the :mission key of each worklist.edn at the window-close sha",
+   :everything-else :lexical-not-declared},
+  :boards
+  [{:ledger-commits-in-window 109,
+    :rows-reaching-a-terminal-status 25,
+    :rows-at-window-close 36,
+    :declares-mission "futon2/holes/missions/M-zaif-harness-v1.md",
+    :window
+    {:from
+     {:ts "2026-09-02T14:03:09.647517345Z",
+      :resolved
+      {:sha "da44c6465ed8829c951094d3191c77554311e792",
+       :at "2026-09-02T13:41:26+00:00"}},
+     :to
+     {:ts "2026-09-03T14:03:09.647517345Z",
+      :resolved
+      {:sha "33073669426d076c072a58e963bd235a25e71a9a",
+       :at "2026-09-03T13:50:22+00:00"}}},
+    :rows-minted-in-window 27,
+    :status-at-close
+    {:blocked 7, :done 27, :done-unreviewed 1, :open 1},
+    :rows-at-window-open 9,
+    :rows-reaching-reviewed-done 27,
+    :board "holes/labs/zaif-harness/worklist.edn"}
+   {:ledger-commits-in-window 68,
+    :rows-reaching-a-terminal-status 22,
+    :rows-at-window-close 129,
+    :declares-mission nil,
+    :window
+    {:from
+     {:ts "2026-09-02T14:03:09.647517345Z",
+      :resolved
+      {:sha "ef7a711d94c46534fdabe83eb07443586b840c07",
+       :at "2026-09-02T13:37:11+00:00"}},
+     :to
+     {:ts "2026-09-03T14:03:09.647517345Z",
+      :resolved
+      {:sha "729f3fdb1ec8f76854c4d4ae0c61d6ff4c9da372",
+       :at "2026-09-03T13:31:32+00:00"}}},
+    :rows-minted-in-window 34,
+    :status-at-close
+    {:done 112, :blocked 5, :open 10, :done-unreviewed 2},
+    :rows-at-window-open 95,
+    :rows-reaching-reviewed-done 21,
+    :board "holes/labs/wm-contract/worklist.edn"}],
+  :lexical
+  [{:board "holes/labs/wm-contract/worklist.edn",
+    :reading :lexical-not-declared,
+    :rows-reaching-a-terminal-status 22,
+    :mentions
+    {:zaif
+     [:U11
+      :U12
+      :U13
+      :U6
+      :U14
+      :U15
+      :U17
+      :U18
+      :U19
+      :U20
+      :U21
+      :U42
+      :U43
+      :U23
+      :U25
+      :U30
+      :U36
+      :U33],
+     :eoi [:U11 :U19 :U21 :U42]}}],
+  :mission-documents
+  {"M-zaif-harness-v1"
+   {:document "futon2/holes/missions/M-zaif-harness-v1.md",
+    :declared-by "holes/labs/zaif-harness/worklist.edn :mission",
+    :declared-board "holes/labs/zaif-harness/worklist.edn"},
+   "M-expressions-of-interest"
+   {:document "futon5a/holes/missions/M-expressions-of-interest.md",
+    :declared-by
+    "futon2/holes/core-mission-gaps.edn:607-609 :stem/:file",
+    :declared-board :none-found,
+    :repository
+    {:repository "/home/joe/code/futon5a",
+     :commits-in-window 0,
+     :last-commit-in-repository
+     "e1a8c5252f45b8b7e7008943a397657ce80d8911 2026-08-26T17:10:22+00:00",
+     :attributable? :no,
+     :note
+     "repository activity is not mission attribution; it is reported because a count of zero is a receipt of absence and a count above zero is not a receipt of presence"}},
+   "M-wm-aif-policy-grain-compliance"
+   {:document
+    "futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+    :declared-board :none-found,
+    :note
+    "the wm-contract ledger declares no :mission -- its :source is TN-edge-review-aif-wiring.md -- so its rows are not a declared receipt for any mission"}}},
+ :section-0-enactment-path
+ {:ticks 94,
+  :selector-ids
+  {"pi-s-9dbc2ceb3317bc38050c41ce" 4,
+   "stub:first-ranked-authorized-mission" 88,
+   "stub:controller-head" 2},
+  :chosen-is-controller-head {false 92, true 2},
+  :chosen-is-in-the-hardcoded-three {true 92, false 2},
+  :scheduler-habit-list-is-the-controller-order-restricted-to-the-three
+  {true 94},
+  :chosen-is-the-head-of-that-list {false 6, true 88},
+  :per-tick
+  [{:at "2026-08-30T10:54:44.860119595Z",
+    :run-id nil,
+    :selector "pi-s-9dbc2ceb3317bc38050c41ce",
+    :chosen "M-shared-memory-control-build-test",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-30T20:15:26.066788324Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-30T20:17:48.509203906Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-30T20:25:04.680315775Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-30T20:33:56.026290728Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-30T20:36:35.667070255Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-30T20:41:52.797464315Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-31T12:58:02.858451893Z",
+    :run-id nil,
+    :selector "pi-s-9dbc2ceb3317bc38050c41ce",
+    :chosen "M-shared-memory-control-build-test",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-31T14:08:21.402547618Z",
+    :run-id nil,
+    :selector "pi-s-9dbc2ceb3317bc38050c41ce",
+    :chosen "M-shared-memory-control-build-test",
+    :controller-head :sorry/pattern-measure-never-target,
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-31T14:30:41.399004095Z",
+    :run-id nil,
+    :selector "pi-s-9dbc2ceb3317bc38050c41ce",
+    :chosen "M-shared-memory-control-build-test",
+    :controller-head :sorry/pattern-measure-never-target,
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-31T20:32:24.972954701Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-08-31T20:35:51.187865882Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:00:45.725336789Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:02:03.726336568Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:03:29.398161909Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:04:52.495898571Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:06:14.608233559Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:08:19.473833370Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:09:42.760203987Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:11:01.608093683Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:12:22.228366495Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:13:47.124107500Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:15:00.695098415Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:16:20.631294958Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:17:38.966251080Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:18:58.825568178Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:20:15.857365620Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:21:35.422181750Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:22:53.453363323Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:24:18.152884008Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:25:39.077874931Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T15:27:00.229092007Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:33:00.394288715Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:34:22.375923180Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:35:40.043712875Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:37:00.034480101Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:38:19.793535421Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:39:40.482755403Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:40:59.710860840Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:42:21.982296254Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:43:39.778272417Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:46:14.523647861Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:48:30.852381791Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:49:49.786509242Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:51:06.899463078Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:52:24.930647528Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:53:45.706796972Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:55:04.183846737Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:56:24.754190514Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:57:41.811552249Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T16:58:59.526877756Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:00:17.864947248Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:01:34.717651998Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:02:53.788518220Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:04:11.057679242Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:05:28.972350368Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:06:46.165448792Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:08:06.316088557Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:09:23.281254434Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:10:41.115340232Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:11:59.316805577Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T17:13:17.340443687Z",
+    :run-id nil,
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:39:57.441876045Z",
+    :run-id "6763baee-1f2b-4d5e-aa60-3580e77dc270",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:41:17.673842025Z",
+    :run-id "38743801-e7b1-48cd-b6bd-ab70fbab1471",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:42:44.308772615Z",
+    :run-id "aa70c2cc-992f-4b2b-b36d-7af33675b17d",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:44:02.116009268Z",
+    :run-id "f135821a-c51c-4b21-be6e-d340ff562305",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:45:21.699083224Z",
+    :run-id "cc0a0703-e9a5-4ee0-9a8e-b098a6a2b929",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:46:42.192036549Z",
+    :run-id "1772dc01-bdd4-4ffb-8433-a20d828e61aa",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:48:06.102484692Z",
+    :run-id "1cfa12ba-0108-4cea-b75f-7f72bf6b0242",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:49:29.000443159Z",
+    :run-id "85125689-18fc-4894-9193-8b3ca9eb2cdd",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:50:49.722240111Z",
+    :run-id "e2ba54bd-a4eb-4583-a54a-99d44f1d9fb8",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:52:06.660826546Z",
+    :run-id "0d9b3025-ce3c-43f3-ab91-7d88f1509daf",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:53:42.508820253Z",
+    :run-id "fac6d798-4389-4104-a8ff-74e755ad821b",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:55:10.063339417Z",
+    :run-id "4ef287e1-ef8e-4101-91e1-5d7c4032ebc8",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:56:38.237872177Z",
+    :run-id "49001423-81d6-4915-b6e9-c377ef3de41e",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:58:00.441023885Z",
+    :run-id "4ff6effd-05dd-44eb-b7ea-862f8084df5a",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T18:59:24.217804513Z",
+    :run-id "2d84e9a8-4f19-4080-82f7-5d2ff2899fca",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T19:00:53.002942157Z",
+    :run-id "b5bd631f-445e-46a7-8fe1-88f0c95e3d09",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T19:02:23.880997306Z",
+    :run-id "4f486ddc-ecf1-4af3-9315-b6484c81a39b",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T19:03:47.733626368Z",
+    :run-id "826c6cee-aa7e-4092-b430-053da84cd1af",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T19:05:05.636608579Z",
+    :run-id "8dbf0aca-92d6-4f65-8083-1cdce77407bd",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T19:06:25.174660123Z",
+    :run-id "1b6fa012-204f-4ddd-b6ae-28aaea3a6d7e",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T20:36:03.800627763Z",
+    :run-id "dd00675b-9672-4b4e-9b5c-1cb4ff17deb3",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T20:37:20.458200407Z",
+    :run-id "73282cf8-3eb7-42f2-b055-b45b0322dde3",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T20:38:39.644885551Z",
+    :run-id "200b894f-04c4-47a7-9c6c-a488571f3dd5",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T20:40:00.843332453Z",
+    :run-id "5bd37efe-5a32-4097-a315-08fa61f86340",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T22:48:41.419048498Z",
+    :run-id "84ca8231-53c7-4d6a-93d3-ecfb5b19a5f7",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T22:50:42.709079837Z",
+    :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T22:52:07.418144767Z",
+    :run-id "c51a8da3-883e-4038-b493-1b268d5d8357",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T22:53:32.871991661Z",
+    :run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-01T22:54:48.942309598Z",
+    :run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-aif-policy-conditioned-eig",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-02T13:47:22.082297526Z",
+    :run-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :selector "stub:first-ranked-authorized-mission",
+    :chosen "M-wm-aif-policy-grain-compliance",
+    :controller-head "M-zaif-harness-v1",
+    :chosen-in-hardcoded-three? true}
+   {:at "2026-09-02T14:00:29.357627605Z",
+    :run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :selector "stub:controller-head",
+    :chosen "M-zaif-harness-v1",
+    :controller-head "M-zaif-harness-v1",
+    :chosen-in-hardcoded-three? false}
+   {:at "2026-09-02T14:03:09.647517345Z",
+    :run-id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :selector "stub:controller-head",
+    :chosen "M-expressions-of-interest",
+    :controller-head "M-expressions-of-interest",
+    :chosen-in-hardcoded-three? false}],
+  :source
+  {:hardcoded-set
+   "scripts/futon2/report/war_machine.clj:6235-6238 strategic-candidate-ids",
+   :filter
+   "war_machine.clj:6239-6245 -- wm-admissible keep'd to those ids, in admissible order",
+   :handoff
+   "war_machine.clj:6246-6251 -- that list, and the controller ranking, are what invoke-strategic-selection is given",
+   :enactment
+   "war_machine.clj:6253-6260 -- the enacted action is the first admissible action matching :selected-mission-ids",
+   :set-age
+   "the set has stood since futon2 fa61e98 (2026-07-24) -- git log -S strategic-candidate-ids"}},
+ :section-2-case-2
+ {:row-says
+  "the controller's M-eoi-over-zaif preference vs what actually happened -- zaif-harness received 30+ reviewed rows via operator-driven work in the following 24h while M-eoi received the lexical probe and criteria only",
+  :claim
+  #:claim{:rejected
+          [{:margin/total 0.0479542388666232,
+            :margin/by-term {:G-risk 0.0479542388666232},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :chosen,
+             :by 0.6931471805599454,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.464967615647737,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.5769701181375955,
+               :rejected 0.42064628214037525},
+              :central
+              {:chosen 0.6848505906879777,
+               :rejected 0.6532314107018763},
+              :strategic {:chosen 0.7, :rejected 0.4},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission,
+             :target "M-distributed-frontiermath"},
+            :ranking-position 1,
+            :controller-rank 2}
+           {:margin/total 0.06125869046971388,
+            :margin/by-term {:G-risk 0.06125869046971388},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :chosen,
+             :by 0.6931471805599454,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.478272067250828,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.5769701181375955,
+               :rejected 0.3768658790826963},
+              :central
+              {:chosen 0.6848505906879777,
+               :rejected 0.4343293954134816},
+              :strategic {:chosen 0.7, :rejected 0.4},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission, :target "M-symbol-grounding"},
+            :ranking-position 2,
+            :controller-rank 3}
+           {:margin/total 0.0644814551074262,
+            :margin/by-term {:G-risk 0.0644814551074262},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :chosen,
+             :by 0.6931471805599454,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.48149483188854,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.5769701181375955,
+               :rejected 0.36623349548297435},
+              :central
+              {:chosen 0.6848505906879777,
+               :rejected 0.38116747741487145},
+              :strategic {:chosen 0.7, :rejected 0.4},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission, :target "M-superpod-mark2"},
+            :ranking-position 3,
+            :controller-rank 4}
+           {:margin/total 0.08598902868425284,
+            :margin/by-term {:G-risk 0.08598902868425284},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :chosen,
+             :by 0.6931471805599454,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.503002405465367,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.5769701181375955, :rejected 0.295},
+              :central {:chosen 0.6848505906879777, :rejected 0.0},
+              :strategic {:chosen 0.7, :rejected 1.0},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 0.5}}},
+            :action
+            {:type :advance-mission, :target "M-zaif-harness-v1"},
+            :ranking-position 4,
+            :controller-rank 5}
+           {:margin/total 0.08749319544585887,
+            :margin/by-term {:G-risk 0.08749319544585887},
+            :counter-channel
+            {:channel :habit-prior,
+             :favours :chosen,
+             :by 0.6931471805599454,
+             :consulted? false,
+             :basis
+             "policy.clj:582 and :593 -- lnE enters the score the selection takes its argmax of only under :full-score-posterior; policy.clj:619-621 records the same fact as :habit-authority"},
+            :G-core 5.504506572226973,
+            :lost-on :G-risk,
+            :lost-on-share 1.0,
+            :term-source
+            {:G-risk-driver
+             {:mission-value-factor
+              {:chosen 0.5769701181375955,
+               :rejected 0.29000000000000004},
+              :central {:chosen 0.6848505906879777, :rejected 0.0},
+              :strategic {:chosen 0.7, :rejected 0.4},
+              :doable {:chosen 0.3, :rejected 0.3},
+              :non-progress-decay {:chosen 1.0, :rejected 1.0}}},
+            :action
+            {:type :advance-mission,
+             :target "M-eoi-outbox-management"},
+            :ranking-position 5,
+            :controller-rank 6}],
+          :derived-from
+          ["[:decision :action]"
+           "[:decision :controller-ranking]"
+           "[:decision :selection-law]"
+           "[:ranked-actions]"
+           "[:policy-support-exclusions]"
+           "[:timestamp]"
+           "[:run/id]"],
+          :law
+          {:requested :controller-head,
+           :applied :controller-head,
+           :refusal nil,
+           :controller-head-rank 1,
+           :chosen-rank 1,
+           :moved-from-controller-head? false,
+           :consulted-ranking :controller},
+          :at "2026-09-02T14:03:09.647517345Z",
+          :new-logging-required :none,
+          :soundness-at-mint
+          {:status :sound, :chosen-controller-rank 1},
+          :refused
+          [{:action
+            {:type :open-mission,
+             :target "futon4-d/mission/essays-diachronic-model"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target
+             "futon4-d/mission/or-training-as-learning-system.v1"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target "futon6-d/mission/canon-fingerprint-store"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}
+           {:action
+            {:type :open-mission,
+             :target "futon6-d/mission/bayesian-structure-learning"},
+            :reason :mission-absent-from-capability-graph,
+            :stage :admission,
+            :scored? false}],
+          :source
+          {:file "data/wm-trace/wm-trace-2026-09-02.edn",
+           :line 3,
+           :run-id "801976e7-01c6-4e39-aada-27f620f7c2f1"},
+          :id "rc-801976e7-01c6-4e39-aada-27f620f7c2f1",
+          :assertion
+          "the chosen action's G-core is below each listed rejected candidate's by :margin/total, and that margin is accounted for by :margin/by-term; :lost-on names the term carrying most of it",
+          :chosen
+          {:action
+           {:type :advance-mission,
+            :target "M-expressions-of-interest"},
+           :controller-rank 1,
+           :G-core 5.417013376781114,
+           :terms
+           {:G-risk 114.29390656552819,
+            :G-ambiguity -108.87689318874708,
+            :G-goal-outcome 0.0,
+            :controller-augmentation 0.0,
+            :structural-pressure 0.0,
+            :graph-feasibility-penalty 0.0,
+            :gap-exploration-bonus 0.0},
+           :mission-value-factor 0.5769701181375955}},
+  :verdict
+  #:verdict{:basis
+            ["[:ranked-actions] of the claim record"
+             "[:decision :controller-ranking] of the claim record"
+             "runs/U42-producers/measurements.edn"
+             "runs/U23-cascade-catalog/carrier-population.edn"],
+            :claim-id "rc-801976e7-01c6-4e39-aada-27f620f7c2f1",
+            :window
+            {:from "2026-09-02T14:03:09.647517345Z",
+             :to :none,
+             :ticks-between 0},
+            :legs
+            {:overtake
+             {:status :absent,
+              :reason :no-later-ranking-record-in-corpus,
+              :detail
+              "the claim is minted on the last record the corpus carries; the machine has not ticked since"},
+             :c-mis
+             {:at-claim
+              {:status :absent,
+               :reason :no-measurable-criteria,
+               :mission "M-expressions-of-interest",
+               :criterion-count 6,
+               :source "runs/U42-producers/measurements.edn"},
+              :at-evaluation nil,
+              :movement
+              {:status :untestable,
+               :reason :c-mis-reads-the-selected-mission-only,
+               :detail
+               "the readback is keyed to the tick's SELECTED mission, so two ticks that select different missions produce two different subjects and no movement"}},
+             :non-progress
+             {:status :absent,
+              :reason :no-later-ranking-record-in-corpus},
+             :receipts
+             {:status :measured-outside-the-trace,
+              :reason :carrier-is-a-board-ledger-not-a-trace-field,
+              :see :section-4-receipts,
+              :basis
+              "U39 typed this leg :no-mission-to-receipt-carrier at trace grain; section 4 of this artifact measures it on the one carrier that DECLARES the mission it serves"}},
+            :verdict-rule
+            {:name :declared-attributed-overtake,
+             :status :declared-not-ruled,
+             :scalars :none,
+             :statement
+             "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake that only happens because the chosen candidate was decayed for having been chosen measures the decay, not the rationale, and is UNTESTABLE. UPHELD requires an outcome leg, which no record in this corpus carries.",
+             :alternatives-not-taken
+             {:overtake-dominant
+              "any overtake refutes -- rejected here because on the recorded 09-02 pair it refutes every claim after one tick, since the chosen mission's mission-value-factor halves by construction",
+              :weighted-legs
+              "combine the four legs with declared weights -- rejected here because three of the four legs are typed absences on this corpus, so the weights would be unmeasurable"},
+             :owner
+             "U39 section 4 -- declared there, used verbatim here"},
+            :verdict :rationale-untestable,
+            :overtake-readings {},
+            :evaluated-against
+            {:status :absent,
+             :reason :no-later-ranking-record-in-corpus},
+            :verdict-reason :no-later-ranking-record-in-corpus},
+  :mint :none,
+  :mint-reason
+  "only a REFUTED verdict mints (U39 section 6); the declared rule types this claim untestable for want of a later ranking record",
+  :row-figure-checked
+  {:row-says "30+ reviewed rows",
+   :declared-carrier-reading 27,
+   :declared-plus-lexical-reading 45,
+   :verdict-on-the-figure
+   "27 under the declared-carrier rule, 45 if the 18 wm-contract rows that mention zaif in their own text are added; the row's figure is reproduced only under the second, lexical reading, and that reading is not a declared carrier binding"}},
+ :builds-on
+ {:row :U39,
+  :shapes
+  ["(a) rationale-as-claim"
+   "(b) retrospective-verdict"
+   "(c) tension mint"],
+  :artifact "runs/U39-selection-retrospective/u39-measurements.edn",
+  :pinned-by :c1-u39-shape-pin},
+ :generated-by "holes/labs/wm-contract/u40_first_retrospective.bb",
+ :read-only true,
+ :section-5-tension-records
+ [{:mint/library-home
+   {:carrier :flexiarg,
+    :root "futon3/library (pattern_registry.clj:48-53)",
+    :addressed-by
+    "pattern_registry.clj:158-161 candidate-pattern-path",
+    :status :named-not-written,
+    :note
+    "no flexiarg is written by this row; the birth rule in DESIGN-tensions-as-patterns.md section 2 requires >=2 typed receipts and a person"},
+   :tension/status :carried,
+   :tension/provenance
+   {:claim "rc-4abad68c-5481-4402-8f0e-252add62c54b",
+    :verdict-against "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :records
+    ["4abad68c-5481-4402-8f0e-252add62c54b"
+     "801976e7-01c6-4e39-aada-27f620f7c2f1"],
+    :minted-by :u40-first-retrospective,
+    :written-to :nothing},
+   :tension/carried-by "M-wm-aif-policy-grain-compliance",
+   :mint/record-shape-owner
+   "DESIGN-tensions-as-patterns.md section 3 (U41 implements)",
+   :tension/resolution-path :none-named-at-mint,
+   :tension/born-of :refuted-rationale,
+   :tension/poles
+   ["select by the G-risk margin as scored this tick"
+    "select by a preference that survives to the next tick"],
+   :mint/from :refuted-rationale,
+   :tension/statement
+   "M-zaif-harness-v1 was preferred over M-expressions-of-interest at 2026-09-02T14:00:29.357627605Z on a G-risk margin of 0.004028677703587391 nats; one tick later M-expressions-of-interest out-ranked it, and its own G-core had fallen by 0.005237160997353385 -- enough to close that margin without any help from the chosen candidate's non-progress decay.",
+   :mint/verdict-id "rc-4abad68c-5481-4402-8f0e-252add62c54b"}
+  {:mint/library-home
+   {:carrier :flexiarg,
+    :root "futon3/library (pattern_registry.clj:48-53)",
+    :addressed-by
+    "pattern_registry.clj:158-161 candidate-pattern-path",
+    :status :named-not-written,
+    :note
+    "no flexiarg is written by this row; the birth rule in DESIGN-tensions-as-patterns.md section 2 requires >=2 typed receipts and a person"},
+   :tension/status :carried,
+   :tension/provenance
+   {:claim "rc-decay-family-2026-08-30..2026-09-02",
+    :verdict-against
+    "the 94-record ranking era, data/wm-trace 2026-08-30..2026-09-02",
+    :records ["data/wm-trace, the 94 ranking-era records"],
+    :minted-by :u40-first-retrospective,
+    :written-to :nothing},
+   :tension/carried-by :the-selection-mechanism-itself,
+   :mint/record-shape-owner
+   "DESIGN-tensions-as-patterns.md section 3 (U41 implements)",
+   :tension/resolution-path :none-named-at-mint,
+   :tension/born-of :refuted-rationale,
+   :tension/poles
+   ["penalise the mission just selected, so attention rotates off it"
+    "return to the mission just selected, because nothing recorded about it changed"],
+   :mint/from :refuted-rationale,
+   :tension/statement
+   "Over the 94 ranking-era ticks the machine recorded 94 non-progress decay events, one per tick, 93 of them on the mission it had selected on the previous tick. Of the 93 events with a next tick, 85 were followed by the machine re-selecting the decayed mission, and on 85 of those 85 the only recorded fields that changed on the mission in between were the decay mechanism's own (mission-value-factor, non-progress-count, non-progress-decay, non-progress?). The decay expresses a one-tick rotation, not a durable judgement, and its own test -- :grounded-change via trace-outcome -- has no readable input on any of the 94 records.",
+   :mint/verdict-id "rc-decay-family-2026-08-30..2026-09-02",
+   :mint/one-record-for-the-family
+   "U39 section 6: only a REFUTED verdict mints, and a decay refutation is one fact, not 94 -- so the family mints one record and the per-event table stays in the measurements artifact"}],
+ :row :U40}

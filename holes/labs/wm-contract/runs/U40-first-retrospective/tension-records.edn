@@ -1,0 +1,65 @@
+{:row :U40,
+ :minted-by "holes/labs/wm-contract/u40_first_retrospective.bb",
+ :shape-owner
+ "U39 section 6 mint edge; DESIGN-tensions-as-patterns.md section 3 owns the record (U41 implements)",
+ :written-to :nothing,
+ :records
+ [{:mint/library-home
+   {:carrier :flexiarg,
+    :root "futon3/library (pattern_registry.clj:48-53)",
+    :addressed-by
+    "pattern_registry.clj:158-161 candidate-pattern-path",
+    :status :named-not-written,
+    :note
+    "no flexiarg is written by this row; the birth rule in DESIGN-tensions-as-patterns.md section 2 requires >=2 typed receipts and a person"},
+   :tension/status :carried,
+   :tension/provenance
+   {:claim "rc-4abad68c-5481-4402-8f0e-252add62c54b",
+    :verdict-against "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :records
+    ["4abad68c-5481-4402-8f0e-252add62c54b"
+     "801976e7-01c6-4e39-aada-27f620f7c2f1"],
+    :minted-by :u40-first-retrospective,
+    :written-to :nothing},
+   :tension/carried-by "M-wm-aif-policy-grain-compliance",
+   :mint/record-shape-owner
+   "DESIGN-tensions-as-patterns.md section 3 (U41 implements)",
+   :tension/resolution-path :none-named-at-mint,
+   :tension/born-of :refuted-rationale,
+   :tension/poles
+   ["select by the G-risk margin as scored this tick"
+    "select by a preference that survives to the next tick"],
+   :mint/from :refuted-rationale,
+   :tension/statement
+   "M-zaif-harness-v1 was preferred over M-expressions-of-interest at 2026-09-02T14:00:29.357627605Z on a G-risk margin of 0.004028677703587391 nats; one tick later M-expressions-of-interest out-ranked it, and its own G-core had fallen by 0.005237160997353385 -- enough to close that margin without any help from the chosen candidate's non-progress decay.",
+   :mint/verdict-id "rc-4abad68c-5481-4402-8f0e-252add62c54b"}
+  {:mint/library-home
+   {:carrier :flexiarg,
+    :root "futon3/library (pattern_registry.clj:48-53)",
+    :addressed-by
+    "pattern_registry.clj:158-161 candidate-pattern-path",
+    :status :named-not-written,
+    :note
+    "no flexiarg is written by this row; the birth rule in DESIGN-tensions-as-patterns.md section 2 requires >=2 typed receipts and a person"},
+   :tension/status :carried,
+   :tension/provenance
+   {:claim "rc-decay-family-2026-08-30..2026-09-02",
+    :verdict-against
+    "the 94-record ranking era, data/wm-trace 2026-08-30..2026-09-02",
+    :records ["data/wm-trace, the 94 ranking-era records"],
+    :minted-by :u40-first-retrospective,
+    :written-to :nothing},
+   :tension/carried-by :the-selection-mechanism-itself,
+   :mint/record-shape-owner
+   "DESIGN-tensions-as-patterns.md section 3 (U41 implements)",
+   :tension/resolution-path :none-named-at-mint,
+   :tension/born-of :refuted-rationale,
+   :tension/poles
+   ["penalise the mission just selected, so attention rotates off it"
+    "return to the mission just selected, because nothing recorded about it changed"],
+   :mint/from :refuted-rationale,
+   :tension/statement
+   "Over the 94 ranking-era ticks the machine recorded 94 non-progress decay events, one per tick, 93 of them on the mission it had selected on the previous tick. Of the 93 events with a next tick, 85 were followed by the machine re-selecting the decayed mission, and on 85 of those 85 the only recorded fields that changed on the mission in between were the decay mechanism's own (mission-value-factor, non-progress-count, non-progress-decay, non-progress?). The decay expresses a one-tick rotation, not a durable judgement, and its own test -- :grounded-change via trace-outcome -- has no readable input on any of the 94 records.",
+   :mint/verdict-id "rc-decay-family-2026-08-30..2026-09-02",
+   :mint/one-record-for-the-family
+   "U39 section 6: only a REFUTED verdict mints, and a decay refutation is one fact, not 94 -- so the family mints one record and the per-event table stays in the measurements artifact"}]}
