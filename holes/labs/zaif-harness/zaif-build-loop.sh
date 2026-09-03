@@ -14,6 +14,12 @@
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG="$HERE/runs/build-loop.log"; mkdir -p "$HERE/runs"
+# Single-instance guard: two loops mean two review seats editing the same
+# board row (happened 2026-09-03 05:46/05:49 UTC — a timed restart and a manual
+# one raced). Refusing here, before the notify trap is installed, exits quietly:
+# the healthy instance needs no bell about it.
+exec 9>"$HERE/runs/build-loop.lock"
+if ! flock -n 9; then echo "another zaif-build-loop holds runs/build-loop.lock; exiting"; exit 0; fi
 WORK_SEAT="${WORK_SEAT:-codex}"; REVIEW_SEAT="${REVIEW_SEAT:-claude}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-40}"
 FUTON3C="$HOME/code/futon3c"
 log() { echo "[$(date -u '+%H:%M:%S')] $*" | tee -a "$LOG"; }
