@@ -336,3 +336,31 @@ outstanding objective.
 The remaining exclusions and their reasons are printed by the workspace gate.
 “Manual” means attached
 to the named operator event above, not merely available on disk.
+
+## What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)
+
+Ruled via claude-1's walkthrough recommendation, adopted verbatim. A
+`holder: by-record` hole's evidence obligation ENDS when all three hold:
+
+1. **A persisted record** (a real run/trace/receipt on disk or substrate —
+   never a fixture, never a staged replay artifact) carries the declared
+   observation;
+2. **The Clojure witness passes with a rejecting negative control** at the
+   current contract sha (a witness that cannot reject proves nothing);
+3. **Where the invariant is decidable over a pinned table**, the Lean
+   transcription exists and proves it (`decide` over the transcribed rows,
+   no `sorry`) — the wmTraceR2/wmTraceR8 precedent.
+
+Where (3) is inapplicable (the invariant is not decidable over any pinned
+table), (1)+(2) suffice and the declaration says so. A hole meeting the
+criterion CLOSES; a hole that cannot yet meet it is typed with WHICH leg is
+missing (the Box-2 fence: a missing (1) on a flag-gated path is
+`run-gated`; a missing (2)/(3) is `pre-run-closable`). "Stays open
+permanently" is not a state this criterion leaves reachable — a permanent
+hole must be re-declared as such by its owner, not left pending.
+
+Dispositions under the criterion, ruled the same day: nonDegenerateAblationLaw
+MEETS the criterion now (Lean proof wmRecordedAblationNonDegenerate, no
+sorry; witness with rejecting negative control at current sha) and closes —
+worklist :U45 executes. findF1Containment/F2/F3/F4 close by transcribing
+the pinned FindReceiptRow into Lean and proving by decide — worklist :U46.
