@@ -186,7 +186,8 @@
            {:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 22
             :substrate :zaif :provenance :planted}
            {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 106
-            :substrate :zaif :provenance :real}
+            :substrate :zaif :provenance :real
+            :record-id "e-63c25e11-ac8b-4287-966e-bdc7f007bc78"}
            {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 136
             :substrate :wm-fixture :provenance :real
             :record-id "801976e7-01c6-4e39-aada-27f620f7c2f1"}]
@@ -194,7 +195,7 @@
    {:status :mapped-separate
     :evidence ["src/futon2/aif/policy.clj:33"
                "../futon3c/src/futon3c/agents/zaif_controller.clj:34"]
-    :note "WM effective temperature tau and zaif mission gamma are distinct computations related by the table. U6 tau comes from planted G spread; zaif tests only gamma lookup/default."}
+    :note "WM effective temperature tau and zaif mission gamma are distinct computations related by the table. U6 tau comes from planted G spread. No longer true that the zaif-side tests only exercise gamma lookup/default: zaif_inputs_test.clj:106 runs the WM path itself -- it folds five -0.5 corrections through futon2.aif.selection-gain/update-selection-gain to selection gain 0.7071067811865476, the value the tracked B1 fold record b1-gamma-mission.edn records for cell M-futon-forward-model, and shows futon2.aif.policy/effective-temperature rising as that gain falls. The typed-empty half of the same deftest is planted: no verdict-stream :status/:reason typing exists in src (grep -rn no-verdict-events over futon2/src futon2/test futon3c/src futon3c/test returns only the two test lines), so that shape is asserted against a literal the test defines."}
    :gap nil
    :blocked-by []}
 
