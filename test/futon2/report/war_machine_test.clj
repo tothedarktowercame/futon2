@@ -12,6 +12,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
+            [futon2.aif.enumeration-completeness :as ec]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.mission-c :as mc]
             [futon2.aif.mission-epistemic-value :as mev]
@@ -22,7 +23,9 @@
             [futon2.aif.sorry-registry :as sorry-registry]
             [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm])
-  (:import (java.io PushbackReader StringReader)))
+  (:import (java.io PushbackReader StringReader)
+           (java.nio.file Files)
+           (java.nio.file.attribute FileAttribute)))
 
 (defn- read-all-forms [source]
   (with-open [reader (PushbackReader. (StringReader. source))]
@@ -2424,3 +2427,41 @@
                (#'wm/mission-value-weights
                 {:mission-value-weights {:central 0.20 :strategic 0.35
                                          :doable 0.25 :epistemic -0.20}}))))
+
+;; ---------------------------------------------------------------------------
+;; U37: the enumeration-completeness projection at its call site.
+
+(deftest enumeration-completeness-projection-is-flag-gated
+  (testing "flag off, the judgement is untouched -- byte-identical, not merely
+            'the key is nil'"
+    (let [judgement {:decision {:action {:type :no-op}
+                                :controller-ranking
+                                [{:action {:type :advance-mission
+                                           :target "M-not-on-disk"}}]}}]
+      (binding [ec/*enumeration-assert?* false]
+        (is (= judgement (#'wm/carry-enumeration-completeness judgement))))))
+
+  (testing "flag on, the tick attaches a real verdict -- the seam is not a
+            no-op: a candidate for a mission that is not in the scanned root
+            comes back as a phantom, so the scan ran and disagreed"
+      (let [root (str (Files/createTempDirectory
+                       "u37-wm" (into-array FileAttribute [])))
+            _ (let [f (io/file root "repo" "holes" "missions" "M-real.md")]
+                (io/make-parents f)
+                (spit f "# M-real\n\nStatus: ACTIVE\n"))
+            judgement {:decision {:action {:type :no-op}
+                                  :controller-ranking
+                                  [{:action {:type :advance-mission
+                                             :target "M-not-on-disk"}}]}}]
+        (with-redefs [ec/default-code-root root]
+          (binding [ec/*enumeration-assert?* true]
+            (let [out (#'wm/carry-enumeration-completeness judgement)
+                  rec (get-in out [:decision :enumeration-completeness])
+                  mission (first (filter #(= :mission (:kind %)) (:kinds rec)))]
+              (is (= :incomplete (:verdict rec)))
+              (is (= ["M-not-on-disk"] (:phantom mission)))
+              (is (= ["M-real"] (:missing mission))
+                  "and the live mission the tick did not enumerate is named")
+              (is (= (dissoc judgement :decision)
+                     (dissoc out :decision))
+                  "nothing outside the decision moved")))))))

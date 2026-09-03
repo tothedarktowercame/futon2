@@ -430,8 +430,11 @@
       (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
           "the enabled record differs from the disabled one in exactly this key
            (:timestamp aside, which trace-record stamps per call)")
-      (is (= 25 trace/trace-schema-version)
-          "and the bump is what separates 'producer predates C_mis' from 'flag was off'"))))
+      (is (= 26 trace/trace-schema-version)
+          ":mission-c entered the ledger at 23, and that bump is what separates
+           'producer predates C_mis' from 'flag was off'. Pinning the ledger
+           HEAD here is what makes every later key-set change bump too -- this
+           assertion is why 26 exists rather than a quiet fourth key at 25."))))
 
 (deftest mission-c-carries-typed-gauge-observables-test
   (testing "U42: the gauge producers' typed records ride INSIDE :mission-c, and
@@ -461,9 +464,41 @@
            producer that read one and measured zero")
       (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
           "and it is still exactly one key that separates the two records")
-      (is (= 25 trace/trace-schema-version)
+      (is (= 26 trace/trace-schema-version)
           "absence of :gauge-observables at 25 or later would mean every
-           producer was absent; before 25 it means the producer predates them"))))
+           producer was absent; before 25 it means the producer predates them.
+           The pin is on the ledger HEAD, so a later key added without a bump
+           fails here."))))
+
+(deftest decision-carries-enumeration-completeness-test
+  (testing "U37: the enumeration-completeness record rides on the DECISION and
+            survives strip-decision, which drops only :softmax-weights and
+            :ranked-actions -- a verdict that did not reach the record would be
+            a check nobody can read afterwards"
+    (let [verdict {:version :enumeration-completeness/v1
+                   :verdict :complete
+                   :kinds [{:kind :mission :available-count 133
+                            :enumerated-count 133 :missing [] :phantom []
+                            :verdict :complete}
+                           {:kind :ticket :available-count 33
+                            :enumerated-count 0
+                            :verdict :kind-not-enumerated
+                            :reason :no-proposer-for-kind}]}
+          off (trace/trace-record sample-judge-output)
+          on (trace/trace-record
+              (assoc-in sample-judge-output
+                        [:decision :enumeration-completeness] verdict))]
+      (is (not (contains? (:decision off) :enumeration-completeness))
+          "no key at all when FUTON_WM_ENUMERATION_ASSERT never put one on")
+      (is (= verdict (get-in on [:decision :enumeration-completeness]))
+          "and the whole typed record survives verbatim, membership diffs included")
+      (is (= (dissoc off :timestamp)
+             (update (dissoc on :timestamp) :decision dissoc :enumeration-completeness))
+          "the flag-on record differs from the flag-off one in exactly this key")
+      (is (= 26 trace/trace-schema-version)
+          "absence of the key at 26 or later means the flag was off on that
+           tick; before 26 it means the producer predates the check, and only
+           the version tells a reader which -- a false clean bill otherwise"))))
 
 (deftest trace-record-carries-typed-mission-focus-test
   (testing "U21: present-only, a SECOND field beside :active-mission, and the

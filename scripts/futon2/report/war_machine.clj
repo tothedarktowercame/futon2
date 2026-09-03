@@ -43,6 +43,7 @@
             [futon2.aif.adapters.interest-network :as interest-net]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
+            [futon2.aif.enumeration-completeness :as enum-complete]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
@@ -1792,6 +1793,39 @@
   [result mission-focus]
   (cond-> result
     *selection-focus?* (assoc :mission-focus mission-focus)))
+
+(defn- carry-enumeration-completeness
+  "U37: attach this tick's enumeration-completeness verdict to its DECISION,
+   under `FUTON_WM_ENUMERATION_ASSERT=1`.
+
+   What it answers is a question the tick cannot answer about itself: the
+   candidate list is the only evidence the record carries that the proposers
+   ran, and a narrowed proposer produces a shorter list that looks exactly like
+   a smaller world (`holes/NOTE-the-whitelist-provenance.md`). So the available
+   population is recomputed by `futon2.aif.enumeration-completeness`, which
+   calls no proposer and no registry, and the two are compared member by
+   member.
+
+   Terminal projection, on the same discipline as the S4/U11/U21 reads above:
+   computed from the candidates the decision already ranked, attached after
+   selection, and consumed by nothing in this tick -- no channel, weight, G
+   term, admissibility verdict or selector can see it. Flag off is
+   byte-identical: no scan runs and no key is attached.
+
+   Defensive: a scan that throws must not take the tick down, so a failure is
+   recorded as a typed refusal rather than propagated."
+  [result]
+  (cond-> result
+    enum-complete/*enumeration-assert?*
+    (assoc-in [:decision :enumeration-completeness]
+              (try
+                (enum-complete/completeness-record
+                 (get-in result [:decision :controller-ranking]))
+                (catch Throwable e
+                  {:version :enumeration-completeness/v1
+                   :verdict :refused
+                   :reason :scan-failed
+                   :error (ex-message e)})))))
 
 ;; ---------------------------------------------------------------------------
 ;; U11 (d) -- C_mis readback. Same terminal-projection discipline as the S4
@@ -6467,7 +6501,10 @@
         ;; U21: the last of the three terminal projections, applied in its own
         ;; step so the two S4/U11 projections above keep the exact shape their
         ;; rows built and reviewed.
-        result0 (carry-mission-focus result0-unfocused mission-focus)
+        result0-unasserted (carry-mission-focus result0-unfocused mission-focus)
+        ;; U37: last of the terminal projections, after the focus read, so the
+        ;; three reviewed shapes above are untouched when the flag is off.
+        result0 (carry-enumeration-completeness result0-unasserted)
         result
         (if trace?
           (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]

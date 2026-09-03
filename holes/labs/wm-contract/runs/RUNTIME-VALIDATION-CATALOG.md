@@ -12,7 +12,7 @@ axis, per Joe. This document is the narrative; the EDN is the data, and every
 count below is computed from it by the validator rather than typed here.
 
 ```
-COUNTS: 83 rows (59 per-node, 24 global-run) | nodes 19/19 | status exists=67 exists-but-stale=4 red=3 named-gap=9 | flips=6 | test namespaces 47/50 green | pointers=169
+COUNTS: 84 rows (59 per-node, 25 global-run) | nodes 19/19 | status exists=69 exists-but-stale=4 red=3 named-gap=8 | flips=6 | test namespaces 47/50 green | pointers=175
 ```
 
 ## 1. What was measured, and how
@@ -92,6 +92,18 @@ that breaks the replay; U4's sweep is byte-identical across runs; R17's offline
 reduction replays a recorded input to equality. None of these re-runs a tick.
 A whole-tick replay is minted here as a named gap rather than left as the
 ambient assumption that one exists.
+
+**One named gap closed since first publication (2026-09-03, U37).**
+`:g/enumeration-completeness` asked whether the selector enumerates everything
+there is to work on. It now does have an answer for missions: an independent
+filesystem scan finds 133 available and the three 2026-09-02 records enumerate
+the same 133, membership diff empty both ways, every one of the other 2,076
+files under `*/holes/missions` carrying a typed exclusion reason
+(`runs/U37-enumeration-completeness/`). Its refusal side is the second new row,
+`:g/enumeration-completeness-controls`. The same replay reports what missions
+being complete does not cover: excursions (157) and tickets (33) have no
+proposer at all, so 190 items sit outside the candidate pool — carried as
+`:kind-not-enumerated`, which is a typed absence rather than a gap in testing.
 
 ## 4. The flip feed for U32
 

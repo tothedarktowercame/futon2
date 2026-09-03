@@ -288,8 +288,21 @@
          code. It declares nothing about selection: the observables are merged
          into the observation the READBACK reads only, never into the tick's
          own observation, so no channel, weight, G term, admissibility verdict
-         or selector can see one."
-  25)
+         or selector can see one.
+    26 - adds the decision's present-only :enumeration-completeness record:
+         per kind, the population an INDEPENDENT filesystem scan found
+         available, the candidates this tick enumerated, the membership diff
+         both ways, and a typed reason for every exclusion (U37, 2026-09-03).
+         Additive and default-off (FUTON_WM_ENUMERATION_ASSERT), so no
+         record's existing bytes change. Bumped under the ledger rule that any
+         key-set change bumps, and for a reason specific to this key: a reader
+         who finds no :enumeration-completeness on a record must be able to
+         tell \"this producer predates the check\" from \"the check ran and the
+         enumeration was complete\" -- the second would be a false clean bill,
+         and only the version separates them. It declares nothing about
+         selection: the record is attached after the decision and no selection
+         path reads it."
+  26)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the

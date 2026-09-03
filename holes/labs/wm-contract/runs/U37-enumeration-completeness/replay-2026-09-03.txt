@@ -1,0 +1,80 @@
+;; U37 enumeration-completeness replay -- 3 record(s) from data/wm-trace/wm-trace-2026-09-02.edn
+
+  0a18c4f7-758e-400a-8223-9c52edf07450  (146 candidates in record, 146 compared)  VERDICT complete
+    excursion  available  157  enumerated    0  missing  157  phantom    0  -> kind-not-enumerated
+      typed absence :no-proposer-for-kind -- 157 available items no proposer emits (scripts/futon2/report/war_machine.clj:6005-6013)
+      first by id: E-2026-08-10-learnings, E-70B-on-raw-control-arm, E-APM-f10-defects, E-APM-f11-defects, E-APM-f12-defects, E-R14-red-ring-fill, E-R2-red-ring-fill, E-R5-red-ring-fill
+      excluded     5  derived-id
+      excluded  1153  duplicate-id
+      excluded    25  index-check-copy
+      excluded   347  non-contract-filename
+      excluded     1  status-draft
+      excluded     4  status-terminal
+    mission    available  133  enumerated  133  missing    0  phantom    0  -> complete
+      excluded    90  derived-id
+      excluded  1207  duplicate-id
+      excluded    84  index-check-copy
+      excluded   590  non-contract-filename
+      excluded     1  status-draft
+      excluded   104  status-terminal
+    ticket     available   33  enumerated    0  missing   33  phantom    0  -> kind-not-enumerated
+      typed absence :no-proposer-for-kind -- 33 available items no proposer emits (scripts/futon2/report/war_machine.clj:6005-6013)
+      first by id: T-agency-desktop-save, T-car3-phase2-impl, T-car3-queue-routing, T-car3-queue-routing-design-note, T-codex-auto-bellback, T-cx-new-blocks-emacs, T-devmap-forward-model-calibration, T-dispatch-clock-excursion-prefix
+      excluded   237  duplicate-id
+      excluded    14  index-check-copy
+      excluded     1  non-contract-filename
+      excluded     1  status-terminal
+
+  4abad68c-5481-4402-8f0e-252add62c54b  (146 candidates in record, 146 compared)  VERDICT complete
+    excursion  available  157  enumerated    0  missing  157  phantom    0  -> kind-not-enumerated
+      typed absence :no-proposer-for-kind -- 157 available items no proposer emits (scripts/futon2/report/war_machine.clj:6005-6013)
+      first by id: E-2026-08-10-learnings, E-70B-on-raw-control-arm, E-APM-f10-defects, E-APM-f11-defects, E-APM-f12-defects, E-R14-red-ring-fill, E-R2-red-ring-fill, E-R5-red-ring-fill
+      excluded     5  derived-id
+      excluded  1153  duplicate-id
+      excluded    25  index-check-copy
+      excluded   347  non-contract-filename
+      excluded     1  status-draft
+      excluded     4  status-terminal
+    mission    available  133  enumerated  133  missing    0  phantom    0  -> complete
+      excluded    90  derived-id
+      excluded  1207  duplicate-id
+      excluded    84  index-check-copy
+      excluded   590  non-contract-filename
+      excluded     1  status-draft
+      excluded   104  status-terminal
+    ticket     available   33  enumerated    0  missing   33  phantom    0  -> kind-not-enumerated
+      typed absence :no-proposer-for-kind -- 33 available items no proposer emits (scripts/futon2/report/war_machine.clj:6005-6013)
+      first by id: T-agency-desktop-save, T-car3-phase2-impl, T-car3-queue-routing, T-car3-queue-routing-design-note, T-codex-auto-bellback, T-cx-new-blocks-emacs, T-devmap-forward-model-calibration, T-dispatch-clock-excursion-prefix
+      excluded   237  duplicate-id
+      excluded    14  index-check-copy
+      excluded     1  non-contract-filename
+      excluded     1  status-terminal
+
+  801976e7-01c6-4e39-aada-27f620f7c2f1  (146 candidates in record, 146 compared)  VERDICT complete
+    excursion  available  157  enumerated    0  missing  157  phantom    0  -> kind-not-enumerated
+      typed absence :no-proposer-for-kind -- 157 available items no proposer emits (scripts/futon2/report/war_machine.clj:6005-6013)
+      first by id: E-2026-08-10-learnings, E-70B-on-raw-control-arm, E-APM-f10-defects, E-APM-f11-defects, E-APM-f12-defects, E-R14-red-ring-fill, E-R2-red-ring-fill, E-R5-red-ring-fill
+      excluded     5  derived-id
+      excluded  1153  duplicate-id
+      excluded    25  index-check-copy
+      excluded   347  non-contract-filename
+      excluded     1  status-draft
+      excluded     4  status-terminal
+    mission    available  133  enumerated  133  missing    0  phantom    0  -> complete
+      excluded    90  derived-id
+      excluded  1207  duplicate-id
+      excluded    84  index-check-copy
+      excluded   590  non-contract-filename
+      excluded     1  status-draft
+      excluded   104  status-terminal
+    ticket     available   33  enumerated    0  missing   33  phantom    0  -> kind-not-enumerated
+      typed absence :no-proposer-for-kind -- 33 available items no proposer emits (scripts/futon2/report/war_machine.clj:6005-6013)
+      first by id: T-agency-desktop-save, T-car3-phase2-impl, T-car3-queue-routing, T-car3-queue-routing-design-note, T-codex-auto-bellback, T-cx-new-blocks-emacs, T-devmap-forward-model-calibration, T-dispatch-clock-excursion-prefix
+      excluded   237  duplicate-id
+      excluded    14  index-check-copy
+      excluded     1  non-contract-filename
+      excluded     1  status-terminal
+
+;; catalogue: holes/labs/wm-contract/runs/U37-enumeration-completeness/replay-2026-09-03.edn
+
+;; VERDICT: 3/3 records complete

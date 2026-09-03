@@ -787,11 +787,24 @@
 
   {:id :g/enumeration-completeness :axis :global-run :substrate :wm
    :validation "That the selector's candidate enumeration is COMPLETE against an independent scan of the available missions, excursions and tickets, with every exclusion a typed filter reason."
-   :evidence-kind :not-yet-produced :status :named-gap :binding :by-registry-row
-   :pointer "futon2/holes/labs/wm-contract/worklist.edn:863-866"
-   :provenance :none
+   :evidence-kind :replay-artifact :status :exists :binding :by-run-record
+   :pointer "futon2/holes/labs/wm-contract/runs/U37-enumeration-completeness/REPLAY-2026-09-02-RECORDS.md:1-40"
+   :also-pointers ["futon2/src/futon2/aif/enumeration_completeness.clj:1-40"
+                   "futon2/holes/labs/wm-contract/u37_enumeration_replay.clj:1-35"
+                   "futon2/holes/labs/wm-contract/runs/U37-enumeration-completeness/replay-2026-09-03.edn:1-3"
+                   "futon2/test/futon2/aif/enumeration_completeness_test.clj:1-14"]
+   :provenance :recorded
    :gates-flip [:mission-c :selection-law]
-   :note "U37, open. The negative precedent is the four-mission whitelist. Nothing today re-derives the 133-candidate population by a path independent of the selector's own enumerator, so a silent narrowing of the candidate set is not currently detectable from a record."}
+   :note "U37, produced 2026-09-03. The three 2026-09-02 records replay :complete for missions: 133 available by an independent filesystem scan, 133 enumerated, membership diff empty both ways, and 2,076 of the 2,209 files under */holes/missions carry a typed exclusion reason. NOT closed by this row and carried as typed absences instead: excursions (157) and tickets (33) have no proposer in the tick's proposer list, so the selector never sees them -- :kind-not-enumerated, not agreement."}
+
+  {:id :g/enumeration-completeness-controls :axis :global-run :substrate :wm
+   :validation "That the enumeration-completeness check can REFUSE: a planted four-mission whitelist, a single lost mission, a phantom candidate, a claimed proposer for a kind that has none, and an empty scan root each fail the replay by name."
+   :evidence-kind :negative-control :status :exists :binding :by-run-record
+   :pointer "futon2/holes/labs/wm-contract/u37_enumeration_controls.sh:1-20"
+   :also-pointers ["futon2/holes/NOTE-the-whitelist-provenance.md:1-30"]
+   :provenance :recorded
+   :gates-flip [:mission-c :selection-law]
+   :note "5 negative, 2 positive, all planted through the environment so no committed file is mutated. Control 5 is the one that makes the other four mean something: pointing the scan at an empty code root must turn all 133 recorded candidates into phantoms, which a check that merely re-read the record would not do."}
 
   {:id :g/u8-report-gate :axis :global-run :substrate :zaif
    :validation "The reporting gate: every claim in a full zaif decision's report re-derived from the Z1 ledger queries and typed records alone -- arm and G terms from decision evidence, tool calls from R16 witnesses, mission attribution from Z1, status from the mission-status oracle. A report line with no backing query is the failure."

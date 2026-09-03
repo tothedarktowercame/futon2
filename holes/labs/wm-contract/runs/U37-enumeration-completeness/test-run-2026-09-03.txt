@@ -1,0 +1,27 @@
+# U37 affected-namespace test run, 2026-09-03
+# futon2 working tree with the U37 changes applied
+# convention: clojure -X:test :nses '[<ns>]' -- one JVM per namespace (U36)
+futon2.aif.a-matrix-live-wiring-test | exit=0 | Ran 3 tests containing 9 assertions. 0 failures, 0 errors. 
+futon2.aif.fold-realized-test | exit=0 | Ran 6 tests containing 51 assertions. 0 failures, 0 errors. 
+futon2.aif.full-loop-runner-test | exit=0 | Ran 122 tests containing 576 assertions. 0 failures, 0 errors. 
+futon2.aif.move-class-intensity-test | exit=0 | Ran 6 tests containing 26 assertions. 0 failures, 0 errors. 
+futon2.aif.observation-test | exit=0 | Ran 6 tests containing 30 assertions. 0 failures, 0 errors. 
+futon2.aif.operator-flip-test | exit=0 | Ran 2 tests containing 7 assertions. 0 failures, 0 errors. 
+futon2.aif.precision-test | exit=0 | Ran 24 tests containing 45 assertions. 0 failures, 0 errors. 
+futon2.aif.selection-score-readiness-test | exit=0 | Ran 19 tests containing 340 assertions. 0 failures, 0 errors. 
+futon2.aif.trace-test | exit=0 | Ran 46 tests containing 145 assertions. 0 failures, 0 errors. 
+futon2.aif.typed-residual-remediation-test | exit=0 | Ran 4 tests containing 17 assertions. 0 failures, 0 errors. 
+futon2.report.war-machine-test | exit=0 | Ran 87 tests containing 503 assertions. 0 failures, 0 errors. 
+futon2.report.war-machine-visual-test | exit=0 | Ran 8 tests containing 43 assertions. 0 failures, 0 errors. 
+futon2.report.wm-regulator-sweep-test | exit=0 | Ran 5 tests containing 20 assertions. 0 failures, 0 errors. 
+run-tick-once-test | exit=0 | Ran 7 tests containing 21 assertions. 0 failures, 0 errors. 
+futon2.aif.enumeration-completeness-test | exit=0 | Ran 10 tests containing 35 assertions. 0 failures, 0 errors. 
+#
+# PRE-EXISTING RED, NOT CAUSED BY U37 AND NOT REPAIRED HERE:
+#   positive-proof-receipt-test | exit=1 | :positive-source-drift
+# It was green in U36's 2026-09-03 run at futon2 42a957c. It fails with the U37
+# src changes stashed as well, so it is not this row's. Cause: the receipt
+# holes/labs/wm-contract/softmax-positive-receipt.edn pins declarations of
+# mathlib4 DarkTower/WarMachine/SoftmaxWitness.lean and Holes.lean by sha256,
+# and mathlib4 6dabfb686f (2026-09-03 17:05Z, "U29: re-resolve the glossary
+# owner pointers against the current sec-glossary.tex") moved one of them.

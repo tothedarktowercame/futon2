@@ -1,0 +1,5 @@
+;; U37 scan-cost measurement, 2026-09-03, futon2 working tree.
+;; Three consecutive full three-kind scans in one JVM (clojure -M:test).
+pass 0: three-kind scan 196 ms  available {:excursion 157, :mission 133, :ticket 33}
+pass 1: three-kind scan 132 ms  available {:excursion 157, :mission 133, :ticket 33}
+pass 2: three-kind scan 127 ms  available {:excursion 157, :mission 133, :ticket 33}
