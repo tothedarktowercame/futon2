@@ -113,7 +113,7 @@
    {:status :mapped-separate
     :evidence ["src/futon2/aif/habit_prior.clj:100" "src/futon2/aif/policy.clj:157"
                "../futon3c/src/futon3c/agents/zaif_controller.clj:124"]
-    :note "The implementations remain separate. The zaif test replays D9's tracked live decision and proves its score vector uniquely selects the arm; the paired WM test proves the tracked R6 posterior ordering supplies its recorded counterfactual winner."}
+    :note "The implementations remain separate. The zaif test replays D9's tracked live decision and proves its score vector uniquely selects the arm; the paired WM test proves the tracked R6 posterior ordering supplies its recorded counterfactual winner. Residual carried over from the retired :gap -- settlement is population-dependent: all 56 live-record decisions are :score-settled, while D9's 114-session replay population still shows 83 :tie-settled (all [:act :yield], broken by tie-class order), so the case-order path is untested rather than gone."}
    :gap nil
    :blocked-by []}
 
