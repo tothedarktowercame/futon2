@@ -67,21 +67,24 @@
    :blocked-by []}
 
   {:node :R4
-   :spec-test :partial
+   :spec-test :covered
    :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 332
             :substrate :fixture-only :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 343
             :substrate :fixture-only :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 539
-            :substrate :fixture-only :provenance :planted}]
+            :substrate :fixture-only :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zaif_actand_test.clj" :line 166
+            :substrate :zaif :provenance :real
+            :record-id "e-0cae94f2-9ca8-4863-9251-44278445a5f7"}]
    :shared-machinery
    {:status :mapped-separate
     :evidence ["src/futon2/aif/forward_model.clj:25"
                "test/futon2/aif/zaif_full_loop_test.clj:152"
                "../futon3c/src/futon3c/agents/zaif_controller.clj:105"]
-    :note "WM's forward model rejects zaif arms. U6 alone maps zaif scalar arm values into planted WM predictions."}
-   :gap "No real zaif observation model exists. R4 and its ordering are explicitly planted; the negative control at line 539 changes the ordering with the plant."
-   :blocked-by [:D8 :U11 :S7]}
+    :note "WM's forward model still rejects zaif arms. The zaif R4 test materialises U11's tracked arm-session Q_actand records, orders three arms through the production density-to-scalar bridge, and reverses the winner with an explicit density plant while retaining provenance."}
+   :gap nil
+   :blocked-by []}
 
   {:node :R5
    :spec-test :covered
