@@ -1,0 +1,196 @@
+{:reader
+ {:id :u41-tension-ledger,
+  :version "v1",
+  :row :U41,
+  :script "holes/labs/wm-contract/u41_tension_ledger.bb",
+  :ledger "holes/labs/wm-contract/tension-ledger.edn",
+  :implements "DESIGN-tensions-as-patterns.md:86-101",
+  :read-only true,
+  :writes-only-under
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/U41-tension-ledger"},
+ :schema
+ {:tension
+  {:required
+   [:tension/id
+    :tension/poles
+    :tension/statement
+    :tension/statement-source
+    :tension/carried-by
+    :tension/status
+    :tension/born-of
+    :tension/provenance],
+   :optional
+   [:tension/resolution-path
+    :tension/resolution-key
+    :tension/cashed-by
+    :tension/pattern-links
+    :tension/note],
+   :enums
+   #:tension{:status #{:refuted :carried :cashed :dissolved},
+             :born-of
+             #{:refuted-rationale :build-event :operator-dictation}},
+   :rules
+   ["poles are exactly two, both non-blank -- a tension with one pole is a plan"
+    ":tension/statement is verbatim from :tension/statement-source"
+    ":tension/status is the status AT MINT and must equal the type of the mint event"
+    ":tension/pattern-links [] means no graduation is claimed; the birth rule proposes and a person writes"]},
+  :event
+  {:required
+   [:event/id
+    :event/seq
+    :event/tension
+    :event/type
+    :event/at
+    :event/by
+    :event/evidence],
+   :optional [:event/row :event/note :event/to-status],
+   :enums
+   #:event{:type
+           #{:evidence-added :refuted :carried :cashed :dissolved}},
+   :rules
+   ["every tension has exactly one :carried mint event, and it is that tension's lowest :event/seq"
+    "a status-moving event (:cashed/:refuted/:dissolved) requires a non-empty :event/evidence AND an :event/row -- section 3's 'status moves only with a pointer to the cashing/refuting row'"
+    ":evidence-added never moves status; it is how a fact that bears on a carried tension is recorded without ruling on it"
+    ":event/seq is unique and ascending across the whole ledger; events are appended, never rewritten"
+    "no status-moving event may follow a terminal one (:cashed/:refuted/:dissolved) for the same tension"]}},
+ :validation {:defects [], :conforms? true},
+ :current-statuses
+ [{:tension :zaif-v1/T1,
+   :status :carried,
+   :status-since "2026-09-02",
+   :moved-by-row nil,
+   :events 3,
+   :evidence-events 2,
+   :evidence-pointers
+   ["futon2/holes/missions/M-zaif-harness-v1.md:35-36"
+    "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"
+    "futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:23 -- the seam is NAMED as the R6 test's acceptance ('arms OPAQUE at the seam (U5)')"
+    "futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:50-51 -- cascade-grain arms explicitly NOT in v1"
+    "row :U5 -- not found: no such id in futon2/holes/labs/zaif-harness/worklist.edn (36 rows) or futon2/holes/labs/wm-contract/worklist.edn (133 rows); the invariant is named in the spec and has no row"
+    "a test asserting arm opacity -- not found: no occurrence of 'opaque' under /home/joe/code/futon3c/test/futon3c/agents/"
+    "runs/U41-tension-ledger/tension-report.edn :birth-rule (this ledger's own first query: 0 candidates over 3 tensions, 0 of them cashed)"]}
+  {:tension :zaif-v1/T2,
+   :status :carried,
+   :status-since "2026-09-02",
+   :moved-by-row nil,
+   :events 3,
+   :evidence-events 2,
+   :evidence-pointers
+   ["futon2/holes/missions/M-zaif-harness-v1.md:36-38"
+    "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"
+    "futon2/holes/labs/M-zaif-harness/z3-prereg.md:3 -- 'Status: DRAFT — awaiting Joe's review. Nothing below is active.' The sanctioned resolution is written and NOT activated."
+    "futon3c/src/futon3c/agents/zaif_controller.clj:25 -- the shipped :operator-attention-cost is still 0.65"
+    "futon3c/src/futon3c/agents/zaif_controller.clj:151-156 -- the 0.15 sweep value is recorded as z3a-sweep-constant and marked 'NOT shipped'"
+    "futon2/holes/labs/wm-contract/C489-u6-zaif-full-loop.md:83 -- at the 0.15 sweep cost the arm distribution is {:retrieve 15 :ask 99}, i.e. the unreachability is a property of the constant, not of the arm"
+    "futon2/holes/labs/wm-contract/worklist.edn:757 -- :U16's subject is the WM's Bernoulli outcome semantics in preferences.clj:242, run behind a per-call selector with no default moved; it never touches a zaif arm constant"
+    "futon2/holes/labs/zaif-harness/worklist.edn:141 -- :U16z's subject is the R2 memory-tool contract tests (17 tests, 69 assertions), also not the ask arm"
+    "futon3c/src/futon3c/agents/zaif_controller.clj:25 -- unchanged shipped constant, as above"]}
+  {:tension :zaif-v1/T3,
+   :status :carried,
+   :status-since "2026-09-02",
+   :moved-by-row nil,
+   :events 2,
+   :evidence-events 1,
+   :evidence-pointers
+   ["futon2/holes/missions/M-zaif-harness-v1.md:38-39"
+    "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"
+    "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.md:52-55 -- measured over all 13 spec nodes: 'no listed node currently has one production code path serving both the live zaif and WM uptakes. The spec table is presently the mapping between the two implementations.'"
+    "futon2/holes/labs/zaif-harness/worklist.edn:302-308 -- the U10 row that carries that measurement cites tension 3 as its premise"]}],
+ :birth-rule
+ {:tensions-considered 3,
+  :terminal 0,
+  :resolution-keys-seen {},
+  :candidates []},
+ :library-links
+ [{:pattern-id "problems/tension-proposes-candidates",
+   :title "Tension Proposes Candidates",
+   :path
+   "/home/joe/code/futon3/library/problems/tension-proposes-candidates.flexiarg",
+   :resolved true,
+   :relation :prior-art,
+   :note
+   "R6 red-ring pattern: tension should CREATE candidates, not only reorder them. Surfaced rank 1 by the retrieval that answered the originating turn (DESIGN-tensions-as-patterns.md:66-69)."}
+  {:pattern-id "p4ng/tension-detection",
+   :title "Tension Detection",
+   :path
+   "/home/joe/code/futon3/library/p4ng/tension-detection.flexiarg",
+   :resolved false,
+   :resolved-instead
+   "/home/joe/code/futon3/library/p4ng/p4ng-agents.multiarg:89-95 (@arg p4ng/tension-detection, @title Tension Detection)",
+   :relation :prior-art,
+   :note
+   "addressed as an id, but it lives as an @arg inside a multiarg rather than as its own .flexiarg -- so pattern_registry.clj:158-161's id->path resolution would MISS it. Recorded as measured; no fix attempted here."}
+  {:pattern-id "ukrns/design-as-function-of-evidence",
+   :title "Design as a Function of Evidence",
+   :path
+   "/home/joe/code/futon3/library/ukrns/design-as-function-of-evidence.flexiarg",
+   :resolved true,
+   :relation :names-the-method,
+   :note
+   "the rule this ledger obeys: a status is written from evidence, never from taste."}],
+ :cross-cites
+ [{:row :U39,
+   :what "the mint edge for :refuted-rationale tensions",
+   :pointer "runs/U39-selection-retrospective/README.md:265-288",
+   :contract
+   "U39 mints the record shape declared here (it names DESIGN section 3 as the shape owner); this ledger does not fork it. u41_tension_ledger.bb runs U39's worked mint payload through THIS validator as a control."}
+  {:row :U23,
+   :what "the catalog reader gains tensions as a carrier",
+   :pointer
+   "u23_cascade_catalog_reader.clj:299-312 (the ledger read) and :604-634 (the per-subject carrier)",
+   :contract
+   "read-only: the reader counts tensions carried by each subject mission and types the absence when a mission carries none."}],
+ :controls
+ {:negative/a-mint-payload-missing-its-statement-is-refused
+  {:defects [:missing-required-key],
+   :pass? true,
+   :why
+   "the validator must refuse a record the schema does not admit; otherwise the control above passes vacuously"},
+  :negative/birth-rule-needs-two-distinct-contexts
+  {:candidates 0,
+   :pass? true,
+   :why
+   "the same synthetic corpus with both tensions in ONE mission must report zero: recurrence across contexts is the rule, not recurrence"},
+  :negative/fabricated-tension
+  {:subject :fabricated/not-a-tension,
+   :status nil,
+   :events 0,
+   :pass? true,
+   :why
+   "a tension id that exists nowhere must fold to no status and no events; if it did not, the statuses above would be a broken query rather than a fact"},
+  :negative/mutated-ledger-is-refused-status-field
+  {:defects [:status-field-is-not-the-mint-status],
+   :pass? true,
+   :why
+   "the real ledger with T1's status field flipped to :cashed and no cashing event must be REFUSED -- otherwise 'the real ledger conforms' is a statement about a validator that accepts anything"},
+  :negative/mutated-ledger-is-refused-unevidenced-status-move
+  {:defects [:status-move-without-row-or-evidence],
+   :pass? true,
+   :why
+   "a cashing event with no receipt and no row must be refused -- section 3's 'status moves only with a pointer to the cashing/refuting row', mechanised"},
+  :negative/the-real-ledger-conforms
+  {:defects 0,
+   :pass? true,
+   :why "the seed corpus is held to the schema it declares"},
+  :positive/birth-rule-fires-on-a-corpus-that-satisfies-it
+  {:candidates 1,
+   :resolution-key :measure-before-tuning,
+   :pass? true,
+   :why
+   "the real ledger reports zero candidates; this synthetic corpus -- two cashed tensions in two missions sharing a resolution key, each with a receipt -- must report exactly one, so the zero is an absence and not a dead query"},
+  :positive/every-seed-carries-a-pointer
+  {:without-pointers [],
+   :pass? true,
+   :why
+   "the row's standard: every claim carries a file:line pointer, a run-record id, or 'not found'"},
+  :positive/u39-mint-payload-validates
+  {:defects [],
+   :pass? true,
+   :why
+   "U39's worked mint payload (README.md:265-288) validates against THIS schema unchanged -- the cross-cite is runnable rather than asserted, and neither row forked the shape"},
+  :report/birth-rule-is-zero-today
+  {:candidates 0,
+   :terminal 0,
+   :pass? true,
+   :why
+   "stated, not asserted as a pass: zero candidates BECAUSE zero of the three seed tensions has reached a terminal status. The rule cannot fire on carried tensions, by construction."}}}

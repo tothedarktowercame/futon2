@@ -296,6 +296,22 @@
 (def apm-frames-dir (str code-root "/apm-frames"))
 (def flight-runs-dir (str code-root "/futon3c/data/repl-traces"))
 
+;; U41 (2026-09-03): the tension ledger, added as a carrier because
+;; DESIGN-tensions-as-patterns.md section 5 names this reader as its first
+;; consumer ("kin missions sharing a tension is precisely the recurrence the
+;; birth rule watches for").  File-backed and read-only like the other non-store
+;; carriers; a missing ledger is :no-typed-carrier, an unparseable one is
+;; :carrier-unreachable -- never a silent zero.
+(def tension-ledger-path
+  (str code-root "/futon2/holes/labs/wm-contract/tension-ledger.edn"))
+
+(defn read-tension-ledger []
+  (let [f (io/file tension-ledger-path)]
+    (cond
+      (not (.exists f)) [:missing nil]
+      :else (try [:ok (edn/read-string {:default tag-reader} (slurp f))]
+                 (catch Throwable t [:err {:message (.getMessage t)}])))))
+
 (defn json-count
   "The learned phylogeny is small, flat JSON; count its two arrays without a
    JSON dependency this repo does not have on the script classpath."
@@ -465,6 +481,7 @@
         apm-dirs (apm-frame-dirs)
         co-app (json-count phylogeny-path "co_app")
         descent (json-count phylogeny-path "descent")
+        [tension-st tension-ledger] (read-tension-ledger)
 
         ;; ---- per-subject carrier readings ------------------------------------
         reading
@@ -583,7 +600,38 @@
               :apm-frames
               (absent :records-exist-not-keyed-by-mission
                       :corpus {:frames (count apm-dirs) :dir apm-frames-dir}
-                      :note "frames are keyed by Lean problem id (a01A01, …), not by mission")}}))
+                      :note "frames are keyed by Lean problem id (a01A01, …), not by mission")
+              ;; U41: the tension ledger IS keyed by mission (:tension/carried-by),
+              ;; which is why it can answer per subject at all -- the first carrier
+              ;; here that joins to a mission without a bridge.
+              :tensions
+              (case tension-st
+                :missing (absent :no-typed-carrier
+                                 :note "no tension ledger at the declared path"
+                                 :pointers [tension-ledger-path
+                                            "futon2/holes/labs/wm-contract/DESIGN-tensions-as-patterns.md:86 (the proposed record)"])
+                :err (absent :carrier-unreachable :carrier :tensions :error tension-ledger)
+                (let [mine (filterv #(= sid (:tension/carried-by %)) (:tensions tension-ledger))
+                      ev (fn [t] (filterv #(= (:tension/id t) (:event/tension %)) (:events tension-ledger)))]
+                  (if (seq mine)
+                    (observed (count mine)
+                              :ledger tension-ledger-path
+                              :tensions (mapv (fn [t]
+                                                {:id (:tension/id t)
+                                                 :status-at-mint (:tension/status t)
+                                                 :current-status (->> (ev t)
+                                                                      (filter #(#{:carried :cashed :refuted :dissolved} (:event/type %)))
+                                                                      (sort-by :event/seq)
+                                                                      last
+                                                                      :event/type)
+                                                 :born-of (:tension/born-of t)
+                                                 :resolution-key (:tension/resolution-key t)
+                                                 :events (count (ev t))})
+                                              mine))
+                    (absent :records-exist-none-for-subject
+                            :corpus {:tensions (count (:tensions tension-ledger))
+                                     :events (count (:events tension-ledger))
+                                     :carried-by (vec (sort (distinct (map :tension/carried-by (:tensions tension-ledger)))))}))))}}))
 
         readings (mapv (comp reading :id) subjects)
 
@@ -726,7 +774,8 @@
                   (second (map :id subjects)) (nth (map :id subjects) 2)))
     (let [carrier-order [:psr :pur :flight-discharge :trace-decision :trace-shown
                          :clocked-on :held-on-mission :cross-mission-references
-                         :shares-capability-with :pattern-phylogeny :apm-frames]
+                         :shares-capability-with :pattern-phylogeny :apm-frames
+                         :tensions]
           cell (fn [r c] (let [v (get-in r [:carriers c])]
                            (cond
                              (not= :observed (:variant v)) (str "absent/" (name (:reason v)))

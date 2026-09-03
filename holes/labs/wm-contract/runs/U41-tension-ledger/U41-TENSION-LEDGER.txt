@@ -1,0 +1,39 @@
+U41 — TENSION LEDGER: the three carried tensions, typed, folded, and queried
+read-only; the ledger is never written by this script; nothing written outside /home/joe/code/futon2/holes/labs/wm-contract/runs/U41-tension-ledger
+
+VALIDATION
+  3 tensions, 8 events, 0 defects against the schema the ledger declares
+
+CURRENT STATUS — the fold of the events, not the record's mint-time field
+  :zaif-v1/T1      :carried   since 2026-09-02   3 events (2 evidence-added), 7 pointers
+  :zaif-v1/T2      :carried   since 2026-09-02   3 events (2 evidence-added), 9 pointers
+  :zaif-v1/T3      :carried   since 2026-09-02   2 events (1 evidence-added), 4 pointers
+
+BIRTH RULE — recurrence across contexts proposes a pattern candidate
+  3 tensions considered, 0 terminal, 0 candidates
+  Zero candidates today, and the reason is structural rather than incidental:
+  the rule reads RESOLVED tensions, and all three seeds are carried. The first
+  candidate is possible only after two tensions are cashed the same way in two
+  missions. The positive control below shows the query firing on a corpus that
+  does satisfy it, so this zero is an absence, not a dead query.
+
+LIBRARY LINKS — linked, not duplicated (DESIGN-tensions-as-patterns.md:66-72)
+  problems/tension-proposes-candidates       resolved=true  /home/joe/code/futon3/library/problems/tension-proposes-candidates.flexiarg
+  p4ng/tension-detection                     resolved=false → /home/joe/code/futon3/library/p4ng/p4ng-agents.multiarg:89-95 (@arg p4ng/tension-detection, @title Tension Detection)
+  ukrns/design-as-function-of-evidence       resolved=true  /home/joe/code/futon3/library/ukrns/design-as-function-of-evidence.flexiarg
+
+CONTROLS
+  :negative/a-mint-payload-missing-its-statement-is-refused  pass?=true
+  :negative/birth-rule-needs-two-distinct-contexts           pass?=true
+  :negative/fabricated-tension                               pass?=true
+  :negative/mutated-ledger-is-refused-status-field           pass?=true
+  :negative/mutated-ledger-is-refused-unevidenced-status-move pass?=true
+  :negative/the-real-ledger-conforms                         pass?=true
+  :positive/birth-rule-fires-on-a-corpus-that-satisfies-it   pass?=true
+  :positive/every-seed-carries-a-pointer                     pass?=true
+  :positive/u39-mint-payload-validates                       pass?=true
+  :report/birth-rule-is-zero-today                           pass?=true
+
+WHAT IS NOT DONE HERE: no ruling, no status moved by this script, no write to the
+pattern library, no registry entry. The ledger proposes; a person or a reviewed
+row disposes.
