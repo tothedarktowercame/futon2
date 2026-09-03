@@ -1,0 +1,261 @@
+{:row :U43,
+ :generated-by "holes/labs/wm-contract/u43_focus_reconcile.clj",
+ :corpus
+ {:dir "data/wm-trace",
+  :files ["wm-trace-2026-09-02.edn"],
+  :record-count 3},
+ :seam
+ {:focus-resolver
+  "scripts/futon2/report/war_machine.clj:1740 tick-mission-focus, called at :6195",
+  :identity
+  "scripts/futon2/report/war_machine.clj:1610 trace-record-identity, stamped by clock-source at :1977",
+  :flag
+  "scripts/futon2/report/war_machine.clj:125 *focus-reconcile?* / FUTON_WM_FOCUS_RECONCILE",
+  :reconciler
+  "scripts/futon2/report/war_machine.clj:1669 focus-reconciliation",
+  :clock-read
+  "scripts/futon2/report/war_machine.clj:1549 read-active-mission-clock",
+  :render-focus
+  "scripts/futon2/report/war_machine.clj:4068 render-mission-focus-line, appended at :4126",
+  :witness-source
+  "scripts/futon2/report/war_machine.clj:1525 active-clock-edge->mission, witness source at :1547",
+  :render-durable
+  "scripts/futon2/report/war_machine.clj:4058 render-active-mission-line",
+  :vocabulary
+  "scripts/futon2/report/war_machine.clj:1631 focus-reconciliation-cases",
+  :clock-write
+  "scripts/futon2/report/war_machine.clj:1986 record-selection-clock!"},
+ :declared-vocabulary
+ [:agrees
+  :clock-not-read
+  :durable-unreadable
+  :lag-unattributable
+  :lagged-write-landed
+  :lagged-write-missing
+  :no-durable-edge
+  :no-selection-this-tick],
+ :corpus-rows
+ [{:comparable? false,
+   :durable-mission nil,
+   :selected-mission "M-wm-aif-policy-grain-compliance",
+   :durable-reason :no-active-clock,
+   :previous-write-landed? :unknown,
+   :previous-trace-id nil,
+   :rendered
+   "**Tick focus:** M-wm-aif-policy-grain-compliance (this-tick-selection, advance-mission) — durable clock: unavailable (no-active-clock); agrees: no; case: no-durable-edge; previous write landed: unknown (no-durable-edge)",
+   :u21-agrees-with-durable? false,
+   :unknown-reason :no-durable-edge,
+   :case :no-durable-edge,
+   :durable-witness-source nil,
+   :previous-selected-mission-id nil,
+   :run-id "0a18c4f7-758e-400a-8223-9c52edf07450"}
+  {:comparable? true,
+   :durable-mission "M-wm-aif-policy-grain-compliance",
+   :selected-mission "M-zaif-harness-v1",
+   :durable-reason nil,
+   :previous-write-landed? :unknown,
+   :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+   :rendered
+   "**Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-wm-aif-policy-grain-compliance; agrees: no; case: lag-unattributable; previous write landed: unknown (no-witness-source-on-edge)",
+   :u21-agrees-with-durable? false,
+   :unknown-reason :no-witness-source-on-edge,
+   :case :lag-unattributable,
+   :durable-witness-source nil,
+   :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+   :run-id "4abad68c-5481-4402-8f0e-252add62c54b"}
+  {:comparable? true,
+   :durable-mission "M-zaif-harness-v1",
+   :selected-mission "M-expressions-of-interest",
+   :durable-reason nil,
+   :previous-write-landed? :unknown,
+   :previous-trace-id "4abad68c-5481-4402-8f0e-252add62c54b",
+   :rendered
+   "**Tick focus:** M-expressions-of-interest (this-tick-selection, advance-mission) — durable clock: M-zaif-harness-v1; agrees: no; case: lag-unattributable; previous write landed: unknown (no-witness-source-on-edge)",
+   :u21-agrees-with-durable? false,
+   :unknown-reason :no-witness-source-on-edge,
+   :case :lag-unattributable,
+   :durable-witness-source nil,
+   :previous-selected-mission-id "M-zaif-harness-v1",
+   :run-id "801976e7-01c6-4e39-aada-27f620f7c2f1"}],
+ :cases
+ [{:reconciliation
+   {:selected-mission-id "M-zaif-harness-v1",
+    :durable-mission-id nil,
+    :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+    :case :clock-not-read,
+    :comparable? false,
+    :previous-write-landed? :unknown,
+    :unknown-reason :clock-focus-flag-off},
+   :rendered-active-line
+   "(no **Active mission:** line -- FUTON_WM_CLOCK_FOCUS off)",
+   :matches-declared? true,
+   :source :corpus,
+   :in-vocabulary? true,
+   :u21-agrees-with-durable? false,
+   :case-key :clock-not-read,
+   :produced :clock-not-read,
+   :rendered-focus-line
+   "**Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: unavailable (unknown); agrees: no; case: clock-not-read; previous write landed: unknown (clock-focus-flag-off)",
+   :what
+   "FUTON_WM_CLOCK_FOCUS off: `active-mission` is nil, so the durable side was never consulted. U21's boolean reads FALSE here, which an operator reads as `the clock names another mission`."}
+  {:reconciliation
+   {:selected-mission-id "M-zaif-harness-v1",
+    :durable-mission-id nil,
+    :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+    :case :durable-unreadable,
+    :comparable? false,
+    :previous-write-landed? :unknown,
+    :unknown-reason :clock-unreadable},
+   :rendered-active-line
+   "**Active mission:** unavailable (clock-unreadable)",
+   :matches-declared? true,
+   :source :constructed,
+   :in-vocabulary? true,
+   :u21-agrees-with-durable? false,
+   :case-key :durable-unreadable,
+   :produced :durable-unreadable,
+   :rendered-focus-line
+   "**Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: unavailable (clock-unreadable); agrees: no; case: durable-unreadable; previous write landed: unknown (clock-unreadable)",
+   :what
+   "The S4 read's own typed failure. Constructed because no record in the corpus was taken while the store was unreachable; the value is exactly what `read-active-mission-clock` returns (war_machine.clj:1549)."}
+  {:reconciliation
+   {:selected-mission-id "M-zaif-harness-v1",
+    :durable-mission-id nil,
+    :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+    :case :no-durable-edge,
+    :comparable? false,
+    :previous-write-landed? :unknown,
+    :unknown-reason :no-durable-edge},
+   :rendered-active-line
+   "**Active mission:** unavailable (no-active-clock)",
+   :matches-declared? true,
+   :source :corpus,
+   :in-vocabulary? true,
+   :u21-agrees-with-durable? false,
+   :case-key :no-durable-edge,
+   :produced :no-durable-edge,
+   :rendered-focus-line
+   "**Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: unavailable (no-active-clock); agrees: no; case: no-durable-edge; previous write landed: unknown (no-durable-edge)",
+   :what
+   "The successful empty read. Record 0a18c4f7 carries exactly this."}
+  {:reconciliation
+   {:selected-mission-id nil,
+    :durable-mission-id "M-wm-aif-policy-grain-compliance",
+    :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+    :case :no-selection-this-tick,
+    :comparable? false,
+    :previous-write-landed? :unknown,
+    :unknown-reason :no-mission-selected-this-tick},
+   :rendered-active-line
+   "**Active mission:** futon2-d/mission/wm-aif-policy-grain-compliance (M-wm-aif-policy-grain-compliance, clocked 1788356843859, witness selection-decision)",
+   :matches-declared? true,
+   :source :constructed,
+   :in-vocabulary? true,
+   :u21-agrees-with-durable? true,
+   :case-key :no-selection-this-tick,
+   :produced :no-selection-this-tick,
+   :rendered-focus-line
+   "**Tick focus:** M-wm-aif-policy-grain-compliance (durable-clock) — durable clock: M-wm-aif-policy-grain-compliance; agrees: yes; case: no-selection-this-tick; previous write landed: unknown (no-mission-selected-this-tick)",
+   :what
+   "A non-mission decision. Constructed because all three corpus records select a mission; the decision shape is the one `selected-mission-focus` rejects."}
+  {:reconciliation
+   {:comparable? true,
+    :previous-write-landed? :unknown,
+    :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :unknown-reason :not-discriminated-when-sides-agree,
+    :case :agrees,
+    :durable-witness-source nil,
+    :durable-mission-id "M-zaif-harness-v1",
+    :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+    :selected-mission-id "M-zaif-harness-v1"},
+   :rendered-active-line
+   "**Active mission:** futon2-d/mission/wm-aif-policy-grain-compliance (M-zaif-harness-v1, clocked 1788356843859, witness selection-decision)",
+   :matches-declared? true,
+   :source :constructed,
+   :in-vocabulary? true,
+   :u21-agrees-with-durable? true,
+   :case-key :agrees,
+   :produced :agrees,
+   :rendered-focus-line
+   "**Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-zaif-harness-v1; agrees: yes; case: agrees; previous write landed: unknown (not-discriminated-when-sides-agree)",
+   :what
+   "Both sides naming the same mission. Constructed by setting the durable edge's mission-id to the selected one; no corpus record agrees, which is U21's 3-of-3 finding."}
+  {:reconciliation
+   {:selected-mission-id "M-zaif-harness-v1",
+    :durable-mission-id "M-wm-aif-policy-grain-compliance",
+    :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+    :case :lagged-write-landed,
+    :comparable? true,
+    :durable-witness-source "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :previous-write-landed? true},
+   :rendered-active-line
+   "**Active mission:** futon2-d/mission/wm-aif-policy-grain-compliance (M-wm-aif-policy-grain-compliance, clocked 1788356843859, witness selection-decision)",
+   :matches-declared? true,
+   :source :constructed,
+   :in-vocabulary? true,
+   :u21-agrees-with-durable? false,
+   :case-key :lagged-write-landed,
+   :produced :lagged-write-landed,
+   :rendered-focus-line
+   "**Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-wm-aif-policy-grain-compliance; agrees: no; case: lagged-write-landed; previous write landed: yes",
+   :what
+   "The designed one-tick lag: the edge's witness source names the PREVIOUS trace record. Constructed by ONE field -- the witness source, set to the previous record's own id. The corpus cannot supply it: `active-clock-edge->mission` dropped `witness.source` until this row, so no persisted `:active-mission` carries it."}
+  {:reconciliation
+   {:selected-mission-id "M-zaif-harness-v1",
+    :durable-mission-id "M-wm-aif-policy-grain-compliance",
+    :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+    :case :lagged-write-missing,
+    :comparable? true,
+    :durable-witness-source "run-before-the-previous-tick",
+    :previous-write-landed? false},
+   :rendered-active-line
+   "**Active mission:** futon2-d/mission/wm-aif-policy-grain-compliance (M-wm-aif-policy-grain-compliance, clocked 1788356843859, witness selection-decision)",
+   :matches-declared? true,
+   :source :constructed,
+   :in-vocabulary? true,
+   :u21-agrees-with-durable? false,
+   :case-key :lagged-write-missing,
+   :produced :lagged-write-missing,
+   :rendered-focus-line
+   "**Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-wm-aif-policy-grain-compliance; agrees: no; case: lagged-write-missing; previous write landed: NO",
+   :what
+   "THE CASE THIS ROW EXISTS FOR: the edge's witness source names something OTHER than the previous trace record, so the previous tick's fire-and-forget write never landed. Constructed by the same ONE field, set to an older id."}
+  {:reconciliation
+   {:comparable? true,
+    :previous-write-landed? :unknown,
+    :previous-trace-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+    :unknown-reason :no-witness-source-on-edge,
+    :case :lag-unattributable,
+    :durable-witness-source nil,
+    :durable-mission-id "M-wm-aif-policy-grain-compliance",
+    :previous-selected-mission-id "M-wm-aif-policy-grain-compliance",
+    :selected-mission-id "M-zaif-harness-v1"},
+   :rendered-active-line
+   "**Active mission:** futon2-d/mission/wm-aif-policy-grain-compliance (M-wm-aif-policy-grain-compliance, clocked 1788356843859, witness selection-decision)",
+   :matches-declared? true,
+   :source :corpus,
+   :in-vocabulary? true,
+   :u21-agrees-with-durable? false,
+   :case-key :lag-unattributable,
+   :produced :lag-unattributable,
+   :rendered-focus-line
+   "**Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-wm-aif-policy-grain-compliance; agrees: no; case: lag-unattributable; previous write landed: unknown (no-witness-source-on-edge)",
+   :what
+   "The discriminator cannot run: the edge carries no witness source. This is what EVERY corpus record produces today, and it is the honest reading of the live corpus -- the divergence is real and its cause is not yet measurable."}],
+ :controls
+ {:every-case-produced-what-it-declared true,
+  :every-case-in-declared-vocabulary true,
+  :u21-boolean-false-covers-these-cases
+  [:clock-not-read
+   :durable-unreadable
+   :lag-unattributable
+   :lagged-write-landed
+   :lagged-write-missing
+   :no-durable-edge],
+  :u21-boolean-false-case-count 6}}

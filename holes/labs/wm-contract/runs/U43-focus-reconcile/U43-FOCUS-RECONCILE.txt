@@ -1,0 +1,147 @@
+U43 -- focus projection vs witnessed clock edge, reconciled
+============================================================
+
+Corpus: wm-trace-2026-09-02.edn -- 3 records.
+Replay only: no live tick, no run lock, nothing written under data/.
+
+1. THE SEAM, WITH POINTERS
+
+   clock-read       scripts/futon2/report/war_machine.clj:1549 read-active-mission-clock
+   clock-write      scripts/futon2/report/war_machine.clj:1986 record-selection-clock!
+   flag             scripts/futon2/report/war_machine.clj:125 *focus-reconcile?* / FUTON_WM_FOCUS_RECONCILE
+   focus-resolver   scripts/futon2/report/war_machine.clj:1740 tick-mission-focus, called at :6195
+   identity         scripts/futon2/report/war_machine.clj:1610 trace-record-identity, stamped by clock-source at :1977
+   reconciler       scripts/futon2/report/war_machine.clj:1669 focus-reconciliation
+   render-durable   scripts/futon2/report/war_machine.clj:4058 render-active-mission-line
+   render-focus     scripts/futon2/report/war_machine.clj:4068 render-mission-focus-line, appended at :4126
+   vocabulary       scripts/futon2/report/war_machine.clj:1631 focus-reconciliation-cases
+   witness-source   scripts/futon2/report/war_machine.clj:1525 active-clock-edge->mission, witness source at :1547
+
+2. THE CORPUS AS IT STANDS
+
+   run       selected this tick                     case                   U21 :agrees?
+   0a18c4f7  M-wm-aif-policy-grain-compliance       no-durable-edge        false
+   4abad68c  M-zaif-harness-v1                      lag-unattributable     false
+   801976e7  M-expressions-of-interest              lag-unattributable     false
+
+   No corpus record reaches :lagged-write-landed or
+   :lagged-write-missing, and that is a finding, not a gap in the
+   replay: the S4 read dropped the edge's witness source until this
+   row, so every persisted :active-mission is missing the one field
+   that discriminates them. On the live corpus the honest answer is
+   :lag-unattributable -- the divergence is real and its cause is
+   not yet measurable. It becomes measurable on the next tick run
+   with FUTON_WM_FOCUS_RECONCILE=1.
+
+3. EVERY CASE IN THE VOCABULARY, AND WHAT IT RECORDS
+
+   clock-not-read  [corpus]
+     FUTON_WM_CLOCK_FOCUS off: `active-mission` is nil, so the durable side was never consulted. U21's boolean reads FALSE here, which an operator reads as `the clock names another mission`.
+     produced          clock-not-read   (declared match: true; in vocabulary: true)
+     comparable?       false
+     previous write    :unknown  (clock-focus-flag-off)
+     U21 :agrees?      false
+     renders as        **Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: unavailable (unknown); agrees: no; case: clock-not-read; previous write landed: unknown (clock-focus-flag-off)
+
+   durable-unreadable  [constructed]
+     The S4 read's own typed failure. Constructed because no record in the corpus was taken while the store was unreachable; the value is exactly what `read-active-mission-clock` returns (war_machine.clj:1549).
+     produced          durable-unreadable   (declared match: true; in vocabulary: true)
+     comparable?       false
+     previous write    :unknown  (clock-unreadable)
+     U21 :agrees?      false
+     renders as        **Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: unavailable (clock-unreadable); agrees: no; case: durable-unreadable; previous write landed: unknown (clock-unreadable)
+
+   no-durable-edge  [corpus]
+     The successful empty read. Record 0a18c4f7 carries exactly this.
+     produced          no-durable-edge   (declared match: true; in vocabulary: true)
+     comparable?       false
+     previous write    :unknown  (no-durable-edge)
+     U21 :agrees?      false
+     renders as        **Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: unavailable (no-active-clock); agrees: no; case: no-durable-edge; previous write landed: unknown (no-durable-edge)
+
+   no-selection-this-tick  [constructed]
+     A non-mission decision. Constructed because all three corpus records select a mission; the decision shape is the one `selected-mission-focus` rejects.
+     produced          no-selection-this-tick   (declared match: true; in vocabulary: true)
+     comparable?       false
+     previous write    :unknown  (no-mission-selected-this-tick)
+     U21 :agrees?      true
+     renders as        **Tick focus:** M-wm-aif-policy-grain-compliance (durable-clock) — durable clock: M-wm-aif-policy-grain-compliance; agrees: yes; case: no-selection-this-tick; previous write landed: unknown (no-mission-selected-this-tick)
+
+   agrees  [constructed]
+     Both sides naming the same mission. Constructed by setting the durable edge's mission-id to the selected one; no corpus record agrees, which is U21's 3-of-3 finding.
+     produced          agrees   (declared match: true; in vocabulary: true)
+     comparable?       true
+     previous write    :unknown  (not-discriminated-when-sides-agree)
+     U21 :agrees?      true
+     renders as        **Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-zaif-harness-v1; agrees: yes; case: agrees; previous write landed: unknown (not-discriminated-when-sides-agree)
+
+   lagged-write-landed  [constructed]
+     The designed one-tick lag: the edge's witness source names the PREVIOUS trace record. Constructed by ONE field -- the witness source, set to the previous record's own id. The corpus cannot supply it: `active-clock-edge->mission` dropped `witness.source` until this row, so no persisted `:active-mission` carries it.
+     produced          lagged-write-landed   (declared match: true; in vocabulary: true)
+     comparable?       true
+     previous write    true
+     U21 :agrees?      false
+     renders as        **Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-wm-aif-policy-grain-compliance; agrees: no; case: lagged-write-landed; previous write landed: yes
+
+   lagged-write-missing  [constructed]
+     THE CASE THIS ROW EXISTS FOR: the edge's witness source names something OTHER than the previous trace record, so the previous tick's fire-and-forget write never landed. Constructed by the same ONE field, set to an older id.
+     produced          lagged-write-missing   (declared match: true; in vocabulary: true)
+     comparable?       true
+     previous write    false
+     U21 :agrees?      false
+     renders as        **Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-wm-aif-policy-grain-compliance; agrees: no; case: lagged-write-missing; previous write landed: NO
+
+   lag-unattributable  [corpus]
+     The discriminator cannot run: the edge carries no witness source. This is what EVERY corpus record produces today, and it is the honest reading of the live corpus -- the divergence is real and its cause is not yet measurable.
+     produced          lag-unattributable   (declared match: true; in vocabulary: true)
+     comparable?       true
+     previous write    :unknown  (no-witness-source-on-edge)
+     U21 :agrees?      false
+     renders as        **Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-wm-aif-policy-grain-compliance; agrees: no; case: lag-unattributable; previous write landed: unknown (no-witness-source-on-edge)
+
+4. THE TWO LINES, NEVER COLLAPSED (half b)
+
+   **Active mission:** futon2-d/mission/wm-aif-policy-grain-compliance (M-wm-aif-policy-grain-compliance, clocked 1788356843859, witness selection-decision)
+   **Tick focus:** M-zaif-harness-v1 (this-tick-selection, advance-mission) — durable clock: M-wm-aif-policy-grain-compliance; agrees: no; case: lagged-write-missing; previous write landed: NO
+
+   The first line is `render-active-mission-line`, unchanged by this
+   row and byte-identical to what it rendered before. The second is
+   `render-mission-focus-line`, appended after it and never folded
+   into it. It is present only when the judgement carries
+   :mission-focus (U21's flag), and it reads no environment
+   variable -- the case clause appears only when the record itself
+   carries a :reconciliation.
+
+5. CONTROLS
+
+   every case produced what it declared      true
+   every case in the declared vocabulary     true
+   U21's `false` covers 6 distinct cases:    clock-not-read, durable-unreadable, lag-unattributable, lagged-write-landed, lagged-write-missing, no-durable-edge
+
+   The last line is the row's finding in one number: on these inputs
+   `:agrees-with-durable? false` is returned for several different
+   states, including one where the durable side was never read. That
+   is why the case vocabulary is added BESIDE the boolean rather
+   than replacing it -- U21's field is pinned by tests and by a
+   committed replay, and a reader that needs the distinction now has
+   :case.
+
+6. WHAT THIS DOES NOT DO
+
+   It mints NO clock edge, retries NO write, and changes NO focus.
+   The chosen option is `record the divergence and let a later tick
+   clear it` (:choices :focus-clock-reconciliation): it makes the
+   dropped write VISIBLE, it does not repair it.
+   record-selection-clock! is still a fire-and-forget future whose
+   failure is printed to stderr and dropped; a tick that records
+   :lagged-write-missing does not re-attempt the write. Repairing
+   the write -- a retry, or a same-tick witnessed edge -- would
+   change what a clock edge MEANS and needs its own witness rule
+   named, which the row's statement puts out of scope. It remains
+   open, and is NOT minted as a row here.
+
+   The reconciliation is a terminal projection: computed from
+   wm-decision and the previous trace record, both already final,
+   and attached after ranking and selection. Nothing it records can
+   move a rank, a weight, a temperature, an admissibility verdict or
+   a selection. Default OFF; flipping it is J-gated.
