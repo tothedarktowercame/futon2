@@ -96,8 +96,14 @@
    :blocked-by []}
 
   {:node :R6
-   :spec-test :partial
-   :tests [{:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 7
+   :spec-test :covered
+   :tests [{:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 26
+            :substrate :zaif :provenance :real
+            :record-id "e-0f2f9aec-6240-40e9-a25a-e45d9452076f"}
+           {:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 47
+            :substrate :wm :provenance :real
+            :record-id "4abad68c-5481-4402-8f0e-252add62c54b"}
+           {:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 69
             :substrate :zaif :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 401
             :substrate :zaif :provenance :real}
@@ -107,9 +113,9 @@
    {:status :mapped-separate
     :evidence ["src/futon2/aif/habit_prior.clj:100" "src/futon2/aif/policy.clj:157"
                "../futon3c/src/futon3c/agents/zaif_controller.clj:124"]
-    :note "U6 feeds real zaif arm history to WM habit-prior, then WM posterior machinery; the shipped zaif controller selects by its own arm-value ordering."}
-   :gap "No shared posterior serves both live uptakes. In the recorded corpus 83/114 choices were settled by zaif case order rather than a score; D9 owns the after-D8 replay."
-   :blocked-by [:D9 :S7]}
+    :note "The implementations remain separate. The zaif test replays D9's tracked live decision and proves its score vector uniquely selects the arm; the paired WM test proves the tracked R6 posterior ordering supplies its recorded counterfactual winner."}
+   :gap nil
+   :blocked-by []}
 
   {:node :R7
    :spec-test :missing
