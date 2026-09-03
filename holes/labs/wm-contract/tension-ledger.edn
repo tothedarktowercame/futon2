@@ -39,9 +39,11 @@
   {:required [:tension/id :tension/poles :tension/statement :tension/statement-source
               :tension/carried-by :tension/status :tension/born-of :tension/provenance]
    :optional [:tension/resolution-path :tension/resolution-key :tension/cashed-by
-              :tension/pattern-links :tension/note]
+              :tension/pattern-links :tension/note :tension/refusal
+              :tension/minted-by]
    :enums {:tension/status #{:carried :cashed :refuted :dissolved}
-           :tension/born-of #{:operator-dictation :refuted-rationale :build-event}}
+           :tension/born-of #{:operator-dictation :refuted-rationale :build-event
+                              :refused-prediction}}
    :rules ["poles are exactly two, both non-blank -- a tension with one pole is a plan"
            ":tension/statement is verbatim from :tension/statement-source"
            ":tension/status is the status AT MINT and must equal the type of the mint event"
@@ -149,7 +151,38 @@
     :how "operator dictation in session, 2026-09-02, three exchanges (futon2/holes/missions/M-zaif-harness-v1.md:40)"
     :pointers ["futon2/holes/missions/M-zaif-harness-v1.md:38-39 (the statement)"
                "futon2/holes/labs/zaif-harness/worklist.edn:302-308 (the :U10 row cites 'carried tension 3' as a premise: 'the microservices claim is a goal, and the matrix says per node whether it is cashed')"]
-    :retrofitted-by {:row :U41 :by "claude-1" :at "2026-09-03"}}}]
+    :retrofitted-by {:row :U41 :by "claude-1" :at "2026-09-03"}}}
+
+  {:tension/id
+   [:refused-prediction
+    {:q-actand/refusal :q-actand/zero-support-after-kin-pool
+     :grain :arm-session
+     :actand {:route :actand :correction-label true}
+     :action :retrieve
+     :target :gold-judged
+     :kin []}]
+   :tension/poles ["make a finite prediction" "preserve the finite-evidence gate"]
+   :tension/statement "{:q-actand/refusal :q-actand/zero-support-after-kin-pool, :grain :arm-session, :actand {:route :actand, :correction-label true}, :action :retrieve, :target :gold-judged, :kin []}"
+   :tension/statement-source "futon2/holes/labs/zaif-harness/worklist.edn:248-251"
+   :tension/carried-by "M-zaif-harness-v1"
+   :tension/resolution-path nil
+   :tension/status :carried
+   :tension/born-of :refused-prediction
+   :tension/pattern-links []
+   :tension/refusal
+   {:q-actand/refusal :q-actand/zero-support-after-kin-pool
+    :grain :arm-session
+    :actand {:route :actand :correction-label true}
+    :action :retrieve
+    :target :gold-judged
+    :kin []}
+   :tension/minted-by {:row :U28z :seat :codex-work}
+   :tension/provenance
+   {:who "zaif rung-3 refusal mint"
+    :when "2026-09-03"
+    :record-ids ["e-b78c3d3b-a530-40c7-a333-ec4e6b258fe4"]
+    :pointers ["futon2/holes/labs/zaif-harness/worklist.edn:248-251"
+               "futon3c/src/futon3c/agents/zaif_actand.clj"]}}]
 
  ;; ------------------------------------------------------------------------
  ;; EVENTS.  Appended, never rewritten.  seq 1-3 are the mints (dated to the
@@ -221,4 +254,30 @@
    :event/type :evidence-added :event/at "2026-09-03" :event/by "claude-1 (row :U41)"
    :event/row :U41
    :event/evidence ["runs/U41-tension-ledger/tension-report.edn :birth-rule (this ledger's own first query: 0 candidates over 3 tensions, 0 of them cashed)"]
-   :event/note "recorded against T1 because T1 is the ledger's first record; the finding is about the ledger, not about T1. Kept as an event rather than a prose line so that the first birth-rule reading is itself append-only evidence."}]}
+   :event/note "recorded against T1 because T1 is the ledger's first record; the finding is about the ledger, not about T1. Kept as an event rather than a prose line so that the first birth-rule reading is itself append-only evidence."}
+
+  {:event/id
+   [:refused-prediction
+    {:q-actand/refusal :q-actand/zero-support-after-kin-pool
+     :grain :arm-session
+     :actand {:route :actand :correction-label true}
+     :action :retrieve
+     :target :gold-judged
+     :kin []}
+    :mint]
+   :event/seq 9
+   :event/tension
+   [:refused-prediction
+    {:q-actand/refusal :q-actand/zero-support-after-kin-pool
+     :grain :arm-session
+     :actand {:route :actand :correction-label true}
+     :action :retrieve
+     :target :gold-judged
+     :kin []}]
+   :event/type :carried
+   :event/at "2026-09-03"
+   :event/by "zaif rung-3 refusal mint (row :U28z)"
+   :event/to-status :carried
+   :event/row :U28z
+   :event/evidence
+   ["calibration-sessions.edn record e-b78c3d3b-a530-40c7-a333-ec4e6b258fe4"]}]}

@@ -3,11 +3,10 @@
 ;;
 ;;   bb holes/labs/wm-contract/u41_tension_ledger.bb [outdir]
 ;;
-;; READ-ONLY over everything except its own artifact directory (default
-;; runs/U41-tension-ledger/). No tick, no run lock, no substrate call, no
-;; network. The ledger itself (tension-ledger.edn) is READ, never written: this
-;; script cannot append an event, because appending is an authoring act and the
-;; append-only discipline is worth more than the convenience.
+;; The report path is read-only over the ledger. `append-tension!` is the sole
+;; write API: it validates the existing and proposed ledgers, adds exactly one
+;; tension and mint event, and atomically replaces the file. No tick, run lock,
+;; substrate call, or network is involved.
 ;;
 ;; WHAT IT DOES, in the order the row asks for it:
 ;;   (a) VALIDATES tension-ledger.edn against the schema DECLARED IN THAT FILE
@@ -139,6 +138,41 @@
                                         (drop (inc terminal-at) es)))
              [{:kind :tension :subject tid :defect :status-move-after-a-terminal-event}])))
        by-tension)))))
+
+(defn append-tension!
+  "Validated append-only API. Replaying the identical pair is a no-op; any
+  partial/conflicting identity or invalid ledger is refused before writing."
+  [tension event]
+  (let [ledger (edn/read-string (slurp ledger-path))
+        existing-defects (validate ledger)
+        old-t (some #(when (= (:tension/id tension) (:tension/id %)) %) (:tensions ledger))
+        old-e (some #(when (= (:event/id event) (:event/id %)) %) (:events ledger))]
+    (when (seq existing-defects)
+      (throw (ex-info "existing tension ledger is invalid" {:defects existing-defects})))
+    (cond
+      (and (= tension old-t) (= event old-e))
+      {:status :already-present :tension/id (:tension/id tension)}
+
+      (or old-t old-e)
+      (throw (ex-info "refusal identity conflicts with an existing append"
+                      {:tension/id (:tension/id tension) :event/id (:event/id event)}))
+
+      :else
+      (let [next-seq (inc (reduce max 0 (map :event/seq (:events ledger))))
+            candidate (-> ledger
+                          (update :tensions conj tension)
+                          (update :events conj (assoc event :event/seq next-seq)))
+            defects (validate candidate)]
+        (when (seq defects)
+          (throw (ex-info "proposed tension append is invalid" {:defects defects})))
+        (let [tmp (io/file lab "tension-ledger.edn.u41-append")]
+          (spit tmp (str (with-out-str (pp/pprint candidate))))
+          (java.nio.file.Files/move
+           (.toPath tmp) (.toPath ledger-path)
+           (into-array java.nio.file.CopyOption
+                       [java.nio.file.StandardCopyOption/ATOMIC_MOVE
+                        java.nio.file.StandardCopyOption/REPLACE_EXISTING])))
+        {:status :appended :tension/id (:tension/id tension)}))))
 
 ;; ---------------------------------------------------------------------------
 ;; (b) The fold: current status is the last status-moving event.
@@ -280,6 +314,15 @@
        {:defects (mapv :defect ds)
         :pass? (some #(= :status-move-without-row-or-evidence (:defect %)) ds)
         :why "a cashing event with no receipt and no row must be refused -- section 3's 'status moves only with a pointer to the cashing/refuting row', mechanised"})
+     :negative/planted-double-mint-is-refused
+     (let [t (last (:tensions ledger))
+           e (last (:events ledger))
+           mutated (-> ledger (update :tensions conj t) (update :events conj e))
+           ds (validate mutated)]
+       {:defects (mapv :defect ds)
+        :pass? (and (some #(= :duplicate-tension-id (:defect %)) ds)
+                    (some #(= :duplicate-event-id (:defect %)) ds))
+        :why "a planted second mint of the same refusal identity must be refused; append-tension! instead returns :already-present for an exact replay"})
      :negative/the-real-ledger-conforms
      {:defects (count defects)
       :pass? (zero? (count defects))
@@ -324,8 +367,8 @@
                 :library-links (:ledger/library-links ledger)
                 :cross-cites (:ledger/cross-cites ledger)
                 :controls ctrls}]
-    (emit "U41 — TENSION LEDGER: the three carried tensions, typed, folded, and queried")
-    (emit "read-only; the ledger is never written by this script; nothing written outside "
+    (emit "U41 — TENSION LEDGER: carried tensions, typed, folded, and queried")
+    (emit "report mode is read-only; the validated append API was not invoked; report writes only under "
           (.getPath outdir))
     (emit "")
     (emit "VALIDATION")
