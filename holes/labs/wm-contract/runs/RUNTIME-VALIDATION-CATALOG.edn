@@ -1,0 +1,1009 @@
+;; RUNTIME-VALIDATION-CATALOG.edn -- worklist row :U36.
+;;
+;; Every runtime validation of the War Machine that can be PRODUCED TODAY with
+;; evidence, organised per R node first (Joe 2026-09-03: per-node "is what was
+;; really missing last time") and then per global run.
+;;
+;; WHAT A ROW IS. One validation: a named thing that can be RUN, that answers
+;; about the machine's behaviour, and whose answer leaves an artifact. A row
+;; names the validation, the pointer that locates it, the KIND of evidence it
+;; produces, its STATUS as measured on 2026-09-03, and which J-gated flip it
+;; becomes a gate line for (the U32 feed).
+;;
+;; WHAT A ROW IS NOT. It is not a claim that the validation is sufficient, and
+;; it is not a ruling. Where a validation exists but its subject is planted
+;; rather than recorded, the row says so in :provenance; where a validation is
+;; missing, the row is :named-gap and carries the row id that owns the gap.
+;;
+;; STATUSES WERE MEASURED, NOT ASSERTED. Every :test-green row names a
+;; namespace in :test-runs, and every entry of :test-runs is one recorded
+;; invocation on 2026-09-03 with its exit code. 102 namespaces were run one
+;; JVM each; the raw log is runs/U36-runtime-validation/test-run-2026-09-03.txt.
+;; Three came back RED and are typed :red here rather than counted as coverage.
+;;
+;; POINTER CONVENTION. Every pointer is REPO-RELATIVE FROM /home/joe/code, with
+;; an optional :LINE or :A-B. runtime_validation_check.bb resolves all of them
+;; by direct path join. This is deliberately not pointer_check.bb's bare-filename
+;; allowlist: this catalog cites five repositories and two test trees, which is
+;; exactly the shape that made a valid pointer read as "file not found" six
+;; times in that checker's own history (its header records C472, C473, AC7,
+;; U11, U13, U23).
+{:schema :wm/runtime-validation-catalog-v1
+ :row :U36
+ :as-of "2026-09-03"
+ :owner :wm-organization
+ :organizing-axis :per-node
+ :heads {:futon2 "42a957c" :futon3c "17fde898"}
+ :validator "futon2/holes/labs/wm-contract/runtime_validation_check.bb"
+ :raw-run-log "futon2/holes/labs/wm-contract/runs/U36-runtime-validation/test-run-2026-09-03.txt"
+
+ :node-set [:R1 :R2 :R3 :R4 :R5 :R6 :R7 :R8 :R9 :R10 :R11 :R12 :R13 :R14 :R15
+            :R16 :R17 :R20 :TRACE]
+ :node-set-source
+ "p4ng/empirics-futon/control-stages.edn:6-27 -- the drawn authority, 19 nodes
+  including TRACE. R19 (the C/preference stack) is named in the Lean run
+  witness (mathlib4/DarkTower/WarMachine/Holes.lean:6592) and carries its own
+  validations, but it is not a node of the drawn map, so its rows are
+  :global-run rather than :per-node. Recorded as an observation about the two
+  node vocabularies; no ruling."
+
+ :vocabulary
+ {:axis [:per-node :global-run]
+  :evidence-kind [:test-green          ;; a test namespace that runs and passes
+                  :replay-artifact     ;; a script re-run over recorded records, emitting a file
+                  :typed-record        ;; a persisted record with a declared schema
+                  :negative-control    ;; a planted defect the check must refuse
+                  :not-yet-produced]   ;; the validation does not exist
+  :status [:exists              ;; runs today and answers
+           :exists-but-stale    ;; runs, but its subject or its pin has moved past it
+           :red                 ;; runs and FAILS today
+           :named-gap]          ;; nothing to run
+  :substrate [:wm :zaif :fixture-only :cross :none]
+  :binding [:self-declared        ;; the test's own docstring names the node
+            :by-source-namespace  ;; the registry's :code names the ns this test covers
+            :by-registry-row      ;; a row of aif-equations.edn or witness-registry.edn
+            :by-run-record        ;; a recorded run/tick record
+            :by-matrix]}          ;; U10's per-node matrix
+
+ ;; ---------------------------------------------------------------------------
+ ;; THE J-GATED FLIPS. U32 enumerates flip x blocking-red; this catalog supplies
+ ;; the per-node half of that product. :exercises is derived from the flag's own
+ ;; read site and the code path it turns on -- pointers, not intuition.
+ ;; ---------------------------------------------------------------------------
+ :flips
+ {:mission-c
+  {:flip "FUTON_WM_MISSION_C=1"
+   :read-at "futon2/scripts/futon2/report/war_machine.clj:85-99"
+   :requires ["FUTON_WM_CLOCK_FOCUS=1 (futon2/scripts/futon2/report/war_machine.clj:80-83)"]
+   :what "Reads the clocked mission's completion criteria, builds C_mis, records risk_mis per mission action. Attached to the judgement AFTER ranking and selection, so no selector reads it."
+   :exercises [:R2 :R4 :R5]
+   :exercise-basis "futon2/src/futon2/aif/mission_c.clj:14-22 states the three things it does: READS criteria as declared observables (R2 grain), BUILDS C_mis through the same c-distribution constructor as C_int (the C stack), SCORES risk_mis under the v0 status-quo forward model (R4 into R5's risk term)."
+   :owner-row :U11}
+
+  :selection-law
+  {:flip "FUTON_WM_SELECTION_LAW=full-score-posterior"
+   :read-at "futon2/scripts/futon2/report/war_machine.clj:207-219"
+   :requires ["FUTON_WM_FPI_POSTERIOR=1, checked loudly by selection-law-preconditions! (futon2/scripts/futon2/report/war_machine.clj:227-240)"]
+   :what "Makes the chosen action the argmax of the ln E - G/tau - F_pi posterior instead of the head of the G-ordered controller list."
+   :exercises [:R5 :R6 :R8 :R14 :R16]
+   :exercise-basis "The posterior it selects by is policy/softmax-weights (aif-equations.edn :policy-posterior :code, futon2/src/futon2/aif/policy.clj:196-201), whose imports are E, G, tau and F_pi; the selection it replaces is the first admissible controller entry (futon2/src/futon2/aif/policy.clj:247-250)."
+   :owner-row :U1}
+
+  :fpi-posterior
+  {:flip "FUTON_WM_FPI_POSTERIOR=1"
+   :read-at "futon2/scripts/futon2/report/war_machine.clj:135-153"
+   :requires ["FUTON_WM_FPI_DARK=1 and FUTON_WM_TRACE_POLICY_DETAILS=1 on the PREVIOUS tick; refused loudly by f-pi-posterior-preconditions! (futon2/scripts/futon2/report/war_machine.clj:155-183)"]
+   :what "Puts the dark-readback F_pi into the live policy posterior at policy/softmax-weights (parr2022 B.9). Already run live under RUN9/S4; still default off."
+   :exercises [:R4 :R6 :R8]
+   :exercise-basis "aif-equations.edn :policy-free-energy imports Q-o-pi (R4) and o, defines F_pi at R8, and its :live-consumer is :policy-posterior at R6."
+   :owner-row :U1}
+
+  :tau-variational
+  {:flip "FUTON_WM_TAU_MODE=variational-beta-gamma"
+   :read-at "futon2/scripts/futon2/report/war_machine.clj:740-761"
+   :requires ["the beta/F_pi chain; the coupling is checked by variational-tau-preconditions!"]
+   :what "tau_eff = beta, the root of friston2017 eq. 2.7 solved on this tick's field, gamma = 1/beta. A different law, not a third calibration of the selection gain."
+   :exercises [:R6 :R8 :R14]
+   :exercise-basis "aif-equations.edn :temperature is defined at R14 and consumed by :policy-posterior at R6; the beta solve reads the dark F_pi computed at R8 (futon2/scripts/futon2/report/war_machine.clj:114-132)."
+   :owner-row :U2}
+
+  :guide-gate
+  {:flip "the dated boolean flip: :receipt/independent-review? -> checked-handoff/grade-receipt"
+   :read-at "futon2/holes/labs/zaif-harness/runs/U14d-consumer-census.md:23-31"
+   :requires ["persisted :receipt/depositor-seat and :receipt/reviewer-seat on new receipts"]
+   :what "Three boolean gates migrate to the computed grade. Intentional interpretation change at the guide gate: an :asserted-unverified receipt stops reading as demonstrated independence."
+   :exercises [:R9]
+   :exercise-basis "All three gates are self-certification refusals -- futon3c/src/futon3c/apm/countdown_control.clj:1245-1251 and :1322-1328 refuse when the reviewer is the depositor -- which is R9's own property (p4ng/empirics-futon/control-stages.edn:23, 'No self- certification')."
+   :owner-row :U14}
+
+  :zaif-u14e
+  {:flip "U14e-flip: retirement of the legacy tickle verdict path"
+   :read-at "futon2/holes/labs/zaif-harness/runs/U14-tickle-migration-proposal-v1.md:1-20"
+   :requires ["the U14e-1..4 packets landed and their census taken; a separate queued-J decision"]
+   :what "Retires the prose-verdict tickle path now that the checked-handoff event is emitted at all four touchpoints. Packets 1-3 landed; e-4 parked behind U11f."
+   :exercises [:R9]
+   :exercise-basis "The migrated emission is the R9 checked-handoff event (futon3c/src/futon3c/apm/checked_handoff.clj:85-122), the same worker-authored-verdict refusal the guide gate reads."
+   :owner-row :U14}}
+
+ ;; ---------------------------------------------------------------------------
+ ;; THE RUNS. One entry per namespace invoked on 2026-09-03, one JVM each.
+ ;; futon2: clojure -X:test :nses '[<ns>]'   futon3c: clojure -M:test -n <ns>
+ ;; Only namespaces cited by a row appear here; the full 102-namespace log is
+ ;; runs/U36-runtime-validation/test-run-2026-09-03.txt.
+ ;; ---------------------------------------------------------------------------
+ :test-runs
+ {"futon2.aif.belief-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.belief-test]'" :exit 0 :tests 78 :assertions 2030 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.observation-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.observation-test]'" :exit 0 :tests 6 :assertions 30 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.memory-contract-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.memory-contract-test]'" :exit 0 :tests 9 :assertions 43 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.forward-model-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.forward-model-test]'" :exit 0 :tests 24 :assertions 72 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.efe-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.efe-test]'" :exit 0 :tests 35 :assertions 137 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.efe-risk-mode-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.efe-risk-mode-test]'" :exit 0 :tests 5 :assertions 24 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.policy-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.policy-test]'" :exit 0 :tests 54 :assertions 296 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.habit-prior-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.habit-prior-test]'" :exit 0 :tests 6 :assertions 18 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.selection-score-readiness-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.selection-score-readiness-test]'" :exit 0 :tests 19 :assertions 340 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.precision-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.precision-test]'" :exit 0 :tests 24 :assertions 45 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.policy-precision-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.policy-precision-test]'" :exit 0 :tests 25 :assertions 138 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.free-energy-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.free-energy-test]'" :exit 0 :tests 28 :assertions 162 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.policy-free-energy-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.policy-free-energy-test]'" :exit 0 :tests 8 :assertions 19 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.r9-named-validation-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.r9-named-validation-test]'" :exit 0 :tests 7 :assertions 10 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.enact-scheduled-path-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.enact-scheduled-path-test]'" :exit 0 :tests 5 :assertions 11 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.hierarchical-budget-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.hierarchical-budget-test]'" :exit 0 :tests 8 :assertions 26 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.intrinsic-values-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.intrinsic-values-test]'" :exit 0 :tests 9 :assertions 46 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.efe-structural-pressure-mode-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.efe-structural-pressure-mode-test]'" :exit 0 :tests 4 :assertions 46 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.rollout-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.rollout-test]'" :exit 0 :tests 25 :assertions 236 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.selection-gain-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.selection-gain-test]'" :exit 0 :tests 22 :assertions 64 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.temporal-hierarchy-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.temporal-hierarchy-test]'" :exit 0 :tests 9 :assertions 37 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.close-loop-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.close-loop-test]'" :exit 0 :tests 2 :assertions 13 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.fold-realized-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.fold-realized-test]'" :exit 0 :tests 6 :assertions 51 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.bmr-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.bmr-test]'" :exit 0 :tests 5 :assertions 15 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.a4a-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.a4a-test]'" :exit 0 :tests 17 :assertions 57 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.r17-offline-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.r17-offline-test]'" :exit 0 :tests 4 :assertions 20 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.tripwire-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.tripwire-test]'" :exit 0 :tests 31 :assertions 68 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.trace-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.trace-test]'" :exit 0 :tests 43 :assertions 131 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.mission-c-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.mission-c-test]'" :exit 0 :tests 29 :assertions 2658 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.preferences-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.preferences-test]'" :exit 0 :tests 5 :assertions 20 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.preferences-cdist-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.preferences-cdist-test]'" :exit 0 :tests 24 :assertions 814 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.invariant-model-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.invariant-model-test]'" :exit 0 :tests 7 :assertions 8 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon2.aif.zaif-full-loop-test" {:repo :futon2 :cmd "clojure -X:test :nses '[futon2.aif.zaif-full-loop-test]'" :exit 0 :tests 22 :assertions 232 :failures 0 :errors 0 :at "2026-09-03"}
+  "r2-channel-contract-test" {:repo :futon2 :cmd "clojure -X:test :nses '[r2-channel-contract-test]'" :exit 0 :tests 6 :assertions 35 :failures 0 :errors 0 :at "2026-09-03"}
+  "r8-f-contract-test" {:repo :futon2 :cmd "clojure -X:test :nses '[r8-f-contract-test]'" :exit 0 :tests 13 :assertions 65 :failures 0 :errors 0 :at "2026-09-03"}
+  "r9-independence-test" {:repo :futon2 :cmd "clojure -X:test :nses '[r9-independence-test]'" :exit 0 :tests 2 :assertions 10 :failures 0 :errors 0 :at "2026-09-03"}
+  "run-tick-once-test" {:repo :futon2 :cmd "clojure -X:test :nses '[run-tick-once-test]'" :exit 0 :tests 7 :assertions 21 :failures 0 :errors 0 :at "2026-09-03"}
+  "wm-run-lock-test" {:repo :futon2 :cmd "clojure -X:test :nses '[wm-run-lock-test]'" :exit 0 :tests 10 :assertions 42 :failures 0 :errors 0 :at "2026-09-03"}
+  "wm-preflight-test" {:repo :futon2 :cmd "clojure -X:test :nses '[wm-preflight-test]'" :exit 0 :tests 2 :assertions 6 :failures 0 :errors 0 :at "2026-09-03"}
+  "control-map-lint-test" {:repo :futon2 :cmd "clojure -X:test :nses '[control-map-lint-test]'" :exit 0 :tests 5 :assertions 22 :failures 0 :errors 0 :at "2026-09-03"}
+  "contract-lint-test" {:repo :futon2 :cmd "clojure -X:test :nses '[contract-lint-test]'" :exit 0 :tests 6 :assertions 40 :failures 0 :errors 0 :at "2026-09-03"}
+  "mutable-read-set-test" {:repo :futon2 :cmd "clojure -X:test :nses '[mutable-read-set-test]'" :exit 0 :tests 6 :assertions 22 :failures 0 :errors 0 :at "2026-09-03"}
+  "wm-operational-certificate-test" {:repo :futon2 :cmd "clojure -X:test :nses '[wm-operational-certificate-test]'" :exit 1 :tests 9 :assertions 35 :failures 5 :errors 0 :at "2026-09-03"}
+  "preemptive-repair-lint-test" {:repo :futon2 :cmd "clojure -X:test :nses '[preemptive-repair-lint-test]'" :exit 1 :tests 5 :assertions 16 :failures 2 :errors 0 :at "2026-09-03"}
+  "preemptive-repair-gate-test" {:repo :futon2 :cmd "clojure -X:test :nses '[preemptive-repair-gate-test]'" :exit 1 :tests 2 :assertions 5 :failures 1 :errors 0 :at "2026-09-03"}
+  "fold-realized-zero-coverage-test" {:repo :futon2 :cmd "clojure -X:test :nses '[fold-realized-zero-coverage-test]'" :exit 0 :tests 0 :assertions 0 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon3c.agents.zaif-controller-test" {:repo :futon3c :cmd "clojure -M:test -n futon3c.agents.zaif-controller-test" :exit 0 :tests 23 :assertions 95 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon3c.agents.zaif-inputs-test" {:repo :futon3c :cmd "clojure -M:test -n futon3c.agents.zaif-inputs-test" :exit 0 :tests 26 :assertions 99 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon3c.agents.zai-memory-tool-contract-test" {:repo :futon3c :cmd "clojure -M:test -n futon3c.agents.zai-memory-tool-contract-test" :exit 0 :tests 20 :assertions 194 :failures 0 :errors 0 :at "2026-09-03"}
+  "futon3c.agents.zai-api-test" {:repo :futon3c :cmd "clojure -M:test -n futon3c.agents.zai-api-test" :exit 0 :tests 20 :assertions 105 :failures 0 :errors 0 :at "2026-09-03"}}
+
+ ;; ---------------------------------------------------------------------------
+ ;; THE ROWS.
+ ;; ---------------------------------------------------------------------------
+ :rows
+ [;; ======================== R1 -- belief state ==============================
+  {:id :n/R1-wm-belief-state :axis :per-node :node :R1 :substrate :wm
+   :validation "Belief state is a valid distribution and the update is deterministic under known input: uniform prior, initial state shape, per-entity update, determinism replay."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.belief-test"
+   :pointer "futon2/test/futon2/aif/belief_test.clj:1-14"
+   :also-pointers ["futon2/test/futon2/aif/belief_test.clj:25-79"]
+   :provenance :synthetic
+   :gates-flip [:selection-law]
+   :note "The namespace's own docstring names R1 and the M-war-machine-aif-completion checkpoint that required the determinism test, so the node binding is the file's, not this catalog's."}
+
+  {:id :n/R1-wm-fixture :axis :per-node :node :R1 :substrate :wm
+   :validation "R1 mu-pre/mu-post as extracted from three recorded live ticks -- a typed per-node fixture, not a test."
+   :evidence-kind :typed-record :status :exists :binding :by-run-record
+   :pointer "futon2/holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/README.md:1-48"
+   :provenance :recorded
+   :gates-flip []
+   :note "40 fixtures over run-id x node, 30 present and 9 typed absences. These are the WM half of the per-node evidence U10's matrix records as blocked on S7."}
+
+  {:id :n/R1-zaif-persistence :axis :per-node :node :R1 :substrate :zaif
+   :validation "Two-turn task-belief persistence/reconstruction on the zaif substrate."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-matrix
+   :pointer "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.edn:17-29"
+   :owner-rows [:U11 :D8 :S7]
+   :gates-flip []
+   :note "U10 records :spec-test :missing and all 114 recorded zaif sessions with an empty task belief. The real task-belief source is U11's actand row."}
+
+  ;; ======================== R2 -- structured observation ====================
+  {:id :n/R2-wm-observation :axis :per-node :node :R2 :substrate :wm
+   :validation "Normalised observation construction from raw scan data: channel set, observe over real and empty data, annotation-health channel."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.observation-test"
+   :pointer "futon2/test/futon2/aif/observation_test.clj:38-100"
+   :provenance :synthetic
+   :gates-flip [:mission-c]
+   :note "Bound to R2 by aif-equations.edn :observe :node :R2 and this namespace being the test of futon2.aif.observation."}
+
+  {:id :n/R2-channel-contract :axis :per-node :node :R2 :substrate :wm
+   :validation "Fail-closed contract on the R2 observation-channel type over the live trace corpus: exact committed-snapshot counts with a digest pin, moving live counts, and a falsifiable annotation-health boundary."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "r2-channel-contract-test"
+   :pointer "futon2/test/r2_channel_contract_test.clj:25-75"
+   :also-pointers ["futon2/checks/r2_channel_contract.clj:1-30"]
+   :provenance :recorded
+   :gates-flip [:mission-c]
+   :note "This is the strongest live R2 validation: the checker reads the trace corpus, not a fixture."}
+
+  {:id :n/R2-wm-fixture :axis :per-node :node :R2 :substrate :wm
+   :validation "The recorded R2 envelope of tick 0a18c4f7: 14 named channels as a typed envelope."
+   :evidence-kind :typed-record :status :exists :binding :by-run-record
+   :pointer "futon2/holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/0a18c4f7-R2.edn:1-21"
+   :provenance :recorded
+   :gates-flip [:mission-c]}
+
+  {:id :n/R2-zaif-envelope :axis :per-node :node :R2 :substrate :zaif
+   :validation "Every read-only zai tool returns a typed envelope or a reason-bearing none, never an untyped absence; the tool list is pinned against zai_api.clj so a new tool without a pair fails."
+   :evidence-kind :test-green :status :exists :binding :by-matrix
+   :ns "futon3c.agents.zai-memory-tool-contract-test"
+   :pointer "futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj:247-276"
+   :provenance :mixed
+   :gates-flip []
+   :note "U10 R2 :spec-test :covered. Four of the five cited assertions are planted or registry-derived; the fifth (line 193) reads the recorded WM tick 0a18c4f7."}
+
+  ;; ======================== R3 -- belief update =============================
+  {:id :n/R3-wm-belief-update :axis :per-node :node :R3 :substrate :wm
+   :validation "Per-entity belief update: posterior stays a distribution, the update is deterministic under known input."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.belief-test"
+   :pointer "futon2/test/futon2/aif/belief_test.clj:41-79"
+   :provenance :synthetic
+   :gates-flip []
+   :note "aif-equations.edn :belief-update is defined at R3 with :code futon2/scripts/futon2/report/war_machine.clj:4375-4388, 4429-4431; the update function itself is futon2.aif.belief, which this namespace tests. There is no test that executes the war_machine call site, which is why the row is bound :by-source-namespace and not :self-declared."}
+
+  {:id :n/R3-zaif-directional :axis :per-node :node :R3 :substrate :zaif
+   :validation "A planted directional update and a typed-empty unchanged case on the zaif substrate."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-matrix
+   :pointer "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.edn:51-62"
+   :owner-rows [:U11 :D8 :S7]
+   :gates-flip []}
+
+  ;; ======================== R4 -- forward model =============================
+  {:id :n/R4-wm-forward-model :axis :per-node :node :R4 :substrate :wm
+   :validation "Predictive forward model: purity, shape, no-op preserves state, and -- the load-bearing one -- a declared variance is not coerced away."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.forward-model-test"
+   :pointer "futon2/test/futon2/aif/forward_model_test.clj:1-6"
+   :also-pointers ["futon2/test/futon2/aif/forward_model_test.clj:27-70"]
+   :provenance :synthetic
+   :gates-flip [:mission-c :fpi-posterior]
+   :note "The docstring names R4. U4's sweep found the live ambiguity zero traces to forward-model variance COVERAGE (aif-equations.edn :ambiguity :what-replaces-them), which is upstream of this namespace's assertions: nothing here checks that an action model declares a variance on the channels that move."}
+
+  {:id :n/R4-witness :axis :per-node :node :R4 :substrate :wm
+   :validation "PredictiveOutcomeKernel Lean witness with its positive-proof receipt."
+   :evidence-kind :typed-record :status :exists :binding :by-registry-row
+   :pointer "futon2/checks/witness-registry.edn:1-20"
+   :also-pointers ["futon2/holes/labs/wm-contract/predictive-outcome-kernel-positive-receipt.edn:1"]
+   :provenance :recorded
+   :gates-flip []}
+
+  {:id :n/R4-zaif-observation-model :axis :per-node :node :R4 :substrate :zaif
+   :validation "A real zaif observation model. U6's R4 predictions are planted, and the negative control changes the ordering with the plant."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-matrix
+   :pointer "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.edn:63-79"
+   :owner-rows [:U11 :D8 :S7]
+   :gates-flip []}
+
+  ;; ======================== R5 -- expected free energy ======================
+  {:id :n/R5-wm-efe :axis :per-node :node :R5 :substrate :wm
+   :validation "Expected free energy composition: purity, shape, exactly two principled terms by name, zero ambiguity for a no-op."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.efe-test"
+   :pointer "futon2/test/futon2/aif/efe_test.clj:1-2"
+   :also-pointers ["futon2/test/futon2/aif/efe_test.clj:127-205"]
+   :provenance :synthetic
+   :gates-flip [:mission-c :selection-law]
+   :note "The docstring names R5."}
+
+  {:id :n/R5-wm-risk-mode :axis :per-node :node :R5 :substrate :wm
+   :validation "The risk term's mode selection and its structural split."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.efe-risk-mode-test"
+   :pointer "futon2/test/futon2/aif/efe_risk_mode_test.clj:1-10"
+   :provenance :synthetic
+   :gates-flip [:selection-law]}
+
+  {:id :n/R5-ambiguity-replay :axis :per-node :node :R5 :substrate :wm
+   :validation "Does the ambiguity term discriminate? Re-score every recorded field with the term dropped and count argmax changes, with five controls run before any measurement was read."
+   :evidence-kind :replay-artifact :status :exists :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/u4_ambiguity_sweep.clj:1-40"
+   :also-pointers ["futon2/holes/labs/wm-contract/U4-AMBIGUITY-SWEEP.txt:1-40"
+                   "futon2/holes/labs/wm-contract/aif-equations.edn:121-137"]
+   :provenance :recorded
+   :gates-flip [:selection-law]
+   :note "Byte-identical on two runs. 882 archived ticks; the term moves the EFE-best candidate on 51, and zero on today's field with lambda_break 1.0238. This is the template for what a per-node runtime validation over recorded history looks like."}
+
+  {:id :n/R5-zaif-mission-risk :axis :per-node :node :R5 :substrate :zaif
+   :validation "D10 mission attribution selects a real gamma cell and preserves its provenance in decision evidence; the paired WM test pins the recorded mission-attributed risk-plus-ambiguity identity."
+   :evidence-kind :test-green :status :exists :binding :by-matrix
+   :ns "futon3c.agents.zaif-inputs-test"
+   :pointer "futon3c/test/futon3c/agents/zaif_inputs_test.clj:214-262"
+   :provenance :recorded
+   :gates-flip []
+   :note "U10 R5 :spec-test :covered; :real-table on the zaif half, recorded tick 0a18c4f7 on the WM half."}
+
+  ;; ======================== R6 -- candidate action space ====================
+  {:id :n/R6-wm-policy :axis :per-node :node :R6 :substrate :wm
+   :validation "Action selection policy: adaptive and effective temperature, softmax weights, abstain, and the deterministic selection rule."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.policy-test"
+   :pointer "futon2/test/futon2/aif/policy_test.clj:1-3"
+   :also-pointers ["futon2/test/futon2/aif/policy_test.clj:11-40"]
+   :provenance :synthetic
+   :gates-flip [:selection-law :fpi-posterior :tau-variational]
+   :note "The docstring names R6. 54 tests / 296 assertions: the largest single-node WM suite."}
+
+  {:id :n/R6-habit-prior :axis :per-node :node :R6 :substrate :wm
+   :validation "The habit prior E: stable policy identity, symmetric Dirichlet fold, and that the learned prior reaches the canonical softmax seam."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.habit-prior-test"
+   :pointer "futon2/test/futon2/aif/habit_prior_test.clj:9-40"
+   :provenance :synthetic
+   :gates-flip [:selection-law]
+   :note "aif-equations.edn :policy-posterior imports :E; the row's citation for E is friston2016 (moved off friston2017 by TN section 8)."}
+
+  {:id :n/R6-posterior-replay :axis :per-node :node :R6 :substrate :wm
+   :validation "Recorded posteriors replay at delta zero -- the RUN9/S4 replay control as a standing test, with a rank-key-join negative control that BREAKS the replay and a synthetic planted field in which each term enters exactly once."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.selection-score-readiness-test"
+   :pointer "futon2/test/futon2/aif/selection_score_readiness_test.clj:139-200"
+   :provenance :recorded
+   :gates-flip [:selection-law :fpi-posterior]
+   :note "The determinism validation that matters for the selection-law flip: it reproduces each record's own posterior from the record before any arm is read, and its negative control proves the reproduction is not vacuous."}
+
+  {:id :n/R6-zaif-controller :axis :per-node :node :R6 :substrate :zaif
+   :validation "D9's tracked live decision replays and its score vector uniquely selects the arm; the paired WM test proves the tracked R6 posterior ordering supplies its recorded counterfactual winner."
+   :evidence-kind :test-green :status :exists :binding :by-matrix
+   :ns "futon3c.agents.zaif-controller-test"
+   :pointer "futon3c/test/futon3c/agents/zaif_controller_test.clj:26-95"
+   :provenance :recorded
+   :gates-flip []
+   :note "U10 R6 :shared-machinery carries the residual: all 56 live-record decisions are score-settled, but D9's 114-session replay population still shows 83 tie-settled, so the case-order path is untested rather than gone."}
+
+  ;; ======================== R7 -- precision =================================
+  {:id :n/R7-wm-precision :axis :per-node :node :R7 :substrate :wm
+   :validation "Adaptive per-channel precision tracked across calls through prediction-error history: state shape, error appended, bounded window, and the rise under zero error."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.precision-test"
+   :pointer "futon2/test/futon2/aif/precision_test.clj:1-4"
+   :also-pointers ["futon2/test/futon2/aif/precision_test.clj:10-50"]
+   :provenance :synthetic
+   :gates-flip [:tau-variational]
+   :note "The docstring names R7. aif-equations.edn :precision records that R7 imports eps, not o -- the theory edge is R8->R7 and R2->R7 holds only at route grain."}
+
+  {:id :n/R7-policy-precision :axis :per-node :node :R7 :substrate :wm
+   :validation "Policy precision: convergence on real-field-shaped input, bit-identity of the default path against the pre-log-prior solver, and the uniform log prior as a no-op."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.policy-precision-test"
+   :pointer "futon2/test/futon2/aif/policy_precision_test.clj:77-140"
+   :provenance :recorded
+   :gates-flip [:tau-variational]
+   :note "The bit-identity test pins the default path against a named prior commit, so a solver change that moves the live numbers cannot land silently."}
+
+  {:id :n/R7-wm-fixture :axis :per-node :node :R7 :substrate :wm
+   :validation "The recorded R7 channel inventory of tick 801976e7: 8 of 14 observation channels present, 6 absent-not-zero."
+   :evidence-kind :typed-record :status :exists :binding :by-run-record
+   :pointer "futon2/holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/801976e7-R7.edn:1-30"
+   :provenance :recorded
+   :gates-flip []}
+
+  {:id :n/R7-zaif-precision-table :axis :per-node :node :R7 :substrate :zaif
+   :validation "The U9 classification-precision table: declared-mark 1.0 > lexical-probe 0.42 within kind, and independently the recorded WM present/absent channel inventory."
+   :evidence-kind :test-green :status :exists :binding :by-matrix
+   :ns "futon3c.agents.zaif-inputs-test"
+   :pointer "futon3c/test/futon3c/agents/zaif_inputs_test.clj:37-72"
+   :also-pointers ["futon2/holes/labs/zaif-harness/runs/U9-r7-precision-table.edn:1-20"]
+   :provenance :recorded
+   :gates-flip []
+   :note "The two halves are DIFFERENT UNIT FAMILIES and the tests do not compare values across them: zaif has no precision machinery at all, so its half can only be a pin over the U9 table."}
+
+  ;; ======================== R8 -- present-fit mismatch ======================
+  {:id :n/R8-free-energy :axis :per-node :node :R8 :substrate :wm
+   :validation "Controller diagnostics and free-energy computation: shape, per-channel decomposition, an absent controller input contributing no score, avoided-state activity."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.free-energy-test"
+   :pointer "futon2/test/futon2/aif/free_energy_test.clj:39-110"
+   :provenance :synthetic
+   :gates-flip [:tau-variational]
+   :note "The scalar F this exercises is :status :retired in the registry (futon2/holes/labs/wm-contract/aif-equations.edn:85-94, Joe's J2 ruling): still computed and stored on every record, read by no equation. The tests are live; what they test has no live consumer."}
+
+  {:id :n/R8-policy-free-energy :axis :per-node :node :R8 :substrate :wm
+   :validation "F_pi: candidate discrimination and sign convention, degenerate identical predictions, a missing channel REJECTED rather than imputed, zero variance as an explicit deterministic constraint."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.policy-free-energy-test"
+   :pointer "futon2/test/futon2/aif/policy_free_energy_test.clj:10-60"
+   :provenance :synthetic
+   :gates-flip [:fpi-posterior :selection-law]
+   :note "The missing-channel rejection is the COMPLETE-OR-OFF rule the live flag depends on: F_pi runs -19.7..-19.0 within a tick against a G spread of 125.3, so imputing 0.0 for an uncovered candidate would hand it the posterior outright (futon2/holes/labs/wm-contract/aif-equations.edn:95-103)."}
+
+  {:id :n/R8-f-contract :axis :per-node :node :R8 :substrate :wm
+   :validation "Fail-closed census and era checker for the R8 free-energy trace contract: exact committed-snapshot counts with a pin, live invariants with typed append growth, and reclassification that is never append growth."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "r8-f-contract-test"
+   :pointer "futon2/test/r8_f_contract_test.clj:35-100"
+   :also-pointers ["futon2/checks/r8_f_contract.clj:1-30"]
+   :provenance :recorded
+   :gates-flip []}
+
+  {:id :n/R8-zaif-typed-absence :axis :per-node :node :R8 :substrate :zaif
+   :validation "The live zaif evidence record replays through the shipped controller and its missing realised observation is TYPED :absent/:zaif-v0-no-realised-observation; the WM half replays the recorded :ticks-firing-ratio prediction-error arithmetic to exact zero."
+   :evidence-kind :test-green :status :exists :binding :by-matrix
+   :ns "futon3c.agents.zaif-inputs-test"
+   :pointer "futon3c/test/futon3c/agents/zaif_inputs_test.clj:73-105"
+   :provenance :recorded
+   :gates-flip []}
+
+  ;; ======================== R9 -- no self-certification =====================
+  {:id :n/R9-named-validation :axis :per-node :node :R9 :substrate :wm
+   :validation "The four named AIF properties with quantitative acceptance criteria: V-shrink, V-shrink monotone, F-decrease, EFE stress-pragmatic."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.r9-named-validation-test"
+   :pointer "futon2/test/futon2/aif/r9_named_validation_test.clj:1-12"
+   :also-pointers ["futon2/test/futon2/aif/r9_named_validation_test.clj:25-120"]
+   :provenance :synthetic
+   :gates-flip [:guide-gate]
+   :note "7 tests / 10 assertions: the thinnest assertion-per-test ratio of any node suite here, and the node whose whole point is that a claim is checked by someone other than its author."}
+
+  {:id :n/R9-independence :axis :per-node :node :R9 :substrate :wm
+   :validation "Verdicts consult the checker: a claim whose producer is inside the producing part cannot certify itself."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "r9-independence-test"
+   :pointer "futon2/test/r9_independence_test.clj:1-29"
+   :also-pointers ["futon2/checks/r9_independence.clj:1-12"
+                   "futon2/holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn:1"]
+   :provenance :recorded
+   :gates-flip [:guide-gate :zaif-u14e]}
+
+  {:id :n/R9-zaif-authorship :axis :per-node :node :R9 :substrate :zaif
+   :validation "Worker-authored verdict refusal versus an adjudicator rerun on the zaif side."
+   :evidence-kind :test-green :status :exists-but-stale :binding :by-matrix
+   :ns "futon3c.agents.zai-api-test"
+   :pointer "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.edn:161-171"
+   :also-pointers ["futon3c/src/futon3c/apm/checked_handoff.clj:85-122"]
+   :provenance :recorded
+   :gates-flip [:guide-gate :zaif-u14e]
+   :note "STALE ENTRY, not a stale validation. U10 (2026-09-02) records R9 :spec-test :missing -- 'no authorship/type-error test for independent witness minting'. U14 packet (a) landed exactly that validator the same evening (grade-receipt with :r9/verdict-event-malformed and the worker-authored refusal), and packets e-1..e-3 landed its emission with refusal tests. The matrix has not been re-derived since. Re-deriving it is U10's refresh, not this row's."}
+
+  ;; ======================== R10 -- scheduled entrypoint =====================
+  {:id :n/R10-run-lock :axis :per-node :node :R10 :substrate :wm
+   :validation "RUN12 cross-process run lock: acquire writes pid/agent/sha, a second starter REFUSES naming the holder before it reads the store, a dead pid is reclaimed and the reclaim logged."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "wm-run-lock-test"
+   :pointer "futon2/test/wm_run_lock_test.clj:1-6"
+   :also-pointers ["futon2/test/wm_run_lock_test.clj:33-90"]
+   :provenance :recorded
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]
+   :note "The namespace docstring states the discipline this catalog wants everywhere: 'a lock that cannot refuse proves nothing, so every test here asserts on a refusal, a reclaim, or a pass-through -- not on the happy path alone.'"}
+
+  {:id :n/R10-run-lock-negative :axis :per-node :node :R10 :substrate :wm
+   :validation "The out-of-process negative control: the real entrypoint (clojure -M -m futon2.run-tick-once) must exit non-zero naming the holder BEFORE it reads the store, writes a trace record, or writes a receipt."
+   :evidence-kind :negative-control :status :exists :binding :by-source-namespace
+   :pointer "futon2/holes/labs/wm-contract/run_lock_negative_control.sh:1-30"
+   :provenance :recorded
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]
+   :note "Not run for this catalog: it starts a lock holder process. Listed as producible, with the header's own statement of what is real, what is a stand-in, and what is displaced."}
+
+  {:id :n/R10-scheduled-path :axis :per-node :node :R10 :substrate :wm
+   :validation "The scheduled enactment path: escrow replay for a matching mission, fall-through when no deposit matches, abstention on prompt drift."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.enact-scheduled-path-test"
+   :pointer "futon2/test/futon2/aif/enact_scheduled_path_test.clj:37-90"
+   :provenance :synthetic
+   :gates-flip []}
+
+  {:id :n/R10-preflight :axis :per-node :node :R10 :substrate :wm
+   :validation "Readiness is explicitly UNVERIFIED without evidence -- the pre-flight refuses to claim readiness it cannot back."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "wm-preflight-test"
+   :pointer "futon2/test/wm_preflight_test.clj:1-24"
+   :provenance :synthetic
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]}
+
+  ;; ======================== R11 -- hierarchical shared budget ===============
+  {:id :n/R11-budget :axis :per-node :node :R11 :substrate :wm
+   :validation "Independently feasible local winners cannot oversubscribe the parent; the parent retains a cheaper child frontier instead of the greedy local winner; every level of a deep hierarchy is charged."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.hierarchical-budget-test"
+   :pointer "futon2/test/futon2/aif/hierarchical_budget_test.clj:19-60"
+   :provenance :synthetic
+   :gates-flip []
+   :note "R11 is drawn in the SELECT stage of control-stages.edn and runs no equation of the registry; these are structural properties of the budget, not of an AIF term."}
+
+  ;; ======================== R12 -- two-layer calibration ====================
+  {:id :n/R12-intrinsic-values :axis :per-node :node :R12 :substrate :wm
+   :validation "Calibration layer: fresh-entry defaults, credit-for defaults to the prior mode, rehydration takes the latest record per class."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.intrinsic-values-test"
+   :pointer "futon2/test/futon2/aif/intrinsic_values_test.clj:24-60"
+   :provenance :synthetic
+   :gates-flip []}
+
+  {:id :n/R12-structural-pressure :axis :per-node :node :R12 :substrate :wm
+   :validation "The structural-pressure mode: the relocated term at the habit-prior seam versus the controller-augmentation rollback hatch."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.efe-structural-pressure-mode-test"
+   :pointer "futon2/test/futon2/aif/efe_structural_pressure_mode_test.clj:1-12"
+   :provenance :synthetic
+   :gates-flip []}
+
+  {:id :n/R12-wm-fixture :axis :per-node :node :R12 :substrate :wm
+   :validation "The recorded R12 fixture of tick 0a18c4f7 -- a TYPED ABSENCE (:no-record-field), not an empty map."
+   :evidence-kind :typed-record :status :exists :binding :by-run-record
+   :pointer "futon2/holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/0a18c4f7-R12.edn:1-6"
+   :provenance :recorded
+   :gates-flip []
+   :note "One of the nine typed absences in the 40-fixture corpus. The absence is the evidence: the node ran and the record carries no field for it."}
+
+  ;; ======================== R13 -- temporal policy depth ====================
+  {:id :n/R13-rollout :axis :per-node :node :R13 :substrate :wm
+   :validation "Rollout depth: the shared step routes ordinary and frontier caps, search unlocks a second step, horizon H unlocks a delayed temporal payoff."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.rollout-test"
+   :pointer "futon2/test/futon2/aif/rollout_test.clj:14-90"
+   :provenance :synthetic
+   :gates-flip []
+   :note "aif-equations.edn :depth :node :R13 :code names futon2/src/futon2/aif/rollout.clj:166-171 (default 2) and futon2/scripts/futon2/report/war_machine.clj:4485-4487 (3 when an anticipation snapshot loads). The horizon-H test exercises the mechanism; nothing pins the LIVE value the tick uses."}
+
+  {:id :n/R13-horizon-pin :axis :per-node :node :R13 :substrate :zaif
+   :validation "A pin on the declared per-turn horizon T=1 and the mission-horizon entry point."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-matrix
+   :pointer "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.edn:172-181"
+   :owner-rows [:U13]
+   :gates-flip []}
+
+  ;; ======================== R14 -- commitment temperature ===================
+  {:id :n/R14-selection-gain :axis :per-node :node :R14 :substrate :wm
+   :validation "Precision over policies as a bounded scalar learned from realized-vs-expected performance: exact match is zero, beat is positive, miss is negative, and the measure is scale-free."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.selection-gain-test"
+   :pointer "futon2/test/futon2/aif/selection_gain_test.clj:1-5"
+   :also-pointers ["futon2/test/futon2/aif/selection_gain_test.clj:13-40"]
+   :provenance :synthetic
+   :gates-flip [:tau-variational :selection-law]
+   :note "The docstring names R14. aif-equations.edn :temperature records that beta/gamma are NOT implemented on the live path -- the default is the selection-gain fold, and the variational law is the tau-variational flip."}
+
+  {:id :n/R14-effective-temperature :axis :per-node :node :R14 :substrate :wm
+   :validation "Effective temperature from selection gain: the floor, the scaling with score spread, and the reduction at unity gain."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.policy-test"
+   :pointer "futon2/test/futon2/aif/policy_test.clj:11-40"
+   :provenance :synthetic
+   :gates-flip [:tau-variational]}
+
+  {:id :n/R14-zaif-fold :axis :per-node :node :R14 :substrate :zaif
+   :validation "The zaif test runs the WM path itself: five -0.5 corrections folded through update-selection-gain to 0.7071067811865476, the value the tracked B1 fold record carries, with effective-temperature rising as the gain falls."
+   :evidence-kind :test-green :status :exists :binding :by-matrix
+   :ns "futon3c.agents.zaif-inputs-test"
+   :pointer "futon3c/test/futon3c/agents/zaif_inputs_test.clj:106-147"
+   :provenance :mixed
+   :gates-flip [:tau-variational]
+   :note "U10 records the honest split: the fold half is real, the typed-empty half is planted because no verdict-stream :status/:reason typing exists in src at all."}
+
+  ;; ======================== R15 -- hierarchy and timescale ==================
+  {:id :n/R15-temporal-hierarchy :axis :per-node :node :R15 :substrate :wm
+   :validation "The fast/slow temporal hierarchy is REAL, not cosmetic: changing the slow-loop state changes the fast loop's prior and its rollout decision; nil mode is regression-safe."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.temporal-hierarchy-test"
+   :pointer "futon2/test/futon2/aif/temporal_hierarchy_test.clj:1-7"
+   :also-pointers ["futon2/test/futon2/aif/temporal_hierarchy_test.clj:28-105"]
+   :provenance :synthetic
+   :gates-flip []
+   :note "The docstring names R15 and names its own load-bearing test. TN section 6 choice 5 records R15 as PLUMBING in the registry (single-level hierarchy), so this suite validates a mechanism the equations do not currently wire."}
+
+  ;; ======================== R16 -- grounded actuation =======================
+  {:id :n/R16-close-loop :axis :per-node :node :R16 :substrate :wm
+   :validation "Close-the-loop: delta-G reconciliation between the step score and the enacted result, and the gate verdict that follows."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.close-loop-test"
+   :pointer "futon2/test/futon2/aif/close_loop_test.clj:16-56"
+   :provenance :synthetic
+   :gates-flip [:selection-law]
+   :note "aif-equations.edn :action :note records C448 5b: the ENACTED action at R16 is the first passing act gate (futon2/src/futon2/aif/enact.clj:287-316), not the recorded selection. This suite tests the reconciliation, not that the two agree."}
+
+  {:id :n/R16-fold-realized :axis :per-node :node :R16 :substrate :wm
+   :validation "Realized outcome: the contract record it builds, the substrate dial for the grounded path, and the two-sided expected leg."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.fold-realized-test"
+   :pointer "futon2/test/futon2/aif/fold_realized_test.clj:40-100"
+   :provenance :synthetic
+   :gates-flip []}
+
+  {:id :n/R16-enacted-vs-selected :axis :per-node :node :R16 :substrate :wm
+   :validation "Whether the enacted action equals the selected one. REFUTED BY RECORD: 50 comparable records over two trace days, 50 differ, 0 agree."
+   :evidence-kind :typed-record :status :exists :binding :by-run-record
+   :pointer "mathlib4/DarkTower/WarMachine/Holes.lean:6867-6870"
+   :also-pointers ["futon2/holes/labs/wm-contract/C460-enacted-vs-selected.md:1"]
+   :provenance :recorded
+   :gates-flip [:selection-law]
+   :note "The successor obligation enactedEqualsSelectedWhenRankOneGated is an OPEN hole with the falsifier 'a run in which the rank-1 selection passes its gate and a different action is enacted'. The selection-law flip changes what 'selected' means, so this is the R16 gate line that flip has to answer."}
+
+  {:id :n/R16-wm-fixture :axis :per-node :node :R16 :substrate :wm
+   :validation "The recorded R16 fixture of tick 801976e7 -- the typed absence :no-enactment-yet."
+   :evidence-kind :typed-record :status :exists :binding :by-run-record
+   :pointer "futon2/holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/801976e7-R16.edn:1-6"
+   :provenance :recorded
+   :gates-flip []}
+
+  {:id :n/R16-zaif-witness :axis :per-node :node :R16 :substrate :zaif
+   :validation "Firing a zai tool produces the witness record with query-provenance; the production round loop is exercised for every exposed tool name, and ask/yield endings are covered."
+   :evidence-kind :test-green :status :exists :binding :by-matrix
+   :ns "futon3c.agents.zai-memory-tool-contract-test"
+   :pointer "futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj:147-246"
+   :provenance :mixed
+   :gates-flip []}
+
+  ;; ======================== R17 -- structure learning =======================
+  {:id :n/R17-bmr :axis :per-node :node :R17 :substrate :wm
+   :validation "Bayesian model reduction: a redundant parameter prunes, an informative one is rejected, identity is a no-op, Dirichlet moments return the standard deviation."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.bmr-test"
+   :pointer "futon2/test/futon2/aif/bmr_test.clj:15-60"
+   :provenance :synthetic
+   :gates-flip []
+   :note "aif-equations.edn :model-reduction :code futon2/src/futon2/aif/bmr.clj:108-130; the sign convention (accept when Delta-F <= -3) is stated in the registry and numerically checked against friston2018bmr."}
+
+  {:id :n/R17-a4a :axis :per-node :node :R17 :substrate :wm
+   :validation "The corpus-to-concentration accumulation: counts, the concept-merge sign pin, standard deviation as an endpoint count, deterministic star-doc shape."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.a4a-test"
+   :pointer "futon2/test/futon2/aif/a4a_test.clj:35-100"
+   :provenance :synthetic
+   :gates-flip []
+   :note "What this accumulates is capability x mission edges from the SUBSTRATE, not the tick model's o and mu -- see the R17 gap row."}
+
+  {:id :n/R17-offline-replay :axis :per-node :node :R17 :substrate :wm
+   :validation "The offline reduction records an auditable result when accepted and a principled non-change when rejected; a RECORDED INPUT REPLAYS TO EQUALITY; parent identity is required."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.r17-offline-test"
+   :pointer "futon2/test/futon2/aif/r17_offline_test.clj:39-86"
+   :provenance :recorded
+   :gates-flip []
+   :note "recorded-input-replays-to-equality is the one determinism replay assertion that lives inside a unit test rather than in a sweep script."}
+
+  {:id :n/R17-dirichlet-import :axis :per-node :node :R17 :substrate :wm
+   :validation "A code path from the tick model's o or mu into R17's Dirichlet concentrations (dacosta2020 eq. 21)."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/aif-equations.edn:162-168"
+   :also-pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:6871-6871"]
+   :provenance :none
+   :gates-flip []
+   :note "The registry says :realised false and names its own earlier claim as an error. The Lean hole dirichletAccumulationImportAbsent carries the same falsifier. This is a gap in the WIRING, not in the testing: there is nothing to validate until the path exists."}
+
+  {:id :n/R17-zaif-constants :axis :per-node :node :R17 :substrate :zaif
+   :validation "Zaif pins its fixed learning constants and the sanctioned A/B overrides."
+   :evidence-kind :test-green :status :exists :binding :by-matrix
+   :ns "futon3c.agents.zaif-controller-test"
+   :pointer "futon3c/test/futon3c/agents/zaif_controller_test.clj:216-259"
+   :provenance :planted
+   :gates-flip []
+   :note "U10 R17 :spec-test :partial: the stub and the A/B vector are tested; no receipt-fed zaif learning test and no shared learning path exist."}
+
+  ;; ======================== R20 -- interoceptive tripwires ==================
+  {:id :n/R20-tripwires :axis :per-node :node :R20 :substrate :wm
+   :validation "The tripwires fire: turn conservation trips on ledger drift, ledger closure trips on a missing job and commit, and the suite proves the production repair and trip stores stayed unreachable throughout."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "futon2.aif.tripwire-test"
+   :pointer "futon2/test/futon2/aif/tripwire_test.clj:31-60"
+   :also-pointers ["futon2/test/futon2/aif/hermetic_repair_fixture.clj:26-40"]
+   :provenance :synthetic
+   :gates-flip []
+   :note "The hermetic fixture is itself a validation: it asserts the production file sets did not change, so an unstubbed default-arity call is caught rather than silently depositing."}
+
+  {:id :n/R20-wm-fixture :axis :per-node :node :R20 :substrate :wm
+   :validation "The recorded R20 fixture of tick 0a18c4f7 -- a typed absence (:no-record-field)."
+   :evidence-kind :typed-record :status :exists :binding :by-run-record
+   :pointer "futon2/holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/0a18c4f7-R20.edn:1-6"
+   :provenance :recorded
+   :gates-flip []}
+
+  ;; ======================== TRACE -- the route ledger =======================
+  {:id :n/TRACE-persistence :axis :per-node :node :TRACE :substrate :wm
+   :validation "Per-call trace persistence: record shape, the route round-trips in hop order, the run id round-trips through the shared per-date trace file, and an absent producer run id is ABSENT rather than nil."
+   :evidence-kind :test-green :status :exists :binding :self-declared
+   :ns "futon2.aif.trace-test"
+   :pointer "futon2/test/futon2/aif/trace_test.clj:119-200"
+   :provenance :recorded
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]
+   :note "The run-id round-trip is what RUN11 made run selection depend on: RUN3 selects a run's records by :run/id equality, so a trace file that loses the id sends conformance back to timestamp-range guessing."}
+
+  {:id :n/TRACE-receipt :axis :per-node :node :TRACE :substrate :wm
+   :validation "The tick receipt preserves the producer-issued run id, the receipt path is unique per run, and the diagnostic judge opts carry the run id."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "run-tick-once-test"
+   :pointer "futon2/test/run_tick_once_test.clj:7-40"
+   :provenance :recorded
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]}
+
+  ;; ======================== GLOBAL RUN ======================================
+  {:id :g/runs-once-witness :axis :global-run :substrate :wm
+   :validation "wmRunsOnce: a tick-entry invocation completes end-to-end leaving a TickRunRecord, with the selector seam recorded rather than silent."
+   :evidence-kind :typed-record :status :exists-but-stale :binding :by-run-record
+   :pointer "futon2/checks/wm_runs_once_witness.clj:1-30"
+   :also-pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:6597-6598"
+                   "futon2/holes/labs/wm-contract/tick-run-record-2026-09-02-0a18c4f7-758e-400a-8223-9c52edf07450.edn:1"]
+   :provenance :recorded
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]
+   :note "RUN 2026-09-03: PASS on the default path and PASS again when handed the 2026-09-02 record explicitly. STALE FOR A NAMED REASON: the default record selection matches tick-run-record-YYYY-MM-DD.edn only (futon2/checks/wm_runs_once_witness.clj:10-22), so the three RUN11-era records whose filenames carry a run id are invisible to it and the bare invocation certifies the 2026-08-31 record. It does not fail; it answers from the older evidence. Typed here, not fixed -- the fix belongs to whoever owns the RUN11 receipt naming."}
+
+  {:id :g/route-conformance-witness :axis :global-run :substrate :wm
+   :validation "wmRunConformsToWiring: a completed tick's reassembled route is non-empty and every hop is an edge of the wiring specification, counted across the original and measured Figure 4 layers."
+   :evidence-kind :typed-record :status :exists-but-stale :binding :by-run-record
+   :pointer "futon2/checks/wm_route_conformance.clj:1-30"
+   :also-pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:6608-6609"]
+   :provenance :recorded
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]
+   :note "RUN 2026-09-03 on record 0a18c4f7: PASS, hops=9 conformant=9 unmapped=0, original-fired=3/21 measured-fired=6/8. STALE FOR A NAMED REASON: the default path is tick-run-record-<today>.edn (futon2/checks/wm_route_conformance.clj:12-13), so on any day with no run the bare invocation throws :read-set/reason :absent instead of reporting a typed no-run-today. Give it a record and it answers."}
+
+  {:id :g/route-verdict-denominators :axis :global-run :substrate :wm
+   :validation "The route verdict the RECEIPT carries, computed at write time from the drawn layer alone."
+   :evidence-kind :typed-record :status :exists-but-stale :binding :by-run-record
+   :pointer "futon2/scripts/futon2/run_tick_once.clj:145-176"
+   :also-pointers ["futon2/checks/wm_route_conformance.clj:26-52"]
+   :provenance :recorded
+   :gates-flip []
+   :note "TWO DENOMINATORS UNDER ONE WORD. futon2/scripts/futon2/run_tick_once.clj:146-151 builds its wiring set from :edges with :status :drawn; futon2/checks/wm_route_conformance.clj:26-29 builds its from that set UNION :route-measured-drawn. Both write :conformant and :unmapped. On record 0a18c4f7 the receipt says conformant 3, unmapped 6; the check on the same record says conformant 9, unmapped 0. The Lean hole's falsifier is 'any hop absent from BOTH the original and measured figure layers', which is the check's definition -- so a reader who takes the receipt's own verdict as the conformance answer reads a 3-of-9 run where the obligation says 9 of 9. Recorded as an observation with pointers; naming which field should be renamed is not this row's to do."}
+
+  {:id :g/run3-conformance :axis :global-run :substrate :wm
+   :validation "RUN3: conformance of a recorded RUN (not a single tick) against the drawn topology, selecting the run's records by :run/id equality, and classifying a traversed retired edge BY GROUNDS -- route-grain refutes the retirement, dependency-grain is excluded and reported as excluded, ruling-retired is a build row."
+   :evidence-kind :replay-artifact :status :exists :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/run3_conformance.bb:1-40"
+   :also-pointers ["futon2/holes/labs/wm-contract/runs/latest-conformance.edn:1"]
+   :provenance :recorded
+   :gates-flip [:selection-law :fpi-posterior :tau-variational]
+   :note "The last recorded verdict is :conformant over run 2026-09-01-s5: 4 records, 36 hops, 9 distinct, 22 drawn, 19 unfired, one excluded pair and one ruling-unrealised pair. The :retires set is read from control-map-edges.edn at run time and no list is carried, because the list in the campaign brief was wrong in three places."}
+
+  {:id :g/run3-negative-controls :axis :global-run :substrate :wm
+   :validation "Three planted defects into a copy of the real S1b route -- a code-retired route-grain edge, an unknown pair, a drawn edge traversed in reverse -- each asserting the exit code AND the class word, with a positive control on the real file so 'refuses everything' cannot pass as 'refuses the defect'."
+   :evidence-kind :negative-control :status :exists :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/run3_conformance_controls.bb:1-30"
+   :provenance :recorded
+   :gates-flip []}
+
+  {:id :g/posterior-replay-determinism :axis :global-run :substrate :wm
+   :validation "Determinism replay of the live scoring: every recorded posterior is reproduced from the record itself at delta zero, with a rank-key-join control that BREAKS the replay and a planted-field control in which each term enters exactly once."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "futon2.aif.selection-score-readiness-test"
+   :pointer "futon2/test/futon2/aif/selection_score_readiness_test.clj:139-200"
+   :provenance :recorded
+   :gates-flip [:selection-law :fpi-posterior :tau-variational]
+   :note "This is the closest thing the machine has to a whole-run determinism gate, and its scope is the SCORE VECTOR, not the tick. A tick-level replay (same inputs, byte-identical record) is a named gap below."}
+
+  {:id :g/whole-tick-determinism :axis :global-run :substrate :wm
+   :validation "A whole-tick determinism replay: the same inputs re-run to a byte-identical tick record."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn:1"
+   :provenance :none
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]
+   :note "What exists is component-grain: the posterior replays at delta zero (g/posterior-replay-determinism), U4's sweep is byte-identical across two runs of the SWEEP, and r17-offline replays a recorded input to equality. None of these re-runs a tick. Minted here as a gap rather than left as the ambient assumption that a replay exists; no owner row yet."}
+
+  {:id :g/enumeration-completeness :axis :global-run :substrate :wm
+   :validation "That the selector's candidate enumeration is COMPLETE against an independent scan of the available missions, excursions and tickets, with every exclusion a typed filter reason."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/worklist.edn:863-866"
+   :provenance :none
+   :gates-flip [:mission-c :selection-law]
+   :note "U37, open. The negative precedent is the four-mission whitelist. Nothing today re-derives the 133-candidate population by a path independent of the selector's own enumerator, so a silent narrowing of the candidate set is not currently detectable from a record."}
+
+  {:id :g/u8-report-gate :axis :global-run :substrate :zaif
+   :validation "The reporting gate: every claim in a full zaif decision's report re-derived from the Z1 ledger queries and typed records alone -- arm and G terms from decision evidence, tool calls from R16 witnesses, mission attribution from Z1, status from the mission-status oracle. A report line with no backing query is the failure."
+   :evidence-kind :negative-control :status :exists :binding :by-registry-row
+   :pointer "futon2/holes/labs/zaif-harness/report_gate.clj:1-30"
+   :also-pointers ["futon2/holes/labs/zaif-harness/report_gate_test.clj:1-30"]
+   :provenance :recorded
+   :gates-flip [:guide-gate :zaif-u14e]
+   :note "Not run for this catalog: the test binds the live Z1 store. Its recorded acceptance is three-sided -- a fixture decision passes, a planted unbacked claim fails NAMED, and a real decision fails carrying exactly the two U8a findings re-derived from the store."}
+
+  {:id :g/operational-certificate :axis :global-run :substrate :wm
+   :validation "The operational certificate over a tick-run record: route present, no undeclared traversal, execution complete, resource status clean, run identity present and matching, topology pinned by content sha, and the serving program matching the tested program."
+   :evidence-kind :test-green :status :red :binding :by-registry-row
+   :ns "wm-operational-certificate-test"
+   :pointer "futon2/test/wm_operational_certificate_test.clj:15-60"
+   :also-pointers ["futon2/checks/wm_operational_certificate.clj:1-20"]
+   :provenance :recorded
+   :gates-flip [:mission-c :selection-law :fpi-posterior :tau-variational]
+   :note "RED ON 2026-09-03, 5 of 35 assertions, and the cause is one stale pin. futon2/checks/wm_operational_certificate.clj:11 pins p4ng/empirics-futon/control-map-edges.edn at 64485bb0...; the file is 7fecd071... today. The SVG pin still matches (568938d2...), so only the edge-data half moved -- which is what the TN-edge-review D-item edits to the edge registry did. Consequence: :topology-pin-valid? false makes EVERY certification verdict :fail, including the two cases whose expected verdict is :incomplete. Nothing certifies a run today. Not repaired here: re-pinning the certificate is a decision about which edge-registry revision the certificate authority is, and that belongs with the D-item review, not with a catalog row."}
+
+  {:id :g/preemptive-repair-gate :axis :global-run :substrate :wm
+   :validation "The build-level consumer of the preemptive-repair lints: an injected lint finding must fail the build, and one gate verdict must capture the live corpus exactly once so a writer cannot expose an intermediate worktree state to a single scanner."
+   :evidence-kind :test-green :status :red :binding :by-source-namespace
+   :ns "preemptive-repair-gate-test"
+   :pointer "futon2/test/preemptive_repair_gate_test.clj:5-12"
+   :provenance :recorded
+   :gates-flip []
+   :note "RED ON 2026-09-03: gate-result is :pass? false with one hard finding -- futon2/holes/labs/wm-contract/C484-refusal-harvester.md:23 cites holes/labs/wm-contract/refusal-sweep-state.edn, which exists on disk and is UNTRACKED in git, so the artefact lint reads it as a citation to an untracked path. One file, one git add, and it belongs to whoever owns C484's harvester, not to this row."}
+
+  {:id :g/preemptive-repair-lint :axis :global-run :substrate :wm
+   :validation "The absence-coercion lint: every site in the C12 census where a consumer could not tell an absence from a value must carry a disposition, and the blocked ones must be visible to the lint."
+   :evidence-kind :test-green :status :red :binding :by-source-namespace
+   :ns "preemptive-repair-lint-test"
+   :pointer "futon2/test/preemptive_repair_lint_test.clj:33-38"
+   :also-pointers ["futon2/checks/preemptive_repair_lint.clj:85-112"
+                   "futon2/checks/absence-coercion-dispositions.edn:1-70"]
+   :provenance :recorded
+   :gates-flip []
+   :note "RED ON 2026-09-03, 2 of 16 assertions: the test asserts 7 findings, all :blocked, and gets 0. The dispositions file now holds 17 rows of which none is :blocked (16 :fix-now, 1 :exempt-with-reason), so the debt this pin was watching was worked down and the pin was not moved with it. A stale expected-count, not a regression -- but it is red, so the suite that guards absence coercion is not currently guarding anything."}
+
+  {:id :g/control-map-lint :axis :global-run :substrate :wm
+   :validation "The drawn control map against an independent baseline: exact committed-snapshot counts with a pin, moving live counts, and falsifiers on the drawn-edge baseline and endpoint agreement."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "control-map-lint-test"
+   :pointer "futon2/test/control_map_lint_test.clj:24-60"
+   :provenance :recorded
+   :gates-flip []
+   :note "Green today over the same control-map-edges.edn revision that makes g/operational-certificate red: this lint tracks the file, the certificate pins it."}
+
+  {:id :g/contract-lint :axis :global-run :substrate :wm
+   :validation "Every judgement in the contract has a falsifier; a malformed registry fails closed; an empty contract is UNAVAILABLE, not valid."
+   :evidence-kind :test-green :status :exists :binding :by-registry-row
+   :ns "contract-lint-test"
+   :pointer "futon2/test/contract_lint_test.clj:30-70"
+   :provenance :recorded
+   :gates-flip []}
+
+  {:id :g/mutable-read-set :axis :global-run :substrate :wm
+   :validation "The read-set capture that fences a check's inputs: an input that cannot be captured refuses rather than being read twice."
+   :evidence-kind :test-green :status :exists :binding :by-source-namespace
+   :ns "mutable-read-set-test"
+   :pointer "futon2/test/mutable_read_set_test.clj:1-30"
+   :provenance :recorded
+   :gates-flip []
+   :note "This is the machinery whose refusal g/route-conformance-witness hits when its default record path does not exist -- the refusal is correct, the default path is what is stale."}
+
+  {:id :g/lean-witness-family :axis :global-run :substrate :wm
+   :validation "43 registered Lean witnesses, each pairing a check script with a positive-proof receipt and a declared expected-rejection mode, generated from per-witness fragments so N units can be written without an N-way conflict."
+   :evidence-kind :typed-record :status :exists :binding :by-registry-row
+   :pointer "futon2/checks/witness-registry.edn:1-24"
+   :provenance :recorded
+   :gates-flip []
+   :note "The per-node cross-references: PrecisionMap to R7, PredictiveOutcomeKernel to R4, predictiveOutcomeRisk and ambiguity and expectedFreeEnergy to R5, softmax to R6, variationalFreeEnergy to R8, DirichletConcentrations and bayesianModelReduction and bayesFactorThreshold and modelReductionFreeEnergyChange to R17, ObservationVector and observationKernel to R2, BeliefState to R1."}
+
+  {:id :g/lean-type-check :axis :global-run :substrate :wm
+   :validation "The Lean formalism type-checks: 68 of 68 modules of DarkTower/WarMachine exit 0 under lake env lean with 0 error diagnostics, plus the sorry/axiom census with locations and the glossary-to-Lean join."
+   :evidence-kind :replay-artifact :status :exists :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/lean_state_probe.bb:1-30"
+   :also-pointers ["futon2/holes/labs/wm-contract/runs/U35-lean-state/lean-state-report.edn:1-20"]
+   :provenance :recorded
+   :gates-flip []
+   :note "U35, landed 2026-09-03. 613 declarations, 10 sorry bodies all in Holes.lean, 0 axiom declarations. Two of those ten sorries are wmRunsOnce and wmRunConformsToWiring, which are permanent external attestations rather than proof debt: Lean cannot prove an event."}
+
+  {:id :g/aif-dag-conformance :axis :global-run :substrate :wm
+   :validation "Class 6a on the check itself: every equation import resolves, every node runs an equation or is listed as plumbing, every reference key exists, and every drawn-edge status is in vocabulary -- BEFORE anything is counted."
+   :evidence-kind :negative-control :status :exists :binding :by-registry-row
+   :pointer "p4ng/empirics-futon/gen_aif_dag.bb:1-30"
+   :also-pointers ["p4ng/empirics-futon/negative_controls.sh:74-96"]
+   :provenance :recorded
+   :gates-flip []
+   :note "Guarded by controls 4c (an equation importing an undefined symbol must fail naming it), 4d (a truthful gap renders), and 4e/4e2/4e3/4f (the pointer check, including a positive control that the real registry's pointers all resolve)."}
+
+  {:id :g/publish-negative-controls :axis :global-run :substrate :wm
+   :validation "The publish gate: 34 controls over the generators, each mutating a TEMP COPY so a mid-test failure cannot leave a mutated source behind for a concurrent lane, and each asserting that a planted defect fails NAMING the row rather than silently reading as zero."
+   :evidence-kind :negative-control :status :exists :binding :by-registry-row
+   :pointer "p4ng/empirics-futon/negative_controls.sh:1-20"
+   :provenance :recorded
+   :gates-flip []
+   :note "Both this and pointer_check are the standing gates every wm-contract row must clear before it commits, so they are the two validations most likely to catch a defect in another validation."}
+
+  {:id :g/registry-pointer-check :axis :global-run :substrate :wm
+   :validation "Every file:line pointer in ANY string of the equations registry, the control map and the worklist resolves: the file exists, the range is not inverted, and both ends are within the file."
+   :evidence-kind :negative-control :status :exists :binding :by-registry-row
+   :pointer "p4ng/empirics-futon/pointer_check.bb:1-10"
+   :provenance :recorded
+   :gates-flip []
+   :note "It checks that a pointer RESOLVES, not that the pointed code says what the field claims. The registry's own F row records the case: futon2/scripts/futon2/report/war_machine.clj:4450-4452 had drifted onto an unrelated invariant-signal map and kept passing, because the line range was still valid."}
+
+  {:id :g/content-grain-pointer-check :axis :global-run :substrate :none
+   :validation "That a registry pointer's TARGET says what the field claims -- not merely that the file exists and the line range is inside it."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-registry-row
+   :pointer "p4ng/empirics-futon/pointer_check.bb:1-10"
+   :provenance :recorded
+   :gates-flip []
+   :note "The existing check says so itself: 'it does NOT check that the pointed code says what the field claims (that is the provenance walk: name the feeder, grep the store, find the writer)'. Building this catalog found that gap paying out -- see the :f/registry-code-pointers-drifted finding. What would close it is modest: the :code field of an equation row could carry the DEFINING FORM's name beside the range, and the check could assert that name appears within it. That is a design, not a ruling, and it belongs to whoever owns the registry."}
+
+  {:id :g/catalog-self-check :axis :global-run :substrate :none
+   :validation "This catalog's own validator: schema, vocabulary closure, pointer resolution across five repositories, that every :test-green row names a recorded run, that a red run cannot be typed as coverage, that every :gates-flip closes against :flips, and that the narrative carries the computed COUNTS line verbatim."
+   :evidence-kind :negative-control :status :exists :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/runtime_validation_check.bb:1-32"
+   :also-pointers ["futon2/holes/labs/wm-contract/runtime_validation_controls.sh:1-15"]
+   :provenance :recorded
+   :gates-flip []
+   :note "Five negative controls and two positive ones, each planting into a temp copy and asserting the refusal REASON rather than the exit code alone -- an invented pointer, a status outside the vocabulary, a red run typed as coverage, an unknown flip reference, and a test row naming a namespace with no recorded run. The positive controls keep 'refuses everything' from passing as 'refuses the defect', and pin the narrative's COUNTS line to the computed one."}
+
+  {:id :g/ledger-check :axis :global-run :substrate :none
+   :validation "The worklist ledger: item shape, signed registry entries verified unchanged since signature, and a WARNING when the ledger directory has uncommitted changes so a signature is never taken over content in motion."
+   :evidence-kind :negative-control :status :exists :binding :by-registry-row
+   :pointer "futon2/holes/labs/wm-contract/worklist_check.bb:1-30"
+   :provenance :recorded
+   :gates-flip []}
+
+  {:id :g/runner-visible-suite :axis :global-run :substrate :wm
+   :validation "That every file named *_test.clj under futon2/test is visible to the test runner."
+   :evidence-kind :not-yet-produced :status :named-gap :binding :by-source-namespace
+   :pointer "futon2/test/fold_realized_zero_coverage_test.clj:1-8"
+   :provenance :recorded
+   :gates-flip []
+   :note "FOUND WHILE BUILDING THIS CATALOG. fold_realized_zero_coverage_test.clj contains zero deftest forms -- it is a script with its own PASS/FAIL printing -- so clojure -X:test reports 'Ran 0 tests' for that namespace and exits 0. Loaded directly it runs and prints ALL TESTS PASS, so the validation works; it is invisible to the runner, which means it is invisible to any gate built on the runner. One instance found in 20 root namespaces; nothing checks for the class."}]
+
+ ;; ---------------------------------------------------------------------------
+ ;; FINDINGS. Code-backed observations produced by building the catalog. None
+ ;; is a ruling: a ruling goes only into aif-equations.edn :choices or
+ ;; control-map-edges.edn :decisions, and only by Joe.
+ ;; ---------------------------------------------------------------------------
+ :findings
+ [{:id :f/certificate-pin-stale :severity :blocks-certification
+   :statement "No tick-run record can be certified today. futon2/checks/wm_operational_certificate.clj:11 pins control-map-edges.edn at 64485bb0..., the live file is 7fecd071..., so :topology-pin-valid? is false and every verdict is :fail."
+   :pointers ["futon2/checks/wm_operational_certificate.clj:1-20"
+              "p4ng/empirics-futon/control-map-edges.edn:1-10"]
+   :owner :undecided
+   :row :g/operational-certificate}
+
+  {:id :f/two-route-denominators :severity :reading-hazard
+   :statement "The receipt's :route-verdict and the conformance check's :route-verdict use the same keys with different wiring sets -- drawn-only versus drawn-union-measured -- giving conformant 3 / unmapped 6 and conformant 9 / unmapped 0 on the same record."
+   :pointers ["futon2/scripts/futon2/run_tick_once.clj:145-176"
+              "futon2/checks/wm_route_conformance.clj:26-52"]
+   :owner :undecided
+   :row :g/route-verdict-denominators}
+
+  {:id :f/witness-default-misses-newest :severity :answers-from-older-evidence
+   :statement "The wmRunsOnce witness's default record selection matches tick-run-record-YYYY-MM-DD.edn only, so the three RUN11-era records whose names carry a run id are invisible and the bare invocation certifies the 2026-08-31 record. It passes; it just does not see today."
+   :pointers ["futon2/checks/wm_runs_once_witness.clj:10-22"]
+   :owner :undecided
+   :row :g/runs-once-witness}
+
+  {:id :f/absence-lint-pin-stale :severity :gate-not-guarding
+   :statement "preemptive-repair-lint-test asserts 7 blocked absence-coercion findings and gets 0: the dispositions file now holds 17 rows, none :blocked. The debt was worked down and the pin was not moved, so the suite guarding absence coercion is red and guarding nothing."
+   :pointers ["futon2/test/preemptive_repair_lint_test.clj:33-38"
+              "futon2/checks/absence-coercion-dispositions.edn:1-70"]
+   :owner :undecided
+   :row :g/preemptive-repair-lint}
+
+  {:id :f/untracked-citation-fails-gate :severity :gate-red
+   :statement "The preemptive-repair build gate is :pass? false on one hard finding: futon2/holes/labs/wm-contract/C484-refusal-harvester.md:23 cites refusal-sweep-state.edn, which is present on disk and untracked in git."
+   :pointers ["futon2/holes/labs/wm-contract/C484-refusal-harvester.md:21-25"]
+   :owner :C484
+   :row :g/preemptive-repair-gate}
+
+  {:id :f/test-invisible-to-runner :severity :coverage-overstated
+   :statement "fold_realized_zero_coverage_test.clj has no deftest form, so the runner reports 'Ran 0 tests' and exit 0 for it. The validation works when loaded directly; it contributes nothing to any runner-based gate."
+   :pointers ["futon2/test/fold_realized_zero_coverage_test.clj:1-8"]
+   :owner :undecided
+   :row :g/runner-visible-suite}
+
+  {:id :f/registry-code-pointers-drifted :severity :pointers-resolve-to-the-wrong-code
+   :statement
+   "NINE :code RANGES IN aif-equations.edn LAND ON UNRELATED CODE, and pointer_check passes every one of them, because it verifies that a line range is inside a file and not that the target says what the row claims. The registry's own F row records this happening once ('4450-4452 had drifted onto an unrelated invariant-signal map and kept resolving'); it is not once. Each was checked by reading the first line of the cited range on 2026-09-03:
+    (1) :prediction-error war_machine.clj lines 4368-4379 -> the mark2 batch-lifecycle comment block;
+    (2) :precision war_machine.clj lines 4380-4388 -> the same comment block (:output-quality). Its OTHER pointer, precision.clj lines 116-135, is correct and lands on update-channel-precision;
+    (3) :free-energy war_machine.clj lines 4913-4915 -> the tail of a :live-summary/:live-domains map;
+    (4) :belief-update war_machine.clj lines 4375-4388 -> the same mark2 comment block;
+    (5) :belief-update war_machine.clj lines 4429-4431 -> Stage-9 manifest counters (s9a-hg, s9b-thr, s9b-emb);
+    (6) :depth war_machine.clj lines 4485-4487 -> the manifests-by-batch keep;
+    (7) :depth rollout.clj lines 166-171 -> a docstring about :unscored/:refused move classification; the real site is rollout-horizon at rollout.clj lines 474-479, which is where {:or {depth 2}} lives;
+    (8) :temperature policy.clj lines 242-245 -> gap-report; the real site is effective-temperature at policy.clj lines 77;
+    (9) :action policy.clj lines 247-250 -> gap-report's body; the real site is select-action at policy.clj lines 672.
+   The war_machine.clj pointers share one cause: every one of them now lands in the mark2 batch-pipeline scanning region of a 6302-line file, so the AIF tick code moved and the ranges did not follow. SCOPE OF THE CHECK, stated so the finding is not read wider than it was tested: the first line of every :code range in the twelve code-bearing equation rows was read; the src/futon2/aif pointers other than (7),(8),(9) land on the function the row names (precision.clj lines 116, policy_free_energy.clj lines 41, forward_model.clj lines 279, efe.clj lines 601, bmr.clj lines 108, a4a.clj lines 85 and :126). NOT REPAIRED HERE: the registry is signed and correcting it is a registry edit under the TN section 9a supersession discipline, which is a row of its own."
+   :pointers ["futon2/holes/labs/wm-contract/aif-equations.edn:77-80"
+              "futon2/holes/labs/wm-contract/aif-equations.edn:104-107"
+              "futon2/holes/labs/wm-contract/aif-equations.edn:146-151"
+              "futon2/src/futon2/aif/rollout.clj:474-479"
+              "futon2/src/futon2/aif/policy.clj:77-80"
+              "futon2/src/futon2/aif/policy.clj:672-675"]
+   :owner :undecided
+   :row :g/content-grain-pointer-check}
+
+  {:id :f/u10-narrative-behind-its-matrix :severity :stale-narrative
+   :statement "U10-node-coverage.md's Gaps section still says R7 has no test and R8/R14 are partial and plant-derived, while U10-node-coverage.edn now types R7, R8 and R14 as :covered with recorded record-ids -- the later U19z/U21z rows updated the matrix and not its narrative. The two addenda at the foot of the md do not cover this."
+   :pointers ["futon2/holes/labs/zaif-harness/runs/U10-node-coverage.md:34-51"
+              "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.edn:120-137"
+              "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.edn:138-160"
+              "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.edn:182-201"]
+   :owner :U10
+   :row :n/R9-zaif-authorship}]}
