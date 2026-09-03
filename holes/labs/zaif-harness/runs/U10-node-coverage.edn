@@ -15,17 +15,20 @@
   "../futon3c/src/futon3c/agents/{zaif_controller,zaif_inputs}.clj"]
  :nodes
  [{:node :R1
-   :spec-test :missing
+   :spec-test :covered
    :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 310
-            :substrate :zaif :provenance :real}]
+            :substrate :zaif :provenance :real}
+           {:path "../futon3c/test/futon3c/agents/zaif_actand_test.clj" :line 104
+            :substrate :zaif :provenance :real
+            :record-id "e-0cae94f2-9ca8-4863-9251-44278445a5f7"}]
    :shared-machinery
    {:status :mapped-separate
     :evidence ["src/futon2/aif/belief.clj:62" "src/futon2/aif/belief.clj:423"
                "../futon3c/src/futon3c/agents/zaif_inputs.clj:177"
                "../futon3c/src/futon3c/agents/zaif_inputs.clj:192"]
-    :note "U6 diagnoses the recorded empty zaif task-belief; it does not test persistence. WM belief state and zaif hydration are separate paths."}
-   :gap "No two-turn persistence/reconstruction test; all 114 recorded zaif sessions had an empty task belief. S7 identifies real WM mu-pre/mu-post fields but has not extracted fixtures."
-   :blocked-by [:D8 :U11 :S7]}
+    :note "WM belief state and zaif hydration remain separate paths. The zaif R1 test now derives a nonempty U11 task belief from the tracked calibration record, serialises it after turn one, reconstructs it for turn two through the production hydrator/controller, and pins the unchanged provenance and nonzero act term."}
+   :gap nil
+   :blocked-by []}
 
   {:node :R2
    :spec-test :covered
