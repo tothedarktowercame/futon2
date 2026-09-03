@@ -61,13 +61,19 @@
    :blocked-by [:D8 :U11 :S7]}
 
   {:node :R4
-   :spec-test :partial
+   :spec-test :covered
    :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 332
             :substrate :fixture-only :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 343
             :substrate :fixture-only :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 539
-            :substrate :fixture-only :provenance :planted}]
+            :substrate :fixture-only :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 71
+            :substrate :zaif :provenance :live-replay
+            :record-id "e-0f2f9aec-6240-40e9-a25a-e45d9452076f"}
+           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 86
+            :substrate :wm :provenance :real
+            :record-id "801976e7-01c6-4e39-aada-27f620f7c2f1"}]
    :shared-machinery
    {:status :mapped-separate
     :evidence ["src/futon2/aif/forward_model.clj:25"
@@ -142,13 +148,15 @@
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 539
             :substrate :fixture-only :provenance :planted}]
    :shared-machinery
-   {:status :mapped-through-plant
+   {:status :mapped-separate
     :evidence ["src/futon2/aif/policy_free_energy.clj:41"
                "test/futon2/aif/zaif_full_loop_test.clj:152"
-               "test/futon2/aif/zaif_full_loop_test.clj:433"]
-    :note "U6 uses WM F-pi machinery, but the realised observation and predictions are planted; lines 433-440 state that the ordering is forced by the plant."}
-   :gap "No replay-delta-zero test from a real zaif observation, because zaif v0 declares none."
-   :blocked-by [:S7]}
+               "test/futon2/aif/zaif_full_loop_test.clj:433"
+               "../futon3c/test/futon3c/agents/zaif_inputs_test.clj:71"
+               "../futon3c/test/futon3c/agents/zaif_inputs_test.clj:86"]
+    :note "U6 uses WM F-pi machinery, but its realised observation and predictions are planted; lines 433-440 state that the ordering is forced by the plant. The closing ZAIF test replays live evidence record e-0f2f9aec-6240-40e9-a25a-e45d9452076f through the shipped controller and types its missing realised observation as :absent/:zaif-v0-no-realised-observation. The separate WM test pins live record 801976e7-01c6-4e39-aada-27f620f7c2f1 and replays the :ticks-firing-ratio prediction-error arithmetic to exact error and weighted-error zero. It does not claim ZAIF produces WM prediction errors."}
+   :gap nil
+   :blocked-by []}
 
   {:node :R9
    :spec-test :missing
