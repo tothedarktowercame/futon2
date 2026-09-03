@@ -48,3 +48,28 @@ a **capability demonstration** relevant to Part 3's business considerations:
 
 Ledger id :programme/T5, :born-of :operator-dictation, statement verbatim
 from the blockquote above.
+
+## 4. Rob's case: the rewrite problem needs TWO specifications (Joe, same evening)
+
+> "Folks will have a working system... written in Forth... or a banking
+> system written in COBOL. And someone will come along and say... let's
+> rewrite it in Rust... they could take the old code as a form of
+> specification and say, well, our new rewrite should at least be as
+> performant as the old code is in this set of circumstances. And that
+> becomes a translation problem. And what Rob has noticed is that doing
+> something like translating the Lean system, which is written in C, into
+> Python, using LLMs is possible, but challenging... you would have thought
+> LLMs... they're just like an even better version of Google Translate...
+> Rob has found that's not the case. So you need the original code as a
+> specification, but you also need a specification of the transcompilation
+> process. And I think that's sort of what we've developed with our
+> tetrahedron model, albeit an informal specification rather than a formal
+> one... that rewrite-code-or-improve-code problem is one that comes up in
+> business settings quite a lot."
+
+Two-spec structure: (1) the old system as EXTENSIONAL spec (which recorded
+behaviours must survive, over a declared envelope of circumstances); (2) the
+PROCESS spec (what maps to what, what counts as equivalent, how conformance
+is checked and staged) — the tetrahedron's role. The campaign's machinery
+(live pins, negative controls, dated-additive windows, kept-vs-ruled-changed
+verdicts, the fence) is a working instance of (2). Feeds Part 3.

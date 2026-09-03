@@ -278,7 +278,16 @@
           :by "claude-1 (operator dictation)",
           :row :NOTE-aif-spec-gap,
           :evidence
-          ["futon2/holes/labs/wm-contract/NOTE-aif-spec-gap.md section 3"]}],
+          ["futon2/holes/labs/wm-contract/NOTE-aif-spec-gap.md section 3"]}
+  #:event{:id :evidence#programme/T5-rob-rewrite,
+          :seq 11,
+          :tension :programme/T5,
+          :type :evidence-added,
+          :at "2026-09-03",
+          :by "claude-1 (joe dictation, Rob's rewrite case)",
+          :row :NOTE-aif-spec-gap,
+          :evidence
+          ["NOTE-aif-spec-gap.md section 4: the legacy-rewrite problem instantiates the tension in business terms -- the old code underspecifies itself, so both an extensional spec (old system + declared envelope) and a process spec (the tetrahedron's role) are required; Rob's C-to-Python Lean translation as the measured difficulty datum"]}],
  :ledger/id :wm-contract/tension-ledger,
  :ledger/cross-cites
  [{:row :U39,
