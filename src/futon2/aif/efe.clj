@@ -90,6 +90,17 @@
 (def default-gap-weight 6.0)
 (def default-model-uncertainty-weight 1.0)
 
+(def default-survey-eig-weight
+  "U24. Exchange rate between the epistemic payload a `:survey-mission`
+   candidate carries (`:survey-eig-nats`, from
+   `futon2.aif.survey-mission-value`) and G. ZERO BY DEFAULT: at 0.0 the
+   `:survey-eig` key is absent from `:augmentation-terms` altogether and
+   `:controller-score` is byte-identical, so no recorded number moves. The nats
+   and G-risk/G-ambiguity are already in the same units, so this scalar is a
+   pure exchange rate and not a unit conversion; declaring it non-zero on the
+   default path is Joe's (worklist :J8)."
+  0.0)
+
 (def legacy-control-mode :controller-augmentation)
 (def retired-control-mode :telemetry-only)
 (def legacy-graph-feasibility-mode :score-penalty)
@@ -504,6 +515,16 @@
                             `(1 + time-pressure × time-pressure-scale)`.
                             Default 0 (no anticipation-driven scaling).
      :time-pressure-scale — default `default-time-pressure-scale` (1.0).
+     :survey-eig-weight   — U24. Exchange rate on a `:survey-mission`
+                            candidate's `:survey-eig-nats` payload (see
+                            `futon2.aif.survey-mission-value`). Default
+                            `default-survey-eig-weight` (0.0), at which the
+                            `:survey-eig` augmentation key is absent and
+                            `:controller-score` is byte-identical. The leg is
+                            SUBTRACTED (information gain is
+                            preference-increasing), and is skipped entirely for
+                            a candidate carrying no payload rather than
+                            imputing 0.0 nats to it.
      :horizon-steps       — v0.15 opt-in multi-horizon scoring. When
                             >= 2, uses `predict-multi-horizon` and
                             scores against the FINAL-state observation
@@ -566,8 +587,9 @@
                          structural-pressure-mode move-class-intensity-mode
                          predictability-control-mode homeostatic-control-mode
                          graph-feasibility-mode
-                         move-class-intensity-weight]
+                         move-class-intensity-weight survey-eig-weight]
                   :or {info-weight default-info-weight
+                       survey-eig-weight default-survey-eig-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
                        time-pressure 0.0
@@ -726,6 +748,16 @@
                       pref/default-c-temperature
                       c-temperature)))
          g-goal-outcome (:score goal-outcome-evaluation)
+         ;; U24: the epistemic leg of a :survey-mission candidate. NEGATIVE by
+         ;; construction (information gain is preference-increasing, the sign
+         ;; Holes.G := risk - eig gives it), and nil unless BOTH the weight is
+         ;; positive and the candidate actually carries a measured payload — so
+         ;; an unenriched survey candidate scores exactly as it did before this
+         ;; key existed, rather than at an imputed zero that looks measured.
+         survey-eig-contribution
+         (when (and (pos? (double survey-eig-weight))
+                    (number? (:survey-eig-nats action)))
+           (- (* (double survey-eig-weight) (double (:survey-eig-nats action)))))
          move-class-intensity (when (= :v1 move-class-intensity-mode)
                                 (move-intensity/intensity action))
          move-class-contribution (when move-class-intensity
@@ -778,7 +810,9 @@
                                      :goal-outcome g-goal-outcome}
                               habit-prior? (dissoc :structural-pressure)
                               move-class-contribution
-                              (assoc :move-class-intensity move-class-contribution))
+                              (assoc :move-class-intensity move-class-contribution)
+                              survey-eig-contribution
+                              (assoc :survey-eig survey-eig-contribution))
 	         g-total-base (+ effective-risk
 	                         g-ambig
 	                         info-contribution
@@ -789,9 +823,12 @@
 	                         (- (:gap-exploration-bonus gap-terms))
 	                         ;; foldC layer id: :live-goal-outcomes composes here.
 	                         g-goal-outcome)
-         g-total (if move-class-contribution
-                   (+ g-total-base move-class-contribution)
-                   g-total-base)
+         g-total-mci (if move-class-contribution
+                       (+ g-total-base move-class-contribution)
+                       g-total-base)
+         g-total (if survey-eig-contribution
+                   (+ g-total-mci survey-eig-contribution)
+                   g-total-mci)
          ;; C108 shadow-only decomposition. These terms do not enter scoring;
          ;; they restate the already-computed sum per observation channel so
          ;; the trace boundary can omit absent channels exactly. Everything
@@ -898,7 +935,15 @@
        move-class-intensity
        (assoc :move-class-intensity-mode move-class-intensity-mode
               :move-class-intensity move-class-intensity
-              :move-class-intensity-contribution move-class-contribution)))))
+              :move-class-intensity-contribution move-class-contribution)
+
+       ;; U24: recorded only when the leg is live, so the trace boundary of a
+       ;; default tick is unchanged and a record carrying these keys is
+       ;; evidence the leg actually ran.
+       survey-eig-contribution
+       (assoc :survey-eig-weight (double survey-eig-weight)
+              :survey-eig-nats (double (:survey-eig-nats action))
+              :survey-eig-contribution survey-eig-contribution)))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by controller-score

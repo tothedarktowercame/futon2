@@ -1,0 +1,54 @@
+{:question
+ "U4 re-run: does the ambiguity leg discriminate once :survey-mission candidates exist?",
+ :grain
+ "U4 grain A (the theory grain): arg-best over G-risk + G-ambiguity against arg-best over G-risk alone. Both legs are recorded per candidate, so this needs no reconstruction.",
+ :before
+ {:ambiguity-spread-entropy-carrying 16.32082820501242,
+  :ties-risk-only 1,
+  :grain-a-changed? false,
+  :ties-with-ambiguity 1,
+  :n 146,
+  :lambda-break {:lambda 1.0240808379706978, :overtaker [:no-op nil]},
+  :field :recorded-146,
+  :ambiguity-spread 125.4477213937595,
+  :arg-best-risk-only [:advance-mission "M-zaif-harness-v1"],
+  :arg-best-with-ambiguity [:advance-mission "M-zaif-harness-v1"],
+  :ambiguity-distinct-values-entropy-carrying 4,
+  :positive-control-drop-risk
+  {:arg-best-ambiguity-only [:no-op nil], :changed? true},
+  :by-action-type
+  {:address-sorry {:n 3, :ambiguity -109.42619933308113, :distinct 1},
+   :advance-mission
+   {:n 133, :ambiguity -108.87689318874708, :distinct 1},
+   :fire-pattern {:n 3, :ambiguity -116.79209997800035, :distinct 1},
+   :learn-action-class {:n 6, :ambiguity 0.25, :distinct 1},
+   :no-op {:n 1, :ambiguity -125.1977213937595, :distinct 1}},
+  :ambiguity-distinct-values 5},
+ :after
+ {:ambiguity-spread-entropy-carrying 16.32082820501242,
+  :ties-risk-only 1,
+  :grain-a-changed? false,
+  :ties-with-ambiguity 1,
+  :n 278,
+  :lambda-break
+  {:lambda 1.0046312905504649,
+   :overtaker [:survey-mission "M-zaif-harness-v1"]},
+  :field :with-133-survey-candidates,
+  :ambiguity-spread 125.4477213937595,
+  :arg-best-risk-only [:advance-mission "M-zaif-harness-v1"],
+  :arg-best-with-ambiguity [:advance-mission "M-zaif-harness-v1"],
+  :ambiguity-distinct-values-entropy-carrying 4,
+  :positive-control-drop-risk
+  {:arg-best-ambiguity-only [:no-op nil], :changed? true},
+  :by-action-type
+  {:address-sorry {:n 3, :ambiguity -109.42619933308113, :distinct 1},
+   :advance-mission
+   {:n 133, :ambiguity -108.87689318874708, :distinct 1},
+   :fire-pattern {:n 3, :ambiguity -116.79209997800035, :distinct 1},
+   :learn-action-class {:n 5, :ambiguity 0.25, :distinct 1},
+   :no-op {:n 1, :ambiguity -125.1977213937595, :distinct 1},
+   :survey-mission
+   {:n 133, :ambiguity -116.79209997800035, :distinct 1}},
+  :ambiguity-distinct-values 5},
+ :note
+ "The epistemic leg lives in the augmentation layer, not in G-core (invariant I3 pins :G-core = risk + ambiguity), so the survey-live arm's grain-A numbers are identical to the survey-dark arm's by construction and are not reported twice."}

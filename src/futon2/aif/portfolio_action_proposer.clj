@@ -23,8 +23,30 @@
   with predict-effects arms, but can-execute? defaults to true only for
   actions a proposer surfaced. The enact path is gated separately by the
   WM's act-gate. This proposer makes the candidates VISIBLE and PRICEABLE;
-  enactment remains the operator's call."
-  (:require [futon2.aif.action-proposer :as ap]))
+  enactment remains the operator's call.
+
+  U24 adds two things here and nothing else. (1) The `can-propose?` /
+  `can-execute?` arms for `:survey-mission`, which READ THE SAME DARK FLAG.
+  `can-propose?` returns false while it is false, which is exactly what the
+  `:default` arm returned, so loading this namespace changes that answer for
+  nobody. `can-execute?` is the one answer that moves: the `:default` arm
+  returns TRUE for any action type, and this arm returns false while dark.
+  That is strictly more conservative, and it is unreachable while dark,
+  because nothing proposes a `:survey-mission` action for it to be asked
+  about. What the arms buy is that arming the proposer also stops the
+  bootstrap proposer emitting the `:learn-action-class` gap for
+  `:survey-mission` -- otherwise
+  the field would carry both a real survey candidate and a candidate saying
+  survey is unavailable. On 2026-09-02 that gap candidate was in the live
+  field with `:G-ambiguity 0.25` (the Beta-predictive-variance collision U4
+  section 5 measured, 125 nats away from the entropy scale), so it is not a
+  harmless duplicate. (2) The epistemic payload: when state carries
+  `:survey-readings`, each survey candidate is enriched with
+  `:survey-eig-nats` by `futon2.aif.survey-mission-value`. Without those
+  readings the candidates are emitted exactly as before."
+  (:require [futon2.aif.action-proposer :as ap]
+            [futon2.aif.forward-model :as fm]
+            [futon2.aif.survey-mission-value :as smv]))
 
 (def ^:dynamic *portfolio-proposer-active?*
   "When false (DEFAULT), the portfolio proposer is dark — propose returns
@@ -50,14 +72,22 @@
 (defn- survey-candidates
   "One :survey-mission candidate per open mission (information-gathering
   before committing to advance). Cheaper than advance; surfaces the
-  option to look before leaping."
-  [missions]
-  (for [m missions]
-    {:type :survey-mission
-     :target (:id m)
-     :weight 0.3
-     :rationale (str "portfolio: survey " (:id m)
-                     " before advance — information-gathering option")}))
+  option to look before leaping.
+
+  U24: enriched with the epistemic payload when READINGS is non-nil. The
+  forward model ignores `:target` for this type, so G-core is the same number
+  for every one of these candidates; `:survey-eig-nats` is the only thing that
+  tells two of them apart."
+  ([missions] (survey-candidates missions nil))
+  ([missions readings]
+   (smv/enrich-survey-candidates
+    readings
+    (for [m missions]
+      {:type :survey-mission
+       :target (:id m)
+       :weight 0.3
+       :rationale (str "portfolio: survey " (:id m)
+                       " before advance — information-gathering option")}))))
 
 (defn- apply-cascade-candidates
   "One :apply-cascade candidate per mission that has a replayable deposit
@@ -85,9 +115,27 @@
         (let [missions (:missions state)
               escrow-missions (:escrow-missions state)]
           (concat (close-candidates missions)
-                  (survey-candidates missions)
+                  (survey-candidates missions (:survey-readings state))
                   (apply-cascade-candidates missions escrow-missions)))))
     (proposer-id [_] :portfolio-action)))
+
+;; ---------------------------------------------------------------------------
+;; U24: :survey-mission addressability. Both arms are gated on the SAME dark
+;; flag as `propose`, so loading this namespace with the flag false returns
+;; exactly what `can-propose? :default` (false) and `can-execute? :default`
+;; (true) already returned. Registering them here rather than in
+;; mission_registry keeps the flag and the addressability claim in one place:
+;; the class is addressable exactly when the proposer that addresses it is on.
+;; ---------------------------------------------------------------------------
+
+(defmethod fm/can-propose? :survey-mission
+  [state _action-type]
+  (boolean (and *portfolio-proposer-active?* (seq (:missions state)))))
+
+(defmethod fm/can-execute? :survey-mission
+  [state action]
+  (boolean (and *portfolio-proposer-active?*
+                (contains? (set (map :id (:missions state []))) (:target action)))))
 
 (defn dry-run-portfolio
   "Return a map of action-type → candidate count for a given state,
@@ -101,7 +149,7 @@
         escrow-missions (:escrow-missions state)
         advance-count (count missions)
         close-count (count (close-candidates missions))
-        survey-count (count (survey-candidates missions))
+        survey-count (count (survey-candidates missions (:survey-readings state)))
         cascade-count (count (apply-cascade-candidates missions escrow-missions))]
     {:advance-mission advance-count
      :close-mission close-count

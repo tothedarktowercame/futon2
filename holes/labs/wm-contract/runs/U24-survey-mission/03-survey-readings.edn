@@ -1,0 +1,2953 @@
+{:carrier-partition
+ {:answerable
+  [:clocked-on
+   :trace-decision
+   :trace-shown
+   :held-on-mission
+   :shares-capability-with],
+  :unanswerable
+  [:psr
+   :pur
+   :pattern-phylogeny
+   :apm-frames
+   :cross-mission-references
+   :flight-discharge],
+  :basis
+  "holes/labs/wm-contract/runs/U23-cascade-catalog/carrier-population.edn",
+  :detail
+  [{:carrier :clocked-on,
+    :answerable? true,
+    :u23-reason :records-exist-none-for-subject,
+    :corpus "65 edges over 14 missions; 7 for M-zaif-harness-v1"}
+   {:carrier :trace-decision,
+    :answerable? true,
+    :u23-reason :observed,
+    :corpus
+    "885 trace records; n=3 / 125 / 125 for U23's three subjects"}
+   {:carrier :trace-shown,
+    :answerable? true,
+    :u23-reason :records-exist-none-for-subject,
+    :corpus "234 records with :shown, 450 occurrences, 5 missions"}
+   {:carrier :held-on-mission,
+    :answerable? true,
+    :u23-reason :records-exist-none-for-subject,
+    :corpus "124 edges"}
+   {:carrier :shares-capability-with,
+    :answerable? true,
+    :u23-reason :records-exist-none-for-subject,
+    :corpus "1 relation -- populated, and thin enough to say so"}
+   {:carrier :psr,
+    :answerable? false,
+    :u23-reason :no-typed-carrier,
+    :corpus
+    "no writer exists; flight-log.spec.edn:61 is v0.1 and unwired"}
+   {:carrier :pur,
+    :answerable? false,
+    :u23-reason :no-typed-carrier,
+    :corpus "no writer exists; flight-log.spec.edn:93"}
+   {:carrier :pattern-phylogeny,
+    :answerable? false,
+    :u23-reason :records-exist-not-keyed-by-mission,
+    :corpus "2 co-application / 0 descent edges, pattern-keyed"}
+   {:carrier :apm-frames,
+    :answerable? false,
+    :u23-reason :records-exist-not-keyed-by-mission,
+    :corpus "172 frames keyed by Lean problem id"}
+   {:carrier :cross-mission-references,
+    :answerable? false,
+    :u23-reason :subject-absent-from-carrier-key-space,
+    :corpus
+    "9 relations over 8 :mission entities in a disjoint id space"}
+   {:carrier :flight-discharge,
+    :answerable? false,
+    :u23-reason :writer-exists-no-records,
+    :corpus
+    "writer reachable, zero *.flight.edn anywhere under ~/code"}]},
+ :map-question-carrier
+ {:pattern
+  "(?i)^\\s*(?:#+\\s*)?(?:\\*\\*)?MAP must answer(?:\\*\\*)?\\s*:?\\s*$",
+  :docs-with-list
+  [{:id "M-apm-capability-ratchet",
+    :path
+    "/home/joe/code/futon0/holes/missions/M-apm-capability-ratchet.md",
+    :heading-line 260,
+    :questions 6}],
+  :docs-without-list 132,
+  :near-miss-phrasings
+  [{:pointer "futon3c/holes/missions/M-agency-hardening.md:196",
+    :text "Questions the evidence bundle must answer:",
+    :why-not-matched :not-a-map-phase-question-list}
+   {:pointer
+    "futon5a/holes/missions/M-stack-stereolithography.md:1323",
+    :text "Questions the audit must answer:",
+    :why-not-matched :not-a-map-phase-question-list}
+   {:pointer "futon3c/holes/missions/M-apm-demonstration.md:15",
+    :text "each with the question MAP must answer",
+    :why-not-matched :prose-reference-no-list}
+   {:pointer "futon3c/holes/missions/M-apm-demonstration.md:278",
+    :text
+    "with the question MAP must answer stated as: already done / partly done / greenfield?",
+    :why-not-matched :one-question-restated-for-a-table-column}]},
+ :catalog-readings-from-u23
+ {"zaif-harness-v1"
+  #{:clocked-on
+    :shares-capability-with
+    :held-on-mission
+    :trace-shown
+    :trace-decision},
+  "aif-a-matrix-faithfulness"
+  #{:clocked-on
+    :shares-capability-with
+    :held-on-mission
+    :trace-shown
+    :trace-decision},
+  "aif-gap-epistemic-affordance"
+  #{:clocked-on
+    :shares-capability-with
+    :held-on-mission
+    :trace-shown
+    :trace-decision}},
+ :status-counts {:measured 123, :phase-unreadable 10},
+ :nats-histogram
+ {0.0 52,
+  0.3465735902799727 7,
+  0.6931471805599454 14,
+  1.0397207708399179 9,
+  2.0794415416798357 35,
+  3.4657359027997265 15,
+  7.6246189861593985 1},
+ :top-10-by-nats
+ [{:map-question-count 6,
+   :normalized 1.0,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 7.6246189861593985,
+   :nats 7.6246189861593985,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "apm-capability-ratchet",
+   :id "M-apm-capability-ratchet",
+   :open-question-count 11,
+   :question-count 11,
+   :map-question-absence nil}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "dionysus-winddown",
+   :id "M-dionysus-winddown",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "capability-zones-S2a-handoff",
+   :id "M-capability-zones-S2a-handoff",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "populate-substrate-2",
+   :id "M-populate-substrate-2",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "web-arxana-missions",
+   :id "M-web-arxana-missions",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "codex-sorry-loop",
+   :id "M-codex-sorry-loop",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "pheromone-field",
+   :id "M-pheromone-field",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "metric-harness",
+   :id "M-metric-harness",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "latex-wysiwyg",
+   :id "M-latex-wysiwyg",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "live-efe-map",
+   :id "M-live-efe-map",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}],
+ :rows
+ [{:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 0.0,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "zaif-harness-v1",
+   :id "M-zaif-harness-v1",
+   :open-question-count 0,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "expressions-of-interest",
+   :id "M-expressions-of-interest",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "verify",
+   :status :measured,
+   :mission-id "distributed-frontiermath",
+   :id "M-distributed-frontiermath",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "symbol-grounding",
+   :id "M-symbol-grounding",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "superpod-mark2",
+   :nats 0.0,
+   :id "M-superpod-mark2"}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "eoi-outbox-management",
+   :id "M-eoi-outbox-management",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "complete",
+   :status :measured,
+   :mission-id "typed-holes-lean-handoffs",
+   :id "M-typed-holes-lean-handoffs",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "verify",
+   :status :measured,
+   :mission-id "typed-holes-mathlib-handoff",
+   :id "M-typed-holes-mathlib-handoff",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "futon-enrichment",
+   :id "M-futon-enrichment",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "a-sorry-enterprise",
+   :id "M-a-sorry-enterprise",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "categorical-code",
+   :id "M-categorical-code",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "war-machine-pilot",
+   :id "M-war-machine-pilot",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "single-locus",
+   :id "M-single-locus",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "futonzero-mvp",
+   :id "M-futonzero-mvp",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "patterns-done-right",
+   :id "M-patterns-done-right",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "the-futon-stack",
+   :id "M-the-futon-stack",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "landing-practice",
+   :id "M-landing-practice",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "recommendation-bindings",
+   :id "M-recommendation-bindings",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "mission-coherence-patterns",
+   :id "M-mission-coherence-patterns",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "self-improvement-loop",
+   :id "M-self-improvement-loop",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "verify",
+   :status :measured,
+   :mission-id "diagramprover",
+   :id "M-diagramprover",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "single-entry-point",
+   :id "M-single-entry-point",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "state-snapshot-witness",
+   :id "M-state-snapshot-witness",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "trip-journal",
+   :id "M-trip-journal",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "pattern-ingest",
+   :id "M-pattern-ingest",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "vsatarcs-invariants-integration",
+   :id "M-vsatarcs-invariants-integration",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "paper-reverse-morphogenesis",
+   :id "M-paper-reverse-morphogenesis",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "war-machine-vsatarcs-interop",
+   :id "M-war-machine-vsatarcs-interop",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "stack-geometry",
+   :id "M-stack-geometry",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "pattern-mining",
+   :id "M-pattern-mining",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "superpod-mark3",
+   :id "M-superpod-mark3",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "the-futon-stack-Q6-r12-design-choices",
+   :id "M-the-futon-stack-Q6-r12-design-choices",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "daily-scan",
+   :id "M-daily-scan",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "differentiable-code",
+   :id "M-differentiable-code",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "hyperreal-dictionary-planning",
+   :id "M-hyperreal-dictionary-planning",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "archaeology-control",
+   :id "M-archaeology-control",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "tpg-coupling-evolution",
+   :id "M-tpg-coupling-evolution",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "pattern-application-diagnostic",
+   :id "M-pattern-application-diagnostic",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "structure-seed-promotion",
+   :nats 0.0,
+   :id "M-structure-seed-promotion"}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "pattern-retrieval-calibration",
+   :id "M-pattern-retrieval-calibration",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "futonzero-prelim-practice",
+   :id "M-futonzero-prelim-practice",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "artificial-stack-exchange",
+   :id "M-artificial-stack-exchange",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "editorial-assistant",
+   :id "M-editorial-assistant",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "webarxana",
+   :id "M-webarxana",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "verify",
+   :status :measured,
+   :mission-id "prior-mathematics",
+   :id "M-prior-mathematics",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "bounded-disposition",
+   :id "M-bounded-disposition",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "reflective-discipline",
+   :id "M-reflective-discipline",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "action-cost-modelling",
+   :id "M-action-cost-modelling",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "stack-hud-refactor",
+   :id "M-stack-hud-refactor",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "weird-modernism",
+   :id "M-weird-modernism",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "coupling-as-constraint",
+   :nats 0.0,
+   :id "M-coupling-as-constraint"}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "or-training-as-learning-system",
+   :id "M-or-training-as-learning-system",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "reachable-from-boot",
+   :id "M-reachable-from-boot",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "stack-stereolithography",
+   :id "M-stack-stereolithography",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "complete",
+   :status :measured,
+   :mission-id "essay-corpus-substrate",
+   :id "M-essay-corpus-substrate",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "canon-fingerprint-store",
+   :id "M-canon-fingerprint-store",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "hypergraph-operator",
+   :id "M-hypergraph-operator",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.05000000000000001,
+   :availability 0.1,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.3465735902799727,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "document",
+   :status :measured,
+   :mission-id "simulating-or-training-as-learning-system",
+   :id "M-simulating-or-training-as-learning-system",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "vsatarcs-writer",
+   :id "M-vsatarcs-writer",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "symbol-grounding-scaling-plan",
+   :nats 0.0,
+   :id "M-symbol-grounding-scaling-plan"}
+  {:status :phase-unreadable,
+   :mission-id "essays-retraction-visibility",
+   :nats 0.0,
+   :id "M-essays-retraction-visibility"}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "complete",
+   :status :measured,
+   :mission-id "essays-edit-cycle",
+   :id "M-essays-edit-cycle",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "xor-coupling-probe",
+   :id "M-xor-coupling-probe",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.05000000000000001,
+   :availability 0.1,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.3465735902799727,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "document",
+   :status :measured,
+   :mission-id "bounded-in-flight-state",
+   :id "M-bounded-in-flight-state",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "differentiable-math",
+   :id "M-differentiable-math",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "fulab-wiring-survey",
+   :id "M-fulab-wiring-survey",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "peeragogy-rewrite",
+   :id "M-peeragogy-rewrite",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "verify",
+   :status :measured,
+   :mission-id "war-machine-wiring",
+   :id "M-war-machine-wiring",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "web-arxana-ui-improvements",
+   :id "M-web-arxana-ui-improvements",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "verify",
+   :status :measured,
+   :mission-id "emacs-cursor-peripheral",
+   :id "M-emacs-cursor-peripheral",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "arxana-roundtrip",
+   :id "M-arxana-roundtrip",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.05000000000000001,
+   :availability 0.1,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.3465735902799727,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "argue",
+   :status :measured,
+   :mission-id "substrate-metric",
+   :id "M-substrate-metric",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "the-perfect-crime",
+   :id "M-the-perfect-crime",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "kangaroo",
+   :id "M-kangaroo",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "librarian",
+   :id "M-librarian",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "aif-tokamak",
+   :id "M-aif-tokamak",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.05000000000000001,
+   :availability 0.1,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.3465735902799727,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "argue",
+   :status :measured,
+   :mission-id "propagators",
+   :id "M-propagators",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "wm-tripwires",
+   :id "M-wm-tripwires",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "lab-standard",
+   :id "M-lab-standard",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "live-efe-map",
+   :id "M-live-efe-map",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "usage-hacking",
+   :id "M-usage-hacking",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "agents-queue",
+   :id "M-agents-queue",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "autoclock-in",
+   :id "M-autoclock-in",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "complete",
+   :status :measured,
+   :mission-id "case-studies",
+   :id "M-case-studies",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "xenotype-its",
+   :nats 0.0,
+   :id "M-xenotype-its"}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "metaca-search",
+   :id "M-metaca-search",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "latex-wysiwyg",
+   :id "M-latex-wysiwyg",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "metric-harness",
+   :id "M-metric-harness",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "becoming-nomad",
+   :id "M-becoming-nomad",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "chipwitz-corps",
+   :id "M-chipwitz-corps",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "verify",
+   :status :measured,
+   :mission-id "omni-wm-runner",
+   :id "M-omni-wm-runner",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "typed-memories",
+   :id "M-typed-memories",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "pheromone-field",
+   :id "M-pheromone-field",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "capability-zones",
+   :id "M-capability-zones",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "arxana-hardening",
+   :id "M-arxana-hardening",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "sci-reproduction",
+   :id "M-sci-reproduction",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "codex-sorry-loop",
+   :id "M-codex-sorry-loop",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "intent-curvature",
+   :nats 0.0,
+   :id "M-intent-curvature"}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "complete",
+   :status :measured,
+   :mission-id "memory-retrieval",
+   :id "M-memory-retrieval",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "formal-war-machine",
+   :id "M-formal-war-machine",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "zai-learning-loop",
+   :id "M-zai-learning-loop",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "pattern-posteriors",
+   :id "M-pattern-posteriors",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "smart-emacs-cursor",
+   :id "M-smart-emacs-cursor",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "web-arxana-missions",
+   :id "M-web-arxana-missions",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "complete",
+   :status :measured,
+   :mission-id "futonzero-grounding",
+   :id "M-futonzero-grounding",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "value-creation-loop",
+   :nats 0.0,
+   :id "M-value-creation-loop"}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "futonzero-generative",
+   :id "M-futonzero-generative",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "sigils-reconsidered",
+   :nats 0.0,
+   :id "M-sigils-reconsidered"}
+  {:map-question-count 0,
+   :normalized 0.05000000000000001,
+   :availability 0.1,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.3465735902799727,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "document",
+   :status :measured,
+   :mission-id "exotype-xenotype-eoc",
+   :id "M-exotype-xenotype-eoc",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "populate-substrate-2",
+   :id "M-populate-substrate-2",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 6,
+   :normalized 1.0,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 7.6246189861593985,
+   :nats 7.6246189861593985,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "apm-capability-ratchet",
+   :id "M-apm-capability-ratchet",
+   :open-question-count 11,
+   :question-count 11,
+   :map-question-absence nil}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "differentiable-substrate",
+   :id "M-differentiable-substrate",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "distributed-proofreaders",
+   :id "M-distributed-proofreaders",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.05000000000000001,
+   :availability 0.1,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.3465735902799727,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "document",
+   :status :measured,
+   :mission-id "efe-bge-followon-actions",
+   :id "M-efe-bge-followon-actions",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 0.0,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "aif-a-matrix-faithfulness",
+   :id "M-aif-a-matrix-faithfulness",
+   :open-question-count 0,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "aif-policy-conditioned-eig",
+   :id "M-aif-policy-conditioned-eig",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "complete",
+   :status :measured,
+   :mission-id "run-produces-its-own-brief",
+   :id "M-run-produces-its-own-brief",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "capability-zones-S1-handoff",
+   :id "M-capability-zones-S1-handoff",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:status :phase-unreadable,
+   :mission-id "capability-zones-S3-handoff",
+   :nats 0.0,
+   :id "M-capability-zones-S3-handoff"}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "federated-agency-hardening",
+   :id "M-federated-agency-hardening",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "capability-zones-S1-coverage",
+   :id "M-capability-zones-S1-coverage",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "capability-zones-S2a-handoff",
+   :id "M-capability-zones-S2a-handoff",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.05000000000000001,
+   :availability 0.1,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.3465735902799727,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "document",
+   :status :measured,
+   :mission-id "capability-zones-S2b-handoff",
+   :id "M-capability-zones-S2b-handoff",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 0.0,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "aif-gap-epistemic-affordance",
+   :id "M-aif-gap-epistemic-affordance",
+   :open-question-count 0,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.10000000000000002,
+   :availability 0.2,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.6931471805599454,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "derive",
+   :status :measured,
+   :mission-id "wm-strategic-mission-selection",
+   :id "M-wm-strategic-mission-selection",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "sci-reproduction-replay-ledger",
+   :id "M-sci-reproduction-replay-ledger",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "mission-scopes-into-substrate-2",
+   :id "M-mission-scopes-into-substrate-2",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "complete",
+   :status :measured,
+   :mission-id "shared-memory-control-build-test",
+   :id "M-shared-memory-control-build-test",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "wm-aif-policy-grain-compliance",
+   :id "M-wm-aif-policy-grain-compliance",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.15,
+   :availability 0.3,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 1.0397207708399179,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "head",
+   :status :measured,
+   :mission-id "futon-problems",
+   :id "M-futon-problems",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.0,
+   :availability 0.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 0.0,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "instantiate",
+   :status :measured,
+   :mission-id "learning-loop",
+   :id "M-learning-loop",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.3,
+   :availability 0.6,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 2.0794415416798357,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "identify",
+   :status :measured,
+   :mission-id "apm-demonstration",
+   :id "M-apm-demonstration",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}
+  {:map-question-count 0,
+   :normalized 0.5,
+   :availability 1.0,
+   :excluded-carriers
+   [:psr
+    :pur
+    :pattern-phylogeny
+    :apm-frames
+    :cross-mission-references
+    :flight-discharge],
+   :raw-nats 3.4657359027997265,
+   :nats 3.4657359027997265,
+   :excluded-carrier-count 6,
+   :reference-nats 6.931471805599453,
+   :phase "map",
+   :status :measured,
+   :mission-id "dionysus-winddown",
+   :id "M-dionysus-winddown",
+   :open-question-count 5,
+   :question-count 5,
+   :map-question-absence {:reason :no-map-question-list}}]}

@@ -1,0 +1,118 @@
+{:planted
+ {:id "M-planted-identify-demo",
+  :phase "identify",
+  :map-question-count 3,
+  :advance-open-hole-count 1},
+ :availability 0.6,
+ :d0-real-identify-phase-missions
+ {:n 36,
+  :survey-wins-at-zero-weight 36,
+  :finding
+  "On every real IDENTIFY-phase candidate the survey option already outranks its own advance option with the epistemic leg OFF. That ordering is bought by the forward model, not by information gain: predict-effects :survey declares a variance on one channel and none on the other thirteen, so its ambiguity term is 7.915 nats better than :advance-mission's. A survey demonstration built on one of these would pass without the epistemic term doing anything.",
+  :rows
+  [{:id "M-a-sorry-enterprise",
+    :survey-eig-nats 2.0794415416798357,
+    :advance-controller-score-dark 5.5173215304308485,
+    :survey-controller-score-dark 5.454879482482923,
+    :survey-wins-at-zero-weight? true}
+   {:id "M-categorical-code",
+    :survey-eig-nats 2.0794415416798357,
+    :advance-controller-score-dark 5.517842742612714,
+    :survey-controller-score-dark 5.454879482482923,
+    :survey-wins-at-zero-weight? true}
+   {:id "M-futonzero-mvp",
+    :survey-eig-nats 2.0794415416798357,
+    :advance-controller-score-dark 5.519551708215971,
+    :survey-controller-score-dark 5.454879482482923,
+    :survey-wins-at-zero-weight? true}
+   {:id "M-patterns-done-right",
+    :survey-eig-nats 2.0794415416798357,
+    :advance-controller-score-dark 5.520239198661102,
+    :survey-controller-score-dark 5.454879482482923,
+    :survey-wins-at-zero-weight? true}
+   {:id "M-the-futon-stack",
+    :survey-eig-nats 2.0794415416798357,
+    :advance-controller-score-dark 5.520405840192836,
+    :survey-controller-score-dark 5.454879482482923,
+    :survey-wins-at-zero-weight? true}]},
+ :survey-value
+ {:map-question-count 3,
+  :normalized 0.48,
+  :availability 0.6,
+  :excluded-carriers
+  [:psr
+   :pur
+   :pattern-phylogeny
+   :apm-frames
+   :cross-mission-references
+   :flight-discharge],
+  :raw-nats 5.545177444479562,
+  :nats 3.3271064666877375,
+  :excluded-carrier-count 6,
+  :reference-nats 6.931471805599453,
+  :phase "identify",
+  :status :measured,
+  :mission-id "planted-identify-demo",
+  :open-question-count 8,
+  :question-count 8,
+  :map-question-absence nil},
+ :d1-minimal-field
+ {:candidates
+  [{:survey-eig-weight 0.02,
+    :G-risk 122.24697946048327,
+    :survey-eig-nats 3.3271064666877375,
+    :G-ambiguity -116.79209997800035,
+    :rank 1,
+    :type :survey-mission,
+    :G-core 5.454879482482923,
+    :controller-score 5.3883373531491685,
+    :survey-eig-contribution -0.06654212933375475,
+    :target "M-planted-identify-demo"}
+   {:type :advance-mission,
+    :target "M-planted-identify-demo",
+    :rank 2,
+    :G-risk 114.27131245454466,
+    :G-ambiguity -108.87689318874708,
+    :G-core 5.3944192657975805,
+    :controller-score 5.3944192657975805}
+   {:type :no-op,
+    :target nil,
+    :rank 3,
+    :G-risk 131.00896247338687,
+    :G-ambiguity -125.1977213937595,
+    :G-core 5.811241079627379,
+    :controller-score 5.811241079627379}],
+  :decision
+  {:type :survey-mission,
+   :target "M-planted-identify-demo",
+   :rank 1,
+   :controller-score 5.3883373531491685,
+   :reason nil},
+  :selected-the-planted-survey? true,
+  :w-break 0.018172011413128294,
+  :declared-weight 0.02,
+  :advance-controller-score-dark 5.3944192657975805,
+  :survey-controller-score-dark 5.454879482482923,
+  :survey-eig-nats 3.3271064666877375},
+ :d2-full-field
+ {:field-size 280,
+  :planted-survey-rank 17,
+  :planted-survey-entry
+  {:survey-eig-weight 0.02,
+   :G-risk 122.24697946048327,
+   :survey-eig-nats 3.3271064666877375,
+   :G-ambiguity -116.79209997800035,
+   :rank 17,
+   :type :survey-mission,
+   :G-core 5.454879482482923,
+   :controller-score 5.3883373531491685,
+   :survey-eig-contribution -0.06654212933375475,
+   :target "M-planted-identify-demo"},
+  :decision
+  {:type :survey-mission,
+   :target "M-apm-capability-ratchet",
+   :rank 1,
+   :controller-score 5.302387102759735,
+   :reason nil},
+  :why-not-rank-1
+  "M-apm-capability-ratchet carries 7.6246189861593985 nats against the plant's 3.3271064666877375; survey candidates share one G-core, so their order is the nats order at every weight."}}

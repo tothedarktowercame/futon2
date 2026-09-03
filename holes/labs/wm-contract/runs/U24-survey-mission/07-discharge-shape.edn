@@ -1,0 +1,20 @@
+{:grain :mission,
+ :subject
+ {:mission-id :string, :run-id :string, :action-type :survey-mission},
+ :answers
+ [{:question [:map-question :ordinal],
+   :answer :string,
+   :basis {:reading :keyword, :pointer :string},
+   :p-after {:true :double, :false :double}}],
+ :carrier-readings
+ [{:carrier :keyword,
+   :variant #{:absent :observed},
+   :reason :keyword,
+   :n :long}],
+ :blocked-by
+ {:carrier :flight-discharge,
+  :reason :writer-exists-no-records,
+  :writer "futon3c/src/futon3c/aif/flight_record.clj:347",
+  :caller "futon3c/src/futon3c/peripheral/war_machine_pilot.clj:585",
+  :measured-by "U23, runs/U23-cascade-catalog/carrier-population.edn"},
+ :status :declared-not-implemented}

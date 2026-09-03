@@ -1,0 +1,27 @@
+{:trace-path "data/wm-trace/wm-trace-2026-09-02.edn",
+ :record-timestamp "2026-09-02T14:00:29.357627605Z",
+ :select-opts
+ {:selection-gain 1.0,
+  :selection-boundary :strategic-recommendation,
+  :selection-law :controller-head},
+ :record-sha256
+ "afe6e76e9f24e3f7c553bafcbefd3b11efb6c41d1fd5af4cd0d571f72e16ba27",
+ :arena-opts
+ {:risk-mode :kl,
+  :ambiguity-mode :gaussian-entropy,
+  :goal-outcome-mode :kl,
+  :structural-pressure-mode :habit-prior,
+  :predictability-control-mode :telemetry-only,
+  :homeostatic-control-mode :telemetry-only,
+  :graph-feasibility-mode :policy-support},
+ :after-candidates 278,
+ :trace-line 2,
+ :recorded-candidates 146,
+ :learn-action-class-survey-gap-removed true,
+ :run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+ :recorded-types
+ {:address-sorry 3,
+  :advance-mission 133,
+  :fire-pattern 3,
+  :learn-action-class 6,
+  :no-op 1}}

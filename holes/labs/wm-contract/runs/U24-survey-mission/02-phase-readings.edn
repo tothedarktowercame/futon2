@@ -1,0 +1,56 @@
+{:as-of "2026-09-03",
+ :source
+ "futon2.aif.mission-epistemic-value/field-readings (code/v05/mission-doc)",
+ :census
+ {:hyperedges 374, :named 374, :unnamed 0, :phase-readable 313},
+ :candidates 133,
+ :phase-carrier-counts
+ {:mission-doc-prop 128, :registry-status-class 5},
+ :phase-counts
+ {"argue" 2,
+  "complete" 8,
+  "derive" 14,
+  "document" 5,
+  "head" 9,
+  "identify" 36,
+  "instantiate" 26,
+  "map" 16,
+  "unknown" 5,
+  "verify" 7},
+ :identify-phase-candidates
+ ["M-a-sorry-enterprise"
+  "M-categorical-code"
+  "M-futonzero-mvp"
+  "M-patterns-done-right"
+  "M-the-futon-stack"
+  "M-landing-practice"
+  "M-single-entry-point"
+  "M-trip-journal"
+  "M-pattern-ingest"
+  "M-stack-geometry"
+  "M-superpod-mark3"
+  "M-daily-scan"
+  "M-hyperreal-dictionary-planning"
+  "M-pattern-application-diagnostic"
+  "M-futonzero-prelim-practice"
+  "M-artificial-stack-exchange"
+  "M-reflective-discipline"
+  "M-or-training-as-learning-system"
+  "M-hypergraph-operator"
+  "M-differentiable-math"
+  "M-fulab-wiring-survey"
+  "M-arxana-roundtrip"
+  "M-librarian"
+  "M-usage-hacking"
+  "M-agents-queue"
+  "M-becoming-nomad"
+  "M-chipwitz-corps"
+  "M-arxana-hardening"
+  "M-formal-war-machine"
+  "M-pattern-posteriors"
+  "M-futonzero-generative"
+  "M-aif-policy-conditioned-eig"
+  "M-federated-agency-hardening"
+  "M-aif-gap-epistemic-affordance"
+  "M-mission-scopes-into-substrate-2"
+  "M-apm-demonstration"]}
