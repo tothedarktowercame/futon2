@@ -18,7 +18,12 @@ class ReceiptAgreementTest(unittest.TestCase):
 CONTRACT
 declarations=15 closed=9 holes=6 source=contract_lint-live-report
 :=sorry-terms=4 sorry-classification={}
+MISSION CRITERIA GAUGES
+gauges=3/9 missions=2
+mission=M-zaif-harness-v1 gauges=3/3 status=present source=/tmp/zaif.edn
+mission=M-expressions-of-interest gauges=0/6 status=present source=/tmp/eoi.md
 NEW component=workspace-gate signature={"exit": 1} reason=test
+NEW component=mission-criteria-gauges signature={"criteria": 9, "measurable": 3, "missions": 2} reason=test
 
 OVERALL
 DEGRADED-NEW exit=1 convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1/DECISION-DUE-3
@@ -27,11 +32,24 @@ DEGRADED-NEW exit=1 convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1/DECISI
             "contract": {"declaration-count": 15, "closed": 9, "hole": 6},
             "lean-sorry": {"count": 4},
             "overall": {"verdict": "DEGRADED-NEW", "exit": 1},
+            "mission-criteria-gauges": {
+                "missions": 2, "criteria": 9, "measurable": 3,
+                "details": [
+                    {"mission": "M-zaif-harness-v1", "measurable": 3,
+                     "criteria": 3, "status": "present", "source": "/tmp/zaif.edn",
+                     "detail": []},
+                    {"mission": "M-expressions-of-interest", "measurable": 0,
+                     "criteria": 6, "status": "present", "source": "/tmp/eoi.md",
+                     "detail": []},
+                ]},
             "components": [
                 {"component": "workspace-gate", "red": True,
                  "signature": {"exit": 1}, "classification": "new-red"},
                 {"component": "strict-lint", "red": False,
                  "signature": {"exit": 0}, "classification": "green"},
+                {"component": "mission-criteria-gauges", "red": True,
+                 "signature": {"missions": 2, "criteria": 9, "measurable": 3},
+                 "classification": "new-red"},
             ],
         })
         receipt = json.loads(serialized)

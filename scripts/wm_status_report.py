@@ -74,7 +74,7 @@ def receipt_text_values(text):
         raise ValueError("status text omitted required receipt agreement fields")
     active_match = re.search(r"^active=(\d+) unused-or-superseded=", text, re.MULTILINE)
     accepted_red = int(active_match.group(1)) if active_match else 0
-    return {"declaration-count": int(contract_match.group(1)),
+    values = {"declaration-count": int(contract_match.group(1)),
             "closed": int(contract_match.group(2)),
             "hole": int(contract_match.group(3)),
             "sorry-count": int(sorry_match.group(1)),
@@ -82,12 +82,26 @@ def receipt_text_values(text):
             "overall-exit": int(overall_match.group(2)),
             "red-components": (accepted_red +
                                len(re.findall(r"^NEW component=", text, re.MULTILINE)))}
+    gauges_match = re.search(r"^gauges=(\d+)/(\d+) missions=(\d+)$", text,
+                             re.MULTILINE)
+    if gauges_match:
+        details = [{"mission": match.group(1), "measurable": int(match.group(2)),
+                    "criteria": int(match.group(3)), "status": match.group(4),
+                    "source": match.group(5)}
+                   for match in re.finditer(
+                       r"^mission=(\S+) gauges=(\d+)/(\d+) status=(\S+) source=(.+)$",
+                       text, re.MULTILINE)]
+        values["mission-criteria-gauges"] = {
+            "measurable": int(gauges_match.group(1)),
+            "criteria": int(gauges_match.group(2)),
+            "missions": int(gauges_match.group(3)), "details": details}
+    return values
 
 
 def receipt_agrees_with_text(receipt, text):
     """True iff the focused authority values in RECEIPT equal the text report."""
     values = receipt_text_values(text)
-    return values == {
+    receipt_values = {
         "declaration-count": receipt["contract"]["declaration-count"],
         "closed": receipt["contract"]["closed"],
         "hole": receipt["contract"]["hole"],
@@ -97,6 +111,15 @@ def receipt_agrees_with_text(receipt, text):
         "red-components": sum(bool(component["red"])
                               for component in receipt["components"]),
     }
+    if "mission-criteria-gauges" in values:
+        gauges = receipt["mission-criteria-gauges"]
+        receipt_values["mission-criteria-gauges"] = {
+            "measurable": gauges["measurable"], "criteria": gauges["criteria"],
+            "missions": gauges["missions"],
+            "details": [{key: detail[key]
+                         for key in ("mission", "measurable", "criteria", "status", "source")}
+                        for detail in gauges["details"]]}
+    return values == receipt_values
 
 
 def edn_json(path, expression):
@@ -126,6 +149,55 @@ def pending_brief_state():
     except (json.JSONDecodeError, AttributeError, TypeError):
         rows, valid = [], False
     return result, rows, valid
+
+
+def mission_criteria_gauges():
+    """Read the two declared criteria sources through mission-c and its gauges."""
+    expression = r'''
+(require '[cheshire.core :as json]
+         '[futon2.aif.mission-c :as mission-c]
+         '[futon2.report.war-machine :as war-machine])
+(let [missions [{:mission "M-zaif-harness-v1"
+                 :path (get war-machine/mission-c-criteria-sources
+                            "M-zaif-harness-v1")}
+                {:mission "M-expressions-of-interest"
+                 :path (str (System/getProperty "user.home")
+                            "/code/futon5a/holes/missions/M-expressions-of-interest.md")}]
+      details
+      (mapv
+       (fn [{:keys [mission path]}]
+         (let [gauges (get war-machine/mission-c-declared-gauges mission {})
+               observables (into {} (map (fn [[_ gauge]]
+                                           [(:observable gauge) 0.0])
+                                         gauges))
+               reading (mission-c/read-criteria
+                        path :observables observables :mission mission
+                        :gauges gauges)
+               criteria (:criteria reading)]
+           {:mission mission :status (:status reading) :source (:source reading)
+            :criteria (count criteria)
+            :measurable (count (filter #(= :measurable (:status %)) criteria))
+            :detail (mapv #(select-keys % [:criterion :status :reason :observable])
+                          criteria)}))
+       missions)]
+  (println
+   (json/generate-string
+    {:missions (count details)
+     :criteria (reduce + (map :criteria details))
+     :measurable (reduce + (map :measurable details))
+     :details details})))
+'''
+    result = run(["clojure", "-M", "-e", expression])
+    if result.returncode:
+        raise RuntimeError("mission criteria gauge read failed: " + result.stderr.strip())
+    try:
+        reading = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("mission criteria gauge read returned invalid JSON") from exc
+    if not all(isinstance(reading.get(key), int)
+               for key in ("missions", "criteria", "measurable")):
+        raise RuntimeError("mission criteria gauge read omitted its census")
+    return reading
 
 
 def brief_decision_summary(rows):
@@ -392,6 +464,7 @@ def main():
     brief_summary = brief_decision_summary(brief_rows) if brief_valid else {
         "count": 0, "attempts": [], "belief-blocked-count": 0,
         "belief-blocked-attempt-ids": []}
+    gauge_reading = mission_criteria_gauges()
 
     futon2, f2_counts = suite_status(futon2_job)
     futon3, f3_counts = suite_status(futon3_job)
@@ -471,6 +544,14 @@ def main():
         print(f"UNREADABLE exit={brief_result.returncode} "
               "source=data/wm-morning-brief/items+reviews")
 
+    print("\nMISSION CRITERIA GAUGES")
+    print(f"gauges={gauge_reading['measurable']}/{gauge_reading['criteria']} "
+          f"missions={gauge_reading['missions']}")
+    for detail in gauge_reading["details"]:
+        print(f"mission={detail['mission']} "
+              f"gauges={detail['measurable']}/{detail['criteria']} "
+              f"status={detail['status']} source={detail['source']}")
+
     absence_findings = int(re.search(r'findings=\s*(\d+)', absence_line).group(1))
     absence_dispositions = sorted(set(re.findall(r':disposition\s+:([\w-]+)', absence.stdout)))
     components = [
@@ -492,7 +573,11 @@ def main():
         {"component": "futon2-suite", "red": futon2["receipt"].get("outer-exit", 1) != 0,
          "signature": {"exit": futon2["receipt"].get("outer-exit", 1)}},
         {"component": "futon3-suite", "red": futon3["receipt"].get("outer-exit", 1) != 0,
-         "signature": {"exit": futon3["receipt"].get("outer-exit", 1)}}]
+         "signature": {"exit": futon3["receipt"].get("outer-exit", 1)}},
+        {"component": "mission-criteria-gauges",
+         "red": gauge_reading["measurable"] < gauge_reading["criteria"],
+         "signature": {key: gauge_reading[key]
+                       for key in ("missions", "criteria", "measurable")}}]
     acceptances = json.load(open(ACCEPTANCES, encoding="utf-8"))["acceptances"]
     accepted, new_red, stale_acceptances = classify_red(components, acceptances, now)
 
@@ -579,6 +664,7 @@ def main():
                                   {"unreadable": True, "exit": health_result.returncode}),
             "morning-brief": (brief_summary if brief_valid else
                               {"unreadable": True, "exit": brief_result.returncode}),
+            "mission-criteria-gauges": gauge_reading,
         }
         sys.stdout = tee.stream
         sys.stdout.flush()   # the tee's stream is block-buffered when redirected;
