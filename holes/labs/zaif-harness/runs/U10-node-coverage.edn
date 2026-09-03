@@ -61,19 +61,13 @@
    :blocked-by [:D8 :U11 :S7]}
 
   {:node :R4
-   :spec-test :covered
+   :spec-test :partial
    :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 332
             :substrate :fixture-only :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 343
             :substrate :fixture-only :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 539
-            :substrate :fixture-only :provenance :planted}
-           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 71
-            :substrate :zaif :provenance :live-replay
-            :record-id "e-0f2f9aec-6240-40e9-a25a-e45d9452076f"}
-           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 86
-            :substrate :wm :provenance :real
-            :record-id "801976e7-01c6-4e39-aada-27f620f7c2f1"}]
+            :substrate :fixture-only :provenance :planted}]
    :shared-machinery
    {:status :mapped-separate
     :evidence ["src/futon2/aif/forward_model.clj:25"
@@ -142,11 +136,17 @@
    :blocked-by []}
 
   {:node :R8
-   :spec-test :partial
+   :spec-test :covered
    :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 418
             :substrate :fixture-only :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 539
-            :substrate :fixture-only :provenance :planted}]
+            :substrate :fixture-only :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 71
+            :substrate :zaif :provenance :live-replay
+            :record-id "e-0f2f9aec-6240-40e9-a25a-e45d9452076f"}
+           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 86
+            :substrate :wm :provenance :real
+            :record-id "801976e7-01c6-4e39-aada-27f620f7c2f1"}]
    :shared-machinery
    {:status :mapped-separate
     :evidence ["src/futon2/aif/policy_free_energy.clj:41"
