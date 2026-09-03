@@ -26,7 +26,7 @@
     :evidence ["src/futon2/aif/belief.clj:62" "src/futon2/aif/belief.clj:423"
                "../futon3c/src/futon3c/agents/zaif_inputs.clj:177"
                "../futon3c/src/futon3c/agents/zaif_inputs.clj:192"]
-    :note "WM belief state and zaif hydration remain separate paths. The zaif R1 test now derives a nonempty U11 task belief from the tracked calibration record, serialises it after turn one, reconstructs it for turn two through the production hydrator/controller, and pins the unchanged provenance and nonzero act term."}
+    :note "WM belief state and zaif hydration remain separate paths. The zaif R1 test now derives a nonempty U11 task belief from the tracked calibration record, serialises it after turn one, reconstructs it for turn two through the production hydrator/controller, and pins the unchanged provenance and nonzero act term. The zaif half is what :spec-test :covered claims: the WM mu-pre/mu-post fixtures S7 identified are still unextracted (S7 :blocked, moved to wm-contract U25), and the serialisation medium here is an in-test EDN round-trip -- no live decision record yet carries a nonempty task-belief (U11a inventory: 56 decisions, 0 with nonempty task-belief), so a production store round-trip is not yet buildable."}
    :gap nil
    :blocked-by []}
 
