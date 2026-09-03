@@ -33,3 +33,53 @@ there's pretty much one way to find out, which is to run it end-to-end and
 get it to accept that mission and see what happens. But let's not do that
 right away." Deferred deliberately; the actionability question is registered
 as a standing question in futon4/holes/mission-lifecycle-wm-alignment.md §5.
+
+## Corrections after codex-8's second read (2026-09-03)
+
+**Act 2's evidence, downgraded to what is independently addressable.** The
+original text implied a directly-queryable mission-doc ingest hyperedge; no
+such receipt is independently openable, and the id given in the narrative
+does not resolve — that claim is RETRACTED as written. What IS verifiable:
+the entity the ingest created, `futon2-d/mission/zaif-harness-v1`, exists
+on the substrate and is independently witnessed as the endpoint of the
+durable clock edges minted 2026-09-02 evening — verify:
+
+  curl -s "http://localhost:7073/api/alpha/hyperedges?type=clock%2Fclocked-on" \
+    | grep -c "futon2-d/mission/zaif-harness-v1"
+
+(≥1; e.g. hx:clock/clocked-on:agent:codex-7.futon2-d/mission/zaif-harness-v1,
+:prop/session-id recorded.) The phase consequence the act claims
+(doable 0.3→1.0 via phase unknown→instantiate) is carried by the ranking
+recomputation below, not by an ingest receipt. Typed:
+:s3/ingest-receipt-not-independently-addressable — the act happened through
+the sanctioned channel; its own receipt is not queryable; the entity it
+produced is.
+
+**Replay command** (codex-8's independent recomputation, encoded): from this
+directory,
+From this directory, save the following as replay.clj and run `bb replay.clj`:
+
+```clojure
+(let [{:keys [weights rows]} (clojure.edn/read-string (slurp "S3-step-through-3-weights.edn"))
+      {:keys [central strategic doable]} weights
+      scored (->> rows
+                  (map (fn [{:keys [id] :as r}]
+                         {:id id
+                          :score (+ (* central (:central r))
+                                    (* strategic (:strategic r))
+                                    (* doable (:doable r)))
+                          :recorded (:blended r)}))
+                  (sort-by :score) reverse vec)
+      mismatches (count (remove #(< (Math/abs (- (:score %) (:recorded %))) 5e-5) scored))]
+  (println :rows (count scored)
+           :rank1 (:id (first scored)) :score (format "%.4f" (:score (first scored)))
+           :runner-up (format "%.4f" (:score (second scored)))
+           :margin (format "%.4f" (- (:score (first scored)) (:score (second scored))))
+           :formula-mismatches mismatches))
+```
+
+Output (verified 2026-09-03):
+`:rows 133 :rank1 M-zaif-harness-v1 :score 0.8000 :runner-up 0.7870 :margin 0.0130 :formula-mismatches 0`
+(tolerance 5e-5 because the artifact records :blended at four decimals).
+reproduces rank 1 M-zaif-harness-v1 at 0.8000, runner-up 0.7870, margin
+0.013; the delta ledger sums 0.09 + 0.21 + 0.45 + 0.05 = 0.80. Input pin: S3-step-through-3-weights.edn sha256/16 1815796ba659716f.

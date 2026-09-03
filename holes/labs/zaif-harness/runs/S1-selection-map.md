@@ -34,7 +34,7 @@ contract: the doc must sit at the scanned path with a live status. (The 09-01
 trace's selected mission lives at `futon2/holes/missions/M-aif-policy-
 conditioned-eig.md` — the contract observed working.)
 
-A second, parallel index: `war_machine.clj:1286-1310` `mission-doc-index`
+A second, parallel index: `war_machine.clj:1383` `mission-doc-index`
 reads `code/v05/mission-doc` HYPEREDGES from the substrate for endpoints and
 parses `**Gate:** operator-… — text` lines out of the source file as operator
 gates. So: the FILE SCAN decides candidacy; the SUBSTRATE INDEX enriches with
@@ -42,28 +42,28 @@ endpoint + gates. Two registrations, two places.
 
 ## Stage 2 — weighting: the three-factor mission value (step ⑬)
 
-`war_machine.clj:1553-1600` `enrich-candidates-with-mission-value`, "all
+`war_machine.clj:2003` `enrich-candidates-with-mission-value`, "all
 substrate reads happen here, at the judge boundary": blends
 
-- **centrality** — normalized from `futon7/holes/M-futon-forward-model.centrality.json` (`:510-511`, cached `:1039-1050`),
+- **centrality** — normalized from `futon7/holes/M-futon-forward-model.centrality.json` (`:607` `forward-model-centrality-path`, consumed `:1137-1149`),
 - **strategic fit** — cascade role from the strategy cascade file (`FUTON_WM_STRATEGY_CASCADE` overridable),
-- **phase doability** — `phase-doability` table `:1405-1415` (head 0.1 …
+- **phase doability** — `phase-doability` table `:1855` (head 0.1 …
   instantiate 1.0, document 0.4, complete 0.0, unknown 0.3), reading the
   mission's lifecycle phase,
 
 then completion/operator gates and repeated-non-progress decay
-(`previous-selection-non-progress?` `:1417`). Weights overridable via
+(`previous-selection-non-progress?` `:1867`). Weights overridable via
 `FUTON_WM_VALUE_WEIGHTS` (EDN map) — a declared input, on the record.
-Also present, separate: `roi-map-for-missions` (`:1087-1101`, name-matching
-against an ROI feature map) feeding the report/rollout surface (`:1116-1118`),
+Also present, separate: `roi-map-for-missions` (`:1184`, name-matching
+against an ROI feature map) feeding the report/rollout surface (`:1213-1214`),
 and an anamnesis tiebreak (`:1120`).
 
 ## Stage 3 — scoring and selection (steps ⑭–⑰)
 
-G_efe = risk + ambiguity per candidate (`efe.clj:808` rank-actions →
+G_efe = risk + ambiguity per candidate (`src/futon2/aif/efe.clj:903` rank-actions →
 `core_efe.clj:94`), plus the named engineering augmentation → controller-score
 (⑮); selection at the policy seam with ln E and τ_eff (⑯,
-`policy.clj:234-271` strategic-recommendation — chosen is
+`src/futon2/aif/policy.clj:538` strategic-recommendation — chosen is
 `(or (first controller-entries) (first ranked-actions))`); abstention when
 nothing beats no-op (⑰); decision explanation with per-term contributions (⑱).
 The registry's C3/C5 findings apply here verbatim (habit computed, not
@@ -106,3 +106,16 @@ mission-doc hyperedge registered, phase stated where the parser reads it —
 then the weights are moved only by declared inputs (phase, gates,
 FUTON_WM_VALUE_WEIGHTS on the record, or Joe's mark once S1's successor wires
 the declared-mark channel into a weight input).
+
+
+## Pointer refresh (2026-09-03)
+
+All file:line pointers re-resolved against the current tree after codex-8's
+second read found drift (the 2026-09-02 C-vector work grew war_machine.clj
+and efe.clj below the cited lines; the S1 review commit ef1ebfae names each
+drifted family). Corrected here: centrality :607/:1137-1149, roi-map
+:1184/:1213-1214, mission-doc-index :1383, phase-doability :1855,
+non-progress :1867, enrich-candidates :2003, rank-actions
+src/futon2/aif/efe.clj:903, strategic-recommendation
+src/futon2/aif/policy.clj:538. Facts unchanged -- drift was positional,
+not semantic (reviewer: 'no factual rewrite was inferred from drift alone').

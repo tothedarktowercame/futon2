@@ -67,3 +67,26 @@ sources:
 Priced outcome: spine (0.45) + instantiate phase (0.30) = 0.75 > 0.5762 —
 with Joe's one authored act plus one registration, the mission tops the board
 through declared inputs only, no rank edited. That re-run is S3.
+
+## Replay scope and pins (2026-09-03, after codex-8's second read)
+
+Input pins (sha256/16): 01-candidates.edn 424b83a18b06b8b4, 02-weights.edn e4963f95c04470b5,
+03-ranking.edn 97e97bd7fb50fa6d.
+
+What IS recomputable from these committed artifacts: candidate count (133),
+winner membership and position in 03, internal consistency of the narrative
+numbers against 03's order. Verify:
+  bb -e '(let [c (count (clojure.edn/read-string (slurp "01-candidates.edn")))
+               r (clojure.edn/read-string (slurp "03-ranking.edn"))]
+           (println :candidates c :ranked (count r) :winner (first r)
+                    :zaif-rank (inc (.indexOf r "M-zaif-harness-v1"))))'
+
+What is NOT recomputable, typed (:s2/factor-inputs-not-captured): the
+per-candidate factor scores (centrality, strategic fit, doability) behind
+0.5762 and 0.09 were read live on 2026-09-02 morning and not captured into
+the artifacts; the corpus has since moved (S3's four declared acts changed
+this very mission's score), so no rerun can reproduce the historical
+baseline. The numbers stand as the contemporaneous record; the capture
+discipline this gap teaches is what S3's delta ledger and U12's fixtures
+then did. Lesson, not defect-in-hindsight: the step-through predates the
+live-pin rule (board header, adopted later the same day).
