@@ -1,0 +1,53 @@
+{:what
+ "the U22 cross-carrier check re-run through the shipped :live-doability? path instead of a with-redefs substitution",
+ :carriers
+ {:doability
+  "mission/phase on the code/v05/mission-doc hyperedge, via war-machine/mission-doc-index (this row's repair)",
+  :epistemic
+  "mission/phase on the same family, via mission-epistemic-value/field-readings' own substrate read"},
+ :declared
+ "epistemic weight 0.15, for this diagnostic only; the default is 0.0",
+ :through-the-new-path {:agree 123, :doability-phase-absent 10},
+ :through-the-default-path {:doability-phase-absent 133},
+ :disagreements [],
+ :absent-detail
+ [{:id "M-capability-zones-S3-handoff",
+   :phase-agreement :doability-phase-absent,
+   :phase "unknown",
+   :epistemic-phase nil}
+  {:id "M-coupling-as-constraint",
+   :phase-agreement :doability-phase-absent,
+   :phase "unknown",
+   :epistemic-phase nil}
+  {:id "M-essays-retraction-visibility",
+   :phase-agreement :doability-phase-absent,
+   :phase "unknown",
+   :epistemic-phase nil}
+  {:id "M-intent-curvature",
+   :phase-agreement :doability-phase-absent,
+   :phase nil,
+   :epistemic-phase nil}
+  {:id "M-sigils-reconsidered",
+   :phase-agreement :doability-phase-absent,
+   :phase "unknown",
+   :epistemic-phase nil}
+  {:id "M-structure-seed-promotion",
+   :phase-agreement :doability-phase-absent,
+   :phase nil,
+   :epistemic-phase nil}
+  {:id "M-superpod-mark2",
+   :phase-agreement :doability-phase-absent,
+   :phase nil,
+   :epistemic-phase nil}
+  {:id "M-symbol-grounding-scaling-plan",
+   :phase-agreement :doability-phase-absent,
+   :phase nil,
+   :epistemic-phase nil}
+  {:id "M-value-creation-loop",
+   :phase-agreement :doability-phase-absent,
+   :phase nil,
+   :epistemic-phase nil}
+  {:id "M-xenotype-its",
+   :phase-agreement :doability-phase-absent,
+   :phase "unknown",
+   :epistemic-phase nil}]}

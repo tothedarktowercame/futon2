@@ -1,0 +1,38 @@
+{:candidates
+ {:source
+  "holes/labs/zaif-harness/runs/S2-step-through-1/02-weights.edn",
+  :source-sha256
+  "e4963f95c04470b5ec1af26ce7a1dd3c358cd11f044e412a77189a6b86f6e885",
+  :count 133,
+  :provenance
+  "S2 step-through 1, claude-1 2026-09-02; ids only, the same pin U22 used"},
+ :weights
+ {:primary {:central 0.2, :strategic 0.5, :doable 0.3},
+  :authority
+  "Joe, 2026-09-02 (zaif-harness runs/S3-declared-weights.edn); held fixed across both primary arms",
+  :epistemic "absent; mission-value-weights defaults it to 0.0",
+  :control
+  {:central 0.25, :strategic 0.45, :doable 0.3, :epistemic 0.0}},
+ :declared-input
+ {:key :live-doability?,
+  :env "FUTON_WM_LIVE_DOABILITY=1",
+  :var "futon2.report.war-machine/*live-doability?*",
+  :default false,
+  :what
+  "the doability factor reads :mission/phase off the code/v05/mission-doc hyperedge mission-doc-index already fetched, instead of the futon3c.aif.mission-delta-t resolution that returns nil on futon2's classpath"},
+ :epistemic-as-of "2026-09-03",
+ :war-machine-sha256
+ "cc9e27c7d6cbd709f594da032b283d292bd97248b3d7b34ce0f8e79e66315ec3",
+ :fiat-table
+ {:what "phase-doability, UNCHANGED by this row",
+  :value
+  {"map" 0.3,
+   "argue" 0.6,
+   "complete" 0.0,
+   "derive" 0.5,
+   "document" 0.4,
+   "verify" 0.8,
+   "identify" 0.2,
+   "head" 0.1,
+   "unknown" 0.3,
+   "instantiate" 1.0}}}

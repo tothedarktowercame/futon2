@@ -1,0 +1,12 @@
+{:baseline-file "00-preedit-baseline.edn",
+ :explicit-off-equals-default true,
+ :baseline-war-machine-sha256
+ "75268c35e3702fa6b1434cd49925a4c0db6c7b29453fee8a419d1f97b6d04aca",
+ :identical 133,
+ :what
+ "the DEFAULT arm after the repair, row for row against the ranking the code produced before it",
+ :war-machine-sha256-now
+ "cc9e27c7d6cbd709f594da032b283d292bd97248b3d7b34ce0f8e79e66315ec3",
+ :rows-compared 133,
+ :differing 0,
+ :detail []}

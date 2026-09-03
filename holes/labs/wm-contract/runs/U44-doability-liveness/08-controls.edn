@@ -1,0 +1,55 @@
+{:controls
+ {:c9-the-completion-gate-was-inert-on-the-same-date
+  {:claim
+   "the nil phase disabled the completion gate as well as the doability factor: no default row is completion-gated, every live completion-gated row carries phase \"complete\", and no other live row does",
+   :default-completion-gated 0,
+   :live-completion-gated 8,
+   :live-complete-phase 8,
+   :pass true},
+  :c4-fabricated-mission-appears-nowhere
+  {:claim
+   "a mission id that does not exist appears in no arm and in no move",
+   :id "M-u44-fabricated-control",
+   :hits 0},
+  :c5-blank-phase-reproduces-the-default
+  {:claim
+   "flag ON with :phase stripped from the index == the default arm; so the live arm reads mission/phase and not some other carrier",
+   :rows 133,
+   :equal? true,
+   :differing 0},
+  :c1-default-arm-is-the-inert-state
+  {:claim
+   "with no declared input the doable factor is the single 'unknown' 0.3, or 0.0 where the operator gate fires, and :phase is nil on every row",
+   :doable-histogram {0.3 129, 0.0 4},
+   :non-nil-phases 0,
+   :pass true},
+  :c3-value-identity
+  {:claim
+   "value = (0.20*central + 0.50*strategic + 0.30*doable-ungated) * completion-gate * operator-gate * decay, recomputed per row in BOTH arms",
+   :formula
+   "blend * completion-gate-factor * operator-gate-factor * non-progress-decay",
+   :violations []},
+  :c2-live-doable-is-the-fiat-table-applied-to-the-read-phase
+  {:claim
+   "every live-arm :doable is phase-doability[:phase], except where the operator gate zeroes it -- recomputed here from the table, not read off the row",
+   :checked 133,
+   :violations []},
+  :c7-not-an-artefact-of-the-declared-weights
+  {:claim
+   "the same repair at the SHIPPED default weights moves ranks too",
+   :weights
+   {:central 0.25, :strategic 0.45, :doable 0.3, :epistemic 0.0},
+   :moved 128,
+   :of 133},
+  :c6-env-var-equals-the-opt
+  {:claim
+   "*live-doability?* bound true with NO opt passed == :live-doability? true",
+   :equal? true},
+  :c8-every-mover-has-a-phase-that-explains-it
+  {:claim
+   "no row moves rank without its own doable changing, or another row's doable changing above it",
+   :movers-with-unchanged-doable 29,
+   :movers-total 129,
+   :note
+   "movers whose own doable is unchanged move because rows above them changed; both are reported"}},
+ :all-pass true}

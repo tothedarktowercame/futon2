@@ -412,10 +412,15 @@
               "EDN-string props normalize to a map")
           (is (= ["repo-d/mission/beta"] (:hx/endpoints (second hxs)))
               "structured :hx/ends normalize to string endpoints")
+          ;; U44: the index carries the phase off the hyperedge now; it is
+          ;; read only when the declared input is on, and the enrichment two
+          ;; lines below is the default path, so the factors are unchanged.
           (is (= {"alpha" {:endpoint "repo-d/mission/alpha"
-                            :operator-gates []}
+                            :operator-gates []
+                            :phase "head"}
                   "beta" {:endpoint "repo-d/mission/beta"
-                           :operator-gates []}}
+                           :operator-gates []
+                           :phase "derive"}}
                  mission-idx))
           (is (every? some? factors))
           (is (apply distinct? factors))
@@ -2413,6 +2418,129 @@
         "M-mapped is in MAP too; its neighbourhood is read and its doc is fresh")
     (is (= 2 (u22-rank after "M-mapped"))
         "it keeps its place ahead of M-builder on the exploit factors alone")))
+
+
+;; ---------------------------------------------------------------------------
+;; U44 -- doability liveness. Declared input, default off, and the default is
+;; byte-identical rather than merely "close".
+
+(def ^:private u44-mission-idx
+  "The index shape the repair reads: `:phase` carried off the mission-doc
+   hyperedge. M-instantiated and M-headed have one; M-shipped is marked
+   complete, which is what makes the completion gate observable; M-phaseless
+   has no phase at all, so its live reading must be a typed absence and not a
+   guess."
+  {"instantiated" {:endpoint "mission/instantiated" :phase "instantiate"}
+   "headed" {:endpoint "mission/headed" :phase "head"}
+   "shipped" {:endpoint "mission/shipped" :phase "complete"}
+   "phaseless" {:endpoint "mission/phaseless"}})
+
+(defn- u44-enrich
+  ([opts] (u44-enrich opts (fn [_] {:delta-T 0.0})))
+  ([opts delta-t-fn]
+   (with-redefs-fn
+     {#'wm/centrality-joint-map (fn [] {})
+      #'wm/mission-doc-index (fn [] u44-mission-idx)
+      #'wm/compute-delta-t-mission delta-t-fn
+      #'wm/read-strategy-cascade (fn [_] {:boxes [] :spine [] :terminals []})}
+     (fn []
+       (wm/enrich-candidates-with-mission-value
+        [{:type :advance-mission :target "M-instantiated"}
+         {:type :advance-mission :target "M-headed"}
+         {:type :advance-mission :target "M-shipped"}
+         {:type :advance-mission :target "M-phaseless"}]
+        nil
+        (merge {:strategy-cascade-path "unused"
+                :mission-value-weights {:central 0.20 :strategic 0.50
+                                        :doable 0.30}}
+               opts))))))
+
+(defn- u44-by-id [entries]
+  (into {} (map (juxt :target identity)) entries))
+
+(deftest the-live-doability-input-defaults-to-off
+  (testing "with no declared input the phase is nil and every doable is the
+            'unknown' 0.3 -- the inert state C492 section 4b measured"
+    (let [entries (u44-enrich {})]
+      (is (every? #(nil? (:phase %)) entries))
+      (is (= #{0.3} (set (map :doable entries))))
+      (is (every? #(not (contains? % :phase-source)) entries)
+          "the field the repair adds is absent from the default record")))
+  (testing "an explicit false is the same judgement as saying nothing"
+    (is (= (u44-enrich {}) (u44-enrich {:live-doability? false})))))
+
+(deftest a-declared-live-doability-reads-the-phase-off-the-hyperedge
+  (let [by-id (u44-by-id (u44-enrich {:live-doability? true}))]
+    (testing "the fiat table is applied to the phase the index already carried"
+      (is (= [1.0 0.1] [(:doable (by-id "M-instantiated"))
+                        (:doable (by-id "M-headed"))]))
+      (is (= ["instantiate" "head"] [(:phase (by-id "M-instantiated"))
+                                     (:phase (by-id "M-headed"))])))
+    (testing "and the record says which carrier the number came from"
+      (is (= :mission-doc-hyperedge (:phase-source (by-id "M-instantiated")))))
+    (testing "a mission with no phase on the hyperedge is typed, not guessed:
+              it keeps the 'unknown' 0.3 and says the reading was unreadable"
+      (is (= 0.3 (:doable (by-id "M-phaseless"))))
+      (is (nil? (:phase (by-id "M-phaseless"))))
+      (is (= :unreadable (:phase-source (by-id "M-phaseless")))))))
+
+(deftest the-delta-t-carrier-remains-the-fallback
+  (testing "when the hyperedge has no phase and delta-t resolves one, the live
+            path takes it and records THAT carrier -- the repair adds a source,
+            it does not replace one"
+    (let [by-id (u44-by-id (u44-enrich {:live-doability? true}
+                                       (fn [_] {:mission-phase "verify"})))]
+      (is (= 0.8 (:doable (by-id "M-phaseless"))))
+      (is (= :delta-t (:phase-source (by-id "M-phaseless")))))
+    (testing "and the hyperedge wins where both carriers have a reading"
+      (let [by-id (u44-by-id (u44-enrich {:live-doability? true}
+                                         (fn [_] {:mission-phase "verify"})))]
+        (is (= "instantiate" (:phase (by-id "M-instantiated"))))
+        (is (= :mission-doc-hyperedge
+               (:phase-source (by-id "M-instantiated"))))))))
+
+(deftest the-completion-gate-was-inert-for-the-same-reason
+  (testing "a mission the field marks complete is ranked like any other while
+            the phase is nil: the gate is (= \"complete\" phase) and phase is nil"
+    (let [shipped (get (u44-by-id (u44-enrich {})) "M-shipped")]
+      (is (= 1.0 (:completion-gate-factor shipped)))
+      (is (pos? (double (:mission-value-factor shipped))))))
+  (testing "with the phase read, the gate fires and the value is zero"
+    (let [shipped (get (u44-by-id (u44-enrich {:live-doability? true}))
+                       "M-shipped")]
+      (is (= 0.0 (:completion-gate-factor shipped)))
+      (is (= 0.0 (:doable shipped)))
+      (is (zero? (double (:mission-value-factor shipped)))))))
+
+(deftest the-environment-switch-and-the-opt-are-one-input
+  (testing "the var bound on, with no opt passed, is the opt passed true"
+    (is (= (with-redefs-fn {#'wm/*live-doability?* true}
+             (fn [] (u44-enrich {})))
+           (u44-enrich {:live-doability? true}))))
+  (testing "and a per-call opt overrides the process-wide switch in both
+            directions, because an opt that is present is a declaration"
+    (is (= (with-redefs-fn {#'wm/*live-doability?* true}
+             (fn [] (u44-enrich {:live-doability? false})))
+           (u44-enrich {})))
+    (is (= (with-redefs-fn {#'wm/*live-doability?* false}
+             (fn [] (u44-enrich {:live-doability? true})))
+           (u44-enrich {:live-doability? true})))))
+
+(deftest mission-doc-index-carries-the-phase-it-used-to-discard
+  (let [hxs [{:hx/endpoints ["repo/mission/kw"]
+              :hx/props {:mission/id "M-kw" :mission/phase "derive"}}
+             {:hx/endpoints ["repo/mission/str"]
+              :hx/props {"mission/id" "M-str" "mission/phase" "argue"}}
+             {:hx/endpoints ["repo/mission/none"]
+              :hx/props {:mission/id "M-none"}}]]
+    (with-redefs-fn {#'wm/fetch-hyperedges-by-type (constantly hxs)}
+      (fn []
+        (let [idx (#'wm/mission-doc-index)]
+          (testing "both prop shapes the family is served in"
+            (is (= "derive" (get-in idx ["kw" :phase])))
+            (is (= "argue" (get-in idx ["str" :phase]))))
+          (testing "and no phase is no phase"
+            (is (nil? (get-in idx ["none" :phase])))))))))
 
 (deftest the-doability-prior-is-pinned-across-the-two-namespaces
   (is (= @#'wm/phase-doability mev/phase-doability-prior)

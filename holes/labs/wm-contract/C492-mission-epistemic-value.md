@@ -157,6 +157,31 @@ acceptance — it would change the default doability of most candidates, which i
 exactly the silent default change U22 forbids — so it is written up here and
 should become its own row.
 
+**UPDATE 2026-09-03 (U44, `C498-doability-liveness.md`): repaired behind a
+declared input, default unchanged.** The row this section asked for was minted
+as `:U44` and done the same day. `mission-doc-index` now carries the
+`:mission/phase` it was discarding (`war_machine.clj:1506`, read at
+`:1517-1522`) and the doability factor takes it under
+`*live-doability?*` / `FUTON_WM_LIVE_DOABILITY=1` / the `:live-doability?` opt
+(`:221-248`, used at `:2537-2539`). The default is off and pinned identical:
+`runs/U44-doability-liveness/05-default-pin.edn` compares the flag-off ranking
+after the repair against the ranking the pre-repair code produced on the same
+133 candidates and finds 133 of 133 rows identical. With the input on, `:doable`
+goes from two distinct values to nine and 129 of the 133 ranks move; rank 1 is
+unchanged. The 123-agree/0-disagree check above was measured through a
+`with-redefs` substitution and is now re-measured through the shipped path:
+`{:agree 123, :doability-phase-absent 10}`, empty disagreement list
+(`06-phase-agreement.edn`), with the 10 splitting 5/5 between missions carrying
+the literal string `"unknown"` and missions carrying no phase prop.
+
+**And the same nil disabled the completion gate**, which this section did not
+notice. It is `(if (= "complete" phase) 0.0 1.0)` (`war_machine.clj:2545`), so
+0 of 133 candidates are completion-gated in the default arm and 8 are under the
+live read — exactly the eight the field marks complete, which have been ranked
+as ordinary live candidates since 2026-07-19. The `{0.0 4, 0.3 130}` and
+`{0.0 8, 0.3 261}` columns in the table above are the operator gate alone, as
+stated; the completion gate contributes nothing to them because it never fired.
+
 **(c) Today's readable uncertainty is nearly all staleness.** Over the 123
 candidates the term could measure, the open-question count is
 `{0: 6, 1: 108, 2: 8, 3: 1}`: 108 have exactly one open question and it is

@@ -218,6 +218,35 @@
    Dynamic binding exists only for isolated tests."
   (= "1" (System/getenv "FUTON_WM_FPI_POSTERIOR")))
 
+(def ^:dynamic *live-doability?*
+  "U44 doability-liveness switch, read once when this namespace loads.
+   `FUTON_WM_LIVE_DOABILITY=1` gives the doability factor the `:mission/phase`
+   already carried on the `code/v05/mission-doc` hyperedge `mission-doc-index`
+   fetches, instead of the phase `compute-delta-t-mission` tries to resolve
+   through `futon3c.aif.mission-delta-t`.
+
+   WHY THERE IS ANYTHING TO SWITCH: futon3c is not on futon2's classpath, so
+   that `requiring-resolve` returns nil, the `{:delta-T 0.0}` fallback carries
+   no `:mission-phase`, and `phase-doable` has taken the \"unknown\" 0.3 for
+   every candidate since 2026-07-19 -- `:phase` is nil on every ranked mission
+   row in every trace file from `wm-trace-2026-07-19.edn` onward (C492 section
+   4b). The string the factor wants is on the hyperedge the judge already read.
+
+   DEFAULT OFF, AND THE FLIP IS NOT THIS SWITCH'S TO MAKE: turning it on
+   changes the `:doable` of most candidates, which is the silent default change
+   U22 forbade, so the default ranking stays byte-identical and the flip goes
+   back to Joe as J7's revisit. Dynamic binding exists only for isolated tests.
+   The same input is reachable per call as the `:live-doability?` opt."
+  (= "1" (System/getenv "FUTON_WM_LIVE_DOABILITY")))
+
+(defn- live-doability?
+  "The declared input, opt first and environment second. An opt that is present
+   and false is a declaration too, so `contains?` decides rather than truthiness."
+  [opts]
+  (if (contains? opts :live-doability?)
+    (boolean (:live-doability? opts))
+    *live-doability?*))
+
 (defn f-pi-posterior-preconditions!
   "RUN9 / stage S4. `FUTON_WM_FPI_POSTERIOR=1` needs an F_pi to put in the
    posterior, and F_pi comes from the same chain S2 and S3 run on:
@@ -1469,7 +1498,12 @@
                     [])]
               (if (and endpoint mission-id (not (str/blank? mission-id)))
                 (assoc idx mission-id {:endpoint endpoint
-                                       :operator-gates operator-gates})
+                                       :operator-gates operator-gates
+                                       ;; U44: carried, not discarded. The
+                                       ;; doability factor's phase is this
+                                       ;; string; reading it here costs the
+                                       ;; fetch that already happened.
+                                       :phase (hx-prop hx :mission/phase)})
                 idx)))
           {}
           (fetch-hyperedges-by-type "code/v05/mission-doc")))
@@ -1479,6 +1513,13 @@
 
 (defn- mission-index-operator-gates [entry]
   (if (map? entry) (vec (:operator-gates entry)) []))
+
+(defn- mission-index-phase
+  "U44: `:mission/phase` as the mission-doc hyperedge carries it, or nil. An
+   entry that is a bare endpoint string (the pre-index shape some callers and
+   tests still pass) has no phase to give and says so by returning nil."
+  [entry]
+  (when (map? entry) (:phase entry)))
 
 ;; S4: write-only mission clocking. This deliberately does not feed the clock
 ;; back into observation, ranking, weights, or selection; the read side is a
@@ -2455,7 +2496,12 @@
   completion/operator gates and repeated-non-progress decay. Pattern value
   continues to use the batch-normalized retrieval score. Optional opts support
   :strategy-cascade-path and :mission-value-weights; the environment variables
-  are FUTON_WM_STRATEGY_CASCADE and FUTON_WM_VALUE_WEIGHTS (an EDN map)."
+  are FUTON_WM_STRATEGY_CASCADE and FUTON_WM_VALUE_WEIGHTS (an EDN map).
+
+  U44: :live-doability? (or FUTON_WM_LIVE_DOABILITY=1) feeds the doability
+  factor the :mission/phase on the mission-doc hyperedge instead of the phase
+  compute-delta-t-mission cannot resolve. Default off, and off is
+  byte-identical -- see *live-doability?*."
   ([candidates prev-trace-record]
    (enrich-candidates-with-mission-value candidates prev-trace-record {}))
   ([candidates prev-trace-record opts]
@@ -2465,6 +2511,7 @@
                           default-strategy-cascade-path)
          centrality (normalized-centrality-map (centrality-joint-map))
          strategic (cascade-role-map (read-strategy-cascade cascade-path))
+         live? (live-doability? opts)
          mission-idx (mission-doc-index) delta-cache (atom {})
          epistemic-idx (mission-epistemic/field-readings weights opts)
          with-value
@@ -2482,7 +2529,14 @@
                                        (let [result (compute-delta-t-mission endpoint)]
                                          (swap! delta-cache assoc endpoint result)
                                          result)))
-                    phase (normalized-phase (:mission-phase delta-result))
+                    delta-phase (normalized-phase (:mission-phase delta-result))
+                    ;; U44: with the declared input on, the phase comes off the
+                    ;; hyperedge this index already holds; the delta-t reading
+                    ;; stays the fallback so the two carriers can still
+                    ;; disagree in the record rather than one erasing the other.
+                    doc-phase (when live? (normalized-phase
+                                           (mission-index-phase mission-doc)))
+                    phase (if live? (or doc-phase delta-phase) delta-phase)
                     central (get centrality mission 0.0)
                     strategic-value (get strategic mission 0.0)
                     phase-doable-value (phase-doable phase)
@@ -2504,6 +2558,15 @@
                                (* blended completion-gate)
                                ::raw-mission-value
                                (* blended completion-gate operator-gate-factor))
+                  ;; U44: the field appears only under the declared input, so
+                  ;; the default record is byte-identical. It says WHICH
+                  ;; carrier the number came from, because "unknown 0.3" from
+                  ;; an unreadable phase and 0.3 from a phase that is actually
+                  ;; "map" are the same scalar and different facts.
+                  live?
+                  (assoc :phase-source (cond doc-phase :mission-doc-hyperedge
+                                             delta-phase :delta-t
+                                             :else :unreadable))
                   operator-gated
                   (assoc :operator-gated true
                          :operator-gates operator-gates)))
