@@ -30,7 +30,12 @@
      no key this machine can read a current value of. The repair is a declared
      `:observable <keyword>` on the criterion, resolving into a supplied
      observable vocabulary.
-   Both are `:status :unmeasurable`: a criterion that cannot be read
+   - `:no-producer` (U28) — a gauge declares that NO measurement is derivable
+     from this criterion's own prose, and names what would have to exist. Not a
+     third test but a third recorded finding: a reader looked and the binding
+     is not there, as against `:no-declared-measurement`, where nobody has
+     looked yet.
+   All three are `:status :unmeasurable`: a criterion that cannot be read
    contributes NOTHING to C_mis, and says so on every read (design §2's C130
    discipline). There is no silent massless criterion here, and no flat
    preference standing in for an absent one.
@@ -151,9 +156,21 @@
 (defn- resolve-measurement
   "Two-test measurability (see ns docstring). `observables` is the declared
    observable vocabulary — a set or map whose keys are observables this machine
-   can read a current value of."
-  [[field value] observables]
+   can read a current value of.
+
+   U28 adds a third failure that is not a third test: `no-producer` is the
+   typed declaration a gauge makes when the criterion CANNOT be bound —
+   `:no-declared-measurement` says the mission wrote no measurement down,
+   `:no-producer` says someone read the criterion, found no measurement
+   derivable from it, and recorded WHAT WOULD HAVE TO EXIST. The two want
+   different repairs: the first is a writing task on the mission's IDENTIFY,
+   the second is an apparatus that does not exist yet."
+  [[field value] observables no-producer]
   (cond
+    (and (nil? field) no-producer)
+    (merge {:status :unmeasurable :reason :no-producer}
+           (select-keys no-producer [:because :would-need]))
+
     (nil? field)
     {:status :unmeasurable :reason :no-declared-measurement}
 
@@ -179,7 +196,10 @@
    mission document by this code and not planted in the reading: U12's channel
    assignments were a stated plant and the reason a gauge's provenance is on the
    row rather than implied. `gauge` is
-   `{:observable <kw> :spec <spec> :gauge <prose> :declared-in <pointer>}`.
+   `{:observable <kw> :spec <spec> :gauge <prose> :declared-in <pointer>}`, or,
+   when nothing can read the criterion, `{:gauge <prose> :declared-in <pointer>
+   :no-producer {:because <prose+pointer> :would-need <prose>}}` — the U28
+   shape, which binds nothing and says why.
 
    THE DOCUMENT WINS. A key the entry already declares is left alone, so a
    gauge can supply a binding the mission never wrote down but cannot overwrite
@@ -189,8 +209,20 @@
   (if (nil? gauge)
     entry
     (let [supplied (select-keys gauge [:observable :spec])
-          from-gauge (into #{} (remove #(contains? entry %)) (keys supplied))]
+          from-gauge (into #{} (remove #(contains? entry %)) (keys supplied))
+          ;; U28: a `:no-producer` gauge supplies no observable — it is the
+          ;; record that none is derivable. THE DOCUMENT STILL WINS: a
+          ;; criterion that declares its own measurement (in any of
+          ;; `measurement-fields`) keeps it and the declaration is dropped,
+          ;; because a gauge saying "nothing can read this" must not silence a
+          ;; mission that said how to read it.
+          no-producer (when (and (:no-producer gauge)
+                                 (nil? (declared-measurement entry)))
+                        (:no-producer gauge))]
       (cond-> (merge supplied entry)
+        no-producer (assoc :no-producer no-producer
+                           :gauge (:gauge gauge)
+                           :gauge-source (:declared-in gauge))
         (seq from-gauge) (assoc :gauge-supplied from-gauge
                                 :gauge (:gauge gauge)
                                 :gauge-source (:declared-in gauge))))))
@@ -205,6 +237,7 @@
    assumed `default-spec` are three different claims about the same field."
   [entry observables source]
   (let [gauge-supplied (:gauge-supplied entry #{})
+        no-producer (:no-producer entry)
         spec-declared? (contains? entry :spec)
         base (cond-> {:criterion (:criterion entry)
                       :statement (:statement entry)
@@ -216,9 +249,10 @@
                (contains? gauge-supplied :observable)
                (assoc :observable-source :declared-gauge)
 
-               (seq gauge-supplied)
+               (or (seq gauge-supplied) no-producer)
                (assoc :gauge (:gauge entry) :gauge-source (:gauge-source entry)))]
-    (merge base (resolve-measurement (declared-measurement entry) observables))))
+    (merge base (resolve-measurement (declared-measurement entry) observables
+                                     no-producer))))
 
 ;; ---------------------------------------------------------------------------
 ;; Reader (a) — the IDENTIFY ingest EDN

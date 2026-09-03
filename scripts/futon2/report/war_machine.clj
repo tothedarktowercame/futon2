@@ -1831,6 +1831,124 @@
     {:observable :registry-gap-list-present
      :gauge "presence of the gap-list artifact where aif-equations.edn points"}]])
 
+(def ^:private expressions-of-interest-gauges
+  "The six criteria of M-expressions-of-interest, and the finding that NONE of
+   them binds. U28 asked for U18 (d)'s move at this seam: derive each gauge
+   from the criterion's own `:measurable-by`/`:carrier` prose. THAT PROSE DOES
+   NOT EXIST HERE. The zaif exemplar is an IDENTIFY ingest whose
+   `:preferences/c` rows carry `:carrier` strings; M-expressions-of-interest is
+   a mission doc read by `mission-c/criteria-from-markdown`, its criteria are
+   six numbered sentences, and the reader returns `:no-declared-measurement`
+   for all six (M-expressions-of-interest.md:174-189). There is nothing to
+   derive FROM, and the row's own instruction -- `never an invented binding` --
+   is what the six entries below record instead.
+
+   WHAT MAKES EACH ONE UNBINDABLE, the same shape five times over: the
+   criterion conjoins an artifact clause with a clause only Joe can discharge
+   (`Joe reports that`, `pass Joe's \"really?\"-test`, `reads as genuinely
+   live`, `does not foreclose`, `evidence that the mission is generative`). A
+   gauge reading the artifact clause alone would measure a DIFFERENT criterion
+   and score it as this one -- the plant U12 was corrected for. The sixth,
+   criterion-5, has no Joe-clause and fails for the other reason: the mission
+   has not settled where its two artifacts live.
+
+   `:would-need` names the producer that would have to exist, in U18's
+   `:undeclared-observable` -> named-producer shape. `:because` carries the
+   pointer the finding rests on. Per-criterion search results, including what
+   was searched for and not found:
+   `holes/labs/wm-contract/C494-u28-eoi-gauge-census.md`."
+  [
+   [:criterion-1
+    {:gauge (str "would read: the type-signature self-note exists, AND "
+                 "re-reading it constrains Joe's drafting")
+     :no-producer
+     {:because (str "M-expressions-of-interest.md:174-176. The second conjunct is a "
+                    "report by Joe and nothing records one; the first names no path "
+                    "-- the self-note is still listed as work to do at :1109, and "
+                    ":321-326 says it is downstream of the prior network.")
+      :would-need (str "a declared path for the type-signature self-note, plus a dated "
+                       "ledger of drafting occasions each recording whether the note "
+                       "was re-read and whether it constrained the draft. Neither "
+                       "exists (grep `self-note` over futon5a: four hits, all inside "
+                       "the mission doc).")}}]
+   [:criterion-2
+    {:gauge (str "would read: the basins are enumerated with per-basin geometry, "
+                 "AND one non-default basin reads as genuinely live")
+     :no-producer
+     {:because (str "M-expressions-of-interest.md:177-180. `reads as genuinely live "
+                    "rather than perfunctorily listed` is a reading, not a value. "
+                    "The enumeration half has a substrate but no artifact: :298-303 "
+                    "puts basin enumeration in the strawmen directory and names "
+                    "`hyperreal-freelancer` as the MISSING strawman.")
+      :would-need (str "a basin register at a declared path with the three geometry "
+                       "fields the criterion names (what each satisfies, what it "
+                       "forecloses, what it costs), plus a recorded per-basin liveness "
+                       "verdict. Found but NOT declared by the mission: "
+                       "futon6/data/dry-basins/M-expressions-of-interest.edn, whose "
+                       "own `:confidence` is `:reconstructed-thin`.")}}]
+   [:criterion-3
+    {:gauge (str "would read: >=2 EoI artefacts built from the doc's own "
+                 "Template, AND each passed Joe's \"really?\"-test")
+     :no-producer
+     {:because (str "M-expressions-of-interest.md:181-182. The corpus the mission "
+                    "declares authoritative (~/code/atthangika-buckets.json, named "
+                    "at :1183-1200) carries 17 `eoi_instances` but records neither "
+                    "template conformance nor a `really?` verdict on any of them; "
+                    "grep for `really` over futon5a returns no verdict record.")
+      :would-need (str "a per-artefact record that it was produced against the "
+                       "Template's field set (`**Speech act:**`, `**Prior anchor:**`, "
+                       "`**Held frame:**`, :226-232), and a `really?`-test verdict Joe "
+                       "entered per artefact. The corpus has slots for neither.")}}]
+   [:criterion-4
+    {:gauge (str "would read: the Hyperreal brief exists at 20-page-equivalent, "
+                 "AND its existence does not foreclose the other basins")
+     :no-producer
+     {:because (str "M-expressions-of-interest.md:183-184. The mission names no "
+                    "path for the brief, and whether it is even to be written is "
+                    "itself open: :1101-1102 puts the choice as `commit (1-3 pages "
+                    "with a date) or formally drop the section 1 criterion`. Note "
+                    "the two numbers disagree -- 20-page-equivalent here, 1-3 pages "
+                    "there.")
+      :would-need (str "the brief at a declared path plus a stated page-equivalent "
+                       "measure, and a recorded non-foreclosure judgement. Until "
+                       ":1101's decision is taken there is no subject to measure.")}}]
+   [:criterion-5
+    {:gauge (str "would read: a diagnosis of the Gary proposal and one of the "
+                 "Bristol sentence, each carrying a speech-act attribution")
+     :no-producer
+     {:because (str "M-expressions-of-interest.md:185-187. This is the only one of "
+                    "the six with no Joe-clause -- it is entirely about artifacts "
+                    "-- and it is unbindable for the other reason: the mission has "
+                    "not settled where they live. :304-308 (MAP move M-3, "
+                    "*Pending*) says they `should become two additional strawmen "
+                    "(or a separate diagnostic-specimens/ subdirectory)`, and an "
+                    "`or` is not a path. Neither diagnosis exists: grep `gary` over "
+                    "futon5a hits five files, none a diagnosis; the Bristol EoI is "
+                    "in the corpus as `ukrn-sra-bristol-2026-07-18` and carries no "
+                    "`speech_act` key (1 of 17 instances does).")
+      :would-need (str "one diagnosis artifact per named specimen, at the path M-3 "
+                       "settles on, each carrying a speech-act attribution drawn from "
+                       "the Template's own vocabulary (`interest | availability | "
+                       "prediction-plus-availability`, :229). This is the criterion "
+                       "closest to bindable: settle M-3's `or` and a producer becomes "
+                       "writable.")}}]
+   [:criterion-6
+    {:gauge (str "would read: at least one basin named through the work that was "
+                 "not named before it")
+     :no-producer
+     {:because (str "M-expressions-of-interest.md:188-189. `previously-unnamed` is "
+                    "a diff against a baseline, and the baseline is prose: the "
+                    "provisional basin list lives in a parenthesis at :132-136. The "
+                    "nearest machine-readable thing is "
+                    "futon5a/interest-scanning/eoi-network-v1.edn:1516-1531 "
+                    "`:basin-coverage`, and it classifies EoI TYPES (17 classified, "
+                    "`outward-one-shot` and so on), not the career basins this "
+                    "criterion means -- reading it as the basin set would be the "
+                    "plant.")
+      :would-need (str "a basin register with a first-named date per basin, so that "
+                       "`previously-unnamed` is computed as a diff rather than judged. "
+                       "The register criterion-2 needs is the same one.")}}]])
+
 (def mission-c-declared-gauges
   "DECLARED gauges, mission-id -> criterion-id -> gauge
    (`mission-c/apply-gauge`). A gauge binds a completion criterion written in
@@ -1846,13 +1964,22 @@
    map is supplied; each row the reader builds from one carries
    `:observable-source :declared-gauge` and the pointer back to this var, so a
    gauge-supplied binding can never be mistaken on the record for a declaration
-   the mission document made itself."
+   the mission document made itself.
+
+   U28: a mission's entry may also hold `:no-producer` rows, which bind NOTHING
+   and say why (`mission-c/apply-gauge`). M-expressions-of-interest is six of
+   them and no bindings — see `expressions-of-interest-gauges` above for the
+   finding. The `:binary` sentence above is about the bound rows only; a
+   `:no-producer` row declares no observable, so there is nothing to binarize."
   {"M-zaif-harness-v1"
    (into {} (for [[ingest-id doc-id g] zaif-harness-v1-gauges
                   id [ingest-id doc-id]]
               [id (assoc g
                          :spec {:becomes 1 :observable-kind :binary}
-                         :declared-in "scripts/futon2/report/war_machine.clj mission-c-declared-gauges")]))})
+                         :declared-in "scripts/futon2/report/war_machine.clj mission-c-declared-gauges")]))
+   "M-expressions-of-interest"
+   (into {} (for [[id g] expressions-of-interest-gauges]
+              [id (assoc g :declared-in "scripts/futon2/report/war_machine.clj mission-c-declared-gauges")]))})
 
 (defn- mission-action?
   [entry]
@@ -1893,7 +2020,9 @@
    with neither field would say only that there is no number.
    `:declared-gauges` records the criterion -> observable bindings this mission
    was read under (`mission-c-declared-gauges`), so a reader can tell a binding
-   this seam supplied from one the mission document declared itself.
+   this seam supplied from one the mission document declared itself. U28: a
+   criterion the seam read and could not bind maps to `:no-producer` rather
+   than to an observable.
 
    U42: `:gauge-observables` is attached BY THE CALLER, not here — the typed
    record of what each gauge producer (`futon2.aif.mission-gauges`) read, one
@@ -1945,9 +2074,13 @@
                    :status (:status risk)}
             (:source-sha256 read-result)
             (assoc :criteria-source-sha256 (:source-sha256 read-result))
+            ;; U28: a gauge that binds nothing records `:no-producer` rather
+            ;; than a nil where an observable would be, so the record
+            ;; distinguishes "bound to X" from "read, and nothing can read it".
             gauges (assoc :declared-gauges
                           (into (sorted-map)
-                                (map (fn [[id g]] [id (:observable g)]))
+                                (map (fn [[id g]]
+                                       [id (or (:observable g) :no-producer)]))
                                 gauges))
             (:per-criterion risk) (assoc :risk-mis-per-criterion (:per-criterion risk))
             (:reason risk) (assoc :reason (:reason risk))

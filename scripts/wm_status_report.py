@@ -167,9 +167,14 @@ def mission_criteria_gauges():
       (mapv
        (fn [{:keys [mission path]}]
          (let [gauges (get war-machine/mission-c-declared-gauges mission {})
-               observables (into {} (map (fn [[_ gauge]]
-                                           [(:observable gauge) 0.0])
-                                         gauges))
+               ;; U28: a gauge may declare `:no-producer` and bind nothing.
+               ;; Only a gauge that names an observable puts one in the
+               ;; vocabulary -- otherwise a nil key enters the map and the
+               ;; component would count a non-binding as a binding.
+               observables (into {} (keep (fn [[_ gauge]]
+                                            (when-let [o (:observable gauge)]
+                                              [o 0.0])))
+                                 gauges)
                reading (mission-c/read-criteria
                         path :observables observables :mission mission
                         :gauges gauges)

@@ -648,3 +648,82 @@
                                         :observables {} :mission "M-zaif-harness-v1"))]
       (is (= 0 (:measurable-count c)))
       (is (= #{:no-declared-measurement} (set (map :reason (:unmeasurable c))))))))
+
+;; ---------------------------------------------------------------------------
+;; U28 — the gauge that binds NOTHING. M-expressions-of-interest's six criteria
+;; carry no `:measurable-by`/`:carrier` prose to derive a gauge from, and each
+;; conjoins its artifact clause with one only Joe can discharge. The declaration
+;; the seam makes about them is therefore a typed absence naming a producer, and
+;; these tests pin that it stays an absence: a `:no-producer` gauge must never
+;; make a criterion measurable, and must never quiet a document that DID say how
+;; it is measured.
+
+(def ^:private fixture-no-producer-gauge
+  {:gauge "would read: the note exists AND re-reading it constrains the drafting"
+   :declared-in "fixture-no-producer-gauge"
+   :no-producer {:because "the second conjunct is a report by Joe (fixture:1)"
+                 :would-need "a dated ledger of drafting occasions"}})
+
+(deftest a-no-producer-gauge-types-the-absence-and-binds-nothing
+  (let [row (mc/criterion-row (mc/apply-gauge {:criterion :criterion-1
+                                               :statement "the note exists and it constrains"}
+                                              fixture-no-producer-gauge)
+                              {:worklist-acceptance-state 1.0} "f:1")]
+    (is (= :unmeasurable (:status row)))
+    (is (= :no-producer (:reason row))
+        "distinct from :no-declared-measurement — a reader looked and recorded why")
+    (is (not (contains? row :observable))
+        "nothing was bound, so no observable is claimed")
+    (is (string? (:would-need row)) "the producer that would have to exist is named")
+    (is (string? (:because row)) "and the pointer the finding rests on")
+    (is (= "fixture-no-producer-gauge" (:gauge-source row))
+        "the declaration points back at where it was made"))
+  (testing "and it contributes nothing to C_mis, exactly as the other two do"
+    (let [c (mc/c-mis {:criteria [(mc/criterion-row
+                                   (mc/apply-gauge {:criterion :criterion-1}
+                                                   fixture-no-producer-gauge)
+                                   {} "f:1")]})]
+      (is (= 0 (:measurable-count c)))
+      (is (= {} (:factors c)))
+      (is (= [:no-producer] (mapv :reason (:unmeasurable c)))))))
+
+(deftest a-no-producer-gauge-cannot-silence-a-document-that-declared-a-measurement
+  (testing "THE DOCUMENT WINS both ways: a criterion that says how it is read
+            keeps its own reading, and the seam's `nothing can read this` is
+            dropped rather than overriding it"
+    (let [row (mc/criterion-row (mc/apply-gauge {:criterion :criterion-1
+                                                 :observable :its-own-channel}
+                                                fixture-no-producer-gauge)
+                                {:its-own-channel 0.6} "f:1")]
+      (is (= :measurable (:status row)))
+      (is (= :its-own-channel (:observable row)))
+      (is (not (contains? row :would-need)))))
+  (testing "including when the document's declaration is prose only — that is
+            :unresolved-observable, a different repair from :no-producer"
+    (let [row (mc/criterion-row (mc/apply-gauge {:criterion :criterion-1
+                                                 :carrier "Joe's own re-reading"}
+                                                fixture-no-producer-gauge)
+                                {} "f:1")]
+      (is (= :unresolved-observable (:reason row))))))
+
+(deftest the-eoi-criteria-read-as-six-named-absences-not-six-bindings
+  (if-not (.exists (io/file eoi-doc))
+    (is true (str "fixture absent, skipped: " eoi-doc))
+    (let [gauges (into {} (map (fn [i]
+                                 [(keyword (str "criterion-" i))
+                                  fixture-no-producer-gauge]))
+                       (range 1 7))
+          r (mc/read-criteria eoi-doc :observables {}
+                              :mission "M-expressions-of-interest"
+                              :gauges gauges)
+          c (mc/c-mis r)]
+      (is (= 6 (:criterion-count c)))
+      (is (= 0 (:measurable-count c))
+          "the honest number: a declaration that nothing reads these is not a reading")
+      (is (= #{:no-producer} (set (map :reason (:unmeasurable c)))))
+      (is (every? :source (:criteria r)) "each still carries its file:line")
+      (testing "and risk refuses rather than scoring the mission as satisfied"
+        (let [risk (mc/risk-mis c {})]
+          (is (= :absent (:status risk)))
+          (is (= :no-measurable-criteria (:reason risk)))
+          (is (not (contains? risk :risk))))))))

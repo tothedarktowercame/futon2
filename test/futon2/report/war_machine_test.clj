@@ -1884,6 +1884,58 @@
              (mapv :reason (:refused-outcomes r)))))))
 
 ;; ---------------------------------------------------------------------------
+;; U28 — the same seam, the other outcome. M-expressions-of-interest's six
+;; criteria produced no bindings, and the declaration says so per criterion
+;; rather than leaving them looking un-looked-at.
+
+(def ^:private u28-eoi-doc
+  "Outside this repo, so its absence skips rather than fails."
+  "/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md")
+
+(deftest mission-c-declared-gauges-carry-the-eoi-non-bindings-test
+  (let [g (get wm/mission-c-declared-gauges "M-expressions-of-interest")]
+    (testing "one entry per criterion, keyed the way the markdown reader numbers
+              them, because the mission document names none of its criteria"
+      (is (= #{:criterion-1 :criterion-2 :criterion-3
+               :criterion-4 :criterion-5 :criterion-6}
+             (set (keys g)))))
+    (testing "and every one of them BINDS NOTHING and says what would have to
+              exist -- the U18 :undeclared-observable -> named-producer move for
+              a criterion where not even the observable can be named"
+      (is (every? #(not (contains? % :observable)) (vals g))
+          "no observable is claimed, so none can be read as a binding")
+      (is (every? #(string? (:would-need (:no-producer %))) (vals g)))
+      (is (every? #(string? (:because (:no-producer %))) (vals g)))
+      (is (every? #(str/includes? (:because (:no-producer %))
+                                  "M-expressions-of-interest.md:")
+                  (vals g))
+          "each finding carries the file:line it rests on")
+      (is (every? #(str/includes? (:declared-in %) "mission-c-declared-gauges")
+                  (vals g))))))
+
+(deftest mission-c-reads-the-eoi-criteria-0-of-6-with-the-gauges-supplied-test
+  (if-not (.exists (io/file u28-eoi-doc))
+    (is true (str "fixture absent, skipped: " u28-eoi-doc))
+    (let [clocked (assoc u11-clocked :mission-id "M-expressions-of-interest")
+          ranked (-> u11-ranked
+                     (assoc-in [0 :action :target] "M-expressions-of-interest")
+                     (assoc-in [0 :action :mission-path] u28-eoi-doc))
+          r (#'wm/mission-c-readback clocked ranked {:sorry-count-norm 0.0})]
+      (is (= 6 (:criterion-count r)))
+      (is (= 0 (:measurable-count r))
+          "the honest number: declaring that nothing reads a criterion is not a
+           reading of it")
+      (is (= #{:no-producer} (set (map :reason (:unmeasurable r)))))
+      (is (= :absent (:status r)))
+      (is (= :no-measurable-criteria (:reason r)))
+      (is (not (contains? r :risk-mis-per-criterion)))
+      (testing "and the record shows the seam was consulted rather than silent"
+        (is (= 6 (count (:declared-gauges r))))
+        (is (= #{:no-producer} (set (vals (:declared-gauges r))))
+            "a criterion read and not bound is distinguishable on the record
+             from one bound to an observable")))))
+
+;; ---------------------------------------------------------------------------
 ;; U21 (from zaif S4) — selection -> clocking, the same-tick half. The focus is
 ;; a projection of THIS tick's decision; it mints no edge and consults none.
 
