@@ -639,18 +639,18 @@
    "findF3NonSelfCertifying"
    "findF4Falsifiable"],
   :freshness :pinned-git-v1,
-  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
-  :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
+  :contract-sha "0bab8f813f047d380fe863bdb2ec6a479cbf21e7",
+  :run-sha "9ef7bc181549fef54d3598c2e063cd6c3a324a1a",
   :check
   {:repo "futon3",
    :path "checks/find_snatch.clj",
    :entrypoint "-main"},
   :note
-  "C85: cured checker reports zero representation mismatches and separately rejects F1 outside-repository selection, F2 missing receipt, F3 score-only receipt, and F4 removal of the recorded omitted member. F4 is narrowed to the pinned FindReceiptRow.",
-  :recorded-at "2026-08-31T15:40:00Z",
+  "C85: cured checker reports zero representation mismatches and separately rejects F1 outside-repository selection, F2 missing receipt, F3 score-only receipt, and F4 removal of the recorded omitted member. F4 is narrowed to the pinned FindReceiptRow. RE-RUN AND RE-STAMPED FOR :U46 (C500): positive exits 0 with drift mismatches 0, and --negative-f1/-f2/-f3/-f4 plus --negative (drift) are all rejected, so leg (2) of the J9 criterion holds at the contract sha the four closes emitted. Two pins were stale and are corrected from the re-run, not carried: :run-sha was 594127059d and :live-invariant :check-sha was ab2b290d, which predates 4e1c410446 (2026-09-02) moving the check onto the generic find/organise path. KNOWN, C500 section 3: the positive path REWRITES checks/find-snatch.edn from the current library, and today's re-run produces sha256 08a0c3e7... rather than the pinned 839897ef... -- identical :scenarios, :laws and :drift, a :repository grown 18 -> 24. The pinned file was restored; the Lean transcription is of the pin.",
+  :recorded-at "2026-09-03T23:40:00Z",
   :live-invariant
   {:check "checks/find_snatch.clj",
-   :check-sha "ab2b290d1caedffd2bde4658300a791d1000b978",
+   :check-sha "4e1c410446ba340bb13bbe8317e0d30d8d61484e",
    :evidence :f1-f2-f3-f4-independent-controls},
   :result :passed,
   :fixture {:repo "futon3", :path "checks/find-snatch.edn"}}

@@ -1,0 +1,648 @@
+{:rounds
+ [{:scenario [:g1 :snatcher],
+   :round 1,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :snatcher],
+   :round 2,
+   :selected
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :receipted
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :snatcher],
+   :round 3,
+   :selected
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :receipted
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :snatcher],
+   :round 4,
+   :selected
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :receipted
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :snatcher],
+   :round 5,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :sharer],
+   :round 1,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :sharer],
+   :round 2,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :sharer],
+   :round 3,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :sharer],
+   :round 4,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :sharer],
+   :round 5,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :price-the-final-round-as-final],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :price-the-final-round-as-final],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :price-the-final-round-as-final],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :cautious],
+   :round 1,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :cautious],
+   :round 2,
+   :selected
+   [:an-unmodelled-response-stops-the-line
+    :ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :receipted
+   [:an-unmodelled-response-stops-the-line
+    :ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :non-self-certifying
+   [:an-unmodelled-response-stops-the-line
+    :ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g4 :snatcher],
+   :round 1,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :zero-mass [:forced-play-needs-a-loss-floor],
+   :absence nil}
+  {:scenario [:g4 :snatcher],
+   :round 2,
+   :selected
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain],
+   :receipted
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain],
+   :non-self-certifying
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain],
+   :zero-mass [:forced-play-needs-a-loss-floor],
+   :absence nil}
+  {:scenario [:g4 :snatcher],
+   :round 3,
+   :selected
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :re-enter-after-observed-repair],
+   :receipted
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :re-enter-after-observed-repair],
+   :non-self-certifying
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :re-enter-after-observed-repair],
+   :zero-mass [:forced-play-needs-a-loss-floor],
+   :absence nil}
+  {:scenario [:g4 :snatcher],
+   :round 4,
+   :selected
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain],
+   :receipted
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain],
+   :non-self-certifying
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain],
+   :zero-mass [:forced-play-needs-a-loss-floor],
+   :absence nil}
+  {:scenario [:g4 :snatcher],
+   :round 5,
+   :selected
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :re-enter-after-observed-repair],
+   :receipted
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :re-enter-after-observed-repair],
+   :non-self-certifying
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :re-enter-after-observed-repair],
+   :zero-mass [:forced-play-needs-a-loss-floor],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 1,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 2,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 3,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 4,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 5,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 6,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 7,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 8,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 9,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 10,
+   :selected
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :receipted
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender :exchange-when-both-sides-gain],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round 11,
+   :selected [],
+   :receipted [],
+   :non-self-certifying [],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence :no-pattern-addresses-this-tension}
+  {:scenario [:g2 :snatcher],
+   :round 12,
+   :selected [:price-the-final-round-as-final],
+   :receipted [:price-the-final-round-as-final],
+   :non-self-certifying [:price-the-final-round-as-final],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g5 :sharer],
+   :round 1,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing
+    :use-talk-to-make-a-testable-offer],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing
+    :use-talk-to-make-a-testable-offer],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing
+    :use-talk-to-make-a-testable-offer],
+   :zero-mass [:re-enter-after-observed-repair],
+   :absence nil}
+  {:scenario [:g5 :sharer],
+   :round 2,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :zero-mass [:re-enter-after-observed-repair],
+   :absence nil}
+  {:scenario [:g5 :sharer],
+   :round 3,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :zero-mass [:re-enter-after-observed-repair],
+   :absence nil}
+  {:scenario [:g5 :sharer],
+   :round 4,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose],
+   :zero-mass [:re-enter-after-observed-repair],
+   :absence nil}
+  {:scenario [:g5 :sharer],
+   :round 5,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :price-the-final-round-as-final],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :price-the-final-round-as-final],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :price-the-final-round-as-final],
+   :zero-mass [:re-enter-after-observed-repair],
+   :absence nil}],
+ :scenarios
+ [{:scenario [:g1 :snatcher],
+   :round nil,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :sharer],
+   :round nil,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g1 :cautious],
+   :round nil,
+   :selected
+   [:an-unmodelled-response-stops-the-line
+    :ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :receipted
+   [:an-unmodelled-response-stops-the-line
+    :ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :non-self-certifying
+   [:an-unmodelled-response-stops-the-line
+    :ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g4 :snatcher],
+   :round nil,
+   :selected
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing
+    :re-enter-after-observed-repair],
+   :receipted
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing
+    :re-enter-after-observed-repair],
+   :non-self-certifying
+   [:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing
+    :re-enter-after-observed-repair],
+   :zero-mass [:forced-play-needs-a-loss-floor],
+   :absence nil}
+  {:scenario [:g2 :snatcher],
+   :round nil,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor
+    :price-the-final-round-as-final
+    :probe-before-committing],
+   :zero-mass [:consult-the-remedy-before-exiting],
+   :absence nil}
+  {:scenario [:g5 :sharer],
+   :round nil,
+   :selected
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing
+    :use-talk-to-make-a-testable-offer],
+   :receipted
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing
+    :use-talk-to-make-a-testable-offer],
+   :non-self-certifying
+   [:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing
+    :use-talk-to-make-a-testable-offer],
+   :zero-mass [:re-enter-after-observed-repair],
+   :absence nil}]}

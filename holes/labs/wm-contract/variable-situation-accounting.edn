@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-09-03",
  :authority
- {:contract-git-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+ {:contract-git-sha "0bab8f813f047d380fe863bdb2ec6a479cbf21e7",
   :contract-sha256
-  "263377cc0cd0a35f8814ea4f33446bf9aeb2120ee0614b45fb13647d259c17ff",
+  "94ec700e0ccb050510e3c9aab4eca8808f8ad841d05cafe330d9fceac6a0e6f2",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "ebc3aa6283c33375874d40a077f3b1507e97401cdad9e92fca32dd4f267ff4d9"},
+  "5725c1417408a94f1da0a298ef517b4d753d311d5a3b5503cf1f163b60868d09"},
  :axes
  {:content-status
   [:named-only
@@ -752,50 +752,34 @@
    :area :demo,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §3e find"}
-  {:pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner},
-   :row-source :contract-declaration,
-   :name "findF1Containment",
-   :basis
-   "The 2026-08-31 scope amendment narrowed it to the recorded-row invariant, but the pinned FindReceiptRow is not in Lean: the name occurs at its definition and its registry row only. Closing means transcribing the row and proving by decide.",
-   :readiness :not-ready,
-   :content-status :open-hole,
+  {:name "findF1Containment",
    :area :demo,
-   :closability :pre-run-closable,
-   :owner "P-validated-R5 §3e F1"}
-  {:pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :owner "P-validated-R5 §3e F1",
    :row-source :contract-declaration,
-   :name "findF2Receipted",
-   :basis
-   "As findF1Containment: no Lean value instantiates the narrowed predicate.",
-   :readiness :not-ready,
-   :content-status :open-hole,
+   :content-status :proven-against-pinned-source,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+  {:name "findF2Receipted",
    :area :demo,
-   :closability :pre-run-closable,
-   :owner "P-validated-R5 §3e F2"}
-  {:pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :owner "P-validated-R5 §3e F2",
    :row-source :contract-declaration,
-   :name "findF3NonSelfCertifying",
-   :basis
-   "As findF1Containment: no Lean value instantiates the narrowed predicate.",
-   :readiness :not-ready,
-   :content-status :open-hole,
+   :content-status :proven-against-pinned-source,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+  {:name "findF3NonSelfCertifying",
    :area :demo,
-   :closability :pre-run-closable,
-   :owner "P-validated-R5 §3e F3"}
-  {:pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :owner "P-validated-R5 §3e F3",
    :row-source :contract-declaration,
-   :name "findF4Falsifiable",
-   :basis
-   "As findF1Containment: no Lean value instantiates the narrowed predicate.",
-   :readiness :not-ready,
-   :content-status :open-hole,
+   :content-status :proven-against-pinned-source,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+  {:name "findF4Falsifiable",
    :area :demo,
-   :closability :pre-run-closable,
-   :owner "P-validated-R5 §3e F4"}
+   :owner "P-validated-R5 §3e F4",
+   :row-source :contract-declaration,
+   :content-status :proven-against-pinned-source,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
   {:pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
@@ -1126,11 +1110,11 @@
   {:closed-by-record-negative-space 62,
    :closed-by-record-with-witness 44,
    :framing 1,
-   :open-hole 15,
-   :proven-against-pinned-source 11},
+   :open-hole 11,
+   :proven-against-pinned-source 15},
   :pointer {:resolves 133},
   :row-source {:contract-declaration 124, :glossary-paragraph 9},
   :glossary-content
   {:closed-by-record-with-witness 7, :framing 1, :open-hole 1},
-  :closability {:pre-run-closable 8, :run-gated 7},
-  :declaration-closability {:pre-run-closable 8, :run-gated 6}}}
+  :closability {:pre-run-closable 4, :run-gated 7},
+  :declaration-closability {:pre-run-closable 4, :run-gated 6}}}

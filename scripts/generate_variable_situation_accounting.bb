@@ -263,21 +263,13 @@
    "find"
    {:closability :pre-run-closable :readiness :not-ready
     :basis "A standing implementation refusal; an owner ruling closes it, no record can."}
-   "findF1Containment"
-   {:closability :pre-run-closable :readiness :not-ready
-    :basis (str "The 2026-08-31 scope amendment narrowed it to the recorded-row "
-                "invariant, but the pinned FindReceiptRow is not in Lean: the "
-                "name occurs at its definition and its registry row only. "
-                "Closing means transcribing the row and proving by decide.")}
-   "findF2Receipted"
-   {:closability :pre-run-closable :readiness :not-ready
-    :basis "As findF1Containment: no Lean value instantiates the narrowed predicate."}
-   "findF3NonSelfCertifying"
-   {:closability :pre-run-closable :readiness :not-ready
-    :basis "As findF1Containment: no Lean value instantiates the narrowed predicate."}
-   "findF4Falsifiable"
-   {:closability :pre-run-closable :readiness :not-ready
-    :basis "As findF1Containment: no Lean value instantiates the narrowed predicate."}
+   ;; findF1Containment / findF2Receipted / findF3NonSelfCertifying /
+   ;; findF4Falsifiable were typed here until :U46 closed all four under the J9
+   ;; criterion (mathlib4 65ec7e4c89, 357b8d0a08, ddef5448ab, 0bab8f813f). Their
+   ;; entries are REMOVED rather than left stale: this map is consulted only for
+   ;; :open-hole rows, so a reader would otherwise still find them typed
+   ;; :pre-run-closable / :not-ready with a basis that says the transcription is
+   ;; missing, which it no longer is.
    "organise"
    {:closability :pre-run-closable :readiness :not-ready
     :basis (str "The declaration names its own gate: whether the refusal weakens "

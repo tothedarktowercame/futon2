@@ -35,7 +35,8 @@ when a row later takes a verdict; the live counts are in
 
 ## 1a. Disposition since the audit (2026-09-03)
 
-One row has taken a verdict. `nonDegenerateAblationLaw` moves `:contested` →
+Five rows have taken verdicts: `nonDegenerateAblationLaw` (`:U45`, below) and
+the four `find` rows (`:U46`, §1b). `nonDegenerateAblationLaw` moves `:contested` →
 `:closed-under-criterion`. The audit could not close it because no criterion for
 `hole → closed` was written down (F1) and the declaration's author had
 deliberately demoted it (F2); Joe's J9 ruling the same day recorded the criterion
@@ -62,6 +63,58 @@ different claims:
 Effect on the counts a reader of Box 2 sees: contract holes 15 → 14, accounting
 `:open-hole` rows 16 → 15, declaration fence `:pre-run-closable` 9 → 8. No other
 row moved and no other declaration was edited.
+
+## 1b. The four `find` rows (`:U46`, 2026-09-03)
+
+`findF1Containment`, `findF2Receipted`, `findF3NonSelfCertifying` and
+`findF4Falsifiable` move `:not-ready` → `:closed-under-criterion`. The same J9
+ruling dispositions all four by name; what §4 recorded as remaining — "the pinned
+`FindReceiptRow` is not in Lean" — is what `:U46` supplied.
+
+- **(3) Lean transcription — met, one commit per declaration.** The pinned record
+  `futon3:checks/find-snatch.edn` (sha256 `839897ef…`) is transcribed as
+  `SnatchPattern` (18 authored ids), `snatchRepository`, `FindSnatchScenario`
+  (6), `findSnatchZeroMass`, and `FindSnatchRowLit` with two tables —
+  `findSnatchRounds` (34 rows, the grain `find_snatch.clj:157-171` iterates) and
+  `findSnatchScenarios` (6 rows carrying `:selected-union`, the grain
+  `find_snatch.clj:172-177` iterates for F4). It is generated from the fixture by
+  `futon2:holes/labs/wm-contract/u46_find_transcribe.bb`, not hand-typed.
+  `wmFindSnatchF1Containment` (`Holes.lean:776`), `wmFindSnatchF2Receipted`
+  (`:788`), `wmFindSnatchF3NonSelfCertifying` (`:803`) and
+  `wmFindSnatchF4Falsifiable` (`:817`) each discharge by `decide`, no `sorry`,
+  each with a soundness lemma carrying the Boolean check to the set-level
+  declaration so the decision is about the recorded rows and not about lists.
+- **(2) Rejecting witness — met, at the current contract sha.**
+  `futon3:checks/find_snatch.clj` exits 0 with drift mismatches 0, and all five
+  controls are rejected: `--negative-f1`, `--negative-f2`, `--negative-f3`,
+  `--negative-f4`, `--negative`. Re-run for `:U46` and re-stamped to
+  `0bab8f813f`. Two pins in that fragment were stale and were corrected from the
+  re-run rather than carried (`:run-sha`, and a `:check-sha` predating futon3
+  `4e1c410446`, which moved the check onto the generic find/organise path).
+- **(1) Persisted record — inapplicable, not met.** The declared observation is a
+  recorded find-receipt table over authored library text, not a run observation.
+
+**One thing the close does not give, stated rather than smoothed.** The positive
+path of `find_snatch.clj` REWRITES `checks/find-snatch.edn` from the current
+library, so the fixture is regenerated rather than frozen: a re-run today writes
+sha256 `08a0c3e7…`, not the pinned `839897ef…`. The `:scenarios`, `:laws` and
+`:drift` are identical — only `:as-of` and the repository move, which grew from
+18 to 24 as `library/snatch` gained six patterns. The recorded rows are therefore
+stable and the pinned 18-member repository is the *stronger* F1 statement, so
+transcribing the pin understates nothing; but the docstring pin names a snapshot
+the check no longer reproduces, and that is a defect in the pinning, not in the
+proof. `C500` §3 carries it.
+
+**A second bound, on F3.** On this record the recorded non-self-certifying set
+equals the recorded receipted set in all 34 rows — every receipt is
+`:structured-antecedent` with a warrant file — so F3's proof discriminates
+nothing that F2's does not. What separates them here is the `--negative-f3`
+control, not the evidence.
+
+Effect on the counts: contract holes 14 → 10 and closed 110 → 114 with the
+declaration population unchanged at 124; accounting `:open-hole` rows 15 → 11 and
+`:proven-against-pinned-source` 11 → 15; declaration fence `:pre-run-closable`
+8 → 4.
 
 ## 2. Why nothing closed
 
@@ -149,17 +202,17 @@ make that concrete and a reader of Box 2 needs both: `wmRunsOnce` is
 open because the Lean proposition is world-level, not because a run is awaited.
 `C` is `:pre-run-closable` and blocked on a scope amendment nobody has made.
 
-### pre-run-closable (9 as audited; 8 after `:U45`, §1a)
+### pre-run-closable (9 as audited; 8 after `:U45`, 4 after `:U46` — §1a, §1b)
 
 | hole | what remains |
 |---|---|
 | `C` | the `DESIGN-c-vector.md §5` split (`C_int`/`C_mis`), an owner amendment. U12 measured the refusal's ground still holding: one `risk_mis` value across all 133 mission actions, all three 2026-09-02 records `:absent`, `FUTON_WM_MISSION_C` off. |
 | `nonDegenerateAblationLaw` | ~~nothing on the evidence side — **contested**, see F2~~ **CLOSED 2026-09-03** under the J9 criterion by `:U45` (§1a); it is no longer a hole and no longer in this count, which now stands at 8 |
 | `find` | an owner ruling overturning the "implementation, not a law" refusal |
-| `findF1Containment` | the pinned `FindReceiptRow` is not in Lean: `Holes.lean` mentions it at exactly two places, its definition (`:267`) and its `mkHole` row (`:6850`). Closing means transcribing the row as a concrete finite-typed value, as `wmTraceR2`/`wmTraceR8` were, and proving by `decide`. Its binding is also one pin behind (`f812795ca6`). |
-| `findF2Receipted` | as F1 (`:272`, `:6851`) |
-| `findF3NonSelfCertifying` | as F1 (`:276`, `:6852`) |
-| `findF4Falsifiable` | as F1 (`:280`, `:6853`) |
+| `findF1Containment` | ~~the pinned `FindReceiptRow` is not in Lean: `Holes.lean` mentions it at exactly two places, its definition (`:267`) and its `mkHole` row (`:6850`). Closing means transcribing the row as a concrete finite-typed value, as `wmTraceR2`/`wmTraceR8` were, and proving by `decide`. Its binding is also one pin behind (`f812795ca6`).~~ **CLOSED 2026-09-03** by `:U46` (§1b): the row is transcribed and `wmFindSnatchF1Containment` proves it by `decide`; the binding is re-run and re-stamped |
+| `findF2Receipted` | ~~as F1 (`:272`, `:6851`)~~ **CLOSED 2026-09-03** by `:U46`, `wmFindSnatchF2Receipted` |
+| `findF3NonSelfCertifying` | ~~as F1 (`:276`, `:6852`)~~ **CLOSED 2026-09-03** by `:U46`, `wmFindSnatchF3NonSelfCertifying` — with the bound in §1b: over this record F3's set is F2's set |
+| `findF4Falsifiable` | ~~as F1 (`:280`, `:6853`)~~ **CLOSED 2026-09-03** by `:U46`, `wmFindSnatchF4Falsifiable`, at the `:selected-union` grain the check uses |
 | `organise` | LA2's decision, named in the declaration itself |
 | `dirichletAccumulationImportAbsent` | the provenance walk is **done and written down** (TN §9a, with the feeder at `a4a_substrate.clj:46-60` and the writer at `actuator_a3.clj:31,68,486-487`); what does not exist is an executable binding of it. The name does not occur in `checks/witness-registry.edn` — no check, no fixture, no negative control. An absence claim without a rejecting control is the shape this lab treats as unproven. |
 
@@ -193,7 +246,8 @@ open because the Lean proposition is world-level, not because a run is awaited.
 5. That no hole's `:content-status` moved and no contract declaration was
    edited: the open-hole count in Figure 3 and Box 2 must be unchanged at 15.
    (True of the audit as delivered. `:U45` subsequently moved it to 14 — §1a —
-   so check this against the audit's own commit, not against HEAD.)
+   and `:U46` to 10 — §1b — so check this against the audit's own commit, not
+   against HEAD.)
 
 ## 6. Superseding record
 
@@ -201,6 +255,7 @@ open because the Lean proposition is world-level, not because a run is awaited.
 |---|---|---|
 | F1's gap (no stated criterion for `hole → closed`) closed | 2026-09-03 | J9 ruling, `RUNBOOK.md` §"What ends a `closed-by-record` evidence obligation" (futon2 `a2641b3`) |
 | F2's subject (`nonDegenerateAblationLaw`) closed | 2026-09-03 | `:U45`; mathlib4 `4bc55c5968` (hole → closed), `e4a8ac81cb` (contract re-emitted) |
+| The four `find` rows closed | 2026-09-03 | `:U46`; mathlib4 `65ec7e4c89`, `357b8d0a08`, `ddef5448ab`, `0bab8f813f` (one declaration per commit), `057e5eccbd` (contract re-emitted) |
 | F3/F4 (the H3/H4 falsifier fields and the four drifted docstring pointers) | ruled, not yet executed | J10 ruling; worklist row `:U47` |
 
 F2 stands as recorded: `86186c3744` really did add the theorem and demote the

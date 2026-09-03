@@ -1,0 +1,16 @@
+{:fixture
+ {:repo "futon3",
+  :path "checks/find-snatch.edn",
+  :sha256
+  "839897ef8fe44952403700bd237389449ae4735d3da7df8239b1b94dc7ef4dfa",
+  :as-of "2734ac570ed78d9bf822a5013cc48e53e68c8ff9"},
+ :repository-count 18,
+ :scenario-count 6,
+ :round-count 34,
+ :laws
+ {:F1 :asserted-selected-subset-of-repository,
+  :F4 :asserted-declared-zero-mass-per-scenario},
+ :drift-mismatch-count 0,
+ :grains
+ {:rounds "find_snatch.clj:157-171 (F1, F2, F3)",
+  :scenarios "find_snatch.clj:172-177 (F4, over :selected-union)"}}

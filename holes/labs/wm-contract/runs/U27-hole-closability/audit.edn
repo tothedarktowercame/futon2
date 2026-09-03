@@ -49,7 +49,19 @@
   :verdicts-since
   [{:name "nonDegenerateAblationLaw", :was :contested, :now :closed-under-criterion,
     :by :U45, :at "2026-09-03",
-    :effect "contract holes 15 -> 14; accounting :open-hole rows 16 -> 15; declaration fence :pre-run-closable 9 -> 8"}]},
+    :effect "contract holes 15 -> 14; accounting :open-hole rows 16 -> 15; declaration fence :pre-run-closable 9 -> 8"}
+   {:name "findF1Containment", :was :not-ready, :now :closed-under-criterion,
+    :by :U46, :at "2026-09-03",
+    :effect "the four find rows moved together on one transcription; the aggregate effect is recorded on findF4Falsifiable"}
+   {:name "findF2Receipted", :was :not-ready, :now :closed-under-criterion,
+    :by :U46, :at "2026-09-03",
+    :effect "as findF1Containment"}
+   {:name "findF3NonSelfCertifying", :was :not-ready, :now :closed-under-criterion,
+    :by :U46, :at "2026-09-03",
+    :effect "as findF1Containment"}
+   {:name "findF4Falsifiable", :was :not-ready, :now :closed-under-criterion,
+    :by :U46, :at "2026-09-03",
+    :effect "the four together: contract holes 14 -> 10 and closed 110 -> 114 with the declaration population unchanged at 124; accounting :open-hole rows 15 -> 11 and :proven-against-pinned-source 11 -> 15; declaration fence :pre-run-closable 8 -> 4"}]},
  :closability-axis [:pre-run-closable :run-gated],
  :authority
  {:contract-file "mathlib4/DarkTower/WarMachine/holes-contract.json",
@@ -136,8 +148,25 @@
    :hole-class :witnessed-instance-obligation,
    :name "findF1Containment",
    :remaining-evidence
-   "The pinned row is not in Lean. Holes.lean mentions findF1Containment at exactly two places -- its definition (:267) and its mkHole registry row (:6850) -- so no Lean value instantiates it and there is no theorem to point at, unlike nonDegenerateAblationLaw. Closing on the Lean side means transcribing the pinned FindReceiptRow as a concrete finite-typed value (as wmTraceR2/wmTraceR8 were transcribed) and proving the four predicates by decide. Also note the binding is :pinned-git-v1 at contract-sha f812795ca6, one pin behind the current 6de47bd050, so it was neither re-run nor re-stamped in U26's rebind.",
-   :readiness :not-ready,
+   "RESOLVED 2026-09-03 by :U46. What was missing was the Lean value: the name occurred at its definition (:267) and its registry row only. The pinned FindReceiptRow is now transcribed (SnatchPattern, snatchRepository, FindSnatchScenario, findSnatchZeroMass, FindSnatchRowLit and the two tables, Holes.lean:284-693, generated from the fixture by futon2 holes/labs/wm-contract/u46_find_transcribe.bb), and wmFindSnatchF1Containment proves the predicate over it by decide. The stale binding this row flagged is also repaired: the fragment was at contract-sha f812795ca6 and is re-run and re-stamped at 0bab8f813f. Nothing remains.",
+   :readiness :closed-under-criterion,
+   :verdict
+   {:verdict :closed-under-criterion,
+    :at "2026-09-03",
+    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\", which dispositions these four declarations by name: they close by transcribing the pinned FindReceiptRow into Lean and proving by decide.",
+    :legs
+    {:leg-1-persisted-record {:status :inapplicable, :why "The declared observation is a recorded find-receipt table over authored library text, not a run observation, so the run leg does not apply here rather than being met. What backs the fixture was checked rather than assumed for :U46: futon3 checks/find_snatch.clj was re-run and its drift check reports 0 mismatches against the authored antecedents, and the recorded rows reproduce -- a re-run today writes byte-identical :scenarios, :laws and :drift. STATED, because it is the one thing this leg does not give: the check REWRITES checks/find-snatch.edn, and today it writes sha256 08a0c3e7... rather than the pinned 839897ef..., because library/snatch grew from 18 to 24 patterns. The pinned file, restored, is what the Lean literal transcribes; the 18-member repository is the stronger F1 statement. See C500 section 3."},
+     :leg-2-rejecting-witness {:status :met, :why "futon3 checks/find_snatch.clj exits 0 over the pinned fixture and all five controls are rejected -- --negative-f1 (a selection member outside the repository), --negative-f2 (the first selected pattern's receipt dropped), --negative-f3 (a receipt rewritten to score-alone), --negative-f4 (the recorded omitted member struck from the repository) and --negative (antecedent drift). All re-run for :U46, and futon2 checks/witness-fragments/findF1Containment.edn re-stamped to contract-sha 0bab8f813f so leg (2) holds at the sha the contract now records. Two pins in that fragment were stale and were corrected from the re-run rather than carried: :run-sha 594127059d and :live-invariant :check-sha ab2b290d, the latter predating futon3 4e1c410446 (2026-09-02), which moved the check onto the generic find/organise path."},
+     :leg-3-lean-transcription {:status :met, :why "theorem wmFindSnatchF1Containment (Holes.lean:776) proves findF1Containment for all 34 transcribed rounds by decide, no sorry. f1Ok is the decidable form and findF1Containment_toRow its soundness against the set-level declaration, so the decision is about the recorded rows and not merely about lists."}},
+    :executed-by :U46,
+    :pointers
+    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion, which dispositions F1-F4 by name)"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:776 theorem wmFindSnatchF1Containment"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:378 findSnatchRounds (34 transcribed rounds) and :626 findSnatchScenarios (6 transcribed scenarios)"
+     "mathlib4 057e5eccbd (contract re-emitted; holes 14 -> 10)"
+     "futon2 holes/labs/wm-contract/u46_find_transcribe.bb (the generator) and runs/U46-find-rows/ (its artifacts)"
+     "futon2 checks/witness-fragments/findF1Containment.edn (:contract-sha 0bab8f813f...)"
+     "futon3 checks/find-snatch.edn (the pinned record, sha256 839897ef...)"]},
    :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 267, :docstring-line 266},
    :area :demo,
    :closability :pre-run-closable,
@@ -151,8 +180,25 @@
    :hole-class :witnessed-instance-obligation,
    :name "findF2Receipted",
    :remaining-evidence
-   "As findF1Containment: no Lean value instantiates it (occurrences: :272 definition, :6851 registry row).",
-   :readiness :not-ready,
+   "RESOLVED 2026-09-03 by :U46, on the table findF1Containment's close generated; wmFindSnatchF2Receipted (Holes.lean:788) instantiates it. Nothing remains.",
+   :readiness :closed-under-criterion,
+   :verdict
+   {:verdict :closed-under-criterion,
+    :at "2026-09-03",
+    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\", which dispositions these four declarations by name: they close by transcribing the pinned FindReceiptRow into Lean and proving by decide.",
+    :legs
+    {:leg-1-persisted-record {:status :inapplicable, :why "The declared observation is a recorded find-receipt table over authored library text, not a run observation, so the run leg does not apply here rather than being met. What backs the fixture was checked rather than assumed for :U46: futon3 checks/find_snatch.clj was re-run and its drift check reports 0 mismatches against the authored antecedents, and the recorded rows reproduce -- a re-run today writes byte-identical :scenarios, :laws and :drift. STATED, because it is the one thing this leg does not give: the check REWRITES checks/find-snatch.edn, and today it writes sha256 08a0c3e7... rather than the pinned 839897ef..., because library/snatch grew from 18 to 24 patterns. The pinned file, restored, is what the Lean literal transcribes; the 18-member repository is the stronger F1 statement. See C500 section 3."},
+     :leg-2-rejecting-witness {:status :met, :why "futon3 checks/find_snatch.clj exits 0 over the pinned fixture and all five controls are rejected -- --negative-f1 (a selection member outside the repository), --negative-f2 (the first selected pattern's receipt dropped), --negative-f3 (a receipt rewritten to score-alone), --negative-f4 (the recorded omitted member struck from the repository) and --negative (antecedent drift). All re-run for :U46, and futon2 checks/witness-fragments/findF1Containment.edn re-stamped to contract-sha 0bab8f813f so leg (2) holds at the sha the contract now records. Two pins in that fragment were stale and were corrected from the re-run rather than carried: :run-sha 594127059d and :live-invariant :check-sha ab2b290d, the latter predating futon3 4e1c410446 (2026-09-02), which moved the check onto the generic find/organise path."},
+     :leg-3-lean-transcription {:status :met, :why "theorem wmFindSnatchF2Receipted (Holes.lean:788) proves findF2Receipted for all 34 transcribed rounds by decide, no sorry."}},
+    :executed-by :U46,
+    :pointers
+    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion, which dispositions F1-F4 by name)"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:788 theorem wmFindSnatchF2Receipted"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:378 findSnatchRounds (34 transcribed rounds) and :626 findSnatchScenarios (6 transcribed scenarios)"
+     "mathlib4 057e5eccbd (contract re-emitted; holes 14 -> 10)"
+     "futon2 holes/labs/wm-contract/u46_find_transcribe.bb (the generator) and runs/U46-find-rows/ (its artifacts)"
+     "futon2 checks/witness-fragments/findF1Containment.edn (:contract-sha 0bab8f813f...)"
+     "futon3 checks/find-snatch.edn (the pinned record, sha256 839897ef...)"]},
    :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 272, :docstring-line 271},
    :area :demo,
    :closability :pre-run-closable,
@@ -166,8 +212,25 @@
    :hole-class :witnessed-instance-obligation,
    :name "findF3NonSelfCertifying",
    :remaining-evidence
-   "As findF1Containment: no Lean value instantiates it (occurrences: :276 definition, :6852 registry row).",
-   :readiness :not-ready,
+   "RESOLVED 2026-09-03 by :U46; wmFindSnatchF3NonSelfCertifying (Holes.lean:803) instantiates it. One thing the close does NOT establish, recorded on the verdict: over this record F3's set is F2's set, so the proof adds no discrimination beyond F2 and the rejecting control is what carries it.",
+   :readiness :closed-under-criterion,
+   :verdict
+   {:verdict :closed-under-criterion,
+    :at "2026-09-03",
+    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\", which dispositions these four declarations by name: they close by transcribing the pinned FindReceiptRow into Lean and proving by decide.",
+    :legs
+    {:leg-1-persisted-record {:status :inapplicable, :why "The declared observation is a recorded find-receipt table over authored library text, not a run observation, so the run leg does not apply here rather than being met. What backs the fixture was checked rather than assumed for :U46: futon3 checks/find_snatch.clj was re-run and its drift check reports 0 mismatches against the authored antecedents, and the recorded rows reproduce -- a re-run today writes byte-identical :scenarios, :laws and :drift. STATED, because it is the one thing this leg does not give: the check REWRITES checks/find-snatch.edn, and today it writes sha256 08a0c3e7... rather than the pinned 839897ef..., because library/snatch grew from 18 to 24 patterns. The pinned file, restored, is what the Lean literal transcribes; the 18-member repository is the stronger F1 statement. See C500 section 3."},
+     :leg-2-rejecting-witness {:status :met, :why "futon3 checks/find_snatch.clj exits 0 over the pinned fixture and all five controls are rejected -- --negative-f1 (a selection member outside the repository), --negative-f2 (the first selected pattern's receipt dropped), --negative-f3 (a receipt rewritten to score-alone), --negative-f4 (the recorded omitted member struck from the repository) and --negative (antecedent drift). All re-run for :U46, and futon2 checks/witness-fragments/findF1Containment.edn re-stamped to contract-sha 0bab8f813f so leg (2) holds at the sha the contract now records. Two pins in that fragment were stale and were corrected from the re-run rather than carried: :run-sha 594127059d and :live-invariant :check-sha ab2b290d, the latter predating futon3 4e1c410446 (2026-09-02), which moved the check onto the generic find/organise path."},
+     :leg-3-lean-transcription {:status :met, :why "theorem wmFindSnatchF3NonSelfCertifying (Holes.lean:803) proves findF3NonSelfCertifying for all 34 transcribed rounds by decide, no sorry. BOUNDED, and said in the docstring rather than left for a reader: on this record the recorded non-self-certifying set EQUALS the recorded receipted set in every one of the 34 rows -- every receipt is :structured-antecedent with a warrant file -- so F3 discriminates nothing here that F2 does not, and what separates them is the --negative-f3 control rather than the evidence."}},
+    :executed-by :U46,
+    :pointers
+    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion, which dispositions F1-F4 by name)"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:803 theorem wmFindSnatchF3NonSelfCertifying"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:378 findSnatchRounds (34 transcribed rounds) and :626 findSnatchScenarios (6 transcribed scenarios)"
+     "mathlib4 057e5eccbd (contract re-emitted; holes 14 -> 10)"
+     "futon2 holes/labs/wm-contract/u46_find_transcribe.bb (the generator) and runs/U46-find-rows/ (its artifacts)"
+     "futon2 checks/witness-fragments/findF1Containment.edn (:contract-sha 0bab8f813f...)"
+     "futon3 checks/find-snatch.edn (the pinned record, sha256 839897ef...)"]},
    :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 276, :docstring-line 275},
    :area :demo,
    :closability :pre-run-closable,
@@ -181,8 +244,25 @@
    :hole-class :witnessed-instance-obligation,
    :name "findF4Falsifiable",
    :remaining-evidence
-   "As findF1Containment: no Lean value instantiates it (occurrences: :280 definition, :6853 registry row).",
-   :readiness :not-ready,
+   "RESOLVED 2026-09-03 by :U46. The docstring wording this row quoted -- \"the pinned row remains deliberately tracked as an evidence obligation\" -- is removed at mathlib4 0bab8f813f, because the obligation is discharged; what would still refute the claim is the falsifier field. wmFindSnatchF4Falsifiable proves it over all six recorded scenarios. Nothing remains.",
+   :readiness :closed-under-criterion,
+   :verdict
+   {:verdict :closed-under-criterion,
+    :at "2026-09-03",
+    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\", which dispositions these four declarations by name: they close by transcribing the pinned FindReceiptRow into Lean and proving by decide.",
+    :legs
+    {:leg-1-persisted-record {:status :inapplicable, :why "The declared observation is a recorded find-receipt table over authored library text, not a run observation, so the run leg does not apply here rather than being met. What backs the fixture was checked rather than assumed for :U46: futon3 checks/find_snatch.clj was re-run and its drift check reports 0 mismatches against the authored antecedents, and the recorded rows reproduce -- a re-run today writes byte-identical :scenarios, :laws and :drift. STATED, because it is the one thing this leg does not give: the check REWRITES checks/find-snatch.edn, and today it writes sha256 08a0c3e7... rather than the pinned 839897ef..., because library/snatch grew from 18 to 24 patterns. The pinned file, restored, is what the Lean literal transcribes; the 18-member repository is the stronger F1 statement. See C500 section 3."},
+     :leg-2-rejecting-witness {:status :met, :why "futon3 checks/find_snatch.clj exits 0 over the pinned fixture and all five controls are rejected -- --negative-f1 (a selection member outside the repository), --negative-f2 (the first selected pattern's receipt dropped), --negative-f3 (a receipt rewritten to score-alone), --negative-f4 (the recorded omitted member struck from the repository) and --negative (antecedent drift). All re-run for :U46, and futon2 checks/witness-fragments/findF1Containment.edn re-stamped to contract-sha 0bab8f813f so leg (2) holds at the sha the contract now records. Two pins in that fragment were stale and were corrected from the re-run rather than carried: :run-sha 594127059d and :live-invariant :check-sha ab2b290d, the latter predating futon3 4e1c410446 (2026-09-02), which moved the check onto the generic find/organise path."},
+     :leg-3-lean-transcription {:status :met, :why "theorem wmFindSnatchF4Falsifiable (Holes.lean:817) proves findF4Falsifiable for all 6 transcribed scenarios by decide, no sorry, at the :selected-union grain find_snatch.clj:172-177 uses; the per-round statement is weaker and follows. f4Ok discharges the existential and the repository.Nonempty conjunct from the same recorded member, which is the degeneracy C70 and C85 named."}},
+    :executed-by :U46,
+    :pointers
+    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion, which dispositions F1-F4 by name)"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:817 theorem wmFindSnatchF4Falsifiable"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:378 findSnatchRounds (34 transcribed rounds) and :626 findSnatchScenarios (6 transcribed scenarios)"
+     "mathlib4 057e5eccbd (contract re-emitted; holes 14 -> 10)"
+     "futon2 holes/labs/wm-contract/u46_find_transcribe.bb (the generator) and runs/U46-find-rows/ (its artifacts)"
+     "futon2 checks/witness-fragments/findF1Containment.edn (:contract-sha 0bab8f813f...)"
+     "futon3 checks/find-snatch.edn (the pinned record, sha256 839897ef...)"]},
    :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 280, :docstring-line 279},
    :area :demo,
    :closability :pre-run-closable,

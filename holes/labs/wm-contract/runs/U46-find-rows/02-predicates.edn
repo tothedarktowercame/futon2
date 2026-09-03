@@ -1,0 +1,403 @@
+{:rounds
+ [{:scenario [:g1 :snatcher],
+   :round 1,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :snatcher],
+   :round 2,
+   :selected-count 2,
+   :f1 (:ask-for-surplus-not-surrender :exchange-when-both-sides-gain),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :snatcher],
+   :round 3,
+   :selected-count 2,
+   :f1 (:ask-for-surplus-not-surrender :exchange-when-both-sides-gain),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :snatcher],
+   :round 4,
+   :selected-count 2,
+   :f1 (:ask-for-surplus-not-surrender :exchange-when-both-sides-gain),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :snatcher],
+   :round 5,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :sharer],
+   :round 1,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :sharer],
+   :round 2,
+   :selected-count 2,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :sharer],
+   :round 3,
+   :selected-count 2,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :sharer],
+   :round 4,
+   :selected-count 2,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :sharer],
+   :round 5,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :price-the-final-round-as-final),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :cautious],
+   :round 1,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :cautious],
+   :round 2,
+   :selected-count 4,
+   :f1
+   (:an-unmodelled-response-stops-the-line
+    :ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g4 :snatcher],
+   :round 1,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g4 :snatcher],
+   :round 2,
+   :selected-count 4,
+   :f1
+   (:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g4 :snatcher],
+   :round 3,
+   :selected-count 5,
+   :f1
+   (:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :re-enter-after-observed-repair),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g4 :snatcher],
+   :round 4,
+   :selected-count 4,
+   :f1
+   (:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g4 :snatcher],
+   :round 5,
+   :selected-count 6,
+   :f1
+   (:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :re-enter-after-observed-repair),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 1,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 2,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 3,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 4,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 5,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 6,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 7,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 8,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 9,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 10,
+   :selected-count 2,
+   :f1 (:ask-for-surplus-not-surrender :exchange-when-both-sides-gain),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 11,
+   :selected-count 0,
+   :f1 true,
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round 12,
+   :selected-count 1,
+   :f1 (:price-the-final-round-as-final),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g5 :sharer],
+   :round 1,
+   :selected-count 4,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing
+    :use-talk-to-make-a-testable-offer),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g5 :sharer],
+   :round 2,
+   :selected-count 2,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g5 :sharer],
+   :round 3,
+   :selected-count 2,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g5 :sharer],
+   :round 4,
+   :selected-count 2,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g5 :sharer],
+   :round 5,
+   :selected-count 3,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :price-the-final-round-as-final),
+   :f2 true,
+   :f3 true,
+   :f4 true}],
+ :scenarios
+ [{:scenario [:g1 :snatcher],
+   :round nil,
+   :selected-count 4,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :sharer],
+   :round nil,
+   :selected-count 5,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g1 :cautious],
+   :round nil,
+   :selected-count 4,
+   :f1
+   (:an-unmodelled-response-stops-the-line
+    :ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g4 :snatcher],
+   :round nil,
+   :selected-count 7,
+   :f1
+   (:a-free-mark-is-always-worth-assigning
+    :ask-for-surplus-not-surrender
+    :consult-the-remedy-before-exiting
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing
+    :re-enter-after-observed-repair),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g2 :snatcher],
+   :round nil,
+   :selected-count 5,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :exchange-when-both-sides-gain
+    :forced-play-needs-a-loss-floor
+    :price-the-final-round-as-final
+    :probe-before-committing),
+   :f2 true,
+   :f3 true,
+   :f4 true}
+  {:scenario [:g5 :sharer],
+   :round nil,
+   :selected-count 6,
+   :f1
+   (:ask-for-surplus-not-surrender
+    :escalate-only-as-far-as-you-can-lose
+    :exchange-when-both-sides-gain
+    :price-the-final-round-as-final
+    :probe-before-committing
+    :use-talk-to-make-a-testable-offer),
+   :f2 true,
+   :f3 true,
+   :f4 true}],
+ :totals
+ {:rounds {:f1 34, :f2 34, :f3 34, :f4 34, :of 34},
+  :scenarios {:f1 6, :f2 6, :f3 6, :f4 6, :of 6}}}
