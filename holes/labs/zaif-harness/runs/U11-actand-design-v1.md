@@ -1,183 +1,151 @@
-# U11 design draft — the actand source, one forward-model family at two grains
+# U11 — actand-indexed world-model source for :task-belief (design v1)
 
-Author: claude-2 (zaif-harness lane), 2026-09-02 ~18:25Z, per the joint-pass
-agreement (claude-2 leads, claude-1 reviews with wm-side constraints; bellback
-on invoke-1788372741639). **Rev 2, ~18:35Z**: claude-1's review
-(invoke-1788373305219) applied in full — scalar-bridge framing (§4), declared
-clamp + typed ambiguity in the adapter record (§2), U12 node-fixtures as the
-reading-map source (§2), discrimination trio (§3). Status: REVIEWED design;
-nothing here is built, flipped, or ruled. Inputs read: D8a (c8eec02),
-DESIGN-c-vector.md §3/§5, wm-contract U12's measured result, and both
-candidate computations in source.
+Date: 2026-09-03. Author: claude-2 (design lead per the 2026-09-02 joint-pass
+agreement; claude-1 reviews with wm-side constraints). Status: DRAFT for
+claude-1 review. Inputs: `runs/U11-reading-map-v1.md` (U11a, reviewed),
+`wm-contract/DESIGN-c-vector.md` §5–§7, D8a/D8b (the task-belief seam),
+Z1's promised table (M-zaif-harness.md:187-194).
 
-## 0. What this designs
+## 1. The object — one statement, two indices
 
-One object, two consumers. zaif's `:task-belief` hole
-(`:d8/task-belief-actand-source-absent`, D8a) and the WM's Q(o_k|π) hole
-(DESIGN-c-vector.md §3, "the honest hole, named not papered") are the same
-missing thing at two grains. The design refuses to build it twice:
+**Q_actand : Grain → Actand → Action → Density over declared observables.**
 
-    Q_actand : Grain → Action → Density over declared observables
+IF zaif needs an arm-grain forward model (what happens to THIS correction
+target under THIS arm) and the WM carries a mission-grain `Q(o|pi)` hole
+(DESIGN-c-vector §3), HOWEVER building two separate forward models would
+recreate the two-C mistake one node over (§5's diagnosis: one function stated
+too widely, repaired as a grain-indexed family), THEN Q_actand is declared
+once as the family above with exactly two indices today —
+`:arm-session` (zaif: actand = the session's correction target; actions = the
+registry arms; observables = the declared outcome vocabulary of the gold
+judgments) and `:mission` (wm: actand = the clocked mission; actions = tick
+candidates; observables = the declared tick channels) — BECAUSE §5 already
+establishes the pattern (`C_int`/`C_mis`) and the acceptance bar is that the
+zaif source and the WM hole are *the same object at two indices*, checkable
+by their sharing the refusal constructor and provenance shape below.
 
-with `Grain ∈ {:arm-session, :mission}` for now. Every emitted prediction
-carries its grain and its source, so it can always say **whose prediction it
-is and at which grain** — the two-C lesson applied one node over (claude-1's
-constraint 1, adopted as the design's spine).
+A (grain, actand, action) triple with no typed source is
+**`:q-actand/no-typed-source`** — a typed constructor, not an empty density
+and not a uniform prior.
 
-## 1. The three arms, as they actually are in code
+## 2. Provenance discipline (the D8b seam is the enforcement point)
 
-Honesty first: **neither runnable arm is a density.** Both are scalar
-expected-progress heuristics with hand-set weights. The design treats them as
-degenerate Q's (point predictions of an improvement observable) and says so in
-their provenance, rather than dressing them as distributions.
+IF every density row must be traceable to records, HOWEVER an untyped or
+unprovenanced value entering `:task-belief` would silently become a prior,
+THEN every Q_actand query result carries
+`{:provenance {:source <registry-key> :query <query-id> :record-ids [...]}}`
+and enters the controller ONLY through the existing seam —
+`zaif_inputs.clj:79-91 task-belief-from`, which already refuses
+value-without-provenance as `:d8/unprovenanced-task-belief` (verified live
+2026-09-03) — BECAUSE D8b built exactly this gate and the design's job is to
+feed it, not to bypass it. A predicted outcome with no typed source is a
+refusal, never a prior.
 
-- **Arm A `:portfolio-policy`** — `futon3c/src/futon3c/portfolio/policy.clj:49-74`.
-  `pragmatic-value(action, observation, mu-sens, adjacent-missions)`: channel
-  errors (gap-count, stall-count, review-age, spinoff-pressure, coverage-pct)
-  between observation and belief, weighted per action
-  (`:work-on :review :consolidate :upvote :acquire-patterns`). Action-conditioned,
-  channel-fed, belief-relative — the closest existing thing to "how much does
-  acting advance the task, given what we believe vs see."
-- **Arm B `:mission-head-channels`** — `futon3c/src/futon3c/aif/mission_head.clj:135-176`.
-  `pragmatic-value(action, channels)`: phase-progress, prediction-divergence,
-  gate-readiness, obligation-satisfaction per action
-  (`:advance-phase :revise-approach …`). Mission-shaped channels, no belief
-  term (channels are taken as read).
-- **Arm C `:cascade-catalog-playout`** — wm-side, S6 §3: precedent as the
-  playout record; predicted outcomes drawn from typed records of kin missions'
-  actual courses. **Not built.** Named here so the registry records all three
-  (claude-1's constraint 2). It is the only arm whose output is naturally a
-  density and whose provenance is naturally a citation ("prediction from
-  precedent M-x's record"); when S6(b) exists, it enters the same comparison
-  harness below unchanged.
+## 3. The three arms (proposed registry entry, verbatim)
 
-D8a's warning is a design constraint, not a footnote: *"copying either action
-vocabulary into the four-arm controller would be a new model, not hydration."*
-So the arms stay where they live; what crosses the seam is an **adapter
-record**, not their vocabulary.
+Proposed for `wm-contract/aif-equations.edn :choices` — **:status :open**;
+this registers the choice set and its decision procedure, not a ruling (Joe's
+2026-09-01 rule: the comparison is designed into the row, not ruled in
+advance). Registry lives wm-side, so landing this entry is part of claude-1's
+review of this draft:
 
-## 2. The adapter into `:task-belief` (consumes D8b's seam)
+```edn
+:task-belief-actand-source
+{:observed :no-actand-source-wired  :status :open
+ :arms {:A {:site "futon3c/src/futon3c/portfolio/policy.clj:49-74"
+            :grain :arm-session
+            :note "portfolio pragmatic-value; scalar heuristic over 5 declared channels + mu-sens + adjacent-missions"}
+        :B {:site "futon3c/src/futon3c/aif/mission_head.clj:135-176"
+            :grain :mission
+            :note "mission-head pragmatic/epistemic/effort lookups; scalar over 4 declared channels"}
+        :C {:site "S6 cascade-catalog playout (NOT BUILT; futon4/holes/mission-lifecycle-wm-alignment.md:143-189)"
+            :grain :mission
+            :note "accreted query over PSR/PUR, discharges, :shown lists, clock lineage; named so the registry records it"}}
+ :decision-procedure "U11 §6 replay comparison; DISCRIMINATION headline; baselines named there"
+ :statement "Three candidate sources for Q_actand; scalar arms A/B are :scalar-awaiting-density (DESIGN-c-vector §6) until declared as log-density images; no arm is ruled on before the comparison runs."}
+```
 
-The zaif `:act` arm needs E[task progress | act-now] for the current session.
-Mapping declared per arm, in data: zaif `:act` ↦ Arm A `:work-on` /
-Arm B `:advance-phase` (the "do the work this turn" action in each
-vocabulary). The adapter evaluates the arm against the session's actual
-channel readings and emits exactly what D8b's acceptance seam propagates:
+## 4. Adapters — channel mapping is declared, missing input refuses
 
-    {:act-value  <double>            ; the arm's scalar
-     :ambiguity  :not-modeled-degenerate-q  ; TYPED, never numeric 0.0 -- a
-                                            ; degenerate Q has zero entropy, so
-                                            ; the ambiguity half of G is
-                                            ; structurally absent for arms A/B;
-                                            ; a numeric 0.0 would rebuild the
-                                            ; U4 problem (a term always zero
-                                            ; with no way to tell if meaningful)
-     :source     {:query   :q-actand/v1
-                  :arm     :portfolio-policy | :mission-head-channels | :cascade-catalog-playout
-                  :grain   :arm-session
-                  :transform :clamp-0-1     ; the clamp is a DECLARED transform;
-                                            ; silent, it would turn section 6's
-                                            ; "affine image" into "clamped
-                                            ; affine image" unannounced
-                  :inputs-digest <sha of the channel readings used>
-                  :at      <instant>}}
+IF no recorded corpus supplies arm A's or B's exact channel vocabulary
+(reading-map conclusion: structural for the 56 decisions, measured 0/114 for
+calibration), HOWEVER renaming `:mission-health` into a mission-head channel
+would be a vocabulary substitution passed off as replay, THEN each arm gets
+an adapter with (a) a DECLARED mapping table — each entry `recorded-field →
+arm-input` with per-entry provenance or a typed absence — and (b)
+**missing-input refusal**: a record lacking a mapped field yields
+`:q-actand/missing-input {:field ...}`, counted in the replay, never
+defaulted, BECAUSE the reading map's conclusion is binding: channel mapping
+and refusal are part of the adapter, and refusal counts are themselves a
+comparison observable (an arm that refuses everything is a weak source, said
+with numbers instead of silence). Scalar outputs from A/B are typed
+`:scalar-awaiting-density` per §6 of DESIGN-c-vector — affine images of
+log-Q_actand whose density has not been declared — so the comparison can run
+on act-values now without pretending the scalars are densities.
 
-    Digest stability is an ASSERTION, not just provenance: same
-    :inputs-digest => same :act-value, replay-checked.
+## 5. The initial actand table — a named query, not an authored prior
 
-No source ⇒ D8b's typed absence stands. Numeric without provenance ⇒ D8b's
-refusal (`:d8/unprovenanced-task-belief`). A predicted outcome with no typed
-source is a refusal, not a prior (claude-1's constraint 3 — already enforced
-by the seam; the design just declines to weaken it).
+**Query `:q-actand/calibration-v1`** (the named provenance-bearing query the
+acceptance demands), `:arm-session` grain: over the 114 tracked calibration
+sessions (`M-zaif-harness/calibration-sessions.edn`), group by (actand class
+derived from the session's route + correction label, arm) and emit the
+empirical outcome distribution of gold judgments per group, each density row
+carrying `:record-ids` (the contributing session `:id`s, e.g.
+`e-0cae94f2-9ca8-4863-9251-44278445a5f7`) and the query id. IF Z1 promised an
+initial actand table with provenance, HOWEVER an authored table would be a
+prior wearing a table's clothes, THEN the table IS this query's materialised
+result — regenerable, provenance-bearing per row, refusing (not defaulting)
+any group with zero support — BECAUSE arm C's design already established the
+pattern (accreted query over existing carriers, never an authored prior) and
+the same rule at arm-session grain is what makes the two indices one object.
 
-Open input the adapter needs and must not invent: **which channel readings
-exist at zaif session grain.** Arm A wants gap/stall/review channels; a zai
-session has posting-stats, turn-round records, and (post-D10) a clocked
-mission whose registry/C_mis fields carry obligation-shaped readings. The
-design pass deliberately leaves the reading-map as the first build question,
-because it is answerable from records, not from taste. Concretely (claude-1
-review): answer it against `wm-contract/runs/U12-c-mis-falsifier/node-fixtures/`
-— 40 per-node fixtures (run-id × node, typed absences included, R7 located as
-`:precision-state` covering 8/14 channels) — plus U10's matrix; do not
-re-extract the tick records.
+## 6. Comparison replay (designed here, ruled nowhere)
 
-## 3. The comparison run — designed into the row (Joe's 2026-09-01 rule)
+Per arm, re-run D9's replay harness with the arm (through its adapter) as
+the act-value source:
 
-Both zaif arms are runnable over recorded data, so no advance ruling: build
-both behind declared inputs, replay, decide on numbers, Joe sees results and
-can veto. One replay harness, three measurements:
+- **Corpora**: 114 calibration sessions + the 56-decision bounded snapshot
+  (`:arm-session`); the 39 tracked U12 node fixtures across three tick runs
+  (`:mission`, arms B/C when C exists).
+- **HEADLINE — DISCRIMINATION**: count of distinct act-values produced
+  across each corpus. Baselines to beat, named: wm U12 status-quo = 1
+  distinct risk value over 133 actions across 14 channels; zaif status-quo =
+  1 distinct act value (0.0) over 114/114 sessions. An arm that cannot beat
+  1 on any corpus is recorded as too weak (DESIGN-c-vector §7's reversion
+  clause, applied to a source instead of a flip).
+- **Secondary columns**: refusal count by type (missing-input vs no-typed-
+  source), provenance coverage (fraction of act-values carrying record-ids),
+  and a planted sanity field: a fixture where all outcomes read satisfied
+  must drive the arm's value to its floor.
+- Deterministic from record fields alone; no live JVM reads.
 
-1. **Discrimination** (headline): count of distinct `:act-value`s and their
-   spread over the replayed corpus. Baselines to beat, named
-   (claude-1's constraint 1, U12's negative result): wm status-quo forward
-   model = **exactly 1 distinct risk value (4.5399e-5) over 133 actions
-   across all 14 channels**; zaif shipped = **1 distinct act value (0.0) on
-   114/114 sessions**. Distinct-count is necessary, not sufficient — a
-   continuous-channel arm produces distinct values from noise alone. So the
-   headline is a trio (claude-1 review): (a) beats both constant baselines;
-   (b) a DIRECTION probe in U12's style — two planted sessions differing
-   only in one gap channel (maximal vs minimal), the arm must order them
-   correctly; (c) digest stability — same `:inputs-digest` ⇒ same value, as
-   an assertion. "Beats constant + ordered plants + digest-stable" is a
-   discrimination claim noise cannot fake.
-2. **D9 re-run per arm**: tie-settled vs score-settled counts over the same
-   recorded corpus (D9's harness, already specified on its row).
-3. **Provenance completeness**: every emitted value resolves to its
-   `:inputs-digest`; any row that doesn't is a harness bug, counted as such.
+## 7. Live-shaped demonstration (one, pinned, default off)
 
-Corpus: the 114 calibration sessions (`calibration-sessions.edn`) + the 56
-live decisions for `:arm-session` grain; the three tick records (S7 seed
-corpus) for `:mission` grain. All replay, no live flips; default off,
-flip J-gated.
+IF the acceptance requires one real nonzero belief term reaching act-value,
+HOWEVER flipping the controller on is J-gated, THEN the demonstration is a
+live-shaped test: feed `:actand-query-result` = one real
+`:q-actand/calibration-v1` row (verbatim, record-ids cited) through
+`task-belief-from` into a controller decision and pin act-value ≠ 0.0 —
+against the before-pin `e-0f2f9aec-6240-40e9-a25a-e45d9452076f` (a real
+decision whose task-belief is empty and act-value 0.0) — BECAUSE the pair
+(before-pin all-zero, after-pin nonzero with provenance) is the minimal
+honest evidence that the wire carries signal, without any live flip. Default
+remains off; the flip rides the J-gate queue with its own census.
 
-## 4. Decisions in DERIVE form
+## 8. Not in v1
 
-- IF the WM needs Q at mission grain (§3) and zaif needs it at arm grain,
-  HOWEVER two forward models built tonight would each be unable to say whose
-  prediction it is, THEN one grain-indexed family with per-grain
-  instantiations and grain in every record's provenance, BECAUSE the two-C
-  design already paid for this lesson and wrote it down (§5's grain-indexed
-  family is the template).
-- IF the theory does not pick between arms A, B and (eventually) C, HOWEVER
-  A and B are runnable over recorded data tonight, THEN a registry `:choices`
-  entry names all three arms and the comparison replay decides on
-  discrimination + D9 numbers, BECAUSE runnable arms get built and run, not
-  ruled on (Joe 2026-09-01; the shared checker enforces it).
-- IF the arms are scalar heuristics, HOWEVER the family's type says Density,
-  THEN v1 records them as declared point-predictions (degenerate densities)
-  with `:arm` and `:transform` in provenance, BECAUSE for a point-prediction
-  Q, KL(Q‖C) collapses to −log C(o*) — which is DESIGN-c-vector.md §6's
-  scalar bridge verbatim ("a scalar payoff is an affine image of log-C at
-  the outcome the action targets"). This is not a weakening of the §5 type
-  but its instantiation, and it gives the tally's `:c-cost-vs-distribution`
-  row (closed `:partial` because no source yet carries
-  `:scalar-awaiting-density`) its first genuine repair path: these scalars
-  become typed point-predictions whose log-C evaluation IS the payoff.
-  RIDER, inherited by name: the moment any arm's output meets a C in one G,
-  wm-contract U17's ≥0 property applies at this seam (−log C can go
-  negative in-band against a range C — U12 clause (c)'s negative-term
-  problem); the composition must not happen unguarded. (Both points:
-  claude-1 review, invoke-1788373305219.)
-- IF a session lacks the channel readings an arm wants, HOWEVER inventing
-  readings would smuggle a model in as data, THEN the adapter emits the D8b
-  typed absence for that session and the replay counts coverage, BECAUSE
-  absence-counting is itself one of the comparison's results (an arm that
-  only fires on 10% of sessions loses to one that fires honestly on 80%).
+No arm ruling (the comparison produces numbers; Joe rules). No flip. No arm-C
+build (S6(a)/wm U23 owns it). No registry edit by this lane — the §3 entry
+lands via claude-1's review. No new persistence: the table materialises from
+tracked records on demand.
 
-## 5. Registry `:choices` entry (draft, to be ported on landing)
+## Build sequence after review (one file / one behaviour each)
 
-    {:choice :q-actand-arm
-     :ruling "Joe 2026-09-01 choice-point discipline; joint-pass claude-2/claude-1 2026-09-02"
-     :arms [{:arm :portfolio-policy      :status :runnable :source "futon3c portfolio/policy.clj:49-74"}
-            {:arm :mission-head-channels :status :runnable :source "futon3c aif/mission_head.clj:135-176"}
-            {:arm :cascade-catalog-playout :status :unbuilt :source "wm-contract S6 §3 (precedent as playout record)"}]
-     :measurement "discrimination (distinct act-values; baselines: wm-U12 1/133, zaif 1/114) + D9 tie counts + coverage; replay-only"
-     :decided :not-yet}
-
-## 6. What this draft does NOT do
-
-No code, no flip, no arm choice, no new channel semantics, no claim that any
-arm's numbers mean progress until the replay says they discriminate. Next
-acts after claude-1's review: (a) the reading-map question to U10/S7 output;
-(b) one build packet per arm adapter (small, separate); (c) the replay
-harness packet; (d) numbers to Joe.
+1. **U11b** — `:q-actand/calibration-v1` query + materialised table + tests
+   (pin: one real session id per density row cited).
+2. **U11c** — arm A adapter (mapping table + refusals + tests).
+3. **U11d** — arm B adapter (same shape, mission fixtures).
+4. **U11e** — comparison replay runner + report (headline + columns above).
+5. **U11f** — the §7 live-shaped demonstration test.
+Arm C joins the comparison when wm U23 lands; its column reads
+`:q-actand/no-typed-source` until then — a truthful hole, displayed.
