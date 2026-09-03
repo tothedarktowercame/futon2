@@ -1,0 +1,65 @@
+{:max-open-questions 3,
+ :not-in-the-score
+ "the same for every candidate on a tick, so it cannot move a rank",
+ :s2-drift
+ {:rows-compared 133,
+  :drifted 1,
+  :detail
+  [{:id "M-zaif-harness-v1",
+    :central-now 0.0,
+    :central-s2 0.0,
+    :strategic-now 1.0,
+    :strategic-s2 0.0}]},
+ :epistemic-status-counts
+ {:measured 123,
+  :phase-unreadable 8,
+  :mission-absent-from-mission-doc-index 2},
+ :phase-agreement-counts {:doability-phase-absent 133},
+ :unresolvable-cross-references
+ {:total 121,
+  :missions-affected 48,
+  :worst
+  [{:id "M-pattern-retrieval-calibration",
+    :unresolvable-refs 11,
+    :questions 5,
+    :open-questions 1}
+   {:id "M-bounded-in-flight-state",
+    :unresolvable-refs 9,
+    :questions 10,
+    :open-questions 1}
+   {:id "M-pattern-mining",
+    :unresolvable-refs 8,
+    :questions 4,
+    :open-questions 1}
+   {:id "M-stack-geometry",
+    :unresolvable-refs 7,
+    :questions 12,
+    :open-questions 1}
+   {:id "M-expressions-of-interest",
+    :unresolvable-refs 6,
+    :questions 9,
+    :open-questions 1}
+   {:id "M-pattern-ingest",
+    :unresolvable-refs 5,
+    :questions 5,
+    :open-questions 1}
+   {:id "M-action-cost-modelling",
+    :unresolvable-refs 5,
+    :questions 13,
+    :open-questions 1}
+   {:id "M-differentiable-code",
+    :unresolvable-refs 4,
+    :questions 8,
+    :open-questions 2}
+   {:id "M-war-machine-wiring",
+    :unresolvable-refs 4,
+    :questions 15,
+    :open-questions 1}
+   {:id "M-autoclock-in",
+    :unresolvable-refs 4,
+    :questions 5,
+    :open-questions 1}]},
+ :as-of "2026-09-03",
+ :max-nats 2.0794415416798357,
+ :clamp-counts {false 123, nil 10},
+ :census {:hyperedges 374, :named 374, :unnamed 0, :phase-readable 313}}

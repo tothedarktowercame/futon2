@@ -1,0 +1,17 @@
+{:before
+ {:value {:central 0.2, :strategic 0.5, :doable 0.3},
+  :authority
+  "Joe, 2026-09-02 (zaif-harness runs/S3-declared-weights.edn); the 09-02 live records carry it",
+  :epistemic "absent; mission-value-weights defaults it to 0.0"},
+ :after
+ {:value
+  {:central 0.17, :strategic 0.425, :doable 0.255, :epistemic 0.15},
+  :authority
+  "DECLARED BY THIS STEP-THROUGH, not by Joe; the default flip is the J row",
+  :construction
+  "the three exploit weights * (1 - 0.15), epistemic 0.15",
+  :identity
+  "value_after = 0.85 * value_before + 0.15 * epistemic * (gates * decay); checked per row in 05-rank-moves.edn"},
+ :as-of "2026-09-03",
+ :carrier
+ "the :mission-value-weights opt (equivalently FUTON_WM_VALUE_WEIGHTS)"}

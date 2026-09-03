@@ -46,7 +46,7 @@
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
-            [futon2.aif.mission-c :as mission-c]
+            [futon2.aif.mission-c :as mission-c] [futon2.aif.mission-epistemic-value :as mission-epistemic]
             [futon2.aif.mission-gauges :as mission-gauges]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.morning-brief :as morning-brief]
@@ -2128,7 +2128,7 @@
 (def ^:private default-mission-value-weights
   {:central 0.25
    :strategic 0.45
-   :doable 0.30})
+   :doable 0.30 :epistemic 0.0})
 
 (def ^:private phase-doability
   {"head" 0.1
@@ -2215,7 +2215,7 @@
                        (some-> (System/getenv "FUTON_WM_VALUE_WEIGHTS")
                                clojure.edn/read-string)
                        default-mission-value-weights)
-        weights (select-keys configured [:central :strategic :doable])
+        weights (merge {:epistemic 0.0} (select-keys configured [:central :strategic :doable :epistemic]))
         values (vals weights)
         valid-values? (every? #(and (number? %)
                                     (<= 0.0 (double %) 1.0))
@@ -2223,7 +2223,7 @@
         total (when valid-values?
                 (reduce + 0.0 (map double values)))]
     (when-not (and (= (set (keys weights))
-                      #{:central :strategic :doable})
+                      #{:central :strategic :doable :epistemic})
                    valid-values?
                    (< (Math/abs (- 1.0 total)) 1.0e-9))
       (throw (ex-info "Mission-value weights must be non-negative and sum to 1"
@@ -2282,13 +2282,13 @@
   "Attach strategic value signals to mission and pattern candidates.
 
   All substrate reads happen here, at the judge boundary. Mission value blends
-  globally normalized centrality, active-cascade role, and phase doability,
-  then applies the completion/operator gates and repeated-non-progress decay.
-  Pattern value continues to use the batch-normalized retrieval score.
-
-  Optional opts support :strategy-cascade-path and :mission-value-weights. The
-  corresponding environment variables are FUTON_WM_STRATEGY_CASCADE and
-  FUTON_WM_VALUE_WEIGHTS (an EDN map)."
+  globally normalized centrality, active-cascade role, phase doability, and --
+  only when the declared :epistemic weight is positive -- the mission-grain
+  epistemic term (futon2.aif.mission-epistemic-value), then applies the
+  completion/operator gates and repeated-non-progress decay. Pattern value
+  continues to use the batch-normalized retrieval score. Optional opts support
+  :strategy-cascade-path and :mission-value-weights; the environment variables
+  are FUTON_WM_STRATEGY_CASCADE and FUTON_WM_VALUE_WEIGHTS (an EDN map)."
   ([candidates prev-trace-record]
    (enrich-candidates-with-mission-value candidates prev-trace-record {}))
   ([candidates prev-trace-record opts]
@@ -2298,8 +2298,8 @@
                           default-strategy-cascade-path)
          centrality (normalized-centrality-map (centrality-joint-map))
          strategic (cascade-role-map (read-strategy-cascade cascade-path))
-         mission-idx (mission-doc-index)
-         delta-cache (atom {})
+         mission-idx (mission-doc-index) delta-cache (atom {})
+         epistemic-idx (mission-epistemic/field-readings weights opts)
          with-value
          (mapv
           (fn [action]
@@ -2323,10 +2323,10 @@
                     doable (if operator-gated 0.0 phase-doable-value)
                     completion-gate (if (= "complete" phase) 0.0 1.0)
                     operator-gate-factor (if operator-gated 0.0 1.0)
-                    blended (+ (* (:central weights) central)
-                               (* (:strategic weights) strategic-value)
-                               (* (:doable weights) phase-doable-value))]
-                (cond-> (assoc action
+                    epi (mission-epistemic/record-for epistemic-idx mission phase)
+                    blended (+ (* (:central weights) central) (* (:strategic weights) strategic-value)
+                               (* (:doable weights) phase-doable-value) (* (:epistemic weights) (:epistemic epi 0.0)))]
+                (cond-> (assoc (merge action epi)
                                :central central
                                :strategic strategic-value
                                :doable doable

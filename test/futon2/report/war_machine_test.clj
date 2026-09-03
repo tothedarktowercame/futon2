@@ -14,6 +14,7 @@
             [futon2.aif.efe :as efe]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.mission-c :as mc]
+            [futon2.aif.mission-epistemic-value :as mev]
             [futon2.aif.mission-gauges :as gauges]
             [futon2.aif.observation :as observation]
             [futon2.aif.policy :as policy]
@@ -2245,3 +2246,129 @@
       (is (str/includes? md "**Tick focus:** M-zaif-harness-v1"))
       (is (str/includes? md "durable clock: M-wm-aif-policy-grain-compliance"))
       (is (not (str/includes? md "case: "))))))
+
+;; ---------------------------------------------------------------------------
+;; U22 -- the epistemic term of mission value. Declared input, default off.
+
+(def ^:private u22-mission-docs
+  "Three candidates the judge can read, plus the neighbourhood two of them
+   declare. M-surveyor is in MAP with ten cross-refs whose phase the judge
+   cannot read; M-builder is in INSTANTIATE with the same unread
+   neighbourhood; M-mapped is in MAP with nothing left to find."
+  (let [dark (mapv #(str "M-dark-" %) (range 10))]
+    (into [{:hx/endpoints ["repo-d/mission/surveyor"]
+            :hx/props {:mission/id "surveyor" :mission/phase "map"
+                       :mission/mtime "2026-01-01"
+                       :mission/cross-refs dark}}
+           {:hx/endpoints ["repo-d/mission/builder"]
+            :hx/props {:mission/id "builder" :mission/phase "instantiate"
+                       :mission/mtime "2026-01-01"
+                       :mission/cross-refs dark}}
+           {:hx/endpoints ["repo-d/mission/mapped"]
+            :hx/props {:mission/id "mapped" :mission/phase "map"
+                       :mission/mtime "2026-09-03"
+                       :mission/cross-refs ["M-builder"]}}]
+          (map (fn [id] {:hx/endpoints [(str "repo-d/mission/" id)]
+                         :hx/props {"mission/id" (str/replace id "M-" "")
+                                    "mission/mtime" "2026-09-03"}}))
+          dark)))
+
+(def ^:private u22-declared-weights
+  "DECLARED for this test only. The default is :epistemic 0.0; the flip is J."
+  {:central 0.20 :strategic 0.30 :doable 0.25 :epistemic 0.25})
+
+(defn- u22-enrich
+  [weights]
+  (with-redefs-fn
+    {#'wm/centrality-joint-map (fn [] {"M-surveyor" 0.0 "M-builder" 0.9
+                                       "M-mapped" 1.0})
+     #'wm/mission-doc-index (fn [] {"surveyor" {:endpoint "mission/surveyor"}
+                                    "builder" {:endpoint "mission/builder"}
+                                    "mapped" {:endpoint "mission/mapped"}})
+     #'wm/compute-delta-t-mission (fn [_] {:delta-T 0.0})
+     #'wm/read-strategy-cascade (fn [_] {:boxes [] :spine [] :terminals []})}
+    (fn []
+      (wm/enrich-candidates-with-mission-value
+       [{:type :advance-mission :target "M-surveyor"}
+        {:type :advance-mission :target "M-builder"}
+        {:type :advance-mission :target "M-mapped"}]
+       nil
+       (cond-> {:strategy-cascade-path "unused"
+                :epistemic-as-of (java.time.LocalDate/parse "2026-09-03")
+                :hyperedges-by-type-fn (fn [_] u22-mission-docs)}
+         weights (assoc :mission-value-weights weights))))))
+
+(defn- u22-rank
+  [entries id]
+  (->> entries
+       (sort-by (comp - :mission-value-factor))
+       (map :target)
+       vec
+       (#(inc (.indexOf ^java.util.List % id)))))
+
+(deftest the-epistemic-weight-defaults-to-zero-and-reads-nothing
+  (testing "the default weights carry the fourth key at zero"
+    (is (= {:central 0.25 :strategic 0.45 :doable 0.30 :epistemic 0.0}
+           @#'wm/default-mission-value-weights))
+    (is (= 1.0 (reduce + 0.0 (vals @#'wm/default-mission-value-weights)))))
+  (testing "a three-key weights map is still accepted, epistemic defaulted"
+    (is (= {:central 0.0 :strategic 0.0 :doable 1.0 :epistemic 0.0}
+           (#'wm/mission-value-weights
+            {:mission-value-weights {:central 0.0 :strategic 0.0 :doable 1.0}}))))
+  (testing "off, no epistemic field is attached and the value is the old blend"
+    (let [entries (u22-enrich nil)]
+      (is (every? #(and (nil? (:epistemic %)) (nil? (:epistemic-basis %)))
+                  entries))
+      ;; central 1.0 * 0.25 + doable 0.3 * 0.30 = 0.34 for M-mapped
+      (is (every? (fn [[entry expected]]
+                    (< (Math/abs (- (double (:mission-value-factor entry))
+                                    expected))
+                       1.0e-9))
+                  (map vector entries [0.09 0.315 0.34]))))))
+
+(deftest a-declared-epistemic-weight-moves-a-map-phase-mission-up
+  (let [before (u22-enrich nil)
+        after (u22-enrich u22-declared-weights)]
+    (is (= [3 2 1] (mapv #(u22-rank before %)
+                         ["M-surveyor" "M-builder" "M-mapped"]))
+        "the exploit-only blend puts the survey mission last")
+    (is (= [1 3 2] (mapv #(u22-rank after %)
+                         ["M-surveyor" "M-builder" "M-mapped"]))
+        "the survey mission takes rank 1 once the term is weighted")
+    (testing "for a stated reason, carried in the record"
+      (let [basis (->> after
+                       (filter #(= "M-surveyor" (:target %)))
+                       first
+                       :epistemic-basis)]
+        (is (= :measured (:status basis)))
+        (is (= "map" (:phase basis)))
+        (is (= 11 (:question-count basis)) "ten neighbours plus freshness")
+        (is (= 11 (:open-question-count basis)))
+        (is (true? (:clamped? basis)) "past the declared reference of ten")
+        (is (= 1.0 (:availability basis)))
+        (is (= :doability-phase-absent (:phase-agreement basis))
+            "the doability factor got no phase in this process; the epistemic
+             term read one, and the record says so rather than reconciling it")))))
+
+(deftest a-map-phase-with-nothing-unread-does-not-move
+  (let [after (u22-enrich u22-declared-weights)
+        mapped (first (filter #(= "M-mapped" (:target %)) after))]
+    (is (= "map" (get-in mapped [:epistemic-basis :phase])))
+    (is (zero? (:epistemic mapped))
+        "M-mapped is in MAP too; its neighbourhood is read and its doc is fresh")
+    (is (= 2 (u22-rank after "M-mapped"))
+        "it keeps its place ahead of M-builder on the exploit factors alone")))
+
+(deftest the-doability-prior-is-pinned-across-the-two-namespaces
+  (is (= @#'wm/phase-doability mev/phase-doability-prior)
+      "mission-epistemic-value reads its workable partition off this table"))
+
+(deftest weights-that-do-not-sum-to-one-are-refused
+  (is (thrown? clojure.lang.ExceptionInfo
+               (#'wm/mission-value-weights
+                {:mission-value-weights {:central 0.25 :strategic 0.45
+                                         :doable 0.30 :epistemic 0.20}})))
+  (is (thrown? clojure.lang.ExceptionInfo
+               (#'wm/mission-value-weights
+                {:mission-value-weights {:central 0.20 :strategic 0.35
+                                         :doable 0.25 :epistemic -0.20}}))))
