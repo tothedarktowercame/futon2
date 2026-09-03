@@ -1,8 +1,10 @@
 # U11 — actand-indexed world-model source for :task-belief (design v1)
 
 Date: 2026-09-03. Author: claude-2 (design lead per the 2026-09-02 joint-pass
-agreement; claude-1 reviews with wm-side constraints). Status: DRAFT for
-claude-1 review. Inputs: `runs/U11-reading-map-v1.md` (U11a, reviewed),
+agreement; claude-1 reviews with wm-side constraints). Status: REVIEWED by
+claude-1 (bellback invoke-1788432100206, pass with conditions); amendments
+below marked [A1]-[A3] are those conditions applied. Registry entry lands
+wm-side as their U33. Inputs: `runs/U11-reading-map-v1.md` (U11a, reviewed),
 `wm-contract/DESIGN-c-vector.md` §5–§7, D8a/D8b (the task-belief seam),
 Z1's promised table (M-zaif-harness.md:187-194).
 
@@ -27,6 +29,15 @@ by their sharing the refusal constructor and provenance shape below.
 A (grain, actand, action) triple with no typed source is
 **`:q-actand/no-typed-source`** — a typed constructor, not an empty density
 and not a uniform prior.
+
+[A1] (claude-1 review condition) Shared constructors and provenance shape are
+implementation sharing; the identity claim becomes CONTRACT sharing through
+**one record schema (`q-actand-record`) and one validator test that both
+grain instantiations must pass** — a divergence in either lane fails the one
+shared test instead of drifting silently. This is part of U11b's acceptance:
+the schema + validator land with the table, the `:arm-session` instantiation
+passes it immediately, and the `:mission` instantiation cites the same test
+when it lands.
 
 ## 2. Provenance discipline (the D8b seam is the enforcement point)
 
@@ -117,6 +128,15 @@ the act-value source:
   source), provenance coverage (fraction of act-values carrying record-ids),
   and a planted sanity field: a fixture where all outcomes read satisfied
   must drive the arm's value to its floor.
+- [A2a] **Ordering probe** (restored rider): distinct-count plus the floor
+  plant is noise-fakeable — an arm emitting hash-noise beats "1 distinct"
+  trivially. Per arm and corpus, plant two inputs differing in exactly one
+  known-direction field and require the arm to ORDER them correctly; a
+  pass/fail column beside the headline. Discrimination = distinct values AND
+  correct ordering on the planted pair.
+- [A2b] **Digest stability as a counted observable** (restored rider):
+  determinism is not asserted in prose but counted per row — same
+  `:inputs-digest` ⇒ same act-value; violations counted beside refusals.
 - Deterministic from record fields alone; no live JVM reads.
 
 ## 7. Live-shaped demonstration (one, pinned, default off)
@@ -136,8 +156,13 @@ remains off; the flip rides the J-gate queue with its own census.
 
 No arm ruling (the comparison produces numbers; Joe rules). No flip. No arm-C
 build (S6(a)/wm U23 owns it). No registry edit by this lane — the §3 entry
-lands via claude-1's review. No new persistence: the table materialises from
-tracked records on demand.
+lands via claude-1's wm row U33. No new persistence: the table materialises
+from tracked records on demand.
+
+[A3] Forward-pointer (not v1 work): when any arm's output eventually meets a
+C inside one G, the U17 nonnegativity property and the
+typed-absence-for-missing-ambiguity rule apply AT THAT COMPOSITION SEAM —
+recorded here so clause (c) is not rediscovered there later.
 
 ## Build sequence after review (one file / one behaviour each)
 
