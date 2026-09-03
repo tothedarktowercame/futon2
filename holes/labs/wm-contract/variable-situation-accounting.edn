@@ -17,7 +17,9 @@
    :closed-by-record-with-witness
    :proven-against-pinned-source],
   :pointer-status [:resolves :drifted],
-  :row-source [:contract-declaration :glossary-paragraph]},
+  :row-source [:contract-declaration :glossary-paragraph],
+  :closability [:pre-run-closable :run-gated],
+  :readiness [:not-ready :contested :witnessed-and-held-open]},
  :rows
  [{:name "Pattern",
    :area :demo,
@@ -744,62 +746,94 @@
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "C",
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "C",
+   :basis
+   "The DESIGN-c-vector.md §5 split (C_int / C_mis) is an owner amendment (P-validated-R5 §2a); nothing in it needs a tick. The refusal's ground still holds as measured: U12 found one risk_mis value across all 133 mission actions and all three 2026-09-02 records :absent.",
+   :readiness :not-ready,
+   :content-status :open-hole,
    :area :preferences,
-   :owner "P-validated-R5 §2a",
+   :closability :pre-run-closable,
+   :owner "P-validated-R5 §2a"}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "nonDegenerateAblationLaw",
+   :basis
+   "Evidence complete twice over -- Holes.lean:217 proves the pinned instance and checks/ablation_exact_dyadic_witness.clj passes with a rejecting negative control -- yet mathlib4 86186c3744 moved it mkClosed -> mkHole in the SAME commit that added the proof. Closing it would reverse the author's decision on no new evidence. Raised as :U27a.",
+   :readiness :contested,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "nonDegenerateAblationLaw",
    :area :demo,
-   :owner "P-validated-R5 §2a′",
+   :closability :pre-run-closable,
+   :owner "P-validated-R5 §2a′"}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "find",
+   :basis
+   "A standing implementation refusal; an owner ruling closes it, no record can.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "find",
    :area :demo,
-   :owner "P-validated-R5 §3e find",
+   :closability :pre-run-closable,
+   :owner "P-validated-R5 §3e find"}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "findF1Containment",
+   :basis
+   "The 2026-08-31 scope amendment narrowed it to the recorded-row invariant, but the pinned FindReceiptRow is not in Lean: the name occurs at its definition and its registry row only. Closing means transcribing the row and proving by decide.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "findF1Containment",
    :area :demo,
-   :owner "P-validated-R5 §3e F1",
+   :closability :pre-run-closable,
+   :owner "P-validated-R5 §3e F1"}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "findF2Receipted",
+   :basis
+   "As findF1Containment: no Lean value instantiates the narrowed predicate.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "findF2Receipted",
    :area :demo,
-   :owner "P-validated-R5 §3e F2",
+   :closability :pre-run-closable,
+   :owner "P-validated-R5 §3e F2"}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "findF3NonSelfCertifying",
+   :basis
+   "As findF1Containment: no Lean value instantiates the narrowed predicate.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "findF3NonSelfCertifying",
    :area :demo,
-   :owner "P-validated-R5 §3e F3",
+   :closability :pre-run-closable,
+   :owner "P-validated-R5 §3e F3"}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "findF4Falsifiable",
+   :basis
+   "As findF1Containment: no Lean value instantiates the narrowed predicate.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "findF4Falsifiable",
    :area :demo,
-   :owner "P-validated-R5 §3e F4",
+   :closability :pre-run-closable,
+   :owner "P-validated-R5 §3e F4"}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "organise",
+   :basis
+   "The declaration names its own gate: whether the refusal weakens to definable is LA2's to decide from a running policy-grain rule. That running is checks/playout_snatch.clj, not a tick.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "organise",
    :area :demo,
-   :owner "P-validated-R5 §3e organise",
-   :row-source :contract-declaration,
-   :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+   :closability :pre-run-closable,
+   :owner "P-validated-R5 §3e organise"}
   {:name "r9VerdictConsultsChecker",
    :area :records,
    :owner "P-R9 §solved 3",
@@ -877,27 +911,45 @@
    :content-status :proven-against-pinned-source,
    :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "preferenceStackLiveRecorded",
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "preferenceStackLiveRecorded",
+   :basis
+   "The claim quantifies over running instances. The C_int half is on all three 2026-09-02 records; mission-c-readback occurs zero times in wm-trace-2026-09-02.edn. Whether the C_mis half would CLOSE it is unsettled: the Lean docstring says PERMANENT (C114) and DESIGN-c-vector.md door 7 says close-by-record.",
+   :readiness :not-ready,
+   :content-status :open-hole,
    :area :preferences,
+   :closability :run-gated,
    :owner "P-R19-preferences-open §gate",
+   :runtime-evidence
+   "A trace record carrying mission-c criteria records beside its :preference-stack -- a tick whose mission-c-readback is neither :no-active-clock nor :no-measurable-criteria."}
+  {:pointer-status :drifted,
+   :pointer-detail {:reason :owner-does-not-name-record},
    :row-source :contract-declaration,
+   :name "wmRunsOnce",
+   :basis
+   "Run-gated here does NOT mean awaiting a run. The witness passes; the hole stays open because the Lean proposition is world-level and C114 declined to narrow it to a pinned receipt.",
+   :readiness :witnessed-and-held-open,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "wmRunsOnce",
    :area :run,
+   :closability :run-gated,
    :owner "Joe 2026-08-31 · run-at-least-once",
+   :runtime-evidence
+   "A completed tick leaving a TickRunRecord. IT EXISTS -- the pinned 2026-08-30 receipt, three 2026-09-02 receipts, four more from the S4 stage run."}
+  {:pointer-status :drifted,
+   :pointer-detail {:reason :owner-does-not-name-record},
    :row-source :contract-declaration,
+   :name "wmRunConformsToWiring",
+   :basis
+   "The topology to judge against has not been re-synced -- :U29 and :U31 are both open -- and the 2026-09-02 receipts still read 6 of 9 hops unmapped against 21 drawn edges, as 2026-08-30 did.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :drifted,
-   :pointer-detail {:reason :owner-does-not-name-record}}
-  {:name "wmRunConformsToWiring",
    :area :run,
+   :closability :run-gated,
    :owner "Joe 2026-08-31 · organisation evidence",
-   :row-source :contract-declaration,
-   :content-status :open-hole,
-   :pointer-status :drifted,
-   :pointer-detail {:reason :owner-does-not-name-record}}
+   :runtime-evidence
+   "TN §11 R2's run: ~20 shadow ticks on current code, records carrying the route, judged by R3 against the re-synced topology."}
   {:name "enactedActionEqualsSelected",
    :area :run,
    :owner
@@ -906,36 +958,58 @@
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "enactedEqualsSelectedWhenRankOneGated",
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "enactedEqualsSelectedWhenRankOneGated",
+   :basis
+   "The antecedent has never occurred on record, and no record since the pin carries the enactment half at all: :realized-outcome occurs 0 times in the 09-01, 09-02 and S4 traces. The S-stage runs are shadow runs, so they cannot produce it by construction.",
+   :readiness :not-ready,
+   :content-status :open-hole,
    :area :run,
+   :closability :run-gated,
    :owner "wm-organization · TN-edge-review worklist H1b",
+   :runtime-evidence
+   "A record joining a rank-1 selection that passes its OWN act gate to the enacted action."}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "dirichletAccumulationImportAbsent",
+   :basis
+   "An absence over code paths, settled by reading the tree; a run could only falsify it. The provenance walk is done and written down (TN §9a) but not bound: the name does not occur in checks/witness-registry.edn, so there is no check, no fixture and no rejecting control.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "dirichletAccumulationImportAbsent",
    :area :learning,
-   :owner "wm-organization · TN-edge-review worklist H2",
+   :closability :pre-run-closable,
+   :owner "wm-organization · TN-edge-review worklist H2"}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "policyPrecisionIsGammaFromBeta",
+   :basis
+   "The wiring exists and the record does not: S3 is a replay, its one live tau = beta tick ran under a write-suppressing preflight, and all 18 :tau-source values in wm-trace-2026-09-01.edn are :selection-gain-only.",
+   :readiness :not-ready,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "policyPrecisionIsGammaFromBeta",
    :area :policy,
+   :closability :run-gated,
    :owner
    "wm-organization · TN-edge-review worklist H3 (Joe's J1 ruling)",
+   :runtime-evidence
+   "A PERSISTED record carrying :tau with :tau-source naming carry-beta's :beta-source, from a tick under FUTON_WM_TAU_MODE=variational-beta-gamma with writes enabled."}
+  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "policyPosteriorImportsPolicyF",
+   :basis
+   "The only hole whose named observation is already on persisted record. Its disposition is contested because the declaration's evidence and falsifier fields name the SAME observation, so one reading closes it by witness and the other refutes it -- which under this contract's own precedent (mkRefutedByRecord) is also a close. FUTON_WM_FPI_POSTERIOR is default-off, which neither field mentions. Raised as :U27b.",
+   :readiness :contested,
    :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "policyPosteriorImportsPolicyF",
    :area :policy,
+   :closability :run-gated,
    :owner
    "wm-organization · TN-edge-review worklist H4 (Joe's J2 ruling)",
-   :row-source :contract-declaration,
-   :content-status :open-hole,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+   :runtime-evidence
+   "A record whose Q(pi) carries the per-policy F term. IT EXISTS: runs/2026-09-01-s4/wm-trace-s4.edn, 3 of 4 ticks with :f-pi-posterior :applied? true."}
   {:pointer-status :resolves,
    :witness
    ["futon2 src/futon2/aif/observation.clj:11 observation-channels"
@@ -1025,18 +1099,24 @@
    :content-status :closed-by-record-with-witness,
    :area :assurance,
    :owner "sec-glossary.tex paragraph:No self-certification"}
-  {:name "Strategic mission selection",
-   :area :policy,
-   :content-status :open-hole,
-   :witness-note
-   "PROMOTED from :named-only (NOTE-glossary-only-triage.md disposition 8): the paragraph at sec-glossary.tex:80 calls the live three-factor additive mission value \"surrogates for outer-loop structure that the implementation has not yet represented\" and specs the principled layer (reason-bearing policy support; predicted mission outcomes in a forward model and G_S; proposal potentials; separate habit E_S; hierarchical Q(pi_S), Q(pi_T|pi_S)). Held open by the mission record above; the current additive model is futon2/holes/M-wm-three-factor-mission-value.md and the dark schema kernel is futon2/src/futon2/aif/mission_control_graph.clj. Cross-link: the risk term of G_S is KL(Q(o|pi) || C_mis), so U11-U13 already build a component (DESIGN-c-vector.md 3). This is a GLOSSARY-side hole, not a contract declaration: it does not appear in holes-contract.json and is therefore reported outside the declaration columns until a declaration is minted for it.",
-   :row-source :glossary-paragraph,
-   :owner "futon2/holes/missions/M-wm-strategic-mission-selection.md",
-   :pointer-status :resolves,
+  {:pointer-status :resolves,
    :pointer-detail
    {:resolution :record-owner,
     :resolved-path
-    "futon2/holes/missions/M-wm-strategic-mission-selection.md"}}
+    "futon2/holes/missions/M-wm-strategic-mission-selection.md"},
+   :row-source :glossary-paragraph,
+   :witness-note
+   "PROMOTED from :named-only (NOTE-glossary-only-triage.md disposition 8): the paragraph at sec-glossary.tex:80 calls the live three-factor additive mission value \"surrogates for outer-loop structure that the implementation has not yet represented\" and specs the principled layer (reason-bearing policy support; predicted mission outcomes in a forward model and G_S; proposal potentials; separate habit E_S; hierarchical Q(pi_S), Q(pi_T|pi_S)). Held open by the mission record above; the current additive model is futon2/holes/M-wm-three-factor-mission-value.md and the dark schema kernel is futon2/src/futon2/aif/mission_control_graph.clj. Cross-link: the risk term of G_S is KL(Q(o|pi) || C_mis), so U11-U13 already build a component (DESIGN-c-vector.md 3). This is a GLOSSARY-side hole, not a contract declaration: it does not appear in holes-contract.json and is therefore reported outside the declaration columns until a declaration is minted for it.",
+   :name "Strategic mission selection",
+   :basis
+   "sec-glossary.tex:80's claim is about what the implementation represents on the live path, so a unit test of the layer would not discharge it. Glossary-side, not a contract declaration.",
+   :readiness :not-ready,
+   :content-status :open-hole,
+   :area :policy,
+   :closability :run-gated,
+   :owner "futon2/holes/missions/M-wm-strategic-mission-selection.md",
+   :runtime-evidence
+   "A record in which the mission value carried is the principled one -- G_S over forward-model predicted mission outcomes with its own habit E_S -- rather than the three-factor additive surrogate."}
   {:pointer-status :resolves,
    :witness
    ["futon2 src/futon2/aif/full_loop_cohort.clj:397 (emits the :post-preregistration/cancelled semantic stratum, with its reason and attempt list)"
@@ -1074,4 +1154,6 @@
   :pointer {:drifted 22, :resolves 111},
   :row-source {:contract-declaration 124, :glossary-paragraph 9},
   :glossary-content
-  {:closed-by-record-with-witness 7, :framing 1, :open-hole 1}}}
+  {:closed-by-record-with-witness 7, :framing 1, :open-hole 1},
+  :closability {:pre-run-closable 9, :run-gated 7},
+  :declaration-closability {:pre-run-closable 9, :run-gated 6}}}

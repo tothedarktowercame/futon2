@@ -227,6 +227,149 @@
          "executed queries and their results, so the shared-substrate claim of "
          "sec-glossary.tex:86 is witnessed by a run rather than by prose.")}])
 
+;; U27's fence typing (Joe 2026-09-03, the visibility amendment on :U27): every
+;; row whose :content-status is :open-hole carries how it could be closed, so
+;; :U34 can draw a line in Box 2 between what is buildable now and what waits on
+;; the machine. The axis is exactly one question -- does closing this need
+;; evidence from a live War Machine tick? -- and it is NEITHER a difficulty
+;; ordering NOR a readiness ordering. wmRunsOnce is :run-gated with its run
+;; evidence already in hand (it stays open because the Lean proposition is
+;; world-level, C114), and C is :pre-run-closable and blocked on a scope
+;; amendment nobody has made. :readiness is the separate axis and is what a
+;; reader should consult before concluding anything from the fence side.
+;;
+;; DECLARED, not derived: the contract carries no field from which this could be
+;; computed, so each entry is an authored reading of that hole's declared close
+;; path, evidenced row by row in
+;; holes/labs/wm-contract/runs/U27-hole-closability/audit.edn (16 rows, 57
+;; pointers, all resolving). The generator refuses to emit if an :open-hole row
+;; has no entry -- U34's render fails on an untyped hole and this is the same
+;; rule one step upstream.
+(def hole-closability
+  {"C"
+   {:closability :pre-run-closable :readiness :not-ready
+    :basis (str "The DESIGN-c-vector.md §5 split (C_int / C_mis) is an owner "
+                "amendment (P-validated-R5 §2a); nothing in it needs a tick. "
+                "The refusal's ground still holds as measured: U12 found one "
+                "risk_mis value across all 133 mission actions and all three "
+                "2026-09-02 records :absent.")}
+   "nonDegenerateAblationLaw"
+   {:closability :pre-run-closable :readiness :contested
+    :basis (str "Evidence complete twice over -- Holes.lean:217 proves the "
+                "pinned instance and checks/ablation_exact_dyadic_witness.clj "
+                "passes with a rejecting negative control -- yet mathlib4 "
+                "86186c3744 moved it mkClosed -> mkHole in the SAME commit "
+                "that added the proof. Closing it would reverse the author's "
+                "decision on no new evidence. Raised as :U27a.")}
+   "find"
+   {:closability :pre-run-closable :readiness :not-ready
+    :basis "A standing implementation refusal; an owner ruling closes it, no record can."}
+   "findF1Containment"
+   {:closability :pre-run-closable :readiness :not-ready
+    :basis (str "The 2026-08-31 scope amendment narrowed it to the recorded-row "
+                "invariant, but the pinned FindReceiptRow is not in Lean: the "
+                "name occurs at its definition and its registry row only. "
+                "Closing means transcribing the row and proving by decide.")}
+   "findF2Receipted"
+   {:closability :pre-run-closable :readiness :not-ready
+    :basis "As findF1Containment: no Lean value instantiates the narrowed predicate."}
+   "findF3NonSelfCertifying"
+   {:closability :pre-run-closable :readiness :not-ready
+    :basis "As findF1Containment: no Lean value instantiates the narrowed predicate."}
+   "findF4Falsifiable"
+   {:closability :pre-run-closable :readiness :not-ready
+    :basis "As findF1Containment: no Lean value instantiates the narrowed predicate."}
+   "organise"
+   {:closability :pre-run-closable :readiness :not-ready
+    :basis (str "The declaration names its own gate: whether the refusal weakens "
+                "to definable is LA2's to decide from a running policy-grain "
+                "rule. That running is checks/playout_snatch.clj, not a tick.")}
+   "dirichletAccumulationImportAbsent"
+   {:closability :pre-run-closable :readiness :not-ready
+    :basis (str "An absence over code paths, settled by reading the tree; a run "
+                "could only falsify it. The provenance walk is done and written "
+                "down (TN §9a) but not bound: the name does not occur in "
+                "checks/witness-registry.edn, so there is no check, no fixture "
+                "and no rejecting control.")}
+   "preferenceStackLiveRecorded"
+   {:closability :run-gated :readiness :not-ready
+    :runtime-evidence (str "A trace record carrying mission-c criteria records "
+                           "beside its :preference-stack -- a tick whose "
+                           "mission-c-readback is neither :no-active-clock nor "
+                           ":no-measurable-criteria.")
+    :basis (str "The claim quantifies over running instances. The C_int half is "
+                "on all three 2026-09-02 records; mission-c-readback occurs zero "
+                "times in wm-trace-2026-09-02.edn. Whether the C_mis half would "
+                "CLOSE it is unsettled: the Lean docstring says PERMANENT (C114) "
+                "and DESIGN-c-vector.md door 7 says close-by-record.")}
+   "wmRunsOnce"
+   {:closability :run-gated :readiness :witnessed-and-held-open
+    :runtime-evidence (str "A completed tick leaving a TickRunRecord. IT EXISTS "
+                           "-- the pinned 2026-08-30 receipt, three 2026-09-02 "
+                           "receipts, four more from the S4 stage run.")
+    :basis (str "Run-gated here does NOT mean awaiting a run. The witness passes; "
+                "the hole stays open because the Lean proposition is world-level "
+                "and C114 declined to narrow it to a pinned receipt.")}
+   "wmRunConformsToWiring"
+   {:closability :run-gated :readiness :not-ready
+    :runtime-evidence (str "TN §11 R2's run: ~20 shadow ticks on current code, "
+                           "records carrying the route, judged by R3 against the "
+                           "re-synced topology.")
+    :basis (str "The topology to judge against has not been re-synced -- :U29 and "
+                ":U31 are both open -- and the 2026-09-02 receipts still read 6 "
+                "of 9 hops unmapped against 21 drawn edges, as 2026-08-30 did.")}
+   "enactedEqualsSelectedWhenRankOneGated"
+   {:closability :run-gated :readiness :not-ready
+    :runtime-evidence (str "A record joining a rank-1 selection that passes its "
+                           "OWN act gate to the enacted action.")
+    :basis (str "The antecedent has never occurred on record, and no record since "
+                "the pin carries the enactment half at all: :realized-outcome "
+                "occurs 0 times in the 09-01, 09-02 and S4 traces. The S-stage "
+                "runs are shadow runs, so they cannot produce it by construction.")}
+   "policyPrecisionIsGammaFromBeta"
+   {:closability :run-gated :readiness :not-ready
+    :runtime-evidence (str "A PERSISTED record carrying :tau with :tau-source "
+                           "naming carry-beta's :beta-source, from a tick under "
+                           "FUTON_WM_TAU_MODE=variational-beta-gamma with writes "
+                           "enabled.")
+    :basis (str "The wiring exists and the record does not: S3 is a replay, its "
+                "one live tau = beta tick ran under a write-suppressing "
+                "preflight, and all 18 :tau-source values in "
+                "wm-trace-2026-09-01.edn are :selection-gain-only.")}
+   "policyPosteriorImportsPolicyF"
+   {:closability :run-gated :readiness :contested
+    :runtime-evidence (str "A record whose Q(pi) carries the per-policy F term. "
+                           "IT EXISTS: runs/2026-09-01-s4/wm-trace-s4.edn, 3 of "
+                           "4 ticks with :f-pi-posterior :applied? true.")
+    :basis (str "The only hole whose named observation is already on persisted "
+                "record. Its disposition is contested because the declaration's "
+                "evidence and falsifier fields name the SAME observation, so one "
+                "reading closes it by witness and the other refutes it -- which "
+                "under this contract's own precedent (mkRefutedByRecord) is also "
+                "a close. FUTON_WM_FPI_POSTERIOR is default-off, which neither "
+                "field mentions. Raised as :U27b.")}
+   "Strategic mission selection"
+   {:closability :run-gated :readiness :not-ready
+    :runtime-evidence (str "A record in which the mission value carried is the "
+                           "principled one -- G_S over forward-model predicted "
+                           "mission outcomes with its own habit E_S -- rather "
+                           "than the three-factor additive surrogate.")
+    :basis (str "sec-glossary.tex:80's claim is about what the implementation "
+                "represents on the live path, so a unit test of the layer would "
+                "not discharge it. Glossary-side, not a contract declaration.")}})
+
+(defn with-closability
+  "Attach U27's fence typing to an :open-hole row. Fail-closed: an open hole with
+   no declared typing is an error here rather than an untyped row that :U34 would
+   have to refuse downstream."
+  [row]
+  (if (= :open-hole (:content-status row))
+    (if-let [t (hole-closability (:name row))]
+      (merge row t)
+      (throw (ex-info (str "open hole carries no U27 closability typing: " (:name row))
+                      {:error :untyped-open-hole :name (:name row)})))
+    row))
+
 (defn sha256 [file]
   (let [d (MessageDigest/getInstance "SHA-256")]
     (.update d (.getBytes (slurp file) "UTF-8"))
@@ -306,11 +449,12 @@
         (mapv (fn [d]
                 (let [row {:name (:name d) :area (area-for d) :owner (:owner d)}
                       pointer (pointer-status (assoc d :area (:area row)))]
-                  (merge row
-                         {:row-source :contract-declaration
-                          :content-status (content-status d (bindings (:name d)))
-                          :pointer-status (:status pointer)
-                          :pointer-detail (dissoc pointer :status)})))
+                  (with-closability
+                    (merge row
+                           {:row-source :contract-declaration
+                            :content-status (content-status d (bindings (:name d)))
+                            :pointer-status (:status pointer)
+                            :pointer-detail (dissoc pointer :status)}))))
               (:declarations contract))
         ;; A glossary row's owner is the paragraph name unless U14 gave it a
         ;; record owner (the promoted hole); a record owner resolves only if
@@ -327,11 +471,12 @@
                                         {:reason :record-path-absent :resolved-path record-owner
                                          :status :drifted})
                                       {:resolution :paragraph-name :status :resolves})]
-                        (assoc (dissoc g :owner)
-                               :row-source :glossary-paragraph
-                               :owner owner
-                               :pointer-status (:status pointer)
-                               :pointer-detail (dissoc pointer :status))))
+                        (with-closability
+                          (assoc (dissoc g :owner)
+                                 :row-source :glossary-paragraph
+                                 :owner owner
+                                 :pointer-status (:status pointer)
+                                 :pointer-detail (dissoc pointer :status)))))
                     glossary-rows)
         rows (vec (concat declared named))]
     {:schema :wm/variable-situation-accounting-v1
@@ -348,7 +493,11 @@
                              :closed-by-record-negative-space
                              :closed-by-record-with-witness :proven-against-pinned-source]
             :pointer-status [:resolves :drifted]
-            :row-source [:contract-declaration :glossary-paragraph]}
+            :row-source [:contract-declaration :glossary-paragraph]
+            ;; U27's fence axis. Present on :open-hole rows only, and total over
+            ;; them by construction (with-closability throws otherwise).
+            :closability [:pre-run-closable :run-gated]
+            :readiness [:not-ready :contested :witnessed-and-held-open]}
      :rows rows
      :counts {:rows (count rows)
               :content (into (sorted-map) (frequencies (map :content-status rows)))
@@ -361,10 +510,44 @@
               :glossary-content
               (into (sorted-map)
                     (frequencies (map :content-status
-                                      (filter #(= :glossary-paragraph (:row-source %)) rows))))}})))
+                                      (filter #(= :glossary-paragraph (:row-source %)) rows))))
+              ;; U34 reads these two: the Total row's fence split counts the
+              ;; DECLARATION holes (the column it sits in), while :closability
+              ;; covers every open hole including the glossary-side one.
+              :closability
+              (into (sorted-map)
+                    (frequencies (keep :closability rows)))
+              :declaration-closability
+              (into (sorted-map)
+                    (frequencies (keep :closability
+                                       (filter #(= :contract-declaration (:row-source %)) rows))))}})))
+
+;; U27 negative control: an open hole with no fence typing must stop the
+;; generator, not emit an untyped row for :U34 to refuse downstream. Planted
+;; with a one-declaration contract whose hole name is in no table.
+(defn negative-untyped! []
+  (try
+    (build-registry
+     {:source {:git-sha "planted"}
+      :declarations [{:name "plantedUntypedHole" :kind "hole"
+                      :owner "P-validated-R5 §2a" :holder "by-record"
+                      :decided "2026-09-03"}]})
+    (binding [*out* *err*]
+      (println "variable-situation-accounting: FAIL untyped open hole accepted"))
+    (System/exit 2)
+    (catch clojure.lang.ExceptionInfo e
+      (if (= :untyped-open-hole (:error (ex-data e)))
+        (do (println "variable-situation-accounting: PASS untyped open hole rejected"
+                     (pr-str (ex-data e)))
+            (System/exit 0))
+        (do (binding [*out* *err*]
+              (println "variable-situation-accounting: FAIL wrong rejection" (ex-data e)))
+            (System/exit 2))))))
 
 (let [check? (some #{"--check"} *command-line-args*)
       empty-negative? (some #{"--negative-empty"} *command-line-args*)
+      untyped-negative? (some #{"--negative-untyped"} *command-line-args*)
+      _ (when untyped-negative? (negative-untyped!))
       value (if empty-negative?
               (try
                 (build-registry {:source {} :declarations []})
