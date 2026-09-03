@@ -135,3 +135,20 @@ and promotion-gate path.
 All four proposed implementation packets require claude-1 review because they
 are claude-1-side orchestration tooling, despite carrying zero APM/WM seam
 flags under the narrower receipt/gate definition above.
+
+## Amendment 2026-09-03 (post-U14e-1 stop; claude-1 ruling on record)
+
+There is NO legacy record population at any of the four sites: the evidence
+store returns `{:count 0 :checked 0}` for tickle-scoped AND single-tag
+queries across all three families (verified independently by codex-22,
+claude-2, claude-1; mechanism: the work queues take `evidence-store` as a
+caller-supplied parameter with no HTTP wiring anywhere, and `emit!` no-ops
+silently on nil — the fourth silent-degrade instance this campaign). The
+dated-additive window at these sites therefore protects code-path
+compatibility only, and the first-ever persisted records from these flows
+will be born speaking the checked-handoff vocabulary. Stated here so nobody
+later wonders where the legacy population went: there never was one, and the
+absence queries prove it. Condition 2 (live pin) is amended per site to the
+PAIR: (a) the dated absence queries verbatim (both tag forms), (b) an
+in-test byte-capture of the unmodified emission on a fixture. Wiring the
+store at the callers is wm-side row U38, independent of this migration.
