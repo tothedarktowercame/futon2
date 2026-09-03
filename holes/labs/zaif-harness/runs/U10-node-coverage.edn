@@ -82,7 +82,7 @@
     :evidence ["src/futon2/aif/forward_model.clj:25"
                "test/futon2/aif/zaif_full_loop_test.clj:152"
                "../futon3c/src/futon3c/agents/zaif_controller.clj:105"]
-    :note "WM's forward model still rejects zaif arms. The zaif R4 test materialises U11's tracked arm-session Q_actand records, orders three arms through the production density-to-scalar bridge, and reverses the winner with an explicit density plant while retaining provenance."}
+    :note "WM's forward model still rejects zaif arms. The zaif R4 test materialises U11's tracked arm-session Q_actand records, orders three arms through the production density-to-scalar bridge, and reverses the winner with an explicit density plant while retaining provenance. The zaif half is what :spec-test :covered claims, over three of the four arms (:ask/:act/:retrieve have calibration groups, :yield has none). The WM half of R4 is still plant-driven: S7 re-grounded U6's R4 level and dispersion layers to 0a18c4f7-R8 values, but the channel placement and the per-arm delta stay planted because forward_model.clj:25-31 excludes all four zaif arms, and test/futon2/aif/zaif_full_loop_test.clj:539 remains that plant's negative control (S7 :blocked, moved to wm-contract U25)."}
    :gap nil
    :blocked-by []}
 
