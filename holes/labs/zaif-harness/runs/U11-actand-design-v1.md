@@ -244,3 +244,34 @@ with numbers instead of silence" (§4) applies to corpora too:
   produced 0 values (arm A over the mission fixtures, e.g.). The probe values
   are visibly planted and no headline number depends on them, but a per-corpus
   plant is what §6 [A2a] asked for and is not what U11e built.
+
+## [A5] The zero-support ladder (J-ruling 2026-09-03, registry efdc401)
+
+Ruled: case history wins — the calibration table IS the Q_actand source at
+:arm-session grain (A/B :too-weak-at-present, refusal counts kept; C the
+named future contender). Zero-support is a LADDER, not a refusal (Joe: "a
+refusal in our language is a protopattern... push a bit further... only if
+it can't get anywhere then give up"):
+
+- **Rung 1 — direct precedent**: the existing table lookup, unchanged.
+- **Rung 2 — constructive generalization**: for a group with zero support
+  for the target outcome, pool sessions over the DECLARED v1 KIN RELATION:
+  groups sharing the SAME ARM and the same correction-label (declared,
+  authored, revisable — same discipline as the arm warrant mapping [U11b]).
+  The result is marked `:constructed`, carries
+  `:derivation {:rule :v1-kin-pool :kin [<group keys>]}` and provenance =
+  the UNION of the kin records' ids — never passed off as observed.
+- **Rung 3 — typed refusal that mints**: only when the pooled support is
+  still zero for the target. The refusal MINTS a tension record through the
+  wm U41 schema (`DESIGN-tensions-as-patterns.md` §3, appended via
+  `u41_tension_ledger.bb`'s ledger, `:born-of :refused-prediction`) —
+  cross-cited, never forked.
+- The D8b finite gate stays beneath all rungs; the controller-consumption
+  flip stays J-gated, unchanged.
+
+Predicted (to be verified in-test, not pinned here): of the nine −∞
+sessions, the c-channel×:ask group (0/8) has kin gamma×:ask (18/28) →
+pooled 18/36 → constructed density 1/2 → bridge 0.0 (finite, honest
+coin-flip); the actand×:retrieve group (0/1) has no kin → rung 3 → the
+first tension record born of a refused prediction. One corpus exercises
+both rungs.
