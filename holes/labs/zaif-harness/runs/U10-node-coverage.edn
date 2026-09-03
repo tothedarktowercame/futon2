@@ -118,15 +118,22 @@
    :blocked-by []}
 
   {:node :R7
-   :spec-test :missing
-   :tests []
+   :spec-test :covered
+   :tests [{:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 35
+            :substrate :zaif :provenance :real-table
+            :record-id "801976e7-01c6-4e39-aada-27f620f7c2f1"}
+           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 53
+            :substrate :wm :provenance :real
+            :record-id "801976e7-01c6-4e39-aada-27f620f7c2f1"}]
    :shared-machinery
-   {:status :none
-    :evidence ["holes/labs/zaif-harness/worklist.edn:89"
-               "holes/labs/zaif-harness/worklist.edn:51"]
-    :note "No precision-table implementation or ordering assertion exists; S7 also records that the WM trace has no top-level precision field."}
-   :gap "No declared-mark versus lexical-guess precision test and no identified WM trace field."
-   :blocked-by [:U9 :S7]}
+   {:status :mapped-separate
+    :evidence ["holes/labs/zaif-harness/runs/U9-r7-precision-table.edn:1"
+               "holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/801976e7-R7.edn:1"
+               "../futon3c/test/futon3c/agents/zaif_inputs_test.clj:35"
+               "../futon3c/test/futon3c/agents/zaif_inputs_test.clj:53"]
+    :note "The U9 table keeps declared-mark and lexical-probe classification precision separate from WM inverse-variance precision. The tests prove the within-kind declared 1.0 > lexical 0.42 ordering and independently pin the recorded WM R7 present/absent channel inventory; they do not compare values across those two unit families."}
+   :gap nil
+   :blocked-by []}
 
   {:node :R8
    :spec-test :partial
