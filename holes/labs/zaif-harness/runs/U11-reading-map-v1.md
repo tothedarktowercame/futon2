@@ -34,6 +34,11 @@ a declared channel mapping. Sample live-derived fixture pin: run id
 `0a18c4f7-758e-400a-8223-9c52edf07450`, whose tracked R2 fixture records
 `:mission-health 0.023376623376623377` and `:support-coverage 0.6` at
 `futon2/holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/0a18c4f7-R2.edn`.
+For the calibration half, the exhaustive command
+`bb -e '(let [xs (clojure.edn/read-string (slurp "holes/labs/M-zaif-harness/calibration-sessions.edn")) ks #{:gap-count :stall-count :review-age :spinoff-pressure :coverage-pct :mu-sens :adjacent-missions}] (prn {:rows (count xs) :hits (count (filter #(some % ks) xs))}))'`
+printed `{:rows 114, :hits 0}`; its one-map output was not truncated. For the
+56-decision half, the bounded search and complete result counts are stated in
+the inventory below.
 
 ## B. Mission-head pragmatic value (mission-action grain)
 
