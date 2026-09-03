@@ -1,284 +1,376 @@
-;; TENSION LEDGER v1 -- the carrier proposed by DESIGN-tensions-as-patterns.md:86
-;; (section 3), implemented by worklist row :U41.
-;;
-;; WHAT THIS IS.  Three prose tensions live in a mission doc's **Carried
-;; tensions** sentence (futon2/holes/missions/M-zaif-harness-v1.md:35-39) and are
-;; already referenced BY NUMBER as premises by other rows.  This file is the same
-;; three, typed, so that "what is the machine carrying, and what has it learned"
-;; is a query rather than a grep chain.
-;;
-;; WHAT THIS IS NOT.  Not a ruling surface.  Rulings live in aif-equations.edn
-;; :choices and control-map-edges.edn :decisions, and Joe writes them.  A status
-;; here is a SCORE with pointers, and no status moved in the retrofit: all three
-;; seeds are :carried, which is what their evidence says today.  Nothing reads
-;; this file on the live path -- no tick, no selector, no weight (the U39 learning
-;; -feed containment, runs/U39-selection-retrospective/README.md:317-330, applies
-;; to this ledger too).
-;;
-;; APPEND-ONLY.  Tension records are never edited in place.  :tension/status is
-;; the status AT MINT and equals the type of that tension's mint event; the
-;; CURRENT status is the fold of :events (u41_tension_ledger.bb computes it and
-;; the validator refuses a record whose field claims otherwise).  That reading is
-;; a design judgement of this row, taken because it is the one that keeps section
-;; 3's field name AND its "never edits in place" discipline at the same time --
-;; and because U39's mint edge (README.md:265-288) writes :tension/status :carried
-;; at mint, so the mint record shape is consumed here unforked.
-{:ledger/id :wm-contract/tension-ledger
- :ledger/version "v1"
- :ledger/row :U41
- :ledger/written-by "claude-1, wm-edge lane, 2026-09-03"
- :ledger/implements "DESIGN-tensions-as-patterns.md:86-101 (section 3)"
- :ledger/read-by ["u41_tension_ledger.bb (validator, fold, birth-rule query)"
-                  "u23_cascade_catalog_reader.clj (the :tensions carrier)"]
-
- ;; The record shape, declared in data so the validator and the prose cannot
- ;; drift apart: u41_tension_ledger.bb reads THIS map, it does not hardcode a
- ;; second copy of the schema.
+{:ledger/read-by
+ ["u41_tension_ledger.bb (validator, fold, birth-rule query)"
+  "u23_cascade_catalog_reader.clj (the :tensions carrier)"],
+ :tensions
+ [#:tension{:id :zaif-v1/T1,
+            :status :carried,
+            :provenance
+            {:who "Joe",
+             :when "2026-09-02",
+             :how
+             "operator dictation in session, 2026-09-02, three exchanges (futon2/holes/missions/M-zaif-harness-v1.md:40)",
+             :pointers
+             ["futon2/holes/missions/M-zaif-harness-v1.md:35-36 (the statement)"
+              "futon2/holes/missions/M-zaif-harness-v1.md:122-125 (the same decision in lifecycle form)"
+              "futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:23 (R6 row: 'arms OPAQUE at the seam (U5) so the test survives arms → cascades')"
+              "futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:50-51 (cascade-grain arms are LA2/LA3's delivery; the U5 seam is the socket)"],
+             :retrofitted-by
+             {:row :U41, :by "claude-1", :at "2026-09-03"}},
+            :carried-by "M-zaif-harness-v1",
+            :resolution-path
+            "candidates stay opaque at the R6 seam (the U5 invariant), so a test names the node and not the candidate's insides and the arm→cascade migration is a type change rather than a rewrite",
+            :born-of :operator-dictation,
+            :statement-source
+            "futon2/holes/missions/M-zaif-harness-v1.md:35-36",
+            :poles
+            ["build arms as cascades now"
+             "defer arms->cascades to LA2/LA3"],
+            :resolution-key :defer-behind-an-opaque-seam,
+            :pattern-links [],
+            :statement
+            "arms→cascades is deliberately deferred to LA2/LA3 — the U5 opaque-candidate seam is the promise that deferral is cheap"}
+  #:tension{:id :zaif-v1/T2,
+            :status :carried,
+            :provenance
+            {:who "Joe",
+             :when "2026-09-02",
+             :how
+             "operator dictation in session, 2026-09-02, three exchanges (futon2/holes/missions/M-zaif-harness-v1.md:40)",
+             :pointers
+             ["futon2/holes/missions/M-zaif-harness-v1.md:36-38 (the statement)"
+              "futon2/holes/missions/M-zaif-harness-v1.md:128-131 (R17 ships as a named stub with Z3 as the only sanctioned change vector)"
+              "futon2/holes/M-zaif-harness.md:829-838 (ZU-2, 2026-07-13: at operator-attention-cost 0.65 the controller picks :act on 37/37 correction sessions; the sweep separates arms cleanly at 0.15)"],
+             :retrofitted-by
+             {:row :U41, :by "claude-1", :at "2026-09-03"}},
+            :carried-by "M-zaif-harness-v1",
+            :resolution-path
+            "Z3's preregistered A/B: Z3a records decide() twice per round from the same hydrated inputs, at the shipped 0.65 and the sweep 0.15, and no constant moves until the paired comparison says so",
+            :born-of :operator-dictation,
+            :statement-source
+            "futon2/holes/missions/M-zaif-harness-v1.md:36-38",
+            :poles
+            ["retune the constant now"
+             "measure first, under preregistration"],
+            :resolution-key
+            :preregistered-ab-before-any-constant-moves,
+            :pattern-links [],
+            :statement
+            "the ask arm is structurally unreachable at shipped constants (Z3's A/B is the sanctioned resolution, preregistration-gated)"}
+  #:tension{:id :zaif-v1/T3,
+            :status :carried,
+            :provenance
+            {:who "Joe",
+             :when "2026-09-02",
+             :how
+             "operator dictation in session, 2026-09-02, three exchanges (futon2/holes/missions/M-zaif-harness-v1.md:40)",
+             :pointers
+             ["futon2/holes/missions/M-zaif-harness-v1.md:38-39 (the statement)"
+              "futon2/holes/labs/zaif-harness/worklist.edn:302-308 (the :U10 row cites 'carried tension 3' as a premise: 'the microservices claim is a goal, and the matrix says per node whether it is cashed')"],
+             :retrofitted-by
+             {:row :U41, :by "claude-1", :at "2026-09-03"}},
+            :carried-by "M-zaif-harness-v1",
+            :resolution-path
+            "carried deliberately: a row cashes it by producing one production code path serving both the live zaif and WM uptakes of a node; until then the spec table is the mapping",
+            :born-of :operator-dictation,
+            :statement-source
+            "futon2/holes/missions/M-zaif-harness-v1.md:38-39",
+            :poles ["formal claim" "fertile analogy"],
+            :resolution-key :carried-until-a-row-cashes-it,
+            :pattern-links [],
+            :statement
+            "whether the lifecycle→node mapping below is a formal claim or a fertile analogy is itself carried forward, deliberately"}
+  #:tension{:id
+            [:refused-prediction
+             {:q-actand/refusal :q-actand/zero-support-after-kin-pool,
+              :grain :arm-session,
+              :actand {:route :actand, :correction-label true},
+              :action :retrieve,
+              :target :gold-judged,
+              :kin []}],
+            :status :carried,
+            :provenance
+            {:who "zaif rung-3 refusal mint",
+             :when "2026-09-03",
+             :record-ids ["e-b78c3d3b-a530-40c7-a333-ec4e6b258fe4"],
+             :pointers
+             ["futon2/holes/labs/zaif-harness/worklist.edn:248-251"
+              "futon3c/src/futon3c/agents/zaif_actand.clj"]},
+            :carried-by "M-zaif-harness-v1",
+            :statement-source-corrected-by
+            {:row :U28z-review,
+             :by "claude-1",
+             :at "2026-09-03",
+             :was
+             "futon2/holes/labs/zaif-harness/worklist.edn:248-251",
+             :why
+             "claude-2's reviewer: statement was pr-str of the refusal, not verbatim of the cited worklist lines. Ruling (a): retarget the source to the refusal itself -- verbatim-ness now holds against the TRUE source; the worklist lines stay in :provenance :pointers as context. Rule clarified + control 12 added in the same commit."},
+            :resolution-path nil,
+            :born-of :refused-prediction,
+            :statement-source
+            ":tension/refusal (in-record; the machine's typed refusal is the primary source for a machine-born tension)",
+            :minted-by {:row :U28z, :seat :codex-work},
+            :poles
+            ["make a finite prediction"
+             "preserve the finite-evidence gate"],
+            :pattern-links [],
+            :refusal
+            {:q-actand/refusal :q-actand/zero-support-after-kin-pool,
+             :grain :arm-session,
+             :actand {:route :actand, :correction-label true},
+             :action :retrieve,
+             :target :gold-judged,
+             :kin []},
+            :statement
+            "{:q-actand/refusal :q-actand/zero-support-after-kin-pool, :grain :arm-session, :actand {:route :actand, :correction-label true}, :action :retrieve, :target :gold-judged, :kin []}"}
+  #:tension{:id :programme/T5,
+            :status :carried,
+            :provenance
+            {:who "joe, dictated in session; claude-1 recorded",
+             :when "2026-09-03",
+             :record-ids [],
+             :pointers
+             ["futon2/holes/labs/wm-contract/NOTE-aif-spec-gap.md"]},
+            :carried-by "futon-2026-programme",
+            :resolution-path
+            "candidates named at mint, none chosen: (i) the spec is the engineering substitute for phylogenetic structure learning -- nature's generative model is implicit in the phenotype, engineering must write it down; (ii) a missing R-node whose job is acquiring/holding the model-of-itself (the operator has been serving as that node; the campaign mechanized pieces of it); (iii) R20 re-stated in formal-specification terms. PLoP revision and the Futon supplement thesis both read this tension.",
+            :born-of :operator-dictation,
+            :statement-source
+            "futon2/holes/labs/wm-contract/NOTE-aif-spec-gap.md section 3 (verbatim from the dictation blockquote)",
+            :minted-by {:row :NOTE-aif-spec-gap, :seat :claude-1},
+            :poles
+            ["active inference claims generality: a model of how any intelligent system works, and formal specifications do not exist in nature"
+             "the campaign's observation: without something approaching a formal specification, AIF was not usable in computational work -- the build held water only where the model was written down"],
+            :pattern-links [],
+            :statement
+            "there's a gap between the active inference framework's claims to generality and our observations that without a formal specification you're not able to use AIF in computational work"}],
+ :ledger/row :U41,
+ :events
+ [#:event{:at "2026-09-02",
+          :tension :zaif-v1/T1,
+          :by "Joe (operator dictation)",
+          :to-status :carried,
+          :note
+          "minted in prose on 2026-09-02; typed here on 2026-09-03 by row :U41 without changing the statement.",
+          :type :carried,
+          :evidence
+          ["futon2/holes/missions/M-zaif-harness-v1.md:35-36"
+           "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"],
+          :id :zaif-v1/T1#mint,
+          :seq 1}
+  #:event{:at "2026-09-02",
+          :tension :zaif-v1/T2,
+          :by "Joe (operator dictation)",
+          :to-status :carried,
+          :note
+          "minted in prose on 2026-09-02; typed here on 2026-09-03 by row :U41 without changing the statement.",
+          :type :carried,
+          :evidence
+          ["futon2/holes/missions/M-zaif-harness-v1.md:36-38"
+           "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"],
+          :id :zaif-v1/T2#mint,
+          :seq 2}
+  #:event{:at "2026-09-02",
+          :tension :zaif-v1/T3,
+          :by "Joe (operator dictation)",
+          :to-status :carried,
+          :note
+          "minted in prose on 2026-09-02; typed here on 2026-09-03 by row :U41 without changing the statement.",
+          :type :carried,
+          :evidence
+          ["futon2/holes/missions/M-zaif-harness-v1.md:38-39"
+           "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"],
+          :id :zaif-v1/T3#mint,
+          :seq 3}
+  #:event{:at "2026-09-03",
+          :tension :zaif-v1/T1,
+          :row :U41,
+          :by "claude-1 (row :U41)",
+          :note
+          "the deferral holds and its promise is unbuilt: the seam that makes deferral cheap is a spec sentence with neither a row nor a test behind it. Recorded, not ruled: whether that is a gap or an acceptable IOU is a row's or Joe's call.",
+          :type :evidence-added,
+          :evidence
+          ["futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:23 -- the seam is NAMED as the R6 test's acceptance ('arms OPAQUE at the seam (U5)')"
+           "futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:50-51 -- cascade-grain arms explicitly NOT in v1"
+           "row :U5 -- not found: no such id in futon2/holes/labs/zaif-harness/worklist.edn (36 rows) or futon2/holes/labs/wm-contract/worklist.edn (133 rows); the invariant is named in the spec and has no row"
+           "a test asserting arm opacity -- not found: no occurrence of 'opaque' under /home/joe/code/futon3c/test/futon3c/agents/"],
+          :id :zaif-v1/T1#u41-scoring,
+          :seq 4}
+  #:event{:at "2026-09-03",
+          :tension :zaif-v1/T2,
+          :row :U41,
+          :by "claude-1 (row :U41)",
+          :note
+          "no constant moved and no A/B ran, so neither pole was taken: :carried is the honest score.",
+          :type :evidence-added,
+          :evidence
+          ["futon2/holes/labs/M-zaif-harness/z3-prereg.md:3 -- 'Status: DRAFT — awaiting Joe's review. Nothing below is active.' The sanctioned resolution is written and NOT activated."
+           "futon3c/src/futon3c/agents/zaif_controller.clj:25 -- the shipped :operator-attention-cost is still 0.65"
+           "futon3c/src/futon3c/agents/zaif_controller.clj:151-156 -- the 0.15 sweep value is recorded as z3a-sweep-constant and marked 'NOT shipped'"
+           "futon2/holes/labs/wm-contract/C489-u6-zaif-full-loop.md:83 -- at the 0.15 sweep cost the arm distribution is {:retrieve 15 :ask 99}, i.e. the unreachability is a property of the constant, not of the arm"],
+          :id :zaif-v1/T2#u41-scoring,
+          :seq 5}
+  #:event{:at "2026-09-03",
+          :tension :zaif-v1/T2,
+          :row :U41,
+          :by "claude-1 (row :U41)",
+          :note
+          "answers the question row :U41 was set (DESIGN-tensions-as-patterns.md's 'tension 2 may already be :cashed by U16's branch run'): it is NOT. Both U16-named rows are branch runs about other subjects. What they share with T2 is a METHOD -- build the branches, run them, move no default -- which is the recurrence the birth rule would watch if a second tension were ever cashed that way; today it is not, and a method resemblance is not a cashing.",
+          :type :evidence-added,
+          :evidence
+          ["futon2/holes/labs/wm-contract/worklist.edn:757 -- :U16's subject is the WM's Bernoulli outcome semantics in preferences.clj:242, run behind a per-call selector with no default moved; it never touches a zaif arm constant"
+           "futon2/holes/labs/zaif-harness/worklist.edn:141 -- :U16z's subject is the R2 memory-tool contract tests (17 tests, 69 assertions), also not the ask arm"
+           "futon3c/src/futon3c/agents/zaif_controller.clj:25 -- unchanged shipped constant, as above"],
+          :id :zaif-v1/T2#u41-u16-check,
+          :seq 6}
+  #:event{:at "2026-09-03",
+          :tension :zaif-v1/T3,
+          :row :U41,
+          :by "claude-1 (row :U41)",
+          :note
+          "the formal-claim pole has zero witnesses at 13/13 nodes, which is evidence about the poles and not a cashing: the tension is carried DELIBERATELY (the mission's word), so only a row that produces a shared production path -- or Joe -- can move it.",
+          :type :evidence-added,
+          :evidence
+          ["futon2/holes/labs/zaif-harness/runs/U10-node-coverage.md:52-55 -- measured over all 13 spec nodes: 'no listed node currently has one production code path serving both the live zaif and WM uptakes. The spec table is presently the mapping between the two implementations.'"
+           "futon2/holes/labs/zaif-harness/worklist.edn:302-308 -- the U10 row that carries that measurement cites tension 3 as its premise"],
+          :id :zaif-v1/T3#u41-scoring,
+          :seq 7}
+  #:event{:at "2026-09-03",
+          :tension :zaif-v1/T1,
+          :row :U41,
+          :by "claude-1 (row :U41)",
+          :note
+          "recorded against T1 because T1 is the ledger's first record; the finding is about the ledger, not about T1. Kept as an event rather than a prose line so that the first birth-rule reading is itself append-only evidence.",
+          :type :evidence-added,
+          :evidence
+          ["runs/U41-tension-ledger/tension-report.edn :birth-rule (this ledger's own first query: 0 candidates over 3 tensions, 0 of them cashed)"],
+          :id :zaif-v1/T1#u41-birth-rule,
+          :seq 8}
+  #:event{:at "2026-09-03",
+          :tension
+          [:refused-prediction
+           {:q-actand/refusal :q-actand/zero-support-after-kin-pool,
+            :grain :arm-session,
+            :actand {:route :actand, :correction-label true},
+            :action :retrieve,
+            :target :gold-judged,
+            :kin []}],
+          :row :U28z,
+          :by "zaif rung-3 refusal mint (row :U28z)",
+          :to-status :carried,
+          :type :carried,
+          :evidence
+          ["calibration-sessions.edn record e-b78c3d3b-a530-40c7-a333-ec4e6b258fe4"],
+          :id
+          [:refused-prediction
+           {:q-actand/refusal :q-actand/zero-support-after-kin-pool,
+            :grain :arm-session,
+            :actand {:route :actand, :correction-label true},
+            :action :retrieve,
+            :target :gold-judged,
+            :kin []}
+           :mint],
+          :seq 9}
+  #:event{:id :mint#programme/T5,
+          :seq 10,
+          :tension :programme/T5,
+          :type :carried,
+          :at "2026-09-03",
+          :by "claude-1 (operator dictation)",
+          :row :NOTE-aif-spec-gap,
+          :evidence
+          ["futon2/holes/labs/wm-contract/NOTE-aif-spec-gap.md section 3"]}],
+ :ledger/id :wm-contract/tension-ledger,
+ :ledger/cross-cites
+ [{:row :U39,
+   :what "the mint edge for :refuted-rationale tensions",
+   :pointer "runs/U39-selection-retrospective/README.md:265-288",
+   :contract
+   "U39 mints the record shape declared here (it names DESIGN section 3 as the shape owner); this ledger does not fork it. u41_tension_ledger.bb runs U39's worked mint payload through THIS validator as a control."}
+  {:row :U23,
+   :what "the catalog reader gains tensions as a carrier",
+   :pointer
+   "u23_cascade_catalog_reader.clj:299-312 (the ledger read) and :604-634 (the per-subject carrier)",
+   :contract
+   "read-only: the reader counts tensions carried by each subject mission and types the absence when a mission carries none."}],
  :ledger/schema
  {:tension
-  {:required [:tension/id :tension/poles :tension/statement :tension/statement-source
-              :tension/carried-by :tension/status :tension/born-of :tension/provenance]
-   :optional [:tension/resolution-path :tension/resolution-key :tension/cashed-by :tension/statement-source-corrected-by
-              :tension/pattern-links :tension/note :tension/refusal
-              :tension/minted-by]
-   :enums {:tension/status #{:carried :cashed :refuted :dissolved}
-           :tension/born-of #{:operator-dictation :refuted-rationale :build-event
-                              :refused-prediction}}
-   :rules ["poles are exactly two, both non-blank -- a tension with one pole is a plan"
-           ":tension/statement is verbatim from :tension/statement-source. For :born-of :refused-prediction the statement-source IS the in-record :tension/refusal field (a machine-born tension has no dictated text; the typed refusal is the primary source) and the statement must be the refusal read back verbatim as data -- control 12 enforces this mechanically; external pointers are context and live in :provenance"
-           ":tension/status is the status AT MINT and must equal the type of the mint event"
-           ":tension/pattern-links [] means no graduation is claimed; the birth rule proposes and a person writes"]}
+  {:required
+   [:tension/id
+    :tension/poles
+    :tension/statement
+    :tension/statement-source
+    :tension/carried-by
+    :tension/status
+    :tension/born-of
+    :tension/provenance],
+   :optional
+   [:tension/resolution-path
+    :tension/resolution-key
+    :tension/cashed-by
+    :tension/statement-source-corrected-by
+    :tension/pattern-links
+    :tension/note
+    :tension/refusal
+    :tension/minted-by],
+   :enums
+   #:tension{:status #{:refuted :carried :cashed :dissolved},
+             :born-of
+             #{:refuted-rationale
+               :build-event
+               :operator-dictation
+               :refused-prediction}},
+   :rules
+   ["poles are exactly two, both non-blank -- a tension with one pole is a plan"
+    ":tension/statement is verbatim from :tension/statement-source. For :born-of :refused-prediction the statement-source IS the in-record :tension/refusal field (a machine-born tension has no dictated text; the typed refusal is the primary source) and the statement must be the refusal read back verbatim as data -- control 12 enforces this mechanically; external pointers are context and live in :provenance"
+    ":tension/status is the status AT MINT and must equal the type of the mint event"
+    ":tension/pattern-links [] means no graduation is claimed; the birth rule proposes and a person writes"]},
   :event
-  {:required [:event/id :event/seq :event/tension :event/type :event/at :event/by :event/evidence]
-   :optional [:event/row :event/note :event/to-status]
-   :enums {:event/type #{:carried :cashed :refuted :dissolved :evidence-added}}
-   :rules ["every tension has exactly one :carried mint event, and it is that tension's lowest :event/seq"
-           "a status-moving event (:cashed/:refuted/:dissolved) requires a non-empty :event/evidence AND an :event/row -- section 3's 'status moves only with a pointer to the cashing/refuting row'"
-           ":evidence-added never moves status; it is how a fact that bears on a carried tension is recorded without ruling on it"
-           ":event/seq is unique and ascending across the whole ledger; events are appended, never rewritten"
-           "no status-moving event may follow a terminal one (:cashed/:refuted/:dissolved) for the same tension"]}}
-
- ;; DESIGN-tensions-as-patterns.md:66-72: the library is ahead of this note, so
- ;; the retrofit LINKS to the patterns that already exist rather than minting
- ;; duplicates.  Paths resolved 2026-09-03 against the production pattern library
- ;; root (futon2/src/futon2/aif/pattern_registry.clj:48-53).
+  {:required
+   [:event/id
+    :event/seq
+    :event/tension
+    :event/type
+    :event/at
+    :event/by
+    :event/evidence],
+   :optional [:event/row :event/note :event/to-status],
+   :enums
+   #:event{:type
+           #{:evidence-added :refuted :carried :cashed :dissolved}},
+   :rules
+   ["every tension has exactly one :carried mint event, and it is that tension's lowest :event/seq"
+    "a status-moving event (:cashed/:refuted/:dissolved) requires a non-empty :event/evidence AND an :event/row -- section 3's 'status moves only with a pointer to the cashing/refuting row'"
+    ":evidence-added never moves status; it is how a fact that bears on a carried tension is recorded without ruling on it"
+    ":event/seq is unique and ascending across the whole ledger; events are appended, never rewritten"
+    "no status-moving event may follow a terminal one (:cashed/:refuted/:dissolved) for the same tension"]}},
+ :ledger/implements
+ "DESIGN-tensions-as-patterns.md:86-101 (section 3)",
+ :ledger/version "v1",
  :ledger/library-links
- [{:pattern-id "problems/tension-proposes-candidates"
-   :title "Tension Proposes Candidates"
-   :path "/home/joe/code/futon3/library/problems/tension-proposes-candidates.flexiarg"
-   :resolved true
-   :relation :prior-art
-   :note "R6 red-ring pattern: tension should CREATE candidates, not only reorder them. Surfaced rank 1 by the retrieval that answered the originating turn (DESIGN-tensions-as-patterns.md:66-69)."}
-  {:pattern-id "p4ng/tension-detection"
-   :title "Tension Detection"
-   :path "/home/joe/code/futon3/library/p4ng/tension-detection.flexiarg"
-   :resolved false
-   :resolved-instead "/home/joe/code/futon3/library/p4ng/p4ng-agents.multiarg:89-95 (@arg p4ng/tension-detection, @title Tension Detection)"
-   :relation :prior-art
-   :note "addressed as an id, but it lives as an @arg inside a multiarg rather than as its own .flexiarg -- so pattern_registry.clj:158-161's id->path resolution would MISS it. Recorded as measured; no fix attempted here."}
-  {:pattern-id "ukrns/design-as-function-of-evidence"
-   :title "Design as a Function of Evidence"
-   :path "/home/joe/code/futon3/library/ukrns/design-as-function-of-evidence.flexiarg"
-   :resolved true
-   :relation :names-the-method
-   :note "the rule this ledger obeys: a status is written from evidence, never from taste."}]
-
- :ledger/cross-cites
- [{:row :U39
-   :what "the mint edge for :refuted-rationale tensions"
-   :pointer "runs/U39-selection-retrospective/README.md:265-288"
-   :contract "U39 mints the record shape declared here (it names DESIGN section 3 as the shape owner); this ledger does not fork it. u41_tension_ledger.bb runs U39's worked mint payload through THIS validator as a control."}
-  {:row :U23
-   :what "the catalog reader gains tensions as a carrier"
-   :pointer "u23_cascade_catalog_reader.clj:299-312 (the ledger read) and :604-634 (the per-subject carrier)"
-   :contract "read-only: the reader counts tensions carried by each subject mission and types the absence when a mission carries none."}]
-
- ;; ------------------------------------------------------------------------
- ;; SEED CORPUS.  The three M-zaif-harness-v1 carried tensions, verbatim.
- ;; DESIGN-tensions-as-patterns.md:121-125: no retro-conversion of every old
- ;; doc; these three are the seed corpus.
- ;; ------------------------------------------------------------------------
- :tensions
- [{:tension/id :zaif-v1/T1
-   :tension/poles ["build arms as cascades now" "defer arms->cascades to LA2/LA3"]
-   :tension/statement "arms→cascades is deliberately deferred to LA2/LA3 — the U5 opaque-candidate seam is the promise that deferral is cheap"
-   :tension/statement-source "futon2/holes/missions/M-zaif-harness-v1.md:35-36"
-   :tension/carried-by "M-zaif-harness-v1"
-   :tension/resolution-path "candidates stay opaque at the R6 seam (the U5 invariant), so a test names the node and not the candidate's insides and the arm→cascade migration is a type change rather than a rewrite"
-   :tension/resolution-key :defer-behind-an-opaque-seam
-   :tension/status :carried
-   :tension/born-of :operator-dictation
-   :tension/pattern-links []
-   :tension/provenance
-   {:who "Joe" :when "2026-09-02"
-    :how "operator dictation in session, 2026-09-02, three exchanges (futon2/holes/missions/M-zaif-harness-v1.md:40)"
-    :pointers ["futon2/holes/missions/M-zaif-harness-v1.md:35-36 (the statement)"
-               "futon2/holes/missions/M-zaif-harness-v1.md:122-125 (the same decision in lifecycle form)"
-               "futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:23 (R6 row: 'arms OPAQUE at the seam (U5) so the test survives arms → cascades')"
-               "futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:50-51 (cascade-grain arms are LA2/LA3's delivery; the U5 seam is the socket)"]
-    :retrofitted-by {:row :U41 :by "claude-1" :at "2026-09-03"}}}
-
-  {:tension/id :zaif-v1/T2
-   :tension/poles ["retune the constant now" "measure first, under preregistration"]
-   :tension/statement "the ask arm is structurally unreachable at shipped constants (Z3's A/B is the sanctioned resolution, preregistration-gated)"
-   :tension/statement-source "futon2/holes/missions/M-zaif-harness-v1.md:36-38"
-   :tension/carried-by "M-zaif-harness-v1"
-   :tension/resolution-path "Z3's preregistered A/B: Z3a records decide() twice per round from the same hydrated inputs, at the shipped 0.65 and the sweep 0.15, and no constant moves until the paired comparison says so"
-   :tension/resolution-key :preregistered-ab-before-any-constant-moves
-   :tension/status :carried
-   :tension/born-of :operator-dictation
-   :tension/pattern-links []
-   :tension/provenance
-   {:who "Joe" :when "2026-09-02"
-    :how "operator dictation in session, 2026-09-02, three exchanges (futon2/holes/missions/M-zaif-harness-v1.md:40)"
-    :pointers ["futon2/holes/missions/M-zaif-harness-v1.md:36-38 (the statement)"
-               "futon2/holes/missions/M-zaif-harness-v1.md:128-131 (R17 ships as a named stub with Z3 as the only sanctioned change vector)"
-               "futon2/holes/M-zaif-harness.md:829-838 (ZU-2, 2026-07-13: at operator-attention-cost 0.65 the controller picks :act on 37/37 correction sessions; the sweep separates arms cleanly at 0.15)"]
-    :retrofitted-by {:row :U41 :by "claude-1" :at "2026-09-03"}}}
-
-  {:tension/id :zaif-v1/T3
-   :tension/poles ["formal claim" "fertile analogy"]
-   :tension/statement "whether the lifecycle→node mapping below is a formal claim or a fertile analogy is itself carried forward, deliberately"
-   :tension/statement-source "futon2/holes/missions/M-zaif-harness-v1.md:38-39"
-   :tension/carried-by "M-zaif-harness-v1"
-   :tension/resolution-path "carried deliberately: a row cashes it by producing one production code path serving both the live zaif and WM uptakes of a node; until then the spec table is the mapping"
-   :tension/resolution-key :carried-until-a-row-cashes-it
-   :tension/status :carried
-   :tension/born-of :operator-dictation
-   :tension/pattern-links []
-   :tension/provenance
-   {:who "Joe" :when "2026-09-02"
-    :how "operator dictation in session, 2026-09-02, three exchanges (futon2/holes/missions/M-zaif-harness-v1.md:40)"
-    :pointers ["futon2/holes/missions/M-zaif-harness-v1.md:38-39 (the statement)"
-               "futon2/holes/labs/zaif-harness/worklist.edn:302-308 (the :U10 row cites 'carried tension 3' as a premise: 'the microservices claim is a goal, and the matrix says per node whether it is cashed')"]
-    :retrofitted-by {:row :U41 :by "claude-1" :at "2026-09-03"}}}
-
-  {:tension/id
-   [:refused-prediction
-    {:q-actand/refusal :q-actand/zero-support-after-kin-pool
-     :grain :arm-session
-     :actand {:route :actand :correction-label true}
-     :action :retrieve
-     :target :gold-judged
-     :kin []}]
-   :tension/poles ["make a finite prediction" "preserve the finite-evidence gate"]
-   :tension/statement "{:q-actand/refusal :q-actand/zero-support-after-kin-pool, :grain :arm-session, :actand {:route :actand, :correction-label true}, :action :retrieve, :target :gold-judged, :kin []}"
-   :tension/statement-source ":tension/refusal (in-record; the machine's typed refusal is the primary source for a machine-born tension)"
-   :tension/statement-source-corrected-by {:row :U28z-review :by "claude-1" :at "2026-09-03" :was "futon2/holes/labs/zaif-harness/worklist.edn:248-251" :why "claude-2's reviewer: statement was pr-str of the refusal, not verbatim of the cited worklist lines. Ruling (a): retarget the source to the refusal itself -- verbatim-ness now holds against the TRUE source; the worklist lines stay in :provenance :pointers as context. Rule clarified + control 12 added in the same commit."}
-   :tension/carried-by "M-zaif-harness-v1"
-   :tension/resolution-path nil
-   :tension/status :carried
-   :tension/born-of :refused-prediction
-   :tension/pattern-links []
-   :tension/refusal
-   {:q-actand/refusal :q-actand/zero-support-after-kin-pool
-    :grain :arm-session
-    :actand {:route :actand :correction-label true}
-    :action :retrieve
-    :target :gold-judged
-    :kin []}
-   :tension/minted-by {:row :U28z :seat :codex-work}
-   :tension/provenance
-   {:who "zaif rung-3 refusal mint"
-    :when "2026-09-03"
-    :record-ids ["e-b78c3d3b-a530-40c7-a333-ec4e6b258fe4"]
-    :pointers ["futon2/holes/labs/zaif-harness/worklist.edn:248-251"
-               "futon3c/src/futon3c/agents/zaif_actand.clj"]}}]
-
- ;; ------------------------------------------------------------------------
- ;; EVENTS.  Appended, never rewritten.  seq 1-3 are the mints (dated to the
- ;; dictation, 2026-09-02, and attributed to Joe -- the retrofit does not claim
- ;; authorship of the tensions).  seq 4-8 are today's :evidence-added records:
- ;; what the row MEASURED about each tension's current standing.  None of them
- ;; moves a status, because none of the evidence cashes or refutes.
- ;; ------------------------------------------------------------------------
- :events
- [{:event/id :zaif-v1/T1#mint :event/seq 1 :event/tension :zaif-v1/T1
-   :event/type :carried :event/at "2026-09-02" :event/by "Joe (operator dictation)"
-   :event/to-status :carried
-   :event/evidence ["futon2/holes/missions/M-zaif-harness-v1.md:35-36"
-                    "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"]
-   :event/note "minted in prose on 2026-09-02; typed here on 2026-09-03 by row :U41 without changing the statement."}
-
-  {:event/id :zaif-v1/T2#mint :event/seq 2 :event/tension :zaif-v1/T2
-   :event/type :carried :event/at "2026-09-02" :event/by "Joe (operator dictation)"
-   :event/to-status :carried
-   :event/evidence ["futon2/holes/missions/M-zaif-harness-v1.md:36-38"
-                    "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"]
-   :event/note "minted in prose on 2026-09-02; typed here on 2026-09-03 by row :U41 without changing the statement."}
-
-  {:event/id :zaif-v1/T3#mint :event/seq 3 :event/tension :zaif-v1/T3
-   :event/type :carried :event/at "2026-09-02" :event/by "Joe (operator dictation)"
-   :event/to-status :carried
-   :event/evidence ["futon2/holes/missions/M-zaif-harness-v1.md:38-39"
-                    "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"]
-   :event/note "minted in prose on 2026-09-02; typed here on 2026-09-03 by row :U41 without changing the statement."}
-
-  {:event/id :zaif-v1/T1#u41-scoring :event/seq 4 :event/tension :zaif-v1/T1
-   :event/type :evidence-added :event/at "2026-09-03" :event/by "claude-1 (row :U41)"
-   :event/row :U41
-   :event/evidence
-   ["futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:23 -- the seam is NAMED as the R6 test's acceptance ('arms OPAQUE at the seam (U5)')"
-    "futon2/holes/labs/wm-contract/SPEC-zaif-harness-v1.md:50-51 -- cascade-grain arms explicitly NOT in v1"
-    "row :U5 -- not found: no such id in futon2/holes/labs/zaif-harness/worklist.edn (36 rows) or futon2/holes/labs/wm-contract/worklist.edn (133 rows); the invariant is named in the spec and has no row"
-    "a test asserting arm opacity -- not found: no occurrence of 'opaque' under /home/joe/code/futon3c/test/futon3c/agents/"]
-   :event/note "the deferral holds and its promise is unbuilt: the seam that makes deferral cheap is a spec sentence with neither a row nor a test behind it. Recorded, not ruled: whether that is a gap or an acceptable IOU is a row's or Joe's call."}
-
-  {:event/id :zaif-v1/T2#u41-scoring :event/seq 5 :event/tension :zaif-v1/T2
-   :event/type :evidence-added :event/at "2026-09-03" :event/by "claude-1 (row :U41)"
-   :event/row :U41
-   :event/evidence
-   ["futon2/holes/labs/M-zaif-harness/z3-prereg.md:3 -- 'Status: DRAFT — awaiting Joe's review. Nothing below is active.' The sanctioned resolution is written and NOT activated."
-    "futon3c/src/futon3c/agents/zaif_controller.clj:25 -- the shipped :operator-attention-cost is still 0.65"
-    "futon3c/src/futon3c/agents/zaif_controller.clj:151-156 -- the 0.15 sweep value is recorded as z3a-sweep-constant and marked 'NOT shipped'"
-    "futon2/holes/labs/wm-contract/C489-u6-zaif-full-loop.md:83 -- at the 0.15 sweep cost the arm distribution is {:retrieve 15 :ask 99}, i.e. the unreachability is a property of the constant, not of the arm"]
-   :event/note "no constant moved and no A/B ran, so neither pole was taken: :carried is the honest score."}
-
-  {:event/id :zaif-v1/T2#u41-u16-check :event/seq 6 :event/tension :zaif-v1/T2
-   :event/type :evidence-added :event/at "2026-09-03" :event/by "claude-1 (row :U41)"
-   :event/row :U41
-   :event/evidence
-   ["futon2/holes/labs/wm-contract/worklist.edn:757 -- :U16's subject is the WM's Bernoulli outcome semantics in preferences.clj:242, run behind a per-call selector with no default moved; it never touches a zaif arm constant"
-    "futon2/holes/labs/zaif-harness/worklist.edn:141 -- :U16z's subject is the R2 memory-tool contract tests (17 tests, 69 assertions), also not the ask arm"
-    "futon3c/src/futon3c/agents/zaif_controller.clj:25 -- unchanged shipped constant, as above"]
-   :event/note "answers the question row :U41 was set (DESIGN-tensions-as-patterns.md's 'tension 2 may already be :cashed by U16's branch run'): it is NOT. Both U16-named rows are branch runs about other subjects. What they share with T2 is a METHOD -- build the branches, run them, move no default -- which is the recurrence the birth rule would watch if a second tension were ever cashed that way; today it is not, and a method resemblance is not a cashing."}
-
-  {:event/id :zaif-v1/T3#u41-scoring :event/seq 7 :event/tension :zaif-v1/T3
-   :event/type :evidence-added :event/at "2026-09-03" :event/by "claude-1 (row :U41)"
-   :event/row :U41
-   :event/evidence
-   ["futon2/holes/labs/zaif-harness/runs/U10-node-coverage.md:52-55 -- measured over all 13 spec nodes: 'no listed node currently has one production code path serving both the live zaif and WM uptakes. The spec table is presently the mapping between the two implementations.'"
-    "futon2/holes/labs/zaif-harness/worklist.edn:302-308 -- the U10 row that carries that measurement cites tension 3 as its premise"]
-   :event/note "the formal-claim pole has zero witnesses at 13/13 nodes, which is evidence about the poles and not a cashing: the tension is carried DELIBERATELY (the mission's word), so only a row that produces a shared production path -- or Joe -- can move it."}
-
-  {:event/id :zaif-v1/T1#u41-birth-rule :event/seq 8 :event/tension :zaif-v1/T1
-   :event/type :evidence-added :event/at "2026-09-03" :event/by "claude-1 (row :U41)"
-   :event/row :U41
-   :event/evidence ["runs/U41-tension-ledger/tension-report.edn :birth-rule (this ledger's own first query: 0 candidates over 3 tensions, 0 of them cashed)"]
-   :event/note "recorded against T1 because T1 is the ledger's first record; the finding is about the ledger, not about T1. Kept as an event rather than a prose line so that the first birth-rule reading is itself append-only evidence."}
-
-  {:event/id
-   [:refused-prediction
-    {:q-actand/refusal :q-actand/zero-support-after-kin-pool
-     :grain :arm-session
-     :actand {:route :actand :correction-label true}
-     :action :retrieve
-     :target :gold-judged
-     :kin []}
-    :mint]
-   :event/seq 9
-   :event/tension
-   [:refused-prediction
-    {:q-actand/refusal :q-actand/zero-support-after-kin-pool
-     :grain :arm-session
-     :actand {:route :actand :correction-label true}
-     :action :retrieve
-     :target :gold-judged
-     :kin []}]
-   :event/type :carried
-   :event/at "2026-09-03"
-   :event/by "zaif rung-3 refusal mint (row :U28z)"
-   :event/to-status :carried
-   :event/row :U28z
-   :event/evidence
-   ["calibration-sessions.edn record e-b78c3d3b-a530-40c7-a333-ec4e6b258fe4"]}]}
+ [{:pattern-id "problems/tension-proposes-candidates",
+   :title "Tension Proposes Candidates",
+   :path
+   "/home/joe/code/futon3/library/problems/tension-proposes-candidates.flexiarg",
+   :resolved true,
+   :relation :prior-art,
+   :note
+   "R6 red-ring pattern: tension should CREATE candidates, not only reorder them. Surfaced rank 1 by the retrieval that answered the originating turn (DESIGN-tensions-as-patterns.md:66-69)."}
+  {:pattern-id "p4ng/tension-detection",
+   :title "Tension Detection",
+   :path
+   "/home/joe/code/futon3/library/p4ng/tension-detection.flexiarg",
+   :resolved false,
+   :resolved-instead
+   "/home/joe/code/futon3/library/p4ng/p4ng-agents.multiarg:89-95 (@arg p4ng/tension-detection, @title Tension Detection)",
+   :relation :prior-art,
+   :note
+   "addressed as an id, but it lives as an @arg inside a multiarg rather than as its own .flexiarg -- so pattern_registry.clj:158-161's id->path resolution would MISS it. Recorded as measured; no fix attempted here."}
+  {:pattern-id "ukrns/design-as-function-of-evidence",
+   :title "Design as a Function of Evidence",
+   :path
+   "/home/joe/code/futon3/library/ukrns/design-as-function-of-evidence.flexiarg",
+   :resolved true,
+   :relation :names-the-method,
+   :note
+   "the rule this ledger obeys: a status is written from evidence, never from taste."}],
+ :ledger/written-by "claude-1, wm-edge lane, 2026-09-03"}
