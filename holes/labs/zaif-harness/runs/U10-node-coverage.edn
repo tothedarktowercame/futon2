@@ -209,7 +209,7 @@
             :substrate :zaif :provenance :registry-derived}
            {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 178
             :substrate :zaif :provenance :planted}
-           {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 222
+           {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 231
             :substrate :wm-fixture :provenance :real
             :record-id "801976e7-01c6-4e39-aada-27f620f7c2f1"}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 463
@@ -218,7 +218,7 @@
    {:status :mapped-separate
     :evidence ["src/futon2/aif/policy.clj:503"
                "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj:103"]
-    :note "Zaif tool execution witnesses and WM action selection are separate. The runner registry test exercises the production round loop for every exposed tool name while stubbing tool side effects; the companion terminal test covers ask/yield endings. The tracked WM fixture honestly records that no action enactment exists before a flight."}
+    :note "Zaif tool execution witnesses and WM action selection are separate. The runner registry test exercises the production round loop for every exposed tool name while stubbing tool side effects; the companion decision test drives the :zaif profile through production dual-decide and asserts the persisted :ask and :yield arm-choice witnesses for both shipped and sweep constants. The tracked WM fixture honestly records that no action enactment exists before a flight."}
    :gap nil
    :blocked-by []}
 
