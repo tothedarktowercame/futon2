@@ -27,8 +27,18 @@
    carries: on three different channels the R5 arm order is three different
    orders. NOTHING here may be read as a measurement of which arm is right.
 
+   RE-GROUNDED BY U25 (wm-contract worklist :U25, from zaif :S7 remainder). The
+   plant above is four separate declarations, and three of them now have a real
+   counterpart in the S7/U12 live corpus. `plant-real-split` types each one
+   :re-grounded or :plant-kept with its pointer or its reason, and the
+   `u25-*` deftests below run the same walk on the grounded values and pin what
+   moves. The two that stay planted stay planted for a stated reason, and
+   `u25-grounded-plant-dependence-negative-control-test` shows the outcome is
+   still theirs.
+
    Replay only: no live run, no run lock, nothing written under data/."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
@@ -159,12 +169,13 @@
    the G-term is a preference score and the channel is a health ratio. It is a
    plant, and `plant-dependence-negative-control-test` is what keeps that from
    being forgotten."
-  ([arm] (plant-per-arm-prediction arm plant-channel plant-base))
-  ([arm channel base]
+  ([arm] (plant-per-arm-prediction arm plant-channel plant-base plant-variance))
+  ([arm channel base] (plant-per-arm-prediction arm channel base plant-variance))
+  ([arm channel base variance]
    {:prediction-mean {channel (clamp01 (+ (double base)
                                           (double (get-in recorded-decision
                                                           [:g-terms arm]))))}
-    :prediction-variance {channel plant-variance}}))
+    :prediction-variance {channel (double variance)}}))
 
 (defn- arm-risk
   "R5a. The SAME call efe.clj:659-668 makes: KL of the predicted Gaussian
@@ -203,19 +214,22 @@
 (defn- pipeline
   "The whole walk, for one plant. Returns every node's output so a test can
    assert on the node it is named for."
-  ([] (pipeline plant-channel plant-base))
-  ([channel base]
+  ([] (pipeline plant-channel plant-base plant-variance plant-base))
+  ([channel base] (pipeline channel base plant-variance base))
+  ([channel base variance realised-value]
    (let [predictions (into {} (for [a modelled-arms]
-                                [a (plant-per-arm-prediction a channel base)]))
+                                [a (plant-per-arm-prediction a channel base variance)]))
          g (into {} (for [a modelled-arms] [a (arm-g (predictions a) channel)]))
          ;; G-ascending: lower controller-score is more preferred (efe.clj:904-919).
          order (vec (sort-by g modelled-arms))
          g-vec (mapv g order)
          log-e (habit/log-priors recorded-habit-state
                                  (mapv (fn [a] {:type a}) order))
-         ;; R8. The recorded turn is labelled a CORRECTION, so the realised
-         ;; outcome planted here is "no gain on the channel" — the base value.
-         realised {channel base}
+         ;; R8. Under the plant, `realised-value` defaults to `base`: the
+         ;; recorded turn is labelled a CORRECTION, so the planted realised
+         ;; outcome is "no gain on the channel". U25's grounded walk passes the
+         ;; live observation instead — see `plant-real-split`.
+         realised {channel realised-value}
          f-pi (mapv #(pfe/f-pi-for-candidate (predictions %) realised) order)
          tau (policy/effective-temperature g-vec 1.0 {})
          ranked (vec (map-indexed (fn [i a]
@@ -230,7 +244,7 @@
                     :f-pi-posterior {:status :applied
                                      :coverage :complete-by-construction
                                      :provenance :u6-planted-realised-outcome}}]
-     {:channel channel :base base
+     {:channel channel :base base :variance variance :realised realised
       :predictions predictions :g g :order order :g-vec g-vec
       :log-e log-e :f-pi f-pi :tau tau :ranked ranked :f-pi-opts f-pi-opts
       :scores-flags-on (policy/selection-scores g-vec tau log-e f-pi-opts)
@@ -556,6 +570,289 @@
       ;; values, not of the arms. What survives the control is the STRUCTURE:
       ;; the pipeline runs end to end on zaif-shaped candidates, and the nodes
       ;; that cannot run are named in the coverage map below.
+      (is (< 1 (count (distinct (map :order runs))))))))
+
+;; ---------------------------------------------------------------------------
+;; U25 — THE RE-GROUNDING. Which parts of the plant have a real counterpart.
+;;
+;; The plant above is not one declaration, it is four: the CHANNEL the arm
+;; values land on, the channel's LEVEL, the predicted DISPERSION on it, and the
+;; per-arm DELTA added to the level. U6 declared all four because zaif v0
+;; declares no observation model. Three of them are quantities the WM itself
+;; produces every tick, and the S7/U12 corpus has them measured on live records
+;; — so those three are re-grounded here and only the two that have no
+;; counterpart stay planted.
+
+(def ^:private s7-corpus-dir
+  "The S7 node corpus, harvested from live `data/wm-trace/` tick records by
+   holes/labs/wm-contract/u12_c_mis_falsifier.clj. Tracked in this repo (39
+   fixtures + README), so this suite reads records and not a re-derivation."
+  "holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures")
+
+(def ^:private s7-run-ids
+  "The three tick records the corpus covers, oldest first."
+  ["0a18c4f7" "4abad68c" "801976e7"])
+
+(def ^:private grounding-run-id
+  "The run the pinned grounded numbers below are taken from. Fixed rather than
+   'latest' so a fourth tick landing in the corpus cannot silently move a pin;
+   `u25-grounding-values-are-stable-across-the-corpus-test` checks the other two
+   agree to the digit that matters."
+  "0a18c4f7")
+
+(defn- s7-fixture
+  "One (run-id, node) fixture as data, or nil if the corpus does not carry it."
+  [run-id node]
+  (let [f (io/file s7-corpus-dir (str run-id "-" (name node) ".edn"))]
+    (when (.exists f) (edn/read-string (slurp f)))))
+
+(defn- grounding-for
+  "The three live quantities for one channel, from one tick record.
+   :level and :variance come from the R8 fixture's own `:predicted-mean` /
+   `:predicted-variance` (what the WM predicted for the channel before the
+   observation landed); :realised is the observation that landed."
+  [run-id channel]
+  (let [pe (get-in (s7-fixture run-id :R8) [:value channel])]
+    (when pe
+      {:level (:predicted-mean pe)
+       :variance (:predicted-variance pe)
+       :realised (:observed pe)
+       :error (:error pe)
+       :producer-contract (:producer-contract pe)})))
+
+(def ^:private grounding
+  "The re-grounded values for the plant channel, at `grounding-run-id`."
+  (grounding-for grounding-run-id plant-channel))
+
+(def ^:private plant-real-split
+  "U25's deliverable, as data: every declaration U6's plant makes, typed either
+   :re-grounded (a real counterpart exists and this suite now uses it) or
+   :plant-kept (none exists; the reason is a pointer, not a preference).
+   :was is the U6 value; :now is the grounded value or ::plant."
+  {:r4-channel-placement
+   {:status :plant-kept
+    :node :R4
+    :was :mission-health
+    :now ::plant
+    :reason "no counterpart: nothing in zaif_controller.clj:1-270 names an observation channel, and its own observation input is :posting-stats (zaif_inputs.clj:153-167), disjoint from the WM's 14 channels (observation.clj:11-33). Which channel the arm values land on is still a declared choice."}
+   :r4-level
+   {:status :re-grounded
+    :node :R4
+    :was 0.5
+    :now (:level grounding)
+    :counterpart "S7 corpus 0a18c4f7-R8.edn :value :mission-health :predicted-mean — the WM's own predicted mean for this channel on a live tick, produced by futon2.aif.free-energy/compute-prediction-error under :prediction-error/v1"
+    :note "U6 used the BOTTOM of the channel's preference range (pref/current-C :mission-health = [0.5 1.0]) because no measurement was to hand. One is."}
+   :r4-dispersion
+   {:status :re-grounded
+    :node :R4
+    :was 0.01
+    :now (:variance grounding)
+    :counterpart "S7 corpus 0a18c4f7-R8.edn :value :mission-health :predicted-variance"
+    :note "U6 reused policy_free_energy.clj:76-77's :variance-floor default 0.01. The live predicted variance is ~94x that, and the sign of R5's ambiguity term turns over between the two — measured in u25-regrounded-r5-layer-test."}
+   :r4-arm-conditional-delta
+   {:status :plant-kept
+    :node :R4
+    :was :g-term-added-to-level
+    :now ::plant
+    :reason "no counterpart: forward_model.clj:25-31 excludes all four zaif arms and fm/predict throws on each, and no record in the S7 corpus is conditioned on a zaif arm — the corpus's R5 fixtures rank the WM's own 146 candidates, none of which is :retrieve/:act/:ask. Q(o|pi) for a zaif arm does not exist anywhere to be read."}
+   :r8-realised-observation
+   {:status :re-grounded
+    :node :R8
+    :was 0.5
+    :now (:realised grounding)
+    :counterpart "S7 corpus 0a18c4f7-R8.edn :value :mission-health :observed, equal to 0a18c4f7-R2.edn :value :mission-health — cross-checked in u25-regrounded-r8-layer-test"
+    :note "U6 planted 'no gain on the channel' = the base. The live observation is not the base: it sits 0.383 BELOW the live prediction (:error -0.3829036175044988)."}})
+
+(defn- grounded-run
+  "The same walk as `run`, on the re-grounded level, dispersion and realised
+   observation. The channel and the per-arm delta are still the plant."
+  []
+  (run plant-channel (:level grounding) (:variance grounding) (:realised grounding)))
+
+(deftest u25-s7-corpus-is-where-this-suite-says-it-is-test
+  (testing "the corpus directory carries a fixture for every (run, node) it claims"
+    (is (.isDirectory (io/file s7-corpus-dir))
+        "without the S7 corpus the re-grounding is a re-plant")
+    (is (.exists (io/file s7-corpus-dir "README.md")))
+    (is (= 39 (count (filter #(.endsWith (.getName ^java.io.File %) ".edn")
+                             (.listFiles (io/file s7-corpus-dir))))))
+    (doseq [rid s7-run-ids
+            node [:R2 :R8]]
+      (is (= :present (:status (s7-fixture rid node)))
+          (str rid "-" (name node) " is the fixture this row grounds on"))))
+  (testing "and the fixtures are records, not plants: each names its producer"
+    (is (= "futon2.aif.observation/observe" (:via (s7-fixture grounding-run-id :R2))))
+    (is (= "futon2.aif.free-energy/compute-prediction-error"
+           (:via (s7-fixture grounding-run-id :R8))))
+    (is (= :prediction-error/v1 (:producer-contract grounding)))))
+
+(deftest u25-grounding-values-are-stable-across-the-corpus-test
+  (testing "all three ticks carry the plant channel at R8"
+    (is (every? some? (map #(grounding-for % plant-channel) s7-run-ids))))
+  (let [gs (map #(grounding-for % plant-channel) s7-run-ids)]
+    (testing "the observation is IDENTICAL on all three ticks"
+      ;; The three records are three ticks of one quiet run; the mission-health
+      ;; channel did not move between them. Pinned so a corpus that grows with
+      ;; a moving channel is visible rather than averaged away.
+      (is (= 1 (count (distinct (map :realised gs)))))
+      (is (within? 1e-15 0.023376623376623377 (:realised grounding))))
+    (testing "the predicted mean and variance drift only in the 4th decimal"
+      (is (every? #(within? 1e-3 (:level grounding) (:level %)) gs))
+      (is (every? #(within? 1e-3 (:variance grounding) (:variance %)) gs))
+      (is (< 1 (count (distinct (map :level gs))))
+          "they DO differ — the pin is to one record, not to a constant"))
+    (testing "the pinned grounding values"
+      (is (within? 1e-15 0.4062802408811222 (:level grounding)))
+      (is (within? 1e-15 0.941315784435399 (:variance grounding)))
+      (is (within? 1e-15 -0.3829036175044988 (:error grounding))))))
+
+(deftest u25-plant-real-split-is-complete-and-typed-test
+  (testing "every declaration the plant makes is in the split, and typed"
+    (is (= #{:r4-channel-placement :r4-level :r4-dispersion
+             :r4-arm-conditional-delta :r8-realised-observation}
+           (set (keys plant-real-split))))
+    (doseq [[k {:keys [status node was now reason counterpart]}] plant-real-split]
+      (is (contains? #{:re-grounded :plant-kept} status) (str k " is untyped"))
+      (is (contains? #{:R4 :R8} node))
+      (is (some? was))
+      (if (= :re-grounded status)
+        (do (is (number? now) (str k " claims a counterpart but has no value"))
+            (is (and (string? counterpart) (< 40 (count counterpart)))
+                (str k " must cite the record it was grounded on"))
+            (is (nil? reason)))
+        (do (is (= ::plant now))
+            (is (and (string? reason) (< 40 (count reason)))
+                (str k " must say WHY no counterpart exists, with a pointer"))
+            (is (nil? counterpart))))))
+  (testing "the split is a split: three re-grounded, two kept"
+    (is (= #{:r4-level :r4-dispersion :r8-realised-observation}
+           (set (for [[k {:keys [status]}] plant-real-split
+                      :when (= :re-grounded status)] k))))
+    (is (= #{:r4-channel-placement :r4-arm-conditional-delta}
+           (set (for [[k {:keys [status]}] plant-real-split
+                      :when (= :plant-kept status)] k)))))
+  (testing "the re-grounded values are the ones the grounded walk actually uses"
+    (let [{:keys [base variance realised]} (grounded-run)]
+      (is (= (get-in plant-real-split [:r4-level :now]) base))
+      (is (= (get-in plant-real-split [:r4-dispersion :now]) variance))
+      (is (= {plant-channel (get-in plant-real-split [:r8-realised-observation :now])}
+             realised)))))
+
+(deftest u25-regrounded-r5-layer-test
+  (let [planted (run)
+        grounded (grounded-run)]
+    (testing "R5b still cannot discriminate — the finding survives re-grounding"
+      ;; zaif declares no per-arm variance, so the grounded variance is the SAME
+      ;; number on every arm just as the planted floor was. This is the U6
+      ;; finding that does not depend on the plant.
+      (is (= 1 (count (distinct (map #(arm-ambiguity (get-in grounded [:predictions %]))
+                                     modelled-arms))))))
+    (testing "but its VALUE turns over: the ambiguity term changes sign"
+      (is (within? 1e-12 -0.883646559789373
+                   (arm-ambiguity (get-in planted [:predictions :act]))))
+      (is (within? 1e-12 1.38870022730075
+                   (arm-ambiguity (get-in grounded [:predictions :act]))))
+      (is (neg? (arm-ambiguity (get-in planted [:predictions :act]))))
+      (is (pos? (arm-ambiguity (get-in grounded [:predictions :act])))))
+    (testing "and no arm keeps its R5 rank between plant and grounding"
+      (is (= [:ask :act :retrieve] (:order planted)))
+      (is (= [:retrieve :ask :act] (:order grounded)))
+      ;; Not a reversal — a rotation: :retrieve last -> first, :act middle ->
+      ;; last, :ask first -> middle. Every rank moves, which is the point.
+      (is (empty? (filter #(= (.indexOf ^java.util.List (:order planted) %)
+                              (.indexOf ^java.util.List (:order grounded) %))
+                          modelled-arms))))
+    (testing ":retrieve's predicted mean saturates the clamp under BOTH"
+      ;; 0.5 + 0.762 and 0.406 + 0.762 both exceed 1.0, so the re-grounding does
+      ;; not recover a distinction the clamp had destroyed.
+      (is (= 1.0 (get-in planted [:predictions :retrieve :prediction-mean plant-channel])))
+      (is (= 1.0 (get-in grounded [:predictions :retrieve :prediction-mean plant-channel]))))))
+
+(deftest u25-regrounded-r8-layer-test
+  (let [{:keys [realised order f-pi]} (grounded-run)
+        by-arm (zipmap order f-pi)]
+    (testing "the realised observation is the record's, and the two records agree"
+      (is (= (get-in (s7-fixture grounding-run-id :R2) [:value plant-channel])
+             (get-in (s7-fixture grounding-run-id :R8) [:value plant-channel :observed]))
+          "R8's :observed IS R2's observation — the corpus is internally coherent")
+      (is (= {plant-channel 0.023376623376623377} realised)))
+    (testing "F_pi runs on the grounded layer"
+      (is (= 3 (count f-pi)))
+      (is (every? #(and (number? %) (Double/isFinite (double %))) f-pi))
+      (is (within? 1e-12 0.9665780142890833 (by-arm :act)))
+      (is (within? 1e-12 1.1740177166241454 (by-arm :ask)))
+      (is (within? 1e-12 1.3953278837887004 (by-arm :retrieve))))
+    (testing "STILL monotone in the planted gain — but now for a stated reason"
+      ;; Under the plant this was forced by construction (realised = base, every
+      ;; mean = base + a non-negative gain). Under grounding it is a FACT about
+      ;; the tick: the live observation 0.0234 fell 0.383 BELOW the live
+      ;; prediction 0.4063, so every arm's planted gain moves the prediction
+      ;; further from what happened. The ordering is still not a measurement of
+      ;; which arm is right — the gain is still planted.
+      (is (neg? (:error grounding)))
+      (is (< (:realised grounding) (:level grounding)))
+      (is (= (vec (sort-by by-arm modelled-arms))
+             (vec (sort-by #(get-in recorded-decision [:g-terms %]) modelled-arms)))))))
+
+(deftest u25-regrounding-moves-the-r16-three-law-finding-test
+  ;; U6's headline at R16 was "three laws, three arms": zaif chose :retrieve,
+  ;; the controller-head law chose :ask, the full-score law chose :act, and the
+  ;; arm zaif chose was the WM's LEAST preferred. On the re-grounded level and
+  ;; dispersion that result does not survive.
+  (let [planted (run)
+        grounded (grounded-run)
+        head #(get-in % [:head-decision :action :type])
+        full #(get-in % [:full-score-decision :action :type])]
+    (testing "the U6 result, restated so the comparison is visible"
+      (is (= :retrieve (:arm recorded-decision)))
+      (is (= :ask (head planted)))
+      (is (= :act (full planted)))
+      (is (true? (get-in planted [:full-score-decision :selection-law
+                                  :moved-from-controller-head?])))
+      (is (= 3 (count (distinct [(:arm recorded-decision) (head planted) (full planted)])))))
+    (testing "re-grounded, all three laws agree on the arm zaif actually chose"
+      (is (= :retrieve (head grounded)))
+      (is (= :retrieve (full grounded)))
+      (is (= 1 (count (distinct [(:arm recorded-decision) (head grounded) (full grounded)]))))
+      (is (false? (get-in grounded [:full-score-decision :selection-law
+                                    :moved-from-controller-head?]))))
+    (testing "and zaif's arm goes from LEAST preferred to MOST preferred at G"
+      (is (= :retrieve (last (:order planted))))
+      (is (= :retrieve (first (:order grounded)))))
+    (testing "tau moves with the G spread, so the posterior is not comparable either"
+      (is (within? 1e-12 0.10396979632561867 (:tau planted)))
+      (is (within? 1e-12 0.047056937300750334 (:tau grounded))))))
+
+(deftest u25-grounded-plant-dependence-negative-control-test
+  ;; The control U6 ran, re-run with the plant REMOVED from level and dispersion
+  ;; — every channel now carries its own live predicted mean and variance from
+  ;; the same tick record. If the outcome were now a property of the arms, the
+  ;; order would be the same on every channel. It is not: the channel placement
+  ;; that `plant-real-split` keeps as a plant is still carrying the result.
+  (let [r8 (:value (s7-fixture grounding-run-id :R8))
+        channels (sort (keys r8))
+        runs (for [ch channels
+                   :let [{:keys [level variance realised]} (grounding-for grounding-run-id ch)]]
+               {:channel ch
+                :order (:order (run ch level variance realised))
+                :head (get-in (run ch level variance realised)
+                              [:head-decision :action :type])})]
+    (testing "the corpus carries seven channels at R8, all grounded"
+      (is (= 7 (count channels)))
+      (is (= [:active-repo-ratio :annotation-health :attack-coverage :coupling-density
+              :mission-health :support-coverage :ticks-firing-ratio]
+             (vec channels))))
+    (testing "three different R5 orders and two different head choices remain"
+      (is (= 3 (count (distinct (map :order runs)))))
+      (is (= #{[:retrieve :ask :act] [:act :retrieve :ask] [:act :ask :retrieve]}
+             (set (map :order runs))))
+      (is (= #{:retrieve :act} (set (map :head runs)))))
+    (testing "the conclusion this licenses, and its limit"
+      ;; Re-grounding removed two invented numbers and left the arm-conditional
+      ;; delta and the channel placement planted. So the U6 prohibition stands
+      ;; unchanged: nothing here is a measurement of which arm is right. What
+      ;; U25 adds is that U6's specific R16 result was an artefact of the two
+      ;; numbers that did have counterparts.
       (is (< 1 (count (distinct (map :order runs))))))))
 
 ;; ---------------------------------------------------------------------------
