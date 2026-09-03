@@ -26,6 +26,38 @@ matrix row both cite "carried tension 3" as a premise ("treat as fertile
 until a row cashes it"). So tensions are referenced-by-number working
 objects — but they are prose, unqueryable, statusless.
 
+## 1.5 Verbatim origins (recovered from the evidence store, 2026-09-03)
+
+**The buffer moment Joe pointed at** (this session, turn 143,
+2026-09-02T07:50Z, retrieval record e-aa3dd403-81c0-4c10-b185-4b92525316f2;
+Joe's turn verbatim):
+
+> "yes, exactly ... indeed, the tension could be recorded as a new design
+> pattern (even if just partial or in draft) which would turn the refusals
+> into the source of new design knowledge!"
+
+Two things that moment carries beyond §2's claim: (i) **refusals as the
+mint** — the machine's refusals (and, per U39, its refuted selection
+rationales) are the *source* of new design knowledge, not noise to
+suppress; (ii) **partial/draft is fine** — a tension-pattern needs no
+finished PLoP form to be worth recording.
+
+**The retrieval system answered that turn by surfacing patterns that
+already exist** — the library is ahead of this note:
+`problems/tension-proposes-candidates` ("Tension Proposes Candidates",
+rank 1), `p4ng/tension-detection` ("Tension Detection", rank 2),
+`ukrns/design-as-function-of-evidence` (rank 3), all in futon3a. U41's
+retrofit must LINK to these entities rather than mint duplicates.
+
+**Deeper origins, same store**: 2026-06-05 (Joe, e-a9b20f38...): tensions
+enter the constellation "via a pointer to a *design pattern*" — a peer,
+not an interest-star — and the same day claude-6's grounding "a flexiarg
+pattern is *already* a structured tension"; one of the ratified "strong 6"
+was a tension→pattern. 2026-05-11 (claude-3, e-98825174...): "real pattern
+mining *from* the existing missions" with the PLoP method paper as
+adaptation target. The idea has been converging from three directions for
+four months; this note is where it gets one schema.
+
 ## 2. The claim: a tension is a pattern before it has earned its name
 
 In the paper's own terms (pattern ≡ policy at every grain, §1c; PLoP form),
