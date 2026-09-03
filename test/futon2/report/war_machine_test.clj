@@ -1847,3 +1847,120 @@
       (is (= [:criterion-1] (mapv :criterion (:refused-outcomes r))))
       (is (= [:non-binary-value-on-binary-observable]
              (mapv :reason (:refused-outcomes r)))))))
+
+;; ---------------------------------------------------------------------------
+;; U21 (from zaif S4) — selection -> clocking, the same-tick half. The focus is
+;; a projection of THIS tick's decision; it mints no edge and consults none.
+
+(def ^:private u21-decision
+  {:action {:type :advance-mission :target "M-zaif-harness-v1"
+            :mission-path "holes/missions/M-zaif-harness-v1.md"}})
+
+(def ^:private u21-stale-clock
+  "What the durable read returns on a tick that selects a DIFFERENT mission —
+   the previous tick's selection, which is the lag this row repairs. The shape
+   is the 2026-09-02 record 4abad68c's own :active-mission."
+  {:endpoint "futon2-d/mission/wm-aif-policy-grain-compliance"
+   :mission-id "M-wm-aif-policy-grain-compliance"
+   :clocked-at-ms 1788356843859 :witness-rule "selection-decision"})
+
+(deftest selection-focus-flag-off-is-the-durable-read-unchanged-test
+  (testing "flag off, the readback's input is the S4 focus read, identical"
+    (with-redefs-fn {#'wm/*selection-focus?* false}
+      (fn []
+        (is (= u21-stale-clock
+               (#'wm/tick-mission-focus u21-stale-clock u21-decision)))
+        (is (nil? (#'wm/tick-mission-focus nil u21-decision)))
+        (is (= {:ok false :reason :no-active-clock}
+               (#'wm/tick-mission-focus {:ok false :reason :no-active-clock}
+                                        u21-decision))))))
+  (testing "and the projection adds no field, so the judgement is byte-identical"
+    (let [judgement {:ranked-actions u11-ranked :decision u21-decision}
+          off (with-redefs-fn {#'wm/*selection-focus?* false}
+                (fn [] (#'wm/carry-mission-focus judgement {:mission-id "M-x"})))]
+      (is (= judgement off))
+      (is (not (contains? off :mission-focus))))))
+
+(deftest selection-focus-makes-this-tick-s-selection-the-focus-test
+  (with-redefs-fn {#'wm/*selection-focus?* true}
+    (fn []
+      (let [focus (#'wm/tick-mission-focus u21-stale-clock u21-decision)]
+        (is (= "M-zaif-harness-v1" (:mission-id focus))
+            "the mission this tick selected, not the one it read")
+        (is (= :this-tick-selection (:origin focus)))
+        (is (= "holes/missions/M-zaif-harness-v1.md" (:mission-path focus)))
+        (is (= :advance-mission (:action-type focus)))
+        (is (false? (:agrees-with-durable? focus))
+            "the lag between selection and clock is ON the record")
+        (is (= "M-wm-aif-policy-grain-compliance"
+               (get-in focus [:durable :mission-id]))
+            "and what the durable read said is kept beside it, not overwritten"))
+      (testing "a tick whose selection the clock already agrees with says so"
+        (let [focus (#'wm/tick-mission-focus
+                     (assoc u21-stale-clock :mission-id "M-zaif-harness-v1")
+                     u21-decision)]
+          (is (true? (:agrees-with-durable? focus))))))))
+
+(deftest selection-focus-on-a-non-mission-decision-falls-back-test
+  (testing "no selected mission to focus on: the durable read, tagged, never
+            a fabricated focus"
+    (with-redefs-fn {#'wm/*selection-focus?* true}
+      (fn []
+        (let [focus (#'wm/tick-mission-focus
+                     u21-stale-clock
+                     {:action {:type :address-sorry :target :sorry/a}})]
+          (is (= :durable-clock (:origin focus)))
+          (is (= "M-wm-aif-policy-grain-compliance" (:mission-id focus))))
+        (testing "and a mission action with no target is not a focus either"
+          (let [focus (#'wm/tick-mission-focus
+                       nil {:action {:type :advance-mission}})]
+            (is (= :durable-clock (:origin focus)))
+            (is (nil? (:mission-id focus)))))
+        (testing "the typed absence of the focus read survives the fallback"
+          (let [focus (#'wm/tick-mission-focus
+                       {:ok false :reason :no-active-clock}
+                       {:action {:type :no-op}})]
+            (is (= :no-active-clock (:reason focus)))
+            (is (= :no-active-clock
+                   (:reason (#'wm/mission-c-readback focus u11-ranked {})))
+                "the S4 read's own reason reaches the readback, not the
+                 coarser :no-clocked-mission it falls back to")))))))
+
+(deftest selection-focus-reaches-risk-mis-through-the-U18-gauge-path-test
+  (testing "the selected mission's criteria are read under the DECLARED gauges,
+            and with the gauge observables present a number comes out"
+    (with-redefs-fn {#'wm/*selection-focus?* true}
+      (fn []
+        (let [ranked (assoc-in u11-ranked [0 :action :target] "M-zaif-harness-v1")
+              focus (#'wm/tick-mission-focus u21-stale-clock u21-decision)
+              observation {:worklist-acceptance-state 1.0
+                           :reporting-gate-test-result 0.0
+                           :registry-gap-list-present 1.0}
+              r (#'wm/mission-c-readback focus ranked observation)]
+          (is (= "M-zaif-harness-v1" (:mission r))
+              "risk_mis is computed for the mission the tick selected")
+          (is (= 3 (:criterion-count r)))
+          (is (= 3 (:measurable-count r))
+              "all three reach the risk term through the declared gauges")
+          (is (= {:criterion-1 :worklist-acceptance-state
+                  :criterion-2 :reporting-gate-test-result
+                  :criterion-3 :registry-gap-list-present
+                  :honest-gap-list-published :registry-gap-list-present
+                  :reporting-gate-holds :reporting-gate-test-result
+                  :u-rows-green :worklist-acceptance-state}
+                 (:declared-gauges r)))
+          (is (= :measured (:status r)))
+          (is (some? (:risk-mis (first (:per-mission-action r)))))))))
+  (testing "with the gauge observables absent — the live state — the same path
+            ends in a typed absence naming the missing producer, not a zero"
+    (with-redefs-fn {#'wm/*selection-focus?* true}
+      (fn []
+        (let [ranked (assoc-in u11-ranked [0 :action :target] "M-zaif-harness-v1")
+              focus (#'wm/tick-mission-focus u21-stale-clock u21-decision)
+              r (#'wm/mission-c-readback focus ranked {:sorry-count-norm 0.0})]
+          (is (= :absent (:status r)))
+          (is (= :no-measurable-criteria (:reason r)))
+          (is (= 0 (:measurable-count r)))
+          (is (= [:undeclared-observable :undeclared-observable
+                  :undeclared-observable]
+                 (mapv :reason (:unmeasurable r)))))))))

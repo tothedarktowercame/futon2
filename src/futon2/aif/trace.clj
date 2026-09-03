@@ -262,8 +262,18 @@
          :mission-c must be readable as \"this producer predates C_mis\" versus
          \"the flag was off on this tick\", and only the version separates
          them. It declares nothing about selection — the key is attached after
-         the decision and no selection path reads it."
-  23)
+         the decision and no selection path reads it.
+    24 — adds the present-only :mission-focus, the mission THIS tick selected
+         (U21, 2026-09-03). Additive and default-off
+         (FUTON_WM_SELECTION_FOCUS), so no record's existing bytes change.
+         Bumped under the same ledger rule as 23: absence must be readable as
+         \"this producer predates the selection focus\" versus \"the flag was
+         off on this tick\". It is a SECOND field beside :active-mission, not a
+         redefinition of it — 23's key stays the durable clock read, and 24's
+         is a projection of the tick's own decision, so a reader can measure
+         the lag between them. It declares nothing about selection: the key is
+         attached after the decision and no selection path reads it."
+  24)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the
@@ -608,6 +618,17 @@
     ;; reads it -- it is attached after the decision (`carry-mission-c`).
     (contains? judge-output :mission-c)
     (assoc :mission-c (:mission-c judge-output))
+    ;; U21 selection focus. Present only behind FUTON_WM_SELECTION_FOCUS=1;
+    ;; the enabled record carries the mission THIS tick selected, what the S4
+    ;; durable read said beside it, and whether the two agree, while
+    ;; default-OFF trace bytes remain unchanged. It is a SECOND field rather
+    ;; than a redefinition of `:active-mission` above, because a projection of
+    ;; the tick's own decision and a witnessed clock edge are not the same
+    ;; claim; without both on the record the lag between them is invisible.
+    ;; Attached after the decision (`carry-mission-focus`) and read by nothing
+    ;; in selection.
+    (contains? judge-output :mission-focus)
+    (assoc :mission-focus (:mission-focus judge-output))
     ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
     ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
     ;; tick (see `selection-gain/fold-realized-outcome`). Present-only —

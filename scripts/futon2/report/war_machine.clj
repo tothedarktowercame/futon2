@@ -98,6 +98,29 @@
    tests."
   (= "1" (System/getenv "FUTON_WM_MISSION_C")))
 
+(def ^:dynamic *selection-focus?*
+  "U21 (from zaif S4). `FUTON_WM_SELECTION_FOCUS=1` makes THIS tick's own
+   mission selection the tick's mission focus, so the mission the War Machine
+   just selected is the mission whose completion criteria parameterize C_mis
+   on the same tick.
+
+   The seam it repairs: `load-active-mission` reads the durable clock at the
+   TOP of the tick, and `record-selection-clock!` writes the new edge AFTER the
+   trace is persisted, so the focus a tick reads is always the PREVIOUS tick's
+   selection. Measured on the three 2026-09-02 records: 4abad68c selected
+   M-zaif-harness-v1 while the focus read returned
+   M-wm-aif-policy-grain-compliance, the mission 0a18c4f7 had selected.
+
+   Non-consumption is structural, not promised: the focus is derived from
+   `wm-decision`, which is already final where it is bound, and is read only by
+   `mission-c-readback` and `carry-mission-focus` -- both after ranking and
+   selection. Nothing this flag changes can move a rank, a weight, a
+   temperature, an admissibility verdict or a selection.
+
+   Default OFF; the flag-off judgement is byte-identical. Dynamic binding
+   exists only for isolated tests."
+  (= "1" (System/getenv "FUTON_WM_SELECTION_FOCUS")))
+
 (def ^:dynamic *f-pi-dark?*
   "I2(c) dark readback switch, read once when this namespace loads.
    `FUTON_WM_FPI_DARK=1` computes and records previous-policy fit without
@@ -1524,6 +1547,59 @@
   [result active-mission]
   (cond-> result
     *clock-focus?* (assoc :active-mission active-mission)))
+
+;; ---------------------------------------------------------------------------
+;; U21 -- selection -> clocking, the same-tick half. `mission-action-types` and
+;; the durable clock write live further down (`record-selection-clock!`); this
+;; is the read side of the same seam, and it deliberately does NOT mint or
+;; consult an edge. A clock edge is witnessed evidence; the focus below is a
+;; projection of the tick's own decision, which is why it is a separate field.
+
+(defn- selected-mission-focus
+  "The mission THIS tick selected, as a focus map, or nil when the decision is
+   not a mission action. `decision` is `wm-decision`, already final."
+  [decision]
+  (let [action (:action decision)
+        target (:target action)]
+    (when (and (mission-action-types (:type action)) (some? target))
+      {:mission-id (str target)
+       :mission-path (:mission-path action)
+       :action-type (:type action)})))
+
+(defn- tick-mission-focus
+  "The mission focus the C_mis readback runs on.
+
+   Flag OFF: the durable clock read, unchanged -- the historical path.
+   Flag ON with a mission decision: this tick's selection, carrying what the
+   durable read said beside it, so the lag between the two is ON THE RECORD
+   rather than silently resolved. `:agrees-with-durable?` is the field that
+   makes a stale focus visible in one look.
+   Flag ON with a non-mission decision: the durable read, tagged
+   `:origin :durable-clock` -- there is no selection to focus on, and inventing
+   one would be a fill."
+  [active-mission decision]
+  (if-not *selection-focus?*
+    active-mission
+    (let [durable (select-keys (or active-mission {})
+                               [:mission-id :endpoint :clocked-at-ms
+                                :witness-rule :reason])]
+      (if-let [selected (selected-mission-focus decision)]
+        (assoc selected
+               :origin :this-tick-selection
+               :durable durable
+               :agrees-with-durable?
+               (= (:mission-id selected) (:mission-id durable)))
+        (assoc durable :origin :durable-clock :durable durable
+               :agrees-with-durable? true)))))
+
+(defn- carry-mission-focus
+  "Attach the focus U21 resolved, exactly as `carry-active-mission` attaches
+   the S4 read. `:active-mission` keeps its meaning -- the durable clock -- and
+   this is a second, separately-typed field, because a projection of a decision
+   and a witnessed clock edge are not the same claim."
+  [result mission-focus]
+  (cond-> result
+    *selection-focus?* (assoc :mission-focus mission-focus)))
 
 ;; ---------------------------------------------------------------------------
 ;; U11 (d) -- C_mis readback. Same terminal-projection discipline as the S4
@@ -5859,18 +5935,23 @@
                             vec)
         ;; Losses: avoided states that are currently active
         losses (avoidance-losses mode free-energy)
+        ;; U21: the mission focus the readback runs on. Derived from
+        ;; `wm-decision`, which is final well above this point, and read by
+        ;; nothing but the readback and `carry-mission-focus`. Flag off it IS
+        ;; `active-mission`, so the historical readback input is unchanged.
+        mission-focus (tick-mission-focus active-mission wm-decision)
         ;; U11 (d): computed here, AFTER every ranking/selection binding above
         ;; is final, and attached by `carry-mission-c` below. Nothing between
         ;; this binding and `result0` reads it.
         mission-c-fields (when *mission-c?*
-                           (try (mission-c-readback active-mission
+                           (try (mission-c-readback mission-focus
                                                     wm-ranked+cascades
                                                     observation)
                                 (catch Exception e
                                   {:version mission-c/version :status :absent
                                    :reason :readback-failed
                                    :message (ex-message e)})))
-        result0
+        result0-unfocused
         (carry-mission-c
          (carry-active-mission
           (cond-> (cond-> {:mode mode
@@ -5976,6 +6057,10 @@
            (assoc :run/id run-id))
           active-mission)
          mission-c-fields)
+        ;; U21: the last of the three terminal projections, applied in its own
+        ;; step so the two S4/U11 projections above keep the exact shape their
+        ;; rows built and reviewed.
+        result0 (carry-mission-focus result0-unfocused mission-focus)
         result
         (if trace?
           (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]

@@ -430,8 +430,36 @@
       (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
           "the enabled record differs from the disabled one in exactly this key
            (:timestamp aside, which trace-record stamps per call)")
-      (is (= 23 trace/trace-schema-version)
+      (is (= 24 trace/trace-schema-version)
           "and the bump is what separates 'producer predates C_mis' from 'flag was off'"))))
+
+(deftest trace-record-carries-typed-mission-focus-test
+  (testing "U21: present-only, a SECOND field beside :active-mission, and the
+            flag-off record is byte-identical"
+    (let [active {:endpoint "futon2-d/mission/wm-aif-policy-grain-compliance"
+                  :mission-id "M-wm-aif-policy-grain-compliance"
+                  :clocked-at-ms 1788356843859
+                  :witness-rule "selection-decision"}
+          focus {:mission-id "M-zaif-harness-v1"
+                 :mission-path "holes/missions/M-zaif-harness-v1.md"
+                 :action-type :advance-mission
+                 :origin :this-tick-selection
+                 :durable (dissoc active :witness-rule)
+                 :agrees-with-durable? false}
+          off (trace/trace-record sample-judge-output)
+          on (trace/trace-record (assoc sample-judge-output
+                                        :active-mission active
+                                        :mission-focus focus))]
+      (is (not (contains? off :mission-focus))
+          "no key at all when the flag never put one on the judgement")
+      (is (= focus (:mission-focus on)))
+      (is (= active (:active-mission on))
+          "the durable clock read keeps its own key and its own meaning")
+      (is (false? (:agrees-with-durable? (:mission-focus on)))
+          "so the lag between selection and clock survives onto the record")
+      (is (= (dissoc off :timestamp)
+             (dissoc on :mission-focus :active-mission :timestamp))
+          "the enabled record differs in exactly those two keys"))))
 
 (deftest write-trace-appends-test
   (testing "two writes produce two records in the file"

@@ -1,0 +1,68 @@
+U21 -- selection -> clocking, the same-tick half
+=================================================
+
+Corpus: wm-trace-2026-09-02.edn -- 3 records.
+Replay only: no live tick, no run lock, nothing written under data/.
+
+1. THE SEAM, WITH POINTERS
+
+   clock-write      scripts/futon2/report/war_machine.clj:1786 record-selection-clock!, called from write-trace-and-clock! at :1828
+   decision         scripts/futon2/report/war_machine.clj:5859 wm-decision
+   flag             scripts/futon2/report/war_machine.clj:101 *selection-focus?* / FUTON_WM_SELECTION_FOCUS
+   focus-read       scripts/futon2/report/war_machine.clj:1539 load-active-mission, called at :5348
+   focus-resolver   scripts/futon2/report/war_machine.clj:1569 tick-mission-focus, called at :5942
+   gauges           scripts/futon2/report/war_machine.clj:1642 mission-c-declared-gauges (U18)
+   projection       scripts/futon2/report/war_machine.clj:1595 carry-mission-focus, applied at :6063
+   readback         scripts/futon2/report/war_machine.clj:1679 mission-c-readback, called at :5947
+
+   The tick reads the durable clock at its TOP (load-active-mission,
+   called at war_machine.clj:5348) and writes the new edge AFTER the
+   trace is persisted (record-selection-clock!, launched from
+   write-trace-and-clock!). So the focus a tick reads is the PREVIOUS
+   tick's selection, and the mission this tick selects parameterizes
+   nothing until the next one.
+
+2. THE LAG, MEASURED ON THE CORPUS
+
+   SELECTED this tick                     FOCUS the tick read                    run
+   M-wm-aif-policy-grain-compliance       -- no-active-clock                     0a18c4f7
+   M-zaif-harness-v1                      M-wm-aif-policy-grain-compliance       4abad68c
+   M-expressions-of-interest              M-zaif-harness-v1                      801976e7
+
+   3 of 3 records selected a mission the focus read did not name.
+
+3. FLAG ON: THE SELECTED MISSION'S CRITERIA REACH risk_mis
+
+   run 0a18c4f7 -- selected M-wm-aif-policy-grain-compliance
+     flag off  mission=                                       status=absent reason=no-active-clock
+     flag on   mission=M-wm-aif-policy-grain-compliance       status=absent reason=no-measurable-criteria
+               criteria=0 measurable=0 gauges=none for this mission
+     probe     status=absent measurable=0 risk_mis=[]
+
+   run 4abad68c -- selected M-zaif-harness-v1
+     flag off  mission=M-wm-aif-policy-grain-compliance       status=absent reason=no-measurable-criteria
+     flag on   mission=M-zaif-harness-v1                      status=absent reason=no-measurable-criteria
+               criteria=3 measurable=0 gauges=6 declared (U18)
+               unmeasurable: undeclared-observable, undeclared-observable, undeclared-observable
+     probe     status=measured measurable=3 risk_mis=[3.333378732232873]
+
+   run 801976e7 -- selected M-expressions-of-interest
+     flag off  mission=M-zaif-harness-v1                      status=absent reason=no-measurable-criteria
+     flag on   mission=M-expressions-of-interest              status=absent reason=no-measurable-criteria
+               criteria=6 measurable=0 gauges=none for this mission
+               unmeasurable: no-declared-measurement, no-declared-measurement, no-declared-measurement, no-declared-measurement, no-declared-measurement, no-declared-measurement
+     probe     status=absent measurable=0 risk_mis=[]
+
+4. WHAT THIS DOES NOT DO
+
+   The flag is default OFF and the flag-off judgement is byte-identical:
+   tick-mission-focus returns the durable read unchanged, and
+   carry-mission-focus adds no field. Flipping the default is J-gated.
+   The focus is derived from wm-decision, which is final where it is
+   bound, and is read only by mission-c-readback and the projection --
+   both after ranking and selection, so nothing it changes can move a
+   rank, a weight, a temperature, an admissibility verdict or a choice.
+   It mints NO clock edge: a clock edge is witnessed evidence and this
+   is a projection of the tick's own decision, which is why
+   :active-mission keeps its meaning and :mission-focus is separate.
+
