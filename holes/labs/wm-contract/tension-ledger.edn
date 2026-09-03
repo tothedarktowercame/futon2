@@ -287,7 +287,16 @@
           :by "claude-1 (joe dictation, Rob's rewrite case)",
           :row :NOTE-aif-spec-gap,
           :evidence
-          ["NOTE-aif-spec-gap.md section 4: the legacy-rewrite problem instantiates the tension in business terms -- the old code underspecifies itself, so both an extensional spec (old system + declared envelope) and a process spec (the tetrahedron's role) are required; Rob's C-to-Python Lean translation as the measured difficulty datum"]}],
+          ["NOTE-aif-spec-gap.md section 4: the legacy-rewrite problem instantiates the tension in business terms -- the old code underspecifies itself, so both an extensional spec (old system + declared envelope) and a process spec (the tetrahedron's role) are required; Rob's C-to-Python Lean translation as the measured difficulty datum"]}
+  #:event{:id :evidence#zaif-v1/T3-paradigm-rewrite,
+          :seq 12,
+          :tension :zaif-v1/T3,
+          :type :evidence-added,
+          :at "2026-09-03",
+          :by "claude-1 (joe dictation)",
+          :row :NOTE-aif-spec-gap,
+          :evidence
+          ["NOTE-aif-spec-gap.md section 5: T3's poles reframed by the rewrite reading -- 'formal claim vs fertile analogy' is 'conformance contract vs inspiration', and the mapping table is the PROCESS SPEC of a paradigm rewrite; the campaign has cashed toward the contract side (13/13 per-node tests, the U11 shared-schema identity condition) without yet declaring it. Not a cashing: T3 remains deliberately carried; this event records the direction."]}],
  :ledger/id :wm-contract/tension-ledger,
  :ledger/cross-cites
  [{:row :U39,

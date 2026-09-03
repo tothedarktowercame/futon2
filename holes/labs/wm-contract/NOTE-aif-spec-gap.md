@@ -73,3 +73,31 @@ PROCESS spec (what maps to what, what counts as equivalent, how conformance
 is checked and staged) — the tetrahedron's role. The campaign's machinery
 (live pins, negative controls, dated-additive windows, kept-vs-ruled-changed
 verdicts, the fence) is a working instance of (2). Feeds Part 3.
+
+## 5. The retrodiction: zaif was already a paradigm rewrite (Joe, same evening)
+
+> "we've kind of tried something already a little bit like this idea with
+> our zaif work with claude-2, where we said, here's a specification of AIF
+> that we're using in the war machine. Now let's rewrite it for agents as a
+> harness... because the war machine itself is described as a supplemental
+> harness for off-the-shelf coding agents. It just didn't anticipate that
+> we'd be getting a raw API like we get. So it is kind of a rewrite. Just
+> not from one programming language to another, but from one programming
+> paradigm to another."
+
+Checked against the record, the mapping holds piece by piece: the WM's AIF
+spec played "old system as extensional spec"; the changed envelope was raw
+API access (unanticipated by the original description); SPEC-zaif-harness-v1's
+lifecycle-to-R-node mapping table WAS the process spec, with the
+anti-glibness rule ("a mapping row without a unit test is decoration and
+does not ship") as its conformance discipline; the U10 per-node matrix is
+the conformance audit; the per-node rows (13/13) are the per-behaviour
+verdicts; the boards are the ledger. Carried tension T3 ("formal claim or
+fertile analogy") is exactly the two-spec question -- is the mapping a
+conformance contract or an inspiration -- and the campaign has been cashing
+it toward the contract side without saying so: per-node tests green,
+the U11 shared-schema identity condition as a cross-paradigm conformance
+clause. Consequence for Part 3: language-to-language rewrite is the SPECIAL
+case; paradigm rewrite (monolith->services, batch->streaming, tick-loop->
+agent-harness) is the general and commercially commoner one, and the case
+study for it already exists in this repo's history.
