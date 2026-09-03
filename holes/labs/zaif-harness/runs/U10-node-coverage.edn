@@ -78,17 +78,22 @@
    :blocked-by [:D8 :U11 :S7]}
 
   {:node :R5
-   :spec-test :partial
+   :spec-test :covered
    :tests [{:path "test/futon2/aif/zaif_full_loop_test.clj" :line 363
-            :substrate :fixture-only :provenance :planted}]
+            :substrate :fixture-only :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 93
+            :substrate :zaif :provenance :real-table}
+           {:path "../futon3c/test/futon3c/agents/zaif_inputs_test.clj" :line 121
+            :substrate :wm :provenance :real
+            :record-id "0a18c4f7-758e-400a-8223-9c52edf07450"}]
    :shared-machinery
    {:status :mapped-separate
     :evidence ["src/futon2/aif/efe.clj:659" "src/futon2/aif/efe.clj:679"
                "test/futon2/aif/zaif_full_loop_test.clj:169"
                "../futon3c/src/futon3c/agents/zaif_controller.clj:105"]
-    :note "U6 calls WM risk and ambiguity functions, but shipped zaif computes its own scalar arm terms. The mapping is exercised only after U6 plants Q."}
-   :gap "The U6 mission C and Q are planted, so its G ranking is not a real zaif outcome. Live decisions also lack mission attribution, preventing a real mission-risk test."
-   :blocked-by [:D10 :S7]}
+    :note "The implementations remain separate. The zaif test now proves that D10 mission attribution selects a real gamma cell and preserves its provenance in decision evidence; the paired WM test reads the tracked R5 fixture and pins its mission-attributed risk-plus-ambiguity identity."}
+   :gap nil
+   :blocked-by []}
 
   {:node :R6
    :spec-test :partial
