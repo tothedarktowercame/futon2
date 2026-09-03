@@ -57,8 +57,14 @@ i=0
 while [ $i -lt "$MAX_ITER" ]; do
   i=$((i+1))
   ledger_ok || { log "ledger invalid; stopping"; notify "ledger invalid before work"; exit 1; }
-  bb "$HERE/build_step.bb" unblock | tee -a "$LOG"
-  if [ -n "$(bb "$HERE/build_step.bb" unblock)" ]; then (cd "$HOME/code/futon2" && git add holes/labs/wm-contract/worklist.edn && git commit -q -m "worklist: wm-build-loop unblocked rows whose :depends-on are done"); fi
+  UNBLOCKED="$(bb "$HERE/build_step.bb" unblock)"
+  # Template bug fix (claude-2, 2026-09-03): calling unblock twice meant the
+  # second call saw nothing left and the flip was NEVER committed -- the edit
+  # lingered as a tracked modification and could stall the pre-flight.
+  if [ -n "$UNBLOCKED" ]; then
+    echo "$UNBLOCKED" | tee -a "$LOG"
+    (cd "$HOME/code/futon2" && git add holes/labs/wm-contract/worklist.edn && git commit -q -m "worklist: wm-build-loop unblocked rows whose :depends-on are done")
+  fi
   next="$(bb "$HERE/build_step.bb" next-open)"; unrev="$(bb "$HERE/build_step.bb" unreviewed)"
   log "iteration $i: next-open=$next unreviewed=[$unrev] counts=$(bb "$HERE/build_step.bb" counts)"
   [ -z "$unrev" ] && stall_check "$(bb "$HERE/build_step.bb" stall-key)"
