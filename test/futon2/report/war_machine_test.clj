@@ -1998,3 +1998,250 @@
           (is (= [:undeclared-observable :undeclared-observable
                   :undeclared-observable]
                  (mapv :reason (:unmeasurable r)))))))))
+
+;; ---------------------------------------------------------------------------
+;; U43 (minted by U21) — reconciling the focus projection with the witnessed
+;; clock edge. The row's finding: `:agrees-with-durable?` is one boolean over at
+;; least four states, and the state it was minted for — the previous tick's
+;; fire-and-forget clock write never landing — is invisible in all of them.
+
+(def ^:private u43-prev-record
+  "The previous tick's persisted record. Its identity is what
+   `record-selection-clock!` stamps into the edge's `witness.source`, so it is
+   what says whether that write landed."
+  {:run/id "0a18c4f7-758e-400a-8223-9c52edf07450"
+   :timestamp "2026-09-02T06:10:00Z"
+   :decision {:action {:type :advance-mission
+                       :target "M-wm-aif-policy-grain-compliance"}}})
+
+(defn- u43-focus
+  [active decision prev]
+  (with-redefs-fn {#'wm/*selection-focus?* true #'wm/*focus-reconcile?* true}
+    (fn [] (#'wm/tick-mission-focus active decision prev))))
+
+(deftest focus-reconcile-flag-off-adds-no-field-test
+  (testing "U21's record is unchanged when only U21's flag is on"
+    (with-redefs-fn {#'wm/*selection-focus?* true #'wm/*focus-reconcile?* false}
+      (fn []
+        (let [focus (#'wm/tick-mission-focus u21-stale-clock u21-decision
+                                             u43-prev-record)]
+          (is (not (contains? focus :reconciliation)))
+          (is (false? (:agrees-with-durable? focus)))
+          (is (= (#'wm/tick-mission-focus u21-stale-clock u21-decision) focus)
+              "and the two-argument arity U21 shipped returns the same map")))))
+  (testing "and the S4 clock read keeps its four-key shape"
+    (let [body (pr-str {:hyperedges
+                        [{:hx/endpoints ["agent:war-machine"
+                                         "futon4-d/mission/next"]
+                          :hx/props {:agent-id "war-machine"
+                                     :mission-id "M-next"
+                                     :clocked-at-ms 1700
+                                     :witness {:rule "selection-decision"
+                                               :source "run-9"}}}]})]
+      (with-redefs-fn {#'wm/*clock-focus?* true
+                       #'wm/*focus-reconcile?* false
+                       #'http/get (fn [_ _] {:status 200 :body body})}
+        (fn []
+          (is (= {:endpoint "futon4-d/mission/next" :mission-id "M-next"
+                  :clocked-at-ms 1700 :witness-rule "selection-decision"}
+                 (#'wm/load-active-mission))
+              "no :witness-source key while U43 is off"))))))
+
+(deftest focus-reconcile-surfaces-the-witness-source-test
+  (testing "the edge's witness source — dropped by the S4 read since S4 — is
+            the discriminator, so U43's flag keeps it"
+    (let [body (pr-str {:hyperedges
+                        [{:hx/endpoints ["agent:war-machine"
+                                         "futon4-d/mission/next"]
+                          :hx/props {:agent-id "war-machine"
+                                     :mission-id "M-next"
+                                     :clocked-at-ms 1700
+                                     :witness {:rule "selection-decision"
+                                               :source "run-9"}}}]})]
+      (with-redefs-fn {#'wm/*clock-focus?* true
+                       #'wm/*focus-reconcile?* true
+                       #'http/get (fn [_ _] {:status 200 :body body})}
+        (fn []
+          (is (= "run-9" (:witness-source (#'wm/load-active-mission))))))))
+  (testing "an edge whose witness carries no source reads as nil, not as absent
+            — the key is present so the reader can tell the two apart"
+    (let [body (pr-str {:hyperedges
+                        [{:hx/endpoints ["agent:war-machine"
+                                         "futon4-d/mission/next"]
+                          :hx/props {:agent-id "war-machine"
+                                     :mission-id "M-next"
+                                     :clocked-at-ms 1700
+                                     :witness {:rule "selection-decision"}}}]})]
+      (with-redefs-fn {#'wm/*clock-focus?* true
+                       #'wm/*focus-reconcile?* true
+                       #'http/get (fn [_ _] {:status 200 :body body})}
+        (fn []
+          (let [active (#'wm/load-active-mission)]
+            (is (contains? active :witness-source))
+            (is (nil? (:witness-source active)))))))))
+
+(deftest focus-reconcile-separates-a-landed-lag-from-a-lost-write-test
+  (testing "the durable edge names the PREVIOUS trace record: the write landed
+            and this is the seam's designed one-tick lag"
+    (let [active (assoc u21-stale-clock
+                        :witness-source "0a18c4f7-758e-400a-8223-9c52edf07450")
+          r (:reconciliation (u43-focus active u21-decision u43-prev-record))]
+      (is (= :lagged-write-landed (:case r)))
+      (is (true? (:previous-write-landed? r)))
+      (is (true? (:comparable? r)))
+      (is (= "M-zaif-harness-v1" (:selected-mission-id r)))
+      (is (= "M-wm-aif-policy-grain-compliance" (:durable-mission-id r)))
+      (is (= "M-wm-aif-policy-grain-compliance"
+             (:previous-selected-mission-id r)))))
+  (testing "the durable edge names something OLDER: the previous tick's
+            fire-and-forget write never landed, which is the failure
+            `record-selection-clock!` drops inside its future"
+    (let [active (assoc u21-stale-clock :witness-source "some-older-run")
+          r (:reconciliation (u43-focus active u21-decision u43-prev-record))]
+      (is (= :lagged-write-missing (:case r)))
+      (is (false? (:previous-write-landed? r)))
+      (is (= "some-older-run" (:durable-witness-source r)))
+      (is (= "0a18c4f7-758e-400a-8223-9c52edf07450" (:previous-trace-id r)))))
+  (testing "U21's boolean cannot tell those two apart — same false, both times"
+    (let [landed (u43-focus (assoc u21-stale-clock :witness-source
+                                   "0a18c4f7-758e-400a-8223-9c52edf07450")
+                            u21-decision u43-prev-record)
+          lost (u43-focus (assoc u21-stale-clock :witness-source "some-older-run")
+                          u21-decision u43-prev-record)]
+      (is (= false (:agrees-with-durable? landed) (:agrees-with-durable? lost)))
+      (is (not= (:case (:reconciliation landed))
+                (:case (:reconciliation lost)))))))
+
+(deftest focus-reconcile-types-an-unmeasurable-lag-rather-than-guessing-test
+  (testing "no witness source on the edge: unknown, and named as unknown"
+    (let [r (:reconciliation (u43-focus u21-stale-clock u21-decision
+                                        u43-prev-record))]
+      (is (= :lag-unattributable (:case r)))
+      (is (= :unknown (:previous-write-landed? r)))
+      (is (= :no-witness-source-on-edge (:unknown-reason r)))))
+  (testing "no previous trace record to compare against: also unknown, and the
+            reason distinguishes it from the missing-source case"
+    (let [active (assoc u21-stale-clock :witness-source "run-9")
+          r (:reconciliation (u43-focus active u21-decision nil))]
+      (is (= :lag-unattributable (:case r)))
+      (is (= :unknown (:previous-write-landed? r)))
+      (is (= :no-previous-trace-record (:unknown-reason r)))))
+  (testing "the previous record's timestamp is the identity when it carries no
+            run id — the same rule the writer stamps (`clock-source`)"
+    (let [prev {:timestamp "2026-09-02T06:10:00Z"
+                :decision {:action {:type :advance-mission :target "M-a"}}}
+          active (assoc u21-stale-clock :witness-source "2026-09-02T06:10:00Z")
+          r (:reconciliation (u43-focus active u21-decision prev))]
+      (is (= :lagged-write-landed (:case r))))))
+
+(deftest focus-reconcile-splits-the-four-states-U21-s-boolean-merged-test
+  (testing "clock never read: the comparison is undefined, not failed —
+            U21's boolean says `false` here, which reads as disagreement"
+    (let [focus (u43-focus nil u21-decision u43-prev-record)]
+      (is (false? (:agrees-with-durable? focus)))
+      (is (= :clock-not-read (:case (:reconciliation focus))))
+      (is (false? (:comparable? (:reconciliation focus))))
+      (is (= :clock-focus-flag-off (:unknown-reason (:reconciliation focus))))))
+  (testing "the read failed: unmeasured, not absent"
+    (let [r (:reconciliation (u43-focus {:ok false :reason :clock-unreadable}
+                                        u21-decision u43-prev-record))]
+      (is (= :durable-unreadable (:case r)))
+      (is (false? (:comparable? r)))))
+  (testing "the store holds no edge: nothing to disagree with"
+    (let [r (:reconciliation (u43-focus {:ok false :reason :no-active-clock}
+                                        u21-decision u43-prev-record))]
+      (is (= :no-durable-edge (:case r)))
+      (is (false? (:comparable? r)))))
+  (testing "no mission selected this tick: there is no projection to compare"
+    (let [r (:reconciliation (u43-focus u21-stale-clock
+                                        {:action {:type :address-sorry}}
+                                        u43-prev-record))]
+      (is (= :no-selection-this-tick (:case r)))
+      (is (false? (:comparable? r)))))
+  (testing "the two sides agree"
+    (let [r (:reconciliation
+             (u43-focus (assoc u21-stale-clock :mission-id "M-zaif-harness-v1")
+                        u21-decision u43-prev-record))]
+      (is (= :agrees (:case r)))
+      (is (true? (:comparable? r)))))
+  (testing "every case produced above is in the declared vocabulary"
+    (is (every? wm/focus-reconciliation-cases
+                (map #(:case (:reconciliation %))
+                     [(u43-focus nil u21-decision u43-prev-record)
+                      (u43-focus {:ok false :reason :clock-unreadable}
+                                 u21-decision u43-prev-record)
+                      (u43-focus {:ok false :reason :no-active-clock}
+                                 u21-decision u43-prev-record)
+                      (u43-focus u21-stale-clock {:action {:type :address-sorry}}
+                                 u43-prev-record)
+                      (u43-focus (assoc u21-stale-clock :mission-id
+                                        "M-zaif-harness-v1")
+                                 u21-decision u43-prev-record)
+                      (u43-focus (assoc u21-stale-clock :witness-source
+                                        "0a18c4f7-758e-400a-8223-9c52edf07450")
+                                 u21-decision u43-prev-record)
+                      (u43-focus (assoc u21-stale-clock :witness-source "old")
+                                 u21-decision u43-prev-record)
+                      (u43-focus u21-stale-clock u21-decision
+                                 u43-prev-record)]))))
+  (testing "and the reconciliation moves nothing the readback reads: the focus
+            the C_mis path receives is the same map with one key added"
+    (let [with-r (u43-focus u21-stale-clock u21-decision u43-prev-record)
+          without (with-redefs-fn {#'wm/*selection-focus?* true
+                                   #'wm/*focus-reconcile?* false}
+                    (fn [] (#'wm/tick-mission-focus u21-stale-clock u21-decision
+                                                    u43-prev-record)))]
+      (is (= without (dissoc with-r :reconciliation))))))
+
+(deftest focus-reconcile-renders-both-fields-on-two-lines-test
+  (testing "U43 (b): the durable clock and the tick's focus are two claims and
+            get two lines; the durable line is byte-identical to U21's"
+    (let [active {:endpoint "futon4-d/mission/next" :mission-id "M-next"
+                  :clocked-at-ms 1700 :witness-rule "selection-decision"}
+          focus (u43-focus (assoc u21-stale-clock :witness-source "old")
+                           u21-decision u43-prev-record)
+          md (wm/render-war-machine
+              {:now "2026-09-03" :days 7
+               :judgement {:active-mission active :mission-focus focus
+                           :mode :steady :mode-prior 0.5
+                           :free-energy {:controller-score 0.0
+                                         :preference-gap-score 0.0
+                                         :coverage-uncertainty-pressure 0.0}}})
+          lines (->> (str/split-lines md)
+                     (filterv #(or (str/starts-with? % "**Active mission:")
+                                   (str/starts-with? % "**Tick focus:"))))]
+      (is (= 2 (count lines)) "two lines, never collapsed into one")
+      (is (= "**Active mission:** futon4-d/mission/next (M-next, clocked 1700, witness selection-decision)"
+             (first lines)))
+      (is (str/starts-with? (second lines) "**Tick focus:** M-zaif-harness-v1"))
+      (is (str/includes? (second lines) "this-tick-selection"))
+      (is (str/includes? (second lines)
+                         "durable clock: M-wm-aif-policy-grain-compliance"))
+      (is (str/includes? (second lines) "agrees: no"))
+      (is (str/includes? (second lines) "case: lagged-write-missing"))
+      (is (str/includes? (second lines) "previous write landed: NO"))))
+  (testing "a judgement with no :mission-focus renders exactly the durable line
+            — the default-off report is unchanged"
+    (let [md (wm/render-war-machine
+              {:now "2026-09-03" :days 7
+               :judgement {:active-mission {:ok false :reason :no-active-clock}
+                           :mode :steady :mode-prior 0.5
+                           :free-energy {:controller-score 0.0
+                                         :preference-gap-score 0.0
+                                         :coverage-uncertainty-pressure 0.0}}})]
+      (is (str/includes? md "**Active mission:** unavailable (no-active-clock)"))
+      (is (not (str/includes? md "**Tick focus:**")))))
+  (testing "a focus with no reconciliation still renders both fields; the case
+            clause is present only when the record carries one"
+    (let [focus (with-redefs-fn {#'wm/*selection-focus?* true
+                                 #'wm/*focus-reconcile?* false}
+                  (fn [] (#'wm/tick-mission-focus u21-stale-clock u21-decision)))
+          md (wm/render-war-machine
+              {:now "2026-09-03" :days 7
+               :judgement {:mission-focus focus :mode :steady :mode-prior 0.5
+                           :free-energy {:controller-score 0.0
+                                         :preference-gap-score 0.0
+                                         :coverage-uncertainty-pressure 0.0}}})]
+      (is (str/includes? md "**Tick focus:** M-zaif-harness-v1"))
+      (is (str/includes? md "durable clock: M-wm-aif-policy-grain-compliance"))
+      (is (not (str/includes? md "case: "))))))

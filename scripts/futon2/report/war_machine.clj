@@ -122,6 +122,47 @@
    exists only for isolated tests."
   (= "1" (System/getenv "FUTON_WM_SELECTION_FOCUS")))
 
+(def ^:dynamic *focus-reconcile?*
+  "U43 (minted by U21). `FUTON_WM_FOCUS_RECONCILE=1` makes the disagreement
+   between the tick's own focus projection and the witnessed durable clock edge
+   a TYPED record rather than a boolean, and says whether the PREVIOUS tick's
+   clock write ever landed.
+
+   What U21 left open: `:agrees-with-durable?` is one boolean carrying at least
+   four different states -- the clock names another mission, the clock was never
+   read (`*clock-focus?*` off, `active-mission` nil, so the projection is
+   compared against `{}` and reports `false`), the read failed
+   (`:clock-unreadable`), and the store holds no edge (`:no-active-clock`). And
+   the case the row was minted for is invisible in all of them:
+   `record-selection-clock!` is a fire-and-forget `future` whose failure is
+   printed to stderr and dropped, so a durable edge that is one tick stale
+   (write landed, designed lag) and one that is older than that (write never
+   landed) read identically from inside a tick.
+
+   What this flag adds: `:reconciliation` on `:mission-focus`, a closed
+   eight-case vocabulary, and the discriminator -- the clock edge's own
+   `witness.source` names the trace record that caused it
+   (`clock-source`, war_machine.clj:1791), so comparing it with the PREVIOUS
+   trace record's identity answers `did the previous tick's write land?` from a
+   witness rather than from an assumption. It also surfaces `:witness-source` on
+   the S4 clock read, which `active-clock-edge->mission` otherwise drops.
+
+   What it does NOT do: it mints no clock edge, retries no write, and changes no
+   focus. The reconciliation is computed from `wm-decision` and the previous
+   trace record, both already final, and is attached by `carry-mission-focus`
+   after ranking and selection -- the same terminal-projection discipline S4,
+   U11 and U21 hold to, so nothing here can move a rank, a weight, a
+   temperature, an admissibility verdict or a selection.
+
+   Depends on FUTON_WM_SELECTION_FOCUS=1 for its carrier (there is no
+   `:mission-focus` without it) and on FUTON_WM_CLOCK_FOCUS=1 for the durable
+   side (without it the case is `:clock-not-read`, which is exactly the state
+   U21's boolean rendered as disagreement).
+
+   Default OFF; the flag-off judgement is byte-identical. Dynamic binding
+   exists only for isolated tests."
+  (= "1" (System/getenv "FUTON_WM_FOCUS_RECONCILE")))
+
 (def ^:dynamic *f-pi-dark?*
   "I2(c) dark readback switch, read once when this namespace loads.
    `FUTON_WM_FPI_DARK=1` computes and records previous-policy fit without
@@ -1489,11 +1530,21 @@
         witness (hx-prop hx :witness)
         witness-rule (or (get witness :rule) (get witness "rule"))]
     (when (and (some #{agent-endpoint} endpoints) endpoint)
-      {:endpoint endpoint
-       :mission-id (or (hx-prop hx :mission-id)
-                       (mission-id-for-clock-witness endpoint))
-       :clocked-at-ms clocked-at-ms
-       :witness-rule witness-rule})))
+      (cond-> {:endpoint endpoint
+               :mission-id (or (hx-prop hx :mission-id)
+                               (mission-id-for-clock-witness endpoint))
+               :clocked-at-ms clocked-at-ms
+               :witness-rule witness-rule}
+        ;; U43: the edge's witness carries `source` -- the identity of the trace
+        ;; record whose selection caused this edge (`clock-source`) -- and the
+        ;; S4 read has always dropped it. It is the only field that tells a
+        ;; later tick whether the previous tick's fire-and-forget write landed,
+        ;; so U43 keeps it. Behind U43's own flag, and always assoc'd when that
+        ;; flag is on, so a nil reads as "this edge carries no source" and not
+        ;; as "the flag was off": the four keys above keep the exact shape S4
+        ;; built and every default-off record already carries.
+        *focus-reconcile?*
+        (assoc :witness-source (or (get witness :source) (get witness "source")))))))
 
 (defn- read-active-mission-clock
   "Read `agent:war-machine`'s current durable clock. The substrate type query is
@@ -1556,6 +1607,16 @@
 ;; consult an edge. A clock edge is witnessed evidence; the focus below is a
 ;; projection of the tick's own decision, which is why it is a separate field.
 
+(defn- trace-record-identity
+  "The value that identifies a trace record on the clock seam: RUN11's run id
+   when present, otherwise that record's own timestamp. Defined ONCE and used by
+   both sides -- `clock-source` (:1848) stamps it into the durable edge's
+   `witness.source` when the write is launched, and `focus-reconciliation`
+   below compares it back. Two copies of this rule would let the writer and the
+   reader disagree and report a landed write as missing."
+  [trace-record]
+  (or (:run/id trace-record) (:timestamp trace-record)))
+
 (defn- selected-mission-focus
   "The mission THIS tick selected, as a focus map, or nil when the decision is
    not a mission action. `decision` is `wm-decision`, already final."
@@ -1567,6 +1628,115 @@
        :mission-path (:mission-path action)
        :action-type (:type action)})))
 
+(def focus-reconciliation-cases
+  "U43's CLOSED vocabulary for the relation between this tick's focus projection
+   and the witnessed durable clock edge. Closed on purpose: U21 recorded the
+   relation as one boolean, and a boolean cannot separate `the clock names
+   another mission` from `the clock was never read`, which is why
+   `:agrees-with-durable?` reads `false` on a tick that never consulted the
+   store. Each case says which of the two sides is missing, or -- when both are
+   present and disagree -- whether the previous tick's write landed.
+
+     :clock-not-read         FUTON_WM_CLOCK_FOCUS off, so `active-mission` is
+                             nil. The durable side was never consulted and the
+                             comparison is undefined, not failed.
+     :durable-unreadable     the S4 read returned `:clock-unreadable`. The
+                             disagreement is UNMEASURED, not absent.
+     :no-durable-edge        the S4 read succeeded and the store holds no
+                             current edge (`:no-active-clock`). Nothing to
+                             disagree with.
+     :no-selection-this-tick the decision is not a mission action, so there is
+                             no projection; the focus IS the durable read.
+     :agrees                 both sides present and naming the same mission.
+     :lagged-write-landed    both present, different missions, and the edge's
+                             witness source names the PREVIOUS trace record --
+                             the previous tick's write landed and this is the
+                             seam's designed one-tick lag, which the next tick
+                             clears.
+     :lagged-write-missing   both present, different missions, and the edge's
+                             witness source names something OTHER than the
+                             previous trace record -- the previous tick's
+                             fire-and-forget write never landed. This is the
+                             failure `record-selection-clock!` drops inside its
+                             future, and it is the case U43 exists to surface.
+     :lag-unattributable     both present and different, and the discriminator
+                             could not run: the edge carries no witness source,
+                             or there is no previous trace record to compare it
+                             with. An unknown, typed as one."
+  #{:clock-not-read :durable-unreadable :no-durable-edge :no-selection-this-tick
+    :agrees :lagged-write-landed :lagged-write-missing :lag-unattributable})
+
+(defn- focus-reconciliation
+  "U43. What the tick RECORDS when its focus projection and the witnessed clock
+   edge disagree. Pure: derived from `active-mission` (the S4 read, taken at the
+   top of the tick), `decision` (`wm-decision`, already final) and
+   `prev-trace-record` (the last persisted record, already loaded beside the
+   clock read). It writes nothing, mints no edge and retries no write --
+   the chosen option is `record the divergence and let a later tick clear it`,
+   registered under `:choices :focus-clock-reconciliation` in
+   aif-equations.edn.
+
+   `:previous-write-landed?` is deliberately three-valued (true / false /
+   :unknown) rather than a boolean, for the reason the case vocabulary is
+   closed: `not landed` and `not measurable` are different findings and the
+   second must never be rendered as the first."
+  [active-mission decision prev-trace-record]
+  (let [selected (selected-mission-focus decision)
+        selected-id (:mission-id selected)
+        durable-id (:mission-id active-mission)
+        prev-id (some-> prev-trace-record trace-record-identity)
+        prev-selected (some-> prev-trace-record :decision selected-mission-focus
+                              :mission-id)
+        witness-source (:witness-source active-mission)
+        base {:selected-mission-id selected-id
+              :durable-mission-id durable-id
+              :previous-trace-id (some-> prev-id str)
+              :previous-selected-mission-id prev-selected}]
+    (cond
+      (nil? active-mission)
+      (assoc base :case :clock-not-read :comparable? false
+             :previous-write-landed? :unknown
+             :unknown-reason :clock-focus-flag-off)
+
+      (= :clock-unreadable (:reason active-mission))
+      (assoc base :case :durable-unreadable :comparable? false
+             :previous-write-landed? :unknown
+             :unknown-reason :clock-unreadable)
+
+      (= :no-active-clock (:reason active-mission))
+      (assoc base :case :no-durable-edge :comparable? false
+             :previous-write-landed? :unknown
+             :unknown-reason :no-durable-edge)
+
+      (nil? selected-id)
+      (assoc base :case :no-selection-this-tick :comparable? false
+             :previous-write-landed? :unknown
+             :unknown-reason :no-mission-selected-this-tick)
+
+      (= selected-id durable-id)
+      (assoc base :case :agrees :comparable? true
+             :durable-witness-source (some-> witness-source str)
+             :previous-write-landed? :unknown
+             :unknown-reason :not-discriminated-when-sides-agree)
+
+      :else
+      (let [landed (cond
+                     (or (nil? witness-source) (nil? prev-id)) :unknown
+                     (= (str witness-source) (str prev-id)) true
+                     :else false)]
+        (cond-> (assoc base
+                       :case (case landed
+                               true :lagged-write-landed
+                               false :lagged-write-missing
+                               :lag-unattributable)
+                       :comparable? true
+                       :durable-witness-source (some-> witness-source str)
+                       :previous-write-landed? landed)
+          (= :unknown landed)
+          (assoc :unknown-reason (if (nil? witness-source)
+                                   :no-witness-source-on-edge
+                                   :no-previous-trace-record)))))))
+
 (defn- tick-mission-focus
   "The mission focus the C_mis readback runs on.
 
@@ -1577,21 +1747,40 @@
    makes a stale focus visible in one look.
    Flag ON with a non-mission decision: the durable read, tagged
    `:origin :durable-clock` -- there is no selection to focus on, and inventing
-   one would be a fill."
-  [active-mission decision]
-  (if-not *selection-focus?*
-    active-mission
-    (let [durable (select-keys (or active-mission {})
-                               [:mission-id :endpoint :clocked-at-ms
-                                :witness-rule :reason])]
-      (if-let [selected (selected-mission-focus decision)]
-        (assoc selected
-               :origin :this-tick-selection
-               :durable durable
-               :agrees-with-durable?
-               (= (:mission-id selected) (:mission-id durable)))
-        (assoc durable :origin :durable-clock :durable durable
-               :agrees-with-durable? true)))))
+   one would be a fill.
+
+   U43: with `*focus-reconcile?*` also on, a `:reconciliation` map is added
+   beside the boolean, typing WHICH of the eight cases holds and -- when the two
+   sides disagree -- whether the previous tick's clock write landed. The
+   three-argument arity takes the previous trace record, which is what carries
+   the answer; the two-argument arity is U21's and passes nil, so a caller that
+   has no previous record gets `:lag-unattributable` rather than a guess."
+  ([active-mission decision] (tick-mission-focus active-mission decision nil))
+  ([active-mission decision prev-trace-record]
+   (if-not *selection-focus?*
+     active-mission
+     (let [durable (select-keys (or active-mission {})
+                                [:mission-id :endpoint :clocked-at-ms
+                                 :witness-rule :witness-source :reason])
+           focus (if-let [selected (selected-mission-focus decision)]
+                   (assoc selected
+                          :origin :this-tick-selection
+                          :durable durable
+                          :agrees-with-durable?
+                          (= (:mission-id selected) (:mission-id durable)))
+                   (assoc durable :origin :durable-clock :durable durable
+                          :agrees-with-durable? true))]
+       ;; U43: the typed case is ADDED beside `:agrees-with-durable?`, never
+       ;; over it. U21's boolean is pinned by tests and by the 2026-09-02
+       ;; replay; overwriting it would move a committed number to fix a
+       ;; vocabulary, which is two changes, not one. A reader that wants the
+       ;; boolean still has it; a reader that needs to tell `the clock names
+       ;; another mission` from `the clock was never read` reads `:case`.
+       (cond-> focus
+         *focus-reconcile?*
+         (assoc :reconciliation
+                (focus-reconciliation active-mission decision
+                                      prev-trace-record)))))))
 
 (defn- carry-mission-focus
   "Attach the focus U21 resolved, exactly as `carry-active-mission` attaches
@@ -1787,9 +1976,12 @@
 
 (defn- clock-source
   "Use the exact identifying value persisted on the trace record: RUN11's run
-   id when present, otherwise that record's own timestamp."
+   id when present, otherwise that record's own timestamp. Delegates to
+   `trace-record-identity` (:1610) so the writer of the witness and U43's reader
+   of it cannot drift apart; a second copy of this rule here would let a landed
+   write be reported as missing."
   [trace-record]
-  (or (:run/id trace-record) (:timestamp trace-record)))
+  (trace-record-identity trace-record))
 
 (defn- record-selection-clock!
   "Fire-and-forget durable clock write for a selected mission. The asynchronous
@@ -3873,6 +4065,48 @@
     (str "**Active mission:** unavailable ("
          (name (:reason active-mission)) ")\n\n")))
 
+(defn- render-mission-focus-line
+  "U43 (b). The durable clock and the tick's own focus are TWO claims, so the
+   report gives them two lines. `render-active-mission-line` above is untouched
+   and keeps rendering the witnessed edge; this renders `:mission-focus`, the
+   projection of the tick's own decision, and never merges the two -- an
+   operator reading `**Active mission:**` alone was reading the PREVIOUS tick's
+   mission and had no way to see it (U21 measured the two disagreeing on 3 of 3
+   recorded ticks).
+
+   The reconciliation clause is present only when the record carries one, so
+   this renders what the judgement holds and reads no environment variable."
+  [mission-focus]
+  (let [{:keys [mission-id origin action-type agrees-with-durable?
+                durable reconciliation]} mission-focus
+        durable-id (:mission-id durable)
+        head (if mission-id
+               (str "**Tick focus:** " mission-id
+                    " (" (name (or origin :unknown))
+                    (when action-type (str ", " (name action-type)))
+                    ")")
+               (str "**Tick focus:** unavailable ("
+                    (name (or (:reason mission-focus) :unknown)) ")"))
+        durable-clause (str "durable clock: "
+                            (or durable-id
+                                (str "unavailable ("
+                                     (name (or (:reason durable) :unknown)) ")")))
+        agree-clause (str "agrees: " (if agrees-with-durable? "yes" "no"))
+        case-clause (when reconciliation
+                      (str "case: " (name (:case reconciliation))
+                           "; previous write landed: "
+                           (let [l (:previous-write-landed? reconciliation)]
+                             (case l
+                               true "yes"
+                               false "NO"
+                               (str "unknown ("
+                                    (name (or (:unknown-reason reconciliation)
+                                              :unknown))
+                                    ")")))))]
+    (str head " — " durable-clause "; " agree-clause
+         (when case-clause (str "; " case-clause))
+         "\n\n")))
+
 (defn render-war-machine
   "Render the War Machine strategic synthesis as markdown."
   [{:keys [self-watch loop-health support-attack mission-triage graph
@@ -3884,6 +4118,13 @@
     (when (contains? (:judgement data) :active-mission)
       (.append sb (render-active-mission-line
                    (get-in data [:judgement :active-mission]))))
+
+    ;; U43 (b): a SECOND line, appended after the durable one and never folded
+    ;; into it. Present only when the judgement carries `:mission-focus` (U21's
+    ;; FUTON_WM_SELECTION_FOCUS), so a default-off report is unchanged.
+    (when (contains? (:judgement data) :mission-focus)
+      (.append sb (render-mission-focus-line
+                   (get-in data [:judgement :mission-focus]))))
 
     ;; --- Input Status ---
     (when input-status
@@ -5947,7 +6188,12 @@
         ;; `wm-decision`, which is final well above this point, and read by
         ;; nothing but the readback and `carry-mission-focus`. Flag off it IS
         ;; `active-mission`, so the historical readback input is unchanged.
-        mission-focus (tick-mission-focus active-mission wm-decision)
+        ;; U43: `prev-trace-record` is the third argument -- the durable edge's
+        ;; witness names the trace record that caused it, so the previous
+        ;; record is what says whether the previous tick's write landed. It is
+        ;; bound at :5544, well above, and is read here only.
+        mission-focus (tick-mission-focus active-mission wm-decision
+                                          prev-trace-record)
         ;; U11 (d): computed here, AFTER every ranking/selection binding above
         ;; is final, and attached by `carry-mission-c` below. Nothing between
         ;; this binding and `result0` reads it.
