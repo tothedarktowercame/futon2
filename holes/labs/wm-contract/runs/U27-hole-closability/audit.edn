@@ -22,7 +22,9 @@
    ["mathlib4 DarkTower/WarMachine/Holes.lean:6647-6648"
     "mathlib4 DarkTower/WarMachine/Holes.lean:6650-6651"
     "mathlib4 DarkTower/WarMachine/Holes.lean:6644-6645 (the contrasting ABSENCE wording)"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:6869-6870 (the two mkHole rows)"]}
+    "mathlib4 DarkTower/WarMachine/Holes.lean:6869-6870 (the two mkHole rows)"],
+   :resolved
+   "RESOLVED 2026-09-03 by :J10 and :U47. Joe ruled the field an AUTHORING ERROR -- twelve of fifteen holes use the falsifier as a genuine refutation, so H3/H4 were the anomaly -- and both fields are corrected to the absence form at mathlib4 a3ae5084be, in the docstring annotation and in the mkHole registry row, re-emitted into holes-contract.json at f16b389596. H3 now reads \"no run record carries tau together with the beta it was derived from\"; H4 reads \"no default-path run record's Q(pi) carries a per-policy F term -- F_pi reaching the posterior only under FUTON_WM_FPI_POSTERIOR=1\", scoped to the default path because the flagged path's record already exists. Both strings carry the correction dated in the field itself, the wmRunsOnce precedent for an amended falsifier. The opposite-dispositions problem this finding named is thereby settled in the WITNESS direction: the S4 record discharges the evidence field and no longer also satisfies the falsifier. Nothing remains."}
    {:id :F4,
     :statement
     "Four of the pointers inside the H3/H4 hole docstrings no longer resolve to what they claim, and one of the claims they support is now false of the code. This is the U29 defect class (drifted pointers, re-resolved through the generator) occurring INSIDE Holes.lean, which U29's scope -- variable-situation-accounting.edn -- does not cover. Checked line by line against the current tree: policy.clj:242-245 and :242-246, cited by BOTH H3 and H4 as the policy score seam, now land on gap-report, an unrelated helper that enumerates :learn-action-class recommendations; the score expression is selection-scores at policy.clj:157 (\"THE ONE PLACE THE SCORE EXPRESSION IS WRITTEN\"), normalised by softmax-weights at :215. war_machine.clj:4450-4451, cited by H4 as where the Laplace channel F is bound, now lands in an unrelated report-prose block; the binding is free-energy (fe/compute-controller-diagnostics observation) at :5543. war_machine.clj:4452, cited as the :R8 route tag, is likewise stale; the tag is at :5857 and now names futon2.aif.free-energy/compute-prediction-error rather than the compute-variational-free-energy the 2026-08-30 receipt recorded. war_machine.clj:4753, cited as the F's one downstream appearance, lands on an unrelated manifest read. ONE POINTER IN THIS FAMILY STILL HOLDS: selection_gain.clj:187-193, cited by H3, still reads \"the field is ABSENT today, sim-only\" -- so the drift is not uniform and each pointer has to be checked rather than the family re-resolved by offset. AND THE CLAIM MOVED, not just its address: H4's docstring says of the policy score \"there is no F term in it, and no free-energy symbol anywhere in the scoring path\". policy.clj:158 now writes the score as \"ln E(a) - G(a)/tau [- F_pi(a)]\" and :184 takes :f-pi-policy-posterior? and :f-pi-values as options, both landed by RUN9/I2 after the docstring was written. The F_pi term is default-off, so the docstring's sentence is true of the default path and false of the seam -- and the docstring makes no such distinction.",
@@ -35,7 +37,9 @@
      "futon2 scripts/futon2/report/war_machine.clj:5857 (the :R8 route tag)"
      "futon2 src/futon2/aif/selection_gain.clj:187-193 (the one pointer of the family that still holds)"
      "mathlib4 DarkTower/WarMachine/Holes.lean:6647 (H3 docstring)"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:6650 (H4 docstring)"]}],
+     "mathlib4 DarkTower/WarMachine/Holes.lean:6650 (H4 docstring)"],
+    :resolved
+    "RESOLVED 2026-09-03 by :J10 and :U47, at mathlib4 a3ae5084be -- with three corrections to THIS FINDING'S OWN re-resolutions, because they were re-verified at source rather than carried. (1) TWO OF THE THREE TARGETS THIS ROW NAMED HAD THEMSELVES DRIFTED by the time :U47 ran, by +230 lines, futon2 6ca58f3 (:U28) having grown war_machine.clj in between: the Laplace F binding is at :5773 and not :5543, the :R8 route tag at :6087 and not :5857. That is the row's own lesson recurring inside its own repair, and it is why the pointers were re-read rather than copied out of :J10. (2) THE SUBJECT OF THE WAR_MACHINE FAMILY IS GONE: the Laplace-channel scalar F was RETIRED on 2026-09-01 by worklist I5 slice (c) under Joe's J2 ruling (futon2 5a66411; free_energy.clj:7-12 records why). So :5773 binds the controller-diagnostics map that used to carry it, :6087's tag names futon2.aif.free-energy/compute-prediction-error -- epsilon, not the removed compute-variational-free-energy -- and :6472 (this row's un-re-resolved :4753) puts that same diagnostics map on the report, not the scalar. The docstring says so, and states the discrepancy the retirement leaves standing: p4ng/empirics-futon/control-map-edges.edn:140-144 and futon2 edge-census.edn:82 still record the R3->R8 hop :via compute-variational-free-energy, correctly, because that is what was measured against tick-run-record-2026-08-30.edn; C473 section 1 reports it unrepaired. (3) H3'S POINTER RE-RESOLVES ELSEWHERE THAN :J10 SAID. :J10 sent both H3 and H4 to the selection-scores seam at policy.clj:157, which is right for H4's sentence (the policy SCORE) and wrong for H3's, whose sentence is about the tau LAW: that is effective-temperature at policy.clj:77-145, whose DEFAULT :spread mode computes tau_eff = tau_spread / g at :133. Sending it to :157 would have left a pointer that does not support the sentence it sits in. NEWLY FOUND AND NOT REPAIRED: H3 carries this finding's own second half -- \"No beta appears anywhere in the policy path\" is false of the current tree, since effective-temperature's :variational-beta-gamma mode sets tau = beta (policy.clj:101-105, :135-144) and policy_precision/carry-beta supplies it with its provenance (:544-560), both landed by RUN8/I1 after the docstring was written; it is true of the DEFAULT :spread path. :J10 enumerated the scoping for H4's sentence and not for H3's, so :U47 states it in the docstring and leaves the sentence standing rather than scoping a sentence the owner did not rule on."}],
  :schema :wm/hole-closability-audit-v1,
  :counts
  {:rows 16,
@@ -61,7 +65,13 @@
     :effect "as findF1Containment"}
    {:name "findF4Falsifiable", :was :not-ready, :now :closed-under-criterion,
     :by :U46, :at "2026-09-03",
-    :effect "the four together: contract holes 14 -> 10 and closed 110 -> 114 with the declaration population unchanged at 124; accounting :open-hole rows 15 -> 11 and :proven-against-pinned-source 11 -> 15; declaration fence :pre-run-closable 8 -> 4"}]},
+    :effect "the four together: contract holes 14 -> 10 and closed 110 -> 114 with the declaration population unchanged at 124; accounting :open-hole rows 15 -> 11 and :proven-against-pinned-source 11 -> 15; declaration fence :pre-run-closable 8 -> 4"}
+   {:name "policyPosteriorImportsPolicyF", :was :contested, :now :witnessed-under-flag,
+    :by :U47, :at "2026-09-03",
+    :effect "NO COUNT MOVES. The hole stays open and stays :run-gated, so contract holes remain 10, closed 114, accounting :open-hole rows 11 and the declaration fence 4/6. What moved is the readiness axis, which gains :witnessed-under-flag as a fourth value; findings :F3 and :F4 are resolved on the same ruling."}
+   {:name "policyPrecisionIsGammaFromBeta", :was :not-ready, :now :not-ready,
+    :by :U47, :at "2026-09-03",
+    :effect "NO COUNT MOVES and no readiness change -- recorded because J10 dispositioned it by name and a silent row would read as an unruled one. Its falsifier field is corrected on the same commit and its :verdict records why the disposition shape it was given cannot yet apply: no persisted record exists to witness under."}]},
  :closability-axis [:pre-run-closable :run-gated],
  :authority
  {:contract-file "mathlib4/DarkTower/WarMachine/holes-contract.json",
@@ -392,7 +402,15 @@
    :area :policy,
    :closability :run-gated,
    :declared-close-path
-   "Declared evidence: \"a run record carrying tau together with the beta it was derived from\". See finding :F3 on what the falsifier field says.",
+   "Declared evidence: \"a run record carrying tau together with the beta it was derived from\". The falsifier field named the SAME observation (finding :F3); corrected 2026-09-03 by :J10/:U47 to the absence form, \"no run record carries tau together with the beta it was derived from\" (mathlib4 a3ae5084be).",
+   :verdict
+   {:disposition :run-gated
+    :by :J10 :at "2026-09-03" :executed-by :U47
+    :why "Joe's J10 gave H3 H4's disposition SHAPE and the contrast is what made the pair worth ruling together: H3's wiring exists and no persisted record does, so there is nothing yet for it to be witnessed under, under a flag or otherwise. It stays :run-gated / :not-ready and closes on the record its :runtime-evidence field names."
+    :pointers ["futon2 data/wm-trace/wm-trace-2026-09-01.edn (18 :tau-source values, all :selection-gain-only; the reported tau 1.0364669814843985 occurs 0 times)"
+               "futon2 holes/labs/wm-contract/run8_s3_preflight.clj:28-54 (the write-suppressing preflight S3's one live tau = beta tick ran under)"
+               "futon2 holes/labs/wm-contract/runs/2026-09-01-s3/README.md:3 (\"a REPLAY, not a 20-tick stage run\")"
+               "mathlib4 DarkTower/WarMachine/Holes.lean:7186 (the corrected docstring), :7422 (the corrected mkHole row)"]},
    :owner "wm-organization · TN-edge-review worklist H3 (Joe's J1 ruling)",
    :evidence-that-exists
    ["futon2 src/futon2/aif/policy.clj:76-145 (effective-temperature, the closed dispatch; FUTON_WM_TAU_MODE=variational-beta-gamma gives tau = beta, gamma = 1/beta)"
@@ -404,9 +422,18 @@
   {:closability-basis "The claim is about what a run's policy posterior imports.",
    :hole-class :open-bound,
    :name "policyPosteriorImportsPolicyF",
+   :verdict
+   {:disposition :witnessed-under-flag
+    :by :J10 :at "2026-09-03" :executed-by :U47
+    :why "RULED. The contest was a wording defect, not an evidential one: with the falsifier corrected to the absence form the S4 record is a WITNESS and not a refutation, so the two opposite dispositions collapse to one. What it witnesses is the FLAGGED path -- FUTON_WM_FPI_POSTERIOR is read from the environment and default-off -- so the hole is held open :run-gated and closes on a default-path persisted record carrying the term, or if the flag is ruled default-on, which is its own ruling."
+    :pointers ["futon2 holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn (3 of 4 ticks :f-pi-posterior :status :present :applied? true; the 4th :status :absent :reason :incomplete-coverage rather than imputing)"
+               "futon2 scripts/futon2/report/war_machine.clj:199-219 (*f-pi-posterior?*, read from FUTON_WM_FPI_POSTERIOR, default-off)"
+               "futon2 src/futon2/aif/policy.clj:158 (the score, ln E - G/tau [- F_pi]), :184-186 (the f-pi options arity)"
+               "futon2 holes/labs/wm-contract/C470-s4-live-f-pi.md (RUN9's replay control reproduces each record's own posterior at delta 0.0)"
+               "mathlib4 DarkTower/WarMachine/Holes.lean:7189 (the corrected docstring), :7423 (the corrected mkHole row)"]},
    :remaining-evidence
-   "THIS IS THE ONE HOLE WHOSE NAMED OBSERVATION IS ALREADY ON PERSISTED RECORD. Q(pi) was computed with a per-policy F term on three of four S4 ticks, scored against persisted predictions, and the replay control reproduces each record's own posterior at delta 0.0. What the record does NOT settle is what that means for the declaration, and there are two readings with opposite dispositions (finding :F3): as a discharge it closes the hole by witness; as the stated falsifier it refutes it, which under this contract's own precedent is ALSO a close (mkRefutedByRecord, used for enactedActionEqualsSelected on 2026-09-01). A third consideration neither field mentions: FUTON_WM_FPI_POSTERIOR is default-off, so the record shows what the machine does under a flag, not what it does. Contested; raised as worklist row :J10. Not forced either way here.",
-   :readiness :contested,
+   "THIS IS THE ONE HOLE WHOSE NAMED OBSERVATION IS ALREADY ON PERSISTED RECORD. Q(pi) was computed with a per-policy F term on three of four S4 ticks, scored against persisted predictions, and the replay control reproduces each record's own posterior at delta 0.0. What the record does NOT settle is what that means for the declaration, and there are two readings with opposite dispositions (finding :F3): as a discharge it closes the hole by witness; as the stated falsifier it refutes it, which under this contract's own precedent is ALSO a close (mkRefutedByRecord, used for enactedActionEqualsSelected on 2026-09-01). A third consideration neither field mentions: FUTON_WM_FPI_POSTERIOR is default-off, so the record shows what the machine does under a flag, not what it does. Contested; raised as worklist row :J10. Not forced either way here. RULED 2026-09-03 -- see :verdict above; this field is the state at audit time and is not rewritten.",
+   :readiness :witnessed-under-flag,
    :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6651, :docstring-line 6650},
    :area :policy,
    :closability :run-gated,

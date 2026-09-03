@@ -1,9 +1,9 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-09-03",
  :authority
- {:contract-git-sha "0bab8f813f047d380fe863bdb2ec6a479cbf21e7",
+ {:contract-git-sha "a3ae5084beb1c2d6b14ee1438df6830a4bbe68c0",
   :contract-sha256
-  "94ec700e0ccb050510e3c9aab4eca8808f8ad841d05cafe330d9fceac6a0e6f2",
+  "1e5d1b157744fc34e1bd78377c4b5cca3f722098040f35210a5d8828738e22c9",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
@@ -19,7 +19,11 @@
   :pointer-status [:resolves :drifted],
   :row-source [:contract-declaration :glossary-paragraph],
   :closability [:pre-run-closable :run-gated],
-  :readiness [:not-ready :contested :witnessed-and-held-open]},
+  :readiness
+  [:not-ready
+   :contested
+   :witnessed-and-held-open
+   :witnessed-under-flag]},
  :rows
  [{:name "Pattern",
    :area :demo,
@@ -948,7 +952,7 @@
    :row-source :contract-declaration,
    :name "policyPrecisionIsGammaFromBeta",
    :basis
-   "The wiring exists and the record does not: S3 is a replay, its one live tau = beta tick ran under a write-suppressing preflight, and all 18 :tau-source values in wm-trace-2026-09-01.edn are :selection-gain-only.",
+   "The wiring exists and the record does not: S3 is a replay, its one live tau = beta tick ran under a write-suppressing preflight, and all 18 :tau-source values in wm-trace-2026-09-01.edn are :selection-gain-only. :J10 (Joe 2026-09-03) gave it H4's disposition shape and :U47 corrected its falsifier field to the absence form (mathlib4 a3ae5084be); with no persisted record at all there is nothing for it to be witnessed under, so it stays :not-ready rather than moving with H4.",
    :readiness :not-ready,
    :content-status :open-hole,
    :area :policy,
@@ -962,15 +966,15 @@
    :row-source :contract-declaration,
    :name "policyPosteriorImportsPolicyF",
    :basis
-   "The only hole whose named observation is already on persisted record. Its disposition is contested because the declaration's evidence and falsifier fields name the SAME observation, so one reading closes it by witness and the other refutes it -- which under this contract's own precedent (mkRefutedByRecord) is also a close. FUTON_WM_FPI_POSTERIOR is default-off, which neither field mentions. Raised as :J10.",
-   :readiness :contested,
+   "RULED :J10 (Joe 2026-09-03), executed by :U47. The contest is settled and it was a wording defect, not an evidential one: the falsifier field named the CONFIRMING observation, word for word what the evidence field asks for, and is corrected to the absence form at mathlib4 a3ae5084be -- so the S4 record is a WITNESS and not a refutation. What it witnesses is the FLAGGED path (FUTON_WM_FPI_POSTERIOR is read from the environment and default-off, war_machine.clj:199-219), so the hole stays open :run-gated and closes on a default-path persisted record carrying the term -- or if the flag is ruled default-on, which is its own ruling.",
+   :readiness :witnessed-under-flag,
    :content-status :open-hole,
    :area :policy,
    :closability :run-gated,
    :owner
    "wm-organization · TN-edge-review worklist H4 (Joe's J2 ruling)",
    :runtime-evidence
-   "A record whose Q(pi) carries the per-policy F term. IT EXISTS: runs/2026-09-01-s4/wm-trace-s4.edn, 3 of 4 ticks with :f-pi-posterior :applied? true."}
+   "A DEFAULT-PATH record whose Q(pi) carries the per-policy F term. The FLAGGED-path record exists: runs/2026-09-01-s4/wm-trace-s4.edn, 3 of 4 ticks with :f-pi-posterior :applied? true."}
   {:pointer-status :resolves,
    :witness
    ["futon2 src/futon2/aif/observation.clj:11 observation-channels"

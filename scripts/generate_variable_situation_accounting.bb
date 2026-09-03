@@ -326,19 +326,29 @@
     :basis (str "The wiring exists and the record does not: S3 is a replay, its "
                 "one live tau = beta tick ran under a write-suppressing "
                 "preflight, and all 18 :tau-source values in "
-                "wm-trace-2026-09-01.edn are :selection-gain-only.")}
+                "wm-trace-2026-09-01.edn are :selection-gain-only. :J10 (Joe "
+                "2026-09-03) gave it H4's disposition shape and :U47 corrected "
+                "its falsifier field to the absence form (mathlib4 a3ae5084be); "
+                "with no persisted record at all there is nothing for it to be "
+                "witnessed under, so it stays :not-ready rather than moving "
+                "with H4.")}
    "policyPosteriorImportsPolicyF"
-   {:closability :run-gated :readiness :contested
-    :runtime-evidence (str "A record whose Q(pi) carries the per-policy F term. "
-                           "IT EXISTS: runs/2026-09-01-s4/wm-trace-s4.edn, 3 of "
-                           "4 ticks with :f-pi-posterior :applied? true.")
-    :basis (str "The only hole whose named observation is already on persisted "
-                "record. Its disposition is contested because the declaration's "
-                "evidence and falsifier fields name the SAME observation, so one "
-                "reading closes it by witness and the other refutes it -- which "
-                "under this contract's own precedent (mkRefutedByRecord) is also "
-                "a close. FUTON_WM_FPI_POSTERIOR is default-off, which neither "
-                "field mentions. Raised as :J10.")}
+   {:closability :run-gated :readiness :witnessed-under-flag
+    :runtime-evidence (str "A DEFAULT-PATH record whose Q(pi) carries the "
+                           "per-policy F term. The FLAGGED-path record exists: "
+                           "runs/2026-09-01-s4/wm-trace-s4.edn, 3 of 4 ticks "
+                           "with :f-pi-posterior :applied? true.")
+    :basis (str "RULED :J10 (Joe 2026-09-03), executed by :U47. The contest is "
+                "settled and it was a wording defect, not an evidential one: "
+                "the falsifier field named the CONFIRMING observation, word for "
+                "word what the evidence field asks for, and is corrected to the "
+                "absence form at mathlib4 a3ae5084be -- so the S4 record is a "
+                "WITNESS and not a refutation. What it witnesses is the FLAGGED "
+                "path (FUTON_WM_FPI_POSTERIOR is read from the environment and "
+                "default-off, war_machine.clj:199-219), so the hole stays open "
+                ":run-gated and closes on a default-path persisted record "
+                "carrying the term -- or if the flag is ruled default-on, which "
+                "is its own ruling.")}
    "Strategic mission selection"
    {:closability :run-gated :readiness :not-ready
     :runtime-evidence (str "A record in which the mission value carried is the "
@@ -518,7 +528,12 @@
             ;; U27's fence axis. Present on :open-hole rows only, and total over
             ;; them by construction (with-closability throws otherwise).
             :closability [:pre-run-closable :run-gated]
-            :readiness [:not-ready :contested :witnessed-and-held-open]}
+            ;; :witnessed-under-flag entered with Joe's :J10 ruling (executed
+            ;; by :U47): the declared observation IS on persisted record, but
+            ;; only from a run under a default-off flag, so it witnesses what
+            ;; the machine does UNDER A FLAG and not what it does.
+            :readiness [:not-ready :contested :witnessed-and-held-open
+                        :witnessed-under-flag]}
      :rows rows
      :counts {:rows (count rows)
               :content (into (sorted-map) (frequencies (map :content-status rows)))

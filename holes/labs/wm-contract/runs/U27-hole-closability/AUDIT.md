@@ -116,6 +116,34 @@ declaration population unchanged at 124; accounting `:open-hole` rows 15 → 11 
 `:proven-against-pinned-source` 11 → 15; declaration fence `:pre-run-closable`
 8 → 4.
 
+## 1c. H3 and H4 (`:U47`, 2026-09-03) — the ruling that moves no count
+
+`policyPosteriorImportsPolicyF` moves `:contested` → `:witnessed-under-flag`;
+`policyPrecisionIsGammaFromBeta` stays `:not-ready`. **No count moves**: both
+holes stay open and stay `:run-gated`, so contract holes remain 10, closed 114,
+accounting `:open-hole` rows 11, declaration fence 4/6. The readiness axis gains
+`:witnessed-under-flag` as a fourth value.
+
+What was decided was a *wording* defect, not an evidential one. Joe's J10 ruled
+the falsifier field on both holes an authoring error (F3): it named the
+confirming observation, word for word what the evidence field asks for. With
+both fields corrected to the absence form the twelve other holes use
+(mathlib4 `a3ae5084be`, contract re-emitted at `f16b389596`), the S4 record is a
+**witness** and no longer also a refutation — the two opposite dispositions this
+audit could not choose between collapse to one.
+
+`policyPosteriorImportsPolicyF` is then witnessed **under a flag**:
+`FUTON_WM_FPI_POSTERIOR` is read from the environment and is default-off
+(`war_machine.clj:199-219`), so the S4 record shows what the machine does under
+a flag, not what it does. It closes on a default-path persisted record carrying
+the term — or if the flag is ruled default-on, which is its own ruling.
+
+`policyPrecisionIsGammaFromBeta` was given the same disposition *shape* and
+cannot yet take it, and that contrast is the reason J10 ruled the pair together:
+its wiring exists and no persisted record does, so there is nothing for it to be
+witnessed under. It keeps `:not-ready` and closes on the record its
+`:runtime-evidence` field names.
+
 ## 2. Why nothing closed
 
 **F1 — there is no checked criterion for hole → closed.** C141 read the
@@ -164,9 +192,9 @@ scope (`variable-situation-accounting.edn`) does not cover.
 | cited | claimed to be | what is there now | current location |
 |---|---|---|---|
 | `policy.clj:242-245` / `:242-246` (H3 **and** H4) | the policy score seam | `gap-report`, an unrelated helper | `policy.clj:157` `selection-scores`, "THE ONE PLACE THE SCORE EXPRESSION IS WRITTEN" |
-| `war_machine.clj:4450-4451` (H4) | where the Laplace channel F is bound | unrelated report prose | `war_machine.clj:5543` |
-| `war_machine.clj:4452` (H4) | the `:R8` route tag | unrelated report prose | `war_machine.clj:5857`, and it now names `compute-prediction-error`, not the `compute-variational-free-energy` the 2026-08-30 receipt recorded |
-| `war_machine.clj:4753` (H4) | the F's one downstream appearance | an unrelated manifest read | not re-resolved by this audit |
+| `war_machine.clj:4450-4451` (H4) | where the Laplace channel F is bound | unrelated report prose | `war_machine.clj:5543` *(as audited; **`:5773` at `:U47`** — see below)* |
+| `war_machine.clj:4452` (H4) | the `:R8` route tag | unrelated report prose | `war_machine.clj:5857` *(as audited; **`:6087` at `:U47`**)*, and it now names `compute-prediction-error`, not the `compute-variational-free-energy` the 2026-08-30 receipt recorded |
+| `war_machine.clj:4753` (H4) | the F's one downstream appearance | an unrelated manifest read | not re-resolved by this audit; **`:6472` at `:U47`** |
 | `selection_gain.clj:187-193` (H3) | "the field is ABSENT today, sim-only" | **still exactly that** | unchanged |
 
 The drift is *not uniform* — one pointer of the family still holds — so this
@@ -183,6 +211,45 @@ and the docstring draws no such distinction.
 Not repaired here: these are Joe-ruled declarations (J1/J2) and editing a
 declaration's content is what U26's review was at pains to verify had *not*
 happened. Carried on `:J10`.
+
+**Repaired 2026-09-03 by `:U47`, with three corrections to this section's own
+re-resolutions** — they were re-read at source rather than copied forward, which
+is the whole of the S1 discipline this section exists to record.
+
+1. **Two of the three targets named above had themselves drifted**, by +230
+   lines, `:U28` (futon2 `6ca58f3`) having grown `war_machine.clj` in between:
+   the F binding is at `:5773`, not `:5543`; the `:R8` tag at `:6087`, not
+   `:5857`. This section's own lesson, recurring inside its own repair.
+2. **The subject of the `war_machine.clj` family is gone.** The Laplace-channel
+   scalar F was retired on 2026-09-01 by worklist I5 slice (c) under Joe's J2
+   ruling (futon2 `5a66411`; `free_energy.clj:7-12` records why). So `:5773`
+   binds the controller-diagnostics map that used to carry it, `:6087`'s tag
+   names `futon2.aif.free-energy/compute-prediction-error` — ε, not the removed
+   `compute-variational-free-energy` — and `:6472` puts that same diagnostics
+   map on the report, not the scalar. The docstring states the discrepancy this
+   leaves standing rather than smoothing it:
+   `p4ng/empirics-futon/control-map-edges.edn:140-144` and futon2
+   `edge-census.edn:82` still record the R3→R8 hop `:via`
+   `compute-variational-free-energy`, correctly, because that is what was
+   measured against `tick-run-record-2026-08-30.edn`; C473 §1 reports it
+   unrepaired.
+3. **H3's pointer re-resolves elsewhere than J10 said.** J10 sent both H3 and H4
+   to `selection-scores` at `policy.clj:157`. That is right for H4, whose
+   sentence is about the policy *score*, and wrong for H3, whose sentence is
+   about the τ *law*: `effective-temperature` at `policy.clj:77-145`, whose
+   default `:spread` mode computes τ_eff = τ_spread / g at `:133`. Sending it to
+   `:157` would have left a pointer that does not support the sentence around
+   it.
+
+**Newly found, and not repaired.** H3 carries this section's second half too:
+"No β appears anywhere in the policy path" is false of the current tree.
+`effective-temperature`'s `:variational-beta-gamma` mode sets τ = β
+(`policy.clj:101-105`, `:135-144`) and `policy_precision/carry-beta` supplies it
+with its provenance (`:544-560`), both landed by RUN8/I1 after the docstring was
+written; the sentence is true of the default `:spread` path. J10 enumerated the
+scoping for H4's sentence and not for H3's, so `:U47` states the fact in the
+docstring and leaves the sentence standing rather than scoping one the owner did
+not rule on.
 
 ## 4. The fence typing
 
@@ -224,8 +291,8 @@ open because the Lean proposition is world-level, not because a run is awaited.
 | `wmRunsOnce` | a completed tick leaving a `TickRunRecord`. **It exists.** Held open for the C114 reason. |
 | `wmRunConformsToWiring` | TN §11 R2's run — ~20 shadow ticks, current code, judged by R3 against the re-synced topology. `:U29` and `:U31` are both still open, so the topology to judge against has not been re-synced; the 2026-09-02 receipts still read 6 of 9 hops unmapped against 21 drawn edges, the same as 2026-08-30. |
 | `enactedEqualsSelectedWhenRankOneGated` | a record joining a rank-1 selection that passes its **own** act gate to the enacted action. No record since the pin carries the enactment half at all: `:realized-outcome` occurs 0 times in `wm-trace-2026-09-01.edn` (158 `:decision`), 0 in `wm-trace-2026-09-02.edn` (6), 0 in `wm-trace-s4.edn` (8). The S-stage runs are shadow runs, so they cannot produce the antecedent by construction. |
-| `policyPrecisionIsGammaFromBeta` | a persisted record carrying `:tau` with `:tau-source` naming `carry-beta`'s `:beta-source`. **The wiring exists and the record does not**: S3 is "a REPLAY, not a 20-tick stage run" (`runs/2026-09-01-s3/README.md:3`), its one live τ = β tick came from `run8_s3_preflight.clj`, which suppresses every write but the run lock (`:28-54`). Checked: `wm-trace-2026-09-01.edn` carries 18 `:tau-source` values, all `:selection-gain-only`, and the reported τ `1.0364669814843985` occurs 0 times. |
-| `policyPosteriorImportsPolicyF` | **the one hole whose named observation is already on persisted record.** `runs/2026-09-01-s4/wm-trace-s4.edn`: 3 of 4 records carry `:f-pi-posterior {:coverage :complete … :applied? true}` with per-candidate `:f-pi-by-candidate-id`; the 4th records `{:status :absent :reason :incomplete-coverage :applied? false}` rather than imputing. **Contested** — see F3, and note `FUTON_WM_FPI_POSTERIOR` is default-off, which neither contract field mentions. |
+| `policyPrecisionIsGammaFromBeta` | a persisted record carrying `:tau` with `:tau-source` naming `carry-beta`'s `:beta-source`. **The wiring exists and the record does not**: S3 is "a REPLAY, not a 20-tick stage run" (`runs/2026-09-01-s3/README.md:3`), its one live τ = β tick came from `run8_s3_preflight.clj`, which suppresses every write but the run lock (`:28-54`). Checked: `wm-trace-2026-09-01.edn` carries 18 `:tau-source` values, all `:selection-gain-only`, and the reported τ `1.0364669814843985` occurs 0 times. **Ruled by J10 and still `:not-ready` — §1c.** |
+| `policyPosteriorImportsPolicyF` | **the one hole whose named observation is already on persisted record.** `runs/2026-09-01-s4/wm-trace-s4.edn`: 3 of 4 records carry `:f-pi-posterior {:coverage :complete … :applied? true}` with per-candidate `:f-pi-by-candidate-id`; the 4th records `{:status :absent :reason :incomplete-coverage :applied? false}` rather than imputing. ~~**Contested** — see F3~~ **`:witnessed-under-flag`** (J10, `:U47` — §1c): the falsifier field is corrected, so the record witnesses rather than refutes, and what it witnesses is the flagged path — `FUTON_WM_FPI_POSTERIOR` is default-off, which the contract fields now say. |
 | `Strategic mission selection` | a record in which the mission value carried is the principled one (G_S over forward-model predicted mission outcomes, with its own habit E_S) rather than the three-factor additive surrogate. The glossary paragraph's claim is about what the implementation represents on the live path, so a unit test of the layer would not discharge it. |
 
 ## 5. What a reviewer should check
@@ -235,7 +302,9 @@ open because the Lean proposition is world-level, not because a run is awaited.
    does not, the "close nothing" conclusion has to be re-argued.
 2. The three `:contested` / `:witnessed-and-held-open` calls, which are the only
    judgement in the artifact: `nonDegenerateAblationLaw`,
-   `policyPosteriorImportsPolicyF`, `wmRunsOnce`.
+   `policyPosteriorImportsPolicyF`, `wmRunsOnce`. (All three have since been
+   dispositioned by Joe — §1a and §1c — so check them against the audit's own
+   commit.)
 3. The negative facts, each of which is a `grep` you can repeat: 0
    `:realized-outcome` in the three recent trace files; 0
    `mission-c-readback` in `wm-trace-2026-09-02.edn`; 18/18
@@ -256,7 +325,8 @@ open because the Lean proposition is world-level, not because a run is awaited.
 | F1's gap (no stated criterion for `hole → closed`) closed | 2026-09-03 | J9 ruling, `RUNBOOK.md` §"What ends a `closed-by-record` evidence obligation" (futon2 `a2641b3`) |
 | F2's subject (`nonDegenerateAblationLaw`) closed | 2026-09-03 | `:U45`; mathlib4 `4bc55c5968` (hole → closed), `e4a8ac81cb` (contract re-emitted) |
 | The four `find` rows closed | 2026-09-03 | `:U46`; mathlib4 `65ec7e4c89`, `357b8d0a08`, `ddef5448ab`, `0bab8f813f` (one declaration per commit), `057e5eccbd` (contract re-emitted) |
-| F3/F4 (the H3/H4 falsifier fields and the four drifted docstring pointers) | ruled, not yet executed | J10 ruling; worklist row `:U47` |
+| F3/F4 (the H3/H4 falsifier fields and the four drifted docstring pointers) | ruled 2026-09-03, executed 2026-09-03 | J10 ruling; `:U47`; mathlib4 `a3ae5084be` (both falsifiers, the pointers, the scoping), `f16b389596` (contract re-emitted) |
+| `policyPosteriorImportsPolicyF` `:contested` → `:witnessed-under-flag`, `policyPrecisionIsGammaFromBeta` held `:not-ready` | 2026-09-03 | `:U47`; §1c. No count moves. |
 
 F2 stands as recorded: `86186c3744` really did add the theorem and demote the
 declaration in one diff. The demotion is superseded, not amended — it stays in
