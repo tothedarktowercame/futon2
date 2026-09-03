@@ -47,7 +47,7 @@
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
-   :sha256-prefix "78c43ff403bd103f"}},
+   :sha256-prefix "94d7c5d175014a17"}},
  :pending
  ["Strategic outcome vocabulary"
   "Authored R16 outward-act binding"
@@ -72,7 +72,7 @@
   :open-dispatched 1,
   :pending-decisions 14},
  :ledger-frontier 382,
- :as-of "2026-09-03T19:57:05.817858316Z",
+ :as-of "2026-09-03T22:06:56.227044567Z",
  :attribution
  {:systematic-from "C378",
   :systematic-run-length 5,
