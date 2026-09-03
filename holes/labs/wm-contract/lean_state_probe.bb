@@ -374,7 +374,17 @@
    {:contract-path (str "mathlib4/" corpus-rel "/holes-contract.json")
     :contract-git-sha (get-in contract [:source :git-sha])
     :corpus-git-sha (git "rev-parse" "HEAD")
-    :pin-state (if (= (get-in contract [:source :git-sha]) (git "rev-parse" "HEAD"))
+    ;; C175 (holes/labs/wm-contract/C175-contract-authority-current.md): the pin's
+    ;; invariant is the Holes.lean SOURCE, not mathlib HEAD. Repository-HEAD lag is
+    ;; allowed and reported. Comparing against HEAD made :pin-state read :stale for
+    ;; every unrelated mathlib commit -- and unavoidably for the regeneration commit
+    ;; itself, which lands holes-contract.json and so always moves HEAD past the
+    ;; authority the contract just recorded. checks/contract_authority_current.clj
+    ;; already uses the source-scoped comparison; this now agrees with it.
+    :holes-last-commit-sha (git "log" "-1" "--format=%H" "--"
+                                (str corpus-rel "/Holes.lean"))
+    :pin-state (if (= (get-in contract [:source :git-sha])
+                      (git "log" "-1" "--format=%H" "--" (str corpus-rel "/Holes.lean")))
                  :current :stale)
     :contract-hole-count (count contract-holes)
     :contract-holes contract-holes
@@ -387,7 +397,7 @@
     :holes-without-a-sorry (if typecheck?
                              (vec (sort (remove (set sorry-warned-decls) source-hole-names)))
                              :typecheck-not-run)
-    :note "The contract JSON is a committed emission pinned to one Holes.lean revision; this compares it to the corpus at HEAD. A hole without a `sorry` is a declaration stated as a Prop whose body is not itself a hole."}
+    :note "The contract JSON is a committed emission pinned to one Holes.lean revision; :pin-state compares it to that source file's last commit (C175), while :corpus-git-sha reports mathlib HEAD for context. A hole without a `sorry` is a declaration stated as a Prop whose body is not itself a hole."}
    :glossary-lean-join
    {:source "futon2/holes/labs/wm-contract/variable-situation-accounting.edn"
     :source-as-of (:as-of accounting)

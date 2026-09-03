@@ -29,4 +29,11 @@
   "runs-once"               {:holder "claude-20" :note "WM-RUN1"}
   "route"                   {:holder "claude-20" :note "WM-RUN2; feeds the CML lane"}
   "run-at-least-once"       {:holder "claude-20" :note "cron question, deferred by Joe"}
-  "organisation"            {:holder "claude-20" :note "EDGES/hyper-edge schema"}}}
+  "organisation"            {:holder "claude-20" :note "EDGES/hyper-edge schema"}
+  ;; Minted 2026-09-03 by the U26 re-pin: Holes.lean 6de47bd050 added five declarations
+  ;; owned by "wm-organization · TN-edge-review worklist H1/H1b/H2/H3/H4". The record is
+  ;; futon2/holes/TN-edge-review-aif-wiring.md, whose header names its addressee:
+  ;; "**Addressee:** wm-organization" (holes/TN-edge-review-aif-wiring.md:4), which is
+  ;; also the owner string's own prefix. Not a reassignment -- reading back what the
+  ;; record and the declarations already say.
+  "TN-edge-review"          {:holder "wm-organization" :note "H1/H1b/H2/H3/H4; the AIF-wiring review queue"}}}

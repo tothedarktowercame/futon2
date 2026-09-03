@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
- :as-of "2026-08-31",
+ :as-of "2026-09-03",
  :authority
- {:contract-git-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+ {:contract-git-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
   :contract-sha256
-  "c905d90ea8e021a937ffa1676c89f7a1cc95cdfbf2c64c313c2ebf49b432c1fc",
+  "c58e8f2fa5fbaacefc3cdb6744cde217134904249209b4d353ecb5210a33fd14",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "e3db8b8fca6f411d6a1a46b4925429b9a6b91993cc927f4bbc40287aa4fe6288"},
+  "e38454bc8108af152005829db66df907717161e17100ab36ee38833e2ea9f467"},
  :axes
  {:content-status
   [:named-only
@@ -898,6 +898,44 @@
    :content-status :open-hole,
    :pointer-status :drifted,
    :pointer-detail {:reason :owner-does-not-name-record}}
+  {:name "enactedActionEqualsSelected",
+   :area :run,
+   :owner
+   "wm-organization · TN-edge-review worklist H1 (refuted), H1b",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-negative-space,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+  {:name "enactedEqualsSelectedWhenRankOneGated",
+   :area :run,
+   :owner "wm-organization · TN-edge-review worklist H1b",
+   :row-source :contract-declaration,
+   :content-status :open-hole,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+  {:name "dirichletAccumulationImportAbsent",
+   :area :learning,
+   :owner "wm-organization · TN-edge-review worklist H2",
+   :row-source :contract-declaration,
+   :content-status :open-hole,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+  {:name "policyPrecisionIsGammaFromBeta",
+   :area :policy,
+   :owner
+   "wm-organization · TN-edge-review worklist H3 (Joe's J1 ruling)",
+   :row-source :contract-declaration,
+   :content-status :open-hole,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
+  {:name "policyPosteriorImportsPolicyF",
+   :area :policy,
+   :owner
+   "wm-organization · TN-edge-review worklist H4 (Joe's J2 ruling)",
+   :row-source :contract-declaration,
+   :content-status :open-hole,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
   {:pointer-status :resolves,
    :witness
    ["futon2 src/futon2/aif/observation.clj:11 observation-channels"
@@ -1026,14 +1064,14 @@
    :owner
    "sec-glossary.tex paragraph:A shared experimental substrate"}],
  :counts
- {:rows 128,
+ {:rows 133,
   :content
-  {:closed-by-record-negative-space 61,
+  {:closed-by-record-negative-space 62,
    :closed-by-record-with-witness 43,
    :framing 1,
-   :open-hole 12,
+   :open-hole 16,
    :proven-against-pinned-source 11},
-  :pointer {:drifted 22, :resolves 106},
-  :row-source {:contract-declaration 119, :glossary-paragraph 9},
+  :pointer {:drifted 22, :resolves 111},
+  :row-source {:contract-declaration 124, :glossary-paragraph 9},
   :glossary-content
   {:closed-by-record-with-witness 7, :framing 1, :open-hole 1}}}

@@ -14,6 +14,6 @@
    {:mode "--unrelated-positive-edit"
     :claim :declaration-slice-locality}]}
  :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379"
- :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
+ :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
  :result :passed
- :recorded-at "2026-08-31T23:59:00Z"}
+ :recorded-at "2026-09-03T15:33:43Z"}

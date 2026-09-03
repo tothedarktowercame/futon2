@@ -23,13 +23,25 @@
              "expectedInformationGain" "parameterInformationGain" "modelUncertaintyBonus"
              "modelUncertaintyAndEIG" "ParameterPriorKernel" "ParameterPosteriorKernel"}
    :preferences #{"PreferenceDistribution"}
-   :policy #{"ControlPolicy" "ControlVocabulary" "cascadeGrainPi" "PolicyPriorKernel"}
+   ;; policyPosteriorImportsPolicyF / policyPrecisionIsGammaFromBeta (Holes.lean:6648,6651,
+   ;; minted 2026-08-30, TN-edge-review H3/H4) are about the policy posterior itself --
+   ;; pi = sigma(ln E - F - G) and the gamma that scales G in it (aif-equations.edn:181,218) --
+   ;; so they sit with E (PolicyPriorKernel) and pi, not with the free energies they read.
+   :policy #{"ControlPolicy" "ControlVocabulary" "cascadeGrainPi" "PolicyPriorKernel"
+             "policyPosteriorImportsPolicyF" "policyPrecisionIsGammaFromBeta"}
+   ;; dirichletAccumulationImportAbsent (Holes.lean:6645, H2) names the missing path into
+   ;; R17's concentrations; its contract evidence is DirichletConcentrations, already here.
    :learning #{"bayesianModelReduction" "modelReductionFreeEnergyChange"
-               "logMultivariateBeta" "DirichletConcentrations" "bayesFactorThreshold"}
+               "logMultivariateBeta" "DirichletConcentrations" "bayesFactorThreshold"
+               "dirichletAccumulationImportAbsent"}
    :demo #{"Fold" "FoldEscrowRecord" "FoldEscrowRecord.reconstructible" "actGate"
            "ActGateVerdict" "HaveWantArrow" "HaveWantArrowState"
            "HaveWantArrowComposition" "aliveness" "AlivenessFactor"}
-   :records #{"Click" "Attempt" "Cohort"}})
+   :records #{"Click" "Attempt" "Cohort"}
+   ;; enactedActionEqualsSelected (Holes.lean:6636, closed/refuted) and its successor bound
+   ;; enactedEqualsSelectedWhenRankOneGated (Holes.lean:6642) both ask whether a RUN enacted
+   ;; what it selected -- run-level conformance, alongside wmRunsOnce/wmRunConformsToWiring.
+   :run #{"enactedActionEqualsSelected" "enactedEqualsSelectedWhenRankOneGated"}})
 
 ;; The nine glossary paragraphs that carry no owning contract declaration
 ;; (NOTE-owner-annotation-drift-2026-08-31.md, drift-corrected uncovered list).
@@ -323,7 +335,7 @@
                     glossary-rows)
         rows (vec (concat declared named))]
     {:schema :wm/variable-situation-accounting-v1
-     :as-of "2026-08-31"
+     :as-of "2026-09-03"
      :authority {:contract-git-sha (get-in contract [:source :git-sha])
                  :contract-sha256 (sha256 contract-file)
                  :glossary-sha256 (sha256 glossary-file)

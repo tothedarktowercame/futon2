@@ -6,6 +6,6 @@
                       [{:fixture "DarkTower/WarMachine/ModelReductionFreeEnergyChangeValueNegative.lean" :claim :model-reduction-change-has-derived-value}
                        {:fixture "DarkTower/WarMachine/ModelReductionFreeEnergyChangeTypeNegative.lean" :claim :present-free-energy-is-not-model-change}]}
  :run-sha "ab33ba4cac8e494d122b940d8163692067fc39b8"
- :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
+ :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
  :result :passed
- :recorded-at "2026-09-01T00:00:00Z"}
+ :recorded-at "2026-09-03T15:33:43Z"}

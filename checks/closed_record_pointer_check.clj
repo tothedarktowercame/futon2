@@ -19,6 +19,12 @@
      {:repo "futon4" :path "holes/delivery-lifecycle.md" :rule :lifecycle}
      (str/starts-with? owner "R19-preference-stack.edn")
      {:repo "futon2" :path "holes/labs/wm-contract/R19-preference-stack.edn" :rule :named-fixture}
+     ;; The TN-edge-review worklist owns the H1/H1b/H2/H3/H4 declarations minted at
+     ;; Holes.lean 6de47bd050. Their owner strings name the record by title rather than
+     ;; by the `record: repo:path` form, so resolve it here the way the glossary and
+     ;; delivery-lifecycle records are resolved.
+     (str/includes? owner "TN-edge-review")
+     {:repo "futon2" :path "holes/TN-edge-review-aif-wiring.md" :rule :edge-review-tn}
      :else
      (when-let [[_ record] (re-find #"^(P-[A-Za-z0-9-]+)" owner)]
        {:repo "futon2" :path (str "holes/problems/" record ".md") :rule :problem-record}))))

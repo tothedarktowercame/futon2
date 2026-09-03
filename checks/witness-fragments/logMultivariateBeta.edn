@@ -6,6 +6,6 @@
            :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"}
  :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/log-multivariate-beta-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :run-sha "720af918c430415bf07f4eba29ec73d49b343a10"
- :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
+ :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
  :result :passed
- :recorded-at "2026-08-31T23:50:00Z"}
+ :recorded-at "2026-09-03T15:33:43Z"}
