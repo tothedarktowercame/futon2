@@ -223,18 +223,22 @@
    :blocked-by []}
 
   {:node :R17
-   :spec-test :partial
+   :spec-test :covered
    :tests [{:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 181
             :substrate :zaif :provenance :planted}
            {:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 197
             :substrate :zaif :provenance :planted}
            {:path "test/futon2/aif/zaif_full_loop_test.clj" :line 514
-            :substrate :fixture-only :provenance :planted}]
+            :substrate :fixture-only :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zaif_controller_test.clj" :line 464
+            :substrate :zaif :provenance :real
+            :record-id "e-0f2f9aec-6240-40e9-a25a-e45d9452076f"}]
    :shared-machinery
    {:status :mapped-separate
     :evidence ["src/futon2/aif/bmr.clj:108" "src/futon2/aif/a4a.clj:85"
                "../futon3c/src/futon3c/agents/zaif_controller.clj:11"
-               "../futon3c/src/futon3c/agents/zaif_controller.clj:151"]
-    :note "Zaif pins fixed constants and sanctioned A/B overrides. WM has receipt-fed BMR/A4A code, but zaif does not call it."}
-   :gap "The fixed-constant stub and A/B vector are tested; no receipt-fed zaif learning test or shared learning path exists."
-   :blocked-by [:S7]}]}
+               "../futon3c/src/futon3c/agents/zaif_controller.clj:151"
+               "../futon3c/src/futon3c/agents/zaif_controller.clj:173"]
+    :note "Zaif now reduces persisted Z3a pairs into a replay-checked learning report while refusing silent constant updates; WM BMR/A4A remains a separate learning path over its different concentration model."}
+   :gap nil
+   :blocked-by []}]}
