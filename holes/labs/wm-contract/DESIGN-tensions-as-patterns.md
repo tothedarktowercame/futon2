@@ -28,9 +28,23 @@ objects — but they are prose, unqueryable, statusless.
 
 ## 1.5 Verbatim origins (recovered from the evidence store, 2026-09-03)
 
-**The buffer moment Joe pointed at** (this session, turn 143,
+**The inspiring turn** (claude-1, turn 142, 2026-09-02T07:46:55Z,
+emacs-ed6555163ad9773b555b2a8ae0d4b1b7 — Joe, on recovering this exchange:
+"it was your previous comment in there that mentioned the keyword tensions
+... that was the source of the inspiration for what I said about tensions,
+patterns, and refusals all coming together"). Verbatim:
+
+> "One observation on the tail-eating, made once: a typed refusal record is
+> a *tension* in exactly the constructor's sense from this morning. When
+> the R5 generalisation trials run, the machine's own refusal stream is a
+> natural input alongside the T/M/E items — constructing policies for its
+> own reported inabilities is the literal form of eating its own tail, and
+> AC8's proposal queue is where that stream will already be pooled,
+> reviewed, and waiting."
+
+**Joe's reply, the buffer moment he pointed at** (turn 143,
 2026-09-02T07:50Z, retrieval record e-aa3dd403-81c0-4c10-b185-4b92525316f2;
-Joe's turn verbatim):
+verbatim):
 
 > "yes, exactly ... indeed, the tension could be recorded as a new design
 > pattern (even if just partial or in draft) which would turn the refusals
