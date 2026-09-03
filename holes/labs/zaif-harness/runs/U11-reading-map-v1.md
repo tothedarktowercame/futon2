@@ -37,8 +37,15 @@ a declared channel mapping. Sample live-derived fixture pin: run id
 For the calibration half, the exhaustive command
 `bb -e '(let [xs (clojure.edn/read-string (slurp "holes/labs/M-zaif-harness/calibration-sessions.edn")) ks #{:gap-count :stall-count :review-age :spinoff-pressure :coverage-pct :mu-sens :adjacent-missions}] (prn {:rows (count xs) :hits (count (filter #(some % ks) xs))}))'`
 printed `{:rows 114, :hits 0}`; its one-map output was not truncated. For the
-56-decision half, the bounded search and complete result counts are stated in
-the inventory below.
+56-decision half the absence is structural, not a search result, and the
+inventory's counts below do not establish it: the persisted `:inputs-snapshot`
+is the hydrator's output map verbatim (`zai_api.clj:1169` passes `:inputs
+inputs`; `zaif_controller.clj:205` stores it unaltered), and `hydrate-inputs`
+returns a closed seven-key map whose `:observations` is `{:posting-stats ...}`
+alone (`futon3c/src/futon3c/agents/zaif_inputs.clj:246-252`), so none of the
+five channels, `:mu-sens`, or `:adjacent-missions` can occur in any snapshot
+written by that path. The bounded query counts are stated in the inventory
+below.
 
 ## B. Mission-head pragmatic value (mission-action grain)
 
