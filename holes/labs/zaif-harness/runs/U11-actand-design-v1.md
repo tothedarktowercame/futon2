@@ -195,3 +195,14 @@ recorded here so clause (c) is not rediscovered there later.
 5. **U11f** — the §7 live-shaped demonstration test.
 Arm C joins the comparison when wm U23 lands; its column reads
 `:q-actand/no-typed-source` until then — a truthful hole, displayed.
+
+## [A4-addendum] Measured at U11e (2026-09-03)
+
+The real corpus contains two zero-gold groups (c-channel corrections 0/8,
+actand-route 0/1) whose demo-bridge value is −∞ — 9 of 114 sessions. The
+comparison reports this truthfully (produced 114, distinct 3, floor −∞).
+Defense-in-depth verified at review: the D8b gate's finite-number? check
+(zaif_inputs.clj:64-67) refuses non-finite act-values, so −∞ cannot reach
+the live controller through hydration. Any post-demo bridge (U11e
+replacement) must decide zero-support-for-target explicitly: smoothing,
+or a typed refusal at the bridge. That decision rides the arm ruling.
