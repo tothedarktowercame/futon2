@@ -75,6 +75,24 @@ quiescence and the reload.
 - **Full analysis:**
   [`C78-outward-act-refusal.md`](../labs/wm-contract/C78-outward-act-refusal.md).
 
+- **RULED (Joe, 2026-09-03, via claude-1's walkthrough; "the way you explained
+  it above makes sense to me, so let's ratify that"):** P-R16's own text is
+  **re-scoped to what ships** — the machine's enactment contract is
+  *attempt-and-record, typed* (the August withdrawal is the repair, not a
+  regression), and no outward act is armed. **The standing tripwire replaces
+  the IOU:** any new action type whose effect is *not self-recording* (an act
+  where "I tried" and "it happened" genuinely differ — email, deploys,
+  anything beyond the self-witnessing commit/board/bell vocabulary)
+  **re-opens the external-witness obligation before that action type may be
+  armed**. The rationale: every outward act in the current vocabulary is
+  self-witnessing (the commit *is* the external state), so external
+  re-observation adds nothing today and the strong promise had become an
+  unbuilt claim; the tripwire keeps the safety obligation exactly where the
+  safety concern is real. Execution: wm-contract row :U48 (re-scope P-R16.md
+  clause 2 + the Edges label + the fork section; record the tripwire in the
+  P-R16 text itself; the r16-engine-wiring tally row then closes through its
+  own file). This entry stays as the record of the fork and its ruling.
+
 ## 3. Hard-guard authority
 
 ### Avoided-range diagnostics as action guards
