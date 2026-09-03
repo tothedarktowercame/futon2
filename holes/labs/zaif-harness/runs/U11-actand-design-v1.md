@@ -152,6 +152,27 @@ decision whose task-belief is empty and act-value 0.0) — BECAUSE the pair
 honest evidence that the wire carries signal, without any live flip. Default
 remains off; the flip rides the J-gate queue with its own census.
 
+[A4] THE DECLARED DEMO BRIDGE (added after U11f's first run correctly
+STOPPED on the wiring absence at zaif_inputs.clj:69-72 — the D8b gate
+accepts only scalar-bearing results, and no density→scalar rule existed;
+locating that absence was the run's valid outcome). Per DESIGN-c-vector §6
+(a scalar payoff is an affine image of log-C at the outcome the action
+targets), the demonstration's bridge is DECLARED here, every constant
+visible:
+
+    :act-value = ln(density(:gold-judged)) − ln(1/2)
+
+Target outcome: `:gold-judged` (declared). Baseline: uniform over the two
+declared observables (ln ½), so the scalar is positive exactly when the
+actand's empirical gold rate beats a fair coin — for the pinned row,
+ln(9/14) − ln(1/2) = ln(9/7) ≈ 0.2513. The bridge function lives beside the
+table (zaif_actand.clj), carries the row's full provenance forward
+UNCHANGED plus a `:bridge` key naming this declaration, and is
+demo-scoped: U11e's comparison may replace it, and the arm A/B adapters
+(U11c/d) do not inherit it. This is the first scalar in the system whose
+density is declared rather than awaited — it graduates from
+`:scalar-awaiting-density` by construction.
+
 ## 8. Not in v1
 
 No arm ruling (the comparison produces numbers; Joe rules). No flip. No arm-C
