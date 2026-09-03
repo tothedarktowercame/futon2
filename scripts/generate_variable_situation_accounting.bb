@@ -41,7 +41,14 @@
    ;; enactedActionEqualsSelected (Holes.lean:6636, closed/refuted) and its successor bound
    ;; enactedEqualsSelectedWhenRankOneGated (Holes.lean:6642) both ask whether a RUN enacted
    ;; what it selected -- run-level conformance, alongside wmRunsOnce/wmRunConformsToWiring.
-   :run #{"enactedActionEqualsSelected" "enactedEqualsSelectedWhenRankOneGated"}})
+   ;; wmRunsOnce and wmRunConformsToWiring are named here because :U29 gave
+   ;; them owners that name their records (WM-RUN1.md / WM-RUN2.md). The
+   ;; fallback below files an owner starting "record:" under :records, which
+   ;; would have moved two run-level attestations out of the run-level row of
+   ;; the coverage table on a change to their POINTER rather than to what they
+   ;; claim.
+   :run #{"enactedActionEqualsSelected" "enactedEqualsSelectedWhenRankOneGated"
+          "wmRunsOnce" "wmRunConformsToWiring"}})
 
 ;; The nine glossary paragraphs that carry no owning contract declaration
 ;; (NOTE-owner-annotation-drift-2026-08-31.md, drift-corrected uncovered list).
@@ -393,25 +400,55 @@
       (some (fn [s] (second (re-find #"\\paragraph\{([^}]+)\}" s)))
             (reverse (take line lines))))))
 
+;; :U29 added the five paragraph titles this table did not name -- "Model
+;; uncertainty and EIG", "Predictive outcome distribution", "Dirichlet
+;; concentration parameters", "Log multivariate beta", "Bayes factor
+;; threshold". Their absence was not harmless: a declaration whose owner had
+;; drifted OFF one of them landed on a neighbour the table did name and read
+;; :resolves, so the gap hid drift rather than reporting it.
 (defn title-area [title]
   (let [t (str/lower-case (or title ""))]
     (cond
       (re-find #"belief|prediction error|precision|observation model|generative model" t) :belief
-      (re-find #"expected free energy|variational free energy|risk|ambiguity|information gain|softmax" t) :scores
+      (re-find #"expected free energy|variational free energy|risk|ambiguity|information gain|softmax|model uncertainty|predictive outcome" t) :scores
       (re-find #"preference" t) :preferences
       (re-find #"policy|habit|strategic mission" t) :policy
-      (re-find #"bayesian model reduction" t) :learning
+      (re-find #"bayesian model reduction|dirichlet|multivariate beta|bayes factor" t) :learning
       (re-find #"fold|act-gate|have--want|aliveness" t) :demo
       (re-find #"click|attempt|cohort|edn|substrate|revision|experimental" t) :records
       :else :unclassified)))
 
+;; Every line a glossary owner cites, not only the first: an owner may name
+;; several paragraphs ("9,15,17,19,31") and the area check reads the first one
+;; alone.
+(defn cited-glossary-lines [owner]
+  (when-let [[_ spec] (re-find #"sec-glossary\.tex:([^ ]+)" owner)]
+    (mapv #(Long/parseLong %) (re-seq #"\d+" spec))))
+
+(defn glossary-paragraph-lines []
+  (into #{} (keep-indexed (fn [i s] (when (re-find #"\\paragraph\{" s) (inc (long i))))
+                          (str/split-lines (slurp glossary-file)))))
+
 (defn pointer-status [{:keys [owner] :as row}]
   (if (str/includes? owner "sec-glossary.tex:")
-    (let [title (glossary-title-at owner)]
-      (if (= (area-for row) (title-area title))
-        {:status :resolves :resolved-title title}
+    ;; Two questions, because passing the first one alone is how a pointer can
+    ;; be wrong and green at once (:U29): (1) does the paragraph the first
+    ;; cited line lands in belong to this row's area, and (2) is every cited
+    ;; line the paragraph's OWN line? A citation into a paragraph's body
+    ;; survives a small insertion above it by sliding onto the next
+    ;; paragraph's text while still reporting the old area.
+    (let [title (glossary-title-at owner)
+          paragraph-lines (glossary-paragraph-lines)
+          off-paragraph (vec (remove paragraph-lines (cited-glossary-lines owner)))]
+      (cond
+        (not= (area-for row) (title-area title))
         {:status :drifted :resolved-title title
-         :reason :line-resolves-to-different-concept}))
+         :reason :line-resolves-to-different-concept}
+        (seq off-paragraph)
+        {:status :drifted :resolved-title title
+         :reason :cited-line-is-not-a-paragraph-start
+         :off-paragraph-lines off-paragraph}
+        :else {:status :resolves :resolved-title title}))
     (cond
       (str/starts-with? owner "record: futon2:")
       (let [[_ path] (re-find #"record: futon2:([^ ]+)" owner)]
@@ -544,10 +581,43 @@
               (println "variable-situation-accounting: FAIL wrong rejection" (ex-data e)))
             (System/exit 2))))))
 
+;; :U29 negative control. The drifted count is a published number (Box 2 says
+;; how many pointers drifted), so nothing distinguishes "no pointer drifted"
+;; from "the checker stopped being able to say so" unless a planted one is
+;; caught. Both reasons are planted, because they fail differently: an owner
+;; that names the wrong paragraph, and an owner that cites a line INSIDE the
+;; right paragraph -- the second is how drift hides, since the area still
+;; matches and only the exact line has moved.
+(defn negative-drift! []
+  (let [plant (fn [owner]
+                (-> (build-registry
+                     {:source {:git-sha "planted"}
+                      :declarations [{:name "softmax" :kind "closed" :owner owner
+                                      :holder "by-record" :decided "2026-09-03"}]})
+                    :rows first))
+        wrong-paragraph (plant "sec-glossary.tex:39 · P-glossary-mathematics")
+        body-line (plant "sec-glossary.tex:36 · P-glossary-mathematics")
+        correct (plant "sec-glossary.tex:35 · P-glossary-mathematics")
+        expect (fn [label row status reason]
+                 (when-not (and (= status (:pointer-status row))
+                                (= reason (:reason (:pointer-detail row))))
+                   (binding [*out* *err*]
+                     (println "variable-situation-accounting: FAIL" label
+                              (pr-str (select-keys row [:pointer-status :pointer-detail]))))
+                   (System/exit 2)))]
+    (expect "wrong paragraph accepted" wrong-paragraph :drifted :line-resolves-to-different-concept)
+    (expect "paragraph-body citation accepted" body-line :drifted :cited-line-is-not-a-paragraph-start)
+    (expect "correct pointer rejected" correct :resolves nil)
+    (println "variable-situation-accounting: PASS planted drift rejected"
+             (pr-str [(:pointer-detail wrong-paragraph) (:pointer-detail body-line)]))
+    (System/exit 0)))
+
 (let [check? (some #{"--check"} *command-line-args*)
       empty-negative? (some #{"--negative-empty"} *command-line-args*)
       untyped-negative? (some #{"--negative-untyped"} *command-line-args*)
+      drift-negative? (some #{"--negative-drift"} *command-line-args*)
       _ (when untyped-negative? (negative-untyped!))
+      _ (when drift-negative? (negative-drift!))
       value (if empty-negative?
               (try
                 (build-registry {:source {} :declarations []})

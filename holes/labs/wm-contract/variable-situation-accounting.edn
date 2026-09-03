@@ -1,9 +1,9 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-09-03",
  :authority
- {:contract-git-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+ {:contract-git-sha "6dabfb686f9754454d7689dc5b5bc39ae08dcf0b",
   :contract-sha256
-  "c58e8f2fa5fbaacefc3cdb6744cde217134904249209b4d353ecb5210a33fd14",
+  "ef5e3b829cb2b0cf058bfaf3c602d63a8f7c7b7f81fc81e9373f63cc05211c98",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
@@ -37,63 +37,60 @@
    :pointer-detail {:resolution :stable-problem-or-record-owner}}
   {:name "HaveWantArrowState",
    :area :demo,
-   :owner "sec-glossary.tex:70 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Act-gate."}}
+   :pointer-detail
+   {:resolved-title "Demonstration Foundry and have--want arrows."}}
   {:name "HaveWantArrowComposition",
    :area :demo,
+   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-negative-space,
+   :pointer-status :resolves,
+   :pointer-detail
+   {:resolved-title "Demonstration Foundry and have--want arrows."}}
+  {:name "ControlPolicy",
+   :area :policy,
+   :owner "sec-glossary.tex:39 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-negative-space,
+   :pointer-status :resolves,
+   :pointer-detail
+   {:resolved-title "Control states $U$ and the policy vocabulary."}}
+  {:name "AlivenessFactor",
+   :area :demo,
+   :owner "sec-glossary.tex:54 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-negative-space,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Aliveness $L = T\\cdot H$."}}
+  {:name "ActGateVerdict",
+   :area :demo,
    :owner "sec-glossary.tex:70 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Act-gate."}}
-  {:name "ControlPolicy",
-   :area :policy,
-   :owner "sec-glossary.tex:35 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Softmax and controller calibration.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "AlivenessFactor",
-   :area :demo,
-   :owner "sec-glossary.tex:50 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Policy prior $E$ and habit.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "ActGateVerdict",
-   :area :demo,
-   :owner "sec-glossary.tex:66 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "GFlowNet ``slush''.",
-    :reason :line-resolves-to-different-concept}}
   {:name "Click",
    :area :records,
-   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:82 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
+   :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Demonstration Foundry and have--want arrows.",
-    :reason :line-resolves-to-different-concept}}
+   {:resolved-title
+    "Clicks, attempts, and cohorts (measurement vocabulary)."}}
   {:name "Attempt",
    :area :records,
-   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:82 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
+   :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Demonstration Foundry and have--want arrows.",
-    :reason :line-resolves-to-different-concept}}
+   {:resolved-title
+    "Clicks, attempts, and cohorts (measurement vocabulary)."}}
   {:name "Tension",
    :area :demo,
    :owner "P-validated-R5 §3e",
@@ -380,34 +377,33 @@
    :pointer-detail {:resolution :stable-problem-or-record-owner}}
   {:name "cascadeGrainPi",
    :area :policy,
-   :owner "sec-glossary.tex:48 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:52 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Policy prior $E$ and habit."}}
+   :pointer-detail {:resolved-title "Policy $\\pi$."}}
   {:name "observationKernelRowMass",
    :area :belief,
-   :owner "sec-glossary.tex:27 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:31 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Risk.",
-    :reason :line-resolves-to-different-concept}}
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Observation model $A$."}}
   {:name "beliefUpdate",
    :area :belief,
-   :owner "sec-glossary.tex:9,15,17,19,27 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:9,15,17,19,31 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Belief state $\\mu$."}}
   {:name "modelReductionFreeEnergyChange",
    :area :learning,
-   :owner "sec-glossary.tex:58 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:62 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
+   :pointer-detail
+   {:resolved-title "Log multivariate beta and $\\Delta F$."}}
   {:name "ObservationVector",
    :area :belief,
    :owner
@@ -418,25 +414,27 @@
    :pointer-detail {:resolution :stable-problem-or-record-owner}}
   {:name "PredictiveOutcomeKernel",
    :area :scores,
-   :owner "sec-glossary.tex:21–29 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:23 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Expected free energy $G$."}}
+   :pointer-detail
+   {:resolved-title
+    "Predictive outcome distribution $Q(o\\mid\\pi)$."}}
   {:name "ParameterPriorKernel",
    :area :scores,
-   :owner "sec-glossary.tex:29 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Ambiguity."}}
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
   {:name "ParameterPosteriorKernel",
    :area :scores,
-   :owner "sec-glossary.tex:29 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Ambiguity."}}
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
   {:name "TransitionKernel",
    :area :belief,
    :owner "sec-glossary.tex:7 · P-glossary-mathematics",
@@ -446,48 +444,46 @@
    :pointer-detail {:resolved-title "Generative model."}}
   {:name "PreferenceDistribution",
    :area :preferences,
-   :owner "sec-glossary.tex:21–23 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:25 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Expected free energy $G$.",
-    :reason :line-resolves-to-different-concept}}
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Preference distribution $C$."}}
   {:name "observationEntropy",
    :area :scores,
-   :owner "sec-glossary.tex:21,25 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:21,29 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Expected free energy $G$."}}
   {:name "G_eq_expectedFreeEnergy",
    :area :scores,
-   :owner "sec-glossary.tex:21–25 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Expected free energy $G$."}}
   {:name "ExpectedInformationGainValue",
    :area :scores,
-   :owner "sec-glossary.tex:29 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Ambiguity."}}
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
   {:name "parameterInformationGain",
    :area :scores,
-   :owner "sec-glossary.tex:29 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Ambiguity."}}
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
   {:name "modelUncertaintyBonus",
    :area :scores,
-   :owner "sec-glossary.tex:29 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Ambiguity."}}
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
   {:name "generativeFactorMass",
    :area :belief,
    :owner "sec-glossary.tex:7 · P-glossary-mathematics",
@@ -504,59 +500,55 @@
    :pointer-detail {:resolution :stable-problem-or-record-owner}}
   {:name "logMultivariateBeta",
    :area :learning,
-   :owner "sec-glossary.tex:58 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:62 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
+   :pointer-detail
+   {:resolved-title "Log multivariate beta and $\\Delta F$."}}
   {:name "expectedFreeEnergy",
    :area :scores,
-   :owner "sec-glossary.tex:21–25 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Expected free energy $G$."}}
   {:name "ambiguity",
    :area :scores,
-   :owner "sec-glossary.tex:21,25 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:21,29 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Expected free energy $G$."}}
   {:name "HaveWantArrow",
    :area :demo,
-   :owner "sec-glossary.tex:70 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Act-gate."}}
+   :pointer-detail
+   {:resolved-title "Demonstration Foundry and have--want arrows."}}
   {:name "Fold",
    :area :demo,
-   :owner "sec-glossary.tex:66 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:68 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "GFlowNet ``slush''.",
-    :reason :line-resolves-to-different-concept}}
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Fold."}}
   {:name "FoldEscrowRecord",
    :area :demo,
-   :owner "sec-glossary.tex:66 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:68 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :proven-against-pinned-source,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "GFlowNet ``slush''.",
-    :reason :line-resolves-to-different-concept}}
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Fold."}}
   {:name "FoldEscrowRecord.reconstructible",
    :area :demo,
-   :owner "sec-glossary.tex:66 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:68 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "GFlowNet ``slush''.",
-    :reason :line-resolves-to-different-concept}}
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Fold."}}
   {:name "BeliefState",
    :area :belief,
    :owner "sec-glossary.tex:9 · P-glossary-mathematics",
@@ -588,40 +580,34 @@
    {:resolved-title "Prediction error $\\varepsilon$."}}
   {:name "softmax",
    :area :scores,
-   :owner "sec-glossary.tex:39 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:35 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
+   :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Control states $U$ and the policy vocabulary.",
-    :reason :line-resolves-to-different-concept}}
+   {:resolved-title "Softmax and controller calibration."}}
   {:name "bayesFactorThreshold",
+   :area :learning,
+   :owner "sec-glossary.tex:64 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Bayes factor threshold."}}
+  {:name "bayesianModelReduction",
+   :area :learning,
+   :owner "sec-glossary.tex:58 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
+  {:name "DirichletConcentrations",
    :area :learning,
    :owner "sec-glossary.tex:60 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
+   :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Dirichlet concentration parameters.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "bayesianModelReduction",
-   :area :learning,
-   :owner "sec-glossary.tex:54 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Aliveness $L = T\\cdot H$.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "DirichletConcentrations",
-   :area :learning,
-   :owner "sec-glossary.tex:56 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Embedding space.",
-    :reason :line-resolves-to-different-concept}}
+   {:resolved-title "Dirichlet concentration parameters."}}
   {:name "Channel",
    :area :records,
    :owner "P-R2 §solved 1 (Channel)",
@@ -631,72 +617,63 @@
    :pointer-detail {:resolution :stable-problem-or-record-owner}}
   {:name "observationKernel",
    :area :belief,
-   :owner "sec-glossary.tex:27 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:31 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Risk.",
-    :reason :line-resolves-to-different-concept}}
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Observation model $A$."}}
   {:name "predictiveOutcomeRisk",
    :area :scores,
-   :owner "sec-glossary.tex:21–23 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:21,27 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Expected free energy $G$."}}
   {:name "PolicyPriorKernel",
    :area :policy,
-   :owner "sec-glossary.tex:7,37 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Generative model.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "ControlVocabulary",
-   :area :policy,
-   :owner "sec-glossary.tex:35 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Softmax and controller calibration.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "aliveness",
-   :area :demo,
-   :owner "sec-glossary.tex:50 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Policy prior $E$ and habit.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "actGate",
-   :area :demo,
-   :owner "sec-glossary.tex:66 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "GFlowNet ``slush''.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "Cohort",
-   :area :records,
-   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Demonstration Foundry and have--want arrows.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "expectedInformationGain",
-   :area :scores,
-   :owner "sec-glossary.tex:29 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:41,7 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Ambiguity."}}
+   :pointer-detail {:resolved-title "Policy prior $E$ and habit."}}
+  {:name "ControlVocabulary",
+   :area :policy,
+   :owner "sec-glossary.tex:39 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail
+   {:resolved-title "Control states $U$ and the policy vocabulary."}}
+  {:name "aliveness",
+   :area :demo,
+   :owner "sec-glossary.tex:54 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Aliveness $L = T\\cdot H$."}}
+  {:name "actGate",
+   :area :demo,
+   :owner "sec-glossary.tex:70 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Act-gate."}}
+  {:name "Cohort",
+   :area :records,
+   :owner "sec-glossary.tex:82 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail
+   {:resolved-title
+    "Clicks, attempts, and cohorts (measurement vocabulary)."}}
+  {:name "expectedInformationGain",
+   :area :scores,
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
   {:name "GenerativeModel",
    :area :belief,
    :owner "sec-glossary.tex:7 · P-glossary-mathematics",
@@ -706,11 +683,11 @@
    :pointer-detail {:resolved-title "Generative model."}}
   {:name "modelUncertaintyAndEIG",
    :area :scores,
-   :owner "sec-glossary.tex:29 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
    :row-source :contract-declaration,
    :content-status :proven-against-pinned-source,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Ambiguity."}}
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
   {:name "organiseO1NodesRecorded",
    :area :demo,
    :owner "P-validated-R5 §3e O1",
@@ -924,8 +901,9 @@
    :owner "P-R19-preferences-open §gate",
    :runtime-evidence
    "A trace record carrying mission-c criteria records beside its :preference-stack -- a tick whose mission-c-readback is neither :no-active-clock nor :no-measurable-criteria."}
-  {:pointer-status :drifted,
-   :pointer-detail {:reason :owner-does-not-name-record},
+  {:pointer-status :resolves,
+   :pointer-detail
+   {:resolved-path "holes/problems/BUILD-packets/WM-RUN1.md"},
    :row-source :contract-declaration,
    :name "wmRunsOnce",
    :basis
@@ -934,11 +912,13 @@
    :content-status :open-hole,
    :area :run,
    :closability :run-gated,
-   :owner "Joe 2026-08-31 · run-at-least-once",
+   :owner
+   "record: futon2:holes/problems/BUILD-packets/WM-RUN1.md · Joe 2026-08-31 · run-at-least-once",
    :runtime-evidence
    "A completed tick leaving a TickRunRecord. IT EXISTS -- the pinned 2026-08-30 receipt, three 2026-09-02 receipts, four more from the S4 stage run."}
-  {:pointer-status :drifted,
-   :pointer-detail {:reason :owner-does-not-name-record},
+  {:pointer-status :resolves,
+   :pointer-detail
+   {:resolved-path "holes/problems/BUILD-packets/WM-RUN2.md"},
    :row-source :contract-declaration,
    :name "wmRunConformsToWiring",
    :basis
@@ -947,7 +927,8 @@
    :content-status :open-hole,
    :area :run,
    :closability :run-gated,
-   :owner "Joe 2026-08-31 · organisation evidence",
+   :owner
+   "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · organisation evidence",
    :runtime-evidence
    "TN §11 R2's run: ~20 shadow ticks on current code, records carrying the route, judged by R3 against the re-synced topology."}
   {:name "enactedActionEqualsSelected",
@@ -1151,7 +1132,7 @@
    :framing 1,
    :open-hole 16,
    :proven-against-pinned-source 11},
-  :pointer {:drifted 22, :resolves 111},
+  :pointer {:resolves 133},
   :row-source {:contract-declaration 124, :glossary-paragraph 9},
   :glossary-content
   {:closed-by-record-with-witness 7, :framing 1, :open-hole 1},
