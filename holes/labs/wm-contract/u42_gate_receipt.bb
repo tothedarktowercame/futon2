@@ -18,7 +18,6 @@
 ;; the store and nothing under data/.
 
 (require '[babashka.fs :as fs]
-         '[clojure.edn :as edn]
          '[clojure.pprint :as pp])
 
 (def here (str (fs/parent (fs/absolutize *file*))))
