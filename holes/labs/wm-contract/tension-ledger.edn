@@ -38,14 +38,14 @@
  {:tension
   {:required [:tension/id :tension/poles :tension/statement :tension/statement-source
               :tension/carried-by :tension/status :tension/born-of :tension/provenance]
-   :optional [:tension/resolution-path :tension/resolution-key :tension/cashed-by
+   :optional [:tension/resolution-path :tension/resolution-key :tension/cashed-by :tension/statement-source-corrected-by
               :tension/pattern-links :tension/note :tension/refusal
               :tension/minted-by]
    :enums {:tension/status #{:carried :cashed :refuted :dissolved}
            :tension/born-of #{:operator-dictation :refuted-rationale :build-event
                               :refused-prediction}}
    :rules ["poles are exactly two, both non-blank -- a tension with one pole is a plan"
-           ":tension/statement is verbatim from :tension/statement-source"
+           ":tension/statement is verbatim from :tension/statement-source. For :born-of :refused-prediction the statement-source IS the in-record :tension/refusal field (a machine-born tension has no dictated text; the typed refusal is the primary source) and the statement must be the refusal read back verbatim as data -- control 12 enforces this mechanically; external pointers are context and live in :provenance"
            ":tension/status is the status AT MINT and must equal the type of the mint event"
            ":tension/pattern-links [] means no graduation is claimed; the birth rule proposes and a person writes"]}
   :event
@@ -163,7 +163,8 @@
      :kin []}]
    :tension/poles ["make a finite prediction" "preserve the finite-evidence gate"]
    :tension/statement "{:q-actand/refusal :q-actand/zero-support-after-kin-pool, :grain :arm-session, :actand {:route :actand, :correction-label true}, :action :retrieve, :target :gold-judged, :kin []}"
-   :tension/statement-source "futon2/holes/labs/zaif-harness/worklist.edn:248-251"
+   :tension/statement-source ":tension/refusal (in-record; the machine's typed refusal is the primary source for a machine-born tension)"
+   :tension/statement-source-corrected-by {:row :U28z-review :by "claude-1" :at "2026-09-03" :was "futon2/holes/labs/zaif-harness/worklist.edn:248-251" :why "claude-2's reviewer: statement was pr-str of the refusal, not verbatim of the cited worklist lines. Ruling (a): retarget the source to the refusal itself -- verbatim-ness now holds against the TRUE source; the worklist lines stay in :provenance :pointers as context. Rule clarified + control 12 added in the same commit."}
    :tension/carried-by "M-zaif-harness-v1"
    :tension/resolution-path nil
    :tension/status :carried

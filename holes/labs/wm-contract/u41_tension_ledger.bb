@@ -35,7 +35,8 @@
          '[clojure.pprint :as pp]
          '[clojure.string :as str])
 
-(def repo-root (str (System/getProperty "user.home") "/code/futon2"))
+(def repo-root ;; derived from the script location (holes/labs/wm-contract under the root) so a worktree run targets its own checkout -- U28z reviewer finding, 2026-09-03
+  (-> (java.io.File. *file*) .getAbsoluteFile .getParentFile .getParentFile .getParentFile .getParentFile .getPath))
 (def lab (io/file repo-root "holes/labs/wm-contract"))
 (def ledger-path (io/file lab "tension-ledger.edn"))
 
@@ -314,6 +315,14 @@
        {:defects (mapv :defect ds)
         :pass? (some #(= :status-move-without-row-or-evidence (:defect %)) ds)
         :why "a cashing event with no receipt and no row must be refused -- section 3's 'status moves only with a pointer to the cashing/refuting row', mechanised"})
+     :positive/machine-born-statement-is-the-refusal-verbatim
+     (let [mb (filter #(= :refused-prediction (:tension/born-of %)) (:tensions ledger))]
+       {:count (count mb)
+        :pass? (and (seq mb)
+                    (every? #(= (clojure.edn/read-string (:tension/statement %))
+                                (:tension/refusal %))
+                            mb))
+        :why "rule clarified 2026-09-03 (U28z review finding): a machine-born tension's statement IS the in-record refusal read back verbatim as data; drift fails here mechanically instead of surviving as prose"})
      :negative/planted-double-mint-is-refused
      (let [t (last (:tensions ledger))
            e (last (:events ledger))
