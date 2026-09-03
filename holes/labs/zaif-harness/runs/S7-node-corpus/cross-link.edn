@@ -1,0 +1,110 @@
+;; S7 node corpus -- CROSS-LINK MANIFEST. Pointers, not copies.
+;;
+;; Written by wm-contract worklist :U25 (from zaif :S7 remainder half (b)).
+;; The corpus itself lives in ONE place and stays there:
+;;
+;;   futon2/holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/
+;;
+;; This board's runs/S7-node-corpus/ is that directory's entry on the zaif
+;; board: a pointer file plus a per-fixture digest, so a reader arriving from a
+;; zaif row finds the corpus, and so a fixture that is edited after this
+;; manifest was written is VISIBLE rather than silently different. Copying the
+;; 39 fixtures here would have produced a second corpus that drifts; the digest
+;; below is what a copy cannot give you.
+;;
+;; Re-verify from the futon2 repository root:
+;;   cd holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures \
+;;     && sha256sum *.edn README.md | sort -k2 | sha256sum
+;; must print :corpus-digest below.
+
+{:manifest/kind :cross-link
+ :manifest/written-by :U25
+ :manifest/written-at "2026-09-03"
+ :repository "futon2"
+ :canonical-path "holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures"
+ :canonical-readme "holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/README.md"
+ :produced-by "holes/labs/wm-contract/u12_c_mis_falsifier.clj"
+ :produced-from "data/wm-trace/ tick records (live, not planted)"
+ :copies-here 0
+ :corpus-digest "802b03c29bbc065c4d67f1bf9c18b7d67bc97f5b5f25ec24ef241f696da15af5"
+ :corpus-digest-recipe "sha256sum *.edn README.md | sort -k2 | sha256sum"
+ :run-ids ["0a18c4f7-758e-400a-8223-9c52edf07450"
+           "4abad68c-5481-4402-8f0e-252add62c54b"
+           "801976e7-01c6-4e39-aada-27f620f7c2f1"]
+ :nodes [:R1 :R2 :R3 :R5 :R6 :R7 :R8 :R9 :R12 :R14 :R16 :R20 :S4]
+ :fixtures
+ [{:file "0a18c4f7-R1.edn" :sha256 "a71b14c9904a666d84a809a841e6b5117b5946bef96552388b9ae70689feed53"}
+  {:file "0a18c4f7-R12.edn" :sha256 "5b8651a1d7fa0eb09863a716a8a05a13013f39208e49b0e7bf2a6bc8293041e7"}
+  {:file "0a18c4f7-R14.edn" :sha256 "0f238084b60a4c34f1adda97697de5031f118fb376bd9ff7d012b3ce4626eb3b"}
+  {:file "0a18c4f7-R16.edn" :sha256 "6b0c330dc095edf6c9862d1f2187abf50370732a6d42949d661b3231747b71e9"}
+  {:file "0a18c4f7-R2.edn" :sha256 "64bb87fca413891ae7cb2ffbf2523ece96cc7a0091bf1435b2f1ba96bcb0a886"}
+  {:file "0a18c4f7-R20.edn" :sha256 "4cd090b92d115e846c72ea21604f9c693e29865359d3421006ae385b25e425b0"}
+  {:file "0a18c4f7-R3.edn" :sha256 "dab700a643fac467492982e5a713a300fbbf231363736ad48d66d3f0c85f67ad"}
+  {:file "0a18c4f7-R5.edn" :sha256 "25fddde8c4bffa6e633f4a0a0bd53c2d20612eb35d7ce0ccd6b78cac24a537f9"}
+  {:file "0a18c4f7-R6.edn" :sha256 "ad2d3c13b1d54f1448f2774e209f4e718ba6725b8d0c9c0a22e9411c02ccbb0b"}
+  {:file "0a18c4f7-R7.edn" :sha256 "059fabbd7dec0d407e4605aab909b85474ab4af7b309c04c61e5c6b4ae6afb35"}
+  {:file "0a18c4f7-R8.edn" :sha256 "3dfac6eff53aa53c915b5952aa55568761325fbc7f3b1cf965f4314105ebecba"}
+  {:file "0a18c4f7-R9.edn" :sha256 "2a8d7f45d37261581010b04956a7d3d7aa366d7ba4364c991d3f6edb83814a61"}
+  {:file "0a18c4f7-S4.edn" :sha256 "03f9909d6a4cf69363882648bd44d5f00290e93ad45280711557a052eab16751"}
+  {:file "4abad68c-R1.edn" :sha256 "57e7fd2cc83472103680248343936bd2d50c3405bb2c26c8bc1be84db836906b"}
+  {:file "4abad68c-R12.edn" :sha256 "5e87d1724a6d6a7fc6ac7e7bde663f5f4269c9fb04688b916b1fb6beba0a32b9"}
+  {:file "4abad68c-R14.edn" :sha256 "5512271027dd208cdd2b516d47c452c9e1793b29024562957ef693e787bc5d07"}
+  {:file "4abad68c-R16.edn" :sha256 "fc31083ffab7fb008d4f16a244874731839317a35b6d6387a86b5d2a99e0dcf5"}
+  {:file "4abad68c-R2.edn" :sha256 "9ae1cb15cf80eed1d0a8ff9a216df064e7b93d1fc52b847ae09aa3afca9861d7"}
+  {:file "4abad68c-R20.edn" :sha256 "0e6477b21f34e2078606f6958cf30bb196eb793149053b14599795fca30fcd88"}
+  {:file "4abad68c-R3.edn" :sha256 "9f4466e5e22415acb7697835b7547901245af66058e3c037d454ef05c97c13a3"}
+  {:file "4abad68c-R5.edn" :sha256 "2886997feab01b9fe71d069af47c4c8d8fdacf3148623c7375dcf37d30416a7f"}
+  {:file "4abad68c-R6.edn" :sha256 "08b2e0da213d43340b4cc3cf3aade15a453f3c20cef4dbec1cf94891ef7e93d8"}
+  {:file "4abad68c-R7.edn" :sha256 "ee7adbd0329c5b3fbfdab3d65f853979550ed0abedb9086e653b165c6ea3daa0"}
+  {:file "4abad68c-R8.edn" :sha256 "7fac2900b205bef7aedebaa2cf68cbdd827120da1a56314d04aa25cf3e2e4759"}
+  {:file "4abad68c-R9.edn" :sha256 "ead0930655b730c6e85a8d0094f5e18d350e52436c24fffcca46a04e020e3b8c"}
+  {:file "4abad68c-S4.edn" :sha256 "74a355b221100b89605952676db73f3c98938d7b8611cab2b39761e252308bbd"}
+  {:file "801976e7-R1.edn" :sha256 "0f01b32096698491a9c6b7a6a40a953cf5f11d482c55df2fe38157972f97e5e0"}
+  {:file "801976e7-R12.edn" :sha256 "8b186f4fbcbaae3f46b2cf70c39d4c2782607468242b08b67ccc546f713eaced"}
+  {:file "801976e7-R14.edn" :sha256 "2207f251a16837a7cbfd8a9175007e0b4014110f2b2b1900f9c4a82a3fd98ece"}
+  {:file "801976e7-R16.edn" :sha256 "8f8618367aef9a5fd8d4e6c49fd036cb40fcf91ef8481cfa840148611184ac38"}
+  {:file "801976e7-R2.edn" :sha256 "2894ca73635b77a6f30b5c426af29a9e6578a4ee37c64610bf912f24cbc00fe5"}
+  {:file "801976e7-R20.edn" :sha256 "b5abc1dff31a7f708a75c93fb7e5bd1e962f8227f1c79115fd8c4effd76f1b60"}
+  {:file "801976e7-R3.edn" :sha256 "064e9aaed1af3e4afe29485ef8c48f5c62f2ed170cc4a3145baef58453dc61c3"}
+  {:file "801976e7-R5.edn" :sha256 "5d268d02f9eed1969d7728a25747fa834006ed40d475ddabcd4dc98c8174ccdf"}
+  {:file "801976e7-R6.edn" :sha256 "3352a6d514a7269d7e41fce2d9521a0910e3cbd656ff325f95cd823bcaf79014"}
+  {:file "801976e7-R7.edn" :sha256 "bb0c91c9a5f5340001c364806a68293dba98d729e588660270a88b47b1ba6b83"}
+  {:file "801976e7-R8.edn" :sha256 "aaa46fce7b9e1b57ab3bedbf2e4e332a428a9eda3e1b2ba3ec85cc4f3b1e18d8"}
+  {:file "801976e7-R9.edn" :sha256 "1533f83abbe2d0c4c878c79e949c370410203e9c31af383607b24d4bb349bd7d"}
+  {:file "801976e7-S4.edn" :sha256 "04fef65719d673b6c45b2e5321d76b8ac449a92632086a11e7783c6249eb26a0"}
+  {:file "README.md" :sha256 "18aa56851dc2b51470e55bda86da3a10af51c3b681c5f4ae5e0c3b7ea29553f1"}]
+
+ ;; What the zaif board reads this corpus FOR. Each entry is a row on
+ ;; holes/labs/zaif-harness/worklist.edn and the fixture field it consumes.
+ :feeds
+ [{:row :S7
+   :half :b
+   :use "the corpus's canonical home on this board -- this file"
+   :status :satisfied}
+  {:row :U7
+   :use "R2/R7/R8 fixtures as the live-record counterpart to the memory-tool pin's synthetic case: the corpus is what a real tick's observation/precision/prediction-error records look like"
+   :fixture-fields [[:R2 [:observation]] [:R7 [:precision-state]] [:R8 [:prediction-errors]]]
+   :status :pointer-recorded}
+  {:row :U9
+   :use "R7's per-channel :precision -- the R7 precision table's live counterpart. The corpus answers R7 with 8 of R2's 14 channels present, so the 6 named absences are measured rather than assumed"
+   :fixture-fields [[:R7 [:precision-state]] [:R2 [:observation]]]
+   :channels-present [:active-repo-ratio :annotation-health :attack-coverage :coupling-density
+                      :mission-health :sorry-count-norm :support-coverage :ticks-firing-ratio]
+   :channels-absent [:consulting-pct :depositing-signal :loop-health :mathematics-pct
+                     :portfolio-pct :stack-pct]
+   :status :pointer-recorded}
+  {:row :U10
+   :use "the per-node coverage matrix cites these fixtures directly instead of re-extracting (S7 :progress says so in as many words)"
+   :status :pointer-recorded}]
+
+ ;; U25 half (a): what the corpus was used to RE-GROUND in the U6 suite.
+ ;; The typed split lives in the suite as data (`plant-real-split`,
+ ;; zaif_full_loop_test.clj), asserted by
+ ;; u25-plant-real-split-is-complete-and-typed-test. Repeated here in summary
+ ;; only, so this manifest is not a second source of truth.
+ :regrounding
+ {:subject "futon2/test/futon2/aif/zaif_full_loop_test.clj"
+  :split-lives-in "plant-real-split (that file)"
+  :re-grounded [:r4-level :r4-dispersion :r8-realised-observation]
+  :plant-kept [:r4-channel-placement :r4-arm-conditional-delta]
+  :grounded-on "0a18c4f7-R8.edn / 0a18c4f7-R2.edn"}}
