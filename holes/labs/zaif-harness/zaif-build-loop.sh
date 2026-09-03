@@ -71,8 +71,12 @@ i=0
 while [ $i -lt "$MAX_ITER" ]; do
   i=$((i+1))
   ledger_ok || { log "ledger invalid; stopping"; notify "ledger invalid before work"; exit 1; }
-  bb "$HERE/zaif_step.bb" unblock | tee -a "$LOG"
-  if [ -n "$(bb "$HERE/zaif_step.bb" unblock)" ]; then (cd "$HOME/code/futon2" && git add holes/labs/zaif-harness/worklist.edn && git commit -q -m "zaif-harness: zaif-build-loop unblocked rows whose :depends-on are done" -- holes/labs/zaif-harness/worklist.edn); fi
+  # Capture unblock output ONCE: a second call finds nothing left to unblock,
+  # so the edit was made but never committed (c427a68 swept it in mislabeled;
+  # the wm template has the same double-call — flagged to claude-1).
+  UNBLOCKED="$(bb "$HERE/zaif_step.bb" unblock)"
+  [ -n "$UNBLOCKED" ] && echo "$UNBLOCKED" | tee -a "$LOG"
+  if [ -n "$UNBLOCKED" ]; then (cd "$HOME/code/futon2" && git add holes/labs/zaif-harness/worklist.edn && git commit -q -m "zaif-harness: zaif-build-loop unblocked rows whose :depends-on are done" -- holes/labs/zaif-harness/worklist.edn); fi
   next="$(bb "$HERE/zaif_step.bb" next-open)"; unrev="$(bb "$HERE/zaif_step.bb" unreviewed)"
   log "iteration $i: next-open=$next unreviewed=[$unrev] counts=$(bb "$HERE/zaif_step.bb" counts)"
   [ -z "$unrev" ] && stall_check "$(bb "$HERE/zaif_step.bb" stall-key)"
