@@ -1,0 +1,46 @@
+U23 — CASCADE CATALOG READER: what a mission's cascade record can be assembled from
+run 2026-09-03T10:50:44.806183263Z; read-only; nothing written outside holes/labs/wm-contract/runs/U23-cascade-catalog
+
+SUBJECTS
+  primary      M-zaif-harness-v1
+  kin          M-aif-a-matrix-faithfulness  kinship {:cross-refs 0, :shared-patterns 0, :shared-clocked-agents 0, :shared-repo 1}
+  kin          M-aif-gap-epistemic-affordance  kinship {:cross-refs 0, :shared-patterns 0, :shared-clocked-agents 0, :shared-repo 1}
+
+KIN SELECTION over a pool of 238 mission docs. All 10 candidates share the top signal
+  vector {:cross-refs 0, :shared-patterns 0, :shared-clocked-agents 0, :shared-repo 1}: cross-refs and shared patterns are ZERO for every candidate, and
+  shared clocked agents is zero too — the seven agents that clocked on the subject
+  clocked on nothing else. Kin selection therefore degenerated to shared repo plus
+  the alphabetical tiebreak, which is the finding, not a defect: ["M-aif-a-matrix-faithfulness" "M-aif-gap-epistemic-affordance"].
+
+CARRIER POPULATION — the deliverable. One line per carrier per subject.
+
+  carrier                    M-zaif-harness-v1              M-aif-a-matrix-faithfulness    M-aif-gap-epistemic-affordance
+  psr                        absent/no-typed-carrier        absent/no-typed-carrier        absent/no-typed-carrier
+  pur                        absent/no-typed-carrier        absent/no-typed-carrier        absent/no-typed-carrier
+  flight-discharge           absent/writer-exists-no-records absent/writer-exists-no-records absent/writer-exists-no-records
+  trace-decision             n=3 (sel 1, clk 1)             n=125 (sel 0, clk 0)           n=125 (sel 0, clk 0)
+  trace-shown                absent/records-exist-none-for-subject absent/records-exist-none-for-subject absent/records-exist-none-for-subject
+  clocked-on                 n=7                            absent/records-exist-none-for-subject absent/records-exist-none-for-subject
+  held-on-mission            absent/records-exist-none-for-subject absent/records-exist-none-for-subject absent/records-exist-none-for-subject
+  cross-mission-references   absent/subject-absent-from-carrier-key-space absent/subject-absent-from-carrier-key-space absent/subject-absent-from-carrier-key-space
+  shares-capability-with     absent/records-exist-none-for-subject absent/records-exist-none-for-subject absent/records-exist-none-for-subject
+  pattern-phylogeny          absent/records-exist-not-keyed-by-mission absent/records-exist-not-keyed-by-mission absent/records-exist-not-keyed-by-mission
+  apm-frames                 absent/records-exist-not-keyed-by-mission absent/records-exist-not-keyed-by-mission absent/records-exist-not-keyed-by-mission
+
+WHAT THIS MEASURES AGAINST SECTION 3c's OWN SENTENCE
+  "PSRs exist in the lifecycle but sparsely in practice" — measured: no PSR section in any of the three docs, and no typed PSR carrier exists at all.
+  ":shown lists exist per tick but aggregate nowhere" — measured: 234 of 885 trace
+    records carry :shown, 450 occurrences over 5 missions, and all of them hang off
+    actions of type {:apply-cascade {:actions 450, :pattern-ids 1466}}, whose rationale is ["apply the acquired cascade-policy (Car-3 / R16); execution HELD "]
+    — cascades PROPOSED and held, not cascades that were built.
+  "APM records are rich but domain-local" — measured: 172 frames under /home/joe/code/apm-frames,
+    keyed by Lean problem id; no mission key, so no join to a cascade record.
+  "futon6 pattern-phylogeny-learned.json holds 2 co-application edges" — measured: {:co-app 2, :descent 0}
+
+CONTROLS
+  :negative/fabricated-mission           pass?=true  {:subject "M-u23-negative-control-does-not-exist", :trace-records 0, :clocked-on-edges 0}
+  :positive/clocked-on-is-live           pass?=true  {:subject "M-apm-demonstration", :edges 25}
+  :positive/shown-is-in-the-corpus       pass?=true  {:records-with-shown 234, :missions-with-shown 5}
+
+WHAT IS NOT DONE HERE: no ruling, no registry write, no store write, no proposed
+edge or pattern (O5). The census is the deliverable; the absences are typed.

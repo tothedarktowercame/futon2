@@ -1,0 +1,4045 @@
+{:absence-vocabulary
+ {:no-typed-carrier
+  "The thing exists in the lifecycle as prose or as a design spec, but no\n    typed event of it is emitted anywhere -- there is no writer to be empty.",
+  :writer-exists-no-records
+  "A writer exists in code and is reachable, but zero records have been\n    written to the place it writes.",
+  :records-exist-none-for-subject
+  "The carrier is populated corpus-wide and returns nothing for this subject.",
+  :records-exist-not-keyed-by-mission
+  "The carrier holds records, but none of its keys is a mission, so no join\n    to a mission cascade record exists without a bridge that is not built.",
+  :subject-absent-from-carrier-key-space
+  "The carrier is keyed by mission, and populated, but this mission does not\n    inhabit that key space at all (a different id space names it elsewhere).",
+  :carrier-unreachable
+  "The carrier could not be read on this run (store down, permission, error).\n    Distinct from empty: nothing is claimed about its population."},
+ :shown-carrier-shape
+ {:action-types {:apply-cascade {:actions 450, :pattern-ids 1466}},
+  :rationales
+  {"apply the acquired cascade-policy (Car-3 / R16); execution HELD "
+   450},
+  :note
+  "every :shown list in the corpus hangs off an action of the types above; a type that is a PROPOSAL means the corpus records cascades that were offered, not cascades that ran"},
+ :parse-selection-rule
+ "A trace line is fully parsed only if it contains \":shown\" or the quoted id/endpoint of one of the three subjects; all other lines are counted, not parsed.  Per-subject counts are exact for the three subjects; the pattern index is exact for :shown.",
+ :trace-corpus
+ {:files 56,
+  :records 885,
+  :records-with-shown 234,
+  :records-with-active-mission 3,
+  :shown-occurrences 450,
+  :records-parsed 355,
+  :by-file
+  [{:file "wm-trace-2026-05-18.edn",
+    :records 7,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-19.edn",
+    :records 9,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-21.edn",
+    :records 13,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-22.edn",
+    :records 24,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-23.edn",
+    :records 24,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-24.edn",
+    :records 24,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-25.edn",
+    :records 21,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-26.edn",
+    :records 17,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-27.edn",
+    :records 9,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-30.edn",
+    :records 2,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-05-31.edn",
+    :records 19,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-01.edn",
+    :records 12,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-02.edn",
+    :records 14,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-03.edn",
+    :records 24,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-04.edn",
+    :records 24,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-05.edn",
+    :records 15,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-06.edn",
+    :records 24,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-07.edn",
+    :records 23,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-08.edn",
+    :records 24,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-09.edn",
+    :records 23,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-10.edn",
+    :records 22,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-12.edn",
+    :records 7,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-13.edn",
+    :records 24,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-14.edn",
+    :records 20,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-15.edn",
+    :records 8,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-16.edn",
+    :records 14,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-17.edn",
+    :records 15,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-18.edn",
+    :records 12,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-21.edn",
+    :records 3,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-22.edn",
+    :records 17,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-23.edn",
+    :records 13,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-06-24.edn",
+    :records 10,
+    :records-with-shown 4,
+    :shown-occurrences 7}
+   {:file "wm-trace-2026-06-25.edn",
+    :records 15,
+    :records-with-shown 13,
+    :shown-occurrences 26}
+   {:file "wm-trace-2026-06-26.edn",
+    :records 12,
+    :records-with-shown 12,
+    :shown-occurrences 24}
+   {:file "wm-trace-2026-06-27.edn",
+    :records 11,
+    :records-with-shown 11,
+    :shown-occurrences 22}
+   {:file "wm-trace-2026-06-28.edn",
+    :records 14,
+    :records-with-shown 14,
+    :shown-occurrences 28}
+   {:file "wm-trace-2026-06-29.edn",
+    :records 18,
+    :records-with-shown 14,
+    :shown-occurrences 28}
+   {:file "wm-trace-2026-06-30.edn",
+    :records 18,
+    :records-with-shown 15,
+    :shown-occurrences 30}
+   {:file "wm-trace-2026-07-01.edn",
+    :records 23,
+    :records-with-shown 23,
+    :shown-occurrences 46}
+   {:file "wm-trace-2026-07-02.edn",
+    :records 34,
+    :records-with-shown 31,
+    :shown-occurrences 62}
+   {:file "wm-trace-2026-07-03.edn",
+    :records 20,
+    :records-with-shown 18,
+    :shown-occurrences 36}
+   {:file "wm-trace-2026-07-04.edn",
+    :records 38,
+    :records-with-shown 38,
+    :shown-occurrences 76}
+   {:file "wm-trace-2026-07-05.edn",
+    :records 18,
+    :records-with-shown 18,
+    :shown-occurrences 31}
+   {:file "wm-trace-2026-07-06.edn",
+    :records 21,
+    :records-with-shown 18,
+    :shown-occurrences 28}
+   {:file "wm-trace-2026-07-09.edn",
+    :records 1,
+    :records-with-shown 1,
+    :shown-occurrences 2}
+   {:file "wm-trace-2026-07-14.edn",
+    :records 14,
+    :records-with-shown 4,
+    :shown-occurrences 4}
+   {:file "wm-trace-2026-07-15.edn",
+    :records 6,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-07-16.edn",
+    :records 6,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-07-17.edn",
+    :records 1,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-07-18.edn",
+    :records 1,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-07-19.edn",
+    :records 1,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-07-21.edn",
+    :records 2,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-08-30.edn",
+    :records 7,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-08-31.edn",
+    :records 5,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-09-01.edn",
+    :records 79,
+    :records-with-shown 0,
+    :shown-occurrences 0}
+   {:file "wm-trace-2026-09-02.edn",
+    :records 3,
+    :records-with-shown 0,
+    :shown-occurrences 0}]},
+ :pattern-index
+ {"M-bayesian-structure-learning"
+  {:patterns 6,
+   :ids
+   ["devmap-coherence/prototype-alignment-bridge"
+    "devmap-coherence/prototype-structure-checklist"
+    "futon-theory/mission-interface-signature"
+    "futon-theory/structural-tension-as-observation"
+    "hdm/deep-storage-to-active-graph"
+    "stack-coherence/futon-bridge-health"]},
+  "M-canon-fingerprint-store"
+  {:patterns 9,
+   :ids
+   ["agent/sense-deliberate-act"
+    "devmap-coherence/devmap-scope-discipline"
+    "devmap-coherence/ifr-f1-dhammavicaya"
+    "devmap-coherence/ifr-f3a-piti-audit"
+    "devmap-coherence/ifr-f4-passaddhi"
+    "devmap-coherence/ifr-f5-samadhi"
+    "devmap-coherence/prototype-alignment-bridge"
+    "devmap-coherence/prototype-structure-checklist"
+    "library-coherence/library-readme-sync"]},
+  "M-first-flights"
+  {:patterns 2,
+   :ids
+   ["agent/sense-deliberate-act"
+    "futon-theory/mission-interface-signature"]},
+  "M-kangaroo"
+  {:patterns 6,
+   :ids
+   ["ants/baseline-cyber-ant"
+    "ants/cargo-return-discipline"
+    "ants/hunger-precision-coupling"
+    "ants/white-space-scout"
+    "peripherals/inhabitation-feeds-evolution"
+    "structure/interest-event-vocabulary"]},
+  "M-learning-loop" {:patterns 1, :ids ["iching/hexagram-04-meng"]}},
+ :controls
+ {:negative/fabricated-mission
+  {:subject "M-u23-negative-control-does-not-exist",
+   :trace-records 0,
+   :clocked-on-edges 0,
+   :pass? true,
+   :why
+   "a mission id that exists nowhere must read zero in every carrier; if it did not, the emptiness above would be a broken query rather than a fact"},
+  :positive/clocked-on-is-live
+  {:subject "M-apm-demonstration",
+   :edges 25,
+   :pass? true,
+   :why
+   "the clocked-on carrier returns a non-zero reading for the mission that has the most, so a zero elsewhere is an absence, not a dead query"},
+  :positive/shown-is-in-the-corpus
+  {:records-with-shown 234,
+   :missions-with-shown 5,
+   :pass? true,
+   :why
+   ":shown lists exist somewhere in the corpus, so a subject reading zero is a fact about the subject"}},
+ :kin-selection
+ {:pool-size 238,
+  :subject-repo "futon2",
+  :chosen
+  ["M-aif-a-matrix-faithfulness" "M-aif-gap-epistemic-affordance"],
+  :degenerate-tie? false,
+  :top-signal-vector
+  {:cross-refs 0,
+   :shared-patterns 0,
+   :shared-clocked-agents 0,
+   :shared-repo 1},
+  :top-20
+  [{:id "M-aif-a-matrix-faithfulness",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-aif-gap-epistemic-affordance",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-aif-policy-conditioned-eig",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-formal-war-machine",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-reflective-discipline",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-run-produces-its-own-brief",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-wm-aif-policy-grain-compliance",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-wm-strategic-mission-selection",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-wm-tripwires",
+    :repo "futon2",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 1}}
+   {:id "M-IRC-stability",
+    :repo "futon3c",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-P3-rational-reconstruction",
+    :repo "futon6",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-P7-rational-reconstruction",
+    :repo "futon6",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-P8-rational-reconstruction",
+    :repo "futon6",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-a-sorry-enterprise",
+    :repo "futon5a",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-action-cost-modelling",
+    :repo "futon3c",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-agency-forum",
+    :repo "futon3",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-agency-hardening",
+    :repo "futon3c",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-agency-hardening-datapoints",
+    :repo "futon3c",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-agency-rebuild",
+    :repo "futon3",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}
+   {:id "M-agency-refactor",
+    :repo "futon3c",
+    :signals
+    {:cross-refs 0,
+     :shared-patterns 0,
+     :shared-clocked-agents 0,
+     :shared-repo 0}}]},
+ :store-reads
+ {:clock/clocked-on {:status :ok, :n 65},
+  :held/on-mission {:status :ok, :n 124},
+  :references {:status :ok, :n 9},
+  :learning-loop/shares-capability-with {:status :ok, :n 1},
+  :mission/doc {:status :ok, :n 704},
+  :mission {:status :ok, :n 8}},
+ :reproducibility
+ "The file-backed carriers (trace corpus, mission docs, phylogeny, apm-frames, flight records) are byte-reproducible: two consecutive runs of this reader differ only in :run-at.  The SUBSTRATE carriers are read live and move -- :clock/clocked-on gained an edge between two runs three minutes apart, because agents were clocking on while this ran.  So a re-run that disagrees with this artifact on clocked-on counts is the store having moved, not the reader disagreeing with itself; the file-backed columns are the ones to diff.",
+ :kinship-rule
+ {:signals
+  [:cross-refs :shared-patterns :shared-clocked-agents :shared-repo],
+  :order
+  "lexicographic on the signal vector, descending; ties broken by mission id ascending",
+  :declared-by :reader,
+  :status :declared-not-ruled,
+  :note
+  "cross-refs, shared-patterns and shared-repo are the three signals section 3c names.  shared-clocked-agents is added by the reader because the first two are empty for every candidate, and it is the overlap of the one lineage carrier that is populated.  No weights are used, so no free scalar is invented; where the vector ties, the ranking table shows the tie instead of hiding it."},
+ :reader
+ {:id :u23-cascade-catalog-reader,
+  :version "v1",
+  :script "holes/labs/wm-contract/u23_cascade_catalog_reader.clj",
+  :row :U23,
+  :asks "futon4/holes/mission-lifecycle-wm-alignment.md section 3c",
+  :run-at "2026-09-03T10:50:44.806183263Z",
+  :read-only true,
+  :writes-only-under
+  "holes/labs/wm-contract/runs/U23-cascade-catalog"},
+ :subjects
+ [{:id "M-zaif-harness-v1", :role :primary}
+  {:id "M-aif-a-matrix-faithfulness",
+   :role :kin,
+   :kinship
+   {:cross-refs 0,
+    :shared-patterns 0,
+    :shared-clocked-agents 0,
+    :shared-repo 1}}
+  {:id "M-aif-gap-epistemic-affordance",
+   :role :kin,
+   :kinship
+   {:cross-refs 0,
+    :shared-patterns 0,
+    :shared-clocked-agents 0,
+    :shared-repo 1}}],
+ :reader-encountered-defects
+ [{:what
+   "substrate/hyperedges-by-type and entities-by-type default :limit 10000, above every futon1b cap",
+   :pointers
+   ["futon2/src/futon2/aif/substrate.clj:114"
+    "futon2/src/futon2/aif/substrate.clj:115"
+    "futon2/src/futon2/aif/substrate.clj:90"],
+   :measured
+   "the cap is per route AND per mode: GET /api/alpha/hyperedges answers 400 {:layer 4 :reason :invalid-limit :context {:maximum 1000 :hint \"advance `after` to page\"}} when include-total=false -- the mode substrate.clj:115 hardcodes -- and :maximum 5000 when include-total=true; GET /api/alpha/entities accepts 5000. request! (substrate.clj:69-73) throws on non-2xx, so the default arity is unusable against the live store rather than silently empty.",
+   :how-found
+   "the first run of this reader passed :limit 5000 to all three routes, the two hyperedge reads threw, and the reader printed clocked-on as :records-exist-none-for-subject. The positive control -- 'the clocked-on carrier returns non-zero for the mission that has the most' -- is what failed and said so; without it the run would have reported a live carrier with 65 edges as empty.",
+   :callers-affected
+   ["futon2/src/futon2/aif/repair_obligation.clj:26 passes :limit 100000"
+    "futon2/src/futon2/aif/a4a_substrate.clj:56 passes opts through, so the default applies"],
+   :done-here
+   "this reader passes 1000 for hyperedges and 5000 for entities/relations, records :store-read-truncation when a read returns exactly its cap, and types a failed read as :carrier-unreachable, never as an absence of records",
+   :ruling nil}
+  {:what "the mission cascade record has no single join key",
+   :measured
+   "the subject is named \"M-zaif-harness-v1\" in the trace and the mission registry, \"futon2-d/mission/zaif-harness-v1\" in the substrate mission/doc table and on clocked-on edges, and not at all in the :mission key space that carries the cross-mission :references graph",
+   :consequence
+   "assembling a cascade record requires the reader to hold three ids per mission; nothing in the stores does that join",
+   :ruling nil}],
+ :store-read-truncation {},
+ :cascade-records
+ [{:mission "M-zaif-harness-v1",
+   :doc
+   {:path "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+    :repo "futon2",
+    :title
+    "Mission: M-zaif-harness-v1 — the harness edition, lifecycle-aligned and WM-fed",
+    :status-line
+    "OPEN — HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.",
+    :status-class :open,
+    :open-hole-count 1},
+   :substrate-endpoint "futon2-d/mission/zaif-harness-v1",
+   :substrate-mission-doc
+   {:variant :observed,
+    :n 1,
+    :entity-id "futon2-d/mission/zaif-harness-v1",
+    :props
+    #:mission{:id "M-zaif-harness-v1",
+              :path
+              "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+              :title
+              "M-zaif-harness-v1 — the harness edition, lifecycle-aligned and WM-fed",
+              :status "in-progress",
+              :repo "futon2",
+              :phase "instantiate"},
+    :source "mission-scope-tree"},
+   :carriers
+   {:psr
+    {:variant :absent,
+     :reason :no-typed-carrier,
+     :note
+     "no PSR section in the doc and no typed PSR carrier anywhere",
+     :pointers
+     ["futon2/holes/flight-log.spec.edn:61 (spec field, v0.1, unwired -- flight-log.spec.edn:27)"
+      "futon2/holes/missions/M-reflective-discipline.md:131 (typed :psr/:pur/:par proposed, DERIVE item)"
+      "futon1b /api/alpha/types: no :psr entity or relation type"]},
+    :clocked-on
+    {:variant :observed,
+     :n 7,
+     :agents
+     ["claude-2"
+      "codex-12"
+      "codex-17"
+      "codex-20"
+      "codex-22"
+      "codex-7"
+      "codex-8"],
+     :clocked-at-ms
+     [1788372814743
+      1788374108194
+      1788374941305
+      1788377878800
+      1788377926097
+      1788431117367
+      1788432325862]},
+    :pattern-phylogeny
+    {:variant :absent,
+     :reason :records-exist-not-keyed-by-mission,
+     :corpus
+     {:co-application-edges 2,
+      :descent-edges 0,
+      :file
+      "/home/joe/code/futon6/data/pattern-phylogeny-learned.json"},
+     :note
+     "edges are pattern-to-pattern; no mission appears in the file"},
+    :shares-capability-with
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus {:relations 1}},
+    :pur
+    {:variant :absent,
+     :reason :no-typed-carrier,
+     :pointers
+     ["futon2/holes/flight-log.spec.edn:93"
+      "futon4/holes/mission-lifecycle.md:227"]},
+    :apm-frames
+    {:variant :absent,
+     :reason :records-exist-not-keyed-by-mission,
+     :corpus {:frames 172, :dir "/home/joe/code/apm-frames"},
+     :note
+     "frames are keyed by Lean problem id (a01A01, …), not by mission"},
+    :held-on-mission
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus {:edges 124}},
+    :trace-shown
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus
+     {:records-with-shown 234,
+      :shown-occurrences 450,
+      :missions-with-shown 5}},
+    :cross-mission-references
+    {:variant :absent,
+     :reason :subject-absent-from-carrier-key-space,
+     :key-space :mission,
+     :corpus
+     {:relations 9,
+      :mission-entities 8,
+      :mission-entity-ids
+      ["M-daily-scan"
+       "M-paper-reverse-morphogenesis"
+       "M-peripheral-phenomenology"
+       "M-psr-pur-mesh-peripheral"
+       "M-superpod-mark2"
+       "M-trip-journal"
+       "M-ukrns-wp"
+       "M-war-machine"]},
+     :note
+     "the cross-mission :references graph is keyed by :mission entities (name \"mission|M-…\"); the mission/doc table this subject lives in is keyed \"<repo>-d/mission/<id>\" and the two are not joined"},
+    :trace-decision
+    {:variant :observed,
+     :n 3,
+     :selected-ticks 1,
+     :active-clock-ticks 1,
+     :ranked-candidate-ticks 3,
+     :records
+     [{:file "wm-trace-2026-09-02.edn",
+       :line 1,
+       :timestamp "2026-09-02T13:47:22.082297526Z",
+       :run-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 6,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-02.edn",
+       :line 2,
+       :timestamp "2026-09-02T14:00:29.357627605Z",
+       :run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+       :selected? true,
+       :active? false,
+       :ranked-action-count 7,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-02.edn",
+       :line 3,
+       :timestamp "2026-09-02T14:03:09.647517345Z",
+       :run-id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+       :selected? false,
+       :active? true,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}]},
+    :flight-discharge
+    {:variant :absent,
+     :reason :writer-exists-no-records,
+     :writer
+     "futon3c/src/futon3c/aif/flight_record.clj:347 write-flight-record!",
+     :caller
+     "futon3c/src/futon3c/peripheral/war_machine_pilot.clj:585",
+     :dir "/home/joe/code/futon3c/data/repl-traces",
+     :note "zero *.flight.edn anywhere under ~/code"}}}
+  {:mission "M-aif-a-matrix-faithfulness",
+   :doc
+   {:path
+    "/home/joe/code/futon2/holes/missions/M-aif-a-matrix-faithfulness.md",
+    :repo "futon2",
+    :title
+    "Mission: Make the belief-update observation model A faithful (M-aif-a-matrix-faithfulness)",
+    :status-line
+    "**INSTANTIATE (Stage 1 production-wired; simulation spike complete; Stage 2 exogenous calibration pending)**",
+    :status-class :active,
+    :open-hole-count 0},
+   :substrate-endpoint "futon2-d/mission/aif-a-matrix-faithfulness",
+   :substrate-mission-doc
+   {:variant :observed,
+    :n 1,
+    :entity-id "futon2-d/mission/aif-a-matrix-faithfulness",
+    :props
+    #:mission{:id "M-aif-a-matrix-faithfulness",
+              :path
+              "/home/joe/code/futon2/holes/missions/M-aif-a-matrix-faithfulness.md",
+              :title
+              "Make the belief-update observation model A faithful (M-aif-a-matrix-faithfulness)",
+              :status "in-progress",
+              :repo "futon2",
+              :phase "instantiate"},
+    :source "mission-scope-tree"},
+   :carriers
+   {:psr
+    {:variant :absent,
+     :reason :no-typed-carrier,
+     :note
+     "no PSR section in the doc and no typed PSR carrier anywhere",
+     :pointers
+     ["futon2/holes/flight-log.spec.edn:61 (spec field, v0.1, unwired -- flight-log.spec.edn:27)"
+      "futon2/holes/missions/M-reflective-discipline.md:131 (typed :psr/:pur/:par proposed, DERIVE item)"
+      "futon1b /api/alpha/types: no :psr entity or relation type"]},
+    :clocked-on
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus {:edges 65, :missions 14}},
+    :pattern-phylogeny
+    {:variant :absent,
+     :reason :records-exist-not-keyed-by-mission,
+     :corpus
+     {:co-application-edges 2,
+      :descent-edges 0,
+      :file
+      "/home/joe/code/futon6/data/pattern-phylogeny-learned.json"},
+     :note
+     "edges are pattern-to-pattern; no mission appears in the file"},
+    :shares-capability-with
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus {:relations 1}},
+    :pur
+    {:variant :absent,
+     :reason :no-typed-carrier,
+     :pointers
+     ["futon2/holes/flight-log.spec.edn:93"
+      "futon4/holes/mission-lifecycle.md:227"]},
+    :apm-frames
+    {:variant :absent,
+     :reason :records-exist-not-keyed-by-mission,
+     :corpus {:frames 172, :dir "/home/joe/code/apm-frames"},
+     :note
+     "frames are keyed by Lean problem id (a01A01, …), not by mission"},
+    :held-on-mission
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus {:edges 124}},
+    :trace-shown
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus
+     {:records-with-shown 234,
+      :shown-occurrences 450,
+      :missions-with-shown 5}},
+    :cross-mission-references
+    {:variant :absent,
+     :reason :subject-absent-from-carrier-key-space,
+     :key-space :mission,
+     :corpus
+     {:relations 9,
+      :mission-entities 8,
+      :mission-entity-ids
+      ["M-daily-scan"
+       "M-paper-reverse-morphogenesis"
+       "M-peripheral-phenomenology"
+       "M-psr-pur-mesh-peripheral"
+       "M-superpod-mark2"
+       "M-trip-journal"
+       "M-ukrns-wp"
+       "M-war-machine"]},
+     :note
+     "the cross-mission :references graph is keyed by :mission entities (name \"mission|M-…\"); the mission/doc table this subject lives in is keyed \"<repo>-d/mission/<id>\" and the two are not joined"},
+    :trace-decision
+    {:variant :observed,
+     :n 125,
+     :selected-ticks 0,
+     :active-clock-ticks 0,
+     :ranked-candidate-ticks 125,
+     :records
+     [{:file "wm-trace-2026-07-14.edn",
+       :line 1,
+       :timestamp "2026-07-14T09:49:57.608850393Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 2,
+       :timestamp "2026-07-14T10:31:07.371543890Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 3,
+       :timestamp "2026-07-14T15:03:41.407059656Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 4,
+       :timestamp "2026-07-14T15:08:39.753829386Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 5,
+       :timestamp "2026-07-14T16:29:08.831713750Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 6,
+       :timestamp "2026-07-14T16:43:16.081975089Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 7,
+       :timestamp "2026-07-14T16:51:22.411473479Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 8,
+       :timestamp "2026-07-14T17:00:21.903496458Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 9,
+       :timestamp "2026-07-14T17:28:45.580135549Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 10,
+       :timestamp "2026-07-14T17:47:16.686539140Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 11,
+       :timestamp "2026-07-14T18:36:10.477451901Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 12,
+       :timestamp "2026-07-14T20:09:12.485143462Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 13,
+       :timestamp "2026-07-14T20:16:36.046206613Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 14,
+       :timestamp "2026-07-14T20:23:36.301882001Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 1,
+       :timestamp "2026-07-15T20:30:03.219449393Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 2,
+       :timestamp "2026-07-15T20:47:33.258625430Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 3,
+       :timestamp "2026-07-15T21:37:11.552223508Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 4,
+       :timestamp "2026-07-15T21:42:23.561103861Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 5,
+       :timestamp "2026-07-15T22:24:19.356158134Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 6,
+       :timestamp "2026-07-15T23:35:47.351034208Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 1,
+       :timestamp "2026-07-16T10:17:45.295574234Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 2,
+       :timestamp "2026-07-16T11:00:52.576211347Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 3,
+       :timestamp "2026-07-16T13:53:42.810954707Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 4,
+       :timestamp "2026-07-16T14:17:49.951440902Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 5,
+       :timestamp "2026-07-16T15:18:40.575143608Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 6,
+       :timestamp "2026-07-16T16:16:26.896894340Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-17.edn",
+       :line 1,
+       :timestamp "2026-07-17T23:42:25.431351246Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-18.edn",
+       :line 1,
+       :timestamp "2026-07-18T14:33:21.885963482Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-19.edn",
+       :line 1,
+       :timestamp "2026-07-19T00:05:32.785413004Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-21.edn",
+       :line 1,
+       :timestamp "2026-07-21T05:53:19.037246784Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-21.edn",
+       :line 2,
+       :timestamp "2026-07-21T10:05:12.153495136Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 1,
+       :timestamp "2026-08-30T10:54:44.860119595Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 2,
+       :timestamp "2026-08-30T20:15:26.066788324Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 3,
+       :timestamp "2026-08-30T20:17:48.509203906Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 4,
+       :timestamp "2026-08-30T20:25:04.680315775Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 5,
+       :timestamp "2026-08-30T20:33:56.026290728Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 6,
+       :timestamp "2026-08-30T20:36:35.667070255Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 7,
+       :timestamp "2026-08-30T20:41:52.797464315Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 1,
+       :timestamp "2026-08-31T12:58:02.858451893Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 2,
+       :timestamp "2026-08-31T14:08:21.402547618Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 3,
+       :timestamp "2026-08-31T14:30:41.399004095Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 4,
+       :timestamp "2026-08-31T20:32:24.972954701Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 5,
+       :timestamp "2026-08-31T20:35:51.187865882Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 1,
+       :timestamp "2026-09-01T15:00:45.725336789Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 2,
+       :timestamp "2026-09-01T15:02:03.726336568Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 3,
+       :timestamp "2026-09-01T15:03:29.398161909Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 4,
+       :timestamp "2026-09-01T15:04:52.495898571Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 5,
+       :timestamp "2026-09-01T15:06:14.608233559Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 6,
+       :timestamp "2026-09-01T15:08:19.473833370Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 7,
+       :timestamp "2026-09-01T15:09:42.760203987Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 8,
+       :timestamp "2026-09-01T15:11:01.608093683Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 9,
+       :timestamp "2026-09-01T15:12:22.228366495Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 10,
+       :timestamp "2026-09-01T15:13:47.124107500Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 11,
+       :timestamp "2026-09-01T15:15:00.695098415Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 12,
+       :timestamp "2026-09-01T15:16:20.631294958Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 13,
+       :timestamp "2026-09-01T15:17:38.966251080Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 14,
+       :timestamp "2026-09-01T15:18:58.825568178Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 15,
+       :timestamp "2026-09-01T15:20:15.857365620Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 16,
+       :timestamp "2026-09-01T15:21:35.422181750Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 17,
+       :timestamp "2026-09-01T15:22:53.453363323Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 18,
+       :timestamp "2026-09-01T15:24:18.152884008Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 19,
+       :timestamp "2026-09-01T15:25:39.077874931Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 20,
+       :timestamp "2026-09-01T15:27:00.229092007Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 21,
+       :timestamp "2026-09-01T16:33:00.394288715Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 22,
+       :timestamp "2026-09-01T16:34:22.375923180Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 23,
+       :timestamp "2026-09-01T16:35:40.043712875Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 24,
+       :timestamp "2026-09-01T16:37:00.034480101Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 25,
+       :timestamp "2026-09-01T16:38:19.793535421Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 26,
+       :timestamp "2026-09-01T16:39:40.482755403Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 27,
+       :timestamp "2026-09-01T16:40:59.710860840Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 28,
+       :timestamp "2026-09-01T16:42:21.982296254Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 29,
+       :timestamp "2026-09-01T16:43:39.778272417Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 30,
+       :timestamp "2026-09-01T16:46:14.523647861Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 31,
+       :timestamp "2026-09-01T16:48:30.852381791Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 32,
+       :timestamp "2026-09-01T16:49:49.786509242Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 33,
+       :timestamp "2026-09-01T16:51:06.899463078Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 34,
+       :timestamp "2026-09-01T16:52:24.930647528Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 35,
+       :timestamp "2026-09-01T16:53:45.706796972Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 36,
+       :timestamp "2026-09-01T16:55:04.183846737Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 37,
+       :timestamp "2026-09-01T16:56:24.754190514Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 38,
+       :timestamp "2026-09-01T16:57:41.811552249Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 39,
+       :timestamp "2026-09-01T16:58:59.526877756Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 40,
+       :timestamp "2026-09-01T17:00:17.864947248Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 41,
+       :timestamp "2026-09-01T17:01:34.717651998Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 42,
+       :timestamp "2026-09-01T17:02:53.788518220Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 43,
+       :timestamp "2026-09-01T17:04:11.057679242Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 44,
+       :timestamp "2026-09-01T17:05:28.972350368Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 45,
+       :timestamp "2026-09-01T17:06:46.165448792Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 46,
+       :timestamp "2026-09-01T17:08:06.316088557Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 47,
+       :timestamp "2026-09-01T17:09:23.281254434Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 48,
+       :timestamp "2026-09-01T17:10:41.115340232Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 49,
+       :timestamp "2026-09-01T17:11:59.316805577Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 50,
+       :timestamp "2026-09-01T17:13:17.340443687Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 51,
+       :timestamp "2026-09-01T18:39:57.441876045Z",
+       :run-id "6763baee-1f2b-4d5e-aa60-3580e77dc270",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 52,
+       :timestamp "2026-09-01T18:41:17.673842025Z",
+       :run-id "38743801-e7b1-48cd-b6bd-ab70fbab1471",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 53,
+       :timestamp "2026-09-01T18:42:44.308772615Z",
+       :run-id "aa70c2cc-992f-4b2b-b36d-7af33675b17d",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 54,
+       :timestamp "2026-09-01T18:44:02.116009268Z",
+       :run-id "f135821a-c51c-4b21-be6e-d340ff562305",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 55,
+       :timestamp "2026-09-01T18:45:21.699083224Z",
+       :run-id "cc0a0703-e9a5-4ee0-9a8e-b098a6a2b929",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 56,
+       :timestamp "2026-09-01T18:46:42.192036549Z",
+       :run-id "1772dc01-bdd4-4ffb-8433-a20d828e61aa",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 57,
+       :timestamp "2026-09-01T18:48:06.102484692Z",
+       :run-id "1cfa12ba-0108-4cea-b75f-7f72bf6b0242",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 58,
+       :timestamp "2026-09-01T18:49:29.000443159Z",
+       :run-id "85125689-18fc-4894-9193-8b3ca9eb2cdd",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 59,
+       :timestamp "2026-09-01T18:50:49.722240111Z",
+       :run-id "e2ba54bd-a4eb-4583-a54a-99d44f1d9fb8",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 60,
+       :timestamp "2026-09-01T18:52:06.660826546Z",
+       :run-id "0d9b3025-ce3c-43f3-ab91-7d88f1509daf",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 61,
+       :timestamp "2026-09-01T18:53:42.508820253Z",
+       :run-id "fac6d798-4389-4104-a8ff-74e755ad821b",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 62,
+       :timestamp "2026-09-01T18:55:10.063339417Z",
+       :run-id "4ef287e1-ef8e-4101-91e1-5d7c4032ebc8",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 63,
+       :timestamp "2026-09-01T18:56:38.237872177Z",
+       :run-id "49001423-81d6-4915-b6e9-c377ef3de41e",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 64,
+       :timestamp "2026-09-01T18:58:00.441023885Z",
+       :run-id "4ff6effd-05dd-44eb-b7ea-862f8084df5a",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 65,
+       :timestamp "2026-09-01T18:59:24.217804513Z",
+       :run-id "2d84e9a8-4f19-4080-82f7-5d2ff2899fca",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 66,
+       :timestamp "2026-09-01T19:00:53.002942157Z",
+       :run-id "b5bd631f-445e-46a7-8fe1-88f0c95e3d09",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 67,
+       :timestamp "2026-09-01T19:02:23.880997306Z",
+       :run-id "4f486ddc-ecf1-4af3-9315-b6484c81a39b",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 68,
+       :timestamp "2026-09-01T19:03:47.733626368Z",
+       :run-id "826c6cee-aa7e-4092-b430-053da84cd1af",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 69,
+       :timestamp "2026-09-01T19:05:05.636608579Z",
+       :run-id "8dbf0aca-92d6-4f65-8083-1cdce77407bd",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 70,
+       :timestamp "2026-09-01T19:06:25.174660123Z",
+       :run-id "1b6fa012-204f-4ddd-b6ae-28aaea3a6d7e",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 71,
+       :timestamp "2026-09-01T20:36:03.800627763Z",
+       :run-id "dd00675b-9672-4b4e-9b5c-1cb4ff17deb3",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 72,
+       :timestamp "2026-09-01T20:37:20.458200407Z",
+       :run-id "73282cf8-3eb7-42f2-b055-b45b0322dde3",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 73,
+       :timestamp "2026-09-01T20:38:39.644885551Z",
+       :run-id "200b894f-04c4-47a7-9c6c-a488571f3dd5",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 74,
+       :timestamp "2026-09-01T20:40:00.843332453Z",
+       :run-id "5bd37efe-5a32-4097-a315-08fa61f86340",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 75,
+       :timestamp "2026-09-01T22:48:41.419048498Z",
+       :run-id "84ca8231-53c7-4d6a-93d3-ecfb5b19a5f7",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 76,
+       :timestamp "2026-09-01T22:50:42.709079837Z",
+       :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 77,
+       :timestamp "2026-09-01T22:52:07.418144767Z",
+       :run-id "c51a8da3-883e-4038-b493-1b268d5d8357",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 78,
+       :timestamp "2026-09-01T22:53:32.871991661Z",
+       :run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 79,
+       :timestamp "2026-09-01T22:54:48.942309598Z",
+       :run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-02.edn",
+       :line 1,
+       :timestamp "2026-09-02T13:47:22.082297526Z",
+       :run-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-02.edn",
+       :line 2,
+       :timestamp "2026-09-02T14:00:29.357627605Z",
+       :run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-02.edn",
+       :line 3,
+       :timestamp "2026-09-02T14:03:09.647517345Z",
+       :run-id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}]},
+    :flight-discharge
+    {:variant :absent,
+     :reason :writer-exists-no-records,
+     :writer
+     "futon3c/src/futon3c/aif/flight_record.clj:347 write-flight-record!",
+     :caller
+     "futon3c/src/futon3c/peripheral/war_machine_pilot.clj:585",
+     :dir "/home/joe/code/futon3c/data/repl-traces",
+     :note "zero *.flight.edn anywhere under ~/code"}}}
+  {:mission "M-aif-gap-epistemic-affordance",
+   :doc
+   {:path
+    "/home/joe/code/futon2/holes/missions/M-aif-gap-epistemic-affordance.md",
+    :repo "futon2",
+    :title
+    "Mission: Turn mission gaps into epistemic affordances (M-aif-gap-epistemic-affordance)",
+    :status-line
+    "**IDENTIFY — dependent on M-aif-policy-conditioned-eig**",
+    :status-class :identify,
+    :open-hole-count 0},
+   :substrate-endpoint "futon2-d/mission/aif-gap-epistemic-affordance",
+   :substrate-mission-doc
+   {:variant :observed,
+    :n 1,
+    :entity-id "futon2-d/mission/aif-gap-epistemic-affordance",
+    :props
+    #:mission{:id "M-aif-gap-epistemic-affordance",
+              :path
+              "/home/joe/code/futon2/holes/missions/M-aif-gap-epistemic-affordance.md",
+              :title
+              "Turn mission gaps into epistemic affordances (M-aif-gap-epistemic-affordance)",
+              :status "in-progress",
+              :repo "futon2",
+              :phase "identify"},
+    :source "mission-scope-tree"},
+   :carriers
+   {:psr
+    {:variant :absent,
+     :reason :no-typed-carrier,
+     :note
+     "no PSR section in the doc and no typed PSR carrier anywhere",
+     :pointers
+     ["futon2/holes/flight-log.spec.edn:61 (spec field, v0.1, unwired -- flight-log.spec.edn:27)"
+      "futon2/holes/missions/M-reflective-discipline.md:131 (typed :psr/:pur/:par proposed, DERIVE item)"
+      "futon1b /api/alpha/types: no :psr entity or relation type"]},
+    :clocked-on
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus {:edges 65, :missions 14}},
+    :pattern-phylogeny
+    {:variant :absent,
+     :reason :records-exist-not-keyed-by-mission,
+     :corpus
+     {:co-application-edges 2,
+      :descent-edges 0,
+      :file
+      "/home/joe/code/futon6/data/pattern-phylogeny-learned.json"},
+     :note
+     "edges are pattern-to-pattern; no mission appears in the file"},
+    :shares-capability-with
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus {:relations 1}},
+    :pur
+    {:variant :absent,
+     :reason :no-typed-carrier,
+     :pointers
+     ["futon2/holes/flight-log.spec.edn:93"
+      "futon4/holes/mission-lifecycle.md:227"]},
+    :apm-frames
+    {:variant :absent,
+     :reason :records-exist-not-keyed-by-mission,
+     :corpus {:frames 172, :dir "/home/joe/code/apm-frames"},
+     :note
+     "frames are keyed by Lean problem id (a01A01, …), not by mission"},
+    :held-on-mission
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus {:edges 124}},
+    :trace-shown
+    {:variant :absent,
+     :reason :records-exist-none-for-subject,
+     :corpus
+     {:records-with-shown 234,
+      :shown-occurrences 450,
+      :missions-with-shown 5}},
+    :cross-mission-references
+    {:variant :absent,
+     :reason :subject-absent-from-carrier-key-space,
+     :key-space :mission,
+     :corpus
+     {:relations 9,
+      :mission-entities 8,
+      :mission-entity-ids
+      ["M-daily-scan"
+       "M-paper-reverse-morphogenesis"
+       "M-peripheral-phenomenology"
+       "M-psr-pur-mesh-peripheral"
+       "M-superpod-mark2"
+       "M-trip-journal"
+       "M-ukrns-wp"
+       "M-war-machine"]},
+     :note
+     "the cross-mission :references graph is keyed by :mission entities (name \"mission|M-…\"); the mission/doc table this subject lives in is keyed \"<repo>-d/mission/<id>\" and the two are not joined"},
+    :trace-decision
+    {:variant :observed,
+     :n 125,
+     :selected-ticks 0,
+     :active-clock-ticks 0,
+     :ranked-candidate-ticks 125,
+     :records
+     [{:file "wm-trace-2026-07-14.edn",
+       :line 1,
+       :timestamp "2026-07-14T09:49:57.608850393Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 2,
+       :timestamp "2026-07-14T10:31:07.371543890Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 3,
+       :timestamp "2026-07-14T15:03:41.407059656Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 4,
+       :timestamp "2026-07-14T15:08:39.753829386Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 5,
+       :timestamp "2026-07-14T16:29:08.831713750Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 6,
+       :timestamp "2026-07-14T16:43:16.081975089Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 7,
+       :timestamp "2026-07-14T16:51:22.411473479Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 8,
+       :timestamp "2026-07-14T17:00:21.903496458Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 9,
+       :timestamp "2026-07-14T17:28:45.580135549Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 10,
+       :timestamp "2026-07-14T17:47:16.686539140Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 11,
+       :timestamp "2026-07-14T18:36:10.477451901Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 12,
+       :timestamp "2026-07-14T20:09:12.485143462Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 13,
+       :timestamp "2026-07-14T20:16:36.046206613Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-14.edn",
+       :line 14,
+       :timestamp "2026-07-14T20:23:36.301882001Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 1,
+       :timestamp "2026-07-15T20:30:03.219449393Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 2,
+       :timestamp "2026-07-15T20:47:33.258625430Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 3,
+       :timestamp "2026-07-15T21:37:11.552223508Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 4,
+       :timestamp "2026-07-15T21:42:23.561103861Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 5,
+       :timestamp "2026-07-15T22:24:19.356158134Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-15.edn",
+       :line 6,
+       :timestamp "2026-07-15T23:35:47.351034208Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 1,
+       :timestamp "2026-07-16T10:17:45.295574234Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 2,
+       :timestamp "2026-07-16T11:00:52.576211347Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 3,
+       :timestamp "2026-07-16T13:53:42.810954707Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 4,
+       :timestamp "2026-07-16T14:17:49.951440902Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 5,
+       :timestamp "2026-07-16T15:18:40.575143608Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-16.edn",
+       :line 6,
+       :timestamp "2026-07-16T16:16:26.896894340Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-17.edn",
+       :line 1,
+       :timestamp "2026-07-17T23:42:25.431351246Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-18.edn",
+       :line 1,
+       :timestamp "2026-07-18T14:33:21.885963482Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-19.edn",
+       :line 1,
+       :timestamp "2026-07-19T00:05:32.785413004Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-21.edn",
+       :line 1,
+       :timestamp "2026-07-21T05:53:19.037246784Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-07-21.edn",
+       :line 2,
+       :timestamp "2026-07-21T10:05:12.153495136Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 1,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 1,
+       :timestamp "2026-08-30T10:54:44.860119595Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 2,
+       :timestamp "2026-08-30T20:15:26.066788324Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 3,
+       :timestamp "2026-08-30T20:17:48.509203906Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 4,
+       :timestamp "2026-08-30T20:25:04.680315775Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 5,
+       :timestamp "2026-08-30T20:33:56.026290728Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 6,
+       :timestamp "2026-08-30T20:36:35.667070255Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-30.edn",
+       :line 7,
+       :timestamp "2026-08-30T20:41:52.797464315Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 1,
+       :timestamp "2026-08-31T12:58:02.858451893Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 2,
+       :timestamp "2026-08-31T14:08:21.402547618Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 3,
+       :timestamp "2026-08-31T14:30:41.399004095Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 3,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 4,
+       :timestamp "2026-08-31T20:32:24.972954701Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-08-31.edn",
+       :line 5,
+       :timestamp "2026-08-31T20:35:51.187865882Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 1,
+       :timestamp "2026-09-01T15:00:45.725336789Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 2,
+       :timestamp "2026-09-01T15:02:03.726336568Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 3,
+       :timestamp "2026-09-01T15:03:29.398161909Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 4,
+       :timestamp "2026-09-01T15:04:52.495898571Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 5,
+       :timestamp "2026-09-01T15:06:14.608233559Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 6,
+       :timestamp "2026-09-01T15:08:19.473833370Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 7,
+       :timestamp "2026-09-01T15:09:42.760203987Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 8,
+       :timestamp "2026-09-01T15:11:01.608093683Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 9,
+       :timestamp "2026-09-01T15:12:22.228366495Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 10,
+       :timestamp "2026-09-01T15:13:47.124107500Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 11,
+       :timestamp "2026-09-01T15:15:00.695098415Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 12,
+       :timestamp "2026-09-01T15:16:20.631294958Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 13,
+       :timestamp "2026-09-01T15:17:38.966251080Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 14,
+       :timestamp "2026-09-01T15:18:58.825568178Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 15,
+       :timestamp "2026-09-01T15:20:15.857365620Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 16,
+       :timestamp "2026-09-01T15:21:35.422181750Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 17,
+       :timestamp "2026-09-01T15:22:53.453363323Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 18,
+       :timestamp "2026-09-01T15:24:18.152884008Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 19,
+       :timestamp "2026-09-01T15:25:39.077874931Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 20,
+       :timestamp "2026-09-01T15:27:00.229092007Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 21,
+       :timestamp "2026-09-01T16:33:00.394288715Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 22,
+       :timestamp "2026-09-01T16:34:22.375923180Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 23,
+       :timestamp "2026-09-01T16:35:40.043712875Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 24,
+       :timestamp "2026-09-01T16:37:00.034480101Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 25,
+       :timestamp "2026-09-01T16:38:19.793535421Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 26,
+       :timestamp "2026-09-01T16:39:40.482755403Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 27,
+       :timestamp "2026-09-01T16:40:59.710860840Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 28,
+       :timestamp "2026-09-01T16:42:21.982296254Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 29,
+       :timestamp "2026-09-01T16:43:39.778272417Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 30,
+       :timestamp "2026-09-01T16:46:14.523647861Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 31,
+       :timestamp "2026-09-01T16:48:30.852381791Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 32,
+       :timestamp "2026-09-01T16:49:49.786509242Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 33,
+       :timestamp "2026-09-01T16:51:06.899463078Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 34,
+       :timestamp "2026-09-01T16:52:24.930647528Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 35,
+       :timestamp "2026-09-01T16:53:45.706796972Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 36,
+       :timestamp "2026-09-01T16:55:04.183846737Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 37,
+       :timestamp "2026-09-01T16:56:24.754190514Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 38,
+       :timestamp "2026-09-01T16:57:41.811552249Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 39,
+       :timestamp "2026-09-01T16:58:59.526877756Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 40,
+       :timestamp "2026-09-01T17:00:17.864947248Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 41,
+       :timestamp "2026-09-01T17:01:34.717651998Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 42,
+       :timestamp "2026-09-01T17:02:53.788518220Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 43,
+       :timestamp "2026-09-01T17:04:11.057679242Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 44,
+       :timestamp "2026-09-01T17:05:28.972350368Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 45,
+       :timestamp "2026-09-01T17:06:46.165448792Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 46,
+       :timestamp "2026-09-01T17:08:06.316088557Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 47,
+       :timestamp "2026-09-01T17:09:23.281254434Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 48,
+       :timestamp "2026-09-01T17:10:41.115340232Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 49,
+       :timestamp "2026-09-01T17:11:59.316805577Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 50,
+       :timestamp "2026-09-01T17:13:17.340443687Z",
+       :run-id nil,
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 51,
+       :timestamp "2026-09-01T18:39:57.441876045Z",
+       :run-id "6763baee-1f2b-4d5e-aa60-3580e77dc270",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 52,
+       :timestamp "2026-09-01T18:41:17.673842025Z",
+       :run-id "38743801-e7b1-48cd-b6bd-ab70fbab1471",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 53,
+       :timestamp "2026-09-01T18:42:44.308772615Z",
+       :run-id "aa70c2cc-992f-4b2b-b36d-7af33675b17d",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 54,
+       :timestamp "2026-09-01T18:44:02.116009268Z",
+       :run-id "f135821a-c51c-4b21-be6e-d340ff562305",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 55,
+       :timestamp "2026-09-01T18:45:21.699083224Z",
+       :run-id "cc0a0703-e9a5-4ee0-9a8e-b098a6a2b929",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 56,
+       :timestamp "2026-09-01T18:46:42.192036549Z",
+       :run-id "1772dc01-bdd4-4ffb-8433-a20d828e61aa",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 57,
+       :timestamp "2026-09-01T18:48:06.102484692Z",
+       :run-id "1cfa12ba-0108-4cea-b75f-7f72bf6b0242",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 58,
+       :timestamp "2026-09-01T18:49:29.000443159Z",
+       :run-id "85125689-18fc-4894-9193-8b3ca9eb2cdd",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 59,
+       :timestamp "2026-09-01T18:50:49.722240111Z",
+       :run-id "e2ba54bd-a4eb-4583-a54a-99d44f1d9fb8",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 60,
+       :timestamp "2026-09-01T18:52:06.660826546Z",
+       :run-id "0d9b3025-ce3c-43f3-ab91-7d88f1509daf",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 61,
+       :timestamp "2026-09-01T18:53:42.508820253Z",
+       :run-id "fac6d798-4389-4104-a8ff-74e755ad821b",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 62,
+       :timestamp "2026-09-01T18:55:10.063339417Z",
+       :run-id "4ef287e1-ef8e-4101-91e1-5d7c4032ebc8",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 63,
+       :timestamp "2026-09-01T18:56:38.237872177Z",
+       :run-id "49001423-81d6-4915-b6e9-c377ef3de41e",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 64,
+       :timestamp "2026-09-01T18:58:00.441023885Z",
+       :run-id "4ff6effd-05dd-44eb-b7ea-862f8084df5a",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 65,
+       :timestamp "2026-09-01T18:59:24.217804513Z",
+       :run-id "2d84e9a8-4f19-4080-82f7-5d2ff2899fca",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 66,
+       :timestamp "2026-09-01T19:00:53.002942157Z",
+       :run-id "b5bd631f-445e-46a7-8fe1-88f0c95e3d09",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 67,
+       :timestamp "2026-09-01T19:02:23.880997306Z",
+       :run-id "4f486ddc-ecf1-4af3-9315-b6484c81a39b",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 68,
+       :timestamp "2026-09-01T19:03:47.733626368Z",
+       :run-id "826c6cee-aa7e-4092-b430-053da84cd1af",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 69,
+       :timestamp "2026-09-01T19:05:05.636608579Z",
+       :run-id "8dbf0aca-92d6-4f65-8083-1cdce77407bd",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 70,
+       :timestamp "2026-09-01T19:06:25.174660123Z",
+       :run-id "1b6fa012-204f-4ddd-b6ae-28aaea3a6d7e",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 71,
+       :timestamp "2026-09-01T20:36:03.800627763Z",
+       :run-id "dd00675b-9672-4b4e-9b5c-1cb4ff17deb3",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 72,
+       :timestamp "2026-09-01T20:37:20.458200407Z",
+       :run-id "73282cf8-3eb7-42f2-b055-b45b0322dde3",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 73,
+       :timestamp "2026-09-01T20:38:39.644885551Z",
+       :run-id "200b894f-04c4-47a7-9c6c-a488571f3dd5",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 74,
+       :timestamp "2026-09-01T20:40:00.843332453Z",
+       :run-id "5bd37efe-5a32-4097-a315-08fa61f86340",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 75,
+       :timestamp "2026-09-01T22:48:41.419048498Z",
+       :run-id "84ca8231-53c7-4d6a-93d3-ecfb5b19a5f7",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 76,
+       :timestamp "2026-09-01T22:50:42.709079837Z",
+       :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 77,
+       :timestamp "2026-09-01T22:52:07.418144767Z",
+       :run-id "c51a8da3-883e-4038-b493-1b268d5d8357",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 78,
+       :timestamp "2026-09-01T22:53:32.871991661Z",
+       :run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-01.edn",
+       :line 79,
+       :timestamp "2026-09-01T22:54:48.942309598Z",
+       :run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-02.edn",
+       :line 1,
+       :timestamp "2026-09-02T13:47:22.082297526Z",
+       :run-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-02.edn",
+       :line 2,
+       :timestamp "2026-09-02T14:00:29.357627605Z",
+       :run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}
+      {:file "wm-trace-2026-09-02.edn",
+       :line 3,
+       :timestamp "2026-09-02T14:03:09.647517345Z",
+       :run-id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+       :selected? false,
+       :active? false,
+       :ranked-action-count 4,
+       :ranked-action-types [:advance-mission]}]},
+    :flight-discharge
+    {:variant :absent,
+     :reason :writer-exists-no-records,
+     :writer
+     "futon3c/src/futon3c/aif/flight_record.clj:347 write-flight-record!",
+     :caller
+     "futon3c/src/futon3c/peripheral/war_machine_pilot.clj:585",
+     :dir "/home/joe/code/futon3c/data/repl-traces",
+     :note "zero *.flight.edn anywhere under ~/code"}}}],
+ :trace-shown-records
+ [{:file "wm-trace-2026-06-24.edn",
+   :line 6,
+   :timestamp "2026-06-24T15:02:20.894714791Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-24.edn",
+   :line 7,
+   :timestamp "2026-06-24T16:02:16.694984259Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-24.edn",
+   :line 8,
+   :timestamp "2026-06-24T18:03:39.242661925Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-24.edn",
+   :line 9,
+   :timestamp "2026-06-24T21:58:26.205186217Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 1,
+   :timestamp "2026-06-25T08:01:16.526424411Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 2,
+   :timestamp "2026-06-25T09:01:13.806056193Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 3,
+   :timestamp "2026-06-25T10:01:21.941789085Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 4,
+   :timestamp "2026-06-25T11:01:56.885127722Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 5,
+   :timestamp "2026-06-25T12:02:03.802827719Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 6,
+   :timestamp "2026-06-25T13:03:25.576848510Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 7,
+   :timestamp "2026-06-25T14:02:54.420844168Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 8,
+   :timestamp "2026-06-25T15:02:35.540344343Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 9,
+   :timestamp "2026-06-25T16:03:42.103071420Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 10,
+   :timestamp "2026-06-25T17:03:50.137804415Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 13,
+   :timestamp "2026-06-25T20:03:22.855978389Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 14,
+   :timestamp "2026-06-25T21:03:44.264007051Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-25.edn",
+   :line 15,
+   :timestamp "2026-06-25T22:02:06.100299818Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 1,
+   :timestamp "2026-06-26T09:02:23.457584185Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 2,
+   :timestamp "2026-06-26T10:02:34.979646182Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 3,
+   :timestamp "2026-06-26T11:02:08.011493737Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 4,
+   :timestamp "2026-06-26T12:02:26.744964334Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 5,
+   :timestamp "2026-06-26T13:02:16.072516543Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 6,
+   :timestamp "2026-06-26T14:02:04.873459378Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 7,
+   :timestamp "2026-06-26T15:02:40.561158093Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 8,
+   :timestamp "2026-06-26T16:01:58.632271721Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 9,
+   :timestamp "2026-06-26T17:02:27.288370762Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 10,
+   :timestamp "2026-06-26T18:02:26.640249228Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 11,
+   :timestamp "2026-06-26T19:02:30.394883204Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-26.edn",
+   :line 12,
+   :timestamp "2026-06-26T20:02:44.387496522Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 1,
+   :timestamp "2026-06-27T13:02:22.610699430Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 2,
+   :timestamp "2026-06-27T14:02:17.595048643Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 3,
+   :timestamp "2026-06-27T15:02:26.594451104Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 4,
+   :timestamp "2026-06-27T16:02:03.130160388Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 5,
+   :timestamp "2026-06-27T17:02:04.548549018Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 6,
+   :timestamp "2026-06-27T18:02:05.967964370Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 7,
+   :timestamp "2026-06-27T19:02:10.202929797Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 8,
+   :timestamp "2026-06-27T20:02:08.680628994Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 9,
+   :timestamp "2026-06-27T21:02:39.454891264Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 10,
+   :timestamp "2026-06-27T22:02:34.220196878Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-27.edn",
+   :line 11,
+   :timestamp "2026-06-27T23:02:41.970467660Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 1,
+   :timestamp "2026-06-28T10:02:56.834817372Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 2,
+   :timestamp "2026-06-28T11:03:34.251994851Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 3,
+   :timestamp "2026-06-28T12:03:14.068960086Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 4,
+   :timestamp "2026-06-28T13:02:34.997107012Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 5,
+   :timestamp "2026-06-28T14:02:30.338319499Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 6,
+   :timestamp "2026-06-28T15:02:25.261035939Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 7,
+   :timestamp "2026-06-28T16:02:28.540277118Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 8,
+   :timestamp "2026-06-28T17:02:31.467309739Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 9,
+   :timestamp "2026-06-28T18:02:29.191182076Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 10,
+   :timestamp "2026-06-28T19:02:35.957375330Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 11,
+   :timestamp "2026-06-28T20:02:29.468649654Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 12,
+   :timestamp "2026-06-28T21:02:32.472221145Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 13,
+   :timestamp "2026-06-28T22:02:28.856410825Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-28.edn",
+   :line 14,
+   :timestamp "2026-06-28T23:02:29.685278945Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 1,
+   :timestamp "2026-06-29T00:02:23.071070846Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 2,
+   :timestamp "2026-06-29T01:02:28.983290100Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 3,
+   :timestamp "2026-06-29T02:02:27.069860059Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 8,
+   :timestamp "2026-06-29T07:02:29.381000538Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 9,
+   :timestamp "2026-06-29T08:02:54.385368288Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 10,
+   :timestamp "2026-06-29T09:03:06.414061512Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 11,
+   :timestamp "2026-06-29T10:03:13.070765572Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 12,
+   :timestamp "2026-06-29T11:02:41.382324850Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 13,
+   :timestamp "2026-06-29T12:02:49.875606072Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 14,
+   :timestamp "2026-06-29T13:02:41.037611715Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 15,
+   :timestamp "2026-06-29T14:03:20.024614556Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 16,
+   :timestamp "2026-06-29T15:03:38.119493980Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 17,
+   :timestamp "2026-06-29T16:03:22.423120759Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-29.edn",
+   :line 18,
+   :timestamp "2026-06-29T17:03:01.697807432Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 1,
+   :timestamp "2026-06-30T03:03:13.770927119Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 2,
+   :timestamp "2026-06-30T04:03:03.779709178Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 3,
+   :timestamp "2026-06-30T05:02:51.474945939Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 4,
+   :timestamp "2026-06-30T06:03:37.315736987Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 5,
+   :timestamp "2026-06-30T07:01:58.017350359Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 6,
+   :timestamp "2026-06-30T11:01:56.952442966Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 7,
+   :timestamp "2026-06-30T12:02:59.979288351Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 8,
+   :timestamp "2026-06-30T13:02:55.526930651Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 9,
+   :timestamp "2026-06-30T14:02:51.476095992Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 10,
+   :timestamp "2026-06-30T15:02:57.422231455Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 11,
+   :timestamp "2026-06-30T16:03:06.880396666Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 12,
+   :timestamp "2026-06-30T17:02:54.720265514Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 13,
+   :timestamp "2026-06-30T18:02:46.108710776Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 14,
+   :timestamp "2026-06-30T19:02:56.022639737Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-06-30.edn",
+   :line 18,
+   :timestamp "2026-06-30T23:02:57.420069498Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 1,
+   :timestamp "2026-07-01T00:02:49.784523480Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 2,
+   :timestamp "2026-07-01T01:02:55.272384775Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 3,
+   :timestamp "2026-07-01T02:02:58.761320623Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 4,
+   :timestamp "2026-07-01T03:02:56.859526092Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 5,
+   :timestamp "2026-07-01T04:03:03.373741526Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 6,
+   :timestamp "2026-07-01T05:03:03.880095661Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 7,
+   :timestamp "2026-07-01T06:03:01.802948292Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 8,
+   :timestamp "2026-07-01T07:02:54.706915378Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 9,
+   :timestamp "2026-07-01T08:03:26.476420333Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 10,
+   :timestamp "2026-07-01T09:03:34.698265133Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 11,
+   :timestamp "2026-07-01T10:03:05.771219968Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 12,
+   :timestamp "2026-07-01T11:03:37.377572571Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 13,
+   :timestamp "2026-07-01T12:03:13.874234915Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 14,
+   :timestamp "2026-07-01T13:03:11.387911901Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 15,
+   :timestamp "2026-07-01T15:02:03.308617221Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 16,
+   :timestamp "2026-07-01T16:01:49.303821345Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 17,
+   :timestamp "2026-07-01T17:01:54.886576734Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 18,
+   :timestamp "2026-07-01T18:01:57.742544932Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 19,
+   :timestamp "2026-07-01T19:01:48.562753033Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 20,
+   :timestamp "2026-07-01T20:01:52.012190541Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 21,
+   :timestamp "2026-07-01T21:01:49.940285314Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 22,
+   :timestamp "2026-07-01T22:01:55.651902039Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-01.edn",
+   :line 23,
+   :timestamp "2026-07-01T23:01:50.984615922Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 1,
+   :timestamp "2026-07-02T00:01:51.870434634Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 2,
+   :timestamp "2026-07-02T01:01:50.282514528Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 3,
+   :timestamp "2026-07-02T02:01:55.568592203Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 4,
+   :timestamp "2026-07-02T03:01:56.109145484Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 5,
+   :timestamp "2026-07-02T04:01:51.789360349Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 9,
+   :timestamp "2026-07-02T08:02:01.204882349Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 10,
+   :timestamp "2026-07-02T09:01:53.400679294Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 11,
+   :timestamp "2026-07-02T10:01:58.256825988Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 12,
+   :timestamp "2026-07-02T11:01:50.408026847Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 13,
+   :timestamp "2026-07-02T12:01:53.639026371Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 14,
+   :timestamp "2026-07-02T13:03:03.295793039Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 15,
+   :timestamp "2026-07-02T13:03:44.903012002Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 16,
+   :timestamp "2026-07-02T13:14:53.729049929Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 17,
+   :timestamp "2026-07-02T13:30:55.818776522Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 18,
+   :timestamp "2026-07-02T13:51:58.708065988Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 19,
+   :timestamp "2026-07-02T13:58:56.585591681Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 20,
+   :timestamp "2026-07-02T14:01:36.964640710Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 21,
+   :timestamp "2026-07-02T14:03:07.263175377Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 22,
+   :timestamp "2026-07-02T14:04:20.627013009Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 23,
+   :timestamp "2026-07-02T14:07:01.738271668Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 24,
+   :timestamp "2026-07-02T14:09:23.731201157Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 25,
+   :timestamp "2026-07-02T15:02:57.298595981Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 26,
+   :timestamp "2026-07-02T15:32:40.906674335Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 27,
+   :timestamp "2026-07-02T16:03:01.209706829Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 28,
+   :timestamp "2026-07-02T17:03:40.299429470Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 29,
+   :timestamp "2026-07-02T18:03:11.275641277Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 30,
+   :timestamp "2026-07-02T19:02:33.486827351Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 31,
+   :timestamp "2026-07-02T20:02:36.119776116Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 32,
+   :timestamp "2026-07-02T21:02:57.844704269Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 33,
+   :timestamp "2026-07-02T22:03:32.641988537Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-02.edn",
+   :line 34,
+   :timestamp "2026-07-02T23:03:04.955955537Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 1,
+   :timestamp "2026-07-03T00:03:07.951189035Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 2,
+   :timestamp "2026-07-03T00:14:45.784319713Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 3,
+   :timestamp "2026-07-03T00:18:16.302657708Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 4,
+   :timestamp "2026-07-03T01:04:13.871956441Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 5,
+   :timestamp "2026-07-03T02:03:13.419460228Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 6,
+   :timestamp "2026-07-03T03:03:20.872939840Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 7,
+   :timestamp "2026-07-03T04:03:38.815779940Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 8,
+   :timestamp "2026-07-03T05:03:27.733855905Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 9,
+   :timestamp "2026-07-03T06:03:03.132325775Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 12,
+   :timestamp "2026-07-03T09:03:41.350950498Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 13,
+   :timestamp "2026-07-03T10:04:10.324484048Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 14,
+   :timestamp "2026-07-03T11:03:18.454612370Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 15,
+   :timestamp "2026-07-03T12:04:06.647101170Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 16,
+   :timestamp "2026-07-03T13:03:52.084643660Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 17,
+   :timestamp "2026-07-03T14:03:56.482168935Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 18,
+   :timestamp "2026-07-03T15:04:09.649212239Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 19,
+   :timestamp "2026-07-03T16:03:54.878188425Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-03.edn",
+   :line 20,
+   :timestamp "2026-07-03T17:03:55.680143568Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 1,
+   :timestamp "2026-07-04T07:03:48.095349930Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 2,
+   :timestamp "2026-07-04T07:09:54.959342073Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 3,
+   :timestamp "2026-07-04T08:03:54.452678908Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 4,
+   :timestamp "2026-07-04T08:37:15.371709244Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 5,
+   :timestamp "2026-07-04T08:41:28.455634654Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 6,
+   :timestamp "2026-07-04T08:45:41.723729135Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 7,
+   :timestamp "2026-07-04T08:49:59.139173278Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 8,
+   :timestamp "2026-07-04T08:54:15.894690491Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 9,
+   :timestamp "2026-07-04T08:58:36.241027254Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 10,
+   :timestamp "2026-07-04T09:03:17.014782080Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 11,
+   :timestamp "2026-07-04T09:03:56.784734886Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 12,
+   :timestamp "2026-07-04T09:07:49.326146955Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 13,
+   :timestamp "2026-07-04T09:12:13.303653272Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 14,
+   :timestamp "2026-07-04T09:16:25.072482997Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 15,
+   :timestamp "2026-07-04T09:20:31.596955764Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 16,
+   :timestamp "2026-07-04T09:24:36.117924058Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 17,
+   :timestamp "2026-07-04T09:28:43.222444840Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 18,
+   :timestamp "2026-07-04T09:34:25.269771725Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 19,
+   :timestamp "2026-07-04T09:38:40.433805177Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 20,
+   :timestamp "2026-07-04T09:42:23.272271669Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 21,
+   :timestamp "2026-07-04T09:46:01.354057734Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 22,
+   :timestamp "2026-07-04T09:49:38.807422624Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 23,
+   :timestamp "2026-07-04T09:53:27.937826735Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 24,
+   :timestamp "2026-07-04T09:57:50.566340716Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 25,
+   :timestamp "2026-07-04T10:03:07.959312489Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 26,
+   :timestamp "2026-07-04T10:05:23.175038588Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 27,
+   :timestamp "2026-07-04T10:07:59.661515373Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 28,
+   :timestamp "2026-07-04T11:01:13.107726676Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 29,
+   :timestamp "2026-07-04T12:01:09.480507525Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 30,
+   :timestamp "2026-07-04T13:01:47.279937225Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 31,
+   :timestamp "2026-07-04T14:02:52.344069944Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 32,
+   :timestamp "2026-07-04T15:02:16.527096972Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 33,
+   :timestamp "2026-07-04T16:03:09.766781295Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 34,
+   :timestamp "2026-07-04T17:01:46.612634061Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 35,
+   :timestamp "2026-07-04T18:02:53.814117515Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 36,
+   :timestamp "2026-07-04T19:01:25.394877757Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 37,
+   :timestamp "2026-07-04T20:02:46.317515342Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-04.edn",
+   :line 38,
+   :timestamp "2026-07-04T21:02:13.676046256Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 1,
+   :timestamp "2026-07-05T07:03:24.915900187Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 2,
+   :timestamp "2026-07-05T08:02:41.644376963Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 3,
+   :timestamp "2026-07-05T09:03:29.218583682Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 4,
+   :timestamp "2026-07-05T10:04:03.341898403Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 5,
+   :timestamp "2026-07-05T10:17:21.116748353Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 6,
+   :timestamp "2026-07-05T11:04:11.025262837Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 7,
+   :timestamp "2026-07-05T12:03:32.871168488Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 8,
+   :timestamp "2026-07-05T13:03:40.290929910Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 9,
+   :timestamp "2026-07-05T14:03:29.823220617Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 10,
+   :timestamp "2026-07-05T15:03:41.733358472Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 11,
+   :timestamp "2026-07-05T16:03:25.831631209Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 12,
+   :timestamp "2026-07-05T17:03:26.647687582Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 13,
+   :timestamp "2026-07-05T18:03:30.932674656Z",
+   :missions
+   ["M-bayesian-structure-learning" "M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 14,
+   :timestamp "2026-07-05T19:03:44.029589378Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 15,
+   :timestamp "2026-07-05T20:04:11.648468937Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 16,
+   :timestamp "2026-07-05T21:02:05.936976152Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 17,
+   :timestamp "2026-07-05T22:02:59.169182476Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-05.edn",
+   :line 18,
+   :timestamp "2026-07-05T23:02:32.961071603Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 4,
+   :timestamp "2026-07-06T03:02:37.741281161Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 5,
+   :timestamp "2026-07-06T04:02:33.506298502Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 6,
+   :timestamp "2026-07-06T05:02:33.172076868Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 7,
+   :timestamp "2026-07-06T06:02:33.330831681Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 8,
+   :timestamp "2026-07-06T07:02:38.012190023Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 9,
+   :timestamp "2026-07-06T08:02:31.787866916Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 10,
+   :timestamp "2026-07-06T09:03:54.666420665Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 11,
+   :timestamp "2026-07-06T10:04:06.573595471Z",
+   :missions ["M-canon-fingerprint-store"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 12,
+   :timestamp "2026-07-06T11:04:32.689430997Z",
+   :missions ["M-canon-fingerprint-store" "M-first-flights"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 13,
+   :timestamp "2026-07-06T12:04:27.412283747Z",
+   :missions ["M-canon-fingerprint-store" "M-first-flights"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 14,
+   :timestamp "2026-07-06T13:04:30.639215623Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 15,
+   :timestamp "2026-07-06T14:04:42.733213897Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 16,
+   :timestamp "2026-07-06T15:04:29.673447232Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 17,
+   :timestamp "2026-07-06T16:04:24.123080997Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 18,
+   :timestamp "2026-07-06T17:04:29.422081343Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 19,
+   :timestamp "2026-07-06T18:04:28.578715595Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 20,
+   :timestamp "2026-07-06T19:04:34.124975024Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-06.edn",
+   :line 21,
+   :timestamp "2026-07-06T20:04:39.619114320Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-09.edn",
+   :line 1,
+   :timestamp "2026-07-09T06:54:01.667704473Z",
+   :missions ["M-canon-fingerprint-store" "M-learning-loop"]}
+  {:file "wm-trace-2026-07-14.edn",
+   :line 1,
+   :timestamp "2026-07-14T09:49:57.608850393Z",
+   :missions ["M-kangaroo"]}
+  {:file "wm-trace-2026-07-14.edn",
+   :line 2,
+   :timestamp "2026-07-14T10:31:07.371543890Z",
+   :missions ["M-kangaroo"]}
+  {:file "wm-trace-2026-07-14.edn",
+   :line 3,
+   :timestamp "2026-07-14T15:03:41.407059656Z",
+   :missions ["M-kangaroo"]}
+  {:file "wm-trace-2026-07-14.edn",
+   :line 4,
+   :timestamp "2026-07-14T15:08:39.753829386Z",
+   :missions ["M-kangaroo"]}]}
