@@ -131,7 +131,7 @@
                "holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/801976e7-R7.edn:1"
                "../futon3c/test/futon3c/agents/zaif_inputs_test.clj:35"
                "../futon3c/test/futon3c/agents/zaif_inputs_test.clj:53"]
-    :note "The U9 table keeps declared-mark and lexical-probe classification precision separate from WM inverse-variance precision. The tests prove the within-kind declared 1.0 > lexical 0.42 ordering and independently pin the recorded WM R7 present/absent channel inventory; they do not compare values across those two unit families."}
+    :note "The U9 table keeps declared-mark and lexical-probe classification precision separate from WM inverse-variance precision. The tests prove the within-kind declared 1.0 > lexical 0.42 ordering and independently pin the recorded WM R7 present/absent channel inventory; they do not compare values across those two unit families. The WM trace field the retired :gap asked for is [:precision-state] (per-channel maps produced by futon2.aif.precision/update-precision-state on record :route R2->R7), covering 8 of the 14 observation channels with 6 more absent-not-zero; zaif has no precision machinery at all, so the zaif half can only be a pin over the U9 table."}
    :gap nil
    :blocked-by []}
 
