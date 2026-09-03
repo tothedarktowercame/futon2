@@ -1,7 +1,7 @@
 {:row :U10
  :scope [:R1 :R2 :R3 :R4 :R5 :R6 :R7 :R8 :R9 :R13 :R14 :R16 :R17]
  :as-of "2026-09-02"
- :provenance-note "real means a recorded operator/WM datum; planted means a test-authored value or stub. U6's R4 predictions and R8 realised observation are plants, and test/futon2/aif/zaif_full_loop_test.clj:539 proves their orderings change with the plant."
+ :provenance-note "real means a recorded operator/WM datum; planted means a test-authored value or stub. U6's R4 predictions and R8 realised observation are plants, and test/futon2/aif/zaif_full_loop_test.clj:539 proves their orderings change with the plant. Two narrower values are also in use: :registry-derived (R2) means the test reads the shipped registry rather than a literal, and :real-table (R5) means the test's own scenario is authored but the number that decides the assertion is read from a tracked recorded artifact."
  :search-trail
  ["holes/labs/wm-contract/SPEC-zaif-harness-v1.md:18-30"
   "holes/labs/zaif-harness/worklist.edn:51-91"
