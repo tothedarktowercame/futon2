@@ -62,7 +62,7 @@
    {:status :mapped-separate
     :evidence ["src/futon2/aif/belief.clj:423"
                "../futon3c/src/futon3c/agents/zaif_inputs.clj:177"]
-    :note "The zaif R3 test varies a planted density through the production U11 bridge and hydrator, proving the task-belief scalar moves upward, and separately proves the typed-empty belief is unchanged. WM belief updating remains a separate path."}
+    :note "The zaif R3 test varies a planted density through the production U11 bridge and hydrator, proving the task-belief scalar moves upward, and separately proves the typed-empty belief is unchanged. What is real in that test is the row identity, its 18/10 counts and its provenance; the two compared densities are test plants, which is what the closed gap asked for (:provenance :real on the pointer is about the pinned row, not about the moving quantity). WM belief updating remains a separate path, and the WM mu-pre/mu-post fixtures S7 identified are still unextracted (S7 :blocked, moved to wm-contract U25)."}
    :gap nil
    :blocked-by []}
 
