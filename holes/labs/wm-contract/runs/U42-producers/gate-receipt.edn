@@ -1,0 +1,39 @@
+{:receipt/row :U42,
+ :receipt/of :u8-reporting-gate,
+ :receipt/generated-by "holes/labs/wm-contract/u42_gate_receipt.bb",
+ :receipt/at "2026-09-03T12:26:18.248138328Z",
+ :gate
+ {:name :u8/report-backed-by-typed-records,
+  :source "holes/labs/zaif-harness/report_gate.clj",
+  :source-sha256
+  "6fd957c3c10d39a1a45ac7a55cbb5010fabd680dafb51a3b173c05ac24d48fc4",
+  :views-source "holes/labs/M-zaif-harness/z1_views.clj",
+  :views-source-sha256
+  "29f2e56fff878b861b3d4bc8c0665b2121f2cf5a89912441fddcbfcbe0bab046",
+  :test
+  "holes/labs/zaif-harness/report_gate_test.clj real-recorded-decision-exposes-known-findings"},
+ :store
+ {:endpoint "http://127.0.0.1:7073/api/alpha/evidence",
+  :access :read-only},
+ :subject
+ {:mission "M-zaif-harness-v1",
+  :session-id "zai-476ceb7567124811958ec8d6dabedd1c",
+  :turn-id "zai-turn-a5e293f5-a9f5-4d1f-89e0-0f415d1ecaa9",
+  :round 1,
+  :pairing-key "zai-turn-a5e293f5-a9f5-4d1f-89e0-0f415d1ecaa9:r1",
+  :event :zaif-arm-choice,
+  :arm :retrieve,
+  :recorded-mission nil},
+ :verdict
+ {:ok false,
+  :failures [:u8/decision-mission-attribution-absent],
+  :claim-count 5,
+  :failed-claim-count 1,
+  :per-claim
+  [{:claim/type :arm-chosen, :verdict :backed}
+   {:claim/type :g-terms, :verdict :backed}
+   {:claim/type :tool-calls, :verdict :backed}
+   {:claim/type :mission-attribution,
+    :verdict :failed,
+    :failure :u8/decision-mission-attribution-absent}
+   {:claim/type :status, :verdict :backed}]}}

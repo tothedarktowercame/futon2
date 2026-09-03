@@ -430,8 +430,40 @@
       (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
           "the enabled record differs from the disabled one in exactly this key
            (:timestamp aside, which trace-record stamps per call)")
-      (is (= 24 trace/trace-schema-version)
+      (is (= 25 trace/trace-schema-version)
           "and the bump is what separates 'producer predates C_mis' from 'flag was off'"))))
+
+(deftest mission-c-carries-typed-gauge-observables-test
+  (testing "U42: the gauge producers' typed records ride INSIDE :mission-c, and
+            the version bump is what makes their absence readable"
+    (let [records [{:observable :worklist-acceptance-state
+                    :producer :worklist-acceptance-state/v1
+                    :status :measured :value 1.0
+                    :sources [{:path "holes/labs/wm-contract/worklist.edn"
+                               :sha256 "deadbeef"}]}
+                   {:observable :reporting-gate-test-result
+                    :producer :reporting-gate-test-result/v1
+                    :status :absent :reason :file-absent
+                    :would-need "a gate receipt"}]
+          fields {:version :mission-c/v1 :status :absent
+                  :reason :no-measurable-criteria
+                  :gauge-observables records}
+          off (trace/trace-record sample-judge-output)
+          on (trace/trace-record (assoc sample-judge-output :mission-c fields))]
+      (is (not (contains? off :mission-c))
+          "still no key at all when the flag never put one on the judgement")
+      (is (= records (:gauge-observables (:mission-c on)))
+          "the typed records survive onto the record verbatim")
+      (is (= #{:measured :absent}
+             (set (map :status (:gauge-observables (:mission-c on)))))
+          "a measured value and a typed absence are BOTH carried -- the absence
+           is what says a producer could not read its artifact, as against a
+           producer that read one and measured zero")
+      (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
+          "and it is still exactly one key that separates the two records")
+      (is (= 25 trace/trace-schema-version)
+          "absence of :gauge-observables at 25 or later would mean every
+           producer was absent; before 25 it means the producer predates them"))))
 
 (deftest trace-record-carries-typed-mission-focus-test
   (testing "U21: present-only, a SECOND field beside :active-mission, and the

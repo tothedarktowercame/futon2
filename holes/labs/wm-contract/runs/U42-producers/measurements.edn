@@ -1,0 +1,201 @@
+{:row :U42,
+ :generated-by "holes/labs/wm-contract/u42_gauge_producers.clj",
+ :corpus
+ {:dir "data/wm-trace",
+  :files ["wm-trace-2026-09-02.edn"],
+  :record-count 3},
+ :producers
+ {:ns "src/futon2/aif/mission_gauges.clj",
+  :call-site "scripts/futon2/report/war_machine.clj mission-c-fields",
+  :reading
+  {:version :mission-gauges/v1,
+   :records
+   [{:observable :registry-gap-list-present,
+     :producer :registry-gap-list-present/v1,
+     :status :measured,
+     :value 0.0,
+     :sources
+     [{:path "holes/labs/wm-contract/aif-equations.edn",
+       :sha256
+       "012f12c8ac0c5d95eda946221a01dbf363ab0715ebc739d382f4e742c14de4d8"}],
+     :basis
+     {:registry-pointer nil,
+      :pointer-keys
+      {:registry :zaif-node-gap-list, :equation :gap-list},
+      :file-present? false,
+      :reason :no-registry-pointer,
+      :gap-lists-found-not-registry-pointed
+      ["holes/labs/zaif-harness/runs/U10-node-coverage.edn"
+       "holes/labs/wm-contract/C489-u6-zaif-full-loop.md"]}}
+    {:observable :reporting-gate-test-result,
+     :producer :reporting-gate-test-result/v1,
+     :status :measured,
+     :value 0.0,
+     :sources
+     [{:path
+       "holes/labs/wm-contract/runs/U42-producers/gate-receipt.edn",
+       :sha256
+       "ad103059698820dd91480fd22d4eda853919a31398bc5a7edac521558fd96653"}],
+     :basis
+     {:gate :u8/report-backed-by-typed-records,
+      :recorded-at "2026-09-03T12:26:18.248138328Z",
+      :subject
+      {:mission "M-zaif-harness-v1",
+       :session-id "zai-476ceb7567124811958ec8d6dabedd1c",
+       :turn-id "zai-turn-a5e293f5-a9f5-4d1f-89e0-0f415d1ecaa9",
+       :round 1,
+       :pairing-key "zai-turn-a5e293f5-a9f5-4d1f-89e0-0f415d1ecaa9:r1",
+       :event :zaif-arm-choice,
+       :arm :retrieve,
+       :recorded-mission nil},
+      :failures [:u8/decision-mission-attribution-absent],
+      :failed-claim-count 1,
+      :claim-count 5}}
+    {:observable :worklist-acceptance-state,
+     :producer :worklist-acceptance-state/v1,
+     :status :measured,
+     :value 1.0,
+     :sources
+     [{:path "holes/labs/wm-contract/worklist.edn",
+       :sha256
+       "d95d1d952cf2b4871df789f8a3b1938b1e91c1df9b763c792c83c142cfc0323b"}
+      {:path "holes/labs/zaif-harness/worklist.edn",
+       :sha256
+       "abc7c0ffc24d0900e21f9f3a80e8da004f99afd03ebbcb9ead1f1062b13cd15c"}],
+     :basis
+     {:rows
+      [{:id :U6,
+        :ledger "holes/labs/wm-contract/worklist.edn",
+        :found? true,
+        :status :done,
+        :reviewed-by "codex",
+        :green? true}
+       {:id :U7,
+        :ledger "holes/labs/zaif-harness/worklist.edn",
+        :found? true,
+        :status :done,
+        :reviewed-by "claude-1",
+        :green? true}
+       {:id :U8,
+        :ledger "holes/labs/zaif-harness/worklist.edn",
+        :found? true,
+        :status :done,
+        :reviewed-by "claude-2",
+        :green? true}
+       {:id :U9,
+        :ledger "holes/labs/zaif-harness/worklist.edn",
+        :found? true,
+        :status :done,
+        :reviewed-by "claude-2",
+        :green? true}],
+      :green-count 4,
+      :row-count 4,
+      :accepted-status #{:done}}}],
+   :observables
+   {:registry-gap-list-present 0.0,
+    :reporting-gate-test-result 0.0,
+    :worklist-acceptance-state 1.0}}},
+ :probe-comparison
+ {:probe-artifact
+  "holes/labs/wm-contract/runs/U21-selection-focus/probe-observation.edn",
+  :probe
+  {:worklist-acceptance-state 1.0,
+   :reporting-gate-test-result 0.0,
+   :registry-gap-list-present 1.0},
+  :per-observable
+  {:registry-gap-list-present
+   {:u21-probe 1.0, :produced 0.0, :agrees? false},
+   :reporting-gate-test-result
+   {:u21-probe 0.0, :produced 0.0, :agrees? true},
+   :worklist-acceptance-state
+   {:u21-probe 1.0, :produced 1.0, :agrees? true}}},
+ :rows
+ [{:run-id "0a18c4f7-758e-400a-8223-9c52edf07450",
+   :timestamp "2026-09-02T13:47:22.082297526Z",
+   :selected-mission "M-wm-aif-policy-grain-compliance",
+   :readback
+   {:mission "M-wm-aif-policy-grain-compliance",
+    :status :absent,
+    :reason :no-measurable-criteria,
+    :criterion-count 0,
+    :measurable-count 0,
+    :criteria-source
+    "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+    :criteria-source-sha256
+    "51f6de53d7e95d42a42bb3a599e8430d35c29c34c692e27e239884541fa0c846"},
+   :unmeasurable-reasons [],
+   :risk-values []}
+  {:run-id "4abad68c-5481-4402-8f0e-252add62c54b",
+   :timestamp "2026-09-02T14:00:29.357627605Z",
+   :selected-mission "M-zaif-harness-v1",
+   :readback
+   {:measurable-count 3,
+    :criterion-count 3,
+    :mission "M-zaif-harness-v1",
+    :action-sensitivity {:distinct-risk-values 1, :constant? true},
+    :status :measured,
+    :criteria-source
+    "/home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn",
+    :criteria-source-sha256
+    "b85cb1dade5acecccfcb5188106a82908aa61a70f60b1f4b9f6af46873a5f2a9",
+    :declared-gauges
+    {:criterion-1 :worklist-acceptance-state,
+     :criterion-2 :reporting-gate-test-result,
+     :criterion-3 :registry-gap-list-present,
+     :honest-gap-list-published :registry-gap-list-present,
+     :reporting-gate-holds :reporting-gate-test-result,
+     :u-rows-green :worklist-acceptance-state},
+    :risk-mis-per-criterion
+    [{:shift 0.0,
+      :log-c -4.539889921682063E-5,
+      :value 1.0,
+      :observable :worklist-acceptance-state,
+      :surprisal 4.539889921682063E-5,
+      :contribution 1.5132966405606876E-5,
+      :outcome 1,
+      :weight 0.3333333333333333,
+      :criterion :u-rows-green,
+      :divergence 4.539889921682063E-5}
+     {:shift 0.0,
+      :log-c -10.000045398900186,
+      :value 0.0,
+      :observable :reporting-gate-test-result,
+      :surprisal 10.000045398900186,
+      :contribution 3.3333484663000617,
+      :outcome 0,
+      :weight 0.3333333333333333,
+      :criterion :reporting-gate-holds,
+      :divergence 10.000045398900186}
+     {:shift 0.0,
+      :log-c -10.000045398900186,
+      :value 0.0,
+      :observable :registry-gap-list-present,
+      :surprisal 10.000045398900186,
+      :contribution 3.3333484663000617,
+      :outcome 0,
+      :weight 0.3333333333333333,
+      :criterion :honest-gap-list-published,
+      :divergence 10.000045398900186}]},
+   :unmeasurable-reasons [],
+   :risk-values [6.666712065566529]}
+  {:run-id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+   :timestamp "2026-09-02T14:03:09.647517345Z",
+   :selected-mission "M-expressions-of-interest",
+   :readback
+   {:mission "M-expressions-of-interest",
+    :status :absent,
+    :reason :no-measurable-criteria,
+    :criterion-count 6,
+    :measurable-count 0,
+    :criteria-source
+    "/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md",
+    :criteria-source-sha256
+    "01247c81a553bcba9e4b7bab9d4083c4a8710b918afd01d35486085d7f9710af"},
+   :unmeasurable-reasons
+   [:no-declared-measurement
+    :no-declared-measurement
+    :no-declared-measurement
+    :no-declared-measurement
+    :no-declared-measurement
+    :no-declared-measurement],
+   :risk-values []}]}

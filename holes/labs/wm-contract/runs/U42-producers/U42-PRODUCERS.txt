@@ -1,0 +1,41 @@
+U42 -- the three gauge observables, produced
+==========================================
+
+Corpus: wm-trace-2026-09-02.edn -- 3 records.
+Replay only: no live tick, no run lock, nothing written under data/.
+
+1. WHAT EACH PRODUCER READ
+
+   registry-gap-list-present    = 0.0
+     source  holes/labs/wm-contract/aif-equations.edn  sha256 012f12c8ac0c5d95
+     basis   no-registry-pointer
+
+   reporting-gate-test-result   = 0.0
+     source  holes/labs/wm-contract/runs/U42-producers/gate-receipt.edn  sha256 ad103059698820dd
+
+   worklist-acceptance-state    = 1.0
+     source  holes/labs/wm-contract/worklist.edn  sha256 d95d1d952cf2b487
+     source  holes/labs/zaif-harness/worklist.edn  sha256 abc7c0ffc24d0900
+
+2. AGAINST U21'S DECLARED PROBE
+
+   observable                   U21 probe    produced     agrees?
+   registry-gap-list-present    1.0          0.0          false
+   reporting-gate-test-result   0.0          0.0          true
+   worklist-acceptance-state    1.0          1.0          true
+
+3. THE READBACK, PROBE REMOVED FROM THE PATH
+
+   run 0a18c4f7 -- selected M-wm-aif-policy-grain-compliance
+     mission=M-wm-aif-policy-grain-compliance       status=absent reason=no-measurable-criteria
+     criteria=0 measurable=0 risk_mis=[]
+
+   run 4abad68c -- selected M-zaif-harness-v1
+     mission=M-zaif-harness-v1                      status=measured reason=none
+     criteria=3 measurable=3 risk_mis=[6.666712065566529]
+
+   run 801976e7 -- selected M-expressions-of-interest
+     mission=M-expressions-of-interest              status=absent reason=no-measurable-criteria
+     criteria=6 measurable=0 risk_mis=[]
+     unmeasurable: no-declared-measurement, no-declared-measurement, no-declared-measurement, no-declared-measurement, no-declared-measurement, no-declared-measurement
+

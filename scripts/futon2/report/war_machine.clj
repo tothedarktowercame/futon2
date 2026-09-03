@@ -47,6 +47,7 @@
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
             [futon2.aif.mission-c :as mission-c]
+            [futon2.aif.mission-gauges :as mission-gauges]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
@@ -1702,6 +1703,13 @@
    `:declared-gauges` records the criterion -> observable bindings this mission
    was read under (`mission-c-declared-gauges`), so a reader can tell a binding
    this seam supplied from one the mission document declared itself.
+
+   U42: `:gauge-observables` is attached BY THE CALLER, not here — the typed
+   record of what each gauge producer (`futon2.aif.mission-gauges`) read, one
+   entry per declared observable, `:measured` with its sources and sha256 or
+   `:absent` with a reason and what would have to exist. It is what tells a
+   reader whether a criterion that did not score was missing a producer or was
+   measured and unsatisfied.
 
    `:action-sensitivity` is on the record because v0's forward model is the
    status quo for every candidate, so risk_mis is expected CONSTANT across
@@ -5944,13 +5952,31 @@
         ;; is final, and attached by `carry-mission-c` below. Nothing between
         ;; this binding and `result0` reads it.
         mission-c-fields (when *mission-c?*
-                           (try (mission-c-readback mission-focus
-                                                    wm-ranked+cascades
-                                                    observation)
-                                (catch Exception e
-                                  {:version mission-c/version :status :absent
-                                   :reason :readback-failed
-                                   :message (ex-message e)})))
+                           (try
+                             ;; U42: the three observables the U18 gauges name
+                             ;; are not R2 channels, so U21 measured all three
+                             ;; criteria reaching risk_mis and stopping at
+                             ;; `:undeclared-observable`. `mission-gauges`
+                             ;; reads the artifacts those gauges point at and
+                             ;; supplies ONLY what it could measure; a producer
+                             ;; that cannot read its artifact supplies no key,
+                             ;; so its criterion stays exactly as unmeasurable
+                             ;; as before and the typed reason rides on the
+                             ;; record. THE MERGE IS FOR THE READBACK ALONE --
+                             ;; `observation` itself is untouched, so no
+                             ;; channel, weight, G term, admissibility verdict
+                             ;; or selector can see a gauge observable.
+                             (let [gauges (mission-gauges/reading)]
+                               (cond-> (mission-c-readback
+                                        mission-focus
+                                        wm-ranked+cascades
+                                        (merge observation (:observables gauges)))
+                                 (seq (:records gauges))
+                                 (assoc :gauge-observables (:records gauges))))
+                             (catch Exception e
+                               {:version mission-c/version :status :absent
+                                :reason :readback-failed
+                                :message (ex-message e)})))
         result0-unfocused
         (carry-mission-c
          (carry-active-mission

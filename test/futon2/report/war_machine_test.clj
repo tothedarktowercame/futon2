@@ -14,6 +14,7 @@
             [futon2.aif.efe :as efe]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.mission-c :as mc]
+            [futon2.aif.mission-gauges :as gauges]
             [futon2.aif.observation :as observation]
             [futon2.aif.policy :as policy]
             [futon2.aif.preferences :as pref]
@@ -1608,6 +1609,39 @@
           "each typed record points at the line it came from")
       (is (not (contains? r :per-mission-action))
           "no per-action numbers when there is no number to record"))))
+
+(deftest mission-c-gauge-producers-close-the-u21-gap-test
+  (testing "U42: with the gauge producers' measured values merged into the
+            observation the READBACK reads, M-zaif-harness-v1's three criteria
+            stop at :undeclared-observable and score"
+    (let [clocked (assoc u11-clocked :mission-id "M-zaif-harness-v1")
+          ranked (assoc-in u11-ranked [0 :action :target] "M-zaif-harness-v1")
+          tick-observation {:sorry-count-norm 0.0}
+          produced (gauges/reading)
+          before (#'wm/mission-c-readback clocked ranked tick-observation)
+          after (#'wm/mission-c-readback clocked ranked
+                                         (merge tick-observation
+                                                (:observables produced)))]
+      (is (= [:undeclared-observable :undeclared-observable :undeclared-observable]
+             (mapv :reason (:unmeasurable before)))
+          "the state U21 measured and this row was minted from")
+      (is (= 3 (:measurable-count after)))
+      (is (= :measured (:status after)))
+      ;; LIVE PIN, and the whole point of the row: this number comes from the
+      ;; tracked artifacts the producers read, not from a supplied probe.
+      ;; U21's probe reported 3.333378732232873 by ASSUMING
+      ;; :registry-gap-list-present is 1.0; the registry declares no gap-list
+      ;; pointer, so it measures 0.0 and a second criterion is unsatisfied.
+      (is (= [6.666712065566529]
+             (vec (distinct (map :risk-mis (:per-mission-action after))))))
+      (is (= {:worklist-acceptance-state 1.0
+              :reporting-gate-test-result 0.0
+              :registry-gap-list-present 0.0}
+             (:observables produced)))
+      (is (not (contains? tick-observation :worklist-acceptance-state))
+          "the tick's own observation is not what was merged into -- the merge
+           is local to the readback's argument, so no channel, weight, G term,
+           admissibility verdict or selector can see a gauge observable"))))
 
 (deftest mission-c-falls-back-to-the-candidates-own-mission-doc-test
   (let [r (#'wm/mission-c-readback u11-clocked u11-ranked {})]

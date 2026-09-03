@@ -272,8 +272,24 @@
          redefinition of it — 23's key stays the durable clock read, and 24's
          is a projection of the tick's own decision, so a reader can measure
          the lag between them. It declares nothing about selection: the key is
-         attached after the decision and no selection path reads it."
-  24)
+         attached after the decision and no selection path reads it.
+    25 — adds :gauge-observables INSIDE the present-only :mission-c readback:
+         one typed record per DECLARED GAUGE observable, `:measured` with the
+         artifact it was read from and that artifact's sha256, or `:absent`
+         with a reason and what would have to exist (U42, 2026-09-03).
+         Additive, nested, and still default-off (FUTON_WM_MISSION_C), so no
+         record's existing bytes change. Bumped under the ledger rule that ANY
+         key-set change bumps — the rule is not top-level-only, as version 4
+         already records. What the version separates: a :mission-c record with
+         no :gauge-observables is one whose producer PREDATES the gauge
+         producers, not one on which every producer came back absent; the
+         producers always emit a record per declared observable, so `absent`
+         at 25 and later is a measurement about the artifacts, not about the
+         code. It declares nothing about selection: the observables are merged
+         into the observation the READBACK reads only, never into the tick's
+         own observation, so no channel, weight, G term, admissibility verdict
+         or selector can see one."
+  25)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the
