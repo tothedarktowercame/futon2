@@ -1246,7 +1246,9 @@
                   (select-keys feature [:id :expected-roi-gbp])])))
        (into {})))
 
-(defn- roi-map-for-missions [missions]
+(defn- ^{:scalar-awaiting-density
+         {:awaits "a declared preference density over ROI outcomes (a C_roi the registry does not yet carry); until then :expected-roi-gbp is a bare scalar, an affine image of a log-density evaluation whose C is undeclared -- DESIGN-c-vector section 6, tally row :c-cost-vs-distribution (wm half, row U30)"}}
+  roi-map-for-missions [missions]
   (let [features (roi-feature-map)]
     (->> missions
          (keep (fn [{:keys [id title]}]

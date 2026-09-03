@@ -90,6 +90,11 @@
                                              (:rank entry)))
                                          ranked)
                                    ##Inf)
+         ;; :scalar-awaiting-density {:awaits "a declared preference density
+         ;; over sustainability outcomes; this sum of bare :expected-roi-gbp
+         ;; scalars is an affine image of log-C evaluations whose C is
+         ;; undeclared -- DESIGN-c-vector section 6, tally row
+         ;; :c-cost-vs-distribution (wm half, row U30)"}
          sustainability (reduce + 0.0
                                 (for [entry bundle
                                       :let [m (action-target entry)]]
