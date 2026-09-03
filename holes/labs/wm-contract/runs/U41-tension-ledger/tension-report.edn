@@ -24,11 +24,16 @@
     :tension/resolution-key
     :tension/cashed-by
     :tension/pattern-links
-    :tension/note],
+    :tension/note
+    :tension/refusal
+    :tension/minted-by],
    :enums
    #:tension{:status #{:refuted :carried :cashed :dissolved},
              :born-of
-             #{:refuted-rationale :build-event :operator-dictation}},
+             #{:refuted-rationale
+               :build-event
+               :operator-dictation
+               :refused-prediction}},
    :rules
    ["poles are exactly two, both non-blank -- a tension with one pole is a plan"
     ":tension/statement is verbatim from :tension/statement-source"
@@ -95,9 +100,24 @@
    ["futon2/holes/missions/M-zaif-harness-v1.md:38-39"
     "futon2/holes/missions/M-zaif-harness-v1.md:40 (provenance sentence)"
     "futon2/holes/labs/zaif-harness/runs/U10-node-coverage.md:52-55 -- measured over all 13 spec nodes: 'no listed node currently has one production code path serving both the live zaif and WM uptakes. The spec table is presently the mapping between the two implementations.'"
-    "futon2/holes/labs/zaif-harness/worklist.edn:302-308 -- the U10 row that carries that measurement cites tension 3 as its premise"]}],
+    "futon2/holes/labs/zaif-harness/worklist.edn:302-308 -- the U10 row that carries that measurement cites tension 3 as its premise"]}
+  {:tension
+   [:refused-prediction
+    {:q-actand/refusal :q-actand/zero-support-after-kin-pool,
+     :grain :arm-session,
+     :actand {:route :actand, :correction-label true},
+     :action :retrieve,
+     :target :gold-judged,
+     :kin []}],
+   :status :carried,
+   :status-since "2026-09-03",
+   :moved-by-row :U28z,
+   :events 1,
+   :evidence-events 0,
+   :evidence-pointers
+   ["calibration-sessions.edn record e-b78c3d3b-a530-40c7-a333-ec4e6b258fe4"]}],
  :birth-rule
- {:tensions-considered 3,
+ {:tensions-considered 4,
   :terminal 0,
   :resolution-keys-seen {},
   :candidates []},
@@ -168,6 +188,16 @@
    :pass? true,
    :why
    "a cashing event with no receipt and no row must be refused -- section 3's 'status moves only with a pointer to the cashing/refuting row', mechanised"},
+  :negative/planted-double-mint-is-refused
+  {:defects
+   [:duplicate-tension-id
+    :duplicate-event-id
+    :duplicate-event-seq
+    :not-exactly-one-mint-event
+    :not-exactly-one-mint-event],
+   :pass? true,
+   :why
+   "a planted second mint of the same refusal identity must be refused; append-tension! instead returns :already-present for an exact replay"},
   :negative/the-real-ledger-conforms
   {:defects 0,
    :pass? true,
