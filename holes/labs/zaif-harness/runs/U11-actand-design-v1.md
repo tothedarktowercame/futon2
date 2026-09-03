@@ -206,3 +206,41 @@ Defense-in-depth verified at review: the D8b gate's finite-number? check
 the live controller through hydration. Any post-demo bridge (U11e
 replacement) must decide zero-support-for-target explicitly: smoothing,
 or a typed refusal at the bridge. That decision rides the arm ruling.
+
+## [A5-addendum] Corpus coverage of the U11e comparison (added at review, 2026-09-03)
+
+§6 named three corpora; the runner replayed two. The committed report
+(`runs/U11e-comparison-v1.edn`) carries
+`:corpus-counts {:calibration-sessions 114, :mission-node-fixtures 39}` and no
+column at all for the 56-decision bounded snapshot. Recorded here rather than
+left as silence, since "an arm that refuses everything is a weak source, said
+with numbers instead of silence" (§4) applies to corpora too:
+
+- **Why it is absent.** The 56 decisions exist only behind D9's live query
+  (`http://127.0.0.1:7073/api/alpha/evidence/text-search?tags=zaif&limit=100`,
+  `runs/regenerate-D9-tie-order-count.bb`); no tracked file carries them. §6's
+  last bullet forbids live JVM reads and `comparison-report`'s stated contract
+  is "already-parsed tracked corpora", so the pure runner cannot reach that
+  corpus without breaking the constraint that makes it replayable.
+- **What its column would have contained, provable without the query.**
+  `hydrate-inputs` returns exactly seven keys — `:mission`, `:mission-source`,
+  `:gamma`, `:gamma-source`, `:task-belief`, `:c-belief`, `:observations`
+  (`zaif_inputs.clj:246-252`) — and that is the shape each persisted
+  `:inputs-snapshot` carries (see D9's `:live-pin :inputs`). None of arm A's
+  seven source paths, none of arm B's four `[:channels …]` paths, and none of
+  `:route`/`:is_correction`/`:gold_judged` is among them, so every cell of that
+  column would read 56 typed `:q-actand/missing-input` refusals, 0 produced
+  values, 0 distinct — it cannot move the discrimination headline in either
+  direction. This is the same absence `zaif_arm_adapters.clj`'s
+  `:zaif-decisions` entries already declare (basis
+  `:zaif-inputs/closed-seven-key-shape`); what was missing was saying it where
+  the comparison itself is read.
+- **Not a substitution.** The 39 node fixtures stand in for §6's mission grain,
+  not for the 56 decisions.
+- **Scope of the [A2a]/plant columns, so the table is not misread.** The
+  ordering probe and floor plant are per ARM, not per (arm, corpus): the same
+  synthetic pair is reported inside both corpus cells of a column. A cell can
+  therefore show `:ordering-probe {:status :pass}` in a corpus where the arm
+  produced 0 values (arm A over the mission fixtures, e.g.). The probe values
+  are visibly planted and no headline number depends on them, but a per-corpus
+  plant is what §6 [A2a] asked for and is not what U11e built.
