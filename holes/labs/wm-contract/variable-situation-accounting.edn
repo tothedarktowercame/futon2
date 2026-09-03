@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-09-03",
  :authority
- {:contract-git-sha "6dabfb686f9754454d7689dc5b5bc39ae08dcf0b",
+ {:contract-git-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
   :contract-sha256
-  "ef5e3b829cb2b0cf058bfaf3c602d63a8f7c7b7f81fc81e9373f63cc05211c98",
+  "263377cc0cd0a35f8814ea4f33446bf9aeb2120ee0614b45fb13647d259c17ff",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "e38454bc8108af152005829db66df907717161e17100ab36ee38833e2ea9f467"},
+  "ebc3aa6283c33375874d40a077f3b1507e97401cdad9e92fca32dd4f267ff4d9"},
  :axes
  {:content-status
   [:named-only
@@ -734,17 +734,13 @@
    :area :preferences,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §2a"}
-  {:pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner},
-   :row-source :contract-declaration,
-   :name "nonDegenerateAblationLaw",
-   :basis
-   "Evidence complete twice over -- Holes.lean:217 proves the pinned instance and checks/ablation_exact_dyadic_witness.clj passes with a rejecting negative control -- yet mathlib4 86186c3744 moved it mkClosed -> mkHole in the SAME commit that added the proof. Closing it would reverse the author's decision on no new evidence. Raised as :J9.",
-   :readiness :contested,
-   :content-status :open-hole,
+  {:name "nonDegenerateAblationLaw",
    :area :demo,
-   :closability :pre-run-closable,
-   :owner "P-validated-R5 §2a′"}
+   :owner "P-validated-R5 §2a′",
+   :row-source :contract-declaration,
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner}}
   {:pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
@@ -1128,13 +1124,13 @@
  {:rows 133,
   :content
   {:closed-by-record-negative-space 62,
-   :closed-by-record-with-witness 43,
+   :closed-by-record-with-witness 44,
    :framing 1,
-   :open-hole 16,
+   :open-hole 15,
    :proven-against-pinned-source 11},
   :pointer {:resolves 133},
   :row-source {:contract-declaration 124, :glossary-paragraph 9},
   :glossary-content
   {:closed-by-record-with-witness 7, :framing 1, :open-hole 1},
-  :closability {:pre-run-closable 9, :run-gated 7},
-  :declaration-closability {:pre-run-closable 9, :run-gated 6}}}
+  :closability {:pre-run-closable 8, :run-gated 7},
+  :declaration-closability {:pre-run-closable 8, :run-gated 6}}}

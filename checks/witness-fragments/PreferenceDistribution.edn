@@ -8,6 +8,6 @@
                       [{:fixture "DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean" :claim :preferences-are-unconditional}
                        {:fixture "DarkTower/WarMachine/PreferenceDistributionPragmaticCostNegative.lean" :claim :preference-distribution-is-not-pragmatic-cost}]}
  :run-sha "146dfcf2679d3a7218d8983782d8a28ef64a8d72"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-03T22:16:17Z"}

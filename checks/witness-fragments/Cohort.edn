@@ -6,6 +6,6 @@
  :positive-evidence-scope "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/CohortNegative.lean" :claim :cohort-window-is-positive}]}
  :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-03T22:16:17Z"}

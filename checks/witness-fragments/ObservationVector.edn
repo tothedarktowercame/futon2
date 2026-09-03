@@ -8,6 +8,6 @@
                       [{:fixture "DarkTower/WarMachine/ObservationVectorPartialNegative.lean" :claim :complete-coordinate-map}
                        {:fixture "DarkTower/WarMachine/ObservationVectorOutcomeNegative.lean" :claim :vector-not-single-outcome}]}
  :run-sha "2972f9f064683919dd2eb75cc969008d44c0443e"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-03T22:16:17Z"}

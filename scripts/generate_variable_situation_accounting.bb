@@ -260,14 +260,6 @@
                 "The refusal's ground still holds as measured: U12 found one "
                 "risk_mis value across all 133 mission actions and all three "
                 "2026-09-02 records :absent.")}
-   "nonDegenerateAblationLaw"
-   {:closability :pre-run-closable :readiness :contested
-    :basis (str "Evidence complete twice over -- Holes.lean:217 proves the "
-                "pinned instance and checks/ablation_exact_dyadic_witness.clj "
-                "passes with a rejecting negative control -- yet mathlib4 "
-                "86186c3744 moved it mkClosed -> mkHole in the SAME commit "
-                "that added the proof. Closing it would reverse the author's "
-                "decision on no new evidence. Raised as :J9.")}
    "find"
    {:closability :pre-run-closable :readiness :not-ready
     :basis "A standing implementation refusal; an owner ruling closes it, no record can."}

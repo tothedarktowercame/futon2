@@ -12,7 +12,9 @@
    :pointers
    ["mathlib4 86186c3744"
     "mathlib4 DarkTower/WarMachine/Holes.lean:217 (the theorem)"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:188 (the predicate, docstring: \"tracks the pinned exact-dyadic ablation instance as an evidence obligation rather than treating definition as discharge\")"]}
+    "mathlib4 DarkTower/WarMachine/Holes.lean:188 (the predicate, docstring: \"tracks the pinned exact-dyadic ablation instance as an evidence obligation rather than treating definition as discharge\")"],
+   :resolved
+   "2026-09-03, by :J9 and :U45. The fact stands as recorded -- 86186c3744 did both things in one diff -- and the gap it names (no stated criterion, so a reader cannot tell a hole waiting for evidence from a hole waiting for nothing) is closed by the criterion in futon2 holes/labs/wm-contract/RUNBOOK.md. The declaration is closed at mathlib4 4bc55c5968 with the docstring naming each leg, and the demotion stands in history as the pre-criterion state rather than being amended away."}
   {:id :F3,
    :statement
    "The `falsifier` field means two different things across the 15 holes, and for H3/H4 it names the CONFIRMING observation rather than a falsifying one. On twelve holes the field states what would refute the claim (wmRunsOnce: \"no tick-entry invocation completes with a TickRunRecord\"; findF2Receipted: \"selected pattern lacks receipt\"; dirichletAccumulationImportAbsent, whose docstring says outright \"the claim held open is the ABSENCE\": \"a code path from the tick model's o or mu into R17's concentrations\"). On policyPrecisionIsGammaFromBeta the field reads \"a run record in which tau is set by the beta update from G and pi\" and on policyPosteriorImportsPolicyF \"a run record in which Q(pi) is computed with an F_pi term\" -- each of which would make the named claim TRUE. Both docstrings say \"this is the claim held open\", so the claims are positive and the fields describe their discharge. This matters now rather than in the abstract, because H4's named observation is on persisted record (see :H4 below): under one reading the record closes the hole by witness, under the other it refutes it, and the two dispositions are opposite.",
@@ -42,7 +44,12 @@
   :closability {:pre-run-closable 9, :run-gated 7},
   :contract-declaration-closability {:pre-run-closable 9, :run-gated 6},
   :readiness {:not-ready 13, :contested 2, :witnessed-and-held-open 1},
-  :closed-by-this-audit 0},
+  :closed-by-this-audit 0,
+  :as-audited "Every count in this map is the audit's own, at 2026-09-03 against contract 6de47bd050; they are NOT re-derived when a row later takes a verdict. See :verdicts-since for what has moved, and variable-situation-accounting.edn for the live counts.",
+  :verdicts-since
+  [{:name "nonDegenerateAblationLaw", :was :contested, :now :closed-under-criterion,
+    :by :U45, :at "2026-09-03",
+    :effect "contract holes 15 -> 14; accounting :open-hole rows 16 -> 15; declaration fence :pre-run-closable 9 -> 8"}]},
  :closability-axis [:pre-run-closable :run-gated],
  :authority
  {:contract-file "mathlib4/DarkTower/WarMachine/holes-contract.json",
@@ -76,8 +83,30 @@
    :hole-class :witnessed-instance-obligation,
    :name "nonDegenerateAblationLaw",
    :remaining-evidence
-   "NOTHING is missing on the evidence side: the pinned instance is proven in Lean AND bound by a passing check with a rejecting negative control. It is contested rather than ready because of finding :F2 -- the declaration was moved mkClosed -> mkHole in the same commit that added the proof (mathlib4 86186c3744). Closing it here would reverse the declaration author's decision on no new evidence, which is a ruling. Raised as worklist row :J9.",
-   :readiness :contested,
+   "AS AUDITED 2026-09-03: nothing is missing on the evidence side -- the pinned instance is proven in Lean AND bound by a passing check with a rejecting negative control. It was contested rather than ready because of finding :F2 -- the declaration was moved mkClosed -> mkHole in the same commit that added the proof (mathlib4 86186c3744). Closing it there would have reversed the declaration author's decision on no new evidence, which is a ruling. Raised as worklist row :J9. RESOLVED the same day: J9 ruled the criterion and dispositioned this hole by name, and :U45 executed the close. Nothing remains.",
+   :readiness :closed-under-criterion,
+   :verdict
+   {:verdict :closed-under-criterion,
+    :at "2026-09-03",
+    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\" (futon2 a2641b3), which dispositions this declaration by name: it MEETS the criterion now and closes.",
+    :legs
+    {:leg-1-persisted-record
+     {:status :inapplicable,
+      :why "The declared observation is a recorded score table, not a run observation, so the run leg does not apply here rather than being met. The pinned fixture is an exact-dyadic transcription of the snatcher-dominant/g1 case of the persisted record futon3 checks/ablation-snatch.edn; all ten scores (five policies x G and risk) were decoded and compared against that record for :U45 and are equal."}
+     :leg-2-rejecting-witness
+     {:status :met,
+      :why "checks/ablation_exact_dyadic_witness.clj exits 0 over the fixture and its --negative mode -- which removes the minimizer separation -- is rejected. Re-run for :U45 and re-stamped at the current contract sha 4bc55c5968bc4568610405660bdae4a98fcc06c5."}
+     :leg-3-lean-transcription
+     {:status :met,
+      :why "theorem wmRecordedAblationNonDegenerate proves the predicate over the pinned exact-dyadic table, no sorry."}},
+    :executed-by :U45,
+    :pointers
+    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion and this hole's disposition)"
+     "mathlib4 4bc55c5968 (hole -> closed, docstring naming each leg)"
+     "mathlib4 e4a8ac81cb (contract re-emitted; 15 -> 14 holes)"
+     "mathlib4 DarkTower/WarMachine/Holes.lean:229 theorem wmRecordedAblationNonDegenerate"
+     "futon2 checks/witness-fragments/nonDegenerateAblationLaw.edn (:contract-sha 4bc55c5968...)"
+     "futon3 checks/ablation-snatch.edn (the persisted record the fixture transcribes)"]},
    :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 188, :docstring-line 187},
    :area :demo,
    :closability :pre-run-closable,

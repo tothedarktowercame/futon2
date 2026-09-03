@@ -8,6 +8,6 @@
                       [{:fixture "DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean" :claim :posterior-requires-outcome-conditioning}
                        {:fixture "DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean" :claim :posterior-is-not-outcome-prediction}]}
  :run-sha "d2b43fb61ad94126f77996296748feed0d6f4bfd"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-03T22:16:17Z"}

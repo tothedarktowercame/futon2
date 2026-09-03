@@ -4,6 +4,6 @@
  :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/prediction-error-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/PredictionErrorNegative.lean" :claim :prediction-error-has-observation-minus-prediction-sign}]}
  :run-sha "478cacfa0fa2221b4b83a0c04c925132f62f20ef"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-03T22:16:17Z"}

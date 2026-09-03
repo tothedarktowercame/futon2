@@ -27,6 +27,42 @@ Readiness, separately from the fence: 13 `:not-ready`, 2 `:contested`
 (`nonDegenerateAblationLaw`, `policyPosteriorImportsPolicyF`), 1
 `:witnessed-and-held-open` (`wmRunsOnce`).
 
+**Every number above is this audit's own, as of 2026-09-03 against contract
+`6de47bd050`.** They are a record of what the audit found, and are not re-derived
+when a row later takes a verdict; the live counts are in
+`variable-situation-accounting.edn`. What has moved since is listed in
+`:counts :verdicts-since` in `audit.edn` and in §6 below.
+
+## 1a. Disposition since the audit (2026-09-03)
+
+One row has taken a verdict. `nonDegenerateAblationLaw` moves `:contested` →
+`:closed-under-criterion`. The audit could not close it because no criterion for
+`hole → closed` was written down (F1) and the declaration's author had
+deliberately demoted it (F2); Joe's J9 ruling the same day recorded the criterion
+in `RUNBOOK.md` (futon2 `a2641b3`) and dispositioned this hole by name, and
+worklist row `:U45` executed the close.
+
+Which legs of the criterion carried it, since "meets the criterion" is three
+different claims:
+
+- **(3) Lean transcription — met.** `wmRecordedAblationNonDegenerate`
+  (`Holes.lean:229`) proves the predicate over the pinned exact-dyadic table, no
+  `sorry`. Unchanged since `86186c3744`.
+- **(2) Rejecting witness — met, and at the current contract sha.**
+  `checks/ablation_exact_dyadic_witness.clj` exits 0 over the fixture, and
+  `--negative` — which removes the minimizer separation — is rejected. Re-run for
+  `:U45` and re-stamped to `4bc55c5968`.
+- **(1) Persisted record — inapplicable, not met.** The declared observation is a
+  recorded score table, not a run observation. Said explicitly rather than
+  counted as satisfied. The fixture is an exact-dyadic transcription of the
+  `snatcher-dominant`/`g1` case of the persisted record
+  `futon3:checks/ablation-snatch.edn`; all ten scores were decoded and compared
+  against that record for `:U45` and are equal.
+
+Effect on the counts a reader of Box 2 sees: contract holes 15 → 14, accounting
+`:open-hole` rows 16 → 15, declaration fence `:pre-run-closable` 9 → 8. No other
+row moved and no other declaration was edited.
+
 ## 2. Why nothing closed
 
 **F1 — there is no checked criterion for hole → closed.** C141 read the
@@ -113,12 +149,12 @@ make that concrete and a reader of Box 2 needs both: `wmRunsOnce` is
 open because the Lean proposition is world-level, not because a run is awaited.
 `C` is `:pre-run-closable` and blocked on a scope amendment nobody has made.
 
-### pre-run-closable (9)
+### pre-run-closable (9 as audited; 8 after `:U45`, §1a)
 
 | hole | what remains |
 |---|---|
 | `C` | the `DESIGN-c-vector.md §5` split (`C_int`/`C_mis`), an owner amendment. U12 measured the refusal's ground still holding: one `risk_mis` value across all 133 mission actions, all three 2026-09-02 records `:absent`, `FUTON_WM_MISSION_C` off. |
-| `nonDegenerateAblationLaw` | nothing on the evidence side — **contested**, see F2 |
+| `nonDegenerateAblationLaw` | ~~nothing on the evidence side — **contested**, see F2~~ **CLOSED 2026-09-03** under the J9 criterion by `:U45` (§1a); it is no longer a hole and no longer in this count, which now stands at 8 |
 | `find` | an owner ruling overturning the "implementation, not a law" refusal |
 | `findF1Containment` | the pinned `FindReceiptRow` is not in Lean: `Holes.lean` mentions it at exactly two places, its definition (`:267`) and its `mkHole` row (`:6850`). Closing means transcribing the row as a concrete finite-typed value, as `wmTraceR2`/`wmTraceR8` were, and proving by `decide`. Its binding is also one pin behind (`f812795ca6`). |
 | `findF2Receipted` | as F1 (`:272`, `:6851`) |
@@ -156,3 +192,17 @@ open because the Lean proposition is world-level, not because a run is awaited.
    fails its render on an untyped hole.
 5. That no hole's `:content-status` moved and no contract declaration was
    edited: the open-hole count in Figure 3 and Box 2 must be unchanged at 15.
+   (True of the audit as delivered. `:U45` subsequently moved it to 14 — §1a —
+   so check this against the audit's own commit, not against HEAD.)
+
+## 6. Superseding record
+
+| what | when | where |
+|---|---|---|
+| F1's gap (no stated criterion for `hole → closed`) closed | 2026-09-03 | J9 ruling, `RUNBOOK.md` §"What ends a `closed-by-record` evidence obligation" (futon2 `a2641b3`) |
+| F2's subject (`nonDegenerateAblationLaw`) closed | 2026-09-03 | `:U45`; mathlib4 `4bc55c5968` (hole → closed), `e4a8ac81cb` (contract re-emitted) |
+| F3/F4 (the H3/H4 falsifier fields and the four drifted docstring pointers) | ruled, not yet executed | J10 ruling; worklist row `:U47` |
+
+F2 stands as recorded: `86186c3744` really did add the theorem and demote the
+declaration in one diff. The demotion is superseded, not amended — it stays in
+history as the pre-criterion state.
