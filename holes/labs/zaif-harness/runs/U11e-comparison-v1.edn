@@ -1,0 +1,149 @@
+{:query :q-actand/comparison-v1,
+ :baselines
+ {:wm-u12-status-quo
+  {:distinct-risk-values 1, :actions 133, :channels 14},
+  :zaif-status-quo
+  {:distinct-act-values 1,
+   :act-value 0.0,
+   :sessions 114,
+   :supported-sessions 114}},
+ :corpus-counts {:calibration-sessions 114, :mission-node-fixtures 39},
+ :cells
+ {:A
+  {:calibration-sessions
+   {:rows 114,
+    :produced-values 0,
+    :distinct-values 0,
+    :refusals #:q-actand{:missing-input 114},
+    :provenance-coverage 0,
+    :digest-stability {:comparisons 114, :violations 0},
+    :ordering-probe
+    {:status :pass,
+     :varied-field [:observation :gap-count],
+     :direction :higher-input-higher-value,
+     :values [0.14 0.56]},
+    :floor-plant {:status :pass, :value 0.0, :floor 0.0}},
+   :mission-node-fixtures
+   {:rows 39,
+    :produced-values 0,
+    :distinct-values 0,
+    :refusals #:q-actand{:missing-input 39},
+    :provenance-coverage 0,
+    :digest-stability {:comparisons 39, :violations 0},
+    :ordering-probe
+    {:status :pass,
+     :varied-field [:observation :gap-count],
+     :direction :higher-input-higher-value,
+     :values [0.14 0.56]},
+    :floor-plant {:status :pass, :value 0.0, :floor 0.0}}},
+  :B
+  {:calibration-sessions
+   {:rows 114,
+    :produced-values 0,
+    :distinct-values 0,
+    :refusals #:q-actand{:missing-input 114},
+    :provenance-coverage 0,
+    :digest-stability {:comparisons 114, :violations 0},
+    :ordering-probe
+    {:status :pass,
+     :varied-field [:channels :phase-progress],
+     :direction :higher-input-lower-value,
+     :values [0.8 0.19999999999999996]},
+    :floor-plant {:status :pass, :value 0.0, :floor 0.0}},
+   :mission-node-fixtures
+   {:rows 39,
+    :produced-values 0,
+    :distinct-values 0,
+    :refusals #:q-actand{:missing-input 39},
+    :provenance-coverage 0,
+    :digest-stability {:comparisons 39, :violations 0},
+    :ordering-probe
+    {:status :pass,
+     :varied-field [:channels :phase-progress],
+     :direction :higher-input-lower-value,
+     :values [0.8 0.19999999999999996]},
+    :floor-plant {:status :pass, :value 0.0, :floor 0.0}}},
+  :C
+  {:calibration-sessions
+   {:rows 114,
+    :produced-values 0,
+    :distinct-values 0,
+    :refusals #:q-actand{:no-typed-source 114},
+    :provenance-coverage 0,
+    :digest-stability {:comparisons 114, :violations 0},
+    :ordering-probe {:status :not-applicable-typed-refusal},
+    :floor-plant {:status :not-applicable-typed-refusal}},
+   :mission-node-fixtures
+   {:rows 39,
+    :produced-values 0,
+    :distinct-values 0,
+    :refusals #:q-actand{:no-typed-source 39},
+    :provenance-coverage 0,
+    :digest-stability {:comparisons 39, :violations 0},
+    :ordering-probe {:status :not-applicable-typed-refusal},
+    :floor-plant {:status :not-applicable-typed-refusal}}},
+  :calibration-table-a4
+  {:calibration-sessions
+   {:rows 114,
+    :produced-values 114,
+    :distinct-values 3,
+    :refusals {},
+    :provenance-coverage 1,
+    :digest-stability {:comparisons 114, :violations 0},
+    :ordering-probe
+    {:status :pass,
+     :varied-field [:density :gold-judged],
+     :direction :higher-density-higher-value,
+     :values [-0.15415067982725827 0.5389965007326869]},
+    :floor-plant {:status :pass, :value ##-Inf, :floor ##-Inf}},
+   :mission-node-fixtures
+   {:rows 39,
+    :produced-values 0,
+    :distinct-values 0,
+    :refusals #:q-actand{:missing-input 39},
+    :provenance-coverage 0,
+    :digest-stability {:comparisons 39, :violations 0},
+    :ordering-probe
+    {:status :pass,
+     :varied-field [:density :gold-judged],
+     :direction :higher-density-higher-value,
+     :values [-0.15415067982725827 0.5389965007326869]},
+    :floor-plant {:status :pass, :value ##-Inf, :floor ##-Inf}}}},
+ :live-pin
+ {:record-id "e-0cae94f2-9ca8-4863-9251-44278445a5f7",
+  :column :calibration-table-a4,
+  :result
+  {:act-value 0.2513144282809061,
+   :bridge :q-actand/demo-bridge-a4,
+   :provenance
+   {:source :zaif/calibration-sessions,
+    :query :q-actand/calibration-v1,
+    :record-ids
+    ["e-0ca30163-0906-42c0-b376-e8d056e6db4b"
+     "e-0cae94f2-9ca8-4863-9251-44278445a5f7"
+     "e-1719b198-6126-4670-bb1d-ee7a8f362405"
+     "e-308c2ce9-ecb4-48e3-a759-7da379a6aff9"
+     "e-3a5430d8-3452-4826-8d09-4e2bd0c9ecd3"
+     "e-3f46c2a9-266e-4ac1-b874-92951890d506"
+     "e-4d475963-5100-4cd0-95da-d65c8b5dac0a"
+     "e-52a3d918-9df3-4ec1-a2e4-963668c93447"
+     "e-566bf6f5-4485-4945-b0ab-25c08062beab"
+     "e-5900e426-9f6e-447a-90e8-00775715629a"
+     "e-5ed146a9-406e-44d4-b59e-5a12d11c9b6c"
+     "e-79af5df3-507f-4d06-a12a-1f7281f58741"
+     "e-7b72a825-4d6e-4b07-bbf2-2994b54cfc99"
+     "e-8abc97a6-f524-4a12-93cc-16a07e8c4a62"
+     "e-8ae3d162-5a14-47d3-822d-5b85e4fedf78"
+     "e-906d06c9-7429-4987-af8a-6b70e390e6b3"
+     "e-a295670e-0932-45d2-9792-695a5f750364"
+     "e-aa885b26-4a7e-45bd-9dc8-ead13a91e1a0"
+     "e-b754bfdf-ee40-4281-a15a-84826494eb76"
+     "e-b98b042d-5647-4ecd-bf4d-831ce5cccb39"
+     "e-bdbf86b2-4f6a-4556-bd7c-36d60c45d0e7"
+     "e-be6780c3-6bd6-447c-8c42-e0ac390548e0"
+     "e-ce907fcf-c7e1-4272-a4a2-13def7aaaa50"
+     "e-cfa92a42-523b-4508-9e4c-07c202d7d868"
+     "e-d26cc8c4-0969-481b-8452-ae3c2537c912"
+     "e-d9fb728d-033d-4dc2-9a4d-3cc63b4553b5"
+     "e-e425ece0-680c-46f0-bb5f-91fc60fd191b"
+     "e-f24e518b-3cd1-4261-90c6-7821cd56b3dc"]}}}}
