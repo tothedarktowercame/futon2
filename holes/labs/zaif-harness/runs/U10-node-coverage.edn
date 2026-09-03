@@ -28,18 +28,25 @@
    :blocked-by [:D8 :U11 :S7]}
 
   {:node :R2
-   :spec-test :partial
+   :spec-test :covered
    :tests [{:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 105
             :substrate :zaif :provenance :planted}
            {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 125
-            :substrate :zaif :provenance :planted}]
+            :substrate :zaif :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 147
+            :substrate :zaif :provenance :registry-derived}
+           {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 173
+            :substrate :zaif :provenance :planted}
+           {:path "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj" :line 193
+            :substrate :wm :provenance :real
+            :record-id "0a18c4f7-758e-400a-8223-9c52edf07450"}]
    :shared-machinery
    {:status :mapped-separate
     :evidence ["src/futon2/aif/observation.clj:103"
                "../futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj:103"]
     :note "The zaif runner tests typed memory-tool envelopes; WM builds observations through futon2.aif.observation. They share the R2 mapping, not a function."}
-   :gap "The six memory tools and mission-context tool have generated planted pairs; the spec's every-tool/operator-turn/declared-mark coverage and WM fixtures are not complete. S7 records 14 real WM channels but no extractor yet."
-   :blocked-by [:S7]}
+   :gap nil
+   :blocked-by []}
 
   {:node :R3
    :spec-test :missing
