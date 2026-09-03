@@ -25,7 +25,7 @@ nothing nested, nothing elsewhere. `open-missions` (`:266`) filters by
 `live-mission?` (`:259`): status-class not in `#{:complete :inactive :draft}`.
 `src/futon2/aif/actuator_a6.clj:141-144` mints one `{:type :open-mission
 :target <id>}` per live mission (`:advance-mission` is the sibling type,
-`war_machine.clj:1246-1248`).
+`war_machine.clj:1341-1345`).
 
 **Consequence for this lab**: `M-zaif-harness.md` and `M-zaif-harness-v1.md`
 both live in `futon2/holes/`, not `futon2/holes/missions/` — NEITHER IS A
@@ -56,7 +56,7 @@ then completion/operator gates and repeated-non-progress decay
 `FUTON_WM_VALUE_WEIGHTS` (EDN map) — a declared input, on the record.
 Also present, separate: `roi-map-for-missions` (`:1184`, name-matching
 against an ROI feature map) feeding the report/rollout surface (`:1213-1214`),
-and an anamnesis tiebreak (`:1120`).
+and an anamnesis tiebreak (`apply-anamnesis-tiebreak` `:2103`).
 
 ## Stage 3 — scoring and selection (steps ⑭–⑰)
 
@@ -119,3 +119,6 @@ non-progress :1867, enrich-candidates :2003, rank-actions
 src/futon2/aif/efe.clj:903, strategic-recommendation
 src/futon2/aif/policy.clj:538. Facts unchanged -- drift was positional,
 not semantic (reviewer: 'no factual rewrite was inferred from drift alone').
+Second pass (dffcb81): two further drifted pointers the first pass missed,
+corrected likewise -- mission-action-types :1341-1345, apply-anamnesis-tiebreak
+:2103; both verified at source before writing.
