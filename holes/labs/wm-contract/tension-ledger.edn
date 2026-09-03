@@ -296,7 +296,16 @@
           :by "claude-1 (joe dictation)",
           :row :NOTE-aif-spec-gap,
           :evidence
-          ["NOTE-aif-spec-gap.md section 5: T3's poles reframed by the rewrite reading -- 'formal claim vs fertile analogy' is 'conformance contract vs inspiration', and the mapping table is the PROCESS SPEC of a paradigm rewrite; the campaign has cashed toward the contract side (13/13 per-node tests, the U11 shared-schema identity condition) without yet declaring it. Not a cashing: T3 remains deliberately carried; this event records the direction."]}],
+          ["NOTE-aif-spec-gap.md section 5: T3's poles reframed by the rewrite reading -- 'formal claim vs fertile analogy' is 'conformance contract vs inspiration', and the mapping table is the PROCESS SPEC of a paradigm rewrite; the campaign has cashed toward the contract side (13/13 per-node tests, the U11 shared-schema identity condition) without yet declaring it. Not a cashing: T3 remains deliberately carried; this event records the direction."]}
+  #:event{:id :evidence#programme/T5-spec-as-invariance,
+          :seq 13,
+          :tension :programme/T5,
+          :type :evidence-added,
+          :at "2026-09-03",
+          :by "claude-1 (joe dictation, continuing)",
+          :row :NOTE-aif-spec-gap,
+          :evidence
+          ["NOTE-aif-spec-gap.md section 6: resolution candidate (i) sharpened -- a spec at level L states what is invariant below L; the tower tops out in the operator-held level (purpose/sustenance = C at organism grain); underdetermination = un-closed-ness; the J-row :bar mechanism is a formal detector of the un-closed boundary, and the campaign's twelve rulings were piecewise closure operations."]}],
  :ledger/id :wm-contract/tension-ledger,
  :ledger/cross-cites
  [{:row :U39,

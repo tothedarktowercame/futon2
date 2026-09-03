@@ -101,3 +101,42 @@ clause. Consequence for Part 3: language-to-language rewrite is the SPECIAL
 case; paradigm rewrite (monolith->services, batch->streaming, tick-loop->
 agent-harness) is the general and commercially commoner one, and the case
 study for it already exists in this repo's history.
+
+## 6. What even IS a formal specification (Joe, same evening, continuing)
+
+> "I think a formal specification is really one where it says, with this
+> level of generality, this is what's true. So... it wouldn't really have
+> mattered from the point of view of the Lean specification if we had
+> written the war machine in Python. Or C. Or C#. Or Lean itself used as a
+> programming language. Because the formal specification doesn't say
+> anything about that. And I think in the same way, there's probably a kind
+> of formal specification of what this kind of agentic work is or does,
+> that would be true at the level of the mission lifecycle and true at the
+> level of an AIF lifecycle. And that probably has to do with... the model
+> of the system itself basically being held by the operator. The operator
+> is someone who's got a sense of where this is all going, and they've got
+> a sense of how it relates to their livelihood or their sustenance. And
+> that's perhaps important if we think about some of the parts of this
+> build which have looked underdetermined. Well, maybe they're
+> underdetermined in a technical way because we haven't done that closure
+> operation."
+
+Sharpened: a formal spec at level L = the statement of what is INVARIANT
+under every implementation choice below L (formality = quantification over
+implementations; the spec is the quotient of the system by
+"doesn't-matter"). Choosing L -- choosing what to forget -- is itself a
+preference statement, which is why the tower tops out in the operator: the
+highest level (purpose, livelihood, sustenance = the viability envelope,
+AIF's C at organism grain) is held informally. UNDERDETERMINATION =
+UN-CLOSED-NESS: a build part looks underdetermined exactly where the tower
+has a gap between the written levels and the operator-held level. The
+closure operation = eliciting and writing the next level up. CONCRETE
+CLAIM, checkable against the record: the J-row mechanism is a formal
+DETECTOR of un-closed spec -- the :bar condition (a), "not decidable from
+sources, code, or a prior ruling", is literally the machine reporting it
+has hit the boundary of the written tower; the twelve J-rows ruled this
+campaign are twelve closure operations performed piecewise, and the zaif
+paradigm rewrite transferred cleanly along exactly the already-written
+invariant levels (per-node semantics, refusal/evidence disciplines) while
+requiring new decisions exactly at the unwritten ones (channel adapters,
+zero-support behaviour -- which then needed Joe).
