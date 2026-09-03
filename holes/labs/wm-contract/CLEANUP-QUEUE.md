@@ -703,3 +703,59 @@ the throughput rose** — which is when a ledger is worth the most.
 
 **Not dispatched.** Changing the generator to count lane report files instead would make the number look right
 and remove the signal that told me this.
+
+---
+
+## U31 (2026-09-03) — Figure 5 still prints `re-observe`, and why the fix is a row of its own
+
+Found while following the R16 box label back to its source (C497 §2). Not
+dispatched, not repaired; a proposal, in PROPOSED-ROWS' convention — nothing
+reaches `worklist.edn` except by a person who read this and filed it.
+
+**The finding.** `p4ng/aif-control-map-futon.svg` is the file the paper
+includes as Figure 5 (`sec-operator.tex:64`). It is generated from
+`aif-control-map-paper.svg` by `gen_wr_overlay.bb`, and it has not been
+regenerated since 2026-08-25 (`p4ng 3e375d5`) while the base moved twice on
+2026-08-31. So the committed figure still draws the label the project withdrew:
+
+| file:line | says |
+|---|---|
+| `p4ng/aif-control-map-futon.svg:69` | `re-observe` |
+| `p4ng/aif-control-map-paper.svg:73` | `observe construction` (Joe, `126d211`) |
+
+Regenerating also brings in `0598d19`'s measured-route layer, its `R3a` and
+`TRACE` boxes, and a legend entry.
+
+**Why it is not a one-command fix.** Run the regenerated drawing through the
+other generator that reads it and it refuses:
+
+```
+$ bb empirics-futon/gen_wr_overlay.bb > /tmp/m.svg
+$ CONTROL_MAP_SVG=/tmp/m.svg python3 empirics-futon/gen_control_stages.py
+AssertionError: ambiguous stage assignment: a node sits 79px from its header
+```
+
+`BOX_W` is hard-coded at 140 (`gen_control_stages.py:38`) and the new `R3a` and
+`TRACE` boxes are 70 wide, so their centres are computed 35px off their true
+position; and a drawn `TRACE` box collides with the `TRACE` row
+`EXTERNAL_MEMBERS` adds on the stated grounds that TRACE is "absent from … the
+SVG's R-node boxes" — which `0598d19` made false. Repairing that moves
+`control-stages.edn`'s node population from 19 to 20 with `R3a` new, and that
+file is an input to both Figure 5A and Figure 5B.
+
+**Which tally instance it bears on.** Class 4, `:svg-fixed-pdf-stale`, whose
+evidence names `p4ng 0598d19` and claims "output reverified" — the derived
+overlay is the output that was not. Not class 3's `:r16-engine-wiring`: the
+withdrawn claim is gone from every site that *authors* it, base drawing
+included, and what remains is a derivation not re-run. U31 left every tally
+status untouched on this account; re-typing `:svg-fixed-pdf-stale` moves
+numbers `make_defect_tally_figure.py` prints and belongs to whoever takes the
+row.
+
+- proposed ledger row (COPY BY HAND after reading; this file writes no ledger):
+
+```clojure
+  {:id :TBD :class :D :status :open :owner :any :covers-key :none
+   :statement "FIGURE 5 IS SIX DAYS BEHIND ITS SOURCE. p4ng/aif-control-map-futon.svg (included at sec-operator.tex:64) was last generated 2026-08-25 (p4ng 3e375d5); its base moved twice on 2026-08-31 (126d211 relabelled the R16->R2 edge, 0598d19 drew the measured-route layer with R3a and TRACE boxes), so the paper still prints the withdrawn label re-observe at aif-control-map-futon.svg:69. Regeneration is blocked by a coupling, not by a ruling: gen_control_stages.py reads the same drawing and refuses the regenerated one (ambiguous stage assignment: a node sits 79px from its header) because BOX_W is hard-coded at 140 (gen_control_stages.py:38) while R3a and TRACE are 70 wide, and a drawn TRACE collides with the row EXTERNAL_MEMBERS adds. Repair the geometry read (use each box's own rect width), decide what a drawn TRACE means for EXTERNAL_MEMBERS, then regenerate. Found by U31/C497 section 5."
+   :acceptance "aif-control-map-futon.svg regenerated from the current base and committed; gen_control_stages.py reads the regenerated drawing without an assertion, with a negative control that a genuinely ambiguous box still refuses; control-stages.edn regenerated (never hand-edited) with the new node population stated and TRACE appearing once; Figure 5's caption still describes what the figure draws, or is amended to; the tally's class-4 :svg-fixed-pdf-stale instance re-typed on the evidence with its figure counts re-derived; paper rebuilds; gates green."}
+```

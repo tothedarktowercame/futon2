@@ -59,6 +59,18 @@ The tally evidence therefore names two remainders, typed apart: the Joe-blocked
 alternative — writing the acceptance's wording verbatim — would have recorded a
 repair as complete while a sixth site still asserts the old object.
 
+**Superseded 2026-09-03 by C497**, the resubmission after this deviation was
+returned as a review finding. "Unblocked" was wrong, and this section is the
+place the error was made: the label is not stored in `control-stages.edn`, it
+is lifted from `aif-control-map-futon.svg:155`, which `gen_wr_overlay.bb`
+derives from the companion paper's `aif-control-map-paper.svg:173` — a drawing
+`gen_wr_overlay.bb:3-6` declares is never edited from this side, and which only
+Joe has ever edited, including this same correction on the adjacent edge
+(`p4ng 126d211`). So `control-stages.edn:20` is blocked on the same hand as the
+`P-R16` text, and the tally's remainder now names one claim in two artifacts.
+The registry carries the disagreement as a refusable `:label-amendment` rather
+than silently: `C497-u31-r16-box-label-disposition.md`.
+
 ## 4. Observation, recorded not acted on
 
 `:boxes :map` in the payload's `:constructed-wiring` arm describes
