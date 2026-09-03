@@ -126,27 +126,26 @@
          "holes-contract.json and is therefore reported outside the declaration "
          "columns until a declaration is minted for it.")}
    {:name "Revision boundary" :area :records
-    :content-status :named-only
-    :contested
-    (str "NOT re-typed. U14's acceptance says a contested typing goes to "
-         ":needs-joe rather than being forced, and this one is contested on its "
-         "REFERENT. NOTE-glossary-only-triage.md disposition 5 witnesses this row "
-         "with \"valid-time retract+put and db-as-of-now queries (clock-lineage "
-         "protocol; S4 review confirmed server-side exclusion)\" -- bitemporal "
-         "store revision. But the row's owner resolves to sec-glossary.tex:84, "
-         "\\paragraph{Revision (2026-08-31; cancellation boundary)}, which is "
-         "about cohort 46's outcome taxonomy: a cancelled attempt stays durably "
-         "visible but begins a new semantic stratum unless a cohort preregisters "
-         "it. Nothing in that paragraph is about valid time. Closing the row on "
-         "the note's witness would assert a witness for a claim the paragraph "
-         "does not make -- the referent-drift defect class this registry exists to "
-         "catch. A witness that DOES match the paragraph as written exists: "
-         "futon2 src/futon2/aif/full_loop_cohort.clj:397 emits "
-         ":stratum/id :post-preregistration/cancelled and :173 excludes "
-         ":cancelled from the preregistered population, against the "
-         "preregistration at futon2 holes/labs/M-aif-full-loop-46/cohort.edn. "
-         "Joe's call: (a) close on the cohort witness, (b) supply the paragraph "
-         "the note meant, or (c) leave :named-only.")}
+    :content-status :closed-by-record-with-witness
+    :witness ["futon2 src/futon2/aif/full_loop_cohort.clj:397 (emits the :post-preregistration/cancelled semantic stratum, with its reason and attempt list)"
+              "futon2 src/futon2/aif/full_loop_cohort.clj:173 (excludes :cancelled attempts from the preregistered denominator and stopping window, keeping the dossier)"
+              "futon2 holes/labs/M-aif-full-loop-46/cohort.edn (the preregistered outcome taxonomy the stratum is measured against)"]
+    :witness-note
+    (str "RULED (a) by Joe, 2026-09-02 ~20:15, recorded at "
+         "NOTE-glossary-only-triage.md:107 and in this row's U14 ledger entry. "
+         "The row was held :named-only because its typing was contested ON ITS "
+         "REFERENT: NOTE-glossary-only-triage.md disposition 5 offered a "
+         "bitemporal-store witness (valid-time retract+put, db-as-of-now "
+         "queries), but the paragraph the row's owner resolves to is "
+         "sec-glossary.tex:84, \\paragraph{Revision (2026-08-31; cancellation "
+         "boundary)}, which says a cancelled attempt stays durably visible and "
+         "begins a new semantic stratum unless a cohort preregisters it. "
+         "Nothing in that paragraph is about valid time. The ruling closes the "
+         "row on the cohort-46 cancellation machinery above, which is what the "
+         "paragraph as written describes; disposition 5's valid-time material "
+         "is NOT re-attached anywhere, because attaching it would assert a "
+         "witness for a claim the paragraph does not make -- the referent-drift "
+         "defect class this registry exists to catch.")}
    {:name "A shared experimental substrate" :area :records
     :content-status :closed-by-record-with-witness
     :witness ["futon2 holes/labs/zaif-harness/runs/U8a-report-sources.md (read-only probes executed against the live store)"

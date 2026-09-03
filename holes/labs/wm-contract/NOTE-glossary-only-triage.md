@@ -112,3 +112,20 @@ flips :needs-joe -> :open at the loop's next pause (this note is the ruling
 record until the row's own evidence carries it); disposition 5's valid-time
 material is NOT re-attached anywhere — it was referent drift, and the
 db-revision machinery already witnesses other rows.
+
+**RULING EXECUTED 2026-09-03 (U14, second slice).** "Revision boundary" is now
+`:closed-by-record-with-witness` in
+`scripts/generate_variable_situation_accounting.bb`, carrying three witness
+pointers: `full_loop_cohort.clj:397` (emits the
+`:post-preregistration/cancelled` stratum with its reason and attempt list),
+`full_loop_cohort.clj:173` (excludes `:cancelled` from the preregistered
+denominator and stopping window while keeping the dossier), and
+`holes/labs/M-aif-full-loop-46/cohort.edn` (the preregistered taxonomy the
+stratum is measured against). All three were re-read at their stated lines
+before the pointers were written. The registry was regenerated, not
+hand-edited. Glossary content counts move from 6 closed / 1 framing / 1
+open-hole / 1 `:named-only` to **7 / 1 / 1 / 0**, and the Box-2 Total clause now
+reads "0 glossary-only of 9 glossary paragraphs carrying no declaration"
+(`p4ng/sec-model-coverage-generated.tex:12`). The declaration columns are
+untouched at `Total & 108 & 11`, which is what negative control 1c pins.
+Disposition 5's valid-time material is not attached anywhere, per the ruling.
