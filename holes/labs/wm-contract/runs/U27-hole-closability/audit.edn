@@ -52,7 +52,7 @@
   :accounting "futon2/holes/labs/wm-contract/variable-situation-accounting.edn",
   :accounting-open-hole-rows 16},
  :item :U27,
- :raised-rows [:U27a :U27b],
+ :raised-rows [:J9 :J10],
  :rows
  [{:closability-basis
    "Nothing in the §5 split needs a tick: C_int is data today and C_mis is built. What is missing is Lean text and an owner's amendment.",
@@ -76,7 +76,7 @@
    :hole-class :witnessed-instance-obligation,
    :name "nonDegenerateAblationLaw",
    :remaining-evidence
-   "NOTHING is missing on the evidence side: the pinned instance is proven in Lean AND bound by a passing check with a rejecting negative control. It is contested rather than ready because of finding :F2 -- the declaration was moved mkClosed -> mkHole in the same commit that added the proof (mathlib4 86186c3744). Closing it here would reverse the declaration author's decision on no new evidence, which is a ruling. Raised as worklist row :U27a.",
+   "NOTHING is missing on the evidence side: the pinned instance is proven in Lean AND bound by a passing check with a rejecting negative control. It is contested rather than ready because of finding :F2 -- the declaration was moved mkClosed -> mkHole in the same commit that added the proof (mathlib4 86186c3744). Closing it here would reverse the declaration author's decision on no new evidence, which is a ruling. Raised as worklist row :J9.",
    :readiness :contested,
    :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 188, :docstring-line 187},
    :area :demo,
@@ -296,7 +296,7 @@
    :hole-class :open-bound,
    :name "policyPosteriorImportsPolicyF",
    :remaining-evidence
-   "THIS IS THE ONE HOLE WHOSE NAMED OBSERVATION IS ALREADY ON PERSISTED RECORD. Q(pi) was computed with a per-policy F term on three of four S4 ticks, scored against persisted predictions, and the replay control reproduces each record's own posterior at delta 0.0. What the record does NOT settle is what that means for the declaration, and there are two readings with opposite dispositions (finding :F3): as a discharge it closes the hole by witness; as the stated falsifier it refutes it, which under this contract's own precedent is ALSO a close (mkRefutedByRecord, used for enactedActionEqualsSelected on 2026-09-01). A third consideration neither field mentions: FUTON_WM_FPI_POSTERIOR is default-off, so the record shows what the machine does under a flag, not what it does. Contested; raised as worklist row :U27b. Not forced either way here.",
+   "THIS IS THE ONE HOLE WHOSE NAMED OBSERVATION IS ALREADY ON PERSISTED RECORD. Q(pi) was computed with a per-policy F term on three of four S4 ticks, scored against persisted predictions, and the replay control reproduces each record's own posterior at delta 0.0. What the record does NOT settle is what that means for the declaration, and there are two readings with opposite dispositions (finding :F3): as a discharge it closes the hole by witness; as the stated falsifier it refutes it, which under this contract's own precedent is ALSO a close (mkRefutedByRecord, used for enactedActionEqualsSelected on 2026-09-01). A third consideration neither field mentions: FUTON_WM_FPI_POSTERIOR is default-off, so the record shows what the machine does under a flag, not what it does. Contested; raised as worklist row :J10. Not forced either way here.",
    :readiness :contested,
    :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6651, :docstring-line 6650},
    :area :policy,

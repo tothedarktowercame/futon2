@@ -62,9 +62,9 @@ describe their discharge. This is not a wording quibble: H4's named observation
 is already on persisted record, so the two readings give opposite dispositions.
 
 Taken together: closing any hole here would be an authored decision wearing a
-record's clothes. Two `:needs-joe` rows are raised instead — `:U27a` (F1/F2:
+record's clothes. Two `:needs-joe` rows are raised instead — `:J9` (F1/F2:
 what the close criterion is, and whether `nonDegenerateAblationLaw` closes) and
-`:U27b` (F3: what the S4 record does to H4).
+`:J10` (F3: what the S4 record does to H4).
 
 ## 3. What the audit found on the way — F4, drifted pointers inside Holes.lean
 
@@ -93,7 +93,7 @@ and the docstring draws no such distinction.
 
 Not repaired here: these are Joe-ruled declarations (J1/J2) and editing a
 declaration's content is what U26's review was at pains to verify had *not*
-happened. Carried on `:U27b`.
+happened. Carried on `:J10`.
 
 ## 4. The fence typing
 

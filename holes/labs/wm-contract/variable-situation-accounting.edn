@@ -762,7 +762,7 @@
    :row-source :contract-declaration,
    :name "nonDegenerateAblationLaw",
    :basis
-   "Evidence complete twice over -- Holes.lean:217 proves the pinned instance and checks/ablation_exact_dyadic_witness.clj passes with a rejecting negative control -- yet mathlib4 86186c3744 moved it mkClosed -> mkHole in the SAME commit that added the proof. Closing it would reverse the author's decision on no new evidence. Raised as :U27a.",
+   "Evidence complete twice over -- Holes.lean:217 proves the pinned instance and checks/ablation_exact_dyadic_witness.clj passes with a rejecting negative control -- yet mathlib4 86186c3744 moved it mkClosed -> mkHole in the SAME commit that added the proof. Closing it would reverse the author's decision on no new evidence. Raised as :J9.",
    :readiness :contested,
    :content-status :open-hole,
    :area :demo,
@@ -1001,7 +1001,7 @@
    :row-source :contract-declaration,
    :name "policyPosteriorImportsPolicyF",
    :basis
-   "The only hole whose named observation is already on persisted record. Its disposition is contested because the declaration's evidence and falsifier fields name the SAME observation, so one reading closes it by witness and the other refutes it -- which under this contract's own precedent (mkRefutedByRecord) is also a close. FUTON_WM_FPI_POSTERIOR is default-off, which neither field mentions. Raised as :U27b.",
+   "The only hole whose named observation is already on persisted record. Its disposition is contested because the declaration's evidence and falsifier fields name the SAME observation, so one reading closes it by witness and the other refutes it -- which under this contract's own precedent (mkRefutedByRecord) is also a close. FUTON_WM_FPI_POSTERIOR is default-off, which neither field mentions. Raised as :J10.",
    :readiness :contested,
    :content-status :open-hole,
    :area :policy,

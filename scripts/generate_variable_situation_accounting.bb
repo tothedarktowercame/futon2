@@ -260,7 +260,7 @@
                 "passes with a rejecting negative control -- yet mathlib4 "
                 "86186c3744 moved it mkClosed -> mkHole in the SAME commit "
                 "that added the proof. Closing it would reverse the author's "
-                "decision on no new evidence. Raised as :U27a.")}
+                "decision on no new evidence. Raised as :J9.")}
    "find"
    {:closability :pre-run-closable :readiness :not-ready
     :basis "A standing implementation refusal; an owner ruling closes it, no record can."}
@@ -347,7 +347,7 @@
                 "reading closes it by witness and the other refutes it -- which "
                 "under this contract's own precedent (mkRefutedByRecord) is also "
                 "a close. FUTON_WM_FPI_POSTERIOR is default-off, which neither "
-                "field mentions. Raised as :U27b.")}
+                "field mentions. Raised as :J10.")}
    "Strategic mission selection"
    {:closability :run-gated :readiness :not-ready
     :runtime-evidence (str "A record in which the mission value carried is the "
