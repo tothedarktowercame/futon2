@@ -1,5 +1,5 @@
 {:schema :wm/q-interface-completeness-v1
- :as-of "2026-08-31"
+ :as-of "2026-09-04"
  :owner :wm-verbs
  :subject :predictive-outcome-Q
  :notation {:primary "Q(o|pi)"
@@ -11,7 +11,7 @@
  :source-pins
  [{:id :lean-spine
    :path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"
-   :sha256 "fef255009bf391b75900fb0fee35bcb7073f21660f89ad8d7df6c6e54753cdf1"}
+   :sha256 "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b"}
   {:id :lean-risk-fixture
    :path "/home/joe/code/mathlib4/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean"
    :sha256 "c49a36983a3d4f7a72d782a5ecf9825c95bac49c354cf9d80d574d522894e58a"}
@@ -20,7 +20,7 @@
    :sha256 "14caaf3db19478267d5473ba48a565328d72d118289d4241b2d57c2177895227"}
   {:id :runtime-efe
    :path "/home/joe/code/futon2/src/futon2/aif/efe.clj"
-   :sha256 "bab60d47054f2b555afdc276c37d3f29b1ca497476318e41502f920d0b93ea84"}
+   :sha256 "138c47f62715facfb7c156f53acd98c94a643d5d7f8a98410d81ebfc4e75c5dc"}
   {:id :runtime-core-efe
    :path "/home/joe/code/futon2/src/futon2/aif/core_efe.clj"
    :sha256 "519c8983328d17e5a3adacb405f9b4d7851e170340d693959c2c5854bdbbe6e3"}
@@ -29,10 +29,10 @@
    :sha256 "0df62893adfdce64189c99724a4e1fb80ff0d0a07f84c74a5acf780cc370b690"}
   {:id :runtime-selection
    :path "/home/joe/code/futon2/src/futon2/aif/policy.clj"
-   :sha256 "35235b9d84bcd8bc471725064f06f4381300de6d7e9644cbe40d83de591c4dc6"}
+   :sha256 "3980d203d4997d9fd3019540652119a6ecc295d045d89bbcf5d5922e2695bd17"}
   {:id :topology
    :path "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn"
-   :sha256 "64485bb0165fe4abdaf799b59853c05efb0e09fbaf293bf9511d91e5098f509d"}]
+   :sha256 "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec"}]
  :definitions
  [{:id :lean/Q-carrier
    :status :implemented-generic
@@ -93,8 +93,8 @@
    :runtime :absent
    :lean :absent
    :effect :missing-wire
-   :blocker "The control map has no R13-to-R4 route; the forward model never receives the constructed cascade."
-   :next-action "Pair R13 and R4 to specify the policy/cascade prediction delivery."}
+   :blocker "The route now exists but does not carry this payload. D7 :r13-r4-depth-realised-undrawn (p4ng 8f0ee87a, 2026-09-01) adds [:R13 :R4] to control-map-edges.edn with label \"T\" conditional on horizon >= 2, on the code evidence that compute-efe passes horizon-steps into fm/predict-multi-horizon (efe.clj:629-631; below the guard only fm/predict runs, efe.clj:624). What crosses that edge is an integer depth. The forward model still never receives a constructed temporal policy/cascade, which is the payload this row declares, so :runtime :absent and :effect :missing-wire stand as written."
+   :next-action "The pair is now drawn; specify the cascade payload the edge must carry, which the depth edge does not supply."}
   {:id :Q/producer-to-risk
    :edge [:R4 :R5]
    :role :primary-Q-delivery
@@ -117,11 +117,69 @@
    :edge nil
    :role :unmapped-consumer
    :payload "Q(o|pi) into expected information gain"
-   :runtime :function-exists-unwired
+   :runtime :called-with-hand-built-Q-off-tick-path
    :lean :parameter-only
    :effect :missing-wire
-   :blocker "Neither the control map nor runtime binds the predictive outcome distribution to canonical EIG."
-   :next-action "Add an edge only after a machine Q producer exists; posterior spread remains outside EIG."}]
+   :blocker "Canonical EIG is called now, but not from R4. epistemic-value/expected-information-gain had no caller in src/ at the pin; it has two since -- mission_epistemic_value.clj:210 (U22, futon2 9e27ad81) and survey_mission_value.clj:261,272 through that one (U24, futon2 e46ed61e) -- and the pinned file efe.clj gained the leg that consumes the resulting nats (:survey-eig, efe.clj:757-760, e46ed61e). The distribution it consumes is not the machine's: mission-epistemic-value/binary-latent-model hand-builds :predicted-observations as a two-point distribution over {:workable :not-workable} set equal to the prior of one binary latent (mission_epistemic_value.clj:186-205). Nothing joins R4's per-channel Gaussian prediction to it. The producer is also off the live tick path -- portfolio-action-proposer has no caller in src/ -- behind two independent default-off gates (*portfolio-proposer-active?* false at portfolio_action_proposer.clj:51-57; efe/default-survey-eig-weight 0.0 at efe.clj:93-103, at which the :survey-eig key is absent from :augmentation-terms). So the wire is still missing; what moved is that the consumer end is occupied by a fixture Q rather than empty."
+   :next-action "Add an edge only after a machine Q producer exists; posterior spread remains outside EIG, and the binary-latent fixture Q does not satisfy the producer condition either."}]
+ :pin-review
+ {:at "2026-09-04"
+  :row :U53
+  :trigger "Joe, 2026-09-04, reading plop-2026: the paper rendered Source state: STALE-PIN (lean-spine, runtime-efe, runtime-selection, topology)."
+  :method "Per stale pin, the diff from the pinned blob to the repo HEAD was read, the declarations named by each finding were read AT HEAD (not grepped), and the call paths the movement opened were followed hop by hop. Four pins were CURRENT and are re-stated as re-verified-at-sha rather than re-read: byte-identical content is the same evidence."
+  :repo-heads {:mathlib4 "4bbc7111c4" :futon2 "897395c8f4" :p4ng "c30a91f562"}
+  :pins-moved
+  [{:pin :lean-spine :from-commit "f812795ca6" :to-commit "69721b1268"
+    :what "19 commits, 1200 insertions: U46 find-row closures, U47 falsifier corrections, U49 + RE5 + RE7 certificates, U29 glossary owner re-resolution."
+    :q-facing-content-change :none
+    :basis "Every declaration added by that diff was enumerated (69 names) and none has PredictiveOutcomeKernel as a result type; the Q-facing hunks in the diff are owner-pointer edits (sec-glossary.tex line numbers, U29 6dabfb68) and the contract table rows echoing them, not mathematics."}
+   {:pin :runtime-efe :from-commit "c0173ed05d" :to-commit "e46ed61e75"
+    :what "U24: the :survey-mission epistemic action; a :survey-eig leg on compute-efe, default weight 0.0."
+    :q-facing-content-change :yes-for-Q/to-EIG}
+   {:pin :runtime-selection :from-commit "8fe540b99d" :to-commit "381c9fd661"
+    :what "5 commits, 476 insertions: U10 selector consult, AC4 fallback selector, RUN8 tau = beta, RUN9 F_pi in the policy posterior."
+    :q-facing-content-change :none
+    :basis "No added line in that diff mentions a predictive outcome distribution, forward-model/predict or Q(o|pi); select-action still ranks efe/rank-actions output (policy.clj:672-676)."}
+   {:pin :topology :from-commit "0598d19cf2" :to-commit "e508eceb17"
+    :what "At the pin :decisions held exactly one entry (:r6-r14-order). It now holds nineteen: D0b/D1-D10, I2, J1, and the U31/U48 pointer re-syncs."
+    :q-facing-content-change :yes-for-Q/in-policy-depth}]
+  :findings
+  [{:id :lean/Q-carrier :pins [:lean-spine] :verdict :re-verified-unchanged
+    :read "Holes.lean:6757-6759 -- still `abbrev PredictiveOutcomeKernel := ProbabilityKernel PolicyIndex (Outcome Obs)`. A type, not an instance."}
+   {:id :lean/Q-machine-construction :pins [:lean-spine] :verdict :re-verified-unchanged
+    :read "The central :missing finding, re-checked against the certificate-era file by reading rather than grepping. `GenerativeModel` (Holes.lean:6787-6790) still carries observation, transition and policyPrior as separate kernels; `generativeFactorMass` (Holes.lean:6792-6799) forms the one-step joint as a SCALAR in R, not as a normalized kernel over Outcome; `BeliefState` (Holes.lean:6806-6808) is still means and variances with no map into an outcome distribution. The only `PredictiveOutcomeKernel` VALUE in the file is `eigCounterPredictive` (Holes.lean:6985-6990) -- private, one policy, one outcome, mass 1, built to state the EIG counterexample. No declaration anywhere composes transition with observation over a policy to produce a kernel. The required signature is still uninhabited."}
+   {:id :lean/Q-risk-consumer :pins [:lean-spine] :verdict :re-verified-unchanged
+    :read "predictiveOutcomeRisk (Holes.lean:6867-6872) and expectedFreeEnergy (Holes.lean:6887-6891) both still take `Q` as a bound parameter; G_eq_expectedFreeEnergy (Holes.lean:6895-6912) relates the two decompositions under hypotheses and constructs no Q."}
+   {:id :lean/Q-eig-consumer :pins [:lean-spine] :verdict :re-verified-unchanged
+    :read "expectedInformationGain (Holes.lean:6926-6934) still takes `Q` as a parameter and sums parameterInformationGain against it. Its one applied use is the counterexample kernel above."}
+   {:id :lean/Q-reference-fixture :pins [:lean-risk-fixture] :verdict :re-verified-at-sha
+    :basis "PredictiveOutcomeRiskWitness.lean is CURRENT at c49a3698 (last touched 3f5654ce21, before the pin); byte-identical content, same evidence."}
+   {:id :runtime/Q-action-proxy :pins [:runtime-forward-model :runtime-efe :runtime-core-efe]
+    :verdict :re-verified-unchanged
+    :read "forward_model.clj and core_efe.clj are CURRENT at their pins. efe.clj moved, and the move does not touch the proxy: U24 adds a scalar `:survey-eig` leg to the G sum (efe.clj:757-760, 823-834), leaving the per-action per-channel Gaussian prediction and the risk/ambiguity terms computed from it exactly as pinned. The limitation stands word for word."
+    :note "RECORDED, NOT A STATUS CHANGE. The topology now draws this same object under the name the registry reserves for what is missing: I2 :r4-r8-q-o-pi-into-f-pi (p4ng 085f758d) adds [:R4 :R8] with :label \"Q(o|pi)\", and its own basis says the payload is :prediction-mean / :prediction-variance persisted from [:prediction :next-observation] -- the action-grain Gaussian proxy, one tick old. Whether the drawn label should say so is a control-map matter and Joe's; this row records that the label and this registry's :claim name different objects."}
+   {:id :runtime/Q-policy :pins [:runtime-selection] :verdict :re-verified-unchanged
+    :read "select-action is still at policy.clj:672 and still consumes efe/rank-actions output. RUN9 adds F_pi to softmax-weights behind FUTON_WM_FPI_POSTERIOR (policy.clj:172-201, 418-421), which makes Q(pi) downstream of the R4 proxy by a second flagged route and so corroborates the limitation rather than moving it: the object is still the selection distribution over policies, not a distribution over outcomes."}
+   {:id :Q/in-belief :pins [:topology :lean-spine] :verdict :re-verified-unchanged
+    :read "[:R1 :R4] is still a drawn edge labelled \"predict\" (control-map-edges.edn:14) and no post-pin decision retires or re-labels it; the Lean side is the :lean/Q-machine-construction finding above."}
+   {:id :Q/in-candidates :pins [:topology] :verdict :re-verified-unchanged
+    :read "D5d :r6-r4-pi-realised-undrawn (p4ng 2ed08b6a) adds [:R6 :R4] and its own note states the blocker this row already carries: the edge is realised only under R6 AS CANDIDATE SPACE, because scoring runs over candidates before selection produces Q(pi). Corroboration, not movement."}
+   {:id :Q/in-policy-depth :pins [:topology] :verdict :changed
+    :changed-by "p4ng 8f0ee87a (D7 :r13-r4-depth-realised-undrawn)"
+    :what-moved "The blocker's first clause -- \"the control map has no R13-to-R4 route\" -- became false. The second clause and the row's :runtime, :lean and :effect are unchanged, because the edge carries an integer horizon, not the declared cascade payload."}
+   {:id :Q/producer-to-risk :pins [:topology :runtime-efe :lean-spine] :verdict :re-verified-unchanged
+    :read "[:R4 :R5] is still drawn (control-map-edges.edn:17); no post-pin decision adds, retires or re-labels it. The runtime end is the unchanged proxy above; the Lean end still accepts an arbitrary kernel."}
+   {:id :Q/risk-to-ranking :pins [:topology :runtime-selection] :verdict :re-verified-unchanged
+    :read "[:R5 :R6] is still drawn and labelled \"rank\" (control-map-edges.edn:18). Its one retirement, :r6-r14-order, is Joe's 2026-08-30 ruling and was already in the pinned blob -- verified by reading the pinned content, which holds :r6-r14-order as the sole :decisions entry. Nothing post-pin touches the pair."}
+   {:id :Q/to-EIG :pins [:runtime-efe :runtime-eig :topology] :verdict :changed
+    :changed-by "futon2 e46ed61e (U24, the pinned efe.clj), with futon2 9e27ad81 (U22) supplying the kernel's first caller"
+    :what-moved ":runtime moved from :function-exists-unwired to :called-with-hand-built-Q-off-tick-path. :effect :missing-wire, :lean :parameter-only and :edge nil are unchanged: nothing joins R4's prediction to the kernel."
+    :basis "epistemic_value.clj is CURRENT at its pin, and at the pinned blob it had no caller anywhere in src/ -- the word \"unwired\" was exact. It now has two, both post-pin."}]
+  :not-done
+  ["No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions."
+   "gen_aif_dag.bb not run; nothing regenerated into a publish (TN 9a)."
+   "REPORTED NOT REPAIRED: D5d and D7 in control-map-edges.edn cite efe.clj:602 and :607-609 for fm/predict and the horizon guard. U24's insertions moved them to efe.clj:624 and :629-631, so both bases are ~22 lines stale at source. That is a control-map registry repair, not this row's, and neither pointer is in this registry."
+   "REPORTED NOT REPAIRED: [:R4 :R8] labelled Q(o|pi) (I2) has no row in :interfaces here. Adding one is a new finding, not a re-verification, so it is left for a row of its own."]}
  :work-order
  [{:order 1 :unit :name-policy-and-outcome-domain
    :acceptance "One concrete policy/cascade and enumerable outcome space are declared; absences are typed."}
