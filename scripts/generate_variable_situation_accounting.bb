@@ -302,13 +302,30 @@
                 "the hole stays open because the Lean proposition is world-level "
                 "and C114 declined to narrow it to a pinned receipt.")}
    "wmRunConformsToWiring"
-   {:closability :run-gated :readiness :not-ready
-    :runtime-evidence (str "TN §11 R2's run: ~20 shadow ticks on current code, "
-                           "records carrying the route, judged by R3 against the "
-                           "re-synced topology.")
-    :basis (str "The topology to judge against has not been re-synced -- :U29 and "
-                ":U31 are both open -- and the 2026-09-02 receipts still read 6 "
-                "of 9 hops unmapped against 21 drawn edges, as 2026-08-30 did.")}
+   {:closability :run-gated :readiness :witnessed-and-held-open
+    :runtime-evidence (str "A CERTIFICATE OVER A QUALIFYING RUN, and the "
+                           "certificate is what ends it (Joe's RUN4 ruling, "
+                           "2026-09-03; executed by :U49): a run's reassembled "
+                           "route and the Figure 4 edge layers transcribed into "
+                           "Lean and conformance proved by decide. The machinery "
+                           "exists and is exercised -- mathlib4 "
+                           "wmS5RunConformsToDrawnWiring over runs/2026-09-01-s5 "
+                           "(futon2 5a66411; 4 routes, 36 hops, 9 distinct, 0 "
+                           "refutations, 0 unmapped), with wmS5RouteCensus "
+                           "deciding its numbers, both at 0 axioms. WHICH run "
+                           "qualifies is Joe's call at certificate time, so what "
+                           "is outstanding is an acceptance, not a build.")
+    :basis (str "RUN-GATED, NOT PERMANENT -- the owner refused the "
+                "permanent-attestation reading on 2026-09-03 and C114's decline "
+                "of the pinned transcription is superseded by that ruling. The "
+                "s5 certificate does not close it and is not claimed to: the "
+                "ruling reserves mkClosed for Joe's acceptance. Two limits the "
+                "certificate states about itself rather than leaving to a "
+                "reader: 5 of the 9 distinct hops are drawn only because a "
+                "previous route MEASUREMENT put them on the "
+                ":route-measured-drawn layer, and 19 of the 22 drawn edges never "
+                "fired, so what is proved is that the run stayed inside the "
+                "union of the two layers.")}
    "enactedEqualsSelectedWhenRankOneGated"
    {:closability :run-gated :readiness :not-ready
     :runtime-evidence (str "A record joining a rank-1 selection that passes its "

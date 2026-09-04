@@ -1,0 +1,97 @@
+;; THE RUN-CONFORMANCE CERTIFICATE for runs/2026-09-01-s5.
+;;
+;; Written by hand from the three commits it names and the artifacts beside it
+;; (00-source.edn .. 04-controls.edn, lean-block.lean), all of which the
+;; producer u49_route_transcribe.bb generated. It is a RECORD of a proof, not a
+;; proof: what carries the claim is the Lean theorem, and this file exists so a
+;; reader can find it and check that it is about this run and this map.
+;;
+;; IT DOES NOT CLOSE wmRunConformsToWiring. Joe's RUN4 ruling reserves the close
+;; for his acceptance of a certificate over a run he judges qualifying, and
+;; which run qualifies is his call at certificate time.
+
+{:schema :wm/run-conformance-certificate-v1
+ :worklist-item :U49
+ :ruling "Joe's RUN4 ruling, holes/labs/wm-contract/worklist.edn :run4-lean-ruling, 2026-09-03"
+ :j9-leg 3
+ :status :minted-awaiting-acceptance
+
+ ;; ---- the run this certificate is about -------------------------------
+ :run
+ {:dir "holes/labs/wm-contract/runs/2026-09-01-s5"
+  :name "2026-09-01-s5"
+  :run-sha "5a66411"                    ; futon2 tree the machine RAN at
+  :records 4
+  :selection :by-run-id                 ; RUN11
+  :run-ids ["4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8"
+            "c51a8da3-883e-4038-b493-1b268d5d8357"
+            "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82"
+            "28da19d2-3a03-40f6-8eef-2818fe5583a9"]
+  :extracted-trace "runs/2026-09-01-s5/wm-trace-s5.edn"
+  :extracted-trace-sha256
+  "c3480955286e548be6fd4bbde80e5081446cfaaac1500294e2de1fa44e2d7c67"
+  :pinned-verdict :conformant           ; runs/2026-09-01-s5/conformance.edn
+  :pinned-verdict-by "run3_conformance.bb"
+  :pinned-checked-at "2026-09-01T22:56:17.282228522Z"}
+
+ ;; ---- the wiring it was judged against ---------------------------------
+ :wiring
+ {:path "p4ng:empirics-futon/control-map-edges.edn"
+  :as-of "2026-08-30"
+  :p4ng-commit "e508ece"
+  :sha256 "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec"
+  :edges 22
+  :route-measured-drawn 8
+  :retired-pairs 8}
+
+ ;; ---- the trees the certificate was minted at --------------------------
+ :minted-at
+ {:futon2-tree-sha "23644d918e7a843f70a17d1f59d194eed8d2972a"
+  :mathlib4-certificate-commit "d4f05a0246"      ; transcription + both theorems
+  :mathlib4-close-path-commit "f5924bdd25"       ; the docstring close path
+  :mathlib4-pointer-fix-commit "11c2e44aff"       ; five drifted docstring pointers, corrected at source
+  :mathlib4-contract-commit "49e8528116"         ; holes-contract.json re-emitted at 11c2e44aff
+  :contract-git-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08"}
+
+ ;; ---- what was proved ---------------------------------------------------
+ :theorems
+ [{:name "DarkTower.WarMachine.Holes.wmS5RunConformsToDrawnWiring"
+   :statement "runConformsToDrawnWiring s5Routes -- the run recorded at least one route, no route is empty, no hop is unmapped, and no hop is a refutation (a code-retired pair traversed at route grain)."
+   :tactic "decide"
+   :axioms []}
+  {:name "DarkTower.WarMachine.Holes.wmS5RouteCensus"
+   :statement "the eleven numbers the certificate is stated over: 4 routes, 36 hops, 9 distinct, 2 drawn, 5 route-measured, 1 excluded at dependency grain, 1 ruling-unrealised, 0 refutations, 0 unmapped, 22 drawn edges, 19 unfired."
+   :tactic "decide"
+   :axioms []}]
+ :no-sorry true
+ :no-native-decide true
+ :axiom-probe "lake env lean: both theorems report 'does not depend on any axioms'"
+ :module-sorry-count-before 10
+ :module-sorry-count-after 10
+
+ ;; ---- the census the theorems decide ------------------------------------
+ :census
+ {:routes 4 :hops 36 :distinct-hops 9
+  :drawn 2 :route-measured 5
+  :excluded-dependency-grain 1 :ruling-unrealised 1
+  :refutations 0 :unmapped 0
+  :drawn-edges 22 :unfired 19}
+
+ ;; ---- what a reader must not read into it -------------------------------
+ :limits
+ ["5 of the 9 distinct hops are on the :route-measured-drawn layer, which a previous route MEASUREMENT put on the figure. For those the run is being compared against a record of a run, not against a prediction."
+  "19 of the 22 drawn edges never fired. The certificate says this run stayed inside the union of the drawn and measured layers; it does not say the drawn figure predicted the run."
+  "The two checkers disagree on the drawn set: run3_conformance.bb:55 takes all of :edges regardless of :status (22, including the one :unresolved self-loop R5->R5), checks/wm_route_conformance.clj:28 filters to :status :drawn (21). The transcription follows run3, which produced the pinned verdict. Inert here -- R5->R5 is not traversed."
+  "It is one run of four ticks on one tree. It generalises to nothing beyond itself; the wanted per-run certificate is per run by design."]
+
+ ;; ---- what would break it ----------------------------------------------
+ :falsifiers-exercised
+ [{:mutation "R99 -> R100 appended to a route (the hop wm_route_conformance.clj --negative plants)"
+   :class :unmapped :conforms false}
+  {:mutation "a route emptied" :class :n/a :conforms false}
+  {:mutation "R2 -> R3 appended to a route (code-retired, NOT on the measured layer, so route grain)"
+   :class :refutation :conforms false}
+  {:mutation "the route table emptied" :class :n/a :conforms false}]
+ :falsifiers-recorded-at "runs/U49-run-conformance/04-controls.edn control C4"
+
+ :produced-by "holes/labs/wm-contract/u49_route_transcribe.bb"}

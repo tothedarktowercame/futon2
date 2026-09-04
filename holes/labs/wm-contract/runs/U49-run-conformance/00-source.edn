@@ -1,0 +1,29 @@
+{:control-map
+ {:path "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn",
+  :sha256
+  "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
+  :p4ng-commit "e508ece",
+  :as-of "2026-08-30"},
+ :run
+ {:dir "runs/2026-09-01-s5",
+  :run-sha "5a66411",
+  :trace-sha256
+  "c3480955286e548be6fd4bbde80e5081446cfaaac1500294e2de1fa44e2d7c67",
+  :receipts
+  [{:file
+    "tick-run-record-2026-09-01-28da19d2-3a03-40f6-8eef-2818fe5583a9.edn",
+    :date "2026-09-01",
+    :run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9"}
+   {:file
+    "tick-run-record-2026-09-01-4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8.edn",
+    :date "2026-09-01",
+    :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8"}
+   {:file
+    "tick-run-record-2026-09-01-b69ec193-5aa0-45ca-9cbb-9df45cbb8d82.edn",
+    :date "2026-09-01",
+    :run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82"}
+   {:file
+    "tick-run-record-2026-09-01-c51a8da3-883e-4038-b493-1b268d5d8357.edn",
+    :date "2026-09-01",
+    :run-id "c51a8da3-883e-4038-b493-1b268d5d8357"}],
+  :records 4}}

@@ -1,9 +1,9 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-09-03",
  :authority
- {:contract-git-sha "a3ae5084beb1c2d6b14ee1438df6830a4bbe68c0",
+ {:contract-git-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
   :contract-sha256
-  "1e5d1b157744fc34e1bd78377c4b5cca3f722098040f35210a5d8828738e22c9",
+  "375efd55e521bc1e44341c9a532407dc3153caf2593866b3684e51b219db1533",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
@@ -906,15 +906,15 @@
    :row-source :contract-declaration,
    :name "wmRunConformsToWiring",
    :basis
-   "The topology to judge against has not been re-synced -- :U29 and :U31 are both open -- and the 2026-09-02 receipts still read 6 of 9 hops unmapped against 21 drawn edges, as 2026-08-30 did.",
-   :readiness :not-ready,
+   "RUN-GATED, NOT PERMANENT -- the owner refused the permanent-attestation reading on 2026-09-03 and C114's decline of the pinned transcription is superseded by that ruling. The s5 certificate does not close it and is not claimed to: the ruling reserves mkClosed for Joe's acceptance. Two limits the certificate states about itself rather than leaving to a reader: 5 of the 9 distinct hops are drawn only because a previous route MEASUREMENT put them on the :route-measured-drawn layer, and 19 of the 22 drawn edges never fired, so what is proved is that the run stayed inside the union of the two layers.",
+   :readiness :witnessed-and-held-open,
    :content-status :open-hole,
    :area :run,
    :closability :run-gated,
    :owner
    "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · organisation evidence",
    :runtime-evidence
-   "TN §11 R2's run: ~20 shadow ticks on current code, records carrying the route, judged by R3 against the re-synced topology."}
+   "A CERTIFICATE OVER A QUALIFYING RUN, and the certificate is what ends it (Joe's RUN4 ruling, 2026-09-03; executed by :U49): a run's reassembled route and the Figure 4 edge layers transcribed into Lean and conformance proved by decide. The machinery exists and is exercised -- mathlib4 wmS5RunConformsToDrawnWiring over runs/2026-09-01-s5 (futon2 5a66411; 4 routes, 36 hops, 9 distinct, 0 refutations, 0 unmapped), with wmS5RouteCensus deciding its numbers, both at 0 axioms. WHICH run qualifies is Joe's call at certificate time, so what is outstanding is an acceptance, not a build."}
   {:name "enactedActionEqualsSelected",
    :area :run,
    :owner
