@@ -2,16 +2,17 @@ U41 — TENSION LEDGER: carried tensions, typed, folded, and queried
 report mode is read-only; the validated append API was not invoked; report writes only under /home/joe/code/futon2/holes/labs/wm-contract/runs/U41-tension-ledger
 
 VALIDATION
-  4 tensions, 9 events, 0 defects against the schema the ledger declares
+  5 tensions, 13 events, 0 defects against the schema the ledger declares
 
 CURRENT STATUS — the fold of the events, not the record's mint-time field
   :zaif-v1/T1      :carried   since 2026-09-02   3 events (2 evidence-added), 7 pointers
   :zaif-v1/T2      :carried   since 2026-09-02   3 events (2 evidence-added), 9 pointers
-  :zaif-v1/T3      :carried   since 2026-09-02   2 events (1 evidence-added), 4 pointers
+  :zaif-v1/T3      :carried   since 2026-09-02   3 events (2 evidence-added), 5 pointers
   [:refused-prediction {:q-actand/refusal :q-actand/zero-support-after-kin-pool, :grain :arm-session, :actand {:route :actand, :correction-label true}, :action :retrieve, :target :gold-judged, :kin []}] :carried   since 2026-09-03   1 events (0 evidence-added), 1 pointers
+  :programme/T5    :carried   since 2026-09-03   3 events (2 evidence-added), 3 pointers
 
 BIRTH RULE — recurrence across contexts proposes a pattern candidate
-  4 tensions considered, 0 terminal, 0 candidates
+  5 tensions considered, 0 terminal, 0 candidates
   Zero candidates today, and the reason is structural rather than incidental:
   the rule reads RESOLVED tensions, and all three seeds are carried. The first
   candidate is possible only after two tensions are cashed the same way in two
@@ -33,6 +34,7 @@ CONTROLS
   :negative/the-real-ledger-conforms                         pass?=true
   :positive/birth-rule-fires-on-a-corpus-that-satisfies-it   pass?=true
   :positive/every-seed-carries-a-pointer                     pass?=true
+  :positive/machine-born-statement-is-the-refusal-verbatim   pass?=true
   :positive/u39-mint-payload-validates                       pass?=true
   :report/birth-rule-is-zero-today                           pass?=true
 
