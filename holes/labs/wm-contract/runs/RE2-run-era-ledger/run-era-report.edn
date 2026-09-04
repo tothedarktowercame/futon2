@@ -73,7 +73,7 @@
           "the ledger enum has no :defect, so the check verdicts :defect and DEPOSITS :red; no new status word is minted. Plateaus of the field not containing the choice are a census (02-plateau-census.edn) and never a verdict."}],
  :validation {:defects [], :conforms? true},
  :head-sha
- "efb33ea5b99843770a3f5ee04d02cdddf5e192cb893a008986ad16b6e8ed6764",
+ "24786ce1071edf38a1728907ce70cc4c24383d9aa67172a47c3d21e734018b60",
  :by-run
  [{:run-id "2026-09-01-s5",
    :checks
@@ -90,6 +90,26 @@
    :status :red,
    :status-reason
    {:cause :red-verdict, :checks [:selection-discrimination]}}
+  {:run-id "2026-09-04-010-accepted",
+   :checks
+   {:contract-pin :green,
+    :enumeration-completeness :green,
+    :flip-readiness :typed-absence,
+    :per-node-runtime-validation :typed-absence,
+    :rationale-regret :typed-absence,
+    :run-conformance :green,
+    :selection-discrimination :green,
+    :tensions-cashed :typed-absence},
+   :checks-not-deposited [],
+   :first-at "2026-09-04T16:30:14.927146598Z",
+   :status :incomplete,
+   :status-reason
+   {:cause :typed-absences,
+    :checks
+    [:flip-readiness
+     :per-node-runtime-validation
+     :rationale-regret
+     :tensions-cashed]}}
   {:run-id "2026-09-04-re5",
    :checks
    {:contract-pin :green,
@@ -112,42 +132,56 @@
      :tensions-cashed]}}],
  :by-check
  [{:check-id :contract-pin,
-   :runs 2,
+   :runs 3,
    :series
    [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]
-    ["2026-09-04T07:56:27Z" "2026-09-04-re5" :green]]}
+    ["2026-09-04T07:56:27Z" "2026-09-04-re5" :green]
+    ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :green]]}
   {:check-id :enumeration-completeness,
-   :runs 2,
+   :runs 3,
    :series
    [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence]
-    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :green]]}
+    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :green]
+    ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :green]]}
   {:check-id :flip-readiness,
-   :runs 2,
+   :runs 3,
    :series
    [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]
-    ["2026-09-04T07:55:02Z" "2026-09-04-re5" :typed-absence]]}
+    ["2026-09-04T07:55:02Z" "2026-09-04-re5" :typed-absence]
+    ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :typed-absence]]}
   {:check-id :per-node-runtime-validation,
-   :runs 2,
+   :runs 3,
    :series
    [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence]
-    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]}
+    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]
+    ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :typed-absence]]}
   {:check-id :rationale-regret,
-   :runs 2,
+   :runs 3,
    :series
    [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence]
-    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]}
+    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]
+    ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :typed-absence]]}
   {:check-id :run-conformance,
-   :runs 2,
+   :runs 3,
    :series
    [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green]
-    ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green]]}
+    ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green]
+    ["2026-09-04T16:40:36.011998629Z"
+     "2026-09-04-010-accepted"
+     :green]]}
   {:check-id :selection-discrimination,
-   :runs 2,
+   :runs 3,
    :series
    [["2026-09-01T22:54:48.942309598Z" "2026-09-01-s5" :red]
-    ["2026-09-04T07:50:47.952039102Z" "2026-09-04-re5" :green]]}
+    ["2026-09-04T07:50:47.952039102Z" "2026-09-04-re5" :green]
+    ["2026-09-04T16:30:14.927146598Z"
+     "2026-09-04-010-accepted"
+     :green]]}
   {:check-id :tensions-cashed,
-   :runs 2,
+   :runs 3,
    :series
    [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence]
-    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]}]}
+    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]
+    ["2026-09-04T16:40:33Z"
+     "2026-09-04-010-accepted"
+     :typed-absence]]}]}

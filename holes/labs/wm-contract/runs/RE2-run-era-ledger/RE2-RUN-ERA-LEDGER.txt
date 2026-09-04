@@ -1,5 +1,5 @@
 RE2 — RUN-ERA LEDGER: one row per (run-id, check-id), folded
-  16 rows, 8 catalogued checks, 0 defects against the schema the ledger declares
+  24 rows, 8 catalogued checks, 0 defects against the schema the ledger declares
 
 CHECK CATALOGUE — the check-id enum, each entry naming its machinery
   :contract-pin                  holes/labs/wm-contract/C177-contract-last-source-change.md (registry contract == live contract at the run sha)
@@ -14,15 +14,17 @@ CHECK CATALOGUE — the check-id enum, each entry naming its machinery
 BY RUN — a run missing a catalogued check is :incomplete, never green
   2026-09-01-s5                :red         8 checks, not deposited: []
                                  because :red-verdict [:selection-discrimination]
+  2026-09-04-010-accepted      :incomplete  8 checks, not deposited: []
+                                 because :typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]
   2026-09-04-re5               :incomplete  8 checks, not deposited: []
                                  because :typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]
 
 BY CHECK — the verdict series across runs, which is the time-correlation
-  :contract-pin                  2 runs [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T07:56:27Z" "2026-09-04-re5" :green]]
-  :enumeration-completeness      2 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :green]]
-  :flip-readiness                2 runs [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T07:55:02Z" "2026-09-04-re5" :typed-absence]]
-  :per-node-runtime-validation   2 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]
-  :rationale-regret              2 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]
-  :run-conformance               2 runs [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green] ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green]]
-  :selection-discrimination      2 runs [["2026-09-01T22:54:48.942309598Z" "2026-09-01-s5" :red] ["2026-09-04T07:50:47.952039102Z" "2026-09-04-re5" :green]]
-  :tensions-cashed               2 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]
+  :contract-pin                  3 runs [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T07:56:27Z" "2026-09-04-re5" :green] ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :green]]
+  :enumeration-completeness      3 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :green] ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :green]]
+  :flip-readiness                3 runs [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T07:55:02Z" "2026-09-04-re5" :typed-absence] ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :typed-absence]]
+  :per-node-runtime-validation   3 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence] ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :typed-absence]]
+  :rationale-regret              3 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence] ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :typed-absence]]
+  :run-conformance               3 runs [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green] ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green] ["2026-09-04T16:40:36.011998629Z" "2026-09-04-010-accepted" :green]]
+  :selection-discrimination      3 runs [["2026-09-01T22:54:48.942309598Z" "2026-09-01-s5" :red] ["2026-09-04T07:50:47.952039102Z" "2026-09-04-re5" :green] ["2026-09-04T16:30:14.927146598Z" "2026-09-04-010-accepted" :green]]
+  :tensions-cashed               3 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence] ["2026-09-04T16:40:33Z" "2026-09-04-010-accepted" :typed-absence]]
