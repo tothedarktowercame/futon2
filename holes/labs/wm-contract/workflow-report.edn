@@ -42,7 +42,7 @@
    :sha256-prefix "a7834793fb31e20d"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "0725848",
+   :revision "0725848f",
    :sha256-prefix "ab55f11fccaee0a5",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
@@ -72,7 +72,7 @@
   :open-dispatched 1,
   :pending-decisions 14},
  :ledger-frontier 382,
- :as-of "2026-09-04T00:16:35.123762985Z",
+ :as-of "2026-09-04T00:17:17.800263335Z",
  :attribution
  {:systematic-from "C378",
   :systematic-run-length 5,
