@@ -144,6 +144,53 @@ RE4 records state on themselves (score ties, non-injective join keys) is
 a candidate catalogued check — the records are designed to be validated,
 so each hazard the producer names is a check the catalogue should grow.
 
+## Ruling 2026-09-04 (Joe, dictated, second): the step era precedes the continuous era
+
+> "What we might want to do, speaking of pins, is get a version of the
+> machine set up that is stepable and resetable, so that we don't
+> immediately have to deal with its peculiar behaviour between runs to
+> make some headway... we could run it forward step by step, fix defects,
+> and only then move on to the next step and eventual continuous running."
+
+The operating mode this asks for: a pinned checkpoint of the machine's
+complete inter-tick state; STEP = run exactly one tick from the pin into
+a sandboxed store; the full check battery runs against that one tick;
+RESET = restore the pin and step again (after a code fix, same state, new
+behavior — the defect-fix loop); ACCEPT = the post-tick state becomes the
+new pin. Continuous running is then the degenerate case of accepting
+every step without inspection — which is exactly why it comes last.
+
+What exists toward it: component-level replay equality (R17 envelope,
+Campaign S portfolios, RE4 retrospective byte-identity), shadow ticks
+(r6_zero_post_preflight's diagnostic tick), per-run stores, the run lock,
+and the per-run check battery (this epic). What does NOT exist: the
+checkpoint boundary itself — an inventory of everything that constitutes
+inter-tick state, explicit AND implicit. The silent-degrade family says
+the implicit part is where the danger is (cwd heuristics, in-memory
+atoms, evidence-store watermarks, wall-clock reads): any state the
+snapshot misses is exactly a way reset lies.
+
+Rows (minted at next loop pause):
+
+- **U54 (discovery — the state-boundary census):** enumerate every datum
+  the machine reads or mutates across a tick boundary, from the code and
+  the recorded runs (data/wm-trace, data/wm-rationale, posterior stores,
+  precision registry, tension ledger, evidence-store queries, RNG, clock,
+  git shas, cwd). One committed artifact: for each item — where it
+  lives, snapshot-able as-is or implicit, and the clock/wall-time reads
+  called out separately (a step must pin time or record that it cannot).
+  No behavior change. The census is the checkpoint spec.
+- **U55 (the stepper, depends on U54):** wm_step.sh — init <pin-dir> |
+  step | reset | accept. Step runs one tick against the pinned state into
+  a sandboxed store (never live data/); determinism control: two steps
+  from the same pin compare byte-identical on the decision records, and a
+  known divergent input (planted) is DETECTED, not absorbed. Reset
+  restores the pin exactly (content-hash verified). Accept advances the
+  pin and deposits the step into a run store so the whole check battery
+  (this epic's ledger) runs per step. The acceptance must show the
+  fix-defect loop once for real: step, observe a planted defect, fix,
+  reset, re-step, observe the fix — the loop Joe described, exercised.
+
 ## Not in scope
 
 - No default flips — every flip remains J-gated (0 READY today; the epic
