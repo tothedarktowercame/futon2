@@ -66,7 +66,7 @@
           :precedent "tension-ledger T1-T5, u41 validator"}],
  :validation {:defects [], :conforms? true},
  :head-sha
- "8048c915a94d7793b23cf46bdb32874d4942e61a519a0e9afa14e75289f298a5",
+ "cc166359233b56116554096ac349ad960a822e19eb5ccd2020946001e20a27a9",
  :by-run
  [{:run-id "2026-09-01-s5",
    :checks
@@ -79,15 +79,32 @@
     :rationale-regret
     :tensions-cashed],
    :first-at "2026-09-01T22:56:17.282228522Z",
+   :status :incomplete}
+  {:run-id "2026-09-04-re5",
+   :checks
+   {:contract-pin :green,
+    :flip-readiness :typed-absence,
+    :run-conformance :green},
+   :checks-not-deposited
+   [:enumeration-completeness
+    :per-node-runtime-validation
+    :rationale-regret
+    :tensions-cashed],
+   :first-at "2026-09-04T07:52:31.929452654Z",
    :status :incomplete}],
  :by-check
  [{:check-id :contract-pin,
-   :runs 1,
-   :series [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]]}
-  {:check-id :flip-readiness,
-   :runs 1,
-   :series [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]]}
-  {:check-id :run-conformance,
-   :runs 1,
+   :runs 2,
    :series
-   [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green]]}]}
+   [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]
+    ["2026-09-04T07:56:27Z" "2026-09-04-re5" :green]]}
+  {:check-id :flip-readiness,
+   :runs 2,
+   :series
+   [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]
+    ["2026-09-04T07:55:02Z" "2026-09-04-re5" :typed-absence]]}
+  {:check-id :run-conformance,
+   :runs 2,
+   :series
+   [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green]
+    ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green]]}]}
