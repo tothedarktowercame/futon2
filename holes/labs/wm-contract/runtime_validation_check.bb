@@ -4,6 +4,7 @@
 ;;
 ;;   bb runtime_validation_check.bb                  ; check the catalog
 ;;   bb runtime_validation_check.bb --summary        ; print the COUNTS line only
+;;   bb runtime_validation_check.bb --deposit <run-id> ; one run-era ledger row (RE6)
 ;;   CATALOG=/path/to/other.edn bb runtime_validation_check.bb
 ;;
 ;; WHAT IT CHECKS, and why each check is here rather than left to a reader:
@@ -31,7 +32,11 @@
 ;;      appear verbatim in RUNTIME-VALIDATION-CATALOG.md, so the prose cannot
 ;;      quote a total the data no longer supports.
 ;; Exit 0 all clear, 1 on any failure (house convention).
-(require '[clojure.edn :as edn] '[clojure.java.io :as io] '[clojure.string :as str])
+(require '[babashka.process :as process]
+         '[clojure.edn :as edn]
+         '[clojure.java.io :as io]
+         '[clojure.pprint :as pp]
+         '[clojure.string :as str])
 
 (def code-root (str (System/getProperty "user.home") "/code/"))
 (def here (str code-root "futon2/holes/labs/wm-contract/"))
@@ -163,6 +168,130 @@
     (fail! "the narrative does not carry the computed COUNTS line; expected verbatim:\n  "
            counts-line))
   (fail! "narrative not found at" md-path))
+
+;; ---------------------------------------------------------------------------
+;; --deposit <run-id> -- one run-era ledger row (RE6)
+;; ---------------------------------------------------------------------------
+;;
+;; WHAT VERDICT THIS DEPOSITS, and why it is a typed absence on every run this
+;; catalog was not written beside. The catalog is a TREE artifact: its rows
+;; point at source lines and its :test-runs record test invocations by
+;; namespace and date. Nothing in it names a WM run, and no run of the machine
+;; writes into it. So the deposit asks the run's own store, as RE3's two
+;; tree-property checks do:
+;;
+;;   the run store holds a runtime-validation artifact -> deposit its verdict
+;;   it does not                                       -> :typed-absence, notes
+;;                                                        naming what was missing
+;;
+;; A failing check deposits :red whatever the store holds, because that failure
+;; is about the tree the deposit is made from and a reader must see it.
+(def deposit-run-id
+  (second (drop-while #(not= "--deposit" %) *command-line-args*)))
+
+(defn run-store-files [dir]
+  (let [d (io/file dir)]
+    (when (.isDirectory d)
+      (let [base (str (.getPath d) "/")]
+        (->> (file-seq d)
+             (filter #(.isFile ^java.io.File %))
+             (map #(str/replace-first (.getPath ^java.io.File %) base ""))
+             sort vec)))))
+
+(defn deposit-receipt [run-id]
+  (let [store-dir (str here "runs/" run-id)
+        holds (run-store-files store-dir)
+        contemporaneous (vec (filter #(re-find #"(?i)runtime[-_]?validation" %) (or holds [])))]
+    ;; array-map, not a literal: a map literal of this size is a hash-map and
+    ;; would print in hash order, so the receipt would not be stable to read.
+    (array-map
+     :schema :wm/run-era-deposit-receipt-v1
+     :row :RE6
+     :check :per-node-runtime-validation
+     :run-id run-id
+     :produced-by "holes/labs/wm-contract/runtime_validation_check.bb --deposit"
+     :deterministic
+     (str "No wall-clock field. This receipt is rewritten byte-identically on every deposit, "
+          "which is what lets the deposit require it to be committed and unmodified, and lets "
+          "the same deposit repeat as :already-present.")
+     :run-store {:dir (str "holes/labs/wm-contract/runs/" run-id)
+                 :exists? (boolean holds)
+                 :holds holds
+                 :runtime-validation-artifacts contemporaneous}
+     :verdict-deposited (cond (seq @problems) :red
+                              (seq contemporaneous) :green
+                              :else :typed-absence)
+     :live-derivation
+     {:read-from "the catalog and the source tree at deposit time, NOT the tree the run was taken at"
+      :artifact "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn"
+      :counts-line counts-line
+      :counts counts
+      :test-runs-recorded (into (sorted-map)
+                                (for [[ns-name run] test-runs]
+                                  [ns-name (select-keys run [:exit :tests :assertions :at])]))
+      :problems (vec @problems)}
+     :why-the-catalog-cannot-be-run-scoped
+     (str "the catalog carries no run identity: its rows are keyed by node and axis, its "
+          ":test-runs are keyed by namespace with an :at date, and neither the catalog nor any "
+          "row names a wm run-id. A tick writes nothing into it. So a verdict about a NAMED RUN "
+          "cannot be read out of it, and this check has no as-of-run mode that could reconstruct "
+          "one.")
+     :not-what-this-says
+     (str "The live derivation above is a property of the tree at deposit time. It is recorded "
+          "so the absence is legible, and it is NOT the deposited verdict."))))
+
+(defn deposit-notes [run-id receipt]
+  (let [d (:live-derivation receipt)
+        store (:run-store receipt)]
+    (case (:verdict-deposited receipt)
+      :typed-absence
+      (str "runs/" run-id "/ holds no runtime-validation artifact"
+           (if (:exists? store)
+             (str " -- the run store holds " (str/join ", " (:holds store)) " and nothing from this check")
+             " -- the run store directory does not exist")
+           ", and the catalog this check validates carries no run identity of its own: its rows "
+           "are keyed by node and axis and its :test-runs by namespace and date, so no row can be "
+           "attributed to a run. This check has no as-of-run mode, so the per-node validation "
+           "state AT this run cannot be reconstructed. The check run at deposit time reports PASS "
+           "with " (:counts-line d)
+           "; that is a property of the tree at deposit time, is recorded in the artifact this row "
+           "points at, and is not deposited as this run's verdict.")
+      :red
+      (str "the runtime-validation catalog check FAILS at deposit time: "
+           (str/join "; " (:problems d)))
+      :green
+      (str "read from the run store's own runtime-validation artifact(s): "
+           (str/join ", " (:runtime-validation-artifacts store))
+           "; " (:counts-line d)))))
+
+(defn deposit! [run-id]
+  (let [r (deposit-receipt run-id)
+        rel (str "holes/labs/wm-contract/runs/RE6-check-deposits/runtime-validation-" run-id ".edn")
+        path (str code-root "futon2/" rel)]
+    (io/make-parents path)
+    (spit path (with-out-str (pp/pprint r)))
+    (println "runtime_validation_check --deposit: receipt" rel)
+    (let [{:keys [exit out err]}
+          (process/shell {:dir (str code-root "futon2") :out :string :err :string :continue true}
+                         "bb" "holes/labs/wm-contract/run_era_ledger.bb" "--deposit"
+                         "--run-id" run-id
+                         "--check-id" ":per-node-runtime-validation"
+                         "--verdict" (str (:verdict-deposited r))
+                         "--artifact" rel
+                         "--author" "runtime_validation_check.bb --deposit"
+                         "--deposited-by" "RE6 -- wire the four remaining catalogued checks"
+                         "--notes" (deposit-notes run-id r))]
+      (print out) (print err) (flush)
+      (when-not (zero? exit)
+        (println (format "runtime_validation_check --deposit: the ledger refused the row (exit %d)" exit))
+        (println "  if the refusal is artifact-untracked or artifact-dirty, commit" rel "and re-run")
+        (System/exit 1))
+      (System/exit 0))))
+
+(when deposit-run-id (deposit! deposit-run-id))
+(when (and (contains? (set *command-line-args*) "--deposit") (nil? deposit-run-id))
+  (println "runtime_validation_check --deposit needs a run-id")
+  (System/exit 1))
 
 ;; --- report ---------------------------------------------------------------
 (println (format "runtime_validation_check: %s" counts-line))

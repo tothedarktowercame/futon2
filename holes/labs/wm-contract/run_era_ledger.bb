@@ -341,14 +341,26 @@
 (defn fold-by-run
   "Per run: what each check said, which catalogued checks never deposited, and
    the run's rolled-up status. A run missing a catalogued check is :incomplete,
-   never green -- the honest store rule at the run level."
+   never green -- the honest store rule at the run level.
+
+   :status-reason names WHICH of the two very different states :incomplete is
+   standing for, because they call for opposite responses and the one word
+   cannot tell them apart (RE6). :checks-not-deposited says a check has not been
+   wired or not been run, and the answer is to wire or run it.
+   :typed-absences says every catalogued check deposited and some of them had
+   nothing about this run to read, which is the honest store rule working: the
+   answer is a run that carries the evidence, not another deposit. A reader who
+   sees only :incomplete cannot tell a ledger nobody has wired from a ledger
+   that is telling the truth about a thin run."
   [ledger]
   (let [catalogue (set (map :check/id (:ledger/check-catalogue ledger)))]
     (vec
      (for [[run-id rows] (sort-by key (group-by :row/run-id (:rows ledger)))]
        (let [by-check (into (sorted-map) (map (juxt :row/check-id :row/verdict)) rows)
              missing (vec (sort (remove (set (keys by-check)) catalogue)))
-             verdicts (set (vals by-check))]
+             verdicts (set (vals by-check))
+             absent (vec (sort (map key (filter #(= :typed-absence (val %)) by-check))))
+             red (vec (sort (map key (filter #(= :red (val %)) by-check))))]
          {:run-id run-id
           :checks by-check
           :checks-not-deposited missing
@@ -356,7 +368,12 @@
           :status (cond (seq missing) :incomplete
                         (contains? verdicts :red) :red
                         (contains? verdicts :typed-absence) :incomplete
-                        :else :green)})))))
+                        :else :green)
+          :status-reason (cond (seq missing) {:cause :checks-not-deposited :checks missing}
+                               (contains? verdicts :red) {:cause :red-verdict :checks red}
+                               (contains? verdicts :typed-absence)
+                               {:cause :typed-absences :checks absent}
+                               :else {:cause :every-catalogued-check-green})})))))
 
 (defn fold-by-check
   "Per check: its verdict series across runs, ordered in time -- the
@@ -707,7 +724,10 @@
       (doseq [r runs]
         (emit (format "  %-28s %-12s %d checks, not deposited: %s"
                       (:run-id r) (str (:status r)) (count (:checks r))
-                      (pr-str (:checks-not-deposited r))))))
+                      (pr-str (:checks-not-deposited r))))
+        (emit (format "  %-28s   because %s %s" ""
+                      (str (:cause (:status-reason r)))
+                      (pr-str (or (:checks (:status-reason r)) []))))))
     (emit "")
     (emit "BY CHECK — the verdict series across runs, which is the time-correlation")
     (if (empty? checks)

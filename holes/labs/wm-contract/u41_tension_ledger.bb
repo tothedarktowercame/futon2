@@ -2,6 +2,7 @@
 ;; U41 -- THE TENSION LEDGER: validator, status fold, and the birth-rule query.
 ;;
 ;;   bb holes/labs/wm-contract/u41_tension_ledger.bb [outdir]
+;;   bb holes/labs/wm-contract/u41_tension_ledger.bb --deposit <run-id>   (RE6)
 ;;
 ;; The report path is read-only over the ledger. `append-tension!` is the sole
 ;; write API: it validates the existing and proposed ledgers, adds exactly one
@@ -30,7 +31,8 @@
 ;; DETERMINISM. The artifact carries no wall-clock field, so two runs over an
 ;; unchanged ledger are byte-identical.
 
-(require '[clojure.edn :as edn]
+(require '[babashka.process :as process]
+         '[clojure.edn :as edn]
          '[clojure.java.io :as io]
          '[clojure.pprint :as pp]
          '[clojure.string :as str])
@@ -421,4 +423,160 @@
     (when (seq defects) (System/exit 1))
     (when-not (every? :pass? (vals ctrls)) (System/exit 2))))
 
-(apply -main *command-line-args*)
+;; ---------------------------------------------------------------------------
+;; --deposit <run-id> -- one run-era ledger row (RE6)
+;; ---------------------------------------------------------------------------
+;;
+;; WHAT VERDICT THIS DEPOSITS, and the finding that decides it: THE TENSION
+;; LEDGER CARRIES NO RUN PROVENANCE. Its :event schema
+;; (tension-ledger.edn:356-363) has :event/at, :event/by and :event/row and no
+;; run field; a tension records :tension/provenance {:who :when :how :pointers}
+;; and :tension/carried-by, a MISSION. So no event in the committed ledger can
+;; be attributed to a named WM run, and a per-run verdict cannot be read out of
+;; it. The deposit says that in a typed absence rather than depositing the
+;; deposit-time fold under a run-id it has no claim to.
+;;
+;; The shape that WOULD carry it exists and is unused: U39's tension mint
+;; payload writes :tension/provenance {:records [run-id run-id]}
+;; (u39_selection_retrospective.bb, section 6c). No committed tension was born
+;; that way -- all of them are :born-of :operator-dictation -- so the green
+;; branch below is reachable only once a run-born tension is minted.
+;;
+;; A ledger defect or a failing control deposits :red whatever the run store
+;; holds: that failure is about the tree the deposit is made from.
+
+(defn run-tick-ids
+  "The tick run/ids of a run, read off its own store's receipt filenames.
+   These are what an event would have to name for the ledger to be run-scoped."
+  [run-id]
+  (let [d (io/file lab "runs" run-id)]
+    (when (.isDirectory d)
+      (->> (.listFiles d)
+           (map #(.getName ^java.io.File %))
+           (keep #(second (re-matches #"tick-run-record-\d{4}-\d{2}-\d{2}-(.+)\.edn" %)))
+           sort vec))))
+
+(defn run-provenance-scan
+  "Everything in the ledger that could tie it to this run: the run-id itself,
+   any of the run's tick ids, and the run-carrying fields the schema declares.
+   A miss on all three is the typed absence's basis, stated as a measurement
+   rather than as an assertion about the schema."
+  [ledger-text ledger run-id tick-ids]
+  (let [event-keys (vec (sort (distinct (mapcat keys (:events ledger)))))
+        tension-keys (vec (sort (distinct (mapcat keys (:tensions ledger)))))
+        run-ish (fn [ks] (vec (filter #(re-find #"(?i)run" (str %)) ks)))]
+    {:run-id-appears-in-ledger? (str/includes? ledger-text run-id)
+     :tick-ids-sought tick-ids
+     :tick-ids-appearing (vec (filter #(str/includes? ledger-text %) tick-ids))
+     :event-keys-in-use event-keys
+     :tension-keys-in-use tension-keys
+     :run-carrying-keys (vec (concat (run-ish event-keys) (run-ish tension-keys)))
+     :events-by-date (into (sorted-map) (frequencies (map :event/at (:events ledger))))
+     :tension-provenance-shapes
+     (vec (sort (distinct (map #(vec (sort (keys (:tension/provenance %)))) (:tensions ledger)))))}))
+
+(defn deposit-receipt [run-id ledger defects statuses birth ctrls scan]
+  ;; array-map, not a literal: a map literal of this size is a hash-map and
+  ;; would print in hash order, so the receipt would not be stable to read.
+  (array-map
+   :schema :wm/run-era-deposit-receipt-v1
+   :row :RE6
+   :check :tensions-cashed
+   :run-id run-id
+   :produced-by "holes/labs/wm-contract/u41_tension_ledger.bb --deposit"
+   :deterministic
+   (str "No wall-clock field. This receipt is rewritten byte-identically on every deposit, "
+        "which is what lets the deposit require it to be committed and unmodified, and lets "
+        "the same deposit repeat as :already-present.")
+   :run-provenance scan
+   :verdict-deposited (cond (seq defects) :red
+                            (not (every? :pass? (vals ctrls))) :red
+                            (or (:run-id-appears-in-ledger? scan)
+                                (seq (:tick-ids-appearing scan))) :green
+                            :else :typed-absence)
+   :live-derivation
+   {:read-from "the tension ledger at deposit time, which names no run"
+    :artifact "holes/labs/wm-contract/tension-ledger.edn"
+    :tensions (count (:tensions ledger))
+    :events (count (:events ledger))
+    :defects defects
+    :statuses (mapv #(select-keys % [:tension :status :status-since :moved-by-row]) statuses)
+    :status-fold (into (sorted-map) (frequencies (map :status statuses)))
+    :cashed (mapv :tension (filter #(= :cashed (:status %)) statuses))
+    :birth-rule-candidates (count (:candidates birth))
+    :controls (into (sorted-map) (map (fn [[k v]] [k (:pass? v)])) ctrls)}
+   :why-the-ledger-cannot-be-run-scoped
+   (str "no field of a tension or an event names a run: the keys in use are "
+        (pr-str (:event-keys-in-use scan)) " on events and "
+        (pr-str (:tension-keys-in-use scan)) " on tensions, of which "
+        (pr-str (:run-carrying-keys scan)) " carry a run. The nearest carrier is :event/at, "
+        "a DATE, and a date is not provenance: two lanes writing on the same day would both "
+        "match. U39's mint payload does carry :tension/provenance {:records [run-id ...]}, and "
+        "no committed tension was minted that way.")
+   :not-what-this-says
+   (str "The live derivation above is the fold of the ledger at deposit time, over tensions "
+        "minted by operator dictation on 2026-09-02. It is recorded so the absence is legible, "
+        "and it is NOT the deposited verdict.")))
+
+(defn deposit-notes [run-id receipt]
+  (let [d (:live-derivation receipt)
+        scan (:run-provenance receipt)]
+    (case (:verdict-deposited receipt)
+      :typed-absence
+      (str "the tension ledger records nothing about run " run-id ", and cannot: no tension "
+           "and no event carries a run identity. Measured, not assumed -- the run-id string "
+           "appears nowhere in tension-ledger.edn, none of the run's " (count (:tick-ids-sought scan))
+           " tick ids (" (str/join ", " (:tick-ids-sought scan)) ") appears in it, and of the "
+           "keys actually in use (" (pr-str (:event-keys-in-use scan)) " on events, "
+           (pr-str (:tension-keys-in-use scan)) " on tensions) none names a run. The nearest "
+           "carrier is :event/at, a date; the ledger's events fall on "
+           (str/join ", " (map key (:events-by-date scan))) ". So no tension can be said to "
+           "have been cashed BY this run. The fold at deposit time is "
+           (pr-str (:status-fold d)) " over " (:tensions d) " tensions and " (:events d)
+           " events, with " (:birth-rule-candidates d) " birth-rule candidates; that is a "
+           "property of the ledger at deposit time, is recorded in the artifact this row points "
+           "at, and is not deposited as this run's verdict.")
+      :red
+      (str "the tension ledger check FAILS at deposit time: " (pr-str (:defects d))
+           " defects, controls " (pr-str (:controls d)))
+      :green
+      (str "the ledger names this run: run-id in ledger? " (:run-id-appears-in-ledger? scan)
+           ", tick ids appearing " (pr-str (:tick-ids-appearing scan))
+           "; status fold " (pr-str (:status-fold d)) ", cashed " (pr-str (:cashed d))))))
+
+(defn deposit! [run-id]
+  (let [ledger-text (slurp ledger-path)
+        ledger (edn/read-string ledger-text)
+        defects (validate ledger)
+        statuses (mapv #(current-status ledger (:tension/id %)) (:tensions ledger))
+        birth (birth-rule ledger)
+        ctrls (into (sorted-map) (controls ledger defects birth))
+        scan (run-provenance-scan ledger-text ledger run-id (or (run-tick-ids run-id) []))
+        r (deposit-receipt run-id ledger defects statuses birth ctrls scan)
+        rel (str "holes/labs/wm-contract/runs/RE6-check-deposits/tensions-cashed-" run-id ".edn")
+        path (io/file repo-root rel)]
+    (io/make-parents path)
+    (spit path (with-out-str (pp/pprint r)))
+    (println "u41_tension_ledger --deposit: receipt" rel)
+    (let [{:keys [exit out err]}
+          (process/shell {:dir repo-root :out :string :err :string :continue true}
+                         "bb" "holes/labs/wm-contract/run_era_ledger.bb" "--deposit"
+                         "--run-id" run-id
+                         "--check-id" ":tensions-cashed"
+                         "--verdict" (str (:verdict-deposited r))
+                         "--artifact" rel
+                         "--author" "u41_tension_ledger.bb --deposit"
+                         "--deposited-by" "RE6 -- wire the four remaining catalogued checks"
+                         "--notes" (deposit-notes run-id r))]
+      (print out) (print err) (flush)
+      (when-not (zero? exit)
+        (println (format "u41_tension_ledger --deposit: the ledger refused the row (exit %d)" exit))
+        (println "  if the refusal is artifact-untracked or artifact-dirty, commit" rel "and re-run")
+        (System/exit 1))
+      (System/exit 0))))
+
+(if-let [run-id (second (drop-while #(not= "--deposit" %) *command-line-args*))]
+  (deposit! run-id)
+  (if (contains? (set *command-line-args*) "--deposit")
+    (do (println "u41_tension_ledger --deposit needs a run-id") (System/exit 1))
+    (apply -main *command-line-args*)))

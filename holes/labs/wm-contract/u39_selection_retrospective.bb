@@ -1,6 +1,9 @@
 #!/usr/bin/env bb
 ;; U39 -- SELECTION-RATIONALE RETROSPECTIVE, design pass.
 ;;
+;;   bb holes/labs/wm-contract/u39_selection_retrospective.bb
+;;   bb holes/labs/wm-contract/u39_selection_retrospective.bb --deposit <run-id>  (RE6)
+;;
 ;; READ-ONLY. Reads the recorded wm-trace corpus and the committed U42 readback;
 ;; writes only under holes/labs/wm-contract/runs/U39-selection-retrospective/.
 ;; No tick, no run lock, no substrate call, no network. Nothing under data/ is
@@ -19,7 +22,8 @@
 ;; only arithmetic is subtraction of two recorded numbers, and the controls pin
 ;; that the differences reproduce the recorded scores exactly.
 
-(require '[clojure.edn :as edn]
+(require '[babashka.process :as process]
+         '[clojure.edn :as edn]
          '[clojure.java.io :as io]
          '[clojure.string :as str]
          '[clojure.pprint :as pp])
@@ -610,4 +614,279 @@
         (println "CONTROL FAILED")
         (System/exit 1)))))
 
-(-main)
+;; ---------------------------------------------------------------------------
+;; --deposit <run-id> -- one run-era ledger row (RE6)
+;; ---------------------------------------------------------------------------
+;;
+;; The catalogue names THIS script as :rationale-regret's machinery, so this is
+;; the path that deposits that check's rows. What it evaluates is exactly the
+;; rule declared above in `retrospective-verdict` -- :declared-attributed-overtake
+;; -- applied to the run's OWN consecutive records, read out of the trace in its
+;; run store rather than out of the shared per-date corpus. No new rule, no new
+;; scalar, and the design pass's own artifact is untouched.
+;;
+;; WHY THIS CHECK CANNOT DEPOSIT A GREEN ON TODAY'S CORPUS, stated here rather
+;; than discovered by a reader: the declared rule has three outcomes and only
+;; two are reachable. UPHELD requires an outcome leg -- a record joining the
+;; selection to what it produced -- and `carrier-census` measures zero such
+;; records. So a run with no refutation folds to a TYPED ABSENCE naming
+;; :no-leg-measurable, never to a green. A green would assert the rationales
+;; held up, which nothing in the corpus can witness.
+;;
+;;   some pair :rationale-refuted    -> :red  (regret, attributed: a candidate
+;;                                             this run rejected out-ranked the
+;;                                             chosen one on its own movement)
+;;   no pair can decide               -> :typed-absence, with which leg failed
+;;   fewer than two ranking records   -> :typed-absence: no pair to evaluate
+;;
+;; A pair is REFUSED AT MINT, and never scored, when the record contradicts the
+;; claim projected from it: an unsound :selection-law (the design pass's own
+;; refusal) or -- the one this row met -- a chosen action that is not the
+;; G-minimal candidate, so the rivals the claim calls "rejected" were ahead of
+;; it all along and `overtake` has nothing to measure. See `assertion-holds?`.
+;;
+;; A claim whose record's own :selection-law contradicts its ranking is UNSOUND
+;; AT MINT and is not scored -- the same refusal the design pass records for the
+;; 2026-09-02 false stamp -- and the receipt names it rather than dropping it.
+
+(def deposit-receipt-dir "holes/labs/wm-contract/runs/RE6-check-deposits")
+
+(defn run-store-dir [run-id]
+  (io/file repo-root "holes/labs/wm-contract/runs" run-id))
+
+(defn run-store-files [run-id]
+  (let [d (run-store-dir run-id)]
+    (when (.isDirectory d)
+      (vec (sort (map #(.getName ^java.io.File %)
+                      (filter #(.isFile ^java.io.File %) (.listFiles d))))))))
+
+(defn run-tick-ids [run-id]
+  (->> (or (run-store-files run-id) [])
+       (keep #(second (re-matches #"tick-run-record-\d{4}-\d{2}-\d{2}-(.+)\.edn" %)))
+       sort vec))
+
+(defn run-trace-files [run-id]
+  (->> (or (run-store-files run-id) [])
+       (filter #(re-matches #"wm-trace.*\.edn" %))
+       (mapv #(str (io/file (run-store-dir run-id) %)))))
+
+(defn run-records
+  "The run's own records, in tick order: the trace in its store, filtered to the
+   ids its tick receipts name, so a shared trace file's foreign records cannot
+   be scored against it."
+  [run-id]
+  (let [ids (set (run-tick-ids run-id))]
+    (->> (mapcat read-trace (run-trace-files run-id))
+         (filter #(contains? ids (:run/id %)))
+         (sort-by :timestamp)
+         vec)))
+
+(defn assertion-holds?
+  "Does the record support the claim's own assertion -- that the chosen action's
+   G-core is BELOW each listed rejected candidate's, by :margin/total?
+
+   This is a precondition of the declared rule and not a second rule: `overtake`
+   asks whether a rejected candidate later out-ranked the chosen one, and on a
+   record where the rivals were ALREADY ahead the question is vacuous -- they
+   never were behind, so nothing overtook anything, and `rival-alone-suffices?`
+   fires on any rival movement at all because the margin it must close is
+   negative. A claim like that is refused here, exactly as an unsound law is,
+   rather than scored into a refutation the record does not carry."
+  [claim]
+  (let [margins (mapv :margin/total (:claim/rejected claim))]
+    {:rejected-considered (count margins)
+     :min-margin (when (seq margins) (apply min margins))
+     :chosen-controller-rank (get-in claim [:claim/chosen :controller-rank])
+     :holds? (and (seq margins) (every? pos? margins))}))
+
+(defn pair-verdicts
+  "One verdict per consecutive pair of ranking-carrying records, by the rule
+   declared in `retrospective-verdict`. A pair whose earlier claim is unsound at
+   mint, or whose assertion the record contradicts, is refused at mint instead
+   of scored."
+  [era u42 top-k source-file]
+  (vec (for [[claim-rec later-rec] (partition 2 1 era)
+             :let [claim (rationale-claim claim-rec source-file 0 top-k)
+                   sound? (= :sound (:status (:claim/soundness-at-mint claim)))
+                   asrt (assertion-holds? claim)]]
+         (cond
+           (not sound?)
+           {:claim-id (:claim/id claim)
+            :from (:run/id claim-rec) :to (:run/id later-rec)
+            :at (:timestamp claim-rec)
+            :verdict :refused-at-mint
+            :reason (:reason (:claim/soundness-at-mint claim))
+            :soundness (:claim/soundness-at-mint claim)}
+
+           (not (:holds? asrt))
+           {:claim-id (:claim/id claim)
+            :from (:run/id claim-rec) :to (:run/id later-rec)
+            :at (:timestamp claim-rec)
+            :verdict :refused-at-mint
+            :reason :claim-assertion-contradicted-by-the-record
+            :chosen (get-in claim [:claim/chosen :action])
+            :assertion asrt}
+
+           :else
+           (let [v (retrospective-verdict claim claim-rec later-rec u42 top-k)]
+             {:claim-id (:claim/id claim)
+              :from (:run/id claim-rec) :to (:run/id later-rec)
+              :at (:timestamp claim-rec)
+              :verdict (:verdict/verdict v)
+              :reason (:verdict/verdict-reason v)
+              :chosen (get-in claim [:claim/chosen :action])
+              :overtaken-by (mapv #(assoc (select-keys % [:action :rank-at-claim :rank-later
+                                                          :margin-at-claim :margin-later])
+                                          :reading (get-in % [:attribution :reading])
+                                          :rival-delta-G (get-in % [:attribution :rival-delta-G])
+                                          :chosen-delta-G (get-in % [:attribution :chosen-delta-G]))
+                                  (get-in v [:verdict/legs :overtake :overtaken-by]))
+              :assertion asrt
+              :legs-measurable
+              {:overtake true
+               :c-mis (get-in v [:verdict/legs :c-mis :movement])
+               :receipts (get-in v [:verdict/legs :receipts :status])}})))))
+
+(defn deposit-receipt [run-id]
+  (let [records (run-records run-id)
+        era (filterv has-ranking? records)
+        u42 (edn/read-string (slurp (io/file repo-root "holes/labs/wm-contract/runs/U42-producers/measurements.edn")))
+        source-file (first (mapv #(str/replace-first % (str repo-root "/") "")
+                                 (run-trace-files run-id)))
+        verdicts (if (< (count era) 2) [] (pair-verdicts era u42 5 source-file))
+        tally (into (sorted-map) (frequencies (map :verdict verdicts)))
+        refuted (filterv #(= :rationale-refuted (:verdict %)) verdicts)]
+    ;; array-map, not a literal: a map literal of this size is a hash-map and
+    ;; would print in hash order, so the receipt would not be stable to read.
+    (array-map
+     :schema :wm/run-era-deposit-receipt-v1
+     :row :RE6
+     :check :rationale-regret
+     :run-id run-id
+     :produced-by "holes/labs/wm-contract/u39_selection_retrospective.bb --deposit"
+     :deterministic
+     (str "No wall-clock field. Every number is read from a record or subtracted from two of "
+          "them, so this receipt is rewritten byte-identically on every deposit. That is what "
+          "lets the deposit require it to be committed and unmodified, and lets the same deposit "
+          "repeat as :already-present.")
+     :rule {:name :declared-attributed-overtake
+            :declared-at "holes/labs/wm-contract/u39_selection_retrospective.bb (retrospective-verdict)"
+            :statement (str "REFUTED iff some candidate this claim rejected later out-ranked the "
+                            "chosen one AND its own recorded movement alone would have closed the "
+                            "margin the claim asserted. An overtake explained by the chosen "
+                            "candidate's own non-progress decay measures the decay, not the "
+                            "rationale, and is UNTESTABLE.")
+            :upheld-unreachable
+            (str "UPHELD requires an outcome leg and no record in this corpus carries one, so "
+                 "this check cannot deposit a green from the trace alone.")}
+     :run-store {:dir (str "holes/labs/wm-contract/runs/" run-id)
+                 :holds (run-store-files run-id)
+                 :tick-ids (run-tick-ids run-id)
+                 :traces (mapv #(str/replace-first % (str repo-root "/") "") (run-trace-files run-id))
+                 :records-of-this-run (count records)
+                 :records-carrying-a-ranking (count era)
+                 :pairs-evaluated (count verdicts)}
+     :verdict-deposited (cond (< (count era) 2) :typed-absence
+                              (seq refuted) :red
+                              :else :typed-absence)
+     :pair-verdicts verdicts
+     :tally tally
+     :outcome-side
+     {:records-with-a-trace-outcome (count (filter trace-outcome records))
+      :records-with-realized-outcome (count (filter :realized-outcome records))
+      :why-it-matters "the UPHELD branch needs one of these; the count is what makes its absence a measurement"}
+     :not-what-this-says
+     (str "A :typed-absence here does NOT say the run's rationales held up. It says no leg of the "
+          "declared rule was measurable on this run's records: no rejected candidate overtook the "
+          "chosen one on its own movement, and there is no outcome carrier that could uphold the "
+          "claim instead."))))
+
+(defn deposit-notes [run-id r]
+  (let [store (:run-store r)
+        refuted (filterv #(= :rationale-refuted (:verdict %)) (:pair-verdicts r))]
+    (case (:verdict-deposited r)
+      :red
+      (str "REGRET, attributed: " (count refuted) " of " (:pairs-evaluated store)
+           " consecutive-tick pairs in this run are :rationale-refuted by the declared rule "
+           ":declared-attributed-overtake -- a candidate the tick rejected out-ranked the chosen "
+           "one at the next tick, and the rival's own recorded movement alone would have closed "
+           "the margin. "
+           (str/join "; " (for [v refuted
+                                :let [o (first (:overtaken-by v))]]
+                            (str (:from v) " chose " (pr-str (:chosen v)) " and "
+                                 (pr-str (:action o)) " went rank " (:rank-at-claim o) " -> "
+                                 (:rank-later o) " with rival-delta-G " (:rival-delta-G o))))
+           ". Tally " (pr-str (:tally r)) " over " (:records-carrying-a-ranking store)
+           " records carrying a ranking.")
+      :typed-absence
+      (let [refused (filterv #(= :refused-at-mint (:verdict %)) (:pair-verdicts r))]
+        (cond
+          (< (:records-carrying-a-ranking store) 2)
+          (str "runs/" run-id "/ holds fewer than two records carrying a controller ranking ("
+               (:records-carrying-a-ranking store) " of " (:records-of-this-run store)
+               " records of this run, from " (pr-str (:traces store))
+               "), and the declared rule evaluates a claim against the NEXT tick, so there is no "
+               "pair to evaluate and no rationale-regret verdict about this run exists.")
+
+          (= (count refused) (:pairs-evaluated store))
+          (str "all " (:pairs-evaluated store) " consecutive-tick pairs of this run are REFUSED AT "
+               "MINT, tally " (pr-str (:tally r))
+               ", so no rationale of this run is scorable by the declared rule. The reason is a "
+               "property of the run and is measured on its own records: the projected claim "
+               "asserts the chosen action's G-core is BELOW each listed rejected candidate's, and "
+               "on these records it is not -- "
+               (str/join "; " (for [v refused]
+                                (str (:from v) " chose " (pr-str (:chosen v))
+                                     " at controller rank "
+                                     (get-in v [:assertion :chosen-controller-rank])
+                                     " with the top-5 margin reaching "
+                                     (get-in v [:assertion :min-margin]))))
+               ". The chosen action was not the G-minimal candidate, so its rivals were ahead "
+               "from the start and the rule's overtake question is vacuous: nothing overtook "
+               "anything, and the margin a rival would have had to close is negative. Scoring it "
+               "would produce a refutation the record does not carry. What this run needs for a "
+               "rationale-regret verdict is a claim projected from the selector that actually "
+               "chose, not from the controller ranking it did not follow.")
+
+          :else
+          (str "no pair of this run's " (:pairs-evaluated store) " can decide, tally "
+               (pr-str (:tally r))
+               ". No rejected candidate out-ranked the chosen one on its own movement, so the "
+               "refutation leg does not fire; and the rule's other outcome, UPHELD, is unreachable "
+               "on this corpus because it needs an outcome leg -- this run's records carry "
+               (get-in r [:outcome-side :records-with-a-trace-outcome])
+               " trace outcomes and " (get-in r [:outcome-side :records-with-realized-outcome])
+               " realized outcomes. So the check ran, both legs are typed, and neither can decide: "
+               "that is an absence with a reason, not a green.")))
+      :green
+      (str "every pair upheld: " (pr-str (:tally r))))))
+
+(defn deposit! [run-id]
+  (let [r (deposit-receipt run-id)
+        rel (str deposit-receipt-dir "/rationale-regret-" run-id ".edn")
+        path (io/file repo-root rel)]
+    (io/make-parents path)
+    (spit path (with-out-str (pp/pprint r)))
+    (println "u39_selection_retrospective --deposit: receipt" rel)
+    (let [{:keys [exit out err]}
+          (process/shell {:dir repo-root :out :string :err :string :continue true}
+                         "bb" "holes/labs/wm-contract/run_era_ledger.bb" "--deposit"
+                         "--run-id" run-id
+                         "--check-id" ":rationale-regret"
+                         "--verdict" (str (:verdict-deposited r))
+                         "--artifact" rel
+                         "--author" "u39_selection_retrospective.bb --deposit"
+                         "--deposited-by" "RE6 -- wire the four remaining catalogued checks"
+                         "--notes" (deposit-notes run-id r))]
+      (print out) (print err) (flush)
+      (when-not (zero? exit)
+        (println (format "u39_selection_retrospective --deposit: the ledger refused the row (exit %d)" exit))
+        (println "  if the refusal is artifact-untracked or artifact-dirty, commit" rel "and re-run")
+        (System/exit 1))
+      (System/exit 0))))
+
+(if-let [run-id (second (drop-while #(not= "--deposit" %) *command-line-args*))]
+  (deposit! run-id)
+  (if (some #{"--deposit"} *command-line-args*)
+    (do (println "u39_selection_retrospective --deposit needs a run-id") (System/exit 1))
+    (-main)))
