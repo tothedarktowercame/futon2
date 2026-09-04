@@ -290,7 +290,14 @@
           "U39/U40: decay-family refutation, 85/85 re-selections"}
   #:check{:id :tensions-cashed,
           :machinery "holes/labs/wm-contract/u41_tension_ledger.bb",
-          :precedent "tension-ledger T1-T5, u41 validator"}],
+          :precedent "tension-ledger T1-T5, u41 validator"}
+  #:check{:id :selection-discrimination,
+          :machinery
+          "holes/labs/wm-contract/re7_selection_discrimination.bb (chosen-candidate controller-score tie from the run rationale records, Lean decide)",
+          :precedent
+          "U51/U52: the s5 55-wide plateau at ranks 73-127, chosen at rank 123 -- the defect Joe named on 2026-09-04",
+          :note
+          "the ledger enum has no :defect, so the check verdicts :defect and DEPOSITS :red; no new status word is minted. Plateaus of the field not containing the choice are a census (02-plateau-census.edn) and never a verdict."}],
  :ledger/version "v1",
  :ledger/hand-edited false,
  :ledger/written-by
