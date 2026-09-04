@@ -8,6 +8,8 @@
 ;;   bb holes/labs/wm-contract/run_era_ledger.bb --append-file <path>
 ;;   bb holes/labs/wm-contract/run_era_ledger.bb --deposit --run-id … --check-id …
 ;;       --verdict … --artifact … --author … [--notes …] [--at …]   (RE3)
+;;   bb holes/labs/wm-contract/run_era_ledger.bb --catalogue-add --id … --machinery …
+;;       --precedent … [--note …]                                    (RE7)
 ;;   (any mode) --ledger <path>   target a copy instead of the committed ledger
 ;;
 ;; `--check` is the gate: bare exit 0 when run-era-ledger.edn conforms to the
@@ -257,6 +259,79 @@
          (write-ledger! path header candidate)
          {:status :appended :run-id (:row/run-id row) :check-id (:row/check-id row)
           :row/seq seq-n :row/sha sha})))))
+
+;; ---------------------------------------------------------------------------
+;; Minting a catalogued check. RE7.
+;; ---------------------------------------------------------------------------
+;;
+;; The catalogue is the check-id enum, so a check that has no entry cannot
+;; deposit at all -- `--deposit` is refused by :check-id-not-in-catalogue. Adding
+;; the entry was the one part of the ledger with no API: the file says it is
+;; never hand-edited, and the row shape is mechanised, but the catalogue was
+;; reachable only with an editor. `catalogue-add!` closes that, through the same
+;; validate-refuse-replace path `append-row!` takes.
+;;
+;; THE CATALOGUE'S OWN RULE IS ENFORCED HERE RATHER THAN ASSERTED. The ledger
+;; states "a check enters the catalogue when its machinery exists"; this refuses
+;; an entry whose :check/machinery does not begin with a pointer resolving to a
+;; file under the pointer root. It is enforced at the ADD path and not added to
+;; `validate`, because turning it on for the seven entries already written would
+;; be a change to what `--check` means, and that is not this row's to make.
+;;
+;; ROWS ARE NOT TOUCHED. The sha chain covers rows only, so adding a catalogue
+;; entry leaves every :row/sha and :ledger/head-sha exactly as they were; control
+;; C22 shows it.
+
+(def catalogue-authored-keys [:check/id :check/machinery :check/precedent :check/note])
+
+(defn machinery-pointer
+  "The leading path of a :check/machinery string -- the entries carry a pointer
+   followed by an optional parenthetical gloss, so the pointer is the first
+   whitespace-delimited token."
+  [m]
+  (when (string? m) (first (str/split (str/trim m) #"\s+"))))
+
+(defn catalogue-add!
+  "Validated append into :ledger/check-catalogue, and the only write path into it.
+   Returns {:status :appended | :already-present ...}; throws on any refusal."
+  ([entry] (catalogue-add! default-ledger-path entry))
+  ([path entry]
+   (let [{:keys [header data]} (read-ledger path)
+         existing-defects (validate data)
+         _ (when (seq existing-defects)
+             (throw (ex-info "existing run-era ledger is invalid; refusing to add a check"
+                             {:defects existing-defects})))
+         proposed (select-keys entry catalogue-authored-keys)
+         _ (when-let [extra (seq (remove (set catalogue-authored-keys) (keys entry)))]
+             (throw (ex-info "proposed catalogue entry carries keys outside the declared shape"
+                             {:keys (vec extra)})))
+         old (some #(when (= (:check/id entry) (:check/id %)) %) (:ledger/check-catalogue data))]
+     (cond
+       (and old (= proposed (select-keys old catalogue-authored-keys)))
+       {:status :already-present :check-id (:check/id entry)}
+
+       old
+       (throw (ex-info "divergent entry for an existing :check/id; the catalogue is append-only"
+                       {:defects [{:kind :catalogue :subject (:check/id entry)
+                                   :defect :divergent-existing-check-id
+                                   :existing (select-keys old catalogue-authored-keys)
+                                   :proposed proposed}]}))
+
+       (not (artifact-resolves? (machinery-pointer (:check/machinery entry))))
+       (throw (ex-info "a check enters the catalogue when its machinery exists; this pointer does not resolve"
+                       {:defects [{:kind :catalogue :subject (:check/id entry)
+                                   :defect :machinery-pointer-does-not-resolve
+                                   :value (machinery-pointer (:check/machinery entry))}]}))
+
+       :else
+       (let [candidate (update data :ledger/check-catalogue (fnil conj []) proposed)
+             defects (validate candidate)]
+         (when (seq defects)
+           (throw (ex-info "proposed catalogue entry is invalid; nothing written"
+                           {:defects defects})))
+         (write-ledger! path header candidate)
+         {:status :appended :check-id (:check/id entry)
+          :catalogue-size (count (:ledger/check-catalogue candidate))})))))
 
 ;; ---------------------------------------------------------------------------
 ;; Deposit -- the path a CHECK takes into the ledger. RE3.
@@ -525,7 +600,20 @@
                                                    :check-id :run-conformance :verdict :green
                                                    :artifact "moved.edn" :author "control"}
                                               fixture))
-          final (read-ledger tmp)]
+          final (read-ledger tmp)
+          ;; RE7 -- the catalogue write path
+          cat-entry {:check/id :0000-self-test-check
+                     :check/machinery "holes/labs/wm-contract/run_era_ledger.bb (the self-test's own synthetic entry)"
+                     :check/precedent "synthetic; written only to a temporary copy"}
+          cat-before (read-ledger tmp)
+          cat-added (catalogue-add! tmp cat-entry)
+          cat-after (read-ledger tmp)
+          cat-replay (catalogue-add! tmp cat-entry)
+          c-cat-divergent (refusal #(catalogue-add! tmp (assoc cat-entry :check/precedent "a different precedent")))
+          c-cat-machinery (refusal #(catalogue-add! tmp {:check/id :0000-self-test-no-machinery
+                                                         :check/machinery "holes/labs/wm-contract/no-such-producer.bb"
+                                                         :check/precedent "synthetic"}))
+          cat-final (read-ledger tmp)]
       (array-map
        :positive/c1-committed-ledger-is-green
        {:defects empty-defects :rows (count (:rows (:data committed)))
@@ -656,7 +744,39 @@
        {:fixture-state (dissoc (artifact-commit-state fixture "committed.edn") :commit)
         :pass? (= {:state :committed :path "committed.edn" :at "2020-01-02T03:04:05Z"}
                   (dissoc (artifact-commit-state fixture "committed.edn") :commit))
-        :why "without this the three refusals above would be indistinguishable from a guard that refuses everything"}))))
+        :why "without this the three refusals above would be indistinguishable from a guard that refuses everything"}
+
+       :positive/c20-catalogue-add-appends-and-leaves-every-row-untouched
+       {:result cat-added
+        :catalogue-before (count (:ledger/check-catalogue (:data cat-before)))
+        :catalogue-after (count (:ledger/check-catalogue (:data cat-after)))
+        :rows-unchanged? (= (:rows (:data cat-before)) (:rows (:data cat-after)))
+        :head-sha-unchanged? (= (:ledger/head-sha (:data cat-before))
+                                (:ledger/head-sha (:data cat-after)))
+        :pass? (and (= :appended (:status cat-added))
+                    (= (inc (count (:ledger/check-catalogue (:data cat-before))))
+                       (count (:ledger/check-catalogue (:data cat-after))))
+                    (empty? (validate (:data cat-after)))
+                    (= (:rows (:data cat-before)) (:rows (:data cat-after)))
+                    (= (:ledger/head-sha (:data cat-before)) (:ledger/head-sha (:data cat-after))))
+        :why "minting a check is a write through the API rather than an edit, and the sha chain covers rows only -- so this shows the rows and the head sha come through it untouched"}
+
+       :positive/c21-identical-catalogue-add-is-already-present
+       {:result cat-replay
+        :byte-identical? (= (:text cat-after) (:text cat-final))
+        :pass? (and (= :already-present (:status cat-replay))
+                    (= (:text cat-after) (:text cat-final)))
+        :why "the mint is re-runnable for the same reason a deposit is: a check wired twice must not double its catalogue entry"}
+
+       :negative/c22-a-divergent-entry-for-an-existing-check-id-is-refused
+       {:defects (defect-kinds c-cat-divergent) :threw? (:threw? c-cat-divergent)
+        :pass? (refused-for? c-cat-divergent {:defect :divergent-existing-check-id})
+        :why "the catalogue is what a row's :check-id means; rewriting an entry in place would silently change what every past row claims"}
+
+       :negative/c23-an-entry-whose-machinery-does-not-resolve-is-refused
+       {:defects (defect-kinds c-cat-machinery) :threw? (:threw? c-cat-machinery)
+        :pass? (refused-for? c-cat-machinery {:defect :machinery-pointer-does-not-resolve})
+        :why "the ledger's own rule is `a check enters the catalogue when its machinery exists`; without this the rule was a sentence, and a check id could be minted for a producer nobody wrote"}))))
 
 ;; ---------------------------------------------------------------------------
 ;; Main
@@ -691,6 +811,26 @@
    "--notes" [:notes :string]
    "--deposited-by" [:deposited-by :string]
    "--at" [:at :string]})
+
+(def ^:private catalogue-flags
+  "--catalogue-add's named inputs. `--id` is read as EDN for the same reason
+   `--check-id` is: a mistyped id arrives as the keyword it really is."
+  {"--id" [:check/id :edn]
+   "--machinery" [:check/machinery :string]
+   "--precedent" [:check/precedent :string]
+   "--note" [:check/note :string]})
+
+(defn- parse-flags [flags mode args]
+  (loop [[a & more] args, out {}]
+    (cond
+      (nil? a) out
+      (= a mode) (recur more out)
+      (contains? flags a)
+      (let [[k kind] (get flags a)
+            v (or (first more) (throw (ex-info (str a " needs a value") {:flag a})))]
+        (recur (rest more) (assoc out k (if (= :edn kind) (edn/read-string v) v))))
+      :else (throw (ex-info (str "unknown " mode " flag")
+                            {:flag a :known (vec (sort (keys flags)))})))))
 
 (defn- parse-deposit [args]
   (loop [[a & more] args, out {}]
@@ -823,6 +963,23 @@
             (println " " (pr-str (ex-data e)))
             (System/exit 1))))
 
+      "--catalogue-add"
+      (let [entry (parse-flags catalogue-flags "--catalogue-add" args)
+            missing (vec (remove #(get entry %) [:check/id :check/machinery :check/precedent]))]
+        (when (seq missing)
+          (println "run_era_ledger --catalogue-add: missing" (pr-str missing))
+          (System/exit 1))
+        (try
+          (let [r (catalogue-add! path entry)]
+            (prn r)
+            (println (format "run_era_ledger: %s -- check %s, machinery %s"
+                             (name (:status r)) (str (:check/id entry))
+                             (machinery-pointer (:check/machinery entry)))))
+          (catch clojure.lang.ExceptionInfo e
+            (println "run_era_ledger --catalogue-add REFUSED:" (ex-message e))
+            (println " " (pr-str (ex-data e)))
+            (System/exit 1))))
+
       "--append"
       (let [row (edn/read-string (or (second (drop-while #(not= "--append" %) args))
                                      (throw (ex-info "--append needs an EDN row map" {}))))]
@@ -835,6 +992,7 @@
 
       (do (println "unknown mode" mode)
           (println "modes: --check | --report [outdir] | --self-test [outdir] | --append '<edn>' | --append-file <path>")
+          (println "       --catalogue-add --id <kw> --machinery <s> --precedent <s> [--note <s>]")
           (println "       --deposit --run-id <id> --check-id <kw> --verdict <kw> --artifact <path> --author <s> [--notes <s>] [--deposited-by <s>] [--at <instant>]")
           (println "       (any mode) [--ledger <path>]")
           (System/exit 64)))))

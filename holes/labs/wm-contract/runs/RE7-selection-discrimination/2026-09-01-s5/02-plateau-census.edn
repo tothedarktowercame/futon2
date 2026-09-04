@@ -1,0 +1,74 @@
+{:reader
+ {:id :re7-plateau-census,
+  :version "v1",
+  :row :RE7,
+  :script "holes/labs/wm-contract/re7_selection_discrimination.bb"},
+ :run-id "2026-09-01-s5",
+ :statement
+ "the plateaus of each decision's controller-score field, whether or not the chosen candidate is in them. This is a WIDTH CENSUS and not a verdict: control C8 shows it is not an input to the check.",
+ :widest-plateau-not-containing-choice 6,
+ :per-decision
+ [{:tick-id "2026-09-01T22:50:42.709079837Z",
+   :field
+   {:field-size 145,
+    :distinct-scores 79,
+    :chosen-rank 123,
+    :chosen-plateau
+    {:width 55, :rank-band [73 127], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 55, :rank-band [73 127], :contains-choice? true}
+     {:width 6, :rank-band [140 145], :contains-choice? false}
+     {:width 4, :rank-band [129 132], :contains-choice? false}
+     {:width 3, :rank-band [25 27], :contains-choice? false}
+     {:width 2, :rank-band [44 45], :contains-choice? false}
+     {:width 2, :rank-band [133 134], :contains-choice? false}],
+    :widest-plateau 55,
+    :widest-plateau-not-containing-choice 6}}
+  {:tick-id "2026-09-01T22:52:07.418144767Z",
+   :field
+   {:field-size 145,
+    :distinct-scores 79,
+    :chosen-rank 115,
+    :chosen-plateau
+    {:width 55, :rank-band [73 127], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 55, :rank-band [73 127], :contains-choice? true}
+     {:width 6, :rank-band [140 145], :contains-choice? false}
+     {:width 4, :rank-band [129 132], :contains-choice? false}
+     {:width 3, :rank-band [25 27], :contains-choice? false}
+     {:width 2, :rank-band [44 45], :contains-choice? false}
+     {:width 2, :rank-band [133 134], :contains-choice? false}],
+    :widest-plateau 55,
+    :widest-plateau-not-containing-choice 6}}
+  {:tick-id "2026-09-01T22:53:32.871991661Z",
+   :field
+   {:field-size 145,
+    :distinct-scores 79,
+    :chosen-rank 123,
+    :chosen-plateau
+    {:width 55, :rank-band [73 127], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 55, :rank-band [73 127], :contains-choice? true}
+     {:width 6, :rank-band [140 145], :contains-choice? false}
+     {:width 4, :rank-band [129 132], :contains-choice? false}
+     {:width 3, :rank-band [25 27], :contains-choice? false}
+     {:width 2, :rank-band [44 45], :contains-choice? false}
+     {:width 2, :rank-band [133 134], :contains-choice? false}],
+    :widest-plateau 55,
+    :widest-plateau-not-containing-choice 6}}
+  {:tick-id "2026-09-01T22:54:48.942309598Z",
+   :field
+   {:field-size 145,
+    :distinct-scores 79,
+    :chosen-rank 115,
+    :chosen-plateau
+    {:width 55, :rank-band [73 127], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 55, :rank-band [73 127], :contains-choice? true}
+     {:width 6, :rank-band [140 145], :contains-choice? false}
+     {:width 4, :rank-band [129 132], :contains-choice? false}
+     {:width 3, :rank-band [25 27], :contains-choice? false}
+     {:width 2, :rank-band [44 45], :contains-choice? false}
+     {:width 2, :rank-band [133 134], :contains-choice? false}],
+    :widest-plateau 55,
+    :widest-plateau-not-containing-choice 6}}]}

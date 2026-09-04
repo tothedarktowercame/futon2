@@ -1,0 +1,111 @@
+{:reader
+ {:id :re7-selection-discrimination,
+  :version "v1",
+  :row :RE7,
+  :script "holes/labs/wm-contract/re7_selection_discrimination.bb",
+  :read-only true,
+  :writes-only-under
+  "runs/RE7-selection-discrimination/2026-09-01-s5"},
+ :run-id "2026-09-01-s5",
+ :rule
+ {:per-decision
+  ":tiebreak when the chosen candidate's controller-score tie is wider than 1; :discriminating at exactly 1; :absent when the record carries no tie datum",
+  :per-run
+  ":defect if any decision is :tiebreak; else :typed-absence if any is :absent or there are no records; else :green",
+  :ledger-mapping
+  "the ledger's declared enum is #{:green :red :typed-absence}, so :defect deposits as :red and no new status word is minted"},
+ :verdict :defect,
+ :verdict-detail
+ {:verdict :defect,
+  :reason :chosen-inside-a-tie-wider-than-1,
+  :counts {:tiebreak 4}},
+ :deposits-as :red,
+ :decisions
+ [{:tick-id "2026-09-01T22:50:42.709079837Z",
+   :trace-run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+   :chosen [:advance-mission "M-wm-aif-policy-grain-compliance"],
+   :recorded {:controller-rank 123, :tie-count 55, :tie-band [73 127]},
+   :recomputed
+   {:controller-rank 123, :tie-count 55, :tie-band [73 127]},
+   :class :tiebreak,
+   :field
+   {:field-size 145,
+    :distinct-scores 79,
+    :chosen-rank 123,
+    :chosen-plateau
+    {:width 55, :rank-band [73 127], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 55, :rank-band [73 127], :contains-choice? true}
+     {:width 6, :rank-band [140 145], :contains-choice? false}
+     {:width 4, :rank-band [129 132], :contains-choice? false}
+     {:width 3, :rank-band [25 27], :contains-choice? false}
+     {:width 2, :rank-band [44 45], :contains-choice? false}
+     {:width 2, :rank-band [133 134], :contains-choice? false}],
+    :widest-plateau 55,
+    :widest-plateau-not-containing-choice 6}}
+  {:tick-id "2026-09-01T22:52:07.418144767Z",
+   :trace-run-id "c51a8da3-883e-4038-b493-1b268d5d8357",
+   :chosen [:advance-mission "M-aif-policy-conditioned-eig"],
+   :recorded {:controller-rank 115, :tie-count 55, :tie-band [73 127]},
+   :recomputed
+   {:controller-rank 115, :tie-count 55, :tie-band [73 127]},
+   :class :tiebreak,
+   :field
+   {:field-size 145,
+    :distinct-scores 79,
+    :chosen-rank 115,
+    :chosen-plateau
+    {:width 55, :rank-band [73 127], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 55, :rank-band [73 127], :contains-choice? true}
+     {:width 6, :rank-band [140 145], :contains-choice? false}
+     {:width 4, :rank-band [129 132], :contains-choice? false}
+     {:width 3, :rank-band [25 27], :contains-choice? false}
+     {:width 2, :rank-band [44 45], :contains-choice? false}
+     {:width 2, :rank-band [133 134], :contains-choice? false}],
+    :widest-plateau 55,
+    :widest-plateau-not-containing-choice 6}}
+  {:tick-id "2026-09-01T22:53:32.871991661Z",
+   :trace-run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+   :chosen [:advance-mission "M-wm-aif-policy-grain-compliance"],
+   :recorded {:controller-rank 123, :tie-count 55, :tie-band [73 127]},
+   :recomputed
+   {:controller-rank 123, :tie-count 55, :tie-band [73 127]},
+   :class :tiebreak,
+   :field
+   {:field-size 145,
+    :distinct-scores 79,
+    :chosen-rank 123,
+    :chosen-plateau
+    {:width 55, :rank-band [73 127], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 55, :rank-band [73 127], :contains-choice? true}
+     {:width 6, :rank-band [140 145], :contains-choice? false}
+     {:width 4, :rank-band [129 132], :contains-choice? false}
+     {:width 3, :rank-band [25 27], :contains-choice? false}
+     {:width 2, :rank-band [44 45], :contains-choice? false}
+     {:width 2, :rank-band [133 134], :contains-choice? false}],
+    :widest-plateau 55,
+    :widest-plateau-not-containing-choice 6}}
+  {:tick-id "2026-09-01T22:54:48.942309598Z",
+   :trace-run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+   :chosen [:advance-mission "M-aif-policy-conditioned-eig"],
+   :recorded {:controller-rank 115, :tie-count 55, :tie-band [73 127]},
+   :recomputed
+   {:controller-rank 115, :tie-count 55, :tie-band [73 127]},
+   :class :tiebreak,
+   :field
+   {:field-size 145,
+    :distinct-scores 79,
+    :chosen-rank 115,
+    :chosen-plateau
+    {:width 55, :rank-band [73 127], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 55, :rank-band [73 127], :contains-choice? true}
+     {:width 6, :rank-band [140 145], :contains-choice? false}
+     {:width 4, :rank-band [129 132], :contains-choice? false}
+     {:width 3, :rank-band [25 27], :contains-choice? false}
+     {:width 2, :rank-band [44 45], :contains-choice? false}
+     {:width 2, :rank-band [133 134], :contains-choice? false}],
+    :widest-plateau 55,
+    :widest-plateau-not-containing-choice 6}}]}

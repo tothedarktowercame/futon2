@@ -1,0 +1,35 @@
+{:run-id "2026-09-01-s5",
+ :rationale-dir
+ "holes/labs/wm-contract/runs/RE4-rationale-logging/store",
+ :rationale-records
+ [{:file
+   "holes/labs/wm-contract/runs/RE4-rationale-logging/store/rationale-2026-09-01-28da19d2-3a03-40f6-8eef-2818fe5583a9.edn",
+   :sha256
+   "5ae0e95bb390951cd074cb337c2398c671776691e7ad3cacda98452babbc510d"}
+  {:file
+   "holes/labs/wm-contract/runs/RE4-rationale-logging/store/rationale-2026-09-01-4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8.edn",
+   :sha256
+   "e92ecb76810df589eba505ae250e23d0a2124aacf295c31ad9c4b89625de6ad0"}
+  {:file
+   "holes/labs/wm-contract/runs/RE4-rationale-logging/store/rationale-2026-09-01-b69ec193-5aa0-45ca-9cbb-9df45cbb8d82.edn",
+   :sha256
+   "8a72aae6a9a050b2e7e5ed22abc2597be173e7350be7b9d4b00d51152e5d0eaf"}
+  {:file
+   "holes/labs/wm-contract/runs/RE4-rationale-logging/store/rationale-2026-09-01-c51a8da3-883e-4038-b493-1b268d5d8357.edn",
+   :sha256
+   "6c1dc40423ee8c530b8f016b0c97607aa3c454289d312c1f2b6e18ad62da4e9d"}],
+ :trace
+ {:path "holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn",
+  :sha256
+  "c3480955286e548be6fd4bbde80e5081446cfaaac1500294e2de1fa44e2d7c67",
+  :records-selected 4,
+  :recorded-trace-paths
+  ["holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn"],
+  :recorded-path-is-the-one-read? true,
+  :note
+  "the census is computed from the COMMITTED run-store trace above. `:rationale/trace-path` on the records says [\"holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn\"]; for 2026-09-04-re5 that is an absolute path into the live, untracked data/wm-trace/, which no reviewer and no other machine can read. Control C1 is what shows the file read here holds the same decisions the records were written from."},
+ :producer "holes/labs/wm-contract/re7_selection_discrimination.bb",
+ :producer-sha256
+ "2020a0a2e7ceabdd2a0727a3c34f57588bf945646eed0f1aa447834f4f9b1437",
+ :lean-slug "s5",
+ :emits-shared-definitions true}
