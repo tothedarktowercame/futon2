@@ -88,27 +88,49 @@
 ;; :typed-absence and the live derivation is recorded in the receipt, plainly
 ;; labelled as a statement about the tree at deposit time.
 
+(defn- store-files
+  "Every file of the run store, as store-relative paths, sorted. RECURSIVE
+   (RE5): the RE4 rationale records live in a `rationale/` SUBDIRECTORY, and a
+   top-level-only scan cannot see them, so the search below would have had to
+   find the authority sha in the README's prose or not at all. A run store with
+   no subdirectory yields exactly what the flat listing yielded."
+  [^java.io.File d]
+  (when (.isDirectory d)
+    (let [base (str (.getPath d) "/")]
+      (->> (file-seq d)
+           (filter #(.isFile ^java.io.File %))
+           (map #(str/replace-first (.getPath ^java.io.File %) base ""))
+           sort
+           vec))))
+
 (defn run-store-scan
   "What the run's own store says about a contract identity. `mentions` is every
    file whose text contains \"contract\" together with the distinct spellings
    found, so a reader can see what the store DOES carry (the producer-contract
-   tag) beside what it does not (the mathlib4 source sha)."
+   tag) beside what it does not (the mathlib4 source sha).
+
+   When the authority IS found, `:recorded-authority-appears-in` names the files
+   that carry it. A bare boolean is not a witness: a README sentence quoting the
+   sha satisfies it exactly as a machine-written record does, and only the list
+   lets a reader tell those apart. The key is omitted when nothing matched, so a
+   typed-absence receipt is unchanged."
   [root rel authority]
   (let [d (io/file root rel)
-        files (when (.isDirectory d) (sort (map #(.getName %) (filter #(.isFile %) (.listFiles d)))))
-        texts (into {} (for [f files] [f (slurp (io/file d f))]))]
-    {:dir rel
-     :exists? (boolean files)
-     :holds (vec files)
-     :mentions-of-contract
-     (into (sorted-map)
-           (for [[f t] texts
-                 :let [ms (vec (sort (distinct (re-seq #"[:a-zA-Z0-9_-]*[Cc]ontract[:a-zA-Z0-9_/.-]*" t))))]
-                 :when (seq ms)]
-             [f ms]))
-     :recorded-authority-sought authority
-     :recorded-authority-appears-in-store?
-     (boolean (some #(str/includes? % authority) (vals texts)))}))
+        files (store-files d)
+        texts (into {} (for [f files] [f (slurp (io/file d f))]))
+        carriers (vec (sort (keep (fn [[f t]] (when (str/includes? t authority) f)) texts)))]
+    (cond-> {:dir rel
+             :exists? (boolean files)
+             :holds (vec files)
+             :mentions-of-contract
+             (into (sorted-map)
+                   (for [[f t] texts
+                         :let [ms (vec (sort (distinct (re-seq #"[:a-zA-Z0-9_-]*[Cc]ontract[:a-zA-Z0-9_/.-]*" t))))]
+                         :when (seq ms)]
+                     [f ms]))
+             :recorded-authority-sought authority
+             :recorded-authority-appears-in-store? (boolean (seq carriers))}
+      (seq carriers) (assoc :recorded-authority-appears-in carriers))))
 
 (defn deposit-receipt [run-id result claim scan]
   (array-map
@@ -170,7 +192,10 @@
            ", last content change " (:holes-last-content-change d) ")")
       :green
       (str "the run store names the contract authority " (:recorded-authority d)
-           " and the pin holds against it"))))
+           " and the pin holds against it. Named in "
+           (str/join ", " (:recorded-authority-appears-in scan))
+           " -- the ledger row's basis is which of those a reader judges to be a "
+           "RECORD of the run rather than narrative about it."))))
 
 (defn deposit! [run-id result claim]
   (let [scan (run-store-scan repo-root (str "holes/labs/wm-contract/runs/" run-id)
