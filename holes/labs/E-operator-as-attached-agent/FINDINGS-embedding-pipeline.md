@@ -113,10 +113,100 @@ repeatedly, over a long history. Any input distribution would accumulate broad
 coverage that way. The question worth asking instead is whether the tags are
 *right*, and coverage cannot answer it.
 
-**Cumulative coverage over the whole store** is in `activations.edn`
-(`harvest_activations.bb`, every `context-retrieval` record paged out of the
-store). Read the ratio there against 1408, and against the 822 that random
-vectors reach on 563 draws, before treating a high number as a quality signal.
+### Cumulative coverage over the whole store
+
+`harvest_activations.bb` paged every `context-retrieval` record out of the
+store: **24,636 records over 128 days**, 2026-04-13 to 2026-09-04, **73,908
+activations**. Against the current library of 1393 distinct ids:
+
+| | |
+|---|---|
+| distinct patterns ever activated | 1315 |
+| of those, still in the library | 1197 |
+| of those, **no longer in the library** | **118** |
+| **coverage of the current library** | **1197 / 1393 = 85.9%** |
+| library patterns that have **never** fired | 196 |
+
+So Joe's impression is right on its face: 86% of the library has fired at least
+once. Three things qualify it.
+
+**It is below the null, not above it.** At 73,908 draws over 1393 patterns,
+uniform sampling would touch essentially all of them (expected miss rate
+e^-53). Observed is 85.9%, and 196 patterns are unreachable by five months of
+real traffic. Coverage this high is what volume buys; the gap from 100% is the
+part that carries information.
+
+**It is very unevenly held.** The top 10 patterns take 21.8% of all
+activations, the top 100 take 60.7%, the top 400 take 87.9%. Median activations
+per activated pattern: 14. 103 patterns have fired exactly once.
+
+**The unreachable 196 cluster by family**, which is the useful part:
+
+| family | never fired / in library |
+|---|---|
+| `iiching` (exotypes) | 86 / 257 |
+| `math-formalization` | 13 / 30 |
+| `or3` | 12 / 17 |
+| `math-formalization-CA` | 9 / 23 |
+| `liberation` | 9 / 16 |
+| `snatch` | 9 / 24 |
+| `math-informal-CT` | 5 / 7 |
+| `math-formalization-CV` | 5 / 7 |
+| `math-informal-CA` | 5 / 6 |
+
+Note `iching` (one i) fires heavily — `hexagram-24-fu` 712 times,
+`hexagram-49-ge` 656 — while a third of the `iiching/exotype-*` family never
+fires at all. Whole families sit far enough from the operational conversation
+in MiniLM space that top-3 never reaches them. That is a more useful statement
+about the library than the coverage percentage is.
+
+**Duplicate slots, measured.** Across all 24,636 records, 86 (0.35%) returned
+the same pattern id in more than one of their three slots — the `.flexiarg` /
+`.multiarg` collision described above, reaching the record.
+
+### A defect in the store's paged read, found by cross-check
+
+The first attempt at this harvest walked the whole corpus with one cursor and
+reported 16,121 records and `exhausted true`. Only 69 of them were dated
+2026-09, while the same filter with `since=2026-09-01` returns 1000 with a
+next-cursor. The single walk had missed **8,515 records, 35% of the corpus**.
+
+Cause: the route's keyset order is not `:evidence/at` order. Replayed documents
+land behind the write frontier carrying old timestamps (futon1b README-fts §3),
+so continuing from a `:next-cursor {:at ...}` over the full corpus skips every
+match newer than the cursor that had not yet been visited. `:incomplete` never
+fired, because no scan hit the 20,000-row ceiling — the loss is silent and the
+response claims exhaustion.
+
+The producer now windows by UTC day, pages each day to exhaustion separately,
+and cross-checks each day's count against text-search, which reads the FTS
+sidecar rather than the same scan. Result: **32 of 128 days disagree between
+the two methods, by 100 records in total (0.4%)**, FTS seeing slightly more;
+worst single day 2026-06-26, scan 161 against FTS 176. Three further days are
+excluded from that count because the FTS cross-check hit its own 1000 cap. The
+disagreeing days are listed in `activations.edn` under
+`:days-where-the-two-counts-disagree` rather than averaged away.
+
+Any earlier work that paged this route unwindowed over a long span should be
+re-checked. A short span is fine; the failure needs a cursor walk long enough
+to cross the frontier.
+
+### Two defects in the library the probe ran into
+
+**Fifteen pattern ids are declared twice.** The embeddings file has 1408 entries
+but 1393 distinct ids. Every duplicate is a `vsatelier/*` or `vsatlatarium/*`
+pattern declared once by its own `.flexiarg` file and again by the family's
+`.multiarg` file, with different text and therefore a different vector (cosine
+0.77–0.97 between the pair). Those fifteen patterns get two draws at every
+top-3, and can take two of the three slots at once. That is not hypothetical:
+census window 1's codex-7 record at 22:15:46 returned
+`["vsatlatarium/cached-layout-computation", "futon-theory/rapid-debugging",
+"vsatlatarium/cached-layout-computation"]` — rank 1 and rank 3 the same pattern,
+so that turn effectively got two tags, not three.
+
+**The ranker does not deduplicate.** `notions_search.py/_rank` sorts all entries
+by score and slices `[:top]` with no id-uniqueness step, which is why the
+collision reaches the record instead of being absorbed.
 
 ### The tags do carry some signal
 
@@ -232,7 +322,11 @@ exemplar — has **no retrieval record** among the 232 fetched for that day.
 1. **Stamp the record.** Add the pattern-library version (a hash of the
    embeddings file) and the full embedding input, or its hash, to the
    `context-retrieval` body. Without this, no census of the tagging layer is
-   reproducible against a corpus that is rebuilt untracked.
+   reproducible against a corpus that is rebuilt untracked — and 118 ids
+   already activated in the history no longer exist in the library.
+1a. **Deduplicate the library and the ranker.** Fifteen ids are declared twice
+   (§2); `_rank` should take the top *distinct* ids. Two lines, and it removes
+   a silent 2-tags-instead-of-3 on 0.35% of records.
 2. **Fix the envelope strip.** `extract-user-message` should recognise the bell
    envelope terminator as well as `"\nUser message:\n"`. One function, and it
    returns ~97 characters of operator budget on every codex-surface turn.
