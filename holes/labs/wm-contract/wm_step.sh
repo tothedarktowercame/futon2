@@ -389,10 +389,11 @@ cmd_plant() {
 }
 
 # --------------------------------------------------------------------------
-# The catalogued check battery, run against ONE accepted step. Every check in
-# run-era-ledger.edn's :ledger/check-catalogue has a `--deposit <run-id>` path
-# (RE3/RE6/RE7 built them); this runs all eight of them plus RUN3, which is what
-# writes the conformance verdict the run-conformance transcription reads.
+# The catalogued check battery, run against ONE accepted step. All EIGHT checks
+# in run-era-ledger.edn's :ledger/check-catalogue have a `--deposit <run-id>`
+# path (RE3/RE6/RE7 built them); this runs all eight, plus RUN3, which is not a
+# catalogued check but the measurement that writes the conformance verdict the
+# run-conformance transcription reads and cites.
 #
 # TWO PASSES, AND THAT IS THE LEDGER'S RULE NOT A LIMITATION HERE: append-row!
 # refuses a row whose artifact is untracked or dirty ("a ledger row may only
@@ -431,7 +432,18 @@ cmd_battery() {
   }
   run_check contract-pin "$ROOT" bb "$ROOT/checks/contract_authority_current.clj" --deposit "$run_id"
   run_check flip-readiness "$LAB" bb "$LAB/flip_readiness_check.bb" --deposit "$run_id"
-  run_check run3-conformance "$LAB" env FUTON_WM_TRACE_DIR="$store" bb "$LAB/run3_conformance.bb" "runs/$run_id"
+  # RUN3 is the MEASUREMENT, not one of the eight catalogued checks: it writes
+  # the run's conformance.edn, which u49 then transcribes and cites by
+  # :checked-at. Re-running it on a second pass restamps that timestamp, and the
+  # ledger then refuses u49's row as divergent for an existing
+  # (run-id, check-id) -- correctly, because the row would name a different
+  # measurement. So it runs once per run and a later pass reuses the verdict.
+  if [ -f "$store/conformance.edn" ]; then
+    say "battery: run3-conformance already measured (conformance.edn present); not re-measuring"
+    echo "=== run3-conformance SKIPPED: conformance.edn already written" >> "$battery"
+  else
+    run_check run3-conformance "$LAB" env FUTON_WM_TRACE_DIR="$store" bb "$LAB/run3_conformance.bb" "runs/$run_id"
+  fi
   run_check run-conformance "$LAB" env FUTON_WM_TRACE_DIR="$store" U49_RUN_DIR="runs/$run_id" U49_SLUG="$U49_SLUG" \
     U49_TRACE_FILE="runs/$run_id/wm-trace-$date_str.edn" U49_EMIT_TABLES=0 \
     bb "$LAB/u49_route_transcribe.bb" --deposit "$run_id" "runs/$run_id/u49"
@@ -450,7 +462,7 @@ cmd_battery() {
     || say "battery: RUN-ERA LEDGER --check FAILED"
   local deposited
   deposited=$(grep -c "exit=0$" "$battery")
-  say "battery: $deposited of 9 checks exited 0 (log: $battery)"
+  say "battery: $deposited of the battery's commands exited 0 -- eight catalogued checks plus RUN3 (log: $battery)"
   say "battery: rows the ledger refused as :artifact-untracked are the FIRST pass;"
   say "battery: commit runs/$run_id (and the RE3/RE6/RE7 receipts) then: wm_step.sh deposit $work $run_id"
 }

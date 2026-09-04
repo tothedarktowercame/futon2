@@ -31,7 +31,7 @@
 {:ledger/read-by
  ["run_era_ledger.bb (validator, run fold, check fold)"],
  :ledger/head-sha
- "efb33ea5b99843770a3f5ee04d02cdddf5e192cb893a008986ad16b6e8ed6764",
+ "24786ce1071edf38a1728907ce70cc4c24383d9aa67172a47c3d21e734018b60",
  :ledger/generated false,
  :ledger/schema
  {:row
@@ -288,7 +288,119 @@
         :author "re7_selection_discrimination.bb --deposit",
         :seq 16,
         :artifact
-        "holes/labs/wm-contract/runs/RE7-selection-discrimination/2026-09-04-re5/01-decisions.edn"}],
+        "holes/labs/wm-contract/runs/RE7-selection-discrimination/2026-09-04-re5/01-decisions.edn"}
+  #:row{:run-id "2026-09-04-010-accepted",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "ce73adc050e8b8b1892886f835236d051d873ad0bb993b9397d5768c920c5cf5",
+        :at "2026-09-04T16:40:36.011998629Z",
+        :verdict :green,
+        :check-id :run-conformance,
+        :notes
+        "the transcription reproduces the run's own pinned verdict :conformant (runs/2026-09-04-010-accepted/conformance.edn, :checked-at 2026-09-04T16:40:36.011998629Z, written by run3_conformance.bb when the run was taken) over 1 routes, 9 hops, 9 distinct, against control map e508ece; control C1 is that reproduction and every falsifier in C4 breaks it. LIMITS, from C6 beside this artifact: 5 of 9 distinct hops are on the :route-measured-drawn layer, which a previous route measurement put there, and 19 of 22 drawn edges never fired -- the run stayed inside the union of the drawn and measured layers, which is not the drawn figure predicting the run. Controls: holes/labs/wm-contract/runs/2026-09-04-010-accepted/u49/04-controls.edn.",
+        :author "u49_route_transcribe.bb --deposit",
+        :seq 17,
+        :artifact
+        "holes/labs/wm-contract/runs/2026-09-04-010-accepted/u49/03-classification.edn"}
+  #:row{:run-id "2026-09-04-010-accepted",
+        :deposited-by
+        "RE6 -- wire the four remaining catalogued checks",
+        :sha
+        "8b3040ee54f5ebd45ed68e0f91cd5b6eedb3a79ca9c1a180764d34b09d7fe382",
+        :at "2026-09-04T16:40:33Z",
+        :verdict :typed-absence,
+        :check-id :tensions-cashed,
+        :notes
+        "the tension ledger records nothing about run 2026-09-04-010-accepted, and cannot: no tension and no event carries a run identity. Measured, not assumed -- the run-id string appears nowhere in tension-ledger.edn, none of the run's 1 tick ids (7923ae0d-4514-40d9-8901-6e22995f5b94) appears in it, and of the keys actually in use ([:event/at :event/by :event/evidence :event/id :event/note :event/row :event/seq :event/tension :event/to-status :event/type] on events, [:tension/born-of :tension/carried-by :tension/id :tension/minted-by :tension/note :tension/pattern-links :tension/poles :tension/provenance :tension/refusal :tension/resolution-key :tension/resolution-path :tension/statement :tension/statement-source :tension/statement-source-corrected-by :tension/status] on tensions) none names a run. The nearest carrier is :event/at, a date; the ledger's events fall on 2026-09-02, 2026-09-03, 2026-09-04. So no tension can be said to have been cashed BY this run. The fold at deposit time is {:carried 7} over 7 tensions and 15 events, with 0 birth-rule candidates; that is a property of the ledger at deposit time, is recorded in the artifact this row points at, and is not deposited as this run's verdict.",
+        :author "u41_tension_ledger.bb --deposit",
+        :seq 18,
+        :artifact
+        "holes/labs/wm-contract/runs/RE6-check-deposits/tensions-cashed-2026-09-04-010-accepted.edn"}
+  #:row{:run-id "2026-09-04-010-accepted",
+        :deposited-by
+        "RE7 -- mint the :selection-discrimination check and wire its deposit",
+        :sha
+        "5da71fb882848ba6051f0a154a14fd597d9a68b5647ad50219f852df995de1c2",
+        :at "2026-09-04T16:30:14.927146598Z",
+        :verdict :green,
+        :check-id :selection-discrimination,
+        :notes
+        "every one of the 1 decisions chose a candidate whose controller score no other candidate shared (tie width 1, chosen rank 1), so no choice was made by the sort's tie-break. read from the 1 rationale records of runs/2026-09-04-010-accepted/rationale (the run's own, written at decision time), with the plateau census recomputed from the trace they name and control C1 requiring the recomputation to reproduce every recorded tie. WHAT THIS GREEN DOES NOT SAY, and the census beside it is why: the score field of these ticks still carries a plateau 56 candidates wide that the chosen candidate is not in (02-plateau-census.edn). The verdict is about the choices this run made, not about whether the scoring discriminates; control C8 shows the census is not an input to it.",
+        :author "re7_selection_discrimination.bb --deposit",
+        :seq 19,
+        :artifact
+        "holes/labs/wm-contract/runs/RE7-selection-discrimination/2026-09-04-010-accepted/01-decisions.edn"}
+  #:row{:run-id "2026-09-04-010-accepted",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "7a3204f2e999cebb2cce3a43f32492d2a51abc86c920909c5c4299f6c10b24ce",
+        :at "2026-09-04T16:40:56Z",
+        :verdict :green,
+        :check-id :contract-pin,
+        :notes
+        "the run store names the contract authority 69721b1268b7eb4bcefb1a4a7a812af4eb922a86 and the pin holds against it. Named in rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn -- the ledger row's basis is which of those a reader judges to be a RECORD of the run rather than narrative about it.",
+        :author "checks/contract_authority_current.clj --deposit",
+        :seq 20,
+        :artifact
+        "holes/labs/wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-04-010-accepted.edn"}
+  #:row{:run-id "2026-09-04-010-accepted",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "e28e4b52b021ed079f9652f676da9d749849757af863b6187e29ca368bed9e99",
+        :at "2026-09-04T16:40:56Z",
+        :verdict :typed-absence,
+        :check-id :flip-readiness,
+        :notes
+        "runs/2026-09-04-010-accepted/ holds no flip-readiness artifact -- the run store holds README.md, battery.log, conformance.edn, step.edn, tick-run-record-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn, wm-trace-2026-09-04.edn, world-after.edn, world-before.edn and nothing from this check, so no flip-readiness verdict contemporaneous with this run was ever recorded. The check run at deposit time reports PASS with 0 of 7 flips READY; that is a property of the tree at deposit time, is recorded in the artifact this row points at, and is not deposited as this run's verdict.",
+        :author "flip_readiness_check.bb --deposit",
+        :seq 21,
+        :artifact
+        "holes/labs/wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-04-010-accepted.edn"}
+  #:row{:run-id "2026-09-04-010-accepted",
+        :deposited-by
+        "RE6 -- wire the four remaining catalogued checks",
+        :sha
+        "08c056bb0efe307ea1ec80b60a5aff1ba517af8cccea6d07a5b2ed700631bc41",
+        :at "2026-09-04T16:40:56Z",
+        :verdict :typed-absence,
+        :check-id :per-node-runtime-validation,
+        :notes
+        "runs/2026-09-04-010-accepted/ holds no runtime-validation artifact -- the run store holds README.md, battery.log, conformance.edn, rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn, step.edn, tick-run-record-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn, u49/00-source.edn, u49/01-topology.edn, u49/02-routes.edn, u49/03-classification.edn, u49/04-controls.edn, u49/lean-block.lean, wm-trace-2026-09-04.edn, world-after.edn, world-before.edn and nothing from this check, and the catalog this check validates carries no run identity of its own: its rows are keyed by node and axis and its :test-runs by namespace and date, so no row can be attributed to a run. This check has no as-of-run mode, so the per-node validation state AT this run cannot be reconstructed. The check run at deposit time reports PASS with COUNTS: 84 rows (59 per-node, 25 global-run) | nodes 19/19 | status exists=69 exists-but-stale=4 red=3 named-gap=8 | flips=7 | test namespaces 47/50 green | pointers=181; that is a property of the tree at deposit time, is recorded in the artifact this row points at, and is not deposited as this run's verdict.",
+        :author "runtime_validation_check.bb --deposit",
+        :seq 22,
+        :artifact
+        "holes/labs/wm-contract/runs/RE6-check-deposits/runtime-validation-2026-09-04-010-accepted.edn"}
+  #:row{:run-id "2026-09-04-010-accepted",
+        :deposited-by
+        "RE6 -- wire the four remaining catalogued checks",
+        :sha
+        "7bcd7be3386b0191b8c80ec332a3204e0ed14f0b89b261b8d181927f485e20f0",
+        :at "2026-09-04T16:40:56Z",
+        :verdict :green,
+        :check-id :enumeration-completeness,
+        :notes
+        "replayed the run's own recorded ticks: 1 of 1 records in holes/labs/wm-contract/runs/2026-09-04-010-accepted/wm-trace-2026-09-04.edn carry this run's tick ids, and all 1 are :complete -- every member of the scanned population was enumerated and no enumerated target is missing from disk. The available side is scanned at deposit time; on this run that scan and the run's own tree agree, which is what a green here means and all it means.",
+        :author "u37_enumeration_replay.clj --deposit",
+        :seq 23,
+        :artifact
+        "holes/labs/wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-04-010-accepted.edn"}
+  #:row{:run-id "2026-09-04-010-accepted",
+        :deposited-by
+        "RE6 -- wire the four remaining catalogued checks",
+        :sha
+        "24786ce1071edf38a1728907ce70cc4c24383d9aa67172a47c3d21e734018b60",
+        :at "2026-09-04T16:40:56Z",
+        :verdict :typed-absence,
+        :check-id :rationale-regret,
+        :notes
+        "runs/2026-09-04-010-accepted/ holds fewer than two records carrying a controller ranking (1 of 1 records of this run, from [\"holes/labs/wm-contract/runs/2026-09-04-010-accepted/wm-trace-2026-09-04.edn\"]), and the declared rule evaluates a claim against the NEXT tick, so there is no pair to evaluate and no rationale-regret verdict about this run exists.",
+        :author "u39_selection_retrospective.bb --deposit",
+        :seq 24,
+        :artifact
+        "holes/labs/wm-contract/runs/RE6-check-deposits/rationale-regret-2026-09-04-010-accepted.edn"}],
  :ledger/check-catalogue
  [#:check{:id :contract-pin,
           :machinery

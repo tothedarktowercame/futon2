@@ -192,12 +192,17 @@ building the state the machine actually had.
 
 It then deposits `runs/2026-09-04-010-accepted` — the appended record as
 `wm-trace-2026-09-04.edn`, the receipt, the RE4 rationale, the world census
-before and after, and a README naming the sha — and runs all nine catalogued
-checks against that single step (`battery.log`). Every check produced a verdict:
+before and after, and a README naming the sha — and runs the whole battery against
+that single step (`battery.log`): all **eight** catalogued checks, plus RUN3,
+which is not a catalogued check but the measurement whose verdict the
+run-conformance transcription cites. Every check produced a verdict:
 RUN3 conformant (9 hops, 2 drawn, 5 route-measured, 1 excluded at dependency
 grain, 1 ruling-unrealised, 0 refutations), U49's transcription reproducing the
 pinned verdict with C1-C4 and C7 PASS, RE7 `:green`. The pin advanced to
-generation 2 and the sandbox was restored from it.
+generation 2 and the sandbox was restored from it. All eight catalogued rows are
+in `run-era-ledger.edn`; the run folds `:incomplete`, on four typed absences —
+the same four re5 folds on — which is the honest store rule, not a gap in the
+stepper.
 
 **The battery is two-pass, and that is the ledger's rule.** `append-row!`
 refuses a row whose artifact is untracked or dirty — "a ledger row may only
@@ -205,9 +210,12 @@ point at a committed, unmodified file" — so the first pass produces receipts a
 its deposits are refused, the operator commits the run store, and
 `wm_step.sh deposit` re-runs the same battery so the rows land. Each check
 rewrites its receipt byte-identically, so the second pass is a replay and not a
-second measurement.
+second measurement — with one exception found by running it: RUN3 stamps a fresh
+`:checked-at` into `conformance.edn`, which u49's row cites, so a second pass
+that re-measured made u49's row divergent and the ledger refused it. RUN3 now
+runs once per run and later passes reuse its verdict.
 
-Two of the nine load only from the repo root, and that is a classpath fact:
+Two of the battery's commands load only from the repo root, and that is a classpath fact:
 `bb.edn` declares `:paths ["."]`, so `checks/contract_authority_current.clj`
 resolves `writer-fence-capability` only from there, and
 `u37_enumeration_replay.clj` needs `src/` on the classpath, which only
