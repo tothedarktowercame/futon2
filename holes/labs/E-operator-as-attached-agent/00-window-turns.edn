@@ -1,0 +1,149 @@
+{:window {:from "2026-09-03T20:50:00Z", :to "2026-09-03T23:30:00Z"},
+ :record-count 21,
+ :session-start-count 3,
+ :turn-count 18,
+ :sessions
+ {"b2de8138-7b54-421d-80f2-17930ec1ae7b" 12,
+  "01a05e43-8c09-7a10-86a3-98df48c96d8b" 4,
+  "86eaf9c4-8250-4ac8-8106-f4f515fa1138" 2},
+ :turns
+ [{:evidence/id "emacs-9480cb9a8aa344fc8ec1c9732e5aae5e",
+   :at "2026-09-03T20:57:59.660275721Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-2440221cdb319ca9756d499d786f08c0",
+   :chars 26,
+   :text "the wm-build-loop is quiet"}
+  {:evidence/id "emacs-ddc40f0d51c430b87e8769f0a7ddb779",
+   :at "2026-09-03T20:58:59.007359892Z",
+   :session "01a05e43-8c09-7a10-86a3-98df48c96d8b",
+   :claim-type :question,
+   :in-reply-to "emacs-144af5aec24b7fe8dc6dfc30d49ccbc3",
+   :chars 21,
+   :text "the amp loop is quiet"}
+  {:evidence/id "emacs-efd4a07fed29b447967ef7b9a7917328",
+   :at "2026-09-03T21:01:40.205270493Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-bfd59867f3ae1a0f416a4543dae73a01",
+   :chars 46,
+   :text "let's walk through the items for me one by one"}
+  {:evidence/id "emacs-dd9b8970eb667e8b0a5bd40641a325b9",
+   :at "2026-09-03T21:43:21.670082905Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-d4e1534315c392e1ab868c537bd1d03d",
+   :chars 196,
+   :text
+   "j7 stay off (but come back to this later) ; j8 stay off (again, for now) ; j9 your recommendation ; j10 your recommendation  .. The others are too technical/abstract for me to comment on right now"}
+  {:evidence/id "emacs-d9ba621af2e5050fd4f6bb207c475980",
+   :at "2026-09-03T21:49:54.354339534Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-8d3807acdac17d5c1cc48ae41cc77608",
+   :chars 180,
+   :text
+   "I don't know if you can help me with the arm ruling and P-R16 ?  right now they remain sort of abstract and unmotivated for me, I don't know where we can get the needed clarity...?"}
+  {:evidence/id "emacs-a057632a361f1b9b2b0048f3ea4c31ee",
+   :at "2026-09-03T21:56:43.574897935Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-ffb97865bc6f20197398cc0dc45efd9a",
+   :chars 436,
+   :text
+   "so, case history should win, that's clear... but in the absence of such, a \"refusal to predict\" seems slightly overkill.  AIF has a notion of anticipating ourselves, and a generative model... let's not yhrow the baby out with the bathwater here.  Firstly, a \"refusal\" in our language is a protopattern.  The system could push a bit further... try creating a real pattern, cascade, etc... anfmd only if it can't get anywhere then give up"}
+  {:evidence/id "emacs-678f6c94b040c4c1d5676e2caaf13b2c",
+   :at "2026-09-03T22:04:21.960072091Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-081bb2bb8f05c17e399bb7d837ae5a6d",
+   :chars 204,
+   :text
+   "yeah, so tge arm ruling to me sounds like, let's get unstuck and exolire these ideas... then come back to this later.  As fir P-R16, tge way you exolained it above makes sense to me, so let's ratify that."}
+  {:evidence/id "emacs-5c2c99b5578ad787a70af38e37448608",
+   :at "2026-09-03T22:07:32.454808123Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-0e6a57fc3b67f50467c48dc025534241",
+   :chars 49,
+   :text "so, what's the word on RUN4? What edit is needed?"}
+  {:evidence/id "emacs-f6fc45b51985c99460cb18f3d77c0361",
+   :at "2026-09-03T22:12:58.527719887Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-7a0beea047c86b69255198478bfbd8d0",
+   :chars 631,
+   :text
+   "So I'm not sure I can declare this as a permanent, attested whole, because I'm not sure I believe... That WMRun conforms to wiring. Cannot be attested to. The machine actually runs along the diagram the paper draws. And I think all that's really needed here is to run the machine and see if it conforms to the... Wiring that we drew. And that should be something we can validate in Lean. So I don't see this as a permanent hole at all. I think it's just waiting until such time as we run the machine and produce the validation certificate. So no, it's not a permanent hole. It might be the last one we fill. But it's not permanent."}
+  {:evidence/id "emacs-3c23d39d1eba95ed2f98cc27b1187c07",
+   :at "2026-09-03T22:15:05.811279368Z",
+   :session "01a05e43-8c09-7a10-86a3-98df48c96d8b",
+   :claim-type :question,
+   :in-reply-to "emacs-b7f71e92d52d5481ca4aa63a551c6283",
+   :chars 379,
+   :text
+   "So why is this so slow? We're only seeing F84 student now. It's taking forever. Seemingly. I used to be expecting maybe it would take two hours. For one of these things to run, because we have an hour and a half for student runs and about half an hour for Codex runs and everything else. But now it looks like we've run maybe two and... 12 hours, if I'm... Remembering correctly."}
+  {:evidence/id "emacs-826802d8d0b5ac4b4e03fa06e9d3147a",
+   :at "2026-09-03T22:19:35.765047331Z",
+   :session "01a05e43-8c09-7a10-86a3-98df48c96d8b",
+   :claim-type :question,
+   :in-reply-to "emacs-e414fe5e5b04101f67daf41fc299f93b",
+   :chars 835,
+   :text
+   "I'm about to get on an airplane in a couple days, and I'd like to have some kind of guarantee that this work is actually going to be progressing during the… Six or eight hour flight. And furthermore, every night I go to sleep for six or eight hours, and I'd like to have some guarantee that this stuff is progressing every night. We've still got... I can't remember. About 150 more problems to get through, if I remember correctly, which I might not. And they're all procedural at this point, as far as I can tell. And so it's just a matter of running them according to a schedule and waiting hours for a fix that takes minutes. Isn't great. And if a frame can fit within two hours, Then it should be fitting in two hours, and if it isn't fitting in two hours, that's an error of a whole other class, which we need to start looking at."}
+  {:evidence/id "emacs-e01c94592f201520064814fad744fbff",
+   :at "2026-09-03T22:20:50.472479317Z",
+   :session "01a05e43-8c09-7a10-86a3-98df48c96d8b",
+   :claim-type :question,
+   :in-reply-to "emacs-65e0c4083dbd9f72af408589d02d7352",
+   :chars 263,
+   :text
+   "Well, how about you bell this to Claude Seven, asking for a design note that will address these considerations. And we'll leave this at a design level right now until such time as we're confident that the design is not going to make the behavior worse. And it is."}
+  {:evidence/id "emacs-aaf9611f6477a2916827fa965cf47794",
+   :at "2026-09-03T22:25:39.104443218Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-789d43ad4c3d1aab9faa84d64380ab5d",
+   :chars 3032,
+   :text
+   "So, while we're waiting on this build stuff and run stuff, I have a couple comments I want to think about. One is that the Futon 2026 paper has grown to something like 54 pages of PDF. And that's interesting because we've been doing lots of stuff to repair this build. But I think if we wanted to kind of move some of that material into a supplement, we could cut a lot of it out and just replace it with, you know, a simple statement saying you shouldn't expect to build a system that actually works according to the design you have in mind unless you have, Something approaching a formal specification, then you build to that. And that's not all there is to what we've done. But I would say it's a lot of what we've done. And that itself doesn't really address the business considerations that come in in part three of the paper. In part three of the paper, we're trying to talk about... How various businesses could benefit from the kinds of work that we're capable of doing. And that supplementary material I talked about, all this work we've put in to make the war machine work, assuming it actually works and all comes together, will be a kind of demonstration of a capability that we have. Which is available to anyone who knows how to use Clojure and Lean together. So that's... Potentially a trainable skill. But it's still perhaps a little bit special, and it's something that I didn't start out knowing two weeks ago in the way that I've started to learn about it in the process of working on this. So that's something to think about relative to the Futon 2026 paper. But for the PLOP 2026 paper, Witch. I had left off thinking I had built a working system that was all validated. According to the informal specification that we developed and that I submitted it, and then only later when I did the audit associated with Futon 2026 and this concept of closing the machine over the operator, Did I realize that the PLOP 2026 paper was... A description of a system. That didn't really hold water. And so I think we need to go back and think about how to revise the PLOP 2026 paper so that we don't just send in exactly the same design patterns and say, yep, it works now. Because that would be leaving out. A considerable amount of intellectual effort, and also maybe leaving out some crucial design patterns that would be aligned with the way... We've gone about building this system. And if we were to think about all of that using the active inference framework itself, we might realize that we had a missing... Rnode, or that R20 actually needs to be put in terms of some kind of formal specification. But that's really weird, because formal specifications don't exist in nature. An active inference is supposed to be a model of how any intelligent system works. So there's a gap between the active inference framework's claims to generality. And our observations that... Without a formal specification. You're not able to use AIF. In computational work. So I suggest there are some issues there we need to think about."}
+  {:evidence/id "emacs-1f890f7ab606e1a3673b10e87a920bfe",
+   :at "2026-09-03T22:34:01.395776128Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-7941484d14dab44df09dad5193baf2c3",
+   :chars 1921,
+   :text
+   "Okay, well I feel those comments you've made are very insightful. Thank you. And I think you're right that the formal specification is basically... A little generative system. And we could state that itself in more precise and general terms. But let's look at a simple business project, something that Rob has been talking about. So, here's a common case that occurs in business settings. Folks will have a working system. Maybe it's chipwits written in Forth, or maybe it's a banking system written in Cobalt. And someone will come along and say, hey, this is written in an outdated system using some outdated patterns. Let's rewrite it in Rust. Or rewrite it in some other language. And then they have two options. One is that they could throw away the old. Codex and start over. And the other is that they could take the old code as a form of specification. And say, well, our new rewrite should at least... Be as performant as the old code is in this set of circumstances. And that becomes a translation problem. And what Rob has noticed is that doing something like translating the lean system, which is written in C, Into Python. Using LLMs is possible, but challenging. Challenging to get right. And I think That detail is interesting. You know, you would have thought LLMs, oh, they're great. They're just like, um... An even better version of Google Translate. And you stick in some C and you get out Python on the other side. But Rob has found that's not the case. So you need the original code as a specification, but you also need a specification of the... Transcompilation process. And I think that's sort of what we've developed with our tetrahedron model, albeit It's an informal specification rather than a formal one. But anyway, these considerations I think are worth taking forward as well. Partly because that rewrite code or improve code problem is one that comes up in business settings quite a lot."}
+  {:evidence/id "emacs-07823f8fb1b05a0afb8f62c18405b5dc",
+   :at "2026-09-03T22:38:51.953295967Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-568cb74b5faf52aebba83eddd1be1990",
+   :chars 808,
+   :text
+   "So if I wanted to be very... Pedantic about this. I suppose I would say, well, let's use this model. And rewrite Chipwits in Rust. For example. Although I'm not sure I actually want to be that pedantic. But I think we've kind of tried something already a little bit like this idea with our Zaif work with Claude II, where we said, here's a specification of AIF that we're using in the warming. Machine. Now let's rewrite it for Agents as a harness. You know, because that's a kind of clever move, right? Because the war machine itself is described as a supplemental harness for... Off-the-shelf coding agents. It just didn't anticipate that we'd be getting a raw API like we get for. So it is kind of a rewrite. Just not from one programming language to another, but from one programming paradigm to another."}
+  {:evidence/id "emacs-d0f9baf316c3a445ea1b34ab8b9f01b6",
+   :at "2026-09-03T22:44:33.192491171Z",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b",
+   :claim-type :question,
+   :in-reply-to "emacs-91a8083e4fa1b2726e80b2b6db5e3e37",
+   :chars 1712,
+   :text
+   "Right. So again, I think this is insightful and it's making me think, what even is a formal specification, right? So... If we think about the mission lifecycle as being sort of analogous to our AIF, Inspired Life Cycle. Then we say, well, okay, in some cases there are seven phases, in another set of cases there are five phases, and maybe another set of cases there's 20 nodes that are distributed across five phases with these specific wirings. And any one of those things could have a formal specification. But I think a formal specification is really one where it says, with this level of generality... This is what's true. So, you know, for example, it wouldn't really have mattered from the point of view of the lean specification if we had written the war machine in Python. Or C. Or C sharp. Or lean itself used as a programming language. Because the formal specification doesn't say anything about that. And I think in the same way, there's probably a kind of formal specification. Of what this kind of agentic work is or does. That would be true at the level of the mission life cycle and true at the level of an AIF life cycle. And that probably has to do with what you were saying before about the... Model of the system itself basically being held by the operator. The operator is someone who's got a sense of where this is all going, and they've got a sense of how it relates to their livelihood or their sustenance. And that's perhaps important if we think about some of the parts of this build which have looked underdetermined. Well, maybe they're underdetermined in a technical way, but maybe they're underdetermined in a technical way. Because we haven't done that closure. Closure. Operation."}
+  {:evidence/id "emacs-9c609a3291a0b092e36e996df6c97185",
+   :at "2026-09-03T22:48:35.007342121Z",
+   :session "86eaf9c4-8250-4ac8-8106-f4f515fa1138",
+   :claim-type :question,
+   :in-reply-to "emacs-e128cac451c816da862bba96dd94e0ca",
+   :chars 1175,
+   :text
+   "So while I've commented that the... The APM loop is in a difficult state. I would like to comment that the topology loop that we built is in a pretty hopeless state. And I've asked you to... Help. Codex 7 with the 8pm loop because it stalls out and is slow. But the topology loop has just been not working at all for hours. Whereas the WMBuild loop works on-demand. And works effectively. And I don't understand why the APM loop can't be given the same. Good behavior. Because the APM loop actually has a whole formal specification behind it, whereas I'm not sure the WM build loop has it all. And yet the WM build loop seems to work fine. And the APM loop, although it's in principle more complicated, is not so complicated that it should be offline more. More time than it's online at this point. And the topology loop. Just never really worked at all, as far as I can tell. And so I'd like you to look into those resources and compare them with the well-working ones. And come up with some kind of diagnosis for why, at this stage, the APM loop is not working well, and why the topology loop is apparently not working at all, or at least not working reliably and robustly."}
+  {:evidence/id "emacs-5abb1c2bdb77e46861a4e1908ca5c53d",
+   :at "2026-09-03T22:58:01.503020721Z",
+   :session "86eaf9c4-8250-4ac8-8106-f4f515fa1138",
+   :claim-type :question,
+   :in-reply-to "emacs-7e4f05447b7a15891256d63b821eda2e",
+   :chars 1701,
+   :text
+   "Well, right now I'm just feeling a bit irked that we've gotten through 84 sessions. of the APM. And usually there has been an agent in the loop for all of those all along the way. Kept in tune with a babysitter or watchdog process. And yet the performance has been unreliable, and no one has noticed these types of issues until you've commented on them. So, clearly there is a specification gap. But, you know, these agents have been running around, like, sticking their fingers in the dike. Rather than doing anything to address it or saying, well, look, this needs a serious consideration. So I'd like you to give it a serious consideration now. We're not going to restart anything until it's got some type of guarantee that it's going to restart reliably. I don't see why the APM service shouldn't be as reliable as the WM build loop, even though it's doing something different. Sure, it's doing something different. But there's nothing about solving problem after problem in the logical, rigorous way we've been doing it. Doing the handoffs, doing the student reviews. There's nothing about that. That... Can't be said to go. over and over and do the same thing over and over again. And there's nothing about it that isn't methodical or mechanical. There's nothing about it that isn't inherently reliable. And yet the system that's been built and verified isn't reliable. So yes, as you said, there's a gap in the specification. I don't know if that's the formal specification. It has the gap, per se, or an informal specification, or something else, but I'd like you to address it now. Not just writing a tech note, but actually addressing the real problems so that we can get this thing working."}]}

@@ -1,0 +1,562 @@
+{:window {:from "2026-09-03T20:50:00Z", :to "2026-09-03T23:30:00Z"},
+ :classification-source
+ "classification.edn (hand-authored fiat; :kind and :node are judgement, :receipts are lookups)",
+ :rows
+ [{:retrieval/id "e-14c65218-9c4c-4719-ac40-5d75e7cc3b4a",
+   :receipt-grade :none,
+   :verbatim-head "the wm-build-loop is quiet",
+   :retrieval/agent "claude-1",
+   :receipt-count 0,
+   :node :none,
+   :node-note
+   "R2 is the declared-marks channel for observations about the FIELD.\n               This is an observation about the harness itself. Nearest missing\n               family: interoception at harness grain.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 26,
+   :retrieval/patterns
+   ["features/emit-per-tick-mismatch"
+    "realtime/loop-recovery-actions"
+    "realtime/loop-failure-signals"],
+   :kind :liveness-probe,
+   :at "2026-09-03T20:57:59.660275721Z",
+   :retrieval/envelope-chars 0,
+   :receipts [],
+   :retrieval/operator-chars 26,
+   :retrieval/lag-s 34,
+   :evidence/id "emacs-9480cb9a8aa344fc8ec1c9732e5aae5e",
+   :gloss
+   "the wm-build-loop is quiet -- an observation about the machine's own running state, offered by the operator",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-1728759c-c1ab-40e0-ba04-418cbc91dc21",
+   :receipt-grade :none,
+   :verbatim-head "the amp loop is quiet",
+   :retrieval/agent "codex-7",
+   :receipt-count 0,
+   :node :none,
+   :node-note
+   "see the wm-build-loop probe; two instances of one kind.",
+   :retrieval/query-chars 100,
+   :retrieval/join :envelope,
+   :chars 21,
+   :retrieval/patterns
+   ["features/emit-per-tick-mismatch"
+    "peripherals/hot-reload-as-default-fix-path"
+    "musn/pause-backtrace"],
+   :kind :liveness-probe,
+   :at "2026-09-03T20:58:59.007359892Z",
+   :retrieval/envelope-chars 97,
+   :receipts [],
+   :retrieval/operator-chars 3,
+   :retrieval/lag-s 231,
+   :evidence/id "emacs-ddc40f0d51c430b87e8769f0a7ddb779",
+   :gloss
+   "the amp loop is quiet -- same kind, different attached agent (codex seat)",
+   :session "01a05e43-8c09-7a10-86a3-98df48c96d8b"}
+  {:retrieval/id "e-1f0990de-a75c-4fd1-b7f8-5986f0680d00",
+   :receipt-grade :none,
+   :verbatim-head "let's walk through the items for me one by one",
+   :retrieval/agent "claude-1",
+   :receipt-count 0,
+   :node :none,
+   :node-note
+   "The table types what a PHASE DEPOSITS. This turn deposits nothing;\n               it changes control flow in the exchange. Above the table, not\n               beside it.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 46,
+   :retrieval/patterns
+   ["snatch/institutions-vary-by-position-and-force"
+    "system-coherence/plan-as-enumeration"
+    "equity/shared-maintenance-merged"],
+   :kind :process-directive,
+   :at "2026-09-03T21:01:40.205270493Z",
+   :retrieval/envelope-chars 0,
+   :receipts [],
+   :retrieval/operator-chars 46,
+   :retrieval/lag-s 78,
+   :evidence/id "emacs-efd4a07fed29b447967ef7b9a7917328",
+   :gloss
+   "let's walk through the items for me one by one -- sets the order in which the machine presents work",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-892aed21-5e1f-4780-8ba0-7c4e7f7ecbd5",
+   :receipt-grade :direct,
+   :verbatim-head
+   "j7 stay off (but come back to this later) ; j8 stay off (again, for now) ; j9 your recommendation ; j10 your recommendat",
+   :retrieval/agent "claude-1",
+   :receipt-count 3,
+   :node :none,
+   :node-note
+   "Preference declaration -- the C-vector / R20 territory\n               NOTE-aif-spec-gap section 3 already flags. Receipted heavily and\n               classified by nothing: the strongest single row for T5.\n               'your recommendation' is a SECOND kind inside the same turn --\n               the operator declaring the machine's recommendation authoritative,\n               which is the inverse of an acceptance gate and has no node either.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 196,
+   :retrieval/patterns
+   ["devmap-coherence/baseline-freeze"
+    "cycle-machine/step-machine"
+    "devmap-coherence/ifr-f3-piti"],
+   :kind :ruling+delegation,
+   :at "2026-09-03T21:43:21.670082905Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon2",
+     :sha "df5f7bff",
+     :what
+     "registry: :choices :mission-phase-value and :survey-mission-epistemic-action -> :decided, both defaults stay off"}
+    {:repo "futon2",
+     :sha "e380293d",
+     :what "J9/J10 closed on the rulings; U44 U45 U46 U47 minted"}
+    {:board "wm-contract/worklist.edn",
+     :rows [:J7 :J8 :J9 :J10],
+     :what ":evidence quotes the turn verbatim on all four rows"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 196,
+   :evidence/id "emacs-dd9b8970eb667e8b0a5bd40641a325b9",
+   :gloss
+   "j7 stay off ; j8 stay off ; j9 your recommendation ; j10 your recommendation -- four rulings in one turn, two of them delegations",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-5d755d95-a3b1-40a4-a36d-7f7653316ce4",
+   :receipt-grade :none,
+   :verbatim-head
+   "I don't know if you can help me with the arm ruling and P-R16 ?  right now they remain sort of abstract and unmotivated ",
+   :retrieval/agent "claude-1",
+   :receipt-count 0,
+   :node :none,
+   :node-note
+   "The operator reporting that HE cannot decide from what is written --\n               the exact mirror of the J-row :bar condition (a), which is the\n               machine reporting the same thing. The table has the machine's\n               side and not the operator's. Sharpest gap in the window.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 180,
+   :retrieval/patterns
+   ["math-strategy/structural-relation-result"
+    "eight-gates/elbow-immediate"
+    "math-informal/structural-characterization"],
+   :kind :operator-bar-report,
+   :at "2026-09-03T21:49:54.354339534Z",
+   :retrieval/envelope-chars 0,
+   :receipts [],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 70,
+   :evidence/id "emacs-d9ba621af2e5050fd4f6bb207c475980",
+   :gloss
+   "I don't know if you can help me with the arm ruling and P-R16 ? right now they remain sort of abstract and unmotivated for me",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-1321728b-46ab-461e-b03a-5c7294944495",
+   :receipt-grade :direct,
+   :verbatim-head
+   "so, case history should win, that's clear... but in the absence of such, a \"refusal to predict\" seems slightly overkill.",
+   :retrieval/agent "claude-1",
+   :receipt-count 9,
+   :node :R4/R5,
+   :node-note
+   "DERIVE-shaped and it cashes: alternatives named (case history vs\n               refusal-to-predict), a risk named (throwing the baby out with the\n               bathwater), and a THIRD design produced -- the three-rung ladder --\n               which is a G-comparison over candidate designs issued from the\n               operator seat. This is the row that extends T3's formal-claim pole.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 436,
+   :retrieval/patterns
+   ["musn/read-aif-plus-one"
+    "aif/shared-kernel-predictive-forward-model"
+    "war-room/wr-20-action-class-inventory-becomes-data"],
+   :kind :design-ruling,
+   :at "2026-09-03T21:56:43.574897935Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon2",
+     :sha "efdc4016",
+     :what
+     "registry :choices :task-belief-actand-source -- the arm ruling, verbatim on the entry"}
+    {:repo "futon2",
+     :sha "a415e8d6",
+     :what "J11 recorded; U33 superseded"}
+    {:repo "futon2",
+     :sha "65be3bad",
+     :what "J11 :acceptance and :bar completed"}
+    {:repo "futon3c",
+     :sha "70357f41",
+     :what
+     "zaif-harness U27z: rung 2, construct zero-support kin densities"}
+    {:repo "futon3c",
+     :sha "88853556",
+     :what
+     "U27z review fix: a de-marked constructed density must not validate as observed"}
+    {:repo "futon3c",
+     :sha "fde158d5",
+     :what "zaif: rung 3, mint refusal tensions"}
+    {:repo "futon3c",
+     :sha "1d4a10b7",
+     :what "zaif: attribute the U28z tension mint"}
+    {:repo "futon2",
+     :sha "630c8d9e",
+     :what
+     "wm: append refused-prediction tension (rung 3 landing in the U41 ledger)"}
+    {:board "zaif-harness/worklist.edn",
+     :rows [:U27z :U28z],
+     :what
+     "both rows open by citing the J-ruling and registry efdc401"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 224,
+   :evidence/id "emacs-a057632a361f1b9b2b0048f3ea4c31ee",
+   :gloss
+   "case history should win ... a refusal in our language is a protopattern ... push a bit further ... only if it can't get anywhere then give up",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-8abcc473-9871-4953-8812-e2154f709e8d",
+   :receipt-grade :direct,
+   :verbatim-head
+   "yeah, so tge arm ruling to me sounds like, let's get unstuck and exolire these ideas... then come back to this later.  A",
+   :retrieval/agent "claude-1",
+   :receipt-count 2,
+   :node :R9,
+   :node-note
+   "R9-shaped -- independent witness before action -- but issued from\n               ABOVE the written tower rather than beside it. The node cashes on\n               function and not on position; recorded as a caveat, not as a\n               failure.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 204,
+   :retrieval/patterns
+   ["musn/selection-before-write"
+    "musn/use-requires-evidence"
+    "fulab/pattern-propose"],
+   :kind :acceptance-gate,
+   :at "2026-09-03T22:04:21.960072091Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon2",
+     :sha "c8ae33cd",
+     :what
+     "J12 (P-R16 ruling) recorded + U48 minted to execute the re-scope and tripwire"}
+    {:board "wm-contract/worklist.edn",
+     :rows [:J12],
+     :what ":evidence quotes the ratification verbatim"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 83,
+   :evidence/id "emacs-678f6c94b040c4c1d5676e2caaf13b2c",
+   :gloss
+   "the way you explained it above makes sense to me, so let's ratify that",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-8991dea3-960b-4d65-92f3-791e953dda18",
+   :receipt-grade :none,
+   :verbatim-head "so, what's the word on RUN4? What edit is needed?",
+   :retrieval/agent "claude-1",
+   :receipt-count 0,
+   :node :none,
+   :node-note
+   "Requests a packet. Deposits nothing, so the table -- which types\n               deposits -- has nothing to type. Its effect is entirely in the\n               NEXT operator turn, which rules on what came back.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 49,
+   :retrieval/patterns
+   ["snatch/play-the-authored-order-first"
+    "ukrns/assumptions-commons"
+    "war-room/wr-8-typed-files-are-sources-of-truth"],
+   :kind :elicitation,
+   :at "2026-09-03T22:07:32.454808123Z",
+   :retrieval/envelope-chars 0,
+   :receipts [],
+   :retrieval/operator-chars 49,
+   :retrieval/lag-s 66,
+   :evidence/id "emacs-5c2c99b5578ad787a70af38e37448608",
+   :gloss "so, what's the word on RUN4? What edit is needed?",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-256a3d91-bb15-4778-b858-bbffc339288b",
+   :receipt-grade :direct,
+   :verbatim-head
+   "So I'm not sure I can declare this as a permanent, attested whole, because I'm not sure I believe... That WMRun conforms",
+   :retrieval/agent "claude-1",
+   :receipt-count 1,
+   :node :none,
+   :node-note
+   "Not R3 (the object is not a belief about the field) and not R17\n               (nothing is deposited for a later mission to inherit). The\n               operator edits the TYPE of a written declaration. The tower's own\n               text is the object -- which is what NOTE-aif-spec-gap section 6\n               says only the operator can do.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 631,
+   :retrieval/patterns
+   ["war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied"
+    "cycle-machine/runtime-restoration"
+    "invariant-coherence/reachable-from-boot"],
+   :kind :declaration-retyping,
+   :at "2026-09-03T22:12:58.527719887Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon2",
+     :sha "40f5b9f9",
+     :what
+     "RUN4 Lean ruling recorded -- NOT permanent, run-gated with a per-run Lean certificate as close-path; C114's decline superseded; U49 minted"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 151,
+   :evidence/id "emacs-f6fc45b51985c99460cb18f3d77c0361",
+   :gloss
+   "I don't see this as a permanent hole at all ... It might be the last one we fill. But it's not permanent.",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-46cae072-7706-448e-ad5f-13a191032a0c",
+   :receipt-grade :indirect,
+   :verbatim-head
+   "So why is this so slow? We're only seeing F84 student now. It's taking forever. Seemingly. I used to be expecting maybe ",
+   :retrieval/agent "codex-7",
+   :receipt-count 1,
+   :node :none,
+   :node-note
+   "An observation, so R2 is the tempting read -- but the observed\n               system is the harness, not the field. Same missing family as the\n               liveness probes, at higher precision.",
+   :retrieval/query-chars 100,
+   :retrieval/join :envelope,
+   :chars 379,
+   :retrieval/patterns
+   ["vsatlatarium/cached-layout-computation"
+    "futon-theory/rapid-debugging"
+    "vsatlatarium/cached-layout-computation"],
+   :kind :defect-report,
+   :at "2026-09-03T22:15:05.811279368Z",
+   :retrieval/envelope-chars 97,
+   :receipts
+   [{:repo "futon3c",
+     :sha "712c4140",
+     :what
+     "apm: classify a transient retirement shortfall as pending, not invalid (23:16, same night)"}],
+   :retrieval/operator-chars 3,
+   :retrieval/lag-s 41,
+   :evidence/id "emacs-3c23d39d1eba95ed2f98cc27b1187c07",
+   :gloss "So why is this so slow? We're only seeing F84 student now.",
+   :session "01a05e43-8c09-7a10-86a3-98df48c96d8b"}
+  {:retrieval/id "e-cca8dbdb-9ba3-470c-b326-5c5a3d10fe3f",
+   :receipt-grade :indirect,
+   :verbatim-head
+   "I'm about to get on an airplane in a couple days, and I'd like to have some kind of guarantee that this work is actually",
+   :retrieval/agent "codex-7",
+   :receipt-count 1,
+   :node :none,
+   :node-note
+   "AIF's C at organism grain -- purpose, livelihood, sustenance --\n               which NOTE-aif-spec-gap section 6 argues is held INFORMALLY by\n               structural necessity, because it is the level the written tower\n               tops out below. If that argument is right this turn kind cannot\n               have a node, and the absence is a result rather than a defect.\n               T5's strongest positive evidence in the window.",
+   :retrieval/query-chars 100,
+   :retrieval/join :envelope,
+   :chars 835,
+   :retrieval/patterns
+   ["war-room/wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch"
+    "realtime/liveness-heartbeats"
+    "aif/scheduled-observer-entrypoint"],
+   :kind :viability-declaration,
+   :at "2026-09-03T22:19:35.765047331Z",
+   :retrieval/envelope-chars 97,
+   :receipts
+   [{:repo "futon3c",
+     :sha "599a7530",
+     :what
+     "claude-7: unattended-progress contract design note -- but commissioned by the NEXT turn, not by this one"}],
+   :retrieval/operator-chars 3,
+   :retrieval/lag-s 16,
+   :evidence/id "emacs-826802d8d0b5ac4b4e03fa06e9d3147a",
+   :gloss
+   "I'm about to get on an airplane in a couple days, and I'd like some kind of guarantee that this work is actually going to be progressing",
+   :session "01a05e43-8c09-7a10-86a3-98df48c96d8b"}
+  {:retrieval/id "e-22c4ba8f-2677-48bf-9434-4c0ff8942810",
+   :receipt-grade :direct,
+   :verbatim-head
+   "Well, how about you bell this to Claude Seven, asking for a design note that will address these considerations. And we'l",
+   :retrieval/agent "codex-7",
+   :receipt-count 1,
+   :node :R16,
+   :node-note
+   "CONTESTED. R16 is the action, witnessed -- and this turn IS the\n               act that dispatches, with a receipt. But R16 in the table is the\n               machine's action under a policy; here the operator is the\n               actuator. Recorded as a proposed R16 with the objection stated,\n               because a census that hides its contested rows is worth less than\n               one that flags them.",
+   :retrieval/query-chars 100,
+   :retrieval/join :envelope,
+   :chars 263,
+   :retrieval/patterns
+   ["orchestration/recorded-handoff"
+    "pacspine/frictionless-next"
+    "features/operator-turns-enter-the-observation-vector"],
+   :kind :routing-directive+hold,
+   :at "2026-09-03T22:20:50.472479317Z",
+   :retrieval/envelope-chars 97,
+   :receipts
+   [{:repo "futon3c",
+     :sha "599a7530",
+     :what
+     "claude-7: unattended-progress contract design note for APM problem loop (22:28, eight minutes after the turn)"}],
+   :retrieval/operator-chars 3,
+   :retrieval/lag-s 56,
+   :evidence/id "emacs-e01c94592f201520064814fad744fbff",
+   :gloss
+   "how about you bell this to Claude Seven, asking for a design note ... and we'll leave this at a design level right now",
+   :session "01a05e43-8c09-7a10-86a3-98df48c96d8b"}
+  {:retrieval/id "e-4e0ab0e7-6000-4194-bce0-2945c4b1f137",
+   :receipt-grade :direct,
+   :verbatim-head
+   "So, while we're waiting on this build stuff and run stuff, I have a couple comments I want to think about. One is that t",
+   :retrieval/agent "claude-1",
+   :receipt-count 1,
+   :node :R2,
+   :node-note
+   "The one operator turn kind the parent mission's table already\n               classifies. It cashes: the dictation reached the store, the note,\n               and the ledger in one hop.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 3032,
+   :retrieval/patterns
+   ["devmap-coherence/ifr-f7-upa-upekkha"
+    "structure/backwards-induction"
+    "futon-theory/proof-path"],
+   :kind :head-dictation,
+   :at "2026-09-03T22:25:39.104443218Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon2",
+     :sha "8f5c5d77",
+     :what
+     "NOTE-aif-spec-gap written from the dictation; :programme/T5 minted through the validated append API -- recorded there as the FIRST operator-dictated use of that API"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 132,
+   :evidence/id "emacs-aaf9611f6477a2916827fa965cf47794",
+   :gloss
+   "the Futon-2026 supplement move, the PLoP retraction, and the AIF-generality gap",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-45178197-629a-4fd7-bac1-c255eecc82bc",
+   :receipt-grade :direct,
+   :verbatim-head
+   "Okay, well I feel those comments you've made are very insightful. Thank you. And I think you're right that the formal sp",
+   :retrieval/agent "claude-1",
+   :receipt-count 1,
+   :node :R2,
+   :node-note nil,
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 1921,
+   :retrieval/patterns
+   ["meta/layering-design-into-argument"
+    "ukrns/reader-as-participant"
+    "vsatelier/annotation-as-commitment"],
+   :kind :head-dictation,
+   :at "2026-09-03T22:34:01.395776128Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon2",
+     :sha "298cbae6",
+     :what
+     "NOTE-aif-spec-gap thread 4; T5 gains its first evidence-added event"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 80,
+   :evidence/id "emacs-1f890f7ab606e1a3673b10e87a920bfe",
+   :gloss
+   "Rob's legacy-rewrite case -- the two-specification structure",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-03d30b91-b9cb-40ff-bdb2-6a0f0d20f599",
+   :receipt-grade :direct,
+   :verbatim-head
+   "So if I wanted to be very... Pedantic about this. I suppose I would say, well, let's use this model. And rewrite Chipwit",
+   :retrieval/agent "claude-1",
+   :receipt-count 1,
+   :node :R2,
+   :node-note nil,
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 808,
+   :retrieval/patterns
+   ["math-strategy/technique-landscape-map"
+    "futon-theory/curry-howard-operational"
+    "math-formalization/separate-proof-transfer-from-artifact-replay"],
+   :kind :head-dictation,
+   :at "2026-09-03T22:38:51.953295967Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon2",
+     :sha "08e7dd70",
+     :what
+     "NOTE-aif-spec-gap thread 5; T3 gains the reframing evidence event"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 68,
+   :evidence/id "emacs-07823f8fb1b05a0afb8f62c18405b5dc",
+   :gloss "zaif was already a paradigm rewrite -- the retrodiction",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-4033b239-f366-44b6-9544-dbcb71b40bae",
+   :receipt-grade :direct,
+   :verbatim-head
+   "Right. So again, I think this is insightful and it's making me think, what even is a formal specification, right? So... ",
+   :retrieval/agent "claude-1",
+   :receipt-count 1,
+   :node :R2,
+   :node-note nil,
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 1712,
+   :retrieval/patterns
+   ["futon-theory/curry-howard-operational"
+    "futon-theory/event-protocol"
+    "futon-theory/mission-interface-signature"],
+   :kind :head-dictation,
+   :at "2026-09-03T22:44:33.192491171Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon2",
+     :sha "0d283ee5",
+     :what "NOTE-aif-spec-gap thread 6; T5 second evidence event"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 72,
+   :evidence/id "emacs-d0f9baf316c3a445ea1b34ab8b9f01b6",
+   :gloss
+   "what even IS a formal specification -- level-indexed invariance; underdetermination = un-closed-ness",
+   :session "b2de8138-7b54-421d-80f2-17930ec1ae7b"}
+  {:retrieval/id "e-20235931-418d-4813-bfb3-c8323eaca860",
+   :receipt-grade :indirect,
+   :verbatim-head
+   "So while I've commented that the... The APM loop is in a difficult state. I would like to comment that the topology loop",
+   :retrieval/agent "claude-7",
+   :receipt-count 2,
+   :node :none,
+   :node-note
+   "IDENTIFY/R1-R3 is the tempting read -- a gap named, scope bounded --\n               but the operator is not depositing a belief state, he is\n               COMMISSIONING one. The table types the deposit and not the order\n               to produce it.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 1175,
+   :retrieval/patterns
+   ["war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+    "features/emit-per-tick-mismatch"
+    "war-room/wr-19-tension-must-generate-not-only-rank"],
+   :kind :commission,
+   :at "2026-09-03T22:48:35.007342121Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon3c",
+     :sha "69d0b311",
+     :what
+     "read-only APM invariant checker (bb), tests, uninstalled unit/timer"}
+    {:repo "futon3c",
+     :sha "4b3b10af",
+     :what
+     "invariant checker: split completed-but-enabled from zombie liveness"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 267,
+   :evidence/id "emacs-9c609a3291a0b092e36e996df6c97185",
+   :gloss
+   "the topology loop ... just never really worked at all ... come up with some kind of diagnosis",
+   :session "86eaf9c4-8250-4ac8-8106-f4f515fa1138"}
+  {:retrieval/id "e-f6a98def-31d9-4962-bb2d-7cec938accf4",
+   :receipt-grade :indirect,
+   :verbatim-head
+   "Well, right now I'm just feeling a bit irked that we've gotten through 84 sessions. of the APM. And usually there has be",
+   :retrieval/agent "claude-7",
+   :receipt-count 4,
+   :node :none,
+   :node-note
+   "Refuses the KIND of artifact on offer. Carries affect ('a bit\n               irked') as part of the signal. No node types a refusal of a\n               deliverable type; the machine's own typed refusals (D8b, the\n               q-actand refusal) are refusals to PRODUCE, not refusals to ACCEPT.",
+   :retrieval/query-chars 100,
+   :retrieval/join :content,
+   :chars 1701,
+   :retrieval/patterns
+   ["cycle-machine/job-port"
+    "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+    "peripherals/pilot-plus-ground-control"],
+   :kind :deliverable-type-refusal,
+   :at "2026-09-03T22:58:01.503020721Z",
+   :retrieval/envelope-chars 0,
+   :receipts
+   [{:repo "futon3c",
+     :sha "99bb3f26",
+     :what "record explicit durable coordinator stop causes"}
+    {:repo "futon3c",
+     :sha "88d0645d",
+     :what "fail closed when stop cause is malformed"}
+    {:repo "futon3c",
+     :sha "ccc422a0",
+     :what "retry transient retirement audits before failing frames"}
+    {:repo "futon3c",
+     :sha "e0cb5462",
+     :what "apm: keep pending retirement fail closed at callers"}],
+   :retrieval/operator-chars 100,
+   :retrieval/lag-s 1175,
+   :evidence/id "emacs-5abb1c2bdb77e46861a4e1908ca5c53d",
+   :gloss
+   "I'd like you to address it now. Not just writing a tech note, but actually addressing the real problems.",
+   :session "86eaf9c4-8250-4ac8-8106-f4f515fa1138"}]}

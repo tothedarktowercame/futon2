@@ -1,0 +1,483 @@
+{:window {:from "2026-09-03T20:50:00Z", :to "2026-09-03T23:30:00Z"},
+ :count 40,
+ :records
+ [{:evidence/id "e-14c65218-9c4c-4719-ac40-5d75e7cc3b4a",
+   :at "2026-09-03T20:58:33.821816168Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "the wm-build-loop is quiet Quiet because *finished*, not stalled — the loop printed its clean `end a",
+   :patterns
+   ["features/emit-per-tick-mismatch"
+    "realtime/loop-recovery-actions"
+    "realtime/loop-failure-signals"]}
+  {:evidence/id "e-b7123990-9d6d-4f92-9b92-a5b3bb5e36b3",
+   :at "2026-09-03T21:01:49.735979833Z",
+   :agent "codex-17",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: apm-watcher-codex\nTo: codex-17\nOrigin: agent\nEdge: invoke-1",
+   :patterns
+   ["cycle-machine/job-port"
+    "orchestration/recorded-handoff"
+    "musn/tool-name-hygiene"]}
+  {:evidence/id "e-1728759c-c1ab-40e0-ba04-418cbc91dc21",
+   :at "2026-09-03T21:02:50.767832253Z",
+   :agent "codex-7",
+   :query-chars 100,
+   :envelope-chars 97,
+   :payload-chars 3,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: joe\nTo: codex-7\nOrigin: operator\nCaller: joe\n---\n\nthe",
+   :patterns
+   ["features/emit-per-tick-mismatch"
+    "peripherals/hot-reload-as-default-fix-path"
+    "musn/pause-backtrace"]}
+  {:evidence/id "e-1f0990de-a75c-4fd1-b7f8-5986f0680d00",
+   :at "2026-09-03T21:02:58.989829378Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "let's walk through the items for me one by one Reading the four J-rows in full first, so the walkthr",
+   :patterns
+   ["snatch/institutions-vary-by-position-and-force"
+    "system-coherence/plan-as-enumeration"
+    "equity/shared-maintenance-merged"]}
+  {:evidence/id "e-793c1dcc-0f18-46df-a536-fec8d6fc1e35",
+   :at "2026-09-03T21:03:56.058261349Z",
+   :agent "f84-proctor",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: countdown-control\nTo: f84-proctor\nOrigin: agent\nCalle",
+   :patterns
+   ["iching/hexagram-24-fu"
+    "iching/hexagram-49-ge"
+    "iching/hexagram-18-gu"]}
+  {:evidence/id "e-0902fa59-3e42-4c78-b8b4-6d5e6a0fc111",
+   :at "2026-09-03T21:10:17.772663373Z",
+   :agent "f84-solver",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: countdown-control\nTo: f84-solver\nOrigin: agent\nCaller",
+   :patterns
+   ["iching/hexagram-49-ge"
+    "iching/hexagram-24-fu"
+    "memory/no-tightening-while-held"]}
+  {:evidence/id "e-d58fee50-962f-4624-8f11-35f34f1ea094",
+   :at "2026-09-03T21:12:53.122501527Z",
+   :agent "f84-solver",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: countdown-control\nTo: f84-solver\nOrigin: agent\nCaller",
+   :patterns
+   ["iching/hexagram-49-ge"
+    "iching/hexagram-24-fu"
+    "iching/hexagram-46-sheng"]}
+  {:evidence/id "e-961d073d-d78d-485c-a6c3-b84864b03e1b",
+   :at "2026-09-03T21:18:39.837250171Z",
+   :agent "f84-solver",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: countdown-control\nTo: f84-solver\nOrigin: agent\nCaller",
+   :patterns
+   ["iching/hexagram-49-ge"
+    "iching/hexagram-24-fu"
+    "iching/hexagram-46-sheng"]}
+  {:evidence/id "e-372cd725-2f50-4b8c-843e-1d037e060c3d",
+   :at "2026-09-03T21:20:47.997540639Z",
+   :agent "f84-proctor",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: countdown-control\nTo: f84-proctor\nOrigin: agent\nCalle",
+   :patterns
+   ["iching/hexagram-49-ge"
+    "iching/hexagram-24-fu"
+    "iching/hexagram-46-sheng"]}
+  {:evidence/id "e-7408ef12-08c4-4ac6-bc03-cd650fd76f77",
+   :at "2026-09-03T21:23:17.608451450Z",
+   :agent "f84-scribe",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: countdown-control\nTo: f84-scribe\nOrigin: agent\nCaller",
+   :patterns
+   ["iching/hexagram-22-bi"
+    "iching/hexagram-49-ge"
+    "iching/hexagram-24-fu"]}
+  {:evidence/id "e-5c95c80f-7bd6-45e7-b433-0d1ec8c8429f",
+   :at "2026-09-03T21:25:36.717356476Z",
+   :agent "f84-promotion-proctor",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: countdown-control\nTo: f84-promotion-proctor\nOrigin: a",
+   :patterns
+   ["iching/hexagram-17-sui"
+    "iching/hexagram-24-fu"
+    "iching/hexagram-49-ge"]}
+  {:evidence/id "e-892aed21-5e1f-4780-8ba0-7c4e7f7ecbd5",
+   :at "2026-09-03T21:46:38.169088967Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "j7 stay off (but come back to this later) ; j8 stay off (again, for now) ; j9 your recommendation ; ",
+   :patterns
+   ["devmap-coherence/baseline-freeze"
+    "cycle-machine/step-machine"
+    "devmap-coherence/ifr-f3-piti"]}
+  {:evidence/id "e-0da35be5-585d-45bf-a08b-f040a48e49ba",
+   :at "2026-09-03T21:49:36.883083360Z",
+   :agent "f84-promotion-proctor",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: countdown-control\nTo: f84-promotion-proctor\nOrigin: a",
+   :patterns
+   ["iching/hexagram-17-sui"
+    "iching/hexagram-24-fu"
+    "musn/fulab-report-block"]}
+  {:evidence/id "e-5d755d95-a3b1-40a4-a36d-7f7653316ce4",
+   :at "2026-09-03T21:51:04.883553092Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "I don't know if you can help me with the arm ruling and P-R16 ?  right now they remain sort of abstr",
+   :patterns
+   ["math-strategy/structural-relation-result"
+    "eight-gates/elbow-immediate"
+    "math-informal/structural-characterization"]}
+  {:evidence/id "e-1321728b-46ab-461e-b03a-5c7294944495",
+   :at "2026-09-03T22:00:28.283979151Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "so, case history should win, that's clear... but in the absence of such, a \"refusal to predict\" seem",
+   :patterns
+   ["musn/read-aif-plus-one"
+    "aif/shared-kernel-predictive-forward-model"
+    "war-room/wr-20-action-class-inventory-becomes-data"]}
+  {:evidence/id "e-a5b82b40-9dcd-4411-a451-b4e67447c78b",
+   :at "2026-09-03T22:01:55.958738170Z",
+   :agent "claude-2",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: claude-1\nTo: claude-2\nOrigin: agent\nEdge: invoke-1788472805",
+   :patterns
+   ["musn/plan-before-tool"
+    "coordination/par-as-obligation"
+    "aif/interoceptive-tripwires"]}
+  {:evidence/id "e-4434b2ec-a73f-4f14-88e8-2343fd80214b",
+   :at "2026-09-03T22:02:22.652636336Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: auto-bellback\nFrom: auto-bellback\nTo: claude-1\nOrigin: harness\nEdge: a",
+   :patterns
+   ["orchestration/recorded-handoff"
+    "problems/tension-proposes-candidates"
+    "vsatlas/facilitation-scaffolds"]}
+  {:evidence/id "e-8abcc473-9871-4953-8812-e2154f709e8d",
+   :at "2026-09-03T22:05:45.916721264Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "yeah, so tge arm ruling to me sounds like, let's get unstuck and exolire these ideas... then come ba",
+   :patterns
+   ["musn/selection-before-write"
+    "musn/use-requires-evidence"
+    "fulab/pattern-propose"]}
+  {:evidence/id "e-8991dea3-960b-4d65-92f3-791e953dda18",
+   :at "2026-09-03T22:08:39.199655356Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "so, what's the word on RUN4? What edit is needed? RUN4's reserved edit is now concrete — and tonight",
+   :patterns
+   ["snatch/play-the-authored-order-first"
+    "ukrns/assumptions-commons"
+    "war-room/wr-8-typed-files-are-sources-of-truth"]}
+  {:evidence/id "e-2196cbc8-c010-416f-a71c-d52e121ebf30",
+   :at "2026-09-03T22:10:33.008879152Z",
+   :agent "claude-2",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: codex\nTo: claude-2\nOrigin: agent\nEdge: invoke-1788473363190",
+   :patterns
+   ["features/operator-turns-enter-the-observation-vector"
+    "social/ARGUMENT"
+    "iiching/exotype-042"]}
+  {:evidence/id "e-dfe61204-3706-412a-b20c-1ffd6119476b",
+   :at "2026-09-03T22:10:36.871776848Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: claude-2\nTo: claude-1\nOrigin: agent\nEdge: invoke-1788473402",
+   :patterns
+   ["futon-theory/derive-exits-on-a-minted-sorry"
+    "problems/satisfied-rungs-are-counted-and-surfaced"
+    "problems/tension-proposes-candidates"]}
+  {:evidence/id "e-0bea46c3-4443-46df-8a45-3762f7fb5f34",
+   :at "2026-09-03T22:14:13.192073307Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: codex\nTo: claude-1\nOrigin: agent\nEdge: invoke-1788473577557",
+   :patterns
+   ["memory/surface-the-closed-set"
+    "memory/no-tightening-while-held"
+    "orchestration/recorded-handoff"]}
+  {:evidence/id "e-d19e54db-bb36-4463-b80f-dc03d5427b54",
+   :at "2026-09-03T22:14:33.685784828Z",
+   :agent "claude-2",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: claude-1\nTo: claude-2\nOrigin: agent\nEdge: invoke-1788473637",
+   :patterns
+   ["musn/fulab-report-block"
+    "social/ARGUMENT"
+    "war-room/wr-17-futon0-as-cyborg-futon7-as-markov-blanket"]}
+  {:evidence/id "e-256a3d91-bb15-4778-b858-bbffc339288b",
+   :at "2026-09-03T22:15:29.990398423Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "So I'm not sure I can declare this as a permanent, attested whole, because I'm not sure I believe...",
+   :patterns
+   ["war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied"
+    "cycle-machine/runtime-restoration"
+    "invariant-coherence/reachable-from-boot"]}
+  {:evidence/id "e-6d785710-300c-457b-85af-7b8bc70f3e52",
+   :at "2026-09-03T22:15:42.268900122Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: auto-bellback\nFrom: auto-bellback\nTo: claude-1\nOrigin: harness\nEdge: a",
+   :patterns
+   ["war-room/wr-17-futon0-as-cyborg-futon7-as-markov-blanket"
+    "pacspine/simple-close"
+    "futon-theory/counter-ratchet"]}
+  {:evidence/id "e-46cae072-7706-448e-ad5f-13a191032a0c",
+   :at "2026-09-03T22:15:46.855445810Z",
+   :agent "codex-7",
+   :query-chars 100,
+   :envelope-chars 97,
+   :payload-chars 3,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: joe\nTo: codex-7\nOrigin: operator\nCaller: joe\n---\n\nSo ",
+   :patterns
+   ["vsatlatarium/cached-layout-computation"
+    "futon-theory/rapid-debugging"
+    "vsatlatarium/cached-layout-computation"]}
+  {:evidence/id "e-db0d175e-89ac-457f-9f47-e4ea8935b99a",
+   :at "2026-09-03T22:19:03.581068224Z",
+   :agent "codex-17",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: apm-watcher-codex\nTo: codex-17\nOrigin: agent\nEdge: invoke-1",
+   :patterns
+   ["orchestration/recorded-handoff"
+    "cycle-machine/job-port"
+    "peripherals/progress-heartbeat-distinct-from-cycle-completion"]}
+  {:evidence/id "e-cca8dbdb-9ba3-470c-b326-5c5a3d10fe3f",
+   :at "2026-09-03T22:19:51.767743577Z",
+   :agent "codex-7",
+   :query-chars 100,
+   :envelope-chars 97,
+   :payload-chars 3,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: joe\nTo: codex-7\nOrigin: operator\nCaller: joe\n---\n\nI'm",
+   :patterns
+   ["war-room/wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch"
+    "realtime/liveness-heartbeats"
+    "aif/scheduled-observer-entrypoint"]}
+  {:evidence/id "e-af7e1b95-2e3f-48e3-aa85-fa9e8de7a8ab",
+   :at "2026-09-03T22:21:19.434243126Z",
+   :agent "claude-2",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: zaif-build-loop\nTo: claude-2\nOrigin: agent\nEdge: invoke-178",
+   :patterns
+   ["futon-theory/derive-exits-on-a-minted-sorry"
+    "problems/tension-proposes-candidates"
+    "aif/interoceptive-tripwires"]}
+  {:evidence/id "e-22c4ba8f-2677-48bf-9434-4c0ff8942810",
+   :at "2026-09-03T22:21:47.308955932Z",
+   :agent "codex-7",
+   :query-chars 100,
+   :envelope-chars 97,
+   :payload-chars 3,
+   :query
+   "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: joe\nTo: codex-7\nOrigin: operator\nCaller: joe\n---\n\nWel",
+   :patterns
+   ["orchestration/recorded-handoff"
+    "pacspine/frictionless-next"
+    "features/operator-turns-enter-the-observation-vector"]}
+  {:evidence/id "e-005b9787-6636-4e9e-b220-183d243ec818",
+   :at "2026-09-03T22:23:01.817306771Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: claude-2\nTo: claude-1\nOrigin: agent\nEdge: invoke-1788474061",
+   :patterns
+   ["features/operator-turns-enter-the-observation-vector"
+    "futon-theory/agent-contract"
+    "orchestration/pattern-warranted-choice-point"]}
+  {:evidence/id "e-46f7549a-80a1-4c18-86c5-a9fa8a5a4325",
+   :at "2026-09-03T22:23:36.089043564Z",
+   :agent "claude-2",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: auto-bellback\nFrom: auto-bellback\nTo: claude-2\nOrigin: harness\nEdge: a",
+   :patterns
+   ["iching/hexagram-18-gu"
+    "pacspine/quick-intro"
+    "problems/operator-turns-become-inference-observations"]}
+  {:evidence/id "e-4e0ab0e7-6000-4194-bce0-2945c4b1f137",
+   :at "2026-09-03T22:27:51.409017646Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "So, while we're waiting on this build stuff and run stuff, I have a couple comments I want to think ",
+   :patterns
+   ["devmap-coherence/ifr-f7-upa-upekkha"
+    "structure/backwards-induction"
+    "futon-theory/proof-path"]}
+  {:evidence/id "e-7346d8df-1517-424c-9fea-a9ba129d6032",
+   :at "2026-09-03T22:29:22.454954154Z",
+   :agent "claude-7",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: bell\nFrom: codex-7\nTo: claude-7\nOrigin: agent\nEdge: invoke-17884740944",
+   :patterns
+   ["orchestration/recorded-handoff"
+    "process-coherence/status-refresh-before-work"
+    "musn/plan-before-tool"]}
+  {:evidence/id "e-abc9c973-f58f-455d-a8a5-afc52b87c4de",
+   :at "2026-09-03T22:29:52.028268032Z",
+   :agent "codex-7",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "--- CURRENT TURN ---\nSurface: auto-bellback\nFrom: auto-bellback\nTo: codex-7\nOrigin: harness\nEdge: au",
+   :patterns
+   ["memory/verify-in-the-serving-process"
+    "devmap-coherence/ifr-f0-sati"
+    "devmap-coherence/ifr-f3-piti"]}
+  {:evidence/id "e-45178197-629a-4fd7-bac1-c255eecc82bc",
+   :at "2026-09-03T22:35:21.423192815Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "Okay, well I feel those comments you've made are very insightful. Thank you. And I think you're righ",
+   :patterns
+   ["meta/layering-design-into-argument"
+    "ukrns/reader-as-participant"
+    "vsatelier/annotation-as-commitment"]}
+  {:evidence/id "e-03d30b91-b9cb-40ff-bdb2-6a0f0d20f599",
+   :at "2026-09-03T22:40:00.587691122Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "So if I wanted to be very... Pedantic about this. I suppose I would say, well, let's use this model.",
+   :patterns
+   ["math-strategy/technique-landscape-map"
+    "futon-theory/curry-howard-operational"
+    "math-formalization/separate-proof-transfer-from-artifact-replay"]}
+  {:evidence/id "e-4033b239-f366-44b6-9544-dbcb71b40bae",
+   :at "2026-09-03T22:45:46.129433130Z",
+   :agent "claude-1",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "Right. So again, I think this is insightful and it's making me think, what even is a formal specific",
+   :patterns
+   ["futon-theory/curry-howard-operational"
+    "futon-theory/event-protocol"
+    "futon-theory/mission-interface-signature"]}
+  {:evidence/id "e-20235931-418d-4813-bfb3-c8323eaca860",
+   :at "2026-09-03T22:53:02.443946724Z",
+   :agent "claude-7",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "So while I've commented that the... The APM loop is in a difficult state. I would like to comment th",
+   :patterns
+   ["war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+    "features/emit-per-tick-mismatch"
+    "war-room/wr-19-tension-must-generate-not-only-rank"]}
+  {:evidence/id "e-f6a98def-31d9-4962-bb2d-7cec938accf4",
+   :at "2026-09-03T23:17:36.615378516Z",
+   :agent "claude-7",
+   :query-chars 100,
+   :envelope-chars 0,
+   :payload-chars 100,
+   :query
+   "Well, right now I'm just feeling a bit irked that we've gotten through 84 sessions. of the APM. And ",
+   :patterns
+   ["cycle-machine/job-port"
+    "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels"
+    "peripherals/pilot-plus-ground-control"]}]}

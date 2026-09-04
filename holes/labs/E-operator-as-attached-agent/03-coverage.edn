@@ -1,0 +1,87 @@
+{:window {:from "2026-09-03T20:50:00Z", :to "2026-09-03T23:30:00Z"},
+ :denominators
+ {:store-records-authored-by-joe 21,
+  :of-which-session-start-events 3,
+  :operator-turns 18},
+ :tag-coverage
+ {:turns-with-a-retrieval-record 18,
+  :turns-without 0,
+  :fraction 1.0,
+  :by-join-stage {:content 14, :envelope 4},
+  :content-joinable-fraction 0.7777777777777778,
+  :lag-seconds {:min 16, :max 1175}},
+ :instrument-fidelity
+ {:note
+  "how many characters of the OPERATOR's own words reached the\n                      embedder, per turn. The parent excursion's caveat says the\n                      query is ~the first 100 chars of the turn; measured, that\n                      is only true on one of the two surfaces.",
+  :by-surface
+  {:bare-turn
+   {:turns 14,
+    :envelope-chars (0),
+    :operator-chars-min 26,
+    :operator-chars-max 100,
+    :operator-chars
+    [26 46 100 100 100 100 49 100 100 100 100 100 100 100]},
+   :bell-envelope
+   {:turns 4,
+    :envelope-chars (97),
+    :operator-chars-min 3,
+    :operator-chars-max 3,
+    :operator-chars [3 3 3 3]}}},
+ :phase-vocabulary
+ {:words
+  ["identify"
+   "map"
+   "derive"
+   "argue"
+   "verify"
+   "instantiate"
+   "document"
+   "survey"],
+  :turns-with-any-phase-word 0,
+  :hits-over-full-text
+  {"identify" 0,
+   "map" 0,
+   "derive" 0,
+   "argue" 0,
+   "verify" 0,
+   "instantiate" 0,
+   "document" 0,
+   "survey" 0},
+  :measured-directly
+  {"identify" 0,
+   "map" 0,
+   "derive" 0,
+   "argue" 0,
+   "verify" 0,
+   "instantiate" 0,
+   "document" 0,
+   "survey" 0}},
+ :node-coverage
+ {:turns-landing-on-a-table-node 7,
+  :turns-landing-on-no-node 11,
+  :by-node {:none 11, :R4/R5 1, :R9 1, :R16 1, :R2 4},
+  :by-kind
+  {:declaration-retyping 1,
+   :routing-directive+hold 1,
+   :operator-bar-report 1,
+   :process-directive 1,
+   :acceptance-gate 1,
+   :commission 1,
+   :viability-declaration 1,
+   :defect-report 1,
+   :head-dictation 4,
+   :elicitation 1,
+   :design-ruling 1,
+   :liveness-probe 2,
+   :ruling+delegation 1,
+   :deliverable-type-refusal 1}},
+ :receipt-coverage
+ {:turns-with-at-least-one-receipt 13,
+  :direct 9,
+  :indirect 4,
+  :none 5,
+  :total-receipts 28},
+ :both
+ {:node-and-direct-receipt 7,
+  :no-node-but-direct-receipt 2,
+  :no-node-and-no-receipt 5}}

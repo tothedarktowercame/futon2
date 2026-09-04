@@ -1,0 +1,247 @@
+;; classification.edn — HAND-AUTHORED. Fiat, and labelled as fiat.
+;;
+;; One entry per operator turn in the pinned window, keyed by the store's
+;; evidence id. Two fields are judgement and two are lookups:
+;;
+;;   :kind      judgement — the turn kind, named in this excursion's own words
+;;   :node      judgement — the M-zaif-harness-v1 phase->node table row this
+;;              turn's deposit lands on, or :none if it lands on no row.
+;;              PROPOSED, not found: a node here is a hypothesis the receipt
+;;              either cashes or fails to cash.
+;;   :receipts  lookup — commits / registry keys / worklist rows in which the
+;;              machine demonstrably CONSUMED this turn at that node.
+;;              Anti-glibness (inherited from the parent mission): a census row
+;;              with an empty :receipts vector is decoration and ships as a
+;;              typed absence, not as a finding.
+;;   :receipt-grade  :direct    the receipt names or quotes this turn
+;;                   :indirect  the work is traceable to this turn but no
+;;                              artifact cites it
+;;                   :none      nothing consumed it
+;;
+;; Node vocabulary is the parent mission's, not new: R1 R2 R3 R4 R5 R6 R9 R16 R17.
+
+{:window {:from "2026-09-03T20:50:00Z"
+          :to   "2026-09-03T23:30:00Z"
+          :why  "the 2026-09-03 ruling session -- the J7-J12 walk, the arm ruling,
+                 P-R16 and RUN4 -- as pinned by holes/E-operator-as-attached-agent.md
+                 method step 1. Bounds are wall-clock and cover all three REPL
+                 sessions live in that span, not only claude-1's, because the
+                 excursion asks about the operator SEAT and the seat was driving
+                 three attached agents at once."}
+
+ :turns
+ {"emacs-9480cb9a8aa344fc8ec1c9732e5aae5e"
+  {:kind :liveness-probe
+   :gloss "the wm-build-loop is quiet -- an observation about the machine's own running state, offered by the operator"
+   :node :none
+   :node-note "R2 is the declared-marks channel for observations about the FIELD.
+               This is an observation about the harness itself. Nearest missing
+               family: interoception at harness grain."
+   :receipts []
+   :receipt-grade :none}
+
+  "emacs-ddc40f0d51c430b87e8769f0a7ddb779"
+  {:kind :liveness-probe
+   :gloss "the amp loop is quiet -- same kind, different attached agent (codex seat)"
+   :node :none
+   :node-note "see the wm-build-loop probe; two instances of one kind."
+   :receipts []
+   :receipt-grade :none}
+
+  "emacs-efd4a07fed29b447967ef7b9a7917328"
+  {:kind :process-directive
+   :gloss "let's walk through the items for me one by one -- sets the order in which the machine presents work"
+   :node :none
+   :node-note "The table types what a PHASE DEPOSITS. This turn deposits nothing;
+               it changes control flow in the exchange. Above the table, not
+               beside it."
+   :receipts []
+   :receipt-grade :none}
+
+  "emacs-dd9b8970eb667e8b0a5bd40641a325b9"
+  {:kind :ruling+delegation
+   :gloss "j7 stay off ; j8 stay off ; j9 your recommendation ; j10 your recommendation -- four rulings in one turn, two of them delegations"
+   :node :none
+   :node-note "Preference declaration -- the C-vector / R20 territory
+               NOTE-aif-spec-gap section 3 already flags. Receipted heavily and
+               classified by nothing: the strongest single row for T5.
+               'your recommendation' is a SECOND kind inside the same turn --
+               the operator declaring the machine's recommendation authoritative,
+               which is the inverse of an acceptance gate and has no node either."
+   :receipts [{:repo "futon2" :sha "df5f7bff"
+               :what "registry: :choices :mission-phase-value and :survey-mission-epistemic-action -> :decided, both defaults stay off"}
+              {:repo "futon2" :sha "e380293d"
+               :what "J9/J10 closed on the rulings; U44 U45 U46 U47 minted"}
+              {:board "wm-contract/worklist.edn" :rows [:J7 :J8 :J9 :J10]
+               :what ":evidence quotes the turn verbatim on all four rows"}]
+   :receipt-grade :direct}
+
+  "emacs-d9ba621af2e5050fd4f6bb207c475980"
+  {:kind :operator-bar-report
+   :gloss "I don't know if you can help me with the arm ruling and P-R16 ? right now they remain sort of abstract and unmotivated for me"
+   :node :none
+   :node-note "The operator reporting that HE cannot decide from what is written --
+               the exact mirror of the J-row :bar condition (a), which is the
+               machine reporting the same thing. The table has the machine's
+               side and not the operator's. Sharpest gap in the window."
+   :receipts []
+   :receipt-grade :none}
+
+  "emacs-a057632a361f1b9b2b0048f3ea4c31ee"
+  {:kind :design-ruling
+   :gloss "case history should win ... a refusal in our language is a protopattern ... push a bit further ... only if it can't get anywhere then give up"
+   :node :R4/R5
+   :node-note "DERIVE-shaped and it cashes: alternatives named (case history vs
+               refusal-to-predict), a risk named (throwing the baby out with the
+               bathwater), and a THIRD design produced -- the three-rung ladder --
+               which is a G-comparison over candidate designs issued from the
+               operator seat. This is the row that extends T3's formal-claim pole."
+   :receipts [{:repo "futon2" :sha "efdc4016"
+               :what "registry :choices :task-belief-actand-source -- the arm ruling, verbatim on the entry"}
+              {:repo "futon2" :sha "a415e8d6" :what "J11 recorded; U33 superseded"}
+              {:repo "futon2" :sha "65be3bad" :what "J11 :acceptance and :bar completed"}
+              {:repo "futon3c" :sha "70357f41" :what "zaif-harness U27z: rung 2, construct zero-support kin densities"}
+              {:repo "futon3c" :sha "88853556" :what "U27z review fix: a de-marked constructed density must not validate as observed"}
+              {:repo "futon3c" :sha "fde158d5" :what "zaif: rung 3, mint refusal tensions"}
+              {:repo "futon3c" :sha "1d4a10b7" :what "zaif: attribute the U28z tension mint"}
+              {:repo "futon2" :sha "630c8d9e" :what "wm: append refused-prediction tension (rung 3 landing in the U41 ledger)"}
+              {:board "zaif-harness/worklist.edn" :rows [:U27z :U28z]
+               :what "both rows open by citing the J-ruling and registry efdc401"}]
+   :receipt-grade :direct}
+
+  "emacs-678f6c94b040c4c1d5676e2caaf13b2c"
+  {:kind :acceptance-gate
+   :gloss "the way you explained it above makes sense to me, so let's ratify that"
+   :node :R9
+   :node-note "R9-shaped -- independent witness before action -- but issued from
+               ABOVE the written tower rather than beside it. The node cashes on
+               function and not on position; recorded as a caveat, not as a
+               failure."
+   :receipts [{:repo "futon2" :sha "c8ae33cd"
+               :what "J12 (P-R16 ruling) recorded + U48 minted to execute the re-scope and tripwire"}
+              {:board "wm-contract/worklist.edn" :rows [:J12]
+               :what ":evidence quotes the ratification verbatim"}]
+   :receipt-grade :direct}
+
+  "emacs-5c2c99b5578ad787a70af38e37448608"
+  {:kind :elicitation
+   :gloss "so, what's the word on RUN4? What edit is needed?"
+   :node :none
+   :node-note "Requests a packet. Deposits nothing, so the table -- which types
+               deposits -- has nothing to type. Its effect is entirely in the
+               NEXT operator turn, which rules on what came back."
+   :receipts []
+   :receipt-grade :none}
+
+  "emacs-f6fc45b51985c99460cb18f3d77c0361"
+  {:kind :declaration-retyping
+   :gloss "I don't see this as a permanent hole at all ... It might be the last one we fill. But it's not permanent."
+   :node :none
+   :node-note "Not R3 (the object is not a belief about the field) and not R17
+               (nothing is deposited for a later mission to inherit). The
+               operator edits the TYPE of a written declaration. The tower's own
+               text is the object -- which is what NOTE-aif-spec-gap section 6
+               says only the operator can do."
+   :receipts [{:repo "futon2" :sha "40f5b9f9"
+               :what "RUN4 Lean ruling recorded -- NOT permanent, run-gated with a per-run Lean certificate as close-path; C114's decline superseded; U49 minted"}]
+   :receipt-grade :direct}
+
+  "emacs-aaf9611f6477a2916827fa965cf47794"
+  {:kind :head-dictation
+   :gloss "the Futon-2026 supplement move, the PLoP retraction, and the AIF-generality gap"
+   :node :R2
+   :node-note "The one operator turn kind the parent mission's table already
+               classifies. It cashes: the dictation reached the store, the note,
+               and the ledger in one hop."
+   :receipts [{:repo "futon2" :sha "8f5c5d77"
+               :what "NOTE-aif-spec-gap written from the dictation; :programme/T5 minted through the validated append API -- recorded there as the FIRST operator-dictated use of that API"}]
+   :receipt-grade :direct}
+
+  "emacs-1f890f7ab606e1a3673b10e87a920bfe"
+  {:kind :head-dictation
+   :gloss "Rob's legacy-rewrite case -- the two-specification structure"
+   :node :R2
+   :receipts [{:repo "futon2" :sha "298cbae6"
+               :what "NOTE-aif-spec-gap thread 4; T5 gains its first evidence-added event"}]
+   :receipt-grade :direct}
+
+  "emacs-07823f8fb1b05a0afb8f62c18405b5dc"
+  {:kind :head-dictation
+   :gloss "zaif was already a paradigm rewrite -- the retrodiction"
+   :node :R2
+   :receipts [{:repo "futon2" :sha "08e7dd70"
+               :what "NOTE-aif-spec-gap thread 5; T3 gains the reframing evidence event"}]
+   :receipt-grade :direct}
+
+  "emacs-d0f9baf316c3a445ea1b34ab8b9f01b6"
+  {:kind :head-dictation
+   :gloss "what even IS a formal specification -- level-indexed invariance; underdetermination = un-closed-ness"
+   :node :R2
+   :receipts [{:repo "futon2" :sha "0d283ee5"
+               :what "NOTE-aif-spec-gap thread 6; T5 second evidence event"}]
+   :receipt-grade :direct}
+
+  "emacs-3c23d39d1eba95ed2f98cc27b1187c07"
+  {:kind :defect-report
+   :gloss "So why is this so slow? We're only seeing F84 student now."
+   :node :none
+   :node-note "An observation, so R2 is the tempting read -- but the observed
+               system is the harness, not the field. Same missing family as the
+               liveness probes, at higher precision."
+   :receipts [{:repo "futon3c" :sha "712c4140"
+               :what "apm: classify a transient retirement shortfall as pending, not invalid (23:16, same night)"}]
+   :receipt-grade :indirect}
+
+  "emacs-826802d8d0b5ac4b4e03fa06e9d3147a"
+  {:kind :viability-declaration
+   :gloss "I'm about to get on an airplane in a couple days, and I'd like some kind of guarantee that this work is actually going to be progressing"
+   :node :none
+   :node-note "AIF's C at organism grain -- purpose, livelihood, sustenance --
+               which NOTE-aif-spec-gap section 6 argues is held INFORMALLY by
+               structural necessity, because it is the level the written tower
+               tops out below. If that argument is right this turn kind cannot
+               have a node, and the absence is a result rather than a defect.
+               T5's strongest positive evidence in the window."
+   :receipts [{:repo "futon3c" :sha "599a7530"
+               :what "claude-7: unattended-progress contract design note -- but commissioned by the NEXT turn, not by this one"}]
+   :receipt-grade :indirect}
+
+  "emacs-e01c94592f201520064814fad744fbff"
+  {:kind :routing-directive+hold
+   :gloss "how about you bell this to Claude Seven, asking for a design note ... and we'll leave this at a design level right now"
+   :node :R16
+   :node-note "CONTESTED. R16 is the action, witnessed -- and this turn IS the
+               act that dispatches, with a receipt. But R16 in the table is the
+               machine's action under a policy; here the operator is the
+               actuator. Recorded as a proposed R16 with the objection stated,
+               because a census that hides its contested rows is worth less than
+               one that flags them."
+   :receipts [{:repo "futon3c" :sha "599a7530"
+               :what "claude-7: unattended-progress contract design note for APM problem loop (22:28, eight minutes after the turn)"}]
+   :receipt-grade :direct}
+
+  "emacs-9c609a3291a0b092e36e996df6c97185"
+  {:kind :commission
+   :gloss "the topology loop ... just never really worked at all ... come up with some kind of diagnosis"
+   :node :none
+   :node-note "IDENTIFY/R1-R3 is the tempting read -- a gap named, scope bounded --
+               but the operator is not depositing a belief state, he is
+               COMMISSIONING one. The table types the deposit and not the order
+               to produce it."
+   :receipts [{:repo "futon3c" :sha "69d0b311" :what "read-only APM invariant checker (bb), tests, uninstalled unit/timer"}
+              {:repo "futon3c" :sha "4b3b10af" :what "invariant checker: split completed-but-enabled from zombie liveness"}]
+   :receipt-grade :indirect}
+
+  "emacs-5abb1c2bdb77e46861a4e1908ca5c53d"
+  {:kind :deliverable-type-refusal
+   :gloss "I'd like you to address it now. Not just writing a tech note, but actually addressing the real problems."
+   :node :none
+   :node-note "Refuses the KIND of artifact on offer. Carries affect ('a bit
+               irked') as part of the signal. No node types a refusal of a
+               deliverable type; the machine's own typed refusals (D8b, the
+               q-actand refusal) are refusals to PRODUCE, not refusals to ACCEPT."
+   :receipts [{:repo "futon3c" :sha "99bb3f26" :what "record explicit durable coordinator stop causes"}
+              {:repo "futon3c" :sha "88d0645d" :what "fail closed when stop cause is malformed"}
+              {:repo "futon3c" :sha "ccc422a0" :what "retry transient retirement audits before failing frames"}
+              {:repo "futon3c" :sha "e0cb5462" :what "apm: keep pending retirement fail closed at callers"}]
+   :receipt-grade :indirect}}}

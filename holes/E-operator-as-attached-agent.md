@@ -180,6 +180,56 @@ operator is actually doing on a turn-by-turn basis."
 - **Staged scope** (Joe's ruling in the dictation): phase-vocabulary turns
   first; "the other turns that happen under other auspices" later.
 
+## Census run 1 — 2026-09-03 ruling window (claude-10, 2026-09-04)
+
+Artifacts: `holes/labs/E-operator-as-attached-agent/` — `CENSUS-2026-09-03.md`
+(report), `operator_turn_census.bb` (producer, read-only, artifacts
+byte-identical on two consecutive runs), `classification.edn` (the node and
+turn-kind judgements, labelled fiat), `00`–`03` EDN artifacts.
+
+Headline numbers, window 2026-09-03T20:50Z–23:30Z: **18 operator turns** (21
+store records less 3 session-start events), across the three sessions the seat
+was driving at once. **18/18 have a pattern-tag record.** **7 land on a
+phase→node table row** (R2 ×4, R4/R5 ×1, R9 ×1, R16 ×1 contested), **11 land on
+none**. 13 turns carry a consuming receipt (9 direct, 4 indirect), 28 receipts
+in all. Both outcomes the excursion wanted are present: a clean cash and an
+honest gap list of nine turn kinds.
+
+Three things run 1 changed about the method as written above.
+
+1. **The prefix-truncation caveat was understated.** Measured, there are two
+   query-construction regimes. On the claude REPL surface the query is the
+   turn's first 100 characters — but for a short turn most of those characters
+   are the *agent's reply*, not the operator's ask (26 of 100 operator
+   characters on `the wm-build-loop is quiet`). On the codex REPL surface the
+   query begins with a 97-character bell envelope, so **three characters** of
+   Joe's words reach the embedder on all four such turns. Not truncation of the
+   operator's words; displacement of them. The content join fails on exactly
+   those four turns, which is why the producer records its join stage per row.
+
+2. **The coverage-denominator worry does not hold on this window.** Coverage is
+   18/18, lag 16 s to 1175 s. The store is a usable denominator here; the
+   *receipt* layer is not (see 3).
+
+3. **The two vocabularies do not intersect on the pinned window.** Zero
+   mission-phase words — identify, map, derive, argue, verify, instantiate,
+   document, survey — occur in any of the 18 turns. Method step 1 pins the
+   ruling session and the Method refinement stages phase-vocabulary turns
+   first; those select disjoint samples. The phase-vocabulary arm is
+   *relocated*, not merely deferred: it needs its own window (the pilot's own
+   hits are May–June). Read positively: a ruling session is not a clocking
+   session.
+
+And one defect found in passing, reported to whoever owns the J rows rather
+than repaired here: all six J-row `:reviewed-at` values disagree with the store
+record of the turn that caused the ruling, and five are anti-causal (J7–J10 by
+83 minutes, four of them predating the session start; J11 by 100 seconds).
+They are hand-typed rather than derived from `:evidence/at`.
+
+Not done in run 1: no T5/T3 ledger append (the §6 gap list is ready for one,
+withheld while the excursion is DRAFT and its rows are unminted); no proposed
+change to `M-zaif-harness-v1`'s table; no second window.
+
 ## What this excursion does NOT do
 
 - No automation of rulings — the census may show which turn kinds are
