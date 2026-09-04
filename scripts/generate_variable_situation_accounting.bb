@@ -1,4 +1,14 @@
 #!/usr/bin/env bb
+;; Generates variable-situation-accounting.edn: ONE ROW PER VARIABLE, over BOTH
+;; populations -- the contract declarations of holes-contract.json and the
+;; glossary paragraphs of sec-glossary.tex that carry no declaration
+;; (:row-source tells them apart). So its :counts :content :open-hole is the
+;; count of open holes ACROSS BOTH, and will exceed the model-coverage table's
+;; open column whenever a glossary paragraph is held open: that table
+;; (p4ng/empirics-futon/gen_model_coverage.py:121) aggregates declarations only
+;; and reports the glossary-side holes in its Total-row stamp instead. Read
+;; :counts :declaration-closability for the declaration-side total the table
+;; prints. Reconciled by name at runs/RE1-hole-count-reconciliation/README.md.
 (require '[cheshire.core :as json]
          '[clojure.edn :as edn]
          '[clojure.java.io :as io]
