@@ -26,7 +26,7 @@
    :selection-run-ids 1,
    :refutations nil},
   :note
-  "The pinned record was written by run3_conformance.bb at 2026-09-04T16:31:58.233541758Z; this comparison is against the CURRENT control map, e508ece.",
+  "The pinned record was written by run3_conformance.bb at 2026-09-04T16:40:36.011998629Z; this comparison is against the CURRENT control map, e508ece.",
   :pass true},
  :C2-node-names-round-trip
  {:nodes-round-trip true,

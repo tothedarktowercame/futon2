@@ -12,8 +12,6 @@
   ["README.md"
    "battery.log"
    "conformance.edn"
-   "delta.edn"
-   "normalized.edn"
    "rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"
    "step.edn"
    "tick-run-record-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"
@@ -28,8 +26,6 @@
    "world-before.edn"],
   :mentions-of-contract
   {"battery.log" ["contract-pin" "contract_authority_current.clj"],
-   "delta.edn" [":producer-contract" "contract" "contracts"],
-   "normalized.edn" [":producer-contract" "contract" "contracts"],
    "rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"
    [":contract-id"
     ":contract-sha"

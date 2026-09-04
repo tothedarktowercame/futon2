@@ -12,8 +12,6 @@
   ["README.md"
    "battery.log"
    "conformance.edn"
-   "delta.edn"
-   "normalized.edn"
    "step.edn"
    "tick-run-record-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"
    "wm-trace-2026-09-04.edn"
