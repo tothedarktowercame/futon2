@@ -241,10 +241,14 @@
                              :max (apply max (map :retrieval/lag-s tagged))}}
 
               :instrument-fidelity
-              {:note "how many characters of the OPERATOR's own words reached the
-                      embedder, per turn. The parent excursion's caveat says the
-                      query is ~the first 100 chars of the turn; measured, that
-                      is only true on one of the two surfaces."
+              {:note "how many characters of the operator's own words appear in
+                      the LOGGED query field, per turn. CORRECTED 2026-09-04:
+                      this is NOT the embedding input. dev.clj context-retrieval!
+                      embeds (subs user-msg 0 200) + \" \" + (subs response 0 200)
+                      and then stores (subs that 0 100) for display. The store
+                      therefore does not record what was embedded; these numbers
+                      measure the record, not the instrument. See
+                      FINDINGS-embedding-pipeline.md section 1."
                :by-surface
                (into {} (for [[k v] by-surface]
                           [k {:turns (count v)

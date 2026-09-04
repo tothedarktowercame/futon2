@@ -12,7 +12,7 @@
   :lag-seconds {:min 16, :max 1175}},
  :instrument-fidelity
  {:note
-  "how many characters of the OPERATOR's own words reached the\n                      embedder, per turn. The parent excursion's caveat says the\n                      query is ~the first 100 chars of the turn; measured, that\n                      is only true on one of the two surfaces.",
+  "how many characters of the operator's own words appear in\n                      the LOGGED query field, per turn. CORRECTED 2026-09-04:\n                      this is NOT the embedding input. dev.clj context-retrieval!\n                      embeds (subs user-msg 0 200) + \" \" + (subs response 0 200)\n                      and then stores (subs that 0 100) for display. The store\n                      therefore does not record what was embedded; these numbers\n                      measure the record, not the instrument. See\n                      FINDINGS-embedding-pipeline.md section 1.",
   :by-surface
   {:bare-turn
    {:turns 14,

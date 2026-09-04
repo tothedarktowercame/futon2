@@ -1,0 +1,231 @@
+{:day "2026-06-01",
+ :mission
+ "M-vsatarcs-invariants-integration (futon4, IDENTIFY->INSTANTIATE in one day)",
+ :vocabulary
+ ["identify"
+  "map"
+  "derive"
+  "argue"
+  "verify"
+  "instantiate"
+  "document"
+  "survey"],
+ :operator-turns
+ {:total 154,
+  :carrying-a-phase-word 16,
+  :fraction 0.1038961038961039,
+  :per-word
+  {"identify" 1,
+   "map" 5,
+   "derive" 2,
+   "argue" 2,
+   "verify" 5,
+   "instantiate" 5,
+   "document" 1,
+   "survey" 0}},
+ :cross
+ {:phase-turns-with-a-retrieval-record 15,
+  :join-stages {:content 15},
+  :rows
+  [{:at "2026-06-01T16:30:37.545033042Z",
+    :phase-words ["argue"],
+    :head
+    "Sure, greenlight 1-2-5 — STANDARD-ARGUE can be promoted, owners noted",
+    :retrieval-agent "claude-3",
+    :join :content,
+    :patterns
+    ["devmap-coherence/prototype-maturity-lifecycle"
+     "equity/shared-maintenance-as-published"
+     "stack-coherence/maturity-evidence-audit"]}
+   {:at "2026-06-01T17:18:54.080464975Z",
+    :phase-words ["map"],
+    :head
+    "Well, let's build the mission *only* against real shared work in the Campaign. I suggest y",
+    :retrieval-agent "claude-3",
+    :join :content,
+    :patterns
+    ["enrichment/ARGUMENT"
+     "futon-theory/mission-interface-signature"
+     "futon-theory/mission-dependency"]}
+   {:at "2026-06-01T17:42:25.628079125Z",
+    :phase-words ["verify"],
+    :head
+    "I've asked claude-2 to put them into RUN/DELIVER in the Campaign as proof points that the ",
+    :retrieval-agent "claude-6",
+    :join :content,
+    :patterns
+    ["social/verify-before-compose"
+     "devmap-coherence/ifr-f3-piti"
+     "agent/evidence-over-assertion"]}
+   {:at "2026-06-01T18:10:10.320043132Z",
+    :phase-words ["instantiate"],
+    :head "I'd expect something like \"INSTANTIATE\" not \"CURING\"",
+    :retrieval-agent "codex-3",
+    :join :content,
+    :patterns
+    ["futon-theory/mission-interface-signature"
+     "social/ARGUMENT"
+     "devmap-coherence/ifr-f3-piti"]}
+   {:at "2026-06-01T18:11:59.993324736Z",
+    :phase-words ["instantiate"],
+    :head
+    "Can Codex be greenlit on these? codex: We are not blocked overall. We are only blocked on ",
+    :retrieval-agent "claude-3",
+    :join :content,
+    :patterns
+    ["social/explicit-exit-over-abandonment"
+     "vsatelier/projection-independence"
+     "peripherals/read-existing-seam-before-implementing"]}
+   {:at "2026-06-01T19:05:38.801825097Z",
+    :phase-words ["identify" "map"],
+    :head
+    "We created /home/joe/code/futon4/holes/missions/M-vsatarcs-invariants-integration.md — it ",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["futon-theory/mission-interface-signature"
+     "iching/hexagram-24-fu"
+     "iiching/exotype-024"]}
+   {:at "2026-06-01T19:08:05.172267890Z",
+    :phase-words ["map"],
+    :head "Is MAP complete?",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["stack-coherence/stack-blocker-detection"
+     "futon-theory/mission-interface-signature"
+     "contributing/devmap-contribution-protocol"]}
+   {:at "2026-06-01T19:08:28.250496829Z",
+    :phase-words ["map"],
+    :head "OK, please work through MAP",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["futon-theory/mission-interface-signature"
+     "enrichment/ARGUMENT"
+     "stack-coherence/futon-bridge-health"]}
+   {:at "2026-06-01T19:14:30.388112383Z",
+    :phase-words ["derive"],
+    :head "OK, we can progress to DERIVE",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["futon-theory/mission-interface-signature"
+     "enrichment/ARGUMENT"
+     "exotic/full-lift-registry"]}
+   {:at "2026-06-01T19:18:16.589944257Z",
+    :phase-words ["derive"],
+    :head
+    "We also need to include in DERIVE not just a definition of derive but a way of processing ",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["futon-theory/proof-path"
+     "coordination/ARGUMENT"
+     "enrichment/ARGUMENT"]}
+   {:at "2026-06-01T19:19:38.918779594Z",
+    :phase-words ["argue"],
+    :head "OK, we are ready for ARGUE",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["futon-theory/mission-interface-signature"
+     "enrichment/ARGUMENT"
+     "social/ARGUMENT"]}
+   {:at "2026-06-01T19:21:59.123863076Z",
+    :phase-words ["verify"],
+    :head "Let's do VERIFY",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["futon-theory/mission-interface-signature"
+     "devmap-coherence/ifr-f3-piti"
+     "agent/evidence-over-assertion"]}
+   {:at "2026-06-01T19:24:03.907374131Z",
+    :phase-words ["verify" "instantiate"],
+    :head
+    "codex-2 pushed the mission forward up to VERIFY — can you review work so far before we INS",
+    :retrieval-agent "claude-2",
+    :join :content,
+    :patterns
+    ["stack-coherence/maturity-evidence-audit"
+     "system-coherence/verified-rewrite-from-diagnostic-annotation"
+     "musn/selection-before-write"]}
+   {:at "2026-06-01T19:26:40.932948052Z",
+    :phase-words ["map" "verify" "instantiate" "document"],
+    :head
+    "Review by Claude. The 100% VERIFY pass reminds me that recent missions *used core.logic* t",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["futon-theory/mission-interface-signature"
+     "devmap-coherence/ifr-f3-piti"
+     "futon-theory/proof-path"]}
+   {:at "2026-06-01T19:31:11.476112389Z",
+    :phase-words ["verify"],
+    :head
+    "OK, so, I tihnk the recent core.logic VERIFY is a crucial upgrade to the futonic logic — i",
+    :retrieval-agent "codex-2",
+    :join :content,
+    :patterns
+    ["devmap-coherence/ifr-f3-piti"
+     "futon-theory/mission-interface-signature"
+     "coordination/ARGUMENT"]}],
+  :unmatched
+  [{:at "2026-06-01T19:38:14.281599898Z",
+    :id "e-66dc0a39-896c-482c-a517-14e6be77b963"}],
+  :pattern-frequencies
+  {"agent/evidence-over-assertion" 2,
+   "contributing/devmap-contribution-protocol" 1,
+   "coordination/ARGUMENT" 2,
+   "devmap-coherence/ifr-f3-piti" 5,
+   "devmap-coherence/prototype-maturity-lifecycle" 1,
+   "enrichment/ARGUMENT" 5,
+   "equity/shared-maintenance-as-published" 1,
+   "exotic/full-lift-registry" 1,
+   "futon-theory/mission-dependency" 1,
+   "futon-theory/mission-interface-signature" 10,
+   "futon-theory/proof-path" 2,
+   "iching/hexagram-24-fu" 1,
+   "iiching/exotype-024" 1,
+   "musn/selection-before-write" 1,
+   "peripherals/read-existing-seam-before-implementing" 1,
+   "social/ARGUMENT" 2,
+   "social/explicit-exit-over-abandonment" 1,
+   "social/verify-before-compose" 1,
+   "stack-coherence/futon-bridge-health" 1,
+   "stack-coherence/maturity-evidence-audit" 2,
+   "stack-coherence/stack-blocker-detection" 1,
+   "system-coherence/verified-rewrite-from-diagnostic-annotation" 1,
+   "vsatelier/projection-independence" 1}},
+ :control
+ {:question
+  "is the top pattern tracking the operator's clocking act, or the day's topic?",
+  :top-pattern "futon-theory/mission-interface-signature",
+  :fires-on-phase-word-turns [10 15],
+  :base-rate-all-records-that-day [73 232 0.3146551724137931],
+  :by-agent
+  {"claude-2" {:records 27, :fires 4},
+   "claude-3" {:records 63, :fires 20},
+   "claude-4" {:records 45, :fires 0},
+   "claude-6" {:records 46, :fires 8},
+   "codex-2" {:records 16, :fires 11},
+   "codex-3" {:records 35, :fires 30}},
+  :verdict
+  "enrichment above base rate is real but the day is saturated; half of every\n               embedding input is the agent's reply, and that day's replies are mission-document\n               text. The cross as run detects the day's topic, not the turn-level operator act."},
+ :day-wide-pattern-frequencies
+ [["futon-theory/mission-interface-signature" 73]
+  ["enrichment/ARGUMENT" 33]
+  ["stack-coherence/futon-bridge-health" 17]
+  ["orchestration/state-in-substrate-deltas-in-messages" 16]
+  ["social/ARGUMENT" 15]
+  ["futon-theory/interface-loop" 11]
+  ["musn/aif-live-scores" 10]
+  ["pacspine/channel-upgrade" 9]
+  ["stack-coherence/futon1-determinism" 9]
+  ["futon-theory/coordination-protocol" 7]
+  ["devmap-coherence/ifr-f3-piti" 7]
+  ["devmap-coherence/ifr-f0-sati" 7]
+  ["devmap-coherence/prototype-alignment-bridge" 7]
+  ["coordination/ARGUMENT" 7]
+  ["futon-theory/proof-path" 7]]}

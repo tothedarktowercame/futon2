@@ -1,0 +1,338 @@
+{
+  "agreement_full_vs_nostop": {
+    "mean_jaccard_top3": 0.258,
+    "top1_exact": 0.3002
+  },
+  "agreement_full_vs_shuffled": {
+    "mean_jaccard_top3": 0.2027,
+    "top1_exact": 0.2256
+  },
+  "agreement_vs_prefix200": {
+    "full": {
+      "mean_jaccard_top3": 0.3318,
+      "top1_exact": 0.3321
+    },
+    "nostop": {
+      "mean_jaccard_top3": 0.1649,
+      "top1_exact": 0.1741
+    },
+    "random": {
+      "mean_jaccard_top3": 0.0007,
+      "top1_exact": 0.0
+    },
+    "shuffled": {
+      "mean_jaccard_top3": 0.1193,
+      "top1_exact": 0.1403
+    }
+  },
+  "corpus": {
+    "chars": {
+      "max": 25421,
+      "mean": 1813.7690941385436,
+      "median": 1114,
+      "min": 42
+    },
+    "fraction_of_turn_inside_the_200_char_prefix": {
+      "mean": 0.3886,
+      "median": 0.1795,
+      "turns_fully_covered": 116
+    },
+    "turns": 563,
+    "wordpiece_tokens_full_turn": {
+      "max": 7321,
+      "median": 289,
+      "model_max_seq_length": 256,
+      "over_model_cap": 292
+    }
+  },
+  "library": {
+    "dim": 384,
+    "patterns": 1408,
+    "score_floor": null,
+    "top_k": 3
+  },
+  "most_activated_top3": {
+    "full": [
+      [
+        "memory/verify-in-the-serving-process",
+        55
+      ],
+      [
+        "devmap-coherence/prototype-alignment-bridge",
+        48
+      ],
+      [
+        "stack-coherence/stack-blocker-detection",
+        39
+      ],
+      [
+        "contributing/stack-scan-logging-protocol",
+        38
+      ],
+      [
+        "coordination/ARGUMENT",
+        36
+      ],
+      [
+        "fulab/clock-out",
+        28
+      ],
+      [
+        "futon-theory/mission-interface-signature",
+        25
+      ],
+      [
+        "cycle-machine/job-port",
+        24
+      ],
+      [
+        "devmap-coherence/baseline-freeze",
+        22
+      ],
+      [
+        "cycle-machine/toolchain-port",
+        21
+      ],
+      [
+        "orchestration/recorded-handoff",
+        20
+      ],
+      [
+        "memory/no-tightening-while-held",
+        17
+      ]
+    ],
+    "nostop": [
+      [
+        "devmap-coherence/prototype-alignment-bridge",
+        79
+      ],
+      [
+        "capability/capability-vocabulary-v0",
+        77
+      ],
+      [
+        "devmap-coherence/ifr-f3-piti",
+        68
+      ],
+      [
+        "stack-coherence/ready-blocked-triage",
+        55
+      ],
+      [
+        "war-room/wr-4-inhabit-before-building",
+        51
+      ],
+      [
+        "stack-coherence/stack-blocker-detection",
+        42
+      ],
+      [
+        "coordination/ARGUMENT",
+        37
+      ],
+      [
+        "war-room/wr-23-upstream-trackers-are-stack-surfaces",
+        30
+      ],
+      [
+        "cycle-machine/toolchain-port",
+        30
+      ],
+      [
+        "orchestration/recorded-handoff",
+        30
+      ],
+      [
+        "contributing/stack-scan-logging-protocol",
+        22
+      ],
+      [
+        "control/agential-pattern-hygiene",
+        21
+      ]
+    ],
+    "prefix200": [
+      [
+        "orchestration/recorded-handoff",
+        103
+      ],
+      [
+        "agent/handoff-preserves-context",
+        77
+      ],
+      [
+        "futon-theory/coordination-protocol",
+        57
+      ],
+      [
+        "fulab/session-resume",
+        48
+      ],
+      [
+        "orchestration/state-in-substrate-deltas-in-messages",
+        28
+      ],
+      [
+        "iching/hexagram-18-gu",
+        24
+      ],
+      [
+        "memory/verify-in-the-serving-process",
+        24
+      ],
+      [
+        "devmap-coherence/ifr-f1-dhammavicaya",
+        18
+      ],
+      [
+        "contributing/stack-scan-logging-protocol",
+        17
+      ],
+      [
+        "musn/pause-backtrace",
+        17
+      ],
+      [
+        "iching/hexagram-64-weiji",
+        14
+      ],
+      [
+        "contributing/devmap-contribution-protocol",
+        14
+      ]
+    ],
+    "random": [
+      [
+        "math-informal-CA/estimate-by-bounding",
+        10
+      ],
+      [
+        "or3/consent-bounded-analysis",
+        8
+      ],
+      [
+        "math-informal/convert-growth-counts-to-summability-by-geometric-shells",
+        8
+      ],
+      [
+        "p4ng/license-laddering",
+        7
+      ],
+      [
+        "vsatlatarium/arc-as-typed-relation",
+        7
+      ],
+      [
+        "vsatlatarium/cached-layout-computation",
+        7
+      ],
+      [
+        "math-formalization-CA/fourier-inversion-for-real-oscillatory-integrals",
+        7
+      ],
+      [
+        "vsatlatarium/dome-projection",
+        7
+      ],
+      [
+        "vsat/embedded-annotation",
+        7
+      ],
+      [
+        "portal/first-class-query-interface",
+        7
+      ],
+      [
+        "relationship-coherence/low-pressure-bid",
+        6
+      ],
+      [
+        "math-formalization-CA/radialize-via-gauge-rescale",
+        6
+      ]
+    ],
+    "shuffled": [
+      [
+        "devmap-coherence/prototype-alignment-bridge",
+        54
+      ],
+      [
+        "cycle-machine/toolchain-port",
+        45
+      ],
+      [
+        "stack-coherence/stack-blocker-detection",
+        37
+      ],
+      [
+        "math-formalization/statement-ladder-before-proof-text",
+        32
+      ],
+      [
+        "memory/verify-in-the-serving-process",
+        29
+      ],
+      [
+        "math-informal/structural-equivalence",
+        27
+      ],
+      [
+        "futon-theory/mission-interface-signature",
+        26
+      ],
+      [
+        "stack-coherence/ready-blocked-triage",
+        25
+      ],
+      [
+        "problems/refusal-prediction-error-v1--source-field-missing",
+        24
+      ],
+      [
+        "devmap-coherence/ifr-f3-piti",
+        24
+      ],
+      [
+        "pattern-discipline/conclusion-required-others-recommended",
+        22
+      ],
+      [
+        "coordination/ARGUMENT",
+        22
+      ]
+    ]
+  },
+  "per_condition": {
+    "full": {
+      "coverage_of_library_top3": 0.3274,
+      "distinct_patterns_top1": 236,
+      "distinct_patterns_top3": 461,
+      "mean_top1_score": 0.4541
+    },
+    "nostop": {
+      "coverage_of_library_top3": 0.3061,
+      "distinct_patterns_top1": 217,
+      "distinct_patterns_top3": 431,
+      "mean_top1_score": 0.4516
+    },
+    "prefix200": {
+      "coverage_of_library_top3": 0.348,
+      "distinct_patterns_top1": 248,
+      "distinct_patterns_top3": 490,
+      "mean_top1_score": 0.4195
+    },
+    "random": {
+      "coverage_of_library_top3": 0.5838,
+      "distinct_patterns_top1": 415,
+      "distinct_patterns_top3": 822,
+      "mean_top1_score": 0.1464
+    },
+    "shuffled": {
+      "coverage_of_library_top3": 0.3331,
+      "distinct_patterns_top1": 228,
+      "distinct_patterns_top3": 469,
+      "mean_top1_score": 0.4576
+    }
+  }
+}
