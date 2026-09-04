@@ -7,7 +7,7 @@
  :controls
  [[:positive/c1-committed-ledger-is-green
    {:defects [],
-    :rows 3,
+    :rows 14,
     :pass? true,
     :why
     "the committed ledger conforms to the schema it declares; this is what `--check` gates on"}]
@@ -16,12 +16,12 @@
     {:status :appended,
      :run-id "0000-00-00-self-test",
      :check-id :flip-readiness,
-     :row/seq 4,
+     :row/seq 15,
      :row/sha
-     "7d836cb2080ac08e3f781774390c697ffa4b4fa08a3978a8a6d70ce2aa22ff71"},
+     "9080cdbef790ddac06c1e508aa6aed78574c100b7399014e0216939736f7ad4b"},
     :defects [],
-    :rows-before 3,
-    :rows 4,
+    :rows-before 14,
+    :rows 15,
     :pass? true,
     :why
     "one row appended through the API, and the ledger it produced validates green -- otherwise every control below is a statement about a ledger nothing can write"}]
@@ -30,10 +30,10 @@
     {:status :already-present,
      :run-id "0000-00-00-self-test",
      :check-id :flip-readiness,
-     :row/seq 4,
+     :row/seq 15,
      :row/sha
-     "7d836cb2080ac08e3f781774390c697ffa4b4fa08a3978a8a6d70ce2aa22ff71"},
-    :rows 4,
+     "9080cdbef790ddac06c1e508aa6aed78574c100b7399014e0216939736f7ad4b"},
+    :rows 15,
     :byte-identical? true,
     :pass? true,
     :why
@@ -104,7 +104,7 @@
     :why
     "the writer pretty-prints the data, so the hand-written schema documentation would be the natural casualty of the first append; it is re-emitted verbatim instead"}]
   [:positive/c14-no-write-touched-the-committed-ledger
-   {:committed-rows 3,
+   {:committed-rows 14,
     :pass? true,
     :why
     "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of committed history"}]
@@ -113,9 +113,9 @@
     {:status :appended,
      :run-id "0000-00-00-self-test-deposit",
      :check-id :run-conformance,
-     :row/seq 5,
+     :row/seq 16,
      :row/sha
-     "98b479e0a69bc1fbd427524ac45521236e51f1c43af52e0c9e44892a11b2ec09"},
+     "d452d20573e76cd29a4eb919f8a6ea3c3079ca6d66cb359b20d1ed4edc32060b"},
     :artifact
     "holes/labs/wm-contract/runs/2026-09-01-s5/conformance.edn",
     :artifact-commit "fe7c1c1b",
