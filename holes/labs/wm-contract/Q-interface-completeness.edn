@@ -93,7 +93,7 @@
    :runtime :absent
    :lean :absent
    :effect :missing-wire
-   :blocker "The route now exists but does not carry this payload. D7 :r13-r4-depth-realised-undrawn (p4ng 8f0ee87a, 2026-09-01) adds [:R13 :R4] to control-map-edges.edn with label \"T\" conditional on horizon >= 2, on the code evidence that compute-efe passes horizon-steps into fm/predict-multi-horizon (efe.clj:629-631; below the guard only fm/predict runs, efe.clj:624). What crosses that edge is an integer depth. The forward model still never receives a constructed temporal policy/cascade, which is the payload this row declares, so :runtime :absent and :effect :missing-wire stand as written."
+   :blocker "The R13-to-R4 route exists since D7 (p4ng 8f0ee87a) but carries an integer horizon, not the constructed cascade; the forward model still never receives one."
    :next-action "The pair is now drawn; specify the cascade payload the edge must carry, which the depth edge does not supply."}
   {:id :Q/producer-to-risk
    :edge [:R4 :R5]
@@ -120,7 +120,7 @@
    :runtime :called-with-hand-built-Q-off-tick-path
    :lean :parameter-only
    :effect :missing-wire
-   :blocker "Canonical EIG is called now, but not from R4. epistemic-value/expected-information-gain had no caller in src/ at the pin; it has two since -- mission_epistemic_value.clj:210 (U22, futon2 9e27ad81) and survey_mission_value.clj:261,272 through that one (U24, futon2 e46ed61e) -- and the pinned file efe.clj gained the leg that consumes the resulting nats (:survey-eig, efe.clj:757-760, e46ed61e). The distribution it consumes is not the machine's: mission-epistemic-value/binary-latent-model hand-builds :predicted-observations as a two-point distribution over {:workable :not-workable} set equal to the prior of one binary latent (mission_epistemic_value.clj:186-205). Nothing joins R4's per-channel Gaussian prediction to it. The producer is also off the live tick path -- portfolio-action-proposer has no caller in src/ -- behind two independent default-off gates (*portfolio-proposer-active?* false at portfolio_action_proposer.clj:51-57; efe/default-survey-eig-weight 0.0 at efe.clj:93-103, at which the :survey-eig key is absent from :augmentation-terms). So the wire is still missing; what moved is that the consumer end is occupied by a fixture Q rather than empty."
+   :blocker "Canonical EIG has callers now, but none of them is R4: they feed it a hand-built binary-latent distribution, off the tick path behind two default-off gates."
    :next-action "Add an edge only after a machine Q producer exists; posterior spread remains outside EIG, and the binary-latent fixture Q does not satisfy the producer condition either."}]
  :pin-review
  {:at "2026-09-04"
@@ -166,7 +166,8 @@
     :read "D5d :r6-r4-pi-realised-undrawn (p4ng 2ed08b6a) adds [:R6 :R4] and its own note states the blocker this row already carries: the edge is realised only under R6 AS CANDIDATE SPACE, because scoring runs over candidates before selection produces Q(pi). Corroboration, not movement."}
    {:id :Q/in-policy-depth :pins [:topology] :verdict :changed
     :changed-by "p4ng 8f0ee87a (D7 :r13-r4-depth-realised-undrawn)"
-    :what-moved "The blocker's first clause -- \"the control map has no R13-to-R4 route\" -- became false. The second clause and the row's :runtime, :lean and :effect are unchanged, because the edge carries an integer horizon, not the declared cascade payload."}
+    :what-moved "The blocker's first clause -- \"the control map has no R13-to-R4 route\" -- became false. The second clause and the row's :runtime, :lean and :effect are unchanged, because the edge carries an integer horizon, not the declared cascade payload."
+    :basis "The route now exists but does not carry this payload. D7 :r13-r4-depth-realised-undrawn (p4ng 8f0ee87a, 2026-09-01) adds [:R13 :R4] to control-map-edges.edn with label \"T\" conditional on horizon >= 2, on the code evidence that compute-efe passes horizon-steps into fm/predict-multi-horizon (efe.clj:629-631; below the guard only fm/predict runs, efe.clj:624). What crosses that edge is an integer depth. The forward model still never receives a constructed temporal policy/cascade, which is the payload this row declares, so :runtime :absent and :effect :missing-wire stand as written."}
    {:id :Q/producer-to-risk :pins [:topology :runtime-efe :lean-spine] :verdict :re-verified-unchanged
     :read "[:R4 :R5] is still drawn (control-map-edges.edn:17); no post-pin decision adds, retires or re-labels it. The runtime end is the unchanged proxy above; the Lean end still accepts an arbitrary kernel."}
    {:id :Q/risk-to-ranking :pins [:topology :runtime-selection] :verdict :re-verified-unchanged
@@ -174,7 +175,8 @@
    {:id :Q/to-EIG :pins [:runtime-efe :runtime-eig :topology] :verdict :changed
     :changed-by "futon2 e46ed61e (U24, the pinned efe.clj), with futon2 9e27ad81 (U22) supplying the kernel's first caller"
     :what-moved ":runtime moved from :function-exists-unwired to :called-with-hand-built-Q-off-tick-path. :effect :missing-wire, :lean :parameter-only and :edge nil are unchanged: nothing joins R4's prediction to the kernel."
-    :basis "epistemic_value.clj is CURRENT at its pin, and at the pinned blob it had no caller anywhere in src/ -- the word \"unwired\" was exact. It now has two, both post-pin."}]
+    :basis "epistemic_value.clj is CURRENT at its pin, and at the pinned blob it had no caller anywhere in src/ -- the word \"unwired\" was exact. It now has two, both post-pin."
+    :detail "Canonical EIG is called now, but not from R4. epistemic-value/expected-information-gain had no caller in src/ at the pin; it has two since -- mission_epistemic_value.clj:210 (U22, futon2 9e27ad81) and survey_mission_value.clj:261,272 through that one (U24, futon2 e46ed61e) -- and the pinned file efe.clj gained the leg that consumes the resulting nats (:survey-eig, efe.clj:757-760, e46ed61e). The distribution it consumes is not the machine's: mission-epistemic-value/binary-latent-model hand-builds :predicted-observations as a two-point distribution over {:workable :not-workable} set equal to the prior of one binary latent (mission_epistemic_value.clj:186-205). Nothing joins R4's per-channel Gaussian prediction to it. The producer is also off the live tick path -- portfolio-action-proposer has no caller in src/ -- behind two independent default-off gates (*portfolio-proposer-active?* false at portfolio_action_proposer.clj:51-57; efe/default-survey-eig-weight 0.0 at efe.clj:93-103, at which the :survey-eig key is absent from :augmentation-terms). So the wire is still missing; what moved is that the consumer end is occupied by a fixture Q rather than empty."}]
   :not-done
   ["No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions."
    "gen_aif_dag.bb not run; nothing regenerated into a publish (TN 9a)."
