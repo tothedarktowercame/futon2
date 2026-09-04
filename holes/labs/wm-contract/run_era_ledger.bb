@@ -603,7 +603,7 @@
        :positive/c14-no-write-touched-the-committed-ledger
        {:committed-rows (count (:rows (:data (read-ledger default-ledger-path))))
         :pass? (= (:text committed) (:text (read-ledger default-ledger-path)))
-        :why "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of an empty ledger"}
+        :why "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of committed history"}
 
        :positive/c15-deposit-derives-its-at-from-the-artifact-commit
        {:result (dissoc deposited :artifact-state)
@@ -636,7 +636,7 @@
         :why "the row would name a path whose committed content is not what the check read; the working copy having moved is exactly the case a resolving pointer hides"}
 
        :positive/c19-the-guard-reads-the-real-commit-instant
-       {:fixture-state (artifact-commit-state fixture "committed.edn")
+       {:fixture-state (dissoc (artifact-commit-state fixture "committed.edn") :commit)
         :pass? (= {:state :committed :path "committed.edn" :at "2020-01-02T03:04:05Z"}
                   (dissoc (artifact-commit-state fixture "committed.edn") :commit))
         :why "without this the three refusals above would be indistinguishable from a guard that refuses everything"}))))
@@ -654,6 +654,13 @@
         (recur (nnext in) kept (second in))
         (recur (next in) (conj kept a) found))
       [kept found])))
+
+(defn- displayed-path [f]
+  (let [root (.toPath (.getCanonicalFile (io/file repo-root)))
+        path (.toPath (.getCanonicalFile (io/file f)))]
+    (if (.startsWith path root)
+      (str (.relativize root path))
+      (str path))))
 
 (def ^:private deposit-flags
   "--deposit's named inputs. The keyword-valued ones are read as EDN, so a
@@ -723,6 +730,7 @@
 
       "--report"
       (let [outdir (io/file (or outdir-arg (str (io/file lab "runs/RE2-run-era-ledger"))))
+            outdir-label (displayed-path outdir)
             _ (.mkdirs outdir)
             {:keys [data]} (read-ledger path)
             defects (validate data)
@@ -732,7 +740,7 @@
                              :ledger "holes/labs/wm-contract/run-era-ledger.edn"
                              :implements "EPIC-run-era.md:31-60"
                              :read-only true
-                             :writes-only-under (.getPath outdir)}
+                             :writes-only-under outdir-label}
                     :schema (:ledger/schema data)
                     :check-catalogue (:ledger/check-catalogue data)
                     :validation {:defects defects :conforms? (empty? defects)}
@@ -749,6 +757,7 @@
 
       "--self-test"
       (let [outdir (io/file (or outdir-arg (str (io/file lab "runs/RE2-run-era-ledger"))))
+            outdir-label (displayed-path outdir)
             _ (.mkdirs outdir)
             ctrls (self-test)
             lines (atom [])
@@ -767,7 +776,7 @@
         (spit (io/file outdir "run-era-self-test.edn")
               (with-out-str (pp/pprint {:reader {:id :re2-run-era-ledger-self-test :row :RE2
                                                  :script "holes/labs/wm-contract/run_era_ledger.bb"
-                                                 :writes-only-under (.getPath outdir)
+                                                 :writes-only-under outdir-label
                                                  :ledger-under-test "a temporary copy of run-era-ledger.edn"}
                                         :controls (mapv (fn [[k v]] [k v]) ctrls)})))
         (println (str/join "\n" @lines))

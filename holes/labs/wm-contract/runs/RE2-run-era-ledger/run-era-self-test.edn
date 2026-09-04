@@ -107,7 +107,7 @@
    {:committed-rows 3,
     :pass? true,
     :why
-    "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of an empty ledger"}]
+    "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of committed history"}]
   [:positive/c15-deposit-derives-its-at-from-the-artifact-commit
    {:result
     {:status :appended,
@@ -149,8 +149,7 @@
    {:fixture-state
     {:state :committed,
      :path "committed.edn",
-     :at "2020-01-02T03:04:05Z",
-     :commit "0b56bec"},
+     :at "2020-01-02T03:04:05Z"},
     :pass? true,
     :why
     "without this the three refusals above would be indistinguishable from a guard that refuses everything"}]]}
