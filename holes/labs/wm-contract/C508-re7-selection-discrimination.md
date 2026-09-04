@@ -32,7 +32,7 @@ data.
 | `2026-09-01-s5` | 4 | 123, 115, 123, 115 | **55** | 73–127 | 145 | `:defect` |
 | `2026-09-04-re5` | 4 | 1, 1, 1, 1 | 1 | 1–1 | 146 | `:green` |
 
-Ledger seq 15 (`:red`) and seq 16 (`:green`), `run-era-ledger.edn:264-293`.
+Ledger seq 15 (`:red`) and seq 16 (`:green`), `run-era-ledger.edn:264-291`.
 
 ## The census beside the green, which is the finding
 
