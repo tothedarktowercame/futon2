@@ -140,7 +140,7 @@ Two of them deserve to be seen before they surprise someone.
 
 *Two timezones decide "today" in one tick.* The trace filename and
 `latest-trace-record`'s two-day lookback use UTC (`run_tick_once.clj:24-25`,
-`trace.clj:75-82,826-859`); the scan window, `since-str`, the operator-gate date
+`trace.clj:75-82,826-854`); the scan window, `since-str`, the operator-gate date
 and `pattern-registry/since-date-str` use Europe/London (`war_machine.clj:693,
 2781-2784,6962`, `pattern_registry.clj:41,119`). Under BST they disagree for
 the hour 23:00–00:00 UTC. This row does not rule on that; it records that a
