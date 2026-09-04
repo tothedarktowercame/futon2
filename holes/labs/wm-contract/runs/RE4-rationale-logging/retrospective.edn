@@ -1,0 +1,98 @@
+#:re4{:store "holes/labs/wm-contract/runs/RE4-rationale-logging/store",
+      :records 4,
+      :verdicts {:refuted 3, :undecidable 1},
+      :scored
+      [{:adjudicated-by "c51a8da3-883e-4038-b493-1b268d5d8357",
+        :adjudicator-at "2026-09-01T22:52:07.418144767Z",
+        :contract-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :chosen-instead
+        [:advance-mission "M-aif-policy-conditioned-eig"],
+        :outcome :selected,
+        :chosen-controller-rank 123,
+        :later-decisions-examined 3,
+        :status :recorded,
+        :at "2026-09-01T22:50:42.709079837Z",
+        :verdict :refuted,
+        :candidate-set-size 145,
+        :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+        :chosen-instead-rank 115,
+        :chosen [:advance-mission "M-wm-aif-policy-grain-compliance"]}
+       {:adjudicated-by "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+        :adjudicator-at "2026-09-01T22:53:32.871991661Z",
+        :contract-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :chosen-instead
+        [:advance-mission "M-wm-aif-policy-grain-compliance"],
+        :outcome :selected,
+        :chosen-controller-rank 115,
+        :later-decisions-examined 2,
+        :status :recorded,
+        :at "2026-09-01T22:52:07.418144767Z",
+        :verdict :refuted,
+        :candidate-set-size 145,
+        :run-id "c51a8da3-883e-4038-b493-1b268d5d8357",
+        :chosen-instead-rank 123,
+        :chosen [:advance-mission "M-aif-policy-conditioned-eig"]}
+       {:adjudicated-by "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+        :adjudicator-at "2026-09-01T22:54:48.942309598Z",
+        :contract-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :chosen-instead
+        [:advance-mission "M-aif-policy-conditioned-eig"],
+        :outcome :selected,
+        :chosen-controller-rank 123,
+        :later-decisions-examined 1,
+        :status :recorded,
+        :at "2026-09-01T22:53:32.871991661Z",
+        :verdict :refuted,
+        :candidate-set-size 145,
+        :run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+        :chosen-instead-rank 115,
+        :chosen [:advance-mission "M-wm-aif-policy-grain-compliance"]}
+       {:contract-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :outcome :selected,
+        :chosen-controller-rank 115,
+        :reason :no-later-decision-in-the-store,
+        :later-decisions-examined 0,
+        :status :recorded,
+        :at "2026-09-01T22:54:48.942309598Z",
+        :verdict :undecidable,
+        :candidate-set-size 145,
+        :run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+        :chosen [:advance-mission "M-aif-policy-conditioned-eig"]}],
+      :controls
+      {:c1-held-up-can-occur
+       {:claim "a re-selected choice scores :held-up",
+        :verdict :held-up,
+        :pass? true},
+       :c2-refuted-can-occur
+       {:claim
+        "a choice the next carrying decision passed over scores :refuted",
+        :verdict :refuted,
+        :chosen-instead [:advance-mission "B"],
+        :pass? true},
+       :c3-no-later-decision-is-undecidable
+       {:claim
+        "the last record in a store is :undecidable, not :held-up",
+        :verdict :undecidable,
+        :reason :no-later-decision-in-the-store,
+        :pass? true},
+       :c4-unavailable-candidate-is-not-refutation
+       {:claim
+        "a later decision that never carried the chosen action is :undecidable, NOT :refuted, and is distinguished from an empty tail",
+        :verdict :undecidable,
+        :reason :no-later-decision-carried-the-chosen-action,
+        :later-decisions-examined 1,
+        :pass? true},
+       :c5-refusal-is-named-not-scored
+       {:claim
+        "a refusal is :undecidable for a stated reason rather than scored as a selection",
+        :verdict :undecidable,
+        :reason :refusal-carries-no-re-selection-claim,
+        :pass? true},
+       :c6-typed-absence-is-named-not-scored
+       {:claim
+        "a typed absence is :undecidable carrying its own absence reason",
+        :verdict :undecidable,
+        :reason :typed-absence,
+        :absence-reason :no-decision,
+        :pass? true}},
+      :all-controls-pass? true}

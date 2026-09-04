@@ -21,6 +21,7 @@
             [futon2.aif.policy :as policy]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
+            [futon2.aif.selection-rationale :as selection-rationale]
             [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm])
   (:import (java.io PushbackReader StringReader)
@@ -1293,21 +1294,66 @@
         (is (nil? (wm/f-pi-posterior-preconditions! :selection-gain-only))
             "flag off: no complaint about anything")))))
 
-(deftest selection-clock-flag-off-preserves-the-trace-write-call-test
+(deftest selection-clock-flag-off-still-writes-the-trace-and-the-rationale-test
+  ;; RE4 CHANGED THIS CALL SHAPE DELIBERATELY, and this test now pins the new
+  ;; one rather than the old. `write-trace-and-clock!` always asks for
+  ;; `:return-record? true`, because the rationale is built from the record that
+  ;; was written, and it always emits a rationale -- the clock flag guards the
+  ;; substrate edge only. What has NOT changed is what lands on disk:
+  ;; `:return-record?` alters the RETURN VALUE of `trace/write-trace!` and
+  ;; nothing it writes (trace.clj:712-733), which the byte control below
+  ;; measures rather than asserts.
   (let [calls (atom [])
+        rationales (atom [])
         result {:decision {:action {:type :advance-mission :target "M-next"}}}]
     (with-redefs-fn {#'wm/*clock-selection?* false
                      #'trace/write-trace!
                      (fn [& args]
                        (swap! calls conj args)
-                       "/tmp/historical-trace.edn")
+                       {:path "/tmp/historical-trace.edn" :record {:written :record}})
+                     #'selection-rationale/emit!
+                     (fn [record opts]
+                       (swap! rationales conj [record opts])
+                       "/tmp/traces/rationale/x.edn")
                      #'wm/record-selection-clock!
                      (fn [& _] (throw (ex-info "must not clock" {})))}
       (fn []
         (is (= "/tmp/historical-trace.edn"
-               (#'wm/write-trace-and-clock! result "/tmp/traces")))
-        (is (= [[result :dir "/tmp/traces"]] @calls)
-            "default OFF makes the exact historical trace/write-trace! call")))))
+               (#'wm/write-trace-and-clock! result "/tmp/traces"))
+            "the seam still returns the trace path")
+        (is (= [[result :dir "/tmp/traces" :return-record? true]] @calls))
+        (is (= [[{:written :record}
+                 {:dir "/tmp/traces/rationale"
+                  :trace-path "/tmp/historical-trace.edn"}]]
+               @rationales)
+            "the rationale is emitted from the written record, beside the trace")))))
+
+(deftest return-record-option-does-not-change-the-persisted-trace-bytes-test
+  ;; The control for the claim above. Two writes of the same judge output, one
+  ;; with the historical argument list and one with RE4's, compared byte for
+  ;; byte. Without this the docstring's "persisted bytes are unchanged" would be
+  ;; an assertion about code someone read once.
+  (let [judge-output {:belief {} :observation {} :free-energy {}
+                      :ranked-actions [{:action {:type :no-op}
+                                        :controller-score 0.0 :rank 1}]
+                      :decision {:action {:type :no-op}}
+                      :mode :multiplied}
+        dir-a (str (java.nio.file.Files/createTempDirectory
+                    "wm-trace-bytes-a" (into-array java.nio.file.attribute.FileAttribute [])))
+        dir-b (str (java.nio.file.Files/createTempDirectory
+                    "wm-trace-bytes-b" (into-array java.nio.file.attribute.FileAttribute [])))
+        fixed-ts "2026-09-04T00:00:00Z"
+        stable (fn [path]
+                 (clojure.string/replace
+                  (slurp path)
+                  #":timestamp \"[^\"]+\"" (str ":timestamp \"" fixed-ts "\"")))
+        path-a (trace/write-trace! judge-output :dir dir-a :date-str "2026-09-04")
+        written-b (trace/write-trace! judge-output :dir dir-b :date-str "2026-09-04"
+                                      :return-record? true)]
+    (is (string? path-a))
+    (is (map? written-b))
+    (is (= (stable path-a) (stable (:path written-b)))
+        "the option changes the return value only")))
 
 (deftest selection-clock-mission-decision-retracts-old-and-puts-one-new-edge-test
   (let [posts (atom [])

@@ -1,0 +1,162 @@
+#:re4{:source
+      {:trace
+       "holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn",
+       :records-read 4},
+      :store
+      {:dir "holes/labs/wm-contract/runs/RE4-rationale-logging/store",
+       :files
+       ["rationale-2026-09-01-4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8.edn"
+        "rationale-2026-09-01-c51a8da3-883e-4038-b493-1b268d5d8357.edn"
+        "rationale-2026-09-01-b69ec193-5aa0-45ca-9cbb-9df45cbb8d82.edn"
+        "rationale-2026-09-01-28da19d2-3a03-40f6-8eef-2818fe5583a9.edn"],
+       :records 4},
+      :emitted
+      [{:contract-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :runner-up-margin 0.1468563155173399,
+        :outcome :selected,
+        :chosen-controller-rank 123,
+        :defects [],
+        :status :recorded,
+        :refused-count 4,
+        :at "2026-09-01T22:50:42.709079837Z",
+        :candidate-set-size 145,
+        :runner-up
+        {:type :advance-mission, :target "M-expressions-of-interest"},
+        :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+        :refusal-reasons [:mission-absent-from-capability-graph],
+        :chosen
+        {:type :advance-mission,
+         :target "M-wm-aif-policy-grain-compliance"}}
+       {:contract-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :runner-up-margin 0.1468563155173399,
+        :outcome :selected,
+        :chosen-controller-rank 115,
+        :defects [],
+        :status :recorded,
+        :refused-count 4,
+        :at "2026-09-01T22:52:07.418144767Z",
+        :candidate-set-size 145,
+        :runner-up
+        {:type :advance-mission, :target "M-expressions-of-interest"},
+        :run-id "c51a8da3-883e-4038-b493-1b268d5d8357",
+        :refusal-reasons [:mission-absent-from-capability-graph],
+        :chosen
+        {:type :advance-mission,
+         :target "M-aif-policy-conditioned-eig"}}
+       {:contract-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :runner-up-margin 0.1468563155173399,
+        :outcome :selected,
+        :chosen-controller-rank 123,
+        :defects [],
+        :status :recorded,
+        :refused-count 4,
+        :at "2026-09-01T22:53:32.871991661Z",
+        :candidate-set-size 145,
+        :runner-up
+        {:type :advance-mission, :target "M-expressions-of-interest"},
+        :run-id "b69ec193-5aa0-45ca-9cbb-9df45cbb8d82",
+        :refusal-reasons [:mission-absent-from-capability-graph],
+        :chosen
+        {:type :advance-mission,
+         :target "M-wm-aif-policy-grain-compliance"}}
+       {:contract-sha "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :runner-up-margin 0.1468563155173399,
+        :outcome :selected,
+        :chosen-controller-rank 115,
+        :defects [],
+        :status :recorded,
+        :refused-count 4,
+        :at "2026-09-01T22:54:48.942309598Z",
+        :candidate-set-size 145,
+        :runner-up
+        {:type :advance-mission, :target "M-expressions-of-interest"},
+        :run-id "28da19d2-3a03-40f6-8eef-2818fe5583a9",
+        :refusal-reasons [:mission-absent-from-capability-graph],
+        :chosen
+        {:type :advance-mission,
+         :target "M-aif-policy-conditioned-eig"}}],
+      :controls
+      {:c1-negative-producer-failure-paths
+       {:claim
+        "an illegible decision lands in the store as a typed absence with a specific reason",
+        :cases
+        [{:file
+          "rationale-2026-09-01-4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8.edn",
+          :absence-reason :no-decision,
+          :defects [],
+          :expected-reason :no-decision,
+          :status :typed-absence,
+          :case :no-decision,
+          :pass? true,
+          :in-closed-enum? true,
+          :file-exists? true}
+         {:file "rationale-2026-09-01-neg-no-outcome.edn",
+          :absence-reason :no-outcome-and-no-refusals,
+          :defects [],
+          :expected-reason :no-outcome-and-no-refusals,
+          :status :typed-absence,
+          :case :decision-with-no-outcome,
+          :pass? true,
+          :in-closed-enum? true,
+          :file-exists? true}
+         {:file "rationale-2026-09-01-neg-empty.edn",
+          :absence-reason :empty-candidate-set,
+          :defects [],
+          :expected-reason :empty-candidate-set,
+          :status :typed-absence,
+          :case :empty-candidate-set,
+          :pass? true,
+          :in-closed-enum? true,
+          :file-exists? true}
+         {:file "rationale-2026-09-01-neg-malformed.edn",
+          :absence-reason :malformed-record-fields,
+          :defects [],
+          :expected-reason :malformed-record-fields,
+          :status :typed-absence,
+          :case :malformed-candidate-field,
+          :pass? true,
+          :in-closed-enum? true,
+          :file-exists? true}],
+        :pass? true},
+       :c2-negative-seam-failure-path
+       {:claim
+        "the WIRED SEAM writes a rationale for a legible decision and a typed absence for an illegible one",
+        :result
+        {:legible
+         {:rationale-files 1,
+          :status :recorded,
+          :outcome :selected,
+          :pass? true},
+         :illegible
+         {:rationale-files 1,
+          :status :typed-absence,
+          :absence-reason :no-decision,
+          :pass? true},
+         :tmp-dir-note "temporary; not committed and not under data/"},
+        :pass? true},
+       :c3-replay-stability
+       {:claim
+        "re-emitting the same records reproduces the store byte for byte",
+        :manifest-1
+        [["rationale-2026-09-01-28da19d2-3a03-40f6-8eef-2818fe5583a9.edn"
+          "5ae0e95bb390951cd074cb337c2398c671776691e7ad3cacda98452babbc510d"]
+         ["rationale-2026-09-01-4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8.edn"
+          "e92ecb76810df589eba505ae250e23d0a2124aacf295c31ad9c4b89625de6ad0"]
+         ["rationale-2026-09-01-b69ec193-5aa0-45ca-9cbb-9df45cbb8d82.edn"
+          "8a72aae6a9a050b2e7e5ed22abc2597be173e7350be7b9d4b00d51152e5d0eaf"]
+         ["rationale-2026-09-01-c51a8da3-883e-4038-b493-1b268d5d8357.edn"
+          "6c1dc40423ee8c530b8f016b0c97607aa3c454289d312c1f2b6e18ad62da4e9d"]],
+        :identical? true,
+        :pass? true},
+       :c4-no-defects
+       {:claim "every emitted record validates",
+        :defects [],
+        :pass? true},
+       :c5-contract-pin-present
+       {:claim
+        "the contract pin RE3 could not find in the run store is carried by every record",
+        :pin "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+        :pin-status :present,
+        :records-carrying 4,
+        :pass? true}},
+      :all-controls-pass? true}
