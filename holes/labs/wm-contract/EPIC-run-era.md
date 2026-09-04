@@ -97,6 +97,53 @@ deposit ledger rows, it does not invent them:
   real time-slice. This is also the earliest candidate for RUN4's
   qualifying run — certificate acceptance stays Joe's act.
 
+## Ruling 2026-09-04 (Joe, dictated): the ladder goes live against the plateau; ties are defects the Lean layer must see
+
+> "Yes to fixing the ladder to remove the plateau. I am still hoping that we
+> can gather run evidence and use it to improve the system as needed. I
+> don't know if we have enough run-time criteria, but the Lean model is
+> supposed to help by validating logged info. A 55-way tie should be seen
+> as an obvious defect for example."
+
+Three consequences, as rows (minted at the next loop pause — a work seat
+is in flight at ruling time):
+
+- **U51 (discovery — split from implementation per handoff discipline):**
+  characterize the plateau's composition from the recorded fields. For the
+  s5 and re5 candidate fields: which candidates have case history (rung 1
+  ground — U40-style records exist), which could be constructively scored
+  (rung 2 — kin class / pattern derivation available, would be marked
+  :constructed), which have nothing (rung 3 — typed refusal territory).
+  One committed artifact, no behavior change. This tells U52 how much of
+  the 55 each rung can drain.
+- **U52 (implementation, depends on U51):** implement the three-rung
+  ladder at the selection scoring seam, per the ratified registry ruling
+  (:task-belief-actand-source, efdc401 — case history wins; constructive
+  generalization marked :constructed with its derivation; only then a
+  typed refusal that MINTS a tension record). Behind a flag; the flip
+  itself goes through the flip-readiness gate like every other flip. The
+  acceptance must show the plateau shrinking on the recorded fields (the
+  55 partitioned by rung, each partition scored or refused with a typed
+  record), not merely code landing.
+- **RE7 (the new run-time criterion):** catalogue check
+  :selection-discrimination. The rationale records already log the
+  instrument (:controller-score-tie {:count :rank-band} — RE4 built it);
+  the check reads a run's records and verdicts :defect when the CHOSEN
+  candidate sits in a tie wider than 1 (choice-by-tiebreak; binary, no
+  magic threshold — field plateaus not containing the choice are reported
+  as a width census, not a verdict). Deposit wiring per RE3/RE6 shape.
+  Lean leg per Joe's sentence: the tie data of each decision transcribed
+  and the census decided in Lean (the U49 producer recipe over rationale
+  records) — the Lean model validating logged info, which is what it is
+  for. Retro-deposited, s5 verdicts :defect (rank 123 in a 55-tie) and
+  re5 :green (head chosen, tie 1) — the series then SHOWS the plateau as
+  a defect the moment it recurs.
+
+Criterion-generation principle worth keeping: every reading hazard the
+RE4 records state on themselves (score ties, non-injective join keys) is
+a candidate catalogued check — the records are designed to be validated,
+so each hazard the producer names is a check the catalogue should grow.
+
 ## Not in scope
 
 - No default flips — every flip remains J-gated (0 READY today; the epic
