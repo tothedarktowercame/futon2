@@ -256,6 +256,31 @@ and moved the history to the stratum that carries history (git; and Joe
 has floated an overlay-comment facility for papers as the explicit home
 for such notes — "we can build that facility if that's important").
 
+### The trim-tab reading (Joe, dictated 2026-09-04, continuing)
+
+> "What's going on in the operator turn is very much like Buckminster
+> Fuller's trim tab. We have got to find very efficient ways to make
+> potentially big changes, but without creating a catastrophe of chained
+> failures in the process. And it's quite remarkable that that works. But
+> I think that only works not just because LLMs are great, but because
+> these harnesses are thought through."
+
+The mechanism claim, made explicit: the operator stratum's efficiency is
+trim-tab leverage — a small input at the top stratum steers a large effect
+below — and what makes the leverage SAFE (big changes without chained
+failures) is not the model but the harness: gates that refuse rather than
+degrade (worklist_check, the ltx_ERROR and PDF gates), author ≠ reviewer,
+append-only ledgers with validated appends, typed absences instead of
+silent no-ops, rows blocked until dependencies sign. The same morning
+supplied both arms of the evidence: one operator sentence put five rows
+through the build loop with two built-and-signed inside the hour (leverage
+through a thought-through harness); and the one place the harness was NOT
+thought through — a publisher with its output filename hardcoded — is
+exactly where a small action DID chain (the plop publish overwrote the
+futon paper's page, twice, caught by title-verification rather than by any
+gate). The trim tab works where the coupling is typed; where a coupling is
+hidden, the small input cascades.
+
 Census consequence: turn-role classification should record not only WHICH
 node a turn lands on but which STRATUM it speaks from — a turn about the
 code, a turn about an agent's handling of the code, a turn about the
