@@ -31,7 +31,7 @@
 {:ledger/read-by
  ["run_era_ledger.bb (validator, run fold, check fold)"],
  :ledger/head-sha
- "e4af8437c12414bcf4555238f357be5559dc51a61128450e982acfb1bc2b8913",
+ "efb33ea5b99843770a3f5ee04d02cdddf5e192cb893a008986ad16b6e8ed6764",
  :ledger/generated false,
  :ledger/schema
  {:row
@@ -260,7 +260,35 @@
         :author "u37_enumeration_replay.clj --deposit",
         :seq 14,
         :artifact
-        "holes/labs/wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-04-re5.edn"}],
+        "holes/labs/wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-04-re5.edn"}
+  #:row{:run-id "2026-09-01-s5",
+        :deposited-by
+        "RE7 -- mint the :selection-discrimination check and wire its deposit",
+        :sha
+        "2e6fdaa6b7492e3f33ca848807ce36bf167d96e9073e341ffbffb51fa0b8a9c5",
+        :at "2026-09-01T22:54:48.942309598Z",
+        :verdict :red,
+        :check-id :selection-discrimination,
+        :notes
+        "the check's verdict is :defect and it deposits as :red, the ledger's declared word -- no new status is minted (the enum is #{:green :red :typed-absence}). 4 of 4 decisions chose a candidate from inside a controller-score tie: widest tie 55 candidates, deepest chosen rank 123 in a field of 145, so the score ranked a plateau and the sort's tie-break picked the member. read from the 4 rationale records of runs/RE4-rationale-logging/store (the run's own, written at decision time), with the plateau census recomputed from the trace they name and control C1 requiring the recomputation to reproduce every recorded tie. CENSUS, NOT VERDICT: the widest plateau not containing the choice on this run is 6 (02-plateau-census.edn); control C8 shows it is not an input to the verdict.",
+        :author "re7_selection_discrimination.bb --deposit",
+        :seq 15,
+        :artifact
+        "holes/labs/wm-contract/runs/RE7-selection-discrimination/2026-09-01-s5/01-decisions.edn"}
+  #:row{:run-id "2026-09-04-re5",
+        :deposited-by
+        "RE7 -- mint the :selection-discrimination check and wire its deposit",
+        :sha
+        "efb33ea5b99843770a3f5ee04d02cdddf5e192cb893a008986ad16b6e8ed6764",
+        :at "2026-09-04T07:50:47.952039102Z",
+        :verdict :green,
+        :check-id :selection-discrimination,
+        :notes
+        "every one of the 4 decisions chose a candidate whose controller score no other candidate shared (tie width 1, chosen rank 1), so no choice was made by the sort's tie-break. read from the 4 rationale records of runs/2026-09-04-re5/rationale (the run's own, written at decision time), with the plateau census recomputed from the trace they name and control C1 requiring the recomputation to reproduce every recorded tie. WHAT THIS GREEN DOES NOT SAY, and the census beside it is why: the score field of these ticks still carries a plateau 56 candidates wide that the chosen candidate is not in (02-plateau-census.edn). The verdict is about the choices this run made, not about whether the scoring discriminates; control C8 shows the census is not an input to it.",
+        :author "re7_selection_discrimination.bb --deposit",
+        :seq 16,
+        :artifact
+        "holes/labs/wm-contract/runs/RE7-selection-discrimination/2026-09-04-re5/01-decisions.edn"}],
  :ledger/check-catalogue
  [#:check{:id :contract-pin,
           :machinery
