@@ -1,9 +1,9 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-09-03",
  :authority
- {:contract-git-sha "581034b67e47240b7a4003dc39bdd7dd545e1daf",
+ {:contract-git-sha "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
   :contract-sha256
-  "f0ecb897909b3a3ddb2c6af015eab5b9cd6408d1c0b70fe2e2cac410869bfb29",
+  "4e1feed965e962dd3f4c033feaaaceeccda9890048c8e4487a65036fb3c7e5d8",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
