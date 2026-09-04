@@ -105,6 +105,81 @@ AIF table cannot type. Either outcome is a product.
    loop. This is priced as a follow-on row, not a precondition; the census
    is the excursion's core deliverable.
 
+## Method refinement — two controlled vocabularies (Joe, dictated 2026-09-04, second exchange)
+
+> "All turns... with some suitable caveat, are tagged with patterns, based on
+> an embedding. And we also have a free text search. So much as we were doing
+> with our library loop, we could go run around looking at those operator
+> turns and trying to use the patterns as an initial limited vocabulary...
+> One problem with that, though, is that this remains destructured in that
+> there is no sense, for example, of clocking in on a mission phase. But we
+> could use the mission phase terminology — identify, map, argue, derive,
+> instantiate, and so on — as another controlled vocabulary whereby the
+> operator does move the agent from section to section within the mission...
+> look at the occurrence of that mission vocabulary and look at the patterns
+> that are associated with those turns, and that would give a fairly tightly
+> scoped sample of turns to look at that could relate to how the operator
+> changes the workflow. And we could come back to the other turns that happen
+> under other auspices later."
+
+So the census instrument is a **cross of two vocabularies**, neither authored
+for the purpose:
+
+1. **Pattern tags** (embedding-assigned): every turn fires a
+   `context-retrieval` event into the evidence store (`:coordination` docs,
+   body `{"event" "context-retrieval", "query" <turn text>, "results"
+   [<ranked patterns>]}`), so the pattern library is already an emergent
+   tag vocabulary over operator turns — trusted case-by-case, per Joe's
+   caveat ("the assumption that those embeddings might be correct in some
+   cases").
+2. **Mission-phase words** (operator-issued): IDENTIFY/MAP/DERIVE/ARGUE/
+   VERIFY/INSTANTIATE/DOCUMENT — the vocabulary Joe actually uses to move
+   an agent between sections. Occurrence of a phase word in an operator
+   turn is a candidate *clocking event*, which is exactly the structure the
+   raw store lacks ("no sense of clocking in on a mission phase").
+
+Where the two vocabularies agree on a turn — phase word present, and the
+retrieval record's patterns accumulate consistently across such turns — the
+turn's role is attested twice, independently. Keywords/phrases that
+accumulate attached to patterns are the product: "then we'd know what the
+operator is actually doing on a turn-by-turn basis."
+
+### Pilot receipts (claude-1, 2026-09-04, run against the live store)
+
+- Instrument: `GET :7073/api/alpha/evidence/text-search` (FTS5 sidecar,
+  `author=joe` filter works; per README-fts, check `:ok` and treat 503 as
+  retry, never as empty).
+- Phase-word counts over Joe-authored docs (limit 500): identify 278,
+  derive 233, argue 125, instantiate 147, document 262, survey 123,
+  lifecycle 171; map and verify saturate the cap (common in other senses —
+  they need co-occurrence filtering, e.g. with "phase" [415] or "mission").
+- Usage verified section-moving, not incidental: e-66dc0a39 ("I'd move the
+  INSTANTIATE-0 items to INSTANTIATE-1..."), e-88a65c30 ("please do
+  instantiate"), e-39cdb738 ("INSTANTIATE now would be good, we're in a
+  strong position to run it end-to-end").
+- The turn→pattern join demonstrated: Joe turn 2026-05-30 "I still think
+  INSTANTIATE can be driven by you end to end..." → retrieval record
+  e-e9b2024c (claude-5, turn 20) → patterns ukrns/reader-run-path (rank 1),
+  transition/persistence-conditions (rank 2), embeddings via futon3a.
+- Aggregation exists server-side: `GET /api/alpha/patterns/activation`
+  explodes all context-retrieval records per pattern with the first 240
+  chars of each query — filter activations by phase vocabulary and the
+  survey table falls out. (Route scans all evidence; price it before
+  running wide.)
+
+### Caveats the census must carry (typed, not waved at)
+
+- **Prefix truncation**: the retrieval query is ~the first 100 chars of the
+  turn — pattern tags are computed from a prefix, out of context. A tag on
+  a long dictated turn may reflect only its opening clause.
+- **Coverage denominator**: not every operator turn necessarily has a
+  retrieval record (retrieval is per-agent-session machinery, agent-id
+  varies). The census must report turns-with-tags / total-turns for the
+  window — the C1 denominator discipline applied to the tagging layer
+  itself.
+- **Staged scope** (Joe's ruling in the dictation): phase-vocabulary turns
+  first; "the other turns that happen under other auspices" later.
+
 ## What this excursion does NOT do
 
 - No automation of rulings — the census may show which turn kinds are
