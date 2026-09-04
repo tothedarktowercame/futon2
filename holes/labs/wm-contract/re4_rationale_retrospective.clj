@@ -28,14 +28,36 @@
 ;;
 ;; Run from the futon2 root:
 ;;   clojure -M holes/labs/wm-contract/re4_rationale_retrospective.clj
+;;
+;; RE5: the store and the output directory are overridable, so the same query
+;; runs against a RUN'S OWN rationale slice rather than only against RE4's
+;; committed shadow store. Both default to RE4's paths, so an invocation with
+;; no arguments is the one RE4 ran and writes the same file.
+;;
+;;   clojure -M holes/labs/wm-contract/re4_rationale_retrospective.clj \
+;;     --store holes/labs/wm-contract/runs/2026-09-04-re5/rationale \
+;;     --out   holes/labs/wm-contract/runs/2026-09-04-re5
 
 (ns re4-rationale-retrospective
   (:require [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [futon2.aif.selection-rationale :as sr]))
 
-(def out-dir "holes/labs/wm-contract/runs/RE4-rationale-logging")
-(def store-dir (str out-dir "/store"))
+(def ^:private flags
+  "`--k v` pairs. A flag with no value is refused loudly rather than silently
+   defaulting, because a mistyped `--store` would otherwise score RE4's store
+   and label the report with the run the caller meant."
+  (loop [[a v & more] (vec *command-line-args*) acc {}]
+    (cond
+      (nil? a) acc
+      (nil? v) (throw (ex-info (str "re4-retrospective: flag " a " has no value") {:flag a}))
+      :else (recur more (assoc acc a v)))))
+
+(def out-dir
+  (get flags "--out" "holes/labs/wm-contract/runs/RE4-rationale-logging"))
+
+(def store-dir
+  (get flags "--store" (str out-dir "/store")))
 
 (defn chosen-key [r]
   (let [a (get-in r [:rationale/chosen :action])]
