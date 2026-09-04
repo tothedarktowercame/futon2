@@ -96,9 +96,9 @@
     :defs-source
     "runs/RE7-selection-discrimination/2026-09-01-s5/00-source.edn",
     :recorded-producer-sha256
-    "2020a0a2e7ceabdd2a0727a3c34f57588bf945646eed0f1aa447834f4f9b1437",
+    "967b758254555b698494bfe805702f3706dec8abe563e3fc1fd39d8a78ca83a2",
     :this-producer-sha256
-    "2020a0a2e7ceabdd2a0727a3c34f57588bf945646eed0f1aa447834f4f9b1437",
+    "967b758254555b698494bfe805702f3706dec8abe563e3fc1fd39d8a78ca83a2",
     :redefines-nothing? true,
     :pass? true,
     :why

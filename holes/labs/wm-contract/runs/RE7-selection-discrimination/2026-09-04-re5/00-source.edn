@@ -29,6 +29,6 @@
   "the census is computed from the COMMITTED run-store trace above. `:rationale/trace-path` on the records says [\"/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-04.edn\"]; for 2026-09-04-re5 that is an absolute path into the live, untracked data/wm-trace/, which no reviewer and no other machine can read. Control C1 is what shows the file read here holds the same decisions the records were written from."},
  :producer "holes/labs/wm-contract/re7_selection_discrimination.bb",
  :producer-sha256
- "2020a0a2e7ceabdd2a0727a3c34f57588bf945646eed0f1aa447834f4f9b1437",
+ "967b758254555b698494bfe805702f3706dec8abe563e3fc1fd39d8a78ca83a2",
  :lean-slug "re5",
  :emits-shared-definitions false}
