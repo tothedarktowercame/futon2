@@ -1,5 +1,5 @@
 RE2 — RUN-ERA LEDGER: one row per (run-id, check-id), folded
-  14 rows, 7 catalogued checks, 0 defects against the schema the ledger declares
+  16 rows, 8 catalogued checks, 0 defects against the schema the ledger declares
 
 CHECK CATALOGUE — the check-id enum, each entry naming its machinery
   :contract-pin                  holes/labs/wm-contract/C177-contract-last-source-change.md (registry contract == live contract at the run sha)
@@ -9,11 +9,12 @@ CHECK CATALOGUE — the check-id enum, each entry naming its machinery
   :enumeration-completeness      holes/labs/wm-contract/u37_enumeration_replay.clj
   :rationale-regret              holes/labs/wm-contract/u39_selection_retrospective.bb
   :tensions-cashed               holes/labs/wm-contract/u41_tension_ledger.bb
+  :selection-discrimination      holes/labs/wm-contract/re7_selection_discrimination.bb (chosen-candidate controller-score tie from the run rationale records, Lean decide)
 
 BY RUN — a run missing a catalogued check is :incomplete, never green
-  2026-09-01-s5                :incomplete  7 checks, not deposited: []
-                                 because :typed-absences [:contract-pin :enumeration-completeness :flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]
-  2026-09-04-re5               :incomplete  7 checks, not deposited: []
+  2026-09-01-s5                :red         8 checks, not deposited: []
+                                 because :red-verdict [:selection-discrimination]
+  2026-09-04-re5               :incomplete  8 checks, not deposited: []
                                  because :typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]
 
 BY CHECK — the verdict series across runs, which is the time-correlation
@@ -23,4 +24,5 @@ BY CHECK — the verdict series across runs, which is the time-correlation
   :per-node-runtime-validation   2 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]
   :rationale-regret              2 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]
   :run-conformance               2 runs [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green] ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green]]
+  :selection-discrimination      2 runs [["2026-09-01T22:54:48.942309598Z" "2026-09-01-s5" :red] ["2026-09-04T07:50:47.952039102Z" "2026-09-04-re5" :green]]
   :tensions-cashed               2 runs [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]

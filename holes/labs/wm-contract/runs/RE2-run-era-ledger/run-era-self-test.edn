@@ -7,7 +7,7 @@
  :controls
  [[:positive/c1-committed-ledger-is-green
    {:defects [],
-    :rows 14,
+    :rows 16,
     :pass? true,
     :why
     "the committed ledger conforms to the schema it declares; this is what `--check` gates on"}]
@@ -16,12 +16,12 @@
     {:status :appended,
      :run-id "0000-00-00-self-test",
      :check-id :flip-readiness,
-     :row/seq 15,
+     :row/seq 17,
      :row/sha
-     "9080cdbef790ddac06c1e508aa6aed78574c100b7399014e0216939736f7ad4b"},
+     "cac5856a3bd29a2e2935bf346ce295fa50301cb8993a9d297e9188cd94d06ce8"},
     :defects [],
-    :rows-before 14,
-    :rows 15,
+    :rows-before 16,
+    :rows 17,
     :pass? true,
     :why
     "one row appended through the API, and the ledger it produced validates green -- otherwise every control below is a statement about a ledger nothing can write"}]
@@ -30,10 +30,10 @@
     {:status :already-present,
      :run-id "0000-00-00-self-test",
      :check-id :flip-readiness,
-     :row/seq 15,
+     :row/seq 17,
      :row/sha
-     "9080cdbef790ddac06c1e508aa6aed78574c100b7399014e0216939736f7ad4b"},
-    :rows 15,
+     "cac5856a3bd29a2e2935bf346ce295fa50301cb8993a9d297e9188cd94d06ce8"},
+    :rows 17,
     :byte-identical? true,
     :pass? true,
     :why
@@ -104,7 +104,7 @@
     :why
     "the writer pretty-prints the data, so the hand-written schema documentation would be the natural casualty of the first append; it is re-emitted verbatim instead"}]
   [:positive/c14-no-write-touched-the-committed-ledger
-   {:committed-rows 14,
+   {:committed-rows 16,
     :pass? true,
     :why
     "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of committed history"}]
@@ -113,9 +113,9 @@
     {:status :appended,
      :run-id "0000-00-00-self-test-deposit",
      :check-id :run-conformance,
-     :row/seq 16,
+     :row/seq 18,
      :row/sha
-     "d452d20573e76cd29a4eb919f8a6ea3c3079ca6d66cb359b20d1ed4edc32060b"},
+     "a7c4421720eeb3e6c6f432bef284ace44d425d4ff3d703b17fad7b7b05804789"},
     :artifact
     "holes/labs/wm-contract/runs/2026-09-01-s5/conformance.edn",
     :artifact-commit "fe7c1c1b",
@@ -152,4 +152,35 @@
      :at "2020-01-02T03:04:05Z"},
     :pass? true,
     :why
-    "without this the three refusals above would be indistinguishable from a guard that refuses everything"}]]}
+    "without this the three refusals above would be indistinguishable from a guard that refuses everything"}]
+  [:positive/c20-catalogue-add-appends-and-leaves-every-row-untouched
+   {:result
+    {:status :appended,
+     :check-id :0000-self-test-check,
+     :catalogue-size 9},
+    :catalogue-before 8,
+    :catalogue-after 9,
+    :rows-unchanged? true,
+    :head-sha-unchanged? true,
+    :pass? true,
+    :why
+    "minting a check is a write through the API rather than an edit, and the sha chain covers rows only -- so this shows the rows and the head sha come through it untouched"}]
+  [:positive/c21-identical-catalogue-add-is-already-present
+   {:result
+    {:status :already-present, :check-id :0000-self-test-check},
+    :byte-identical? true,
+    :pass? true,
+    :why
+    "the mint is re-runnable for the same reason a deposit is: a check wired twice must not double its catalogue entry"}]
+  [:negative/c22-a-divergent-entry-for-an-existing-check-id-is-refused
+   {:defects #{:divergent-existing-check-id},
+    :threw? true,
+    :pass? true,
+    :why
+    "the catalogue is what a row's :check-id means; rewriting an entry in place would silently change what every past row claims"}]
+  [:negative/c23-an-entry-whose-machinery-does-not-resolve-is-refused
+   {:defects #{:machinery-pointer-does-not-resolve},
+    :threw? true,
+    :pass? true,
+    :why
+    "the ledger's own rule is `a check enters the catalogue when its machinery exists`; without this the rule was a sentence, and a check id could be minted for a producer nobody wrote"}]]}

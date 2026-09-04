@@ -63,10 +63,17 @@
           "U39/U40: decay-family refutation, 85/85 re-selections"}
   #:check{:id :tensions-cashed,
           :machinery "holes/labs/wm-contract/u41_tension_ledger.bb",
-          :precedent "tension-ledger T1-T5, u41 validator"}],
+          :precedent "tension-ledger T1-T5, u41 validator"}
+  #:check{:id :selection-discrimination,
+          :machinery
+          "holes/labs/wm-contract/re7_selection_discrimination.bb (chosen-candidate controller-score tie from the run rationale records, Lean decide)",
+          :precedent
+          "U51/U52: the s5 55-wide plateau at ranks 73-127, chosen at rank 123 -- the defect Joe named on 2026-09-04",
+          :note
+          "the ledger enum has no :defect, so the check verdicts :defect and DEPOSITS :red; no new status word is minted. Plateaus of the field not containing the choice are a census (02-plateau-census.edn) and never a verdict."}],
  :validation {:defects [], :conforms? true},
  :head-sha
- "e4af8437c12414bcf4555238f357be5559dc51a61128450e982acfb1bc2b8913",
+ "efb33ea5b99843770a3f5ee04d02cdddf5e192cb893a008986ad16b6e8ed6764",
  :by-run
  [{:run-id "2026-09-01-s5",
    :checks
@@ -76,19 +83,13 @@
     :per-node-runtime-validation :typed-absence,
     :rationale-regret :typed-absence,
     :run-conformance :green,
+    :selection-discrimination :red,
     :tensions-cashed :typed-absence},
    :checks-not-deposited [],
-   :first-at "2026-09-01T22:56:17.282228522Z",
-   :status :incomplete,
+   :first-at "2026-09-01T22:54:48.942309598Z",
+   :status :red,
    :status-reason
-   {:cause :typed-absences,
-    :checks
-    [:contract-pin
-     :enumeration-completeness
-     :flip-readiness
-     :per-node-runtime-validation
-     :rationale-regret
-     :tensions-cashed]}}
+   {:cause :red-verdict, :checks [:selection-discrimination]}}
   {:run-id "2026-09-04-re5",
    :checks
    {:contract-pin :green,
@@ -97,9 +98,10 @@
     :per-node-runtime-validation :typed-absence,
     :rationale-regret :typed-absence,
     :run-conformance :green,
+    :selection-discrimination :green,
     :tensions-cashed :typed-absence},
    :checks-not-deposited [],
-   :first-at "2026-09-04T07:52:31.929452654Z",
+   :first-at "2026-09-04T07:50:47.952039102Z",
    :status :incomplete,
    :status-reason
    {:cause :typed-absences,
@@ -139,6 +141,11 @@
    :series
    [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green]
     ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green]]}
+  {:check-id :selection-discrimination,
+   :runs 2,
+   :series
+   [["2026-09-01T22:54:48.942309598Z" "2026-09-01-s5" :red]
+    ["2026-09-04T07:50:47.952039102Z" "2026-09-04-re5" :green]]}
   {:check-id :tensions-cashed,
    :runs 2,
    :series

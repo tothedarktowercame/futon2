@@ -21,5 +21,9 @@ every append below goes to a TEMPORARY COPY; the committed ledger is not written
   :negative/c17-deposit-refuses-an-untracked-artifact        pass?=true
   :negative/c18-deposit-refuses-an-artifact-modified-since-its-commit pass?=true
   :positive/c19-the-guard-reads-the-real-commit-instant      pass?=true
+  :positive/c20-catalogue-add-appends-and-leaves-every-row-untouched pass?=true
+  :positive/c21-identical-catalogue-add-is-already-present   pass?=true
+  :negative/c22-a-divergent-entry-for-an-existing-check-id-is-refused pass?=true
+  :negative/c23-an-entry-whose-machinery-does-not-resolve-is-refused pass?=true
 
-  20 controls, 13 negative (each shown REFUSING), 7 positive
+  24 controls, 15 negative (each shown REFUSING), 9 positive
