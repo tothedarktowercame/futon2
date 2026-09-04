@@ -2,8 +2,7 @@
  {:id :re2-run-era-ledger-self-test,
   :row :RE2,
   :script "holes/labs/wm-contract/run_era_ledger.bb",
-  :writes-only-under
-  "/home/joe/code/futon2/holes/labs/wm-contract/runs/RE2-run-era-ledger",
+  :writes-only-under "holes/labs/wm-contract/runs/RE2-run-era-ledger",
   :ledger-under-test "a temporary copy of run-era-ledger.edn"},
  :controls
  [[:positive/c1-committed-ledger-is-green
@@ -107,4 +106,50 @@
    {:committed-rows 0,
     :pass? true,
     :why
-    "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of an empty ledger"}]]}
+    "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of an empty ledger"}]
+  [:positive/c15-deposit-derives-its-at-from-the-artifact-commit
+   {:result
+    {:status :appended,
+     :run-id "0000-00-00-self-test-deposit",
+     :check-id :run-conformance,
+     :row/seq 2,
+     :row/sha
+     "b64af9f675057eb992cebe6f4002f4043f34b43656c56eadcb7faa1748c6822a"},
+    :artifact
+    "holes/labs/wm-contract/runs/2026-09-01-s5/conformance.edn",
+    :artifact-commit "fe7c1c1b",
+    :row-at "2026-09-01T22:58:26Z",
+    :replay :already-present,
+    :byte-identical? true,
+    :pass? true,
+    :why
+    "a check calls --deposit, not the EDN: the row is assembled here and its :row/at is the artifact's commit instant, which is what makes the same deposit repeat as :already-present instead of colliding with itself"}]
+  [:negative/c16-deposit-refuses-an-artifact-that-is-not-there
+   {:defects #{:artifact-missing},
+    :threw? true,
+    :pass? true,
+    :why
+    "the guard runs before the append, so a row naming a file nobody wrote is refused at the deposit rather than at the validator"}]
+  [:negative/c17-deposit-refuses-an-untracked-artifact
+   {:state {:state :untracked, :path "untracked.edn"},
+    :defects #{:artifact-untracked},
+    :threw? true,
+    :pass? true,
+    :why
+    "`--check` is satisfied by any file on disk; a reviewer reading this row later has only the history, so an artifact that was never committed is not evidence"}]
+  [:negative/c18-deposit-refuses-an-artifact-modified-since-its-commit
+   {:state {:state :dirty, :path "moved.edn"},
+    :defects #{:artifact-dirty},
+    :threw? true,
+    :pass? true,
+    :why
+    "the row would name a path whose committed content is not what the check read; the working copy having moved is exactly the case a resolving pointer hides"}]
+  [:positive/c19-the-guard-reads-the-real-commit-instant
+   {:fixture-state
+    {:state :committed,
+     :path "committed.edn",
+     :at "2020-01-02T03:04:05Z",
+     :commit "b06e44d"},
+    :pass? true,
+    :why
+    "without this the three refusals above would be indistinguishable from a guard that refuses everything"}]]}

@@ -2,6 +2,11 @@
 ;; U49 -- TRANSCRIBE THE 2026-09-01-s5 RUN'S ROUTE AND THE DRAWN WIRING INTO LEAN.
 ;;
 ;;   bb holes/labs/wm-contract/u49_route_transcribe.bb [outdir]
+;;   bb holes/labs/wm-contract/u49_route_transcribe.bb --deposit <run-id> [outdir]
+;;       ; also deposits one run-era ledger row (RE3)
+;;
+;; Both forms are run FROM THE LAB DIRECTORY: run-dir and the default outdir are
+;; relative to the working directory.
 ;;
 ;; Joe's RUN4 ruling (2026-09-03, worklist.edn :run4-lean-ruling) refuses the
 ;; "permanent external attestation" reading of `wmRunConformsToWiring`: "all
@@ -97,7 +102,22 @@
   (or (System/getenv "FUTON_WM_TRACE_DIR")
       "/home/joe/code/futon2/data/wm-trace"))
 
-(def outdir (or (first *command-line-args*) "runs/U49-run-conformance"))
+(def cli
+  "Positional arguments and flag pairs, split. An invocation with no flags parses
+   exactly as it did before: the first positional is still the outdir."
+  (loop [[a & more] *command-line-args*, pos [], flags {}]
+    (cond
+      (nil? a) {:positional pos :flags flags}
+      (str/starts-with? a "--") (recur (rest more) pos (assoc flags a (first more)))
+      :else (recur more (conj pos a) flags))))
+
+(def outdir (or (first (:positional cli)) "runs/U49-run-conformance"))
+
+(def repo-root ;; from the script's own location, so a worktree run targets its own checkout
+  (-> (java.io.File. *file*) .getAbsoluteFile
+      .getParentFile .getParentFile .getParentFile .getParentFile .getPath))
+
+(def deposit-run-id (get-in cli [:flags "--deposit"]))
 
 ;; --------------------------------------------------------------- reading ---
 
@@ -547,6 +567,68 @@
 (spit (str outdir "/04-controls.edn") (pp-str control-results))
 (spit (str outdir "/lean-block.lean") lean-text)
 
+;; -------------------------------------------------------------- deposit ----
+;; --deposit <run-id> -- one run-era ledger row (RE3).
+;;
+;; This is the one check of the three RE3 wires whose evidence IS in the run
+;; store: `conformance.edn` was written there by run3_conformance.bb when the
+;; run was taken, and C1 above is the test that this transcription reproduces
+;; that pinned verdict. So the row is a verdict about this run rather than a
+;; property of the tree, and it deposits :green or :red, never a typed absence.
+;;
+;; :row/at is the run's own :checked-at, not a deposit-time stamp: the
+;; transcription writes no wall-clock field by design (it re-decides the same
+;; comparison rather than making a new observation), and the time a reader
+;; wants on the series is when the run's conformance was determined.
+
+(defn deposit! [run-id]
+  (let [expected (last (str/split run-dir #"/"))]
+    (when-not (= run-id expected)
+      (println (format "u49 --deposit: run-id %s does not name the transcribed run (%s); refusing"
+                       run-id run-dir))
+      (System/exit 1))
+    (let [failed (vec (sort (keep (fn [[k v]] (when (false? (:pass v)) (name k))) control-results)))
+          conformant (= :conformant (:verdict pinned-conformance))
+          verdict (if (and (empty? failed) conformant (conforms? routes)) :green :red)
+          out-rel (str (fs/relativize repo-root (fs/absolutize outdir)))
+          artifact (str out-rel "/03-classification.edn")
+          notes (if (= :green verdict)
+                  (str "the transcription reproduces the run's own pinned verdict :conformant "
+                       "(runs/" run-id "/conformance.edn, :checked-at " (:checked-at pinned-conformance)
+                       ", written by run3_conformance.bb when the run was taken) over "
+                       (count routes) " routes, " (count all-hops) " hops, "
+                       (count distinct-hops) " distinct, against control map "
+                       (get-in source-facts [:control-map :p4ng-commit])
+                       "; control C1 is that reproduction and every falsifier in C4 breaks it. "
+                       "LIMITS, from C6 beside this artifact: "
+                       (:route-measured (frequencies (map classify distinct-hops)) 0)
+                       " of " (count distinct-hops) " distinct hops are on the :route-measured-drawn "
+                       "layer, which a previous route measurement put there, and " (count unfired)
+                       " of " (count drawn-edges) " drawn edges never fired -- the run stayed inside "
+                       "the union of the drawn and measured layers, which is not the drawn figure "
+                       "predicting the run. Controls: " out-rel "/04-controls.edn.")
+                  (str "the run-conformance transcription FAILS at deposit time: controls "
+                       (pr-str failed) " failed"
+                       (when-not conformant
+                         (str "; the run's pinned verdict is " (pr-str (:verdict pinned-conformance))))
+                       ". Controls: " out-rel "/04-controls.edn."))
+          {:keys [exit out err]}
+          (process/shell {:dir repo-root :out :string :err :string :continue true}
+                         "bb" "holes/labs/wm-contract/run_era_ledger.bb" "--deposit"
+                         "--run-id" run-id
+                         "--check-id" ":run-conformance"
+                         "--verdict" (str verdict)
+                         "--artifact" artifact
+                         "--at" (:checked-at pinned-conformance)
+                         "--author" "u49_route_transcribe.bb --deposit"
+                         "--deposited-by" "RE3 -- wire the existing checks to deposit ledger rows"
+                         "--notes" notes)]
+      (print out) (print err) (flush)
+      (when-not (zero? exit)
+        (println (format "u49 --deposit: the ledger refused the row (exit %d)" exit))
+        (println "  if the refusal is artifact-dirty, commit" artifact "and re-run"))
+      (System/exit exit))))
+
 (let [failures (keep (fn [[k v]] (when (false? (:pass v)) k)) control-results)]
   (println (format "u49: %d records, %d hops (%d distinct), verdict %s"
                    (count records) (count all-hops) (count distinct-hops)
@@ -557,4 +639,5 @@
   (println (format "u49: wrote %s" outdir))
   (when (seq failures)
     (println "u49: FAIL" (pr-str failures))
-    (System/exit 1)))
+    (System/exit 1))
+  (when deposit-run-id (deposit! deposit-run-id)))

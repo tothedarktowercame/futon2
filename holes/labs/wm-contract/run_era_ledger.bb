@@ -6,6 +6,8 @@
 ;;   bb holes/labs/wm-contract/run_era_ledger.bb --self-test [outdir]
 ;;   bb holes/labs/wm-contract/run_era_ledger.bb --append '<edn row map>'
 ;;   bb holes/labs/wm-contract/run_era_ledger.bb --append-file <path>
+;;   bb holes/labs/wm-contract/run_era_ledger.bb --deposit --run-id … --check-id …
+;;       --verdict … --artifact … --author … [--notes …] [--at …]   (RE3)
 ;;   (any mode) --ledger <path>   target a copy instead of the committed ledger
 ;;
 ;; `--check` is the gate: bare exit 0 when run-era-ledger.edn conforms to the
@@ -33,7 +35,8 @@
 ;; No tick, no run lock, no substrate call, no network. --check and --report are
 ;; read-only. --self-test writes only under a temporary directory and its outdir.
 
-(require '[clojure.edn :as edn]
+(require '[babashka.process :as process]
+         '[clojure.edn :as edn]
          '[clojure.java.io :as io]
          '[clojure.pprint :as pp]
          '[clojure.string :as str])
@@ -256,6 +259,82 @@
           :row/seq seq-n :row/sha sha})))))
 
 ;; ---------------------------------------------------------------------------
+;; Deposit -- the path a CHECK takes into the ledger. RE3.
+;; ---------------------------------------------------------------------------
+;;
+;; A check does not build a row and it does not touch the EDN. It calls
+;; `--deposit`, which assembles the row and hands it to `append-row!`. Two
+;; things are enforced here rather than left to each check:
+;;
+;; THE ARTIFACT MUST BE COMMITTED AND UNMODIFIED. `--check` only requires the
+;; pointer to resolve to a file on disk, which an uncommitted scratch file
+;; does. A reviewer reading the row three months later has only the history, so
+;; a row pointing at a file that was never committed -- or at a file whose
+;; working copy has moved since -- points at nothing they can read. The deposit
+;; refuses both, naming which.
+;;
+;; :row/at IS DERIVED, NOT STAMPED. Wall-clock at deposit time would make every
+;; replay a different row, and a conflicting (run-id, check-id) rather than the
+;; :already-present the append API offers. So the default :row/at is the
+;; artifact's last commit instant -- when the evidence was recorded -- and a
+;; check with a better answer (a verdict-time recorded inside the run store)
+;; passes it explicitly with --at. Either way the same deposit repeats.
+
+(defn- git-out
+  "Run git in `dir`; {:exit n :out trimmed}. Never throws on a nonzero exit --
+   a nonzero exit is an answer here (untracked, no history)."
+  [dir & argv]
+  (let [{:keys [exit out]} (apply process/shell
+                                  {:dir dir :out :string :err :string :continue true}
+                                  "git" argv)]
+    {:exit exit :out (str/trim (or out ""))}))
+
+(defn artifact-commit-state
+  "What the history says about the artifact a proposed row points at:
+   {:state :missing | :untracked | :dirty | :no-history | :committed, :at ...}.
+   Only :committed may be deposited."
+  [root relpath]
+  (let [rel (strip-line-suffix relpath)
+        f (io/file root rel)]
+    (if-not (.isFile f)
+      {:state :missing :path rel}
+      (let [tracked (git-out root "ls-files" "--error-unmatch" "--" rel)
+            status (git-out root "status" "--porcelain" "--" rel)
+            last-commit (git-out root "log" "-1" "--format=%aI" "--" rel)]
+        (cond
+          (not (zero? (:exit tracked))) {:state :untracked :path rel}
+          (not (str/blank? (:out status))) {:state :dirty :path rel :status (:out status)}
+          (str/blank? (:out last-commit)) {:state :no-history :path rel}
+          :else {:state :committed :path rel
+                 :at (str (.toInstant (java.time.OffsetDateTime/parse (:out last-commit))))
+                 :commit (:out (git-out root "log" "-1" "--format=%h" "--" rel))})))))
+
+(defn deposit!
+  "Assemble one row from a check's verdict and append it. Returns append-row!'s
+   result map, with the artifact's commit state attached so the caller can print
+   what the row was pinned to. Throws when the artifact is not committed-clean.
+   `root` is the history the artifact is judged against; it is this repository
+   everywhere but the self-test, which points it at a throwaway one."
+  ([path opts] (deposit! path opts repo-root))
+  ([path {:keys [run-id check-id verdict artifact author notes deposited-by at]} root]
+   (let [state (artifact-commit-state root artifact)]
+     (when-not (= :committed (:state state))
+       (throw (ex-info (str "a ledger row may only point at a committed, unmodified file; this artifact is "
+                            (name (:state state)))
+                       {:defects [{:kind :deposit :subject artifact
+                                   :defect (keyword (str "artifact-" (name (:state state))))
+                                   :state state}]})))
+     (assoc (append-row! path (cond-> {:row/run-id run-id
+                                       :row/check-id check-id
+                                       :row/verdict verdict
+                                       :row/artifact artifact
+                                       :row/at (or at (:at state))
+                                       :row/author author}
+                                notes (assoc :row/notes notes)
+                                deposited-by (assoc :row/deposited-by deposited-by)))
+            :artifact-state state))))
+
+;; ---------------------------------------------------------------------------
 ;; The folds. There is no status field in the ledger; status is computed here.
 ;; ---------------------------------------------------------------------------
 
@@ -328,6 +407,31 @@
         (some (fn [d] (= expected (select-keys d (keys expected))))
               (get-in r [:data :defects])))))
 
+(def deposit-artifact
+  "The committed file the deposit controls point a row at: the pinned s5 run's
+   own conformance record, chosen because nothing edits it."
+  "holes/labs/wm-contract/runs/2026-09-01-s5/conformance.edn")
+
+(defn- git-fixture!
+  "A throwaway git repository under a temp dir holding one committed file, one
+   committed-then-modified file and one untracked file. The artifact guard is
+   about history, so it is exercised against a real history rather than a stub.
+   The author date is fixed, so the instant the guard reads is asserted exactly."
+  []
+  (let [d (.toFile (java.nio.file.Files/createTempDirectory
+                    "re3-artifact-guard" (into-array java.nio.file.attribute.FileAttribute [])))
+        g (fn [& a] (apply process/shell {:dir d :out :string :err :string :continue true} "git" a))]
+    (spit (io/file d "committed.edn") "{:fixture :committed}\n")
+    (spit (io/file d "moved.edn") "{:fixture :as-committed}\n")
+    (g "init" "-q")
+    (g "config" "user.email" "re3@invalid.example")
+    (g "config" "user.name" "re3 artifact-guard fixture")
+    (g "add" "committed.edn" "moved.edn")
+    (g "commit" "-q" "-m" "fixture" "--date" "2020-01-02T03:04:05+00:00")
+    (spit (io/file d "moved.edn") "{:fixture :modified-since-the-commit}\n")
+    (spit (io/file d "untracked.edn") "{:fixture :never-committed}\n")
+    (.getPath d)))
+
 (defn self-test
   "Appends one synthetic row to a temp copy, replays it, and exercises the
    rejecting controls. Returns an ordered map of control -> result."
@@ -374,6 +478,35 @@
           c-forged-sha (refusal #(append-row! tmp (assoc synthetic-row
                                                          :row/run-id "0000-00-00-control-h"
                                                          :row/sha "deadbeef")))
+          ;; the deposit path (RE3) and its artifact guard
+          deposited (deposit! tmp {:run-id "0000-00-00-self-test-deposit"
+                                   :check-id :run-conformance
+                                   :verdict :green
+                                   :artifact deposit-artifact
+                                   :author "run_era_ledger.bb --self-test"
+                                   :notes "synthetic; written only to a temporary copy"})
+          after-deposit (read-ledger tmp)
+          deposited-row (last (:rows (:data after-deposit)))
+          deposit-replay (deposit! tmp {:run-id "0000-00-00-self-test-deposit"
+                                        :check-id :run-conformance
+                                        :verdict :green
+                                        :artifact deposit-artifact
+                                        :author "run_era_ledger.bb --self-test"
+                                        :notes "synthetic; written only to a temporary copy"})
+          after-deposit-replay (read-ledger tmp)
+          c-deposit-missing (refusal #(deposit! tmp {:run-id "0000-00-00-control-i"
+                                                     :check-id :run-conformance :verdict :green
+                                                     :artifact "holes/labs/wm-contract/no-such-artifact.edn"
+                                                     :author "control"}))
+          fixture (git-fixture!)
+          c-deposit-untracked (refusal #(deposit! tmp {:run-id "0000-00-00-control-j"
+                                                       :check-id :run-conformance :verdict :green
+                                                       :artifact "untracked.edn" :author "control"}
+                                                  fixture))
+          c-deposit-dirty (refusal #(deposit! tmp {:run-id "0000-00-00-control-k"
+                                                   :check-id :run-conformance :verdict :green
+                                                   :artifact "moved.edn" :author "control"}
+                                              fixture))
           final (read-ledger tmp)]
       (array-map
        :positive/c1-committed-ledger-is-green
@@ -465,7 +598,43 @@
        :positive/c14-no-write-touched-the-committed-ledger
        {:committed-rows (count (:rows (:data (read-ledger default-ledger-path))))
         :pass? (= (:text committed) (:text (read-ledger default-ledger-path)))
-        :why "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of an empty ledger"}))))
+        :why "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of an empty ledger"}
+
+       :positive/c15-deposit-derives-its-at-from-the-artifact-commit
+       {:result (dissoc deposited :artifact-state)
+        :artifact deposit-artifact
+        :artifact-commit (:commit (:artifact-state deposited))
+        :row-at (:row/at deposited-row)
+        :replay (:status deposit-replay)
+        :byte-identical? (= (:text after-deposit) (:text after-deposit-replay))
+        :pass? (and (= :appended (:status deposited))
+                    (= (:at (:artifact-state deposited)) (:row/at deposited-row))
+                    (= :already-present (:status deposit-replay))
+                    (= (:text after-deposit) (:text after-deposit-replay)))
+        :why "a check calls --deposit, not the EDN: the row is assembled here and its :row/at is the artifact's commit instant, which is what makes the same deposit repeat as :already-present instead of colliding with itself"}
+
+       :negative/c16-deposit-refuses-an-artifact-that-is-not-there
+       {:defects (defect-kinds c-deposit-missing) :threw? (:threw? c-deposit-missing)
+        :pass? (refused-for? c-deposit-missing {:defect :artifact-missing})
+        :why "the guard runs before the append, so a row naming a file nobody wrote is refused at the deposit rather than at the validator"}
+
+       :negative/c17-deposit-refuses-an-untracked-artifact
+       {:state (artifact-commit-state fixture "untracked.edn")
+        :defects (defect-kinds c-deposit-untracked) :threw? (:threw? c-deposit-untracked)
+        :pass? (refused-for? c-deposit-untracked {:defect :artifact-untracked})
+        :why "`--check` is satisfied by any file on disk; a reviewer reading this row later has only the history, so an artifact that was never committed is not evidence"}
+
+       :negative/c18-deposit-refuses-an-artifact-modified-since-its-commit
+       {:state (dissoc (artifact-commit-state fixture "moved.edn") :status)
+        :defects (defect-kinds c-deposit-dirty) :threw? (:threw? c-deposit-dirty)
+        :pass? (refused-for? c-deposit-dirty {:defect :artifact-dirty})
+        :why "the row would name a path whose committed content is not what the check read; the working copy having moved is exactly the case a resolving pointer hides"}
+
+       :positive/c19-the-guard-reads-the-real-commit-instant
+       {:fixture-state (artifact-commit-state fixture "committed.edn")
+        :pass? (= {:state :committed :path "committed.edn" :at "2020-01-02T03:04:05Z"}
+                  (dissoc (artifact-commit-state fixture "committed.edn") :commit))
+        :why "without this the three refusals above would be indistinguishable from a guard that refuses everything"}))))
 
 ;; ---------------------------------------------------------------------------
 ;; Main
@@ -480,6 +649,31 @@
         (recur (nnext in) kept (second in))
         (recur (next in) (conj kept a) found))
       [kept found])))
+
+(def ^:private deposit-flags
+  "--deposit's named inputs. The keyword-valued ones are read as EDN, so a
+   mistyped check id arrives as a keyword the catalogue does not hold and is
+   refused by the validator, rather than as a string that merely looks wrong."
+  {"--run-id" [:run-id :string]
+   "--check-id" [:check-id :edn]
+   "--verdict" [:verdict :edn]
+   "--artifact" [:artifact :string]
+   "--author" [:author :string]
+   "--notes" [:notes :string]
+   "--deposited-by" [:deposited-by :string]
+   "--at" [:at :string]})
+
+(defn- parse-deposit [args]
+  (loop [[a & more] args, out {}]
+    (cond
+      (nil? a) out
+      (= a "--deposit") (recur more out)
+      (contains? deposit-flags a)
+      (let [[k kind] (get deposit-flags a)
+            v (or (first more) (throw (ex-info (str a " needs a value") {:flag a})))]
+        (recur (rest more) (assoc out k (if (= :edn kind) (edn/read-string v) v))))
+      :else (throw (ex-info "unknown --deposit flag"
+                            {:flag a :known (vec (sort (keys deposit-flags)))})))))
 
 (defn- report-lines [ledger defects]
   (let [runs (fold-by-run ledger)
@@ -577,6 +771,24 @@
                  "and" (str (.getPath outdir) "/run-era-self-test.edn"))
         (when-not (every? :pass? (vals ctrls)) (System/exit 2)))
 
+      "--deposit"
+      (let [opts (parse-deposit args)
+            missing (vec (remove #(get opts %) [:run-id :check-id :verdict :artifact :author]))]
+        (when (seq missing)
+          (println "run_era_ledger --deposit: missing" (pr-str missing))
+          (System/exit 1))
+        (try
+          (let [r (deposit! path opts)]
+            (prn (dissoc r :artifact-state))
+            (println (format "run_era_ledger: %s -- run %s, check %s, seq %s, at %s, artifact %s (commit %s)"
+                             (name (:status r)) (:run-id r) (str (:check-id r)) (:row/seq r)
+                             (or (:at opts) (:at (:artifact-state r)))
+                             (:artifact opts) (:commit (:artifact-state r)))))
+          (catch clojure.lang.ExceptionInfo e
+            (println "run_era_ledger --deposit REFUSED:" (ex-message e))
+            (println " " (pr-str (ex-data e)))
+            (System/exit 1))))
+
       "--append"
       (let [row (edn/read-string (or (second (drop-while #(not= "--append" %) args))
                                      (throw (ex-info "--append needs an EDN row map" {}))))]
@@ -588,7 +800,9 @@
         (prn (append-row! path (edn/read-string (slurp f)))))
 
       (do (println "unknown mode" mode)
-          (println "modes: --check | --report [outdir] | --self-test [outdir] | --append '<edn>' | --append-file <path>  [--ledger <path>]")
+          (println "modes: --check | --report [outdir] | --self-test [outdir] | --append '<edn>' | --append-file <path>")
+          (println "       --deposit --run-id <id> --check-id <kw> --verdict <kw> --artifact <path> --author <s> [--notes <s>] [--deposited-by <s>] [--at <instant>]")
+          (println "       (any mode) [--ledger <path>]")
           (System/exit 64)))))
 
 (apply -main *command-line-args*)

@@ -4,6 +4,7 @@
 ;;   bb flip_readiness_check.bb              ; check the committed artifacts
 ;;   bb flip_readiness_check.bb --emit       ; regenerate them from live sources
 ;;   bb flip_readiness_check.bb --summary    ; print the VERDICTS block only
+;;   bb flip_readiness_check.bb --deposit <run-id>   ; one run-era ledger row (RE3)
 ;;
 ;; WHAT THIS IS. Joe, 2026-09-03: "if we are gonna flip the machine on, we
 ;; should get a reasonably confident state ... so it is gathering empirical data
@@ -448,7 +449,129 @@
     (spit md-path marked))
   (println "flip_readiness_check: emitted" md-path "and" edn-path))
 
+;; ---------------------------------------------------------------------------
+;; --deposit <run-id> -- one run-era ledger row (RE3)
+;; ---------------------------------------------------------------------------
+;;
+;; WHAT VERDICT THIS DEPOSITS, and why it is usually not the one printed above.
+;; Flip readiness is a property of the TREE at the moment of asking: it reads
+;; the contract, the accounting, the tally, the receipt and the catalog as they
+;; stand. A ledger row, by contrast, says something about a named RUN. So the
+;; deposit asks the run store, not the tree:
+;;
+;;   the run store holds a flip-readiness artifact -> deposit its verdict
+;;   it does not                                   -> :typed-absence, notes
+;;                                                    naming what was missing
+;;
+;; Retro-depositing today's green against a run taken days ago would attach a
+;; tree property to a run-id and read, in the fold, as though the check had run
+;; with that run. The live derivation is still recorded -- in the receipt this
+;; row points at -- so nothing is lost, but it is labelled for what it is.
+;; A failing check (problems) deposits :red, because that failure is about the
+;; tree the deposit is being made from and a reader must see it.
+(defn deposit-paths [run-id]
+  {:run-store (str here "runs/" run-id)
+   :receipt-rel (str "holes/labs/wm-contract/runs/RE3-check-deposits/flip-readiness-" run-id ".edn")
+   :receipt (str here "runs/RE3-check-deposits/flip-readiness-" run-id ".edn")})
+
+(defn run-store-flip-artifacts
+  "Files in the run's own store that came from this check. The match is on the
+   name, so a run that recorded one under any spelling of flip-readiness is
+   found; nothing here guesses from a registry."
+  [run-store]
+  (->> (.listFiles (io/file run-store))
+       (filter #(.isFile %))
+       (map #(.getName %))
+       (filter #(re-find #"(?i)flip[-_]?readiness" %))
+       sort vec))
+
+(defn deposit-receipt [run-id]
+  (let [{:keys [run-store]} (deposit-paths run-id)
+        store-files (if (.isDirectory (io/file run-store))
+                      (vec (sort (map #(.getName %) (filter #(.isFile %) (.listFiles (io/file run-store))))))
+                      nil)
+        contemporaneous (when store-files (run-store-flip-artifacts run-store))]
+    ;; array-map, not a literal: at this size a map literal is a hash-map and
+    ;; would print in hash order, so the receipt would not be stable to read.
+    (array-map
+     :schema :wm/run-era-deposit-receipt-v1
+     :row :RE3
+     :check :flip-readiness
+     :run-id run-id
+     :produced-by "holes/labs/wm-contract/flip_readiness_check.bb --deposit"
+     :deterministic
+     (str "No wall-clock field. This receipt is rewritten byte-identically on every "
+          "deposit, which is what lets the deposit require it to be committed and "
+          "unmodified, and lets the same deposit repeat as :already-present.")
+     :run-store {:dir (str "holes/labs/wm-contract/runs/" run-id)
+                 :exists? (boolean store-files)
+                 :holds store-files
+                 :flip-readiness-artifacts contemporaneous}
+     :verdict-deposited (cond (seq @problems) :red
+                              (seq contemporaneous) :green
+                              :else :typed-absence)
+     :live-derivation
+     {:read-from "the tree at deposit time, NOT the tree the run was taken at"
+      :artifact "holes/labs/wm-contract/runs/U32-flip-readiness/flip-readiness.edn"
+      :gate {:flips (count verdicts)
+             :ready (count (filter #(= :ready (:verdict %)) (vals verdicts)))
+             :blocked (count (filter #(= :blocked (:verdict %)) (vals verdicts)))
+             :lines line-order}
+      :verdicts verdicts
+      :problems (vec @problems)}
+     :not-what-this-says
+     (str "The live derivation above is a property of the tree at deposit time. It is "
+          "recorded so the absence is legible, and it is NOT the deposited verdict."))))
+
+(defn deposit-notes [run-id receipt]
+  (let [d (:live-derivation receipt)]
+    (case (:verdict-deposited receipt)
+      :typed-absence
+      (str "runs/" run-id "/ holds no flip-readiness artifact"
+           (if (get-in receipt [:run-store :exists?])
+             (str " -- the run store holds " (str/join ", " (get-in receipt [:run-store :holds])) " and nothing from this check")
+             " -- the run store directory does not exist")
+           ", so no flip-readiness verdict contemporaneous with this run was ever recorded. "
+           "The check run at deposit time reports PASS with "
+           (get-in d [:gate :ready]) " of " (get-in d [:gate :flips]) " flips READY; that is a "
+           "property of the tree at deposit time, is recorded in the artifact this row points at, "
+           "and is not deposited as this run's verdict.")
+      :red
+      (str "the flip-readiness check FAILS at deposit time: "
+           (str/join "; " (:problems d)))
+      :green
+      (str "read from the run store's own flip-readiness artifact(s): "
+           (str/join ", " (get-in receipt [:run-store :flip-readiness-artifacts]))
+           "; " (get-in d [:gate :ready]) " of " (get-in d [:gate :flips]) " flips READY"))))
+
+(defn deposit! [run-id]
+  (let [{:keys [receipt receipt-rel]} (deposit-paths run-id)
+        r (deposit-receipt run-id)]
+    (io/make-parents (io/file receipt))
+    (spit receipt (with-out-str (pp/pprint r)))
+    (println "flip_readiness_check --deposit: receipt" receipt-rel)
+    (let [{:keys [exit out err]}
+          (process/shell {:dir (str code-root "futon2") :out :string :err :string :continue true}
+                         "bb" "holes/labs/wm-contract/run_era_ledger.bb" "--deposit"
+                         "--run-id" run-id
+                         "--check-id" ":flip-readiness"
+                         "--verdict" (str (:verdict-deposited r))
+                         "--artifact" receipt-rel
+                         "--author" "flip_readiness_check.bb --deposit"
+                         "--deposited-by" "RE3 -- wire the existing checks to deposit ledger rows"
+                         "--notes" (deposit-notes run-id r))]
+      (print out) (print err) (flush)
+      (when-not (zero? exit)
+        (println (format "flip_readiness_check --deposit: the ledger refused the row (exit %d)" exit))
+        (println "  if the refusal is artifact-untracked or artifact-dirty, commit" receipt-rel "and re-run")
+        (System/exit 1))
+      (System/exit 0))))
+
 (cond
+  (contains? (set *command-line-args*) "--deposit")
+  (deposit! (or (second (drop-while #(not= "--deposit" %) *command-line-args*))
+                (do (println "flip_readiness_check --deposit needs a run-id") (System/exit 1))))
+
   (contains? (set *command-line-args*) "--summary")
   (do (println verdict-block)
       (doseq [p @problems] (println "  PROBLEM" p))

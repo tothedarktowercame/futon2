@@ -16,5 +16,10 @@ every append below goes to a TEMPORARY COPY; the committed ledger is not written
   :negative/c12-typed-absence-with-no-notes-is-refused       pass?=true
   :positive/c13-the-schema-header-survives-a-write           pass?=true
   :positive/c14-no-write-touched-the-committed-ledger        pass?=true
+  :positive/c15-deposit-derives-its-at-from-the-artifact-commit pass?=true
+  :negative/c16-deposit-refuses-an-artifact-that-is-not-there pass?=true
+  :negative/c17-deposit-refuses-an-untracked-artifact        pass?=true
+  :negative/c18-deposit-refuses-an-artifact-modified-since-its-commit pass?=true
+  :positive/c19-the-guard-reads-the-real-commit-instant      pass?=true
 
-  15 controls, 10 negative (each shown REFUSING), 5 positive
+  20 controls, 13 negative (each shown REFUSING), 7 positive

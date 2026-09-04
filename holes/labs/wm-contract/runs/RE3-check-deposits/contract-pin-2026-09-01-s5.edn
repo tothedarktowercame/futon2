@@ -1,0 +1,47 @@
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE3,
+ :check :contract-pin,
+ :run-id "2026-09-01-s5",
+ :produced-by "checks/contract_authority_current.clj --deposit",
+ :deterministic
+ "No wall-clock field: the observation interval and the event claim's interval are omitted here on purpose, so this receipt is rewritten byte-identically on every deposit. That is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present. The interval is still printed on stdout by an ordinary invocation.",
+ :run-store
+ {:dir "holes/labs/wm-contract/runs/2026-09-01-s5",
+  :exists? true,
+  :holds
+  ["README.md"
+   "conformance.edn"
+   "tick-run-record-2026-09-01-28da19d2-3a03-40f6-8eef-2818fe5583a9.edn"
+   "tick-run-record-2026-09-01-4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8.edn"
+   "tick-run-record-2026-09-01-b69ec193-5aa0-45ca-9cbb-9df45cbb8d82.edn"
+   "tick-run-record-2026-09-01-c51a8da3-883e-4038-b493-1b268d5d8357.edn"
+   "wm-trace-s5.edn"],
+  :mentions-of-contract
+  {"README.md"
+   [":producer-contract" "contract" "wm-contract/wm_run.sh"],
+   "wm-trace-s5.edn" [":producer-contract" "contract" "contracts"]},
+  :recorded-authority-sought
+  "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+  :recorded-authority-appears-in-store? false},
+ :verdict-deposited :typed-absence,
+ :live-derivation
+ {:read-from
+  "the mathlib4 working tree at deposit time, NOT the tree the run was taken at",
+  :assertion
+  "the contract was generated from the current content of Holes.lean",
+  :pass? true,
+  :failures [],
+  :recorded-authority "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+  :holes-last-content-change
+  "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+  :recorded-holes-blob "cd215a529ee668dda99247c653f43d17cb77d9a1",
+  :current-holes-blob "cd215a529ee668dda99247c653f43d17cb77d9a1",
+  :mathlib-head "49e8528116a8ed8cebb59a29514c79d9f4f938e7",
+  :holes-clean? true,
+  :event-claim
+  {:claim :event-free,
+   :writer-fence {:status :absent, :reason :not-declared},
+   :event-free? :unverified,
+   :distinguishable-cause? false}},
+ :not-what-this-says
+ "The live derivation above is a property of the mathlib4 tree at deposit time. It is recorded so the absence is legible, and it is NOT the deposited verdict."}
