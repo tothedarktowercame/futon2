@@ -1,0 +1,19 @@
+RE2 — RUN-ERA LEDGER SELF-TEST: the append API and its rejecting controls
+every append below goes to a TEMPORARY COPY; the committed ledger is not written
+
+  :positive/c1-committed-ledger-is-green                     pass?=true
+  :positive/c2-synthetic-row-appends-and-revalidates-green   pass?=true
+  :positive/c3-identical-append-is-already-present           pass?=true
+  :negative/c4-missing-run-id-is-refused                     pass?=true
+  :negative/c5-unknown-check-id-is-refused                   pass?=true
+  :negative/c6-dangling-artifact-pointer-is-refused          pass?=true
+  :negative/c7-malformed-verdict-is-refused                  pass?=true
+  :negative/c8-divergent-duplicate-pair-is-refused           pass?=true
+  :negative/c9-in-place-edit-of-a-written-row-is-refused     pass?=true
+  :negative/c10-tail-truncation-is-refused                   pass?=true
+  :negative/c11-depositor-may-not-assign-the-sha             pass?=true
+  :negative/c12-typed-absence-with-no-notes-is-refused       pass?=true
+  :positive/c13-the-schema-header-survives-a-write           pass?=true
+  :positive/c14-no-write-touched-the-committed-ledger        pass?=true
+
+  14 controls, 9 negative (each shown REFUSING), 5 positive

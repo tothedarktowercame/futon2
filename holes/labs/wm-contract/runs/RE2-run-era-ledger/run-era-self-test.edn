@@ -1,0 +1,104 @@
+{:reader
+ {:id :re2-run-era-ledger-self-test,
+  :row :RE2,
+  :script "holes/labs/wm-contract/run_era_ledger.bb",
+  :writes-only-under
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/RE2-run-era-ledger",
+  :ledger-under-test "a temporary copy of run-era-ledger.edn"},
+ :controls
+ [[:positive/c1-committed-ledger-is-green
+   {:defects [],
+    :rows 0,
+    :pass? true,
+    :why
+    "the committed ledger -- empty at RE2 -- conforms to the schema it declares; this is what `--check` gates on"}]
+  [:positive/c2-synthetic-row-appends-and-revalidates-green
+   {:result
+    {:status :appended,
+     :run-id "0000-00-00-self-test",
+     :check-id :flip-readiness,
+     :row/seq 1,
+     :row/sha
+     "ac53c6b4d88719f9c062bbef50ecd9b2b9ad31efa3b58b60ff9c9ddff197f00b"},
+    :defects [],
+    :rows 1,
+    :pass? true,
+    :why
+    "one row appended through the API, and the ledger it produced validates green -- otherwise every control below is a statement about a ledger nothing can write"}]
+  [:positive/c3-identical-append-is-already-present
+   {:result
+    {:status :already-present,
+     :run-id "0000-00-00-self-test",
+     :check-id :flip-readiness,
+     :row/seq 1,
+     :row/sha
+     "ac53c6b4d88719f9c062bbef50ecd9b2b9ad31efa3b58b60ff9c9ddff197f00b"},
+    :rows 1,
+    :byte-identical? true,
+    :pass? true,
+    :why
+    "replaying the identical row is a no-op returning :already-present and leaving the file byte-identical -- RE3's --deposit paths are re-runnable because of this"}]
+  [:negative/c4-missing-run-id-is-refused
+   {:defects #{:missing-required-key},
+    :threw? true,
+    :pass? true,
+    :why
+    "a row with no run-id cannot be time-correlated to anything, which is the whole point of the ledger; it is refused before any write"}]
+  [:negative/c5-unknown-check-id-is-refused
+   {:defects #{:check-id-not-in-catalogue},
+    :threw? true,
+    :pass? true,
+    :why
+    "check ids come from :ledger/check-catalogue and nowhere else, so a typo cannot quietly mint a check nobody runs"}]
+  [:negative/c6-dangling-artifact-pointer-is-refused
+   {:defects #{:artifact-pointer-does-not-resolve},
+    :threw? true,
+    :pass? true,
+    :why
+    "a verdict whose artifact cannot be opened is a claim without evidence; the campaign standard is a pointer that resolves"}]
+  [:negative/c7-malformed-verdict-is-refused
+   {:defects #{:value-outside-declared-set},
+    :threw? true,
+    :pass? true,
+    :why
+    "the verdict enum is declared in the ledger file; a value outside it is refused rather than folded as an unknown status"}]
+  [:negative/c8-divergent-duplicate-pair-is-refused
+   {:threw? true,
+    :differing [:row/verdict],
+    :pass? true,
+    :why
+    "the same (run-id, check-id) with a different verdict is the ledger being rewritten by another name; an exact replay is :already-present, a divergence throws and names the differing field"}]
+  [:negative/c9-in-place-edit-of-a-written-row-is-refused
+   {:defects #{:head-sha-is-not-the-last-row-sha :row-sha-mismatch},
+    :pass? true,
+    :why
+    "the edit flips a written row's verdict from :green to :red -- both legal enum values, so no shape rule can see it. The sha chain does, which is what makes append-only a check rather than a convention"}]
+  [:negative/c10-tail-truncation-is-refused
+   {:defects #{:head-sha-is-not-the-last-row-sha},
+    :pass? true,
+    :why
+    "dropping the last row leaves every remaining sha internally consistent; :ledger/head-sha is what anchors the end of the chain, so a quiet truncation is caught too"}]
+  [:negative/c11-depositor-may-not-assign-the-sha
+   {:threw? true,
+    :keys [:row/sha],
+    :pass? true,
+    :why
+    "the chain is only worth checking if the API assigns it; a caller-supplied :row/sha or :row/seq is refused"}]
+  [:negative/c12-typed-absence-with-no-notes-is-refused
+   {:defects #{:typed-absence-without-notes},
+    :threw? true,
+    :pass? true,
+    :why
+    "the honest store rule: an absence must say what the store did not hold, or it is silence wearing a verdict"}]
+  [:positive/c13-the-schema-header-survives-a-write
+   {:header-bytes 1777,
+    :pass? true,
+    :pass-note
+    "compared byte-for-byte against the committed file's header",
+    :why
+    "the writer pretty-prints the data, so the hand-written schema documentation would be the natural casualty of the first append; it is re-emitted verbatim instead"}]
+  [:positive/c14-no-write-touched-the-committed-ledger
+   {:committed-rows 0,
+    :pass? true,
+    :why
+    "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of an empty ledger"}]]}

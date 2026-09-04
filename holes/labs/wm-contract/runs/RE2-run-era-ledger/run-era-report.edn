@@ -1,0 +1,71 @@
+{:reader
+ {:id :re2-run-era-ledger,
+  :version "v1",
+  :row :RE2,
+  :script "holes/labs/wm-contract/run_era_ledger.bb",
+  :ledger "holes/labs/wm-contract/run-era-ledger.edn",
+  :implements "EPIC-run-era.md:31-60",
+  :read-only true,
+  :writes-only-under
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/RE2-run-era-ledger"},
+ :schema
+ {:row
+  {:required
+   [:row/seq
+    :row/run-id
+    :row/check-id
+    :row/verdict
+    :row/artifact
+    :row/at
+    :row/author
+    :row/sha],
+   :optional [:row/notes :row/deposited-by],
+   :enums #:row{:verdict #{:green :red :typed-absence}},
+   :rules
+   ["exactly one row per (:row/run-id, :row/check-id) -- a second, divergent verdict for the same pair is a conflict the append API refuses, and an identical replay is :already-present"
+    ":row/check-id must be a member of the declared :ledger/check-catalogue -- the catalogue below is the only enumeration of check ids, so a typo cannot invent a check"
+    ":row/artifact must RESOLVE: a repository-relative path (optionally suffixed :LINE or :LINE-LINE) naming a file that exists under the pointer root. A verdict with no readable artifact is not evidence"
+    ":row/verdict :typed-absence requires non-blank :row/notes naming what the run store did not hold -- the honest store rule, mechanised; an absence that says nothing is indistinguishable from a check that never ran"
+    ":row/seq is unique, starts at 1, and is contiguous and ascending -- rows are appended, never rewritten or removed"
+    ":row/at is an ISO-8601 instant (parseable by java.time.Instant), so rows form a time series"
+    ":row/sha is SHA-256 over the previous row's :row/sha (\"genesis\" for the first) followed by this row's authored fields serialised canonically (all keys but :row/sha, in sorted-key order). :ledger/head-sha equals the last row's :row/sha, or nil for an empty ledger"]},
+  :check
+  {:required [:check/id :check/machinery :check/precedent],
+   :optional [:check/note],
+   :rules
+   ["a check enters the catalogue when its machinery exists; the catalogue is the check-id enum"
+    ":check/machinery is a pointer to the script or recipe that produces the verdict, not a description of it"]}},
+ :check-catalogue
+ [#:check{:id :contract-pin,
+          :machinery
+          "holes/labs/wm-contract/C177-contract-last-source-change.md (registry contract == live contract at the run sha)",
+          :precedent "U-series publish pin check, green 2026-09-04"}
+  #:check{:id :flip-readiness,
+          :machinery "holes/labs/wm-contract/flip_readiness_check.bb",
+          :precedent
+          "U32; 6 flips x 6 lines, 0 READY / 6 BLOCKED at epic-drafting time"}
+  #:check{:id :run-conformance,
+          :machinery
+          "holes/labs/wm-contract/u49_route_transcribe.bb (transcribe run vs drawn wiring, Lean decide)",
+          :precedent "wmS5RunConformsToDrawnWiring, axiom-free (U49)"}
+  #:check{:id :per-node-runtime-validation,
+          :machinery
+          "holes/labs/wm-contract/runtime_validation_check.bb",
+          :precedent "zaif per-node gate, 13/13"}
+  #:check{:id :enumeration-completeness,
+          :machinery
+          "holes/labs/wm-contract/u37_enumeration_replay.clj",
+          :precedent
+          "the four-mission-whitelist incident -- the check this would have caught"}
+  #:check{:id :rationale-regret,
+          :machinery
+          "holes/labs/wm-contract/u39_selection_retrospective.bb",
+          :precedent
+          "U39/U40: decay-family refutation, 85/85 re-selections"}
+  #:check{:id :tensions-cashed,
+          :machinery "holes/labs/wm-contract/u41_tension_ledger.bb",
+          :precedent "tension-ledger T1-T5, u41 validator"}],
+ :validation {:defects [], :conforms? true},
+ :head-sha nil,
+ :by-run [],
+ :by-check []}
