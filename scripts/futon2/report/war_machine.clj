@@ -57,6 +57,7 @@
             [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.policy-precision :as policy-precision]
             [futon2.aif.selection-gain :as selection-gain]
+            [futon2.aif.selection-rationale :as selection-rationale]
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
@@ -2235,21 +2236,42 @@
               (println "War Machine selection clock write failed:" (ex-message e)))
             {:ok? false :reason :substrate-failure}))))))
 
+(defn- rationale-dir
+  "Where this tick's RE4 rationale record goes. The rationale follows the
+   trace: a caller that redirected the trace (tests, replays) gets its
+   rationale beside that redirected trace and never touches the live store;
+   the unredirected live path writes `selection-rationale/default-store-dir`.
+   Pure, total, and NOT a switch on whether to write -- both arms write."
+  [trace-dir]
+  (if trace-dir
+    (str trace-dir "/rationale")
+    selection-rationale/default-store-dir))
+
 (defn- write-trace-and-clock!
-  "Persist RESULT, then (only when enabled) launch the clock witness from the
-   exact record that was written. The flag-off call and return are the historical
-   `trace/write-trace!` invocation byte-for-byte."
+  "Persist RESULT, then write the RE4 selection/refusal rationale from the
+   exact record that was written, then (only when enabled) launch the clock
+   witness from that same record.
+
+   The rationale write is UNCONDITIONAL (worklist RE4): a decision this seam
+   cannot read produces a typed-absence record and that record is written, so
+   the store never merely lacks a rationale. `selection-rationale/emit!` throws
+   with `:stage :selection-rationale` on a defective record or an unwritable
+   store, and `judge` records that under its own key -- see the catch there.
+   The clock witness keeps its historical flag guard; that guard is about a
+   substrate write, not about the rationale.
+
+   Persisted trace bytes are unchanged: `:return-record? true` only changes
+   what `trace/write-trace!` RETURNS (trace.clj:712-733)."
   [result trace-dir]
-  (if *clock-selection?*
-    (let [{:keys [path record]}
-          (if trace-dir
-            (trace/write-trace! result :dir trace-dir :return-record? true)
-            (trace/write-trace! result :return-record? true))]
-      (record-selection-clock! record (:decision result))
-      path)
-    (if trace-dir
-      (trace/write-trace! result :dir trace-dir)
-      (trace/write-trace! result))))
+  (let [{:keys [path record]}
+        (if trace-dir
+          (trace/write-trace! result :dir trace-dir :return-record? true)
+          (trace/write-trace! result :return-record? true))]
+    (selection-rationale/emit! record {:dir (rationale-dir trace-dir)
+                                       :trace-path path})
+    (when *clock-selection?*
+      (record-selection-clock! record (:decision result)))
+    path))
 
 (defn- compute-delta-t-mission
   [mission-endpoint]
@@ -6571,15 +6593,27 @@
         result
         (if trace?
           (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]
-            (if-let [trace-write-failed
+            ;; RE4: a rationale-store failure is reported under its OWN key.
+            ;; Folding it into :trace-write-failed would tell a reader (and
+            ;; `run-tick-once`, which reads that key) that the trace did not
+            ;; land when it did.
+            (if-let [write-failed
                      (try
                        (write-trace-and-clock! result trace-dir)
                        nil
                        (catch Exception e
-                         (binding [*out* *err*]
-                           (println "trace/write-trace! failed:" (ex-message e)))
-                         {:trace-write-failed (ex-message e)}))]
-              (assoc result :trace-write-failed trace-write-failed)
+                         (let [rationale? (= :selection-rationale
+                                             (:stage (ex-data e)))
+                               k (if rationale?
+                                   :rationale-write-failed
+                                   :trace-write-failed)]
+                           (binding [*out* *err*]
+                             (println (if rationale?
+                                        "selection-rationale/emit! failed:"
+                                        "trace/write-trace! failed:")
+                                      (ex-message e)))
+                           {k {k (ex-message e)}})))]
+              (conj result write-failed)
               result))
           result0)]
     result)))
