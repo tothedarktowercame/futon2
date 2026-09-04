@@ -31,7 +31,7 @@
 {:ledger/read-by
  ["run_era_ledger.bb (validator, run fold, check fold)"],
  :ledger/head-sha
- "8048c915a94d7793b23cf46bdb32874d4942e61a519a0e9afa14e75289f298a5",
+ "cc166359233b56116554096ac349ad960a822e19eb5ccd2020946001e20a27a9",
  :ledger/generated false,
  :ledger/schema
  {:row
@@ -106,7 +106,49 @@
         :author "u49_route_transcribe.bb --deposit",
         :seq 3,
         :artifact
-        "holes/labs/wm-contract/runs/U49-run-conformance/03-classification.edn"}],
+        "holes/labs/wm-contract/runs/U49-run-conformance/03-classification.edn"}
+  #:row{:run-id "2026-09-04-re5",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "62f78b04f1f88491732e4ff0d92f23869a9d8d45f47ad5f1737ae88b7d854317",
+        :at "2026-09-04T07:55:02Z",
+        :verdict :typed-absence,
+        :check-id :flip-readiness,
+        :notes
+        "runs/2026-09-04-re5/ holds no flip-readiness artifact -- the run store holds README.md, conformance.edn, retrospective.edn, tick-run-record-2026-09-04-308d1622-55ca-4671-aab7-273731d3c99e.edn, tick-run-record-2026-09-04-67c72ac3-5d8b-4ffd-8732-650864d18182.edn, tick-run-record-2026-09-04-8ae111bc-d758-45f3-9c5b-f98832e10bb6.edn, tick-run-record-2026-09-04-c149f9de-669c-4817-9b0e-ed4aad77db79.edn, wm-trace-re5.edn and nothing from this check, so no flip-readiness verdict contemporaneous with this run was ever recorded. The check run at deposit time reports PASS with 0 of 6 flips READY; that is a property of the tree at deposit time, is recorded in the artifact this row points at, and is not deposited as this run's verdict.",
+        :author "flip_readiness_check.bb --deposit",
+        :seq 4,
+        :artifact
+        "holes/labs/wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-04-re5.edn"}
+  #:row{:run-id "2026-09-04-re5",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "db811cf0defab1947489925dd62a128a58557d61bd0dbf5c40cad93b95d6475b",
+        :at "2026-09-04T07:56:27Z",
+        :verdict :green,
+        :check-id :contract-pin,
+        :notes
+        "the run store names the contract authority 11c2e44affa167bf85b0a2d7c29d8705f89a8d08 and the pin holds against it. Named in README.md, rationale/rationale-2026-09-04-308d1622-55ca-4671-aab7-273731d3c99e.edn, rationale/rationale-2026-09-04-67c72ac3-5d8b-4ffd-8732-650864d18182.edn, rationale/rationale-2026-09-04-8ae111bc-d758-45f3-9c5b-f98832e10bb6.edn, rationale/rationale-2026-09-04-c149f9de-669c-4817-9b0e-ed4aad77db79.edn, retrospective.edn -- the ledger row's basis is which of those a reader judges to be a RECORD of the run rather than narrative about it.",
+        :author "checks/contract_authority_current.clj --deposit",
+        :seq 5,
+        :artifact
+        "holes/labs/wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-04-re5.edn"}
+  #:row{:run-id "2026-09-04-re5",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "cc166359233b56116554096ac349ad960a822e19eb5ccd2020946001e20a27a9",
+        :at "2026-09-04T07:52:31.929452654Z",
+        :verdict :green,
+        :check-id :run-conformance,
+        :notes
+        "the transcription reproduces the run's own pinned verdict :conformant (runs/2026-09-04-re5/conformance.edn, :checked-at 2026-09-04T07:52:31.929452654Z, written by run3_conformance.bb when the run was taken) over 4 routes, 36 hops, 9 distinct, against control map e508ece; control C1 is that reproduction and every falsifier in C4 breaks it. LIMITS, from C6 beside this artifact: 5 of 9 distinct hops are on the :route-measured-drawn layer, which a previous route measurement put there, and 19 of 22 drawn edges never fired -- the run stayed inside the union of the drawn and measured layers, which is not the drawn figure predicting the run. Controls: holes/labs/wm-contract/runs/RE5-run-conformance/04-controls.edn.",
+        :author "u49_route_transcribe.bb --deposit",
+        :seq 6,
+        :artifact
+        "holes/labs/wm-contract/runs/RE5-run-conformance/03-classification.edn"}],
  :ledger/check-catalogue
  [#:check{:id :contract-pin,
           :machinery
