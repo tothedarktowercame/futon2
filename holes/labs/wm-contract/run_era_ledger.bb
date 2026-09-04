@@ -86,8 +86,11 @@
 (defn artifact-resolves? [p]
   (and (string? p)
        (not (str/blank? p))
-       (let [f (io/file repo-root (strip-line-suffix p))]
-         (.exists f))))
+       (let [root (.getCanonicalFile (io/file repo-root))
+             f (.getCanonicalFile (io/file root (strip-line-suffix p)))
+             root-prefix (str (.getPath root) java.io.File/separator)]
+         (and (str/starts-with? (.getPath f) root-prefix)
+              (.isFile f)))))
 
 (defn instant? [s]
   (and (string? s)
@@ -348,6 +351,9 @@
           c-dangling (refusal #(append-row! tmp (assoc synthetic-row
                                                        :row/artifact "holes/labs/wm-contract/no-such-artifact.edn"
                                                        :row/run-id "0000-00-00-control-c")))
+          c-outside-repo (refusal #(append-row! tmp (assoc synthetic-row
+                                                           :row/artifact "../futon2"
+                                                           :row/run-id "0000-00-00-control-c2")))
           c-bad-verdict (refusal #(append-row! tmp (assoc synthetic-row
                                                           :row/verdict :probably-fine
                                                           :row/run-id "0000-00-00-control-d")))
@@ -407,6 +413,13 @@
                              {:defect :artifact-pointer-does-not-resolve
                               :value "holes/labs/wm-contract/no-such-artifact.edn"})
         :why "a verdict whose artifact cannot be opened is a claim without evidence; the campaign standard is a pointer that resolves"}
+
+       :negative/c6b-artifact-pointer-outside-repository-is-refused
+       {:defects (defect-kinds c-outside-repo) :threw? (:threw? c-outside-repo)
+        :pass? (refused-for? c-outside-repo
+                             {:defect :artifact-pointer-does-not-resolve
+                              :value "../futon2"})
+        :why "repository-relative means the canonical target must be a file inside futon2; traversal and directory pointers are not evidence artifacts"}
 
        :negative/c7-malformed-verdict-is-refused
        {:defects (defect-kinds c-bad-verdict) :threw? (:threw? c-bad-verdict)

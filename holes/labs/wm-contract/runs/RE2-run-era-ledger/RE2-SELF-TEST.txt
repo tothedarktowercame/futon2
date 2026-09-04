@@ -7,6 +7,7 @@ every append below goes to a TEMPORARY COPY; the committed ledger is not written
   :negative/c4-missing-run-id-is-refused                     pass?=true
   :negative/c5-unknown-check-id-is-refused                   pass?=true
   :negative/c6-dangling-artifact-pointer-is-refused          pass?=true
+  :negative/c6b-artifact-pointer-outside-repository-is-refused pass?=true
   :negative/c7-malformed-verdict-is-refused                  pass?=true
   :negative/c8-divergent-duplicate-pair-is-refused           pass?=true
   :negative/c9-in-place-edit-of-a-written-row-is-refused     pass?=true
@@ -16,4 +17,4 @@ every append below goes to a TEMPORARY COPY; the committed ledger is not written
   :positive/c13-the-schema-header-survives-a-write           pass?=true
   :positive/c14-no-write-touched-the-committed-ledger        pass?=true
 
-  14 controls, 9 negative (each shown REFUSING), 5 positive
+  15 controls, 10 negative (each shown REFUSING), 5 positive
