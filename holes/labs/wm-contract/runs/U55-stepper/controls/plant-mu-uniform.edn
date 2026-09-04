@@ -1,0 +1,11 @@
+#:plant{:file "data/wm-step/w1/pin/wm-trace/wm-trace-2026-09-04.edn",
+        :record-index 3,
+        :run-id "c149f9de-669c-4817-9b0e-ed4aad77db79",
+        :what :mu-uniform,
+        :entities 417,
+        :mu-before-sha256
+        "497c04ed5cedfa784abbf177e0df5065c2393d2e76d871d989bbe0e34befef40",
+        :mu-after-sha256
+        "0a13cec1018bc34d5837f973230cecea0043e9571d26fa7e5645d5315945c900",
+        :note
+        "the pinned corpus is now DIFFERENT from pin/manifest.edn; `wm_step.sh step` refuses on that drift unless --allow-pin-drift is passed"}

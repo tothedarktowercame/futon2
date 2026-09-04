@@ -1,0 +1,14 @@
+#:world-drift{:between
+              ["data/wm-step/w1/steps/011-det-a/world-before.edn"
+               "data/wm-step/w1/steps/012-det-b/world-before.edn"],
+              :moved [],
+              :count 0,
+              :mana-age [2.6899333333333333 4.199983333333333],
+              :mana-stale [false false],
+              :commit-census
+              {:total [3762 3762],
+               :moved [],
+               :note
+               "the four :*-pct observation channels are this census divided by its total (war_machine.clj:3828-3836); a census that moves moves the observation"},
+              :note
+              "a step cannot redirect these paths (C509 R7/R6), so it hashes them; the mana snapshot decides mode by AGE, not content (C509 T5)"}

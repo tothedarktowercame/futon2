@@ -1,0 +1,41 @@
+{:reader
+ {:id :re7-selection-discrimination,
+  :version "v1",
+  :row :RE7,
+  :script "holes/labs/wm-contract/re7_selection_discrimination.bb",
+  :read-only true,
+  :writes-only-under
+  "/home/joe/code/futon2/data/wm-step/w1/steps/006-defect/re7"},
+ :run-id "006-defect",
+ :rule
+ {:per-decision
+  ":tiebreak when the chosen candidate's controller-score tie is wider than 1; :discriminating at exactly 1; :absent when the record carries no tie datum",
+  :per-run
+  ":defect if any decision is :tiebreak; else :typed-absence if any is :absent or there are no records; else :green",
+  :ledger-mapping
+  "the ledger's declared enum is #{:green :red :typed-absence}, so :defect deposits as :red and no new status word is minted"},
+ :verdict :defect,
+ :verdict-detail
+ {:verdict :defect,
+  :reason :chosen-inside-a-tie-wider-than-1,
+  :counts {:tiebreak 1}},
+ :deposits-as :red,
+ :decisions
+ [{:tick-id "2026-09-04T16:19:23.821539314Z",
+   :trace-run-id "0ba83d65-1f92-4c0a-92c2-f9c4cec050e5",
+   :chosen [:no-op nil],
+   :recorded {:controller-rank 1, :tie-count 136, :tie-band [1 136]},
+   :recomputed {:controller-rank 1, :tie-count 136, :tie-band [1 136]},
+   :class :tiebreak,
+   :field
+   {:field-size 146,
+    :distinct-scores 4,
+    :chosen-rank 1,
+    :chosen-plateau
+    {:width 136, :rank-band [1 136], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 136, :rank-band [1 136], :contains-choice? true}
+     {:width 6, :rank-band [141 146], :contains-choice? false}
+     {:width 3, :rank-band [138 140], :contains-choice? false}],
+    :widest-plateau 136,
+    :widest-plateau-not-containing-choice 6}}]}

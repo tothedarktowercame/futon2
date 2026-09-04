@@ -1,0 +1,173 @@
+#:compare{:a "data/wm-step/w1/steps/002-det-a/normalized.edn",
+          :b "data/wm-step/w1/steps/005-planted/normalized.edn",
+          :a-sha256
+          "42dd426a9b21298e178a8010ddf6d7f7c79c5fb18354ad03d8caa3c032a366fa",
+          :b-sha256
+          "663380a442212bf8fab7f2d2ce4efa5f47fd1ac422afefc15ca222cf6dd2bc58",
+          :forms [1 1],
+          :verdict :divergent,
+          :differing-paths
+          [{:path [:decision :controller-ranking 0 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 0 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 1 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 1 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 2 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 2 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 3 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 3 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 4 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 4 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 5 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 5 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 6 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 6 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 7 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 7 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 8 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 8 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 9 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 9 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 10 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 10 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 11 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 11 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 12 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 12 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 13 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 13 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 14 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 14 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 15 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 15 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 16 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 16 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 17 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 17 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 18 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 18 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 19 :controller-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}
+           {:path [:decision :controller-ranking 19 :selection-score],
+            :why :differs,
+            :a-type "class java.lang.Double",
+            :b-type "class java.lang.Double"}],
+          :excluded
+          {:anywhere [:startedAt :timestamp :run/id],
+           :in-route [:at :at_],
+           :where "C509-inter-tick-state-boundary.md, handoff item 4"}}

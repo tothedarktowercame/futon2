@@ -1,0 +1,159 @@
+#:steps{:work-dir "data/wm-step/w1",
+        :note
+        "the work dir lives under untracked data/; this is its ledger. Every row is one tick from the pin into the sandbox. :normalized-sha256 is the sha of the trace record(s) the step APPENDED, after the C509 handoff-4 exclusion list (:run/id, :timestamp, :startedAt, per-hop route :at). Steps are comparable only WITHIN a pin generation: generation 1 and 2 were minted by accepts, so a sha change across an accept is the pin advancing, not a defect.",
+        :count 11,
+        :rows
+        [{:pin-generation 0,
+          :normalized-sha256
+          "42dd426a9b21298e178a8010ddf6d7f7c79c5fb18354ad03d8caa3c032a366fa",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:10:11Z",
+          :id "001-warm",
+          :ended-at "2026-09-04T16:11:41Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "927d01be9a634f0d1fa11a795fd87ddd39bbf912650c772e642f8ac1e2c86270",
+          :evidence-mode :pinned-replay,
+          :store-basis-count [212863 212863],
+          :run-id "aff986cc-abc4-41c8-946a-63ac514217cf"}
+         {:pin-generation 0,
+          :normalized-sha256
+          "42dd426a9b21298e178a8010ddf6d7f7c79c5fb18354ad03d8caa3c032a366fa",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:12:21Z",
+          :id "002-det-a",
+          :ended-at "2026-09-04T16:13:33Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "b65347e7f84ae5333d242546fae3cb18f830c6a494f94e441cf87c8de46c695a",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212863 212864],
+          :run-id "7fbdb9ea-c8c6-4de5-b742-d4be13e08712"}
+         {:pin-generation 0,
+          :normalized-sha256
+          "42dd426a9b21298e178a8010ddf6d7f7c79c5fb18354ad03d8caa3c032a366fa",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:13:55Z",
+          :id "003-det-b",
+          :ended-at "2026-09-04T16:15:08Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "c09d32a4ddc68af2b734f155bb29af09dee5cbc2d83fefbef14750c039f43701",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212864 212865],
+          :run-id "d99a87b4-2f88-4262-888a-4898f99bd271"}
+         {:pin-generation 0,
+          :normalized-sha256
+          "663380a442212bf8fab7f2d2ce4efa5f47fd1ac422afefc15ca222cf6dd2bc58",
+          :pin-verify :drift,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:16:36Z",
+          :id "005-planted",
+          :ended-at "2026-09-04T16:17:49Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "1ba9a0a9a0d5a8f65a32a8be8b1d3c4102be09f5fcab9943c94f7806dffb549f",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212865 212865],
+          :run-id "d3c5efb2-d4e2-4130-bed7-4cbd6cc78634"}
+         {:pin-generation 0,
+          :normalized-sha256
+          "d28b8e19aa18590540f44f48841504ba23347deaeeb40833271b3dd2058b167b",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:19:06Z",
+          :id "006-defect",
+          :ended-at "2026-09-04T16:20:19Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "8cee4102d66cf3b81be1ee2995a105bd64e14d85a371b662f5bb8bb6ad5232f1",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212866 212867],
+          :run-id "0ba83d65-1f92-4c0a-92c2-f9c4cec050e5"}
+         {:pin-generation 0,
+          :normalized-sha256
+          "d8c444bf4713d876ab1a8abd2f83938193eb99be77672b5988c3f042194217e0",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:20:48Z",
+          :id "007-fixed",
+          :ended-at "2026-09-04T16:22:01Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "b17d3babb14cdfe0eb5b26a196aa1263c24227d34eee02cc38f8fc1d8b38407d",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212867 212867],
+          :run-id "c81a68e1-df6b-4108-97a6-dc7152acfb0f"}
+         {:pin-generation 0,
+          :normalized-sha256
+          "d8c444bf4713d876ab1a8abd2f83938193eb99be77672b5988c3f042194217e0",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:25:11Z",
+          :id "008-det-a",
+          :ended-at "2026-09-04T16:26:24Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "f0ec16a71e16fd3e891cc9deb5e2f22a4db0f6d819e2efde3ccde0ed65cc1d52",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212868 212869],
+          :run-id "4d695f4b-6f92-4809-8609-45d5208b3f4c"}
+         {:pin-generation 0,
+          :normalized-sha256
+          "d8c444bf4713d876ab1a8abd2f83938193eb99be77672b5988c3f042194217e0",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:26:46Z",
+          :id "009-det-b",
+          :ended-at "2026-09-04T16:27:59Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "0d6b9168b2a5fb11432d7b2ea495d7b1fa784d286bd51a76ae64ca39abf726d9",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212869 212869],
+          :run-id "f507ce85-ca12-4c52-b34d-4cbdd7a89039"}
+         {:pin-generation 1,
+          :normalized-sha256
+          "7bc09dccd3189d0eb640a228065bd392038d66932599d8b5daef0cf5cc14597d",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:29:56Z",
+          :id "010-accepted",
+          :ended-at "2026-09-04T16:31:09Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "6e8d67ca350c9ea7d6aa05c0ecd8f6bd960ad0ccb632a8a45891be1afee732a4",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212870 212871],
+          :run-id "7923ae0d-4514-40d9-8901-6e22995f5b94"}
+         {:pin-generation 2,
+          :normalized-sha256
+          "98bdc350d97e785785b726e78550bfaf66f31a36f0d0bf15005ebb4fd8e7ec85",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:33:56Z",
+          :id "011-det-a",
+          :ended-at "2026-09-04T16:35:04Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "6e8d67ca350c9ea7d6aa05c0ecd8f6bd960ad0ccb632a8a45891be1afee732a4",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212871 212872],
+          :run-id "5d7f4d26-6b66-4c55-8185-ef1cfe50225b"}
+         {:pin-generation 2,
+          :normalized-sha256
+          "98bdc350d97e785785b726e78550bfaf66f31a36f0d0bf15005ebb4fd8e7ec85",
+          :pin-verify :ok,
+          :tick-exit 0,
+          :started-at "2026-09-04T16:35:27Z",
+          :id "012-det-b",
+          :ended-at "2026-09-04T16:36:36Z",
+          :cassette-entries 7,
+          :cassette-sha256
+          "6e8d67ca350c9ea7d6aa05c0ecd8f6bd960ad0ccb632a8a45891be1afee732a4",
+          :evidence-mode :pinned-frozen,
+          :store-basis-count [212872 212873],
+          :run-id "9af906b0-c4ed-44e9-9baa-9591baf05dd2"}]}

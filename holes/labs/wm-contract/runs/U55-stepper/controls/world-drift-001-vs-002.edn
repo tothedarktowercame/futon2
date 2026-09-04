@@ -1,0 +1,16 @@
+#:world-drift{:between
+              ["data/wm-step/w1/steps/001-warm/world-before.edn"
+               "data/wm-step/w1/steps/002-det-a/world-before.edn"],
+              :moved
+              [{:id :mana-snapshot,
+                :path
+                "/home/joe/code/storage/futon0/mana-snapshot.json",
+                :a
+                "05c9b9ee9521d1838f716950897163ab3f6886ff42f425b9332ee03a8e9beb9d",
+                :b
+                "5383dcbb8efd385cf747e56f7566aa944c284af72c22d668a4ca2200886c849e"}],
+              :count 1,
+              :mana-age [3.9643 1.1261166666666667],
+              :mana-stale [false false],
+              :note
+              "a step cannot redirect these paths (C509 R7/R6), so it hashes them; the mana snapshot decides mode by AGE, not content (C509 T5)"}

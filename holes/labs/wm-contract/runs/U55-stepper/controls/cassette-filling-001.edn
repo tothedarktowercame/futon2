@@ -1,0 +1,9 @@
+#:cassette{:entries 7,
+           :miss-count 0,
+           :frozen? false,
+           :hits 3,
+           :non-get-refusals [],
+           :upstream "http://127.0.0.1:7070",
+           :path "data/wm-step/w1/pin/evidence-cassette.edn",
+           :fills 7,
+           :misses []}

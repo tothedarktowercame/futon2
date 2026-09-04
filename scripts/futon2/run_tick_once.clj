@@ -29,14 +29,53 @@
   []
   (run-lock/default-lock-path))
 
-(defn- trace-path-for-date [date-str]
-  (str (System/getProperty "user.home")
-       "/code/futon2/data/wm-trace/wm-trace-" date-str ".edn"))
+(def ^:private trace-dir-env "FUTON_WM_TRACE_DIR")
+(def ^:private receipt-dir-env "FUTON_WM_RECEIPT_DIR")
 
-(defn- receipt-path-for-run [date-str run-id]
-  (str (System/getProperty "user.home")
-       "/code/futon2/holes/labs/wm-contract/tick-run-record-"
-       date-str "-" run-id ".edn"))
+(defn- live-trace-dir []
+  (str (System/getProperty "user.home") "/code/futon2/data/wm-trace"))
+
+(defn- live-receipt-dir []
+  (str (System/getProperty "user.home") "/code/futon2/holes/labs/wm-contract"))
+
+(defn sandbox
+  "Where this tick's trace corpus and receipt live (worklist `:U55`, the
+   stepper's sandbox seam; C509 handoff item 1). Pure in GETENV — a
+   `(fn [name] value-or-nil)` — so the seam is testable without mutating the
+   process environment.
+
+   `FUTON_WM_TRACE_DIR` redirects the trace corpus this tick reads its prior
+   records from and appends to; war-machine's `:trace-dir` carries it through
+   the habit-prior fold, the case-history index and the RE4 rationale store
+   (`scripts/futon2/report/war_machine.clj:2273-2282,5957,5983-5987,6274,6732`).
+   `FUTON_WM_RECEIPT_DIR` redirects the tick-run-record, which is otherwise the
+   one tick write that lands in TRACKED git state (C509 §What a tick writes).
+
+   Both unset is the live path and returns `:sandboxed? false` with the live
+   directories, so an unredirected tick's behaviour and bytes are unchanged.
+   The run lock is deliberately NOT redirected here: a sandboxed step is still
+   one machine and one runner, so it takes the live lock (RUN12) unless
+   `FUTON_WM_RUN_LOCK` says otherwise."
+  [getenv]
+  (let [trace (not-empty (str (or (getenv trace-dir-env) "")))
+        receipt (not-empty (str (or (getenv receipt-dir-env) "")))]
+    {:sandboxed? (boolean (or trace receipt))
+     :trace-dir-override trace
+     :trace-dir (or trace (live-trace-dir))
+     :receipt-dir (or receipt (live-receipt-dir))}))
+
+(defn- env-sandbox []
+  (sandbox #(System/getenv %)))
+
+(defn- trace-path-for-date
+  ([date-str] (trace-path-for-date (:trace-dir (env-sandbox)) date-str))
+  ([trace-dir date-str]
+   (str trace-dir "/wm-trace-" date-str ".edn")))
+
+(defn- receipt-path-for-run
+  ([date-str run-id] (receipt-path-for-run (:receipt-dir (env-sandbox)) date-str run-id))
+  ([receipt-dir date-str run-id]
+   (str receipt-dir "/tick-run-record-" date-str "-" run-id ".edn")))
 
 (defn- trace-stat [path]
   (let [f (io/file path)]
@@ -209,8 +248,9 @@
   the same `:run/id` this tick's receipt carries. Both come from the one id
   minted in `run-tick-once*`, so the join between a receipt file and its trace
   record is an equality, not a timestamp comparison."
-  ([selector version-stamp] (diagnostic-judge-opts selector version-stamp nil))
-  ([selector version-stamp run-id]
+  ([selector version-stamp] (diagnostic-judge-opts selector version-stamp nil nil))
+  ([selector version-stamp run-id] (diagnostic-judge-opts selector version-stamp run-id nil))
+  ([selector version-stamp run-id trace-dir]
    (cond-> {:trace? true
             :include-advisory-lanes? false
             :step-portfolio? false
@@ -218,11 +258,15 @@
             :eval-invariant-fallback? false
             :strategic-selection-fn selector
             :wm-version version-stamp}
-     run-id (assoc :run-id run-id))))
+     run-id (assoc :run-id run-id)
+     ;; U55: present-only, so an unredirected tick passes no :trace-dir and
+     ;; war-machine takes its own default — the live path is byte-unchanged.
+     trace-dir (assoc :trace-dir trace-dir))))
 
 (defn- tick* [days started-at run-id]
   (let [date-str (today-date-string)
-        trace-path (trace-path-for-date date-str)
+        {:keys [sandboxed? trace-dir-override trace-dir receipt-dir]} (env-sandbox)
+        trace-path (trace-path-for-date trace-dir date-str)
         before-trace (trace-stat trace-path)
         store-basis (store-basis)
         sample (evidence-sample days)
@@ -232,7 +276,8 @@
                               :trigger :diagnostic-run-tick-once
                               :live-wire? false))
         generated (wm/generate-war-machine
-                   days (diagnostic-judge-opts selector version-stamp run-id))
+                   days (diagnostic-judge-opts selector version-stamp run-id
+                                               trace-dir-override))
         result (-> (:judgement generated)
                    (assoc :preference-stack efe/preference-stack-record
                           :selector-seam selector-seam)
@@ -243,8 +288,13 @@
         trace-written? (and (nil? (:trace-write-failed result))
                             after-trace
                             (not= before-trace after-trace))
-        record (tick-run-record run-id started-at store-basis sample result selector-seam trace-written?)
-        receipt-path (receipt-path-for-run date-str run-id)]
+        record (cond-> (tick-run-record run-id started-at store-basis sample result selector-seam trace-written?)
+                 ;; U55: present-only. A receipt written under the stepper's
+                 ;; sandbox says so, so a step's receipt deposited into a run
+                 ;; store is never mistaken for a live tick's.
+                 sandboxed? (assoc :stepSandbox {:trace-dir trace-dir
+                                                 :receipt-dir receipt-dir}))
+        receipt-path (receipt-path-for-run receipt-dir date-str run-id)]
     (write-receipt! receipt-path record)
     {:days days
      :selector-seam selector-seam

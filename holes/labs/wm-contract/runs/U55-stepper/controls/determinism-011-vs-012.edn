@@ -1,0 +1,13 @@
+#:compare{:a "data/wm-step/w1/steps/011-det-a/normalized.edn",
+          :b "data/wm-step/w1/steps/012-det-b/normalized.edn",
+          :a-sha256
+          "98bdc350d97e785785b726e78550bfaf66f31a36f0d0bf15005ebb4fd8e7ec85",
+          :b-sha256
+          "98bdc350d97e785785b726e78550bfaf66f31a36f0d0bf15005ebb4fd8e7ec85",
+          :forms [1 1],
+          :verdict :identical,
+          :differing-paths [],
+          :excluded
+          {:anywhere [:startedAt :timestamp :run/id],
+           :in-route [:at :at_],
+           :where "C509-inter-tick-state-boundary.md, handoff item 4"}}

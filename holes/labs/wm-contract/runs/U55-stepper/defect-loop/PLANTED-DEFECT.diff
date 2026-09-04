@@ -1,0 +1,7 @@
+--- a/src/futon2/aif/efe.clj
++++ b/src/futon2/aif/efe.clj
+@@ -906,7 +906,7 @@
+         graph-feasibility-mode graph-feasibility-mode
+-        :controller-score g-total
++        :controller-score (/ (Math/round (* 2.0 (double g-total))) 2.0) ;; U55 PLANTED DEFECT -- quantise the controller score to 0.5, flattening the ranking into ties
+         :support-shadow-terms support-shadow-terms

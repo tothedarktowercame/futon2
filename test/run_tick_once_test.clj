@@ -120,3 +120,46 @@
           (is (= (get-in run [:tick-run-record :run/id])
                  (:run-id @generated-opts))
               "receipt and judge opts name the same run"))))))
+
+;; ---------------------------------------------------------------------------
+;; U55 -- the stepper's sandbox seam. `sandbox` is pure in its getenv function,
+;; so these assert the seam itself rather than a process environment.
+;; ---------------------------------------------------------------------------
+
+(deftest sandbox-unset-is-the-live-path-test
+  (testing "no override ⇒ not sandboxed, live directories, and NO :trace-dir in the judge opts"
+    (let [s (tick/sandbox (constantly nil))]
+      (is (false? (:sandboxed? s)))
+      (is (nil? (:trace-dir-override s)))
+      (is (.endsWith (:trace-dir s) "/code/futon2/data/wm-trace"))
+      (is (.endsWith (:receipt-dir s) "/code/futon2/holes/labs/wm-contract"))
+      (is (not (contains? (#'tick/diagnostic-judge-opts :selector {:version :test}
+                                                        "run-1" (:trace-dir-override s))
+                          :trace-dir))
+          "an unredirected tick passes no :trace-dir, so war-machine keeps its own default"))))
+
+(deftest sandbox-empty-string-is-not-an-override-test
+  (testing "an exported-but-empty variable is the live path, not a write into \"\""
+    (let [s (tick/sandbox {"FUTON_WM_TRACE_DIR" "" "FUTON_WM_RECEIPT_DIR" ""})]
+      (is (false? (:sandboxed? s)))
+      (is (nil? (:trace-dir-override s))))))
+
+(deftest sandbox-redirects-trace-and-receipt-test
+  (let [s (tick/sandbox {"FUTON_WM_TRACE_DIR" "/tmp/step/wm-trace"
+                         "FUTON_WM_RECEIPT_DIR" "/tmp/step/receipts"})]
+    (is (true? (:sandboxed? s)))
+    (is (= "/tmp/step/wm-trace" (:trace-dir-override s)))
+    (is (= "/tmp/step/wm-trace/wm-trace-2026-09-04.edn"
+           (#'tick/trace-path-for-date (:trace-dir s) "2026-09-04")))
+    (is (= "/tmp/step/receipts/tick-run-record-2026-09-04-run-7.edn"
+           (#'tick/receipt-path-for-run (:receipt-dir s) "2026-09-04" "run-7")))
+    (is (= "/tmp/step/wm-trace"
+           (:trace-dir (#'tick/diagnostic-judge-opts :selector {:version :test}
+                                                     "run-7" (:trace-dir-override s))))
+        "the redirect reaches the judge, which is what carries it to the habit-prior fold")))
+
+(deftest sandbox-trace-dir-alone-still-sandboxes-test
+  (testing "redirecting only the trace still marks the tick sandboxed -- a receipt beside the live ones would otherwise look live"
+    (let [s (tick/sandbox {"FUTON_WM_TRACE_DIR" "/tmp/step/wm-trace"})]
+      (is (true? (:sandboxed? s)))
+      (is (.endsWith (:receipt-dir s) "/code/futon2/holes/labs/wm-contract")))))

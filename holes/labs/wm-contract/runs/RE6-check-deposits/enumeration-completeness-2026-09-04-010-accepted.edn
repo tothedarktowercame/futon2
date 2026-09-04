@@ -1,0 +1,336 @@
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE6,
+ :check :enumeration-completeness,
+ :run-id "2026-09-04-010-accepted",
+ :produced-by
+ "holes/labs/wm-contract/u37_enumeration_replay.clj --deposit",
+ :deterministic
+ "No wall-clock field: the completeness record's :at is dropped, so this receipt is rewritten byte-identically on every deposit over an unchanged tree. That is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present.",
+ :run-store
+ {:dir "holes/labs/wm-contract/runs/2026-09-04-010-accepted",
+  :holds
+  ["README.md"
+   "battery.log"
+   "conformance.edn"
+   "delta.edn"
+   "normalized.edn"
+   "step.edn"
+   "tick-run-record-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"
+   "wm-trace-2026-09-04.edn"
+   "world-after.edn"
+   "world-before.edn"],
+  :tick-ids ["7923ae0d-4514-40d9-8901-6e22995f5b94"],
+  :traces
+  ["holes/labs/wm-contract/runs/2026-09-04-010-accepted/wm-trace-2026-09-04.edn"],
+  :records-in-traces 1,
+  :records-of-this-run 1,
+  :records-of-another-run [],
+  :run-last-tick "2026-09-04T16:30:14.927146598Z"},
+ :verdict-deposited :green,
+ :replay
+ {:records 1,
+  :complete 1,
+  :incomplete 0,
+  :per-record
+  [{:record-timestamp "2026-09-04T16:30:14.927146598Z",
+    :code-root "/home/joe/code",
+    :candidates-in-record 146,
+    :run/id "7923ae0d-4514-40d9-8901-6e22995f5b94",
+    :independent-of "scripts/futon2/report/war_machine.clj:6005-6013",
+    :typed-kind-absences
+    [{:kind :excursion,
+      :available-count 157,
+      :reason :no-proposer-for-kind,
+      :would-need
+      "a proposer for this kind in the tick's proposer list"}
+     {:kind :ticket,
+      :available-count 33,
+      :reason :no-proposer-for-kind,
+      :would-need
+      "a proposer for this kind in the tick's proposer list"}],
+    :verdict :complete,
+    :candidates-compared 146,
+    :version :enumeration-completeness/v1,
+    :kinds
+    [{:available-count 157,
+      :exclusions-by-reason
+      {:derived-id 5,
+       :duplicate-id 1153,
+       :index-check-copy 25,
+       :non-contract-filename 347,
+       :status-draft 1,
+       :status-terminal 4},
+      :phantom [],
+      :would-need
+      "a proposer for this kind in the tick's proposer list",
+      :enumerated-count 0,
+      :available-by-repo
+      {"futon0" 5,
+       "futon3" 10,
+       "futon3c" 94,
+       "futon4" 2,
+       "futon5a" 27,
+       "futon6" 19},
+      :scan-counts
+      {:files-under-dir 1692,
+       :contract-matched 1345,
+       :available 157,
+       :excluded 1535},
+      :reason :no-proposer-for-kind,
+      :kind :excursion,
+      :verdict :kind-not-enumerated,
+      :missing
+      ["E-2026-08-10-learnings"
+       "E-70B-on-raw-control-arm"
+       "E-APM-f10-defects"
+       "E-APM-f11-defects"
+       "E-APM-f12-defects"
+       "E-R14-red-ring-fill"
+       "E-R2-red-ring-fill"
+       "E-R5-red-ring-fill"
+       "E-R6-red-ring-fill"
+       "E-R8-red-ring-fill"
+       "E-Ttotal"
+       "E-affect-live"
+       "E-agency-invariants"
+       "E-agency-ws-cutover"
+       "E-aif-daisyworld"
+       "E-aif-stack"
+       "E-apm-A3-ingest-efficiency"
+       "E-apm-bundle-sorry-drift"
+       "E-apm-drainer"
+       "E-apm-halftime-B1-options"
+       "E-apm-halftime-pre-go-live"
+       "E-apm-halftime-pre-go-live-A3"
+       "E-apm-halftime-pre-go-live-B"
+       "E-apm-halftime-pre-go-live-C"
+       "E-apm-halftime-pre-go-live-D"
+       "E-apm-halftime-pre-go-live-EF"
+       "E-arse-ct-probe"
+       "E-arxana-clock"
+       "E-arxana-workflow-management"
+       "E-ashby-variety-stratum"
+       "E-batch-operator-runbook"
+       "E-bell-clink-adapter"
+       "E-bg-check"
+       "E-bge-retrieval-cas-sel-3b"
+       "E-btoa-candidate-queue-reweighting-v0"
+       "E-btoa-evidence-sample-mapping-v0"
+       "E-candidate-queue-xtdb-shape-v0"
+       "E-capability-graph-ui-polish"
+       "E-captain-pass-to-claude-2"
+       "E-cascade-assembly"
+       "E-causal-coupling-top-down"
+       "E-claude-usage-anchor-handoff-2026-05-01"
+       "E-clause-vocabulary-survey"
+       "E-clean"
+       "E-clean-up-substrate-2"
+       "E-close-S6"
+       "E-comprehension-foundation"
+       "E-compression-conductor-runbook"
+       "E-cross-prototype-geometry"
+       "E-crossed-bells"
+       "E-current-usage-report"
+       "E-deep-research-hardening"
+       "E-discover-terms-as-dictionary-construction"
+       "E-distributed-formalisation"
+       "E-drainer-stall-announced-jobs"
+       "E-dynamic-queries"
+       "E-early-memories-review"
+       "E-entity-point-read-latency"
+       "E-essay-versioning-ux"
+       "E-evidence-flow"
+       "E-evidence-flows-everywhere"
+       "E-exotype-ct-grounding"
+       "E-fetch-entity-miss-path"
+       "E-first-flights-policy-grade-G-closure"
+       "E-first-flights-typed-grounds-closure"
+       "E-first-flights-typed-grounds-tail-closure"
+       "E-fix-cx-cr-runners-to-clock-in"
+       "E-formalisation-defect-memories"
+       "E-futon-memories"
+       "E-futon1a-archivist"
+       "E-futon1b-gc-wedge"
+       "E-futon1b-latency-inventory"
+       "E-globe-6-closure-rubric"
+       "E-globe2-candidate-bridge-v0"
+       "E-globe3-candidate-bridge-v0"
+       "E-globe4-candidate-bridge-v0"
+       "E-globe5-candidate-bridge-v0"
+       "E-globe6-candidate-bridge-v0"
+       "E-globe8-candidate-bridge-v0"
+       "E-ground-control-pass-to-zone"
+       "E-half-mil-audit"
+       "E-held-work-ledger"
+       "E-iatc-expository-alignment"
+       "E-iatc-model"
+       "E-inbox-zero-implementation"
+       "E-informal-proof-checking"
+       "E-informal-proof-checking-final-checklist"
+       "E-interest-mining"
+       "E-invariant-stepper"
+       "E-jax-demonstrators"
+       "E-learning-across-levels"
+       "E-learning-as-we-go-vs-futonzero"
+       "E-live-means-live"
+       "E-loss-function-shape"
+       "E-math-prototype-pilot"
+       "E-memory-causal-integration"
+       "E-memory-priors-survey"
+       "E-memory-resourcing-and-strategy"
+       "E-memory-topology"
+       "E-memory-v3-programme"
+       "E-memory-v3-staging"
+       "E-memory-whitepaper-plan"
+       "E-memory-whitepaper-v2-plan"
+       "E-memory-whitepaper-v2-programme"
+       "E-memory-whitepaper-v3-programme"
+       "E-mfuton-silver"
+       "E-mission-mining"
+       "E-mo-query-phylogeny"
+       "E-networked-intelligence"
+       "E-old-arxiv-block-detection"
+       "E-operator-turn-modelling-2026-08-25"
+       "E-pace-layered-tower"
+       "E-park-delivery-losses"
+       "E-pattern-census-and-orphans"
+       "E-pattern-peripheral"
+       "E-per-turn-isolation"
+       "E-pipeline-pipecleaner"
+       "E-port-wiring-map"
+       "E-prior-over-terms"
+       "E-promotion-deadlock-discovery"
+       "E-prove-salingaros-cascade-scorer"
+       "E-queries-and-scopes"
+       "E-question-driven-scope-coverage"
+       "E-ratchet-probe"
+       "E-repl-continuations"
+       "E-retrieval-flows"
+       "E-sanitize-invalid-EDN"
+       "E-strategic-bridge-motif-comparison-v0"
+       "E-strategy-candidate-bridge-v0"
+       "E-strategy-recognizer"
+       "E-structure-first-concepts"
+       "E-substrate-2-directed-edge-id"
+       "E-substrate-2-elisp-projection"
+       "E-substrate-2-timetravel"
+       "E-substrate-metrics"
+       "E-superpod-ct-nlp-intrinsic-eval"
+       "E-superpod-hardening"
+       "E-superpod-mark3"
+       "E-t01A05-repair-plan"
+       "E-the-dark-tower"
+       "E-the-dark-tower-2"
+       "E-transitive-proxy-ghosts"
+       "E-trip-journal-base-camp"
+       "E-turn-dsl"
+       "E-typed-bells"
+       "E-typed-holes-aif-alternate"
+       "E-typed-holes-cascade-sorry-wiring-alternate"
+       "E-typed-holes-example-self"
+       "E-unified-live-surface"
+       "E-unsolicited-pouch-turns"
+       "E-virtual-patterns"
+       "E-vwm"
+       "E-war-machine-qa"
+       "E-webarxana-as-hinge-log-backend"
+       "E-whitepaper-v2-to-v3-claims-inventory"
+       "E-wm-operator-lane"
+       "E-wm-operator-observations"],
+      :enumerator
+      {:proposer nil,
+       :pointer "scripts/futon2/report/war_machine.clj:6005-6013"}}
+     {:available-count 133,
+      :exclusions-by-reason
+      {:derived-id 90,
+       :duplicate-id 1207,
+       :index-check-copy 84,
+       :non-contract-filename 590,
+       :status-draft 1,
+       :status-terminal 104},
+      :phantom [],
+      :enumerated-count 133,
+      :available-by-repo
+      {"futon0" 16,
+       "futon2" 10,
+       "futon3" 7,
+       "futon3a" 1,
+       "futon3c" 35,
+       "futon4" 17,
+       "futon5" 13,
+       "futon5a" 12,
+       "futon6" 19,
+       "futon7" 3},
+      :scan-counts
+      {:files-under-dir 2209,
+       :contract-matched 1619,
+       :available 133,
+       :excluded 2076},
+      :kind :mission,
+      :verdict :complete,
+      :missing [],
+      :enumerator
+      {:proposer :mission-enumerator,
+       :pointer "src/futon2/aif/mission_registry.clj:322"}}
+     {:available-count 33,
+      :exclusions-by-reason
+      {:duplicate-id 237,
+       :index-check-copy 14,
+       :non-contract-filename 1,
+       :status-terminal 1},
+      :phantom [],
+      :would-need
+      "a proposer for this kind in the tick's proposer list",
+      :enumerated-count 0,
+      :available-by-repo {"futon3c" 33},
+      :scan-counts
+      {:files-under-dir 286,
+       :contract-matched 285,
+       :available 33,
+       :excluded 253},
+      :reason :no-proposer-for-kind,
+      :kind :ticket,
+      :verdict :kind-not-enumerated,
+      :missing
+      ["T-agency-desktop-save"
+       "T-car3-phase2-impl"
+       "T-car3-queue-routing"
+       "T-car3-queue-routing-design-note"
+       "T-codex-auto-bellback"
+       "T-cx-new-blocks-emacs"
+       "T-devmap-forward-model-calibration"
+       "T-dispatch-clock-excursion-prefix"
+       "T-durable-queue-rename-and-tidies"
+       "T-evidence-pinned-to-mutable-prose-26082026"
+       "T-exogenous-evidence-update-rule"
+       "T-fail-activation-authority-unavailable"
+       "T-fail-agent-not-found"
+       "T-fail-invoke-error"
+       "T-fail-invoke-interrupted"
+       "T-fail-no-execution-evidence"
+       "T-fail-operator-cancelled"
+       "T-fail-worker-lost-on-restart"
+       "T-fixture-becomes-registry-26082026"
+       "T-forward-model-vs-active-work"
+       "T-jvm-provenance-before-multi-jvm"
+       "T-kangaroo-caching-and-compaction"
+       "T-kangaroo-v1-pouch"
+       "T-lean-authority-alias-27082026"
+       "T-mesh-edge-coverage"
+       "T-mesh-qa-misrouting"
+       "T-mq7-unaddressable-caller"
+       "T-strategic-cascade-emits-disconnected-patterns"
+       "T-typed-bell-arse-write-async"
+       "T-watu-replay-layer"
+       "T-wm-turns-are-not-operator-turns"
+       "T-wm-wrong-corpus-26082026"
+       "T-zai-chat-transient-timeout"],
+      :enumerator
+      {:proposer nil,
+       :pointer
+       "scripts/futon2/report/war_machine.clj:6005-6013"}}]}]},
+ :dating nil,
+ :population-side-is-not-contemporaneous
+ "the available population is scanned from the filesystem at deposit time (ec/scan-population over /home/joe/code), while the enumerated side is read off the run's own records. Members are therefore dated by first commit before any red is deposited; a phantom cannot be dated at all, because the file the scan looked for is not there.",
+ :not-what-this-says
+ "A :typed-absence here does NOT say the enumeration was complete at the run. It says the only evidence of incompleteness this check can produce today is evidence about a population the run never saw, so no verdict about the run is reconstructible."}

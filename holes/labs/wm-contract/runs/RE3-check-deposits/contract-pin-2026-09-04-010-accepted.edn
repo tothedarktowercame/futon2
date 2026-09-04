@@ -1,0 +1,72 @@
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE3,
+ :check :contract-pin,
+ :run-id "2026-09-04-010-accepted",
+ :produced-by "checks/contract_authority_current.clj --deposit",
+ :deterministic
+ "No wall-clock field: the observation interval and the event claim's interval are omitted here on purpose, so this receipt is rewritten byte-identically on every deposit. That is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present. The interval is still printed on stdout by an ordinary invocation.",
+ :run-store
+ {:dir "holes/labs/wm-contract/runs/2026-09-04-010-accepted",
+  :exists? true,
+  :holds
+  ["README.md"
+   "battery.log"
+   "conformance.edn"
+   "delta.edn"
+   "normalized.edn"
+   "rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"
+   "step.edn"
+   "tick-run-record-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"
+   "u49/00-source.edn"
+   "u49/01-topology.edn"
+   "u49/02-routes.edn"
+   "u49/03-classification.edn"
+   "u49/04-controls.edn"
+   "u49/lean-block.lean"
+   "wm-trace-2026-09-04.edn"
+   "world-after.edn"
+   "world-before.edn"],
+  :mentions-of-contract
+  {"battery.log" ["contract-pin" "contract_authority_current.clj"],
+   "delta.edn" [":producer-contract" "contract" "contracts"],
+   "normalized.edn" [":producer-contract" "contract" "contracts"],
+   "rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"
+   [":contract-id"
+    ":contract-sha"
+    ":producer-contract"
+    "holes-contract.json"],
+   "u49/lean-block.lean"
+   ["wm-contract/run3_conformance.bb"
+    "wm-contract/runs/2026-09-04-010-accepted"
+    "wm-contract/u49_route_transcribe.bb"],
+   "wm-trace-2026-09-04.edn"
+   [":producer-contract" "contract" "contracts"],
+   "world-after.edn" [":holes-contract" "holes-contract.json"],
+   "world-before.edn" [":holes-contract" "holes-contract.json"]},
+  :recorded-authority-sought
+  "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+  :recorded-authority-appears-in-store? true,
+  :recorded-authority-appears-in
+  ["rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn"]},
+ :verdict-deposited :green,
+ :live-derivation
+ {:read-from
+  "the mathlib4 working tree at deposit time, NOT the tree the run was taken at",
+  :assertion
+  "the contract was generated from the current content of Holes.lean",
+  :pass? true,
+  :failures [],
+  :recorded-authority "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+  :holes-last-content-change
+  "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+  :recorded-holes-blob "d00dfab3f4e703832fc4b2c91f1af3e3d733b0ad",
+  :current-holes-blob "d00dfab3f4e703832fc4b2c91f1af3e3d733b0ad",
+  :mathlib-head "4bbc7111c4b6193e79c02d9d381377587271b56f",
+  :holes-clean? true,
+  :event-claim
+  {:claim :event-free,
+   :writer-fence {:status :absent, :reason :not-declared},
+   :event-free? :unverified,
+   :distinguishable-cause? false}},
+ :not-what-this-says
+ "The live derivation above is a property of the mathlib4 tree at deposit time. It is recorded so the absence is legible, and it is NOT the deposited verdict."}

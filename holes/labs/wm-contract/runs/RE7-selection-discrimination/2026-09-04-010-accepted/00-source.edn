@@ -1,0 +1,24 @@
+{:run-id "2026-09-04-010-accepted",
+ :rationale-dir
+ "holes/labs/wm-contract/runs/2026-09-04-010-accepted/rationale",
+ :rationale-records
+ [{:file
+   "holes/labs/wm-contract/runs/2026-09-04-010-accepted/rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn",
+   :sha256
+   "784092c604786ef324c7c07f0dbc15bc63e3f307871a59d202d430770c683c3f"}],
+ :trace
+ {:path
+  "holes/labs/wm-contract/runs/2026-09-04-010-accepted/wm-trace-2026-09-04.edn",
+  :sha256
+  "294b868b9d1ccee1c156390add45233c150ce1df6606c9c5b0c61bd2c8885389",
+  :records-selected 1,
+  :recorded-trace-paths
+  ["data/wm-step/w1/sandbox/wm-trace/wm-trace-2026-09-04.edn"],
+  :recorded-path-is-the-one-read? false,
+  :note
+  "the census is computed from the COMMITTED run-store trace above. `:rationale/trace-path` on the records says [\"data/wm-step/w1/sandbox/wm-trace/wm-trace-2026-09-04.edn\"]; for 2026-09-04-re5 that is an absolute path into the live, untracked data/wm-trace/, which no reviewer and no other machine can read. Control C1 is what shows the file read here holds the same decisions the records were written from."},
+ :producer "holes/labs/wm-contract/re7_selection_discrimination.bb",
+ :producer-sha256
+ "967b758254555b698494bfe805702f3706dec8abe563e3fc1fd39d8a78ca83a2",
+ :lean-slug "step20260904010accepted",
+ :emits-shared-definitions true}
