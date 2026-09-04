@@ -230,6 +230,41 @@ Not done in run 1: no T5/T3 ledger append (the §6 gap list is ready for one,
 withheld while the excursion is DRAFT and its rows are unminted); no proposed
 change to `M-zaif-harness-v1`'s table; no second window.
 
+## The commentary-stratification hypothesis (Joe, dictated 2026-09-04, after the plop-2026 draft-chat ruling)
+
+> "Sometimes it seems as if the operator layer is a commentary on what the
+> agents are doing. And what the agents say in their chats are commentaries
+> on what they're doing in code. So it's not as though there's no space for
+> commentary. I think commentary is great. What if that was all compressed?
+> So that all the agent chats and all the operator turns, once they enter,
+> [became] comments inside of code — it would be very confusing."
+
+This is a candidate answer to the excursion's core question, stated as a
+structural claim: the operator's turns are not just another agent's turns —
+they sit one commentary stratum up. Code at the bottom; agent chat as
+commentary on the code work; operator turns as commentary on the agents.
+Each stratum is valuable IN ITS STRATUM, and the failure mode is
+compression: flattening a commentary layer into the artifact it comments
+on.
+
+The same morning supplied the worked example from the paper side: the
+plop-2026 "Correction, 2026-08-31" paragraph and the "Figure 2 now uses"
+sentence were revision commentary (an operator/agent-stratum concern)
+flattened into the paper body — the paper-layer version of pasting a chat
+transcript into a code comment. The repair kept each claim in the artifact
+and moved the history to the stratum that carries history (git; and Joe
+has floated an overlay-comment facility for papers as the explicit home
+for such notes — "we can build that facility if that's important").
+
+Census consequence: turn-role classification should record not only WHICH
+node a turn lands on but which STRATUM it speaks from — a turn about the
+code, a turn about an agent's handling of the code, a turn about the
+process itself. If the strata are real, phase-vocabulary turns should
+cluster in the operator-on-agent stratum (moving the agent between
+sections), and the embedding-assigned patterns for them should differ
+systematically from turns that reach down a stratum. That is a testable
+refinement of the survey, not a new instrument.
+
 ## What this excursion does NOT do
 
 - No automation of rulings — the census may show which turn kinds are
