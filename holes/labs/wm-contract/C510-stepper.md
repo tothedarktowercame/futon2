@@ -215,6 +215,34 @@ second measurement — with one exception found by running it: RUN3 stamps a fre
 that re-measured made u49's row divergent and the ledger refused it. RUN3 now
 runs once per run and later passes reuse its verdict.
 
+**The RUN3-once fix landed one pass too late, and review caught what that left
+behind.** Commit 82276605 carried both the fix and the artifacts of the very
+pass that had exposed the problem, so the committed run store named a
+measurement (`:checked-at 2026-09-04T16:40:59.705961817Z`, in
+`conformance.edn` and in `u49/04-controls.edn`) that the append-only ledger's
+`:run-conformance` row, seq 17, does not — it cites
+`2026-09-04T16:40:36.011998629Z`, the measurement u49 transcribed when the row
+landed. The evidence named two measurements of one run and a deposit replay
+still produced a divergent row.
+
+The ledger cannot be rewritten, so the artifacts moved to it: `conformance.edn`
+and `u49/04-controls.edn` restored to the 16:40:36 measurement (commit
+2698dc02), and `runs/latest-conformance.edn` with them — it had held 16:31:58,
+a third re-measurement of the same run. The three measurements differ in
+nothing but the timestamp: same `:conformant`, 1 record / 9 hops / 9 distinct /
+22 drawn / 19 unfired, same control-map sha `b1246f2`, because they are three
+readings of one unchanged run store.
+
+The replay then shows the property the row claims. `wm_step.sh deposit` re-runs
+the battery: RUN3 `SKIPPED: conformance.edn already written`, all **eight**
+catalogued checks `:already-present` at their existing seqs (17, 18, 19, 20, 21,
+22, 23, 24) with the recorded `:row/sha` unchanged, every command `exit=0`, and
+`run_era_ledger.bb --check` green. Nothing appended and nothing refused. The
+working tree after the replay is dirty in `battery.log` alone — every check,
+u49's transcription included, rewrote its receipt byte-for-byte, so the restored
+`04-controls.edn` is exactly what u49 derives from the restored
+`conformance.edn` rather than a hand-edit that happens to match.
+
 Two of the battery's commands load only from the repo root, and that is a classpath fact:
 `bb.edn` declares `:paths ["."]`, so `checks/contract_authority_current.clj`
 resolves `writer-fence-capability` only from there, and

@@ -1,53 +1,14 @@
 === contract-pin (cwd /home/joe/code/futon2): bb /home/joe/code/futon2/checks/contract_authority_current.clj --deposit 2026-09-04-010-accepted 
 contract-authority-current --deposit: receipt holes/labs/wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-04-010-accepted.edn
-{:status :appended, :run-id "2026-09-04-010-accepted", :check-id :contract-pin, :row/seq 20, :row/sha "7a3204f2e999cebb2cce3a43f32492d2a51abc86c920909c5c4299f6c10b24ce"}
-run_era_ledger: appended -- run 2026-09-04-010-accepted, check :contract-pin, seq 20, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-04-010-accepted.edn (commit 2169fa1f)
+{:status :already-present, :run-id "2026-09-04-010-accepted", :check-id :contract-pin, :row/seq 20, :row/sha "7a3204f2e999cebb2cce3a43f32492d2a51abc86c920909c5c4299f6c10b24ce"}
+run_era_ledger: already-present -- run 2026-09-04-010-accepted, check :contract-pin, seq 20, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-04-010-accepted.edn (commit 2169fa1f)
 === contract-pin exit=0
 === flip-readiness (cwd /home/joe/code/futon2/holes/labs/wm-contract): bb /home/joe/code/futon2/holes/labs/wm-contract/flip_readiness_check.bb --deposit 2026-09-04-010-accepted 
 flip_readiness_check --deposit: receipt holes/labs/wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-04-010-accepted.edn
-{:status :appended, :run-id "2026-09-04-010-accepted", :check-id :flip-readiness, :row/seq 21, :row/sha "e28e4b52b021ed079f9652f676da9d749849757af863b6187e29ca368bed9e99"}
-run_era_ledger: appended -- run 2026-09-04-010-accepted, check :flip-readiness, seq 21, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-04-010-accepted.edn (commit 2169fa1f)
+{:status :already-present, :run-id "2026-09-04-010-accepted", :check-id :flip-readiness, :row/seq 21, :row/sha "e28e4b52b021ed079f9652f676da9d749849757af863b6187e29ca368bed9e99"}
+run_era_ledger: already-present -- run 2026-09-04-010-accepted, check :flip-readiness, seq 21, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-04-010-accepted.edn (commit 2169fa1f)
 === flip-readiness exit=0
-=== run3-conformance (cwd /home/joe/code/futon2/holes/labs/wm-contract): env FUTON_WM_TRACE_DIR=/home/joe/code/futon2/holes/labs/wm-contract/runs/2026-09-04-010-accepted bb /home/joe/code/futon2/holes/labs/wm-contract/run3_conformance.bb runs/2026-09-04-010-accepted 
-run3: selection by-run-id (1 receipts, 1 run ids, dates 2026-09-04)
-run3: 1 records, 1 routes, 9 hops (9 distinct)
-run3: :controller-score on 1/1, :f-pi-by-candidate-id on 0/1 (:present 0)
-run3: ruling-unrealised          1
-run3:     R5->R6
-run3: excluded-dependency-grain  1
-run3:     R2->R7
-run3: drawn                      2
-run3:     R7->R3
-run3:     R8->R5
-run3: route-measured             5
-run3:     R12->R2
-run3:     R14->TRACE
-run3:     R20->R12
-run3:     R3->R8
-run3:     R6->R14
-run3: drawn edges never traversed: 19 of 22
-run3:     unfired R1->R4
-run3:     unfired R10->R8
-run3:     unfired R11->R16
-run3:     unfired R12->R7
-run3:     unfired R13->R14
-run3:     unfired R14->R16
-run3:     unfired R15->R13
-run3:     unfired R15->R16
-run3:     unfired R16->R2
-run3:     unfired R2->R3
-run3:     unfired R20->R7
-run3:     unfired R3->R1
-run3:     unfired R4->R5
-run3:     unfired R5->R5
-run3:     unfired R6->R11
-run3:     unfired R6->R13
-run3:     unfired R7->R14
-run3:     unfired R7->R8
-run3:     unfired R9->R16
-
-run3: CONFORMANT -- every hop is an edge of the checked topology, and no code-retired route-grain edge was traversed
-=== run3-conformance exit=0
+=== run3-conformance SKIPPED: conformance.edn already written
 === run-conformance (cwd /home/joe/code/futon2/holes/labs/wm-contract): env FUTON_WM_TRACE_DIR=/home/joe/code/futon2/holes/labs/wm-contract/runs/2026-09-04-010-accepted U49_RUN_DIR=runs/2026-09-04-010-accepted U49_SLUG=step20260904010accepted U49_TRACE_FILE=runs/2026-09-04-010-accepted/wm-trace-2026-09-04.edn U49_EMIT_TABLES=0 bb /home/joe/code/futon2/holes/labs/wm-contract/u49_route_transcribe.bb --deposit 2026-09-04-010-accepted runs/2026-09-04-010-accepted/u49 
 u49: 1 records, 9 hops (9 distinct), verdict conformant
 u49: C1-reproduces-the-pinned-verdict               PASS
@@ -58,25 +19,23 @@ u49: C5-drawn-set-differs-between-the-two-checkers  REPORTED
 u49: C6-what-the-certificate-does-not-show          REPORTED
 u49: C7-reused-tables-are-still-the-current-map     PASS
 u49: wrote runs/2026-09-04-010-accepted/u49
-run_era_ledger --deposit REFUSED: divergent row for an existing (run-id, check-id); the ledger is append-only
-  {:run-id "2026-09-04-010-accepted", :check-id :run-conformance, :existing #:row{:run-id "2026-09-04-010-accepted", :check-id :run-conformance, :verdict :green, :artifact "holes/labs/wm-contract/runs/2026-09-04-010-accepted/u49/03-classification.edn", :at "2026-09-04T16:40:36.011998629Z", :author "u49_route_transcribe.bb --deposit", :notes "the transcription reproduces the run's own pinned verdict :conformant (runs/2026-09-04-010-accepted/conformance.edn, :checked-at 2026-09-04T16:40:36.011998629Z, written by run3_conformance.bb when the run was taken) over 1 routes, 9 hops, 9 distinct, against control map e508ece; control C1 is that reproduction and every falsifier in C4 breaks it. LIMITS, from C6 beside this artifact: 5 of 9 distinct hops are on the :route-measured-drawn layer, which a previous route measurement put there, and 19 of 22 drawn edges never fired -- the run stayed inside the union of the drawn and measured layers, which is not the drawn figure predicting the run. Controls: holes/labs/wm-contract/runs/2026-09-04-010-accepted/u49/04-controls.edn.", :deposited-by "RE3 -- wire the existing checks to deposit ledger rows"}, :proposed #:row{:run-id "2026-09-04-010-accepted", :check-id :run-conformance, :verdict :green, :artifact "holes/labs/wm-contract/runs/2026-09-04-010-accepted/u49/03-classification.edn", :at "2026-09-04T16:40:59.705961817Z", :author "u49_route_transcribe.bb --deposit", :notes "the transcription reproduces the run's own pinned verdict :conformant (runs/2026-09-04-010-accepted/conformance.edn, :checked-at 2026-09-04T16:40:59.705961817Z, written by run3_conformance.bb when the run was taken) over 1 routes, 9 hops, 9 distinct, against control map e508ece; control C1 is that reproduction and every falsifier in C4 breaks it. LIMITS, from C6 beside this artifact: 5 of 9 distinct hops are on the :route-measured-drawn layer, which a previous route measurement put there, and 19 of 22 drawn edges never fired -- the run stayed inside the union of the drawn and measured layers, which is not the drawn figure predicting the run. Controls: holes/labs/wm-contract/runs/2026-09-04-010-accepted/u49/04-controls.edn.", :deposited-by "RE3 -- wire the existing checks to deposit ledger rows"}, :differing [:row/at :row/notes]}
-u49 --deposit: the ledger refused the row (exit 1)
-  if the refusal is artifact-dirty, commit holes/labs/wm-contract/runs/2026-09-04-010-accepted/u49/03-classification.edn and re-run
-=== run-conformance exit=1
+{:status :already-present, :run-id "2026-09-04-010-accepted", :check-id :run-conformance, :row/seq 17, :row/sha "ce73adc050e8b8b1892886f835236d051d873ad0bb993b9397d5768c920c5cf5"}
+run_era_ledger: already-present -- run 2026-09-04-010-accepted, check :run-conformance, seq 17, at 2026-09-04T16:40:36.011998629Z, artifact holes/labs/wm-contract/runs/2026-09-04-010-accepted/u49/03-classification.edn (commit aafe4ef3)
+=== run-conformance exit=0
 === per-node-runtime-validation (cwd /home/joe/code/futon2/holes/labs/wm-contract): bb /home/joe/code/futon2/holes/labs/wm-contract/runtime_validation_check.bb --deposit 2026-09-04-010-accepted 
 runtime_validation_check --deposit: receipt holes/labs/wm-contract/runs/RE6-check-deposits/runtime-validation-2026-09-04-010-accepted.edn
-{:status :appended, :run-id "2026-09-04-010-accepted", :check-id :per-node-runtime-validation, :row/seq 22, :row/sha "08c056bb0efe307ea1ec80b60a5aff1ba517af8cccea6d07a5b2ed700631bc41"}
-run_era_ledger: appended -- run 2026-09-04-010-accepted, check :per-node-runtime-validation, seq 22, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE6-check-deposits/runtime-validation-2026-09-04-010-accepted.edn (commit 2169fa1f)
+{:status :already-present, :run-id "2026-09-04-010-accepted", :check-id :per-node-runtime-validation, :row/seq 22, :row/sha "08c056bb0efe307ea1ec80b60a5aff1ba517af8cccea6d07a5b2ed700631bc41"}
+run_era_ledger: already-present -- run 2026-09-04-010-accepted, check :per-node-runtime-validation, seq 22, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE6-check-deposits/runtime-validation-2026-09-04-010-accepted.edn (commit 2169fa1f)
 === per-node-runtime-validation exit=0
 === enumeration-completeness (cwd /home/joe/code/futon2): env FUTON_WM_TRACE_DIR=/home/joe/code/futon2/holes/labs/wm-contract/runs/2026-09-04-010-accepted clojure -M:test holes/labs/wm-contract/u37_enumeration_replay.clj --deposit 2026-09-04-010-accepted 
 u37_enumeration_replay --deposit: receipt holes/labs/wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-04-010-accepted.edn
-{:status :appended, :run-id "2026-09-04-010-accepted", :check-id :enumeration-completeness, :row/seq 23, :row/sha "7bcd7be3386b0191b8c80ec332a3204e0ed14f0b89b261b8d181927f485e20f0"}
-run_era_ledger: appended -- run 2026-09-04-010-accepted, check :enumeration-completeness, seq 23, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-04-010-accepted.edn (commit 2169fa1f)
+{:status :already-present, :run-id "2026-09-04-010-accepted", :check-id :enumeration-completeness, :row/seq 23, :row/sha "7bcd7be3386b0191b8c80ec332a3204e0ed14f0b89b261b8d181927f485e20f0"}
+run_era_ledger: already-present -- run 2026-09-04-010-accepted, check :enumeration-completeness, seq 23, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-04-010-accepted.edn (commit 2169fa1f)
 === enumeration-completeness exit=0
 === rationale-regret (cwd /home/joe/code/futon2/holes/labs/wm-contract): bb /home/joe/code/futon2/holes/labs/wm-contract/u39_selection_retrospective.bb --deposit 2026-09-04-010-accepted 
 u39_selection_retrospective --deposit: receipt holes/labs/wm-contract/runs/RE6-check-deposits/rationale-regret-2026-09-04-010-accepted.edn
-{:status :appended, :run-id "2026-09-04-010-accepted", :check-id :rationale-regret, :row/seq 24, :row/sha "24786ce1071edf38a1728907ce70cc4c24383d9aa67172a47c3d21e734018b60"}
-run_era_ledger: appended -- run 2026-09-04-010-accepted, check :rationale-regret, seq 24, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE6-check-deposits/rationale-regret-2026-09-04-010-accepted.edn (commit 2169fa1f)
+{:status :already-present, :run-id "2026-09-04-010-accepted", :check-id :rationale-regret, :row/seq 24, :row/sha "24786ce1071edf38a1728907ce70cc4c24383d9aa67172a47c3d21e734018b60"}
+run_era_ledger: already-present -- run 2026-09-04-010-accepted, check :rationale-regret, seq 24, at 2026-09-04T16:40:56Z, artifact holes/labs/wm-contract/runs/RE6-check-deposits/rationale-regret-2026-09-04-010-accepted.edn (commit 2169fa1f)
 === rationale-regret exit=0
 === tensions-cashed (cwd /home/joe/code/futon2/holes/labs/wm-contract): bb /home/joe/code/futon2/holes/labs/wm-contract/u41_tension_ledger.bb --deposit 2026-09-04-010-accepted 
 u41_tension_ledger --deposit: receipt holes/labs/wm-contract/runs/RE6-check-deposits/tensions-cashed-2026-09-04-010-accepted.edn
