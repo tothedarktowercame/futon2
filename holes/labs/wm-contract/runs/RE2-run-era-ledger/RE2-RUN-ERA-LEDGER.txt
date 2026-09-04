@@ -1,5 +1,5 @@
 RE2 — RUN-ERA LEDGER: one row per (run-id, check-id), folded
-  0 rows, 7 catalogued checks, 0 defects against the schema the ledger declares
+  3 rows, 7 catalogued checks, 0 defects against the schema the ledger declares
 
 CHECK CATALOGUE — the check-id enum, each entry naming its machinery
   :contract-pin                  holes/labs/wm-contract/C177-contract-last-source-change.md (registry contract == live contract at the run sha)
@@ -11,7 +11,9 @@ CHECK CATALOGUE — the check-id enum, each entry naming its machinery
   :tensions-cashed               holes/labs/wm-contract/u41_tension_ledger.bb
 
 BY RUN — a run missing a catalogued check is :incomplete, never green
-  (no runs: the ledger is empty. RE3 wires the first three checks to deposit; RE5 is the first correlated run.)
+  2026-09-01-s5                :incomplete  3 checks, not deposited: [:enumeration-completeness :per-node-runtime-validation :rationale-regret :tensions-cashed]
 
 BY CHECK — the verdict series across runs, which is the time-correlation
-  (no series yet)
+  :contract-pin                  1 runs [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]]
+  :flip-readiness                1 runs [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]]
+  :run-conformance               1 runs [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green]]

@@ -7,20 +7,21 @@
  :controls
  [[:positive/c1-committed-ledger-is-green
    {:defects [],
-    :rows 0,
+    :rows 3,
     :pass? true,
     :why
-    "the committed ledger -- empty at RE2 -- conforms to the schema it declares; this is what `--check` gates on"}]
+    "the committed ledger conforms to the schema it declares; this is what `--check` gates on"}]
   [:positive/c2-synthetic-row-appends-and-revalidates-green
    {:result
     {:status :appended,
      :run-id "0000-00-00-self-test",
      :check-id :flip-readiness,
-     :row/seq 1,
+     :row/seq 4,
      :row/sha
-     "ac53c6b4d88719f9c062bbef50ecd9b2b9ad31efa3b58b60ff9c9ddff197f00b"},
+     "7d836cb2080ac08e3f781774390c697ffa4b4fa08a3978a8a6d70ce2aa22ff71"},
     :defects [],
-    :rows 1,
+    :rows-before 3,
+    :rows 4,
     :pass? true,
     :why
     "one row appended through the API, and the ledger it produced validates green -- otherwise every control below is a statement about a ledger nothing can write"}]
@@ -29,10 +30,10 @@
     {:status :already-present,
      :run-id "0000-00-00-self-test",
      :check-id :flip-readiness,
-     :row/seq 1,
+     :row/seq 4,
      :row/sha
-     "ac53c6b4d88719f9c062bbef50ecd9b2b9ad31efa3b58b60ff9c9ddff197f00b"},
-    :rows 1,
+     "7d836cb2080ac08e3f781774390c697ffa4b4fa08a3978a8a6d70ce2aa22ff71"},
+    :rows 4,
     :byte-identical? true,
     :pass? true,
     :why
@@ -103,7 +104,7 @@
     :why
     "the writer pretty-prints the data, so the hand-written schema documentation would be the natural casualty of the first append; it is re-emitted verbatim instead"}]
   [:positive/c14-no-write-touched-the-committed-ledger
-   {:committed-rows 0,
+   {:committed-rows 3,
     :pass? true,
     :why
     "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of an empty ledger"}]
@@ -112,9 +113,9 @@
     {:status :appended,
      :run-id "0000-00-00-self-test-deposit",
      :check-id :run-conformance,
-     :row/seq 2,
+     :row/seq 5,
      :row/sha
-     "b64af9f675057eb992cebe6f4002f4043f34b43656c56eadcb7faa1748c6822a"},
+     "98b479e0a69bc1fbd427524ac45521236e51f1c43af52e0c9e44892a11b2ec09"},
     :artifact
     "holes/labs/wm-contract/runs/2026-09-01-s5/conformance.edn",
     :artifact-commit "fe7c1c1b",
@@ -149,7 +150,7 @@
     {:state :committed,
      :path "committed.edn",
      :at "2020-01-02T03:04:05Z",
-     :commit "b06e44d"},
+     :commit "0b56bec"},
     :pass? true,
     :why
     "without this the three refusals above would be indistinguishable from a guard that refuses everything"}]]}

@@ -153,9 +153,11 @@
            (str/join ", " (:holds scan))
            ", and a search of every one of those files for the contract's recorded authority "
            (:recorded-authority-sought scan) " finds it in none of them. What the store does "
-           "name is the producer contract ("
-           (str/join ", " (distinct (mapcat val (:mentions-of-contract scan))))
-           "), which is the tick's own contract tag, not the mathlib4 holes-contract source sha. "
+           "name is "
+           (str/join ", " (sort (distinct (filter #(str/starts-with? % ":")
+                                                  (mapcat val (:mentions-of-contract scan))))))
+           ", the tick's own contract tag, which is not the mathlib4 holes-contract source sha "
+           "(the full scan, including the non-keyword spellings, is in this receipt). "
            "This check has no as-of-sha mode, so the pin AT this run cannot be reconstructed. "
            "The pin observed at deposit time is "
            (if (:pass? d) "green" (str "RED " (pr-str (:failures d))))

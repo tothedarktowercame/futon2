@@ -6,8 +6,7 @@
   :ledger "holes/labs/wm-contract/run-era-ledger.edn",
   :implements "EPIC-run-era.md:31-60",
   :read-only true,
-  :writes-only-under
-  "/home/joe/code/futon2/holes/labs/wm-contract/runs/RE2-run-era-ledger"},
+  :writes-only-under "holes/labs/wm-contract/runs/RE2-run-era-ledger"},
  :schema
  {:row
   {:required
@@ -66,6 +65,29 @@
           :machinery "holes/labs/wm-contract/u41_tension_ledger.bb",
           :precedent "tension-ledger T1-T5, u41 validator"}],
  :validation {:defects [], :conforms? true},
- :head-sha nil,
- :by-run [],
- :by-check []}
+ :head-sha
+ "8048c915a94d7793b23cf46bdb32874d4942e61a519a0e9afa14e75289f298a5",
+ :by-run
+ [{:run-id "2026-09-01-s5",
+   :checks
+   {:contract-pin :typed-absence,
+    :flip-readiness :typed-absence,
+    :run-conformance :green},
+   :checks-not-deposited
+   [:enumeration-completeness
+    :per-node-runtime-validation
+    :rationale-regret
+    :tensions-cashed],
+   :first-at "2026-09-01T22:56:17.282228522Z",
+   :status :incomplete}],
+ :by-check
+ [{:check-id :contract-pin,
+   :runs 1,
+   :series [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]]}
+  {:check-id :flip-readiness,
+   :runs 1,
+   :series [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]]}
+  {:check-id :run-conformance,
+   :runs 1,
+   :series
+   [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green]]}]}

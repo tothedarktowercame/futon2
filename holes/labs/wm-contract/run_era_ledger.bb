@@ -441,7 +441,8 @@
         tmp (io/file (.toFile tmpdir) "run-era-ledger.edn")
         committed (read-ledger default-ledger-path)]
     (io/copy (io/file default-ledger-path) tmp)
-    (let [empty-defects (validate (:data (read-ledger tmp)))
+    (let [rows-before (count (:rows (:data (read-ledger tmp))))
+          empty-defects (validate (:data (read-ledger tmp)))
           appended (append-row! tmp synthetic-row)
           after (read-ledger tmp)
           after-defects (validate (:data after))
@@ -512,19 +513,23 @@
        :positive/c1-committed-ledger-is-green
        {:defects empty-defects :rows (count (:rows (:data committed)))
         :pass? (empty? empty-defects)
-        :why "the committed ledger -- empty at RE2 -- conforms to the schema it declares; this is what `--check` gates on"}
+        :why "the committed ledger conforms to the schema it declares; this is what `--check` gates on"}
 
        :positive/c2-synthetic-row-appends-and-revalidates-green
-       {:result appended :defects after-defects :rows (count (:rows (:data after)))
+       ;; counted RELATIVE to the ledger the self-test started from. These two
+       ;; controls asserted the absolute count 1, which held only while the
+       ;; committed ledger was empty and broke the moment RE3 deposited into it.
+       {:result appended :defects after-defects
+        :rows-before rows-before :rows (count (:rows (:data after)))
         :pass? (and (= :appended (:status appended)) (empty? after-defects)
-                    (= 1 (count (:rows (:data after)))))
+                    (= (inc rows-before) (count (:rows (:data after)))))
         :why "one row appended through the API, and the ledger it produced validates green -- otherwise every control below is a statement about a ledger nothing can write"}
 
        :positive/c3-identical-append-is-already-present
        {:result replay :rows (count (:rows (:data after-replay)))
         :byte-identical? (= (:text after) (:text after-replay))
         :pass? (and (= :already-present (:status replay))
-                    (= 1 (count (:rows (:data after-replay))))
+                    (= (inc rows-before) (count (:rows (:data after-replay))))
                     (= (:text after) (:text after-replay)))
         :why "replaying the identical row is a no-op returning :already-present and leaving the file byte-identical -- RE3's --deposit paths are re-runnable because of this"}
 

@@ -28,18 +28,11 @@
 ;; (`bb run_era_ledger.bb --report`), and a check's history is the fold of its
 ;; rows ordered by run -- the time-correlation the epic exists for.
 
-{:ledger/version "v1",
- :ledger/implements
- "EPIC-run-era.md:31-60 (the seam file, the inherited disciplines) and worklist row :RE2",
- :ledger/generated false,
- :ledger/hand-edited false,
- :ledger/written-by
- ["run_era_ledger.bb append-row! -- the sole write API (CLI --append/--append-file)"],
- :ledger/read-by
+{:ledger/read-by
  ["run_era_ledger.bb (validator, run fold, check fold)"],
- :ledger/pointer-root
- "the futon2 repository root -- :row/artifact is resolved relative to it, with an optional :LINE or :LINE-LINE suffix stripped before resolution",
-
+ :ledger/head-sha
+ "8048c915a94d7793b23cf46bdb32874d4942e61a519a0e9afa14e75289f298a5",
+ :ledger/generated false,
  :ledger/schema
  {:row
   {:required
@@ -51,11 +44,8 @@
     :row/at
     :row/author
     :row/sha],
-   :optional
-   [:row/notes
-    :row/deposited-by],
-   :enums
-   #:row{:verdict #{:green :red :typed-absence}},
+   :optional [:row/notes :row/deposited-by],
+   :enums #:row{:verdict #{:green :red :typed-absence}},
    :rules
    ["exactly one row per (:row/run-id, :row/check-id) -- a second, divergent verdict for the same pair is a conflict the append API refuses, and an identical replay is :already-present"
     ":row/check-id must be a member of the declared :ledger/check-catalogue -- the catalogue below is the only enumeration of check ids, so a typo cannot invent a check"
@@ -64,14 +54,59 @@
     ":row/seq is unique, starts at 1, and is contiguous and ascending -- rows are appended, never rewritten or removed"
     ":row/at is an ISO-8601 instant (parseable by java.time.Instant), so rows form a time series"
     ":row/sha is SHA-256 over the previous row's :row/sha (\"genesis\" for the first) followed by this row's authored fields serialised canonically (all keys but :row/sha, in sorted-key order). :ledger/head-sha equals the last row's :row/sha, or nil for an empty ledger"]},
-
   :check
   {:required [:check/id :check/machinery :check/precedent],
    :optional [:check/note],
    :rules
    ["a check enters the catalogue when its machinery exists; the catalogue is the check-id enum"
     ":check/machinery is a pointer to the script or recipe that produces the verdict, not a description of it"]}},
-
+ :ledger/pointer-root
+ "the futon2 repository root -- :row/artifact is resolved relative to it, with an optional :LINE or :LINE-LINE suffix stripped before resolution",
+ :ledger/implements
+ "EPIC-run-era.md:31-60 (the seam file, the inherited disciplines) and worklist row :RE2",
+ :rows
+ [#:row{:run-id "2026-09-01-s5",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "218d779899bbcca580afa0c6fff361d51df282fc28e55f08d91da5f3ebe110a7",
+        :at "2026-09-04T07:07:10Z",
+        :verdict :typed-absence,
+        :check-id :flip-readiness,
+        :notes
+        "runs/2026-09-01-s5/ holds no flip-readiness artifact -- the run store holds README.md, conformance.edn, tick-run-record-2026-09-01-28da19d2-3a03-40f6-8eef-2818fe5583a9.edn, tick-run-record-2026-09-01-4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8.edn, tick-run-record-2026-09-01-b69ec193-5aa0-45ca-9cbb-9df45cbb8d82.edn, tick-run-record-2026-09-01-c51a8da3-883e-4038-b493-1b268d5d8357.edn, wm-trace-s5.edn and nothing from this check, so no flip-readiness verdict contemporaneous with this run was ever recorded. The check run at deposit time reports PASS with 0 of 6 flips READY; that is a property of the tree at deposit time, is recorded in the artifact this row points at, and is not deposited as this run's verdict.",
+        :author "flip_readiness_check.bb --deposit",
+        :seq 1,
+        :artifact
+        "holes/labs/wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-01-s5.edn"}
+  #:row{:run-id "2026-09-01-s5",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "2969c2235a4911c3e8319977e49c787eae0273f7e4399fae9a75b85112f1c69f",
+        :at "2026-09-04T07:07:10Z",
+        :verdict :typed-absence,
+        :check-id :contract-pin,
+        :notes
+        "runs/2026-09-01-s5/ records no contract identity to pin against: the store holds README.md, conformance.edn, tick-run-record-2026-09-01-28da19d2-3a03-40f6-8eef-2818fe5583a9.edn, tick-run-record-2026-09-01-4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8.edn, tick-run-record-2026-09-01-b69ec193-5aa0-45ca-9cbb-9df45cbb8d82.edn, tick-run-record-2026-09-01-c51a8da3-883e-4038-b493-1b268d5d8357.edn, wm-trace-s5.edn, and a search of every one of those files for the contract's recorded authority 11c2e44affa167bf85b0a2d7c29d8705f89a8d08 finds it in none of them. What the store does name is :producer-contract, the tick's own contract tag, which is not the mathlib4 holes-contract source sha (the full scan, including the non-keyword spellings, is in this receipt). This check has no as-of-sha mode, so the pin AT this run cannot be reconstructed. The pin observed at deposit time is green at authority 11c2e44affa167bf85b0a2d7c29d8705f89a8d08; that is a statement about the tree at deposit time, recorded in the artifact this row points at, and not deposited as this run's verdict.",
+        :author "checks/contract_authority_current.clj --deposit",
+        :seq 2,
+        :artifact
+        "holes/labs/wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-01-s5.edn"}
+  #:row{:run-id "2026-09-01-s5",
+        :deposited-by
+        "RE3 -- wire the existing checks to deposit ledger rows",
+        :sha
+        "8048c915a94d7793b23cf46bdb32874d4942e61a519a0e9afa14e75289f298a5",
+        :at "2026-09-01T22:56:17.282228522Z",
+        :verdict :green,
+        :check-id :run-conformance,
+        :notes
+        "the transcription reproduces the run's own pinned verdict :conformant (runs/2026-09-01-s5/conformance.edn, :checked-at 2026-09-01T22:56:17.282228522Z, written by run3_conformance.bb when the run was taken) over 4 routes, 36 hops, 9 distinct, against control map e508ece; control C1 is that reproduction and every falsifier in C4 breaks it. LIMITS, from C6 beside this artifact: 5 of 9 distinct hops are on the :route-measured-drawn layer, which a previous route measurement put there, and 19 of 22 drawn edges never fired -- the run stayed inside the union of the drawn and measured layers, which is not the drawn figure predicting the run. Controls: holes/labs/wm-contract/runs/U49-run-conformance/04-controls.edn.",
+        :author "u49_route_transcribe.bb --deposit",
+        :seq 3,
+        :artifact
+        "holes/labs/wm-contract/runs/U49-run-conformance/03-classification.edn"}],
  :ledger/check-catalogue
  [#:check{:id :contract-pin,
           :machinery
@@ -79,22 +114,30 @@
           :precedent "U-series publish pin check, green 2026-09-04"}
   #:check{:id :flip-readiness,
           :machinery "holes/labs/wm-contract/flip_readiness_check.bb",
-          :precedent "U32; 6 flips x 6 lines, 0 READY / 6 BLOCKED at epic-drafting time"}
+          :precedent
+          "U32; 6 flips x 6 lines, 0 READY / 6 BLOCKED at epic-drafting time"}
   #:check{:id :run-conformance,
-          :machinery "holes/labs/wm-contract/u49_route_transcribe.bb (transcribe run vs drawn wiring, Lean decide)",
+          :machinery
+          "holes/labs/wm-contract/u49_route_transcribe.bb (transcribe run vs drawn wiring, Lean decide)",
           :precedent "wmS5RunConformsToDrawnWiring, axiom-free (U49)"}
   #:check{:id :per-node-runtime-validation,
-          :machinery "holes/labs/wm-contract/runtime_validation_check.bb",
+          :machinery
+          "holes/labs/wm-contract/runtime_validation_check.bb",
           :precedent "zaif per-node gate, 13/13"}
   #:check{:id :enumeration-completeness,
-          :machinery "holes/labs/wm-contract/u37_enumeration_replay.clj",
-          :precedent "the four-mission-whitelist incident -- the check this would have caught"}
+          :machinery
+          "holes/labs/wm-contract/u37_enumeration_replay.clj",
+          :precedent
+          "the four-mission-whitelist incident -- the check this would have caught"}
   #:check{:id :rationale-regret,
-          :machinery "holes/labs/wm-contract/u39_selection_retrospective.bb",
-          :precedent "U39/U40: decay-family refutation, 85/85 re-selections"}
+          :machinery
+          "holes/labs/wm-contract/u39_selection_retrospective.bb",
+          :precedent
+          "U39/U40: decay-family refutation, 85/85 re-selections"}
   #:check{:id :tensions-cashed,
           :machinery "holes/labs/wm-contract/u41_tension_ledger.bb",
           :precedent "tension-ledger T1-T5, u41 validator"}],
-
- :ledger/head-sha nil,
- :rows []}
+ :ledger/version "v1",
+ :ledger/hand-edited false,
+ :ledger/written-by
+ ["run_era_ledger.bb append-row! -- the sole write API (CLI --append/--append-file)"]}
