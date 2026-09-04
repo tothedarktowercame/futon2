@@ -1,0 +1,45 @@
+{:declared-inputs
+ {:relation :k-doc-xref,
+  :relation-statement
+  "one document names the other mission, or both name a mission in common (the mission documents' own cross-references)",
+  :generalization-discount 0.5,
+  :support-map "n/(n+1)",
+  :note
+  "DECLARED, NOT RULED. Neither the relation nor the support map is derived from a source; they are this row's inputs, reachable per call, and the :choices entry that would settle them is Joe's. The default-off flag is what keeps that honest."},
+ :flag
+ "FUTON_WM_TASK_BELIEF_LADDER=1 (futon2/scripts/futon2/report/war_machine.clj:252-283), DEFAULT OFF",
+ :fields
+ [{:id :s5,
+   :trace "holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn",
+   :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8",
+   :timestamp "2026-09-01T22:50:42.709079837Z",
+   :field-size 145,
+   :chosen [:advance-mission "M-wm-aif-policy-grain-compliance"],
+   :recorded-plateau
+   {:score 5.055525524889362, :width 55, :ranks [73 127]}}
+  {:id :re5,
+   :trace
+   "holes/labs/wm-contract/runs/2026-09-04-re5/wm-trace-re5.edn",
+   :run-id "8ae111bc-d758-45f3-9c5b-f98832e10bb6",
+   :timestamp "2026-09-04T07:46:52.742121237Z",
+   :field-size 146,
+   :chosen [:advance-mission "M-zaif-harness-v1"],
+   :recorded-plateau
+   {:score 3.5175439026866684, :width 56, :ranks [75 130]}}],
+ :corpus
+ {:dir "/home/joe/code/futon2/data/wm-trace",
+  :distinct-chosen-keys 17,
+  :total-decisions 889,
+  :cross-check
+  "U51 read the same corpus and reported 17 distinct chosen keys over 889 records (C506-u51-plateau-composition.md); the shipped index reproduces both.",
+  :in-scope-keys 7,
+  :note
+  "case history means CHOSEN, never CHOSEN AND IT WORKED -- U51 measured 0 of the chosen keys carrying an outcome. 146 of the 889 decisions chose [:learn-action-class nil], a typed action with no target: counted in the index, excluded by the ladder's scope rule."},
+ :as-of "2026-09-04",
+ :ruling
+ "futon2/holes/labs/wm-contract/aif-equations.edn:364-369 (:task-belief-actand-source, Joe 2026-09-03)",
+ :seam
+ "futon2/scripts/futon2/report/war_machine.clj:6273-6274 -- between enrichment and efe/rank-actions",
+ :measures-against
+ "futon2/holes/labs/wm-contract/runs/U51-plateau-composition/plateau-composition.edn",
+ :row :U52}

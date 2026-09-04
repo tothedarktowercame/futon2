@@ -116,6 +116,15 @@
    :exercise-basis "All three gates are self-certification refusals -- futon3c/src/futon3c/apm/countdown_control.clj:1245-1251 and :1322-1328 refuse when the reviewer is the depositor -- which is R9's own property (p4ng/empirics-futon/control-stages.edn:23, 'No self- certification')."
    :owner-row :U14}
 
+  :task-belief-ladder
+  {:flip "FUTON_WM_TASK_BELIEF_LADDER=1"
+   :read-at "futon2/scripts/futon2/report/war_machine.clj:252-283"
+   :requires ["a :choices ruling on the kin relation and the support map -- neither is derivable from a source and both are declared inputs of the flag (futon2/holes/labs/wm-contract/aif-equations.edn:364-369 names kin/patterns/cascade-playout and writes no relation at mission grain)"]
+   :what "Puts the three-rung ladder of :task-belief-actand-source between candidate enrichment and EFE ranking: rung 1 direct case history, rung 2 constructive generalization from kin marked :constructed, rung 3 a typed refusal that removes the candidate. On the recorded s5 field it refuses 81 of 132 in-scope candidates and cuts the 55-way controller-score tie to 16 members over 8 distinct scores."
+   :exercises [:R4 :R5 :R6]
+   :exercise-basis "The ladder writes :mission-value-factor, which reaches the score by exactly one path: futon2/src/futon2/aif/forward_model.clj:111-126 into predict-effects :advance-mission (futon2/src/futon2/aif/forward_model.clj:152-168), R4's forward model, whose prediction is what futon2/src/futon2/aif/efe.clj:472 scores at R5. The rung-3 refusal removes candidates from the vector futon2/src/futon2/aif/efe.clj:948-966 ranks, which is R6's candidate action space."
+   :owner-row :U52}
+
   :zaif-u14e
   {:flip "U14e-flip: retirement of the legacy tickle verdict path"
    :read-at "futon2/holes/labs/zaif-harness/runs/U14-tickle-migration-proposal-v1.md:1-20"

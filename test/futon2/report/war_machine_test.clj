@@ -2639,3 +2639,76 @@
               (is (= (dissoc judgement :decision)
                      (dissoc out :decision))
                   "nothing outside the decision moved")))))))
+
+;; ---------------------------------------------------------------------------
+;; U52 -- the three-rung ladder at the selection scoring seam
+;; ---------------------------------------------------------------------------
+
+(def ^:private u52-candidates
+  [{:type :advance-mission :target "M-known"
+    :mission-path "/nowhere/M-known.md" :mission-value-factor 0.09}
+   {:type :advance-mission :target "M-unknown"
+    :mission-path "/nowhere/M-unknown.md" :mission-value-factor 0.09}
+   {:type :no-op :target nil}])
+
+(deftest u52-ladder-default-is-the-identity
+  (testing "with no declared input the SAME vector object comes back"
+    (let [out (wm/apply-task-belief-ladder u52-candidates)]
+      (is (identical? u52-candidates (:candidates out)))
+      (is (= [] (:refusals out)))
+      (is (nil? (:ladder out))
+          "and no ladder record is attached, so a default judgement carries no U52 key")))
+
+  (testing "an opt that is present and false is a declaration too"
+    (binding [wm/*task-belief-ladder?* true]
+      (is (identical? u52-candidates
+                      (:candidates (wm/apply-task-belief-ladder
+                                    u52-candidates
+                                    {:task-belief-ladder? false}))))))
+
+  (testing "the dynamic var alone turns it on"
+    (binding [wm/*task-belief-ladder?* true]
+      (is (some? (:ladder (wm/apply-task-belief-ladder
+                           u52-candidates
+                           {:case-history {}})))))))
+
+(deftest u52-ladder-on-rungs-and-refusal
+  (let [out (wm/apply-task-belief-ladder
+             u52-candidates
+             {:task-belief-ladder? true
+              :relation :k-doc-xref
+              :case-history {[:advance-mission "M-known"] 4}})
+        kept (into {} (map (juxt :target identity)) (:candidates out))]
+    (is (= {1 1, 3 1, :out-of-scope 1} (:census out))
+        "one direct case history, one nothing, one out of scope")
+    (is (= 1 (count (:refusals out))))
+    (is (= [:advance-mission "M-unknown"]
+           (:refusal/action-key (first (:refusals out)))))
+    (is (nil? (kept "M-unknown")) "a refused candidate leaves the field")
+    (is (= (* 0.09 0.8) (:mission-value-factor (kept "M-known"))))
+    (is (= 0.09 (:task-belief/pre-ladder-mission-value-factor (kept "M-known")))
+        "the pre-ladder number stays on the record beside the new one")
+    (is (= 1 (:history-size (:ladder out)))
+        "the ladder record says how many keys the index it read carried")))
+
+(deftest u52-case-history-index-counts-chosen-actions
+  (let [dir (str (Files/createTempDirectory "u52-trace" (into-array FileAttribute [])))
+        write! (fn [date recs]
+                 (spit (io/file dir (str "wm-trace-" date ".edn"))
+                       (str/join "\n" (map pr-str recs))))]
+    (write! "2026-09-01"
+            [{:decision {:action {:type :advance-mission :target "M-a"}}}
+             {:decision {:action {:type :advance-mission :target "M-a"}}}
+             {:decision {:action {:type :learn-action-class :target nil}}}])
+    (write! "2026-09-02"
+            [{:decision {:action {:type :advance-mission :target "M-b"}}}])
+    ;; a file that is not a daily trace must not be read as one
+    (spit (io/file dir "notes.edn") (pr-str {:decision {:action {:type :advance-mission :target "M-c"}}}))
+    (let [idx (wm/case-history-index dir)]
+      (is (= {[:advance-mission "M-a"] 2
+              [:advance-mission "M-b"] 1
+              [:learn-action-class nil] 1}
+             idx)
+          "a typed action with no target is a decision the corpus records and is counted; the ladder's SCOPE rule is what excludes it")
+      (is (nil? (get idx [:advance-mission "M-c"]))
+          "and a file that is not a daily trace is not corpus"))))

@@ -1,0 +1,492 @@
+{:statement
+ "The acceptance: what the ladder does to the recorded plateau, under each of the four kin relations U51 measured.",
+ :default-relation :k-doc-xref,
+ :under-the-default
+ {:s5
+  {:relation :k-doc-xref,
+   :recorded
+   {:width 55,
+    :ranks [73 127],
+    :score 5.055525524889362,
+    :distinct-mission-value-factors 1,
+    :distinct-controller-scores 1},
+   :after
+   {:members-refused 39,
+    :members-kept 16,
+    :rungs-of-kept {2 14, 1 2},
+    :distinct-mission-value-factors 8,
+    :distinct-controller-scores 8,
+    :widest-remaining-tie-among-them 3}},
+  :re5
+  {:relation :k-doc-xref,
+   :recorded
+   {:width 56,
+    :ranks [75 130],
+    :score 3.5175439026866684,
+    :distinct-mission-value-factors 1,
+    :distinct-controller-scores 1},
+   :after
+   {:members-refused 38,
+    :members-kept 18,
+    :rungs-of-kept {2 15, 1 3},
+    :distinct-mission-value-factors 11,
+    :distinct-controller-scores 11,
+    :widest-remaining-tie-among-them 3}}},
+ :under-each-relation
+ {:s5
+  {:k-doc-xref
+   {:relation :k-doc-xref,
+    :recorded
+    {:width 55,
+     :ranks [73 127],
+     :score 5.055525524889362,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 39,
+     :members-kept 16,
+     :rungs-of-kept {2 14, 1 2},
+     :distinct-mission-value-factors 8,
+     :distinct-controller-scores 8,
+     :widest-remaining-tie-among-them 3},
+    :census {1 5, 3 81, 2 46, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 49, :widest 6, :ties-over-1 8}},
+   :k-produces
+   {:relation :k-produces,
+    :recorded
+    {:width 55,
+     :ranks [73 127],
+     :score 5.055525524889362,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 53,
+     :members-kept 2,
+     :rungs-of-kept {1 2},
+     :distinct-mission-value-factors 2,
+     :distinct-controller-scores 2,
+     :widest-remaining-tie-among-them 1},
+    :census {1 5, 3 127, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 12, :widest 6, :ties-over-1 2}},
+   :k-repo
+   {:relation :k-repo,
+    :recorded
+    {:width 55,
+     :ranks [73 127],
+     :score 5.055525524889362,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 29,
+     :members-kept 26,
+     :rungs-of-kept {2 24, 1 2},
+     :distinct-mission-value-factors 4,
+     :distinct-controller-scores 4,
+     :widest-remaining-tie-among-them 18},
+    :census {1 5, 3 76, 2 51, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 38, :widest 18, :ties-over-1 6}},
+   :k-type
+   {:relation :k-type,
+    :recorded
+    {:width 55,
+     :ranks [73 127],
+     :score 5.055525524889362,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 0,
+     :members-kept 55,
+     :rungs-of-kept {2 53, 1 2},
+     :distinct-mission-value-factors 3,
+     :distinct-controller-scores 3,
+     :widest-remaining-tie-among-them 53},
+    :census {1 5, 2 127, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 81, :widest 53, :ties-over-1 6}}},
+  :re5
+  {:k-doc-xref
+   {:relation :k-doc-xref,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 3.5175439026866684,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 38,
+     :members-kept 18,
+     :rungs-of-kept {2 15, 1 3},
+     :distinct-mission-value-factors 11,
+     :distinct-controller-scores 11,
+     :widest-remaining-tie-among-them 3},
+    :census {1 6, 3 80, :out-of-scope 13, 2 47},
+    :field-width-census
+    {:distinct-scores 53, :widest 6, :ties-over-1 8}},
+   :k-produces
+   {:relation :k-produces,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 3.5175439026866684,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 53,
+     :members-kept 3,
+     :rungs-of-kept {1 3},
+     :distinct-mission-value-factors 2,
+     :distinct-controller-scores 2,
+     :widest-remaining-tie-among-them 2},
+    :census {1 6, 3 127, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 12, :widest 6, :ties-over-1 3}},
+   :k-repo
+   {:relation :k-repo,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 3.5175439026866684,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 29,
+     :members-kept 27,
+     :rungs-of-kept {2 24, 1 3},
+     :distinct-mission-value-factors 4,
+     :distinct-controller-scores 4,
+     :widest-remaining-tie-among-them 18},
+    :census {1 6, 3 76, :out-of-scope 13, 2 51},
+    :field-width-census
+    {:distinct-scores 38, :widest 18, :ties-over-1 7}},
+   :k-type
+   {:relation :k-type,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 3.5175439026866684,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 0,
+     :members-kept 56,
+     :rungs-of-kept {2 53, 1 3},
+     :distinct-mission-value-factors 3,
+     :distinct-controller-scores 3,
+     :widest-remaining-tie-among-them 53},
+    :census {1 6, 2 127, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 81, :widest 53, :ties-over-1 7}}}},
+ :relation-arms
+ {:s5
+  {:k-doc-xref
+   {:ladder-record
+    {:relation :k-doc-xref,
+     :relation-statement
+     "one document names the other mission, or both name a mission in common (the mission documents' own cross-references)",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 5, 3 81, 2 46, :out-of-scope 13},
+     :refused 81},
+    :plateau
+    {:score 130.2450086016297,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-doc-xref,
+    :scored-rows 64,
+    :width-census {:distinct-scores 49, :widest 6, :ties-over-1 8},
+    :refused 81,
+    :census {1 5, 3 81, 2 46, :out-of-scope 13}},
+   :k-produces
+   {:ladder-record
+    {:relation :k-produces,
+     :relation-statement
+     "shares a :produces entry of the capability-graph input recorded on the candidate",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 5, 3 127, :out-of-scope 13},
+     :refused 127},
+    :plateau
+    {:score 130.2450086016297,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-produces,
+    :scored-rows 18,
+    :width-census {:distinct-scores 12, :widest 6, :ties-over-1 2},
+    :refused 127,
+    :census {1 5, 3 127, :out-of-scope 13}},
+   :k-repo
+   {:ladder-record
+    {:relation :k-repo,
+     :relation-statement
+     "same home repository, read off :mission-path",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 5, 3 76, 2 51, :out-of-scope 13},
+     :refused 76},
+    :plateau
+    {:score 5.071415640065368,
+     :width 18,
+     :members
+     [[:advance-mission "M-kangaroo"]
+      [:advance-mission "M-agents-queue"]
+      [:advance-mission "M-autoclock-in"]
+      [:advance-mission "M-case-studies"]
+      [:advance-mission "M-xenotype-its"]
+      [:advance-mission "M-latex-wysiwyg"]
+      [:advance-mission "M-chipwitz-corps"]
+      [:advance-mission "M-omni-wm-runner"]
+      [:advance-mission "M-typed-memories"]
+      [:advance-mission "M-codex-sorry-loop"]
+      [:advance-mission "M-intent-curvature"]
+      [:advance-mission "M-memory-retrieval"]
+      [:advance-mission "M-zai-learning-loop"]
+      [:advance-mission "M-smart-emacs-cursor"]
+      [:advance-mission "M-sigils-reconsidered"]
+      [:advance-mission "M-populate-substrate-2"]
+      [:advance-mission "M-federated-agency-hardening"]
+      [:advance-mission "M-mission-scopes-into-substrate-2"]]},
+    :relation :k-repo,
+    :scored-rows 69,
+    :width-census {:distinct-scores 38, :widest 18, :ties-over-1 6},
+    :refused 76,
+    :census {1 5, 3 76, 2 51, :out-of-scope 13}},
+   :k-type
+   {:ladder-record
+    {:relation :k-type,
+     :relation-statement "same action :type",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 5, 2 127, :out-of-scope 13},
+     :refused 0},
+    :plateau
+    {:score 5.0688861031865144,
+     :width 53,
+     :members
+     [[:advance-mission "M-kangaroo"]
+      [:advance-mission "M-librarian"]
+      [:advance-mission "M-aif-tokamak"]
+      [:advance-mission "M-propagators"]
+      [:advance-mission "M-wm-tripwires"]
+      [:advance-mission "M-lab-standard"]
+      [:advance-mission "M-live-efe-map"]
+      [:advance-mission "M-usage-hacking"]
+      [:advance-mission "M-agents-queue"]
+      [:advance-mission "M-autoclock-in"]
+      [:advance-mission "M-case-studies"]
+      [:advance-mission "M-xenotype-its"]
+      [:advance-mission "M-metaca-search"]
+      [:advance-mission "M-latex-wysiwyg"]
+      [:advance-mission "M-metric-harness"]
+      [:advance-mission "M-becoming-nomad"]
+      [:advance-mission "M-chipwitz-corps"]
+      [:advance-mission "M-omni-wm-runner"]
+      [:advance-mission "M-typed-memories"]
+      [:advance-mission "M-pheromone-field"]
+      [:advance-mission "M-capability-zones"]
+      [:advance-mission "M-arxana-hardening"]
+      [:advance-mission "M-sci-reproduction"]
+      [:advance-mission "M-codex-sorry-loop"]
+      [:advance-mission "M-intent-curvature"]
+      [:advance-mission "M-memory-retrieval"]
+      [:advance-mission "M-formal-war-machine"]
+      [:advance-mission "M-zai-learning-loop"]
+      [:advance-mission "M-pattern-posteriors"]
+      [:advance-mission "M-smart-emacs-cursor"]
+      [:advance-mission "M-web-arxana-missions"]
+      [:advance-mission "M-futonzero-grounding"]
+      [:advance-mission "M-value-creation-loop"]
+      [:advance-mission "M-futonzero-generative"]
+      [:advance-mission "M-sigils-reconsidered"]
+      [:advance-mission "M-exotype-xenotype-eoc"]
+      [:advance-mission "M-populate-substrate-2"]
+      [:advance-mission "M-apm-capability-ratchet"]
+      [:advance-mission "M-differentiable-substrate"]
+      [:advance-mission "M-distributed-proofreaders"]
+      [:advance-mission "M-efe-bge-followon-actions"]
+      [:advance-mission "M-aif-a-matrix-faithfulness"]
+      [:advance-mission "M-run-produces-its-own-brief"]
+      [:advance-mission "M-capability-zones-S1-handoff"]
+      [:advance-mission "M-capability-zones-S3-handoff"]
+      [:advance-mission "M-federated-agency-hardening"]
+      [:advance-mission "M-capability-zones-S1-coverage"]
+      [:advance-mission "M-capability-zones-S2a-handoff"]
+      [:advance-mission "M-capability-zones-S2b-handoff"]
+      [:advance-mission "M-aif-gap-epistemic-affordance"]
+      [:advance-mission "M-wm-strategic-mission-selection"]
+      [:advance-mission "M-sci-reproduction-replay-ledger"]
+      [:advance-mission "M-mission-scopes-into-substrate-2"]]},
+    :relation :k-type,
+    :scored-rows 145,
+    :width-census {:distinct-scores 81, :widest 53, :ties-over-1 6},
+    :refused 0,
+    :census {1 5, 2 127, :out-of-scope 13}}},
+  :re5
+  {:k-doc-xref
+   {:ladder-record
+    {:relation :k-doc-xref,
+     :relation-statement
+     "one document names the other mission, or both name a mission in common (the mission documents' own cross-references)",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 6, 3 80, :out-of-scope 13, 2 47},
+     :refused 80},
+    :plateau
+    {:score 128.321577302369,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-doc-xref,
+    :scored-rows 66,
+    :width-census {:distinct-scores 53, :widest 6, :ties-over-1 8},
+    :refused 80,
+    :census {1 6, 3 80, :out-of-scope 13, 2 47}},
+   :k-produces
+   {:ladder-record
+    {:relation :k-produces,
+     :relation-statement
+     "shares a :produces entry of the capability-graph input recorded on the candidate",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 6, 3 127, :out-of-scope 13},
+     :refused 127},
+    :plateau
+    {:score 128.321577302369,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-produces,
+    :scored-rows 19,
+    :width-census {:distinct-scores 12, :widest 6, :ties-over-1 3},
+    :refused 127,
+    :census {1 6, 3 127, :out-of-scope 13}},
+   :k-repo
+   {:ladder-record
+    {:relation :k-repo,
+     :relation-statement
+     "same home repository, read off :mission-path",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 6, 3 76, :out-of-scope 13, 2 51},
+     :refused 76},
+    :plateau
+    {:score 3.5459146651326563,
+     :width 18,
+     :members
+     [[:advance-mission "M-kangaroo"]
+      [:advance-mission "M-agents-queue"]
+      [:advance-mission "M-autoclock-in"]
+      [:advance-mission "M-case-studies"]
+      [:advance-mission "M-xenotype-its"]
+      [:advance-mission "M-latex-wysiwyg"]
+      [:advance-mission "M-chipwitz-corps"]
+      [:advance-mission "M-omni-wm-runner"]
+      [:advance-mission "M-typed-memories"]
+      [:advance-mission "M-codex-sorry-loop"]
+      [:advance-mission "M-intent-curvature"]
+      [:advance-mission "M-memory-retrieval"]
+      [:advance-mission "M-zai-learning-loop"]
+      [:advance-mission "M-smart-emacs-cursor"]
+      [:advance-mission "M-sigils-reconsidered"]
+      [:advance-mission "M-populate-substrate-2"]
+      [:advance-mission "M-federated-agency-hardening"]
+      [:advance-mission "M-mission-scopes-into-substrate-2"]]},
+    :relation :k-repo,
+    :scored-rows 70,
+    :width-census {:distinct-scores 38, :widest 18, :ties-over-1 7},
+    :refused 76,
+    :census {1 6, 3 76, :out-of-scope 13, 2 51}},
+   :k-type
+   {:ladder-record
+    {:relation :k-type,
+     :relation-statement "same action :type",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 6, 2 127, :out-of-scope 13},
+     :refused 0},
+    :plateau
+    {:score 3.5413665248003525,
+     :width 53,
+     :members
+     [[:advance-mission "M-kangaroo"]
+      [:advance-mission "M-librarian"]
+      [:advance-mission "M-aif-tokamak"]
+      [:advance-mission "M-propagators"]
+      [:advance-mission "M-wm-tripwires"]
+      [:advance-mission "M-lab-standard"]
+      [:advance-mission "M-live-efe-map"]
+      [:advance-mission "M-usage-hacking"]
+      [:advance-mission "M-agents-queue"]
+      [:advance-mission "M-autoclock-in"]
+      [:advance-mission "M-case-studies"]
+      [:advance-mission "M-xenotype-its"]
+      [:advance-mission "M-metaca-search"]
+      [:advance-mission "M-latex-wysiwyg"]
+      [:advance-mission "M-metric-harness"]
+      [:advance-mission "M-becoming-nomad"]
+      [:advance-mission "M-chipwitz-corps"]
+      [:advance-mission "M-omni-wm-runner"]
+      [:advance-mission "M-typed-memories"]
+      [:advance-mission "M-pheromone-field"]
+      [:advance-mission "M-capability-zones"]
+      [:advance-mission "M-arxana-hardening"]
+      [:advance-mission "M-sci-reproduction"]
+      [:advance-mission "M-codex-sorry-loop"]
+      [:advance-mission "M-intent-curvature"]
+      [:advance-mission "M-memory-retrieval"]
+      [:advance-mission "M-formal-war-machine"]
+      [:advance-mission "M-zai-learning-loop"]
+      [:advance-mission "M-pattern-posteriors"]
+      [:advance-mission "M-smart-emacs-cursor"]
+      [:advance-mission "M-web-arxana-missions"]
+      [:advance-mission "M-futonzero-grounding"]
+      [:advance-mission "M-value-creation-loop"]
+      [:advance-mission "M-futonzero-generative"]
+      [:advance-mission "M-sigils-reconsidered"]
+      [:advance-mission "M-exotype-xenotype-eoc"]
+      [:advance-mission "M-populate-substrate-2"]
+      [:advance-mission "M-apm-capability-ratchet"]
+      [:advance-mission "M-differentiable-substrate"]
+      [:advance-mission "M-distributed-proofreaders"]
+      [:advance-mission "M-efe-bge-followon-actions"]
+      [:advance-mission "M-aif-a-matrix-faithfulness"]
+      [:advance-mission "M-run-produces-its-own-brief"]
+      [:advance-mission "M-capability-zones-S1-handoff"]
+      [:advance-mission "M-capability-zones-S3-handoff"]
+      [:advance-mission "M-federated-agency-hardening"]
+      [:advance-mission "M-capability-zones-S1-coverage"]
+      [:advance-mission "M-capability-zones-S2a-handoff"]
+      [:advance-mission "M-capability-zones-S2b-handoff"]
+      [:advance-mission "M-aif-gap-epistemic-affordance"]
+      [:advance-mission "M-wm-strategic-mission-selection"]
+      [:advance-mission "M-sci-reproduction-replay-ledger"]
+      [:advance-mission "M-mission-scopes-into-substrate-2"]]},
+    :relation :k-type,
+    :scored-rows 146,
+    :width-census {:distinct-scores 81, :widest 53, :ties-over-1 7},
+    :refused 0,
+    :census {1 6, 2 127, :out-of-scope 13}}}}}

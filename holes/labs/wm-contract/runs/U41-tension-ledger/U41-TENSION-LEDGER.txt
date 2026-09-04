@@ -2,7 +2,7 @@ U41 — TENSION LEDGER: carried tensions, typed, folded, and queried
 report mode is read-only; the validated append API was not invoked; report writes only under /home/joe/code/futon2/holes/labs/wm-contract/runs/U41-tension-ledger
 
 VALIDATION
-  5 tensions, 13 events, 0 defects against the schema the ledger declares
+  7 tensions, 15 events, 0 defects against the schema the ledger declares
 
 CURRENT STATUS — the fold of the events, not the record's mint-time field
   :zaif-v1/T1      :carried   since 2026-09-02   3 events (2 evidence-added), 7 pointers
@@ -10,9 +10,11 @@ CURRENT STATUS — the fold of the events, not the record's mint-time field
   :zaif-v1/T3      :carried   since 2026-09-02   3 events (2 evidence-added), 5 pointers
   [:refused-prediction {:q-actand/refusal :q-actand/zero-support-after-kin-pool, :grain :arm-session, :actand {:route :actand, :correction-label true}, :action :retrieve, :target :gold-judged, :kin []}] :carried   since 2026-09-03   1 events (0 evidence-added), 1 pointers
   :programme/T5    :carried   since 2026-09-03   3 events (2 evidence-added), 3 pointers
+  :wm-ladder/re5-8ae111bc-zero-support :carried   since 2026-09-04   1 events (0 evidence-added), 3 pointers
+  :wm-ladder/s5-4e35e740-zero-support :carried   since 2026-09-04   1 events (0 evidence-added), 3 pointers
 
 BIRTH RULE — recurrence across contexts proposes a pattern candidate
-  5 tensions considered, 0 terminal, 0 candidates
+  7 tensions considered, 0 terminal, 0 candidates
   Zero candidates today, and the reason is structural rather than incidental:
   the rule reads RESOLVED tensions, and all three seeds are carried. The first
   candidate is possible only after two tensions are cashed the same way in two

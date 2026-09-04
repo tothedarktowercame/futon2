@@ -574,6 +574,137 @@
     :env-preconditions [],
     :verdict :blocked,
     :blocked-on ["prerequisite flip :fpi-posterior is not READY"]}},
+  :task-belief-ladder
+  {:flip "FUTON_WM_TASK_BELIEF_LADDER=1",
+   :read-at "futon2/scripts/futon2/report/war_machine.clj:252-283",
+   :owner-row :U52,
+   :exercises [:R4 :R5 :R6],
+   :mission-gauges
+   {:verdict :n/a,
+    :because
+    "the flip's flag chain does not name FUTON_WM_MISSION_C, so no mission's completion criteria are read"},
+   :per-node-tests
+   {:verdict :green,
+    :nodes
+    [{:node :R4,
+      :verdict :green,
+      :test-files ["futon2/test/futon2/aif/forward_model_test.clj"],
+      :evidence
+      [{:substrate :wm,
+        :exit 0,
+        :catalog-status :exists,
+        :ns "futon2.aif.forward-model-test",
+        :state :fresh-green,
+        :test-file "futon2/test/futon2/aif/forward_model_test.clj",
+        :run-at "2026-09-03",
+        :row :n/R4-wm-forward-model,
+        :head-at "42a957c"}],
+      :named-gaps
+      [{:row :n/R4-zaif-observation-model,
+        :substrate :zaif,
+        :owner-rows [:U11 :D8 :S7]}],
+      :substrates {:wm [:fresh-green]}}
+     {:node :R5,
+      :verdict :green,
+      :test-files
+      ["futon2/test/futon2/aif/efe_test.clj"
+       "futon2/test/futon2/aif/efe_risk_mode_test.clj"
+       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+      :evidence
+      [{:substrate :wm,
+        :exit 0,
+        :catalog-status :exists,
+        :ns "futon2.aif.efe-test",
+        :state :fresh-green,
+        :test-file "futon2/test/futon2/aif/efe_test.clj",
+        :run-at "2026-09-03",
+        :row :n/R5-wm-efe,
+        :head-at "42a957c"}
+       {:substrate :wm,
+        :exit 0,
+        :catalog-status :exists,
+        :ns "futon2.aif.efe-risk-mode-test",
+        :state :fresh-green,
+        :test-file "futon2/test/futon2/aif/efe_risk_mode_test.clj",
+        :run-at "2026-09-03",
+        :row :n/R5-wm-risk-mode,
+        :head-at "42a957c"}
+       {:substrate :zaif,
+        :exit 0,
+        :catalog-status :exists,
+        :ns "futon3c.agents.zaif-inputs-test",
+        :state :fresh-green,
+        :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
+        :run-at "2026-09-03",
+        :row :n/R5-zaif-mission-risk,
+        :head-at "17fde898"}],
+      :named-gaps [],
+      :substrates
+      {:wm [:fresh-green :fresh-green], :zaif [:fresh-green]}}
+     {:node :R6,
+      :verdict :green,
+      :test-files
+      ["futon2/test/futon2/aif/policy_test.clj"
+       "futon2/test/futon2/aif/habit_prior_test.clj"
+       "futon2/test/futon2/aif/selection_score_readiness_test.clj"],
+      :evidence
+      [{:substrate :wm,
+        :exit 0,
+        :catalog-status :exists,
+        :ns "futon2.aif.policy-test",
+        :state :fresh-green,
+        :test-file "futon2/test/futon2/aif/policy_test.clj",
+        :run-at "2026-09-03",
+        :row :n/R6-wm-policy,
+        :head-at "42a957c"}
+       {:substrate :wm,
+        :exit 0,
+        :catalog-status :exists,
+        :ns "futon2.aif.habit-prior-test",
+        :state :fresh-green,
+        :test-file "futon2/test/futon2/aif/habit_prior_test.clj",
+        :run-at "2026-09-03",
+        :row :n/R6-habit-prior,
+        :head-at "42a957c"}
+       {:substrate :wm,
+        :exit 0,
+        :catalog-status :exists,
+        :ns "futon2.aif.selection-score-readiness-test",
+        :state :fresh-green,
+        :test-file
+        "futon2/test/futon2/aif/selection_score_readiness_test.clj",
+        :run-at "2026-09-03",
+        :row :n/R6-posterior-replay,
+        :head-at "42a957c"}
+       {:substrate :zaif,
+        :exit 0,
+        :catalog-status :exists,
+        :ns "futon3c.agents.zaif-controller-test",
+        :state :stale-green,
+        :test-file
+        "futon3c/test/futon3c/agents/zaif_controller_test.clj",
+        :run-at "2026-09-03",
+        :row :n/R6-zaif-controller,
+        :head-at "17fde898"}],
+      :named-gaps [],
+      :substrates
+      {:wm [:fresh-green :fresh-green :fresh-green],
+       :zaif [:stale-green]}}],
+    :separate-from-full-run
+    "each cited run is one namespace in its own JVM (catalog :test-runs :cmd), not a suite or a tick",
+    :caveats
+    [":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"
+     ":R4 has a named gap :n/R4-zaif-observation-model on the :zaif substrate, owned by [:U11 :D8 :S7]"],
+    :blocked-on nil},
+   :flag-chain
+   {:requires
+    ["a :choices ruling on the kin relation and the support map -- neither is derivable from a source and both are declared inputs of the flag (futon2/holes/labs/wm-contract/aif-equations.edn:364-369 names kin/patterns/cascade-playout and writes no relation at mission grain)"],
+    :required-flags [],
+    :prerequisite-flips [],
+    :env-preconditions [],
+    :verdict :not-derivable,
+    :blocked-on
+    [":requires names no environment flag, so the chain cannot be derived; the declared requirement is carried verbatim: [\"a :choices ruling on the kin relation and the support map -- neither is derivable from a source and both are declared inputs of the flag (futon2/holes/labs/wm-contract/aif-equations.edn:364-369 names kin/patterns/cascade-playout and writes no relation at mission grain)\"]"]}},
   :tau-variational
   {:flip "FUTON_WM_TAU_MODE=variational-beta-gamma",
    :read-at "futon2/scripts/futon2/report/war_machine.clj:740-761",
@@ -800,7 +931,7 @@
     :blocked-on
     [":requires names no environment flag, so the chain cannot be derived; the declared requirement is carried verbatim: [\"the U14e-1..4 packets landed and their census taken; a separate queued-J decision\"]"]}}},
  :emitted-by "futon2/holes/labs/wm-contract/flip_readiness_check.bb",
- :emitted-at "2026-09-03",
+ :emitted-at "2026-09-04",
  :sources
  {:catalog
   "futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
@@ -814,20 +945,20 @@
  :whole-tree-lines
  {:contract-pin
   {:verdict :green,
-   :contract-authority "6dabfb686f9754454d7689dc5b5bc39ae08dcf0b",
+   :contract-authority "581034b67e47240b7a4003dc39bdd7dd545e1daf",
    :holes-last-content-change
-   "6dabfb686f9754454d7689dc5b5bc39ae08dcf0b",
+   "581034b67e47240b7a4003dc39bdd7dd545e1daf",
    :comparand
    "the last commit that touched DarkTower/WarMachine/Holes.lean, not mathlib HEAD (C175)",
    :receipt-says
    {:fresh? true,
-    :json-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+    :json-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
     :module-last-commit-sha
-    "6de47bd0503dd4e6090c420ca32d8e7474438d7e"},
-   :receipt-timestamp "2026-09-03T16:40:51.021119+00:00",
+    "4bc55c5968bc4568610405660bdae4a98fcc06c5"},
+   :receipt-timestamp "2026-09-03T22:40:16.060969+00:00",
    :blocked-on nil},
   :box2-holes
-  {:open-hole-count 16,
+  {:open-hole-count 11,
    :flip-blocking-axis-declared? false,
    :verdict :blocked,
    :cleared [],
@@ -838,42 +969,12 @@
      :closability :pre-run-closable,
      :readiness :not-ready,
      :owner "P-validated-R5 §2a"}
-    {:name "nonDegenerateAblationLaw",
-     :row-source :contract-declaration,
-     :area :demo,
-     :closability :pre-run-closable,
-     :readiness :contested,
-     :owner "P-validated-R5 §2a′"}
     {:name "find",
      :row-source :contract-declaration,
      :area :demo,
      :closability :pre-run-closable,
      :readiness :not-ready,
      :owner "P-validated-R5 §3e find"}
-    {:name "findF1Containment",
-     :row-source :contract-declaration,
-     :area :demo,
-     :closability :pre-run-closable,
-     :readiness :not-ready,
-     :owner "P-validated-R5 §3e F1"}
-    {:name "findF2Receipted",
-     :row-source :contract-declaration,
-     :area :demo,
-     :closability :pre-run-closable,
-     :readiness :not-ready,
-     :owner "P-validated-R5 §3e F2"}
-    {:name "findF3NonSelfCertifying",
-     :row-source :contract-declaration,
-     :area :demo,
-     :closability :pre-run-closable,
-     :readiness :not-ready,
-     :owner "P-validated-R5 §3e F3"}
-    {:name "findF4Falsifiable",
-     :row-source :contract-declaration,
-     :area :demo,
-     :closability :pre-run-closable,
-     :readiness :not-ready,
-     :owner "P-validated-R5 §3e F4"}
     {:name "organise",
      :row-source :contract-declaration,
      :area :demo,
@@ -897,7 +998,7 @@
      :row-source :contract-declaration,
      :area :run,
      :closability :run-gated,
-     :readiness :not-ready,
+     :readiness :witnessed-and-held-open,
      :owner
      "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · organisation evidence"}
     {:name "enactedEqualsSelectedWhenRankOneGated",
@@ -923,7 +1024,7 @@
      :row-source :contract-declaration,
      :area :policy,
      :closability :run-gated,
-     :readiness :contested,
+     :readiness :witnessed-under-flag,
      :owner
      "wm-organization · TN-edge-review worklist H4 (Joe's J2 ruling)"}
     {:name "Strategic mission selection",
@@ -933,11 +1034,11 @@
      :readiness :not-ready,
      :owner
      "futon2/holes/missions/M-wm-strategic-mission-selection.md"}],
-   :by-closability {:pre-run-closable 9, :run-gated 7},
-   :audit-agrees? true,
-   :by-row-source {:contract-declaration 15, :glossary-paragraph 1},
+   :by-closability {:pre-run-closable 4, :run-gated 7},
+   :audit-agrees? false,
+   :by-row-source {:contract-declaration 10, :glossary-paragraph 1},
    :blocked-on
-   ["16 of 16 open holes are neither closed nor typed :flip-blocking false; :flip-blocking is not in variable-situation-accounting.edn's :axes at all, which declares :closability and :readiness (U27's pre-run/run-gated fence) and nothing about flips"]},
+   ["11 of 11 open holes are neither closed nor typed :flip-blocking false; :flip-blocking is not in variable-situation-accounting.edn's :axes at all, which declares :closability and :readiness (U27's pre-run/run-gated fence) and nothing about flips"]},
   :figure5-partials
   {:verdict :blocked,
    :instances 61,
@@ -970,6 +1071,9 @@
   {:verdict :blocked,
    :blocked-on [:box2-holes :figure5-partials :mission-gauges]},
   :selection-law
+  {:verdict :blocked,
+   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+  :task-belief-ladder
   {:verdict :blocked,
    :blocked-on [:box2-holes :figure5-partials :flag-chain]},
   :tau-variational

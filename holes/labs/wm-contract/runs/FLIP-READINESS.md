@@ -21,9 +21,10 @@ FLIP fpi-posterior    BLOCKED-ON [box2-holes figure5-partials]
 FLIP guide-gate       BLOCKED-ON [box2-holes figure5-partials flag-chain]
 FLIP mission-c        BLOCKED-ON [box2-holes figure5-partials mission-gauges]
 FLIP selection-law    BLOCKED-ON [box2-holes figure5-partials flag-chain]
+FLIP task-belief-ladder BLOCKED-ON [box2-holes figure5-partials flag-chain]
 FLIP tau-variational  BLOCKED-ON [box2-holes figure5-partials flag-chain]
 FLIP zaif-u14e        BLOCKED-ON [box2-holes figure5-partials flag-chain]
-GATE: 6 flips | 0 READY | 6 BLOCKED | lines per flip: contract-pin box2-holes figure5-partials mission-gauges per-node-tests flag-chain
+GATE: 7 flips | 0 READY | 7 BLOCKED | lines per flip: contract-pin box2-holes figure5-partials mission-gauges per-node-tests flag-chain
 ```
 <!-- END flip_readiness_check -->
 

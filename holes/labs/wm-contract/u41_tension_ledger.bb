@@ -144,7 +144,14 @@
 
 (defn append-tension!
   "Validated append-only API. Replaying the identical pair is a no-op; any
-  partial/conflicting identity or invalid ledger is refused before writing."
+  partial/conflicting identity or invalid ledger is refused before writing.
+
+  `:event/seq` IS ASSIGNED BY THIS FUNCTION, so the replay comparison ignores
+  it. Until 2026-09-04 it did not, and the documented no-op was unreachable for
+  any caller that did not already know the sequence number the ledger would hand
+  its event -- which is every caller, since the number is chosen here. U52's
+  rung-3 mint is the second caller of this API and hit it on its first replay;
+  the first caller (U28z) appended once and never replayed."
   [tension event]
   (let [ledger (edn/read-string (slurp ledger-path))
         existing-defects (validate ledger)
@@ -153,7 +160,8 @@
     (when (seq existing-defects)
       (throw (ex-info "existing tension ledger is invalid" {:defects existing-defects})))
     (cond
-      (and (= tension old-t) (= event old-e))
+      (and (= tension old-t)
+           (= (dissoc event :event/seq) (dissoc old-e :event/seq)))
       {:status :already-present :tension/id (:tension/id tension)}
 
       (or old-t old-e)
@@ -575,8 +583,14 @@
         (System/exit 1))
       (System/exit 0))))
 
-(if-let [run-id (second (drop-while #(not= "--deposit" %) *command-line-args*))]
-  (deposit! run-id)
-  (if (contains? (set *command-line-args*) "--deposit")
-    (do (println "u41_tension_ledger --deposit needs a run-id") (System/exit 1))
-    (apply -main *command-line-args*)))
+;; RUN AS A SCRIPT, LOADABLE AS A LIBRARY. `append-tension!` is declared above
+;; as the ledger's SOLE write API; a second caller that wants it (U52's rung-3
+;; refusal mint) has to be able to `load-file` this file without also running
+;; the report and its side effects. The guard is babashka's own answer to
+;; "am I the file that was invoked".
+(when (= *file* (System/getProperty "babashka.file"))
+  (if-let [run-id (second (drop-while #(not= "--deposit" %) *command-line-args*))]
+    (deposit! run-id)
+    (if (contains? (set *command-line-args*) "--deposit")
+      (do (println "u41_tension_ledger --deposit needs a run-id") (System/exit 1))
+      (apply -main *command-line-args*))))

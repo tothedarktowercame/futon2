@@ -127,9 +127,29 @@
    :evidence-pointers
    ["futon2/holes/labs/wm-contract/NOTE-aif-spec-gap.md section 3"
     "NOTE-aif-spec-gap.md section 4: the legacy-rewrite problem instantiates the tension in business terms -- the old code underspecifies itself, so both an extensional spec (old system + declared envelope) and a process spec (the tetrahedron's role) are required; Rob's C-to-Python Lean translation as the measured difficulty datum"
-    "NOTE-aif-spec-gap.md section 6: resolution candidate (i) sharpened -- a spec at level L states what is invariant below L; the tower tops out in the operator-held level (purpose/sustenance = C at organism grain); underdetermination = un-closed-ness; the J-row :bar mechanism is a formal detector of the un-closed boundary, and the campaign's twelve rulings were piecewise closure operations."]}],
+    "NOTE-aif-spec-gap.md section 6: resolution candidate (i) sharpened -- a spec at level L states what is invariant below L; the tower tops out in the operator-held level (purpose/sustenance = C at organism grain); underdetermination = un-closed-ness; the J-row :bar mechanism is a formal detector of the un-closed boundary, and the campaign's twelve rulings were piecewise closure operations."]}
+  {:tension :wm-ladder/re5-8ae111bc-zero-support,
+   :status :carried,
+   :status-since "2026-09-04",
+   :moved-by-row :U52,
+   :events 1,
+   :evidence-events 0,
+   :evidence-pointers
+   ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
+    "futon2/holes/labs/wm-contract/C507-u52-three-rung-ladder.md"
+    "futon2/holes/labs/wm-contract/runs/2026-09-04-re5/wm-trace-re5.edn (run 8ae111bc-d758-45f3-9c5b-f98832e10bb6)"]}
+  {:tension :wm-ladder/s5-4e35e740-zero-support,
+   :status :carried,
+   :status-since "2026-09-04",
+   :moved-by-row :U52,
+   :events 1,
+   :evidence-events 0,
+   :evidence-pointers
+   ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
+    "futon2/holes/labs/wm-contract/C507-u52-three-rung-ladder.md"
+    "futon2/holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn (run 4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8)"]}],
  :birth-rule
- {:tensions-considered 5,
+ {:tensions-considered 7,
   :terminal 0,
   :resolution-keys-seen {},
   :candidates []},
@@ -202,7 +222,11 @@
    "a cashing event with no receipt and no row must be refused -- section 3's 'status moves only with a pointer to the cashing/refuting row', mechanised"},
   :negative/planted-double-mint-is-refused
   {:defects
-   [:duplicate-tension-id :duplicate-event-id :duplicate-event-seq],
+   [:duplicate-tension-id
+    :duplicate-event-id
+    :duplicate-event-seq
+    :not-exactly-one-mint-event
+    :not-exactly-one-mint-event],
    :pass? true,
    :why
    "a planted second mint of the same refusal identity must be refused; append-tension! instead returns :already-present for an exact replay"},
@@ -222,7 +246,7 @@
    :why
    "the row's standard: every claim carries a file:line pointer, a run-record id, or 'not found'"},
   :positive/machine-born-statement-is-the-refusal-verbatim
-  {:count 1,
+  {:count 3,
    :pass? true,
    :why
    "rule clarified 2026-09-03 (U28z review finding): a machine-born tension's statement IS the in-record refusal read back verbatim as data; drift fails here mechanically instead of surviving as prose"},

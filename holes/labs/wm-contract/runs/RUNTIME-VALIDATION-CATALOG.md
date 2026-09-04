@@ -12,8 +12,15 @@ axis, per Joe. This document is the narrative; the EDN is the data, and every
 count below is computed from it by the validator rather than typed here.
 
 ```
-COUNTS: 84 rows (59 per-node, 25 global-run) | nodes 19/19 | status exists=69 exists-but-stale=4 red=3 named-gap=8 | flips=6 | test namespaces 47/50 green | pointers=175
+COUNTS: 84 rows (59 per-node, 25 global-run) | nodes 19/19 | status exists=69 exists-but-stale=4 red=3 named-gap=8 | flips=7 | test namespaces 47/50 green | pointers=181
 ```
+
+**Seventh flip added 2026-09-04 by row `:U52`** (`FUTON_WM_TASK_BELIEF_LADDER`,
+the three-rung ladder). No row's status, no test run and no head moved with it:
+the counts above differ from the 2026-09-03 measurement only in `flips` and in
+`pointers`, both of which are properties of the flip entry itself. The gate
+reads it BLOCKED-ON, which is what a flip whose declared inputs are unruled
+should read as.
 
 ## 1. What was measured, and how
 

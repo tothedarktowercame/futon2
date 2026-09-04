@@ -142,7 +142,87 @@
              "the campaign's observation: without something approaching a formal specification, AIF was not usable in computational work -- the build held water only where the model was written down"],
             :pattern-links [],
             :statement
-            "there's a gap between the active inference framework's claims to generality and our observations that without a formal specification you're not able to use AIF in computational work"}],
+            "there's a gap between the active inference framework's claims to generality and our observations that without a formal specification you're not able to use AIF in computational work"}
+  #:tension{:id :wm-ladder/re5-8ae111bc-zero-support,
+            :status :carried,
+            :provenance
+            {:who "U52 ladder rung-3 refusal mint",
+             :when "2026-09-04",
+             :pointers
+             ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
+              "futon2/holes/labs/wm-contract/C507-u52-three-rung-ladder.md"
+              "futon2/holes/labs/wm-contract/runs/2026-09-04-re5/wm-trace-re5.edn (run 8ae111bc-d758-45f3-9c5b-f98832e10bb6)"]},
+            :carried-by "M-wm-aif-policy-grain-compliance",
+            :resolution-path
+            "either a kin relation that reaches these candidates, or recorded material a construction could read (U51: :open-hole-count varies 0-24 over the plateau and enters no score), or the admission that the machine has no belief about them and should not be ranking them",
+            :born-of :refused-prediction,
+            :statement-source
+            ":tension/refusal (in-record; the machine's typed refusal is the primary source for a machine-born tension)",
+            :minted-by {:row :U52, :seat "wm-build-loop work seat"},
+            :poles
+            ["score them from the silent default and rank missions the machine knows nothing about"
+             "refuse them and lose candidates the machine may need"],
+            :pattern-links [],
+            :refusal
+            {:task-belief/refusal
+             :task-belief/zero-support-construction-exhausted,
+             :grain :mission,
+             :subject :re5-8ae111bc,
+             :relation :k-doc-xref,
+             :refused-count 80,
+             :refused-sample
+             ["M-agents-queue"
+              "M-aif-tokamak"
+              "M-apm-demonstration"
+              "M-archaeology-control"
+              "M-arxana-hardening"],
+             :artifact
+             "futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn",
+             :kin []},
+            :statement
+            "{:task-belief/refusal :task-belief/zero-support-construction-exhausted, :grain :mission, :subject :re5-8ae111bc, :relation :k-doc-xref, :refused-count 80, :refused-sample [\"M-agents-queue\" \"M-aif-tokamak\" \"M-apm-demonstration\" \"M-archaeology-control\" \"M-arxana-hardening\"], :artifact \"futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn\", :kin []}",
+            :note
+            "80 candidate(s) of re5-8ae111bc reached rung 3 under k-doc-xref."}
+  #:tension{:id :wm-ladder/s5-4e35e740-zero-support,
+            :status :carried,
+            :provenance
+            {:who "U52 ladder rung-3 refusal mint",
+             :when "2026-09-04",
+             :pointers
+             ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
+              "futon2/holes/labs/wm-contract/C507-u52-three-rung-ladder.md"
+              "futon2/holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn (run 4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8)"]},
+            :carried-by "M-wm-aif-policy-grain-compliance",
+            :resolution-path
+            "either a kin relation that reaches these candidates, or recorded material a construction could read (U51: :open-hole-count varies 0-24 over the plateau and enters no score), or the admission that the machine has no belief about them and should not be ranking them",
+            :born-of :refused-prediction,
+            :statement-source
+            ":tension/refusal (in-record; the machine's typed refusal is the primary source for a machine-born tension)",
+            :minted-by {:row :U52, :seat "wm-build-loop work seat"},
+            :poles
+            ["score them from the silent default and rank missions the machine knows nothing about"
+             "refuse them and lose candidates the machine may need"],
+            :pattern-links [],
+            :refusal
+            {:task-belief/refusal
+             :task-belief/zero-support-construction-exhausted,
+             :grain :mission,
+             :subject :s5-4e35e740,
+             :relation :k-doc-xref,
+             :refused-count 81,
+             :refused-sample
+             ["M-agents-queue"
+              "M-aif-tokamak"
+              "M-apm-demonstration"
+              "M-archaeology-control"
+              "M-arxana-hardening"],
+             :artifact
+             "futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn",
+             :kin []},
+            :statement
+            "{:task-belief/refusal :task-belief/zero-support-construction-exhausted, :grain :mission, :subject :s5-4e35e740, :relation :k-doc-xref, :refused-count 81, :refused-sample [\"M-agents-queue\" \"M-aif-tokamak\" \"M-apm-demonstration\" \"M-archaeology-control\" \"M-arxana-hardening\"], :artifact \"futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn\", :kin []}",
+            :note
+            "81 candidate(s) of s5-4e35e740 reached rung 3 under k-doc-xref."}],
  :ledger/row :U41,
  :events
  [#:event{:at "2026-09-02",
@@ -305,7 +385,35 @@
           :by "claude-1 (joe dictation, continuing)",
           :row :NOTE-aif-spec-gap,
           :evidence
-          ["NOTE-aif-spec-gap.md section 6: resolution candidate (i) sharpened -- a spec at level L states what is invariant below L; the tower tops out in the operator-held level (purpose/sustenance = C at organism grain); underdetermination = un-closed-ness; the J-row :bar mechanism is a formal detector of the un-closed boundary, and the campaign's twelve rulings were piecewise closure operations."]}],
+          ["NOTE-aif-spec-gap.md section 6: resolution candidate (i) sharpened -- a spec at level L states what is invariant below L; the tower tops out in the operator-held level (purpose/sustenance = C at organism grain); underdetermination = un-closed-ness; the J-row :bar mechanism is a formal detector of the un-closed boundary, and the campaign's twelve rulings were piecewise closure operations."]}
+  #:event{:at "2026-09-04",
+          :tension :wm-ladder/re5-8ae111bc-zero-support,
+          :row :U52,
+          :by "U52 ladder rung-3 refusal mint",
+          :to-status :carried,
+          :note
+          "Minted by the U52 ladder's rung-3 partition; 80 refusal record(s), reason :task-belief/zero-support-construction-exhausted.",
+          :type :carried,
+          :evidence
+          ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
+           "futon2/holes/labs/wm-contract/C507-u52-three-rung-ladder.md"
+           "futon2/holes/labs/wm-contract/runs/2026-09-04-re5/wm-trace-re5.edn (run 8ae111bc-d758-45f3-9c5b-f98832e10bb6)"],
+          :id :wm-ladder/re5-8ae111bc-zero-support#mint,
+          :seq 14}
+  #:event{:at "2026-09-04",
+          :tension :wm-ladder/s5-4e35e740-zero-support,
+          :row :U52,
+          :by "U52 ladder rung-3 refusal mint",
+          :to-status :carried,
+          :note
+          "Minted by the U52 ladder's rung-3 partition; 81 refusal record(s), reason :task-belief/zero-support-construction-exhausted.",
+          :type :carried,
+          :evidence
+          ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
+           "futon2/holes/labs/wm-contract/C507-u52-three-rung-ladder.md"
+           "futon2/holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn (run 4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8)"],
+          :id :wm-ladder/s5-4e35e740-zero-support#mint,
+          :seq 15}],
  :ledger/id :wm-contract/tension-ledger,
  :ledger/cross-cites
  [{:row :U39,

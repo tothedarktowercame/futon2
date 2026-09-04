@@ -61,6 +61,7 @@
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
+            [futon2.aif.task-belief-ladder :as ladder]
             [futon2.aif.trace :as trace]
             [futon2.aif2.tension :as tension])
   (:import (java.time Instant LocalDate ZoneId ZonedDateTime)
@@ -247,6 +248,39 @@
   (if (contains? opts :live-doability?)
     (boolean (:live-doability? opts))
     *live-doability?*))
+
+(def ^:dynamic *task-belief-ladder?*
+  "U52 three-rung ladder switch, read once when this namespace loads.
+   `FUTON_WM_TASK_BELIEF_LADDER=1` puts the ladder of
+   `aif-equations.edn :choices :task-belief-actand-source` (Joe, 2026-09-03)
+   between candidate enrichment and EFE ranking: rung 1 direct case history,
+   rung 2 constructive generalization from kin marked `:constructed` with its
+   derivation, rung 3 a typed refusal.
+
+   WHAT IT IS AIMED AT. U51 measured a 55-way controller-score tie on the
+   recorded s5 field at ranks 73-127, chosen inside at rank 123; the 55 are
+   exactly the `:advance-mission` candidates for which every scored channel is
+   silent, so each takes the same `:mission-value-factor` 0.09, and the mission
+   the machine has chosen 44 times scores identically to 54 it has never
+   chosen. The ladder makes case history enter that number.
+
+   DEFAULT OFF, AND THE FLIP IS NOT THIS SWITCH'S TO MAKE: with the flag on
+   every in-scope candidate's `:mission-value-factor` moves and 39 of the s5
+   plateau leave the field entirely, which is the silent default change U22
+   forbade. The flip goes to Joe through the flip-readiness gate
+   (`runs/RUNTIME-VALIDATION-CATALOG.edn :flips :task-belief-ladder`), and the
+   kin relation and support map the ladder declares are a `:choices` question
+   this row does not answer. Dynamic binding exists only for isolated tests.
+   The same input is reachable per call as the `:task-belief-ladder?` opt."
+  (= "1" (System/getenv "FUTON_WM_TASK_BELIEF_LADDER")))
+
+(defn- task-belief-ladder?
+  "The declared input, opt first and environment second. An opt that is present
+   and false is a declaration too, so `contains?` decides rather than truthiness."
+  [opts]
+  (if (contains? opts :task-belief-ladder?)
+    (boolean (:task-belief-ladder? opts))
+    *task-belief-ladder?*))
 
 (defn f-pi-posterior-preconditions!
   "RUN9 / stage S4. `FUTON_WM_FPI_POSTERIOR=1` needs an F_pi to put in the
@@ -2629,6 +2663,86 @@
             (assoc :operator-gate-top-candidate true)
             (some? value) (assoc :mission-value-factor (* value decay)))))
       with-value))))
+
+(defn- trace-corpus-dates
+  "The dates of every daily trace file under `dir`, oldest first. The corpus is
+   enumerated from the filenames rather than from a date window, so a gap in the
+   record is a gap and not a silently shortened range."
+  [dir]
+  (let [root (io/file dir)]
+    (if (.isDirectory root)
+      (->> (.listFiles root)
+           (filter #(.isFile ^java.io.File %))
+           (keep #(second (re-matches #"wm-trace-(\d{4}-\d{2}-\d{2})\.edn"
+                                      (.getName ^java.io.File %))))
+           sort
+           vec)
+      [])))
+
+(defn case-history-index
+  "[type target] -> the number of persisted decisions that CHOSE that key, over
+   the whole recorded trace corpus at `dir`.
+
+   THIS IS `WAS CHOSEN`, NEVER `AND IT WORKED`. U51 measured 17 distinct chosen
+   keys over 889 records and 0 of them carrying an outcome -- no record reaches
+   any of the three places `trace-outcome` looks -- so rung 1 means the machine
+   selected this before and nothing in the corpus says whether it helped. The
+   ladder is built on the only history the corpus actually holds, and the
+   account says so rather than letting `case history` be read as `evidence of
+   success`."
+  [dir]
+  (reduce (fn [acc date-str]
+            (reduce (fn [acc rec]
+                      (let [a (get-in rec [:decision :action])
+                            k [(:type a) (:target a)]]
+                        ;; A typed action with no target IS a decision the
+                        ;; corpus records -- 146 of the 889 are
+                        ;; [:learn-action-class nil] -- so it is counted here
+                        ;; and excluded by the ladder's SCOPE rule instead. The
+                        ;; index is the corpus; what the ladder scores is a
+                        ;; separate, stated rule, and keeping the two apart is
+                        ;; what lets this count be checked against U51's.
+                        (if (:type a)
+                          (update acc k (fnil inc 0))
+                          acc)))
+                    acc
+                    (trace/read-trace :dir dir :date-str date-str)))
+          {}
+          (trace-corpus-dates dir)))
+
+(def ^:private case-history-index-memo (memoize case-history-index))
+
+(defn apply-task-belief-ladder
+  "U52. The three-rung ladder, applied between candidate enrichment and EFE
+   ranking. Returns `{:candidates ... :refusals ... :census ... :ladder ...}`.
+
+   WITH THE DECLARED INPUT ABSENT THIS IS THE IDENTITY: the same candidate
+   vector object comes back, `:refusals` is empty and `:ladder` is nil, so a
+   default tick cannot differ from a pre-U52 tick by construction rather than
+   by comparison. The comparison is run anyway -- runs/U52-ladder/.
+
+   `opts` may carry `:task-belief-ladder?`, `:relation`,
+   `:generalization-discount`, `:support->factor`, `:case-history` (an index,
+   which is how the replay path avoids re-reading the corpus) and
+   `:trace-dir`."
+  ([candidates] (apply-task-belief-ladder candidates {}))
+  ([candidates opts]
+   (if-not (task-belief-ladder? opts)
+     {:candidates candidates :refusals [] :census {} :ladder nil}
+     (let [history (or (:case-history opts)
+                       (case-history-index-memo (or (:trace-dir opts)
+                                                    default-wm-trace-dir)))
+           ctx (ladder/field-context candidates history opts)
+           {:keys [candidates refusals census]} (ladder/apply-ladder candidates ctx)]
+       {:candidates candidates
+        :refusals refusals
+        :census census
+        :ladder {:relation (:relation ctx)
+                 :relation-statement (:relation-statement ctx)
+                 :generalization-discount (:generalization-discount ctx)
+                 :history-size (count history)
+                 :census census
+                 :refused (count refusals)}}))))
 
 (defn- apply-anamnesis-tiebreak
   [ranked-actions]
@@ -6142,13 +6256,23 @@
         wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)
                                     (seq (:events anticipation-snapshot)))
                            3)
-        wm-enriched-candidates (->> wm-candidates
-                                    enrich-candidates-with-structural-pressure
-                                    (#(enrich-candidates-with-mission-value
-                                       % recent-trace-records))
-                                    ;; M-interest-network-coupling capstone:
-                                    ;; bias candidates by the lived interest posterior
-                                    interest-net/enrich-candidates)
+        wm-enriched-candidates-pre-ladder
+        (->> wm-candidates
+             enrich-candidates-with-structural-pressure
+             (#(enrich-candidates-with-mission-value
+                % recent-trace-records))
+             ;; M-interest-network-coupling capstone:
+             ;; bias candidates by the lived interest posterior
+             interest-net/enrich-candidates)
+        ;; U52: the three-rung ladder sits HERE -- after every channel has had
+        ;; its say and before ranking -- because the plateau it is aimed at is a
+        ;; property of the enriched field (55 candidates at one
+        ;; :mission-value-factor) and because refusing a candidate has to happen
+        ;; before it can be ranked. Default off: with the flag absent
+        ;; wm-enriched-candidates is the identical object.
+        wm-ladder (apply-task-belief-ladder wm-enriched-candidates-pre-ladder
+                                            {:trace-dir wm-trace-dir})
+        wm-enriched-candidates (:candidates wm-ladder)
         wm-as-of (str (java.time.Instant/now))
         operator-actions
         (->> wm-enriched-candidates
@@ -6579,6 +6703,12 @@
            ;; tick receipt uses. Present-only — a caller that passes no
            ;; `:run-id` (the scheduled runner and the full-loop runner) leaves
            ;; the key off the record entirely.
+           ;; U52: the ladder's own record, PRESENT-ONLY. An absent key means
+           ;; the ladder did not run, not that it ran and refused nothing --
+           ;; and it is what keeps the default record byte-identical.
+           (:ladder wm-ladder)
+           (assoc :task-belief-ladder (:ladder wm-ladder)
+                  :task-belief-refusals (:refusals wm-ladder))
            run-id
            (assoc :run/id run-id))
           active-mission)
