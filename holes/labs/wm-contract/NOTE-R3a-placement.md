@@ -48,3 +48,19 @@ assignment supersedes the code-side one — say so in the placement's basis.
 
 Interim (done 2026-09-04): plop-2026's Figure 2 caption names R3a and its
 two measured edges, so the red node is explained where it is seen.
+
+## Closed 2026-09-04 by :U50 — and one thing this note had wrong
+
+R3a is placed in **BELIEVE**, loop band, from the call chain; account
+`C504-r3a-placement.md`.
+
+What this note got wrong: "Why unplaced" says R3a "was born from measurement,
+not drawing". By the time the row was taken that was no longer true — Joe drew
+R3a onto the base figure in p4ng `0598d19` (2026-08-31),
+`aif-control-map-paper.svg:123-125`, five days before this note was written. It
+was invisible from here because `control-stages.edn` is generated from
+`aif-control-map-futon.svg`, which has not been regenerated since p4ng `3e375d5`
+(2026-08-25). The drawing's own geometry puts R3a in BELIEVE, which is the
+column the code chain argues, so the two agree; the code-side placement is a
+stand-in until the derived drawing is regenerated, and `gen_control_stages.py`
+now refuses it the day that happens.
