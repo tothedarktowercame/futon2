@@ -119,6 +119,41 @@
 
 (def deposit-run-id (get-in cli [:flags "--deposit"]))
 
+;; ------------------------------------------------------- run identity ------
+;;
+;; RE5: the run is a parameter, not a literal. `U49_SLUG` names the run inside
+;; Lean -- `<slug>Routes`, `wm<Slug>RunConformsToDrawnWiring` -- and defaults to
+;; `s5`, so an invocation with no environment set emits U49's block character
+;; for character. `U49_EMIT_TABLES=0` suppresses the SHARED definitions
+;; (`RouteNode` .. `runConformsToDrawnWiring`), which a second run's block must
+;; not redefine; the tables are a function of the control map, and a run whose
+;; block omits them is asserting that the map has not moved -- which control C7
+;; below checks rather than assumes.
+
+(def run-name (last (str/split run-dir #"/")))
+
+(def slug (or (System/getenv "U49_SLUG") "s5"))
+
+(def Slug (str (str/upper-case (subs slug 0 1)) (subs slug 1)))
+
+(def trace-file
+  (or (System/getenv "U49_TRACE_FILE") (str run-dir "/wm-trace-" slug ".edn")))
+
+(def emit-tables? (not= "0" (System/getenv "U49_EMIT_TABLES")))
+
+(def controls-ref
+  "Where the emitted docstring tells a reader to find the exercised mutations.
+   A LITERAL, never the outdir: the outdir is an invocation argument, and
+   putting it in the generated text made the block differ between two runs that
+   generate the same certificate (the defect RE3's review caught in the RE2
+   report and self-test)."
+  (or (System/getenv "U49_CONTROLS_REF") "runs/U49-run-conformance"))
+
+(def row-ref
+  "The worklist row this certificate is produced under. U49 built the machinery;
+   a later row that mints a certificate for its own run says so."
+  (or (System/getenv "U49_ROW") ":U49"))
+
 ;; --------------------------------------------------------------- reading ---
 
 (defn sha256 [path]
@@ -254,7 +289,7 @@
    :run {:dir run-dir
          :run-sha (second (re-find #"sha `([0-9a-f]{7,40})`"
                                    (slurp (str run-dir "/README.md"))))
-         :trace-sha256 (sha256 (str run-dir "/wm-trace-s5.edn"))
+         :trace-sha256 (sha256 trace-file)
          :receipts receipts
          :records (count records)}})
 
@@ -263,13 +298,13 @@
         cm (:control-map source-facts)
         rn (:run source-facts)]
     (str
-     "/-! ### The 2026-09-01-s5 run's route against the drawn wiring (worklist `:U49`)\n\n"
+     "/-! ### The " run-name " run's route against the drawn wiring (worklist `:U49`)\n\n"
      "Joe's RUN4 ruling (2026-09-03) refuses the permanent-attestation reading of\n"
      "`wmRunConformsToWiring`: what is wanted is to run the machine and validate in\n"
      "Lean that the run conforms to the wiring that was drawn. This block is the\n"
      "transcription that makes the validation decidable -- the drawn map as data and\n"
      "one pinned run's reassembled route -- and\n"
-     "`wmS5RunConformsToDrawnWiring` below is the certificate over it.\n\n"
+     "`wm" Slug "RunConformsToDrawnWiring` below is the certificate over it.\n\n"
      "SOURCES, both pinned:\n"
      "* `p4ng:empirics-futon/control-map-edges.edn`, `:as-of` " (:as-of cm)
      ", commit `" (:p4ng-commit cm) "`,\n"
@@ -379,25 +414,60 @@
      "    (∀ h ∈ routes.flatMap routeHops, classifyHop h ≠ HopClass.unmapped) ∧\n"
      "    (∀ h ∈ routes.flatMap routeHops, classifyHop h ≠ HopClass.refutation)\n\n"
 
+     )))
+
+(defn lean-run-header
+  "The header a run's block carries when the shared tables are NOT re-emitted:
+   it names the two pinned sources exactly as the full header does, and says
+   which block the definitions it uses come from."
+  []
+  (let [cm (:control-map source-facts)
+        rn (:run source-facts)]
+    (str
+     "/-! ### The " run-name " run's route against the drawn wiring (worklist `:RE5`)\n\n"
+     "The SECOND run certified against the drawn wiring, under Joe's RUN4 ruling.\n"
+     "The transcription's shared definitions -- `RouteNode`, `WiringEdge`,\n"
+     "`figureDrawnEdges`, `figureRouteMeasured`, `figureRetired`, `classifyHop`,\n"
+     "`routeHops`, `runConformsToDrawnWiring` -- are the ones the `:U49` block\n"
+     "above defines, and are NOT redefined here. They are a function of the drawn\n"
+     "map alone, so reusing them is a claim that the map has not moved since that\n"
+     "block was generated; the producer checks it (control C7) rather than\n"
+     "assuming it.\n\n"
+     "SOURCES, both pinned:\n"
+     "* `p4ng:empirics-futon/control-map-edges.edn`, `:as-of` " (:as-of cm)
+     ", commit `" (:p4ng-commit cm) "`,\n"
+     "  sha256 `" (:sha256 cm) "`\n"
+     "  -- " (count drawn-edges) " `:edges`, " (count measured-edges)
+     " `:route-measured-drawn`, " (count (sort-by key retired)) " retired pairs.\n"
+     "* `futon2:holes/labs/wm-contract/" run-dir "`, the run at futon2 sha `"
+     (:run-sha rn) "` --\n"
+     "  " (count records) " records selected by `:run/id` (RUN11), extracted trace sha256\n"
+     "  `" (:trace-sha256 rn) "`.\n\n"
+     "GENERATED from those two files by\n"
+     "`futon2:holes/labs/wm-contract/u49_route_transcribe.bb`; edit the sources and\n"
+     "regenerate rather than editing the literals.\n-/\n\n")))
+
+(defn lean-run-defs []
+  (str
      "/-- The " (count routes) " routes the run recorded, in the order `:run/id` selection\n"
      "returns them out of the shared trace:\n"
      (str/join ",\n" (map (fn [r] (str "`" (:run/id r) "`")) records)) ". -/\n"
-     "def s5Routes : List (List RouteNode) :=\n  ["
+     "def " slug "Routes : List (List RouteNode) :=\n  ["
      (str/join ",\n   " (map #(lean-route % 4) routes)) "]\n\n"
 
      "/-- The run's " (count all-hops) " hops, " (count distinct-hops) " of them distinct. -/\n"
-     "def s5Hops : List WiringEdge := s5Routes.flatMap routeHops\n\n"
+     "def " slug "Hops : List WiringEdge := " slug "Routes.flatMap routeHops\n\n"
 
      "/-- The drawn edges this run never traversed. -/\n"
-     "def s5UnfiredDrawnEdges : List WiringEdge :=\n"
-     "  figureDrawnEdges.filter (fun e => !edgeMem e s5Hops)\n")))
+     "def " slug "UnfiredDrawnEdges : List WiringEdge :=\n"
+     "  figureDrawnEdges.filter (fun e => !edgeMem e " slug "Hops)\n"))
 
 (defn lean-theorems []
   (let [census (frequencies (map classify distinct-hops))]
     (str
      "\n/-- CLOSED UNDER THE J9 CRITERION · leg (3) · THE RUN-CONFORMANCE CERTIFICATE\n"
      "for the run `" run-dir "` (futon2 sha `" (get-in source-facts [:run :run-sha]) "`),\n"
-     "worklist `:U49` under Joe's RUN4 ruling of 2026-09-03. Every one of the "
+     "worklist `" row-ref "` under Joe's RUN4 ruling of 2026-09-03. Every one of the "
      (count all-hops) "\n"
      "hops the run recorded is an edge of the drawn wiring on run3's own\n"
      "classification, no route is empty, and no code-retired pair was traversed at\n"
@@ -405,8 +475,8 @@
      "`native_decide` -- the `wmTraceR2`/`wmTraceR8` precedent. The Clojure side of\n"
      "the same comparison is `futon2:holes/labs/wm-contract/run3_conformance.bb`,\n"
      "whose pinned verdict for this run is\n"
-     "`runs/2026-09-01-s5/conformance.edn` `:verdict :conformant`; the mutations that\n"
-     "break this proposition are listed at `runs/U49-run-conformance/04-controls.edn`\n"
+     "`runs/" run-name "/conformance.edn` `:verdict :conformant`; the mutations that\n"
+     "break this proposition are listed at `" controls-ref "/04-controls.edn`\n"
      "control C4.\n\n"
      "WHAT IT DOES NOT SHOW, because a reader will otherwise take it for more: "
      (:route-measured census) " of\n"
@@ -416,11 +486,11 @@
      (count drawn-edges) " drawn edges never\n"
      "fired at all. The certificate says this run stayed inside the union of the two\n"
      "layers. It does not say the drawn figure predicted the run. -/\n"
-     "theorem wmS5RunConformsToDrawnWiring : runConformsToDrawnWiring s5Routes := by\n"
+     "theorem wm" Slug "RunConformsToDrawnWiring : runConformsToDrawnWiring " slug "Routes := by\n"
      "  decide\n\n"
 
      "/-- The census the certificate is stated over, so the numbers a reader checks\n"
-     "against `runs/2026-09-01-s5/conformance.edn` are themselves decided rather than\n"
+     "against `runs/" run-name "/conformance.edn` are themselves decided rather than\n"
      "asserted in prose: " (count routes) " routes, " (count all-hops) " hops, "
      (count distinct-hops) " distinct, and the class split\n"
      "-- " (:drawn census 0) " drawn, " (:route-measured census 0) " route-measured, "
@@ -428,28 +498,33 @@
      (:ruling-unrealised census 0) " ruling-unrealised,\n"
      "0 refutations, 0 unmapped -- with " (count unfired) " of " (count drawn-edges)
      " drawn edges unfired. -/\n"
-     "theorem wmS5RouteCensus :\n"
-     "    s5Routes.length = " (count routes) " ∧\n"
-     "      s5Hops.length = " (count all-hops) " ∧\n"
-     "      s5Hops.dedup.length = " (count distinct-hops) " ∧\n"
-     "      (s5Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.drawn))).length = "
+     "theorem wm" Slug "RouteCensus :\n"
+     "    " slug "Routes.length = " (count routes) " ∧\n"
+     "      " slug "Hops.length = " (count all-hops) " ∧\n"
+     "      " slug "Hops.dedup.length = " (count distinct-hops) " ∧\n"
+     "      (" slug "Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.drawn))).length = "
      (:drawn census 0) " ∧\n"
-     "      (s5Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.routeMeasured))).length = "
+     "      (" slug "Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.routeMeasured))).length = "
      (:route-measured census 0) " ∧\n"
-     "      (s5Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.excludedDependencyGrain))).length = "
+     "      (" slug "Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.excludedDependencyGrain))).length = "
      (:excluded-dependency-grain census 0) " ∧\n"
-     "      (s5Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.rulingUnrealised))).length = "
+     "      (" slug "Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.rulingUnrealised))).length = "
      (:ruling-unrealised census 0) " ∧\n"
-     "      (s5Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.refutation))).length = 0 ∧\n"
-     "      (s5Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.unmapped))).length = 0 ∧\n"
+     "      (" slug "Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.refutation))).length = 0 ∧\n"
+     "      (" slug "Hops.dedup.filter (fun h => decide (classifyHop h = HopClass.unmapped))).length = 0 ∧\n"
      "      figureDrawnEdges.length = " (count drawn-edges) " ∧\n"
-     "      s5UnfiredDrawnEdges.length = " (count unfired) " := by\n"
+     "      " slug "UnfiredDrawnEdges.length = " (count unfired) " := by\n"
      "  decide\n")))
 
 ;; ------------------------------------------------------------- controls ----
 
 (def pinned-conformance
   (edn/read-string (slurp (str run-dir "/conformance.edn"))))
+
+(def tables-source-path
+  "The producer artifact recording what the SHARED Lean tables were generated
+   from. Only consulted when this invocation does not re-emit them."
+  (or (System/getenv "U49_TABLES_SOURCE") "runs/U49-run-conformance/00-source.edn"))
 
 (defn controls [lean-text]
   (let [census (frequencies (map classify distinct-hops))
@@ -471,7 +546,8 @@
         neg-b (assoc routes 0 [])
         neg-c (update routes 0 #(vec (concat % ["R2" "R3"])))
         neg-d []]
-    {:C1-reproduces-the-pinned-verdict
+    (merge
+     {:C1-reproduces-the-pinned-verdict
      {:pinned pinned :reproduced reproduced
       :note (str "The pinned record was written by run3_conformance.bb at "
                  (:checked-at pinned-conformance)
@@ -540,7 +616,22 @@
                     (count unfired) " of " (count drawn-edges)
                     " drawn edges never fired. The certificate says the run stayed "
                     "inside the union of the two layers; it does not say the drawn "
-                    "figure predicted the run.")}}))
+                    "figure predicted the run.")}}
+
+     (when-not emit-tables?
+       (let [prior (edn/read-string (slurp tables-source-path))
+             prior-sha (get-in prior [:control-map :sha256])
+             now-sha (get-in source-facts [:control-map :sha256])]
+         {:C7-reused-tables-are-still-the-current-map
+          {:tables-from tables-source-path
+           :tables-control-map-sha256 prior-sha
+           :this-run-control-map-sha256 now-sha
+           :finding (str "This block omits the shared definitions and uses the ones the "
+                         "earlier block defines. Those were generated from control map "
+                         prior-sha ". If that is not the map this run was classified "
+                         "against, the theorem below decides the wrong tables and says "
+                         "nothing about the drawn wiring as it now stands.")
+           :pass (= prior-sha now-sha)}})))))
 
 ;; ---------------------------------------------------------------- write ----
 
@@ -548,7 +639,10 @@
 
 (fs/create-dirs outdir)
 
-(def lean-text (str (lean-block) (lean-theorems)))
+(def lean-text
+  (str (if emit-tables? (lean-block) (lean-run-header))
+       (lean-run-defs)
+       (lean-theorems)))
 (def control-results (controls lean-text))
 
 (spit (str outdir "/00-source.edn") (pp-str source-facts))
