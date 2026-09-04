@@ -66,45 +66,81 @@
           :precedent "tension-ledger T1-T5, u41 validator"}],
  :validation {:defects [], :conforms? true},
  :head-sha
- "cc166359233b56116554096ac349ad960a822e19eb5ccd2020946001e20a27a9",
+ "e4af8437c12414bcf4555238f357be5559dc51a61128450e982acfb1bc2b8913",
  :by-run
  [{:run-id "2026-09-01-s5",
    :checks
    {:contract-pin :typed-absence,
+    :enumeration-completeness :typed-absence,
     :flip-readiness :typed-absence,
-    :run-conformance :green},
-   :checks-not-deposited
-   [:enumeration-completeness
-    :per-node-runtime-validation
-    :rationale-regret
-    :tensions-cashed],
+    :per-node-runtime-validation :typed-absence,
+    :rationale-regret :typed-absence,
+    :run-conformance :green,
+    :tensions-cashed :typed-absence},
+   :checks-not-deposited [],
    :first-at "2026-09-01T22:56:17.282228522Z",
-   :status :incomplete}
+   :status :incomplete,
+   :status-reason
+   {:cause :typed-absences,
+    :checks
+    [:contract-pin
+     :enumeration-completeness
+     :flip-readiness
+     :per-node-runtime-validation
+     :rationale-regret
+     :tensions-cashed]}}
   {:run-id "2026-09-04-re5",
    :checks
    {:contract-pin :green,
+    :enumeration-completeness :green,
     :flip-readiness :typed-absence,
-    :run-conformance :green},
-   :checks-not-deposited
-   [:enumeration-completeness
-    :per-node-runtime-validation
-    :rationale-regret
-    :tensions-cashed],
+    :per-node-runtime-validation :typed-absence,
+    :rationale-regret :typed-absence,
+    :run-conformance :green,
+    :tensions-cashed :typed-absence},
+   :checks-not-deposited [],
    :first-at "2026-09-04T07:52:31.929452654Z",
-   :status :incomplete}],
+   :status :incomplete,
+   :status-reason
+   {:cause :typed-absences,
+    :checks
+    [:flip-readiness
+     :per-node-runtime-validation
+     :rationale-regret
+     :tensions-cashed]}}],
  :by-check
  [{:check-id :contract-pin,
    :runs 2,
    :series
    [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]
     ["2026-09-04T07:56:27Z" "2026-09-04-re5" :green]]}
+  {:check-id :enumeration-completeness,
+   :runs 2,
+   :series
+   [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence]
+    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :green]]}
   {:check-id :flip-readiness,
    :runs 2,
    :series
    [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence]
     ["2026-09-04T07:55:02Z" "2026-09-04-re5" :typed-absence]]}
+  {:check-id :per-node-runtime-validation,
+   :runs 2,
+   :series
+   [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence]
+    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]}
+  {:check-id :rationale-regret,
+   :runs 2,
+   :series
+   [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence]
+    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]}
   {:check-id :run-conformance,
    :runs 2,
    :series
    [["2026-09-01T22:56:17.282228522Z" "2026-09-01-s5" :green]
-    ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green]]}]}
+    ["2026-09-04T07:52:31.929452654Z" "2026-09-04-re5" :green]]}
+  {:check-id :tensions-cashed,
+   :runs 2,
+   :series
+   [["2026-09-04T12:44:24Z" "2026-09-01-s5" :typed-absence]
+    ["2026-09-04T12:44:24Z" "2026-09-04-re5" :typed-absence]]}]}
