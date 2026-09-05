@@ -1,0 +1,24 @@
+{:run-id "014-014-ladder-on-fixed",
+ :rationale-dir
+ "holes/labs/wm-contract//home/joe/code/futon2/data/wm-step/w1/steps/014-014-ladder-on-fixed/rationale",
+ :rationale-records
+ [{:file
+   "holes/labs/wm-contract//home/joe/code/futon2/data/wm-step/w1/steps/014-014-ladder-on-fixed/rationale/rationale-2026-09-05-a199cb49-8716-4ee5-a62f-aa3867820077.edn",
+   :sha256
+   "0baaae1ff0546c40c3afab057a6eb97a1673240dea42ceef8ec629246c702446"}],
+ :trace
+ {:path
+  "holes/labs/wm-contract//home/joe/code/futon2/data/wm-step/w1/steps/014-014-ladder-on-fixed/decision-records.edn",
+  :sha256
+  "ef53b3a3b12b0ce1b93732dedbde606d54a2c87aee602708ec1b5154a9683637",
+  :records-selected 1,
+  :recorded-trace-paths
+  ["/home/joe/code/futon2/data/wm-step/w1/sandbox/wm-trace/wm-trace-2026-09-05.edn"],
+  :recorded-path-is-the-one-read? false,
+  :note
+  "the census is computed from the COMMITTED run-store trace above. `:rationale/trace-path` on the records says [\"/home/joe/code/futon2/data/wm-step/w1/sandbox/wm-trace/wm-trace-2026-09-05.edn\"]; for 2026-09-04-re5 that is an absolute path into the live, untracked data/wm-trace/, which no reviewer and no other machine can read. Control C1 is what shows the file read here holds the same decisions the records were written from."},
+ :producer "holes/labs/wm-contract/re7_selection_discrimination.bb",
+ :producer-sha256
+ "967b758254555b698494bfe805702f3706dec8abe563e3fc1fd39d8a78ca83a2",
+ :lean-slug "chk014014ladderonfixed",
+ :emits-shared-definitions true}

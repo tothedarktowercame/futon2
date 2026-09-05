@@ -1,0 +1,2 @@
+wm_step_evidence: serving /home/joe/code/futon2/data/wm-step/w1/pin/evidence-cassette.edn on 127.0.0.1:7099 (frozen? false, 9 recorded)
+wm_step_evidence: 9 entr(ies), 10 hit, 0 filled, 0 miss, 0 non-GET

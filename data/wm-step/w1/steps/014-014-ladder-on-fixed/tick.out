@@ -1,0 +1,91 @@
+{:selector-seam "stub:controller-head",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-step/w1/sandbox/wm-trace/wm-trace-2026-09-05.edn",
+ :trace-before nil,
+ :trace-after {:size 590313, :mtime 1788581929030},
+ :receipt-path
+ "/home/joe/code/futon2/data/wm-step/w1/sandbox/receipts/tick-run-record-2026-09-05-a199cb49-8716-4ee5-a62f-aa3867820077.edn",
+ :tick-run-record
+ {:stepSandbox
+  {:trace-dir "/home/joe/code/futon2/data/wm-step/w1/sandbox/wm-trace",
+   :receipt-dir
+   "/home/joe/code/futon2/data/wm-step/w1/sandbox/receipts"},
+  :startedAt "2026-09-05T04:18:10.720412689Z",
+  :inputIssues 0,
+  :storeBasisCount 212863,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-05T04:18:11.621459868Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-05T04:18:15.839730660Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-05T04:18:21.954519412Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-prediction-error",
+     :at_ "2026-09-05T04:18:21.954565418Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-05T04:18:37.566362298Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-05T04:18:37.575214883Z"}]},
+  :entriesLimit 500,
+  :run/id "a199cb49-8716-4ee5-a62f-aa3867820077",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-05T04:18:11.621459868Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-05T04:18:15.839730660Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-05T04:18:21.954519412Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-05T04:18:21.954556732Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-prediction-error",
+    :at_ "2026-09-05T04:18:21.954565418Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-05T04:18:37.370675137Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-05T04:18:37.566222636Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-05T04:18:37.566362298Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-05T04:18:37.575214883Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:controller-head",
+  :storeBasisMaxAt "2026-09-04T16:08:13.368512438Z"}}
