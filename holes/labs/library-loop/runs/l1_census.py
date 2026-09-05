@@ -12,7 +12,10 @@ an unchanged library is byte-identical.
 import os, re, sys, hashlib, subprocess
 from collections import defaultdict
 
-LIB = "/home/joe/code/futon3/library"
+# Library root is an explicit argument so the census can be rerun against an
+# isolated worktree at a pinned commit; default is the canonical checkout.
+LIB = os.path.abspath(sys.argv[1] if len(sys.argv) > 1
+                      else "/home/joe/code/futon3/library")
 OUT = os.path.dirname(os.path.abspath(__file__))
 
 ann_line = re.compile(r"^@([A-Za-z0-9_-]+)\s+(.*)$")
@@ -118,13 +121,19 @@ carrying_how = sorted(n for n in nodes if "how" in nodes[n])
 carrying_why_posthoc = sorted(n for n in nodes if "why-posthoc" in nodes[n])
 
 # grep floor
-grep_cmd = "grep -rlE '@(why|how)' --include='*.flexiarg' /home/joe/code/futon3/library"
+grep_cmd = "grep -rlE '@(why|how)' --include='*.flexiarg' %s" % LIB
 floor = subprocess.run(grep_cmd, shell=True, capture_output=True, text=True)
 floor_n = len([l for l in floor.stdout.splitlines() if l.strip()])
 
-# git sha of futon3 at census time
-sha = subprocess.run("git -C /home/joe/code/futon3 rev-parse HEAD",
+# git state of the checkout containing LIB
+gitrepo = subprocess.run("git -C %s rev-parse --show-toplevel" % LIB,
+                         shell=True, capture_output=True, text=True).stdout.strip()
+sha = subprocess.run("git -C %s rev-parse HEAD" % gitrepo,
                      shell=True, capture_output=True, text=True).stdout.strip()
+dirty_flexiarg = subprocess.run(
+    "git -C %s status --porcelain -- library" % gitrepo,
+    shell=True, capture_output=True, text=True).stdout.splitlines()
+dirty_flexiarg = [l for l in dirty_flexiarg if l.strip().endswith(".flexiarg")]
 
 with open(os.path.join(OUT, "L1-census-graph.edn"), "w") as f:
     f.write(";; L1 census graph -- nodes+edges EDN. Sorted; deterministic.\n")
@@ -139,7 +148,8 @@ with open(os.path.join(OUT, "L1-census-graph.edn"), "w") as f:
 
 with open(os.path.join(OUT, "L1-census-receipt.edn"), "w") as f:
     f.write(";; L1 RATIONALE-REACHABILITY CENSUS receipt. Deterministic rerun.\n")
-    f.write("{:row :L1\n :library-git-sha %s\n" % q(sha))
+    f.write("{:row :L1\n :library-root %s\n :library-git-sha %s\n" % (q(LIB), q(sha)))
+    f.write(" :library-dirty-flexiarg %s\n" % str(dirty_flexiarg).replace("'", '"'))
     f.write(" :files-parsed %d\n" % files)
     f.write(" :files-missing-flexiarg-id %s\n" % (str(sorted(files_missing_flexiarg)).replace("'", '"')))
     f.write(" :patterns-total %d\n" % len(nodes))
@@ -149,7 +159,7 @@ with open(os.path.join(OUT, "L1-census-receipt.edn"), "w") as f:
     f.write(" :carrying-how %d\n" % len(carrying_how))
     f.write(" :carrying-why-or-how-unique %d\n"
             % len(set(carrying_why) | set(carrying_how)))
-    f.write(" :grep-floor-command %s\n" % q("cd /home/joe/code/futon3/library && " + grep_cmd))
+    f.write(" :grep-floor-command %s\n" % q("cd %s && grep -rlE '@(why|how)' --include='*.flexiarg' ." % LIB))
     f.write(" :grep-floor-files %d\n" % floor_n)
     f.write(" :problem-nodes %d %s\n" % (len(problems), str(problems).replace("'", '"')))
     f.write(" :wr-nodes %d\n" % len(wr))

@@ -1,14 +1,16 @@
 ;; L1 RATIONALE-REACHABILITY CENSUS receipt. Deterministic rerun.
 {:row :L1
+ :library-root "/tmp/futon3-L1-9ef7bc18/library"
  :library-git-sha "9ef7bc181549fef54d3598c2e063cd6c3a324a1a"
- :files-parsed 1257
+ :library-dirty-flexiarg []
+ :files-parsed 1256
  :files-missing-flexiarg-id ["ai4ci/dual-layer-proof-patterns", "ai4ci/process-vs-exposition", "ai4ci/proof-pattern-hierarchy", "ai4ci/sota-distinction", "corps/five-arrows", "repository-transition/counterstrawman", "repository-transition/counterstrawman-indicators", "repository-transition/diagnostics", "repository-transition/identity-space", "repository-transition/invariants", "repository-transition/job-argument", "repository-transition/strawman", "repository-transition/transformation-engine", "software-design/adapter-pattern", "software-design/facade-pattern", "software-design/observer-pattern", "software-design/proxy-pattern", "software-design/state-pattern", "t4r/dtp-fit", "t4r/exec-summary", "t4r/legacy", "t4r/rationale", "t4r/supplement", "t4r/support", "t4r/training", "t4r/value", "workday/clock-hygiene", "workday/external-project-index"]
- :patterns-total 1257
+ :patterns-total 1256
  :carrying-why 83
  :carrying-why-posthoc-only 7
  :carrying-how 21
  :carrying-why-or-how-unique 99
- :grep-floor-command "cd /home/joe/code/futon3/library && grep -rlE '@(why|how)' --include='*.flexiarg' /home/joe/code/futon3/library"
+ :grep-floor-command "cd /tmp/futon3-L1-9ef7bc18/library && grep -rlE '@(why|how)' --include='*.flexiarg' ."
  :grep-floor-files 106
  :problem-nodes 6 ["problems/commitment-temperature-is-instrumented-as-gain", "problems/operator-turns-become-inference-observations", "problems/per-tick-mismatch-instruments-outer-loop-gain", "problems/refusal-prediction-error-v1--source-field-missing", "problems/satisfied-rungs-are-counted-and-surfaced", "problems/tension-proposes-candidates"]
  :wr-nodes 28
@@ -25,7 +27,7 @@
   {:key :ancestors :count 35}
   {:key :ant-interpretation :count 64}
   {:key :arg :count 28}
-  {:key :audience :count 1193}
+  {:key :audience :count 1192}
   {:key :binary :count 64}
   {:key :bits :count 257}
   {:key :builds-from :count 2}
@@ -35,7 +37,7 @@
   {:key :cross-list :count 14}
   {:key :ct-interpretation :count 64}
   {:key :definition :count 2}
-  {:key :difficulty :count 67}
+  {:key :difficulty :count 66}
   {:key :divergence :count 5}
   {:key :domain :count 1}
   {:key :domain-transfer-notes :count 64}
@@ -52,7 +54,7 @@
   {:key :factor :count 198}
   {:key :family :count 11}
   {:key :family-note :count 1}
-  {:key :flexiarg :count 1229}
+  {:key :flexiarg :count 1228}
   {:key :futon5-lift-path :count 257}
   {:key :futon5-manifest-path :count 257}
   {:key :futon5-ref :count 257}
@@ -67,7 +69,7 @@
   {:key :illustrates :count 23}
   {:key :instantiated-by :count 10}
   {:key :instantiates :count 32}
-  {:key :keywords :count 556}
+  {:key :keywords :count 555}
   {:key :layer-position :count 5}
   {:key :merge-policy :count 5}
   {:key :merged-from :count 5}
@@ -86,19 +88,19 @@
   {:key :review :count 5}
   {:key :see :count 29}
   {:key :see-also :count 111}
-  {:key :sigils :count 969}
+  {:key :sigils :count 968}
   {:key :source :count 3}
   {:key :source-dois :count 22}
   {:key :specifies :count 3}
   {:key :status :count 67}
   {:key :style :count 909}
-  {:key :subjects :count 39}
+  {:key :subjects :count 38}
   {:key :summary :count 10}
   {:key :theory-grounding :count 19}
   {:key :tier :count 22}
-  {:key :title :count 1257}
+  {:key :title :count 1256}
   {:key :tokipona :count 6}
-  {:key :tone :count 1193}
+  {:key :tone :count 1192}
   {:key :trigrams :count 64}
   {:key :truth :count 6}
   {:key :up :count 20}
