@@ -86,3 +86,33 @@ solved:    (a property of the MODEL, checked before running)
 Operator confirmation of §1, per the delivery lifecycle — with the
 conventions note's own caveat applied to this record: until a checker
 refuses process work that lacks these assurances, this document is prose.
+
+## 4. Three lifecycles, three subjects (recorded observation, 2026-09-05)
+
+Joe, verbatim: "it is interesting that you have invented a new lifecycle
+that is not the mission lifecycle, nor the 5 AIF stages from the Figure 7A
+in futon-2026. Not that these all need to be aligned themselves -- they may
+relate to different problem classes."
+
+Provenance owned: the seven stages transcribe this campaign's operating
+practice (packet -> agency_send -> park -> wake -> review-as-gate -> record
+-> report), promoted to a named lifecycle by this record. Until a checker
+refuses on it, the lifecycle sits at rung "named" on its own scale.
+
+The three structures have distinct subjects and should not be forced into
+alignment: the five AIF stages decompose ONE TICK and recur (subject: the
+control loop); the mission lifecycle governs campaign-grain candidacy
+(subject: a mission); the handoff lifecycle governs one delegation
+(subject: a dispatch). Two real relations to keep: (1) GRAIN — a handoff
+runs inside a stage traversal (the census found R16's actuator implementing
+5/7 handoff stages inside ACT) and a mission discharges through many
+handoffs; parallel to the four-grain cascade correspondence on the action
+side. (2) SHAPE — the handoff lifecycle is the mission lifecycle
+miniaturized, and the trap catalogue (T1, T6) bites at both grains, which
+is why checked and surfaced are separate stages.
+
+Open question for the Lean spec: whether `parked` is essential conduct or
+an implementation detail of "awaiting return" (the other six are
+obligations; parked is our transport's waiting discipline). The two stages
+R16 lacks (parked, surfaced) are the two to scrutinize before building to
+them.
