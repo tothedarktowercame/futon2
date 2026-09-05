@@ -1,0 +1,27 @@
+{:reader
+ {:id :re7-plateau-census,
+  :version "v1",
+  :row :RE7,
+  :script "holes/labs/wm-contract/re7_selection_discrimination.bb"},
+ :run-id "013-013-ladder-on",
+ :statement
+ "the plateaus of each decision's controller-score field, whether or not the chosen candidate is in them. This is a WIDTH CENSUS and not a verdict: control C8 shows it is not an input to the check.",
+ :widest-plateau-not-containing-choice 6,
+ :per-decision
+ [{:tick-id "2026-09-05T04:11:40.186131907Z",
+   :field
+   {:field-size 66,
+    :distinct-scores 53,
+    :chosen-rank 1,
+    :chosen-plateau
+    {:width 1, :rank-band [1 1], :contains-choice? true},
+    :plateaus-wider-than-1
+    [{:width 6, :rank-band [61 66], :contains-choice? false}
+     {:width 3, :rank-band [44 46], :contains-choice? false}
+     {:width 3, :rank-band [51 53], :contains-choice? false}
+     {:width 2, :rank-band [33 34], :contains-choice? false}
+     {:width 2, :rank-band [47 48], :contains-choice? false}
+     {:width 2, :rank-band [49 50], :contains-choice? false}
+     {:width 2, :rank-band [55 56], :contains-choice? false}],
+    :widest-plateau 6,
+    :widest-plateau-not-containing-choice 6}}]}
