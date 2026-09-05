@@ -12,6 +12,28 @@
 (def required-caveats ["BOX-5 STALENESS" "R5 CERTIFICATE LIMIT"
                        "R17 CLASS-(b) DIVERGENCE" "retired scalar F"])
 
+;; REVIEW REPAIR (reviewing seat). The caveat check above matches HEADLINES, so
+;; a caveat could be rewritten to say the opposite of itself and still pass:
+;; the reviewing seat's plant 31 replaced the R5 caveat with "R5 CERTIFICATE
+;; LIMIT: resolved, nothing to see here." and the gate reported ACCEPT, as did a
+;; longer rewrite asserting the pilot IS a shipped accepted-run certificate.
+;; Deleting :rung-rule, :rung-rule-limit or :registry-basis outright passed too.
+;; So the rows were checked exhaustively and the ledger's own frame not at all,
+;; and every claim the frame makes -- what the rungs mean, where the rule stops,
+;; what the transcription is against, which limits are still live -- was
+;; editable without the gate saying anything. These four fields are now pinned
+;; BY CONTENT. Re-pin deliberately, in a commit that says why the frame moved;
+;; a digest you can update silently is the failure this repair exists against.
+(def frame-fields [:registry-basis :rung-rule :rung-rule-limit :caveats])
+(def frame-digest "e2cb36997c10fcee18cfcc8b755bcef5c30f8255f61cf13d3edb0cd90cd48171")
+
+(defn sha256 [^String s]
+  (->> (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                (.getBytes s "UTF-8"))
+       (map #(format "%02x" %))
+       (apply str)))
+(defn frame-of [ledger] (sha256 (pr-str (mapv #(get ledger %) frame-fields))))
+
 (defn finding! [code & xs]
   (println (str code) (str/join " " (map pr-str xs)))
   false)
@@ -144,13 +166,46 @@
         :else (swap! findings conj (finding! :error/unknown-certificate-form (:id row)))))
     (doseq [needle required-caveats :when (not (some #(str/includes? % needle) (:caveats ledger)))]
       (swap! findings conj (finding! :error/missing-caveat needle)))
+    (doseq [field frame-fields
+            :let [v (get ledger field)]
+            :when (or (nil? v) (and (string? v) (str/blank? v)) (and (coll? v) (empty? v)))]
+      (swap! findings conj (finding! :error/missing-frame-field field)))
+    (let [computed (frame-of ledger)]
+      (when-not (= frame-digest computed)
+        (swap! findings conj (finding! :error/frame-digest-drift
+                                       :fields frame-fields :pinned frame-digest :computed computed))))
+    ;; REVIEW REPAIR (reviewing seat). This checker licenses a
+    ;; :witnessed-or-higher rung on a run identity found ANYWHERE in the
+    ;; artifact, which is a rung the F6 predicate refuses. That decision was the
+    ;; implementer's to make and it is defensible, but it carries an obligation:
+    ;; the ledger must SAY where the rule stops. It did not have to -- deleting
+    ;; :rung-rule-limit left the ledger claiming :constructed under a rule that
+    ;; answers false on its own licence, with the limit stated nowhere, and the
+    ;; gate accepted it. The obligation is now tied to the policy that creates
+    ;; it, so it survives a deliberate re-pin of the frame digest.
+    (doseq [row rows leg [:spec-leg :impl-leg]
+            :let [rung (get-in row [leg :rung])]
+            :when (and (contains? order rung) (>= (order rung) (order :witnessed)))
+            :let [artifact (read-artifact (licences [(:id row) leg]))]
+            :when (and (seq (nested-run-ids artifact)) (not (f6-machine-record? artifact)))]
+      (when (str/blank? (str (:rung-rule-limit ledger)))
+        (swap! findings conj (finding! :error/unstated-rung-rule-limit (:id row) leg)))
+      (when (str/blank? (str (get-in row [leg :basis])))
+        (swap! findings conj (finding! :error/nested-licence-without-basis (:id row) leg))))
     (if (some false? @findings) false
         (let [higher (for [row rows leg [:spec-leg :impl-leg]
                            :let [r (get-in row [leg :rung])] :when (>= (order r) (order :witnessed))]
                        [row leg (read-artifact (licences [(:id row) leg]))])
               f6-count (count (filter #(f6-machine-record? (nth % 2)) higher))
               nested-count (count (filter #(seq (nested-run-ids (nth % 2))) higher))]
-          (println "ACCEPT" (count rows) "rows, 54 identity fields, 36 licences," f6-count
+          ;; REVIEW REPAIR (reviewing seat). "54 identity fields, 36 licences"
+          ;; were STRING LITERALS in a line whose own label says they were
+          ;; counted, and control 14u pins that line -- so a number nobody
+          ;; computes was being defended by a control. This is the leg-2 review
+          ;; finding again (claims counted inside a total that said they were
+          ;; not), so both are recomputed from the population they describe.
+          (println "ACCEPT" (count rows) "rows," (* 3 (count rows)) "identity fields,"
+                   (count licences) "licences," f6-count
                    "F6-top-level run identities," nested-count "nested run identities,"
                    (count (filter :converged? rows)) "converged")
           true))))
