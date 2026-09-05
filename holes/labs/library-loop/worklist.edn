@@ -1,0 +1,23 @@
+;; Library theory-track board. Rows run in ledger order.
+{:schema :wm/worklist-v1
+ :as-of "2026-09-05"
+ :mission "EPIC-run-era.md#the-theory-track-ruling"
+ :classes {:M "map/discovery -- facts and measurements, no decision"
+           :I "implement -- build what the cited ruling specifies"
+           :V "verify against source or running code"
+           :RUN "produce or check execution evidence"
+           :J "requires Joe's judgment; never loop-eligible"}
+ :statuses #{:open :blocked :done :done-unreviewed :needs-joe}
+ :items
+ [{:id :L1 :class :M :status :open :owner :any
+   :statement "RATIONALE-REACHABILITY CENSUS. Parse every futon3/library *.flexiarg (1257 at commissioning); extract ALL @-annotations, not only @how/@why; build the traversal graph; report per-section counts: patterns total, carrying @how, carrying @why, and reachable from any problem-stating node via @why. Produce receipt EDN and a short report with the graph serialized as nodes+edges EDN, not prose."
+   :acceptance "Counts reproduce byte-identically on rerun; the 106-file bare-grep floor is confirmed or corrected with the complete grep command shown; no library file is modified."}
+  {:id :L2 :class :I :status :open :owner :any
+   :statement "LIBRARY/PROCESS PATTERNS FROM THE TRAP CATALOGUE. Mint T1-T8 from futon2/holes/N-process-trap-recording-conventions.md section 1 as library/process/*.flexiarg in WR violation+repair form. Each pattern cites its receipts from the conventions note, has @why naming the process problem it answers in P-assured-process.md, and @how naming the repair mechanism."
+   :acceptance "All files parse as flexiarg; rerunning L1's census counts them as @why-reachable; every pattern cites the conventions-note receipts."}
+  {:id :L3 :class :I :status :open :owner :any
+   :statement "RATIONALE BACKFILL PILOT, library/aif only. For every pattern there, add @why from the matching twenty-node problem dossier statement and @how from the pattern's own mechanism. When no dossier matches, the annotation says so rather than inventing a rationale."
+   :acceptance "State before/after library/aif reachability from the L1 graph; every annotation has a source pointer; no non-library/aif pattern is changed."}
+  {:id :L4 :class :M :status :open :owner :any
+   :statement "GRAPH-CERTIFICATE STRAWMAN, discovery only. Against the actual L1 graph evaluate: (a) every pattern consulted by a served cascade is @why-reachable from a named problem; (b) no @why cycle lacks a grounding problem node; (c) cascade construction refuses a pattern with no rationale path. This feeds the F7/F8 merge and decides nothing."
+   :acceptance "A lab note measures, for each candidate invariant, how many current patterns and cascades would be refused today; no certificate or runtime refusal is implemented."}]}
