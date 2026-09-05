@@ -365,3 +365,33 @@ Rows (minted at next loop pause — U57 seat in flight at ruling time;
   domain preregistration first, constructor second, unified updates
   third, typed delivery fourth, shadow packet fifth; slice per row
   discipline if it grows.
+
+## RUN4 preregistration ruling (Joe, 2026-09-05)
+
+Verbatim: "i don't get a sense of how far off we are from being able to
+do RUN4 without it being a waste of time. Maybe RUN4 needs its own
+manifest/preregistration. That is unlikely to fit in Voxterm but it
+could go well in Lean"
+
+- **F2 (:F — the RUN4 preregistration and its readiness meter; mint
+  order F0, F2, F1):** a Lean preregistration block beside the
+  certificates stating exactly WHAT Joe's acceptance would assert (the
+  named conformance theorems and censuses, :minted-awaiting-acceptance),
+  the authorities they are pinned to (contract sha and control-map sha
+  are already transcribed as data by the u49 producer — reuse, don't
+  re-pin), and the DECLARED invalidation set: which pending work would
+  make acceptance stale on arrival. For each candidate invalidator
+  (the R16 base-drawing stroke; any control-map :decisions entry after
+  the pinned sha; F1's model extensions), MEASURE whether it touches
+  the certificates' definitions and say so — conformance is wiring
+  topology and the Q(o|pi) constructor is scores, so F1 is likely
+  disjoint, but likely is not a manifest entry. Readiness is split
+  honestly: Lean decides the in-repo part (theorems elaborate,
+  axiom-free, pins as transcribed); run4_readiness.bb (flip-readiness
+  shape) compares pinned identities to the live repos and emits READY
+  or BLOCKED-ON [named list], writing a committed READINESS.edn.
+  Acceptance: today's verdict reported with the exact blockers named
+  (that IS the answer to "how far off"); negative control: a perturbed
+  pin must flip the verdict; voxterm's /agency/backlog reads
+  READINESS.edn and shows the verdict beside RUN4 in needs-Joe (small
+  server-side join, no bb per poll).
