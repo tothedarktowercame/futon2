@@ -14,6 +14,12 @@ REQ = ["context", "if", "however", "then", "because"]
 # Pre-existing problems/* nodes minted by another lane before this gate
 # existed (L5 acceptance gates the L5-minted files; legacy files are left
 # untouched per the row's path-scope rule).
+LEGACY_ID_MISMATCH = {
+    # pre-existing: file baldwin/ARGUMENT.flexiarg declares id baldwin/mechanism
+    # (an argument-map entry point, named by INDEX.md); left untouched per
+    # path-scope rules, allowlisted here so the gate checks the L18 bar only.
+    "baldwin/ARGUMENT",
+}
 LEGACY = {
     "problems/commitment-temperature-is-instrumented-as-gain",
     "problems/operator-turns-become-inference-observations",
@@ -30,6 +36,8 @@ for fn in sorted(os.listdir(d)):
         continue
     n += 1
     pid = SEC + "/" + fn[:-len(".flexiarg")]
+    if pid in LEGACY_ID_MISMATCH:
+        continue  # id mismatch allowlisted above
     if pid in LEGACY:
         continue
     # Backfill rows (L6+) check the backfill bar: id match, a conclusion

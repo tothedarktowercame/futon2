@@ -1,0 +1,6 @@
+;; L18 served-refused remainder (discovery receipt). Deterministic.
+{:served-cascades ["zaif-cascade.edn" "construct-cascade.edn" "snatch-cascade.edn" "ants-cascade.edn" "alfworld-cascade.edn"]
+ :union-refused-before 71
+ :grounded-this-row ["baldwin/ablation-axes-must-not-disable-the-instrument" "baldwin/choose-the-heritable-unit-where-invariance-lives" "devmap-coherence/next-steps-to-done" "devmap-coherence/prototype-alignment-embedding" "eight-gates/lean-commit" "or3/ask-first-then-bring-the-expert" "or3/openness-without-exposure"]
+ :remainder-count 64
+ :remainder-reasons "every remaining pattern: no section documentation, mission doc, WR ruling, or problem-node text states its problem (holds-token and id-text searches found no cover); rationale not invented"}
