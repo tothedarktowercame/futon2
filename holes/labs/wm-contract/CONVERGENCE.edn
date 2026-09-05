@@ -1,0 +1,118 @@
+{:schema :wm/convergence-v1
+ :as-of "2026-09-05"
+ :registry-basis "holes/labs/wm-contract/aif-equations.edn:74-200; :id, :defines, :node, and :formal transcribed from HEAD"
+ :rung-order [:named :type-transcribed :formula-transcribed :witnessed :constructed :wired :validated :run-correlated]
+ :rung-rule "scripts/generate_variable_situation_accounting.bb:417-428: :witnessed and higher require an exhibiting machine record carrying a run identity; every rung requires the preceding rung."
+ :caveats
+ ["BOX-5 STALENESS STILL HOLDS: runs/U35-lean-state/lean-state-report.edn predates the reviewed action and Dirichlet modules at mathlib4 4617204890 and 4d89779d08; registry :lean-at is current at aif-equations.edn:181-192, and the corpus was resolved at HEAD rather than silently taking the stale join."
+  "R5 CERTIFICATE LIMIT STILL HOLDS: runs/F3-node-sim/00-r5-pilot.edn is a node simulation over declared carriers and says no shipped call path was wired; it carries no run identity, so it does not reach :witnessed under scripts/generate_variable_situation_accounting.bb:417-428."
+  "R17 CLASS-(b) DIVERGENCE STILL HOLDS: aif-equations.edn:187-195 says A4a recounts capability-by-mission substrate records rather than accumulating tick-model o and mu; MachineDirichletAccumulation.lean states that divergence but does not inhabit the declared accumulation."
+  "The retired scalar F has no producer at HEAD (aif-equations.edn:92-101); policy F-pi remains realised only behind FUTON_WM_FPI_POSTERIOR (aif-equations.edn:102-109)."]
+ :rows
+ [{:id :observe :defines :o :node :R2
+   :formal "o_t <- structured observation of the world after action u_{t-1}"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachineObservation.lean:58-84" :basis "machineObservation states the construction; aif-equations.edn:74-79 records the reviewed carrier."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/observation.clj:103-146" :basis "observe constructs the fourteen values; runs/F8-observe/clojure-readback.txt has no run identity, so :witnessed is not licensed."}
+   :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no F3-form accepted-run certificate for o" :what-would-license "A refusing accepted-run record carrying the raw world input, all fourteen produced coordinates, and an independent machineObservation reference."} :converged? false}
+
+  {:id :prediction-error :defines :eps :node :R8
+   :formal "eps_k := o_k - mu_k"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachinePredictionError.lean:160-181" :basis "The reviewed producer and typed outcomes are recorded at aif-equations.edn:80-85."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/free_energy.clj:203-278" :basis "compute-prediction-error implements the typed formula; runs/F8-prediction-error/clojure-readback.txt has no run identity."}
+   :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no accepted-run eps certificate" :what-would-license "A run-identified record with observation, predicted mean, typed outcome, and independently derived error."} :converged? false}
+
+  {:id :precision :defines :Pi :node :R7
+   :formal "Pi_k := 1 / max(Var(eps_k), eps0)"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachinePrecision.lean:101-104" :basis "machinePrecision states the guarded production map; aif-equations.edn:86-91 records its reviewed status."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/precision.clj:116-158" :basis "update-channel-precision computes the bounded history-derived quantity; runs/F8-precision/clojure-readback.txt has no run identity."}
+   :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no accepted-run Pi certificate" :what-would-license "A run-identified error history and independent variance/floor/cap reconstruction with a refusing verdict."} :converged? false}
+
+  {:id :free-energy :defines :F :node :R8
+   :formal "F = 1/2 * mean_k (Pi_k eps_k^2)"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6827-6831" :basis "variationalFreeEnergy states the formula."}
+   :impl-leg {:rung :named :licence "holes/labs/wm-contract/aif-equations.edn:92-101" :basis "The row is retired and its :code says NO PRODUCER AT HEAD; a runtime formula or record was not found."}
+   :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "Runtime producer retired; not found at HEAD." :what-would-license "A deliberate replacement producer plus an accepted-run certificate, or an adjudicated removal of this convergence row."} :converged? false}
+
+  {:id :policy-free-energy :defines :F-pi :node :R8
+   :formal "F_pi := sum_k 1/2 ( ln(2 pi v_k(pi)) + (o_k - mu_k(pi))^2 / v_k(pi) )"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachinePolicyFreeEnergy.lean:59-69" :basis "The reviewed total variance trichotomy is recorded at aif-equations.edn:102-109."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/policy_free_energy.clj:41-144" :basis "f-pi-for-candidate implements the formula, but the path remains flag-gated at aif-equations.edn:102-109 and its readback has no run identity."}
+   :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no accepted-run F-pi certificate" :what-would-license "A run with F-pi enabled, complete candidate coverage, independent per-channel terms, and a refusing verdict."} :converged? false}
+
+  {:id :belief-update :defines :mu-next :node :R3
+   :formal "mu <- mu + alpha Pi eps"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachineBeliefUpdate.lean:181-188" :basis "machineBeliefUpdate states the actual tempered categorical map and the registry-form counterexample; aif-equations.edn:110-119 records it closed."}
+   :impl-leg {:rung :type-transcribed :licence "src/futon2/aif/belief.clj:325-346" :basis "The categorical filter inhabits the carrier, but it is not the additive registry formula; runs/F8-belief-update/clojure-readback.txt has no run identity."}
+   :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "Implementation and declared additive formula diverge; no accepted-run certificate found." :what-would-license "An adjudicated formula aligned to the categorical map, then a run-identified posterior comparison."} :converged? false}
+
+  {:id :belief-state :defines :mu :node :R1
+   :formal "mu_t := the stored belief after the update at t-1"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachineBeliefState.lean:25-45" :basis "machineBeliefState and reconcileBeliefCarry state the domain-reconciling carry; aif-equations.edn:120-126 records it closed."}
+   :impl-leg {:rung :type-transcribed :licence "src/futon2/aif/belief.clj:510-522" :basis "reconcile-belief-carry drops departed entities and initializes re-entry, so the formal line is not exact; its F8 readback has no run identity."}
+   :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "The stored value is reconciled, not simply the prior tick's mu-post; no accepted-run certificate found." :what-would-license "A run-identified three-tick carry record checked against reconcileBeliefCarry."} :converged? false}
+
+  {:id :forward-model :defines :Q-o-pi :node :R4
+   :formal "Q(o|pi) := sum_s A(o|s) Q(s|pi), Q(s|pi) rolled forward by B from mu over depth T"
+   :spec-leg {:rung :type-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6757-6759" :basis "PredictiveOutcomeKernel is a carrier only, as aif-equations.edn:127-131 states."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/machine_q.clj:336-374" :basis "The composition is implemented at a default-off seam; runs/F1-machine-q/01-runtime-seam.edn measures it but carries no run identity and says no live caller."}
+   :leading-leg :impl-ahead :certificate {:trailing-leg :spec :reason "Lean has only the carrier and the runtime seam is not shipped; no accepted-run certificate found." :what-would-license "A machine-grain Lean composition and an accepted run through the enabled seam with independent rows."} :converged? false}
+
+  {:id :risk :defines :risk :node :R5
+   :formal "risk(pi) := D_KL[Q(o|pi) || C]"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6864-6871" :basis "predictiveOutcomeRisk states KL[Q||C]."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/node_sim.clj:241-255" :basis "The node simulation computes risk; its F3 receipt has no run identity and explicitly is not the shipped call path."}
+   :leading-leg :level :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn" :green? true :accepted-run? false :reason "No run identity and no shipped call path; runs/F3-node-sim/00-r5-pilot.edn :what-this-is/:not-done."} :converged? false}
+
+  {:id :ambiguity :defines :ambiguity :node :R5
+   :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6873-6884" :basis "ambiguity states expected observation entropy."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/node_sim.clj:232-255" :basis "The node simulation computes the formula; its receipt lacks run identity and reports an import-name finding."}
+   :leading-leg :level :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn" :green? true :accepted-run? false :reason "No run identity and no shipped call path; the pilot also records Q-o-pi/Q-s-pi import disagreement."} :converged? false}
+
+  {:id :expected-free-energy :defines :G :node :R5
+   :formal "G(pi) := risk(pi) + ambiguity(pi)"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6886-6891" :basis "expectedFreeEnergy states the two-term sum."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/node_sim.clj:241-255" :basis "The node simulation emits risk, ambiguity and G; the F3 receipt lacks run identity."}
+   :leading-leg :level :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn" :green? true :accepted-run? false :reason "Exact/refusing node certificate, but not an accepted run and not shipped wiring."} :converged? false}
+
+  {:id :policy-set :defines :pi :node :R6
+   :formal "pi ranges over the candidate action space"
+   :spec-leg {:rung :named :licence "holes/labs/wm-contract/aif-equations.edn:158-160" :basis "No :lean identifier is declared; not found in the current equation-to-Lean join."}
+   :impl-leg {:rung :constructed :licence "holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:140-151" :basis "Run c149f9de-669c-4817-9b0e-ed4aad77db79 constructs and scores two distinct cascades for one mission; the receipt says production still constructs one per target."}
+   :leading-leg :impl-ahead :certificate {:trailing-leg :spec :reason "No Lean policy-set carrier and no F3-form accepted-run equivalence certificate." :what-would-license "A Lean cascade-policy carrier and a refusing certificate tying its population to the F7 run."} :converged? false}
+
+  {:id :depth :defines :T :node :R13
+   :formal "T := temporal policy depth (the range of the sums in Q(o|pi) and G)"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachineDepth.lean:133-150" :basis "Resolved at mathlib4 HEAD; the U35 report predates this reviewed carrier, as aif-equations.edn:161-170 records."}
+   :impl-leg {:rung :type-transcribed :licence "src/futon2/aif/efe.clj:629-706" :basis "The machine has multiple term depths rather than one T; runs/F8-depth/clojure-readback.txt has no run identity."}
+   :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "The single-depth formal does not describe the mixed-depth implementation; no accepted-run certificate found." :what-would-license "An adjudicated multi-depth contract and a run-identified per-term depth receipt."} :converged? false}
+
+  {:id :temperature :defines :tau :node :R14
+   :formal "tau := commitment temperature (inverse precision gamma of policy selection)"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachineTemperature.lean:42-54" :basis "machineTemperature states all three modes; aif-equations.edn:171-176 records the reviewed carrier."}
+   :impl-leg {:rung :type-transcribed :licence "src/futon2/aif/policy.clj:77-146" :basis "Only the variational arm is inverse precision; two engineering temperature laws share the runtime name, and the F8 readback has no run identity."}
+   :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "The registry formula describes one of three runtime laws; no accepted-run certificate found." :what-would-license "A run-identified mode/source/beta record checked against machineTemperature."} :converged? false}
+
+  {:id :policy-posterior :defines :Q-pi :node :R6
+   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau - F_pi(pi))"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6959-6965" :basis "softmax states the normalized score map."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/policy.clj:157-235" :basis "selection-scores and softmax-weights implement it when F-pi enters; no run-identified F3-form certificate was found."}
+   :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no accepted-run posterior certificate with all three terms" :what-would-license "A run-identified candidate menu and independent normalized weights, including the F-pi coverage decision."} :converged? false}
+
+  {:id :action :defines :u :node :R16
+   :formal "u_t := argmax_u sum_pi delta(u, pi_t) Q(pi)"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachineAction.lean:49-70" :basis "Resolved at mathlib4 HEAD; runs/U35-lean-state/lean-state-report.edn is stale and still says no carrier, while aif-equations.edn:181-186 records the reviewed module."}
+   :impl-leg {:rung :type-transcribed :licence "src/futon2/aif/policy.clj:567-594" :basis "The implementation has multiple selection laws and the default does not use Q(pi); runs/F8-action/clojure-readback.txt has no run identity."}
+   :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "The registry argmax describes only a non-default arm and selected action can differ from enacted action; no accepted-run certificate found." :what-would-license "A run-identified selection-law/F-pi/gate record checked against machineAction and enacted output."} :converged? false}
+
+  {:id :dirichlet-accumulation :defines :a-conc :node :R17
+   :formal "a = a + sum_tau o_tau (x) s_tau  (Dirichlet concentrations accumulated from observed outcome/state pairs)"
+   :spec-leg {:rung :type-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6935-6936" :basis "DirichletConcentrations is carrier-only; aif-equations.edn:187-195 deliberately does not point at machineDirichletAccumulation because that module proves the runtime object differs."}
+   :impl-leg {:rung :named :licence "holes/labs/wm-contract/aif-equations.edn:187-195" :basis "The declared o-by-mu recurrence is not found; A4a recounts a different capability-by-mission model."}
+   :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "Class-(b) divergence remains and no declared runtime inhabitant exists." :what-would-license "A runtime recurrence over fixed Channel/Status coordinates consuming tick o and mu, plus an accepted-run outer-product certificate."} :converged? false}
+
+  {:id :model-reduction :defines :Delta-F :node :R17
+   :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A') over Dirichlet concentrations a (prior), A (posterior), a' (reduced prior); a reduction is accepted when Delta F <= -3"
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6949-6957" :basis "modelReductionFreeEnergyChange and bayesFactorThreshold state the formula and threshold."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/bmr.clj:108-134" :basis "bayesian-model-reduction implements the formula; no candidate artifact with a run identity and independent reference was found."}
+   :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no accepted-run Delta-F certificate" :what-would-license "A run-identified full/reduced concentration tuple, independent log-beta reference, and refusing threshold verdict."} :converged? false}]}
