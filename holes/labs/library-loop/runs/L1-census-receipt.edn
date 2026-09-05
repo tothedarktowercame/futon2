@@ -1,6 +1,6 @@
 ;; L1 RATIONALE-REACHABILITY CENSUS receipt. Deterministic rerun.
 {:row :L1
- :library-root "/tmp/futon3-L1-9ef7bc18/library"
+ :library-subdir "library"
  :library-git-sha "9ef7bc181549fef54d3598c2e063cd6c3a324a1a"
  :library-dirty-flexiarg []
  :files-parsed 1256
@@ -10,7 +10,7 @@
  :carrying-why-posthoc-only 7
  :carrying-how 21
  :carrying-why-or-how-unique 99
- :grep-floor-command "cd /tmp/futon3-L1-9ef7bc18/library && grep -rlE '@(why|how)' --include='*.flexiarg' ."
+ :grep-floor-command "cd $LIBRARY_SUBDIR && grep -rlE '@(why|how)' --include='*.flexiarg' ."
  :grep-floor-files 106
  :problem-nodes 6 ["problems/commitment-temperature-is-instrumented-as-gain", "problems/operator-turns-become-inference-observations", "problems/per-tick-mismatch-instruments-outer-loop-gain", "problems/refusal-prediction-error-v1--source-field-missing", "problems/satisfied-rungs-are-counted-and-surfaced", "problems/tension-proposes-candidates"]
  :wr-nodes 28

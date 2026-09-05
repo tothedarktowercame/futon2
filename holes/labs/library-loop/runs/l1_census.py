@@ -125,13 +125,17 @@ grep_cmd = "grep -rlE '@(why|how)' --include='*.flexiarg' %s" % LIB
 floor = subprocess.run(grep_cmd, shell=True, capture_output=True, text=True)
 floor_n = len([l for l in floor.stdout.splitlines() if l.strip()])
 
-# git state of the checkout containing LIB
+# git state of the checkout containing LIB. Serialized provenance is
+# path-independent: the absolute root is used for execution only, and the
+# receipt records the repo-relative subdir, so any checkout of the same
+# commit yields a byte-identical receipt.
 gitrepo = subprocess.run("git -C %s rev-parse --show-toplevel" % LIB,
                          shell=True, capture_output=True, text=True).stdout.strip()
+LIB_REL = os.path.relpath(LIB, gitrepo)
 sha = subprocess.run("git -C %s rev-parse HEAD" % gitrepo,
                      shell=True, capture_output=True, text=True).stdout.strip()
 dirty_flexiarg = subprocess.run(
-    "git -C %s status --porcelain -- library" % gitrepo,
+    "git -C %s status --porcelain -- %s" % (gitrepo, LIB_REL),
     shell=True, capture_output=True, text=True).stdout.splitlines()
 dirty_flexiarg = [l for l in dirty_flexiarg if l.strip().endswith(".flexiarg")]
 
@@ -148,7 +152,7 @@ with open(os.path.join(OUT, "L1-census-graph.edn"), "w") as f:
 
 with open(os.path.join(OUT, "L1-census-receipt.edn"), "w") as f:
     f.write(";; L1 RATIONALE-REACHABILITY CENSUS receipt. Deterministic rerun.\n")
-    f.write("{:row :L1\n :library-root %s\n :library-git-sha %s\n" % (q(LIB), q(sha)))
+    f.write("{:row :L1\n :library-subdir %s\n :library-git-sha %s\n" % (q(LIB_REL), q(sha)))
     f.write(" :library-dirty-flexiarg %s\n" % str(dirty_flexiarg).replace("'", '"'))
     f.write(" :files-parsed %d\n" % files)
     f.write(" :files-missing-flexiarg-id %s\n" % (str(sorted(files_missing_flexiarg)).replace("'", '"')))
@@ -159,7 +163,8 @@ with open(os.path.join(OUT, "L1-census-receipt.edn"), "w") as f:
     f.write(" :carrying-how %d\n" % len(carrying_how))
     f.write(" :carrying-why-or-how-unique %d\n"
             % len(set(carrying_why) | set(carrying_how)))
-    f.write(" :grep-floor-command %s\n" % q("cd %s && grep -rlE '@(why|how)' --include='*.flexiarg' ." % LIB))
+    f.write(" :grep-floor-command %s\n"
+            % q("cd $LIBRARY_SUBDIR && grep -rlE '@(why|how)' --include='*.flexiarg' ." ))
     f.write(" :grep-floor-files %d\n" % floor_n)
     f.write(" :problem-nodes %d %s\n" % (len(problems), str(problems).replace("'", '"')))
     f.write(" :wr-nodes %d\n" % len(wr))

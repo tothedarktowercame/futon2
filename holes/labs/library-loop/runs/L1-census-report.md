@@ -12,7 +12,7 @@ count below is identical in both trees except `patterns total`
 (1257 canonical / 1256 committed). Artifacts here are generated from the
 committed tree.
 
-Artifacts (both byte-identical on rerun, md5 over two consecutive runs against the isolated worktree):
+Artifacts (both byte-identical on rerun, md5 over three runs from two differently named isolated worktrees (/tmp/l1wt-alpha, /home/joe/code/futon3-L1-rerun-zai1) — serialized provenance is path-independent (repo-relative subdir + HEAD sha), so any checkout of the same commit yields a byte-identical receipt):
 - `L1-census-receipt.edn` — counts, full annotation-key histogram, unresolved refs
 - `L1-census-graph.edn` — graph as nodes+edges EDN (3830 edges, `{:from :kind :to :resolved}`)
 - `l1_census.py` — the parser (deterministic: sorted walks, sorted emission; takes the library root as argv[1], defaulting to the canonical checkout, and records that root's HEAD plus any dirty/untracked .flexiarg)
