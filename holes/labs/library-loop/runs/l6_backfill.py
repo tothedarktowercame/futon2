@@ -23,21 +23,25 @@ LIB = os.path.abspath(sys.argv[2] if len(sys.argv) > 2
                       else "/home/joe/code/futon3/library")
 TAG = sys.argv[3] if len(sys.argv) > 3 else "L6"
 
-# L5 dossier nodes by holds-at token
-prob_dir = os.path.join(LIB, "problems")
-holds_to_node = {}
-for fn in sorted(os.listdir(prob_dir)):
-    if not fn.endswith(".flexiarg"):
-        continue
-    pid = "problems/" + fn[:-len(".flexiarg")]
-    m = re.match(r"^(r[a-z0-9]+)-", fn)
-    if m:
-        tok = m.group(1)
-        tok = "R" + tok[1:]
-        if tok == "Ra":
-            tok = "R3a"
-        holds_to_node.setdefault(tok.upper(), pid)
-        holds_to_node.setdefault(tok, pid)
+# Source corpus: every library/problems/*.flexiarg node with its own
+# @holds-at tokens and full text (same corpus and match rule as
+# runs/l6_no_source_check.py: holds-token equality, or the pattern's
+# qualified id named in a node's text).
+corpus = []
+_pdir = os.path.join(LIB, "problems")
+for _fn in sorted(os.listdir(_pdir)):
+    if _fn.endswith(".flexiarg"):
+        _pid = "problems/" + _fn[:-len(".flexiarg")]
+        _txt = open(os.path.join(_pdir, _fn), encoding="utf-8",
+                    errors="replace").read()
+        _holds = re.findall(r"^@holds-at\s+(\S+)", _txt, re.M)
+        corpus.append((_pid, _holds, _txt))
+
+def corpus_match(pid, holds):
+    for (nid, nholds, ntxt) in corpus:
+        if (holds and any(h in nholds for h in holds)) or (pid in ntxt):
+            return nid, ("holds" if (holds and any(h in nholds for h in holds)) else "named")
+    return None
 
 def q(s):
     return s
@@ -83,12 +87,12 @@ for sec in SECTIONS:
                 break
         add = []
         if not has_why:
-            target = holds_to_node.get(holds) if holds else None
-            if target:
-                add.append("@why %s (source: this pattern's @holds-at %s matched to the L5 dossier node; %s rationale-backfill, zai-1, 2026-09-05)"
-                           % (target, holds, TAG))
+            m = corpus_match(pid, [holds] if holds else [])
+            if m:
+                add.append("@why %s (source: %s match against the problem corpus per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L6-no-source-check.edn; %s rationale-backfill, zai-1, 2026-09-05)"
+                           % (m[0], m[1], TAG))
             else:
-                add.append("@why no problem-corpus source matched (@holds-at %s; no dossier, WR-ruling problem node, or L5 record node names this pattern's problem). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L6-no-source-check.edn. Rationale not invented (%s rationale-backfill, zai-1, 2026-09-05)"
+                add.append("@why no problem-corpus source matched (@holds-at %s; holds-token and id-text searches over every library/problems node -- legacy 6, L5 dossier 20 incl. TRACE, L5 record/ruling 6 -- found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L6-no-source-check.edn. Rationale not invented (%s rationale-backfill, zai-1, 2026-09-05)"
                            % (holds if holds else "absent", TAG))
         if not has_how:
             c = first_conclusion(lines)
@@ -103,7 +107,7 @@ for sec in SECTIONS:
                          if ln.startswith("@")], default=0)
         new = lines[:last_meta + 1] + add + lines[last_meta + 1:]
         open(path, "w", encoding="utf-8").write("\n".join(new) + "\n")
-        changed.append((pid, "dossier" if (not has_why and holds_to_node.get(holds)) else
+        changed.append((pid, "corpus-match" if (not has_why and corpus_match(pid, [holds] if holds else [])) else
                         ("no-source" if not has_why else "kept-why"),
                         "own-how" if not has_how else "kept-how"))
 for c in changed:
