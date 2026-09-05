@@ -3,14 +3,14 @@
  {:ran? false,
   :method
   "lake env lean <module> run per module, fresh, in the corpus checkout",
-  :started-at "2026-09-05T13:51:45.907154231Z",
+  :started-at "2026-09-05T14:03:25.503335255Z",
   :nonzero-modules [],
   :exit-zero 0,
   :exit-nonzero 0,
   :wall-ms 0,
   :verdict :not-run,
   :error-diagnostics 0,
-  :finished-at "2026-09-05T13:51:45.907358312Z",
+  :finished-at "2026-09-05T14:03:25.503558623Z",
   :modules-checked 0},
  :modules
  [{:path "DarkTower/WarMachine/ActGateNegative.lean",
@@ -476,13 +476,13 @@
     :diagnostics {:error 0, :warning 0},
     :output-sha256 nil},
    :sorry-warnings 0,
-   :lines 167,
+   :lines 200,
    :module "DarkTower.WarMachine.MachineBeliefUpdate",
-   :declaration-total 26,
-   :bytes 6186,
+   :declaration-total 28,
+   :bytes 8119,
    :sha256
-   "b744d89afc465afe8f8d33f8557ff442782ffda9a7d5726d096137c7724fe003",
-   :declarations {:def 14, :inductive 1, :structure 1, :theorem 10}}
+   "344afaf5e9c103de711e00989f9be3ccf000d91740a65b840eb56a1b3984bb70",
+   :declarations {:def 15, :inductive 1, :structure 1, :theorem 11}}
   {:path "DarkTower/WarMachine/MachineBeliefUpdateWitness.lean",
    :typecheck
    {:exit nil,
@@ -1146,7 +1146,7 @@
    {:name "wmRunConformsToWiring", :constructor "mkHole"}
    {:name "wmRunsOnce", :constructor "mkHole"}],
   :in-source-not-in-contract [],
-  :corpus-git-sha "1282b75e3223d3f94d536ebabbb5b4125989722d",
+  :corpus-git-sha "0e89cc1cb5622b252b43ced54dbfa65959043a5b",
   :contract-path "mathlib4/DarkTower/WarMachine/holes-contract.json",
   :contract-holes
   ["C"
@@ -1163,13 +1163,12 @@
  {:source "futon2/holes/labs/wm-contract/aif-equations.edn",
   :source-as-of "2026-09-01",
   :equations 18,
-  :with-declared-carrier 10,
-  :carrier-resolves 10,
+  :with-declared-carrier 11,
+  :carrier-resolves 11,
   :carrier-declared-but-not-found [],
   :no-carrier-declared
   [:observe
    :policy-free-energy
-   :belief-update
    :belief-state
    :policy-set
    :depth
@@ -1230,9 +1229,14 @@
     :defines :mu-next,
     :node :R3,
     :class :theory-defined,
-    :declared-lean nil,
-    :declared-lean-status :missing,
-    :lean {:found false, :resolution :no-lean-carrier-declared}}
+    :declared-lean "machineBeliefUpdate",
+    :declared-lean-status :closed,
+    :resolved-name "machineBeliefUpdate",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/MachineBeliefUpdate.lean",
+     :line 181,
+     :kind "def"}}
    {:equation :belief-state,
     :defines :mu,
     :node :R1,
@@ -1357,26 +1361,26 @@
  {:modules 77,
   :lake-version
   "Lake version 5.0.0-src+fd00994 (Lean version 4.31.0-rc1)",
-  :source-lines 12933,
+  :source-lines 12966,
   :toolchain "leanprover/lean4:v4.31.0-rc1",
   :root "mathlib4/DarkTower/WarMachine",
-  :worktree-clean? false,
-  :declaration-total 856,
-  :git-sha "1282b75e3223d3f94d536ebabbb5b4125989722d",
+  :worktree-clean? true,
+  :declaration-total 858,
+  :git-sha "0e89cc1cb5622b252b43ced54dbfa65959043a5b",
   :declarations-by-kind
   {:abbrev 22,
-   :def 427,
+   :def 428,
    :example 8,
    :inductive 94,
    :instance 1,
    :structure 91,
-   :theorem 213},
+   :theorem 214},
   :out-of-scope
   {:darktower-sibling-modules 49,
    :note
    "DarkTower/*.lean outside WarMachine/ (APM and other lines) are not in this report's scope"},
   :git-describe
-  "1282b75e32 F8 leg 1 slice 2: state the machine's prediction error eps in Lean"},
+  "0e89cc1cb5 F8 leg 1 slice 3: name the belief-update carrier machineBeliefUpdate"},
  :sorry-census
  {:source-token-count 10,
   :lean-reported-count 0,
@@ -1427,7 +1431,7 @@
    {:path "DarkTower/WarMachine/Holes.lean",
     :line 7685,
     :text "def policyPosteriorImportsPolicyF : Prop := sorry"}]},
- :as-of "2026-09-05T13:51:45.907358312Z",
+ :as-of "2026-09-05T14:03:25.503558623Z",
  :produced-by "futon2/holes/labs/wm-contract/lean_state_probe.bb",
  :axiom-census
  {:count 0,
