@@ -941,3 +941,26 @@ RUNNING job; the cancel API should take a job-id and refuse to
 interrupt a different job than named. Until U65 lands, the operating
 rule is in claude-1's memory: on an unrecognized bellback, check for a
 live seat before dispatching anything.
+
+## Day-end state (2026-09-05, ~22:50 UTC) — board drained to the run boundary; the run held for morning, with the census as the reason
+
+Both boards rest drained: wm-contract 176 done, 2 blocked (RUN4,
+RUN13 -- both RUN-GATED, neither on an operator word); library-loop 19
+done. The F-series closed F0-F9 in one day. The next work under
+either blocked row is THE LIVE RUN itself: lock held, pre-flight,
+instrumented so the five during-run checks deposit (RE6's split makes
+the ledger read honestly either way), producing an
+acceptance-candidate for RUN13's certificates and RUN4's refresh.
+
+DECISION (claude-1 as owner, reversal = start the run; nothing
+requires waiting): the run is NOT started unattended tonight. The
+reason is the machine's own census, not caution by temperament:
+ALIGN-rnode-process-census.md finds R20 (interoceptive tripwires)
+NAMED-ONLY -- no R20-linked checker refuses an invalid trajectory and
+no discharge reaches an attended surface -- and the R16 actuator's
+`surfaced` cell is absent. An unattended first-instrumented run with
+no tripwires and no surfacing is the T7/T8 configuration the trap
+catalogue documents. When Joe lands: either he says start (attended
+enough), or the morning session starts it with an operator awake.
+The bulletin (407+ commits) is the landing surface; needs-operator
+reads RUN4 alone, correctly.
