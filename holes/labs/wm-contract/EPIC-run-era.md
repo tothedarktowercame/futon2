@@ -623,3 +623,21 @@ the definition of done was explicit and progressive."
 - F4 amendment: the paper renders the stage distribution and the
   17-row unbucketed hole list against this scale -- a progress bar per
   substantive noun, exactly as ruled.
+
+**Placement (Joe, 2026-09-05, verbatim):** "it is coherent with the
+nouns, verbs, organisation, evidence, workflow breakdown. What this
+concerns is the composition of workflow and evidence, which acts over
+the others."
+
+Design consequence for F6: the scale is the workflow∘evidence
+composite realized as an ACTION on the other lanes — each rung is a
+workflow stage licensed by an evidence type, and an item moves up only
+by supplying that evidence type. Therefore the schema must not
+hardcode nouns as the only rung-bearing items: the same scale acts on
+verbs (an operation's alignment matures through the identical rungs)
+and on organisation (a topology claim likewise). F6 implements the
+scale over the accounting registry's rows first, but defines the rung
+vocabulary as lane-independent so the action extends without a second
+schema. Faking is blocked by typing: no rung is reachable except by
+its own evidence kind, which is what "explicit and progressive"
+purchases.
