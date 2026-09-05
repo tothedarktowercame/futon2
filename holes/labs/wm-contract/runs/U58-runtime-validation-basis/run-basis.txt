@@ -1,0 +1,45 @@
+{:schema :wm/runtime-validation-run-basis-v1,
+ :run-id "9509555b-b1e2-4825-8dc2-91672f48777b",
+ :world-record "/tmp/wm-step-u58/steps/002-u58-final/world-before.edn",
+ :produced-by "runtime_validation_check.bb run-keyed-basis (U58)",
+ :status :captured,
+ :catalog
+ {:path
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+  :repo "futon2",
+  :repo-rel
+  "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+  :sha256
+  "244becbeb00cae1775a50385557dc4442f10dd96f98834041bc5ff1fb15edf52",
+  :last-commit "7157af97267e9a1874bb86752a40003d09ad0899",
+  :committed-blob-sha1 "28b58c0b5c4b2297ef0e79446ee10a0d5d8faa7e",
+  :worktree-blob-sha1 "28b58c0b5c4b2297ef0e79446ee10a0d5d8faa7e",
+  :worktree-matches-commit? true},
+ :pointers 181,
+ :repos
+ [{:repo "futon2",
+   :pointers 157,
+   :head "316091df7b6b2f696734d2c928d04762a30a3453",
+   :porcelain-lines 6}
+  {:repo "futon3c",
+   :pointers 11,
+   :head "d34a1ceb28ae9365100afa498e0e85e2422cfbd4",
+   :porcelain-lines 1}
+  {:repo "mathlib4",
+   :pointers 5,
+   :head "4bbc7111c4b6193e79c02d9d381377587271b56f",
+   :porcelain-lines 0}
+  {:repo "p4ng",
+   :pointers 8,
+   :head "e28ebc9d7b5b008c09058d51c3e4776048b267b2",
+   :porcelain-lines 2}],
+ :what-this-establishes
+ "the bytes of the catalogue this check validates, and the commit each repository its pointers reach stood at, AT THE RUN. A later reader can ask whether the tree it is resolving pointers against is that tree.",
+ :what-this-does-not-establish
+ "that the check's verdict is a property of the run. The catalogue carries no run identity and no tick writes into it, so the verdict here remains a property of the tree at deposit time; this basis names that tree's relation to the run's, it does not convert one into the other."}
+run-basis: the catalog check at THIS tree: PASS (0 problems) -- COUNTS: 84 rows (59 per-node, 25 global-run) | nodes 19/19 | status exists=69 exists-but-stale=4 red=3 named-gap=8 | flips=7 | test namespaces 47/50 green | pointers=181
+run-basis:   futon2    pointers 157  head 316091df7b6b  porcelain captured 6 / now 6
+run-basis:   futon3c   pointers  11  head d34a1ceb28ae  porcelain captured 1 / now 1
+run-basis:   mathlib4  pointers   5  head 4bbc7111c4b6  porcelain captured 0 / now 0
+run-basis:   p4ng      pointers   8  head e28ebc9d7b5b  porcelain captured 2 / now 2
+run-basis: all 5 captured identities unmoved -- this tree is 9509555b-b1e2-4825-8dc2-91672f48777b's tree for every repository its 181 pointers reach

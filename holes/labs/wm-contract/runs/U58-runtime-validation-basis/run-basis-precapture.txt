@@ -1,0 +1,9 @@
+{:schema :wm/runtime-validation-run-basis-v1,
+ :run-id "2026-09-04-010-accepted",
+ :world-record
+ "holes/labs/wm-contract/runs/2026-09-04-010-accepted/world-before.edn",
+ :produced-by "runtime_validation_check.bb run-keyed-basis (U58)",
+ :status :predates-u58-capture,
+ :why
+ "the world record carries no :world/runtime-validation -- it was taken before the U58 capture, so the catalogue's cross-repo identity set at this run was never written down and cannot be recovered"}
+run-basis: NO CAPTURE for 2026-09-04-010-accepted -- the world record carries no :world/runtime-validation -- it was taken before the U58 capture, so the catalogue's cross-repo identity set at this run was never written down and cannot be recovered

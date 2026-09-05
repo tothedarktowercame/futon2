@@ -5,6 +5,10 @@
 ;;   bb runtime_validation_check.bb                  ; check the catalog
 ;;   bb runtime_validation_check.bb --summary        ; print the COUNTS line only
 ;;   bb runtime_validation_check.bb --deposit <run-id> ; one run-era ledger row (RE6)
+;;   bb runtime_validation_check.bb --deposit <run-id> --dry-run ; print it, write nothing
+;;   bb runtime_validation_check.bb --run-basis <run-id> ; U58: the run's captured
+;;       cross-repo identity set, compared to the tree now. Exit 0 unmoved, 1 moved,
+;;       2 no capture. WORLD_RECORD=<path> overrides the run store's world-before.edn.
 ;;   CATALOG=/path/to/other.edn bb runtime_validation_check.bb
 ;;
 ;; WHAT IT CHECKS, and why each check is here rather than left to a reader:
@@ -198,47 +202,276 @@
              (map #(str/replace-first (.getPath ^java.io.File %) base ""))
              sort vec)))))
 
+;; ---------------------------------------------------------------------------
+;; U58 -- the run-keyed basis, and --run-basis <run-id>
+;; ---------------------------------------------------------------------------
+;;
+;; WHAT WAS MISSING, measured rather than presumed (C511-repair-or-elaborate.md
+;; section 2). The catalogue input reproduces exactly -- its blob has not moved
+;; and the COUNTS line re-computes byte-identically. The POINTER leg does not:
+;; the catalogue's 181 pointers reach four repositories, 24 of them outside
+;; futon2, and futon2's sha is the only repository identity a step recorded
+;; (`:step/futon2-sha`, wm_step.sh:301). So "the pointer resolves" was a
+;; property of the tree at reading time with no way to attribute it to the run --
+;; for futon3c the accepted run's store held no identity at all.
+;;
+;; The stepper now captures the set (`wm_step_records.bb` `runtime-validation-capture`,
+;; written into `world-before.edn` at `wm_step_records.bb:437` and copied into a run
+;; store at `wm_step.sh:511`). This reads it back and names it AS THE BASIS OF THE
+;; DEPOSIT: the identities the run's pointer resolution rested on, cited by the
+;; row rather than left to a reader to reconstruct.
+;;
+;; IT DOES NOT MAKE THE CHECK RUN-SCOPED. The verdict is unchanged: the catalogue
+;; carries no run identity (:why-the-catalog-cannot-be-run-scoped, :446-451), so a
+;; run with no runtime-validation artifact in its store still deposits a typed
+;; absence. What changes is that the absence now says WHICH tree the live
+;; derivation was read from and which repositories that tree shares with the run.
+(def world-record-override (System/getenv "WORLD_RECORD"))
+
+(defn world-record-path [run-id]
+  (or world-record-override (str here "runs/" run-id "/world-before.edn")))
+
+(defn- futon2-rel [path]
+  (let [root (str code-root "futon2/")]
+    (if (str/starts-with? path root) (subs path (count root)) path)))
+
+(defn- sha256-file [path]
+  (let [md (java.security.MessageDigest/getInstance "SHA-256")
+        buf (byte-array 1048576)]
+    (with-open [in (io/input-stream (io/file path))]
+      (loop [] (let [n (.read in buf)] (when (pos? n) (.update md buf 0 n) (recur)))))
+    (str/join (map #(format "%02x" (bit-and % 0xff)) (.digest md)))))
+
+(defn- git-head [root]
+  (when (.isDirectory (io/file root))
+    (let [r (try (process/shell {:dir root :out :string :err :string :continue true}
+                                "git" "rev-parse" "HEAD")
+                 (catch Exception e {:exit 1 :out "" :err (str e)}))]
+      (when (zero? (:exit r)) (str/trim (str (:out r)))))))
+
+(defn- porcelain-count [root]
+  (when (.isDirectory (io/file root))
+    (let [r (try (process/shell {:dir root :out :string :err :string :continue true}
+                                "git" "status" "--porcelain")
+                 (catch Exception e {:exit 1 :out "" :err (str e)}))]
+      (when (zero? (:exit r))
+        (count (remove str/blank? (str/split-lines (str (:out r)))))))))
+
+(defn run-keyed-basis
+  "The identities the run's pointer resolution rested on, read from the run's own
+   world record. EVERY FIELD COMES FROM THE CAPTURE and none from the tree, so
+   the value is fixed by the run store: the deposit receipt embeds it and stays
+   byte-stable, which is what lets the ledger require the receipt committed and
+   unmodified and lets the same deposit repeat as :already-present. The
+   comparison against the tree NOW is `--run-basis`, and it is deliberately not
+   in the receipt.
+
+   array-map, not a literal, for the same reason the receipt is: past eight keys
+   a map literal is a hash-map and prints in hash order, and this value is read
+   inside a receipt a person is expected to read."
+  [run-id]
+  (let [path (world-record-path run-id)
+        f (io/file path)
+        w (when (.isFile f) (edn/read-string {:default (fn [_ v] v)} (slurp path)))
+        rv (:world/runtime-validation w)
+        head (fn [status] (array-map
+                           :schema :wm/runtime-validation-run-basis-v1
+                           :run-id run-id
+                           :world-record (futon2-rel path)
+                           :produced-by "runtime_validation_check.bb run-keyed-basis (U58)"
+                           :status status))]
+    (cond
+      (not (.isFile f))
+      (assoc (head :no-world-record)
+             :why (str "the run store holds no world-before.edn, so the run recorded no "
+                       "repository identities and the pointer resolution behind any verdict "
+                       "about it cannot be attributed to a tree"))
+
+      (nil? rv)
+      (assoc (head :predates-u58-capture)
+             :why (str "the world record carries no :world/runtime-validation -- it was taken "
+                       "before the U58 capture, so the catalogue's cross-repo identity set at "
+                       "this run was never written down and cannot be recovered"))
+
+      ;; One `array-map` CALL, not `assoc` onto the head: `assoc` past eight
+      ;; entries returns a hash-map, which is the very thing the head is built
+      ;; as an array-map to avoid.
+      :else
+      (array-map
+       :schema :wm/runtime-validation-run-basis-v1
+       :run-id run-id
+       :world-record (futon2-rel path)
+       :produced-by "runtime_validation_check.bb run-keyed-basis (U58)"
+       :status :captured
+       :catalog (array-map
+                 :path (get-in rv [:catalog :path])
+                 :repo (get-in rv [:catalog :repo])
+                 :repo-rel (get-in rv [:catalog :repo-rel])
+                 :sha256 (get-in rv [:catalog :sha256])
+                 :last-commit (get-in rv [:catalog :last-commit])
+                 :committed-blob-sha1 (get-in rv [:catalog :committed-blob-sha1])
+                 :worktree-blob-sha1 (get-in rv [:catalog :worktree-blob-sha1])
+                 :worktree-matches-commit? (get-in rv [:catalog :worktree-matches-commit?]))
+       :pointers (:pointers rv)
+       :repos (vec (for [r (:pointer-repos rv)]
+                     (array-map :repo (:repo r) :pointers (:pointers r)
+                                :head (:head r)
+                                :porcelain-lines (count (:porcelain r)))))
+       :what-this-establishes
+       (str "the bytes of the catalogue this check validates, and the commit each "
+            "repository its pointers reach stood at, AT THE RUN. A later reader can "
+            "ask whether the tree it is resolving pointers against is that tree.")
+       :what-this-does-not-establish
+       (str "that the check's verdict is a property of the run. The catalogue carries "
+            "no run identity and no tick writes into it, so the verdict here remains a "
+            "property of the tree at deposit time; this basis names that tree's "
+            "relation to the run's, it does not convert one into the other.")))))
+
+(defn run-basis-report
+  "`--run-basis <run-id>`: print the basis and compare it to the tree NOW. Exit
+   0 when every captured identity still matches, 1 when one has MOVED, 2 when
+   there is no capture to compare. Exit 1 is a FINDING and not a tool failure:
+   it says the tree a pointer would resolve against today is not the tree the
+   run read, which is precisely the inference C511 section 2 recorded as
+   unavailable.
+
+   Heads and the catalogue's content hash decide the exit. Porcelain LINE COUNTS
+   are printed and decide nothing: uncommitted movement inside a repository is
+   visible here as a count that differs, and this mode does not rule on it."
+  [run-id]
+  (let [b (run-keyed-basis run-id)]
+    (pp/pprint b)
+    (case (:status b)
+      (:no-world-record :predates-u58-capture)
+      (do (println (format "run-basis: NO CAPTURE for %s -- %s" run-id (:why b)))
+          (System/exit 2))
+      :captured
+      (let [cat (:catalog b)
+            now-cat (when (.isFile (io/file catalog-path)) (sha256-file catalog-path))
+            moved (cond-> []
+                    (not= (:sha256 cat) now-cat)
+                    (conj (format "catalog: captured sha256 %s, now %s (%s)"
+                                  (str (:sha256 cat)) (str now-cat) (futon2-rel catalog-path))))
+            moved (into moved
+                        (for [r (:repos b)
+                              :let [now (git-head (str code-root (:repo r)))]
+                              :when (not= (:head r) now)]
+                          (format "%s: captured head %s, now %s -- %d of %d pointers resolve there"
+                                  (:repo r) (str (:head r)) (str now) (:pointers r) (:pointers b))))]
+        (println (format "run-basis: the catalog check at THIS tree: %s (%d problem%s) -- %s"
+                         (if (seq @problems) "FAIL" "PASS") (count @problems)
+                         (if (= 1 (count @problems)) "" "s") counts-line))
+        (doseq [r (:repos b)]
+          (println (format "run-basis:   %-9s pointers %3d  head %s  porcelain captured %d / now %s"
+                           (:repo r) (:pointers r)
+                           (let [h (str (:head r))] (if (>= (count h) 12) (subs h 0 12) h))
+                           (:porcelain-lines r)
+                           (str (porcelain-count (str code-root (:repo r)))))))
+        (if (seq moved)
+          (do (doseq [m moved] (println "run-basis: MOVED" m))
+              (println (format "run-basis: %d of %d captured identities have MOVED since the run -- resolving a pointer against this tree is not resolving it against %s's"
+                               (count moved) (inc (count (:repos b))) run-id))
+              (System/exit 1))
+          (do (println (format "run-basis: all %d captured identities unmoved -- this tree is %s's tree for every repository its %d pointers reach"
+                               (inc (count (:repos b))) run-id (:pointers b)))
+              (System/exit 0)))))))
+
+(def run-basis-run-id
+  (second (drop-while #(not= "--run-basis" %) *command-line-args*)))
+(when (and (contains? (set *command-line-args*) "--run-basis") (nil? run-basis-run-id))
+  (println "runtime_validation_check --run-basis needs a run-id")
+  (System/exit 2))
+;; Refused rather than ordered. `--run-basis` exits before the deposit block, so
+;; the two given together would silently perform the report and swallow the
+;; deposit -- a caller that asked for a ledger row and got a printout, with a
+;; zero exit either way.
+(when (and run-basis-run-id (contains? (set *command-line-args*) "--deposit"))
+  (println "runtime_validation_check: --run-basis does not compose with --deposit -- the basis is a report and the deposit writes a ledger row; run them separately")
+  (System/exit 2))
+(when run-basis-run-id (run-basis-report run-basis-run-id))
+
+(defn- ordered-map
+  "An array-map from [k v] pairs, dropping nils. `array-map` takes a flat arg
+   list and `assoc`/`conj` past eight entries silently returns a hash-map, so a
+   receipt with an OPTIONAL key and a stable print order cannot be written as
+   either. Here a key that is not carried is simply a nil pair."
+  [& pairs]
+  (apply array-map (apply concat (remove nil? pairs))))
+
 (defn deposit-receipt [run-id]
   (let [store-dir (str here "runs/" run-id)
         holds (run-store-files store-dir)
-        contemporaneous (vec (filter #(re-find #"(?i)runtime[-_]?validation" %) (or holds [])))]
+        contemporaneous (vec (filter #(re-find #"(?i)runtime[-_]?validation" %) (or holds [])))
+        basis (run-keyed-basis run-id)]
     ;; array-map, not a literal: a map literal of this size is a hash-map and
     ;; would print in hash order, so the receipt would not be stable to read.
-    (array-map
-     :schema :wm/run-era-deposit-receipt-v1
-     :row :RE6
-     :check :per-node-runtime-validation
-     :run-id run-id
-     :produced-by "holes/labs/wm-contract/runtime_validation_check.bb --deposit"
-     :deterministic
-     (str "No wall-clock field. This receipt is rewritten byte-identically on every deposit, "
-          "which is what lets the deposit require it to be committed and unmodified, and lets "
-          "the same deposit repeat as :already-present.")
-     :run-store {:dir (str "holes/labs/wm-contract/runs/" run-id)
-                 :exists? (boolean holds)
-                 :holds holds
-                 :runtime-validation-artifacts contemporaneous}
-     :verdict-deposited (cond (seq @problems) :red
-                              (seq contemporaneous) :green
-                              :else :typed-absence)
-     :live-derivation
-     {:read-from "the catalog and the source tree at deposit time, NOT the tree the run was taken at"
-      :artifact "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn"
-      :counts-line counts-line
-      :counts counts
-      :test-runs-recorded (into (sorted-map)
-                                (for [[ns-name run] test-runs]
-                                  [ns-name (select-keys run [:exit :tests :assertions :at])]))
-      :problems (vec @problems)}
-     :why-the-catalog-cannot-be-run-scoped
-     (str "the catalog carries no run identity: its rows are keyed by node and axis, its "
-          ":test-runs are keyed by namespace with an :at date, and neither the catalog nor any "
-          "row names a wm run-id. A tick writes nothing into it. So a verdict about a NAMED RUN "
-          "cannot be read out of it, and this check has no as-of-run mode that could reconstruct "
-          "one.")
-     :not-what-this-says
-     (str "The live derivation above is a property of the tree at deposit time. It is recorded "
-          "so the absence is legible, and it is NOT the deposited verdict."))))
+    (ordered-map
+     [:schema :wm/run-era-deposit-receipt-v1]
+     [:row :RE6]
+     [:check :per-node-runtime-validation]
+     [:run-id run-id]
+     [:produced-by "holes/labs/wm-contract/runtime_validation_check.bb --deposit"]
+     [:deterministic
+      (str "No wall-clock field. This receipt is rewritten byte-identically on every deposit, "
+           "which is what lets the deposit require it to be committed and unmodified, and lets "
+           "the same deposit repeat as :already-present.")]
+     [:run-store {:dir (str "holes/labs/wm-contract/runs/" run-id)
+                  :exists? (boolean holds)
+                  :holds holds
+                  :runtime-validation-artifacts contemporaneous}]
+     ;; U58. The identities the run's pointer resolution rested on, read from the
+     ;; run's own world record and from nothing else. It is cited here because
+     ;; the live derivation below resolves 181 pointers into four repositories
+     ;; and, before this, the row named the tree for exactly one of them.
+     ;;
+     ;; CARRIED ONLY WHEN THERE IS A CAPTURE TO CITE. The ledger is append-only
+     ;; and compares a re-deposit field by field (run_era_ledger.bb:235-245), so
+     ;; adding a key to the receipt of a run whose row is already deposited would
+     ;; turn its replay from :already-present into a divergence refusal. A run
+     ;; taken before the capture existed is answered by
+     ;; `--run-basis <run-id>` at exit 2, which rewrites nothing.
+     (when (= :captured (:status basis)) [:run-keyed-basis basis])
+     [:verdict-deposited (cond (seq @problems) :red
+                               (seq contemporaneous) :green
+                               :else :typed-absence)]
+     [:live-derivation
+      {:read-from "the catalog and the source tree at deposit time, NOT the tree the run was taken at"
+       :artifact "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn"
+       :counts-line counts-line
+       :counts counts
+       :test-runs-recorded (into (sorted-map)
+                                 (for [[ns-name run] test-runs]
+                                   [ns-name (select-keys run [:exit :tests :assertions :at])]))
+       :problems (vec @problems)}]
+     [:why-the-catalog-cannot-be-run-scoped
+      (str "the catalog carries no run identity: its rows are keyed by node and axis, its "
+           ":test-runs are keyed by namespace with an :at date, and neither the catalog nor any "
+           "row names a wm run-id. A tick writes nothing into it. So a verdict about a NAMED RUN "
+           "cannot be read out of it, and this check has no as-of-run mode that could reconstruct "
+           "one.")]
+     [:not-what-this-says
+      (str "The live derivation above is a property of the tree at deposit time. It is recorded "
+           "so the absence is legible, and it is NOT the deposited verdict.")])))
+
+(defn- basis-note
+  "One sentence naming the run's captured identities, empty when the receipt
+   carries no basis. Deterministic: every value comes from the run store.
+
+   Empty rather than a sentence about the absence, because a run deposited
+   before the capture existed must keep the notes it was deposited with --
+   otherwise replaying its deposit stops being :already-present and becomes the
+   append-only ledger's divergence refusal (run_era_ledger.bb:235-245). What is
+   missing for those runs is not silent: `--run-basis <run-id>` says it and
+   exits 2."
+  [receipt]
+  (if-let [b (:run-keyed-basis receipt)]
+    (str " The run's own capture (U58) names the identities its pointer resolution rested on: catalog sha256 "
+         (subs (str (get-in b [:catalog :sha256])) 0 12) " at " (:repo-rel (:catalog b)) ", and "
+         (str/join ", " (for [r (:repos b)]
+                          (str (:repo r) " " (subs (str (:head r)) 0 12) " (" (:pointers r) " pointers)")))
+         "; `bb runtime_validation_check.bb --run-basis " (:run-id b)
+         "` compares them to the tree a reader is standing in.")
+    ""))
 
 (defn deposit-notes [run-id receipt]
   (let [d (:live-derivation receipt)
@@ -255,19 +488,35 @@
            "state AT this run cannot be reconstructed. The check run at deposit time reports PASS "
            "with " (:counts-line d)
            "; that is a property of the tree at deposit time, is recorded in the artifact this row "
-           "points at, and is not deposited as this run's verdict.")
+           "points at, and is not deposited as this run's verdict."
+           (basis-note receipt))
       :red
       (str "the runtime-validation catalog check FAILS at deposit time: "
-           (str/join "; " (:problems d)))
+           (str/join "; " (:problems d))
+           (basis-note receipt))
       :green
       (str "read from the run store's own runtime-validation artifact(s): "
            (str/join ", " (:runtime-validation-artifacts store))
-           "; " (:counts-line d)))))
+           "; " (:counts-line d)
+           (basis-note receipt)))))
+
+(def deposit-dry-run? (contains? (set *command-line-args*) "--dry-run"))
 
 (defn deposit! [run-id]
   (let [r (deposit-receipt run-id)
         rel (str "holes/labs/wm-contract/runs/RE6-check-deposits/runtime-validation-" run-id ".edn")
         path (str code-root "futon2/" rel)]
+    ;; --dry-run prints the receipt and the notes the ledger row would carry and
+    ;; writes NOTHING -- no receipt file, no ledger row. A run-era row is a claim
+    ;; about an accepted run, so this is how the deposit's own citation can be
+    ;; exhibited for a step that has not been accepted, without minting a row
+    ;; about a run that does not exist.
+    (when deposit-dry-run?
+      (pp/pprint r)
+      (println "runtime_validation_check --deposit --dry-run: notes the ledger row would carry:")
+      (println " " (deposit-notes run-id r))
+      (println "runtime_validation_check --deposit --dry-run: nothing written; receipt would be" rel)
+      (System/exit 0))
     (io/make-parents path)
     (spit path (with-out-str (pp/pprint r)))
     (println "runtime_validation_check --deposit: receipt" rel)

@@ -329,6 +329,69 @@
    :where "flip_readiness_check.bb:196-202,240,351-380"
    :consumed-by "bb flip_readiness_check.bb --as-of <world-record.edn>"})
 
+;; ---------------------------------------------------------------------------
+;; U58 -- the runtime-validation catalogue's cross-repo identity set
+;; ---------------------------------------------------------------------------
+
+(def runtime-validation-catalog-source
+  "The one input `runtime_validation_check.bb` reads (:44), in the
+   [id path env repo where] shape `source-identity` takes. It is also the
+   `:catalog` of `flip-readiness-sources` above -- the two checks read the same
+   file, and each capture names it for its own reason, so neither depends on the
+   other's presence."
+  [:catalog (str home "/code/futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn")
+   "CATALOG" "futon2" "runtime_validation_check.bb:47"])
+
+(def catalog-pointer-re
+  "`ptr-re` verbatim (runtime_validation_check.bb:71). Duplicated rather than
+   shared because this file is the stepper's and that one is the check's; the
+   duplication is a fact the check's own basis re-derives and reports, so a
+   divergence between the two shows up as a pointer count that disagrees rather
+   than as a silent miss."
+  #"([A-Za-z0-9_./\-]+\.(?:clj|cljc|bb|lean|edn|sh|py|md|txt|tex)):(\d+)(?:-(\d+))?")
+
+(defn- catalog-pointer-repos
+  "repo -> pointer count over the catalogue's 181 pointers, keyed by the first
+   path segment. Catalogue pointers are repo-relative from ~/code
+   (runtime_validation_check.bb:19-30), so the first segment IS the repository,
+   and the set is DERIVED rather than listed: a catalogue that grows a pointer
+   into a fifth repo captures that repo's identity without an edit here."
+  [path]
+  (let [cat (edn/read-string read-opts (slurp path))
+        strings (filter string? (tree-seq coll? seq cat))]
+    (->> (for [s strings [_ file] (re-seq catalog-pointer-re s)]
+           (first (str/split file #"/")))
+         frequencies
+         (into (sorted-map)))))
+
+(defn runtime-validation-capture
+  "C511 section 2's elaborate leg. The check's verdict rests on resolving every
+   catalogue pointer against the live tree, and 24 of the 181 pointers resolve
+   OUTSIDE futon2 -- the one repository whose sha a step records
+   (`:step/futon2-sha`, wm_step.sh:301). A pointer's line range resolving today
+   is not evidence it resolved at the run, and for futon3c the accepted run's
+   store held no identity at all.
+
+   So the step records, per repository the catalogue's pointers name, the head
+   and the porcelain list, plus the catalogue's own content hash and git
+   identity. That makes the catalogue's inputs as-of-able. It does not make the
+   CHECK run-scoped: the catalogue carries no run identity of its own
+   (runtime_validation_check.bb:446-451), and this capture does not give it one."
+  []
+  (let [[_ cat-path :as src] runtime-validation-catalog-source
+        by-repo (if (.isFile (io/file cat-path)) (catalog-pointer-repos cat-path) (sorted-map))]
+    {:catalog (source-identity src)
+     :pointers (reduce + 0 (vals by-repo))
+     :pointer-repos
+     (vec (for [[repo n] by-repo
+                :let [root (str home "/code/" repo)]]
+            {:repo repo :root root :pointers n
+             :exists? (.isDirectory (io/file root))
+             :head (git-out root "git" "rev-parse" "HEAD")
+             :porcelain (porcelain-lines root)}))
+     :where "runtime_validation_check.bb:47,71,89-95; the repo set is derived from the catalogue's own pointers"
+     :consumed-by "bb runtime_validation_check.bb --run-basis <run-id> (and the --deposit receipt's :run-keyed-basis)"}))
+
 (defn world []
   (let [now (System/currentTimeMillis)
         mana (io/file (str home "/code/storage/futon0/mana-snapshot.json"))]
@@ -365,6 +428,13 @@
      ;; the rest of the world, so `--as-of` can re-derive the run's own
      ;; flip-readiness verdict instead of the tree's verdict at reading time.
      :world/flip-readiness (flip-readiness-capture)
+     ;; U58. The catalogue `runtime_validation_check.bb` validates, plus a head
+     ;; and a porcelain list for every repository its pointers reach. C511
+     ;; section 2 measured the gap: 24 of 181 pointers resolve outside futon2 and
+     ;; the run recorded no identity for three of the four repos, so "the pointer
+     ;; resolves" was a statement about the tree at reading time and could not be
+     ;; attributed to the run.
+     :world/runtime-validation (runtime-validation-capture)
      :world/anticipation
      (let [p (str home "/code/calendar/events.edn")
            f (io/file p)]
@@ -607,7 +677,15 @@
                 (println (format "world: flip-readiness sources %d/%d hashed, %d in-commit; per-node repos %s"
                                  (count (filter :sha256 srcs)) (count srcs)
                                  (count (filter :worktree-matches-commit? srcs))
-                                 (str/join "," (map (comp name :repo) (:per-node-git fr)))))))
+                                 (str/join "," (map (comp name :repo) (:per-node-git fr))))))
+              (let [rv (:world/runtime-validation w)
+                    reps (:pointer-repos rv)]
+                (println (format "world: runtime-validation catalog %s; %d pointers across %d repos %s; heads %d/%d"
+                                 (let [s (str (get-in rv [:catalog :sha256]))]
+                                   (if (>= (count s) 12) (subs s 0 12) s))
+                                 (:pointers rv) (count reps)
+                                 (str/join "," (map (fn [r] (str (:repo r) "=" (:pointers r))) reps))
+                                 (count (filter :head reps)) (count reps)))))
     "delta" (let [[pin sand out] args
                   d (delta pin sand)]
               (emit! out d)

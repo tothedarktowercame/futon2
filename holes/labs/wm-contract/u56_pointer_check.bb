@@ -8,7 +8,7 @@
 ;;
 ;; TWO RESOLUTION CONVENTIONS, and the second one is here for a reason. A
 ;; pointer is resolved FIRST as a path relative to ~/code (the convention
-;; runtime_validation_check.bb:16-27 adopted, and the reason it gives -- a
+;; runtime_validation_check.bb:19-30 adopted, and the reason it gives -- a
 ;; hand-maintained allowlist of directories matched against a BARE FILENAME
 ;; reports "file not found" for every directory nobody has cited before, and
 ;; pointer_check.bb's own header records six occasions of exactly that), and

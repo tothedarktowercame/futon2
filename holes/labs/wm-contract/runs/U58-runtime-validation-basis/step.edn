@@ -1,0 +1,28 @@
+{:step/schema :wm/step-record-v1
+ :step/id "002-u58-final"
+ :step/work "/tmp/wm-step-u58"
+ :step/started-at "2026-09-05T05:16:33Z"
+ :step/ended-at "2026-09-05T05:17:42Z"
+ :step/tick-exit 0
+ :step/days 14
+ :step/run-id "9509555b-b1e2-4825-8dc2-91672f48777b"
+ :step/pin-verify :ok
+ :step/pin-generation 0
+ :step/futon2-sha "316091df7b6b2f696734d2c928d04762a30a3453"
+ :step/futon2-tree-dirty? true
+ :step/futon2-tree-dirty-files [" M holes/labs/wm-contract/runtime_validation_check.bb" " M holes/labs/wm-contract/u56_pointer_check.bb" " M holes/labs/wm-contract/wm_step_records.bb" "?? holes/labs/wm-contract/runs/U58-runtime-validation-basis/" "?? holes/labs/zaif-harness/runs/build-loop.lock" "?? holes/labs/zaif-harness/runs/build-loop.log"]
+ :step/sandbox {:trace-dir "/tmp/wm-step-u58/sandbox/wm-trace"
+                :receipt-dir "/tmp/wm-step-u58/sandbox/receipts"
+                :rationale-dir "/tmp/wm-step-u58/sandbox/wm-trace/rationale"}
+ :step/live-data-written false
+ :step/run-lock :taken-and-released
+ :step/normalized-sha256 "e33c6375e8aad104d2d81df46b76d8aa4e4aea4bb8f632222467e136ba7aea00"
+ :step/store-basis {:before {:base "http://127.0.0.1:7070" :count 213332 :max-at "2026-09-05T05:15:38.447388209Z" :at "2026-09-05T05:16:33Z"} :after {:base "http://127.0.0.1:7070" :count 213336 :max-at "2026-09-05T05:17:12.963395914Z" :at "2026-09-05T05:17:50Z"}}
+ :step/evidence {:mode :pinned-replay
+                 :cassette "pin/evidence-cassette.edn"
+                 :cassette-sha256 "11b12729f530db4bca39ef0b376074186028acbfc2e4988fbc924ddefab64aef"
+                 :cassette-entries 7
+                 :log "cassette.log"
+                 :note "the evidence store is the one input C509 called unpinnable; the cassette pins its ANSWERS, reached through the existing FUTON3C_EVIDENCE_BASE seam (pattern_registry.clj:33-38)"}
+ :step/world {:before "world-before.edn" :after "world-after.edn"}
+ :step/note "the sandbox is restored from the pin before the tick, so two steps of the same pin are steps from the same state"}
