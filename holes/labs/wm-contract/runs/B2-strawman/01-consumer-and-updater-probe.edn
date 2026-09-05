@@ -1,0 +1,75 @@
+{:schema :wm/b2-strawman-experiments-v1,
+ :row :B2,
+ :at "2026-09-05",
+ :what-this-is
+ "Measured output of two refutation attempts, produced by running them. Every\n    verdict below is read off a call.",
+ :E4
+ {:q-source
+  "futon2.aif.machine-q/predictive-outcome-kernel over the MachineQWitness carriers",
+  :risk-consumer
+  {:as-a-map
+   {:accepted? false,
+    :refusal :threw,
+    :class "java.lang.ClassCastException",
+    :reason
+    "class clojure.lang.MapEntry cannot be cast to class java.lang.Number (clojure.lang.MapEntry is in unnamed module of loader 'app'; java.lang.Number is in module java.base of loader 'bootstrap')"},
+   :as-parallel-seqs {:accepted? true, :value 0.0},
+   :as-parallel-seqs-permuted
+   {:accepted? true, :value 1.170904017857143}},
+  :normalisation-residual {:acquisition 0.0, :review 0.0},
+  :q-row
+  {:ordinary 0.390625,
+   :no-result 0.21875,
+   :failure 0.125,
+   :timeout 0.125,
+   :conflict 0.078125,
+   :missing 0.0625},
+  :q-row-policy :acquisition,
+  :refutation-attempted
+  "Hand ONE row of the machine Q that :F1 pinned to each of the two consumers the acceptance names. Refuted if both accept it.",
+  :eig-consumer
+  {:with-only-the-row
+   {:accepted? false,
+    :refusal nil,
+    :reason "expected a finite normalized probability distribution",
+    :ex-data {:label :prior, :distribution nil}},
+   :with-degenerate-prior-and-posteriors
+   {:accepted? true, :value 0.0}},
+  :hole
+  "Specify typed policy-to-Q and Q-to-consumer delivery (STRAWMAN-M-aif-policy-conditioned-eig.md hole 4)",
+  :agrees-with-F1-record
+  {:claim
+   "the row reproduces runs/F1-machine-q/01-runtime-seam.edn :rows :acquisition",
+   :ordinary 0.390625,
+   :f1-ordinary 0.390625,
+   :max-abs-difference 0.0}},
+ :E3
+ {:hole
+  "Unify simulated and realised posterior updates through one A4a/BMR updater (STRAWMAN-M-aif-policy-conditioned-eig.md hole 3)",
+  :refutation-attempted
+  "Name the updater both paths would share, by enumerating the public surface of both namespaces.",
+  :probe
+  {:a4a-public-count 13,
+   :bmr-public-count 6,
+   :a4a-publics
+   ["capability->concept"
+    "concept->star-doc"
+    "concept->stddev"
+    "concept-star-id"
+    "constellation->model-uncertainty"
+    "corpus->concentration"
+    "make-model-uncertainty-fn"
+    "mission->model-uncertainty"
+    "model-uncertainty-for-produces"
+    "normalize-mission-id"
+    "pattern-stem"
+    "prior"
+    "reduce-concepts"],
+   :bmr-publics
+   ["acceptance-threshold"
+    "bayesian-model-reduction"
+    "bmr"
+    "dirichlet-moments"
+    "log-gamma"
+    "log-multivariate-beta"],
+   :named-for-update []}}}

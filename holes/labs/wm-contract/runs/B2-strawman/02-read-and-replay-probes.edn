@@ -1,0 +1,176 @@
+{:schema :wm/b2-strawman-reads-v1,
+ :G4
+ {:hole "Run a dark end-to-end hierarchy shadow",
+  :refutation-attempted
+  "Enumerate cascade-prior/shadow-rank's call sites and look for the mission's lab directory. Refuted if a committed report states the useful-case fraction and the failure rates.",
+  :shadow-rank-sites
+  [["src/futon2/aif/cascade_prior.clj" 163 "(defn shadow-rank"]
+   ["src/futon2/aif/cascade_prior.clj"
+    171
+    "([state cascades] (shadow-rank state cascades {}))"]
+   ["test/futon2/aif/cascade_prior_test.clj"
+    77
+    "(let [cold (prior/shadow-rank (prior/initial-state)"]
+   ["test/futon2/aif/cascade_prior_test.clj"
+    82
+    "habitual (prior/shadow-rank learned-state [cascade-a cascade-b])]"]
+   ["test/futon2/aif/cascade_prior_test.clj"
+    101
+    "(prior/shadow-rank (prior/initial-state) [cascade-a])))"]
+   ["test/futon2/aif/cascade_prior_test.clj"
+    104
+    "(prior/shadow-rank (prior/initial-state)"]],
+  :non-test-call-sites ["src/futon2/aif/cascade_prior.clj"],
+  :lab-dir "holes/labs/M-wm-aif-policy-grain-compliance",
+  :lab-dir-exists? false,
+  :lab-dirs-present
+  ["A-next-IRC-stability"
+   "A-next-a-sorry-enterprise"
+   "A-next-agency-rebuild"
+   "A-next-autoclock-in"
+   "A-next-codex-agent-behaviour"
+   "A-next-f6-ingest"
+   "A-next-invariant-queue-unstuck"
+   "A-next-live-geometric-stack"
+   "A-next-operational-readiness"
+   "A-next-pattern-ingest"
+   "A-next-patterns-done-right"
+   "A-next-single-entry-point"
+   "A-next-state-snapshot-witness"
+   "A-next-stepper-calibration"
+   "A-next-typed-bells"
+   "E-cascade-sampler-sampler"
+   "E-operator-as-attached-agent"
+   "M-aif-ants-port"
+   "M-aif-faithfulness"
+   "M-aif-full-loop-40"
+   "M-aif-full-loop-41"
+   "M-aif-full-loop-42"
+   "M-aif-full-loop-43"
+   "M-aif-full-loop-44"
+   "M-aif-full-loop-45"
+   "M-aif-full-loop-46"
+   "M-digital-nomad-patterns"
+   "M-evaluate-policies"
+   "M-fold-ansatz"
+   "M-joe-reflection"
+   "M-legacy-sorry-cleanup"
+   "M-text-sidecar"
+   "M-zaif-harness"
+   "ants-faithfulness"
+   "fold-gfn"
+   "slush-demo"
+   "wm-contract"
+   "zaif-harness"]},
+ :G2
+ {:live-construction-not-attempted
+  "python3 cascade_serve.py raises ModuleNotFoundError: No module named 'sentence_transformers' (cascade_construct.py:56) on this machine, so the replay is over the recorded artifact.",
+  :score-identity-check
+  {:claim
+   "the emitted score is accuracy - lambda*complexity over the FULL cascade",
+   :recomputed 4.861},
+  :prefix-coverage-reward 1.921,
+  :emitted-coverage-reward 6.242,
+  :shown-count 6,
+  :prefix-T-intensity 2.109,
+  :full-size 14,
+  :emitted-T-intensity 4.84,
+  :refutation-attempted
+  "Re-score the one committed truncated cascade over its own :shown prefix and compare with the score it emitted. Refuted if they agree.",
+  :code-basis
+  ["futon3a/holes/labs/M-memes-arrows/cascade_construct.py:206 construct_cascade takes no budget"
+   "futon3a/holes/labs/M-memes-arrows/cascade_construct.py:236-238 accuracy over the whole trajectory, complexity over the whole chosen set"
+   "futon3a/holes/labs/M-memes-arrows/cascade_serve.py:27 shown = full[:budget]"
+   "futon3a/holes/labs/M-memes-arrows/cascade_serve.py:30 only the semilattice is recomputed on the prefix"
+   "futon3a/holes/labs/M-memes-arrows/cascade_serve.py:36-37 the emitted coverage-reward/prior-cost/cascade-score are the untruncated ones"],
+  :truncated true,
+  :emitted-score 4.861,
+  :budget 6,
+  :artifact
+  "holes/labs/M-evaluate-policies/exhibit/cascade-3-serve.json",
+  :hole "Make cascade scoring prefix-local and auditable",
+  :coverage-difference 4.321},
+ :what-this-is
+ "Measured output of five refutation attempts, produced by running them. Each\n    probe reports the set it searched as well as the set it found.",
+ :search-space {:trees ["src" "scripts" "test"], :clj-file-count 306},
+ :at "2026-09-05",
+ :G3
+ {:hole "Specify and persist the cascade-habit return event",
+  :refutation-attempted
+  "Enumerate every mention of :cascade-prior-state in the source/script/test trees, and every namespace that requires cascade-prior. Refuted if a non-test caller persists or increments it.",
+  :cascade-prior-state-mentions [],
+  :habit-prior-state-mentions
+  [["scripts/futon2/report/war_machine.clj"
+    6008
+    "(if-let [persisted (:habit-prior-state prev-trace-record)]"]
+   ["scripts/futon2/report/war_machine.clj"
+    6725
+    "(assoc :habit-prior-state habit-prior-state)"]
+   ["src/futon2/aif/trace.clj" 688 "(:habit-prior-state judge-output)"]
+   ["src/futon2/aif/trace.clj"
+    689
+    "(assoc :habit-prior-state (:habit-prior-state judge-output))"]],
+  :cascade-prior-requiring-namespaces
+  ["src/futon2/aif/cascade_prior.clj"
+   "test/futon2/aif/cascade_prior_test.clj"],
+  :non-test-callers ["src/futon2/aif/cascade_prior.clj"]},
+ :G1
+ {:hole "Adapt one non-threshold diversity source for Slice 1b",
+  :refutation-attempted
+  "Enumerate every :candidate-source declared in the tree and every file that mentions :semilattice; refuted if one of them adapts an arguing-worlds or slush artifact into the cascade-candidate schema.",
+  :candidate-sources-declared
+  [["scripts/futon2/report/cascade_lane.clj"
+    126
+    ":candidate-source :coverage-saturation-frontier"]
+   ["scripts/futon2/report/cascade_lane.clj"
+    138
+    ":candidate-source :coverage-saturation-frontier"]
+   ["src/futon2/aif/mission_control_graph.clj"
+    126
+    ":candidate-source :p4ng-control-hypergraph"]],
+  :candidate-source-values
+  [":coverage-saturation-frontier" ":p4ng-control-hypergraph"],
+  :semilattice-files
+  ["scripts/futon2/report/cascade_lane.clj"
+   "src/futon2/aif/a4a_substrate.clj"
+   "src/futon2/aif/cascade_prior.clj"
+   "src/futon2/aif/close_loop.clj"
+   "src/futon2/aif/fold_semilattice.clj"
+   "src/futon2/aif/full_loop_runner.clj"
+   "src/futon2/aif/pattern_registry.clj"
+   "test/futon2/aif/actuator_a6_test.clj"
+   "test/futon2/aif/cascade_order_check_test.clj"
+   "test/futon2/aif/cascade_prior_test.clj"
+   "test/futon2/aif/fold_semilattice_test.clj"
+   "test/futon2/aif/full_loop_runner_test.clj"
+   "test/futon2/report/cascade_lane_policy_menu_test.clj"],
+  :arguing-worlds-emits-semilattice? false,
+  :nearest-existing-non-threshold-artifact
+  {:path
+   "holes/labs/slush-demo/findings/proposals/batch-2-worklist.json",
+   :shape {:rows 6, :keys ["mission" "patterns" "proposal"]},
+   :note
+   "A pattern BAG keyed by mission. No ordering, no :semilattice, no inclusion/exclusion reasons -- so it is not a complete policy identity under mission invariant 2 (holes/missions/M-wm-aif-policy-grain-compliance.md:65)."}},
+ :E5
+ {:hole "Collect a default-off EIG shadow and calibration packet",
+  :refutation-attempted
+  "Enumerate, over the whole source/script/test tree, every mention of the five fields the acceptance requires persisted. Refuted if they are already written.",
+  :fields-probed
+  {:degeneracy-reason [],
+   :expected-information-gain-key [],
+   :expected-posterior-entropy [],
+   :prior-entropy [],
+   :realised-information-gain []},
+  :eig-kernel-call-sites
+  [["src/futon2/aif/mission_epistemic_value.clj"
+    24
+    "`futon2.aif.epistemic-value/expected-information-gain` -- the canonical"]
+   ["src/futon2/aif/mission_epistemic_value.clj"
+    210
+    "(epistemic-value/expected-information-gain (binary-latent-model p)))"]
+   ["src/futon2/aif/survey_mission_value.clj"
+    96
+    "-> `epistemic-value/expected-information-gain`, with its Bayes-coherence"]],
+  :lab-dir "holes/labs/M-aif-policy-conditioned-eig",
+  :lab-dir-exists? false},
+ :row :B2}

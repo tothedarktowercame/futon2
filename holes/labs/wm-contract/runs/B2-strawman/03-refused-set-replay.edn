@@ -1,0 +1,63 @@
+{:schema :wm/b2-refused-set-replay-v1,
+ :row :B2,
+ :at "2026-09-05",
+ :what-this-is
+ "The refusal that the adopted holes lift, replayed. Every verdict is read off\n    a call to the same classify the field build calls.",
+ :case-history-sizes {:empty 0, :one-per-candidate 2},
+ :missions
+ {"M-aif-policy-conditioned-eig"
+  {:registry-open-hole-count-now 3,
+   :empty-case-history
+   {:before-adoption
+    {:open-hole-count 0,
+     :rung 3,
+     :factor 0.0,
+     :rule :no-open-holes,
+     :refused? true},
+    :after-adoption
+    {:open-hole-count 3,
+     :rung 3,
+     :factor 0.0,
+     :rule :construction-exhausted,
+     :refused? false}},
+   :one-persisted-decision
+   {:before-adoption
+    {:open-hole-count 0,
+     :rung 3,
+     :factor 0.0,
+     :rule :no-open-holes,
+     :refused? true},
+    :after-adoption
+    {:open-hole-count 3,
+     :rung 1,
+     :factor 0.375,
+     :rule :direct-case-history,
+     :refused? false}}},
+  "M-wm-aif-policy-grain-compliance"
+  {:registry-open-hole-count-now 4,
+   :empty-case-history
+   {:before-adoption
+    {:open-hole-count 0,
+     :rung 3,
+     :factor 0.0,
+     :rule :no-open-holes,
+     :refused? true},
+    :after-adoption
+    {:open-hole-count 4,
+     :rung 3,
+     :factor 0.0,
+     :rule :construction-exhausted,
+     :refused? false}},
+   :one-persisted-decision
+   {:before-adoption
+    {:open-hole-count 0,
+     :rung 3,
+     :factor 0.0,
+     :rule :no-open-holes,
+     :refused? true},
+    :after-adoption
+    {:open-hole-count 4,
+     :rung 1,
+     :factor 0.4,
+     :rule :direct-case-history,
+     :refused? false}}}}}
