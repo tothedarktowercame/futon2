@@ -887,3 +887,35 @@ construction and processing"
   (amended); I4 blocker rewrite (gates on F7); F1 blocker rewrite
   (gates on F7, cites :choices :policy-grain). Needs-joe then reads
   RUN4 alone, correctly.
+
+## Theory-track coda (2026-09-05, three rounds, 19 rows, all reviewed) — the mechanical frontier is now honest
+
+Numbers, first to last: @why-unreachable 95.8% -> 93.1% library-wide
+(most-permissive reading); problem-stating nodes 6 -> 39; patterns
+carrying @why 83 -> 533+; served-cascade refusals zaif 50 -> 27,
+open/retrodiction 1187 -> 849; the graph-certificate gate v0 exists
+with red negative controls and four distinguishable readings, unwired
+by design (direction reserved to the F7/F8 merge). The codex review
+seat caught FIVE substantive findings across the three rounds (numeric
+drift off a receipt, a reading silently aliased to another, a
+names-only-for-one-cascade filter, mixed units, a stale wording) --
+the author!=reviewer discipline is earning its cost inside the lane.
+
+What the last round established is a BOUNDARY, not a shortfall:
+- The remaining served-surface refusals (64) have ONE honest reason:
+  no committed source states their problems. Grinding further means
+  AUTHORING rationale, not resolving edges.
+- The @how axis is today a thin editorial layer (21 resolving values,
+  32 edges, 25 targets; 521 patterns' @how is self-referential prose)
+  -- not a second traversal axis until mechanism nodes are authored.
+
+NEXT DECISION IS JOE-SHAPED, OFFERED NOT QUEUED (no board row; this is
+not a blocker): the historical problem-mining round -- reading the
+excursion logs, mission docs and campaign records to AUTHOR the
+problem statements the library's patterns answered ("mining the
+evidence landscape... what problems we have been solving
+historically", the Deleuze programme). zai can draft against sources;
+the judgment of what constitutes a problem statement worth minting is
+the part Joe may want to shape before a loop runs it at scale. The
+library board rests drained (19 done) until then; the lane restarts
+with one mint.
