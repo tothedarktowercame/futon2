@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """L18 v3 COMPLETE rationale-source search over the FIXED 71-member worklist.
 
-Usage: l18_complete_check.py [LIBRARY_DIR] [WORKLIST_REPORT] [OUT_EDN]
+Usage: l18_complete_check.py [LIBRARY_DIR] [WORKLIST_REPORT] [OUT_EDN] [FUTON2_DIR] [REPOS_CSV]
+FUTON2_DIR (default canonical) supplies the rationale corpus (missions,
+EPIC-run-era, P-*.md); REPOS_CSV (default canonical six) supplies provenance
+resolution roots. Every source authority is an explicit pinned input so the
+receipt reproduces from detached evidence worktrees without consulting
+canonical live checkouts; the receipt pins each authority's git HEAD.
 The worklist is FIXED: the served-refused union (down-problems+wr) from the
 committed pre-grounding L17 report (runs/L17-advisory-gate-report.md, futon3
 835278b), not the mutable current report. For EVERY one of the 71 members the
@@ -22,8 +27,12 @@ LIB = os.path.abspath(sys.argv[1] if len(sys.argv) > 1
                       else "/home/joe/code/futon3/library")
 REPORT = sys.argv[2] if len(sys.argv) > 2 else "L17-advisory-gate-report.md"
 OUT = sys.argv[3] if len(sys.argv) > 3 else "L18-remainder.edn"
-REPOS = ["/home/joe/code/futon2", "/home/joe/code/futon3", "/home/joe/code/p4ng",
-         "/home/joe/code/futon5", "/home/joe/code/futon3c", "/home/joe/code/futon0"]
+FUTON2 = os.path.abspath(sys.argv[4] if len(sys.argv) > 4
+                         else "/home/joe/code/futon2")
+_repos = (sys.argv[5].split(",") if len(sys.argv) > 5 else
+          ["futon2", "futon3", "p4ng", "futon5", "futon3c", "futon0"])
+REPOS = [r if r.startswith("/") else
+         os.path.join(os.path.dirname(FUTON2), r) for r in _repos]
 
 def gitsha(d):
     repo = subprocess.run("git -C %s rev-parse --show-toplevel" % d,
@@ -54,22 +63,22 @@ for fn in sorted(os.listdir(pdir)):
         txt = open(os.path.join(pdir, fn), encoding="utf-8", errors="replace").read()
         corpus.append((pid, re.findall(r"^@holds-at\s+(\S+)", txt, re.M), txt))
 
-# (d) fixed rationale corpus
+# (d) fixed rationale corpus -- every file pinned from FUTON2_DIR (explicit input)
 rationale = []
 def add_src(label, path):
     if os.path.isfile(path):
         rationale.append((label, open(path, encoding="utf-8", errors="replace").read()))
-M = "/home/joe/code/futon2/holes/missions"
+M = os.path.join(FUTON2, "holes/missions")
 if os.path.isdir(M):
     for fn in sorted(os.listdir(M)):
         if fn.endswith(".md"):
             add_src("futon2 holes/missions/" + fn, os.path.join(M, fn))
-add_src("futon2 holes labs wm-contract EPIC-run-era.md",
-        "/home/joe/code/futon2/holes/labs/wm-contract/EPIC-run-era.md")
-P = "/home/joe/code/futon2/holes/problems"
+add_src("futon2 holes/labs/wm-contract/EPIC-run-era.md",
+        os.path.join(FUTON2, "holes/labs/wm-contract/EPIC-run-era.md"))
+P = os.path.join(FUTON2, "holes/problems")
 for fn in sorted(os.listdir(P)):
     if fn.startswith("P-") and fn.endswith(".md"):
-        add_src("futon2 holes problems " + fn, os.path.join(P, fn))
+        add_src("futon2 holes/problems/" + fn, os.path.join(P, fn))
 W = os.path.join(LIB, "war-room")
 for fn in sorted(os.listdir(W)):
     if fn.endswith(".flexiarg"):
@@ -122,8 +131,8 @@ for pid in union:
             if name in t or pid in t:
                 result = "named-source-candidate:%s (names the member; problem-statement extraction is a per-node judgment, left for commissioning)" % tok
                 break
-    # (d) rationale corpus
-    searched.append("rationale corpus: holes/missions/*.md + EPIC-run-era.md + holes/problems/P-*.md + war-room/*.flexiarg")
+    # (d) rationale corpus -- every concrete file, serialized per member
+    searched += [label for (label, _) in rationale]
     if not result:
         for (label, t) in rationale:
             if name in t or pid in t:
@@ -138,7 +147,8 @@ sha, rel = gitsha(LIB)
 with open(OUT, "w") as f:
     f.write(";; L18 v3 complete rationale-source search over the FIXED 71-member worklist.\n")
     f.write(";; Worklist source: runs/L17-advisory-gate-report.md (pre-grounding). Deterministic.\n")
-    f.write("{:library-subdir %s\n :library-git-sha %s\n" % (q(rel), q(sha)))
+    f2sha, f2rel = gitsha(os.path.join(FUTON2, "holes"))
+    f.write("{:library-subdir %s\n :library-git-sha %s\n :futon2-subdir %s\n :futon2-git-sha %s\n" % (q(rel), q(sha), q(f2rel), q(f2sha)))
     f.write(" :worklist-source %s\n" % q("runs/L17-advisory-gate-report.md served-refused union, down-problems+wr"))
     f.write(" :union-count %d\n :members [\n" % len(rows))
     for (pid, searched, result) in rows:
