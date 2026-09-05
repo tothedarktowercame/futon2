@@ -1,0 +1,34 @@
+adaptiveTemperatureReference               tau_spread [1 2 3.5 0.5]           expected 0.6                      actual 0.6                      delta 0.0
+emptySpreadIsTheFloor                      tau_spread []                      expected 0.01                     actual 0.01                     MATCH
+degenerateSpreadIsTheFloor                 tau_spread [2 2 2]                 expected 0.01                     actual 0.01                     MATCH
+threeLawsDisagree.1                        :spread                            expected 0.3                      actual 0.3                      delta 0.0
+threeLawsDisagree.2                        :selection-gain-only               expected 0.5                      actual 0.5                      delta 0.0
+threeLawsDisagree.3                        :variational-beta-gamma            expected 0.25                     actual 0.25                     delta 0.0
+threeLawsDisagree.4-6                      three laws pairwise distinct       expected [true true true]         actual [true true true]         MATCH
+variationalGammaIsInverseBeta              gamma on the variational arm       expected 4.0                      actual 4.0                      delta 0.0
+engineeringGammaIsNotInverseBeta.1         gamma :spread                      expected 3.3333333333333335       actual 3.3333333333333335       delta 0.0
+engineeringGammaIsNotInverseBeta.2         gamma :selection-gain-only         expected 2.0                      actual 2.0                      delta 0.0
+engineeringGammaIsNotInverseBeta.3-4       neither engineering gamma = 1/beta expected [true true]              actual [true true]              MATCH
+productionFloorGainOne.1                   g=1 :spread = tau_spread           expected true                     actual true                     MATCH
+productionFloorGainOne.2                   g=1 :selection-gain-only = 1       expected 1.0                      actual 1.0                      MATCH
+productionGainFloorReference               g=0 :selection-gain-only           expected 100.0                    actual 100.0                    MATCH
+belowFloorBetaReference                    beta=0.001 < tau-min survives      expected 0.001                    actual 0.001                    MATCH
+missingBetaNeverFallsBack                  beta missing refuses               expected true                     actual true                     MATCH
+zeroBetaReference                          beta 0 refuses                     expected true                     actual true                     MATCH
+negativeBetaReference                      beta -0.25 refuses                 expected true                     actual true                     MATCH
+nonfiniteBetaReference                     beta NaN refuses                   expected true                     actual true                     MATCH
+nonfiniteBetaReference                     beta Inf refuses                   expected true                     actual true                     MATCH
+missingBetaNeverFallsBack                  and none of them returned 1/g      expected true                     actual true                     MATCH
+temperatureDefaultsDisagree.policy         effective-temperature default      expected :spread                  actual :spread                  MATCH
+temperatureDefaultsDisagree.arena          FUTON_WM_TAU_MODE unset            expected :selection-gain-only     actual :selection-gain-only     MATCH
+temperatureDefaultsDisagree                the two defaults differ            expected true                     actual true                     MATCH
+variationalModeCanCarryHeldBeta            held sources reported unchanged    expected [:converged-posterior :held-unsolved :held-absent :initial] actual [:converged-posterior :held-unsolved :held-absent :initial] MATCH
+variationalModeCanCarryHeldBeta            3 of the 4 are not a solve this tick expected 3                        actual 3                        MATCH
+largerTemperatureFlattensScores.1          score gap at tau=1                 expected 1.0                      actual 1.0                      delta 0.0
+largerTemperatureFlattensScores.2          score gap at tau=10                expected 0.1                      actual 0.1                      delta 0.0
+largerTemperatureFlattensScores            gap contracts as tau rises         expected true                     actual true                     MATCH
+zeroPriorOrderIsTemperatureInvariant       head action at tau 0.1 vs 9.0      expected true                     actual true                     MATCH
+zeroPriorOrderIsTemperatureInvariant       the recorded tau DID move          expected true                     actual true                     MATCH
+zeroPriorOrderIsTemperatureInvariant       and so did :softmax-weights        expected true                     actual true                     MATCH
+habitPriorMakesOrderTemperatureDependent.1 habit action at tau=0.5            expected {:type :cautious}        actual {:type :cautious}        MATCH
+habitPriorMakesOrderTemperatureDependent.2 habit action at tau=8.0            expected {:type :habitual}        actual {:type :habitual}        MATCH
