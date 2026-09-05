@@ -5,6 +5,8 @@
 ;;   bb flip_readiness_check.bb --emit       ; regenerate them from live sources
 ;;   bb flip_readiness_check.bb --summary    ; print the VERDICTS block only
 ;;   bb flip_readiness_check.bb --deposit <run-id>   ; one run-era ledger row (RE3)
+;;   bb flip_readiness_check.bb --as-of <world-before.edn>  ; derive from a run's
+;;                                                  ; own captured sources (U57)
 ;;
 ;; WHAT THIS IS. Joe, 2026-09-03: "if we are gonna flip the machine on, we
 ;; should get a reasonably confident state ... so it is gathering empirical data
@@ -64,20 +66,142 @@
 (def code-root (str (System/getProperty "user.home") "/code/"))
 (def here (str code-root "futon2/holes/labs/wm-contract/"))
 
+(def problems (atom []))
+(defn fail! [& parts] (swap! problems conj (str/join " " (map str parts))))
+
+;; ---------------------------------------------------------------------------
+;; U57 -- --as-of <world-record.edn>: derive from a RUN'S CAPTURE, not the tree
+;; ---------------------------------------------------------------------------
+;;
+;; Every line below is a property of the tree at the moment of asking, which is
+;; why the deposit (:453-471) can only record a typed absence for a run taken
+;; earlier: nothing said what the six sources held when the run ran. The stepper
+;; now captures them (`wm_step_records.bb` `flip-readiness-capture`, written into
+;; `world-before.edn` at `wm_step.sh:239` and copied into the run store at
+;; `wm_step.sh:501`), and this mode reads that capture back.
+;;
+;; RESOLUTION IS HASH-VERIFIED, WITH TWO ROUTES AND AN HONEST FAILURE. For each
+;; source the capture holds both a git identity and a sha256 of the bytes the
+;; step saw.
+;;   (1) `git show <last-commit>:<rel>` -- if its sha256 is the recorded one,
+;;       those are the bytes, fetched from a commit.
+;;   (2) otherwise the live file, if ITS sha256 is the recorded one -- the source
+;;       has not moved since the capture, which is the only thing that can
+;;       recover bytes that were never committed (the capture records
+;;       :worktree-matches-commit? false for exactly that case).
+;;   (3) otherwise the source is UNRESOLVABLE and this mode fails. It does not
+;;       fall back to the live tree: a derivation labelled with a run-id that
+;;       silently read today's bytes is the mislabelling the deposit comment at
+;;       :456-469 refuses to make.
+;; A repo sha alone would not do this. C511 section 1 records the wrong-commit
+;; extraction (`69721b12`, the contract AUTHORITY, against the `4bbc7111` that
+;; re-emitted the JSON) that only the content hash rejected.
+(def as-of-path
+  (let [t (drop-while #(not= "--as-of" %) *command-line-args*)]
+    (when (seq t)
+      (or (second t)
+          (do (println "flip_readiness_check --as-of needs a world record (world-before.edn)")
+              (System/exit 2))))))
+
+(def as-of-record
+  (when as-of-path
+    (if-not (.isFile (io/file as-of-path))
+      (do (println "flip_readiness_check --as-of: no such world record:" as-of-path) (System/exit 2))
+      (let [w (edn/read-string {:default (fn [_ v] v)} (slurp as-of-path))
+            fr (:world/flip-readiness w)]
+        (when-not fr
+          (println "flip_readiness_check --as-of:" as-of-path
+                   "carries no :world/flip-readiness -- it predates U57's capture, so this run's"
+                   "sources were never pinned and no as-of derivation is possible")
+          (System/exit 2))
+        fr))))
+
+(def as-of-dir
+  (when as-of-record
+    (let [d (io/file (str (System/getProperty "java.io.tmpdir")
+                          "/flip-readiness-as-of-" (System/currentTimeMillis)))]
+      (.mkdirs d)
+      ;; A shutdown hook, not .deleteOnExit: every exit path here goes through
+      ;; System/exit, and the blobs are six registries' worth of bytes -- a check
+      ;; that leaves a copy of them in /tmp on every invocation grows a second,
+      ;; unowned copy of the registries it exists to read.
+      (.addShutdownHook (Runtime/getRuntime)
+                        (Thread. ^Runnable (fn []
+                                             (doseq [^java.io.File f (or (.listFiles d) [])] (.delete f))
+                                             (.delete d))))
+      d)))
+
+(defn- sha256-of-file [path]
+  (let [md (java.security.MessageDigest/getInstance "SHA-256")
+        buf (byte-array 1048576)]
+    (with-open [in (io/input-stream (io/file path))]
+      (loop [] (let [n (.read in buf)] (when (pos? n) (.update md buf 0 n) (recur)))))
+    (str/join (map #(format "%02x" (bit-and % 0xff)) (.digest md)))))
+
+(defn- resolve-as-of-source
+  "One captured source -> {:id :path :route} with `:path` holding the recorded
+   bytes, or {:id :route :unresolvable} with the reason. Writes only under
+   `as-of-dir`."
+  [{:keys [id path repo-root repo-rel last-commit sha256] :as src}]
+  (let [want sha256
+        out (io/file as-of-dir (str (name id) ".blob"))]
+    (cond
+      (nil? want)
+      {:id id :route :unresolvable
+       :why (str "the capture records no sha256 for " path " (:exists? " (:exists? src) ")")}
+
+      (and last-commit repo-rel
+           (let [r (process/shell {:dir repo-root :out out :err :string :continue true}
+                                  "git" "show" (str last-commit ":" repo-rel))]
+             (and (zero? (:exit r)) (= want (sha256-of-file (.getPath out))))))
+      {:id id :route :commit :path (.getPath out)
+       :from (str repo-rel "@" (subs (str last-commit) 0 12)) :sha256 want}
+
+      (and (.isFile (io/file path)) (= want (sha256-of-file path)))
+      {:id id :route :worktree-unmoved :path path :from path :sha256 want}
+
+      :else
+      {:id id :route :unresolvable
+       :why (format (str "neither %s@%s nor the live %s hashes to the captured %s "
+                         "-- the source moved since the capture and its bytes are not recoverable")
+                    (str repo-rel) (if last-commit (subs (str last-commit) 0 12) "<no-commit>")
+                    path (subs (str want) 0 12))})))
+
+(def as-of-sources
+  "Resolved BEFORE anything is derived, and an unresolvable source stops the run
+   here rather than being carried as a problem. Carrying it would let the six
+   lines fall through to their live defaults and print a verdict block under an
+   AS-OF header -- a derivation labelled with a run and read from the tree, which
+   is the one thing this mode exists to prevent."
+  (when as-of-record
+    (let [rs (mapv resolve-as-of-source (:sources as-of-record))
+          bad (filterv #(= :unresolvable (:route %)) rs)]
+      (when (seq bad)
+        (println (format "flip_readiness_check --as-of: REFUSING to derive -- %d of %d captured sources unresolvable"
+                         (count bad) (count rs)))
+        (doseq [r bad] (println "  UNRESOLVABLE" (:id r) "--" (:why r)))
+        (println "  no verdict is printed: the capture no longer identifies the bytes the run read.")
+        (System/exit 1))
+      rs)))
+
+(def as-of-src-path
+  "id -> the file holding the captured bytes."
+  (into {} (map (juxt :id :path)) as-of-sources))
+
 ;; Sources. Each is overridable so negative_controls.sh can plant a defect in a
-;; COPY -- the shared registries are never mutated by a control.
-(def catalog-path   (or (System/getenv "CATALOG")       (str here "runs/RUNTIME-VALIDATION-CATALOG.edn")))
-(def accounting-path (or (System/getenv "ACCOUNTING")   (str here "variable-situation-accounting.edn")))
-(def audit-path     (or (System/getenv "HOLE_AUDIT")    (str here "runs/U27-hole-closability/audit.edn")))
-(def tally-path     (or (System/getenv "TALLY")         (str code-root "p4ng/empirics-futon/defect-repair-tally.edn")))
-(def receipt-path   (or (System/getenv "RECEIPT")       (str code-root "p4ng/empirics-futon/wm-status-receipt.json")))
-(def contract-path  (or (System/getenv "CONTRACT_JSON") (str code-root "mathlib4/DarkTower/WarMachine/holes-contract.json")))
+;; COPY -- the shared registries are never mutated by a control. The capture
+;; wins over the environment: --as-of names a run, and an env override that
+;; silently displaced one of its pinned sources would produce a derivation
+;; labelled with that run and read from somewhere else.
+(def catalog-path   (or (as-of-src-path :catalog)    (System/getenv "CATALOG")       (str here "runs/RUNTIME-VALIDATION-CATALOG.edn")))
+(def accounting-path (or (as-of-src-path :accounting) (System/getenv "ACCOUNTING")   (str here "variable-situation-accounting.edn")))
+(def audit-path     (or (as-of-src-path :hole-audit) (System/getenv "HOLE_AUDIT")    (str here "runs/U27-hole-closability/audit.edn")))
+(def tally-path     (or (as-of-src-path :tally)      (System/getenv "TALLY")         (str code-root "p4ng/empirics-futon/defect-repair-tally.edn")))
+(def receipt-path   (or (as-of-src-path :receipt)    (System/getenv "RECEIPT")       (str code-root "p4ng/empirics-futon/wm-status-receipt.json")))
+(def contract-path  (or (as-of-src-path :contract)   (System/getenv "CONTRACT_JSON") (str code-root "mathlib4/DarkTower/WarMachine/holes-contract.json")))
 (def mathlib-root   (or (System/getenv "MATHLIB_ROOT")  (str code-root "mathlib4")))
 (def md-path        (or (System/getenv "FLIP_MD")       (str here "runs/FLIP-READINESS.md")))
 (def edn-path       (or (System/getenv "FLIP_EDN")      (str here "runs/U32-flip-readiness/flip-readiness.edn")))
-
-(def problems (atom []))
-(defn fail! [& parts] (swap! problems conj (str/join " " (map str parts))))
 
 (defn read-edn [path what]
   (if (.isFile (io/file path))
@@ -108,12 +232,18 @@
     (if-not (.isFile f)
       (do (fail! "the emitted contract not found at" contract-path) {:verdict :blocked})
       (let [authority (get-in (json/parse-string (slurp contract-path) true) [:source :git-sha])
-            last-change (git mathlib-root "git" "log" "-1" "--format=%H" "--" "DarkTower/WarMachine/Holes.lean")
+            ;; The comparand is a `git log`, not a file, so --as-of takes it from
+            ;; the capture rather than re-running it: re-running would answer for
+            ;; the tree now and label the answer with the run.
+            captured-change (get-in as-of-record [:holes-lean-last-commit :commit])
+            last-change (or captured-change
+                            (git mathlib-root "git" "log" "-1" "--format=%H" "--" "DarkTower/WarMachine/Holes.lean"))
             fresh? (= authority last-change)]
         {:verdict (if fresh? :green :blocked)
          :contract-authority authority
          :holes-last-content-change last-change
          :comparand "the last commit that touched DarkTower/WarMachine/Holes.lean, not mathlib HEAD (C175)"
+         :comparand-read-from (if captured-change :the-run-capture :live-git)
          :receipt-says (:contract-pin receipt)
          :receipt-timestamp (:timestamp receipt)
          :blocked-on (when-not fresh?
@@ -212,18 +342,42 @@
   (str (get repo-dir repo (name repo)) "/test/"
        (-> ns-name (str/replace "-" "_") (str/replace "." "/")) ".clj"))
 
+(def as-of-per-node-git
+  "repo -> the captured {:head :porcelain} for the repos this line reads live git
+   in. U56 named this line as the one with no as-of seam at all (C511 section 1,
+   residual (b)); the capture is that seam."
+  (into {} (map (juxt :repo identity)) (:per-node-git as-of-record)))
+
 (def moved-since-head
   "Per repo: the set of repo-relative paths that have changed since the head the
    catalog recorded its runs at, INCLUDING uncommitted working-tree changes. A
    recorded green over a file that has since moved is reported stale, not
-   counted as fresh."
+   counted as fresh.
+
+   Under --as-of the second revision and the porcelain list both come from the
+   run's capture, so `changed since the catalog head` means `as of the run` and
+   not `as of now`. The diff is still asked of live git -- it has to be, the
+   answer is between two commits -- so an as-of derivation needs the captured
+   head to still be in the repo, and says so when it is not."
   (into {}
         (for [[repo-kw head] (:heads catalog)
-              :let [dir (str code-root (get repo-dir repo-kw (name repo-kw)))]]
-          [repo-kw
-           (into (set (remove str/blank? (str/split-lines (git dir "git" "diff" "--name-only" head "HEAD"))))
-                 (map #(str/trim (subs % 3))
-                      (remove str/blank? (str/split-lines (git dir "git" "status" "--porcelain")))))])))
+              :let [dir (str code-root (get repo-dir repo-kw (name repo-kw)))
+                    cap (get as-of-per-node-git repo-kw)
+                    to-rev (or (:head cap) "HEAD")
+                    porcelain (if cap
+                                (:porcelain cap)
+                                (str/split-lines (git dir "git" "status" "--porcelain")))]]
+          (do
+            (when (and as-of-record (nil? cap))
+              ;; Same refusal as an unresolvable source, for the same reason: the
+              ;; alternative is HEAD, which is the live tree wearing a run's label.
+              (println "flip_readiness_check --as-of: REFUSING to derive -- the capture holds no git"
+                       "state for repo" repo-kw "which the catalog's :heads names, so :per-node-tests"
+                       "cannot be derived as of the run")
+              (System/exit 1))
+            [repo-kw
+             (into (set (remove str/blank? (str/split-lines (git dir "git" "diff" "--name-only" head to-rev))))
+                   (map #(str/trim (subs % 3)) (remove str/blank? porcelain)))]))))
 
 (def node-evidence
   "node -> the per-node rows that carry a recorded test run, with each one's
@@ -567,11 +721,51 @@
         (System/exit 1))
       (System/exit 0))))
 
+;; ---------------------------------------------------------------------------
+;; --as-of report
+;; ---------------------------------------------------------------------------
+(defn as-of-provenance []
+  (str/join
+   "\n"
+   (concat
+    [(format "AS-OF %s" as-of-path)]
+    (for [r as-of-sources]
+      (format "  %-12s %-18s %s"
+              (name (:id r)) (name (:route r))
+              (or (:from r) (:why r))))
+    [(format "  %-12s %-18s %s" "per-node-git" "capture"
+             (str/join " " (for [g (:per-node-git as-of-record)]
+                             (format "%s@%s+%d-dirty" (name (:repo g))
+                                     (subs (str (:head g)) 0 12) (count (:porcelain g))))))
+     (format "  %-12s %-18s %s" "holes-lean" "capture"
+             (str (get-in as-of-record [:holes-lean-last-commit :commit])))])))
+
 (cond
+  ;; --as-of does not compose with --deposit. What a deposit made from a
+  ;; re-derivation asserts about a run is exactly the question U56 left open
+  ;; (C511 section 5: a repair has nowhere to land, three ways out named and
+  ;; none chosen), and it is Joe's to settle, not this script's.
+  (and as-of-path (contains? (set *command-line-args*) "--deposit"))
+  (do (println "flip_readiness_check: --as-of does not compose with --deposit.")
+      (println "  What a deposit made from a re-derivation asserts about an already-deposited run")
+      (println "  is the open question C511 section 5 records; it is not settled here.")
+      (System/exit 2))
+
+  ;; --emit writes the committed tree artifacts. Emitting them from a run's
+  ;; captured state would put a run property into a tree artifact -- the same
+  ;; mislabelling the deposit comment at :456-469 refuses in the other direction.
+  (and as-of-path (contains? (set *command-line-args*) "--emit"))
+  (do (println "flip_readiness_check: --as-of does not compose with --emit --")
+      (println "  FLIP-READINESS.md and its sidecar are properties of the tree, not of a run.")
+      (System/exit 2))
+
   (contains? (set *command-line-args*) "--deposit")
   (deposit! (or (second (drop-while #(not= "--deposit" %) *command-line-args*))
                 (do (println "flip_readiness_check --deposit needs a run-id") (System/exit 1))))
 
+  ;; --summary prints the VERDICTS block and nothing else, under --as-of too:
+  ;; that is what makes "the as-of derivation equals the live derivation" a byte
+  ;; comparison rather than a reading.
   (contains? (set *command-line-args*) "--summary")
   (do (println verdict-block)
       (doseq [p @problems] (println "  PROBLEM" p))
@@ -584,6 +778,19 @@
         (System/exit 1))
       (write-artifacts!)
       (System/exit 0))
+
+  ;; The as-of derivation is a property of a RUN, so it is not compared against
+  ;; the committed FLIP-READINESS.md or its sidecar -- those record the tree.
+  as-of-path
+  (do
+    (println (as-of-provenance))
+    (println verdict-block)
+    (doseq [p @problems] (println "  PROBLEM" p))
+    (if (seq @problems)
+      (do (println (format "flip_readiness_check --as-of: FAIL (%d problems) exit-convention=0-pass/1-fail"
+                           (count @problems)))
+          (System/exit 1))
+      (println "flip_readiness_check --as-of: PASS exit-convention=0-pass/1-fail")))
 
   :else
   (do

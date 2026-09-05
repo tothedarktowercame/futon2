@@ -1,0 +1,28 @@
+{:step/schema :wm/step-record-v1
+ :step/id "001-u57-capture"
+ :step/work "/tmp/wm-step-u57"
+ :step/started-at "2026-09-05T04:46:27Z"
+ :step/ended-at "2026-09-05T04:47:56Z"
+ :step/tick-exit 0
+ :step/days 14
+ :step/run-id "15eca31e-751d-4ecd-a259-68a5dd7a0408"
+ :step/pin-verify :ok
+ :step/pin-generation 0
+ :step/futon2-sha "e5f05733f17a5c7990354191cfbd6bad012e3053"
+ :step/futon2-tree-dirty? true
+ :step/futon2-tree-dirty-files [" M holes/labs/wm-contract/flip_readiness_check.bb" " M holes/labs/wm-contract/wm_step.sh" " M holes/labs/wm-contract/wm_step_records.bb" "?? holes/labs/zaif-harness/runs/build-loop.lock" "?? holes/labs/zaif-harness/runs/build-loop.log"]
+ :step/sandbox {:trace-dir "/tmp/wm-step-u57/sandbox/wm-trace"
+                :receipt-dir "/tmp/wm-step-u57/sandbox/receipts"
+                :rationale-dir "/tmp/wm-step-u57/sandbox/wm-trace/rationale"}
+ :step/live-data-written false
+ :step/run-lock :taken-and-released
+ :step/normalized-sha256 "9c3699b04e5e983ea9d347cd42f57c4d75443f3e91028411b92b193e81841300"
+ :step/store-basis {:before {:base "http://127.0.0.1:7070" :count 213241 :max-at "2026-09-05T04:45:49.971159373Z" :at "2026-09-05T04:46:27Z"} :after {:base "http://127.0.0.1:7070" :count 213248 :max-at "2026-09-05T04:47:43.546189412Z" :at "2026-09-05T04:48:04Z"}}
+ :step/evidence {:mode :pinned-replay
+                 :cassette "pin/evidence-cassette.edn"
+                 :cassette-sha256 "bb816a030f408cde2c9c26ef77d5f458b51b6ac730f2f007c274ec2be3c3973d"
+                 :cassette-entries 7
+                 :log "cassette.log"
+                 :note "the evidence store is the one input C509 called unpinnable; the cassette pins its ANSWERS, reached through the existing FUTON3C_EVIDENCE_BASE seam (pattern_registry.clj:33-38)"}
+ :step/world {:before "world-before.edn" :after "world-after.edn"}
+ :step/note "the sandbox is restored from the pin before the tick, so two steps of the same pin are steps from the same state"}

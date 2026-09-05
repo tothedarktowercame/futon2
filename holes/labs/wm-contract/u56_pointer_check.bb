@@ -1,9 +1,9 @@
 #!/usr/bin/env bb
 ;; U56 -- the per-artifact pointer check for C511-repair-or-elaborate.md.
 ;;
-;;   bb u56_pointer_check.bb
+;;   bb u56_pointer_check.bb [artifact.md]
 ;;
-;; Every file:line or file:A-B pointer in C511 must resolve: the file exists,
+;; Every file:line or file:A-B pointer in the artifact must resolve: the file exists,
 ;; A <= B, and both are within the file's line count. Exit 1 on any failure.
 ;;
 ;; TWO RESOLUTION CONVENTIONS, and the second one is here for a reason. A
@@ -26,7 +26,11 @@
    (str futon2 "checks/") (str futon2 "holes/labs/wm-contract/")
    (str code "mathlib4/DarkTower/WarMachine/") (str code "p4ng/empirics-futon/")])
 
-(def artifact (str futon2 "holes/labs/wm-contract/C511-repair-or-elaborate.md"))
+(def artifact
+  "U57 made the artifact an argument: the resolution rules here are not specific
+   to C511 and a second copy of them would be a second thing to keep true."
+  (or (first *command-line-args*)
+      (str futon2 "holes/labs/wm-contract/C511-repair-or-elaborate.md")))
 (def ptr-re #"([A-Za-z0-9_][A-Za-z0-9_./-]*\.(?:clj|bb|sh|edn|md|json|lean)):(\d+)(?:-(\d+))?")
 
 (defn resolve-file [f]
@@ -54,7 +58,7 @@
                                          (format "past EOF (file has %d lines)" (line-count file)))]
                      :when problem]
                  [p problem]))]
-  (println (format "u56_pointer_check: %d distinct file:line pointers in C511, %d unresolved"
-                   (count ptrs) (count bad)))
+  (println (format "u56_pointer_check: %d distinct file:line pointers in %s, %d unresolved"
+                   (count ptrs) (str/replace artifact code "") (count bad)))
   (doseq [[p why] bad] (println "  UNRESOLVED" p "--" why))
   (System/exit (if (seq bad) 1 0)))

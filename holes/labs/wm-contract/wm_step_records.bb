@@ -226,6 +226,109 @@
      :percentages (into {} (map (fn [[k v]] [k (/ (double v) total)])) by-ws)
      :where "war_machine.clj:2794-2801,3652-3668,3828-3836; observation.clj:53-56"}))
 
+;; ---------------------------------------------------------------------------
+;; U57 -- the flip-readiness capture
+;; ---------------------------------------------------------------------------
+
+(def flip-readiness-sources
+  "The six files `flip_readiness_check.bb` reads at :69-74, each with the
+   environment variable that overrides it (:69-75) and the repo it lives in.
+   `world-files` above is a DIFFERENT set -- C509 R7's tick inputs -- and only
+   one of these six is on it (:holes-contract, :167). The check derives its six
+   lines from the state of these files at the moment of asking, so a run that
+   does not pin them cannot have its verdict re-derived later; U56 measured that
+   as the :flip-readiness absence's elaborate leg (C511 section 1).
+
+   Each entry is [id path env-var repo where]. `env-var` is recorded, not used
+   here: it is what lets an as-of derivation reach the check through the check's
+   own override seam instead of a hand-assembled env block."
+  [[:catalog    (str home "/code/futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn")
+    "CATALOG"       "futon2"   "flip_readiness_check.bb:69"]
+   [:accounting (str home "/code/futon2/holes/labs/wm-contract/variable-situation-accounting.edn")
+    "ACCOUNTING"    "futon2"   "flip_readiness_check.bb:70"]
+   [:hole-audit (str home "/code/futon2/holes/labs/wm-contract/runs/U27-hole-closability/audit.edn")
+    "HOLE_AUDIT"    "futon2"   "flip_readiness_check.bb:71"]
+   [:tally      (str home "/code/p4ng/empirics-futon/defect-repair-tally.edn")
+    "TALLY"         "p4ng"     "flip_readiness_check.bb:72"]
+   [:receipt    (str home "/code/p4ng/empirics-futon/wm-status-receipt.json")
+    "RECEIPT"       "p4ng"     "flip_readiness_check.bb:73"]
+   [:contract   (str home "/code/mathlib4/DarkTower/WarMachine/holes-contract.json")
+    "CONTRACT_JSON" "mathlib4" "flip_readiness_check.bb:74"]])
+
+(def per-node-test-repos
+  "`repo-dir` verbatim (flip_readiness_check.bb:205), the repos whose live git
+   the :per-node-tests line reads with no override: `moved-since-head`
+   (:215-226) is `git diff --name-only <catalog-head> HEAD` unioned with
+   `git status --porcelain`, both evaluated at NOW. Capturing each repo's HEAD
+   and its porcelain list is the as-of input that line has never had."
+  [[:futon2 (str home "/code/futon2")]
+   [:futon3c (str home "/code/futon3c")]])
+
+(defn- git-out
+  "stdout of a git command in `dir`, trimmed; nil if the command failed or the
+   directory is not there. Failure is nil rather than an exception because a
+   sibling repo that is absent is a fact the record should carry, not a crash."
+  [dir & argv]
+  (when (.isDirectory (io/file dir))
+    (let [r (try (apply process/shell {:dir dir :out :string :err :string :continue true} argv)
+                 (catch Exception e {:exit 1 :out "" :err (str e)}))]
+      (when (zero? (:exit r)) (str/trim (str (:out r)))))))
+
+(defn- porcelain-lines [dir]
+  (vec (remove str/blank? (str/split-lines (or (git-out dir "git" "status" "--porcelain") "")))))
+
+(defn- source-identity
+  "One captured source: its content hash NOW, plus the git identity that lets
+   the bytes be fetched back. The two are recorded together on purpose -- the
+   commit says where to look and the sha256 says whether what came back is what
+   the run read. A repo sha alone would not have caught the wrong-commit
+   extraction C511 section 1 records (`69721b12` vs `4bbc7111`)."
+  [[id path env repo where]]
+  (let [f (io/file path)
+        root (str home "/code/" repo)
+        rel (when (str/starts-with? path (str root "/")) (subs path (inc (count root))))
+        last-commit (when rel (git-out root "git" "log" "-1" "--format=%H" "--" rel))
+        committed-blob (when (and rel last-commit)
+                         (git-out root "git" "rev-parse" (str last-commit ":" rel)))
+        worktree-blob (when (.isFile f) (git-out root "git" "hash-object" "--" path))]
+    (merge {:id id :path path :env env :where where :exists? (.exists f)
+            :repo repo :repo-rel rel
+            :repo-root root
+            :repo-head (git-out root "git" "rev-parse" "HEAD")
+            :last-commit last-commit
+            :last-commit-at (when (and rel last-commit)
+                              (git-out root "git" "log" "-1" "--format=%cI" last-commit))
+            :committed-blob-sha1 committed-blob
+            :worktree-blob-sha1 worktree-blob
+            ;; The one field an as-of resolver branches on: false means the bytes
+            ;; the run read are in no commit, so `git show` cannot return them and
+            ;; only an unmoved worktree can.
+            :worktree-matches-commit? (boolean (and committed-blob worktree-blob
+                                                    (= committed-blob worktree-blob)))}
+           (when (.isFile f)
+             {:bytes (.length f) :sha256 (sha256-file path) :mtime-ms (.lastModified f)}))))
+
+(defn flip-readiness-capture
+  "Everything `flip_readiness_check.bb` reads from outside its own code, pinned:
+   the six sources by content hash and git identity, the two repos the
+   :per-node-tests line reads live git in, and the one `git log` the
+   :contract-pin line runs (:111) -- which is a source too, and is not a file."
+  []
+  {:sources (mapv source-identity flip-readiness-sources)
+   :per-node-git (vec (for [[repo-kw root] per-node-test-repos]
+                        {:repo repo-kw :root root
+                         :head (git-out root "git" "rev-parse" "HEAD")
+                         :porcelain (porcelain-lines root)
+                         :where "flip_readiness_check.bb:215-226"}))
+   :holes-lean-last-commit
+   {:repo "mathlib4"
+    :path "DarkTower/WarMachine/Holes.lean"
+    :commit (git-out (str home "/code/mathlib4") "git" "log" "-1" "--format=%H"
+                     "--" "DarkTower/WarMachine/Holes.lean")
+    :where "flip_readiness_check.bb:111 -- the comparand C175 settled; NOT mathlib HEAD"}
+   :where "flip_readiness_check.bb:69-75,111,215-226"
+   :consumed-by "bb flip_readiness_check.bb --as-of <world-record.edn>"})
+
 (defn world []
   (let [now (System/currentTimeMillis)
         mana (io/file (str home "/code/storage/futon0/mana-snapshot.json"))]
@@ -256,6 +359,12 @@
      ;; CONDITION under which its determinism claim holds rather than asserting
      ;; the read is harmless.
      :world/commit-census (commit-census (Long/parseLong (or (System/getenv "FUTON_WM_STEP_DAYS") "14")))
+     ;; U57. The six sources flip_readiness_check.bb:69-74 reads, plus the two
+     ;; repos its :per-node-tests line reads live git in and the Holes.lean
+     ;; `git log` its :contract-pin line runs. Captured BEFORE the tick, beside
+     ;; the rest of the world, so `--as-of` can re-derive the run's own
+     ;; flip-readiness verdict instead of the tree's verdict at reading time.
+     :world/flip-readiness (flip-readiness-capture)
      :world/anticipation
      (let [p (str home "/code/calendar/events.edn")
            f (io/file p)]
@@ -492,7 +601,13 @@
               (println (format "world: %d files hashed; mana age %.2f min, stale? %s"
                                (count (:world/files w))
                                (double (or (get-in w [:world/mana-age :age-min]) -1.0))
-                               (get-in w [:world/mana-age :stale?]))))
+                               (get-in w [:world/mana-age :stale?])))
+              (let [fr (:world/flip-readiness w)
+                    srcs (:sources fr)]
+                (println (format "world: flip-readiness sources %d/%d hashed, %d in-commit; per-node repos %s"
+                                 (count (filter :sha256 srcs)) (count srcs)
+                                 (count (filter :worktree-matches-commit? srcs))
+                                 (str/join "," (map (comp name :repo) (:per-node-git fr)))))))
     "delta" (let [[pin sand out] args
                   d (delta pin sand)]
               (emit! out d)

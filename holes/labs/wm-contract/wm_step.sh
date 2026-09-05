@@ -121,6 +121,15 @@ ev_stop() {
 sha_of() { sha256sum "$1" | cut -d' ' -f1; }
 git_sha() { ( cd "$1" && git rev-parse HEAD 2>/dev/null || echo "" ); }
 tree_dirty() { ( cd "$1" && [ -n "$(git status --porcelain 2>/dev/null)" ] && echo true || echo false ); }
+# U57 closes the residual C511 section 1 named: the boolean above cannot exclude
+# a dirty-then-reverted-without-a-commit path, so a later reader cannot tell
+# which files the tick actually read. This records the porcelain LIST beside it.
+# `prn` of a vector, not a hand-built literal: a path with a quote or a backslash
+# in it would otherwise write EDN the step record cannot be read back from.
+tree_dirty_files() {
+  ( cd "$1" && git status --porcelain 2>/dev/null ) \
+    | bb -e '(prn (vec (remove clojure.string/blank? (clojure.string/split-lines (slurp *in*)))))'
+}
 
 # The evidence store's watermark: C509's :store-basis, the only cursor-shaped
 # thing anywhere on the tick path (run_tick_once.clj:126-135) -- and nothing
@@ -291,6 +300,7 @@ cmd_step() {
  :step/pin-generation $(bb -e '(println (:pin/generation (clojure.edn/read-string (slurp (first *command-line-args*)))))' "$work/pin/pin.edn")
  :step/futon2-sha "$(git_sha "$ROOT")"
  :step/futon2-tree-dirty? $(tree_dirty "$ROOT")
+ :step/futon2-tree-dirty-files $(tree_dirty_files "$ROOT")
  :step/sandbox {:trace-dir "$work/sandbox/wm-trace"
                 :receipt-dir "$work/sandbox/receipts"
                 :rationale-dir "$work/sandbox/wm-trace/rationale"}
