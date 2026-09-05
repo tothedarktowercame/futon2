@@ -135,6 +135,29 @@
         (is (= :already-queued (get-in second-run [:item :status])))
         (is (= 1 (count (brief/items (:brief-root cfg)))))))))
 
+(deftest the-bulletins-own-commit-is-not-the-days-work
+  (testing "generate, commit only the bulletin, regenerate -> identical bytes"
+    (let [repo (fixture-repo)
+          _ (write-registry-and-ledger! repo)
+          out (str (:dir repo) "/holes/labs/demo/bulletins")
+          cfg (assoc (fixture-config repo out
+                                     (.getPath (temp-dir "bulletin-brief")))
+                     :out-dir out)
+          first-run (bulletin/generate! cfg)
+          text-1 (slurp (:file first-run))]
+      (sh! (:dir repo) nil "git" "add" "--" "holes/labs/demo/bulletins")
+      (sh! (:dir repo) "2026-03-02T23:00:00" "git" "commit" "-q"
+           "-m" "bulletin: the day's digest" "--" "holes/labs/demo/bulletins")
+      (is (= 2 (count (bulletin/day-commits (:dir repo) "2026-03-02")))
+          "the day really does now hold the bulletin's own commit")
+      (let [second-run (bulletin/generate! cfg)]
+        (is (false? (:rewritten? second-run))
+            "the digest must not chase its own commit")
+        (is (= text-1 (slurp (:file second-run))))
+        (is (= 1 (get-in (bulletin/collect-facts cfg "2026-03-02")
+                         [:counts :commits]))
+            "one commit of work, the bulletin's own dropped")))))
+
 (deftest the-facts-are-the-ones-the-sources-carry
   (let [repo (fixture-repo)
         _ (write-registry-and-ledger! repo)

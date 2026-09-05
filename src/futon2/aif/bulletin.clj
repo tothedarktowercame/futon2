@@ -249,13 +249,29 @@
                   :outcome (outcome-line (io/file runs-repo runs-rel d))})))))
 
 ;; ----------------------------------------------------------- fact gathering
+(defn self-commit?
+  "A commit that writes nothing but the bulletin directory is the digest
+  recording itself, not the day's work.
+
+  Dropping these is what makes the acceptance property true: without it,
+  generating and committing a bulletin adds a commit to the day, so the next
+  regeneration produces different bytes and commits again -- the digest chases
+  its own tail once per session stop. With it, generate -> commit ->
+  regenerate is a fixed point."
+  [bulletin-rel-dir {:keys [files]}]
+  (and (seq files)
+       (every? #(str/starts-with? % (str bulletin-rel-dir "/")) files)))
+
 
 (defn collect-facts
   "Everything the bulletin for `date` states, with nothing rendered yet."
   [cfg date]
-  (let [repo-commits (mapv (fn [{:keys [name path]}]
+  (let [self? (partial self-commit? (:bulletin-rel-dir cfg))
+        repo-commits (mapv (fn [{:keys [name path]}]
                              {:repo name :path path
-                              :commits (day-commits path date)})
+                              :commits (some->> (day-commits path date)
+                                                (remove self?)
+                                                vec)})
                            (:repos cfg))
         ;; The run store belongs to one repository, and it is the one named by
         ;; :runs-repo -- keyed on the path rather than on the repo's label, so
