@@ -1,16 +1,27 @@
 #!/usr/bin/env python3
-"""L2 flexiarg parse gate for library/process/*.flexiarg.
+"""L2/L5 flexiarg parse gate.
 
-Validates README-flexiarg section 1/3 structure: @flexiarg id matches the
-file's path, one `! conclusion:` node, and the five required components
-(context, IF, HOWEVER, THEN, BECAUSE) as top-level `+` nodes; each file also
-carries @why, @how, @receipts-or-evidence citations. Exit 1 on any failure.
+Usage: l2_parse_gate.py [SECTION] [LIB]
+Default section "process" (L2). Section "problems" (L5) checks the same
+structure but requires an @holds-at-or-source pointer instead of the
+conventions-note citation. Exit 1 on any failure.
 """
 import os, re, sys
 
-LIB = sys.argv[1] if len(sys.argv) > 1 else "/home/joe/code/futon3/library"
-SEC = "process"
+SEC = sys.argv[1] if len(sys.argv) > 1 else "process"
+LIB = sys.argv[2] if len(sys.argv) > 2 else "/home/joe/code/futon3/library"
 REQ = ["context", "if", "however", "then", "because"]
+# Pre-existing problems/* nodes minted by another lane before this gate
+# existed (L5 acceptance gates the L5-minted files; legacy files are left
+# untouched per the row's path-scope rule).
+LEGACY = {
+    "problems/commitment-temperature-is-instrumented-as-gain",
+    "problems/operator-turns-become-inference-observations",
+    "problems/per-tick-mismatch-instruments-outer-loop-gain",
+    "problems/refusal-prediction-error-v1--source-field-missing",
+    "problems/satisfied-rungs-are-counted-and-surfaced",
+    "problems/tension-proposes-candidates",
+}
 fails = []
 n = 0
 d = os.path.join(LIB, SEC)
@@ -19,6 +30,8 @@ for fn in sorted(os.listdir(d)):
         continue
     n += 1
     pid = SEC + "/" + fn[:-len(".flexiarg")]
+    if pid in LEGACY:
+        continue
     lines = open(os.path.join(d, fn), encoding="utf-8").read().splitlines()
     meta = {}
     nodes = []
@@ -50,10 +63,16 @@ for fn in sorted(os.listdir(d)):
         if k not in meta:
             fails.append((pid, "missing @%s" % k))
     text = "\n".join(lines)
-    if "N-process-trap-recording-conventions" not in text:
-        fails.append((pid, "no conventions-note receipt citation"))
-    if "P-assured-process" not in text:
-        fails.append((pid, "no P-assured-process problem naming"))
+    if SEC == "process":
+        if "N-process-trap-recording-conventions" not in text:
+            fails.append((pid, "no conventions-note receipt citation"))
+        if "P-assured-process" not in text:
+            fails.append((pid, "no P-assured-process problem naming"))
+    elif SEC == "problems":
+        if not (re.search(r"^@(source|why|how) .*source:", text, re.M)
+                or "@holds-at" in text
+                or "source:" in text):
+            fails.append((pid, "no source pointer"))
     if re.search(r"^@draft", text, re.M):
         fails.append((pid, "@draft pattern cannot carry @why (AC8)"))
 for f in fails:
