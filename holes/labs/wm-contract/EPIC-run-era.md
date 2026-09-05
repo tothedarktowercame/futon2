@@ -769,3 +769,47 @@ residual counts, and the would-we-know line — the paper's per-node
 reporting then carries the problem, the readiness, the process
 assurance, and the residuals in one generated block. PENDING F8
 relation: the map's class-(a)/(b) residuals are F8's row-level input.
+
+## The convergence ruling (Joe, 2026-09-05) — F8 sharpened: Lean completion, name discipline, leading-leg readiness, runtime certificates
+
+Verbatim: "the first order of business as I see it is to get the lean
+material complete with regard to our implementation of the theory,
+keeping distinct variable names clearly distinct, and where necessary
+indexing the implementation by a readiness level (e.g. if cascades
+need work, we could have the implementation run ahead of the spec or
+the spec run ahead of the implementation, but both need to converge
+into a form where run-time certificates can be provided showing that
+the actual implementation's behaviour matches the intended one)"
+
+F8 (pending mint, to be inserted as the NEXT F row at the pause —
+F4's seat was already in flight at 10:26 when this ruling arrived)
+gains its three legs from this ruling:
+
+1. **Lean completion.** One Lean statement per class-(a) quantity
+   (o, eps, Pi-precision, F-pi, mu, mu-next, u, T, tau — each already
+   runs; the problem map cites every runtime site), plus the R17
+   class-(b) repair path (the declared o/mu accumulation vs the
+   A4a substrate divergence). Slice discipline: one quantity or one
+   coherent cluster per slice.
+2. **Name discipline.** A symbol concordance registry: glossary
+   symbol <-> Lean identifier <-> runtime var <-> node, with a checker
+   REFUSING a bare-symbol collision (the capital-Pi three-way case is
+   the negative control's basis). Distinctness is checked, not
+   remembered.
+3. **Convergence ledger + certificates.** Per quantity, BOTH legs
+   indexed on the F6 rung vocabulary with a LEADING-LEG marker (both
+   directions already exist: implementation ahead for the nine
+   class-(a) rows; spec ahead for pi/cascades, where F1's Lean
+   constructors await F7's runtime carrier). Convergence terminates in
+   a runtime certificate on the F3 pattern — F3's R5 receipt
+   (runs/F3-node-sim/00-r5-pilot.edn: Lean witness numbers AND every
+   F1 seam row at deviation 0.0, byte-identical re-run) is the FORM:
+   reference derived from carriers independently of the node under
+   test, exact arithmetic, refusing verdict. A quantity is CONVERGED
+   when its certificate exists and is green on accepted runs; the
+   ledger row cites the certificate or says which leg is behind.
+
+Priority note: this ruling makes F8 ordering-first among unstarted F
+rows (before F5/F6/F7 in pick order; F6's scale vocabulary is consumed
+by leg-indexing but the accounting build itself does not gate F8's
+slices; F7 becomes the runtime leg of the pi convergence row).
