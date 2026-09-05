@@ -1,0 +1,46 @@
+{:schema :wm/f1-lean-axiom-probe-v1
+ :row :F1
+ :slice "slice 1 -- the Lean composition"
+ :taken-by "lake env lean + #print axioms, run from /home/joe/code/mathlib4"
+ :toolchain "leanprover/lean4:v4.31.0-rc1"
+ :modules
+ [{:module "DarkTower.WarMachine.MachineQ"
+   :path "mathlib4/DarkTower/WarMachine/MachineQ.lean"
+   :sha256 "d30b1bfceab5cccc214f95e6593318b0bd53f3a838482ad3f6b2af4fb41a91ed"
+   :lean-exit 0 :error-diagnostics 0 :sorry-in-module 0}
+  {:module "DarkTower.WarMachine.MachineQWitness"
+   :path "mathlib4/DarkTower/WarMachine/MachineQWitness.lean"
+   :sha256 "601445753f31a930acc5bc0f8b23d080a8c313e5f2c1b911d0578f97aeb587f3"
+   :lean-exit 0 :error-diagnostics 0 :sorry-in-module 0}]
+ :lake-build :ok
+ :lake-build-jobs "2706"
+ :corpus-typecheck
+  {:method "futon2/holes/labs/wm-contract/lean_state_probe.bb --out /tmp/F1-lean-state.edn"
+   :modules 71 :exit-zero 71 :error-diagnostics 0
+   :sorry-source 10 :sorry-lean-reported 10
+   :note "The ten sorries are Holes.lean's pre-existing declared holes; neither new module adds one."}
+ :declarations
+  [{:name "DarkTower.WarMachine.MachineQ.QReading" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.predictedStateMass" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.predictedStateMass_nonneg" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.predictedStateMass_sum" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.machinePredictedStateKernel" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.predictiveOutcomeMass" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.predictiveOutcomeMass_nonneg" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.predictiveOutcomeMass_sum" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.machinePredictiveOutcomeKernel" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.rowsEqualOfEqualPlans" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.plansDifferOfRowsDiffer" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.machineAmbiguity" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQ.machineExpectedFreeEnergy" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQWitness.alphabetIsClosed" :axioms [propext]}
+   {:name "DarkTower.WarMachine.MachineQWitness.demoModel" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQWitness.demoReading" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQWitness.demoQ" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQWitness.demoRowsNormalised" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQWitness.demoOrdinaryRowMasses" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQWitness.demoPolicyConditionedDifference" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQWitness.demoPlansDiffer" :axioms [propext Classical.choice Quot.sound]}
+   {:name "DarkTower.WarMachine.MachineQWitness.flatReadingRowsCoincide" :axioms [propext Classical.choice Quot.sound]}]
+ :sorry-ax-count 0
+ :note "Every declaration rests on Lean's own three axioms and nothing else; alphabetIsClosed needs only propext. `sorryAx` occurs nowhere, which is the difference between a kernel that is CONSTRUCTED and one that is asserted. The two #guard_msgs blocks in the modules re-check this at build time, so a later sorry breaks the build rather than passing quietly."}

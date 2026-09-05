@@ -1,5 +1,5 @@
 {:schema :wm/q-interface-completeness-v1
- :as-of "2026-09-04"
+ :as-of "2026-09-05"
  :owner :wm-verbs
  :subject :predictive-outcome-Q
  :notation {:primary "Q(o|pi)"
@@ -7,7 +7,11 @@
                               "Q(s), the variational state posterior"
                               "Beta/Dirichlet structure-learning posteriors"]}
  :claim
- "Lean defines the finite-support carrier and Q-consuming formulas, but the War Machine has no Lean construction of its predictive outcome kernel from belief/model/policy inputs and no concrete policy-grain binding. Runtime action-grain Gaussian prediction is a scoped proxy, not that missing construction."
+ "Lean now CONSTRUCTS the predictive outcome kernel from belief/model/policy inputs (:F1 slice 1, mathlib4 824f67b5e2), but the War Machine has no concrete policy-grain binding to apply it at: its policy carrier, state space, belief reading and preference distribution are all still uninhabited. Runtime action-grain Gaussian prediction is a scoped proxy, not that construction and not bound to it."
+ :claim-superseded
+ {:at "2026-09-05" :by :F1 :commit "mathlib4 824f67b5e2"
+  :was "Lean defines the finite-support carrier and Q-consuming formulas, but the War Machine has no Lean construction of its predictive outcome kernel from belief/model/policy inputs and no concrete policy-grain binding. Runtime action-grain Gaussian prediction is a scoped proxy, not that missing construction."
+  :what-moved "The first clause only. The composition exists; the machine-grain binding does not."}
  :source-pins
  [{:id :lean-spine
    :path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"
@@ -40,10 +44,14 @@
    :meaning "PolicyIndex -> finite normalized distribution over heterogeneous Outcome Obs"
    :limitation "A type and laws, not the War Machine's kernel instance."}
   {:id :lean/Q-machine-construction
-   :status :missing
+   :status :constructor-landed-machine-instance-missing
+   :moved-by "mathlib4 824f67b5e2 (:F1 slice 1, 2026-09-05)"
    :required-signature "GenerativeModel + BeliefState + policy/cascade -> PredictiveOutcomeKernel"
-   :blocker "No Lean definition composes transition and observation kernels over a concrete policy/cascade to construct Q(o|pi)."
+   :constructor "DarkTower.WarMachine.MachineQ.machinePredictiveOutcomeKernel (mathlib4 DarkTower/WarMachine/MachineQ.lean:187-198), non-private, arguments a GenerativeModel and a BeliefState, every row normalized by proof at MachineQ.lean:168-181. Q(s|pi) at MachineQ.lean:139-146, normalization at MachineQ.lean:122-134."
+   :blocker "The composition exists; nothing applies it at the machine's own grain. The four carriers a machine application needs -- policy family, state space, belief reading, preference distribution -- are separately uninhabited (FUNDAMENTALS.edn), so the only application in the corpus is over carriers declared for a demonstration (MachineQWitness.lean:218-232)."
+   :blocker-superseded "No Lean definition composes transition and observation kernels over a concrete policy/cascade to construct Q(o|pi)."
    :acceptance "A non-toy machine instance is constructed from pinned model inputs and proves row normalization."
+   :acceptance-status :not-met
    :falsifier "The constructor cannot elaborate for a declared machine policy, or its row mass differs from one."}
   {:id :lean/Q-risk-consumer
    :status :implemented-parametric
@@ -182,6 +190,62 @@
    "gen_aif_dag.bb not run; nothing regenerated into a publish (TN 9a)."
    "REPORTED NOT REPAIRED: D5d and D7 in control-map-edges.edn cite efe.clj:602 and :607-609 for fm/predict and the horizon guard. U24's insertions moved them to efe.clj:624 and :629-631, so both bases are ~22 lines stale at source. That is a control-map registry repair, not this row's, and neither pointer is in this registry."
    "REPORTED NOT REPAIRED: [:R4 :R8] labelled Q(o|pi) (I2) has no row in :interfaces here. Adding one is a new finding, not a re-verification, so it is left for a row of its own."]}
+ :slice-review
+ {:at "2026-09-05"
+  :row :F1
+  :slice "slice 1 of :F1 -- the Lean leg. The runtime leg is untouched and no runtime file was read for this entry."
+  :commit "mathlib4 824f67b5e2"
+  :method "Wrote the composition the :lean/Q-machine-construction blocker said did not exist, then re-read the finding against it. Every claim below is a declaration at a file:line in the committed tree, not a grep."
+  :what-landed
+  [{:what "the declared seam"
+    :at "mathlib4/DarkTower/WarMachine/MachineQ.lean:84-101"
+    :read "structure QReading (model : GenerativeModel Obs State Action PolicyIndex) carries states, outcomes, plan : PolicyIndex -> Action, beliefMass : BeliefState -> State -> R, the two mass obligations on the reading, and the two support hypotheses tying the model's rows to the declared carriers. The join the pin-review recorded as impossible (\"THE TYPES DO NOT MEET\") is this field, stated as an obligation a caller must discharge rather than assumed."}
+   {:what "Q(s|pi), constructed"
+    :at "mathlib4/DarkTower/WarMachine/MachineQ.lean:139-146"
+    :read "machinePredictedStateKernel : ProbabilityKernel PolicyIndex State, mass = the belief pushed one controlled step through the transition kernel under plan pi; normalization proved at :122-134 by swapping the double sum (:57-62) onto the transition kernel's own normalised field. This is the predictedState argument Holes.ambiguity (Holes.lean:6880-6885) takes and that no declaration previously produced."}
+   {:what "Q(o|pi), constructed"
+    :at "mathlib4/DarkTower/WarMachine/MachineQ.lean:187-198"
+    :read "machinePredictiveOutcomeKernel : PredictiveOutcomeKernel PolicyIndex Obs, non-private, arguments a GenerativeModel and a BeliefState. Row normalization at :168-181 reduces to the observation kernel's own normalised field and then to the predicted-state sum. This is exactly the falsifier FUNDAMENTALS.edn states for the Lean side of :fundamental/predictive-outcome-kernel-constructor."}
+   {:what "the construction's law"
+    :at "mathlib4/DarkTower/WarMachine/MachineQ.lean:210-218"
+    :read "rowsEqualOfEqualPlans: two policies with the same planned action have the same predicted-outcome row. This is the falsifiable content of policy-conditioning here -- it says what a difference must come FROM -- and its contrapositive is at :221-228."}
+   {:what "the joins the constructed kernels open"
+    :at "mathlib4/DarkTower/WarMachine/MachineQ.lean:238-253"
+    :read "machineAmbiguity applies Holes.ambiguity to the constructed Q(s|pi); machineExpectedFreeEnergy applies Holes.expectedFreeEnergy to both. The preference distribution C and its positivity hypothesis stay arguments, because C is a separate uninhabited fundamental and choosing it is a ruling."}
+   {:what "the exhibited difference"
+    :at "mathlib4/DarkTower/WarMachine/MachineQWitness.lean:234-253"
+    :read "demoOrdinaryRowMasses reads 25/64 against 11/64 off the constructed kernel for two policies, for every BeliefState; demoPolicyConditionedDifference is the inequality. Negative control at :264-274: with both policies committing to the same step the rows coincide, so the separation is the planned action's and not the machinery's."}
+   {:what "the outcome alphabet"
+    :at "mathlib4/DarkTower/WarMachine/MachineQWitness.lean:56-75"
+    :read "the six rows are the mission's declared observation closure -- ordinary evidence plus no-result, failure, timeout, conflict, missing (futon2/holes/missions/M-aif-policy-conditioned-eig.md:81) -- and alphabetIsClosed decides that those six are all of them, so no catch-all absorbs a seventh outcome."}]
+  :what-moved
+  [{:id :lean/Q-machine-construction :verdict :changed
+    :what-moved "The blocker's whole sentence became false: a Lean definition now composes transition and observation kernels over a policy to construct Q(o|pi). :status moved from :missing to :constructor-landed-machine-instance-missing, and the superseded wording is kept on the row rather than edited away."
+    :what-did-not-move ":acceptance. \"A non-toy machine instance is constructed from pinned model inputs\" is NOT met and is recorded :acceptance-status :not-met. The only application of the constructor in the corpus is over carriers declared for the demonstration, which the FUNDAMENTALS.edn criterion classes as a fixture."}]
+  :what-did-not-move
+  [{:id :lean/Q-carrier :verdict :unchanged :read "Holes.lean:6757-6759 untouched; this slice added no declaration to Holes.lean."}
+   {:id :lean/Q-risk-consumer :verdict :unchanged
+    :read "predictiveOutcomeRisk and expectedFreeEnergy still take Q as a bound parameter (Holes.lean:6867-6872, 6887-6891). MachineQ.machineExpectedFreeEnergy supplies one at a call site; it does not alter the Holes declarations."}
+   {:id :lean/Q-eig-consumer :verdict :unchanged
+    :read "expectedInformationGain (Holes.lean:6926-6934) still takes Q, a parameter prior and a parameter posterior. The last two are :fundamental/parameter-kernels, uninhabited, so this slice does not reach it: nothing here constructs a theta."}
+   {:id :runtime/Q-action-proxy :verdict :unchanged :read "No runtime file was touched or read for this slice."}
+   {:id :runtime/Q-policy :verdict :unchanged}
+   {:id :Q/in-belief :verdict :unchanged
+    :note "The Lean end of this row's blocker is narrowed, not discharged: a composition now maps a belief through transition and observation kernels into Q, but only through a QReading that the machine does not have. The seam is named where an absence was."}
+   {:id :Q/in-candidates :verdict :unchanged}
+   {:id :Q/in-policy-depth :verdict :unchanged
+    :read "This slice's plan : PolicyIndex -> Action is a ONE-STEP projection. A constructed temporal cascade is still absent on both sides, so the row's :runtime :absent and :effect :missing-wire stand."}
+   {:id :Q/producer-to-risk :verdict :unchanged
+    :read "The Lean end now has a constructor a producer could be bound to; no binding is asserted, and the runtime end is the unchanged proxy."}
+   {:id :Q/risk-to-ranking :verdict :unchanged}
+   {:id :Q/to-EIG :verdict :unchanged}]
+  :work-order-effect
+  "Unit 2 (:construct-machine-Q-in-Lean) is met AS A COMPOSITION and not AT THE MACHINE'S GRAIN, because unit 1 (:name-policy-and-outcome-domain) is not done: the policy carrier is still an open question to Joe (proposals/STRAWMAN-M-aif-policy-conditioned-eig.md question 1). The order in the work order was right and this slice did not reorder it -- it built the composition that unit 1 will be applied through."
+  :not-done
+  ["No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions. Nothing here is a ruling."
+   "gen_aif_dag.bb and gen_q_interface_table.bb not run; nothing regenerated into a publish (TN 9a)."
+   "No source pin re-taken. The pins in :source-pins still name the 2026-09-04 shas; Holes.lean is byte-identical since, and the two new modules are not pinned here because they are this slice's own output rather than evidence it read."
+   "The runtime leg of :F1 -- the R4 seam, the default-off flag, the boundary rejection of the Gaussian proxy and the two-point fixture -- is untouched."]}
  :work-order
  [{:order 1 :unit :name-policy-and-outcome-domain
    :acceptance "One concrete policy/cascade and enumerable outcome space are declared; absences are typed."}
