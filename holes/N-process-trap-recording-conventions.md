@@ -320,7 +320,8 @@ checker is marked `aspirational`.
 | `worklist_check.bb` | board rows failing structural validity |
 | F6 registry validator *(to be built)* | rung advancement without the rung's evidence kind |
 | `run_era_ledger.bb` | deposits failing ledger form |
-| `negative_controls.sh` | instrument integrity failures (fixtures at `constructed`) |
+| `negative_controls.sh` | generator/checker integrity failures shown by planted defects |
+| fixture-refusal at `constructed` | **aspirational** — lands with the F6 validator |
 
 ### APM
 
