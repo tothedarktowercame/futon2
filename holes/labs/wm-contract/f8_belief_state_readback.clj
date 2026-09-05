@@ -33,6 +33,7 @@
                   status-order)))
 (def entropy-a (belief/entropy collision-a))
 (def entropy-b (belief/entropy collision-b))
+(defn mass [posterior] (reduce + (vals posterior)))
 
 (def lines
   ["F8 leg 1 slice 6 -- production stored-belief readback"
@@ -47,6 +48,14 @@
            entropy-a entropy-b collision-entropy-expected
            (delta entropy-a collision-entropy-expected)
            (delta entropy-b collision-entropy-expected))
+   ;; The collision IS the A-vs-B difference; measuring each against the
+   ;; reference leaves it to be inferred. Lean: collisionSameEntropy.
+   (format "collision entropy A-B actual %.17g Lean 0 (collisionSameEntropy)"
+           (delta entropy-a entropy-b))
+   (str "collision posteriors distinct actual=" (not= collision-a collision-b)
+        " Lean=true (collisionDistinct)")
+   (format "collision masses A %.17g B %.17g Lean 1 1 (collisionA/BIsNormalised)"
+           (mass collision-a) (mass collision-b))
    (str "carry survivor[0] actual=" (= peaked (get reconciled 0)) " Lean=true")
    (str "carry new[1] actual=" (= uniform (get reconciled 1)) " Lean=true")
    (str "carry vanished[2] actual=" (contains? reconciled 2) " Lean=false")
@@ -63,6 +72,10 @@
                         (belief/most-likely-status collision-b))
             (< (Math/abs (delta entropy-a collision-entropy-expected)) 1.0e-12)
             (< (Math/abs (delta entropy-b collision-entropy-expected)) 1.0e-12)
+            (zero? (delta entropy-a entropy-b))
+            (not= collision-a collision-b)
+            (< (Math/abs (delta (mass collision-a) 1.0)) 1.0e-12)
+            (< (Math/abs (delta (mass collision-b) 1.0)) 1.0e-12)
             (= peaked (get reconciled 0)) (= uniform (get reconciled 1))
             (not (contains? reconciled 2)) (not= reconciled fresh)
             (not= reconciled carried) (= cold fresh)

@@ -1,0 +1,17 @@
+status-set count 7 (addressed falsified foreclosed refined reopened spawned strengthened)
+uniform {:addressed 0.14285714285714285, :falsified 0.14285714285714285, :foreclosed 0.14285714285714285, :refined 0.14285714285714285, :reopened 0.14285714285714285, :spawned 0.14285714285714285, :strengthened 0.14285714285714285}
+entropy uniform 1.945910149055313 log7 1.9459101490553132
+p  argmax :spawned entropy 1.2798542258336674
+p' argmax :spawned entropy 1.2798542258336674
+distinct? true same-argmax? true entropy-delta 0.0
+t1 domain (f) e present? false
+t2 e = {:addressed 0.14285714285714285, :falsified 0.14285714285714285, :foreclosed 0.14285714285714285, :refined 0.14285714285714285, :reopened 0.14285714285714285, :spawned 0.14285714285714285, :strengthened 0.14285714285714285}
+t2 e = uniform? true
+peaked lost? true
+result domain (a b)
+a carried? true
+b fresh? true
+c dropped? true
+r = carried? false  r = fresh? false
+cold start true
+channels-with-likelihood 8 (active-repo-ratio annotation-health attack-coverage coupling-density mission-health sorry-count-norm support-coverage ticks-firing-ratio)

@@ -3,6 +3,9 @@ uniform coordinates actual=[0.14285714285714285 0.14285714285714285 0.1428571428
 uniform entropy actual 1.9459101490553130 Lean symbolic -7*(1/7*log(1/7)) 1.9459101490553135 delta -4.4408920985006260e-16
 collision argmax A=:spawned B=:spawned Lean=:spawned
 collision entropy A 1.0296530140645737 B 1.0296530140645737 Lean 1.0296530140645737 deltas 0.0000000000000000 0.0000000000000000
+collision entropy A-B actual 0.0000000000000000 Lean 0 (collisionSameEntropy)
+collision posteriors distinct actual=true Lean=true (collisionDistinct)
+collision masses A 1.0000000000000000 B 1.0000000000000000 Lean 1 1 (collisionA/BIsNormalised)
 carry survivor[0] actual=true Lean=true
 carry new[1] actual=true Lean=true
 carry vanished[2] actual=false Lean=false
