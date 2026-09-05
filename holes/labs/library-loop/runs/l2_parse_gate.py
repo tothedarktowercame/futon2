@@ -83,6 +83,10 @@ for fn in sorted(os.listdir(d)):
         if "P-assured-process" not in text:
             fails.append((pid, "no P-assured-process problem naming"))
     elif SEC in BACKFILL_SECTIONS or SEC == "problems":
+        for rcpt in re.findall(r"receipt runs/(L[\w-]+-no-source-check\.edn)", text):
+            if not os.path.exists(os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), rcpt)):
+                fails.append((pid, "cited receipt does not resolve: runs/%s" % rcpt))
         if not (re.search(r"^@(source|why|how) .*source:", text, re.M)
                 or "@holds-at" in text
                 or "source:" in text):

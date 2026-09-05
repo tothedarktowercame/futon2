@@ -24,7 +24,7 @@ SECTIONS = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1
 LIB = os.path.abspath(sys.argv[2] if len(sys.argv) > 2
                       else "/home/joe/code/futon3/library")
 TAG = sys.argv[3] if len(sys.argv) > 3 else "L6"
-RECEIPT = "L%s-no-source-check.edn" % TAG
+RECEIPT = "%s-no-source-check.edn" % TAG  # TAG carries its own row prefix
 # Source corpus: every node in the grounding sections (default: problems),
 # with its own @holds-at tokens and full text. L8 passes
 # "problems,futon-theory" per its row statement. Same match rule as
