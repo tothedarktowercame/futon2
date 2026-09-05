@@ -1,0 +1,94 @@
+;; DECLARED CARRIERS for the :F3 per-node simulation, node R5.
+;;
+;; WHAT THIS FILE IS. The imports R5's equations need, stated as values, so the
+;; node can be run with no loop, no tick and no trace around it. Consumed by
+;; `futon2.aif.node-sim/carriers!` (src/futon2/aif/node_sim.clj:161) and by
+;; `f3_node_sim.clj`.
+;;
+;; WHAT IT IS NOT. Under FUNDAMENTALS.edn's `:what-does-not-count` a carrier
+;; declared for a demonstration inhabits nothing. The state space, the policy
+;; family, the belief reading and the preference distribution below are four
+;; separately uninhabited fundamentals of the War Machine
+;; (FUNDAMENTALS.edn:243-272 and the three beside it); declaring them HERE
+;; closes none of them and is not a ruling. What the file lets a reader do is
+;; see exactly which numbers a reported R5 value came from.
+;;
+;; EVERY MASS IS AN EXACT RATIONAL. The reference route in the harness expands
+;; each logarithm over the primes of its argument and does exactly one
+;; floating-point multiply per prime; a mass stated as a double is refused
+;; (`:refusal/inexact-carrier-mass`).
+;;
+;; PROVENANCE. States, alphabet, observation kernel, transition kernel and plan
+;; are `DarkTower.WarMachine.MachineQWitness`'s demonstration carriers, field
+;; for field: mathlib4/DarkTower/WarMachine/MachineQWitness.lean:56-67 (the
+;; alphabet, the mission's observation closure at
+;; futon2/holes/missions/M-aif-policy-conditioned-eig.md:81), :88-106 (states,
+;; actions, policies), :115-127 (aRow), :143-147 (bRow), :198-214 (the plan).
+;; The same numbers are the runtime fixture at
+;; futon2/test/futon2/aif/machine_q_test.clj:20-67, whose rows F1 pinned in
+;; futon2/holes/labs/wm-contract/runs/F1-machine-q/01-runtime-seam.edn.
+{:schema :wm/node-sim-carriers-v1
+ :node :R5
+ :id :demo/evidence-acquisition
+
+ :states [:informative :opaque]
+
+ :outcomes [:ordinary :no-result :failure :timeout :conflict :missing]
+
+ ;; aRow, MachineQWitness.lean:115-127. Both rows put strictly positive mass on
+ ;; every typed absence. NOTE, and it is what the pilot's ambiguity result turns
+ ;; on: the two rows are PERMUTATIONS of one another -- the same multiset
+ ;; {1/2, 1/8, 1/8, 1/8, 1/16, 1/16} -- so they have equal Shannon entropy.
+ :observation
+ {:informative {:ordinary 1/2 :no-result 1/8 :failure 1/8
+                :timeout 1/8 :conflict 1/16 :missing 1/16}
+  :opaque {:ordinary 1/16 :no-result 1/2 :failure 1/8
+           :timeout 1/8 :conflict 1/8 :missing 1/16}}
+
+ ;; bRow, MachineQWitness.lean:143-147: action-conditioned and
+ ;; state-independent. The harness expands this over the declared states, so
+ ;; state-independence is visible here rather than buried in a [state action]
+ ;; key table.
+ :transition-by-action
+ {:acquire {:informative 3/4 :opaque 1/4}
+  :review {:informative 1/4 :opaque 3/4}}
+
+ ;; demoReading.plan, MachineQWitness.lean:201-203.
+ :plan {:acquisition :acquire :review :review}
+
+ ;; flatReading, MachineQWitness.lean:264-265: both policies commit to the same
+ ;; controlled step. The harness's flat-plan control runs R5 through it.
+ :flat-plan {:acquisition :acquire :review :acquire}
+
+ ;; THE BELIEF READING IS A DECLARED STATE MASS, not a logistic. Lean's
+ ;; demoBeliefMass (MachineQWitness.lean:193-195) reads one channel through a
+ ;; logistic to get a mass on each state; what R5 consumes is only the mass, and
+ ;; a logistic of an irrational argument would put the reference route outside
+ ;; exact arithmetic for no gain. Two beliefs are declared because the harness
+ ;; CHECKS belief-independence rather than assuming it -- MachineQWitness.lean
+ ;; :229-241 says these row masses do not depend on the belief, and that is a
+ ;; property of this transition kernel, not of the composition.
+ :beliefs [{:id :uniform :mass {:informative 1/2 :opaque 1/2}}
+           {:id :confident-informative :mass {:informative 7/8 :opaque 1/8}}]
+
+ ;; C, THE PREFERENCE DISTRIBUTION. Declared here, and the declaration is the
+ ;; whole of its authority: `:fundamental/machine-preference-distribution` is
+ ;; uninhabited and choosing the machine's C is Joe's ruling. What is declared:
+ ;; ordinary evidence preferred, the five typed absences equally dispreferred.
+ ;; Strictly positive on every declared outcome, which is the Lean hypothesis
+ ;; `positivePreference` (Holes.lean:6869); a zero here would put the risk
+ ;; term outside its domain and the harness refuses it.
+ :preference {:ordinary 11/16 :no-result 1/16 :failure 1/16
+              :timeout 1/16 :conflict 1/16 :missing 1/16}
+
+ ;; RECORDED INPUTS. The harness recomputes Q(o|pi) through machine-q and
+ ;; checks it against both of these before R5 is allowed to read it.
+ :pinned
+ {:pinned-outcome :ordinary
+  :lean-row-masses {:acquisition 25/64 :review 11/64}
+  :lean-source "mathlib4/DarkTower/WarMachine/MachineQWitness.lean:234-241 (demoOrdinaryRowMasses)"
+  :rows {:acquisition {:ordinary 25/64 :no-result 14/64 :failure 8/64
+                       :timeout 8/64 :conflict 5/64 :missing 4/64}
+         :review {:ordinary 11/64 :no-result 26/64 :failure 8/64
+                  :timeout 8/64 :conflict 7/64 :missing 4/64}}
+  :rows-source "futon2/holes/labs/wm-contract/runs/F1-machine-q/01-runtime-seam.edn:31-45"}}
