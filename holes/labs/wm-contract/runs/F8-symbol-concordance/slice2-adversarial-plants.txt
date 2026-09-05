@@ -1,0 +1,25 @@
+F8 leg 2 slice 2 -- adversarial plants against /home/joe/code/futon2/holes/labs/wm-contract/symbol_concordance_check.bb
+registry: /home/joe/code/futon2/holes/labs/wm-contract/symbol-concordance.edn
+
+01-pi-collision-deleted                expect refuse  exit 1   OK
+02-new-row-reusing-mu                  expect refuse  exit 1   OK
+03-pi-members-cut-to-two               expect refuse  exit 1   OK
+04-member-id-nonexistent               expect refuse  exit 1   OK
+05-fold-field-drift                    expect refuse  exit 1   OK
+06-column-at-past-eof                  expect refuse  exit 1   OK
+07-untyped-column                      expect refuse  exit 1   OK
+08-symbols-emptied                     expect refuse  exit 1   OK
+09-collision-without-basis             expect refuse  exit 1   OK
+10-foreign-schema                      expect refuse  exit 1   OK
+11-pi-members-reversed                 expect accept  exit 0   OK
+12-unmodified                          expect accept  exit 0   OK
+13-row-with-no-bare                    expect refuse  exit 1   OK
+14-row-with-no-fold                    expect refuse  exit 1   OK
+15-duplicate-row-id                    expect refuse  exit 1   OK
+16-inverted-column-range               expect refuse  exit 1   OK
+17-collision-declared-for-singleton    expect refuse  exit 1   OK
+18-bare-respelled-uppercase            expect accept  exit 0   OK
+19-fold-group-split                    expect refuse  exit 1   OK
+20-ambiguous-bare-path                 expect refuse  exit 1   OK
+
+20 plants, 0 findings

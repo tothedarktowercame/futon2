@@ -33,8 +33,8 @@
                 (or (= p suffix) (str/ends-with? p (str "/" suffix))))
              files)))
 
-(defn line-count [file]
-  (with-open [r (io/reader file)] (count (line-seq r))))
+(def line-count
+  (memoize (fn [file] (with-open [r (io/reader file)] (count (line-seq r))))))
 
 (defn check-pointer! [files {:keys [file start end label]}]
   (let [matches (suffix-matches files file)]
@@ -105,7 +105,22 @@
                                                        (select-keys % [:file :start :end])))
                                    (group-by #(select-keys % [:file :start :end]))
                                    vals (map first))
-        distinct-pointers (concat column-pointers added-string-pointers)
+        ;; REVIEW FIX (this seat). What follows was `(concat column-pointers
+        ;; added-string-pointers)` reported as "distinct pointers". The
+        ;; column list is never deduplicated: 70 column claims stand over 60
+        ;; locations, because EIGHT locations are cited by more than one row --
+        ;; p4ng/sec-glossary.tex:15 by four rows, and seven more by two each
+        ;; (MachinePrecision.lean:101, sec-glossary.tex:31, :39, :62,
+        ;; bmr.clj:108-134, efe.clj:472-727, free_energy.clj:203-278) -- so ten
+        ;; claims were counted again inside a number whose own label said they
+        ;; were not. The count is pinned in a negative control, so a
+        ;; mislabelled number is the thing that control would defend. Claims
+        ;; and locations are different quantities and both are now reported as
+        ;; themselves.
+        pointer-claims (concat column-pointers (string-pointers registry))
+        pointer-locations (->> (concat column-pointers added-string-pointers)
+                               (group-by #(select-keys % [:file :start :end]))
+                               vals (mapv first))
         checks (atom [])]
     (when-not (= schema (:schema registry))
       (swap! checks conj (fail! :error/not-a-symbol-concordance (:schema registry))))
@@ -133,6 +148,22 @@
       (swap! checks conj (fail! :error/collision-member-mismatch (:fold decl)
                                 :missing (sort (set/difference actual declared))
                                 :extra (sort (set/difference declared actual)))))
+    ;; REVIEW FIX (this seat). The member-mismatch check above is guarded on
+    ;; the fold HAVING a recomputed group, so a declaration naming a fold that
+    ;; is not a collision at all -- one member, or no member -- fell through
+    ;; every check and was accepted. That is the false record pointing the
+    ;; other way: the registry would carry a collision nobody can reproduce,
+    ;; and "distinctness is checked, not remembered" has to cut in both
+    ;; directions or the checker only defends the reading it already holds.
+    (doseq [decl declarations
+            :let [cf (get case-groups (:fold decl))
+                  rk (some (fn [[_ members]] (when (= members (set (:members decl))) members))
+                           runtime-groups)]
+            :when (and (nil? cf) (nil? rk))]
+      (swap! checks conj (fail! :error/collision-not-recomputed (:fold decl)
+                                :declared (sort (:members decl))
+                                :recomputed-case-fold-group nil
+                                :recomputed-runtime-key-group nil)))
     (doseq [decl declarations :when (not (seq (:basis decl)))]
       (swap! checks conj (fail! :error/collision-without-basis (:fold decl) (:members decl))))
     (doseq [[key members] runtime-groups
@@ -145,12 +176,13 @@
                                  [row column (column-pointer row column)])
             :when (= ::untyped result)]
       (swap! checks conj (fail! :error/untyped-absence (:id row) column (get row column))))
-    (doseq [pointer distinct-pointers]
+    (doseq [pointer pointer-locations]
       (when-not (check-pointer! files pointer) (swap! checks conj false)))
     (if (some false? @checks)
         false
         (do (println "ACCEPT" (count rows) "rows," (count case-groups)
-                     "case-fold groups," (count distinct-pointers) "distinct pointers resolved")
+                     "case-fold groups," (count pointer-claims) "pointer claims over"
+                     (count pointer-locations) "distinct locations resolved")
             true))))
 
 (let [script (.getCanonicalFile (io/file *file*))

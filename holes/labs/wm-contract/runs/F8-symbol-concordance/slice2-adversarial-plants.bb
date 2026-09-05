@@ -128,4 +128,10 @@
 (println)
 (let [bad (count (remove :ok @results))]
   (printf "%d plants, %d findings%n" (count @results) bad)
-  (System/exit 0))
+  ;; The flush is not decoration. Without it this script's own summary line --
+  ;; the only line that says whether anything was found -- was dropped by
+  ;; System/exit before *out* was written, so a run with findings and a run
+  ;; with none ended with the same last line. A report that loses its verdict
+  ;; on the way out is the failure mode this suite exists to catch elsewhere.
+  (flush)
+  (System/exit (if (pos? bad) 1 0)))
