@@ -1,0 +1,49 @@
+=== 1. CASE-FOLD GROUPS, RECOMPUTED FROM :bare ===
+file: /home/joe/code/futon2/holes/labs/wm-contract/symbol-concordance.edn
+rows 31
+  fold a          2 members [:model/observation :model/dirichlet-posterior-A]
+  fold f          2 members [:free-energy/variational :free-energy/reduction-F]
+  fold pi         3 members [:precision/evidence-channel :policy/set :policy/space-capital-pi]
+  fold precision  2 members [:precision/likelihood-per-call :precision/history-runtime-key]
+  fold t          2 members [:policy/depth :architecture/aliveness-temperature]
+folds with more than one member: 5
+rows whose stored :fold differs from lower-case of :bare: 0 []
+
+=== 2. DECLARED :collisions AGAINST THE RECOMPUTED GROUPS ===
+  fold pi         declared 3, recomputed 3, agree true
+  fold a          declared 2, recomputed 2, agree true
+  fold t          declared 2, recomputed 2, agree true
+  fold precision  declared 2, recomputed 2, agree true
+  fold f          declared 2, recomputed 2, agree true
+multi-member folds with NO :collisions entry: 0 []
+:collisions entries for folds that are not multi-member: 0 []
+
+=== 3. \Pi IN THE GLOSSARY, WHOLE-FILE SCAN ===
+file: /home/joe/code/p4ng/sec-glossary.tex
+   15 \Pi | \Pi | \Pi | \Pi | \Pi
+   17 \Pi
+   19 \Pi_k | \Pi
+   39 \Pi_H(U) | \Pi_H(U')
+   47 \Pi_{\mathrm{feasible}
+
+=== 4. file:line POINTERS IN symbol-concordance.edn STRING VALUES ===
+pointers in string values: 16
+  .tex   8
+  .edn   3
+  .lean  2
+  .clj   2
+  .md    1
+distinct: 16
+   ["C277-model-reduction-free-energy-change-binding.md:5-8" "MachinePredictionError.lean:129-135" "MachinePredictionErrorWitness.lean:152-156" "aif-equations.edn:158-160" "aif-equations.edn:161-165" "aif-equations.edn:86-91" "free_energy.clj:252-278" "precision.clj:212-233" "sec-glossary.tex:17" "sec-glossary.tex:19" "sec-glossary.tex:31" "sec-glossary.tex:39" "sec-glossary.tex:47" "sec-glossary.tex:54" "sec-glossary.tex:58" "sec-glossary.tex:62"]
+
+=== 5. COLUMN POINTERS (:file + :at PAIRS), WHICH ARE NOT file:line STRINGS ===
+column pointers: 70
+  .tex   25
+  .clj   25
+  .lean  20
+NOTE: pointer_check.bb's regex only sees file:line inside ONE string, so
+      adding this file to its extra-paths gates section 4's pointers and
+      NOT section 5's. The two numbers above are that gap, measured.
+
+=== 6. DO THEY RESOLVE? (this seat's own resolution, roots fixed here) ===
+checked 76 distinct pointers (16 string + 60 column), unresolved 0
