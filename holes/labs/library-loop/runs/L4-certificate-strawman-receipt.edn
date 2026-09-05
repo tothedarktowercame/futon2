@@ -1,0 +1,41 @@
+;; L4 graph-certificate strawman measurement. Discovery only; decides
+;; nothing; implements no refusal. Deterministic rerun.
+{:library-subdir "library"
+ :library-git-sha "41448add834a75a65942b48f1206dac3e6553345"
+ :patterns-total 1264
+ :carrying-why 118
+ :problem-nodes 6 :wr-nodes 28
+ :reachability {down-problems 6, down-problems+wr 61, up-problems 14, up-problems+wr 34}
+ :cycles {:why-cycles 0 :grounded-at-problem 0 :grounded-at-problem+wr 0
+           :ungrounded-strict []
+           :ungrounded-wide []}
+ :invariant-a-cascade-patterns-not-why-reachable [
+  {:file "alfworld-cascade.edn" :consulted 1
+   :refused-down-problems 1 :refused-down-problems+wr 1 :refused-up-problems 1 :refused-up-problems+wr 1
+   :no-authored-why 0}
+  {:file "ants-cascade.edn" :consulted 6
+   :refused-down-problems 6 :refused-down-problems+wr 6 :refused-up-problems 6 :refused-up-problems+wr 6
+   :no-authored-why 5}
+  {:file "construct-cascade.edn" :consulted 33
+   :refused-down-problems 33 :refused-down-problems+wr 31 :refused-up-problems 33 :refused-up-problems+wr 33
+   :no-authored-why 18}
+  {:file "open-cascade.edn" :consulted 1240
+   :refused-down-problems 1234 :refused-down-problems+wr 1187 :refused-up-problems 1226 :refused-up-problems+wr 1206
+   :no-authored-why 1130}
+  {:file "retrodiction-cascade.edn" :consulted 1240
+   :refused-down-problems 1234 :refused-down-problems+wr 1187 :refused-up-problems 1226 :refused-up-problems+wr 1206
+   :no-authored-why 1130}
+  {:file "snatch-cascade.edn" :consulted 12
+   :refused-down-problems 12 :refused-down-problems+wr 12 :refused-up-problems 12 :refused-up-problems+wr 12
+   :no-authored-why 2}
+  {:file "zaif-cascade.edn" :consulted 54
+   :refused-down-problems 54 :refused-down-problems+wr 50 :refused-up-problems 54 :refused-up-problems+wr 54
+   :no-authored-why 41}
+ ]
+ :invariant-c-library-wide-refusal-counts {
+  :no-authored-why 1146
+  :not-why-reachable-down-problems 1258
+  :not-why-reachable-down-problems+wr 1203
+  :not-why-reachable-up-problems 1250
+  :not-why-reachable-up-problems+wr 1230
+ }}
