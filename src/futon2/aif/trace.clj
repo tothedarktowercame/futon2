@@ -635,6 +635,17 @@
     ;; run, NOT that the record belongs to an unnamed one.
     (:run/id judge-output)
     (assoc :run/id (:run/id judge-output))
+    ;; U52 ladder judgement. The judge attaches the ladder's own record and
+    ;; its typed refusals to the judgement; the per-action rung annotations
+    ;; survive via `strip-ranked-action` but these two top-level fields are
+    ;; what carries the refusal census, and without them a ladder-on tick is
+    ;; unauditable from its trace (C511: the first ladder-on step could not
+    ;; state its refusal count). Present-only: an absent key means the ladder
+    ;; did not run, not that it ran and refused nothing — and it is what keeps
+    ;; the default (flag-off) record byte-identical.
+    (:task-belief-ladder judge-output)
+    (assoc :task-belief-ladder (:task-belief-ladder judge-output)
+           :task-belief-refusals (:task-belief-refusals judge-output))
     ;; S4 durable mission focus. Present only behind FUTON_WM_CLOCK_FOCUS=1;
     ;; the enabled record always carries either the typed focus or its typed
     ;; absence, while default-OFF trace bytes remain unchanged.
