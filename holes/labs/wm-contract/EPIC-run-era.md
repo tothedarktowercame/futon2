@@ -395,3 +395,51 @@ could go well in Lean"
   pin must flip the verdict; voxterm's /agency/backlog reads
   READINESS.edn and shows the verdict beside RUN4 in needs-Joe (small
   server-side join, no bb per poll).
+
+## The autonomy ruling — breakdown, discovery, build, bulletin (Joe, 2026-09-05)
+
+Verbatim: "the strawman idea is the same 'needs breakdown' concept. i
+don't think they need me, they may need some experiments... but this is
+exactly the kind of thing that will distinguish an AIF war machine from
+a 'software factory'. if we assume it 'needs joe' we may be disabling
+its coolest and most important features. it should be able to do the
+breakdown, discovery, build... and present me with a morning bulletin
+explaining what was accomplished, not bugging me to get it unstuck"
+
+Operating principle, effective immediately: **prefer reversible,
+evidence-backed self-decision plus accounting, over escalation.**
+Escalate only the irreducibles: Joe's hand (the base drawing, WR-8),
+Joe's name (RUN4's signature — now criteria-gated by F2), Joe's voice
+(mission prose he authors). Everything else — including choosing among
+measured alternatives — is inference work: run the experiment, adopt
+the result reversibly (git + a recorded reversal path), and account for
+it in the bulletin. The queued rulings are re-triaged under this rule
+at the next pause: each becomes experiment / reversible-adoption /
+irreducible, and only the last kind stays "for Joe".
+
+Rows (minted at next loop pause):
+
+- **B1 (the morning bulletin — producer side of the existing
+  morning-brief):** futon2.aif.morning-brief already defines immutable
+  items + typed operator verdicts that project to A-matrix events "the
+  next War Machine judgement consumes" — the consumer half of exactly
+  this ruling. B1 builds the producer: a daily digest (accomplished
+  work with evidence pointers; decisions the machine took, each with
+  its reversal path; experiments run and their outcomes; what is
+  queued next and what genuinely waits on Joe) written as a committed
+  BULLETIN-<date>.md plus a machine-readable item in the morning-brief
+  shape, surfaced in voxterm's backlog panel. Joe's verdicts, when
+  given, flow through the EXISTING review projection — the bulletin is
+  thereby also the outcome-learning channel U59 is un-darkening (a
+  review is a realized outcome).
+- **B2 (strawman adoption by experiment, not by Joe):** the two
+  proposal files stop waiting for accept/strike. For each strawman
+  hole, run the cheapest experiment that could refute it (the
+  grain-compliance holes are experiment-shaped already); adopt
+  validated holes into the mission doc marked machine-proposed with
+  the experiment cited; drop refuted ones with the refutation
+  recorded; report the adoptions in the bulletin. Reversal path: one
+  git revert per mission doc, noted in the adoption line. (The EIG
+  strawman's holes 1-2 are F1's work plan and are NOT duplicated here
+  — B2 covers grain-compliance and the leftover EIG holes 3-5 only if
+  F1 has not already consumed them.)
