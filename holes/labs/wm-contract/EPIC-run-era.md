@@ -443,3 +443,47 @@ Rows (minted at next loop pause):
   strawman's holes 1-2 are F1's work plan and are NOT duplicated here
   — B2 covers grain-compliance and the leftover EIG holes 3-5 only if
   F1 has not already consumed them.)
+
+## The R5-spine reckoning (Joe, 2026-09-05) — and the gate that parked it
+
+Verbatim: "how is it possible that after days of work, and many deep
+dives into the relationship between cascades and policy and G, the
+machine does not centre those as its core units? ... This is worse than
+Q not being defined. It seems to me that my effort to get the
+fundamentals baked in has been either ignored or worked around, with
+yet another façade in place instead of a validated EFE model based on
+the topics we actually discussed. For all I KNOW the code was built but
+not wired again. ... Noting also that all work that doesn't build
+appropriately on the fundamentals will have to be redone or discarded."
+
+The mechanism, found: **futon2/holes/problems/P-validated-R5.md**
+(drafted 2026-08-30 from Joe's direction) holds exactly this program —
+"build a validated R5 and build everything else around that," with the
+three blocked nouns named: **Policy** (a borrowed name for a cascade),
+**Q(o|pi)**, an **Outcome space** — and it has sat since 08-30 behind
+"Gate: operator-acceptance — Joe confirms §1 before any §5 packet is
+dispatched." The gate meant to protect the commissioner's authority
+became the parking brake; the queue filled with individually-validated
+consolidation work that did not build on the spine. This is the
+strongest instance of the failure Joe named this morning ("needs Joe"
+hiding "needs breakdown") and of the drowned-fundamentals failure the
+:F gate now corrects.
+
+**Gate discharge:** Joe's 2026-09-05 message confirms the S1 problem
+statement in his own words ("worse than Q not being defined" — the
+policy/cascade noun is the deeper gap). The operator-acceptance gate on
+P-validated-R5 is discharged; the record binds to the :F gate:
+
+- **F1 is re-anchored on P-validated-R5**: its object is not Q(o|pi)
+  alone but the three nouns together — Policy AS a cascade-shaped type
+  (the four-grain addendum, N-strategy-as-computational-object), the
+  Outcome space with closure rows, and the constructor over both. The
+  F1 seat must read P-validated-R5 §0-§1 and the strawman before its
+  domain preregistration.
+- **F0 gains a second criterion**: besides uninhabited signatures,
+  census the BUILT-BUT-NOT-WIRED family — inhabited definitions with no
+  consumer on the tick path (known members, all already measured: the
+  R14 dial; EIG's callers behind two default-off gates consuming a
+  fixture Q; intrinsic-values/state never rehydrated on the tick path;
+  the realized-outcome channel). If the F0 seat has already passed this
+  point when it lands, the criterion mints as F0b at review.
