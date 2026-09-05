@@ -178,3 +178,59 @@ stays diagnostic.
 
 The mathematical kernel exists. The generative experiment model does not.
 Accordingly, Box 1's `model-uncertainty-bonus` residual remains real.
+
+## Machine-proposed instantiation work (`:B2`, 2026-09-05)
+
+Three items proposed by the machine, not by the owner, covering the shared
+updater (C5), the typed Q delivery, and the shadow/calibration packet (C9). The
+two items about preregistering the first experiment domain and constructing the
+first machine `Q(o|pi)` are deliberately absent: they are `:F1`'s plan and
+belong to that row. Each item below was given the cheapest experiment that
+could have retired it, and each survived; the measurement is cited on the item
+and the raw output is in `holes/labs/wm-contract/runs/B2-strawman/`. Reversal: a
+single `git revert` of the one commit that added this section, whose sha is
+named in
+`holes/labs/wm-contract/proposals/STRAWMAN-M-aif-policy-conditioned-eig.md`.
+
+- [ ] **Mint the shared posterior updater, then unify the two paths through
+  it.** Hypothetical evidence and its later observed counterpart routed through
+  one A4a/BMR updater with only the observation source changed, so that a pinned
+  observation fixture yields equal posterior state and provenance on both paths
+  while an unknown outcome fails closed. *Machine-proposed; measured
+  2026-09-05:* the public surface of `futon2.aif.a4a` (13 vars) and
+  `futon2.aif.bmr` (6 vars) was enumerated in full and none of the 19 is named
+  for an update, an observation, a posterior or a fold — the realised path
+  recomputes concentrations from a corpus (`src/futon2/aif/a4a.clj:85`) rather
+  than updating a state, so the object both paths would share has to be minted
+  before it can be shared. That is why this item leads with minting it, which
+  the strawman it came from did not
+  (`runs/B2-strawman/01-consumer-and-updater-probe.edn` `:E3`).
+- [ ] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the
+  R13→R4 and R4→R5 payloads.** The policy payload and the predictive-kernel
+  payload defined with model/source pins, outcome-domain identity, a
+  normalization receipt and executable falsifiers, such that the same
+  constructed Q is accepted by both the risk and the EIG fixture. *Machine-
+  proposed; measured 2026-09-05, and NARROWED by that measurement:* the
+  rejection half of the strawman's acceptance — action-grain Gaussian telemetry
+  and `Q(pi)` refused at the boundary — is already discharged by `:F1`
+  (`src/futon2/aif/machine_q.clj:138`, receipt
+  `runs/F1-machine-q/01-runtime-seam.edn` `:boundary-refusals`), so it is not
+  asked for again here. What the experiment left standing is the acceptance
+  half: handed one row of the machine Q that `:F1` pinned,
+  `futon2.aif.epistemic-value/expected-information-gain` accepts it as
+  `:predicted-observations`, while `core-efe/risk` — the only runtime risk
+  consumer in the tree — throws `ClassCastException` on the map and, given the
+  parallel scalar seqs its signature admits, silently computes 0.0 for the row
+  and 1.170904 for the same row permuted. Outcome identity does not survive that
+  boundary, and nothing refuses it
+  (`runs/B2-strawman/01-consumer-and-updater-probe.edn` `:E4`).
+- [ ] **Collect a default-off EIG shadow and calibration packet.** Prior
+  entropy, expected posterior entropy, EIG, degeneracy reasons and later
+  realised information gain persisted without affecting selection, reported with
+  held-out log-loss/Brier results and predicted-versus-realised entropy
+  reductions alongside winner/abstain/scale effects, with feature-off selection
+  traces byte-identical. *Machine-proposed; measured 2026-09-05:* each of those
+  five fields occurs zero times across the 306 `.clj` files of `src/`,
+  `scripts/` and `test/`, and `holes/labs/M-aif-policy-conditioned-eig/` — the
+  directory section 4 of this mission names for the shadow artifact — does not
+  exist (`runs/B2-strawman/02-read-and-replay-probes.edn` `:E5`).
