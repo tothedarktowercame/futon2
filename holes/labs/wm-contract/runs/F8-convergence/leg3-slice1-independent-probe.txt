@@ -1,0 +1,154 @@
+=== F8 leg 3 slice 1 independent probe ===
+draft   CONVERGENCE-draft.edn (18 rows, as-of 2026-09-05)
+registry aif-equations.edn as-of 2026-09-01, 18 equations
+mathlib4 HEAD 4d89779d08ba625b8a9e1bc0a52cb42f19c567dc
+U35 report finished-at 2026-09-05T16:16:46.404723801Z
+
+=== 1. DRAFT SPEC-LEG vs THE REGISTRY CARRIER AT HEAD ===
+  A draft row saying 'not in Lean' whose registry row now declares a carrier is STALE.
+row                      draft spec rung      registry :lean at HEAD             :lean-status   verdict
+:observe                 :named               machineObservation                 :closed        STALE-carrier-now-declared
+:prediction-error        :named               machineChannelPredictionError      :closed        STALE-carrier-now-declared
+:precision               :named               machinePrecision                   :closed        STALE-carrier-now-declared
+:free-energy             :formula-transcribed variationalFreeEnergy              :closed        agrees-carrier
+:policy-free-energy      :named               machinePolicyFreeEnergy            :closed        STALE-carrier-now-declared
+:belief-update           :named               machineBeliefUpdate                :closed        STALE-carrier-now-declared
+:belief-state            :named               machineBeliefState                 :closed        STALE-carrier-now-declared
+:forward-model           :formula-transcribed PredictiveOutcomeKernel            :carrier-only  agrees-carrier
+:risk                    :formula-transcribed predictiveOutcomeRisk              :closed        agrees-carrier
+:ambiguity               :formula-transcribed ambiguity                          :closed        agrees-carrier
+:expected-free-energy    :formula-transcribed expectedFreeEnergy                 :closed        agrees-carrier
+:policy-set              :named                                                                 agrees-no-carrier
+:depth                   :named               machineDepth                       :closed        STALE-carrier-now-declared
+:temperature             :named               machineTemperature                 :closed        STALE-carrier-now-declared
+:policy-posterior        :formula-transcribed softmax                            :closed        agrees-carrier
+:action                  :named               machineAction                      :closed        STALE-carrier-now-declared
+:dirichlet-accumulation  :formula-transcribed DirichletConcentrations (carri...  :carrier-only  agrees-carrier
+:model-reduction         :formula-transcribed bayesFactorThreshold               :closed        agrees-carrier
+STALE spec legs: 9 [:observe :prediction-error :precision :policy-free-energy :belief-update :belief-state :depth :temperature :action]
+
+=== 1b. REGISTRY :status FIELDS THE DRAFT DOES NOT CARRY ===
+  :free-energy             :status :retired
+  :policy-free-energy      :status :realised-flag-gated
+
+=== 2. EVERY BASIS POINTER IN THE DRAFT ===
+  caveat[0]                                      p4ng/sec-lean-state-generated.tex:1-4                ok
+  caveat[3]                                      FUNDAMENTALS.edn:296-298                             ok
+  caveat[3]                                      aif-equations.edn:162-168                            ok
+  :registry-basis                                holes/labs/wm-contract/aif-equations.edn:1-173       ok
+  :name-hazard-basis                             holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:127-129 ok
+  :observe spec-leg                              p4ng/sec-lean-state-generated.tex:12                 ok
+  :observe impl-leg                              holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:32-37 ok
+  :observe impl-leg                              src/futon2/aif/observation.clj:103-146               ok
+  :prediction-error spec-leg                     p4ng/sec-lean-state-generated.tex:13                 ok
+  :prediction-error impl-leg                     holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:79-85 ok
+  :prediction-error impl-leg                     src/futon2/aif/free_energy.clj:203-218               ok
+  :precision spec-leg                            p4ng/sec-lean-state-generated.tex:14                 ok
+  :precision impl-leg                            holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:133-138 ok
+  :precision impl-leg                            src/futon2/aif/precision.clj:116-158                 ok
+  :free-energy spec-leg                          p4ng/sec-lean-state-generated.tex:15                 ok
+  :free-energy spec-leg                          Holes.lean:6828                                      ok
+  :free-energy impl-leg                          holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:98-103 ok
+  :free-energy impl-leg                          src/futon2/aif/free_energy.clj:184-205               ok
+  :policy-free-energy spec-leg                   p4ng/sec-lean-state-generated.tex:16                 ok
+  :policy-free-energy impl-leg                   holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:86-91 ok
+  :policy-free-energy impl-leg                   src/futon2/aif/policy_free_energy.clj:41-82          ok
+  :belief-update spec-leg                        p4ng/sec-lean-state-generated.tex:17                 ok
+  :belief-update impl-leg                        holes/labs/wm-contract/PROBLEMS-r1-r3-r3a-batch3.md:77-82 ok
+  :belief-update impl-leg                        src/futon2/aif/belief.clj:364-445                    ok
+  :belief-state spec-leg                         p4ng/sec-lean-state-generated.tex:18                 ok
+  :belief-state impl-leg                         holes/labs/wm-contract/PROBLEMS-r1-r3-r3a-batch3.md:32-37 ok
+  :belief-state impl-leg                         src/futon2/aif/belief.clj:62                         ok
+  :forward-model spec-leg                        p4ng/sec-lean-state-generated.tex:19                 ok
+  :forward-model spec-leg                        Holes.lean:6758                                      ok
+  :forward-model impl-leg                        holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:37-42 ok
+  :forward-model impl-leg                        src/futon2/aif/forward_model.clj:279-324             ok
+  :risk spec-leg                                 p4ng/sec-lean-state-generated.tex:20                 ok
+  :risk spec-leg                                 Holes.lean:6867                                      ok
+  :risk impl-leg                                 holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116 ok
+  :risk impl-leg                                 src/futon2/aif/efe.clj:842-872                       ok
+  :ambiguity spec-leg                            p4ng/sec-lean-state-generated.tex:21                 ok
+  :ambiguity spec-leg                            Holes.lean:6880                                      ok
+  :ambiguity impl-leg                            holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116 ok
+  :ambiguity impl-leg                            src/futon2/aif/efe.clj:842-872                       ok
+  :expected-free-energy spec-leg                 p4ng/sec-lean-state-generated.tex:22                 ok
+  :expected-free-energy spec-leg                 Holes.lean:6887                                      ok
+  :expected-free-energy impl-leg                 holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116 ok
+  :expected-free-energy impl-leg                 src/futon2/aif/efe.clj:842-872                       ok
+  :policy-set spec-leg                           p4ng/sec-lean-state-generated.tex:23                 ok
+  :policy-set impl-leg                           holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:143-147 ok
+  :policy-set impl-leg                           holes/labs/wm-contract/FUNDAMENTALS.edn:243-272      ok
+  :depth spec-leg                                p4ng/sec-lean-state-generated.tex:24                 ok
+  :depth impl-leg                                holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:91-97 ok
+  :depth impl-leg                                src/futon2/aif/forward_model.clj:278-303             ok
+  :temperature spec-leg                          p4ng/sec-lean-state-generated.tex:25                 ok
+  :temperature impl-leg                          holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:144-149 ok
+  :temperature impl-leg                          src/futon2/aif/policy.clj:77-95                      ok
+  :policy-posterior spec-leg                     p4ng/sec-lean-state-generated.tex:27                 ok
+  :policy-posterior spec-leg                     Holes.lean:6960                                      ok
+  :policy-posterior impl-leg                     holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:132-138 ok
+  :policy-posterior impl-leg                     src/futon2/aif/policy.clj:196-201                    ok
+  :action spec-leg                               p4ng/sec-lean-state-generated.tex:28                 ok
+  :action impl-leg                               holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:31-36 ok
+  :action impl-leg                               src/futon2/aif/enact.clj:250-321                     ok
+  :dirichlet-accumulation spec-leg               p4ng/sec-lean-state-generated.tex:29                 ok
+  :dirichlet-accumulation spec-leg               Holes.lean:6936                                      ok
+  :dirichlet-accumulation impl-leg               holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:136-143 ok
+  :dirichlet-accumulation impl-leg               src/futon2/aif/a4a.clj:85-113                        ok
+  :dirichlet-accumulation impl-leg               FUNDAMENTALS.edn:296-298                             ok
+  :model-reduction spec-leg                      p4ng/sec-lean-state-generated.tex:30                 ok
+  :model-reduction spec-leg                      Holes.lean:6957                                      ok
+  :model-reduction impl-leg                      holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:127-130 ok
+  :model-reduction impl-leg                      src/futon2/aif/bmr.clj:108-130                       ok
+unresolved or out-of-bounds: 0
+
+=== 3. THE F6 MACHINE-RECORD TEST ON EVERY IMPL-LEG LICENCE ===
+  F6: :witnessed and above assert a RECORD exhibits the quantity, and the
+  test is whether the licensed artifact carries a run identity
+  (generate_variable_situation_accounting.bb:417-428).
+row                      draft impl rung record?   licences
+:observe                 :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:32-37, src/futon2/aif/observation.clj:103-146
+:prediction-error        :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:79-85, src/futon2/aif/free_energy.clj:203-218
+:precision               :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:133-138, src/futon2/aif/precision.clj:116-158
+:free-energy             :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:98-103, src/futon2/aif/free_energy.clj:184-205
+:policy-free-energy      :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:86-91, src/futon2/aif/policy_free_energy.clj:41-82
+:belief-update           :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r1-r3-r3a-batch3.md:77-82, src/futon2/aif/belief.clj:364-445
+:belief-state            :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r1-r3-r3a-batch3.md:32-37, src/futon2/aif/belief.clj:62
+:forward-model           :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:37-42, src/futon2/aif/forward_model.clj:279-324
+:risk                    :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116, src/futon2/aif/efe.clj:842-872
+:ambiguity               :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116, src/futon2/aif/efe.clj:842-872
+:expected-free-energy    :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116, src/futon2/aif/efe.clj:842-872
+:policy-set              :absent        NO        holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:143-147, holes/labs/wm-contract/FUNDAMENTALS.edn:243-272
+:depth                   :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:91-97, src/futon2/aif/forward_model.clj:278-303
+:temperature             :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:144-149, src/futon2/aif/policy.clj:77-95
+:policy-posterior        :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:132-138, src/futon2/aif/policy.clj:196-201
+:action                  :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:31-36, src/futon2/aif/enact.clj:250-321
+:dirichlet-accumulation  :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:136-143, src/futon2/aif/a4a.clj:85-113, FUNDAMENTALS.edn:296-298
+:model-reduction         :witnessed     NO        holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:127-130, src/futon2/aif/bmr.clj:108-130
+impl legs at :witnessed+ with NO machine record: 17 [:observe :prediction-error :precision :free-energy :policy-free-energy :belief-update :belief-state :forward-model :risk :ambiguity :expected-free-energy :depth :temperature :policy-posterior :action :dirichlet-accumulation :model-reduction]
+
+=== 4. F3-FORM CERTIFICATE ARTIFACTS ON DISK ===
+  runs/F1-machine-q: ("00-axiom-probe.edn" "01-runtime-seam.edn" "02-policy-family-census.edn" "03-machine-grain-q.edn")
+  runs/F2-run4-preregistration: ("00-source.edn" "01-assertions.edn" "02-authorities.edn" "03-invalidators.edn" "04-controls.edn" "Run4Preregistration.lean" "axiom-probe.edn")
+  runs/F2-run4-readiness: ("READINESS.edn" "README.md" "negative-controls.edn")
+  runs/F3-node-sim: ("00-r5-pilot.edn")
+  runs/F7-cascade-policy: ("f7-cascade-policy-decision.edn" "f7-single-cascade-decision.edn")
+  runs/F8-action: ("clojure-readback.txt" "lean-state-join-after.edn" "lean-state-join-before.edn" "lean-state-probe.log" "review-independent-probe.clj" "review-independent-probe.txt")
+  runs/F8-belief-state: ("clojure-readback.txt" "lean-state-join-after.edn" "lean-state-join-before.edn" "review-independent-probe.clj" "review-independent-probe.txt")
+  runs/F8-belief-update: ("clojure-readback.txt" "lean-state-join-check.edn")
+  runs/F8-convergence: ("leg3-slice1-independent-probe.bb" "leg3-slice1-independent-probe.txt")
+  runs/F8-depth: ("clojure-readback.txt" "lean-state-join-after.edn" "lean-state-join-before.edn" "review-independent-probe.clj" "review-independent-probe.txt")
+  runs/F8-dirichlet-accumulation: ("clojure-readback.txt" "lean-state-join-after.edn" "lean-state-join-before.edn" "lean-state-probe-after.log" "lean-state-probe-before.log" "review-independent-probe-2.clj" "review-independent-probe-2.txt" "review-independent-probe.clj" "review-independent-probe.txt")
+  runs/F8-observe: ("clojure-readback.txt" "codex-handoff-summary.md" "lean-state-join-check.edn")
+  runs/F8-policy-free-energy: ("clojure-readback.txt" "codex-handoff-summary.md" "lean-state-join-check.edn" "lean-state-probe.edn")
+  runs/F8-precision: ("clojure-readback.txt" "lean-state-join-check.edn")
+  runs/F8-prediction-error: ("clojure-readback.txt" "lean-state-join-check.edn")
+  runs/F8-symbol-concordance: ("independent-probe.bb" "independent-probe.txt" "review-column-check.bb" "review-column-check.txt" "slice2-adversarial-plants.bb" "slice2-adversarial-plants.txt" "slice2-independent-probe.bb" "slice2-independent-probe.txt" "slice2-tex-pointer-blast-radius.bb" "slice2-tex-pointer-blast-radius.txt")
+  runs/F8-temperature: ("clojure-readback.txt" "lean-state-join-after.edn" "lean-state-join-before.edn" "lean-state-probe.log" "review-independent-probe.clj" "review-independent-probe.txt")
+
+=== 5. THE F6 RUNG SCALE, READ FROM ITS GENERATOR ===
+  futon2/scripts/generate_variable_situation_accounting.bb
+   [:named :type-transcribed :formula-transcribed :witnessed :constructed :wired :validated :run-correlated]
+  accounting registry :axes :rung -> [:named :type-transcribed :formula-transcribed :witnessed :constructed :wired :validated :run-correlated]
+
+PROBE SUMMARY stale-spec-legs=9 unresolved-pointers=0 unlicensed-witnessed-impl-legs=17
