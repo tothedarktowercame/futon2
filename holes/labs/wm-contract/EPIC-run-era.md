@@ -269,3 +269,51 @@ only when it reaches the front:
    (:per-node-tests reads the live tree by design; U57's capture gives it
    an as-of input, but whether the catalogue should carry tree-level
    checks at all is a design ruling.)
+
+## The meta-hole ruling — refusals must be generative (Joe, 2026-09-05)
+
+Verbatim: "the problem is to do with the definition of hole. A 'mission
+that declares no holes' is to me a hole in its own right. if they are
+refused, ergo, they can never be selected or progressed, and will remain
+dark matter for the machine forever. i don't like that much. in some
+cases it may be genuinely impossible to make much progress, but it
+should still be possible to ask some intelligent questions (ArSE) and
+come back with a strawman"
+
+Reading: the :no-open-holes refusal (C512) is TRUE for :advance-mission
+— you cannot advance undeclared work — but it must not be TERMINAL for
+the mission. The absence of declared holes is itself a workable hole at
+the meta level: "determine what this mission's work is." The machine's
+response to a :no-open-holes refusal is an EPISTEMIC action: ask typed
+questions (ArSE performatives) about the mission and return a strawman
+hole set for operator review. Refused missions become the question
+queue, not dark matter. FLIP STATUS: the ladder flip question stays
+open until this path exists — a flip that permanently darkens 53
+missions is not what the ruling ratifies.
+
+Rows (minted at next loop pause — U57 work seat in flight at ruling
+time):
+
+- **U61 (candidacy — the meta-hole enters the field):** a mission
+  carrying a :no-open-holes refusal yields an epistemic candidate
+  (working name :question-mission) scored so it is selectable but never
+  outranks a real advance with holes; behind the ladder flag. Mechanism
+  choice IN the row, both options stated with trade-offs: (a) a new
+  action class through the existing gap-action idiom
+  (action_proposer.clj's :learn-action-class precedent — the machine
+  already models its own capability boundary as actions); (b) minting a
+  literal meta-hole so the existing hole machinery carries it (rejected
+  if it requires writing into Joe's mission docs uninvited — say so if
+  so). The dark survey-mission/EIG path (U24, portfolio_action_proposer)
+  is prior art to consult, not a dependency — do not couple this to the
+  fixture-Q problem.
+- **U62 (enactment — questions out, strawman back):** enacting
+  :question-mission opens an ArSE-typed exchange (query performatives)
+  about the mission — what would done look like, what blocks it, what
+  is the smallest falsifiable next step — and lands a strawman hole
+  set as a PROPOSAL FILE for operator review (never a direct edit to
+  the mission doc). The strawman's acceptance: each proposed hole has
+  an acceptance shape, and the proposal records the questions it came
+  from. Depends on U61 for the trigger record; the drafting recipe is
+  prototyped by hand first (see STRAWMAN dispatch, 2026-09-05) so the
+  row automates a demonstrated shape rather than inventing one.
