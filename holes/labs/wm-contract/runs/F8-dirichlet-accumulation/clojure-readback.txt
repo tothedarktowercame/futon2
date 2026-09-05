@@ -1,0 +1,14 @@
+F8 leg 1 slice 10 -- production Dirichlet recount readback
+priorReference prior expected=0.1 actual=0.1 MATCH
+oneEdgeReference one edge cell expected=1.1 actual=1.1 MATCH
+twoEdgesReference two edge cell expected=2.1 actual=2.1 MATCH
+twoMissionRowReference cap-a row expected=[1.1 0.1] actual=[1.1 0.1] MATCH
+recountReference same corpus twice expected=true actual=true MATCH
+machineCoordinatesAreNotStable outcomes before expected=["m1" "m2"] actual=["m1" "m2"] MATCH
+machineCoordinatesAreNotStable outcomes after expected=["aaa" "m1" "m2"] actual=["aaa" "m1" "m2"] MATCH
+machineCoordinatesAreNotStable m1 index before/after expected=[0 1] actual=[0 1] MATCH
+bmrThresholdReference BMR threshold expected=-3.0 actual=-3.0 MATCH
+recurrenceMissingBothArms declared recurrence: NOT MEASURED in Clojure; production has no previous-a parameter
+oneHotOuterProductIsUnitCell/nonOneHotOuterProductIsNotUnitCell: NOT MEASURED in Clojure; declared tick-model rule is absent
+machineSatisfiesNoneOfRepairPredicate: NOT MEASURED in Clojure; predicate specifies the repair boundary
+VERDICT: 9 MATCH, 0 MISMATCH; explicit NOT MEASURED lines retained.
