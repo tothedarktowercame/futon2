@@ -423,33 +423,62 @@ minted from two of these runs' records, and none of the seven is `:cashed`. So t
 question is not about emptiness. It is: **what does a `:tensions-cashed` green
 assert?** Three readings, each already implementable:
 
-- **(A) The run's tensions are all cashed.** What the check-id says. Today this is
-  `0 cashed / 2 attributed` on re5, so (A) yields an absence or a red, never a
-  green, and would do so until a `:cashed` event is ever written.
+- **(A) The run's tensions are all cashed.** What the check-id says. Measured
+  per run (`u56_fold_consequences.bb`, MEASURED INPUTS): 1 tension attributed to
+  s5, 1 to re5, 0 to the accepted run; 0 of them cashed, and 0 `:cashed` events
+  in the whole ledger. So (A) can only speak about s5 and re5, and where it
+  speaks it says NOT-all-cashed — never a green, and not until some `:cashed`
+  event is written. Which non-green it says is a second question the reading
+  does not settle: a `:red` (the check can see an uncashed tension) or a
+  `:typed-absence` (no `:cashed` event has ever been written, so cashing is
+  unobservable rather than failed). Both are folded below. The accepted run,
+  with nothing attributed, is outside (A)'s scope entirely — that empty case is
+  reading (C), which is why (A) and (C) are not one scenario.
 - **(B) The ledger can attribute a tension to this run.** What the green branch at
   `u41_tension_ledger.bb:500-505` actually tests. Under (B) s5 and re5 are green
   today, on the evidence in §4.
-- **(C) The run minted no tension, so the check is vacuously satisfied.** Not
-  establishable on the present schema: `:event/at` is a DATE
+- **(C) The run minted no tension, so the check is vacuously satisfied.** Speaks
+  only about the accepted run, the one run with nothing attributed to it — and
+  even there it is not establishable on the present schema: `:event/at` is a DATE
   (`u41_tension_ledger.bb:521-523` makes exactly this point), so "minted by this
   run" and "minted by an operator the same day" cannot be separated. Two events
-  fall on 2026-09-04, the day of two of the three runs.
+  fall on 2026-09-04, the day of two of the three runs. The fold below therefore
+  gives (C)'s value IF GRANTED, not a value the ledger can currently support.
 
 **Fold consequences, computed** by applying `run_era_ledger.bb:432-451`'s rule to
-the ledger's rows with the verdicts substituted (no row was written):
+the ledger's rows with the verdicts substituted (no row was written). Each
+reading gets its own scenario, and which runs a reading is even in scope for is
+derived from the measurement above, not assigned by hand
+(`u56_fold_consequences.bb:97-105`; the attribution it rests on is measured at
+`u56_fold_consequences.bb:46-63`):
 
 | scenario | s5 | 010-accepted | re5 |
 |---|---|---|---|
-| as-is | `:red` (selection-discrimination) | `:incomplete` (4 absences) | `:incomplete` (4 absences) |
-| (A)/(C) green everywhere | `:red` | `:incomplete` (3 absences) | `:incomplete` (3 absences) |
-| (B) green where the ledger names the run | `:red` | `:incomplete` (4 absences) | `:incomplete` (3 absences) |
-| all four checks green on the accepted run | `:red` | **`:green`** | `:incomplete` (4) |
+| S0 as-is | `:red` (selection-discrimination) | `:incomplete` (4 absences) | `:incomplete` (4 absences) |
+| S1a (A), not-all-cashed ⇒ `:red` | `:red` (2 causes: selection-discrimination, tensions-cashed) | `:incomplete` (4) — outside (A)'s scope | **`:red`** |
+| S1b (A), not-all-cashed ⇒ `:typed-absence` | `:red` | `:incomplete` (4) | `:incomplete` (4) |
+| S2 (B) green where the ledger names the run | `:red` | `:incomplete` (4) | `:incomplete` (3) |
+| S3 (C) vacuous green where nothing is attributed | `:red` | `:incomplete` (3) | `:incomplete` (4) — outside (C)'s scope |
+| S4 (A)-with-a-red composed with (C) | `:red` (2 causes) | `:incomplete` (3) | **`:red`** |
+| S5 all four checks green on the accepted run | `:red` | **`:green`** | `:incomplete` (4) |
 
-**No reading of `:tensions-cashed` moves any run off `:incomplete`.** The question
-is worth settling on its own terms, and settling it does not unblock a run; only
-all four going green does. That is the measurement the ruling asked for, and the
-choice between (A), (B) and (C) is Joe's — it is a `:choices` entry, and this row
-does not make it.
+Three things the split shows that the single "(A)/(C) green everywhere" line hid:
+
+- **No reading of `:tensions-cashed` makes any run `:green`.** Only S5 does, and
+  that takes all four standing absences. Settling the reading does not unblock a
+  run.
+- **One reading moves a run the other way.** Under S1a, re5 goes from
+  `:incomplete` to **`:red`**, and s5's red gains a second cause. (A) is the
+  reading the check-id asserts, so the reading that best matches the name is the
+  one that would worsen the fold, not improve it. The choice is therefore not
+  cosmetic even though it unblocks nothing.
+- **S1b reproduces the deposited ledger exactly** (compare S0 and S1b: identical
+  rows). The three deposits as they stand are already consistent with reading (A)
+  read as can't-see. What they are NOT consistent with is (B), under which re5's
+  row would have been green.
+
+The choice between (A), (B) and (C) — and, if (A), between its red and its
+absence — is Joe's: it is a `:choices` entry, and this row does not make it.
 
 ### Recommendation: `:both`
 
@@ -531,7 +560,7 @@ bb u56_pointer_check.bb
 The four `u56_*.bb` scripts are committed beside this file. They are read-only:
 they take no run lock, write nothing, deposit nothing, and read only committed
 artifacts plus `data/wm-trace` (§3's census). `u56_pointer_check.bb` resolves the
-48 distinct `file:line` pointers in this artifact, 0 unresolved.
+50 distinct `file:line` pointers in this artifact, 0 unresolved.
 
 ---
 
@@ -544,5 +573,7 @@ artifacts plus `data/wm-trace` (§3's census). `u56_pointer_check.bb` resolves t
 | `:rationale-regret` | **refuted** — 0 of 889 records reach `trace-outcome`; the 88 that carry an outcome are all July and under a third key vocabulary; and one tick per step means no pair, structurally | `war_machine.clj:2284-2306` (join key) + a post-accept observation pass in `wm_step.sh:471-520`; pairing at `wm_step.sh:413-465` | `:elaborate-only` |
 | `:tensions-cashed` | **demonstrated** for s5 and re5 — the check's own green branch fires against the current ledger; refuted for the accepted run | the run-born mint site: `u39_selection_retrospective.bb:418-421`'s `:records` field, reached from `wm_step.sh:455-456` | `:both` |
 
-Open for Joe: the `:tensions-cashed` reading (A)/(B)/(C), §4; and what a repair of
-an already-deposited run may do at all, §5.
+Open for Joe: the `:tensions-cashed` reading (A)/(B)/(C) and, under (A), whether
+a not-all-cashed run gets a `:red` or a `:typed-absence` — §4, where each is
+folded separately and (A)-with-a-red is the one that makes re5 worse; and what a
+repair of an already-deposited run may do at all, §5.
