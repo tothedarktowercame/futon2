@@ -35,6 +35,8 @@ CONTROLS
   :negative/mutated-ledger-is-refused-unevidenced-status-move pass?=true
   :negative/planted-double-mint-is-refused                   pass?=true
   :negative/the-real-ledger-conforms                         pass?=true
+  :negative/without-the-cashing-the-same-attribution-stays-uncashed pass?=true
+  :positive/a-planted-cashing-makes-the-attributed-set-all-cashed pass?=true
   :positive/birth-rule-fires-on-a-corpus-that-satisfies-it   pass?=true
   :positive/every-seed-carries-a-pointer                     pass?=true
   :positive/machine-born-statement-is-the-refusal-verbatim   pass?=true

@@ -23,6 +23,13 @@
 ;; The per-run inputs each scenario rests on -- how many tensions the committed
 ;; ledger attributes to the run, and how many of those are cashed -- are MEASURED
 ;; here from tension-ledger.edn, not asserted, and printed before the folds.
+;;
+;; S1a IS NOW THE SHIPPED READING (:AD1, 2026-09-05, aif-equations.edn :choices
+;; :tensions-cashed-reading). This script still prints all six scenarios and is
+;; still a discovery record: the deposited rows it folds are NOT repaired, so S0
+;; remains what the ledger holds and S1a remains what the check would deposit if
+;; those runs were deposited today. The gap between the two is the divergence the
+;; adoption reports rather than repairs.
 (require '[clojure.edn :as edn] '[clojure.java.io :as io] '[clojure.string :as str] '[clojure.set :as set])
 
 (def lab (str (System/getProperty "user.home") "/code/futon2/holes/labs/wm-contract"))
@@ -45,11 +52,11 @@
 
 (defn attributed
   "The committed tensions this run can be read off, by the same substring test
-   u41_tension_ledger.bb:571-573 uses -- but scoped to ONE tension's own form
+   u41_tension_ledger.bb:615-616 uses -- but scoped to ONE tension's own form
    rather than to the whole ledger text, so the result is per-run rather than
    per-ledger. Returns [{:id :status}].
 
-   :U60 gave u41 that per-tension form as an API -- `attribute-tension:507-529`,
+   :U60 gave u41 that per-tension form as an API -- `attribute-tension:589-621`,
    which prefers :tension/provenance :records and falls back to this substring
    test -- so this copy is now a second implementation of the FALLBACK half. It
    is left in place because this script is a U56 discovery record, not a

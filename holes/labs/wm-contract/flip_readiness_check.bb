@@ -742,9 +742,14 @@
 
 (cond
   ;; --as-of does not compose with --deposit. What a deposit made from a
-  ;; re-derivation asserts about a run is exactly the question U56 left open
-  ;; (C511 section 5: a repair has nowhere to land, three ways out named and
-  ;; none chosen), and it is Joe's to settle, not this script's.
+  ;; re-derivation asserts about a run is the question U56 left open (C511
+  ;; section 5: a repair has nowhere to land, three ways out named and none
+  ;; chosen). SETTLED 2026-09-05 by :AD1, and settled the way this refusal
+  ;; already behaved: a repair of a deposited run is a committed RECEIPT and
+  ;; never a row (aif-equations.edn :choices :deposited-run-repair-semantics,
+  ;; :adopted-by :machine, reversible by re-recording). The refusal therefore
+  ;; stands and is no longer provisional; the receipts live in
+  ;; holes/labs/wm-contract/runs/RE-repair-receipts/.
   (and as-of-path (contains? (set *command-line-args*) "--deposit"))
   (do (println "flip_readiness_check: --as-of does not compose with --deposit.")
       (println "  What a deposit made from a re-derivation asserts about an already-deposited run")

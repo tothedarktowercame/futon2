@@ -1,0 +1,8 @@
+ledger /home/joe/code/futon2/holes/labs/wm-contract/tension-ledger.edn
+  tensions 8  events 16  structural-carriers 1  defects 0
+  2026-09-01-s5              replays-identically false  deposited :typed-absence replays :red            tensions 5->8
+                             fields-moved [":live-derivation" ":run-provenance" ":verdict-deposited" ":why-the-ledger-cannot-be-run-scoped"]
+  2026-09-04-010-accepted    replays-identically false  deposited :typed-absence replays :typed-absence  tensions 7->8
+                             fields-moved [":live-derivation" ":run-provenance" ":why-the-ledger-cannot-be-run-scoped"]
+  2026-09-04-re5             replays-identically false  deposited :typed-absence replays :red            tensions 5->8
+                             fields-moved [":live-derivation" ":run-provenance" ":verdict-deposited" ":why-the-ledger-cannot-be-run-scoped"]

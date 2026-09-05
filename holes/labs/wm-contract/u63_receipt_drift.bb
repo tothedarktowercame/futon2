@@ -7,7 +7,7 @@
 ;;
 ;; WHY THIS EXISTS AS A SCRIPT AND NOT AS A PASTED TRANSCRIPT. :U63 mints into
 ;; the curated ledger, and `:live-derivation` folds the WHOLE ledger into EVERY
-;; run's receipt (u41_tension_ledger.bb:602-613), so every deposited run replays
+;; run's receipt (u41_tension_ledger.bb:712-722), so every deposited run replays
 ;; differently afterwards. The row is required to REPORT that rather than repair
 ;; it, and a report a reviewer cannot re-derive is an assertion. Pointing
 ;; FUTON_TENSION_LEDGER at the pre-mint ledger --

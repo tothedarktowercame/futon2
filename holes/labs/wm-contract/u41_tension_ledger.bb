@@ -296,8 +296,26 @@
                         :how "minted by a :rationale-refuted verdict"
                         :pointers ["runs/U39-selection-retrospective/README.md:265-288"]}})
 
+;; FORWARD DECLARATION, and it is load order rather than taste: `run-attribution`
+;; is defined with the deposit path far below, because that is where it is read,
+;; while the two :AD1 controls that pin what its `:cashed?` field now means
+;; belong with the other controls. Declaring it here keeps both in their place.
+(declare run-attribution)
+
 (defn controls [ledger defects birth]
-  (let [fake :fabricated/not-a-tension
+  (let [ad1-subject
+        ;; THE SUBJECT OF THE TWO :AD1 CONTROLS: the LAST tension that has not
+        ;; already reached a terminal status. Not simply the last tension --
+        ;; `validate` refuses a status move after a terminal event, so planting a
+        ;; cashing on an already-cashed tension would make both controls fail for
+        ;; a reason that has nothing to do with the reading. `controls` runs over
+        ;; whatever ledger it is handed, including the planted ones the (A)-strict
+        ;; controls build, so this has to hold for a ledger that already carries a
+        ;; cashing and not only for the curated one, which carries none.
+        (last (remove #(contains? terminal-statuses
+                                  (:status (current-status ledger (:tension/id %))))
+                      (:tensions ledger)))
+        fake :fabricated/not-a-tension
         fake-status (current-status ledger fake)
         fake-events (filter #(= fake (:event/tension %)) (:events ledger))
         synth (birth-rule synthetic-corpus)
@@ -369,6 +387,62 @@
                                    (:tensions ledger)))
       :pass? (every? #(seq (get-in % [:tension/provenance :pointers])) (:tensions ledger))
       :why "the row's standard: every claim carries a file:line pointer, a run-record id, or 'not found'"}
+     :positive/a-planted-cashing-makes-the-attributed-set-all-cashed
+     ;; :AD1. THE READING HAS TO BE ABLE TO SAY GREEN, and on the curated ledger
+     ;; it never does: zero :cashed events have ever been written, so every
+     ;; attributed tension is :carried and every in-scope run reads :red. A
+     ;; reading that can only ever say one thing is not a reading. This plants
+     ;; the cashing -- a :cashed event with a row and a receipt, which
+     ;; `validate` demands -- on the ledger's LAST tension, points a control run
+     ;; at it structurally, and requires the green.
+     (let [ctrl-run "ctrl-all-cashed-run"
+           t ad1-subject
+           tid (:tension/id t)
+           declared (assoc-in t [:tension/provenance :records] [ctrl-run])
+           cashed-event {:event/id :ctrl/all-cashed#cash
+                         :event/seq (inc (reduce max 0 (map :event/seq (:events ledger))))
+                         :event/tension tid :event/type :cashed
+                         :event/at "2026-09-05" :event/by "control" :event/row :AD1
+                         :event/evidence ["control-receipt:1"]}
+           planted (-> ledger
+                       (update :tensions (fn [ts] (mapv #(if (= tid (:tension/id %)) declared %) ts)))
+                       (update :events conj cashed-event))
+           att (run-attribution planted ctrl-run [])
+           naming (:naming-this-run att)]
+       {:subject tid
+        :attributed (count naming)
+        :statuses (mapv :status naming)
+        :defects (count (validate planted))
+        :pass? (and (some? t)
+                    (= 1 (count naming))
+                    (every? :cashed? naming)
+                    (empty? (:uncashed att))
+                    (zero? (count (validate planted))))
+        :why "the input (A)-strict reads -- `:cashed?` on every tension attributed to the run -- must be able to come back ALL-TRUE. The curated ledger has no :cashed event, so without this plant the field would be pinned only on the side it always takes. The plant is a schema-conforming cashing event and the status is the FOLD, so :cashed? is reached through validate and current-status rather than asserted. THE VERDICT ITSELF IS NOT CHECKED HERE and that is deliberate: `deposit-receipt` reds on any failing control, so a verdict computed inside `controls` would either be circular or a second copy of the rule it is meant to guard (holes/TN-edge-review-aif-wiring.md:627-633). The end-to-end green and red are pinned by negative_controls.sh control 8z, which calls the shipped `deposit-receipt`"})
+     :negative/without-the-cashing-the-same-attribution-stays-uncashed
+     ;; :AD1, the other half. THE SAME PLANT WITH THE CASHING EVENT REMOVED must
+     ;; go red, and it must be red for the RUN and not for the tree: defects 0
+     ;; and every other control passing, so the only thing separating this from
+     ;; the green above is the cashing.
+     (let [ctrl-run "ctrl-uncashed-run"
+           t ad1-subject
+           tid (:tension/id t)
+           declared (assoc-in t [:tension/provenance :records] [ctrl-run])
+           planted (update ledger :tensions
+                           (fn [ts] (mapv #(if (= tid (:tension/id %)) declared %) ts)))
+           att (run-attribution planted ctrl-run [])
+           naming (:naming-this-run att)]
+       {:subject tid
+        :attributed (count naming)
+        :uncashed (:uncashed att)
+        :statuses (mapv :status naming)
+        :defects (count (validate planted))
+        :pass? (and (some? t)
+                    (= 1 (count naming))
+                    (not-any? :cashed? naming)
+                    (= 1 (count (:uncashed att)))
+                    (zero? (count (validate planted))))
+        :why "the same planted attribution WITHOUT the cashing event must leave that tension uncashed and in the `:uncashed` set, which is what (A)-strict deposits :red for. Paired with the control above this is the discrimination -- one cashing event is the whole difference -- and `defects 0` on both plants is what says neither side is reached by a broken ledger"})
      :report/birth-rule-is-zero-today
      {:candidates (count (:candidates birth))
       :terminal (:terminal birth)
@@ -468,14 +542,22 @@
 ;; match: `run-attribution` below prefers that field and falls back to the
 ;; substring scan for a tension that carries none, marking which is which.
 ;;
-;; WHAT :U60 DID NOT DO, and the boundary is the point: it did not move the
-;; verdict. `:verdict-deposited` still reads exactly the two substring
-;; conditions it read before -- the run id or one of its tick ids appearing
-;; anywhere in the ledger text -- so a green is still green for the same reason
-;; and an absence for the same reason. What the deposit gained is a BASIS that
-;; says which tensions name the run and by what evidence. Whether a structural
-;; attribution should mean something different from a prose one is exactly the
-;; (A)/(B)/(C) ruling this row is forbidden to answer.
+;; :U60 BUILT THE BASIS AND LEFT THE VERDICT ALONE; :AD1 MOVED THE VERDICT ONTO
+;; IT. Until 2026-09-05 `:verdict-deposited` read two substring conditions -- the
+;; run id or one of its tick ids appearing anywhere in the ledger TEXT -- which
+;; is reading (B) of C511-repair-or-elaborate.md:437-439, "the ledger can
+;; attribute a tension to this run", and greens a run for being MENTIONED. It now
+;; reads (A)-strict: green iff every tension the ledger attributes to the run has
+;; been cashed, :red if any has not, and the typed absence only where nothing is
+;; attributed. Adopted by the machine, recorded at aif-equations.edn :choices
+;; :tensions-cashed-reading, reversible by re-recording the choice.
+;;
+;; THE THREE DEPOSITED ROWS ARE NOT REPAIRED. The ledger is append-only
+;; (run_era_ledger.bb:241-243) and :AD1's second adoption is that a repair of a
+;; deposited run is a RECEIPT and never a row mutation, a new run-id or a
+;; supersedes field. So 2026-09-01-s5 and 2026-09-04-re5, deposited
+;; :typed-absence, now REPLAY :red, and that divergence is reported beside the
+;; ledger rather than written into it.
 ;;
 ;; A ledger defect or a failing control deposits :red whatever the run store
 ;; holds: that failure is about the tree the deposit is made from.
@@ -514,28 +596,40 @@
    over its printed form -- which is what this check has always done, and which
    is marked `:prose-scan` in the basis rather than presented as the same
    evidence: a substring match cannot tell a run the tension is ABOUT from a run
-   it merely mentions."
-  [t sought]
-  (let [structured (structured-run-keys t)]
+   it merely mentions.
+
+   STATUS IS THE FOLD, NOT THE RECORD'S FIELD (:AD1). `:cashed?` is read from
+   `status`, which the caller computes with `current-status` -- the last
+   status-moving EVENT -- and not from `:tension/status`, which is the status
+   the tension was minted at and which `validate` refuses to let move. A reading
+   of `:tensions-cashed` off the mint-time field could never see a cashing."
+  [t sought status]
+  (let [structured (structured-run-keys t)
+        cashed? (= :cashed (:status status))]
     (if (seq structured)
       (let [hits (vec (filter (set structured) sought))]
         (array-map :tension (:tension/id t) :attribution :structural
                    :declares structured :matched hits
-                   :names-this-run? (boolean (seq hits))))
+                   :names-this-run? (boolean (seq hits))
+                   :status (:status status) :cashed? cashed?))
       (let [text (pr-str t)
             hits (vec (filter #(str/includes? text %) sought))]
         (array-map :tension (:tension/id t) :attribution :prose-scan
                    :matched hits
-                   :names-this-run? (boolean (seq hits)))))))
+                   :names-this-run? (boolean (seq hits))
+                   :status (:status status) :cashed? cashed?)))))
 
 (defn run-attribution
-  "The per-tension basis: which tensions name this run, and by which method.
+  "The per-tension basis: which tensions name this run, by which method, and --
+   since :AD1 -- whether each has been cashed, which is what the verdict reads.
    Ledger order, not sorted -- tension ids are keywords AND vectors here (the
    zaif rung-3 mint's id is the refusal itself), so there is no total order to
    sort by, and the ledger's own order is already deterministic."
   [ledger run-id tick-ids]
   (let [sought (into [run-id] tick-ids)
-        per (mapv #(attribute-tension % sought) (:tensions ledger))]
+        per (mapv #(attribute-tension % sought (current-status ledger (:tension/id %)))
+                  (:tensions ledger))
+        naming (filterv :names-this-run? per)]
     (array-map
      :method
      (str "prefer the structured field :tension/provenance :records; fall back to a substring "
@@ -543,7 +637,16 @@
           "marked :prose-scan and is what attributes every tension minted before the key existed.")
      :sought sought
      :fold (into (sorted-map) (frequencies (map :attribution per)))
-     :naming-this-run (filterv :names-this-run? per)
+     :naming-this-run naming
+     :reading
+     (str "(A)-strict, adopted by the machine 2026-09-05 under :AD1 and recorded at "
+          "aif-equations.edn :choices :tensions-cashed-reading. A green asserts that every "
+          "tension this ledger attributes to the run has been CASHED; an attributed tension that "
+          "has not is a :red, because the ledger has FOUND the tension debt rather than failed to "
+          "look. A run with no attributed tension is outside the reading's scope and deposits the "
+          "typed absence it always did. Reversal: re-record the choice.")
+     :uncashed (mapv :tension (remove :cashed? naming))
+     :status-fold (into (sorted-map) (frequencies (map :status naming)))
      :per-tension per)))
 
 (defn run-provenance-scan
@@ -594,11 +697,18 @@
         "which is what lets the deposit require it to be committed and unmodified, and lets "
         "the same deposit repeat as :already-present.")
    :run-provenance scan
-   :verdict-deposited (cond (seq defects) :red
-                            (not (every? :pass? (vals ctrls))) :red
-                            (or (:run-id-appears-in-ledger? scan)
-                                (seq (:tick-ids-appearing scan))) :green
-                            :else :typed-absence)
+   ;; (A)-STRICT, adopted by the machine under :AD1 (2026-09-05); the basis is
+   ;; `:run-provenance :run-attribution`, which the scan carries exactly when
+   ;; some tension names the run. Before :AD1 this read the (B) condition -- the
+   ;; run id or one of its tick ids appearing anywhere in the ledger TEXT -- so
+   ;; a run was green for being MENTIONED. Under (A)-strict green asserts what
+   ;; the check-id says: every attributed tension is cashed.
+   :verdict-deposited (let [naming (get-in scan [:run-attribution :naming-this-run])]
+                        (cond (seq defects) :red
+                              (not (every? :pass? (vals ctrls))) :red
+                              (empty? naming) :typed-absence
+                              (every? :cashed? naming) :green
+                              :else :red))
    :live-derivation
    {:read-from "the tension ledger at deposit time, which names no run"
     :artifact "holes/labs/wm-contract/tension-ledger.edn"
@@ -655,8 +765,9 @@
            ". :structural means the tension declares the run at :tension/provenance :records; "
            ":prose-scan means the run id was found as a substring of the record and the tension "
            "declares no runs. The ledger-wide fold is " (pr-str (:fold att))
-           ". This names WHICH tensions and by WHAT evidence; it does not change what the "
-           "verdict above asserts, which waits on the (A)/(B)/(C) ruling."))))
+           ". This names WHICH tensions and by WHAT evidence. Since :AD1 the verdict READS it: "
+           "under (A)-strict a green asserts every one of them is cashed, and "
+           (pr-str (:uncashed att)) " is the uncashed set that makes it a :red."))))
 
 (defn deposit-notes [run-id receipt]
   (let [d (:live-derivation receipt)
@@ -664,13 +775,23 @@
     (str
      (case (:verdict-deposited receipt)
       :typed-absence
-      (str "the tension ledger records nothing about run " run-id ", and cannot: no tension "
-           "and no event carries a run identity. Measured, not assumed -- the run-id string "
-           "appears nowhere in tension-ledger.edn, none of the run's " (count (:tick-ids-sought scan))
-           " tick ids (" (str/join ", " (:tick-ids-sought scan)) ") appears in it, and of the "
-           "keys actually in use (" (pr-str (:event-keys-in-use scan)) " on events, "
-           (pr-str (:tension-keys-in-use scan)) " on tensions) none names a run. The nearest "
-           "carrier is :event/at, a date; the ledger's events fall on "
+      ;; NO TENSION IS ATTRIBUTED TO THIS RUN, which is a weaker and truer claim
+      ;; than the one this branch made before :AD1. It used to say the run-id
+      ;; "appears nowhere in tension-ledger.edn"; since :U60 a tension that
+      ;; DECLARES its runs at :records is not attributed by its prose, so a run
+      ;; can be mentioned in the file and still have nothing attributed to it.
+      ;; Both measurements are printed rather than one being inferred from the
+      ;; other.
+      (str "no tension in the tension ledger is attributed to run " run-id ", so under (A)-strict "
+           "there is nothing for a green to be about and nothing for a red to have found. "
+           "Measured, not assumed -- the run-id string appears in tension-ledger.edn? "
+           (:run-id-appears-in-ledger? scan) "; of the run's " (count (:tick-ids-sought scan))
+           " tick ids (" (str/join ", " (:tick-ids-sought scan)) ") the ones appearing are "
+           (pr-str (:tick-ids-appearing scan)) "; and of the keys actually in use ("
+           (pr-str (:event-keys-in-use scan)) " on events, "
+           (pr-str (:tension-keys-in-use scan)) " on tensions) the run-carrying ones are "
+           (pr-str (:run-carrying-keys scan)) ". The events carry no run field at all; their "
+           "nearest carrier is :event/at, a date, and the ledger's events fall on "
            (str/join ", " (map key (:events-by-date scan))) ". So no tension can be said to "
            "have been cashed BY this run. The fold at deposit time is "
            (pr-str (:status-fold d)) " over " (:tensions d) " tensions and " (:events d)
@@ -678,12 +799,32 @@
            "property of the ledger at deposit time, is recorded in the artifact this row points "
            "at, and is not deposited as this run's verdict.")
       :red
-      (str "the tension ledger check FAILS at deposit time: " (pr-str (:defects d))
-           " defects, controls " (pr-str (:controls d)))
+      ;; TWO WAYS TO BE RED AND THEY ARE NOT THE SAME FINDING, so the note says
+      ;; which. A defect or a failing control is about the TREE the deposit is
+      ;; made from; an uncashed attributed tension is about the RUN, and is the
+      ;; (A)-strict reading doing its job.
+      (if (or (seq (:defects d)) (not (every? true? (vals (:controls d)))))
+        (str "the tension ledger check FAILS at deposit time: " (pr-str (:defects d))
+             " defects, controls " (pr-str (:controls d)))
+        (let [att (:run-attribution scan)]
+          (str "the ledger attributes " (count (:naming-this-run att)) " tension(s) to this run "
+               "and " (count (:uncashed att)) " of them are NOT cashed: "
+               (pr-str (:uncashed att)) ", status fold " (pr-str (:status-fold att))
+               ". Under (A)-strict -- adopted 2026-09-05, aif-equations.edn :choices "
+               ":tensions-cashed-reading -- that is a :red and not an absence: the ledger has "
+               "FOUND the tension debt. Whole-ledger fold at deposit time "
+               (pr-str (:status-fold d)) " over " (:tensions d) " tensions, cashed "
+               (pr-str (:cashed d)) ".")))
       :green
-      (str "the ledger names this run: run-id in ledger? " (:run-id-appears-in-ledger? scan)
-           ", tick ids appearing " (pr-str (:tick-ids-appearing scan))
-           "; status fold " (pr-str (:status-fold d)) ", cashed " (pr-str (:cashed d))))
+      (let [att (:run-attribution scan)]
+        (str "every tension the ledger attributes to this run is cashed: "
+             (pr-str (mapv :tension (:naming-this-run att)))
+             ", status fold " (pr-str (:status-fold att))
+             ". Measured too, and kept because it is what the pre-:AD1 (B) reading tested: "
+             "run-id in ledger? " (:run-id-appears-in-ledger? scan)
+             ", tick ids appearing " (pr-str (:tick-ids-appearing scan))
+             "; whole-ledger status fold " (pr-str (:status-fold d))
+             ", cashed " (pr-str (:cashed d)))))
      (attribution-note scan))))
 
 (defn deposit! [run-id dry-run?]

@@ -244,6 +244,23 @@
   {:defects 0,
    :pass? true,
    :why "the seed corpus is held to the schema it declares"},
+  :negative/without-the-cashing-the-same-attribution-stays-uncashed
+  {:subject :wm-ladder/u60-3416e82b-zero-support,
+   :attributed 1,
+   :uncashed [:wm-ladder/u60-3416e82b-zero-support],
+   :statuses [:carried],
+   :defects 0,
+   :pass? true,
+   :why
+   "the same planted attribution WITHOUT the cashing event must leave that tension uncashed and in the `:uncashed` set, which is what (A)-strict deposits :red for. Paired with the control above this is the discrimination -- one cashing event is the whole difference -- and `defects 0` on both plants is what says neither side is reached by a broken ledger"},
+  :positive/a-planted-cashing-makes-the-attributed-set-all-cashed
+  {:subject :wm-ladder/u60-3416e82b-zero-support,
+   :attributed 1,
+   :statuses [:cashed],
+   :defects 0,
+   :pass? true,
+   :why
+   "the input (A)-strict reads -- `:cashed?` on every tension attributed to the run -- must be able to come back ALL-TRUE. The curated ledger has no :cashed event, so without this plant the field would be pinned only on the side it always takes. The plant is a schema-conforming cashing event and the status is the FOLD, so :cashed? is reached through validate and current-status rather than asserted. THE VERDICT ITSELF IS NOT CHECKED HERE and that is deliberate: `deposit-receipt` reds on any failing control, so a verdict computed inside `controls` would either be circular or a second copy of the rule it is meant to guard (holes/TN-edge-review-aif-wiring.md:627-633). The end-to-end green and red are pinned by negative_controls.sh control 8z, which calls the shipped `deposit-receipt`"},
   :positive/birth-rule-fires-on-a-corpus-that-satisfies-it
   {:candidates 1,
    :resolution-key :measure-before-tuning,

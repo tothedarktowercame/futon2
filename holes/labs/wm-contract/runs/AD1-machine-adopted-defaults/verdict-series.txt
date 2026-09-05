@@ -1,0 +1,7 @@
+run                        (A)-strict     (B)-as-coded   attributed uncashed
+2026-09-01-s5              :red           :green         1          [:wm-ladder/s5-4e35e740-zero-support]
+2026-09-04-re5             :red           :green         1          [:wm-ladder/re5-8ae111bc-zero-support]
+2026-09-04-010-accepted    :typed-absence :typed-absence 0          nil
+2026-09-05-u59-a           :typed-absence :typed-absence 0          nil
+2026-09-05-u59-b           :typed-absence :typed-absence 0          nil
+2026-09-05-u60             :red           :green         1          [:wm-ladder/u60-3416e82b-zero-support]

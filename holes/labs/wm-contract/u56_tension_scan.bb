@@ -11,11 +11,15 @@
 ;; the run-era ledger is append-only (run_era_ledger.bb:241-243), so those rows
 ;; cannot be rewritten in any case.
 ;;
-;; The scan logic mirrors u41_tension_ledger.bb:549-581 and its green branch at
-;; :597-601: `(or run-id-appears-in-ledger? (seq tick-ids-appearing))`. (:U60
-;; moved both down the file and added a per-tension BASIS beside the scan,
-;; `run-attribution:531-547`; the green condition itself is unchanged, which is
-;; why this mirror still holds.)
+;; The scan logic mirrors u41_tension_ledger.bb:652-685. IT NO LONGER MIRRORS THE
+;; VERDICT, and that is a change of 2026-09-05 rather than a caveat: this script
+;; reports `(or run-id-appears-in-ledger? (seq tick-ids-appearing))`, which is
+;; what u41's green branch tested until :AD1 -- reading (B). :AD1 moved the
+;; verdict to (A)-strict (u41_tension_ledger.bb:706-711): green iff every tension
+;; the ledger ATTRIBUTES to the run has been cashed. So what this U56 discovery
+;; record prints is the (B) column, kept as it was written because it is the
+;; measurement C511 §4 rests on; for what the deposit now says, read
+;; `run-attribution:622-651` and the receipt's `:run-provenance :run-attribution`.
 (require '[clojure.edn :as edn] '[clojure.java.io :as io] '[clojure.string :as str])
 
 (def lab (str (System/getProperty "user.home") "/code/futon2/holes/labs/wm-contract"))

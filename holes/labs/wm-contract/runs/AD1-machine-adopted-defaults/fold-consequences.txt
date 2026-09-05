@@ -1,0 +1,41 @@
+MEASURED INPUTS (tension-ledger.edn, current commit)
+  2026-09-01-s5                attributed 1, cashed 0 [:wm-ladder/s5-4e35e740-zero-support]
+  2026-09-04-re5               attributed 1, cashed 0 [:wm-ladder/re5-8ae111bc-zero-support]
+  2026-09-04-010-accepted      attributed 0, cashed 0 []
+  :cashed events in the whole ledger: 0
+  (A) can speak about: ["2026-09-01-s5" "2026-09-04-re5"] ; of those, all-cashed: []
+  (B) can speak about: ["2026-09-01-s5" "2026-09-04-re5"]
+  (C) can speak about: ["2026-09-04-010-accepted"]
+
+S0 -- as deposited:
+  2026-09-01-s5                :red        {:red-verdict [:selection-discrimination]}
+  2026-09-04-010-accepted      :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]}
+  2026-09-04-re5               :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]}
+S1a -- reading (A) 'the run's tensions are all cashed', uncashed => :red.
+       Speaks only where a tension is attributed; ["2026-09-04-010-accepted"] is out of its scope and stays as deposited.
+  2026-09-01-s5                :red        {:red-verdict [:selection-discrimination :tensions-cashed]}
+  2026-09-04-010-accepted      :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]}
+  2026-09-04-re5               :red        {:red-verdict [:tensions-cashed]}
+S1b -- reading (A), uncashed => :typed-absence (no :cashed event has ever been
+       written, so the cashing signal is unobservable rather than failed):
+  2026-09-01-s5                :red        {:red-verdict [:selection-discrimination]}
+  2026-09-04-010-accepted      :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]}
+  2026-09-04-re5               :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]}
+S2 -- reading (B): green where the ledger names the run:
+  2026-09-01-s5                :red        {:red-verdict [:selection-discrimination]}
+  2026-09-04-010-accepted      :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]}
+  2026-09-04-re5               :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret]}
+S3 -- reading (C): vacuous green only where the ledger attributes no tension
+       to the run (and see C511 §4: that emptiness is not establishable on the
+       present schema, :event/at being a date -- this is (C)'s value IF GRANTED):
+  2026-09-01-s5                :red        {:red-verdict [:selection-discrimination]}
+  2026-09-04-010-accepted      :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret]}
+  2026-09-04-re5               :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]}
+S4 -- (A) with a red, composed with (C): every run in scope of some reading:
+  2026-09-01-s5                :red        {:red-verdict [:selection-discrimination :tensions-cashed]}
+  2026-09-04-010-accepted      :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret]}
+  2026-09-04-re5               :red        {:red-verdict [:tensions-cashed]}
+S5 -- all four standing absences green on the accepted run:
+  2026-09-01-s5                :red        {:red-verdict [:selection-discrimination]}
+  2026-09-04-010-accepted      :green      {:every-catalogued-check-green true}
+  2026-09-04-re5               :incomplete {:typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]}
