@@ -244,3 +244,28 @@ minted from its findings):
   during these runs — is that vacuously cashed or can't-see?), which if
   so is stated as a question for Joe, not answered by fiat. No check
   code changed, no deposit made.
+
+## Pending rulings queue (one at a time, in this order)
+
+U56 (C511-repair-or-elaborate.md) leaves three questions that are Joe's;
+they are QUEUED, not asked — the flip question (ladder + hole-availability,
+awaiting the C512 measurement) goes first, and each later one goes to Joe
+only when it reaches the front:
+
+1. **What may a repair of a deposited run do?** The ledger is append-only
+   and refuses divergent rows, so U56's demonstrated as-of derivation for
+   the accepted step's :flip-readiness has nowhere to land. Options named,
+   none chosen: receipt-only beside the ledger; a new run-id for the
+   re-derivation; a :row/supersedes field. (:choices question about the
+   seam file's own contract.)
+2. **What does :tensions-cashed green assert?** (A) all the run's tensions
+   cashed — matches the check-id, and today WORSENS folds (re5 → :red, 0
+   cashed of 2); if (A), second choice: red or typed-absence for
+   not-all-cashed. (B) the ledger can attribute a tension to the run —
+   what the code tests; the one reading inconsistent with the deposits
+   already made. (C) the run minted none — not establishable (:event/at is
+   a date). No reading makes any run :green.
+3. **Does a tree-artifact check belong in a per-run catalogue?**
+   (:per-node-tests reads the live tree by design; U57's capture gives it
+   an as-of input, but whether the catalogue should carry tree-level
+   checks at all is a design ruling.)
