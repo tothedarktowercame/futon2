@@ -14,7 +14,7 @@ committed tree.
 
 Artifacts (both byte-identical on rerun, md5 over three runs from two differently named isolated worktrees (/tmp/l1wt-alpha, /home/joe/code/futon3-L1-rerun-zai1) — serialized provenance is path-independent (repo-relative subdir + HEAD sha), so any checkout of the same commit yields a byte-identical receipt):
 - `L1-census-receipt.edn` — counts, full annotation-key histogram, unresolved refs
-- `L1-census-graph.edn` — graph as nodes+edges EDN (3830 edges, `{:from :kind :to :resolved}`)
+- `L1-census-graph.edn` — graph as nodes+edges EDN (6043 edges, `{:from :kind :to :resolved}`)
 - `l1_census.py` — the parser (deterministic: sorted walks, sorted emission; takes the library root as argv[1], defaulting to the canonical checkout, and records that root's HEAD plus any dirty/untracked .flexiarg)
 
 ## Headline counts
@@ -85,9 +85,17 @@ All 99 sections are in the receipt's `:per-section-counts`; the 17 sections belo
 ## Other census facts worth the receipt
 
 - 28 files have no `@flexiarg` id line (id taken from path; listed in receipt).
-- 2004 of 3830 extracted reference edges do not resolve to an existing pattern
+- 3893 of 6043 extracted reference edges do not resolve to an existing pattern
   id — most are `@references`/`@see-also` shorthand and external names; full
   list in the receipt under `:unresolved-refs`.
-- Full annotation-key histogram (86 distinct keys, including the exotype block,
+- Full annotation-key histogram (87 distinct keys, including the exotype block,
   `@holds-at`, `@verdict`, `@governance`, …) is in the receipt; this row
-  extracts ALL annotations, not only `@how`/`@why`.
+  extracts ALL annotations, not only `@how`/`@why`, including value-less
+  multiline headers (e.g. `@exotype-encoding`, `@ct-interpretation`) whose
+  bodies start on the following indented lines: 12297 annotation headers in
+  total, of which 1293 are header-only/multiline (matching the complete
+  search `rg -c '^@[A-Za-z0-9_-]+[[:space:]]*$'` = 1293); the receipt
+  records `:multiline-coverage-check true` (headers captured == headers
+  seen) and the parser asserts equality. Multiline bodies add 2213 edges
+  (3830 -> 6043), mostly `@exotype-lift`/`@instantiates` pattern-id lists;
+  `@why`/`@how` carrier counts are unchanged (83/21).

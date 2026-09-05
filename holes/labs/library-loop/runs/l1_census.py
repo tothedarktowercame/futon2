@@ -18,9 +18,41 @@ LIB = os.path.abspath(sys.argv[1] if len(sys.argv) > 1
                       else "/home/joe/code/futon3/library")
 OUT = os.path.dirname(os.path.abspath(__file__))
 
-ann_line = re.compile(r"^@([A-Za-z0-9_-]+)\s+(.*)$")
+ann_line = re.compile(r"^@([A-Za-z0-9_-]+)(?:\s+(.*))?$")
 # annotation value tokens shaped like section/name refs
 ref_tok = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9._-]+)+")
+
+def parse_annotations(lines):
+    """Extract ALL @-annotations, including value-less headers whose value
+    starts on the following (indented) lines, per flexiarg syntax: a
+    multiline annotation body continues until the next line-initial @, !, +,
+    ;; or non-indented line. Returns (anns, header_count)."""
+    anns = defaultdict(list)
+    headers = 0
+    i = 0
+    while i < len(lines):
+        m = ann_line.match(lines[i])
+        if not m:
+            i += 1
+            continue
+        headers += 1
+        key = m.group(1)
+        parts = []
+        if m.group(2):
+            parts.append(m.group(2).strip())
+        i += 1
+        while i < len(lines):
+            ln = lines[i]
+            if ln.startswith((" ", "\t")):
+                parts.append(ln.strip())
+                i += 1
+            elif ln.strip() == "" and i + 1 < len(lines) \
+                    and lines[i + 1].startswith((" ", "\t")):
+                i += 1  # blank line inside a multiline body
+            else:
+                break
+        anns[key].append("\n".join(parts).strip())
+    return anns, headers
 
 def q(s):  # EDN string
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
@@ -33,6 +65,8 @@ edges = []          # [id from, kind, id to, resolved?]
 ann_hist = defaultdict(int)   # annotation key -> occurrence count across files
 files = 0
 files_missing_flexiarg = []
+total_headers = 0
+captured_headers = 0
 
 for root, dirs, fnames in os.walk(LIB):
     dirs.sort()
@@ -45,13 +79,12 @@ for root, dirs, fnames in os.walk(LIB):
         files += 1
         anns = defaultdict(list)
         with open(path, encoding="utf-8", errors="replace") as f:
-            for line in f:
-                m = ann_line.match(line)
-                if not m:
-                    continue
-                key, val = m.group(1), m.group(2).strip()
-                anns[key].append(val)
+            anns, headers = parse_annotations(f.read().splitlines())
+        for key, vals in anns.items():
+            for val in vals:
                 ann_hist[key] += 1
+        total_headers += headers
+        captured_headers += sum(len(v) for v in anns.values())
         if "flexiarg" not in anns:
             files_missing_flexiarg.append(pid)
         nodes[pid] = dict(anns)
@@ -120,6 +153,9 @@ carrying_why = sorted(n for n in nodes if "why" in nodes[n])
 carrying_how = sorted(n for n in nodes if "how" in nodes[n])
 carrying_why_posthoc = sorted(n for n in nodes if "why-posthoc" in nodes[n])
 
+# coverage check: every @-header line must be captured (multiline included)
+assert total_headers == captured_headers, (total_headers, captured_headers)
+
 # grep floor
 grep_cmd = "grep -rlE '@(why|how)' --include='*.flexiarg' %s" % LIB
 floor = subprocess.run(grep_cmd, shell=True, capture_output=True, text=True)
@@ -180,7 +216,11 @@ with open(os.path.join(OUT, "L1-census-receipt.edn"), "w") as f:
     f.write(" :grep-floor-command %s\n"
             % q("cd $LIBRARY_SUBDIR && grep -rlE '@(why|how)' --include='*.flexiarg' ." ))
     f.write(" :grep-floor-files %d\n" % floor_n)
-    f.write(" :problem-nodes-count %d\n :problem-nodes %s\n" % (len(problems), str(problems).replace("'", '"')))
+    f.write(" :problem-nodes-count %d\n :problem-nodes %s\n"
+            % (len(problems), str(problems).replace("'", '"')))
+    f.write(" :annotation-headers-total %d\n :annotation-headers-captured %d\n"
+            " :multiline-coverage-check %s\n" % (total_headers, captured_headers,
+                                                 "true" if total_headers == captured_headers else "false"))
     f.write(" :wr-nodes %d\n" % len(wr))
     f.write(" :why-reachable-up-from-problems %d\n" % len(reachA1))
     f.write(" :why-reachable-up-from-problems+wr %d\n" % len(reachA2))
