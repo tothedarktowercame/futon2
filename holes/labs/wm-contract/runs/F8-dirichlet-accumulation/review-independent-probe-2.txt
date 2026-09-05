@@ -1,0 +1,9 @@
+:F8 leg 1 slice 10 -- second independent probe (the recurrence question)
+run 2026-09-05T16:54:48Z by the reviewing seat
+
+a1 = {"cap-a" [2.1 0.1], "cap-b" [1.1 1.1]}
+reduce from corpus = reduce from concentration ? = true
+merge-scores delta-F = [-2.690782367583605]
+concepts = ["cap-a" "cap-b"]
+concept-concentrations = {"cap-a" [2.1 0.1], "cap-b" [1.1 1.1]}
+a4a public arglists = {capability->concept ([reduced-concepts]), concept->star-doc ([concept]), concept->stddev ([reduced-concepts]), concept-star-id ([concept]), constellation->model-uncertainty ([pattern->constellation corpus-edges]), corpus->concentration ([{:keys [capabilities edges discharges]}]), make-model-uncertainty-fn ([mission->model-uncertainty]), mission->model-uncertainty ([mission->patterns pattern->constellation constellation->model-uncertainty]), model-uncertainty-for-produces ([reduced-concepts produces-set]), normalize-mission-id ([mission-id]), pattern-stem ([pattern-id]), prior nil, reduce-concepts ([corpus-or-concentrations])}

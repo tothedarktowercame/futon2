@@ -1,14 +1,21 @@
-F8 leg 1 slice 10 -- production Dirichlet recount readback
-priorReference prior expected=0.1 actual=0.1 MATCH
-oneEdgeReference one edge cell expected=1.1 actual=1.1 MATCH
-twoEdgesReference two edge cell expected=2.1 actual=2.1 MATCH
-twoMissionRowReference cap-a row expected=[1.1 0.1] actual=[1.1 0.1] MATCH
-recountReference same corpus twice expected=true actual=true MATCH
-machineCoordinatesAreNotStable outcomes before expected=["m1" "m2"] actual=["m1" "m2"] MATCH
-machineCoordinatesAreNotStable outcomes after expected=["aaa" "m1" "m2"] actual=["aaa" "m1" "m2"] MATCH
-machineCoordinatesAreNotStable m1 index before/after expected=[0 1] actual=[0 1] MATCH
-bmrThresholdReference BMR threshold expected=-3.0 actual=-3.0 MATCH
-recurrenceMissingBothArms declared recurrence: NOT MEASURED in Clojure; production has no previous-a parameter
-oneHotOuterProductIsUnitCell/nonOneHotOuterProductIsNotUnitCell: NOT MEASURED in Clojure; declared tick-model rule is absent
-machineSatisfiesNoneOfRepairPredicate: NOT MEASURED in Clojure; predicate specifies the repair boundary
-VERDICT: 9 MATCH, 0 MISMATCH; explicit NOT MEASURED lines retained.
+F8 leg 1 slice 10 -- production R17 accumulation readback
+priorReference                       a4a/prior                          expected 0.1                      actual 0.1                      MATCH
+oneEdgeReference                     one record -> its cell             expected 1.1                      actual 1.1                      MATCH
+twoEdgesReference                    the same record twice              expected 2.1                      actual 2.1                      MATCH
+twoMissionRowReference               the record's own cell              expected 1.1                      actual 1.1                      MATCH
+twoMissionRowReference               the untouched cell                 expected 0.1                      actual 0.1                      MATCH
+machineAppendRaisesItsOwnCell        delta at the record's cell         expected 1.0                      actual 1.0                      MATCH
+machineAppendMovesNoOtherCell        cells that moved                   expected [["cap-a" 1]]            actual [["cap-a" 1]]            MATCH
+noSingleRecordProducesASoftUpdate    how many cells moved               expected 1                        actual 1                        MATCH
+machineCoordinatesAreNotStable       outcomes before                    expected ["m1" "m2"]              actual ["m1" "m2"]              MATCH
+machineCoordinatesAreNotStable       outcomes after                     expected ["aaa" "m1" "m2"]        actual ["aaa" "m1" "m2"]        MATCH
+machineCoordinatesAreNotStable       m1's column before/after           expected [0 1]                    actual [0 1]                    MATCH
+bmrThresholdReference                bmr/acceptance-threshold           expected -3.0                     actual -3.0                     MATCH
+PRODUCTION-ONLY                      same corpus twice -> identical     true  (no previous-a is carried across calls)
+PRODUCTION-ONLY                      the two accumulation entry points  corpus->concentration ([{:keys [capabilities edges discharges]}]) / reduce-concepts ([corpus-or-concentrations])  -- neither takes a previous concentration together with new records
+PRODUCTION-ONLY                      arity-2 publics in futon2.aif.a4a  [constellation->model-uncertainty model-uncertainty-for-produces]  -- listed for completeness; both are model-uncertainty helpers, neither is an accumulation
+oneHotDeclaredUpdateIsTheUnitIncrement declared one-hot update            NOT MEASURED -- production has no tick-model accumulation to run
+softDeclaredUpdateRaisesTwoCells     declared soft update               NOT MEASURED -- production has no tick-model accumulation to run
+declaredCoordinatesAreFixedAndMachineCoordinatesAreNot Channel/Status arm                 NOT MEASURED -- the declared coordinates have no runtime inhabitant here
+recountShapedDoesNotRealise          the repair predicate               NOT MEASURED -- it constrains a repaired implementation that does not exist
+VERDICT: 12 MATCH, 0 MISMATCH
