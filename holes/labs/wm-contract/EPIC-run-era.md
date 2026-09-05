@@ -682,3 +682,42 @@ so they can be merged when both are ready."
   each cell marked exists / named-only / absent. Dispatched 2026-09-05
   as a parked codex handoff.
 - P-assured-process.md §Ordering updated to cite this ruling.
+
+## The per-node-problems ruling (Joe, 2026-09-05) — and the Box-5 gap the census criterion left open
+
+Verbatim: "even though there are nodes related to process assurance, I
+think we need to try to really understand the problems that each node
+itself solves. That seemed like the right level of analysis. And if
+there are problems that they do not solve, either AIF needs an
+extension or our implementation of AIF is flawed (or both). Right now
+the 'Not in Lean' rows in Box 5 make me question if we would even know
+whether we had an AIF implementation or not when the dust settles ...
+I am assuming that the Fundamentals work will address those gaps,
+however"
+
+- **The assumption is PARTIALLY FALSE, cross-checked 2026-09-05:** of
+  Box 5's ten no-carrier rows, the F0 census covers pi directly (F7),
+  mu/mu-next/u adjacently, and misses o, eps, Pi(precision), F(pi), T,
+  tau entirely — they are runtime-inhabited, so the both-legs
+  uninhabited criterion excluded them. Defect class named:
+  RUNTIME-INHABITED-BUT-UNFORMALIZED (proof-side mirror of
+  built-not-wired). The F-track as scoped will not close Box 5.
+- **PENDING MINT at next pause (loop in seat, board untouchable): F8**
+  — the dust-settles criterion as an object: (a) extend the census
+  with the second class (one entry per Box-5 row, each with a Lean
+  carrier obligation); (b) regenerate the U35 lean-state join (pin is
+  STALE-PIN, predates F1's MachineQ.lean); (c) state the
+  AIF-implementation criterion checkably: every aif-equations row at
+  rung >= wired with resolving Lean carrier and F3-harness runtime
+  agreement — composed from F6 x F3, so "would we know" has a
+  mechanical answer.
+- **PENDING AMENDMENT to F4 at next pause:** each dossier LEADS with
+  "the problem this node solves" (joined from the catalog pattern,
+  the completeness criterion via R-concordance, the equations rows);
+  residual problems typed :aif-extension-needed | :implementation-flaw
+  | :both | :undetermined, per the ruling's dichotomy.
+- **Symbol hazard recorded:** capital Pi = evidence-channel precision
+  (R7) vs policy carrier (census) vs gamma=1/beta policy precision;
+  three objects, one letter; disambiguation lands with F4's dossiers.
+- Pilot problem-dossiers for R4/R5/R6 dispatched to codex-18
+  2026-09-05 (parallel track, fixes the form for the other 17 nodes).
