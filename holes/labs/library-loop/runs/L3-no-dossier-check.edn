@@ -1,0 +1,43 @@
+;; L3 negative-claim check receipt. Deterministic, path-independent rerun.
+{:aif-subdir "library/aif"
+ :aif-git-sha "41448add834a75a65942b48f1206dac3e6553345"
+ :wm-contract-subdir "holes/labs/wm-contract"
+ :wm-contract-git-sha "475c964c452aa51943d31b368c76008d3be1a00d"
+ :search "every *.flexiarg in aif-root scanned for line-leading @holds-at Rn tokens; dossier node set extracted from ^## Rn - headings across PROBLEMS-*.md in wm-contract-root"
+ :dossier-nodes ["R1" "R10" "R11" "R12" "R13" "R14" "R15" "R16" "R17" "R2" "R20" "R3" "R3a" "R4" "R5" "R6" "R7" "R8" "R9"]
+ :patterns [
+  {:pattern "aif/admissibility" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/belief-aware-risk-term" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/belief-state-operational-hypotheses" :holds-at ["R1"] :matched ["R1"] :no-dossier-match false}
+  {:pattern "aif/candidate-pattern-action-space" :holds-at ["R6"] :matched ["R6"] :no-dossier-match false}
+  {:pattern "aif/currency-before-merge" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/declare-the-conditioning" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/decomposed-prediction-noise" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/evidence-precision-registry" :holds-at ["R7"] :matched ["R7"] :no-dossier-match false}
+  {:pattern "aif/expected-free-energy-scorecard" :holds-at ["R5"] :matched ["R5"] :no-dossier-match false}
+  {:pattern "aif/experimental-comparison-of-EFE-variants" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/free-energy-as-tick-scalar" :holds-at ["R8"] :matched ["R8"] :no-dossier-match false}
+  {:pattern "aif/grounded-actuation-not-reobservation" :holds-at ["R16"] :matched ["R16"] :no-dossier-match false}
+  {:pattern "aif/hierarchical-and-temporal-depth" :holds-at ["R15"] :matched ["R15"] :no-dossier-match false}
+  {:pattern "aif/hierarchical-budget-aware-action-selection" :holds-at ["R11"] :matched ["R11"] :no-dossier-match false}
+  {:pattern "aif/interoceptive-tripwires" :holds-at ["R20"] :matched ["R20"] :no-dossier-match false}
+  {:pattern "aif/measurement-window-hygiene" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/niche-construction" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/no-self-certification" :holds-at ["R9"] :matched ["R9"] :no-dossier-match false}
+  {:pattern "aif/off-continuity-null-discriminates" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/placeholder-is-load-bearing" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/policy-precision-commitment-temperature" :holds-at ["R14"] :matched ["R14"] :no-dossier-match false}
+  {:pattern "aif/posterior-variance-as-epistemic-value" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/predictive-coding-belief-update" :holds-at ["R3"] :matched ["R3"] :no-dossier-match false}
+  {:pattern "aif/predictive-entropy-as-ambiguity" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/scheduled-observer-entrypoint" :holds-at ["R10"] :matched ["R10"] :no-dossier-match false}
+  {:pattern "aif/shared-kernel-predictive-forward-model" :holds-at ["R4"] :matched ["R4"] :no-dossier-match false}
+  {:pattern "aif/status-gated-belief-update" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/structure-learning-by-model-reduction" :holds-at ["R17"] :matched ["R17"] :no-dossier-match false}
+  {:pattern "aif/structured-observation-vector" :holds-at ["R2"] :matched ["R2"] :no-dossier-match false}
+  {:pattern "aif/temporal-depth-beyond-greedy" :holds-at ["R13"] :matched ["R13"] :no-dossier-match false}
+  {:pattern "aif/term-to-channel-traceability" :holds-at [] :matched [] :no-dossier-match true}
+  {:pattern "aif/two-layer-calibration" :holds-at ["R12"] :matched ["R12"] :no-dossier-match false}
+  {:pattern "aif/valuation-reads-the-paperwork" :holds-at [] :matched [] :no-dossier-match true}
+ ]
+ :counts {:patterns 33 :matched 18 :no-dossier-match 15}}
