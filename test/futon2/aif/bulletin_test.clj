@@ -219,7 +219,7 @@
       (is (= [:selection-quality :substantive-achievement]
              (brief/item-objectives item)))
       (is (nil? (:outcome item)))
-      (is (= [:J9] (:bulletin/waits-on-joe item)))))
+      (is (= [:J9] (:bulletin/waits-on-joe-at-queue item)))))
   (testing "a bound grounded entity target restores the third objective's target"
     (let [item (bulletin/item-for {:date "2026-03-02" :counts {} :waits-on-joe []
                                    :adopted [] :experiments []}

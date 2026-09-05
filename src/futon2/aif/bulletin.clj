@@ -402,7 +402,10 @@
           " *was this the best available policy selection?* and *did the result"
           " substantively advance the selected target?* -- are answered with"
           " `futon2.aif.morning-brief/review!`, the review path that already"
-          " exists; no new reader of verdicts was written.")
+          " exists; no new reader of verdicts was written. The item is"
+          " immutable and was minted at this day's first stop, so its"
+          " `-at-queue` fields are a snapshot; THIS FILE is the day's current"
+          " record.")
      ""
      (str "**Counts.** "
           (plural (:commits counts) "commit" "commits") ", "
@@ -492,10 +495,15 @@
    :selected-target (str "the day's work, " date)
    :bulletin/date date
    :bulletin/file bulletin-rel
-   :bulletin/counts counts
-   :bulletin/waits-on-joe (mapv :id waits-on-joe)
-   :bulletin/machine-adopted (mapv :choice adopted)
-   :bulletin/experiments (mapv :run experiments)
+   ;; Named for WHEN they were taken. The item is immutable and is minted at
+   ;; the day's FIRST stop; the bulletin file keeps being regenerated at every
+   ;; later stop, so these numbers are a snapshot and the file at
+   ;; :bulletin/file is the day's current record. An unqualified :counts here
+   ;; would read as the day's total and quietly stop being one.
+   :bulletin/counts-at-queue counts
+   :bulletin/waits-on-joe-at-queue (mapv :id waits-on-joe)
+   :bulletin/machine-adopted-at-queue (mapv :choice adopted)
+   :bulletin/experiments-at-queue (mapv :run experiments)
    :qa-targets {:selection {:policy nil}
                 :achievement {:entity-id entity-id}}})
 
