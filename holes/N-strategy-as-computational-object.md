@@ -196,3 +196,46 @@ rulings are already instances), then run `obligation_accuracy` / `fold_engine`
 over that corpus (Level 2, real research) starting with the two term-flows
 above. If it holds, the strategy layer is the first non-proof corpus to become
 a computational object.
+
+## Addendum 2026-09-05 — strategy, selection, and the policy as ONE cascade; R-nodes as its finest grain
+
+**Provenance:** Joe, 2026-09-05, during the fundamentals-gate session
+(verbatim): "the 'cascade live' webpage tries to show both what has been
+achieved, and what's coming up. in principle, what's coming up can be
+approached strategically, and we had created a 'merged' strategy based on
+War Room patterns to give an example. all of this could be revised again,
+so that the strategy, the policy selection, and the policy itself are all
+part of one coherent cascade. Indeed, maybe our R-number nodes,
+themselves, correspond to part or parts of this cascade."
+
+The correspondence, grounded in what exists today — four nested grains,
+one shape:
+
+1. **Tick grain — the R-nodes.** A tick's route through the drawn wiring
+   (the u49 conformance certificates transcribe exactly this) is a
+   cascade playout at the finest timescale: each stage's output is the
+   next stage's input, which is the flexiarg THEN→IF wiring with stages
+   for boxes.
+2. **Policy grain — the constructed cascade.** In AIF a policy IS a
+   sequence; the machine's policy object should be cascade-shaped. Today
+   it is not: D7 measured that R13→R4 carries only an integer horizon —
+   the "policy itself" has no first-class carrier. The unrealized
+   :r6-r14-order ruling (select the target, then construct the cascade
+   to match — I4) is this grain's ordering law.
+3. **Selection grain — the candidate field.** R6/R14 plus the ladder:
+   choosing among cascade-shaped candidates. The backlog panel is this
+   grain's forward view for the operator.
+4. **Strategy grain — the WR/pattern cascade.** The merged forward
+   cascade and the retrospective bulletin cascade, same typed frame,
+   coarsest timescale.
+
+Consequence for the fundamentals gate, actionable now: **F1's domain
+preregistration (its first slice) should name a cascade-shaped policy
+family**, so Q(o|pi) is inhabited over the object this unification wants
+— a policy that is a typed sequence with the flexiarg wiring — rather
+than over a degenerate policy type that would have to be redone when the
+grains merge. The hierarchical-AIF reading: one functional form repeated
+across the four timescales, each level's THEN the level below's IF.
+(Also: B1's bulletin is the retrospective cascade level of this very
+note — the machine writing its own WR-style rulings-with-evidence is the
+strategy grain becoming self-producing.)
