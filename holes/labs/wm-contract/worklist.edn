@@ -12,6 +12,17 @@
  :steward :claude-20
  :handover "2026-09-01 (Joe): the collection passes from claude-1 to claude-20 -- ledger stewardship, the second-read gate (TN 9a), regeneration/publish of p4ng futon-2026 from the registries, dispatch of remaining rows (CLI seat or Codex), and the I track. Rows authored by claude-20 still need a reader who is not their author: claude-1 remains available for those reads on request. J3 stays :needs-joe."
  :source "futon2/holes/TN-edge-review-aif-wiring.md §6, §8, §9"
+ ;; :F5, the contract-fidelity gate. Rows present in this ledger at :landed-after
+ ;; are GRANDFATHERED: they may lack ancestry, and the count is printed by
+ ;; ancestry_check.bb rather than assumed. Every row minted after that sha must
+ ;; name what commissioned it (:basis / :epic / a :covers-key into a registry),
+ ;; and the pointer must resolve. Ancestry a grandfathered row DOES declare is
+ ;; resolved too -- grandfathering excuses an absence, never a falsehood.
+ ;; Mechanism: DRIFT-2026-09-05-account.md:78 (the genesis schema "offers no
+ ;; parent-plan field"). Schema: N-process-trap-recording-conventions.md:273.
+ :ancestry-gate {:landed-after "e8b89211"
+                 :ledger-path "holes/labs/wm-contract/worklist.edn"
+                 :basis "futon2/holes/problems/DRIFT-2026-09-05-account.md, worklist :F5"}
  :classes {:I "implement a theory-aligned replacement decided by a J ruling; a separate track from the review, owner to be assigned"
            :V "verify against a source or the code and record the result"
            :C "correct the registry (aif-equations.edn)"
