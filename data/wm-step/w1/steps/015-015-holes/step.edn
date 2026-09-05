@@ -1,0 +1,27 @@
+{:step/schema :wm/step-record-v1
+ :step/id "015-015-holes"
+ :step/work "/home/joe/code/futon2/data/wm-step/w1"
+ :step/started-at "2026-09-05T04:30:08Z"
+ :step/ended-at "2026-09-05T04:31:17Z"
+ :step/tick-exit 0
+ :step/days 14
+ :step/run-id "9ec7ab9f-6ce0-48ec-bf8b-2b0980e40a14"
+ :step/pin-verify :ok
+ :step/pin-generation 2
+ :step/futon2-sha "c5b414b9a58306948db2c5ee512508d1f210ff11"
+ :step/futon2-tree-dirty? true
+ :step/sandbox {:trace-dir "/home/joe/code/futon2/data/wm-step/w1/sandbox/wm-trace"
+                :receipt-dir "/home/joe/code/futon2/data/wm-step/w1/sandbox/receipts"
+                :rationale-dir "/home/joe/code/futon2/data/wm-step/w1/sandbox/wm-trace/rationale"}
+ :step/live-data-written false
+ :step/run-lock :taken-and-released
+ :step/normalized-sha256 "edc5ad7c1fb81d89258efb8bce29aa7fc9ecd37aebe7fe30d77cffe0f2f5c9fb"
+ :step/store-basis {:before {:base "http://127.0.0.1:7070" :count 213197 :max-at "2026-09-05T04:29:49.547115900Z" :at "2026-09-05T04:30:08Z"} :after {:base "http://127.0.0.1:7070" :count 213198 :max-at "2026-09-05T04:31:17.179514103Z" :at "2026-09-05T04:31:25Z"}}
+ :step/evidence {:mode :pinned-replay
+                 :cassette "pin/evidence-cassette.edn"
+                 :cassette-sha256 "40cd12df5edd8d62a6e37054b91a77acb94aeaf6189f08811337f1fa4f0bfddc"
+                 :cassette-entries 9
+                 :log "cassette.log"
+                 :note "the evidence store is the one input C509 called unpinnable; the cassette pins its ANSWERS, reached through the existing FUTON3C_EVIDENCE_BASE seam (pattern_registry.clj:33-38)"}
+ :step/world {:before "world-before.edn" :after "world-after.edn"}
+ :step/note "the sandbox is restored from the pin before the tick, so two steps of the same pin are steps from the same state"}
