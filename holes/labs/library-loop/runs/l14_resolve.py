@@ -60,6 +60,14 @@ for sec in SECTIONS:
         path = os.path.join(d, fn)
         lines = open(path, encoding="utf-8").read().splitlines()
         holds = re.findall(r"^@holds-at\s+(R[A-Za-z0-9]+|TRACE)", "\n".join(lines), re.M)
+        holds = [h for h in holds]  # findall already takes every token on the line
+        # multi-token @holds-at lines: capture every R-token/TRACE on the line
+        for ln in lines:
+            m = re.match(r"^@holds-at\s+(.+)$", ln)
+            if m:
+                for tok in re.findall(r"R[A-Za-z0-9]+|TRACE", m.group(1)):
+                    if tok not in holds:
+                        holds.append(tok)
         existing = set()
         for ln in lines:
             m = re.match(r"^@why\s+(.*)$", ln)

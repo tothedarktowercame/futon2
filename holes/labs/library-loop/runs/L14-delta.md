@@ -1,6 +1,6 @@
 # L14 — edge-resolution re-census delta
 
-Before: `L12-census-receipt.edn` (futon3 `5704359`). After: `L14-census-receipt.edn` / `L14-census-graph.edn` (futon3 `c0b001c`), generated from two differently named clean worktrees, byte-identical (receipt md5 `b8822c3ba4895c2d58bec73cd65a6f0e`), EDN-parseable.
+Before: `L12-census-receipt.edn` (futon3 `5704359`). After: `L14-census-receipt.edn` / `L14-census-graph.edn` (futon3 `64436d7`), from two differently named clean worktrees, byte-identical (receipt md5 `6f389722f9dc073db98fba5d54adba9c`), EDN-parseable.
 
 ## Library-wide
 
@@ -12,7 +12,7 @@ Before: `L12-census-receipt.edn` (futon3 `5704359`). After: `L14-census-receipt.
 | down, problems | 34 | 67 |
 | down, problems+WR | 89 | 104 |
 
-@why-unreachable share (down, problems+WR): 1202/1291 = 93.1% -> 1187/1291 = 91.9%.
+@why-unreachable share (down, problems+WR): 93.1% -> 91.9%.
 
 ## Per-section reachability delta (sections that changed)
 
@@ -24,8 +24,6 @@ Before: `L12-census-receipt.edn` (futon3 `5704359`). After: `L14-census-receipt.
 | process | 0->0 | 0->0 | 0->5 | 8->8 |
 | war-room | 8->8 | 28->28 | 0->6 | 28->28 |
 
-Unchanged sections omitted (full tables in both receipts).
+## Match accounting (transformation receipt `L14-edge-resolution.edn`, md5 `e609bbe7f7e7783dda89f31af9657c09`, pre-state futon3 `5704359`)
 
-## Match accounting (receipt `L14-edge-resolution.edn`, md5 `adf94d7aa8c8f036bd5aacf92667a445`)
-
-469 patterns re-matched; 35 resolvable edges added (basis holds or named — no other basis admitted, no invention); 2 matches already edged before L14; 443 unmatched, left alone, reason distribution: 443 `no-holds-and-not-named`, 0 `holds-token-without-node-and-not-named` (every holds-token pattern matched its L5 node).
+469 patterns re-matched with EVERY @holds-at token parsed (multi-token lines included: wr-24 `R13 R15`, wr-25 `R9 R12`); 37 resolvable @why edges added, each citing its basis inline (holds or named; no other basis admitted); 2 matches already edged; 443 unmatched left alone (443 no-holds-and-not-named, 0 holds-token-without-node).

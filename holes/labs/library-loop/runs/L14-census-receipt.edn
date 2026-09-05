@@ -1,7 +1,7 @@
 ;; L1 RATIONALE-REACHABILITY CENSUS receipt. Deterministic rerun.
 {:row :L1
  :library-subdir "library"
- :library-git-sha "c0b001cb8308804721dad51c01cc2f7a6e665cc3"
+ :library-git-sha "64436d7efb815994b69d6c7d2b2b3ac28f406d68"
  :library-dirty-flexiarg []
  :files-parsed 1291
  :files-missing-flexiarg-id ["ai4ci/dual-layer-proof-patterns", "ai4ci/process-vs-exposition", "ai4ci/proof-pattern-hierarchy", "ai4ci/sota-distinction", "corps/five-arrows", "repository-transition/counterstrawman", "repository-transition/counterstrawman-indicators", "repository-transition/diagnostics", "repository-transition/identity-space", "repository-transition/invariants", "repository-transition/job-argument", "repository-transition/strawman", "repository-transition/transformation-engine", "software-design/adapter-pattern", "software-design/facade-pattern", "software-design/observer-pattern", "software-design/proxy-pattern", "software-design/state-pattern", "t4r/dtp-fit", "t4r/exec-summary", "t4r/legacy", "t4r/rationale", "t4r/supplement", "t4r/support", "t4r/training", "t4r/value", "workday/clock-hygiene", "workday/external-project-index"]
@@ -14,8 +14,8 @@
  :grep-floor-files 537
  :problem-nodes-count 32
  :problem-nodes ["problems/commitment-temperature-is-instrumented-as-gain", "problems/facade-instead-of-validated-efe-model", "problems/fundamentals-drowned-by-backlog", "problems/g-over-cascade-is-undefined", "problems/most-patterns-have-no-globally-recognised-rationale", "problems/operator-turns-become-inference-observations", "problems/per-tick-mismatch-instruments-outer-loop-gain", "problems/process-conduct-is-unassured", "problems/r1-belief-state", "problems/r10-scheduled-entrypoint", "problems/r11-hierarchical-shared-budget", "problems/r12-two-layer-calibration", "problems/r13-temporal-policy-depth", "problems/r14-commitment-temperature", "problems/r15-hierarchy-and-timescale", "problems/r16-grounded-actuation", "problems/r17-structure-learning", "problems/r2-structured-observation", "problems/r20-interoceptive-tripwires", "problems/r3-belief-update", "problems/r3a-prediction-error-projection", "problems/r4-forward-model", "problems/r5-expected-free-energy-core", "problems/r6-candidate-action-space-and-selection", "problems/r7-evidence-channel-precision", "problems/r8-present-fit-mismatch", "problems/r9-no-self-certification", "problems/refusal-prediction-error-v1--source-field-missing", "problems/satisfied-rungs-are-counted-and-surfaced", "problems/spec-and-implementation-must-converge-to-runtime-certificates", "problems/tension-proposes-candidates", "problems/trace-wm-trace-store-route-ledger"]
- :annotation-headers-total 13529
- :annotation-headers-captured 13529
+ :annotation-headers-total 13531
+ :annotation-headers-captured 13531
  :multiline-coverage-check true
  :wr-nodes 28
  :why-reachable-up-from-problems 41
@@ -324,9 +324,9 @@
    :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
    :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
  ]
- :edges-total 6832
- :edges-resolved 2195
- :edges-unresolved 4637
+ :edges-total 6836
+ :edges-resolved 2197
+ :edges-unresolved 4639
  :annotation-keys [
   {:key :adjacent-to :count 1}
   {:key :aif-delta :count 5}
@@ -413,7 +413,7 @@
   {:key :up :count 20}
   {:key :variant-of :count 5}
   {:key :verdict :count 29}
-  {:key :why :count 574}
+  {:key :why :count 576}
   {:key :why-posthoc :count 7}
  ]
  :unresolved-refs [

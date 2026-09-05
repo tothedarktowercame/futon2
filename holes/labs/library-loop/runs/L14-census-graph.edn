@@ -8018,10 +8018,14 @@
   {:from "war-room/wr-23-upstream-trackers-are-stack-surfaces" :kind :why-posthoc :to "war-room/wr-0-organise-without-apparatus" :resolved true}
   {:from "war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied" :kind :references :to "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain" :resolved true}
   {:from "war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied" :kind :why :to "problems/r13-temporal-policy-depth" :resolved true}
+  {:from "war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied" :kind :why :to "problems/r15-hierarchy-and-timescale" :resolved true}
+  {:from "war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied" :kind :why :to "runs/L14-edge-resolution.edn" :resolved false}
   {:from "war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied" :kind :why :to "runs/L14-edge-resolution.edn" :resolved false}
   {:from "war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied" :kind :why :to "war-room/wr-9-bites-empirical-or-logical" :resolved true}
+  {:from "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :kind :why :to "problems/r12-two-layer-calibration" :resolved true}
   {:from "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :kind :why :to "problems/r9-no-self-certification" :resolved true}
   {:from "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :kind :why :to "problems/satisfied-rungs-are-counted-and-surfaced" :resolved true}
+  {:from "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :kind :why :to "runs/L14-edge-resolution.edn" :resolved false}
   {:from "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :kind :why :to "runs/L14-edge-resolution.edn" :resolved false}
   {:from "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :kind :why :to "runs/L14-edge-resolution.edn" :resolved false}
   {:from "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :kind :why :to "war-room/wr-9-bites-empirical-or-logical" :resolved true}

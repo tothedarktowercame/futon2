@@ -1,11 +1,36 @@
 ;; L14 edge-resolution receipt. Deterministic, path-independent.
 {:library-subdir "library"
- :library-git-sha "c0b001cb8308804721dad51c01cc2f7a6e665cc3"
+ :library-git-sha "5704359975a41ff125ffa94f7ce227dcf5d53217"
  :bases "holds: pattern @holds-at token equals problem node @holds-at token; named: problem node text contains the pattern's qualified id. No other basis admitted."
  :sections ["aif" "war-room" "cascades" "futon-theory" "ukrns" "snatch" "vsatlas" "storage" "math-formalization" "math-formalization-CA" "math-informal" "math-strategy" "writing-coherence" "devmap-coherence" "relationship-coherence" "campaign-coherence" "code-coherence" "collaboration-coherence" "career-coherence" "peeragogy" "or3" "musn" "plos-npt-with-small-n" "agency" "agent"]
  :added-edges [
+  {:pattern "aif/belief-state-operational-hypotheses" :to [["problems/r1-belief-state" "holds"]]}
+  {:pattern "aif/candidate-pattern-action-space" :to [["problems/r6-candidate-action-space-and-selection" "holds"] ["problems/tension-proposes-candidates" "holds"]]}
+  {:pattern "aif/evidence-precision-registry" :to [["problems/r7-evidence-channel-precision" "holds"]]}
+  {:pattern "aif/expected-free-energy-scorecard" :to [["problems/g-over-cascade-is-undefined" "holds"] ["problems/r5-expected-free-energy-core" "holds"] ["problems/satisfied-rungs-are-counted-and-surfaced" "holds"]]}
+  {:pattern "aif/free-energy-as-tick-scalar" :to [["problems/per-tick-mismatch-instruments-outer-loop-gain" "holds"] ["problems/r8-present-fit-mismatch" "holds"]]}
+  {:pattern "aif/grounded-actuation-not-reobservation" :to [["problems/r16-grounded-actuation" "holds"]]}
+  {:pattern "aif/hierarchical-and-temporal-depth" :to [["problems/r15-hierarchy-and-timescale" "holds"]]}
+  {:pattern "aif/hierarchical-budget-aware-action-selection" :to [["problems/r11-hierarchical-shared-budget" "holds"]]}
+  {:pattern "aif/interoceptive-tripwires" :to [["problems/r20-interoceptive-tripwires" "holds"]]}
+  {:pattern "aif/no-self-certification" :to [["problems/r9-no-self-certification" "holds"]]}
+  {:pattern "aif/policy-precision-commitment-temperature" :to [["problems/commitment-temperature-is-instrumented-as-gain" "holds"] ["problems/r14-commitment-temperature" "holds"]]}
+  {:pattern "aif/predictive-coding-belief-update" :to [["problems/r3-belief-update" "holds"]]}
+  {:pattern "aif/scheduled-observer-entrypoint" :to [["problems/r10-scheduled-entrypoint" "holds"]]}
+  {:pattern "aif/shared-kernel-predictive-forward-model" :to [["problems/r4-forward-model" "holds"]]}
+  {:pattern "aif/structure-learning-by-model-reduction" :to [["problems/r17-structure-learning" "holds"]]}
+  {:pattern "aif/structured-observation-vector" :to [["problems/operator-turns-become-inference-observations" "holds"] ["problems/r2-structured-observation" "holds"]]}
+  {:pattern "aif/temporal-depth-beyond-greedy" :to [["problems/r13-temporal-policy-depth" "holds"]]}
+  {:pattern "aif/two-layer-calibration" :to [["problems/r12-two-layer-calibration" "holds"]]}
+  {:pattern "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels" :to [["problems/operator-turns-become-inference-observations" "holds"] ["problems/r2-structured-observation" "holds"]]}
+  {:pattern "war-room/wr-19-tension-must-generate-not-only-rank" :to [["problems/r17-structure-learning" "holds"] ["problems/tension-proposes-candidates" "named"]]}
+  {:pattern "war-room/wr-24-a-removed-constraint-does-not-remove-the-discipline-it-supplied" :to [["problems/r13-temporal-policy-depth" "holds"] ["problems/r15-hierarchy-and-timescale" "holds"]]}
+  {:pattern "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :to [["problems/r12-two-layer-calibration" "holds"] ["problems/r9-no-self-certification" "holds"] ["problems/satisfied-rungs-are-counted-and-surfaced" "named"]]}
+  {:pattern "war-room/wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch" :to [["problems/r20-interoceptive-tripwires" "holds"]]}
+  {:pattern "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain" :to [["problems/commitment-temperature-is-instrumented-as-gain" "named"] ["problems/per-tick-mismatch-instruments-outer-loop-gain" "named"]]}
+  {:pattern "futon-theory/futonic-logic" :to [["problems/satisfied-rungs-are-counted-and-surfaced" "named"]]}
  ]
- :already-edged 37
+ :already-edged 2
  :unmatched [
   {:pattern "aif/admissibility" :reason "no-holds-and-not-named"}
   {:pattern "aif/belief-aware-risk-term" :reason "no-holds-and-not-named"}
@@ -451,4 +476,4 @@
   {:pattern "agent/student-dispatch" :reason "no-holds-and-not-named"}
   {:pattern "agent/trail-enables-return" :reason "no-holds-and-not-named"}
  ]
- :counts {:patterns 469 :edges-added 0 :already-edged 37 :unmatched 443}}
+ :counts {:patterns 469 :edges-added 37 :already-edged 2 :unmatched 443}}
