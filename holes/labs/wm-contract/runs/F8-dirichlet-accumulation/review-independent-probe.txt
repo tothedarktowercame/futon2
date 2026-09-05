@@ -1,0 +1,29 @@
+:F8 leg 1 slice 10 -- independent production probe of the R17 accumulation
+run 2026-09-05T16:50:01Z by the reviewing seat, BEFORE any Lean was dispatched
+
+prior constant (a4a/prior) = 0.1
+one edge -> concentrations = {"cap-a" [1.1]}
+one edge -> outcomes = ["m1"]
+two identical edges -> cell = 2.1
+increment per record = 1.0
+two caps two missions -> concentrations = {"cap-a" [1.1 0.1], "cap-b" [0.1 1.1]}
+row cap-a minus prior row = [1.0 0.0]
+corpus->concentration arglists = ([{:keys [capabilities edges discharges]}])
+same corpus twice -> identical (no carry) = true
+reduce-concepts arglists = ([corpus-or-concentrations])
+before outcomes = ["m1" "m2"]
+after  outcomes = ["aaa" "m1" "m2"]
+before row cap-a = [1.1 1.1]
+after  row cap-a = [1.1 1.1 1.1]
+index of m1 before / after = [0 1]
+bmr/acceptance-threshold = -3.0
+r17-offline/run arglists = ([{:keys [run-id parent-model corpus]}])
+envelope-version = 1
+grep counts printed by the shell, not here
+
+-- caller census (shell greps, re-runnable) --
+requires of futon2.aif.a4a / futon2.aif.r17 outside those namespaces:
+src/futon2/aif/actuator_a6.clj:6:            [futon2.aif.a4a-substrate :as a4a-substrate]
+callers of corpus->concentration / reduce-concepts / r17-offline/run in src/:
+src/futon2/aif/a4a_substrate.clj:48:   Returns the pure corpus shape consumed by futon2.aif.a4a/corpus->concentration."
+(none = the accumulation has no production caller)
