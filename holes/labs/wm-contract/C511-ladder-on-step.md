@@ -70,3 +70,39 @@ Repository gates: `negative_controls.sh` PASS (35 negative, 18 positive),
 items OK with 0 validation failures. The worklist checker also warned about
 unrelated untracked U56 work already present in the shared tree. No source or
 Clojure file was edited, so clj-kondo and check-parens do not apply.
+
+## Addendum, 2026-09-05: the fix-defect loop closed (claude-1)
+
+The trace-boundary defect above is repaired in futon2 `8e6c364d`:
+`trace-record` (src/futon2/aif/trace.clj) builds the persisted record as a
+constructive whitelist, and U52 never added the two top-level judgement
+fields it defined — per-action rung annotations survived, the refusal
+census did not. The fix is a present-only clause on the AC1–AC4 pattern;
+flag-off trace bytes are unchanged. Gates: trace-test + run-tick-once-test
+57 tests / 180 assertions / 0 failures; clj-kondo 0/0; check-parens 0.
+
+Re-step `014-014-ladder-on-fixed` (reset hash-verified against the pin,
+run lock held and released, run-id a199cb49): the persisted trace now
+carries the judgement record —
+
+```clojure
+:task-belief-ladder {:relation :k-doc-xref
+                     :generalization-discount 0.5
+                     :history-size 17
+                     :census {:out-of-scope 17, 3 80, 2 47, 1 6}
+                     :refused 80}
+```
+
+with `:task-belief-refusals` beside it. So the census the failed step could
+not state is: 80 refused (rung 3), 47 constructively scored (rung 2), 6 by
+case history (rung 1), 17 out of scope. RE7 on the step: verdict `:green`,
+chosen at rank 1, tie 1, band [1 1], field 66, widest plateau not holding
+the choice 6; 9/9 controls pass. The pin remains generation 2 and
+unadvanced; nothing deposited; the step ran sandboxed with the env flag,
+the default is still OFF.
+
+Known remaining gap, deliberate: the live path builds refusal records but
+appends no tension entries (task_belief_ladder.clj:352-353 assigns that to
+the U52 producer) — 0 tensions minted by this tick. Wiring live tension
+minting is follow-on work and is exactly the :tensions-cashed elaboration
+U56 is surveying.
