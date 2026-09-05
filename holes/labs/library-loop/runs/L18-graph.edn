@@ -975,6 +975,7 @@
   "problems/r9-no-self-certification"
   "problems/refusal-prediction-error-v1--source-field-missing"
   "problems/satisfied-rungs-are-counted-and-surfaced"
+  "problems/snatch-play-theory-gaps"
   "problems/spec-and-implementation-must-converge-to-runtime-certificates"
   "problems/tension-proposes-candidates"
   "problems/tensions-are-navigated-not-eliminated"
@@ -7448,6 +7449,7 @@
   {:from "problems/refusal-prediction-error-v1--source-field-missing" :kind :title :to "prediction-error/v1" :resolved false}
   {:from "problems/satisfied-rungs-are-counted-and-surfaced" :kind :see-also :to "futon-theory/futonic-logic" :resolved true}
   {:from "problems/satisfied-rungs-are-counted-and-surfaced" :kind :why :to "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad" :resolved true}
+  {:from "problems/snatch-play-theory-gaps" :kind :why :to "library/snatch/README.md" :resolved false}
   {:from "problems/tension-proposes-candidates" :kind :see-also :to "futon-theory/reverse-morphogenesis" :resolved true}
   {:from "problems/tension-proposes-candidates" :kind :why :to "war-room/wr-19-tension-must-generate-not-only-rank" :resolved true}
   {:from "problems/tensions-are-navigated-not-eliminated" :kind :why :to "library/eight-gates/README.md" :resolved false}
@@ -7537,22 +7539,34 @@
   {:from "snatch/a-free-mark-is-always-worth-assigning" :kind :why :to "snatch/mark-without-force" :resolved true}
   {:from "snatch/accept-an-offer-that-beats-holding" :kind :see-also :to "snatch/revert-then-invert" :resolved true}
   {:from "snatch/accept-an-offer-that-beats-holding" :kind :why :to "snatch/exchange-when-both-sides-gain" :resolved true}
+  {:from "snatch/an-unmodelled-response-stops-the-line" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/an-unmodelled-response-stops-the-line" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/an-unmodelled-response-stops-the-line" :kind :why :to "snatch/protect-the-unprotected-move" :resolved true}
   {:from "snatch/ask-for-surplus-not-surrender" :kind :see-also :to "snatch/probe-before-committing" :resolved true}
   {:from "snatch/ask-for-surplus-not-surrender" :kind :why :to "snatch/exchange-when-both-sides-gain" :resolved true}
+  {:from "snatch/consult-the-remedy-before-exiting" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/consult-the-remedy-before-exiting" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/consult-the-remedy-before-exiting" :kind :why :to "snatch/mark-without-force" :resolved true}
   {:from "snatch/consult-the-remedy-before-exiting" :kind :why :to "snatch/revert-then-invert" :resolved true}
   {:from "snatch/escalate-only-as-far-as-you-can-lose" :kind :see-also :to "snatch/probe-before-committing" :resolved true}
+  {:from "snatch/escalate-only-as-far-as-you-can-lose" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/escalate-only-as-far-as-you-can-lose" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/escalate-only-as-far-as-you-can-lose" :kind :why :to "snatch/protect-the-unprotected-move" :resolved true}
   {:from "snatch/exchange-when-both-sides-gain" :kind :see-also :to "snatch/accept-an-offer-that-beats-holding" :resolved true}
   {:from "snatch/exchange-when-both-sides-gain" :kind :see-also :to "snatch/ask-for-surplus-not-surrender" :resolved true}
   {:from "snatch/exchange-when-both-sides-gain" :kind :why :to "library/problems" :resolved false}
+  {:from "snatch/exchange-when-both-sides-gain" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
   {:from "snatch/exchange-when-both-sides-gain" :kind :why :to "record/ruling" :resolved false}
+  {:from "snatch/exchange-when-both-sides-gain" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/exchange-when-both-sides-gain" :kind :why :to "runs/L7-no-source-check.edn." :resolved false}
   {:from "snatch/forced-play-needs-a-loss-floor" :kind :see-also :to "snatch/ask-for-surplus-not-surrender" :resolved true}
+  {:from "snatch/forced-play-needs-a-loss-floor" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/forced-play-needs-a-loss-floor" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/forced-play-needs-a-loss-floor" :kind :why :to "snatch/preserve-the-right-to-abstain" :resolved true}
   {:from "snatch/grim-cuts-the-cascade-and-never-widens-it" :kind :see-also :to "snatch/consult-the-remedy-before-exiting" :resolved true}
   {:from "snatch/grim-cuts-the-cascade-and-never-widens-it" :kind :see-also :to "snatch/re-enter-after-observed-repair" :resolved true}
+  {:from "snatch/grim-cuts-the-cascade-and-never-widens-it" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/grim-cuts-the-cascade-and-never-widens-it" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/grim-cuts-the-cascade-and-never-widens-it" :kind :why :to "snatch/have-a-temperament" :resolved true}
   {:from "snatch/have-a-temperament" :kind :how :to "snatch/grim-cuts-the-cascade-and-never-widens-it" :resolved true}
   {:from "snatch/have-a-temperament" :kind :how :to "snatch/lead-with-the-exchange-rule" :resolved true}
@@ -7560,21 +7574,35 @@
   {:from "snatch/have-a-temperament" :kind :how :to "snatch/promote-the-remedy-before-the-exit" :resolved true}
   {:from "snatch/have-a-temperament" :kind :how :to "snatch/widen-the-cascade-only-on-evidence" :resolved true}
   {:from "snatch/have-a-temperament" :kind :why :to "cascades/declared-skeleton" :resolved true}
+  {:from "snatch/have-a-temperament" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/have-a-temperament" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/institutions-vary-by-position-and-force" :kind :how :to "snatch/mark-without-force" :resolved true}
   {:from "snatch/institutions-vary-by-position-and-force" :kind :how :to "snatch/non-binding-talk-still-moves-play" :resolved true}
   {:from "snatch/institutions-vary-by-position-and-force" :kind :how :to "snatch/preserve-the-right-to-abstain" :resolved true}
   {:from "snatch/institutions-vary-by-position-and-force" :kind :how :to "snatch/revert-then-invert" :resolved true}
   {:from "snatch/institutions-vary-by-position-and-force" :kind :why :to "library/problems" :resolved false}
+  {:from "snatch/institutions-vary-by-position-and-force" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
   {:from "snatch/institutions-vary-by-position-and-force" :kind :why :to "record/ruling" :resolved false}
+  {:from "snatch/institutions-vary-by-position-and-force" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/institutions-vary-by-position-and-force" :kind :why :to "runs/L7-no-source-check.edn." :resolved false}
   {:from "snatch/lead-with-the-exchange-rule" :kind :see-also :to "snatch/exchange-when-both-sides-gain" :resolved true}
+  {:from "snatch/lead-with-the-exchange-rule" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/lead-with-the-exchange-rule" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/lead-with-the-exchange-rule" :kind :why :to "snatch/have-a-temperament" :resolved true}
   {:from "snatch/mark-without-force" :kind :see-also :to "snatch/revert-then-invert" :resolved true}
+  {:from "snatch/mark-without-force" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/mark-without-force" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/mark-without-force" :kind :why :to "snatch/institutions-vary-by-position-and-force" :resolved true}
   {:from "snatch/mark-without-force" :kind :why :to "snatch/protect-the-unprotected-move" :resolved true}
+  {:from "snatch/non-binding-talk-still-moves-play" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/non-binding-talk-still-moves-play" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/non-binding-talk-still-moves-play" :kind :why :to "snatch/institutions-vary-by-position-and-force" :resolved true}
   {:from "snatch/non-binding-talk-still-moves-play" :kind :why :to "snatch/protect-the-unprotected-move" :resolved true}
+  {:from "snatch/play-the-authored-order-first" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/play-the-authored-order-first" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/play-the-authored-order-first" :kind :why :to "snatch/have-a-temperament" :resolved true}
+  {:from "snatch/preserve-the-right-to-abstain" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/preserve-the-right-to-abstain" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/preserve-the-right-to-abstain" :kind :why :to "snatch/institutions-vary-by-position-and-force" :resolved true}
   {:from "snatch/preserve-the-right-to-abstain" :kind :why :to "snatch/protect-the-unprotected-move" :resolved true}
   {:from "snatch/price-the-final-round-as-final" :kind :see-also :to "snatch/a-free-mark-is-always-worth-assigning" :resolved true}
@@ -7582,23 +7610,35 @@
   {:from "snatch/price-the-final-round-as-final" :kind :why :to "library/problems" :resolved false}
   {:from "snatch/price-the-final-round-as-final" :kind :why :to "record/ruling" :resolved false}
   {:from "snatch/price-the-final-round-as-final" :kind :why :to "runs/L7-no-source-check.edn." :resolved false}
+  {:from "snatch/probe-before-committing" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/probe-before-committing" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/probe-before-committing" :kind :why :to "snatch/protect-the-unprotected-move" :resolved true}
   {:from "snatch/promote-the-remedy-before-the-exit" :kind :see-also :to "snatch/consult-the-remedy-before-exiting" :resolved true}
   {:from "snatch/promote-the-remedy-before-the-exit" :kind :see-also :to "snatch/revert-then-invert" :resolved true}
+  {:from "snatch/promote-the-remedy-before-the-exit" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/promote-the-remedy-before-the-exit" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/promote-the-remedy-before-the-exit" :kind :why :to "snatch/have-a-temperament" :resolved true}
   {:from "snatch/protect-the-unprotected-move" :kind :how :to "snatch/mark-without-force" :resolved true}
   {:from "snatch/protect-the-unprotected-move" :kind :how :to "snatch/non-binding-talk-still-moves-play" :resolved true}
   {:from "snatch/protect-the-unprotected-move" :kind :how :to "snatch/preserve-the-right-to-abstain" :resolved true}
   {:from "snatch/protect-the-unprotected-move" :kind :how :to "snatch/revert-then-invert" :resolved true}
+  {:from "snatch/protect-the-unprotected-move" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/protect-the-unprotected-move" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/protect-the-unprotected-move" :kind :why :to "snatch/institutions-vary-by-position-and-force" :resolved true}
+  {:from "snatch/re-enter-after-observed-repair" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/re-enter-after-observed-repair" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/re-enter-after-observed-repair" :kind :why :to "snatch/consult-the-remedy-before-exiting" :resolved true}
   {:from "snatch/re-enter-after-observed-repair" :kind :why :to "snatch/revert-then-invert" :resolved true}
   {:from "snatch/revert-then-invert" :kind :see-also :to "snatch/mark-without-force" :resolved true}
+  {:from "snatch/revert-then-invert" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/revert-then-invert" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/revert-then-invert" :kind :why :to "snatch/institutions-vary-by-position-and-force" :resolved true}
   {:from "snatch/revert-then-invert" :kind :why :to "snatch/protect-the-unprotected-move" :resolved true}
   {:from "snatch/use-talk-to-make-a-testable-offer" :kind :see-also :to "snatch/probe-before-committing" :resolved true}
   {:from "snatch/use-talk-to-make-a-testable-offer" :kind :why :to "snatch/non-binding-talk-still-moves-play" :resolved true}
   {:from "snatch/widen-the-cascade-only-on-evidence" :kind :see-also :to "cascades/on-the-fly-cascade" :resolved true}
+  {:from "snatch/widen-the-cascade-only-on-evidence" :kind :why :to "problems/snatch-play-theory-gaps" :resolved true}
+  {:from "snatch/widen-the-cascade-only-on-evidence" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "snatch/widen-the-cascade-only-on-evidence" :kind :why :to "snatch/have-a-temperament" :resolved true}
   {:from "social/ARGUMENT" :kind :references :to "coordination/ARGUMENT" :resolved true}
   {:from "social/ARGUMENT" :kind :references :to "coordination/INDEX" :resolved false}

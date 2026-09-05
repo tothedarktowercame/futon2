@@ -58,9 +58,12 @@ for fn in sorted(cascades):
         refused = [l.strip() for l in p.stdout.splitlines()
                    if l.startswith("   ")]
         m = re.search(r"gate: (\d+)/(\d+) refused", p.stdout)
-        res[r] = (p.returncode,
-                  int(m.group(1)) if m else None,
-                  int(m.group(2)) if m else None, refused)
+        if not m:
+            m2 = re.search(r"gate: PASS, (\d+)/(\d+) reachable", p.stdout)
+            nref, ntot = (0, int(m2.group(2))) if m2 else (None, None)
+        else:
+            nref, ntot = int(m.group(1)), int(m.group(2))
+        res[r] = (p.returncode, nref, ntot, refused)
     rows.append((fn, cascades[fn], res))
 
 out = ["# L17 — advisory gate report (discovery only)\n",

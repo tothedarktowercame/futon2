@@ -1,6 +1,53 @@
-;; L18 served-refused remainder (discovery receipt). Deterministic.
-{:served-cascades ["zaif-cascade.edn" "construct-cascade.edn" "snatch-cascade.edn" "ants-cascade.edn" "alfworld-cascade.edn"]
- :union-refused-before 71
- :grounded-this-row ["baldwin/ablation-axes-must-not-disable-the-instrument" "baldwin/choose-the-heritable-unit-where-invariance-lives" "devmap-coherence/next-steps-to-done" "devmap-coherence/prototype-alignment-embedding" "eight-gates/lean-commit" "or3/ask-first-then-bring-the-expert" "or3/openness-without-exposure"]
- :remainder-count 64
- :remainder-reasons "every remaining pattern: no section documentation, mission doc, WR ruling, or problem-node text states its problem (holds-token and id-text searches found no cover); rationale not invented"}
+;; L18 v2 complete no-source search. Deterministic, path-independent.
+{:library-subdir "library"
+ :library-git-sha "e58576cec0f14c3da4667ed452d522c561487ee8"
+ :search "per member of the served-refused union (zaif-cascade.edn construct-cascade.edn snatch-cascade.edn ants-cascade.edn alfworld-cascade.edn): (a) every problems/*.flexiarg by holds-token and qualified-id-in-text; (b) every *.md in the member's section directory by bare name and qualified id"
+ :union-count 45
+ :members [
+  {:pattern "agent/handoff-preserves-context" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "agent/student-dispatch" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "agent/trail-enables-return" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ai4ci/ai-core-function" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ai4ci/funding-justification" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ai4ci/pilot-feasibility" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "aif/belief-aware-risk-term" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "aif/status-gated-belief-update" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ants/baseline-cyber-ant" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ants/cargo-return-discipline" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ants/hunger-precision-coupling" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ants/pheromone-trail-tuner" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ants/white-space-scout" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "budgeted-action-selection/mana-gated-work" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "cascades/declared-skeleton" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "cascades/on-the-fly-cascade" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "cascades/the-slice-is-the-unit-of-use" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "control/effort-estimation" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "coordination/pattern-search-protocol" :searched ["problems/*.flexiarg (holds+id-text)" "coordination/INDEX.md"] :result "section-doc-names-member:coordination/INDEX.md"}
+  {:pattern "cycle-machine/runtime-restoration" :searched ["problems/*.flexiarg (holds+id-text)" "cycle-machine/INDEX.md"] :result "section-doc-names-member:cycle-machine/INDEX.md"}
+  {:pattern "cycle-machine/step-machine" :searched ["problems/*.flexiarg (holds+id-text)" "cycle-machine/INDEX.md"] :result "section-doc-names-member:cycle-machine/INDEX.md"}
+  {:pattern "data-mining/gates-as-code" :searched ["problems/*.flexiarg (holds+id-text)" "data-mining/README.md"] :result "section-doc-names-member:data-mining/README.md"}
+  {:pattern "data-mining/saturate-the-accelerator-with-concurrency" :searched ["problems/*.flexiarg (holds+id-text)" "data-mining/README.md"] :result "section-doc-names-member:data-mining/README.md"}
+  {:pattern "equity/confident-adaptation-as-published" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "equity/confident-adaptation-merged" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "equity/contribution-pathways" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "equity/contribution-pathways-merged" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "equity/protected-interaction-as-published" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "futon-theory/derive-exits-on-a-minted-sorry" :searched ["problems/*.flexiarg (holds+id-text)" "futon-theory/INDEX.md"] :result "no-source"}
+  {:pattern "futon-theory/progress-signal" :searched ["problems/*.flexiarg (holds+id-text)" "futon-theory/INDEX.md"] :result "section-doc-names-member:futon-theory/INDEX.md"}
+  {:pattern "gauntlet/modeline-persists-across-worlds" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "gauntlet/teaching-inversion" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "hdm/non-capture" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "math-formalization-CA/measure-integration-api" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "math-formalization-CV/frontier-bound-from-arc-hypotheses" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "math-formalization-CV/holomorphic-disk-api" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "math-strategy/missing-dependency-protocol" :searched ["problems/*.flexiarg (holds+id-text)" "math-strategy/PAPER-SHAPES-INDEX.md"] :result "no-source"}
+  {:pattern "or2/two-joes-one-mandate" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "plos-npt-with-small-n/scope-shield-via-companion-paper" :searched ["problems/*.flexiarg (holds+id-text)" "plos-npt-with-small-n/README.md" "plos-npt-with-small-n/_pattern-coding-corpus.md" "plos-npt-with-small-n/_verification-pack.md"] :result "section-doc-names-member:plos-npt-with-small-n/_pattern-coding-corpus.md"}
+  {:pattern "plos-npt-with-small-n/venue-register-boundary" :searched ["problems/*.flexiarg (holds+id-text)" "plos-npt-with-small-n/README.md" "plos-npt-with-small-n/_pattern-coding-corpus.md" "plos-npt-with-small-n/_verification-pack.md"] :result "section-doc-names-member:plos-npt-with-small-n/_pattern-coding-corpus.md"}
+  {:pattern "process-coherence/is-this-even-a-problem" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "sidecar/artifact-entity-mention-grounding" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "ukrns/publication-cadence" :searched ["problems/*.flexiarg (holds+id-text)" "ukrns/SHADOW-PASS-2026-05-08.md"] :result "no-source"}
+  {:pattern "war-machine/ambient-pattern-retrieval" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+  {:pattern "writing-coherence/citation-density-load-bearing-claim" :searched ["problems/*.flexiarg (holds+id-text)"] :result "no-source"}
+ ]
+ :counts {:union 45 :edged-this-row 0 :no-source 37}}
