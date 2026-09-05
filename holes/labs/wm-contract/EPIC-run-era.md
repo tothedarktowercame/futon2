@@ -200,3 +200,47 @@ Rows (minted at next loop pause):
 - The 100-char embedding-prefix question (E-operator-as-attached-agent
   caveat) stays parked per Joe: "let's not rush to change it until we see
   how it works."
+
+## The :incomplete response ruling — repair or elaborate (Joe, 2026-09-05)
+
+Verbatim: "regarding RE6 and RE7, if we witness an :incomplete run, I
+think we then need to repair or elaborate -- maybe we can explore
+whether that is possible with the four such signals already captured"
+
+Reading: :incomplete is not a wording problem to be ruled away — it is
+a signal that demands action. The two sanctioned actions are **repair**
+(the evidence the check needs turns out to be reconstructible from what
+the run already captured) and **elaborate** (the check or the capture
+path is extended so the next accepted step records the evidence live).
+The four standing signals are the same on all three deposited runs'
+recent folds: :flip-readiness, :per-node-runtime-validation,
+:rationale-regret, :tensions-cashed.
+
+There is one precedent that says repair can work: :contract-pin was a
+typed absence on s5 for exactly this shape of reason, gained an
+as-of-sha mode, and is :green on re5 and on the accepted step — because
+those run stores recorded the sha the check needed to re-read. Whether
+each of the four has an analogous already-captured hook is precisely
+the question.
+
+Rows (discovery first, per handoff discipline; implementation rows
+minted from its findings):
+
+- **U56 (discovery — repair-or-elaborate survey over the four):** for
+  each of the four typed absences, working from the captured signal
+  itself (the absence record names what the check could not see): (1)
+  state exactly what evidence the check needs and at what time it must
+  be taken; (2) REPAIR — is that evidence reconstructible from committed
+  artifacts (run receipts' git shas enabling as-of-sha re-reads; the
+  trace corpus and evidence store now containing what happened *after*
+  each decision, which is what :rationale-regret's UPHELD leg wants;
+  store-basis URLs)? Demonstrate with one worked example per repairable
+  check, or refute by naming the specific datum that was never captured.
+  (3) ELABORATE — name the capture point (file:line) in the stepper's
+  step/accept path where the evidence would be taken live. (4) Type the
+  recommendation per check — :repairable / :elaborate-only / :both /
+  :neither — each implying its follow-on row. Special attention:
+  :tensions-cashed may be a semantics question (no tension was minted
+  during these runs — is that vacuously cashed or can't-see?), which if
+  so is stated as a question for Joe, not answered by fiat. No check
+  code changed, no deposit made.
