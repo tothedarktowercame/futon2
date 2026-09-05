@@ -1,0 +1,52 @@
+F8 leg 3 slice 2 -- adversarial plants against /home/joe/code/futon2/holes/labs/wm-contract/convergence_check.bb
+ledger: /home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE.edn
+
+01-foreign-schema                          expect refuse   exit 1   OK
+02-schema-absent                           expect refuse   exit 1   OK
+03-row-deleted                             expect refuse   exit 1   OK
+04-row-not-in-registry                     expect refuse   exit 1   OK
+05-duplicate-row-id                        expect refuse   exit 1   OK
+06-rows-emptied                            expect refuse   exit 1   OK
+07-formal-edited                           expect refuse   exit 1   OK
+08-node-edited                             expect refuse   exit 1   OK
+09-defines-edited                          expect refuse   exit 1   OK
+10-rung-off-scale                          expect refuse   exit 1   OK
+11-rung-order-permuted                     expect refuse   exit 1   OK
+12-rung-order-truncated                    expect refuse   exit 1   OK
+13-licence-past-eof                        expect refuse   exit 1   OK
+14-licence-file-absent                     expect refuse   exit 1   OK
+15-licence-ambiguous-path                  expect refuse   exit 1   OK
+16-licence-missing                         expect refuse   exit 1   OK
+17-witnessed-on-a-readback                 expect refuse   exit 1   OK
+18-run-correlated-on-a-lean-module         expect refuse   exit 1   OK
+19-nested-basis-statement-removed          expect observe  exit 0   OBSERVED
+20-constructed-on-a-runless-artifact       expect refuse   exit 1   OK
+21-leading-leg-flipped                     expect refuse   exit 1   OK
+22-leading-leg-absent                      expect refuse   exit 1   OK
+23-converged-on-a-trailing-leg-row         expect refuse   exit 1   OK
+24-converged-on-green-but-unaccepted       expect refuse   exit 1   OK
+25-accepted-run-declared-but-not-in-pin    expect refuse   exit 1   OK
+26-certificate-with-neither                expect refuse   exit 1   OK
+27-certificate-absent                      expect refuse   exit 1   OK
+28-fourth-caveat-deleted                   expect refuse   exit 1   OK
+29-first-caveat-deleted                    expect refuse   exit 1   OK
+30-caveats-emptied                         expect refuse   exit 1   OK
+31-caveat-reworded                         expect refuse   exit 1   OK
+32-unmodified                              expect accept   exit 0   OK
+33-as-of-date-changed                      expect accept   exit 0   OK
+34-rows-reordered                          expect observe  exit 0   OBSERVED
+
+--- 19-nested-basis-statement-removed ( observe )
+    run-identity-policy :nested-tree; F6-top-level predicate reported separately
+    ACCEPT 18 rows, 54 identity fields, 36 licences, 0 F6-top-level run identities, 1 nested run identities, 0 converged
+--- 34-rows-reordered ( observe )
+    run-identity-policy :nested-tree; F6-top-level predicate reported separately
+    ACCEPT 18 rows, 54 identity fields, 36 licences, 0 F6-top-level run identities, 1 nested run identities, 0 converged
+
+34 plants, 2 observed, 0 findings
+
+=== four further frame plants, by hand (all ACCEPTED before the repair, all refuse after) ===
+rung-rule-limit-deleted                  exit 1  :error/frame-digest-drift :error/missing-frame-field :error/unstated-rung-rule-limit 
+rung-rule-deleted                        exit 1  :error/frame-digest-drift :error/missing-frame-field 
+caveat-inverted-with-headline-kept       exit 1  :error/frame-digest-drift 
+registry-basis-deleted                   exit 1  :error/frame-digest-drift :error/missing-frame-field 
