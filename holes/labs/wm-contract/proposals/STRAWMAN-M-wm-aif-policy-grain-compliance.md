@@ -62,3 +62,33 @@ accept/edit/strike-able.
 ## BASIS
 
 I read the mission's grain-mismatch diagnosis, candidate contract, persistence seam, and operator-gated shadow criteria (`holes/missions/M-wm-aif-policy-grain-compliance.md:12`, `holes/missions/M-wm-aif-policy-grain-compliance.md:91`, `holes/missions/M-wm-aif-policy-grain-compliance.md:152`, `holes/missions/M-wm-aif-policy-grain-compliance.md:166`). I also checked the registry's countable-hole syntax at `src/futon2/aif/mission_registry.clj:34`, so every proposed hole is an unchecked task item that would count if Joe pasted it into the mission.
+
+## EXPERIMENT VERDICTS (`:B2`, 2026-09-05)
+
+Every strawman hole above was given the cheapest experiment that could have
+refuted it — refuted meaning *the work it proposes is already done, so writing
+it down would be asking for it twice*. None of the four was refuted; all four
+are adopted into the mission doc marked machine-proposed with the measurement
+cited, in commit `27a6dd5b`.
+
+**Reversal: `git revert 27a6dd5b`.** That commit adds one section to
+`holes/missions/M-wm-aif-policy-grain-compliance.md` and touches nothing else,
+so the revert is complete and needs no follow-up.
+
+The QUESTIONS above are untouched. They are Joe's, and no answer to any of them
+is recorded here or anywhere else by this row.
+
+| Hole | Verdict | The experiment, and what it measured |
+|---|---|---|
+| Adapt one non-threshold diversity source for Slice 1b | **validated** | Enumerate every `:candidate-source` in `src/`, `scripts/`, `test/` (306 `.clj` files). Two exist: `:coverage-saturation-frontier` (`scripts/futon2/report/cascade_lane.clj:126` — the Slice 1a threshold frontier this item is meant to be compared against) and `:p4ng-control-hypergraph` (`src/futon2/aif/mission_control_graph.clj:126` — mission grain, not cascade grain). `src/futon2/aif/arguing_worlds.clj` never mentions `:semilattice`. The nearest existing non-threshold artifact is `holes/labs/slush-demo/findings/proposals/batch-2-worklist.json`: `{proposal, mission, patterns}`, a bag with no ordering and no wiring, which invariant 2 says is not a policy identity. `runs/B2-strawman/02-read-and-replay-probes.edn` `:G1` |
+| Make cascade scoring prefix-local and auditable | **validated** | A replay, not a read. The one committed cascade artifact with `truncated: true` (`holes/labs/M-evaluate-policies/exhibit/cascade-3-serve.json`, full size 14, budget 6) was re-scored over its own six `:shown` rows: it emits coverage-reward 6.242 against a prefix sum of 1.921, and T-intensity 4.84 against 2.109. The code path agrees — `cascade_construct.py:206` takes no budget and sums coverage over the whole trajectory, `cascade_serve.py:27` truncates afterwards and `:30` recomputes only the semilattice. Live construction was not attempted: `cascade_construct.py:56` imports `sentence_transformers`, which is not installed on this machine. `runs/B2-strawman/02-read-and-replay-probes.edn` `:G2` |
+| Specify and persist the cascade-habit return event | **validated** | `:cascade-prior-state` occurs 0 times across the 306 `.clj` files; `src/futon2/aif/cascade_prior.clj` is required by nothing outside itself and its own two test namespaces. The Slice 0 kernel has no persistence seam to extend, so the item is minting one rather than amending one. `runs/B2-strawman/02-read-and-replay-probes.edn` `:G3` |
+| Run a dark end-to-end hierarchy shadow | **validated** | `cascade-prior/shadow-rank` has no call site outside its own namespace and its tests, and `holes/labs/M-wm-aif-policy-grain-compliance/` does not exist. No shadow corpus has ever been collected. `runs/B2-strawman/02-read-and-replay-probes.edn` `:G4` |
+
+The consequence for the field, replayed rather than run: this mission sat at
+`:open-hole-count 0`, where `task-belief-ladder/classify` overrides every
+support rung with the typed rung-3 `:no-open-holes` refusal
+(`src/futon2/aif/task_belief_ladder.clj:262`). At 4 that override no longer
+fires — over a field carrying one persisted decision the candidate moves from
+factor 0.0 refused to rung 1 at factor 0.4, which is `h/(h+1)` scaling the
+support instead of zeroing it (`runs/B2-strawman/03-refused-set-replay.edn`).
