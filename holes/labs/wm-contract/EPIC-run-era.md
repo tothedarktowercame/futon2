@@ -317,3 +317,51 @@ time):
   from. Depends on U61 for the trigger record; the drafting recipe is
   prototyped by hand first (see STRAWMAN dispatch, 2026-09-05) so the
   row automates a demonstrated shape rather than inventing one.
+
+## The fundamentals ruling — the Lean model gates the queue (Joe, 2026-09-05)
+
+Verbatim: "the missing Q(o|π) constructor our interface audit keeps
+finding.... this is the kind of fundamental gap that the big backlog of
+letter-number tasks and :keyword-statuses was drowning out. this should
+be a major finding and a priority focus, the Lean model should be
+saying stop other work until this is solved (and similar needed
+fundamentals exist)"
+
+Reading and mechanism: a new worklist class **:F (fundamental)** whose
+rows the loop takes FIRST AND EXCLUSIVELY — build_step.bb's prio now
+puts :F ahead of everything, so while an F row is open no other row can
+be picked (the operational meaning of "stop other work"). The finding
+itself has been in the audit since the table was first built — always
+renderable, never blocking; the failure was the queue's, not the
+audit's.
+
+Rows (minted at next loop pause — U57 seat in flight at ruling time;
+:F must also be added to worklist.edn :classes then):
+
+- **F0 (census — what else is fundamental):** enumerate the
+  fundamentals by a STATED criterion, Lean-anchored per the ruling: a
+  definition the theory requires whose constructing signature is
+  uninhabited in both Lean and the runtime (proxies and fixtures do not
+  count as inhabitants). Known members to verify, not assume: the
+  Q(o|π) constructor (audit finding, central); BeliefState → outcome
+  distribution (no map exists, Holes.lean ~6806); the realized-outcome
+  channel (U56: dark since July — G's outcome feedback has no reader).
+  Sweep Holes.lean's abbrevs/structures and the runtime seams for
+  others. Deliverable: FUNDAMENTALS.edn, machine-readable, each entry
+  with the uninhabited signature named on both sides + what depends on
+  it; propose (do not implement) how the contract emission should mark
+  fundamentals so the F-list is DERIVED from the Lean model rather than
+  hand-kept. F0 itself is :F.
+- **F1 (inhabit Q(o|π), depends F0 only for confirmation not start):**
+  the constructor, both legs. Lean: a non-private, non-toy
+  PredictiveOutcomeKernel built from GenerativeModel + BeliefState +
+  Policy — ≥2 policy rows, normalization proven, policy-conditioned
+  difference exhibited (the eigCounterPredictive fixture explicitly
+  does not count). Runtime: the same composition at the R4 seam,
+  default-off, with the Gaussian proxy and the hand-built two-point
+  fixture rejected at the boundary. Work plan basis: the accepted
+  strawman holes for M-aif-policy-conditioned-eig
+  (proposals/STRAWMAN-M-aif-policy-conditioned-eig.md, e5f05733) —
+  domain preregistration first, constructor second, unified updates
+  third, typed delivery fourth, shadow packet fifth; slice per row
+  discipline if it grows.

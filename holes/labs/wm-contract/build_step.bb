@@ -16,9 +16,14 @@
        (not= :J (:class i))
        (not= :joe (:owner i))
        (not (:loop-skip i))))
-;; Priority: rows the loop itself needs first (a run lock before any run),
-;; then RUN rows in id order, then everything else in ledger order.
-(defn prio [i] [(case (:id i) :RUN12 0 :RUN11 1 2) (if (= :RUN (:class i)) 0 1)])
+;; Priority: FUNDAMENTALS first and exclusively -- while any :F row is open
+;; the loop may not take other work (Joe, 2026-09-05: the missing Q(o|pi)
+;; constructor "should be a major finding and a priority focus, the Lean model
+;; should be saying stop other work until this is solved"). Then rows the loop
+;; itself needs (a run lock before any run), then RUN rows, then ledger order.
+(defn prio [i] [(if (= :F (:class i)) 0 1)
+                (case (:id i) :RUN12 0 :RUN11 1 2)
+                (if (= :RUN (:class i)) 0 1)])
 (def cmd (first *command-line-args*))
 (case cmd
   ;; stall-key: id + status + progress content of the next-open row, so a
