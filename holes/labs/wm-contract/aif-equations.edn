@@ -176,7 +176,16 @@
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
  ;; control-map-edges.edn :decisions so a decision can replace an observation.
  :choices
- {:free-energy-form {:observed :laplace-channel-grain-diagnostic :status :decided
+ {:policy-grain
+  {:observed :selection-counts-inhabited-cascade-grain-uninhabited
+   :status :decided
+   :ruling {:by "joe" :at "2026-09-05" :grounds :ruling
+            :channel "session, claude-1 presenting F1's blocker as a two-option menu; Joe verbatim: 'i don't know why we are still talking about action grain or why this is even a question after weeks -- months -- of saying that G must be evaluated over policies, and developing a theory of how that can work, which is the core of R5. I guess someone didnt get the memo'"
+            :decision "The policy grain is the CASCADE and the question is CLOSED, not defaulted. G is evaluated over policies; policies are cascades (four-grain correspondence, N-strategy-as-computational-object.md addendum, 2026-09-05); the action grain is NOT admissible as pi and is not to be re-presented as an option by any seat. A blocker that reduces to this question cites this entry and proceeds on the cascade grain."
+            :consequence "F7 (cascade construction: two or more distinct cascades constructed and scored for one target) is the only path to inhabiting pi; it was already in the work seat when this entry was written. F1 slice 2 waits on F7, not on Joe -- F1's :blocker is to be rewritten at the next board pause to name F7 as its gate, so the row leaves the needs-joe channel. The census runs/F1-machine-q/02-policy-family-census.edn stays as the measurement of why the cascade grain is uninhabited today: evidence for the build, not grounds to reopen the grain."}
+   :evidence "machine_q.clj:150 (:refusal/policy-selection-distribution -- the boundary already refuses the selection grain); runs/F1-machine-q/02-policy-family-census.edn (889/889 stable identities, all selections; 0/889 offer a cascade choice); habit_prior.clj:13-14 (the namespace's own disclaimer)"
+   :statement "This entry exists because the ruling previously lived in EPIC-run-era.md and the strategy note but NOT in this registry, and F1's seat -- correctly consulting this registry under its no-ruling discipline -- found no entry and re-opened a settled question (2026-09-05). A ruling not present in the registry the lanes consult is not a ruling for the lanes."}
+  :free-energy-form {:observed :laplace-channel-grain-diagnostic :status :decided
                      :ruling {:by "joe" :at "2026-09-01" :grounds :ruling
                               :decision "The current Laplace channel F is a shortcut (J2). Do not accept it as a diagnostic to keep: retire it, and replace it with theory-aligned free-energy quantities that are actually needed and consumed -- the per-policy F_pi that the policy posterior imports (parr2022 eq. B.9: pi = sigma(ln E - F - G)), and a belief update that is the gradient of the F the machine reports, at one grain."
                               :consequence "The F row (R8) is marked :status :shortcut-to-retire; it stays in the registry and the figure until its replacement is realised and consumed, so the drawing keeps matching the code. Opened H4 (hole: F_pi not computed, F not consumed) and I2 (implement F_pi into Q(pi)) in worklist.edn."}
