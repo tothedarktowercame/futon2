@@ -41,7 +41,11 @@ for fn in sorted(os.listdir(d)):
     BACKFILL_SECTIONS = {"war-room", "cascades", "futon-theory",
                          "ukrns", "snatch", "vsatlas", "storage",
                          "math-formalization", "math-formalization-CA",
-                         "math-informal", "math-strategy"}
+                         "math-informal", "math-strategy",
+                         "writing-coherence", "devmap-coherence",
+                         "relationship-coherence", "campaign-coherence",
+                         "code-coherence", "collaboration-coherence",
+                         "career-coherence"}
     lines = open(os.path.join(d, fn), encoding="utf-8").read().splitlines()
     meta = {}
     nodes = []
