@@ -1,0 +1,16 @@
+F8 leg 1 slice 5 -- production structured-observation readback
+Every expected value is transcribed from the named Lean theorem table in the script header.
+empty coordinate count actual=14 expected=14
+empty coordinates actual=[0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0] expected=[0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0] max-delta=0.0
+sorry at cap actual 1.0 expected 1.0 delta 0.0
+sorry above cap actual 1.0 expected 1.0 delta 0.0
+coupling at cap actual 1.0 expected 1.0 delta 0.0
+coupling above cap actual 1.0 expected 1.0 delta 0.0
+stack pass-through actual 70.0 expected 70.0 delta 0.0
+loop-health pass-through actual -3.0 expected -3.0 delta 0.0
+active-repo quotient actual 5.0 expected 5.0 delta 0.0
+observed variant actual=:observed expected=:observed
+absent variant actual=:absent expected=:absent
+sense->vector mismatched-envelope outcome={:status :refused, :class "clojure.lang.ExceptionInfo", :message "numeric observation vector requires its matching envelope"}
+incomplete-summary outcome={:status :threw, :class "java.lang.NullPointerException", :message "Cannot invoke \"Object.getClass()\" because \"x\" is null"}
+VERDICT: production matches every named Lean witness; all numeric deltas are 0.0.
