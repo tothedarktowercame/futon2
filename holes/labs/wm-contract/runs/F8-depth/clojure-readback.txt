@@ -1,0 +1,17 @@
+F8 leg 1 slice 7 -- production temporal-depth readback
+multi horizon actual=3 Lean=3 (depthThreeTrajectory) delta=0.0
+trajectory count actual=3 Lean=3 (depthThreeTrajectory) delta=0.0
+step-1 mean=0.75 final-K mean=0.55 final-minus-first=-0.19999999999999996 Lean=distinct (depthThreeDiffersFromFirst)
+forward-model default actual=3 Lean=3 (forwardDefaultReference) delta=0.0
+rollout default actual=2 Lean=2 (rolloutDefaultReference) delta=0.0
+cascade lane depth actual=5 Lean=5 (cascadeLaneReference) delta=0.0
+live tick literal is 3 under loaded events (war_machine.clj:6283-6285), Lean=3 (liveDepthWitness) -- not callable from here, not measured
+nil horizon=nil one horizon=nil three horizon=3 Lean=nil,nil,3 (someOneEqualsNone)
+nil-vs-one controller delta=0.0 Lean=0 (someOneEqualsNone)
+K3-minus-K1 G-risk=-2.4115244739422366 Lean=nonzero (gTermsDisagreeOnDepth, risk at depth K)
+K3-minus-K1 homeostatic-pressure=-0.23999999999999994 Lean=nonzero (gTermsDisagreeOnDepth, homeostatic at depth K)
+K3-minus-K1 G-ambiguity=0.0 Lean=0 (epistemicAtThreeEqualsAtOne)
+K3-minus-K1 predictability-bonus=0.0 Lean=0 (epistemicAtThreeEqualsAtOne)
+step-3 variance minus step-1 variance, max over channels=0.0 Lean=0 (trajectoryVarianceIsOne)
+step-3 variance = step-1 variance actual=true Lean=true (trajectoryVarianceIsConstant)
+VERDICT: production matches every Lean depth witness.
