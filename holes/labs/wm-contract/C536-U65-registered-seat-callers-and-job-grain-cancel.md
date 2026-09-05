@@ -22,16 +22,16 @@ in claude-1's session, which dispatched a continuation nobody had asked for.
 
 **The repair, and what it did NOT need.** No futon3c code change. The server
 already carries the mechanism for a pull-only caller: registering with
-`delivery-mode inbox` makes `inbox-agent?` true (`http.clj:966`), and
+`delivery-mode inbox` makes `inbox-agent?` true (`futon3c/src/futon3c/transport/http.clj:966`), and
 `enqueue-auto-bellback!` then writes the completion bell as JSON under
 `~/.claude/agency-inbox/<seat>/` instead of trying to invoke the caller
-(`http.clj:1023`, `futon3c/src/futon3c/agency/inbox.clj:24-51`). The
+(`futon3c/src/futon3c/transport/http.clj:1023`, `futon3c/src/futon3c/agency/inbox.clj:24-51`). The
 roster had **zero** inbox seats before this. So the repair is registration plus
 wiring:
 
 - `wm-build-work` and `wm-build-loop` registered as `type claude`,
-  `delivery-mode inbox`. Persisted by `roster_store.clj:79-80` and restored on
-  boot (`restore-enabled?`, `roster_store.clj:26-38`).
+  `delivery-mode inbox`. Persisted by `futon3c/src/futon3c/agency/roster_store.clj:79-80` and restored on
+  boot (`restore-enabled?`, `futon3c/src/futon3c/agency/roster_store.clj:26-38`).
 - `wm-build-loop.sh` `ensure_seats()` (`wm-build-loop.sh:13-33`), run at loop
   start. Idempotent: a duplicate answers 409 and is ignored. It runs every
   start so a roster reset cannot silently return the loop to a borrowed id.
@@ -41,7 +41,7 @@ wiring:
   running reaches the NEXT seat rather than the owner's session.
 - The ACK matters twice: it is also a pull-only seat's only liveness signal.
   An inbox seat never runs an invoke, so `:agent/last-active` moves only on ack
-  (`http.clj:5788-5800`), and the idle reaper reads it.
+  (`futon3c/src/futon3c/transport/http.clj:5788-5800`), and the idle reaper reads it.
 - `worklist-prompt.md:34-43` now tells the seat which id to dispatch from and
   why, since the borrowed id was a seat DECISION, not a line in a script.
 
@@ -61,19 +61,19 @@ process-tree kill was not: it called `interrupt-agent-process-tree!` with only
 the AGENT id, and `futon3c.dev/interrupt-agent-invoke!`
 (`futon3c/dev/futon3c/dev.clj:3321-3357`) resolves its control from
 `!invoke-controls`, which is keyed by agent with no job recorded
-(`dev.clj:3284-3291`). So "cancel my queued duplicate" destroyed whatever
+(`futon3c/dev/futon3c/dev.clj:3284-3291`). So "cancel my queued duplicate" destroyed whatever
 process tree the agent happened to be running. It also called
 `reg/mark-agent-idle!` unconditionally, handing a mid-turn seat to the next
 queued dispatch.
 
 **The repair** (`futon3c` 80f4ebc9):
 
-- `executing-invoke-job-ids-for-agent` (`http.clj:1487-1513`) — the jobs that
+- `executing-invoke-job-ids-for-agent` (`futon3c/src/futon3c/transport/http.clj:1487-1513`) — the jobs that
   own an agent's subprocess tree right now. `process-owning-job-states` is
   `#{"running" "overrun"}`: `queued` has started no process and `delivered` is
   an inbox drop, so neither may authorise a kill. `overrun` is included
   deliberately — an overrun turn is exactly the one an operator cancels.
-- `handle-cancel-invoke-job` (`http.clj:5874-5962`) kills the tree only when
+- `handle-cancel-invoke-job` (`futon3c/src/futon3c/transport/http.clj:5874-5962`) kills the tree only when
   the named job is the one, and the ONLY one, the agent is executing.
   Otherwise it ends the job in the ledger and answers
   `:action :refused-not-the-executing-job` with the preserved job-ids. The
@@ -84,7 +84,7 @@ queued dispatch.
   job left it in the agent's turn-queue, and `run-invoke-job!` had no terminal
   check — the drainer would later `mark-invoke-job-running!` and resurrect a
   job the operator had stopped. The body is now `run-invoke-job-body!` and the
-  wrapper (`http.clj:4446-4467`) refuses a job that reached a terminal state
+  wrapper (`futon3c/src/futon3c/transport/http.clj:4446-4467`) refuses a job that reached a terminal state
   while it sat in the queue.
 
 **Live negative control (acceptance clause 2).** Both jobs to codex-17,
@@ -131,7 +131,7 @@ which claude-15 used its OWN id. Nothing in the loop borrows an owner id.
 ## Gates
 
 - clj-kondo: 0 errors, 0 warnings on `http.clj` and `job_timeout_test.clj`
-  (one pre-existing `info` at `http.clj:7285`, not in the diff).
+  (one pre-existing `info` at `futon3c/src/futon3c/transport/http.clj:7285`, not in the diff).
 - `futon4/dev/check-parens.el`: OK on both.
 - Tests: `job-timeout-test` 23 tests / 70 assertions, 8 failures — the SAME 8
   in the same 4 tests (`job-past-cap-becomes-overrun`,
@@ -168,7 +168,8 @@ nothing, so the count does not move again.
   decision is therefore taken in `http.clj` against the invoke-jobs ledger,
   which is the authority the cancel already writes to. Threading a job-id
   through the three `register-invoke-control!` call sites
-  (`dev.clj:3662,3912,4586`) would let the control itself refuse a mismatch;
+  (`futon3c/dev/futon3c/dev.clj:3662`, `futon3c/dev/futon3c/dev.clj:3912`,
+  `futon3c/dev/futon3c/dev.clj:4586`) would let the control itself refuse a mismatch;
   that is a larger change and was not taken.
 - No futon2 `src/` change, so no futon2 test run is claimed. No tick, no run
   lock, nothing under `data/`.
