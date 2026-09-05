@@ -56,6 +56,7 @@
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.policy-precision :as policy-precision]
+            [futon2.aif.realized-outcome :as ro]
             [futon2.aif.selection-gain :as selection-gain]
             [futon2.aif.selection-rationale :as selection-rationale]
             [futon2.aif.precision :as precision]
@@ -2406,6 +2407,37 @@
    "complete" 0.0
    "unknown" 0.3})
 
+(def ^:dynamic *observed-outcomes*
+  "Realized outcomes OBSERVED AFTER THE FACT, keyed by the `:run/id` of the
+   record they are about: `{run-id <:wm/realized-outcome-v1 record>}`.
+
+   OFF BY DEFAULT AND EMPTY ON EVERY LIVE PATH, and that is the point. The
+   decay input becoming readable is a flip decision, not a default (worklist
+   `:U59`): with this empty, `trace-outcome` answers exactly what it answered
+   before -- nothing, on all 889 records -- and the non-progress count, the
+   decay it feeds and therefore every selection score are byte-identical.
+
+   The post-accept observation pass (`wm_step.sh observe`) writes such records
+   into the accepted run store; binding this to them is what a MEASUREMENT of
+   the difference does, and `u59_decay_difference.bb` is the measurement."
+  {})
+
+(defn- trace-outcome
+  "The categorical outcome of a trace record, through the one vocabulary
+   (`futon2.aif.realized-outcome/categorical-outcome`, which holds the three
+   places this function used to spell out). Unchanged when
+   `*observed-outcomes*` is empty, which is every live path.
+
+   The three in-record places carry nothing on any record in the live corpus
+   (889 of 889, C511-repair-or-elaborate.md section 3), because their only
+   producers are on the enactment path that `run-tick-once` does not reach. The
+   observed side-channel is the fourth place, and it is joined by `:run/id`
+   because an observation is taken after the record is written and cannot be a
+   key on it."
+  [trace-record]
+  (or (ro/categorical-outcome trace-record)
+      (:outcome (get *observed-outcomes* (:run/id trace-record)))))
+
 (defn- previous-selection-non-progress?
   [action prev-trace-record]
   (let [previous-action (get-in prev-trace-record [:decision :action])
@@ -2415,17 +2447,12 @@
         target-mu-pre (get-in prev-trace-record [:mu-pre target])
         target-mu-post (get-in prev-trace-record [:mu-post target])
         mu-moved? (not= target-mu-pre target-mu-post)
-        outcome (or (:outcome prev-trace-record)
-                    (get-in prev-trace-record [:enactment :outcome])
-                    (get-in prev-trace-record [:realized-outcome :outcome]))]
+        ;; The same one accessor the batch path uses -- this was the second
+        ;; hand-inlined copy of the three places (worklist :U59).
+        outcome (trace-outcome prev-trace-record)]
     (and same-selection?
          (or (not mu-moved?)
              (not= :grounded-change outcome)))))
-
-(defn- trace-outcome [trace-record]
-  (or (:outcome trace-record)
-      (get-in trace-record [:enactment :outcome])
-      (get-in trace-record [:realized-outcome :outcome])))
 
 (defn- repair-selection? [trace-record]
   (let [previous-action (get-in trace-record [:decision :action])
