@@ -1,0 +1,7 @@
+F8 leg 1 slice 9 -- production selected-action readback
+controllerHeadReference expected=:a actual=:a MATCH
+posteriorReference expected=:b actual=:b MATCH
+posteriorFallbackReference expected=:a actual=:a MATCH
+tiedArgmaxesDisagree last-max expected=:b actual=:b MATCH
+noOpCandidateSetsDiffer strategic expected=:a actual=:a MATCH
+VERDICT: production matches every measured Lean action witness.
