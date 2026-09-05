@@ -813,3 +813,42 @@ Priority note: this ruling makes F8 ordering-first among unstarted F
 rows (before F5/F6/F7 in pick order; F6's scale vocabulary is consumed
 by leg-indexing but the accounting build itself does not gate F8's
 slices; F7 becomes the runtime leg of the pi convergence row).
+
+## The theory-track ruling (Joe, 2026-09-05, pre-flight) — the library loop, rationale reachability, graph certificates
+
+Verbatim: "we should ideally find a way to get the 'theory' part
+moving, possibly with Zai agents to balance my usage. [Deleuze on
+problems/singularities/events, epochemagazine.org/34, as philosophical
+frame] the programme here would continue the library loop, mining the
+evidence landscape and annotating patterns, so that we get a sense of
+what problems we have been solving historically. even though we only
+have 20 nodes and a comparable number of WR patterns, we have a whole
+library of other patterns, and it would be good if this would all come
+together, e.g., the process observations we made recently might become
+new 'library/process' patterns. Right now most patterns would be
+unreachable via @how or @why traversal, ie. they have no globally
+recognised rationale. While this is clearly different from the Lean
+issues, ultimately we will want graph-level certificates too, and
+these tracks should eventually merge around on the fly cascade
+construction and processing"
+
+- **Measured on receipt:** futon3/library holds 1257 .flexiarg
+  patterns; 106 mention @how or @why at all (~92% unreachable at
+  bare-grep grain; the census row below measures it properly).
+- **Vehicle:** a NEW lane, holes/labs/library-loop/ (own board, loop
+  forked per the fork discipline from the newest loop copy), WORK
+  seat zai (zai-1 registered 2026-09-05 via zai-picker for exactly
+  Joe's balance-my-usage purpose), REVIEW seat codex, owner claude-1.
+  Initial board: L1 :M rationale-reachability census (the real graph,
+  per-section coverage); L2 :I library/process patterns minted from
+  the T1-T8 trap catalogue in WR violation+repair form; L3 :I
+  rationale backfill pilot on library/aif with @why drawn from the
+  twenty-node problem dossiers; L4 :M graph-certificate strawman
+  (what invariant a graph-level certificate refuses on — e.g. every
+  pattern a served cascade consults is @why-reachable from a named
+  problem).
+- **The merge, recorded as direction not plan:** Lean/runtime
+  certificates (F8, behaviour matches intent) and graph certificates
+  (L-track, consultation matches rationale) converge at ON-THE-FLY
+  CASCADE CONSTRUCTION (F7's build): a constructed-and-scored cascade
+  should eventually carry BOTH certificate kinds.
