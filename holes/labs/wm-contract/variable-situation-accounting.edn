@@ -13,8 +13,8 @@
   [:named-only
    :framing
    :open-hole
-   :closed-by-record-negative-space
-   :closed-by-record-with-witness
+   :record-negative-space
+   :record-with-witness
    :proven-against-pinned-source],
   :pointer-status [:resolves :drifted],
   :row-source [:contract-declaration :glossary-paragraph],
@@ -23,861 +23,2798 @@
   [:not-ready
    :contested
    :witnessed-and-held-open
-   :witnessed-under-flag]},
+   :witnessed-under-flag],
+  :rung
+  [:named
+   :type-transcribed
+   :formula-transcribed
+   :witnessed
+   :constructed
+   :wired
+   :validated
+   :run-correlated]},
  :rows
- [{:name "Pattern",
-   :area :demo,
-   :owner "P-validated-R5 §2.1d",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+ [{:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "Cascade",
-   :area :demo,
-   :owner "P-validated-R5 §3e",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "Pattern",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7776",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:24",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :demo,
+   :owner "P-validated-R5 §2.1d"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "HaveWantArrowState",
-   :area :demo,
-   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "Cascade",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7776",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:29",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :demo,
+   :owner "P-validated-R5 §3e"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Demonstration Foundry and have--want arrows."}}
-  {:name "HaveWantArrowComposition",
-   :area :demo,
-   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
+   {:resolved-title "Demonstration Foundry and have--want arrows."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "HaveWantArrowState",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7777",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:38",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :demo,
+   :owner "sec-glossary.tex:78 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Demonstration Foundry and have--want arrows."}}
-  {:name "ControlPolicy",
+   {:resolved-title "Demonstration Foundry and have--want arrows."},
+   :row-source :contract-declaration,
+   :name "HaveWantArrowComposition",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7778",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:52",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :demo,
+   :owner "sec-glossary.tex:78 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail
+   {:resolved-title "Control states $U$ and the policy vocabulary."},
+   :row-source :contract-declaration,
+   :name "ControlPolicy",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7779",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:81",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :policy,
-   :owner "sec-glossary.tex:39 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:39 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail
-   {:resolved-title "Control states $U$ and the policy vocabulary."}}
-  {:name "AlivenessFactor",
+   :pointer-detail {:resolved-title "Aliveness $L = T\\cdot H$."},
+   :row-source :contract-declaration,
+   :name "AlivenessFactor",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7780",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:85",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "sec-glossary.tex:54 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:54 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Aliveness $L = T\\cdot H$."}}
-  {:name "ActGateVerdict",
+   :pointer-detail {:resolved-title "Act-gate."},
+   :row-source :contract-declaration,
+   :name "ActGateVerdict",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7781",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:93",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "sec-glossary.tex:70 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Act-gate."}}
-  {:name "Click",
-   :area :records,
-   :owner "sec-glossary.tex:82 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:70 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
    :pointer-detail
    {:resolved-title
-    "Clicks, attempts, and cohorts (measurement vocabulary)."}}
-  {:name "Attempt",
-   :area :records,
-   :owner "sec-glossary.tex:82 · P-glossary-mathematics",
+    "Clicks, attempts, and cohorts (measurement vocabulary)."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "Click",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7782",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:103",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "sec-glossary.tex:82 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
    :pointer-detail
    {:resolved-title
-    "Clicks, attempts, and cohorts (measurement vocabulary)."}}
-  {:name "Tension",
+    "Clicks, attempts, and cohorts (measurement vocabulary)."},
+   :row-source :contract-declaration,
+   :name "Attempt",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7783",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:106",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "sec-glossary.tex:82 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "Tension",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7784",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:127",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "P-validated-R5 §3e",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-validated-R5 §3e"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "InformationState",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "InformationState",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7784",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:133",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "P-validated-R5 §3d",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-validated-R5 §3d"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "DecisionRule",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DecisionRule",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7785",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:140",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "P-validated-R5 §3",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-validated-R5 §3"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "Outcome",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "Outcome",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7785",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:150",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "P-validated-R5 §2a",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-validated-R5 §2a"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "G",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "G",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7786",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:164",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "P-validated-R5 §2a′",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-validated-R5 §2a′"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "nonDegenerate",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "nonDegenerate",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7786",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:172",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "P-validated-R5 §2a′",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-validated-R5 §2a′"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "fastForward",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "fastForward",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7787",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:829",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "P-validated-R5 §3e O3",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-validated-R5 §3e O3"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "independent",
-   :area :records,
-   :owner "P-R9 S1",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "independent",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7787",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:937",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R9 S1"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "IndependenceVerdict",
-   :area :records,
-   :owner "P-R9 §solved 2",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "IndependenceVerdict",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7788",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:941",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R9 §solved 2"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "independenceVerdict",
-   :area :records,
-   :owner "P-R9 §solved 1–2",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "independenceVerdict",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7788",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:948",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R9 §solved 1–2"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r9CheckerSound",
-   :area :records,
-   :owner "P-R9 §solved 3",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "r9CheckerSound",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7789",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:956",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R9 §solved 3"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r9VerdictsSound",
-   :area :records,
-   :owner "P-R9 §solved 3",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "r9VerdictsSound",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7789",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:997",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R9 §solved 3"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "ShapeTally",
-   :area :records,
-   :owner "P-R8 §solved 1 (iii) evidence",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "ShapeTally",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7789",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7709",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R8 §solved 1 (iii) evidence"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "EraSummary.meanPrecision",
-   :area :records,
-   :owner "P-R8 §solved 1 (iii) evidence",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "EraSummary.meanPrecision",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7789",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7726",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R8 §solved 1 (iii) evidence"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "EraSummary.uniform",
-   :area :records,
-   :owner "P-R8 §solved 1 (iii) evidence",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "EraSummary.uniform",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7789",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7730",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R8 §solved 1 (iii) evidence"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "DeclarationSource",
-   :area :records,
-   :owner "P-R9 §solved 2 (declaration source)",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :name "DeclarationSource",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7789",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:977",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R9 §solved 2 (declaration source)"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r9PerRowDeclarations",
-   :area :records,
-   :owner "P-R9 §solved 2 (per-row declarations)",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "TickRunRecord",
+   :name "r9PerRowDeclarations",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7789",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1002",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
-   :owner
-   "record: futon2:holes/problems/BUILD-packets/WM-RUN1.md · Joe 2026-08-31 · runs-once receipt",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-R9 §solved 2 (per-row declarations)"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-path "holes/problems/BUILD-packets/WM-RUN1.md"}}
-  {:name "RouteHop",
+   {:resolved-path "holes/problems/BUILD-packets/WM-RUN1.md"},
+   :row-source :contract-declaration,
+   :name "TickRunRecord",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7790",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7122",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
    :owner
-   "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · route tracer",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   "record: futon2:holes/problems/BUILD-packets/WM-RUN1.md · Joe 2026-08-31 · runs-once receipt"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-path "holes/problems/BUILD-packets/WM-RUN2.md"}}
-  {:name "PreferenceSource",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
+   {:resolved-path "holes/problems/BUILD-packets/WM-RUN2.md"},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "PreferenceLayerRecord",
-   :area :preferences,
-   :owner "P-R19-preferences-open §tetrahedron",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "wmPreferenceStack2026_08_30",
-   :area :preferences,
-   :owner "R19-preference-stack.edn @ dc1dac8",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "wmStackDeclaredPurpose",
-   :area :preferences,
-   :owner "R19-preference-stack.edn @ dc1dac8",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "preferenceStackRecorded",
-   :area :preferences,
-   :owner "P-R19-preferences-open §gate",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "PreferenceLayer",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "foldC",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "PreferenceStack",
-   :area :preferences,
-   :owner "P-R19-preferences-open §tetrahedron",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "PreferenceSpineDeclaration",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "PreferenceConstantCensusRow",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "preferenceConstantCensus",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "freePreferenceConstants",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "freePreferenceConstants_eq",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "machineHasNoC",
-   :area :preferences,
-   :owner "P-R19-preferences-open §principle",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "Delivery",
+   :name "RouteHop",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7790",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7140",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
-   :owner "delivery-lifecycle §0.6",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner
+   "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · route tracer"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "Handoff",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "PreferenceSource",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7791",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7025",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "PreferenceLayerRecord",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7791",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7030",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §tetrahedron"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "wmPreferenceStack2026_08_30",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7792",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7040",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "R19-preference-stack.edn @ dc1dac8"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "wmStackDeclaredPurpose",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7792",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7048",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "R19-preference-stack.edn @ dc1dac8"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "preferenceStackRecorded",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7793",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7051",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §gate"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "PreferenceLayer",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7793",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7055",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "foldC",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7794",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7061",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "PreferenceStack",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7794",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7066",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §tetrahedron"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "PreferenceSpineDeclaration",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7795",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7073",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "PreferenceConstantCensusRow",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7796",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7085",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "preferenceConstantCensus",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7797",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7093",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "freePreferenceConstants",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7798",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7106",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "freePreferenceConstants_eq",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7799",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7110",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "machineHasNoC",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7800",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7117",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :preferences,
+   :owner "P-R19-preferences-open §principle"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "Delivery",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7801",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1063",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
-   :owner "delivery-lifecycle §0.10",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "delivery-lifecycle §0.6"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "Workflow",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "Handoff",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7801",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1075",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
-   :owner "delivery-lifecycle §0.10",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "delivery-lifecycle §0.10"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r2WellFormed",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "Workflow",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7802",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1086",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
-   :owner "P-R2 §solved 1",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "delivery-lifecycle §0.10"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r2ContractCensus",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r2WellFormed",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7802",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1095",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
-   :owner "P-R2 §solved 1",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-R2 §solved 1"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r8Disposition",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r2ContractCensus",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7803",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1100",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
-   :owner "P-R8 §solved 1",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-R2 §solved 1"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r8Census",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r8Disposition",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7803",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1166",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :records,
-   :owner "P-R8 §solved 1",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-R8 §solved 1"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "cascadeGrainPi",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r8Census",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7804",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1174",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R8 §solved 1"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Policy $\\pi$."},
+   :row-source :contract-declaration,
+   :name "cascadeGrainPi",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7805",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7022",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :policy,
-   :owner "sec-glossary.tex:52 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:52 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Policy $\\pi$."}}
-  {:name "observationKernelRowMass",
+   :pointer-detail {:resolved-title "Observation model $A$."},
+   :row-source :contract-declaration,
+   :name "observationKernelRowMass",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7806",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6834",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :belief,
-   :owner "sec-glossary.tex:31 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:31 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Observation model $A$."}}
-  {:name "beliefUpdate",
+   :pointer-detail {:resolved-title "Belief state $\\mu$."},
+   :row-source :contract-declaration,
+   :name "beliefUpdate",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7807",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6839",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :belief,
-   :owner "sec-glossary.tex:9,15,17,19,31 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Belief state $\\mu$."}}
-  {:name "modelReductionFreeEnergyChange",
-   :area :learning,
-   :owner "sec-glossary.tex:62 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:9,15,17,19,31 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Log multivariate beta and $\\Delta F$."}}
-  {:name "ObservationVector",
+   {:resolved-title "Log multivariate beta and $\\Delta F$."},
+   :row-source :contract-declaration,
+   :name "modelReductionFreeEnergyChange",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/model-reduction-free-energy-change-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7808",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6950",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:674",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/model_reduction_free_energy_change_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :learning,
+   :owner "sec-glossary.tex:62 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "ObservationVector",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/observation-vector-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7810",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6811",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:269",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/observation_vector_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :belief,
    :owner
-   "sec-glossary.tex paragraph:Observation vector o · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "PredictiveOutcomeKernel",
-   :area :scores,
-   :owner "sec-glossary.tex:23 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   "sec-glossary.tex paragraph:Observation vector o · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
    :pointer-detail
    {:resolved-title
-    "Predictive outcome distribution $Q(o\\mid\\pi)$."}}
-  {:name "ParameterPriorKernel",
-   :area :scores,
-   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
+    "Predictive outcome distribution $Q(o\\mid\\pi)$."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
-  {:name "ParameterPosteriorKernel",
+   :name "PredictiveOutcomeKernel",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/predictive-outcome-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7812",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6758",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:404",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/predictive_outcome_kernel_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :scores,
-   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:23 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
-  {:name "TransitionKernel",
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."},
+   :row-source :contract-declaration,
+   :name "ParameterPriorKernel",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/parameter-prior-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7814",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6762",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:328",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/parameter_prior_kernel_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :scores,
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."},
+   :row-source :contract-declaration,
+   :name "ParameterPosteriorKernel",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/parameter-posterior-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7816",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6766",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:298",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/parameter_posterior_kernel_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :scores,
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Generative model."},
+   :row-source :contract-declaration,
+   :name "TransitionKernel",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/transition-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7818",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6771",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:482",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/transition_kernel_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :belief,
-   :owner "sec-glossary.tex:7 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:7 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Generative model."}}
-  {:name "PreferenceDistribution",
+   :pointer-detail {:resolved-title "Preference distribution $C$."},
+   :row-source :contract-declaration,
+   :name "PreferenceDistribution",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/preference-distribution-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7820",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6779",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:452",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/preference_distribution_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :preferences,
-   :owner "sec-glossary.tex:25 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:25 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Preference distribution $C$."}}
-  {:name "observationEntropy",
+   :pointer-detail {:resolved-title "Expected free energy $G$."},
+   :row-source :contract-declaration,
+   :name "observationEntropy",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7822",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6875",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :scores,
-   :owner "sec-glossary.tex:21,29 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:21,29 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Expected free energy $G$."}}
-  {:name "G_eq_expectedFreeEnergy",
+   :pointer-detail {:resolved-title "Expected free energy $G$."},
+   :row-source :contract-declaration,
+   :name "G_eq_expectedFreeEnergy",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7823",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6895",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :scores,
-   :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Expected free energy $G$."}}
-  {:name "ExpectedInformationGainValue",
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."},
+   :row-source :contract-declaration,
+   :name "ExpectedInformationGainValue",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7824",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6912",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :scores,
-   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
-  {:name "parameterInformationGain",
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."},
+   :row-source :contract-declaration,
+   :name "parameterInformationGain",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7825",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6917",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :scores,
-   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
-  {:name "modelUncertaintyBonus",
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."},
+   :row-source :contract-declaration,
+   :name "modelUncertaintyBonus",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7826",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6973",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :scores,
-   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
-  {:name "generativeFactorMass",
+   :pointer-detail {:resolved-title "Generative model."},
+   :row-source :contract-declaration,
+   :name "generativeFactorMass",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7827",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6794",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :belief,
-   :owner "sec-glossary.tex:7 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:7 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Generative model."}}
-  {:name "wmCascadeDiffFixture",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "wmCascadeDiffFixture",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7828",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :demo,
-   :owner "P-validated-R5 §3e O1–O4",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "P-validated-R5 §3e O1–O4"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "logMultivariateBeta",
+   :pointer-detail
+   {:resolved-title "Log multivariate beta and $\\Delta F$."},
+   :row-source :contract-declaration,
+   :name "logMultivariateBeta",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/log-multivariate-beta-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7829",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6939",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:657",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/log_multivariate_beta_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :learning,
-   :owner "sec-glossary.tex:62 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:62 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Expected free energy $G$."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :name "expectedFreeEnergy",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/expected-free-energy-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7831",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6887",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:601",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/expected_free_energy_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :scores,
+   :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Expected free energy $G$."},
+   :row-source :contract-declaration,
+   :name "ambiguity",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/ambiguity-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7833",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6880",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:538",
+     :evidence :passing-witness-check,
+     :why "witness check checks/ambiguity_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :scores,
+   :owner "sec-glossary.tex:21,29 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Log multivariate beta and $\\Delta F$."}}
-  {:name "expectedFreeEnergy",
-   :area :scores,
-   :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics",
+   {:resolved-title "Demonstration Foundry and have--want arrows."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Expected free energy $G$."}}
-  {:name "ambiguity",
-   :area :scores,
-   :owner "sec-glossary.tex:21,29 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Expected free energy $G$."}}
-  {:name "HaveWantArrow",
+   :name "HaveWantArrow",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/have-want-arrow-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7835",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:45",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:225",
+     :evidence :passing-witness-check,
+     :why "witness check checks/have_want_arrow_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :demo,
-   :owner "sec-glossary.tex:78 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:78 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail
-   {:resolved-title "Demonstration Foundry and have--want arrows."}}
-  {:name "Fold",
-   :area :demo,
-   :owner "sec-glossary.tex:68 · P-glossary-mathematics",
+   :pointer-detail {:resolved-title "Fold."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :name "Fold",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/fold-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7837",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:57",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:167",
+     :evidence :passing-witness-check,
+     :why "witness check checks/fold_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :demo,
+   :owner "sec-glossary.tex:68 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Fold."}}
-  {:name "FoldEscrowRecord",
-   :area :demo,
-   :owner "sec-glossary.tex:68 · P-glossary-mathematics",
+   :pointer-detail {:resolved-title "Fold."},
    :row-source :contract-declaration,
+   :name "FoldEscrowRecord",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/fold-turn-quarantine.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7839",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:63",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:190",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/fold_turn_quarantine_check.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Fold."}}
-  {:name "FoldEscrowRecord.reconstructible",
    :area :demo,
-   :owner "sec-glossary.tex:68 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:68 · P-glossary-mathematics"}
+  {:rung :type-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Fold."}}
-  {:name "BeliefState",
+   :pointer-detail {:resolved-title "Fold."},
+   :row-source :contract-declaration,
+   :name "FoldEscrowRecord.reconstructible",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7841",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:72",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :demo,
+   :owner "sec-glossary.tex:68 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Belief state $\\mu$."},
+   :row-source :contract-declaration,
+   :name "BeliefState",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/belief-state-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7842",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6806",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:47",
+     :evidence :passing-witness-check,
+     :why "witness check checks/belief_state_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :belief,
-   :owner "sec-glossary.tex:9 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:9 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Belief state $\\mu$."}}
-  {:name "variationalFreeEnergy",
+   :pointer-detail {:resolved-title "Variational free energy $F$."},
+   :row-source :contract-declaration,
+   :name "variationalFreeEnergy",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/variational-free-energy-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7844",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6828",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:510",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/variational_free_energy_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :scores,
-   :owner "sec-glossary.tex:19 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:19 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Variational free energy $F$."}}
-  {:name "PrecisionMap",
-   :area :belief,
-   :owner "sec-glossary.tex:17 · P-glossary-mathematics",
+   :pointer-detail {:resolved-title "Precision $\\Pi$."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Precision $\\Pi$."}}
-  {:name "predictionError",
+   :name "PrecisionMap",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/precision-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7846",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6820",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:383",
+     :evidence :passing-witness-check,
+     :why "witness check checks/precision_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :belief,
-   :owner "sec-glossary.tex:15 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:17 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Prediction error $\\varepsilon$."}}
-  {:name "softmax",
+   {:resolved-title "Prediction error $\\varepsilon$."},
+   :row-source :contract-declaration,
+   :name "predictionError",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/prediction-error-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7848",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6815",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:759",
+     :evidence :passing-witness-check,
+     :why "witness check checks/prediction_error_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :belief,
+   :owner "sec-glossary.tex:15 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail
+   {:resolved-title "Softmax and controller calibration."},
+   :row-source :contract-declaration,
+   :name "softmax",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/softmax-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7850",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6960",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:876",
+     :evidence :passing-witness-check,
+     :why "witness check checks/softmax_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :scores,
-   :owner "sec-glossary.tex:35 · P-glossary-mathematics",
+   :owner "sec-glossary.tex:35 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Bayes factor threshold."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :name "bayesFactorThreshold",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/bayes-factor-threshold-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7852",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6957",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:554",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/bayes_factor_threshold_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :learning,
+   :owner "sec-glossary.tex:64 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Bayesian Model Reduction."},
+   :row-source :contract-declaration,
+   :name "bayesianModelReduction",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/bayesian-model-reduction-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7854",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6968",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:577",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/bayesian_model_reduction_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :learning,
+   :owner "sec-glossary.tex:58 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Softmax and controller calibration."}}
-  {:name "bayesFactorThreshold",
-   :area :learning,
-   :owner "sec-glossary.tex:64 · P-glossary-mathematics",
+   {:resolved-title "Dirichlet concentration parameters."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Bayes factor threshold."}}
-  {:name "bayesianModelReduction",
+   :name "DirichletConcentrations",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/dirichlet-concentrations-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7856",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6936",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:134",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/dirichlet_concentrations_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :learning,
-   :owner "sec-glossary.tex:58 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:60 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
-  {:name "DirichletConcentrations",
-   :area :learning,
-   :owner "sec-glossary.tex:60 · P-glossary-mathematics",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail
-   {:resolved-title "Dirichlet concentration parameters."}}
-  {:name "Channel",
+   :name "Channel",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/channel-vocabulary-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7858",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1105",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:66",
+     :evidence :passing-witness-check,
+     :why "witness check checks/channel_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :records,
-   :owner "P-R2 §solved 1 (Channel)",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "P-R2 §solved 1 (Channel)"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "observationKernel",
+   :pointer-detail {:resolved-title "Observation model $A$."},
+   :row-source :contract-declaration,
+   :name "observationKernel",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/observation-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7860",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6803",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:249",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/observation_kernel_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :belief,
-   :owner "sec-glossary.tex:31 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:31 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Observation model $A$."}}
-  {:name "predictiveOutcomeRisk",
+   :pointer-detail {:resolved-title "Expected free energy $G$."},
+   :row-source :contract-declaration,
+   :name "predictiveOutcomeRisk",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/predictive-outcome-risk-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7862",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6867",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:434",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/predictive_outcome_risk_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :scores,
-   :owner "sec-glossary.tex:21,27 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:21,27 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Expected free energy $G$."}}
-  {:name "PolicyPriorKernel",
-   :area :policy,
-   :owner "sec-glossary.tex:41,7 · P-glossary-mathematics",
+   :pointer-detail {:resolved-title "Policy prior $E$ and habit."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Policy prior $E$ and habit."}}
-  {:name "ControlVocabulary",
+   :name "PolicyPriorKernel",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/policy-prior-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7864",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6775",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:358",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/policy_prior_kernel_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :policy,
-   :owner "sec-glossary.tex:39 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:41,7 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
    :pointer-detail
-   {:resolved-title "Control states $U$ and the policy vocabulary."}}
-  {:name "aliveness",
-   :area :demo,
-   :owner "sec-glossary.tex:54 · P-glossary-mathematics",
+   {:resolved-title "Control states $U$ and the policy vocabulary."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :name "ControlVocabulary",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/control-vocabulary-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7866",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:78",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:109",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/machine_vocabulary_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :policy,
+   :owner "sec-glossary.tex:39 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Aliveness $L = T\\cdot H$."}}
-  {:name "actGate",
+   :pointer-detail {:resolved-title "Aliveness $L = T\\cdot H$."},
+   :row-source :contract-declaration,
+   :name "aliveness",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/aliveness-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7868",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:90",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:26",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/machine_vocabulary_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :demo,
-   :owner "sec-glossary.tex:70 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "sec-glossary.tex:54 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Act-gate."}}
-  {:name "Cohort",
-   :area :records,
-   :owner "sec-glossary.tex:82 · P-glossary-mathematics",
+   :pointer-detail {:resolved-title "Act-gate."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :name "actGate",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/act-gate-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7870",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:98",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:5",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/machine_vocabulary_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :demo,
+   :owner "sec-glossary.tex:70 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
    :pointer-detail
    {:resolved-title
-    "Clicks, attempts, and cohorts (measurement vocabulary)."}}
-  {:name "expectedInformationGain",
-   :area :scores,
-   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
+    "Clicks, attempts, and cohorts (measurement vocabulary)."},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
-  {:name "GenerativeModel",
-   :area :belief,
-   :owner "sec-glossary.tex:7 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Generative model."}}
-  {:name "modelUncertaintyAndEIG",
-   :area :scores,
-   :owner "sec-glossary.tex:33 · P-glossary-mathematics",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Model uncertainty and EIG."}}
-  {:name "organiseO1NodesRecorded",
-   :area :demo,
-   :owner "P-validated-R5 §3e O1",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "organiseO2AuthoredReachability",
-   :area :demo,
-   :owner "P-validated-R5 §3e O2",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "organiseO3FastForward",
-   :area :demo,
-   :owner "P-validated-R5 §3e O3",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "organiseO4PrecedenceGovernance",
-   :area :demo,
-   :owner "P-validated-R5 §3e O4 and S-G4",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "valueEvidenceRequiresL2",
+   :name "Cohort",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/cohort-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7872",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:112",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:85",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/machine_vocabulary_witness.clj passed"}],
+   :content-status :record-with-witness,
    :area :records,
-   :owner "P-R9 S1",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   :owner "sec-glossary.tex:82 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:pointer-status :resolves,
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."},
+   :row-source :contract-declaration,
+   :name "expectedInformationGain",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/expected-information-gain-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7874",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6926",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:618",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/expected_information_gain_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :scores,
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Generative model."},
+   :row-source :contract-declaration,
+   :name "GenerativeModel",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/generative-model-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7876",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6787",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:203",
+     :evidence :passing-witness-check,
+     :why "witness check checks/generative_model_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :belief,
+   :owner "sec-glossary.tex:7 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Model uncertainty and EIG."},
+   :row-source :contract-declaration,
+   :name "modelUncertaintyAndEIG",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/model-uncertainty-eig-proof-receipt.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7878",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7013",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:701",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/model_uncertainty_eig_witness.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
+   :area :scores,
+   :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "organiseO1NodesRecorded",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/cascade-diff-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7880",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:894",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:741",
+     :evidence :passing-witness-check,
+     :why "witness check checks/cascade_diff_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :demo,
+   :owner "P-validated-R5 §3e O1"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "organiseO2AuthoredReachability",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/cascade-diff-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7882",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:902",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:741",
+     :evidence :passing-witness-check,
+     :why "witness check checks/cascade_diff_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :demo,
+   :owner "P-validated-R5 §3e O2"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "organiseO3FastForward",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/cascade-diff-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7884",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:909",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:741",
+     :evidence :passing-witness-check,
+     :why "witness check checks/cascade_diff_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :demo,
+   :owner "P-validated-R5 §3e O3"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "organiseO4PrecedenceGovernance",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/cascade-diff-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7886",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:916",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:741",
+     :evidence :passing-witness-check,
+     :why "witness check checks/cascade_diff_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :demo,
+   :owner "P-validated-R5 §3e O4 and S-G4"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "valueEvidenceRequiresL2",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7888",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1049",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :area :records,
+   :owner "P-R9 S1"}
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "C",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "The DESIGN-c-vector.md §5 split (C_int / C_mis) is an owner amendment (P-validated-R5 §2a); nothing in it needs a tick. The refusal's ground still holds as measured: U12 found one risk_mis value across all 133 mission actions and all three 2026-09-02 records :absent.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7892",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
    :area :preferences,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §2a"}
-  {:name "nonDegenerateAblationLaw",
-   :area :demo,
-   :owner "P-validated-R5 §2a′",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "nonDegenerateAblationLaw",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/ablation-exact-dyadic.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7893",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:188",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:727",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/ablation_exact_dyadic_witness.clj passed"}],
+   :content-status :record-with-witness,
+   :area :demo,
+   :owner "P-validated-R5 §2a′"}
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "find",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "A standing implementation refusal; an owner ruling closes it, no record can.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7894",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
    :area :demo,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §3e find"}
-  {:name "findF1Containment",
-   :area :demo,
-   :owner "P-validated-R5 §3e F1",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "findF2Receipted",
-   :area :demo,
-   :owner "P-validated-R5 §3e F2",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "findF1Containment",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is checks/find-snatch.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7895",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:267",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:636",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/find_snatch.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "findF3NonSelfCertifying",
    :area :demo,
-   :owner "P-validated-R5 §3e F3",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-validated-R5 §3e F1"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "findF4Falsifiable",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "findF2Receipted",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is checks/find-snatch.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7896",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:272",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:636",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/find_snatch.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
    :area :demo,
-   :owner "P-validated-R5 §3e F4",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-validated-R5 §3e F2"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "findF3NonSelfCertifying",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is checks/find-snatch.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7897",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:276",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:636",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/find_snatch.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
+   :area :demo,
+   :owner "P-validated-R5 §3e F3"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "findF4Falsifiable",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is checks/find-snatch.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7898",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:280",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:636",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/find_snatch.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
+   :area :demo,
+   :owner "P-validated-R5 §3e F4"}
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "organise",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "The declaration names its own gate: whether the refusal weakens to definable is LA2's to decide from a running policy-grain rule. That running is checks/playout_snatch.clj, not a tick.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7899",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
    :area :demo,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §3e organise"}
-  {:name "r9VerdictConsultsChecker",
-   :area :records,
-   :owner "P-R9 §solved 3",
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "r9VerdictConsultsChecker",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7900",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:963",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:838",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r9_proof_receipt_check.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "wmVerdictsLedgerAlone",
    :area :records,
-   :owner "P-R9 §solved 2",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :owner "P-R9 §solved 3"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "wmVerdictsDeclared",
-   :area :records,
-   :owner "P-R9 §solved 2",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
-   :content-status :closed-by-record-with-witness,
+   :name "wmVerdictsLedgerAlone",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7901",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1009",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:937",
+     :evidence :passing-witness-check,
+     :why "witness check checks/r9_independence.clj passed"}],
+   :content-status :record-with-witness,
+   :area :records,
+   :owner "P-R9 §solved 2"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r9WmVerdictsSound",
-   :area :records,
-   :owner "P-R9 §solved 3",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
+   :name "wmVerdictsDeclared",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7902",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1023",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:937",
+     :evidence :passing-witness-check,
+     :why "witness check checks/r9_independence.clj passed"}],
+   :content-status :record-with-witness,
+   :area :records,
+   :owner "P-R9 §solved 2"}
+  {:rung :formula-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r9WmVerdictsSound",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7903",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1026",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:859",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r9_independence.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
-   :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r9TwoRunCensus",
    :area :records,
-   :owner "P-R9 §solved 2",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-R9 §solved 3"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r9WmPerRowDeclarations",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r9TwoRunCensus",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7904",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1036",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:859",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r9_independence.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
    :area :records,
-   :owner "P-R9 §solved 2 (per-row declarations)",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-R9 §solved 2"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "wmTraceR2",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r9WmPerRowDeclarations",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7905",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1031",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:859",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r9_independence.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
    :area :records,
-   :owner "P-R2 §solved 1",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-R9 §solved 2 (per-row declarations)"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r2ContractCensusWmTrace",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "wmTraceR2",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R2-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7906",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1129",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:801",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r2_pinned_snapshot_witness.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
    :area :records,
-   :owner "P-R2 §solved 1",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-R2 §solved 1"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "wmTraceR8",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r2ContractCensusWmTrace",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R2-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7907",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1133",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:801",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r2_pinned_snapshot_witness.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
    :area :records,
-   :owner "P-R8 §solved 1",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-R2 §solved 1"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r8CensusWmTrace",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "wmTraceR8",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R8-D3-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7908",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1184",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:820",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
    :area :records,
-   :owner "P-R8 §solved 1",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-R8 §solved 1"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:name "r8EraBoundary",
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r8CensusWmTrace",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R8-D3-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7909",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6733",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:820",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
    :area :records,
-   :owner "P-R8 §solved 1 (iii)",
-   :row-source :contract-declaration,
-   :content-status :proven-against-pinned-source,
+   :owner "P-R8 §solved 1"}
+  {:rung :formula-transcribed,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "r8EraBoundary",
+   :rung-blocked-by
+   {:rung :witnessed,
+    :why
+    "the witness's evidence is holes/labs/wm-contract/R8-D3-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7910",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6737",
+     :evidence :lean-definition-site,
+     :why "the closed declaration has a definition site in the module"}
+    {:rung :formula-transcribed,
+     :licence "futon2/checks/witness-registry.edn:820",
+     :evidence :passing-witness-check,
+     :why
+     "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
+   :content-status :proven-against-pinned-source,
+   :area :records,
+   :owner "P-R8 §solved 1 (iii)"}
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "preferenceStackLiveRecorded",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "The claim quantifies over running instances. The C_int half is on all three 2026-09-02 records; mission-c-readback occurs zero times in wm-trace-2026-09-02.edn. Whether the C_mis half would CLOSE it is unsettled: the Lean docstring says PERMANENT (C114) and DESIGN-c-vector.md door 7 says close-by-record.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7911",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
    :area :preferences,
@@ -885,13 +2822,23 @@
    :owner "P-R19-preferences-open §gate",
    :runtime-evidence
    "A trace record carrying mission-c criteria records beside its :preference-stack -- a tick whose mission-c-readback is neither :no-active-clock nor :no-measurable-criteria."}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail
    {:resolved-path "holes/problems/BUILD-packets/WM-RUN1.md"},
    :row-source :contract-declaration,
    :name "wmRunsOnce",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "Run-gated here does NOT mean awaiting a run. The witness passes; the hole stays open because the Lean proposition is world-level and C114 declined to narrow it to a pinned receipt.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7912",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-and-held-open,
    :content-status :open-hole,
    :area :run,
@@ -900,13 +2847,23 @@
    "record: futon2:holes/problems/BUILD-packets/WM-RUN1.md · Joe 2026-08-31 · run-at-least-once",
    :runtime-evidence
    "A completed tick leaving a TickRunRecord. IT EXISTS -- the pinned 2026-08-30 receipt, three 2026-09-02 receipts, four more from the S4 stage run."}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail
    {:resolved-path "holes/problems/BUILD-packets/WM-RUN2.md"},
    :row-source :contract-declaration,
    :name "wmRunConformsToWiring",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "RUN-GATED, NOT PERMANENT -- the owner refused the permanent-attestation reading on 2026-09-03 and C114's decline of the pinned transcription is superseded by that ruling. The s5 certificate does not close it and is not claimed to: the ruling reserves mkClosed for Joe's acceptance. Two limits the certificate states about itself rather than leaving to a reader: 5 of the 9 distinct hops are drawn only because a previous route MEASUREMENT put them on the :route-measured-drawn layer, and 19 of the 22 drawn edges never fired, so what is proved is that the run stayed inside the union of the two layers.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7913",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-and-held-open,
    :content-status :open-hole,
    :area :run,
@@ -915,20 +2872,45 @@
    "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · organisation evidence",
    :runtime-evidence
    "A CERTIFICATE OVER A QUALIFYING RUN, and the certificate is what ends it (Joe's RUN4 ruling, 2026-09-03; executed by :U49): a run's reassembled route and the Figure 4 edge layers transcribed into Lean and conformance proved by decide. The machinery exists and is exercised -- mathlib4 wmS5RunConformsToDrawnWiring over runs/2026-09-01-s5 (futon2 5a66411; 4 routes, 36 hops, 9 distinct, 0 refutations, 0 unmapped), with wmS5RouteCensus deciding its numbers, both at 0 axioms. WHICH run qualifies is Joe's call at certificate time, so what is outstanding is an acceptance, not a build."}
-  {:name "enactedActionEqualsSelected",
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "enactedActionEqualsSelected",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7914",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7670",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :area :run,
    :owner
-   "wm-organization · TN-edge-review worklist H1 (refuted), H1b",
-   :row-source :contract-declaration,
-   :content-status :closed-by-record-negative-space,
+   "wm-organization · TN-edge-review worklist H1 (refuted), H1b"}
+  {:rung :named,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :stable-problem-or-record-owner}}
-  {:pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "enactedEqualsSelectedWhenRankOneGated",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "The antecedent has never occurred on record, and no record since the pin carries the enactment half at all: :realized-outcome occurs 0 times in the 09-01, 09-02 and S4 traces. The S-stage runs are shadow runs, so they cannot produce it by construction.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7915",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
    :area :run,
@@ -936,23 +2918,43 @@
    :owner "wm-organization · TN-edge-review worklist H1b",
    :runtime-evidence
    "A record joining a rank-1 selection that passes its OWN act gate to the enacted action."}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "dirichletAccumulationImportAbsent",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "An absence over code paths, settled by reading the tree; a run could only falsify it. The provenance walk is done and written down (TN §9a) but not bound: the name does not occur in checks/witness-registry.edn, so there is no check, no fixture and no rejecting control.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7916",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
    :area :learning,
    :closability :pre-run-closable,
    :owner "wm-organization · TN-edge-review worklist H2"}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "policyPrecisionIsGammaFromBeta",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "The wiring exists and the record does not: S3 is a replay, its one live tau = beta tick ran under a write-suppressing preflight, and all 18 :tau-source values in wm-trace-2026-09-01.edn are :selection-gain-only. :J10 (Joe 2026-09-03) gave it H4's disposition shape and :U47 corrected its falsifier field to the absence form (mathlib4 a3ae5084be); with no persisted record at all there is nothing for it to be witnessed under, so it stays :not-ready rather than moving with H4.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7917",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
    :area :policy,
@@ -961,12 +2963,22 @@
    "wm-organization · TN-edge-review worklist H3 (Joe's J1 ruling)",
    :runtime-evidence
    "A PERSISTED record carrying :tau with :tau-source naming carry-beta's :beta-source, from a tick under FUTON_WM_TAU_MODE=variational-beta-gamma with writes enabled."}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "policyPosteriorImportsPolicyF",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
    :basis
    "RULED :J10 (Joe 2026-09-03), executed by :U47. The contest is settled and it was a wording defect, not an evidential one: the falsifier field named the CONFIRMING observation, word for word what the evidence field asks for, and is corrected to the absence form at mathlib4 a3ae5084be -- so the S4 record is a WITNESS and not a refutation. What it witnesses is the FLAGGED path (FUTON_WM_FPI_POSTERIOR is read from the environment and default-off, war_machine.clj:199-219), so the hole stays open :run-gated and closes on a default-path persisted record carrying the term -- or if the flag is ruled default-on, which is its own ruling.",
+   :rung-ladder
+   [{:rung :named,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7918",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-under-flag,
    :content-status :open-hole,
    :area :policy,
@@ -975,7 +2987,8 @@
    "wm-organization · TN-edge-review worklist H4 (Joe's J2 ruling)",
    :runtime-evidence
    "A DEFAULT-PATH record whose Q(pi) carries the per-policy F term. The FLAGGED-path record exists: runs/2026-09-01-s4/wm-trace-s4.edn, 3 of 4 ticks with :f-pi-posterior :applied? true."}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :witness
    ["futon2 src/futon2/aif/observation.clj:11 observation-channels"
     "futon2 src/futon2/aif/belief.clj:919 channels-with-likelihood"
@@ -985,12 +2998,22 @@
    :pointer-detail {:resolution :paragraph-name},
    :row-source :glossary-paragraph,
    :witness-note
-   "Also owned by a contract declaration: ObservationVector, owner \"sec-glossary.tex paragraph:Observation vector o\", already :closed-by-record-with-witness in this file -- so this glossary row is a duplicate of a declaration and is NOT counted in the declaration columns. Formal residue (NOTE-glossary-only-triage.md disposition 1): the literal `Obs v` occurs in the Lean corpus only at mathlib4/DarkTower/WarMachine/Holes.lean:153, C's signature (the other two occurrences, :6556 and :6577, are prose quoting it), so when P-validated-R5 2a splits C per DESIGN-c-vector.md 5, o's mission-grain half is the criteria reader's :observable fields (U11).",
+   "Also owned by a contract declaration: ObservationVector, owner \"sec-glossary.tex paragraph:Observation vector o\", already :record-with-witness in this file -- so this glossary row is a duplicate of a declaration and is NOT counted in the declaration columns. Formal residue (NOTE-glossary-only-triage.md disposition 1): the literal `Obs v` occurs in the Lean corpus only at mathlib4/DarkTower/WarMachine/Holes.lean:153, C's signature (the other two occurrences, :6556 and :6577, are prose quoting it), so when P-validated-R5 2a splits C per DESIGN-c-vector.md 5, o's mission-grain half is the criteria reader's :observable fields (U11).",
    :name "Observation vector o",
-   :content-status :closed-by-record-with-witness,
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "p4ng/sec-glossary.tex:12",
+     :evidence :glossary-paragraph,
+     :why "the glossary paragraph"}],
+   :content-status :record-with-witness,
    :area :belief,
    :owner "sec-glossary.tex paragraph:Observation vector o"}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :witness
    ["futon3c holes/excursions/pipeline-semilattice-clusters.edn (constellation data A4a reads)"
     "futon2 src/futon2/aif/a4a_substrate.clj (guarded star/candidate writes)"],
@@ -999,19 +3022,39 @@
    :witness-note
    "Split verdict (NOTE-glossary-only-triage.md disposition 9): the infrastructure fact is closed by record; NO hole is minted for the exploratory proposal mechanism, because the Strategic mission selection paragraph itself demotes a mission-level embedding to \"neither foundational nor required\" (sec-glossary.tex:80).",
    :name "Embedding space",
-   :content-status :closed-by-record-with-witness,
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "p4ng/sec-glossary.tex:56",
+     :evidence :glossary-paragraph,
+     :why "the glossary paragraph"}],
+   :content-status :record-with-witness,
    :area :belief,
    :owner "sec-glossary.tex paragraph:Embedding space"}
-  {:name "Active Inference Framework",
-   :area :framing,
-   :content-status :framing,
+  {:rung :named,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :paragraph-name},
+   :row-source :glossary-paragraph,
    :witness-note
    "Framing vocabulary, not machinery (NOTE-glossary-only-triage.md disposition 7): the paragraph names the framework the paper is written in, so there is nothing to build and nothing to hold open. Typed :framing so it stops counting as uncovered rather than being counted as covered.",
-   :row-source :glossary-paragraph,
-   :owner "sec-glossary.tex paragraph:Active Inference Framework",
+   :name "Active Inference Framework",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "p4ng/sec-glossary.tex:5",
+     :evidence :glossary-paragraph,
+     :why "the glossary paragraph"}],
+   :content-status :framing,
+   :area :framing,
+   :owner "sec-glossary.tex paragraph:Active Inference Framework"}
+  {:rung :named,
    :pointer-status :resolves,
-   :pointer-detail {:resolution :paragraph-name}}
-  {:pointer-status :resolves,
    :witness
    ["futon2 src/futon2/aif/fold_escrow.clj (reader/checker for the deposits)"
     "futon6 data/fold-turns/ (the EDN records themselves)"],
@@ -1020,10 +3063,20 @@
    :witness-note
    "The record format every artifact in this lab is written in; witness is any typed record plus its reader (NOTE-glossary-only-triage.md disposition 6), instantiated here by the pair the glossary footnote names at sec-glossary.tex:72.",
    :name "EDN",
-   :content-status :closed-by-record-with-witness,
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "p4ng/sec-glossary.tex:72",
+     :evidence :glossary-paragraph,
+     :why "the glossary paragraph"}],
+   :content-status :record-with-witness,
    :area :records,
    :owner "sec-glossary.tex paragraph:EDN"}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :witness
    ["futon2 src/futon2/aif/actuator_a3.clj (Drawbridge helpers for substrate-2)"
     "futon2 src/futon2/aif/a4a_substrate.clj (guarded star/candidate writes)"],
@@ -1032,10 +3085,20 @@
    :witness-note
    "Live infrastructure per the glossary footnote at sec-glossary.tex:74 (NOTE-glossary-only-triage.md disposition 3).",
    :name "Substrate and Drawbridge",
-   :content-status :closed-by-record-with-witness,
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "p4ng/sec-glossary.tex:74",
+     :evidence :glossary-paragraph,
+     :why "the glossary paragraph"}],
+   :content-status :record-with-witness,
    :area :records,
    :owner "sec-glossary.tex paragraph:Substrate and Drawbridge"}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :witness
    ["futon0 scripts/futon0/futonzero/rollout_ledger.clj (birth-tagging)"
     "futon0 scripts/futon0/futonzero/reward_red_team.clj (birth-tagging)"
@@ -1047,6 +3110,10 @@
    :witness-note
    "The L1/L2 calibration rule of sec-glossary.tex:76, plus the operational enforcement this ledger runs under: worklist_check.bb:48 refuses a :done row with no :reviewed-by, so author and reviewer cannot be the same seat (NOTE-glossary-only-triage.md disposition 2).",
    :name "No self-certification",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
    :caveat-pointers
    ["futon2 holes/labs/zaif-harness/runs/U12-r9-finding.md (the finding :u12/worker-verdict-not-refused, its reviewer addendum, and the correction to that addendum)"
     "futon2 holes/labs/zaif-harness/runs/U14-r9-ingress-design-v1.md (the reviewed three-grade design)"
@@ -1059,12 +3126,18 @@
     "futon3c src/futon3c/apm/checked_handoff.clj:85-122 (grade-receipt; the :ungradeable-legacy floor at :121)"
     "futon3c src/futon3c/apm/frame_cycle_handlers.clj:13-18 and :197-200 (the closed grade vocabulary and its refusal)"
     "futon3c commits bf634fab, 6c088fc9, ef3ff249 (U14a); b3d770a4 (U14b); f7c373f4, 8a090c66 (U14c); b4604c0c (U14d) -- line numbers above read at futon3c ae88efe7"],
+   :rung-ladder
+   [{:rung :named,
+     :licence "p4ng/sec-glossary.tex:76",
+     :evidence :glossary-paragraph,
+     :why "the glossary paragraph"}],
    :caveat-note
    "ADDITIVE (worklist :U20, 2026-09-03): the row stays closed on the witnesses above; this field records a live counter-instance and its repair, both dated 2026-09-02. THE COUNTER-INSTANCE: the APM promotion path carries a receipt field named :receipt/independent-review? that asserted the property instead of computing it. Five guide-path writers set it to the literal true (live_learning_phases.clj:618, :635, :1252, :1342 and learning_loop_dry_run.clj:43), and the gate that consults it -- guide-snapshot-evidence-valid? at frame_cycle_handlers.clj:20-25, branched at :193 -- asks only that it be true, so those receipts satisfied it vacuously. Three countdown writers do compute it, as a depositor-versus-reviewer seat-string comparison (countdown_control.clj:1101-1104, called at :1168, :1241, :1320), and two refusals can actually fire on the result (:zai-scribe-reviewer-is-depositor at :1250-1251, :guide-promotion-reviewer-is-depositor at :1326-1327): weak evidence, since distinct seat strings are not independence and no adjudicator rerun is witnessed, but not vacuous. The reviewer's first reading -- hardcoded true at every site -- was overclaimed from a truncated grep and is corrected inside U12-r9-finding.md; the two-population account is the corrected census, and it is that corrected version this caveat carries. THE REPAIR (U14 (a)-(d)): (a) a typed checked-handoff verdict event whose validator computes the grade and returns :r9/worker-authored-verdict-refused when the author seat equals the worker seat, and :r9/verdict-event-malformed when a seat is missing or blank (checked_handoff.clj:37-84); (b) the compared seats persisted onto the receipt, so a later grade re-derives from the strings the comparison consumed (countdown_control.clj:1101-1104); (c) :receipt/independence :asserted-unverified written alongside the legacy boolean at the five constant sites, with a closed grade vocabulary and a typed refusal for anything outside it (frame_cycle_handlers.clj:13-18, :197-200); (d) grade-receipt, which lets persisted seats override an asserted field and floors every pre-migration receipt at :ungradeable-legacy regardless of the boolean's value (checked_handoff.clj:85-122). WHAT THE REPAIR DOES NOT YET DO: no production code calls the validator -- searching futon3c src/ for checked-handoff returns only the namespace itself -- so :adjudicator-rerun-witnessed is reachable from tests only and no live verdict has passed through the author-equals-worker refusal; the dated flip of the five constant booleans is held for Joe. This caveat asserts no new witness for the row and changes no count.",
-   :content-status :closed-by-record-with-witness,
+   :content-status :record-with-witness,
    :area :assurance,
    :owner "sec-glossary.tex paragraph:No self-certification"}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :pointer-detail
    {:resolution :record-owner,
     :resolved-path
@@ -1073,8 +3146,18 @@
    :witness-note
    "PROMOTED from :named-only (NOTE-glossary-only-triage.md disposition 8): the paragraph at sec-glossary.tex:80 calls the live three-factor additive mission value \"surrogates for outer-loop structure that the implementation has not yet represented\" and specs the principled layer (reason-bearing policy support; predicted mission outcomes in a forward model and G_S; proposal potentials; separate habit E_S; hierarchical Q(pi_S), Q(pi_T|pi_S)). Held open by the mission record above; the current additive model is futon2/holes/M-wm-three-factor-mission-value.md and the dark schema kernel is futon2/src/futon2/aif/mission_control_graph.clj. Cross-link: the risk term of G_S is KL(Q(o|pi) || C_mis), so U11-U13 already build a component (DESIGN-c-vector.md 3). This is a GLOSSARY-side hole, not a contract declaration: it does not appear in holes-contract.json and is therefore reported outside the declaration columns until a declaration is minted for it.",
    :name "Strategic mission selection",
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
    :basis
    "sec-glossary.tex:80's claim is about what the implementation represents on the live path, so a unit test of the layer would not discharge it. Glossary-side, not a contract declaration.",
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "futon2/holes/missions/M-wm-strategic-mission-selection.md:1",
+     :evidence :record-owner,
+     :why "held open by a named record"}],
    :readiness :not-ready,
    :content-status :open-hole,
    :area :policy,
@@ -1082,7 +3165,8 @@
    :owner "futon2/holes/missions/M-wm-strategic-mission-selection.md",
    :runtime-evidence
    "A record in which the mission value carried is the principled one -- G_S over forward-model predicted mission outcomes with its own habit E_S -- rather than the three-factor additive surrogate."}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :witness
    ["futon2 src/futon2/aif/full_loop_cohort.clj:397 (emits the :post-preregistration/cancelled semantic stratum, with its reason and attempt list)"
     "futon2 src/futon2/aif/full_loop_cohort.clj:173 (excludes :cancelled attempts from the preregistered denominator and stopping window, keeping the dossier)"
@@ -1092,10 +3176,20 @@
    :witness-note
    "RULED (a) by Joe, 2026-09-02 ~20:15, recorded at NOTE-glossary-only-triage.md:107 and in this row's U14 ledger entry. The row was held :named-only because its typing was contested ON ITS REFERENT: NOTE-glossary-only-triage.md disposition 5 offered a bitemporal-store witness (valid-time retract+put, db-as-of-now queries), but the paragraph the row's owner resolves to is sec-glossary.tex:84, \\paragraph{Revision (2026-08-31; cancellation boundary)}, which says a cancelled attempt stays durably visible and begins a new semantic stratum unless a cohort preregisters it. Nothing in that paragraph is about valid time. The ruling closes the row on the cohort-46 cancellation machinery above, which is what the paragraph as written describes; disposition 5's valid-time material is NOT re-attached anywhere, because attaching it would assert a witness for a claim the paragraph does not make -- the referent-drift defect class this registry exists to catch.",
    :name "Revision boundary",
-   :content-status :closed-by-record-with-witness,
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "p4ng/sec-glossary.tex:84",
+     :evidence :glossary-paragraph,
+     :why "the glossary paragraph"}],
+   :content-status :record-with-witness,
    :area :records,
    :owner "sec-glossary.tex paragraph:Revision boundary"}
-  {:pointer-status :resolves,
+  {:rung :named,
+   :pointer-status :resolves,
    :witness
    ["futon2 holes/labs/zaif-harness/runs/U8a-report-sources.md (read-only probes executed against the live store)"
     "futon2 holes/labs/M-zaif-harness/z1_views.clj (the replayable views those probes ran)"],
@@ -1104,21 +3198,47 @@
    :witness-note
    "The evidence store today's U8a probes executed against (NOTE-glossary-only-triage.md disposition 4). The report names the executed queries and their results, so the shared-substrate claim of sec-glossary.tex:86 is witnessed by a run rather than by prose.",
    :name "A shared experimental substrate",
-   :content-status :closed-by-record-with-witness,
+   :rung-blocked-by
+   {:rung :type-transcribed,
+    :why
+    "the paragraph carries no contract declaration, so the module transcribes no carrier for it"},
+   :rung-ladder
+   [{:rung :named,
+     :licence "p4ng/sec-glossary.tex:86",
+     :evidence :glossary-paragraph,
+     :why "the glossary paragraph"}],
+   :content-status :record-with-witness,
    :area :records,
    :owner
    "sec-glossary.tex paragraph:A shared experimental substrate"}],
  :counts
- {:rows 133,
-  :content
-  {:closed-by-record-negative-space 62,
-   :closed-by-record-with-witness 44,
-   :framing 1,
-   :open-hole 11,
-   :proven-against-pinned-source 15},
-  :pointer {:resolves 133},
+ {:rung
+  {:named 19,
+   :type-transcribed 62,
+   :formula-transcribed 52,
+   :witnessed 0,
+   :constructed 0,
+   :wired 0,
+   :validated 0,
+   :run-correlated 0},
   :row-source {:contract-declaration 124, :glossary-paragraph 9},
-  :glossary-content
-  {:closed-by-record-with-witness 7, :framing 1, :open-hole 1},
+  :content
+  {:framing 1,
+   :open-hole 11,
+   :proven-against-pinned-source 15,
+   :record-negative-space 62,
+   :record-with-witness 44},
+  :declaration-rung
+  {:named 10,
+   :type-transcribed 62,
+   :formula-transcribed 52,
+   :witnessed 0,
+   :constructed 0,
+   :wired 0,
+   :validated 0,
+   :run-correlated 0},
+  :rows 133,
+  :glossary-content {:framing 1, :open-hole 1, :record-with-witness 7},
+  :pointer {:resolves 133},
   :closability {:pre-run-closable 4, :run-gated 7},
   :declaration-closability {:pre-run-closable 4, :run-gated 6}}}

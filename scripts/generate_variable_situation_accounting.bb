@@ -22,6 +22,13 @@
 (def glossary-file (io/file "/home/joe/code/p4ng/sec-glossary.tex"))
 (def witness-file (io/file root "checks/witness-registry.edn"))
 (def output-file (io/file root "holes/labs/wm-contract/variable-situation-accounting.edn"))
+(def lean-file (io/file "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"))
+;; Licences are written relative to ~/code so one resolver checks every one of
+;; them, whichever repository the evidence lives in.
+(def code-root (io/file "/home/joe/code"))
+(def lean-rel "mathlib4/DarkTower/WarMachine/Holes.lean")
+(def witness-rel "futon2/checks/witness-registry.edn")
+(def glossary-rel "p4ng/sec-glossary.tex")
 
 (def area-names
   {:belief #{"GenerativeModel" "generativeFactorMass" "TransitionKernel" "BeliefState" "ObservationVector"
@@ -73,7 +80,7 @@
 ;; closed there as the declaration ObservationVector).
 (def glossary-rows
   [{:name "Observation vector o" :area :belief
-    :content-status :closed-by-record-with-witness
+    :content-status :record-with-witness
     :witness ["futon2 src/futon2/aif/observation.clj:11 observation-channels"
               "futon2 src/futon2/aif/belief.clj:919 channels-with-likelihood"
               "futon2 test/futon2/aif/observation_test.clj:38-44 (count 14 derived)"
@@ -82,7 +89,7 @@
     :witness-note
     (str "Also owned by a contract declaration: ObservationVector, owner "
          "\"sec-glossary.tex paragraph:Observation vector o\", already "
-         ":closed-by-record-with-witness in this file -- so this glossary row is "
+         ":record-with-witness in this file -- so this glossary row is "
          "a duplicate of a declaration and is NOT counted in the declaration "
          "columns. Formal residue (NOTE-glossary-only-triage.md disposition 1): "
          "the literal `Obs v` occurs in the Lean corpus only at "
@@ -91,7 +98,7 @@
          "P-validated-R5 2a splits C per DESIGN-c-vector.md 5, o's mission-grain "
          "half is the criteria reader's :observable fields (U11).")}
    {:name "Embedding space" :area :belief
-    :content-status :closed-by-record-with-witness
+    :content-status :record-with-witness
     :witness ["futon3c holes/excursions/pipeline-semilattice-clusters.edn (constellation data A4a reads)"
               "futon2 src/futon2/aif/a4a_substrate.clj (guarded star/candidate writes)"]
     :witness-note
@@ -109,7 +116,7 @@
          ":framing so it stops counting as uncovered rather than being counted "
          "as covered.")}
    {:name "EDN" :area :records
-    :content-status :closed-by-record-with-witness
+    :content-status :record-with-witness
     :witness ["futon2 src/futon2/aif/fold_escrow.clj (reader/checker for the deposits)"
               "futon6 data/fold-turns/ (the EDN records themselves)"]
     :witness-note
@@ -118,14 +125,14 @@
          "disposition 6), instantiated here by the pair the glossary footnote "
          "names at sec-glossary.tex:72.")}
    {:name "Substrate and Drawbridge" :area :records
-    :content-status :closed-by-record-with-witness
+    :content-status :record-with-witness
     :witness ["futon2 src/futon2/aif/actuator_a3.clj (Drawbridge helpers for substrate-2)"
               "futon2 src/futon2/aif/a4a_substrate.clj (guarded star/candidate writes)"]
     :witness-note
     (str "Live infrastructure per the glossary footnote at sec-glossary.tex:74 "
          "(NOTE-glossary-only-triage.md disposition 3).")}
    {:name "No self-certification" :area :assurance
-    :content-status :closed-by-record-with-witness
+    :content-status :record-with-witness
     :witness ["futon0 scripts/futon0/futonzero/rollout_ledger.clj (birth-tagging)"
               "futon0 scripts/futon0/futonzero/reward_red_team.clj (birth-tagging)"
               "futon3c test/futon3c/aif/flight_record_test.clj (tag-discipline tests)"
@@ -214,7 +221,7 @@
          "holes-contract.json and is therefore reported outside the declaration "
          "columns until a declaration is minted for it.")}
    {:name "Revision boundary" :area :records
-    :content-status :closed-by-record-with-witness
+    :content-status :record-with-witness
     :witness ["futon2 src/futon2/aif/full_loop_cohort.clj:397 (emits the :post-preregistration/cancelled semantic stratum, with its reason and attempt list)"
               "futon2 src/futon2/aif/full_loop_cohort.clj:173 (excludes :cancelled attempts from the preregistered denominator and stopping window, keeping the dossier)"
               "futon2 holes/labs/M-aif-full-loop-46/cohort.edn (the preregistered outcome taxonomy the stratum is measured against)"]
@@ -235,7 +242,7 @@
          "witness for a claim the paragraph does not make -- the referent-drift "
          "defect class this registry exists to catch.")}
    {:name "A shared experimental substrate" :area :records
-    :content-status :closed-by-record-with-witness
+    :content-status :record-with-witness
     :witness ["futon2 holes/labs/zaif-harness/runs/U8a-report-sources.md (read-only probes executed against the live store)"
               "futon2 holes/labs/M-zaif-harness/z1_views.clj (the replayable views those probes ran)"]
     :witness-note
@@ -386,6 +393,284 @@
                 "represents on the live path, so a unit test of the layer would "
                 "not discharge it. Glossary-side, not a contract declaration.")}})
 
+;; ---------------------------------------------------------------------------
+;; :F6 -- THE READINESS RUNGS. Joe's progressive-done ruling, 2026-09-05
+;; (holes/labs/wm-contract/EPIC-run-era.md:594): "It would be much harder to
+;; create a fake 'done' if the definition of done was explicit and
+;; progressive." The binary closed/open is replaced by an ordered scale on
+;; which each rung is reachable ONLY by its own evidence type and no rung is
+;; skippable. The vocabulary is LANE-INDEPENDENT by the placement ruling --
+;; the same eight rungs type a noun, an operation or a topology claim -- so it
+;; is written once and consumed verbatim by the R-node dossiers
+;; (p4ng/empirics-futon/gen_rnode_dossiers.py:71).
+;;
+;; DIVERGENCE, RECORDED AND NOT RESOLVED HERE: the rung grammar at
+;; holes/N-process-trap-recording-conventions.md:231 carries a NINTH rung,
+;; RECORDED, between `constructed` and `wired`. The scale below is the :F6
+;; row's verbatim eight (holes/labs/wm-contract/worklist.edn:1271). Which of
+;; the two is the scale is a ruling; this generator states the disagreement
+;; and makes neither call.
+(def rung-scale
+  [:named :type-transcribed :formula-transcribed :witnessed
+   :constructed :wired :validated :run-correlated])
+(def rung-index (into {} (map-indexed (fn [i r] [r i]) rung-scale)))
+
+;; :witnessed and above assert that a RECORD exhibits the quantity; :constructed
+;; and above assert an inhabitant BUILT FROM MACHINE STATE, and the ruling says
+;; bound parameters and fixtures explicitly do not reach it. The test is a
+;; WHITELIST (does the licensed artifact carry a run identity?) and not a
+;; blacklist of fixture paths, because checks/witness-registry.edn files a real
+;; tick record under :fixture -- wmRunsOnce's fixture IS
+;; holes/labs/wm-contract/tick-run-record-2026-08-30.edn -- so a path blacklist
+;; would refuse the one true record in the registry and pass every reference
+;; fixture that some later commit renames.
+(def run-identity-keys #{:run-id :runId :startedAt :tick-id :wm-run-id})
+
+(def pointer-re #"^([^:\s]+):(\d+)(?:-(\d+))?$")
+
+(defn resolve-licence
+  "nil if the licence resolves, else the reason it does not. The standard is
+   pointer_check.bb's: the file exists under ~/code and the line range lies
+   inside it. A rung claim whose pointer does not resolve is not rendered."
+  [pointer]
+  (if-let [[_ path lo hi] (re-matches pointer-re (str/trim (str pointer)))]
+    (let [f (io/file code-root path)
+          ;; hi from the ORIGINAL strings: a sequential let that rebinds lo
+          ;; first would hand a Long to parseLong on the open-ended form.
+          hi (Long/parseLong (or hi lo))
+          lo (Long/parseLong lo)]
+      (cond
+        (not (.isFile f)) (str "file not found: " pointer)
+        (or (< lo 1) (< hi lo)) (str "empty or inverted line range: " pointer)
+        (> hi (count (str/split-lines (slurp f))))
+        (str "line past end of file: " pointer)
+        :else nil))
+    (str "not a file:line pointer: " (pr-str pointer))))
+
+(defn machine-record?
+  "True iff the artifact a licence names carries a run identity -- at the top
+   level, or in a top-level sequence of maps. A hand-derived reference fixture
+   does not: holes/labs/wm-contract/act-gate-reference.edn:6 declares itself
+   :kind :hand-derived-from-record."
+  [pointer]
+  (if-let [[_ path] (re-matches pointer-re (str/trim (str pointer)))]
+    (let [f (io/file code-root path)]
+      (try
+        (let [v (edn/read-string {:default (fn [_ x] x)} (slurp f))
+              maps (cond (map? v) [v] (sequential? v) (filter map? v) :else [])]
+          (boolean (some (fn [m] (some run-identity-keys (keys m))) maps)))
+        (catch Throwable _ false)))
+    false))
+
+;; --- one-pass indexes over the evidence sources -----------------------------
+(def lean-lines (delay (str/split-lines (slurp lean-file))))
+
+;; Every quoted string literal in the module, earliest line wins. The contract
+;; manifest emits declarations as `mkClosed "name" "owner"` and as
+;; `("name", "owner")` tuples, so the quoted literal is the one shape both
+;; forms share; all 124 declarations have one.
+(def lean-literal-lines
+  (delay (into {} (reverse (mapcat (fn [i s] (map (fn [m] [(second m) (inc (long i))])
+                                                  (re-seq #"\"([^\"]+)\"" s)))
+                                   (range) @lean-lines)))))
+
+(def lean-definition-lines
+  (delay (into {} (reverse (keep-indexed
+                            (fn [i s]
+                              (when-let [m (re-find #"^\s*(?:noncomputable\s+)?(?:abbrev|def|structure|inductive|theorem|lemma|class|opaque|axiom)\s+([A-Za-z_][A-Za-z0-9_'.]*)" s)]
+                                [(second m) (inc (long i))]))
+                            @lean-lines)))))
+
+;; The witness registry is pprinted one entry per `{:witnesses` line, so the
+;; nth such line starts the nth parsed entry. Positional, because the value may
+;; be a vector that wraps onto the next line.
+(def witness-entry-lines
+  (delay (vec (keep-indexed (fn [i s] (when (re-find #"^\s*\[?\{:witnesses" s) (inc (long i))))
+                            (str/split-lines (slurp witness-file))))))
+
+(defn normalise-title [s]
+  (-> (str s) (str/replace #"\$" "") (str/replace #"\s+" " ")
+      (str/replace #"\.$" "") str/trim str/lower-case))
+
+(def glossary-paragraph-line-index
+  (delay (into {} (reverse (keep-indexed
+                            (fn [i s]
+                              (when-let [m (re-find #"\\paragraph\{([^}]+)\}" s)]
+                                [(normalise-title (second m)) (inc (long i))]))
+                            (str/split-lines (slurp glossary-file)))))))
+
+;; The one glossary row whose registry name is not its paragraph title: the
+;; paragraph is \paragraph{Revision (2026-08-31; cancellation boundary)}.
+(def glossary-paragraph-override
+  {"Revision boundary" "Revision (2026-08-31; cancellation boundary)"})
+
+(defn unlicensed! [nm rung why]
+  (throw (ex-info (str "rung " rung " for " nm " has no machine-checkable pointer: " why)
+                  {:error :unlicensed-rung :name nm :rung rung :why why})))
+
+;; --- the derivation ---------------------------------------------------------
+;; Rungs 0-3 are DERIVED here and nothing above them is. Each step names the
+;; evidence type it consumes; a row that cannot supply the next one stops and
+;; PRINTS WHICH RUNG BLOCKED IT, which is what "no rung skippable" buys.
+(defn declaration-ladder
+  "[ladder blocked] for a contract declaration."
+  [d binding binding-line]
+  (let [nm (:name d)
+        literal (get @lean-literal-lines nm)
+        _ (when-not literal
+            (unlicensed! nm :named "no line of the Lean module names it as a string literal"))
+        l0 [{:rung :named :licence (str lean-rel ":" literal)
+             :evidence :contract-manifest-entry
+             :why "the declaration is named in the contract manifest"}]]
+    (cond
+      (= "hole" (:kind d))
+      [l0 {:rung :type-transcribed
+           :why (str "the declaration is a contract HOLE: the proposition is stated, "
+                     "not discharged, so nothing is transcribed by its presence")}]
+
+      (nil? (get @lean-definition-lines nm))
+      [l0 {:rung :type-transcribed
+           :why "the module carries no definition site for the declared name"}]
+
+      :else
+      (let [l1 (conj l0 {:rung :type-transcribed
+                         :licence (str lean-rel ":" (get @lean-definition-lines nm))
+                         :evidence :lean-definition-site
+                         :why "the closed declaration has a definition site in the module"})]
+        (cond
+          (nil? binding)
+          [l1 {:rung :formula-transcribed
+               :why (str "no passing entry of checks/witness-registry.edn exercises "
+                         "the declaration, so nothing elaborates its defining expression")}]
+
+          :else
+          (let [fixture (:fixture binding)
+                fixture-ptr (when fixture
+                              (str (:repo fixture) "/" (:path fixture) ":1"))
+                l2 (conj l1 {:rung :formula-transcribed
+                             :licence (str witness-rel ":" binding-line)
+                             :evidence :passing-witness-check
+                             :why (str "witness check " (get-in binding [:check :path])
+                                       " passed"
+                                       (when (= :pinned-git-v1 (:freshness binding))
+                                         " against a pinned source"))})]
+            (cond
+              (nil? fixture-ptr)
+              [l2 {:rung :witnessed
+                   :why "the witness entry names no evidence artifact at all"}]
+
+              (not (machine-record? fixture-ptr))
+              [l2 {:rung :witnessed
+                   :why (str "the witness's evidence is " (:path fixture)
+                             ", which carries no run identity -- a fixture, not a "
+                             "record exhibiting the quantity")}]
+
+              :else
+              [(conj l2 {:rung :witnessed :licence fixture-ptr
+                         :evidence :machine-record
+                         :why (str (:path fixture) " carries a run identity")})
+               {:rung :constructed
+                :why (str "an inhabitant built from machine state is not derivable "
+                          "from these registries; it is declared with a licence "
+                          "that must itself be a machine record")}])))))))
+
+(defn glossary-ladder
+  "[ladder blocked] for a glossary paragraph row."
+  [g]
+  (let [nm (:name g)
+        record-owner (:owner g)
+        licence
+        (if record-owner
+          ;; :U14's record owners are already written relative to ~/code
+          ;; ("futon2/holes/missions/..."), which is this resolver's root.
+          (str record-owner ":1")
+          (let [title (get glossary-paragraph-override nm nm)]
+            (if-let [line (get @glossary-paragraph-line-index (normalise-title title))]
+              (str glossary-rel ":" line)
+              (unlicensed! nm :named
+                           (str "no \\paragraph{" title "} in " glossary-rel)))))]
+    [[{:rung :named :licence licence
+       :evidence (if record-owner :record-owner :glossary-paragraph)
+       :why (if record-owner "held open by a named record" "the glossary paragraph")}]
+     {:rung :type-transcribed
+      :why (str "the paragraph carries no contract declaration, so the module "
+                "transcribes no carrier for it")}]))
+
+;; --- DECLARED rungs ---------------------------------------------------------
+;; The seam the ruling asks for: "READINESS registry rows carry the rung + the
+;; evidence pointer that licenses it." DECLARED, not derived -- the same shape
+;; hole-closability above uses, and the same shape aif-equations.edn :readiness
+;; uses for R-nodes. EMPTY TODAY: no row in this registry has been shown to
+;; reach a rung the derivation cannot license, and an empty map is the truthful
+;; state rather than a seeded one. The validator below is not a no-op over an
+;; empty map: negative_controls.sh plants entries on both sides of every
+;; refusal, including the acceptance path, so the checker has a demonstrated
+;; live population even while the committed map has none.
+(def ^:dynamic *declared-rung* {})
+
+(defn apply-declared-rungs
+  "Merge a row's declared rung claims onto its derived ladder. Refuses:
+   a rung off the scale; a claim with no :licence; a licence that does not
+   resolve; a claim at or below what is already licensed; a claim that SKIPS a
+   rung; and -- the fixture refusal the ruling names -- a claim at :constructed
+   or above whose licence is not a machine record."
+  [nm ladder blocked claims]
+  (reduce
+   (fn [[ladder _blocked] claim]
+     (let [rung (:rung claim)
+           licence (:licence claim)
+           held (:rung (peek ladder))]
+       (when-not (contains? rung-index rung)
+         (throw (ex-info (str "declared rung " rung " for " nm " is not on the readiness scale")
+                         {:error :rung-off-scale :name nm :rung rung})))
+       (when-not licence
+         (throw (ex-info (str "declared rung " rung " for " nm " carries no :licence -- "
+                              "a rung claim without a machine-checkable pointer does not render")
+                         {:error :rung-unlicensed :name nm :rung rung})))
+       (when-let [problem (resolve-licence licence)]
+         (throw (ex-info (str "declared rung " rung " for " nm " has an unresolvable :licence -- " problem)
+                         {:error :rung-licence-unresolvable :name nm :rung rung :problem problem})))
+       (when (<= (rung-index rung) (rung-index held))
+         (throw (ex-info (str "declared rung " rung " for " nm " is not above the licensed rung "
+                              held " -- a declaration may license a rung, never retract one")
+                         {:error :rung-not-above :name nm :rung rung :held held})))
+       (when (> (rung-index rung) (inc (rung-index held)))
+         (throw (ex-info (str "declared rung " rung " for " nm " SKIPS "
+                              (nth rung-scale (inc (rung-index held)))
+                              " -- no rung is reachable except over the one below it")
+                         {:error :rung-skipped :name nm :rung rung :held held})))
+       (when (and (>= (rung-index rung) (rung-index :constructed))
+                  (not (machine-record? licence)))
+         (throw (ex-info (str "declared rung " rung " for " nm " is licensed by " licence
+                              ", which carries no run identity -- fixtures and bound "
+                              "parameters do not reach :constructed")
+                         {:error :fixture-at-constructed :name nm :rung rung :licence licence})))
+       [(conj ladder (assoc claim :evidence (:evidence claim :declared)
+                            :why (or (:basis claim) "declared in the accounting generator")))
+        (when (< (rung-index rung) (dec (count rung-scale)))
+          {:rung (nth rung-scale (inc (rung-index rung)))
+           :why "no further evidence is declared"})]))
+   [ladder blocked]
+   claims))
+
+(defn with-rung
+  "Attach the rung, its ladder and what blocked the next one. Fail-closed: a
+   row whose ladder cannot be licensed stops the generator."
+  [row derive]
+  (let [nm (:name row)
+        [ladder blocked] (derive)
+        [ladder blocked] (apply-declared-rungs nm ladder blocked (get *declared-rung* nm))]
+    (doseq [claim ladder]
+      (when-let [problem (resolve-licence (:licence claim))]
+        (throw (ex-info (str "the " (:rung claim) " claim for " nm
+                             " has an unresolvable pointer -- " problem)
+                        {:error :rung-licence-unresolvable :name nm
+                         :rung (:rung claim) :problem problem}))))
+    (assoc row
+           :rung (:rung (peek ladder))
+           :rung-ladder (vec ladder)
+           :rung-blocked-by blocked)))
+
 (defn with-closability
   "Attach U27's fence typing to an :open-hole row. Fail-closed: an open hole with
    no declared typing is an error here rather than an untyped row that :U34 would
@@ -484,8 +769,8 @@
     (= "hole" (:kind declaration)) :open-hole
     (and binding (= :passed (:result binding)) (= :pinned-git-v1 (:freshness binding)))
     :proven-against-pinned-source
-    (and binding (= :passed (:result binding))) :closed-by-record-with-witness
-    :else :closed-by-record-negative-space))
+    (and binding (= :passed (:result binding))) :record-with-witness
+    :else :record-negative-space))
 
 (defn witness-names [binding]
   (let [w (:witnesses binding)]
@@ -498,21 +783,36 @@
             (throw (ex-info "model coverage unavailable: zero contract declarations"
                             {:error :zero-declarations})))
         witnesses (edn/read-string (slurp witness-file))
+        ;; The nth `{:witnesses` line of the registry starts the nth entry, so
+        ;; every binding can license its rung with a pointer INTO the registry
+        ;; rather than with the fact that a lookup succeeded.
+        entry-lines @witness-entry-lines
+        _ (when-not (= (count entry-lines) (count witnesses))
+            (throw (ex-info (str "witness registry entry lines (" (count entry-lines)
+                                 ") do not match parsed entries (" (count witnesses) ")")
+                            {:error :witness-line-index-broken})))
         bindings (into {}
                        (mapcat (fn [binding]
                                  (map (fn [name] [name binding])
                                       (witness-names binding))))
                        witnesses)
+        binding-lines (into {}
+                            (mapcat (fn [binding line]
+                                      (map (fn [name] [name line])
+                                           (witness-names binding)))
+                                    witnesses entry-lines))
         declared
         (mapv (fn [d]
                 (let [row {:name (:name d) :area (area-for d) :owner (:owner d)}
                       pointer (pointer-status (assoc d :area (:area row)))]
-                  (with-closability
-                    (merge row
-                           {:row-source :contract-declaration
-                            :content-status (content-status d (bindings (:name d)))
-                            :pointer-status (:status pointer)
-                            :pointer-detail (dissoc pointer :status)}))))
+                  (-> (merge row
+                             {:row-source :contract-declaration
+                              :content-status (content-status d (bindings (:name d)))
+                              :pointer-status (:status pointer)
+                              :pointer-detail (dissoc pointer :status)})
+                      with-closability
+                      (with-rung #(declaration-ladder d (bindings (:name d))
+                                                      (binding-lines (:name d)))))))
               (:declarations contract))
         ;; A glossary row's owner is the paragraph name unless U14 gave it a
         ;; record owner (the promoted hole); a record owner resolves only if
@@ -529,12 +829,13 @@
                                         {:reason :record-path-absent :resolved-path record-owner
                                          :status :drifted})
                                       {:resolution :paragraph-name :status :resolves})]
-                        (with-closability
-                          (assoc (dissoc g :owner)
-                                 :row-source :glossary-paragraph
-                                 :owner owner
-                                 :pointer-status (:status pointer)
-                                 :pointer-detail (dissoc pointer :status)))))
+                        (-> (assoc (dissoc g :owner)
+                                   :row-source :glossary-paragraph
+                                   :owner owner
+                                   :pointer-status (:status pointer)
+                                   :pointer-detail (dissoc pointer :status))
+                            with-closability
+                            (with-rung #(glossary-ladder g)))))
                     glossary-rows)
         rows (vec (concat declared named))]
     {:schema :wm/variable-situation-accounting-v1
@@ -548,8 +849,8 @@
      ;; so neither :named-only (reads as uncovered) nor a closed status (reads
      ;; as built) is true of it.
      :axes {:content-status [:named-only :framing :open-hole
-                             :closed-by-record-negative-space
-                             :closed-by-record-with-witness :proven-against-pinned-source]
+                             :record-negative-space
+                             :record-with-witness :proven-against-pinned-source]
             :pointer-status [:resolves :drifted]
             :row-source [:contract-declaration :glossary-paragraph]
             ;; U27's fence axis. Present on :open-hole rows only, and total over
@@ -560,7 +861,12 @@
             ;; only from a run under a default-off flag, so it witnesses what
             ;; the machine does UNDER A FLAG and not what it does.
             :readiness [:not-ready :contested :witnessed-and-held-open
-                        :witnessed-under-flag]}
+                        :witnessed-under-flag]
+            ;; :F6's scale. NOT the :readiness axis above, which is U27's
+            ;; question about an OPEN HOLE (is its witness in hand?). :rung is
+            ;; ordered, total over every row, and lane-independent: the same
+            ;; eight rungs type a noun, an operation or a topology claim.
+            :rung rung-scale}
      :rows rows
      :counts {:rows (count rows)
               :content (into (sorted-map) (frequencies (map :content-status rows)))
@@ -583,7 +889,16 @@
               :declaration-closability
               (into (sorted-map)
                     (frequencies (keep :closability
-                                       (filter #(= :contract-declaration (:row-source %)) rows))))}})))
+                                       (filter #(= :contract-declaration (:row-source %)) rows))))
+              ;; Ordered by the scale, not alphabetically, and EVERY rung is
+              ;; printed including the empty ones -- a scale whose zeros are
+              ;; omitted reads as a scale that ends where the evidence ends.
+              :rung
+              (let [f (frequencies (map :rung rows))]
+                (into {} (map (fn [r] [r (get f r 0)]) rung-scale)))
+              :declaration-rung
+              (let [f (frequencies (map :rung (filter #(= :contract-declaration (:row-source %)) rows)))]
+                (into {} (map (fn [r] [r (get f r 0)]) rung-scale)))}})))
 
 ;; U27 negative control: an open hole with no fence typing must stop the
 ;; generator, not emit an untyped row for :U34 to refuse downstream. Planted
@@ -606,6 +921,70 @@
         (do (binding [*out* *err*]
               (println "variable-situation-accounting: FAIL wrong rejection" (ex-data e)))
             (System/exit 2))))))
+
+;; :F6 negative control. The declared-rung map is EMPTY in the committed
+;; registry, so without this the validator would be a checker with no
+;; population -- indistinguishable from a no-op. Every refusal is planted, and
+;; so is the acceptance: a checker that only ever says no is also not tested.
+;; The refusal the ruling names by hand is (e): "bound parameters and fixtures
+;; EXPLICITLY do not reach this rung".
+(defn negative-rung! []
+  (let [contract {:source {:git-sha "planted"}
+                  :declarations [{:name "softmax" :kind "closed"
+                                  :owner "sec-glossary.tex:35 · P-glossary-mathematics"
+                                  :holder "by-record" :decided "2026-09-03"}]}
+        run! (fn [claims]
+               (binding [*declared-rung* {"softmax" claims}]
+                 (try {:rows (:rows (build-registry contract))}
+                      (catch clojure.lang.ExceptionInfo e {:error (:error (ex-data e))}))))
+        record "futon2/holes/labs/wm-contract/tick-run-record-2026-08-30.edn:1"
+        fixture "futon2/holes/labs/wm-contract/softmax-reference.edn:1"
+        witnessed {:rung :witnessed :licence record :basis "planted"}
+        expect (fn [label claims want]
+                 (let [got (run! claims)]
+                   (when-not (= want (:error got))
+                     (binding [*out* *err*]
+                       (println "variable-situation-accounting: FAIL" label
+                                "expected" want "got" (pr-str (dissoc got :rows))))
+                     (System/exit 2))))]
+    ;; (a) a rung that is not on the scale
+    (expect "off-scale rung accepted" [{:rung :done :licence record}] :rung-off-scale)
+    ;; (b) a rung claim with no pointer at all
+    (expect "unlicensed rung accepted" [{:rung :witnessed}] :rung-unlicensed)
+    ;; (c) a pointer that does not resolve
+    (expect "unresolvable licence accepted"
+            [{:rung :witnessed :licence "futon2/checks/witness-registry.edn:999999"}]
+            :rung-licence-unresolvable)
+    ;; (d) a rung that skips the one below it
+    (expect "skipped rung accepted" [{:rung :constructed :licence record}] :rung-skipped)
+    ;; (e) THE FIXTURE REFUSAL: a fully-pointed, non-skipping :constructed whose
+    ;;     licence is a hand-derived reference fixture rather than machine state.
+    (expect "fixture accepted at :constructed"
+            [witnessed {:rung :constructed :licence fixture}] :fixture-at-constructed)
+    ;; (f) a declaration that retracts rather than licenses
+    (expect "retracting declaration accepted"
+            [{:rung :named :licence record}] :rung-not-above)
+    ;; (g) POSITIVE: witnessed then constructed, both licensed by a record.
+    (let [ok (run! [witnessed {:rung :constructed :licence record}])
+          row (first (:rows ok))]
+      (when-not (and (nil? (:error ok)) (= :constructed (:rung row))
+                     (= 5 (count (:rung-ladder row))))
+        (binding [*out* *err*]
+          (println "variable-situation-accounting: FAIL record-licensed rungs rejected"
+                   (pr-str (or (:error ok) (select-keys row [:rung :rung-ladder])))))
+        (System/exit 2)))
+    ;; (h) POSITIVE: the derived floor is unchanged by an empty declaration map.
+    (let [row (first (:rows (run! nil)))]
+      (when-not (and (= :formula-transcribed (:rung row))
+                     (= :witnessed (:rung (:rung-blocked-by row))))
+        (binding [*out* *err*]
+          (println "variable-situation-accounting: FAIL derived floor moved"
+                   (pr-str (select-keys row [:rung :rung-blocked-by]))))
+        (System/exit 2)))
+    (println "variable-situation-accounting: PASS rung validator refuses"
+             "off-scale, unlicensed, unresolvable, skipped, retracting and"
+             "FIXTURE-AT-CONSTRUCTED claims; accepts record-licensed ones")
+    (System/exit 0)))
 
 ;; :U29 negative control. The drifted count is a published number (Box 2 says
 ;; how many pointers drifted), so nothing distinguishes "no pointer drifted"
@@ -642,8 +1021,10 @@
       empty-negative? (some #{"--negative-empty"} *command-line-args*)
       untyped-negative? (some #{"--negative-untyped"} *command-line-args*)
       drift-negative? (some #{"--negative-drift"} *command-line-args*)
+      rung-negative? (some #{"--negative-rung"} *command-line-args*)
       _ (when untyped-negative? (negative-untyped!))
       _ (when drift-negative? (negative-drift!))
+      _ (when rung-negative? (negative-rung!))
       value (if empty-negative?
               (try
                 (build-registry {:source {} :declarations []})
