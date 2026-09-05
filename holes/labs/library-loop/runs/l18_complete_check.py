@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
-"""L18 v2 COMPLETE no-source search over the served-refused worklist.
+"""L18 v3 COMPLETE rationale-source search over the FIXED 71-member worklist.
 
-Usage: l18_complete_check.py [LIBRARY_DIR] [REPORT_MD] [OUT_EDN]
-Enumerates the served-refused union from the committed L18 advisory report
-(before this fix), and for EVERY member runs the complete source search:
-  (a) the whole problem corpus (holds-token and qualified-id-in-text),
-  (b) the member's section documentation (*.md in its section dir),
-      searching for the member's qualified id and bare name.
-Serializes every id with its specific searched sources and result -- no
-blanket claims. Patterns in sections whose committed README states the
-problem (snatch, per this row's minted node) are marked covered-by-section-doc.
-Deterministic; path-independent provenance.
+Usage: l18_complete_check.py [LIBRARY_DIR] [WORKLIST_REPORT] [OUT_EDN]
+The worklist is FIXED: the served-refused union (down-problems+wr) from the
+committed pre-grounding L17 report (runs/L17-advisory-gate-report.md, futon3
+835278b), not the mutable current report. For EVERY one of the 71 members the
+search covers:
+  (a) the whole problem corpus (holds-token + qualified-id-in-text);
+  (b) every *.md in the member's section;
+  (c) the member's OWN named provenance: every .md/.tex/.org/.edn path token
+      in its file that exists under the sibling repos;
+  (d) a fixed rationale corpus: futon2 holes/missions/*.md, EPIC-run-era.md,
+      holes/problems/P-*.md, and the war-room pattern bodies.
+Serializes all 71 results (searched sources + result per member). Members
+grounded by earlier L18 passes are recorded with their grounding basis, not
+dropped. Deterministic; path-independent provenance.
 """
 import os, re, sys, subprocess
 
 LIB = os.path.abspath(sys.argv[1] if len(sys.argv) > 1
                       else "/home/joe/code/futon3/library")
-REPORT = sys.argv[2] if len(sys.argv) > 2 else "L18-advisory-gate-report.md"
+REPORT = sys.argv[2] if len(sys.argv) > 2 else "L17-advisory-gate-report.md"
 OUT = sys.argv[3] if len(sys.argv) > 3 else "L18-remainder.edn"
+REPOS = ["/home/joe/code/futon2", "/home/joe/code/futon3", "/home/joe/code/p4ng",
+         "/home/joe/code/futon5", "/home/joe/code/futon3c", "/home/joe/code/futon0"]
 
 def gitsha(d):
     repo = subprocess.run("git -C %s rev-parse --show-toplevel" % d,
@@ -32,13 +38,13 @@ def q(s):
 SERVED = ["zaif-cascade.edn", "construct-cascade.edn", "snatch-cascade.edn",
           "ants-cascade.edn", "alfworld-cascade.edn"]
 
-def refused(fn):
-    txt = open(REPORT, encoding="utf-8").read()
+def refused_from(path, fn):
+    txt = open(path, encoding="utf-8").read()
     sec = txt.split("### %s" % fn, 1)[1].split("\n### ", 1)[0]
     m = re.search(r"- \*\*down-problems\+wr\*\*: (\d+) refused -- (.*)", sec)
     return set(m.group(2).split(", ")) if m and m.group(2) != "(none)" else set()
 
-union = sorted(set().union(*[refused(f) for f in SERVED]))
+union = sorted(set().union(*[refused_from(REPORT, f) for f in SERVED]))
 
 corpus = []
 pdir = os.path.join(LIB, "problems")
@@ -48,80 +54,109 @@ for fn in sorted(os.listdir(pdir)):
         txt = open(os.path.join(pdir, fn), encoding="utf-8", errors="replace").read()
         corpus.append((pid, re.findall(r"^@holds-at\s+(\S+)", txt, re.M), txt))
 
-# sections whose committed README states the problem (node minted this row)
-SECTION_DOC_NODES = {"snatch": "problems/snatch-play-theory-gaps"}
+# (d) fixed rationale corpus
+rationale = []
+def add_src(label, path):
+    if os.path.isfile(path):
+        rationale.append((label, open(path, encoding="utf-8", errors="replace").read()))
+M = "/home/joe/code/futon2/holes/missions"
+if os.path.isdir(M):
+    for fn in sorted(os.listdir(M)):
+        if fn.endswith(".md"):
+            add_src("futon2 holes/missions/" + fn, os.path.join(M, fn))
+add_src("futon2 holes labs wm-contract EPIC-run-era.md",
+        "/home/joe/code/futon2/holes/labs/wm-contract/EPIC-run-era.md")
+P = "/home/joe/code/futon2/holes/problems"
+for fn in sorted(os.listdir(P)):
+    if fn.startswith("P-") and fn.endswith(".md"):
+        add_src("futon2 holes problems " + fn, os.path.join(P, fn))
+W = os.path.join(LIB, "war-room")
+for fn in sorted(os.listdir(W)):
+    if fn.endswith(".flexiarg"):
+        add_src("war-room/" + fn, os.path.join(W, fn))
 
 rows = []
 for pid in union:
     sec, name = pid.split("/", 1)
-    pat = os.path.join(LIB, sec)
-    lines = open(os.path.join(pat, name + ".flexiarg"),
-                 encoding="utf-8", errors="replace").read().splitlines()
+    ppath = os.path.join(LIB, sec, name + ".flexiarg")
+    ptxt = open(ppath, encoding="utf-8", errors="replace").read()
+    plines = ptxt.splitlines()
     holds = []
-    for ln in lines:
+    for ln in plines:
         m = re.match(r"^@holds-at\s+(.+)$", ln)
         if m:
             holds += re.findall(r"R[A-Za-z0-9]+|TRACE", m.group(1))
-    searched, result = [], "no-source"
+    searched, hits, result = [], [], None
     # (a) corpus
     searched.append("problems/*.flexiarg (holds+id-text)")
-    hit = next(((n, b) for (n, nh, t) in corpus
-                for b in (["holds"] if holds and any(h in nh for h in holds) else [])
-                + (["named"] if pid in t else [])), None)
-    if hit:
-        result = "corpus-match:%s:%s" % (hit[1], hit[0])
-    # (b) section docs
-    mdfiles = sorted(f for f in os.listdir(pat) if f.endswith(".md"))
-    searched += ["%s/%s" % (sec, f) for f in mdfiles]
-    for f in mdfiles:
-        t = open(os.path.join(pat, f), encoding="utf-8", errors="replace").read()
-        if name in t or pid in t:
-            result = "section-doc-names-member:%s/%s" % (sec, f)
+    for (nid, nh, t) in corpus:
+        basis = ("holds" if holds and any(h in nh for h in holds)
+                 else ("named" if pid in t else None))
+        if basis:
+            result = "corpus-match:%s:%s" % (basis, nid)
             break
-    if result == "no-source" and sec in SECTION_DOC_NODES:
-        result = "covered-by-section-doc:%s (README states the section problem; member edged this row)" % SECTION_DOC_NODES[sec]
+    # (b) section docs
+    mdfiles = sorted(f for f in os.listdir(os.path.join(LIB, sec)) if f.endswith(".md"))
+    searched += ["%s/%s" % (sec, f) for f in mdfiles]
+    if not result:
+        for f in mdfiles:
+            t = open(os.path.join(LIB, sec, f), encoding="utf-8", errors="replace").read()
+            if name in t or pid in t:
+                result = "section-doc-names-member:%s/%s" % (sec, f)
+                break
+    # already grounded by L18 v1/v2 (edge present)?
+    if not result and any(re.match(r"^@why problems/\S+ \(L18", l) for l in plines):
+        m = re.search(r"^@why (problems/\S+) \(L18", ptxt, re.M)
+        result = "grounded-L18:%s" % m.group(1)
+    # (c) named provenance files
+    named = []
+    for tok in set(re.findall(r"[A-Za-z0-9_./'-]+\.(?:md|tex|org|edn)", ptxt)):
+        for r in REPOS:
+            cand = os.path.join(r, tok)
+            if os.path.isfile(cand):
+                named.append((tok, cand))
+    searched += ["provenance:" + t for (t, _) in named]
+    if not result:
+        for (tok, cand) in named:
+            t = open(cand, encoding="utf-8", errors="replace").read()
+            if name in t or pid in t:
+                result = "named-source-candidate:%s (names the member; problem-statement extraction is a per-node judgment, left for commissioning)" % tok
+                break
+    # (d) rationale corpus
+    searched.append("rationale corpus: holes/missions/*.md + EPIC-run-era.md + holes/problems/P-*.md + war-room/*.flexiarg")
+    if not result:
+        for (label, t) in rationale:
+            if name in t or pid in t:
+                hits.append(label)
+        if hits:
+            result = "rationale-candidates (names the member): " + "; ".join(hits[:4])
+    if not result:
+        result = "no-source (all listed sources searched; none names or covers the member)"
     rows.append((pid, searched, result))
-
-# edge snatch members (the covered-by-section-doc cohort)
-EDGE = ("@why problems/snatch-play-theory-gaps (L18 v2 section-grain grounding; "
-        "basis: snatch README's own gap assessment and gaps-filled record cover "
-        "this member (treatment table or named gap closure); source: futon2 "
-        "holes labs library-loop runs l18_complete_check.py receipt "
-        "runs/L18-remainder.edn; zai-1, 2026-09-05)")
-EDGE_NAMED = ("@why problems/snatch-play-theory-gaps (L18 v2 grounding; basis: "
-              "snatch/README.md names this member explicitly (treatment table or "
-              "gaps-filled record); source: futon2 holes labs library-loop runs "
-              "l18_complete_check.py receipt runs/L18-remainder.edn; zai-1, 2026-09-05)")
-edged = 0
-for (pid, _, result) in rows:
-    if not (result.startswith("covered-by-section-doc")
-            or result.startswith("section-doc-names-member:snatch/")):
-        continue
-    edge = EDGE if result.startswith("covered-by-section-doc") else EDGE_NAMED
-    sec, name = pid.split("/", 1)
-    path = os.path.join(LIB, sec, name + ".flexiarg")
-    lines = open(path, encoding="utf-8").read().splitlines()
-    if any("L18 v2 section-grain grounding" in l or "L18 v2 grounding" in l
-           for l in lines):
-        continue
-    body = next((i for i, ln in enumerate(lines)
-                 if re.match(r"^\s*[!+?]\s*[A-Za-z]", ln)), len(lines))
-    last = max([i for i, ln in enumerate(lines[:body]) if ln.startswith("@")],
-               default=0)
-    lines = lines[:last + 1] + [EDGE] + lines[last + 1:]
-    open(path, "w", encoding="utf-8").write("\n".join(lines) + "\n")
-    edged += 1
 
 sha, rel = gitsha(LIB)
 with open(OUT, "w") as f:
-    f.write(";; L18 v2 complete no-source search. Deterministic, path-independent.\n")
+    f.write(";; L18 v3 complete rationale-source search over the FIXED 71-member worklist.\n")
+    f.write(";; Worklist source: runs/L17-advisory-gate-report.md (pre-grounding). Deterministic.\n")
     f.write("{:library-subdir %s\n :library-git-sha %s\n" % (q(rel), q(sha)))
-    f.write(" :search \"per member of the served-refused union (%s): (a) every problems/*.flexiarg by holds-token and qualified-id-in-text; (b) every *.md in the member's section directory by bare name and qualified id\"\n" % " ".join(SERVED))
+    f.write(" :worklist-source %s\n" % q("runs/L17-advisory-gate-report.md served-refused union, down-problems+wr"))
     f.write(" :union-count %d\n :members [\n" % len(rows))
     for (pid, searched, result) in rows:
-        f.write("  {:pattern %s :searched [%s] :result %s}\n"
+        f.write("  {:pattern %s\n   :searched [%s]\n   :result %s}\n"
                 % (q(pid), " ".join(q(s) for s in searched), q(result)))
-    f.write(" ]\n :counts {:union %d :edged-this-row %d :no-source %d}}\n"
-            % (len(rows), edged, len([r for r in rows if r[2] == "no-source"])))
-print("l18v2: union %d, edged %d, no-source %d"
-      % (len(rows), edged, len([r for r in rows if r[2] == "no-source"])))
+    f.write(" ]\n :counts {:union %d :grounded-L18 %d :corpus-match %d :section-doc %d :named-source-candidate %d :rationale-candidate %d :no-source %d}}\n"
+            % (len(rows),
+               len([r for r in rows if r[2].startswith("grounded-L18")]),
+               len([r for r in rows if r[2].startswith("corpus-match")]),
+               len([r for r in rows if r[2].startswith("section-doc")]),
+               len([r for r in rows if r[2].startswith("named-source-candidate")]),
+               len([r for r in rows if r[2].startswith("rationale-candidates")]),
+               len([r for r in rows if r[2].startswith("no-source")])))
+print("l18v3: union %d | %s" % (len(rows), " ".join(
+    "%s=%d" % (k, v) for k, v in [
+        ("grounded", len([r for r in rows if r[2].startswith("grounded-L18")])),
+        ("corpus", len([r for r in rows if r[2].startswith("corpus-match")])),
+        ("section-doc", len([r for r in rows if r[2].startswith("section-doc")])),
+        ("named-src", len([r for r in rows if r[2].startswith("named-source-candidate")])),
+        ("rationale", len([r for r in rows if r[2].startswith("rationale-candidates")])),
+        ("no-source", len([r for r in rows if r[2].startswith("no-source")]))])))

@@ -944,13 +944,17 @@
   "problems/baldwin-causal-claims-vs-engineering-metaphor"
   "problems/catalogue-r5-efe-label-auditability"
   "problems/commitment-temperature-is-instrumented-as-gain"
+  "problems/coordination-patterns-derivation"
+  "problems/cycle-model-boundary-gaps"
   "problems/devmap-self-consistency-standards"
   "problems/exotype-encoding-programme"
   "problems/facade-instead-of-validated-efe-model"
   "problems/fundamentals-drowned-by-backlog"
   "problems/g-over-cascade-is-undefined"
+  "problems/llm-over-corpus-mining-lessons"
   "problems/most-patterns-have-no-globally-recognised-rationale"
   "problems/operator-turns-become-inference-observations"
+  "problems/pattern-coding-and-novel-force-mining"
   "problems/pattern-genesis-from-evidence-bearing-holes"
   "problems/per-tick-mismatch-instruments-outer-loop-gain"
   "problems/process-conduct-is-unassured"
@@ -979,6 +983,7 @@
   "problems/spec-and-implementation-must-converge-to-runtime-certificates"
   "problems/tension-proposes-candidates"
   "problems/tensions-are-navigated-not-eliminated"
+  "problems/theory-general-enough-to-drive-the-stack"
   "problems/trace-wm-trace-store-route-ledger"
   "problems/transferable-open-research-practice"
   "process-coherence/author-the-missing-pattern"
@@ -1817,6 +1822,8 @@
   {:from "coordination/par-as-obligation" :kind :references :to "futon-theory/stop-the-line" :resolved true}
   {:from "coordination/pattern-search-protocol" :kind :references :to "futon-theory/minimum-viable-events" :resolved true}
   {:from "coordination/pattern-search-protocol" :kind :references :to "futon-theory/proof-path" :resolved true}
+  {:from "coordination/pattern-search-protocol" :kind :why :to "problems/coordination-patterns-derivation" :resolved true}
+  {:from "coordination/pattern-search-protocol" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "coordination/session-durability-check" :kind :references :to "futon-theory/durability-first" :resolved true}
   {:from "coordination/session-durability-check" :kind :references :to "futon-theory/error-hierarchy" :resolved true}
   {:from "coordination/session-durability-check" :kind :references :to "futon-theory/proof-path" :resolved true}
@@ -1839,6 +1846,8 @@
   {:from "cycle-machine/job-port" :kind :why :to "cycle-machine/single-producer" :resolved true}
   {:from "cycle-machine/runtime-restoration" :kind :see-also :to "coordination/session-durability-check" :resolved true}
   {:from "cycle-machine/runtime-restoration" :kind :why :to "cycle-machine/step-machine" :resolved true}
+  {:from "cycle-machine/runtime-restoration" :kind :why :to "problems/cycle-model-boundary-gaps" :resolved true}
+  {:from "cycle-machine/runtime-restoration" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "cycle-machine/single-producer" :kind :see-also :to "coordination/session-durability-check" :resolved true}
   {:from "cycle-machine/single-producer" :kind :see-also :to "futon-theory/proof-path" :resolved true}
   {:from "cycle-machine/single-producer" :kind :why :to "claude/fable" :resolved false}
@@ -1849,6 +1858,8 @@
   {:from "cycle-machine/step-machine" :kind :see-also :to "cycle-machine/job-port" :resolved true}
   {:from "cycle-machine/step-machine" :kind :why :to "coordination/session-durability-check" :resolved true}
   {:from "cycle-machine/step-machine" :kind :why :to "futon-theory/durability-first" :resolved true}
+  {:from "cycle-machine/step-machine" :kind :why :to "problems/cycle-model-boundary-gaps" :resolved true}
+  {:from "cycle-machine/step-machine" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "cycle-machine/toolchain-port" :kind :see-also :to "cycle-machine/authority-port" :resolved true}
   {:from "cycle-machine/toolchain-port" :kind :why :to "cycle-machine/single-producer" :resolved true}
   {:from "data-mining/checkpoint-the-long-run" :kind :references :to "data-mining/saturate-the-accelerator-with-concurrency" :resolved true}
@@ -1862,10 +1873,14 @@
   {:from "data-mining/fan-out-independent-runs-across-devices" :kind :references :to "data-mining/smoke-before-the-paid-run" :resolved true}
   {:from "data-mining/gates-as-code" :kind :references :to "data-mining/golden-is-curated-not-raw" :resolved true}
   {:from "data-mining/gates-as-code" :kind :references :to "data-mining/smoke-before-the-paid-run" :resolved true}
+  {:from "data-mining/gates-as-code" :kind :why :to "problems/llm-over-corpus-mining-lessons" :resolved true}
+  {:from "data-mining/gates-as-code" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "data-mining/golden-is-curated-not-raw" :kind :references :to "data-mining/constrain-extraction-to-the-downstream-vocabulary" :resolved true}
   {:from "data-mining/golden-is-curated-not-raw" :kind :references :to "data-mining/gates-as-code" :resolved true}
   {:from "data-mining/saturate-the-accelerator-with-concurrency" :kind :references :to "data-mining/checkpoint-the-long-run" :resolved true}
   {:from "data-mining/saturate-the-accelerator-with-concurrency" :kind :references :to "data-mining/smoke-before-the-paid-run" :resolved true}
+  {:from "data-mining/saturate-the-accelerator-with-concurrency" :kind :why :to "problems/llm-over-corpus-mining-lessons" :resolved true}
+  {:from "data-mining/saturate-the-accelerator-with-concurrency" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "data-mining/seed-the-run-for-a-fair-ablation" :kind :references :to "data-mining/gates-as-code" :resolved true}
   {:from "data-mining/seed-the-run-for-a-fair-ablation" :kind :references :to "data-mining/smoke-before-the-paid-run" :resolved true}
   {:from "data-mining/seed-the-run-for-a-fair-ablation" :kind :references :to "data-mining/the-first-checkpoint-is-a-quality-probe" :resolved true}
@@ -2295,7 +2310,9 @@
   {:from "futon-theory/curry-howard-operational" :kind :why :to "record/ruling" :resolved false}
   {:from "futon-theory/curry-howard-operational" :kind :why :to "runs/L6-no-source-check.edn." :resolved false}
   {:from "futon-theory/derive-exits-on-a-minted-sorry" :kind :why :to "library/problems" :resolved false}
+  {:from "futon-theory/derive-exits-on-a-minted-sorry" :kind :why :to "problems/theory-general-enough-to-drive-the-stack" :resolved true}
   {:from "futon-theory/derive-exits-on-a-minted-sorry" :kind :why :to "record/ruling" :resolved false}
+  {:from "futon-theory/derive-exits-on-a-minted-sorry" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "futon-theory/derive-exits-on-a-minted-sorry" :kind :why :to "runs/L6-no-source-check.edn." :resolved false}
   {:from "futon-theory/durability-first" :kind :references :to "futon-theory/error-hierarchy" :resolved true}
   {:from "futon-theory/durability-first" :kind :references :to "futon-theory/proof-path" :resolved true}
@@ -2389,7 +2406,9 @@
   {:from "futon-theory/progress-signal" :kind :related :to "futon-theory/minimum-viable-events" :resolved true}
   {:from "futon-theory/progress-signal" :kind :related :to "futon-theory/mission-lifecycle" :resolved true}
   {:from "futon-theory/progress-signal" :kind :why :to "library/problems" :resolved false}
+  {:from "futon-theory/progress-signal" :kind :why :to "problems/theory-general-enough-to-drive-the-stack" :resolved true}
   {:from "futon-theory/progress-signal" :kind :why :to "record/ruling" :resolved false}
+  {:from "futon-theory/progress-signal" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "futon-theory/progress-signal" :kind :why :to "runs/L6-no-source-check.edn." :resolved false}
   {:from "futon-theory/proof-path" :kind :governance :to "PSR/PUR" :resolved false}
   {:from "futon-theory/proof-path" :kind :references :to "futon-theory/event-protocol" :resolved true}
@@ -7391,7 +7410,9 @@
   {:from "plos-npt-with-small-n/scope-shield-via-companion-paper" :kind :references :to "plos-npt-with-small-n/venue-register-boundary" :resolved true}
   {:from "plos-npt-with-small-n/scope-shield-via-companion-paper" :kind :source-dois :to "10.1186/s12913-021-06977-1" :resolved false}
   {:from "plos-npt-with-small-n/scope-shield-via-companion-paper" :kind :source-dois :to "10.1371/journal.pone.0195890" :resolved false}
+  {:from "plos-npt-with-small-n/scope-shield-via-companion-paper" :kind :why :to "problems/pattern-coding-and-novel-force-mining" :resolved true}
   {:from "plos-npt-with-small-n/scope-shield-via-companion-paper" :kind :why :to "runs/L10-no-source-check.edn." :resolved false}
+  {:from "plos-npt-with-small-n/scope-shield-via-companion-paper" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "plos-npt-with-small-n/site-case-data-display" :kind :references :to "plos-npt-with-small-n/multi-method-triangulation-ladder" :resolved true}
   {:from "plos-npt-with-small-n/site-case-data-display" :kind :references :to "plos-npt-with-small-n/small-n-is-a-design-feature" :resolved true}
   {:from "plos-npt-with-small-n/site-case-data-display" :kind :source-dois :to "10.1371/journal.pone.0215873" :resolved false}
@@ -7431,16 +7452,22 @@
   {:from "plos-npt-with-small-n/venue-register-boundary" :kind :source-dois :to "10.1186/s12913-021-06977-1" :resolved false}
   {:from "plos-npt-with-small-n/venue-register-boundary" :kind :source-dois :to "10.1371/journal.pone.0195890" :resolved false}
   {:from "plos-npt-with-small-n/venue-register-boundary" :kind :source-dois :to "10.1371/journal.pone.0239181" :resolved false}
+  {:from "plos-npt-with-small-n/venue-register-boundary" :kind :why :to "problems/pattern-coding-and-novel-force-mining" :resolved true}
   {:from "plos-npt-with-small-n/venue-register-boundary" :kind :why :to "runs/L10-no-source-check.edn." :resolved false}
+  {:from "plos-npt-with-small-n/venue-register-boundary" :kind :why :to "runs/L18-remainder.edn" :resolved false}
   {:from "problems/baldwin-causal-claims-vs-engineering-metaphor" :kind :why :to "library/baldwin/INDEX.md" :resolved false}
   {:from "problems/catalogue-r5-efe-label-auditability" :kind :why :to "IF/HOWEVER" :resolved false}
   {:from "problems/catalogue-r5-efe-label-auditability" :kind :why :to "p4ng/sec-catalog.tex" :resolved false}
   {:from "problems/catalogue-r5-efe-label-auditability" :kind :why :to "problems/r5-expected-free-energy-core" :resolved true}
   {:from "problems/commitment-temperature-is-instrumented-as-gain" :kind :why :to "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain" :resolved true}
+  {:from "problems/coordination-patterns-derivation" :kind :why :to "library/coordination/INDEX.md" :resolved false}
+  {:from "problems/cycle-model-boundary-gaps" :kind :why :to "library/cycle-machine/INDEX.md" :resolved false}
   {:from "problems/devmap-self-consistency-standards" :kind :why :to "library/devmap-coherence/README.md" :resolved false}
   {:from "problems/exotype-encoding-programme" :kind :how :to "manifest/lift" :resolved false}
   {:from "problems/exotype-encoding-programme" :kind :why :to "library/iiching/README.md" :resolved false}
+  {:from "problems/llm-over-corpus-mining-lessons" :kind :why :to "library/data-mining/README.md" :resolved false}
   {:from "problems/operator-turns-become-inference-observations" :kind :why :to "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels" :resolved true}
+  {:from "problems/pattern-coding-and-novel-force-mining" :kind :why :to "library/plos-npt-with-small-n/_pattern-coding-corpus.md" :resolved false}
   {:from "problems/pattern-genesis-from-evidence-bearing-holes" :kind :why :to "IF/HOWEVER" :resolved false}
   {:from "problems/pattern-genesis-from-evidence-bearing-holes" :kind :why :to "p4ng/sec-catalog.tex" :resolved false}
   {:from "problems/pattern-genesis-from-evidence-bearing-holes" :kind :why :to "problems/r17-structure-learning" :resolved true}
@@ -7453,6 +7480,7 @@
   {:from "problems/tension-proposes-candidates" :kind :see-also :to "futon-theory/reverse-morphogenesis" :resolved true}
   {:from "problems/tension-proposes-candidates" :kind :why :to "war-room/wr-19-tension-must-generate-not-only-rank" :resolved true}
   {:from "problems/tensions-are-navigated-not-eliminated" :kind :why :to "library/eight-gates/README.md" :resolved false}
+  {:from "problems/theory-general-enough-to-drive-the-stack" :kind :why :to "library/futon-theory/INDEX.md" :resolved false}
   {:from "problems/transferable-open-research-practice" :kind :why :to "library/or3/README.md" :resolved false}
   {:from "process/built-but-not-wired-invisibility" :kind :why :to "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain" :resolved true}
   {:from "process/detection-wired-to-single-catastrophic-response" :kind :why :to "war-room/wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch" :resolved true}
