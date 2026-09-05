@@ -13,4 +13,6 @@ observed variant actual=:observed expected=:observed
 absent variant actual=:absent expected=:absent
 sense->vector mismatched-envelope outcome={:status :refused, :class "clojure.lang.ExceptionInfo", :message "numeric observation vector requires its matching envelope"}
 incomplete-summary outcome={:status :threw, :class "java.lang.NullPointerException", :message "Cannot invoke \"Object.getClass()\" because \"x\" is null"}
+refused-pair coordinates={:values-equal true, :envelopes-equal false, :differing-channels [:loop-health]}
+coupling default on missing :total-repos is unreachable through observe: {:status :threw, :class "java.lang.NullPointerException"}
 VERDICT: production matches every named Lean witness; all numeric deltas are 0.0.
