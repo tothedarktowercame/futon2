@@ -1,0 +1,42 @@
+{:assertions
+ [{:theorem "DarkTower.WarMachine.Holes.wmS5RunConformsToDrawnWiring",
+   :short-name "wmS5RunConformsToDrawnWiring",
+   :run "2026-09-01-s5",
+   :row :U49,
+   :status :minted-awaiting-acceptance,
+   :tactic "decide",
+   :asserts
+   "runConformsToDrawnWiring s5Routes -- the run recorded at least one route, no route is empty, no hop is unmapped, and no hop is a refutation (a code-retired pair traversed at route grain)."}
+  {:theorem "DarkTower.WarMachine.Holes.wmS5RouteCensus",
+   :short-name "wmS5RouteCensus",
+   :run "2026-09-01-s5",
+   :row :U49,
+   :status :minted-awaiting-acceptance,
+   :tactic "decide",
+   :asserts
+   "the eleven numbers the certificate is stated over: 4 routes, 36 hops, 9 distinct, 2 drawn, 5 route-measured, 1 excluded at dependency grain, 1 ruling-unrealised, 0 refutations, 0 unmapped, 22 drawn edges, 19 unfired."}
+  {:theorem "DarkTower.WarMachine.Holes.wmRe5RunConformsToDrawnWiring",
+   :short-name "wmRe5RunConformsToDrawnWiring",
+   :run "2026-09-04-re5",
+   :row :RE5,
+   :status :minted-awaiting-acceptance,
+   :tactic "decide",
+   :asserts
+   "runConformsToDrawnWiring re5Routes -- the run recorded at least one route, no route is empty, no hop is unmapped, and no hop is a refutation (a code-retired pair traversed at route grain)."}
+  {:theorem "DarkTower.WarMachine.Holes.wmRe5RouteCensus",
+   :short-name "wmRe5RouteCensus",
+   :run "2026-09-04-re5",
+   :row :RE5,
+   :status :minted-awaiting-acceptance,
+   :tactic "decide",
+   :asserts
+   "the eleven numbers the certificate is stated over: 4 routes, 36 hops, 9 distinct, 2 drawn, 5 route-measured, 1 excluded at dependency grain, 1 ruling-unrealised, 0 refutations, 0 unmapped, 22 drawn edges, 19 unfired."}],
+ :acceptance-closes
+ {:declaration "wmRunConformsToWiring",
+  :from "mkHole",
+  :to "mkClosed",
+  :whose-act "Joe",
+  :ruling "worklist.edn :run4-lean-ruling, Joe 2026-09-03",
+  :which-run-qualifies
+  "Joe's call at certificate time -- reserved by the same ruling"},
+ :count 4}

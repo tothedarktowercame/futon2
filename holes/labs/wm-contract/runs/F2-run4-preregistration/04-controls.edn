@@ -1,0 +1,127 @@
+{:C1
+ {:claim
+  "every transcribed certificate is a v1 certificate awaiting acceptance, naming a run, a wiring pin and at least one theorem",
+  :certificates ["2026-09-01-s5" "2026-09-04-re5"],
+  :rejected [],
+  :pass? true},
+ :C2
+ {:claim
+  "every named theorem occurs in its own certificate's generated block and in the live Holes.lean, and every derived slug matches the names that block uses",
+  :rows
+  [{:run "2026-09-01-s5",
+    :theorem "wmS5RunConformsToDrawnWiring",
+    :in-certificate-block? true,
+    :in-live-holes? true,
+    :slug-routes-in-block? true,
+    :slug-theorem-matches? true}
+   {:run "2026-09-01-s5",
+    :theorem "wmS5RouteCensus",
+    :in-certificate-block? true,
+    :in-live-holes? true,
+    :slug-routes-in-block? true,
+    :slug-theorem-matches? true}
+   {:run "2026-09-04-re5",
+    :theorem "wmRe5RunConformsToDrawnWiring",
+    :in-certificate-block? true,
+    :in-live-holes? true,
+    :slug-routes-in-block? true,
+    :slug-theorem-matches? true}
+   {:run "2026-09-04-re5",
+    :theorem "wmRe5RouteCensus",
+    :in-certificate-block? true,
+    :in-live-holes? true,
+    :slug-routes-in-block? true,
+    :slug-theorem-matches? true}],
+  :pass? true},
+ :C3
+ {:claim
+  "a fabricated theorem and a fabricated authority occur nowhere in the emitted Lean",
+  :fabricated
+  ["wmZ99RunConformsToDrawnWiring"
+   "0000000000000000000000000000000000000000000000000000000000000000"],
+  :pass? true},
+ :C4
+ {:claim
+  "each certificate's generated Lean block occurs verbatim in the live Holes.lean, so the manifest is pinned to theorems that have not been restated",
+  :holes-lean
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean",
+  :holes-lean-sha256
+  "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
+  :rows
+  [{:run "2026-09-01-s5",
+    :block "runs/U49-run-conformance/lean-block.lean",
+    :block-sha256
+    "5adf397f80ab51acdfd86c01dcbee9b20fd1692f0f8c30446fef36abddf50e11",
+    :verbatim-in-live-holes? true}
+   {:run "2026-09-04-re5",
+    :block "runs/RE5-run-conformance/lean-block.lean",
+    :block-sha256
+    "3858f4f29d194a88c1e11bb09fbcd823e7f0abf8061e8b2b832805ef8e0353b6",
+    :verbatim-in-live-holes? true}],
+  :pass? true},
+ :C5
+ {:claim
+  "every declared invalidator carries an executable measurement, re-run on this invocation",
+  :rows
+  [{:id :r16-base-drawing-stroke,
+    :touches-certificate-definitions? false,
+    :measurements
+    {:label-terms-in-producer
+     {":label" 0,
+      "Grounded actuation" 0,
+      "aif-control-map" 0,
+      "control-stage-amendments" 0,
+      "control-stages" 0,
+      "observe construction" 0},
+     :label-terms-in-lean-blocks
+     {":label" 0,
+      "Grounded actuation" 0,
+      "aif-control-map" 0,
+      "control-stage-amendments" 0,
+      "control-stages" 0,
+      "observe construction" 0},
+     :r16-node-in-routes {"2026-09-01-s5" 0, "2026-09-04-re5" 0}}}
+   {:id :post-pin-control-map-decisions,
+    :touches-certificate-definitions? true,
+    :measurements
+    {:decisions-read-by-producer 1, :figure-retired-in-lean-blocks 3}}
+   {:id :f1-model-extensions,
+    :touches-certificate-definitions? false,
+    :measurements
+    {:f1-names-in-lean-blocks
+     {"BeliefState" 0,
+      "GenerativeModel" 0,
+      "Policy" 0,
+      "PredictiveOutcomeKernel" 0,
+      "eigCounterPredictive" 0},
+     :cert-definitions-outside-holes-excluding
+     ["Holes.lean" "Run4Preregistration.lean"],
+     :cert-definitions-outside-holes
+     {"HopClass" 0,
+      "RetirementGrounds" 0,
+      "RouteNode" 0,
+      "WiringEdge" 0,
+      "classifyHop" 0,
+      "edgeMem" 0,
+      "figureDrawnEdges" 0,
+      "figureRetired" 0,
+      "figureRouteMeasured" 0,
+      "routeHops" 0,
+      "runConformsToDrawnWiring" 0}}}
+   {:id :selection-discrimination-verdicts,
+    :touches-certificate-definitions? false,
+    :measurements
+    {:selection-names-in-lean-blocks
+     {"SelectionTie" 0,
+      "chosenByTiebreak" 0,
+      "selectionDiscriminates" 0}}}],
+  :touching [:post-pin-control-map-decisions],
+  :pass? true},
+ :C6
+ {:claim "WHAT IS NOT SETTLED HERE: which run qualifies",
+  :censuses-identical? true,
+  :selection-verdicts
+  {"2026-09-01-s5" :defect, "2026-09-04-re5" :green},
+  :reserved-to
+  "Joe, at certificate time (worklist.edn :run4-lean-ruling)",
+  :pass? :not-a-gate}}

@@ -1,0 +1,21 @@
+{:probe-exit 0,
+ :schema :wm/run4-axiom-probe-v1,
+ :holes-lean-sha256
+ "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
+ :taken-by "futon2/holes/labs/wm-contract/run4_readiness.bb --probe",
+ :prereg-sha256
+ "880dfab4dc37ddb42953cd80e309deb857f53ef8a2afd8de0dd616b2c91bc6fa",
+ :module "DarkTower.WarMachine.Run4Preregistration",
+ :note
+ "The receipt is what the :lean-probe line reads. It is pinned to the BYTES of both files, so a Holes.lean or a module edit makes it :stale rather than silently keeping a green line that was true of other bytes.",
+ :lake-build :ok,
+ :lake-build-jobs "2705",
+ :sorry-in-module 0,
+ :theorems
+ [{:name "run4CertifiedS5Conformance", :axioms []}
+  {:name "run4CertifiedS5Census", :axioms []}
+  {:name "run4CertifiedRe5Conformance", :axioms []}
+  {:name "run4CertifiedRe5Census", :axioms []}
+  {:name "wmRun4PreregCensus", :axioms []}
+  {:name "wmRun4InvalidatorsTouchingDefinitions", :axioms []}],
+ :row :F2}

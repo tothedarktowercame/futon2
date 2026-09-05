@@ -1,0 +1,165 @@
+{:schema :wm/run4-readiness-v1,
+ :emitted-by "futon2/holes/labs/wm-contract/run4_readiness.bb",
+ :not-a-requirement
+ {:note
+  "REPORTED, NOT GATED. These bear on WHICH RUN QUALIFIES, and the RUN4 ruling reserves that judgement to Joe at certificate time. Turning them into a line would be writing his ruling here.",
+  :candidate-runs ["2026-09-01-s5" "2026-09-04-re5"],
+  :selection-discrimination
+  {"2026-09-01-s5" :defect,
+   "2026-09-04-010-accepted" :green,
+   "2026-09-04-re5" :green,
+   "2026-09-05-u59-a" :green,
+   "2026-09-05-u59-b" :green,
+   "2026-09-05-u60" :green},
+  :censuses-identical
+  "both certified runs walk the same nine-hop route and their censuses agree hop for hop (runs/RE5-run-conformance/certificate.edn :limits) -- two runs agreeing about a route they were always going to take is one measurement repeated, not two"},
+ :emitted-at "2026-09-05",
+ :lines
+ {:regenerates
+  {:certificates
+   [{:run "2026-09-01-s5", :exit 0, :differing []}
+    {:run "2026-09-04-re5", :exit 0, :differing []}],
+   :manifest-exit 0,
+   :manifest-differing [],
+   :verdict :green,
+   :blocked-on []},
+  :invalidators
+  {:declared
+   [:r16-base-drawing-stroke
+    :post-pin-control-map-decisions
+    :f1-model-extensions
+    :selection-discrimination-verdicts],
+   :touching [:post-pin-control-map-decisions],
+   :unmeasured [],
+   :landing-check {:post-pin-control-map-decisions :wiring-pin},
+   :landed? false,
+   :verdict :green,
+   :blocked-on []},
+  :closability-audit
+  {:audit "runs/U27-hole-closability/audit.edn",
+   :audit-as-of "2026-09-03",
+   :audit-authority "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+   :live-authority "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+   :rows
+   {"enactedEqualsSelectedWhenRankOneGated"
+    {:closability :run-gated,
+     :readiness :not-ready,
+     :hole-class :open-bound},
+    "wmRunConformsToWiring"
+    {:closability :run-gated,
+     :readiness :not-ready,
+     :hole-class :permanent-external-attestation}},
+   :verdict :blocked,
+   :blocked-on
+   ["the closability audit was derived at contract 6de47bd (:as-of 2026-09-03) while the live authority is 69721b1 -- its readiness typings are about a different contract"
+    "the closability audit types wmRunConformsToWiring :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"
+    "the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"]},
+  :run-pins
+  {:runs
+   [{:run "2026-09-01-s5",
+     :path "./runs/2026-09-01-s5/wm-trace-s5.edn",
+     :pinned
+     "c3480955286e548be6fd4bbde80e5081446cfaaac1500294e2de1fa44e2d7c67",
+     :live
+     "c3480955286e548be6fd4bbde80e5081446cfaaac1500294e2de1fa44e2d7c67",
+     :tracked? true,
+     :dirty? false}
+    {:run "2026-09-04-re5",
+     :path "./runs/2026-09-04-re5/wm-trace-re5.edn",
+     :pinned
+     "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120",
+     :live
+     "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120",
+     :tracked? true,
+     :dirty? false}],
+   :verdict :green,
+   :blocked-on []},
+  :hole-open
+  {:declaration "wmRunConformsToWiring",
+   :kind "hole",
+   :contract-authority "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+   :holes-last-content-change
+   "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+   :comparand
+   "the last commit that touched Holes.lean, not mathlib HEAD (C175)",
+   :verdict :green,
+   :blocked-on []},
+  :lean-probe
+  {:receipt "runs/F2-run4-preregistration/axiom-probe.edn",
+   :taken-at-prereg
+   "880dfab4dc37ddb42953cd80e309deb857f53ef8a2afd8de0dd616b2c91bc6fa",
+   :live-prereg
+   "880dfab4dc37ddb42953cd80e309deb857f53ef8a2afd8de0dd616b2c91bc6fa",
+   :live-holes
+   "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
+   :build :ok,
+   :verdict :green,
+   :taken-at-holes
+   "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
+   :sorry-in-module 0,
+   :theorems
+   [{:name "run4CertifiedS5Conformance", :axioms []}
+    {:name "run4CertifiedS5Census", :axioms []}
+    {:name "run4CertifiedRe5Conformance", :axioms []}
+    {:name "run4CertifiedRe5Census", :axioms []}
+    {:name "wmRun4PreregCensus", :axioms []}
+    {:name "wmRun4InvalidatorsTouchingDefinitions", :axioms []}],
+   :blocked-on []},
+  :wiring-pin
+  {:pinned
+   "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
+   :live
+   "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
+   :pinned-commit "e508ece",
+   :live-last-commit "e508eceb17519b40beb565c5d7145fbf210e1295",
+   :path "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn",
+   :verdict :green,
+   :blocked-on []},
+  :certificates
+  {:manifest-runs ["2026-09-01-s5" "2026-09-04-re5"],
+   :live-runs ["2026-09-01-s5" "2026-09-04-re5"],
+   :manifest-assertions 4,
+   :manifest-dir "runs/F2-run4-preregistration",
+   :verdict :green,
+   :blocked-on []},
+  :definitions-intact
+  {:blocks
+   [{:run "2026-09-01-s5",
+     :block "runs/U49-run-conformance/lean-block.lean",
+     :present? true,
+     :verbatim? true}
+    {:run "2026-09-04-re5",
+     :block "runs/RE5-run-conformance/lean-block.lean",
+     :present? true,
+     :verbatim? true}],
+   :prereg-artifact
+   "runs/F2-run4-preregistration/Run4Preregistration.lean",
+   :prereg-module
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/Run4Preregistration.lean",
+   :prereg-identical? true,
+   :verdict :green,
+   :blocked-on []}},
+ :manifest
+ "futon2/holes/labs/wm-contract/runs/F2-run4-preregistration",
+ :summary "BLOCKED-ON [closability-audit]",
+ :verdict :blocked,
+ :accepts-nothing
+ "This artifact performs no acceptance and writes no ruling. READY means the evidence an acceptance needs is intact and current; it is not permission, and it does not say which run qualifies.",
+ :line-order
+ [:certificates
+  :definitions-intact
+  :wiring-pin
+  :run-pins
+  :regenerates
+  :lean-probe
+  :hole-open
+  :closability-audit
+  :invalidators],
+ :preregistration
+ "mathlib4/DarkTower/WarMachine/Run4Preregistration.lean",
+ :subject {:board "wm-contract", :item :RUN4},
+ :row :F2,
+ :blocked-on
+ ["closability-audit: the closability audit was derived at contract 6de47bd (:as-of 2026-09-03) while the live authority is 69721b1 -- its readiness typings are about a different contract"
+  "closability-audit: the closability audit types wmRunConformsToWiring :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"
+  "closability-audit: the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"]}

@@ -1,0 +1,97 @@
+{:base-verdicts
+ {:certificates :green,
+  :closability-audit :blocked,
+  :definitions-intact :green,
+  :hole-open :green,
+  :invalidators :green,
+  :lean-probe :green,
+  :regenerates :not-derivable,
+  :run-pins :green,
+  :wiring-pin :green},
+ :plants
+ [{:id :N1,
+   :line :wiring-pin,
+   :what "the pinned control-map sha256 perturbed in the manifest",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["the drawn control map has moved: pinned sha256 161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafde0, live 161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec -- the certificates were judged against a map that is no longer the map"],
+   :caught? true}
+  {:id :N2,
+   :line :run-pins,
+   :what "a pinned trace sha256 perturbed in the manifest",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["the 2026-09-01-s5 run's trace has changed since the pin: pinned c3480955286e548be6fd4bbde80e5081446cfaaac1500294e2de1fa44e2d7c60, live c3480955286e548be6fd4bbde80e5081446cfaaac1500294e2de1fa44e2d7c67"],
+   :caught? true}
+  {:id :N3,
+   :line :lean-probe,
+   :what
+   "the probe receipt's Holes.lean hash altered -- a probe taken at other bytes",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["the axiom probe was taken at a different Holes.lean than the live one (:stale) -- re-run --probe"],
+   :caught? true}
+  {:id :N4,
+   :line :lean-probe,
+   :what "the probe receipt reports an axiom dependency",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["run4CertifiedS5Conformance depends on axioms [\"propext\"]"],
+   :caught? true}
+  {:id :N5,
+   :line :definitions-intact,
+   :what
+   "the preregistration module edited away from the committed artifact",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["the committed preregistration artifact and the module mathlib4 holds differ -- regenerate and copy, or the manifest in the repo is not the manifest Lean checks"],
+   :caught? true}
+  {:id :N6,
+   :line :definitions-intact,
+   :what
+   "a certificate's transcribed block no longer verbatim in Holes.lean",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["the 2026-09-01-s5 certificate's generated Lean block is not verbatim in the live Holes.lean -- the theorems it is pinned to have been restated or removed"],
+   :caught? true}
+  {:id :N7,
+   :line :invalidators,
+   :what "a declared invalidator stripped of its measurement",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["declared invalidator :r16-base-drawing-stroke carries no executable measurement (:not-derivable)"],
+   :caught? true}
+  {:id :N8,
+   :line :hole-open,
+   :what "the contract types wmRunConformsToWiring closed",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["wmRunConformsToWiring is typed \"closed\", not a hole -- there is nothing left for an acceptance to close"],
+   :caught? true}
+  {:id :N9,
+   :line :certificates,
+   :what "the manifest's assertion set emptied",
+   :before :green,
+   :after :blocked,
+   :new-blockers
+   ["the manifest names runs [] while the live awaiting-acceptance certificates are [\"2026-09-01-s5\" \"2026-09-04-re5\"] -- regenerate the manifest"],
+   :caught? true}
+  {:id :N10,
+   :line :closability-audit,
+   :what
+   "the closability audit loses the row for a hole RUN4's own row names",
+   :before :blocked,
+   :after :blocked,
+   :new-blockers
+   ["the closability audit carries no row for wmRunConformsToWiring, which RUN4's row names (:not-derivable)"],
+   :caught? true}],
+ :caught 10,
+ :missed []}

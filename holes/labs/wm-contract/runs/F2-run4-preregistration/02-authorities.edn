@@ -1,0 +1,44 @@
+{:authorities
+ [{:key "control-map",
+   :kind :sha256,
+   :identity
+   "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
+   :path "p4ng:empirics-futon/control-map-edges.edn",
+   :git-commit "e508ece",
+   :as-of "2026-08-30",
+   :from [:U49 :RE5]}
+  {:key "trace:2026-09-01-s5",
+   :kind :sha256,
+   :identity
+   "c3480955286e548be6fd4bbde80e5081446cfaaac1500294e2de1fa44e2d7c67",
+   :path
+   "futon2:holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn",
+   :git-commit "5a66411",
+   :as-of "2026-09-01T22:56:17.282228522Z",
+   :from [:U49]}
+  {:key "trace:2026-09-04-re5",
+   :kind :sha256,
+   :identity
+   "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120",
+   :path
+   "futon2:holes/labs/wm-contract/runs/2026-09-04-re5/wm-trace-re5.edn",
+   :git-commit "e0552943",
+   :as-of "2026-09-04T07:52:31.929452654Z",
+   :from [:RE5]}
+  {:key "contract:U49",
+   :kind :git-commit,
+   :identity "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+   :path "mathlib4:DarkTower/WarMachine/Holes.lean",
+   :git-commit "11c2e44affa167bf85b0a2d7c29d8705f89a8d08",
+   :as-of nil,
+   :from [:U49]}
+  {:key "contract:RE5",
+   :kind :git-commit,
+   :identity "581034b67e47240b7a4003dc39bdd7dd545e1daf",
+   :path "mathlib4:DarkTower/WarMachine/Holes.lean",
+   :git-commit "581034b67e47240b7a4003dc39bdd7dd545e1daf",
+   :as-of nil,
+   :from [:RE5]}],
+ :count 5,
+ :note
+ "COPIED from the certificates, not re-taken. run4_readiness.bb compares each identity to the live repositories; this file is the comparand."}

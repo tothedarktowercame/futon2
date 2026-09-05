@@ -1,0 +1,29 @@
+{:row :F2,
+ :epic "holes/labs/wm-contract/EPIC-run-era.md",
+ :ruling
+ "Joe, 2026-09-05 (RUN4 preregistration ruling, EPIC-run-era.md)",
+ :produced-by "holes/labs/wm-contract/run4_prereg_transcribe.bb",
+ :certificates
+ [{:path
+   "holes/labs/wm-contract/runs/U49-run-conformance/certificate.edn",
+   :row :U49,
+   :run "2026-09-01-s5",
+   :status :minted-awaiting-acceptance,
+   :sha256
+   "d85810d9947c88910c0b35412e8e922045c781744fb651d7a68374a5d5312348",
+   :lean-block-sha256
+   "5adf397f80ab51acdfd86c01dcbee9b20fd1692f0f8c30446fef36abddf50e11"}
+  {:path
+   "holes/labs/wm-contract/runs/RE5-run-conformance/certificate.edn",
+   :row :RE5,
+   :run "2026-09-04-re5",
+   :status :minted-awaiting-acceptance,
+   :sha256
+   "44b4c4794d6a28c60567103e5401e1f88cdeff71ee1a131cdd8e26b283e3b632",
+   :lean-block-sha256
+   "3858f4f29d194a88c1e11bb09fbcd823e7f0abf8061e8b2b832805ef8e0353b6"}],
+ :holes-lean
+ {:path "mathlib4/DarkTower/WarMachine/Holes.lean",
+  :sha256
+  "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b"},
+ :emitted-lean "mathlib4/DarkTower/WarMachine/Run4Preregistration.lean"}
