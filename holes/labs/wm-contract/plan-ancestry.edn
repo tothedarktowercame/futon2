@@ -1,0 +1,139 @@
+;; plan-ancestry.edn -- the operative plan artifacts of the WM build, and the
+;; ancestry each one pins. Schema from N-process-trap-recording-conventions.md:267
+;; (§3, "Ancestry and surfacing fields (F5)"); mechanism from
+;; DRIFT-2026-09-05-account.md:125 (§4-§5), where the R5 spine was displaced with
+;; no actor-authored decision and no field in which such a decision could have
+;; been recorded.
+;;
+;; Checked by: bb ancestry_check.bb  (called from worklist_check.bb, so the loop
+;; runs it before a seat takes a row).
+;;
+;; Fields, per §3:
+;;   :artifact                 repo-relative path of the plan (must exist)
+;;   :ancestor/commissioning   file or file:line the plan descends from (must resolve)
+;;   :clauses/declared         clause ids THIS plan declares, each with a pointer
+;;   :clauses/inherited        clause ids carried forward from the ancestor
+;;   :clauses/dropped          {:clause :by :at :decision/not-done} -- all four required
+;;   :deps/derived             [[producer consumer] ...] over the ids in :order
+;;                             (clause ids, or the nouns a spine plan schedules)
+;;   :order                    the schedule the plan declares, if it declares one
+;;   :notify/required?         whether this record must be surfaced (T6)
+;;   :notify/discharged-at     the surfacing event id -- not a timestamp alone
+;;
+;; JURISDICTION. :grandfathered true means the plan predates the F5 gate: what it
+;; DECLARES is still checked in full (pointers resolve; a dropped clause carries
+;; its four fields; an inherited clause is one the ancestor actually declares; no
+;; consumer is ordered before its producer), but a clause of its ancestor that is
+;; neither inherited nor dropped is REPORTED as unaccounted rather than refused.
+;; A plan minted after the gate refuses on the same finding. Same rule as the
+;; worklist rows: grandfathering excuses an absence, never a falsehood.
+{:schema :wm/plan-ancestry-v1
+ :as-of "2026-09-05"
+ :repo "futon2"
+ :basis ["holes/N-process-trap-recording-conventions.md:267"
+         "holes/problems/DRIFT-2026-09-05-account.md:125"]
+ :plans
+ [{:artifact "holes/problems/BUILD-tech-lead-charter.md"
+   :ancestor/commissioning "holes/problems/BUILD-tech-lead-charter.md:3"
+   :ancestor/note "Root of Structure A: Joe's commissioning words, quoted verbatim in the artifact's own opening (DRIFT-2026-09-05-account.md:11-16). The ancestor is not another plan, so no clause-completeness check applies to this row."
+   :clauses/declared {:parallel-r-node-build "holes/problems/BUILD-tech-lead-charter.md:3"
+                      :interface-coordination "holes/problems/BUILD-tech-lead-charter.md:53"
+                      :cml-first-then-r9-r2-r8 "holes/problems/BUILD-tech-lead-charter.md:25"
+                      :review-as-real-gate "holes/problems/BUILD-tech-lead-charter.md:30"}
+   :clauses/inherited []
+   :clauses/dropped []
+   :deps/derived [[:cml-first-then-r9-r2-r8 :review-as-real-gate]]
+   :order [:parallel-r-node-build :interface-coordination :cml-first-then-r9-r2-r8 :review-as-real-gate]
+   :notify/required? false
+   :grandfathered true}
+
+  {:artifact "holes/problems/P-validated-R5.md"
+   :ancestor/commissioning "holes/problems/BUILD-tech-lead-charter.md:3"
+   :ancestor/note "claude-15 translated the charter's commission into the R5 spine on 2026-08-30 (DRIFT-2026-09-05-account.md:16). The clause mapping onto the charter's four clauses is NOT declared here -- writing one would be a judgement this row is not entitled to make -- so the checker reports the unaccounted count."
+   :clauses/declared {:operator-acceptance-gate "holes/problems/P-validated-R5.md:8"
+                      :definition-order "holes/problems/P-validated-R5.md:90"
+                      :each-step-refusable "holes/problems/P-validated-R5.md:90"}
+   :clauses/inherited []
+   :clauses/dropped []
+   ;; The chain of holes/problems/P-validated-R5.md:90, as data. This is the
+   ;; clause DRIFT-2026-09-05-account.md:79 names as lost: it existed as prose in
+   ;; three places and in no field a checker reads.
+   :deps/derived [[:outcome :c] [:c :cascade] [:cascade :policy]
+                  [:policy :q-o-pi] [:q-o-pi :g-pi] [:g-pi :coverage]]
+   :order [:outcome :c :cascade :policy :q-o-pi :g-pi :coverage]
+   :notify/required? false
+   :grandfathered true}
+
+  {:artifact "holes/TN-edge-review-aif-wiring.md"
+   :ancestor/commissioning "holes/TN-edge-review-aif-wiring.md:19"
+   :ancestor/note "Root of Structure B: Joe's 2026-09-01 standard, quoted verbatim in the note's §1. Not another plan, so no clause-completeness check applies."
+   :clauses/declared {:edge-justified-by-an-equation-or-plumbing "holes/TN-edge-review-aif-wiring.md:30"
+                      :every-equation-carries-its-citation "holes/TN-edge-review-aif-wiring.md:36"
+                      :free-hand-choices-written-down "holes/TN-edge-review-aif-wiring.md:42"
+                      :derived-means-derived "holes/TN-edge-review-aif-wiring.md:47"
+                      :class-6a-applies-to-the-check-itself "holes/TN-edge-review-aif-wiring.md:52"
+                      :one-row-per-invocation "holes/TN-edge-review-aif-wiring.md:498"
+                      :second-reader-gate "holes/TN-edge-review-aif-wiring.md:500"
+                      :no-rulings-in-the-loop "holes/TN-edge-review-aif-wiring.md:502"
+                      :regenerate-only-when-clear "holes/TN-edge-review-aif-wiring.md:503"}
+   :clauses/inherited []
+   :clauses/dropped []
+   :deps/derived []
+   :notify/required? false
+   :grandfathered true}
+
+  {:artifact "holes/labs/wm-contract/worklist.edn"
+   :ancestor/commissioning "holes/TN-edge-review-aif-wiring.md:245"
+   :ancestor/note "The ledger's own :source field names TN §6, §8, §9. THE LINK TO holes/problems/P-validated-R5.md IS NOT ESTABLISHED: DRIFT-2026-09-05-account.md:125 searched BUILD-ledger.md, BUILD-status.md, DECISIONS-REGISTER.md, DECISIONS-PENDING.md, the charter, all BUILD packets, the two REPL archives and git subjects 2026-08-30..09-05, and found no actor-authored decision replacing Structure A with Structure B. No :clauses/dropped entry is written for that displacement, because a dropped-clause record names an author, a date and a rationale, and inventing one would fabricate the decision the account could not find."
+   :clauses/declared {:statuses-open-to-done "holes/labs/wm-contract/worklist.edn:5"
+                      :class-j-never-taken "holes/labs/wm-contract/worklist.edn:6"
+                      :rulings-never-written-by-the-loop "holes/labs/wm-contract/worklist.edn:7"
+                      :registry-rows-held-until-second-read "holes/labs/wm-contract/worklist.edn:23"}
+   :clauses/inherited [:one-row-per-invocation :second-reader-gate :no-rulings-in-the-loop
+                       :regenerate-only-when-clear]
+   :clauses/dropped []
+   :deps/derived []
+   :notify/required? false
+   :grandfathered true}
+
+  {:artifact "holes/problems/P-assured-process.md"
+   :ancestor/commissioning "holes/problems/P-assured-process.md:20"
+   :ancestor/note "Transcribed from the artifact's own prose ancestry block (holes/problems/P-assured-process.md:7-10), which names its §0 verbatim as the commissioning ancestor and 'dropped clauses: none'."
+   :clauses/declared {:process-conduct-unassured "holes/problems/P-assured-process.md:34"
+                      :parallel-track "holes/problems/P-assured-process.md:11"}
+   :clauses/inherited []
+   :clauses/dropped []
+   :deps/derived []
+   :notify/required? false
+   :grandfathered true}
+
+  ;; T5, reflexivity: the gate's own registry is a plan artifact and pins its
+  ;; ancestry like any other. Not grandfathered -- it is minted at the gate's
+  ;; landing, so it is the first artifact the full check applies to, and every
+  ;; clause of its registered ancestor is accounted for below.
+  {:artifact "holes/labs/wm-contract/plan-ancestry.edn"
+   :ancestor/commissioning "holes/N-process-trap-recording-conventions.md:267"
+   :ancestor/note "The conventions note's §3 table is this registry's schema, field for field."
+   :clauses/declared {:plans-pin-their-ancestor "holes/N-process-trap-recording-conventions.md:280"
+                      :dropped-clauses-carry-author-date-rationale "holes/N-process-trap-recording-conventions.md:275"
+                      :grandfathering-excuses-absence-not-falsehood "holes/labs/wm-contract/plan-ancestry.edn"}
+   :clauses/inherited [:ancestry-fields :notify-fields :decision-not-done]
+   :clauses/dropped [{:clause :surfacing-discharge-enforced
+                      :by "claude (F5 seat)"
+                      :at "2026-09-05"
+                      :decision/not-done "The §3 rule that a record with :notify/required? true is not filed until :notify/discharged-at names a real surfacing event is DECLARED in this registry's field list and is NOT ENFORCED by ancestry_check.bb: no plan registered today sets :notify/required? true, so a checker written for that path would have no population to run on and no control that could distinguish it from a no-op. F5's acceptance names two refusals -- ancestry-less mint, clause-dropping spec -- and this is neither. Recorded as dropped rather than silently unimplemented; the rung is aspirational in the sense of N-process-trap-recording-conventions.md:30."}]
+   :deps/derived [[:plans-pin-their-ancestor :dropped-clauses-carry-author-date-rationale]]
+   :order [:plans-pin-their-ancestor :dropped-clauses-carry-author-date-rationale
+           :grandfathering-excuses-absence-not-falsehood]
+   :notify/required? false
+   :grandfathered false}]
+
+ ;; The clauses N-process-trap-recording-conventions.md §3 declares, so that the
+ ;; registry above can be checked against it as a registered ancestor rather than
+ ;; against a reading of it.
+ :ancestor-clauses
+ {"holes/N-process-trap-recording-conventions.md:267"
+  {:ancestry-fields "holes/N-process-trap-recording-conventions.md:273"
+   :notify-fields "holes/N-process-trap-recording-conventions.md:277"
+   :decision-not-done "holes/N-process-trap-recording-conventions.md:294"
+   :surfacing-discharge-enforced "holes/N-process-trap-recording-conventions.md:283"}}}

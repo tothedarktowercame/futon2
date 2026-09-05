@@ -210,6 +210,24 @@
     (die (:id i) "looks like a control-map node (R1..R20). Run rows are RUN1.., "
          "so a bare R<digit> always means a node.")))
 
+;; ---------------------------------------------------------------------------
+;; :F5, the contract-fidelity gate. Run here rather than as a separate step in
+;; the loop scripts, because worklist_check.bb is what wm-build-loop.sh calls
+;; BEFORE it hands a row to a seat (`ledger_ok || exit`) -- so a mint with no
+;; ancestry cannot enter a seat, which is the acceptance. Kept as its own script
+;; so a negative control can point it at a temp ledger without touching this one.
+(let [checker (str script-dir "/ancestry_check.bb")]
+  (when (.exists (io/file checker))
+    (let [{:keys [exit out err]} (shell/sh "bb" checker
+                                           "--worklist" (str (io/file (or (first *command-line-args*)
+                                                                          (str script-dir "/worklist.edn"))))
+                                           "--repo" repo-root
+                                           :dir script-dir)]
+      (doseq [l (remove str/blank? (str/split-lines (str out))) ] (println l))
+      (when-not (zero? exit)
+        (doseq [l (remove str/blank? (str/split-lines (str err)))] (binding [*out* *err*] (println l)))
+        (die "the contract-fidelity gate refused this ledger (:F5)")))))
+
 (def by-status (frequencies (map :status (:items w))))
 (println (format "worklist_check: %d items OK; %s; %d signed registry entries verified unchanged since signature, %d superseded and skipped, %d declared :covers-key :none, %d signed registry rows carry no :covers-key and are NOT checked"
                  (count (:items w)) (pr-str by-status)
