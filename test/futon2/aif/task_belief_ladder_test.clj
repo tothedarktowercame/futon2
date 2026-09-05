@@ -149,6 +149,56 @@
     (is (= 2 (:task-belief/rung (ladder/classify ctx (assoc plant :type :advance-mission))))
         "the SAME plant retyped reaches rung 2 under :k-type, so rung 3 above is a classification and not a lookup miss")))
 
+(deftest the-mint-payload-counts-the-partition-by-reason
+  ;; :U63. The defect this pins: `refusal-payload` labelled the whole rung-3
+  ;; partition `refusal-reason` and counted all of it, so on the 2026-09-05 u60
+  ;; field the payload asserted 98 zero-support refusals over a partition of 45
+  ;; zero-support and 53 :no-open-holes. A fixture with BOTH reasons is what
+  ;; makes the test able to fail: over the plain field every refusal is
+  ;; zero-support and a single-reason payload reads correct.
+  (let [mixed (assoc-in field [0 :open-hole-count] 0)   ; M-alpha: rung 1, refused by the hole rule
+        ctx (ladder/field-context mixed history {:relation :k-doc-xref :doc-reader reader})
+        {:keys [refusals]} (ladder/apply-ladder mixed ctx)
+        {:keys [tension]} (ladder/refusal-tension
+                           {:subject-id :test-mixed :refusals refusals :relation :k-doc-xref
+                            :artifact "runs/U52-ladder/04-refusals.edn" :at "2026-09-05"
+                            :pointers ["runs/U52-ladder/04-refusals.edn"]})
+        payload (:tension/refusal tension)]
+    (is (= 2 (count refusals)) "M-alpha by the hole rule, M-gamma by construction-exhausted")
+    (is (= {:no-open-holes 1
+            :task-belief/zero-support-construction-exhausted 1}
+           (:refused-by-reason payload))
+        "one count per reason, not one count under one reason")
+    (is (= [:no-open-holes :task-belief/zero-support-construction-exhausted]
+           (:task-belief/refusal payload))
+        "the reasons the records actually carry, in sorted order")
+    (is (= 2 (:refused-count payload)))
+    (is (= (:refused-count payload) (reduce + 0 (vals (:refused-by-reason payload))))
+        "the per-reason counts sum to the total, which is what makes the total checkable")
+    (is (= {:no-open-holes ["M-alpha"]
+            :task-belief/zero-support-construction-exhausted ["M-gamma"]}
+           (:refused-sample payload))
+        "the sample is per reason: one drawn from the union cannot be read against either count")
+    (testing "the mint event names the same partition rather than one reason"
+      (let [{:keys [event]} (ladder/refusal-tension
+                             {:subject-id :test-mixed :refusals refusals :relation :k-doc-xref
+                              :artifact "a" :at "2026-09-05" :pointers ["p:1"]})]
+        (is (re-find #"1 :no-open-holes" (:event/note event)))
+        (is (re-find #"1 :task-belief/zero-support-construction-exhausted"
+                     (:event/note event)))))
+    (testing "and a single-reason partition still reads as one reason"
+      (let [only (:tension/refusal
+                  (:tension (ladder/refusal-tension
+                             {:subject-id :test-one
+                              :refusals (filterv #(= ladder/refusal-reason (:refusal/reason %))
+                                                 refusals)
+                              :relation :k-doc-xref :artifact "a" :at "2026-09-05"
+                              :pointers ["p:1"]})))]
+        (is (= [ladder/refusal-reason] (:task-belief/refusal only)))
+        (is (= {ladder/refusal-reason 1} (:refused-by-reason only)))))
+    (testing "every reason a record carries is one this namespace declares"
+      (is (every? (set ladder/refusal-reasons) (map :refusal/reason refusals))))))
+
 (deftest the-mint-payload-has-the-shape-the-ledger-declares
   (let [{:keys [refusals]} (ladder/apply-ladder field (ctx-for :k-doc-xref))
         {:keys [tension event]}

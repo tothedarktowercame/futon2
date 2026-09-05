@@ -300,10 +300,32 @@
                  :reason :open-hole-count-not-recorded}))))
 
 (def refusal-reason
-  "The typed refusal. One reason, because there is one way to reach rung 3."
+  "The typed refusal a candidate gets when construction ran out: no persisted
+   decision chose it and no kin key under the declared relation carries one.
+   It was the ONLY reason until `classify` gained the hole rule; see
+   `refusal-reasons`, which is the whole set."
   :task-belief/zero-support-construction-exhausted)
 
 (def no-open-holes-refusal-reason :no-open-holes)
+
+(def refusal-reasons
+  "Every reason a rung-3 refusal may carry, in declaration order. There are TWO
+   of them, and the count is what `refusal-payload` got wrong until :U63: when
+   the hole rule landed in `classify` (commit `24cea67e`, after U52's mint)
+   `refusal-reason` stopped being the only way to reach rung 3, so a rung-3
+   partition stopped being one reason's set. This vector is the declaration a
+   record is checked against; `refusals-by-reason` counts what the records
+   actually carry, so a third reason arriving without being declared here shows
+   up as a count under a reason this vector does not list rather than
+   disappearing into one it does."
+  [refusal-reason no-open-holes-refusal-reason])
+
+(defn refusals-by-reason
+  "reason -> how many of `refusals` carry it. Sorted, so a printed payload is
+   byte-stable, and built from the RECORDS rather than from `refusal-reasons`:
+   a reason nobody carries is absent, and a reason nobody declared is present."
+  [refusals]
+  (into (sorted-map) (frequencies (map :refusal/reason refusals))))
 
 (defn refusal-record
   "The typed record a rung-3 candidate is refused with. It names the candidate,
@@ -369,9 +391,9 @@
 ;; ---------------------------------------------------------------------------
 
 (defn refusal-payload
-  "The typed refusal a rung-3 PARTITION is refused with. One refusal per
-   (subject, reason), because a proto-pattern is the class and not each of its
-   instances.
+  "The typed refusal a rung-3 PARTITION is refused with. One record per subject
+   rather than one per candidate, because a proto-pattern is the class and not
+   each of its instances.
 
    THE MEMBERS ARE POINTED AT, NOT INLINED. The rung-3 partition of one field is
    80-odd candidates; carrying all of them inside the record would put three
@@ -379,16 +401,41 @@
    and make it unreadable for a set that is already written down, per candidate
    and with its own typed record, in the artifact `:artifact` names. What is
    inline is what a reader needs to check the claim without opening it: the
-   count, the relation that came up empty, and a deterministic sample."
+   counts, the relation that came up empty, and a deterministic sample.
+
+   THE PARTITION IS NOT ONE REASON'S SET, AND SAYING WHICH IS THIS RECORD'S JOB
+   (:U63). Until this row `:task-belief/refusal` was the single keyword
+   `refusal-reason` and `:refused-count` was one number over the whole
+   partition, so the record asserted that every member had been refused for
+   zero support. `classify`'s hole rule (`24cea67e`) had already made that
+   false: on the 2026-09-05 u60 field 53 of the 98 members were refused
+   `:no-open-holes`, and the tension minted from this payload would have said
+   98 zero-support refusals. So `:task-belief/refusal` is the vector of reasons
+   the records ACTUALLY carry, `:refused-by-reason` carries one count each, and
+   `:refused-count` stays the total the two must sum to -- which is what
+   `u52_ladder.clj`'s `:positive/refusal-is-typed-and-grounded` checks.
+   `:refused-sample` is per reason for the same reason: a sample drawn from the
+   union cannot be read against either count."
   [{:keys [subject-id relation refusals artifact]}]
-  {:task-belief/refusal refusal-reason
-   :grain :mission
-   :subject subject-id
-   :relation relation
-   :refused-count (count refusals)
-   :refused-sample (vec (take 5 (sort (map (comp str second :refusal/action-key) refusals))))
-   :artifact artifact
-   :kin []})
+  (let [by-reason (refusals-by-reason refusals)]
+    ;; array-map, not a literal: the ninth key :U63 adds tips a map literal over
+    ;; into a hash-map, which prints in hash order -- so a record written to be
+    ;; read in a curated ledger would come back with its sample above its count.
+    ;; Equality is unaffected, which is what the replay and u41 control 12 use.
+    (array-map
+     :task-belief/refusal (vec (keys by-reason))
+     :grain :mission
+     :subject subject-id
+     :relation relation
+     :refused-count (count refusals)
+     :refused-by-reason by-reason
+     :refused-sample
+     (into (sorted-map)
+           (map (fn [[reason rs]]
+                  [reason (vec (take 5 (sort (map (comp str second :refusal/action-key) rs))))]))
+           (group-by :refusal/reason refusals))
+     :artifact artifact
+     :kin [])))
 
 (defn refusal-tension
   "The U41 tension/event pair a rung-3 partition mints, in the shape the ledger
@@ -454,4 +501,7 @@
              :by (or by "U52 ladder rung-3 refusal mint")
              :evidence (vec pointers)
              :note (str "Minted by the U52 ladder's rung-3 partition; "
-                        n " refusal record(s), reason " refusal-reason ".")}}))
+                        n " refusal record(s), by reason "
+                        (str/join ", " (map (fn [[reason c]] (str c " " reason))
+                                            (refusals-by-reason refusals)))
+                        ".")}}))

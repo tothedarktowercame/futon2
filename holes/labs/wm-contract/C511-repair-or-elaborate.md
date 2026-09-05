@@ -352,7 +352,7 @@ the run-id string, any of the run's tick ids (read off the store's receipt
 filenames, `:456-465`), and any run-carrying key in the schema. The green branch
 is `(or run-id-appears-in-ledger? (seq tick-ids-appearing))` (`:500-505`). The
 receipt's `:why-the-ledger-cannot-be-run-scoped` (`:516-524`) records the finding
-the deposits rest on: the `:event` schema (`tension-ledger.edn:470-480`) has
+the deposits rest on: the `:event` schema (`tension-ledger.edn:528-537`) has
 `:event/at`, `:event/by`, `:event/row` and no run field.
 
 ### REPAIR — demonstrated for `2026-09-01-s5` and `2026-09-04-re5`

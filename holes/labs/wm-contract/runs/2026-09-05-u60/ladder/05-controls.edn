@@ -34,13 +34,24 @@
     :why
     "the ruling's first clause as an ORDERING PROPERTY OF THE ARITHMETIC, not a claim about it: with support n/(n+1) a rung-1 candidate scores at least 0.5 and the 0.5 generalization discount holds every constructed value strictly under 0.5"},
    :positive/refusal-is-typed-and-grounded
-   {:refusals 99,
-    :census-rung-3 99,
-    :mistyped 53,
-    :ungrounded 53,
-    :pass? false,
+   {:minted-refusal
+    [:no-open-holes :task-belief/zero-support-construction-exhausted],
+    :minted-count 99,
+    :declared-reasons
+    [:task-belief/zero-support-construction-exhausted :no-open-holes],
+    :mistyped 0,
     :why
-    "every refusal carries the one typed reason and a `not found` basis naming where the ladder looked -- a refusal is distinguishable from a candidate nobody considered"},
+    "every refusal carries one of the two DECLARED reasons and a basis that grounds that reason -- a refusal is distinguishable from a candidate nobody considered -- AND the payload minted from the partition carries those counts rather than one number under one reason (:U63)",
+    :by-reason
+    {:no-open-holes 53,
+     :task-belief/zero-support-construction-exhausted 46},
+    :refusals 99,
+    :pass? true,
+    :minted-by-reason
+    {:no-open-holes 53,
+     :task-belief/zero-support-construction-exhausted 46},
+    :ungrounded 0,
+    :census-rung-3 99},
    :negative/empty-history-refuses-everything-in-scope
    {:census {3 132, :out-of-scope 13},
     :refused 132,
@@ -121,13 +132,24 @@
     :why
     "the ruling's first clause as an ORDERING PROPERTY OF THE ARITHMETIC, not a claim about it: with support n/(n+1) a rung-1 candidate scores at least 0.5 and the 0.5 generalization discount holds every constructed value strictly under 0.5"},
    :positive/refusal-is-typed-and-grounded
-   {:refusals 98,
-    :census-rung-3 98,
-    :mistyped 53,
-    :ungrounded 53,
-    :pass? false,
+   {:minted-refusal
+    [:no-open-holes :task-belief/zero-support-construction-exhausted],
+    :minted-count 98,
+    :declared-reasons
+    [:task-belief/zero-support-construction-exhausted :no-open-holes],
+    :mistyped 0,
     :why
-    "every refusal carries the one typed reason and a `not found` basis naming where the ladder looked -- a refusal is distinguishable from a candidate nobody considered"},
+    "every refusal carries one of the two DECLARED reasons and a basis that grounds that reason -- a refusal is distinguishable from a candidate nobody considered -- AND the payload minted from the partition carries those counts rather than one number under one reason (:U63)",
+    :by-reason
+    {:no-open-holes 53,
+     :task-belief/zero-support-construction-exhausted 45},
+    :refusals 98,
+    :pass? true,
+    :minted-by-reason
+    {:no-open-holes 53,
+     :task-belief/zero-support-construction-exhausted 45},
+    :ungrounded 0,
+    :census-rung-3 98},
    :negative/empty-history-refuses-everything-in-scope
    {:census {3 133, :out-of-scope 13},
     :refused 133,
@@ -208,13 +230,24 @@
     :why
     "the ruling's first clause as an ORDERING PROPERTY OF THE ARITHMETIC, not a claim about it: with support n/(n+1) a rung-1 candidate scores at least 0.5 and the 0.5 generalization discount holds every constructed value strictly under 0.5"},
    :positive/refusal-is-typed-and-grounded
-   {:refusals 98,
-    :census-rung-3 98,
-    :mistyped 53,
-    :ungrounded 53,
-    :pass? false,
+   {:minted-refusal
+    [:no-open-holes :task-belief/zero-support-construction-exhausted],
+    :minted-count 98,
+    :declared-reasons
+    [:task-belief/zero-support-construction-exhausted :no-open-holes],
+    :mistyped 0,
     :why
-    "every refusal carries the one typed reason and a `not found` basis naming where the ladder looked -- a refusal is distinguishable from a candidate nobody considered"},
+    "every refusal carries one of the two DECLARED reasons and a basis that grounds that reason -- a refusal is distinguishable from a candidate nobody considered -- AND the payload minted from the partition carries those counts rather than one number under one reason (:U63)",
+    :by-reason
+    {:no-open-holes 53,
+     :task-belief/zero-support-construction-exhausted 45},
+    :refusals 98,
+    :pass? true,
+    :minted-by-reason
+    {:no-open-holes 53,
+     :task-belief/zero-support-construction-exhausted 45},
+    :ungrounded 0,
+    :census-rung-3 98},
    :negative/empty-history-refuses-everything-in-scope
    {:census {3 133, :out-of-scope 13},
     :refused 133,

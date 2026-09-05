@@ -1,6 +1,7 @@
 {:statement
  "The rung-3 partition of each field: one typed refusal record per candidate, and one U41 tension/event pair per partition. The pairs are BUILT here and APPENDED by u52_mint_refusals.bb, because the ledger append is U41's sole write API.",
- :reason :task-belief/zero-support-construction-exhausted,
+ :declared-reasons
+ [:task-belief/zero-support-construction-exhausted :no-open-holes],
  :per-field
  {:s5
   {:refused 99,
@@ -1988,22 +1989,33 @@
               :pattern-links [],
               :refusal
               {:task-belief/refusal
-               :task-belief/zero-support-construction-exhausted,
+               [:no-open-holes
+                :task-belief/zero-support-construction-exhausted],
                :grain :mission,
                :subject :s5-4e35e740,
                :relation :k-doc-xref,
                :refused-count 99,
+               :refused-by-reason
+               {:no-open-holes 53,
+                :task-belief/zero-support-construction-exhausted 46},
                :refused-sample
-               ["M-agents-queue"
-                "M-aif-a-matrix-faithfulness"
-                "M-aif-gap-epistemic-affordance"
-                "M-aif-policy-conditioned-eig"
-                "M-aif-tokamak"],
+               {:no-open-holes
+                ["M-agents-queue"
+                 "M-aif-a-matrix-faithfulness"
+                 "M-aif-gap-epistemic-affordance"
+                 "M-aif-policy-conditioned-eig"
+                 "M-aif-tokamak"],
+                :task-belief/zero-support-construction-exhausted
+                ["M-apm-demonstration"
+                 "M-archaeology-control"
+                 "M-autoclock-in"
+                 "M-canon-fingerprint-store"
+                 "M-categorical-code"]},
                :artifact
                "futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn",
                :kin []},
               :statement
-              "{:task-belief/refusal :task-belief/zero-support-construction-exhausted, :grain :mission, :subject :s5-4e35e740, :relation :k-doc-xref, :refused-count 99, :refused-sample [\"M-agents-queue\" \"M-aif-a-matrix-faithfulness\" \"M-aif-gap-epistemic-affordance\" \"M-aif-policy-conditioned-eig\" \"M-aif-tokamak\"], :artifact \"futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn\", :kin []}",
+              "{:task-belief/refusal [:no-open-holes :task-belief/zero-support-construction-exhausted], :grain :mission, :subject :s5-4e35e740, :relation :k-doc-xref, :refused-count 99, :refused-by-reason {:no-open-holes 53, :task-belief/zero-support-construction-exhausted 46}, :refused-sample {:no-open-holes [\"M-agents-queue\" \"M-aif-a-matrix-faithfulness\" \"M-aif-gap-epistemic-affordance\" \"M-aif-policy-conditioned-eig\" \"M-aif-tokamak\"], :task-belief/zero-support-construction-exhausted [\"M-apm-demonstration\" \"M-archaeology-control\" \"M-autoclock-in\" \"M-canon-fingerprint-store\" \"M-categorical-code\"]}, :artifact \"futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn\", :kin []}",
               :note
               "99 candidate(s) of s5-4e35e740 reached rung 3 under k-doc-xref."},
     :event
@@ -2013,7 +2025,7 @@
             :by "U52 ladder rung-3 refusal mint",
             :to-status :carried,
             :note
-            "Minted by the U52 ladder's rung-3 partition; 99 refusal record(s), reason :task-belief/zero-support-construction-exhausted.",
+            "Minted by the U52 ladder's rung-3 partition; 99 refusal record(s), by reason 53 :no-open-holes, 46 :task-belief/zero-support-construction-exhausted.",
             :type :carried,
             :evidence
             ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
@@ -3995,22 +4007,33 @@
               :pattern-links [],
               :refusal
               {:task-belief/refusal
-               :task-belief/zero-support-construction-exhausted,
+               [:no-open-holes
+                :task-belief/zero-support-construction-exhausted],
                :grain :mission,
                :subject :re5-8ae111bc,
                :relation :k-doc-xref,
                :refused-count 98,
+               :refused-by-reason
+               {:no-open-holes 53,
+                :task-belief/zero-support-construction-exhausted 45},
                :refused-sample
-               ["M-agents-queue"
-                "M-aif-a-matrix-faithfulness"
-                "M-aif-gap-epistemic-affordance"
-                "M-aif-policy-conditioned-eig"
-                "M-aif-tokamak"],
+               {:no-open-holes
+                ["M-agents-queue"
+                 "M-aif-a-matrix-faithfulness"
+                 "M-aif-gap-epistemic-affordance"
+                 "M-aif-policy-conditioned-eig"
+                 "M-aif-tokamak"],
+                :task-belief/zero-support-construction-exhausted
+                ["M-apm-demonstration"
+                 "M-archaeology-control"
+                 "M-autoclock-in"
+                 "M-canon-fingerprint-store"
+                 "M-categorical-code"]},
                :artifact
                "futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn",
                :kin []},
               :statement
-              "{:task-belief/refusal :task-belief/zero-support-construction-exhausted, :grain :mission, :subject :re5-8ae111bc, :relation :k-doc-xref, :refused-count 98, :refused-sample [\"M-agents-queue\" \"M-aif-a-matrix-faithfulness\" \"M-aif-gap-epistemic-affordance\" \"M-aif-policy-conditioned-eig\" \"M-aif-tokamak\"], :artifact \"futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn\", :kin []}",
+              "{:task-belief/refusal [:no-open-holes :task-belief/zero-support-construction-exhausted], :grain :mission, :subject :re5-8ae111bc, :relation :k-doc-xref, :refused-count 98, :refused-by-reason {:no-open-holes 53, :task-belief/zero-support-construction-exhausted 45}, :refused-sample {:no-open-holes [\"M-agents-queue\" \"M-aif-a-matrix-faithfulness\" \"M-aif-gap-epistemic-affordance\" \"M-aif-policy-conditioned-eig\" \"M-aif-tokamak\"], :task-belief/zero-support-construction-exhausted [\"M-apm-demonstration\" \"M-archaeology-control\" \"M-autoclock-in\" \"M-canon-fingerprint-store\" \"M-categorical-code\"]}, :artifact \"futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn\", :kin []}",
               :note
               "98 candidate(s) of re5-8ae111bc reached rung 3 under k-doc-xref."},
     :event
@@ -4020,7 +4043,7 @@
             :by "U52 ladder rung-3 refusal mint",
             :to-status :carried,
             :note
-            "Minted by the U52 ladder's rung-3 partition; 98 refusal record(s), reason :task-belief/zero-support-construction-exhausted.",
+            "Minted by the U52 ladder's rung-3 partition; 98 refusal record(s), by reason 53 :no-open-holes, 45 :task-belief/zero-support-construction-exhausted.",
             :type :carried,
             :evidence
             ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
@@ -6003,22 +6026,33 @@
               :pattern-links [],
               :refusal
               {:task-belief/refusal
-               :task-belief/zero-support-construction-exhausted,
+               [:no-open-holes
+                :task-belief/zero-support-construction-exhausted],
                :grain :mission,
                :subject :u60-3416e82b,
                :relation :k-doc-xref,
                :refused-count 98,
+               :refused-by-reason
+               {:no-open-holes 53,
+                :task-belief/zero-support-construction-exhausted 45},
                :refused-sample
-               ["M-agents-queue"
-                "M-aif-a-matrix-faithfulness"
-                "M-aif-gap-epistemic-affordance"
-                "M-aif-policy-conditioned-eig"
-                "M-aif-tokamak"],
+               {:no-open-holes
+                ["M-agents-queue"
+                 "M-aif-a-matrix-faithfulness"
+                 "M-aif-gap-epistemic-affordance"
+                 "M-aif-policy-conditioned-eig"
+                 "M-aif-tokamak"],
+                :task-belief/zero-support-construction-exhausted
+                ["M-apm-demonstration"
+                 "M-archaeology-control"
+                 "M-autoclock-in"
+                 "M-canon-fingerprint-store"
+                 "M-categorical-code"]},
                :artifact
                "futon2/holes/labs/wm-contract/runs/2026-09-05-u60/ladder/04-refusals.edn",
                :kin []},
               :statement
-              "{:task-belief/refusal :task-belief/zero-support-construction-exhausted, :grain :mission, :subject :u60-3416e82b, :relation :k-doc-xref, :refused-count 98, :refused-sample [\"M-agents-queue\" \"M-aif-a-matrix-faithfulness\" \"M-aif-gap-epistemic-affordance\" \"M-aif-policy-conditioned-eig\" \"M-aif-tokamak\"], :artifact \"futon2/holes/labs/wm-contract/runs/2026-09-05-u60/ladder/04-refusals.edn\", :kin []}",
+              "{:task-belief/refusal [:no-open-holes :task-belief/zero-support-construction-exhausted], :grain :mission, :subject :u60-3416e82b, :relation :k-doc-xref, :refused-count 98, :refused-by-reason {:no-open-holes 53, :task-belief/zero-support-construction-exhausted 45}, :refused-sample {:no-open-holes [\"M-agents-queue\" \"M-aif-a-matrix-faithfulness\" \"M-aif-gap-epistemic-affordance\" \"M-aif-policy-conditioned-eig\" \"M-aif-tokamak\"], :task-belief/zero-support-construction-exhausted [\"M-apm-demonstration\" \"M-archaeology-control\" \"M-autoclock-in\" \"M-canon-fingerprint-store\" \"M-categorical-code\"]}, :artifact \"futon2/holes/labs/wm-contract/runs/2026-09-05-u60/ladder/04-refusals.edn\", :kin []}",
               :note
               "98 candidate(s) of u60-3416e82b reached rung 3 under k-doc-xref."},
     :event
@@ -6028,7 +6062,7 @@
             :by "U52 ladder rung-3 refusal mint",
             :to-status :carried,
             :note
-            "Minted by the U52 ladder's rung-3 partition; 98 refusal record(s), reason :task-belief/zero-support-construction-exhausted.",
+            "Minted by the U52 ladder's rung-3 partition; 98 refusal record(s), by reason 53 :no-open-holes, 45 :task-belief/zero-support-construction-exhausted.",
             :type :carried,
             :evidence
             ["futon2/holes/labs/wm-contract/runs/2026-09-05-u60/ladder/04-refusals.edn"

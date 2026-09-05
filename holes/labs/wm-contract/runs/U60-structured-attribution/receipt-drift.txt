@@ -1,0 +1,19 @@
+=== BEFORE the mint (ledger at HEAD 204c519e)
+ledger /tmp/u63-ledger-before.edn
+  tensions 7  events 15  structural-carriers 0  defects 0
+  2026-09-01-s5              replays-identically false  deposited :typed-absence replays :green          tensions 5->7
+                             fields-moved [":live-derivation" ":run-provenance" ":verdict-deposited" ":why-the-ledger-cannot-be-run-scoped"]
+  2026-09-04-010-accepted    replays-identically true   deposited :typed-absence replays :typed-absence  tensions 7->7
+                             fields-moved []
+  2026-09-04-re5             replays-identically false  deposited :typed-absence replays :green          tensions 5->7
+                             fields-moved [":live-derivation" ":run-provenance" ":verdict-deposited" ":why-the-ledger-cannot-be-run-scoped"]
+
+=== AFTER the mint (the curated ledger)
+ledger /home/joe/code/futon2/holes/labs/wm-contract/tension-ledger.edn
+  tensions 8  events 16  structural-carriers 1  defects 0
+  2026-09-01-s5              replays-identically false  deposited :typed-absence replays :green          tensions 5->8
+                             fields-moved [":live-derivation" ":run-provenance" ":verdict-deposited" ":why-the-ledger-cannot-be-run-scoped"]
+  2026-09-04-010-accepted    replays-identically false  deposited :typed-absence replays :typed-absence  tensions 7->8
+                             fields-moved [":live-derivation" ":run-provenance" ":why-the-ledger-cannot-be-run-scoped"]
+  2026-09-04-re5             replays-identically false  deposited :typed-absence replays :green          tensions 5->8
+                             fields-moved [":live-derivation" ":run-provenance" ":verdict-deposited" ":why-the-ledger-cannot-be-run-scoped"]

@@ -241,6 +241,11 @@
                                   history {:relation relation})]
     (ladder/classify ctx candidate)))
 
+;; The control below reads the payload the mint would carry, and `mint-payload`
+;; is defined with the other mint machinery further down -- the payload belongs
+;; beside the tension it builds, and the control belongs with the controls.
+(declare mint-payload)
+
 (defn controls [field off on]
   (let [hist @case-history
         pm (plateau-members field)
@@ -303,15 +308,52 @@
                   (every? #(seq (get-in % [:task-belief/derivation :provenance])) rung2))
       :why "the ruling: a constructed value is never passed off as observed, and its provenance points at the kin records it generalized from"}
 
+     ;; :U63. This control read the partition as ONE reason's set and reported
+     ;; `mistyped 53` on every field -- correctly, and about ITSELF as much as
+     ;; about the records: `classify`'s hole rule (24cea67e) made
+     ;; `:no-open-holes` a second way to reach rung 3, so 53 records carrying it
+     ;; were counted as mistyped against a declaration of one. What is checked
+     ;; now is that every record carries a DECLARED reason and a basis that
+     ;; grounds THAT reason, and -- the half the row is actually about -- that
+     ;; the mint payload's counts are the records' counts, so a tension cannot
+     ;; assert 98 zero-support refusals over a partition of 45 and 53.
      :positive/refusal-is-typed-and-grounded
-     {:refusals (count refusals)
-      :census-rung-3 (get (:census (:result on)) 3 0)
-      :mistyped (count (remove #(= ladder/refusal-reason (:refusal/reason %)) refusals))
-      :ungrounded (count (remove #(str/starts-with? (str (:refusal/basis %)) "not found") refusals))
-      :pass? (and (= (count refusals) (get (:census (:result on)) 3 0))
-                  (every? #(= ladder/refusal-reason (:refusal/reason %)) refusals)
-                  (every? #(str/starts-with? (str (:refusal/basis %)) "not found") refusals))
-      :why "every refusal carries the one typed reason and a `not found` basis naming where the ladder looked -- a refusal is distinguishable from a candidate nobody considered"}
+     (let [declared (set ladder/refusal-reasons)
+           grounded? (fn [r]
+                       (condp = (:refusal/reason r)
+                         ;; construction ran out: the basis names where the
+                         ;; ladder looked and came up empty
+                         ladder/refusal-reason
+                         (str/starts-with? (str (:refusal/basis r)) "not found")
+                         ;; the hole rule fired: the basis is the rule, and the
+                         ;; rung it OVERRODE is preserved -- which is what makes
+                         ;; this refusal distinguishable from a candidate the
+                         ;; ladder never reached
+                         ladder/no-open-holes-refusal-reason
+                         (and (= ladder/no-open-holes-refusal-reason (:refusal/basis r))
+                              (some? (:refusal/overridden-task-belief r)))
+                         false))
+           mistyped (remove #(contains? declared (:refusal/reason %)) refusals)
+           ungrounded (remove grounded? refusals)
+           by-reason (ladder/refusals-by-reason refusals)
+           minted (get-in (mint-payload field on) [:tension :tension/refusal])]
+       {:refusals (count refusals)
+        :census-rung-3 (get (:census (:result on)) 3 0)
+        :declared-reasons ladder/refusal-reasons
+        :by-reason by-reason
+        :mistyped (count mistyped)
+        :ungrounded (count ungrounded)
+        :minted-refusal (:task-belief/refusal minted)
+        :minted-by-reason (:refused-by-reason minted)
+        :minted-count (:refused-count minted)
+        :pass? (and (= (count refusals) (get (:census (:result on)) 3 0))
+                    (empty? mistyped)
+                    (empty? ungrounded)
+                    (= by-reason (:refused-by-reason minted))
+                    (= (count refusals) (:refused-count minted))
+                    (= (count refusals) (reduce + 0 (vals (:refused-by-reason minted))))
+                    (= (vec (keys by-reason)) (:task-belief/refusal minted)))
+        :why "every refusal carries one of the two DECLARED reasons and a basis that grounds that reason -- a refusal is distinguishable from a candidate nobody considered -- AND the payload minted from the partition carries those counts rather than one number under one reason (:U63)"})
 
      :negative/planted-unknown-candidate-reaches-rung-3
      {:classification (dissoc (classify-one field ladder/default-relation planted-unknown hist)
@@ -499,7 +541,9 @@
 
     (write! "04-refusals.edn"
             {:statement "The rung-3 partition of each field: one typed refusal record per candidate, and one U41 tension/event pair per partition. The pairs are BUILT here and APPENDED by u52_mint_refusals.bb, because the ledger append is U41's sole write API."
-             :reason ladder/refusal-reason
+             ;; :U63 -- the DECLARED set, not one member of it: the partition
+             ;; carries both reasons and the per-field :mint says how many of each
+             :declared-reasons ladder/refusal-reasons
              :per-field
              (into {} (map (fn [f a]
                              [(:id f)

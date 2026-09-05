@@ -454,7 +454,7 @@
 ;;
 ;; WHAT VERDICT THIS DEPOSITS, and the finding that decides it: THE TENSION
 ;; LEDGER CARRIES NO RUN PROVENANCE. Its :event schema
-;; (tension-ledger.edn:356-363) has :event/at, :event/by and :event/row and no
+;; (tension-ledger.edn:528-537) has :event/at, :event/by and :event/row and no
 ;; run field; a tension records :tension/provenance {:who :when :how :pointers}
 ;; and :tension/carried-by, a MISSION. So no event in the committed ledger can
 ;; be attributed to a named WM run, and a per-run verdict cannot be read out of
