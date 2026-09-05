@@ -487,3 +487,52 @@ P-validated-R5 is discharged; the record binds to the :F gate:
   fixture Q; intrinsic-values/state never rehydrated on the tick path;
   the realized-outcome channel). If the F0 seat has already passed this
   point when it lands, the criterion mints as F0b at review.
+
+## Done-AND-WIRED, per-node simulation, and the paper's false "done" (Joe, 2026-09-05)
+
+Verbatim: "this has not been treated as a strategic priority. i have
+been given a dozen sign-off requests, RUN4 has been mooted... none of
+that is the priority until the fundamentals are done and wired. This is
+what I was also saying about the need for per node unit tests. we have
+enough cores on this machine that each node could be spun up and
+simulated by an agent. but instead we have been working our way through
+a number-letter queue with ambiguous foundations, which are moreover
+invisibly ambiguous because if you look at the futon-2026 paper it
+looks as though everything is 'done' except for some procedural
+run-era verification. apparently that is far from true."
+
+Three bindings:
+
+1. **F1's acceptance is amended: done AND WIRED.** "Runtime leg behind
+   a default-off flag" as an END STATE would be the R14-dial failure
+   reproduced at the spine. The flag stays as the delivery mechanism,
+   but F1 does not close until its flip criteria are named, met, and
+   EXECUTED per the autonomy ruling — the constructor consumed on the
+   live tick path, the proxy retired or demoted to a labelled fallback,
+   shown on a stepped run. Parked-dark does not satisfy :F.
+2. **F3 (:F — per-node simulation harness, R5 pilot, then agent
+   fan-out):** each R-node gets a unit harness: synthetic inputs
+   generated against the node's declared contract (aif-equations.edn
+   formula + glossary types), the node's code run in isolation, output
+   validated against the formula — the epistemic layer aligned with
+   reality per node (Joe, 2026-08-30, quoted in P-validated-R5 §0).
+   PILOT ON R5 (the spine; its harness is F1's acceptance instrument).
+   Then fan out: one agent per node in parallel — the cores exist; the
+   runtime-validation catalogue (84 rows, 19 nodes) is the existing
+   inventory the harnesses upgrade from checks-of-code to
+   simulation-against-contract. Deposits per run via the U58 identity
+   capture.
+3. **F4 (:F — the papers tell the fundamentals truth):** futon-2026
+   currently reads as done-except-procedure while G runs on proxies and
+   Policy has no carrier. Fix at the GENERATOR, not by hand prose: a
+   fundamentals block derived from FUNDAMENTALS.edn (F0's deliverable)
+   rendered PROMINENTLY in both papers, and the coverage table's
+   "closed" recontextualized (closed = contract-conformant, which is
+   not theoretically-grounded; the table must say which). The
+   invisible ambiguity is a rendering defect: the honest measurements
+   exist and the page layout buries them.
+
+Also binding, already in force: the dozen sign-off requests were the
+failure mode and stand withdrawn (autonomy ruling); RUN4 stays mooted
+-- F2's meter will simply report BLOCKED-ON [F1 ...] until the spine
+is real, which is the correct answer to "how far off".
