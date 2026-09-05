@@ -1,0 +1,158 @@
+{:schema :wm/symbol-concordance-v1
+ :as-of "2026-09-05"
+ :owner :wm-contract
+ :basis "Exactly the 25 distinct :defines/:exogenous symbols in aif-equations.edn, plus pointer-backed additional readings of those same bare symbols in sec-glossary.tex or futon2 source. H, beta, gamma and parameter-kernel Q forms are recorded as out-of-bound findings in C529, not silently added."
+ :symbols
+ [{:id :observation/vector :bare "o" :fold "o" :reading "The fourteen-channel structured observation." :node :R2 :registry-symbol :o
+   :glossary {:file "p4ng/sec-glossary.tex" :at 12 :term "Observation vector o"}
+   :lean {:ident "machineObservation" :file "DarkTower/WarMachine/MachineObservation.lean" :at 58}
+   :runtime {:var "futon2.aif.observation/observe" :file "src/futon2/aif/observation.clj" :at "103-146"}}
+  {:id :prediction/error :bare "eps" :fold "eps" :reading "Per-channel observed minus predicted value." :node :R8 :registry-symbol :eps
+   :glossary {:file "p4ng/sec-glossary.tex" :at 15 :term "Prediction error epsilon"}
+   :lean {:ident "machineChannelPredictionError" :file "DarkTower/WarMachine/MachinePredictionError.lean" :at 160}
+   :runtime {:var "futon2.aif.free-energy/compute-prediction-error" :file "src/futon2/aif/free_energy.clj" :at "203-278"}}
+  {:id :precision/evidence-channel :bare "Pi" :fold "pi" :reading "History-derived evidence-channel precision." :node :R7 :registry-symbol :Pi
+   :glossary {:file "p4ng/sec-glossary.tex" :at 17 :term "Precision Pi"}
+   :lean {:ident "machinePrecision" :file "DarkTower/WarMachine/MachinePrecision.lean" :at 101}
+   :runtime {:var "futon2.aif.precision/precision-for" :file "src/futon2/aif/precision.clj" :at "195-201"}}
+  {:id :free-energy/variational :bare "F" :fold "f" :reading "Present-tense variational free energy." :node :R8 :registry-symbol :F
+   :glossary {:file "p4ng/sec-glossary.tex" :at 19 :term "Variational free energy F"}
+   :lean {:ident "variationalFreeEnergy" :file "DarkTower/WarMachine/Holes.lean" :at 6828}
+   :runtime {:absent :no-single-runtime-producer-found}}
+  {:id :free-energy/policy :bare "F-pi" :fold "f-pi" :reading "Per-policy Gaussian residual score." :node :R8 :registry-symbol :F-pi
+   :glossary {:absent :not-found-in-glossary-math-spans}
+   :lean {:ident "machinePolicyFreeEnergy" :file "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean" :at 59}
+   :runtime {:var "futon2.aif.policy-free-energy/f-pi-for-candidate" :file "src/futon2/aif/policy_free_energy.clj" :at "41-144"}}
+  {:id :belief/update :bare "mu-next" :fold "mu-next" :reading "The tempered categorical belief update." :node :R3 :registry-symbol :mu-next
+   :glossary {:file "p4ng/sec-glossary.tex" :at 15 :term "mu after correction"}
+   :lean {:ident "machineBeliefUpdate" :file "DarkTower/WarMachine/MachineBeliefUpdate.lean" :at 181}
+   :runtime {:var "futon2.aif.belief/update-belief-batch" :file "src/futon2/aif/belief.clj" :at "434-446"}}
+  {:id :belief/stored :bare "mu" :fold "mu" :reading "Entity-indexed stored categorical belief." :node :R1 :registry-symbol :mu
+   :glossary {:file "p4ng/sec-glossary.tex" :at 15 :term "belief mu"}
+   :lean {:ident "machineBeliefState" :file "DarkTower/WarMachine/MachineBeliefState.lean" :at 25}
+   :runtime {:var "futon2.aif.belief/reconcile-belief-carry" :file "src/futon2/aif/belief.clj" :at "510-522"}}
+  {:id :distribution/predictive-outcome :bare "Q(o|pi)" :fold "q(o|pi)" :reading "Policy-conditioned predictive outcome kernel." :node :R4 :registry-symbol :Q-o-pi
+   :glossary {:file "p4ng/sec-glossary.tex" :at 23 :term "Predictive outcome distribution Q(o|pi)"}
+   :lean {:ident "PredictiveOutcomeKernel" :file "DarkTower/WarMachine/Holes.lean" :at 6758}
+   :runtime {:var "futon2.aif.machine-q/predictive-outcome-distribution" :file "src/futon2/aif/machine_q.clj" :at "364-395"}}
+  {:id :score/risk :bare "risk" :fold "risk" :reading "Predictive-outcome divergence from preferences." :node :R5 :registry-symbol :risk
+   :glossary {:file "p4ng/sec-glossary.tex" :at 27 :term "Risk"}
+   :lean {:ident "predictiveOutcomeRisk" :file "DarkTower/WarMachine/Holes.lean" :at 6867}
+   :runtime {:var "risk branch inside futon2.aif.efe/compute-efe" :file "src/futon2/aif/efe.clj" :at "472-727"}}
+  {:id :score/ambiguity :bare "ambiguity" :fold "ambiguity" :reading "Expected observation entropy." :node :R5 :registry-symbol :ambiguity
+   :glossary {:file "p4ng/sec-glossary.tex" :at 29 :term "Ambiguity"}
+   :lean {:ident "ambiguity" :file "DarkTower/WarMachine/Holes.lean" :at 6880}
+   :runtime {:var "futon2.aif.efe/ambiguity-by-channel" :file "src/futon2/aif/efe.clj" :at "63-75"}}
+  {:id :score/expected-free-energy :bare "G" :fold "g" :reading "Expected free energy used to rank candidates." :node :R5 :registry-symbol :G
+   :glossary {:file "p4ng/sec-glossary.tex" :at 21 :term "Expected free energy G"}
+   :lean {:ident "expectedFreeEnergy" :file "DarkTower/WarMachine/Holes.lean" :at 6887}
+   :runtime {:var "futon2.aif.efe/compute-efe" :file "src/futon2/aif/efe.clj" :at "472-727"}}
+  {:id :policy/set :bare "pi" :fold "pi" :reading "The set or menu of allowable policies." :node :R6 :registry-symbol :pi
+   :glossary {:file "p4ng/sec-glossary.tex" :at 52 :term "Policy pi"}
+   :lean {:absent :registry-row-has-no-lean-and-war-machine-search-found-no-machine-policy-set}
+   :runtime {:absent :registry-row-has-no-code-and-source-search-found-no-single-policy-set-var}}
+  {:id :policy/depth :bare "T" :fold "t" :reading "Temporal policy depth." :node :R13 :registry-symbol :T
+   :glossary {:absent :depth-symbol-not-spelled-in-glossary}
+   :lean {:ident "machineDepth" :file "DarkTower/WarMachine/MachineDepth.lean" :at 133}
+   :runtime {:var "futon2.aif.forward-model/default-horizon-steps" :file "src/futon2/aif/forward_model.clj" :at 278}}
+  {:id :policy/temperature :bare "tau" :fold "tau" :reading "Effective policy-selection temperature." :node :R14 :registry-symbol :tau
+   :glossary {:file "p4ng/sec-glossary.tex" :at 35 :term "temperature tau"}
+   :lean {:ident "machineTemperature" :file "DarkTower/WarMachine/MachineTemperature.lean" :at 42}
+   :runtime {:var "futon2.aif.policy/effective-temperature" :file "src/futon2/aif/policy.clj" :at "77-146"}}
+  {:id :distribution/policy-posterior :bare "Q(pi)" :fold "q(pi)" :reading "Softmax posterior over policies." :node :R6 :registry-symbol :Q-pi
+   :glossary {:file "p4ng/sec-glossary.tex" :at 43 :term "Q(pi)"}
+   :lean {:ident "softmax" :file "DarkTower/WarMachine/Holes.lean" :at 6960}
+   :runtime {:var "futon2.aif.policy/softmax-weights" :file "src/futon2/aif/policy.clj" :at "215-235"}}
+  {:id :action/selected :bare "u" :fold "u" :reading "The selected action." :node :R16 :registry-symbol :u
+   :glossary {:file "p4ng/sec-glossary.tex" :at 39 :term "control u"}
+   :lean {:ident "machineAction" :file "DarkTower/WarMachine/MachineAction.lean" :at 49}
+   :runtime {:var "futon2.aif.policy/select-action" :file "src/futon2/aif/policy.clj" :at "672-868"}}
+  {:id :learning/dirichlet-concentration :bare "a-conc" :fold "a-conc" :reading "Dirichlet concentration parameters." :node :R17 :registry-symbol :a-conc
+   :glossary {:file "p4ng/sec-glossary.tex" :at 60 :term "Dirichlet concentration parameters"}
+   :lean {:ident "DirichletConcentrations" :file "DarkTower/WarMachine/Holes.lean" :at 6936}
+   :runtime {:var "futon2.aif.a4a/corpus->concentration" :file "src/futon2/aif/a4a.clj" :at "85-113"}}
+  {:id :learning/model-reduction-change :bare "Delta-F" :fold "delta-f" :reading "BMR evidence change." :node :R17 :registry-symbol :Delta-F
+   :glossary {:file "p4ng/sec-glossary.tex" :at 62 :term "Delta F"}
+   :lean {:ident "bayesFactorThreshold" :file "DarkTower/WarMachine/Holes.lean" :at 6957}
+   :runtime {:var "futon2.aif.bmr/acceptance-threshold" :file "src/futon2/aif/bmr.clj" :at "4-5"}}
+  {:id :model/observation :bare "A" :fold "a" :reading "The observation likelihood matrix." :node :R4 :registry-symbol :A
+   :glossary {:file "p4ng/sec-glossary.tex" :at 31 :term "Observation model A"}
+   :lean {:absent :registry-row-has-no-lean-identifier}
+   :runtime {:var "futon2.aif.belief/observation-model-v1" :file "src/futon2/aif/belief.clj" :at "199-205"}}
+  {:id :model/transition :bare "B" :fold "b" :reading "The state transition model." :node :R4 :registry-symbol :B
+   :glossary {:file "p4ng/sec-glossary.tex" :at 31 :term "Transition model B"}
+   :lean {:absent :registry-row-has-no-lean-identifier}
+   :runtime {:var "futon2.aif.belief/transition-model-v1" :file "src/futon2/aif/belief.clj" :at "214-226"}}
+  {:id :preference/distribution :bare "C" :fold "c" :reading "Preferred-outcome distribution." :node nil :node-note "The registry assigns preference C to R19, which is outside the R1-R17 control-map nodes." :registry-symbol :C
+   :glossary {:file "p4ng/sec-glossary.tex" :at 25 :term "Preference distribution C"}
+   :lean {:absent :registry-row-has-no-lean-identifier}
+   :runtime {:var "futon2.aif.efe/preference-stack-record" :file "src/futon2/aif/efe.clj" :at "117-125"}}
+  {:id :policy/habit-prior :bare "E" :fold "e" :reading "Habit prior over allowable policies." :node :R6 :registry-symbol :E
+   :glossary {:file "p4ng/sec-glossary.tex" :at 41 :term "Policy prior E"}
+   :lean {:absent :registry-row-has-no-lean-identifier}
+   :runtime {:var "futon2.aif.habit-prior/attach-log-priors" :file "src/futon2/aif/habit_prior.clj" :at "121-163"}}
+  {:id :belief/step-size :bare "alpha" :fold "alpha" :reading "Belief-update step size." :node :R3 :registry-symbol :alpha
+   :glossary {:file "p4ng/sec-glossary.tex" :at 15 :term "learning rate alpha"}
+   :lean {:absent :registry-symbol-is-stack-defined-but-has-no-own-lean-carrier}
+   :runtime {:absent :implemented-as-local-annealing-expression-not-a-runtime-var}}
+  {:id :precision/variance-floor :bare "eps0" :fold "eps0" :reading "Positive variance floor used in precision." :node :R7 :registry-symbol :eps0
+   :glossary {:absent :not-found-in-glossary-math-spans}
+   :lean {:absent :registry-symbol-has-no-own-lean-carrier}
+   :runtime {:var ":min-variance option" :file "src/futon2/aif/free_energy.clj" :at "203-278"}}
+  {:id :boundary/world :bare "world" :fold "world" :reading "The exogenous environment observed and acted upon." :node :R16 :registry-symbol :world
+   :glossary {:absent :not-found-as-a-math-symbol}
+   :lean {:absent :exogenous-boundary-not-given-a-war-machine-identifier}
+   :runtime {:absent :exogenous-boundary-not-a-single-runtime-var}}
+
+  {:id :policy/space-capital-pi :bare "Pi" :fold "pi" :reading "The horizon-indexed policy space Pi_H(U)." :node nil :node-note "Glossary notation, not an aif-equations node." :registry-symbol nil
+   :glossary {:file "p4ng/sec-glossary.tex" :at 39 :term "policy space Pi_H(U)"}
+   :lean {:absent :glossary-reading-has-no-corresponding-war-machine-identifier-found}
+   :runtime {:absent :glossary-reading-has-no-single-runtime-var-found}}
+  {:id :model/dirichlet-posterior-A :bare "A" :fold "a" :reading "The old Dirichlet posterior in Bayesian model reduction." :node nil :node-note "Glossary BMR notation, not the R4 observation-model node." :registry-symbol nil
+   :glossary {:file "p4ng/sec-glossary.tex" :at 58 :term "old posterior A"}
+   :lean {:absent :glossary-reading-has-no-distinct-registry-lean-identifier}
+   :runtime {:var "BMR full-posterior argument" :file "src/futon2/aif/bmr.clj" :at "108-134"}}
+  {:id :architecture/aliveness-temperature :bare "T" :fold "t" :reading "Salingaros temperature-like intensity in L = T times H." :node nil :node-note "Architectural glossary quantity, not AIF policy depth." :registry-symbol nil
+   :glossary {:file "p4ng/sec-glossary.tex" :at 54 :term "Aliveness T"}
+   :lean {:absent :glossary-reading-has-no-war-machine-identifier-found}
+   :runtime {:absent :glossary-reading-has-no-single-runtime-var-found}}
+  {:id :precision/likelihood-per-call :bare "precision" :fold "precision" :reading "Likelihood-derived precision for one prediction-error call." :node :R8 :registry-symbol nil
+   :glossary {:absent :runtime-key-reading-not-a-separate-glossary-symbol}
+   :lean {:ident "perCallPrecision" :file "DarkTower/WarMachine/MachinePredictionError.lean" :at "81-84"}
+   :runtime {:var ":precision result key" :file "src/futon2/aif/free_energy.clj" :at "252-278"}}
+  {:id :precision/history-runtime-key :bare "precision" :fold "precision" :reading "History-derived R7 precision after weighted-error overwrites the result key." :node :R7 :registry-symbol nil
+   :glossary {:absent :runtime-key-reading-not-a-separate-glossary-symbol}
+   :lean {:ident "machinePrecision" :file "DarkTower/WarMachine/MachinePrecision.lean" :at 101}
+   :runtime {:var ":precision overwritten by futon2.aif.precision/weighted-error" :file "src/futon2/aif/precision.clj" :at "212-233"}}
+  {:id :free-energy/reduction-F :bare "F" :fold "f" :reading "The F component of model-reduction evidence Delta F, distinct from per-tick F." :node :R17 :registry-symbol nil
+   :glossary {:file "p4ng/sec-glossary.tex" :at 62 :term "Delta F"}
+   :lean {:ident "ModelReductionFreeEnergyChange" :file "DarkTower/WarMachine/Holes.lean" :at "6949-6950"}
+   :runtime {:var "futon2.aif.bmr/bayesian-model-reduction" :file "src/futon2/aif/bmr.clj" :at "108-134"}}]
+
+ :collisions
+ [{:fold "pi" :members [:precision/evidence-channel :policy/set :policy/space-capital-pi]
+   :kind :within-registry
+   :statement "Pi is evidence-channel precision while pi is the policy set; the glossary also uses capital Pi for the horizon-indexed policy space."
+   :basis ["aif-equations.edn:86-91" "aif-equations.edn:158-160" "p4ng/sec-glossary.tex:17" "p4ng/sec-glossary.tex:39"]}
+  {:fold "a" :members [:model/observation :model/dirichlet-posterior-A]
+   :kind :within-glossary
+   :statement "A names both the observation model and the old Dirichlet posterior."
+   :basis ["p4ng/sec-glossary.tex:31" "p4ng/sec-glossary.tex:58"]}
+  {:fold "t" :members [:policy/depth :architecture/aliveness-temperature]
+   :kind :cross-source
+   :statement "T is policy depth in the registry but Salingaros intensity in the glossary."
+   :basis ["aif-equations.edn:161-165" "p4ng/sec-glossary.tex:54"]}
+  {:fold "precision" :members [:precision/likelihood-per-call :precision/history-runtime-key]
+   :kind :runtime-key
+   :statement "The same :precision key first carries likelihood-derived per-call precision and is then overwritten with R7 history-derived precision."
+   :basis ["src/futon2/aif/free_energy.clj:252-278" "src/futon2/aif/precision.clj:212-233"]}
+  {:fold "f" :members [:free-energy/variational :free-energy/reduction-F]
+   :kind :within-glossary
+   :statement "F denotes per-tick variational free energy while Delta F denotes model-reduction evidence change."
+   :basis ["p4ng/sec-glossary.tex:19" "p4ng/sec-glossary.tex:62" "C277-model-reduction-free-energy-change-binding.md:5-8"]}]
+
+ :limits
+ ["This is a bounded concordance census, not a ruling on preferred notation."
+  "H, beta, gamma, Q(theta|pi), and Q(theta|o,pi) are outside the row bound because none is one of the 25 registry defines/exogenous symbols; C529 records them for slice 2."
+  "A missing Lean or runtime entry means the stated search found no authoritative identifier; it is not evidence that no implementation can exist."
+  "The glossary probe scans dollar-delimited math spans; Pi_feasible at sec-glossary.tex:47 is inside a display delimited on separate lines and is therefore outside that probe's occurrence list."]}
