@@ -641,3 +641,44 @@ vocabulary as lane-independent so the action extends without a second
 schema. Faking is blocked by typing: no rung is reachable except by
 its own evidence kind, which is what "explicit and progressive"
 purchases.
+
+## The parallel-practicalities ruling (Joe, 2026-09-05) — P-assured-process becomes a parallel track with a merge point
+
+Verbatim: "the clear issue for me is that *none* of the problems we are
+working on now (essentially by definition) were solved by the plop-2026
+work to date, even though it treats the R node collection in some
+detail. The alignment of the R nodes with things like P-assured-process
+has only become possible now that we have written that note down. But
+that alignment is not done, and to my knowledge, not started. This
+suggests to me that, as yet, the PloP paper does only the barest
+schematic work, and even a verified implementation, if wm-build-loop
+manages to create one, will not yet have the practicalities baked in.
+So, work on those needs to progress in parallel with the fundamentals,
+so they can be merged when both are ready."
+
+- **Reading.** plop-2026 is the schematic layer (patterns, R-node
+  catalogue); the fundamentals track (:F) is the formal/constructive
+  layer; P-assured-process is the PRACTICALITIES layer — the WM's own
+  process and handoff conduct. A verified implementation out of
+  wm-build-loop discharges the second layer only. The R-node <->
+  process-assurance alignment (which node carries which lifecycle
+  assurance; where the assurance band is named-only) exists nowhere:
+  the 2026-09-05 paper survey found R9/R10/R12/R20/TRACE largely
+  named-only, and P-assured-process §2 lists inventory, not mappings.
+- **Ordering change.** P-assured-process moves from "downstream of the
+  fundamentals gate" to a PARALLEL TRACK. The :F gate in build_step.bb
+  is untouched — the loop remains exclusively on fundamentals; the
+  practicalities track runs OUTSIDE the loop via parked codex
+  dispatches under claude-1, and the two tracks MERGE when both are
+  ready (merge criterion: the alignment census names, per R-node, the
+  process assurance it must carry, and the fundamentals build reaches
+  the rung where wiring decisions consume that census).
+- **First work item (discovery, not build):** the alignment census —
+  map each assurance-band node (R9 no-self-certification, R10
+  scheduled entrypoint, R12 two-layer calibration, R20 interoceptive
+  tripwires, TRACE) and the loop-band handoff-touching behaviour onto
+  P-assured-process's lifecycle (commissioned -> dispatched -> parked ->
+  returned -> checked -> recorded -> surfaced), with file:line evidence,
+  each cell marked exists / named-only / absent. Dispatched 2026-09-05
+  as a parked codex handoff.
+- P-assured-process.md §Ordering updated to cite this ruling.

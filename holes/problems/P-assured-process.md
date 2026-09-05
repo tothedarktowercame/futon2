@@ -8,9 +8,14 @@ packet.
 commissioning ancestor: this record's §0 verbatim; inherited clauses: the
 restated contract (EPIC-run-era.md, "THE CONTRACT, RESTATED") and the
 conventions note's §0 governing rule; dropped clauses: none.
-**Ordering:** downstream of the fundamentals gate (F1 nouns; this record's
-build work does not preempt :F rows). Specification drafting may proceed
-in parallel as discovery.
+**Ordering:** PARALLEL TRACK (Joe's ruling, 2026-09-05 — see EPIC-run-era.md,
+"The parallel-practicalities ruling"): this work progresses in parallel with
+the fundamentals, outside the wm-build-loop (whose :F gate is untouched), via
+parked dispatches under claude-1; the tracks merge when both are ready. The
+merge criterion: the R-node <-> process-assurance alignment census names, per
+node, the assurance it must carry, and the fundamentals build reaches the
+rung where wiring decisions consume that census. Superseded wording:
+"downstream of the fundamentals gate."
 
 ## 0. The commissioning question, in Joe's words
 
