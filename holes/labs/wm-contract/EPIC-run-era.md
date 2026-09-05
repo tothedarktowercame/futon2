@@ -721,3 +721,51 @@ however"
   three objects, one letter; disambiguation lands with F4's dossiers.
 - Pilot problem-dossiers for R4/R5/R6 dispatched to codex-18
   2026-09-05 (parallel track, fixes the form for the other 17 nodes).
+
+## The twenty-node problem map — COMPLETE (2026-09-05, per-node-problems ruling discharged at discovery grain)
+
+Six dossier files, all reviewed at the gate (citations and residual
+pointers re-verified at file:line by the reviewer, one type tag per
+residual, numbering schemes labelled per citation):
+PROBLEMS-r4-r5-r6-pilot.md (f58a0862), PROBLEMS-r2-r8-r7-batch2.md
+(7ef4ed31), PROBLEMS-r1-r3-r3a-batch3.md (933fd2c5),
+PROBLEMS-r16-r13-r14-batch4.md (db6d66d3),
+PROBLEMS-r15-r11-r17-batch5.md (20ab77c5),
+PROBLEMS-assurance-band-batch6.md (b18f449f). Every control-stages.edn
+row covered: 14 loop + 6 assurance.
+
+**The typed-residual tally (definitive recount from the six files):**
+62 residuals — 39 :implementation-flaw, 10 :both, 9 :undetermined,
+4 :aif-extension-needed. Joe's either/or answered at discovery grain:
+mostly our implementation, with a short specific extension list:
+ 1. tension-as-generator (R6) — nothing lets tension GENERATE a
+    missing option rather than rank the menu (WR-19's demand).
+ 2. dual-clock precision window (R7) — wall time + evidence events,
+    changes what temporal evidence the precision model represents.
+ 3. contract criteria for catalogue-native R17'/R17''/R17''' (R17).
+ 4. contract-side tripwire criterion for R20 (catalogue-native, no
+    checkable contract form).
+
+**Defect classes the map established:** (a)
+runtime-inhabited-but-unformalized — 9 of Box 5's 10 rows (o, eps, Pi,
+F-pi, mu, mu-next, u, T, tau), each verified to actually run; (b) its
+inverse, FORMALIZED-BUT-RUNTIME-DIVERGENT (R17: Lean names resolve,
+runtime feeds capability x mission records instead of declared o and
+mu); (c) the tenth Box-5 row (pi) confirmed genuinely empty on the
+runtime leg = F7's build. Both (a) and (b) terminate in the same
+missing artifact: the Lean<->runtime agreement check, which is F3's
+harness generalized.
+
+**Top would-we-know gaps across the map:** Lean<->runtime agreement
+checks (classes a+b); the P-validated-R5 s2 executable conformance
+property; a two-cascade live menu check (R6/R13, waits on F7); an
+enacted-choice ablation for R14 (the dial is counterfactual); process
+lifecycle joins (R9 checker-identity refusal, TRACE surfaced
+discharge, R20 injected-invalid-trajectory test).
+
+**PENDING CONSUMPTION (F4, at its seat):** gen_rnode_dossiers.py gains
+per node: the problem-it-solves field (from these dossiers), the typed
+residual counts, and the would-we-know line — the paper's per-node
+reporting then carries the problem, the readiness, the process
+assurance, and the residuals in one generated block. PENDING F8
+relation: the map's class-(a)/(b) residuals are F8's row-level input.
