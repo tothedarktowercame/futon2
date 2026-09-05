@@ -30,3 +30,14 @@ ledger of `futon2/holes/TN-edge-review-aif-wiring.md` (read §1 for the standard
    `:progress "<slice>: <sha>"`, and leave `:status :open` unless the last slice is done. A slice
    that touches src/ needs clj-kondo, check-parens and tests; a slice that runs the machine needs
    the pre-flight first and must hold `data/wm-trace/.run-lock` (RUN12) once it exists.
+
+8. If you dispatch work to a Codex seat, send it as **`--from wm-build-work`**.
+   That id is a registered Agency seat with `delivery-mode inbox`, so the
+   completion bellback is written to `~/.claude/agency-inbox/wm-build-work/`
+   and the loop hands it to the next invocation. Never borrow a human seat's id
+   (`--from claude-1`) to get a bellback route: on 2026-09-05 that put a
+   bail-out into the owner's session, which dispatched a continuation nobody
+   asked for (U65, `EPIC-run-era.md:923`). You are a CLI seat, so do not park —
+   poll `GET /api/alpha/invoke/jobs/<job-id>`. To cancel a dispatch, use
+   `POST /api/alpha/invoke/jobs/<job-id>/cancel`, which acts at job grain and
+   refuses to interrupt any job other than the one named.

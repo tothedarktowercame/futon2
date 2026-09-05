@@ -10,6 +10,28 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG="$HERE/runs/build-loop.log"; mkdir -p "$HERE/runs"
 WORK_SEAT="${WORK_SEAT:-claude}"; REVIEW_SEAT="${REVIEW_SEAT:-codex}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-60}"
 log() { echo "[$(date -u '+%H:%M:%S')] $*" | tee -a "$LOG"; }
+# U65: the loop's two identities are REGISTERED Agency seats with
+# delivery-mode inbox, so a bellback addressed to either is written under
+# ~/.claude/agency-inbox/<seat>/ instead of needing a live session. Before
+# this, an unregistered --from got no bellback route at all, and the work seat
+# borrowed the owner's id (--from claude-1); the bail-out then landed in the
+# owner's session, which dispatched a continuation nobody asked for, and the
+# seat's cancel of its own duplicate killed that continuation
+# (EPIC-run-era.md:923). Registration is idempotent -- a duplicate answers 409
+# and is ignored -- and re-run at start so a roster reset does not silently
+# return the loop to a borrowed id.
+AGENCY_BASE="${AGENCY_BASE:-http://localhost:7070}"
+ensure_seats() {
+  local seat
+  for seat in wm-build-work wm-build-loop; do
+    curl -s -X POST "$AGENCY_BASE/api/alpha/agents" \
+      -H 'Content-Type: application/json' \
+      -d "{\"agent-id\":\"$seat\",\"type\":\"claude\",\"delivery-mode\":\"inbox\"}" \
+      >> "$LOG" 2>&1
+    echo >> "$LOG"
+  done
+}
+
 # Every way out of this loop bells claude-1 (the Emacs seat) with the reason and
 # the tail of the log, so a stopped loop is a message in that session, not a
 # discovery the next day (Joe, 2026-09-01: "if it stops, I feel like you should
@@ -57,6 +79,7 @@ publish() {
 # idempotent, so both exits below may call it and only one writes.
 bulletin() { bash "$HERE/write-bulletin.sh" "$LOG"; }
 log "=== wm-build-loop start (work=$WORK_SEAT review=$REVIEW_SEAT) ==="
+ensure_seats
 i=0
 while [ $i -lt "$MAX_ITER" ]; do
   i=$((i+1))
@@ -77,7 +100,16 @@ while [ $i -lt "$MAX_ITER" ]; do
     # The loop chose the row (build_step.bb priorities); the prompt must say so,
     # or the seat takes the first open row in ledger order (iteration 1 took I1
     # when RUN12 was meant). The prompt is composed per iteration.
-    { echo "ROW TO DO THIS INVOCATION: $next -- the build loop chose it by priority; take this row and no other. If it carries :loop-mode :one-slice-per-invocation, do its next slice."; echo; cat "$HERE/worklist-prompt.md"; } > /tmp/wm-build-work-prompt.md
+    # A bellback for the work seat landed in its inbox while no seat was
+    # running; drain it into THIS prompt so the reply reaches the seat that
+    # sent the bell, not the owner's session (U65).
+    bash "$HERE/wm-inbox-drain.sh" wm-build-work > /tmp/wm-build-inbox.md 2>>"$LOG"
+    { echo "ROW TO DO THIS INVOCATION: $next -- the build loop chose it by priority; take this row and no other. If it carries :loop-mode :one-slice-per-invocation, do its next slice."
+      if [ -s /tmp/wm-build-inbox.md ]; then
+        echo; echo "BELLS WAITING IN YOUR INBOX (seat wm-build-work), already acked -- read them before you dispatch anything new:"; echo
+        cat /tmp/wm-build-inbox.md
+      fi
+      echo; cat "$HERE/worklist-prompt.md"; } > /tmp/wm-build-work-prompt.md
     run_seat "$WORK_SEAT" /tmp/wm-build-work-prompt.md "work($next)"
     ledger_ok || { log "ledger invalid after work; stopping"; notify "ledger invalid after work"; exit 1; }
   fi
