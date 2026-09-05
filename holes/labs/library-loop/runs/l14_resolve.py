@@ -18,7 +18,7 @@ SECTIONS = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1
 LIB = os.path.abspath(sys.argv[2] if len(sys.argv) > 2
                       else "/home/joe/code/futon3/library")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                   "L14-edge-resolution.edn")
+                   (os.environ.get("L14_RECEIPT") or "L14-edge-resolution.edn"))
 
 def gitsha(d):
     repo = subprocess.run("git -C %s rev-parse --show-toplevel" % d,
@@ -75,7 +75,7 @@ for sec in SECTIONS:
                 existing |= {t for t in ref_tok.findall(m.group(1)) if t.startswith("problems/")}
         ms = matches(pid, holds)
         new_edges = [(n, b) for (n, b) in ms if n not in existing]
-        if new_edges and not any("L14 edge-resolution" in l for l in lines):
+        if new_edges:  # idempotence via the existing-edge check above
             add = ["@why %s (L14 edge-resolution; basis: %s -- the problem node's own %s covers this pattern; source: receipt runs/L14-edge-resolution.edn; zai-1, 2026-09-05)"
                    % (n, b, "holds-at token" if b == "holds" else "text names the pattern id")
                    for (n, b) in new_edges]

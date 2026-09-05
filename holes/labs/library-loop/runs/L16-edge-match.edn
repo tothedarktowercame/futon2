@@ -1,0 +1,49 @@
+;; L14 edge-resolution receipt. Deterministic, path-independent.
+{:library-subdir "library"
+ :library-git-sha "9a6e3d5a295db230931f49784356dcc9041a9168"
+ :bases "holds: pattern @holds-at token equals problem node @holds-at token; named: problem node text contains the pattern's qualified id. No other basis admitted."
+ :sections ["war-room" "aif"]
+ :added-edges [
+  {:pattern "aif/expected-free-energy-scorecard" :to [["problems/catalogue-r5-efe-label-auditability" "holds"]]}
+ ]
+ :already-edged 36
+ :unmatched [
+  {:pattern "war-room/wr-0-organise-without-apparatus" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-1-three-futon-split" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-10-next-move-surface-is-recursive-closure" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-12-essay-health-is-the-aif-observation-channel" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-13-futonic-debt-is-paid-in-order" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-14-predecessor-completion-pull-is-a-fourth-next-move-criterion" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-17-futon0-as-cyborg-futon7-as-markov-blanket" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-18-war-machine-is-demonstrated-not-hypothesised" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-2-pattern-library-stays-canonical" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-20-action-class-inventory-becomes-data" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-21-geometrization-is-a-shared-cross-mission-dependency" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-22-logic-model-before-code-is-a-sanctioned-verify-method" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-23-upstream-trackers-are-stack-surfaces" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-3-social-exotype-before-implementation" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-4-inhabit-before-building" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-5-war-machine-is-not-a-mission" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-6-daily-scan-is-depositing-heartbeat" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-7-frames-interoperate-or-they-do-not-exist" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-8-typed-files-are-sources-of-truth" :reason "no-holds-and-not-named"}
+  {:pattern "war-room/wr-9-bites-empirical-or-logical" :reason "no-holds-and-not-named"}
+  {:pattern "aif/admissibility" :reason "no-holds-and-not-named"}
+  {:pattern "aif/belief-aware-risk-term" :reason "no-holds-and-not-named"}
+  {:pattern "aif/currency-before-merge" :reason "no-holds-and-not-named"}
+  {:pattern "aif/declare-the-conditioning" :reason "no-holds-and-not-named"}
+  {:pattern "aif/decomposed-prediction-noise" :reason "no-holds-and-not-named"}
+  {:pattern "aif/experimental-comparison-of-EFE-variants" :reason "no-holds-and-not-named"}
+  {:pattern "aif/measurement-window-hygiene" :reason "no-holds-and-not-named"}
+  {:pattern "aif/niche-construction" :reason "no-holds-and-not-named"}
+  {:pattern "aif/off-continuity-null-discriminates" :reason "no-holds-and-not-named"}
+  {:pattern "aif/placeholder-is-load-bearing" :reason "no-holds-and-not-named"}
+  {:pattern "aif/posterior-variance-as-epistemic-value" :reason "no-holds-and-not-named"}
+  {:pattern "aif/predictive-entropy-as-ambiguity" :reason "no-holds-and-not-named"}
+  {:pattern "aif/status-gated-belief-update" :reason "no-holds-and-not-named"}
+  {:pattern "aif/term-to-channel-traceability" :reason "no-holds-and-not-named"}
+  {:pattern "aif/valuation-reads-the-paperwork" :reason "no-holds-and-not-named"}
+ ]
+ :counts {:patterns 61 :edges-added 1 :already-edged 36 :unmatched 37}}

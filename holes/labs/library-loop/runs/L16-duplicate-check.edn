@@ -1,0 +1,41 @@
+;; L16 duplicate check: every sec-catalog.tex pattern paragraph (label pat:*)
+;; against the existing 32 problem nodes (before this round). Verdict
+;; "covered" = an existing node's quoted problem states the same tension;
+;; "distinct" = minted this round. Path-independent; deterministic.
+{:catalogue-file "p4ng/sec-catalog.tex"
+ :catalogue-labels [pat:r1 pat:r5 pat:r6 pat:r13 pat:r14 pat:r16 pat:r17mint pat:r20]
+ :existing-nodes 32
+ :verdicts
+ [{:label pat:r1 :line 190
+   :existing problems/r1-belief-state
+   :verdict covered
+   :reason "dossier node already states the raw-history vs revisable-hypotheses tension the catalogue IF/HOWEVER states"}
+  {:label pat:r5 :line 237
+   :existing problems/r5-expected-free-energy-core
+   :verdict distinct
+   :reason "dossier node states comparing policies by achievement and uncertainty; the catalogue IF/HOWEVER states EFE-label auditability (tuning indistinguishable from storytelling) -- minted as problems/catalogue-r5-efe-label-auditability"}
+  {:label pat:r6 :line 239
+   :existing problems/r6-candidate-action-space-and-selection
+   :verdict covered
+   :reason "dossier node already states the candidate-action-space problem, quoting the same catalogue paragraph's criterion (contract/catalogue divergence included)"}
+  {:label pat:r13 :line 256
+   :existing problems/r13-temporal-policy-depth
+   :verdict covered
+   :reason "dossier node states delayed-consequences-outrank-greedy; catalogue IF/HOWEVER (machinery without depth) is the same tension"}
+  {:label pat:r14 :line 241
+   :existing problems/r14-commitment-temperature
+   :verdict covered
+   :reason "dossier node states commitment control without changing the value model; catalogue thrash-or-tunnel tension is the same"}
+  {:label pat:r16 :line 311
+   :existing problems/r16-grounded-actuation
+   :verdict covered
+   :reason "dossier node states intervention-not-internal-calculation; catalogue mirror-not-act tension is the same"}
+  {:label pat:r17mint :line 346
+   :existing problems/r17-structure-learning
+   :verdict distinct
+   :reason "dossier node states model reduction; the catalogue R17-triple-prime states vocabulary ENLARGEMENT (no pattern expresses a recurring way of acting) -- minted as problems/pattern-genesis-from-evidence-bearing-holes"}
+  {:label pat:r20 :line 369
+   :existing problems/r20-interoceptive-tripwires
+   :verdict covered
+   :reason "dossier node already states machine-self observation with the same task-level-blindness tension"}]
+ :counts {:catalogue-patterns 8 :covered 6 :distinct 2 :minted 2}}
