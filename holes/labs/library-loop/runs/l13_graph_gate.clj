@@ -28,7 +28,7 @@
         roots (case reading
                 (:down-problems :down-problems+wr :up-problems :up-problems+wr)
                 (set (filter #(str/starts-with? % "problems/") nodes)))
-        roots (if (= reading :down-problems+wr)
+        roots (if (str/ends-with? (name reading) "+wr")
                 (into roots (filter #(str/starts-with? % "war-room/wr-") nodes))
                 roots)
         why-edges (filter #(and (= (:kind %) :why) (:resolved %)) edges)

@@ -1,0 +1,8 @@
+;; L13 reading-distinguishing control: ["war-room/wr-1-three-futon-split"].
+;; wr-1 carries no authored @why edge (L6 no-source note), so it is NOT
+;; reachable under up-problems or down-problems, but it IS a root under both
+;; +wr readings. Expected: REFUSED (1/1, exit 1) under up-problems and
+;; down-problems; PASS (exit 0) under up-problems+wr and down-problems+wr.
+;; This control distinguishes each paired reading; it accompanies the
+;; rationale-free negative control in l13-negative-control.edn.
+["war-room/wr-1-three-futon-split"]
