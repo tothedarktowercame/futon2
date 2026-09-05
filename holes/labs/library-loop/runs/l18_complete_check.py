@@ -29,10 +29,14 @@ REPORT = sys.argv[2] if len(sys.argv) > 2 else "L17-advisory-gate-report.md"
 OUT = sys.argv[3] if len(sys.argv) > 3 else "L18-remainder.edn"
 FUTON2 = os.path.abspath(sys.argv[4] if len(sys.argv) > 4
                          else "/home/joe/code/futon2")
-_repos = (sys.argv[5].split(",") if len(sys.argv) > 5 else
-          ["futon2", "futon3", "p4ng", "futon5", "futon3c", "futon0"])
-REPOS = [r if r.startswith("/") else
-         os.path.join(os.path.dirname(FUTON2), r) for r in _repos]
+_repos = (sys.argv[5].split(",") if len(sys.argv) > 5 else None)
+# Default authorities: the pinned futon2 root and the library's own repo root.
+# Every authority must exist; a missing declared authority is a hard error.
+REPOS = _repos or [FUTON2, os.path.dirname(LIB)]
+REPOS = [os.path.abspath(r) for r in REPOS]
+for _r in REPOS:
+    if not os.path.isdir(_r):
+        sys.exit("l18: missing declared provenance authority: %s" % _r)
 
 def gitsha(d):
     repo = subprocess.run("git -C %s rev-parse --show-toplevel" % d,
@@ -147,9 +151,13 @@ sha, rel = gitsha(LIB)
 with open(OUT, "w") as f:
     f.write(";; L18 v3 complete rationale-source search over the FIXED 71-member worklist.\n")
     f.write(";; Worklist source: runs/L17-advisory-gate-report.md (pre-grounding). Deterministic.\n")
+    auths = []
+    for _r in REPOS:
+        _sha, _rel = gitsha(_r)
+        auths.append("{:authority %s :repo-subdir %s :git-sha %s}" % (q(("futon2" if _r == FUTON2 else ("library-repo" if os.path.realpath(_r) == os.path.realpath(os.path.dirname(LIB)) else os.path.basename(_r.rstrip("/"))))), q(_rel), q(_sha)))
     f2sha, f2rel = gitsha(os.path.join(FUTON2, "holes"))
     f.write("{:library-subdir %s\n :library-git-sha %s\n :futon2-subdir %s\n :futon2-git-sha %s\n" % (q(rel), q(sha), q(f2rel), q(f2sha)))
-    f.write(" :worklist-source %s\n" % q("runs/L17-advisory-gate-report.md served-refused union, down-problems+wr"))
+    f.write(" :worklist-source %s\n :provenance-authorities [%s]\n" % (q("runs/L17-advisory-gate-report.md served-refused union, down-problems+wr"), " ".join(auths)))
     f.write(" :union-count %d\n :members [\n" % len(rows))
     for (pid, searched, result) in rows:
         f.write("  {:pattern %s\n   :searched [%s]\n   :result %s}\n"
