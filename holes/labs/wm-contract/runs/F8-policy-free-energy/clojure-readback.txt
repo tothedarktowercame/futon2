@@ -1,0 +1,15 @@
+F8 leg 1 slice 4 -- production F_pi readback
+production calls: f-pi-for-candidate, f-pi-vector, selection-scores
+Lean keeps log symbolic; complete floating terms compare at tolerance 1e-12
+positive two-channel total actual 1.7697298858494000 expected 1.7697298858494000 delta 0.0000000000000000
+zero tolerated status=:ok value=0.0
+zero mismatch status=:error error=:deterministic-mismatch
+absent zero + floor status=ok actual -0.88364655978937290 expected -0.88364655978937300 delta 1.1102230246251565e-16
+bare zero + floor status=:error error=:deterministic-mismatch
+negative variance status=:error error=:invalid-variance
+f-pi-vector[0] actual 1.7697298858494000 expected 1.7697298858494000 delta 0.0000000000000000
+f-pi-vector[1] actual 2.3691270664093453 expected 2.3691270664093453 delta 0.0000000000000000
+selection unscaled tau=2 actual=[-5.0 -2.0] expected=[-5.0 -2.0]
+selection by-tau tau=2 actual=[-3.5 -2.0] expected=[-3.5 -2.0]
+selection by-tau tau=4 actual=[-1.75 -1.0] expected=[-1.75 -1.0]
+VERDICT: every production case matches its Lean branch/reference.
