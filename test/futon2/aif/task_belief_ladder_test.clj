@@ -52,6 +52,40 @@
            (get-in c [:task-belief/derivation :provenance]))
         "the provenance points at the kin record it generalized from")))
 
+(deftest zero-open-holes-refuses-even-recorded-case-history
+  (let [action (assoc (first field) :open-hole-count 0)
+        c (ladder/classify (ctx-for :k-doc-xref) action)
+        refusal (ladder/refusal-record (ctx-for :k-doc-xref) action c)]
+    (is (= 3 (:task-belief/rung c)))
+    (is (= :no-open-holes (:refusal/reason refusal)))
+    (is (= :no-open-holes (:refusal/basis refusal)))
+    (is (= 1 (get-in refusal [:refusal/overridden-task-belief
+                              :task-belief/rung])))
+    (is (= 4.0 (get-in refusal [:refusal/overridden-task-belief
+                                :task-belief/support]))
+        "the refusal preserves the case history it overrode")))
+
+(deftest planted-nonzero-hole-candidate-escapes-the-availability-refusal
+  (let [action (assoc (first field) :open-hole-count 1)
+        c (ladder/classify (ctx-for :k-doc-xref) action)]
+    (is (= 1 (:task-belief/rung c)))
+    (is (= (* 0.8 0.5) (:task-belief/factor c)))
+    (is (not= :no-open-holes
+              (get-in c [:task-belief/derivation :rule])))))
+
+(deftest recorded-mission-band-tie-is-drained-by-hole-availability
+  (let [base (second field)
+        c2 (ladder/classify (ctx-for :k-doc-xref)
+                            (assoc base :open-hole-count 2))
+        c24 (ladder/classify (ctx-for :k-doc-xref)
+                             (assoc base :open-hole-count 24))]
+    (is (= 2 (:task-belief/rung c2) (:task-belief/rung c24)))
+    (is (not= (:task-belief/factor c2) (:task-belief/factor c24)))
+    (is (= (/ 2.0 3.0)
+           (get-in c2 [:task-belief/derivation :hole-availability :factor])))
+    (is (= (/ 24.0 25.0)
+           (get-in c24 [:task-belief/derivation :hole-availability :factor])))))
+
 (deftest rung-3-is-a-typed-refusal-with-a-not-found-basis
   (let [c (ladder/classify (ctx-for :k-doc-xref) (nth field 2))]
     (is (= 3 (:task-belief/rung c)))

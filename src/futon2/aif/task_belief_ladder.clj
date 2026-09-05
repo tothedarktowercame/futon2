@@ -150,6 +150,16 @@
   (let [n (max 0.0 (double (or n 0)))]
     (/ n (+ 1.0 n))))
 
+(defn hole-availability-factor
+  "Recorded open holes -> a saturating availability factor in [0,1).
+   `h/(h+1)` is only applied when the candidate carries a non-negative numeric
+   `:open-hole-count`; absence remains an explicit evidence gap rather than
+   being silently read as zero."
+  [h]
+  (when (and (number? h) (not (neg? h)))
+    (let [h (double h)]
+      (/ h (+ h 1.0)))))
+
 ;; ---------------------------------------------------------------------------
 ;; The field context
 ;; ---------------------------------------------------------------------------
@@ -205,7 +215,7 @@
 ;; The three rungs
 ;; ---------------------------------------------------------------------------
 
-(defn classify
+(defn- classify-from-case-history
   "One candidate -> its rung, its support, and the derivation that grounds it.
    Rung 3 carries `:basis \"not found\"` rather than a silence."
   [ctx action]
@@ -249,16 +259,61 @@
             :relation-statement (:relation-statement ctx)
             :basis "not found: no persisted decision chose this key, and no kin key under the declared relation carries one"}})))))
 
+(defn classify
+  "Classify case-history support, then apply recorded hole availability.
+
+   Zero open holes overrides every support rung with the typed rung-3
+   `:no-open-holes` refusal: case history can establish belief in an action but
+   cannot make `advance open holes` non-vacuous. Positive availability scales
+   rung 1 and rung 2 by h/(h+1). A missing hole count is recorded as an evidence
+   gap and leaves the prior ladder arithmetic unchanged."
+  [ctx action]
+  (let [prior (classify-from-case-history ctx action)
+        h (:open-hole-count action)
+        availability (hole-availability-factor h)]
+    (cond
+      (and (number? availability) (zero? availability))
+      {:task-belief/rung 3
+       :task-belief/support 0.0
+       :task-belief/factor 0.0
+       :task-belief/derivation
+       {:rule :no-open-holes
+        :basis :no-open-holes
+        :open-hole-count h
+        :hole-availability-factor availability
+        :support-map "h/(h+1)"
+        :overridden-task-belief prior}}
+
+      (and (number? availability) (#{1 2} (:task-belief/rung prior)))
+      (-> prior
+          (update :task-belief/factor #(* (double %) availability))
+          (assoc-in [:task-belief/derivation :hole-availability]
+                    {:open-hole-count h
+                     :factor availability
+                     :support-map "h/(h+1)"})
+          (update-in [:task-belief/derivation :support-map]
+                     #(str % " x h/(h+1)")))
+
+      :else
+      (assoc-in prior [:task-belief/derivation :hole-availability]
+                {:status :absent
+                 :reason :open-hole-count-not-recorded}))))
+
 (def refusal-reason
   "The typed refusal. One reason, because there is one way to reach rung 3."
   :task-belief/zero-support-construction-exhausted)
+
+(def no-open-holes-refusal-reason :no-open-holes)
 
 (defn refusal-record
   "The typed record a rung-3 candidate is refused with. It names the candidate,
    the reason, the relation that came up empty, and where the ladder looked --
    so a reader can tell a refusal from a candidate that was never considered."
   [ctx action classification]
-  {:refusal/reason refusal-reason
+  {:refusal/reason (if (= :no-open-holes
+                          (get-in classification [:task-belief/derivation :rule]))
+                     no-open-holes-refusal-reason
+                     refusal-reason)
    :refusal/action-key (action-key action)
    :refusal/mission-path (:mission-path action)
    :refusal/relation (:relation ctx)
@@ -266,6 +321,8 @@
    :refusal/history-size (count (:history ctx))
    :refusal/field-size (count (:tokens ctx))
    :refusal/basis (get-in classification [:task-belief/derivation :basis])
+   :refusal/overridden-task-belief
+   (get-in classification [:task-belief/derivation :overridden-task-belief])
    :refusal/rung 3})
 
 (defn apply-ladder
