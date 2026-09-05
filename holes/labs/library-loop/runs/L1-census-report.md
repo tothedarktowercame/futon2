@@ -59,6 +59,29 @@ Under every reading the ruling's observation holds: the overwhelming majority
 of the 1256 committed patterns (≥95%) are unreachable via `@why` from any
 problem-stating node.
 
+## Per-section counts
+
+All 99 sections are in the receipt's `:per-section-counts`; the 17 sections below are exactly those with a nonzero value for @why, @how, or any @why-reachability reading (the remaining 82 sections are all-zero on all four measures):
+
+| section | total | @why | @how | reach↑prob | reach↑prob+WR | reach↓prob | reach↓prob+WR |
+|---|---|---|---|---|---|---|---|
+| aif | 33 | 6 | 13 | 0 | 0 | 0 | 5 |
+| cycle-machine | 7 | 7 | 1 | 0 | 0 | 0 | 5 |
+| features | 2 | 2 | 0 | 0 | 0 | 0 | 2 |
+| forward-model | 7 | 7 | 0 | 0 | 0 | 0 | 7 |
+| math-formalization | 29 | 4 | 0 | 0 | 0 | 0 | 0 |
+| math-formalization-CA | 23 | 6 | 0 | 0 | 0 | 0 | 0 |
+| math-formalization-CV | 7 | 6 | 0 | 0 | 0 | 0 | 0 |
+| math-formalization-FA | 2 | 2 | 0 | 0 | 0 | 0 | 0 |
+| math-formalization-GN | 2 | 1 | 0 | 0 | 0 | 0 | 0 |
+| math-strategy | 20 | 4 | 0 | 0 | 0 | 0 | 0 |
+| peripherals | 11 | 0 | 2 | 0 | 0 | 0 | 0 |
+| problems | 6 | 5 | 0 | 6 | 6 | 6 | 6 |
+| sidecar | 12 | 0 | 1 | 0 | 0 | 0 | 0 |
+| snatch | 24 | 21 | 3 | 0 | 0 | 0 | 0 |
+| ukrns | 26 | 0 | 1 | 0 | 0 | 0 | 0 |
+| war-room | 28 | 10 | 0 | 8 | 28 | 0 | 28 |
+| writing-coherence | 23 | 2 | 0 | 0 | 0 | 0 | 0 |
 ## Other census facts worth the receipt
 
 - 28 files have no `@flexiarg` id line (id taken from path; listed in receipt).

@@ -150,6 +150,20 @@ with open(os.path.join(OUT, "L1-census-graph.edn"), "w") as f:
                 % (q(a), kw(k), q(b), ("true" if res else "false")))
     f.write("]}\n")
 
+def section_of(n):
+    return n.split("/", 1)[0] if "/" in n else "(root)"
+
+sections = sorted({section_of(n) for n in nodes})
+def per_section(pred):
+    out = []
+    for s in sections:
+        c = len([n for n in nodes if section_of(n) == s and pred(n)])
+        out.append((s, c))
+    return out
+
+def in_set(st):
+    return lambda n: n in st
+
 with open(os.path.join(OUT, "L1-census-receipt.edn"), "w") as f:
     f.write(";; L1 RATIONALE-REACHABILITY CENSUS receipt. Deterministic rerun.\n")
     f.write("{:row :L1\n :library-subdir %s\n :library-git-sha %s\n" % (q(LIB_REL), q(sha)))
@@ -172,6 +186,20 @@ with open(os.path.join(OUT, "L1-census-receipt.edn"), "w") as f:
     f.write(" :why-reachable-up-from-problems+wr %d\n" % len(reachA2))
     f.write(" :why-reachable-down-from-problems %d\n" % len(reachB1))
     f.write(" :why-reachable-down-from-problems+wr %d\n" % len(reachB2))
+    f.write(" :per-section-counts [\n")
+    for s in sections:
+        f.write("  {:section %s :patterns-total %d :carrying-why %d :carrying-how %d\n"
+                "   :why-reachable-up-from-problems %d :why-reachable-up-from-problems+wr %d\n"
+                "   :why-reachable-down-from-problems %d :why-reachable-down-from-problems+wr %d}\n"
+                % (q(s),
+                   len([n for n in nodes if section_of(n) == s]),
+                   len([n for n in nodes if section_of(n) == s and "why" in nodes[n]]),
+                   len([n for n in nodes if section_of(n) == s and "how" in nodes[n]]),
+                   len([n for n in nodes if section_of(n) == s and n in reachA1]),
+                   len([n for n in nodes if section_of(n) == s and n in reachA2]),
+                   len([n for n in nodes if section_of(n) == s and n in reachB1]),
+                   len([n for n in nodes if section_of(n) == s and n in reachB2])))
+    f.write(" ]\n")
     f.write(" :edges-total %d\n" % len(edges))
     f.write(" :edges-resolved %d\n" % len([e for e in edges if e[3]]))
     f.write(" :edges-unresolved %d\n" % len([e for e in edges if not e[3]]))

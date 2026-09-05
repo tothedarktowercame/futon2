@@ -18,6 +18,305 @@
  :why-reachable-up-from-problems+wr 34
  :why-reachable-down-from-problems 6
  :why-reachable-down-from-problems+wr 53
+ :per-section-counts [
+  {:section "agency" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "agent" :patterns-total 17 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "ai4ci" :patterns-total 13 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "aif" :patterns-total 33 :carrying-why 6 :carrying-how 13
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 5}
+  {:section "ants" :patterns-total 5 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "baldwin" :patterns-total 11 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "budgeted-action-selection" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "campaign-coherence" :patterns-total 3 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "capability" :patterns-total 3 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "career-coherence" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "cascades" :patterns-total 5 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "code-coherence" :patterns-total 2 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "collaboration-coherence" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "contributing" :patterns-total 2 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "control" :patterns-total 4 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "coordination" :patterns-total 13 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "corps" :patterns-total 6 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "correspondence-coherence" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "cycle-machine" :patterns-total 7 :carrying-why 7 :carrying-how 1
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 5}
+  {:section "data-mining" :patterns-total 10 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "depositing" :patterns-total 3 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "devmap-coherence" :patterns-total 20 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "eight-gates" :patterns-total 16 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "enrichment" :patterns-total 7 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "eoi-engine" :patterns-total 3 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "equity" :patterns-total 16 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "exotic" :patterns-total 11 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "f6" :patterns-total 10 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "features" :patterns-total 2 :carrying-why 2 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 2}
+  {:section "forward-model" :patterns-total 7 :carrying-why 7 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 7}
+  {:section "futon-theory" :patterns-total 37 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "gauntlet" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "hdm" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "iching" :patterns-total 64 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "iiching" :patterns-total 257 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "invariant-coherence" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "liberation" :patterns-total 16 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "library-coherence" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-formalization" :patterns-total 29 :carrying-why 4 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-formalization-CA" :patterns-total 23 :carrying-why 6 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-formalization-CV" :patterns-total 7 :carrying-why 6 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-formalization-FA" :patterns-total 2 :carrying-why 2 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-formalization-GN" :patterns-total 2 :carrying-why 1 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-formalization-GR" :patterns-total 2 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-formalization-MG" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-informal" :patterns-total 24 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-informal-CA" :patterns-total 6 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-informal-CO" :patterns-total 2 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-informal-CT" :patterns-total 7 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-informal-LO" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-informal-NA" :patterns-total 2 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-informal-RA" :patterns-total 2 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "math-strategy" :patterns-total 20 :carrying-why 4 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "measurement" :patterns-total 3 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "memory" :patterns-total 5 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "meta" :patterns-total 6 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "mission-coherence" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "mmca" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "musn" :patterns-total 17 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "nomad" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "or2" :patterns-total 11 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "or3" :patterns-total 17 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "orchestration" :patterns-total 5 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "p4ng" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "paramitas" :patterns-total 10 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "pattern-coherence" :patterns-total 6 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "pattern-discipline" :patterns-total 4 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "pattern-mining" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "peeragogy" :patterns-total 18 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "peripherals" :patterns-total 11 :carrying-why 0 :carrying-how 2
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "plos-npt-with-small-n" :patterns-total 22 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "portal" :patterns-total 3 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "problems" :patterns-total 6 :carrying-why 5 :carrying-how 0
+   :why-reachable-up-from-problems 6 :why-reachable-up-from-problems+wr 6
+   :why-reachable-down-from-problems 6 :why-reachable-down-from-problems+wr 6}
+  {:section "process-coherence" :patterns-total 4 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "proof-search" :patterns-total 3 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "realtime" :patterns-total 13 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "relationship-coherence" :patterns-total 19 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "repository-transition" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "scan-coherence" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "sidecar" :patterns-total 12 :carrying-why 0 :carrying-how 1
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "snatch" :patterns-total 24 :carrying-why 21 :carrying-how 3
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "social" :patterns-total 7 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "software-design" :patterns-total 9 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "stack-coherence" :patterns-total 10 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "storage" :patterns-total 21 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "structure" :patterns-total 11 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "system-coherence" :patterns-total 16 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "t3" :patterns-total 12 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "t4r" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "ukrns" :patterns-total 26 :carrying-why 0 :carrying-how 1
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "vsatelier" :patterns-total 7 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "vsatlas" :patterns-total 23 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "vsatlatarium" :patterns-total 8 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "war-machine" :patterns-total 10 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "war-room" :patterns-total 28 :carrying-why 10 :carrying-how 0
+   :why-reachable-up-from-problems 8 :why-reachable-up-from-problems+wr 28
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 28}
+  {:section "workday" :patterns-total 2 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "workflow-coherence" :patterns-total 3 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "writing-coherence" :patterns-total 23 :carrying-why 2 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+  {:section "xed-roads" :patterns-total 1 :carrying-why 0 :carrying-how 0
+   :why-reachable-up-from-problems 0 :why-reachable-up-from-problems+wr 0
+   :why-reachable-down-from-problems 0 :why-reachable-down-from-problems+wr 0}
+ ]
  :edges-total 3830
  :edges-resolved 1826
  :edges-unresolved 2004
