@@ -172,6 +172,21 @@ not that it has been taken.
   exists at the declared grain, which is what `02-policy-family-census.edn`
   `:conclusion` said slice 2 was waiting for; whether slice 2 proceeds on it is
   that row's call and a reviewer's.
-- The row's `:statement` records a reversal: one line from Joe ruling the action
-  grain admissible as π supersedes this row. Nothing here forecloses it — the
-  action-grain reading is untouched, and this record is additive.
+- The row's `:statement` records a reversal — one line from Joe ruling the action
+  grain admissible as π supersedes this row. **That branch closed while the row
+  was in the seat, and not by anything here.** futon2 `4eaeee2a` (Joe,
+  2026-09-05 12:01 UTC) writes `aif-equations.edn :choices :policy-grain`
+  `:status :decided`: the policy grain is the cascade, the question is closed
+  rather than defaulted, and the action grain is not admissible as π. Its
+  `:consequence` names this row as the only path to inhabiting π and says F1
+  slice 2 waits on F7 rather than on Joe. Two things that entry asks for are
+  other rows' and were not done here: rewriting `:F1`'s `:blocker` to name `:F7`
+  as its gate, and the now-stale reversal sentence in this row's own
+  `:statement`, left as written so a reviewer sees what the row was minted
+  against.
+- `worklist_check.bb <relative-path>` from a cwd other than the lab directory
+  fails misleadingly: the ancestry gate it shells out to runs with `:dir
+  script-dir` (`worklist_check.bb:219-224`) while the ledger path is passed
+  through unresolved, so the gate reports a refusal when it simply cannot find
+  the file. `wm-build-loop.sh` passes absolute paths, so nothing in the loop hits
+  it. Reported, not repaired — it is `:F5`'s code and outside this row's bar.
