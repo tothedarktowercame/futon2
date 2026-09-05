@@ -185,3 +185,61 @@ forward-model contract for `u*`. New patterns enter candidate generation with
 uniform reliability/proposal priors, but they do not inherit fabricated
 historical mass in `E_cascade`. Once cascades containing them are genuinely
 selected, the ordinary cascade-habit update applies.
+
+## Machine-proposed slice work (`:B2`, 2026-09-05)
+
+Four items proposed by the machine, not by the owner. Each was given the
+cheapest experiment that could have retired it before it was written down, and
+each survived; the measurement is cited on the item and the raw output is in
+`holes/labs/wm-contract/runs/B2-strawman/`. They are ordinary unchecked items
+and count as such; striking any of them is an edit to this file. Reversal: a
+single `git revert` of the one commit that added this section, whose sha is
+named in `holes/labs/wm-contract/proposals/STRAWMAN-M-wm-aif-policy-grain-compliance.md`.
+
+- [ ] **Adapt one non-threshold diversity source for Slice 1b.** A read-only
+  adapter from one named arguing-worlds or slush artifact into the complete
+  cascade-candidate schema, with a pinned fixture yielding at least two foldable
+  candidates including the incumbent, a deterministic seed/deposit, and an
+  explicit difference in membership or semilattice wiring. *Machine-proposed;
+  measured 2026-09-05:* the tree declares two `:candidate-source` values,
+  `:coverage-saturation-frontier` (`scripts/futon2/report/cascade_lane.clj:126`,
+  the threshold frontier this item is meant to compare against) and
+  `:p4ng-control-hypergraph` (`src/futon2/aif/mission_control_graph.clj:126`,
+  mission grain, not cascade grain); `src/futon2/aif/arguing_worlds.clj` never
+  mentions `:semilattice`; and the nearest existing non-threshold artifact,
+  `holes/labs/slush-demo/findings/proposals/batch-2-worklist.json`, is a
+  `{proposal, mission, patterns}` bag with no ordering and no wiring, which
+  invariant 2 above says is not a policy identity
+  (`runs/B2-strawman/02-read-and-replay-probes.edn` `:G1`).
+- [ ] **Make cascade scoring prefix-local and auditable.** Recompute every
+  candidate selection term from that candidate's own `:shown` and
+  `:semilattice`, keeping full-construction measurements under distinct
+  telemetry keys, and prove on a truncation fixture that the selected score
+  equals a direct recomputation on the enacted prefix and that changing only
+  discarded suffix telemetry cannot change its rank. *Machine-proposed;
+  measured 2026-09-05:* the one committed cascade artifact with
+  `truncated: true` (`holes/labs/M-evaluate-policies/exhibit/cascade-3-serve.json`,
+  full size 14, budget 6) emits coverage-reward 6.242 where its own six shown
+  rows sum to 1.921, and T-intensity 4.84 where the prefix sums to 2.109 — the
+  gap this item exists to close, measured rather than inferred
+  (`runs/B2-strawman/02-read-and-replay-probes.edn` `:G2`).
+- [ ] **Specify and persist the cascade-habit return event.** A distinct
+  versioned `:cascade-prior-state`, the complete selected identity pinned, and
+  the one reviewed event that increments it — with replay showing a qualifying
+  event increments once, cancelled or failed construction does not, and legacy
+  traces with no reconstructible identity cold-start. *Machine-proposed;
+  measured 2026-09-05:* `:cascade-prior-state` occurs zero times across the 306
+  `.clj` files of `src/`, `scripts/` and `test/`, and
+  `src/futon2/aif/cascade_prior.clj` is required by nothing outside itself and
+  its own two test namespaces, so the Slice 0 kernel has no persistence seam to
+  extend (`runs/B2-strawman/02-read-and-replay-probes.edn` `:G3`).
+- [ ] **Run a dark end-to-end hierarchy shadow.** Candidate construction,
+  prefix-local ranking, fold/gate and trace production exercised without
+  changing live selection, reported with the non-degenerate useful-case
+  fraction, incumbent and candidate construction failure rates, separately named
+  `E_scheduler` / cascade-score / `E_cascade` terms, deterministic replay, and
+  byte identity with the feature off. *Machine-proposed; measured 2026-09-05:*
+  `cascade-prior/shadow-rank` has no call site outside its own namespace and its
+  tests, and `holes/labs/M-wm-aif-policy-grain-compliance/` does not exist, so
+  no shadow corpus has ever been collected
+  (`runs/B2-strawman/02-read-and-replay-probes.edn` `:G4`).
