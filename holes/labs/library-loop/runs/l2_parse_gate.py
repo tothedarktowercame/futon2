@@ -45,7 +45,9 @@ for fn in sorted(os.listdir(d)):
                          "writing-coherence", "devmap-coherence",
                          "relationship-coherence", "campaign-coherence",
                          "code-coherence", "collaboration-coherence",
-                         "career-coherence"}
+                         "career-coherence",
+                         "peeragogy", "or3", "musn",
+                         "plos-npt-with-small-n", "agency", "agent"}
     lines = open(os.path.join(d, fn), encoding="utf-8").read().splitlines()
     meta = {}
     nodes = []
