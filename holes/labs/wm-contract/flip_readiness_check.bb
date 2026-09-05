@@ -74,11 +74,11 @@
 ;; ---------------------------------------------------------------------------
 ;;
 ;; Every line below is a property of the tree at the moment of asking, which is
-;; why the deposit (:453-471) can only record a typed absence for a run taken
+;; why the deposit (:607-625) can only record a typed absence for a run taken
 ;; earlier: nothing said what the six sources held when the run ran. The stepper
 ;; now captures them (`wm_step_records.bb` `flip-readiness-capture`, written into
-;; `world-before.edn` at `wm_step.sh:239` and copied into the run store at
-;; `wm_step.sh:501`), and this mode reads that capture back.
+;; `world-before.edn` at `wm_step.sh:248` and copied into the run store at
+;; `wm_step.sh:511`), and this mode reads that capture back.
 ;;
 ;; RESOLUTION IS HASH-VERIFIED, WITH TWO ROUTES AND AN HONEST FAILURE. For each
 ;; source the capture holds both a git identity and a sha256 of the bytes the
@@ -92,7 +92,7 @@
 ;;   (3) otherwise the source is UNRESOLVABLE and this mode fails. It does not
 ;;       fall back to the live tree: a derivation labelled with a run-id that
 ;;       silently read today's bytes is the mislabelling the deposit comment at
-;;       :456-469 refuses to make.
+;;       :610-623 refuses to make.
 ;; A repo sha alone would not do this. C511 section 1 records the wrong-commit
 ;; extraction (`69721b12`, the contract AUTHORITY, against the `4bbc7111` that
 ;; re-emitted the JSON) that only the content hash rejected.
@@ -753,7 +753,7 @@
 
   ;; --emit writes the committed tree artifacts. Emitting them from a run's
   ;; captured state would put a run property into a tree artifact -- the same
-  ;; mislabelling the deposit comment at :456-469 refuses in the other direction.
+  ;; mislabelling the deposit comment at :610-623 refuses in the other direction.
   (and as-of-path (contains? (set *command-line-args*) "--emit"))
   (do (println "flip_readiness_check: --as-of does not compose with --emit --")
       (println "  FLIP-READINESS.md and its sidecar are properties of the tree, not of a run.")

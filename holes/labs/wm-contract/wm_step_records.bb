@@ -231,8 +231,8 @@
 ;; ---------------------------------------------------------------------------
 
 (def flip-readiness-sources
-  "The six files `flip_readiness_check.bb` reads at :69-74, each with the
-   environment variable that overrides it (:69-75) and the repo it lives in.
+  "The six files `flip_readiness_check.bb` reads at :196-201, each with the
+   environment variable that overrides it (:196-202) and the repo it lives in.
    `world-files` above is a DIFFERENT set -- C509 R7's tick inputs -- and only
    one of these six is on it (:holes-contract, :167). The check derives its six
    lines from the state of these files at the moment of asking, so a run that
@@ -243,22 +243,22 @@
    here: it is what lets an as-of derivation reach the check through the check's
    own override seam instead of a hand-assembled env block."
   [[:catalog    (str home "/code/futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn")
-    "CATALOG"       "futon2"   "flip_readiness_check.bb:69"]
+    "CATALOG"       "futon2"   "flip_readiness_check.bb:196"]
    [:accounting (str home "/code/futon2/holes/labs/wm-contract/variable-situation-accounting.edn")
-    "ACCOUNTING"    "futon2"   "flip_readiness_check.bb:70"]
+    "ACCOUNTING"    "futon2"   "flip_readiness_check.bb:197"]
    [:hole-audit (str home "/code/futon2/holes/labs/wm-contract/runs/U27-hole-closability/audit.edn")
-    "HOLE_AUDIT"    "futon2"   "flip_readiness_check.bb:71"]
+    "HOLE_AUDIT"    "futon2"   "flip_readiness_check.bb:198"]
    [:tally      (str home "/code/p4ng/empirics-futon/defect-repair-tally.edn")
-    "TALLY"         "p4ng"     "flip_readiness_check.bb:72"]
+    "TALLY"         "p4ng"     "flip_readiness_check.bb:199"]
    [:receipt    (str home "/code/p4ng/empirics-futon/wm-status-receipt.json")
-    "RECEIPT"       "p4ng"     "flip_readiness_check.bb:73"]
+    "RECEIPT"       "p4ng"     "flip_readiness_check.bb:200"]
    [:contract   (str home "/code/mathlib4/DarkTower/WarMachine/holes-contract.json")
-    "CONTRACT_JSON" "mathlib4" "flip_readiness_check.bb:74"]])
+    "CONTRACT_JSON" "mathlib4" "flip_readiness_check.bb:201"]])
 
 (def per-node-test-repos
-  "`repo-dir` verbatim (flip_readiness_check.bb:205), the repos whose live git
+  "`repo-dir` verbatim (flip_readiness_check.bb:335), the repos whose live git
    the :per-node-tests line reads with no override: `moved-since-head`
-   (:215-226) is `git diff --name-only <catalog-head> HEAD` unioned with
+   (:351-380) is `git diff --name-only <catalog-head> HEAD` unioned with
    `git status --porcelain`, both evaluated at NOW. Capturing each repo's HEAD
    and its porcelain list is the as-of input that line has never had."
   [[:futon2 (str home "/code/futon2")]
@@ -312,21 +312,21 @@
   "Everything `flip_readiness_check.bb` reads from outside its own code, pinned:
    the six sources by content hash and git identity, the two repos the
    :per-node-tests line reads live git in, and the one `git log` the
-   :contract-pin line runs (:111) -- which is a source too, and is not a file."
+   :contract-pin line runs (:240) -- which is a source too, and is not a file."
   []
   {:sources (mapv source-identity flip-readiness-sources)
    :per-node-git (vec (for [[repo-kw root] per-node-test-repos]
                         {:repo repo-kw :root root
                          :head (git-out root "git" "rev-parse" "HEAD")
                          :porcelain (porcelain-lines root)
-                         :where "flip_readiness_check.bb:215-226"}))
+                         :where "flip_readiness_check.bb:351-380"}))
    :holes-lean-last-commit
    {:repo "mathlib4"
     :path "DarkTower/WarMachine/Holes.lean"
     :commit (git-out (str home "/code/mathlib4") "git" "log" "-1" "--format=%H"
                      "--" "DarkTower/WarMachine/Holes.lean")
-    :where "flip_readiness_check.bb:111 -- the comparand C175 settled; NOT mathlib HEAD"}
-   :where "flip_readiness_check.bb:69-75,111,215-226"
+    :where "flip_readiness_check.bb:240 -- the comparand C175 settled; NOT mathlib HEAD"}
+   :where "flip_readiness_check.bb:196-202,240,351-380"
    :consumed-by "bb flip_readiness_check.bb --as-of <world-record.edn>"})
 
 (defn world []
@@ -359,7 +359,7 @@
      ;; CONDITION under which its determinism claim holds rather than asserting
      ;; the read is harmless.
      :world/commit-census (commit-census (Long/parseLong (or (System/getenv "FUTON_WM_STEP_DAYS") "14")))
-     ;; U57. The six sources flip_readiness_check.bb:69-74 reads, plus the two
+     ;; U57. The six sources flip_readiness_check.bb:196-201 reads, plus the two
      ;; repos its :per-node-tests line reads live git in and the Holes.lean
      ;; `git log` its :contract-pin line runs. Captured BEFORE the tick, beside
      ;; the rest of the world, so `--as-of` can re-derive the run's own

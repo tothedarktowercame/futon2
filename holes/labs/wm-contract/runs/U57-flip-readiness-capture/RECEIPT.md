@@ -9,17 +9,17 @@ The stepper now pins them and the check can read the pin back.
 ## What was added
 
 **The capture** — `wm_step_records.bb:233-256` lists the six files
-`flip_readiness_check.bb:178-183` reads, each with the environment variable that
+`flip_readiness_check.bb:196-201` reads, each with the environment variable that
 overrides it. `:258-265` lists the two repos the `:per-node-tests` line reads
-live git in (`repo-dir`, `flip_readiness_check.bb:344`). `source-identity`
+live git in (`repo-dir`, `flip_readiness_check.bb:335`). `source-identity`
 (`:280-309`) records, per source, the sha256 of the bytes NOW plus the git
 identity that fetches them back — last commit touching the path, that commit's
 blob sha1, the worktree's blob sha1, and `:worktree-matches-commit?`.
 `flip-readiness-capture` (`:311-330`) adds the two repo heads with their
 porcelain lists and the one `git log` the `:contract-pin` line runs
-(`flip_readiness_check.bb:240-241`), which is a source and is not a file. It is
+(`flip_readiness_check.bb:240`), which is a source and is not a file. It is
 written into the step's world record at `wm_step_records.bb:367`, taken before
-the tick at `wm_step.sh:246`, and already copied into a run store at
+the tick at `wm_step.sh:248`, and already copied into a run store at
 `wm_step.sh:511`.
 
 `world-files` (`wm_step_records.bb:150-172`) is a different set — C509 item R7's
@@ -28,13 +28,13 @@ It is left alone.
 
 **The residual C511 named** — `:step/futon2-tree-dirty?` is a boolean
 (`wm_step.sh:123`), so it cannot exclude a dirty-then-reverted-without-a-commit
-path. `tree_dirty_files` (`wm_step.sh:129-134`) records the porcelain LIST
+path. `tree_dirty_files` (`wm_step.sh:124-132`) records the porcelain LIST
 beside it, written at `wm_step.sh:303`. It emits the list through `prn` of a
 vector rather than a hand-built literal: a path holding a quote would otherwise
 produce a step record that cannot be read back.
 
 **The as-of mode** — `bb flip_readiness_check.bb --as-of <world-record.edn>`
-(`flip_readiness_check.bb:99-190`). Resolution is hash-verified with two routes
+(`flip_readiness_check.bb:73-189`). Resolution is hash-verified with two routes
 and a refusal:
 
 1. `git show <last-commit>:<rel>` — used if its sha256 is the recorded one.
@@ -48,7 +48,7 @@ The refusal is placed before the derivation on purpose. Carrying an unresolvable
 source as a problem would let the six lines fall through to their live defaults
 and print a verdict block under an `AS-OF` header — a derivation labelled with a
 run and read from today's tree, which is the mislabelling the deposit comment at
-`flip_readiness_check.bb:590-603` declines to make in the other direction.
+`flip_readiness_check.bb:610-623` declines to make in the other direction.
 `moved-since-head` (`:351-380`) refuses the same way when the capture holds no
 git state for a repo the catalog's `:heads` names, rather than falling back to
 `HEAD`.
