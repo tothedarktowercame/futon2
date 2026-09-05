@@ -1,0 +1,121 @@
+=== A. ROW HYGIENE ===
+rows: 31
+distinct :id: 31 no duplicates
+
+=== B. REGISTRY-SYMBOL COVERAGE (aif-equations.edn) ===
+aif-equations symbols: 25 claimed by concordance: 25
+
+=== C. NODE ===
+control-stages nodes: 20
+
+=== D. GLOSSARY POINTERS ===
+ :observation/vector                o    L12   symbol PRESENT on line
+ :prediction/error                  eps  L15   symbol PRESENT on line
+ :precision/evidence-channel        Pi   L17   symbol PRESENT on line
+ :free-energy/variational           F    L19   symbol PRESENT on line
+  :free-energy/policy glossary ABSENT: :not-found-in-glossary-math-spans
+ :belief/update                     mu-next L15   symbol PRESENT on line
+ :belief/stored                     mu   L15   symbol PRESENT on line
+ :distribution/predictive-outcome   Q(o|pi) L23   symbol PRESENT on line
+ :score/risk                        risk L27   symbol PRESENT on line
+ :score/ambiguity                   ambiguity L29   symbol PRESENT on line
+ :score/expected-free-energy        G    L21   symbol PRESENT on line
+ :policy/set                        pi   L52   symbol PRESENT on line
+  :policy/depth glossary ABSENT: :depth-symbol-not-spelled-in-glossary
+ :policy/temperature                tau  L35   symbol PRESENT on line
+ :distribution/policy-posterior     Q(pi) L43   symbol PRESENT on line
+ :action/selected                   u    L39   symbol PRESENT on line
+ :learning/dirichlet-concentration  a-conc L60   symbol PRESENT on line
+ :learning/model-reduction-change   Delta-F L62   symbol PRESENT on line
+ :model/observation                 A    L31   symbol PRESENT on line
+ :model/transition                  B    L31   symbol PRESENT on line
+ :preference/distribution           C    L25   symbol PRESENT on line
+ :policy/habit-prior                E    L41   symbol PRESENT on line
+ :belief/step-size                  alpha L15   symbol PRESENT on line
+  :precision/variance-floor glossary ABSENT: :not-found-in-glossary-math-spans
+  :boundary/world glossary ABSENT: :not-found-as-a-math-symbol
+ :policy/space-capital-pi           Pi   L39   symbol PRESENT on line
+ :model/dirichlet-posterior-A       A    L58   symbol PRESENT on line
+ :architecture/aliveness-temperature T    L54   symbol PRESENT on line
+  :precision/likelihood-per-call glossary ABSENT: :runtime-key-reading-not-a-separate-glossary-symbol
+  :precision/history-runtime-key glossary ABSENT: :runtime-key-reading-not-a-separate-glossary-symbol
+ :free-energy/reduction-F           F    L62   symbol PRESENT on line
+
+=== E. LEAN POINTERS ===
+ :observation/vector                machineObservation @ DarkTower/WarMachine/MachineObservation.lean:58 OK
+ :prediction/error                  machineChannelPredictionError @ DarkTower/WarMachine/MachinePredictionError.lean:160 OK
+ :precision/evidence-channel        machinePrecision @ DarkTower/WarMachine/MachinePrecision.lean:101 OK
+ :free-energy/variational           variationalFreeEnergy @ DarkTower/WarMachine/Holes.lean:6828 OK
+ :free-energy/policy                machinePolicyFreeEnergy @ DarkTower/WarMachine/MachinePolicyFreeEnergy.lean:59 OK
+ :belief/update                     machineBeliefUpdate @ DarkTower/WarMachine/MachineBeliefUpdate.lean:181 OK
+ :belief/stored                     machineBeliefState @ DarkTower/WarMachine/MachineBeliefState.lean:25 OK
+ :distribution/predictive-outcome   PredictiveOutcomeKernel @ DarkTower/WarMachine/Holes.lean:6758 OK
+ :score/risk                        predictiveOutcomeRisk @ DarkTower/WarMachine/Holes.lean:6867 OK
+ :score/ambiguity                   ambiguity @ DarkTower/WarMachine/Holes.lean:6880 OK
+ :score/expected-free-energy        expectedFreeEnergy @ DarkTower/WarMachine/Holes.lean:6887 OK
+  :policy/set lean ABSENT: :registry-row-has-no-lean-and-war-machine-search-found-no-machine-policy-set
+ :policy/depth                      machineDepth @ DarkTower/WarMachine/MachineDepth.lean:133 OK
+ :policy/temperature                machineTemperature @ DarkTower/WarMachine/MachineTemperature.lean:42 OK
+ :distribution/policy-posterior     softmax @ DarkTower/WarMachine/Holes.lean:6960 OK
+ :action/selected                   machineAction @ DarkTower/WarMachine/MachineAction.lean:49 OK
+ :learning/dirichlet-concentration  DirichletConcentrations @ DarkTower/WarMachine/Holes.lean:6936 OK
+ :learning/model-reduction-change   bayesFactorThreshold @ DarkTower/WarMachine/Holes.lean:6957 OK
+  :model/observation lean ABSENT: :registry-row-has-no-lean-identifier
+  :model/transition lean ABSENT: :registry-row-has-no-lean-identifier
+  :preference/distribution lean ABSENT: :registry-row-has-no-lean-identifier
+  :policy/habit-prior lean ABSENT: :registry-row-has-no-lean-identifier
+  :belief/step-size lean ABSENT: :registry-symbol-is-stack-defined-but-has-no-own-lean-carrier
+  :precision/variance-floor lean ABSENT: :registry-symbol-has-no-own-lean-carrier
+  :boundary/world lean ABSENT: :exogenous-boundary-not-given-a-war-machine-identifier
+  :policy/space-capital-pi lean ABSENT: :glossary-reading-has-no-corresponding-war-machine-identifier-found
+  :model/dirichlet-posterior-A lean ABSENT: :glossary-reading-has-no-distinct-registry-lean-identifier
+  :architecture/aliveness-temperature lean ABSENT: :glossary-reading-has-no-war-machine-identifier-found
+ :precision/likelihood-per-call     perCallPrecision @ DarkTower/WarMachine/MachinePredictionError.lean:134 OK
+ :precision/history-runtime-key     machinePrecision @ DarkTower/WarMachine/MachinePrecision.lean:101 OK
+ :free-energy/reduction-F           ModelReductionFreeEnergyChange @ DarkTower/WarMachine/Holes.lean:6946-6947 OK
+
+=== F. RUNTIME POINTERS ===
+ :observation/vector                observe                                  src/futon2/aif/observation.clj:103-146 OK
+ :prediction/error                  compute-prediction-error                 src/futon2/aif/free_energy.clj:203-278 OK
+ :precision/evidence-channel        precision-for                            src/futon2/aif/precision.clj:195-201 OK
+  :free-energy/variational runtime ABSENT: :no-single-runtime-producer-found
+ :free-energy/policy                f-pi-for-candidate                       src/futon2/aif/policy_free_energy.clj:41-144 OK
+ :belief/update                     update-belief-batch                      src/futon2/aif/belief.clj:434-446 OK
+ :belief/stored                     reconcile-belief-carry                   src/futon2/aif/belief.clj:510-522 OK
+ :distribution/predictive-outcome   predictive-outcome-distribution          src/futon2/aif/machine_q.clj:364-395 OK
+ :score/ambiguity                   ambiguity-by-channel                     src/futon2/aif/efe.clj:63-75 OK
+ :score/expected-free-energy        compute-efe                              src/futon2/aif/efe.clj:472-727 OK
+  :policy/set runtime ABSENT: :registry-row-has-no-code-and-source-search-found-no-single-policy-set-var
+ :policy/depth                      default-horizon-steps                    src/futon2/aif/forward_model.clj:278 OK
+ :policy/temperature                effective-temperature                    src/futon2/aif/policy.clj:77-146 OK
+ :distribution/policy-posterior     softmax-weights                          src/futon2/aif/policy.clj:215-235 OK
+ :action/selected                   select-action                            src/futon2/aif/policy.clj:672-862 OK
+ :learning/dirichlet-concentration  corpus->concentration                    src/futon2/aif/a4a.clj:85-113 OK
+ :learning/model-reduction-change   acceptance-threshold                     src/futon2/aif/bmr.clj:4-5 OK
+ :model/observation                 observation-model-v1                     src/futon2/aif/belief.clj:199-205 OK
+ :model/transition                  transition-model-v1                      src/futon2/aif/belief.clj:214-226 OK
+ :preference/distribution           preference-stack-record                  src/futon2/aif/efe.clj:117-125 OK
+ :policy/habit-prior                attach-log-priors                        src/futon2/aif/habit_prior.clj:121-163 OK
+  :belief/step-size runtime ABSENT: :implemented-as-local-annealing-expression-not-a-runtime-var
+  :boundary/world runtime ABSENT: :exogenous-boundary-not-a-single-runtime-var
+  :policy/space-capital-pi runtime ABSENT: :glossary-reading-has-no-single-runtime-var-found
+  :architecture/aliveness-temperature runtime ABSENT: :glossary-reading-has-no-single-runtime-var-found
+ :free-energy/reduction-F           bayesian-model-reduction                 src/futon2/aif/bmr.clj:108-134 OK
+
+=== G. BARE-SYMBOL COLLISIONS (report only; refusal is slice 2) ===
+ fold "a" -> 2 rows: [:model/observation :model/dirichlet-posterior-A]
+ fold "f" -> 2 rows: [:free-energy/variational :free-energy/reduction-F]
+ fold "pi" -> 3 rows: [:precision/evidence-channel :policy/set :policy/space-capital-pi]
+ fold "precision" -> 2 rows: [:precision/likelihood-per-call :precision/history-runtime-key]
+ fold "t" -> 2 rows: [:policy/depth :architecture/aliveness-temperature]
+
+=== NOTES (shape, not resolution) ===
+ * :score/risk: :runtime :var "risk branch inside futon2.aif.efe/compute-efe" is prose, not a var name; range 472-727 is in file
+ * :precision/variance-floor: :runtime :var ":min-variance option" is prose, not a var name; range 203-278 is in file
+ * :model/dirichlet-posterior-A: :runtime :var "BMR full-posterior argument" is prose, not a var name; range 108-134 is in file
+ * :precision/likelihood-per-call: :runtime :var ":precision result key" is prose, not a var name; range 252-278 is in file
+ * :precision/history-runtime-key: :runtime :var ":precision overwritten by futon2.aif.precision/weighted-error" is prose, not a var name; range 212-233 is in file
+
+=== FINDINGS ===
+none
+count: 0

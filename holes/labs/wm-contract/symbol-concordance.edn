@@ -66,7 +66,7 @@
   {:id :action/selected :bare "u" :fold "u" :reading "The selected action." :node :R16 :registry-symbol :u
    :glossary {:file "p4ng/sec-glossary.tex" :at 39 :term "control u"}
    :lean {:ident "machineAction" :file "DarkTower/WarMachine/MachineAction.lean" :at 49}
-   :runtime {:var "futon2.aif.policy/select-action" :file "src/futon2/aif/policy.clj" :at "672-868"}}
+   :runtime {:var "futon2.aif.policy/select-action" :file "src/futon2/aif/policy.clj" :at "672-862"}}
   {:id :learning/dirichlet-concentration :bare "a-conc" :fold "a-conc" :reading "Dirichlet concentration parameters." :node :R17 :registry-symbol :a-conc
    :glossary {:file "p4ng/sec-glossary.tex" :at 60 :term "Dirichlet concentration parameters"}
    :lean {:ident "DirichletConcentrations" :file "DarkTower/WarMachine/Holes.lean" :at 6936}
@@ -118,7 +118,8 @@
    :runtime {:absent :glossary-reading-has-no-single-runtime-var-found}}
   {:id :precision/likelihood-per-call :bare "precision" :fold "precision" :reading "Likelihood-derived precision for one prediction-error call." :node :R8 :registry-symbol nil
    :glossary {:absent :runtime-key-reading-not-a-separate-glossary-symbol}
-   :lean {:ident "perCallPrecision" :file "DarkTower/WarMachine/MachinePredictionError.lean" :at "81-84"}
+   :lean {:ident "perCallPrecision" :file "DarkTower/WarMachine/MachinePredictionError.lean" :at 134}
+   :lean-note "perCallPrecision is a FIELD of structure PresentRecord (MachinePredictionError.lean:129-135), not a top-level declaration; the review corrected :at from 81-84, which is the unrelated inductive Field. The distinctness this row records is stated as a theorem: perCallPrecisionIsNotMachinePrecision (MachinePredictionErrorWitness.lean:152-156)."
    :runtime {:var ":precision result key" :file "src/futon2/aif/free_energy.clj" :at "252-278"}}
   {:id :precision/history-runtime-key :bare "precision" :fold "precision" :reading "History-derived R7 precision after weighted-error overwrites the result key." :node :R7 :registry-symbol nil
    :glossary {:absent :runtime-key-reading-not-a-separate-glossary-symbol}
@@ -126,7 +127,8 @@
    :runtime {:var ":precision overwritten by futon2.aif.precision/weighted-error" :file "src/futon2/aif/precision.clj" :at "212-233"}}
   {:id :free-energy/reduction-F :bare "F" :fold "f" :reading "The F component of model-reduction evidence Delta F, distinct from per-tick F." :node :R17 :registry-symbol nil
    :glossary {:file "p4ng/sec-glossary.tex" :at 62 :term "Delta F"}
-   :lean {:ident "ModelReductionFreeEnergyChange" :file "DarkTower/WarMachine/Holes.lean" :at "6949-6950"}
+   :lean {:ident "ModelReductionFreeEnergyChange" :file "DarkTower/WarMachine/Holes.lean" :at "6946-6947"}
+   :lean-note "The review corrected :at from 6949-6950, which is `def modelReductionFreeEnergyChange` -- the lower-case function, a different declaration from the capitalised wrapper structure this row names. In a registry whose subject is case-distinctness, the pointer had crossed exactly that boundary."
    :runtime {:var "futon2.aif.bmr/bayesian-model-reduction" :file "src/futon2/aif/bmr.clj" :at "108-134"}}]
 
  :collisions

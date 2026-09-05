@@ -3,7 +3,7 @@
 Date: 2026-09-05
 
 This slice adds `symbol-concordance.edn`: 25 rows for the distinct
-`:defines`/`:exogenous` symbols in `aif-equations.edn`, plus five additional
+`:defines`/`:exogenous` symbols in `aif-equations.edn`, plus six additional
 pointer-backed readings of those symbols.  It is a census, not a notation
 ruling, and it adds no checker.
 
