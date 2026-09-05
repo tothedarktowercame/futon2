@@ -11,13 +11,15 @@ CHECK CATALOGUE — the check-id enum, each entry naming its machinery
   :tensions-cashed               holes/labs/wm-contract/u41_tension_ledger.bb
   :selection-discrimination      holes/labs/wm-contract/re7_selection_discrimination.bb (chosen-candidate controller-score tie from the run rationale records, Lean decide)
 
-BY RUN — a run missing a catalogued check is :incomplete, never green
-  2026-09-01-s5                :red         8 checks, not deposited: []
+BY RUN — never green while a catalogued check is missing; a typed absence folds to the response it asks for
+  2026-09-01-s5                :red                        8 checks, not deposited: []
                                  because :red-verdict [:selection-discrimination]
-  2026-09-04-010-accepted      :incomplete  8 checks, not deposited: []
+  2026-09-04-010-accepted      :incomplete-uninstrumented  8 checks, not deposited: []
                                  because :typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]
-  2026-09-04-re5               :incomplete  8 checks, not deposited: []
+                                 instrument the next run: [:per-node-runtime-validation :rationale-regret] | wait for the datum: [:flip-readiness :tensions-cashed]
+  2026-09-04-re5               :incomplete-uninstrumented  8 checks, not deposited: []
                                  because :typed-absences [:flip-readiness :per-node-runtime-validation :rationale-regret :tensions-cashed]
+                                 instrument the next run: [:flip-readiness :per-node-runtime-validation :rationale-regret] | wait for the datum: [:tensions-cashed]
 
 BY CHECK — the verdict series across runs, which is the time-correlation
   :contract-pin                  3 runs [["2026-09-04T07:07:10Z" "2026-09-01-s5" :typed-absence] ["2026-09-04T07:56:27Z" "2026-09-04-re5" :green] ["2026-09-04T16:40:56Z" "2026-09-04-010-accepted" :green]]

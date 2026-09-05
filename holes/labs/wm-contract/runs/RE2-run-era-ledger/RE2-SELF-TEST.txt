@@ -25,5 +25,12 @@ every append below goes to a TEMPORARY COPY; the committed ledger is not written
   :positive/c21-identical-catalogue-add-is-already-present   pass?=true
   :negative/c22-a-divergent-entry-for-an-existing-check-id-is-refused pass?=true
   :negative/c23-an-entry-whose-machinery-does-not-resolve-is-refused pass?=true
+  :positive/c24-labelling-an-absence-leaves-every-row-untouched pass?=true
+  :positive/c25-identical-label-is-already-present           pass?=true
+  :positive/c26-the-fold-splits-typed-absences-by-kind       pass?=true
+  :negative/c27-an-unlabelled-absence-folds-to-neither-new-word pass?=true
+  :negative/c28-a-label-for-a-pair-that-is-not-a-typed-absence-is-refused pass?=true
+  :negative/c29-a-divergent-label-for-an-existing-pair-is-refused pass?=true
+  :negative/c30-a-kind-outside-the-declared-set-and-a-blank-basis-are-refused pass?=true
 
-  24 controls, 15 negative (each shown REFUSING), 9 positive
+  31 controls, 19 negative (each shown REFUSING), 12 positive

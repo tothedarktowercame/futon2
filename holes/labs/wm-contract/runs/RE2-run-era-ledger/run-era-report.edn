@@ -33,7 +33,23 @@
    :optional [:check/note],
    :rules
    ["a check enters the catalogue when its machinery exists; the catalogue is the check-id enum"
-    ":check/machinery is a pointer to the script or recipe that produces the verdict, not a description of it"]}},
+    ":check/machinery is a pointer to the script or recipe that produces the verdict, not a description of it"]},
+  :absence
+  {:required
+   [:absence/run-id
+    :absence/check-id
+    :absence/kind
+    :absence/basis
+    :absence/by],
+   :optional [],
+   :enums #:absence{:kind #{:data-pending :not-contemporaneous}},
+   :rules
+   ["one entry per (:absence/run-id, :absence/check-id), and the pair must name a row whose :row/verdict is :typed-absence -- a label is about a standing absence, never about a green or a red"
+    ":absence/kind is read off ONE question: can this absence still be closed without changing what a run captures? :data-pending when yes -- the evidence is committed and derivable, or the route to it needs no instrumentation and the datum simply has not been produced yet; the response is to wait for it or to derive it. :not-contemporaneous when no -- the evidence had to be taken while the run ran, or at the tree state it ran against, and the run is closed; the response is to instrument the next run"
+    "C511-repair-or-elaborate.md is the per-(run, check) measurement those answers are read off. Its `repair demonstrated` is :data-pending; its `repair refuted` is :not-contemporaneous EXCEPT where the refutation is that the datum has not been produced yet rather than that nothing could produce it -- each such reading is stated in that entry's :absence/basis"
+    ":absence/basis names, with file:line pointers or a run-record id, the measurement the kind was read off; a kind with no basis is a preference"
+    "a label CHANGES NO VERDICT and is not a repair. The row it names keeps its :typed-absence for good, because the rows are append-only; the label says only which of the two responses that standing absence calls for"
+    "an unlabelled typed absence is treated as neither kind: the run folds :incomplete, the pre-split word, and the fold names the unlabelled checks under :unclassified"]}},
  :check-catalogue
  [#:check{:id :contract-pin,
           :machinery
@@ -102,14 +118,18 @@
     :tensions-cashed :typed-absence},
    :checks-not-deposited [],
    :first-at "2026-09-04T16:30:14.927146598Z",
-   :status :incomplete,
+   :status :incomplete-uninstrumented,
    :status-reason
    {:cause :typed-absences,
     :checks
     [:flip-readiness
      :per-node-runtime-validation
      :rationale-regret
-     :tensions-cashed]}}
+     :tensions-cashed],
+    :not-contemporaneous
+    [:per-node-runtime-validation :rationale-regret],
+    :data-pending [:flip-readiness :tensions-cashed],
+    :unclassified []}}
   {:run-id "2026-09-04-re5",
    :checks
    {:contract-pin :green,
@@ -122,14 +142,18 @@
     :tensions-cashed :typed-absence},
    :checks-not-deposited [],
    :first-at "2026-09-04T07:50:47.952039102Z",
-   :status :incomplete,
+   :status :incomplete-uninstrumented,
    :status-reason
    {:cause :typed-absences,
     :checks
     [:flip-readiness
      :per-node-runtime-validation
      :rationale-regret
-     :tensions-cashed]}}],
+     :tensions-cashed],
+    :not-contemporaneous
+    [:flip-readiness :per-node-runtime-validation :rationale-regret],
+    :data-pending [:tensions-cashed],
+    :unclassified []}}],
  :by-check
  [{:check-id :contract-pin,
    :runs 3,

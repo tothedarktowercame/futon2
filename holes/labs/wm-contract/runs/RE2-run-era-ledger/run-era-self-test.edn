@@ -7,7 +7,7 @@
  :controls
  [[:positive/c1-committed-ledger-is-green
    {:defects [],
-    :rows 16,
+    :rows 24,
     :pass? true,
     :why
     "the committed ledger conforms to the schema it declares; this is what `--check` gates on"}]
@@ -16,12 +16,12 @@
     {:status :appended,
      :run-id "0000-00-00-self-test",
      :check-id :flip-readiness,
-     :row/seq 17,
+     :row/seq 25,
      :row/sha
-     "cac5856a3bd29a2e2935bf346ce295fa50301cb8993a9d297e9188cd94d06ce8"},
+     "43e60e0942fe68da84ac7211ce64aee1fc85530eeffd32e1bdb1097289d798d2"},
     :defects [],
-    :rows-before 16,
-    :rows 17,
+    :rows-before 24,
+    :rows 25,
     :pass? true,
     :why
     "one row appended through the API, and the ledger it produced validates green -- otherwise every control below is a statement about a ledger nothing can write"}]
@@ -30,10 +30,10 @@
     {:status :already-present,
      :run-id "0000-00-00-self-test",
      :check-id :flip-readiness,
-     :row/seq 17,
+     :row/seq 25,
      :row/sha
-     "cac5856a3bd29a2e2935bf346ce295fa50301cb8993a9d297e9188cd94d06ce8"},
-    :rows 17,
+     "43e60e0942fe68da84ac7211ce64aee1fc85530eeffd32e1bdb1097289d798d2"},
+    :rows 25,
     :byte-identical? true,
     :pass? true,
     :why
@@ -75,7 +75,10 @@
     :why
     "the same (run-id, check-id) with a different verdict is the ledger being rewritten by another name; an exact replay is :already-present, a divergence throws and names the differing field"}]
   [:negative/c9-in-place-edit-of-a-written-row-is-refused
-   {:defects #{:head-sha-is-not-the-last-row-sha :row-sha-mismatch},
+   {:defects
+    #{:absence-kind-names-no-typed-absence-row
+      :head-sha-is-not-the-last-row-sha
+      :row-sha-mismatch},
     :pass? true,
     :why
     "the edit flips a written row's verdict from :green to :red -- both legal enum values, so no shape rule can see it. The sha chain does, which is what makes append-only a check rather than a convention"}]
@@ -97,14 +100,14 @@
     :why
     "the honest store rule: an absence must say what the store did not hold, or it is silence wearing a verdict"}]
   [:positive/c13-the-schema-header-survives-a-write
-   {:header-bytes 1777,
+   {:header-bytes 2512,
     :pass? true,
     :pass-note
     "compared byte-for-byte against the committed file's header",
     :why
     "the writer pretty-prints the data, so the hand-written schema documentation would be the natural casualty of the first append; it is re-emitted verbatim instead"}]
   [:positive/c14-no-write-touched-the-committed-ledger
-   {:committed-rows 16,
+   {:committed-rows 24,
     :pass? true,
     :why
     "every append above went to a temp copy; the committed ledger is byte-identical to what the self-test started with, which is why `--check` on it stays a check of committed history"}]
@@ -113,9 +116,9 @@
     {:status :appended,
      :run-id "0000-00-00-self-test-deposit",
      :check-id :run-conformance,
-     :row/seq 18,
+     :row/seq 26,
      :row/sha
-     "a7c4421720eeb3e6c6f432bef284ace44d425d4ff3d703b17fad7b7b05804789"},
+     "df89295ff8924fd6197ae2542e0eec21f0f8337a5363b3fb716d2f846ee23ac9"},
     :artifact
     "holes/labs/wm-contract/runs/2026-09-01-s5/conformance.edn",
     :artifact-commit "fe7c1c1b",
@@ -183,4 +186,61 @@
     :threw? true,
     :pass? true,
     :why
-    "the ledger's own rule is `a check enters the catalogue when its machinery exists`; without this the rule was a sentence, and a check id could be minted for a producer nobody wrote"}]]}
+    "the ledger's own rule is `a check enters the catalogue when its machinery exists`; without this the rule was a sentence, and a check id could be minted for a producer nobody wrote"}]
+  [:positive/c24-labelling-an-absence-leaves-every-row-untouched
+   {:result
+    {:status :appended,
+     :pair ["0000-00-00-self-test-absence" :flip-readiness],
+     :kind :data-pending,
+     :labels 15},
+    :labels-before 14,
+    :labels-after 15,
+    :rows-unchanged? true,
+    :head-sha-unchanged? true,
+    :pass? true,
+    :why
+    "a label says which response a standing absence calls for and must not be a repair by another name; the deposited row and the whole sha chain come through it byte-for-byte"}]
+  [:positive/c25-identical-label-is-already-present
+   {:result
+    {:status :already-present,
+     :pair ["0000-00-00-self-test-absence" :flip-readiness],
+     :kind :data-pending},
+    :byte-identical? true,
+    :pass? true,
+    :why
+    "relabelling is re-runnable for the same reason a deposit is, so a relabel pass can be replayed against the committed ledger without a second entry"}]
+  [:positive/c26-the-fold-splits-typed-absences-by-kind
+   {:table
+    {:unlabelled :incomplete,
+     :half-labelled :incomplete,
+     :both-data-pending :incomplete-data-pending,
+     :one-not-contemporaneous :incomplete-uninstrumented,
+     :both-not-contemporaneous :incomplete-uninstrumented,
+     :no-absences :green},
+    :pass? true,
+    :why
+    "the whole point of the ruling, on a fixture where each row of the table differs from its neighbour by one label. It pins the precedence too: ONE :not-contemporaneous absence beside a :data-pending one reads as uninstrumented, because that is the response the run needs"}]
+  [:negative/c27-an-unlabelled-absence-folds-to-neither-new-word
+   {:unlabelled :incomplete,
+    :half-labelled :incomplete,
+    :pass? true,
+    :why
+    "the split must not launder an unexamined absence into the milder word. An absence nobody has labelled keeps the pre-split :incomplete, and one labelled absence beside one unlabelled is still :incomplete -- the fold names the unlabelled ones under :unclassified"}]
+  [:negative/c28-a-label-for-a-pair-that-is-not-a-typed-absence-is-refused
+   {:no-row #{:absence-kind-names-no-typed-absence-row},
+    :not-an-absence #{:absence-kind-names-no-typed-absence-row},
+    :pass? true,
+    :why
+    "both halves matter: a label for a run nobody deposited, and a label for a pair that WAS deposited and came back :green. Either would be a kind attached to nothing, which the fold would then never read"}]
+  [:negative/c29-a-divergent-label-for-an-existing-pair-is-refused
+   {:defects #{:divergent-existing-absence-kind},
+    :threw? true,
+    :pass? true,
+    :why
+    "re-labelling a pair in place would move a run between statuses with no record that it moved; changing a kind is a decision, so it has to be visible as one"}]
+  [:negative/c30-a-kind-outside-the-declared-set-and-a-blank-basis-are-refused
+   {:bad-kind #{:value-outside-declared-set},
+    :blank-basis #{:missing-required-key},
+    :pass? true,
+    :why
+    "the two ways a label could say nothing: a third kind the fold has no branch for, and a kind with no measurement behind it. The enum is declared in the ledger file, and the basis is required there"}]]}

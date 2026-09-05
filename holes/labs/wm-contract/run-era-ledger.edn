@@ -27,6 +27,17 @@
 ;; status is the fold of its rows against the declared check catalogue
 ;; (`bb run_era_ledger.bb --report`), and a check's history is the fold of its
 ;; rows ordered by run -- the time-correlation the epic exists for.
+;;
+;; TYPED ABSENCES DO NOT FOLD TO ONE WORD (Joe's ruling, EPIC-run-era.md:864-873).
+;; A standing typed absence calls for one of two responses, and the fold names
+;; which: :not-contemporaneous (the evidence had to be taken while the run ran
+;; and the run is closed -- instrument the next one) or :data-pending (it can
+;; still be reached without changing what a run captures -- wait for the datum,
+;; or derive it). The labels live in
+;; `:ledger/absence-kinds` below, one per (run-id, check-id), written by
+;; `run_era_ledger.bb --label-absence` and never by hand. A label CHANGES NO
+;; VERDICT: the row it names keeps its :typed-absence, because rows are
+;; append-only. An unlabelled absence folds to the pre-split :incomplete.
 
 {:ledger/read-by
  ["run_era_ledger.bb (validator, run fold, check fold)"],
@@ -59,7 +70,23 @@
    :optional [:check/note],
    :rules
    ["a check enters the catalogue when its machinery exists; the catalogue is the check-id enum"
-    ":check/machinery is a pointer to the script or recipe that produces the verdict, not a description of it"]}},
+    ":check/machinery is a pointer to the script or recipe that produces the verdict, not a description of it"]},
+  :absence
+  {:required
+   [:absence/run-id
+    :absence/check-id
+    :absence/kind
+    :absence/basis
+    :absence/by],
+   :optional [],
+   :enums #:absence{:kind #{:data-pending :not-contemporaneous}},
+   :rules
+   ["one entry per (:absence/run-id, :absence/check-id), and the pair must name a row whose :row/verdict is :typed-absence -- a label is about a standing absence, never about a green or a red"
+    ":absence/kind is read off ONE question: can this absence still be closed without changing what a run captures? :data-pending when yes -- the evidence is committed and derivable, or the route to it needs no instrumentation and the datum simply has not been produced yet; the response is to wait for it or to derive it. :not-contemporaneous when no -- the evidence had to be taken while the run ran, or at the tree state it ran against, and the run is closed; the response is to instrument the next run"
+    "C511-repair-or-elaborate.md is the per-(run, check) measurement those answers are read off. Its `repair demonstrated` is :data-pending; its `repair refuted` is :not-contemporaneous EXCEPT where the refutation is that the datum has not been produced yet rather than that nothing could produce it -- each such reading is stated in that entry's :absence/basis"
+    ":absence/basis names, with file:line pointers or a run-record id, the measurement the kind was read off; a kind with no basis is a preference"
+    "a label CHANGES NO VERDICT and is not a repair. The row it names keeps its :typed-absence for good, because the rows are append-only; the label says only which of the two responses that standing absence calls for"
+    "an unlabelled typed absence is treated as neither kind: the run folds :incomplete, the pre-split word, and the fold names the unlabelled checks under :unclassified"]}},
  :ledger/pointer-root
  "the futon2 repository root -- :row/artifact is resolved relative to it, with an optional :LINE or :LINE-LINE suffix stripped before resolution",
  :ledger/implements
@@ -438,6 +465,105 @@
           "U51/U52: the s5 55-wide plateau at ranks 73-127, chosen at rank 123 -- the defect Joe named on 2026-09-04",
           :note
           "the ledger enum has no :defect, so the check verdicts :defect and DEPOSITS :red; no new status word is minted. Plateaus of the field not containing the choice are a census (02-plateau-census.edn) and never a verdict."}],
+ :ledger/absence-kinds
+ [#:absence{:run-id "2026-09-01-s5",
+            :check-id :flip-readiness,
+            :kind :not-contemporaneous,
+            :basis
+            "C511-repair-or-elaborate.md:113-131 -- repair REFUTED, and not for want of a datum: s5 ran 2026-09-01T22:54 at futon2 5a664114, and four of the five futon2 sources the check reads, plus flip_readiness_check.bb itself, were first committed 37-43 h later. The store additionally names no p4ng or mathlib4 identity at all. There is nothing committed to point an as-of derivation at, so only a future run can carry this evidence.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-01-s5",
+            :check-id :contract-pin,
+            :kind :not-contemporaneous,
+            :basis
+            "the check has no as-of-sha mode and this run recorded no contract identity: the seq-2 row's own note reports the authority 11c2e44affa167bf85b0a2d7c29d8705f89a8d08 found in NONE of the seven files of runs/2026-09-01-s5/. C511-repair-or-elaborate.md:22-45 reads the s5-to-re5 change as a CAPTURE and not a repair -- a decision-time rationale record carrying the sha (src/futon2/aif/selection_rationale.clj:59-63) plus a recursive store scan (checks/contract_authority_current.clj:91-98) -- which is what made the NEXT run green and can do nothing for this one.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-01-s5",
+            :check-id :per-node-runtime-validation,
+            :kind :not-contemporaneous,
+            :basis
+            "C511-repair-or-elaborate.md:217-231 -- :elaborate-only. The reproducible leg was never the missing one: the U36 catalog blob reproduces byte-identically and the COUNTS line matches the deposit, while 24 of the catalog's 181 pointers reach futon3c, p4ng and mathlib4, for which no run store records a repo identity at tick time. runtime_validation_check.bb:233-238 records the deeper reason -- the catalog's rows are keyed by node and axis and its :test-runs by namespace and date, so nothing a tick writes lands in it. The capture points named (sibling-repo heads at wm_step.sh:292, the catalog hashed into world-before.edn) are instrumentation of a future run.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-01-s5",
+            :check-id :rationale-regret,
+            :kind :not-contemporaneous,
+            :basis
+            "C511-repair-or-elaborate.md:326-344 -- :elaborate-only, repair refuted with the datum named: 0 of 889 corpus records reach trace-outcome, and the 88 that carry an outcome are July records under a third key vocabulary, so the UPHELD leg has nothing to read. This run is refused a leg earlier still: the seq-8 row measures all three of its pairs REFUSED AT MINT because the chosen action sat at controller rank 123 with top-5 margins at -0.147, which is a property of the records this run wrote and no later datum changes.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-01-s5",
+            :check-id :tensions-cashed,
+            :kind :data-pending,
+            :basis
+            "repair DEMONSTRATED for this run: C511-repair-or-elaborate.md:358-399 -- after the 12:44 deposit, U52 minted :wm-ladder/s5-4e35e740-zero-support, born of this run and citing its tick 4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8, and the check's own scan finds it against the current committed ledger. Nothing had to be instrumented; the datum arrived. THE LABEL IS NOT A GREEN: under the (A)-strict reading now in force (u41_tension_ledger.bb:545-553, recorded at aif-equations.edn :choices :tensions-cashed-reading) this run REPLAYS :red, because every attributed tension is uncashed and no :cashed event has ever been written. The deposited row keeps its :typed-absence -- the ledger is append-only and :AD1 repairs by receipt, never by row mutation.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-01-s5",
+            :check-id :enumeration-completeness,
+            :kind :not-contemporaneous,
+            :basis
+            "the seq-10 row measured it: the only member reported missing, mission M-zaif-harness-v1, was first committed 2026-09-02T12:40:23Z in futon2/holes/missions/M-zaif-harness-v1.md, against a run whose last tick is 2026-09-01T22:54:48.942309598Z. The available population is scanned at deposit time and u37_enumeration_replay.clj has no as-of-run scan, so the population this run saw cannot be reconstructed from anything committed.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-04-re5",
+            :check-id :flip-readiness,
+            :kind :not-contemporaneous,
+            :basis
+            "repair is not reachable for THIS run, measured here rather than inherited: C511-repair-or-elaborate.md:62-111 demonstrates the as-of re-derivation only for 2026-09-04-010-accepted, and only because that store carries step.edn (:step/futon2-sha) and world-before.edn's content hashes. runs/2026-09-04-re5/ holds neither -- README.md, conformance.edn, rationale/, retrospective.edn, four tick-run-records, wm-trace-re5.edn -- so nothing committed pins the check's six inputs at this run's tree state.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-04-re5",
+            :check-id :per-node-runtime-validation,
+            :kind :not-contemporaneous,
+            :basis
+            "C511-repair-or-elaborate.md:217-231 -- :elaborate-only. The reproducible leg was never the missing one: the U36 catalog blob reproduces byte-identically and the COUNTS line matches the deposit, while 24 of the catalog's 181 pointers reach futon3c, p4ng and mathlib4, for which no run store records a repo identity at tick time. runtime_validation_check.bb:233-238 records the deeper reason -- the catalog's rows are keyed by node and axis and its :test-runs by namespace and date, so nothing a tick writes lands in it. The capture points named (sibling-repo heads at wm_step.sh:292, the catalog hashed into world-before.edn) are instrumentation of a future run.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-04-re5",
+            :check-id :rationale-regret,
+            :kind :not-contemporaneous,
+            :basis
+            "C511-repair-or-elaborate.md:326-344 -- :elaborate-only, repair refuted: the seq-12 row reports 0 trace outcomes and 0 realized outcomes on this run, and the corpus-wide measurement is 0 of 889 records reaching trace-outcome. Both capture points C511 names are instrumentation -- the join key at scripts/futon2/report/war_machine.clj:2284-2306, and a post-accept observation pass in the step path -- so a closed run cannot be given the leg.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-04-re5",
+            :check-id :tensions-cashed,
+            :kind :data-pending,
+            :basis
+            "repair DEMONSTRATED for this run: C511-repair-or-elaborate.md:358-399 -- after the 12:44 deposit, U52 minted :wm-ladder/re5-8ae111bc-zero-support, born of this run and citing its tick 8ae111bc-d758-45f3-9c5b-f98832e10bb6, and the check's own scan finds it against the current committed ledger. THE LABEL IS NOT A GREEN, for the same reason as s5: under the (A)-strict reading (u41_tension_ledger.bb:545-553) this run REPLAYS :red over an attributed-but-uncashed tension, and the deposited row is left alone because the ledger is append-only.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-04-010-accepted",
+            :check-id :flip-readiness,
+            :kind :data-pending,
+            :basis
+            "repair DEMONSTRATED for this run: C511-repair-or-elaborate.md:62-111 re-derives the verdict from committed artifacts alone -- step.edn's :step/futon2-sha b1246f21 and world-before.edn's content hashes over the cross-repo inputs -- and reproduces the deposit-time line exactly (7 flips, 0 READY, same blocked-on lists), with a discrimination control that moves the verdict when an input is substituted and a content hash that rejected a wrong sha. Nothing needs instrumenting for the evidence to exist; C511-repair-or-elaborate.md:499-521 is why the derived verdict has nowhere to land in an append-only row.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-04-010-accepted",
+            :check-id :per-node-runtime-validation,
+            :kind :not-contemporaneous,
+            :basis
+            "C511-repair-or-elaborate.md:217-231 -- :elaborate-only. The reproducible leg was never the missing one: the U36 catalog blob reproduces byte-identically and the COUNTS line matches the deposit, while 24 of the catalog's 181 pointers reach futon3c, p4ng and mathlib4, for which no run store records a repo identity at tick time. runtime_validation_check.bb:233-238 records the deeper reason -- the catalog's rows are keyed by node and axis and its :test-runs by namespace and date, so nothing a tick writes lands in it. The capture points named (sibling-repo heads at wm_step.sh:292, the catalog hashed into world-before.edn) are instrumentation of a future run.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-04-010-accepted",
+            :check-id :rationale-regret,
+            :kind :not-contemporaneous,
+            :basis
+            "structural, not a missing datum: an accepted step is ONE tick and the declared rule evaluates a claim against the NEXT tick, so this run has no pair and never will -- the seq-24 row measures 1 of 1 records carrying a ranking. C511-repair-or-elaborate.md:306-325 names the two exits (steps become multi-tick, or a claim from step N is scored against step N+1), and both are changes to what a run captures or to the rule, not data that can arrive for a closed run.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}
+  #:absence{:run-id "2026-09-04-010-accepted",
+            :check-id :tensions-cashed,
+            :kind :data-pending,
+            :basis
+            "THE DATUM HAS NOT BEEN PRODUCED, AND PRODUCING IT NEEDS NO INSTRUMENTATION -- so this reads :data-pending where C511-repair-or-elaborate.md:381-386 reports the repair refuted for this run. What C511 measured is that no committed tension names 2026-09-04-010-accepted today; what it also measured, three lines above, is that the two tensions naming s5 and re5 were minted by U52 from those runs' COMMITTED records days after they closed. The same route is open here, and this run's records are committed. The refutation is that nobody has minted one yet, not that nothing could.",
+            :by
+            "RE6 -- relabel the standing absences under Joe's fold-vocabulary ruling (EPIC-run-era.md:864-873)"}],
  :ledger/version "v1",
  :ledger/hand-edited false,
  :ledger/written-by

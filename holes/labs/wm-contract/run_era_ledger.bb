@@ -10,6 +10,8 @@
 ;;       --verdict … --artifact … --author … [--notes …] [--at …]   (RE3)
 ;;   bb holes/labs/wm-contract/run_era_ledger.bb --catalogue-add --id … --machinery …
 ;;       --precedent … [--note …]                                    (RE7)
+;;   bb holes/labs/wm-contract/run_era_ledger.bb --label-absence --run-id … --check-id …
+;;       --kind … --basis … --by …                                   (RE6)
 ;;   (any mode) --ledger <path>   target a copy instead of the committed ledger
 ;;
 ;; `--check` is the gate: bare exit 0 when run-era-ledger.edn conforms to the
@@ -114,7 +116,9 @@
   [kind spec m]
   (let [{:keys [required optional enums]} spec
         allowed (set (concat required optional))
-        id (or (:row/seq m) (:check/id m) m)]
+        id (or (:row/seq m) (:check/id m)
+               (when (:absence/check-id m) [(:absence/run-id m) (:absence/check-id m)])
+               m)]
     (concat
      (for [k required :when (or (not (contains? m k)) (nil? (get m k)) (blank-string? (get m k)))]
        {:kind kind :subject id :defect :missing-required-key :key k})
@@ -133,6 +137,9 @@
         rows (vec (:rows ledger))
         catalogue (:ledger/check-catalogue ledger)
         check-ids (set (map :check/id catalogue))
+        absences (vec (:ledger/absence-kinds ledger))
+        typed-absence-pairs (set (for [r rows :when (= :typed-absence (:row/verdict r))]
+                                   [(:row/run-id r) (:row/check-id r)]))
         expected (chain-shas rows)]
     (vec
      (concat
@@ -168,6 +175,18 @@
       (for [r rows :when (not (instant? (:row/at r)))]
         {:kind :row :subject (:row/seq r) :defect :at-is-not-an-iso-instant
          :value (:row/at r)})
+      ;; RE6 -- the absence kinds. A label says which of the two responses a
+      ;; standing typed absence calls for. It changes no verdict, so the one
+      ;; thing it must not be is free-floating: it names a (run-id, check-id)
+      ;; that really is a typed absence in this file, or it is a defect.
+      (mapcat #(check-map :absence (:absence schema) %) absences)
+      (for [[pair n] (frequencies (map (juxt :absence/run-id :absence/check-id) absences))
+            :when (> n 1)]
+        {:kind :absence :subject pair :defect :duplicate-absence-run-id-check-id-pair :n n})
+      (for [a absences
+            :let [pair [(:absence/run-id a) (:absence/check-id a)]]
+            :when (not (contains? typed-absence-pairs pair))]
+        {:kind :absence :subject pair :defect :absence-kind-names-no-typed-absence-row})
       ;; the append-only chain
       (for [[r expect] (map vector rows expected)
             :when (not= (:row/sha r) expect)]
@@ -334,6 +353,71 @@
           :catalogue-size (count (:ledger/check-catalogue candidate))})))))
 
 ;; ---------------------------------------------------------------------------
+;; Labelling a standing typed absence. RE6, under Joe's ruling of 2026-09-05.
+;; ---------------------------------------------------------------------------
+;;
+;; Before the ruling, every typed absence folded to the single word :incomplete,
+;; and that word stood for two states asking for opposite work: evidence that
+;; had to be taken while the run ran and was not, and the run is closed
+;; (instrument the NEXT run), and evidence that could still be reached without
+;; changing what a run captures -- committed and derivable, or simply not
+;; produced yet (wait for the datum, or derive it). EPIC-run-era.md:864-873 rules
+;; that the fold must distinguish them; this is where the distinction is
+;; recorded, and C511-repair-or-elaborate.md is the per-(run, check) measurement
+;; each kind is read off.
+;;
+;; A LABEL IS NOT A REPAIR AND NOT A VERDICT. The rows are append-only, so a run
+;; deposited :typed-absence stays :typed-absence -- C511-repair-or-elaborate.md
+;; §5 is that a repair has nowhere to land. The label says which of the two
+;; responses the standing absence calls for, nothing more, and the validator
+;; refuses one that names a pair which is not a typed absence in this file.
+;;
+;; ROWS ARE NOT TOUCHED, for the same reason `catalogue-add!` does not touch
+;; them: the sha chain covers :rows, so writing here leaves every :row/sha and
+;; :ledger/head-sha exactly as they were (control C24 shows it).
+
+(def absence-authored-keys
+  [:absence/run-id :absence/check-id :absence/kind :absence/basis :absence/by])
+
+(defn absence-kind!
+  "Validated append into :ledger/absence-kinds, and the only write path into it.
+   Returns {:status :appended | :already-present ...}; throws on any refusal."
+  ([entry] (absence-kind! default-ledger-path entry))
+  ([path entry]
+   (let [{:keys [header data]} (read-ledger path)
+         existing-defects (validate data)
+         _ (when (seq existing-defects)
+             (throw (ex-info "existing run-era ledger is invalid; refusing to label an absence"
+                             {:defects existing-defects})))
+         proposed (select-keys entry absence-authored-keys)
+         _ (when-let [extra (seq (remove (set absence-authored-keys) (keys entry)))]
+             (throw (ex-info "proposed absence label carries keys outside the declared shape"
+                             {:keys (vec extra)})))
+         pair [(:absence/run-id entry) (:absence/check-id entry)]
+         old (some #(when (= pair [(:absence/run-id %) (:absence/check-id %)]) %)
+                   (:ledger/absence-kinds data))]
+     (cond
+       (and old (= proposed (select-keys old absence-authored-keys)))
+       {:status :already-present :pair pair :kind (:absence/kind old)}
+
+       old
+       (throw (ex-info "divergent label for an existing (run-id, check-id); absence kinds are append-only"
+                       {:defects [{:kind :absence :subject pair
+                                   :defect :divergent-existing-absence-kind
+                                   :existing (select-keys old absence-authored-keys)
+                                   :proposed proposed}]}))
+
+       :else
+       (let [candidate (update data :ledger/absence-kinds (fnil conj []) proposed)
+             defects (validate candidate)]
+         (when (seq defects)
+           (throw (ex-info "proposed absence label is invalid; nothing written"
+                           {:defects defects})))
+         (write-ledger! path header candidate)
+         {:status :appended :pair pair :kind (:absence/kind entry)
+          :labels (count (:ledger/absence-kinds candidate))})))))
+
+;; ---------------------------------------------------------------------------
 ;; Deposit -- the path a CHECK takes into the ledger. RE3.
 ;; ---------------------------------------------------------------------------
 ;;
@@ -413,41 +497,71 @@
 ;; The folds. There is no status field in the ledger; status is computed here.
 ;; ---------------------------------------------------------------------------
 
+(defn absence-kind-index
+  "{[run-id check-id] kind} over :ledger/absence-kinds."
+  [ledger]
+  (into {} (map (juxt (juxt :absence/run-id :absence/check-id) :absence/kind))
+        (:ledger/absence-kinds ledger)))
+
 (defn fold-by-run
   "Per run: what each check said, which catalogued checks never deposited, and
-   the run's rolled-up status. A run missing a catalogued check is :incomplete,
-   never green -- the honest store rule at the run level.
+   the run's rolled-up status. A run missing a catalogued check is never green.
 
-   :status-reason names WHICH of the two very different states :incomplete is
-   standing for, because they call for opposite responses and the one word
-   cannot tell them apart (RE6). :checks-not-deposited says a check has not been
-   wired or not been run, and the answer is to wire or run it.
-   :typed-absences says every catalogued check deposited and some of them had
-   nothing about this run to read, which is the honest store rule working: the
-   answer is a run that carries the evidence, not another deposit. A reader who
-   sees only :incomplete cannot tell a ledger nobody has wired from a ledger
-   that is telling the truth about a thin run."
+   THE STATUS WORD NAMES THE WORK THE RUN IS ASKING FOR (RE6, under Joe's ruling
+   at EPIC-run-era.md:864-873). Before it, three unrelated states shared the word
+   :incomplete, and a reader could not tell them apart:
+
+     :incomplete                 a catalogued check has not been wired or not
+                                 been run, or an absence carries no label --
+                                 wire it, run it, or label it.
+     :incomplete-uninstrumented  every check deposited and at least one absence
+                                 is :not-contemporaneous: the evidence had to be
+                                 taken while the run ran and the run is closed,
+                                 so no deposit can close it. Instrument the next.
+     :incomplete-data-pending    every check deposited and every absence is
+                                 :data-pending: each could still be closed
+                                 without changing what a run captures. Nothing to
+                                 instrument -- wait for the datum, or derive it.
+
+   The two-kind precedence is deliberate: a run carrying even one
+   :not-contemporaneous absence reads as uninstrumented, because that is the
+   response it needs, and :incomplete-data-pending is reserved for the run whose
+   only absences are waiting on data (which is the case Joe's ruling says does
+   not read as nonfunctional).
+
+   :status-reason keeps naming WHICH checks, now split by kind, so a reader gets
+   the actionable list and not only the word."
   [ledger]
-  (let [catalogue (set (map :check/id (:ledger/check-catalogue ledger)))]
+  (let [catalogue (set (map :check/id (:ledger/check-catalogue ledger)))
+        kinds (absence-kind-index ledger)]
     (vec
      (for [[run-id rows] (sort-by key (group-by :row/run-id (:rows ledger)))]
        (let [by-check (into (sorted-map) (map (juxt :row/check-id :row/verdict)) rows)
              missing (vec (sort (remove (set (keys by-check)) catalogue)))
              verdicts (set (vals by-check))
              absent (vec (sort (map key (filter #(= :typed-absence (val %)) by-check))))
-             red (vec (sort (map key (filter #(= :red (val %)) by-check))))]
+             red (vec (sort (map key (filter #(= :red (val %)) by-check))))
+             by-kind (group-by #(get kinds [run-id %] :unclassified) absent)
+             not-contemporaneous (vec (sort (:not-contemporaneous by-kind)))
+             data-pending (vec (sort (:data-pending by-kind)))
+             unclassified (vec (sort (:unclassified by-kind)))]
          {:run-id run-id
           :checks by-check
           :checks-not-deposited missing
           :first-at (apply min-key #(.toEpochMilli (java.time.Instant/parse %)) (map :row/at rows))
           :status (cond (seq missing) :incomplete
                         (contains? verdicts :red) :red
-                        (contains? verdicts :typed-absence) :incomplete
+                        (seq unclassified) :incomplete
+                        (seq not-contemporaneous) :incomplete-uninstrumented
+                        (seq data-pending) :incomplete-data-pending
                         :else :green)
           :status-reason (cond (seq missing) {:cause :checks-not-deposited :checks missing}
                                (contains? verdicts :red) {:cause :red-verdict :checks red}
-                               (contains? verdicts :typed-absence)
-                               {:cause :typed-absences :checks absent}
+                               (seq absent)
+                               {:cause :typed-absences :checks absent
+                                :not-contemporaneous not-contemporaneous
+                                :data-pending data-pending
+                                :unclassified unclassified}
                                :else {:cause :every-catalogued-check-green})})))))
 
 (defn fold-by-check
@@ -613,7 +727,53 @@
           c-cat-machinery (refusal #(catalogue-add! tmp {:check/id :0000-self-test-no-machinery
                                                          :check/machinery "holes/labs/wm-contract/no-such-producer.bb"
                                                          :check/precedent "synthetic"}))
-          cat-final (read-ledger tmp)]
+          cat-final (read-ledger tmp)
+          ;; RE6 -- the absence-kind write path. Two synthetic typed-absence
+          ;; rows first, because a label may only name a pair that really is one.
+          abs-run "0000-00-00-self-test-absence"
+          abs-row (assoc synthetic-row :row/run-id abs-run :row/verdict :typed-absence
+                         :row/notes "synthetic; the store held nothing")
+          abs-row2 (assoc abs-row :row/check-id :run-conformance)
+          _ (append-row! tmp abs-row)
+          _ (append-row! tmp abs-row2)
+          abs-entry {:absence/run-id abs-run
+                     :absence/check-id :flip-readiness
+                     :absence/kind :data-pending
+                     :absence/basis "synthetic; written only to a temporary copy"
+                     :absence/by "run_era_ledger.bb --self-test"}
+          abs-entry2 (assoc abs-entry :absence/check-id :run-conformance)
+          abs-before (read-ledger tmp)
+          abs-added (absence-kind! tmp abs-entry)
+          abs-after (read-ledger tmp)
+          abs-replay (absence-kind! tmp abs-entry)
+          abs-final (read-ledger tmp)
+          c-abs-divergent (refusal #(absence-kind! tmp (assoc abs-entry :absence/kind :not-contemporaneous)))
+          c-abs-no-row (refusal #(absence-kind! tmp (assoc abs-entry :absence/run-id "0000-00-00-no-such-run")))
+          c-abs-not-an-absence (refusal #(absence-kind! tmp (assoc abs-entry :absence/run-id "0000-00-00-self-test")))
+          c-abs-bad-kind (refusal #(absence-kind! tmp (assoc abs-entry2 :absence/kind :probably-fine)))
+          c-abs-blank-basis (refusal #(absence-kind! tmp (assoc abs-entry2 :absence/basis "")))
+          ;; the fold's branch table, on a fixture rather than on this file, so
+          ;; each of the four outcomes is reached by exactly one input change
+          fold-fixture (fn [kinds]
+                         {:ledger/check-catalogue [{:check/id :a} {:check/id :b} {:check/id :c}]
+                          :rows [{:row/run-id "r" :row/check-id :a :row/verdict :green
+                                  :row/at "2026-01-01T00:00:00Z"}
+                                 {:row/run-id "r" :row/check-id :b :row/verdict :typed-absence
+                                  :row/at "2026-01-01T00:00:00Z"}
+                                 {:row/run-id "r" :row/check-id :c :row/verdict :typed-absence
+                                  :row/at "2026-01-01T00:00:00Z"}]
+                          :ledger/absence-kinds (vec (for [[ck k] kinds]
+                                                       {:absence/run-id "r" :absence/check-id ck
+                                                        :absence/kind k}))})
+          fold-status (fn [kinds] (:status (first (fold-by-run (fold-fixture kinds)))))
+          fold-table {:unlabelled (fold-status {})
+                      :half-labelled (fold-status {:b :data-pending})
+                      :both-data-pending (fold-status {:b :data-pending :c :data-pending})
+                      :one-not-contemporaneous (fold-status {:b :data-pending :c :not-contemporaneous})
+                      :both-not-contemporaneous (fold-status {:b :not-contemporaneous :c :not-contemporaneous})
+                      :no-absences (:status (first (fold-by-run
+                                                    (update (fold-fixture {}) :rows
+                                                            (fn [rs] (mapv #(assoc % :row/verdict :green) rs))))))}]
       (array-map
        :positive/c1-committed-ledger-is-green
        {:defects empty-defects :rows (count (:rows (:data committed)))
@@ -776,7 +936,66 @@
        :negative/c23-an-entry-whose-machinery-does-not-resolve-is-refused
        {:defects (defect-kinds c-cat-machinery) :threw? (:threw? c-cat-machinery)
         :pass? (refused-for? c-cat-machinery {:defect :machinery-pointer-does-not-resolve})
-        :why "the ledger's own rule is `a check enters the catalogue when its machinery exists`; without this the rule was a sentence, and a check id could be minted for a producer nobody wrote"}))))
+        :why "the ledger's own rule is `a check enters the catalogue when its machinery exists`; without this the rule was a sentence, and a check id could be minted for a producer nobody wrote"}
+
+       :positive/c24-labelling-an-absence-leaves-every-row-untouched
+       {:result abs-added
+        :labels-before (count (:ledger/absence-kinds (:data abs-before)))
+        :labels-after (count (:ledger/absence-kinds (:data abs-after)))
+        :rows-unchanged? (= (:rows (:data abs-before)) (:rows (:data abs-after)))
+        :head-sha-unchanged? (= (:ledger/head-sha (:data abs-before))
+                                (:ledger/head-sha (:data abs-after)))
+        :pass? (and (= :appended (:status abs-added))
+                    (= (inc (count (:ledger/absence-kinds (:data abs-before))))
+                       (count (:ledger/absence-kinds (:data abs-after))))
+                    (empty? (validate (:data abs-after)))
+                    (= (:rows (:data abs-before)) (:rows (:data abs-after)))
+                    (= (:ledger/head-sha (:data abs-before)) (:ledger/head-sha (:data abs-after))))
+        :why "a label says which response a standing absence calls for and must not be a repair by another name; the deposited row and the whole sha chain come through it byte-for-byte"}
+
+       :positive/c25-identical-label-is-already-present
+       {:result abs-replay
+        :byte-identical? (= (:text abs-after) (:text abs-final))
+        :pass? (and (= :already-present (:status abs-replay))
+                    (= (:text abs-after) (:text abs-final)))
+        :why "relabelling is re-runnable for the same reason a deposit is, so a relabel pass can be replayed against the committed ledger without a second entry"}
+
+       :positive/c26-the-fold-splits-typed-absences-by-kind
+       {:table fold-table
+        :pass? (= {:unlabelled :incomplete
+                   :half-labelled :incomplete
+                   :both-data-pending :incomplete-data-pending
+                   :one-not-contemporaneous :incomplete-uninstrumented
+                   :both-not-contemporaneous :incomplete-uninstrumented
+                   :no-absences :green}
+                  fold-table)
+        :why "the whole point of the ruling, on a fixture where each row of the table differs from its neighbour by one label. It pins the precedence too: ONE :not-contemporaneous absence beside a :data-pending one reads as uninstrumented, because that is the response the run needs"}
+
+       :negative/c27-an-unlabelled-absence-folds-to-neither-new-word
+       {:unlabelled (:unlabelled fold-table) :half-labelled (:half-labelled fold-table)
+        :pass? (and (= :incomplete (:unlabelled fold-table))
+                    (= :incomplete (:half-labelled fold-table)))
+        :why "the split must not launder an unexamined absence into the milder word. An absence nobody has labelled keeps the pre-split :incomplete, and one labelled absence beside one unlabelled is still :incomplete -- the fold names the unlabelled ones under :unclassified"}
+
+       :negative/c28-a-label-for-a-pair-that-is-not-a-typed-absence-is-refused
+       {:no-row (defect-kinds c-abs-no-row) :not-an-absence (defect-kinds c-abs-not-an-absence)
+        :pass? (and (refused-for? c-abs-no-row {:defect :absence-kind-names-no-typed-absence-row})
+                    (refused-for? c-abs-not-an-absence {:defect :absence-kind-names-no-typed-absence-row}))
+        :why "both halves matter: a label for a run nobody deposited, and a label for a pair that WAS deposited and came back :green. Either would be a kind attached to nothing, which the fold would then never read"}
+
+       :negative/c29-a-divergent-label-for-an-existing-pair-is-refused
+       {:defects (defect-kinds c-abs-divergent) :threw? (:threw? c-abs-divergent)
+        :pass? (refused-for? c-abs-divergent {:defect :divergent-existing-absence-kind})
+        :why "re-labelling a pair in place would move a run between statuses with no record that it moved; changing a kind is a decision, so it has to be visible as one"}
+
+       :negative/c30-a-kind-outside-the-declared-set-and-a-blank-basis-are-refused
+       {:bad-kind (defect-kinds c-abs-bad-kind) :blank-basis (defect-kinds c-abs-blank-basis)
+        :pass? (and (refused-for? c-abs-bad-kind
+                                  {:defect :value-outside-declared-set
+                                   :key :absence/kind :value :probably-fine})
+                    (refused-for? c-abs-blank-basis
+                                  {:defect :missing-required-key :key :absence/basis}))
+        :why "the two ways a label could say nothing: a third kind the fold has no branch for, and a kind with no measurement behind it. The enum is declared in the ledger file, and the basis is required there"}))))
 
 ;; ---------------------------------------------------------------------------
 ;; Main
@@ -820,6 +1039,15 @@
    "--precedent" [:check/precedent :string]
    "--note" [:check/note :string]})
 
+(def ^:private absence-flags
+  "--label-absence's named inputs. `--check-id` and `--kind` are read as EDN so a
+   mistyped value arrives as the keyword it really is and meets the enum."
+  {"--run-id" [:absence/run-id :string]
+   "--check-id" [:absence/check-id :edn]
+   "--kind" [:absence/kind :edn]
+   "--basis" [:absence/basis :string]
+   "--by" [:absence/by :string]})
+
 (defn- parse-flags [flags mode args]
   (loop [[a & more] args, out {}]
     (cond
@@ -858,16 +1086,23 @@
     (doseq [c (:ledger/check-catalogue ledger)]
       (emit (format "  %-30s %s" (str (:check/id c)) (:check/machinery c))))
     (emit "")
-    (emit "BY RUN — a run missing a catalogued check is :incomplete, never green")
+    (emit "BY RUN — never green while a catalogued check is missing; a typed absence folds to the response it asks for")
     (if (empty? runs)
       (emit "  (no runs: the ledger is empty. RE3 wires the first three checks to deposit; RE5 is the first correlated run.)")
       (doseq [r runs]
-        (emit (format "  %-28s %-12s %d checks, not deposited: %s"
+        (emit (format "  %-28s %-27s %d checks, not deposited: %s"
                       (:run-id r) (str (:status r)) (count (:checks r))
                       (pr-str (:checks-not-deposited r))))
         (emit (format "  %-28s   because %s %s" ""
                       (str (:cause (:status-reason r)))
-                      (pr-str (or (:checks (:status-reason r)) []))))))
+                      (pr-str (or (:checks (:status-reason r)) []))))
+        (let [sr (:status-reason r)]
+          (when (= :typed-absences (:cause sr))
+            (emit (format "  %-28s   instrument the next run: %s | wait for the datum: %s%s" ""
+                          (pr-str (:not-contemporaneous sr)) (pr-str (:data-pending sr))
+                          (if (seq (:unclassified sr))
+                            (str " | UNLABELLED: " (pr-str (:unclassified sr)))
+                            "")))))))
     (emit "")
     (emit "BY CHECK — the verdict series across runs, which is the time-correlation")
     (if (empty? checks)
@@ -963,6 +1198,23 @@
             (println " " (pr-str (ex-data e)))
             (System/exit 1))))
 
+      "--label-absence"
+      (let [entry (parse-flags absence-flags "--label-absence" args)
+            missing (vec (remove #(get entry %) absence-authored-keys))]
+        (when (seq missing)
+          (println "run_era_ledger --label-absence: missing" (pr-str missing))
+          (System/exit 1))
+        (try
+          (let [r (absence-kind! path entry)]
+            (prn r)
+            (println (format "run_era_ledger: %s -- run %s, check %s, kind %s"
+                             (name (:status r)) (:absence/run-id entry)
+                             (str (:absence/check-id entry)) (str (:absence/kind entry)))))
+          (catch clojure.lang.ExceptionInfo e
+            (println "run_era_ledger --label-absence REFUSED:" (ex-message e))
+            (println " " (pr-str (ex-data e)))
+            (System/exit 1))))
+
       "--catalogue-add"
       (let [entry (parse-flags catalogue-flags "--catalogue-add" args)
             missing (vec (remove #(get entry %) [:check/id :check/machinery :check/precedent]))]
@@ -993,6 +1245,7 @@
       (do (println "unknown mode" mode)
           (println "modes: --check | --report [outdir] | --self-test [outdir] | --append '<edn>' | --append-file <path>")
           (println "       --catalogue-add --id <kw> --machinery <s> --precedent <s> [--note <s>]")
+          (println "       --label-absence --run-id <id> --check-id <kw> --kind <kw> --basis <s> --by <s>")
           (println "       --deposit --run-id <id> --check-id <kw> --verdict <kw> --artifact <path> --author <s> [--notes <s>] [--deposited-by <s>] [--at <instant>]")
           (println "       (any mode) [--ledger <path>]")
           (System/exit 64)))))
