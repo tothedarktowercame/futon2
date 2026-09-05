@@ -852,3 +852,38 @@ construction and processing"
   (L-track, consultation matches rationale) converge at ON-THE-FLY
   CASCADE CONSTRUCTION (F7's build): a constructed-and-scored cascade
   should eventually carry BOTH certificate kinds.
+
+## Two rulings + a reviewer decision (2026-09-05, Joe: "i agree with your recommendations on the other 2")
+
+- **U59 RULED MET (Joe, adopting the recommendation):** the acceptance
+  clause "a real (not typed-absent) retrospective row" is discharged by
+  the mechanism being demonstrably in place with both legs measured and
+  the absence honestly restated (UPHELD reachable and did not fire).
+  Standing obligation: the first real verdict on live data is reported
+  when it lands. AT PAUSE: U59 :blocked -> :done, ruling cited in
+  evidence.
+- **RE6 RULED: SPLIT THE FOLD VOCABULARY (Joe, adopting the
+  recommendation):** typed absences stop folding to one word; the fold
+  distinguishes not-contemporaneous (instrument the next run) from
+  data-pending (machinery fine, wait for data) — names subject to
+  Joe's veto at review. The RE6 clause re-reads against the split: a
+  run whose only absences are data-pending does not read as
+  nonfunctional. AT PAUSE: RE6 :blocked -> :open with the statement
+  amended to implement the split (run_era_ledger.bb fold-by-run branch
+  + relabelling + clause re-read), citing this ruling.
+- **I4 REVIEWER DECISION (claude-1 as lane owner, reversal = strike
+  this entry and restore I4's blocker text):** BOTH findings are to be
+  written. (a) RUN3's :ruling-unrealised classification of the R5->R6
+  hop used a grain proxy on a relation the tag does not name
+  (run3_conformance.bb:117-124) — the conformance record gets a
+  correction note. (b) The 2026-07-06 operator ruling realised at
+  cascade_lane.clj:381-389 appears in no :decisions/:choices entry —
+  the same defect class as today's :policy-grain filing gap; it gets a
+  backfilled entry. Discovery of the original ruling text dispatched
+  2026-09-05 (parallel track); claude-1 files both after review.
+  AT PAUSE: I4's blocker rewritten — leg (2) resolved by this
+  decision; leg (1) gates on F7.
+- **PAUSE CHECKLIST (when F7's seat ends):** U59 -> done; RE6 -> open
+  (amended); I4 blocker rewrite (gates on F7); F1 blocker rewrite
+  (gates on F7, cites :choices :policy-grain). Needs-joe then reads
+  RUN4 alone, correctly.
