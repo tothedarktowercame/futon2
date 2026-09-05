@@ -1,0 +1,81 @@
+{:C1-reproduces-the-pinned-verdict
+ {:pinned
+  {:routes 1,
+   :unmapped nil,
+   :excluded [["R2" "R7"]],
+   :hops 9,
+   :distinct 9,
+   :drawn 22,
+   :records 1,
+   :unfired 19,
+   :verdict :conformant,
+   :ruling-unrealised [["R5" "R6"]],
+   :selection-run-ids 1,
+   :refutations nil},
+  :reproduced
+  {:routes 1,
+   :unmapped nil,
+   :excluded [["R2" "R7"]],
+   :hops 9,
+   :distinct 9,
+   :drawn 22,
+   :records 1,
+   :unfired 19,
+   :verdict :conformant,
+   :ruling-unrealised [["R5" "R6"]],
+   :selection-run-ids 1,
+   :refutations nil},
+  :note
+  "The pinned record was written by run3_conformance.bb at 2026-09-05T05:44:58.398722852Z; this comparison is against the CURRENT control map, e508ece.",
+  :pass true},
+ :C2-node-names-round-trip
+ {:nodes-round-trip true,
+  :distinct-lean-names true,
+  :routes-round-trip true,
+  :every-route-node-declared true,
+  :pass true},
+ :C3-fabricated-node-absent
+ {:name "R404",
+  :in-nodes false,
+  :in-any-route false,
+  :in-any-edge false,
+  :in-lean-text false,
+  :pass true},
+ :C4-mutations-rejected
+ {:baseline-conformant true,
+  :a-planted-unmapped-hop
+  {:mutation "R99 R100 appended to route 0",
+   :hop-class :unmapped,
+   :conforms false},
+  :b-route-emptied {:mutation "route 0 emptied", :conforms false},
+  :c-code-retired-route-grain
+  {:mutation "R2 R3 appended to route 0",
+   :hop-class :refutation,
+   :grounds #{:code},
+   :conforms false},
+  :d-no-routes {:mutation "route table emptied", :conforms false},
+  :pass true},
+ :C5-drawn-set-differs-between-the-two-checkers
+ {:run3-takes-all-edges 22,
+  :wm-route-conformance-filters-status-drawn 21,
+  :the-difference [["R5" "R5"]],
+  :traversed-by-this-run false,
+  :finding
+  "run3_conformance.bb:55 does not filter :status and checks/wm_route_conformance.clj:28 does. The transcription follows run3, which produced the pinned verdict. Inert on this run: the difference is not traversed."},
+ :C6-what-the-certificate-does-not-show
+ {:distinct-hops 9,
+  :on-the-measured-layer 5,
+  :on-the-drawn-layer 2,
+  :unfired-drawn-edges 19,
+  :drawn-edges 22,
+  :finding
+  "5 of 9 distinct hops are drawn only because a previous route measurement put them on the :route-measured-drawn layer, and 19 of 22 drawn edges never fired. The certificate says the run stayed inside the union of the two layers; it does not say the drawn figure predicted the run."},
+ :C7-reused-tables-are-still-the-current-map
+ {:tables-from "runs/U49-run-conformance/00-source.edn",
+  :tables-control-map-sha256
+  "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
+  :this-run-control-map-sha256
+  "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
+  :finding
+  "This block omits the shared definitions and uses the ones the earlier block defines. Those were generated from control map 161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec. If that is not the map this run was classified against, the theorem below decides the wrong tables and says nothing about the drawn wiring as it now stands.",
+  :pass true}}

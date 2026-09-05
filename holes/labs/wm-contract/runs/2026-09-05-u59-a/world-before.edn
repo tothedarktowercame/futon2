@@ -1,0 +1,423 @@
+#:world{:at "2026-09-05T05:40:22.968257810Z",
+        :files
+        [{:id :stack-annotations,
+          :path "/home/joe/code/futon5a/holes/stack-annotations.edn",
+          :where "src/futon2/aif/belief.clj:475-476",
+          :exists? true,
+          :bytes 257848,
+          :sha256
+          "c3ac3fdba2ae001d6b40678513cc9515c68be43d5759a69e947f545e574176ca",
+          :mtime-ms 1780179324756}
+         {:id :sorrys,
+          :path "/home/joe/code/futon2/resources/sorrys.edn",
+          :where "src/futon2/aif/sorry_registry.clj:38-40",
+          :exists? true,
+          :bytes 44032,
+          :sha256
+          "696745cc729edb96b2b540849b53975800236db720bf7ac4a163d223b7aee8c9",
+          :mtime-ms 1784061029728}
+         {:id :calendar-events,
+          :path "/home/joe/code/calendar/events.edn",
+          :where "src/futon2/aif/anticipation.clj:24-25",
+          :exists? true,
+          :bytes 15152,
+          :sha256
+          "aa9506d5bb83eebc016788e027946e1a9e9a1147ce5524075b05272a4d1924b8",
+          :mtime-ms 1780669127718}
+         {:id :strategic-vocabulary,
+          :path
+          "/home/joe/code/futon5a/data/war-machine-strategic-vocabulary.edn",
+          :where "scripts/futon2/report/war_machine.clj:696-698",
+          :exists? true,
+          :bytes 23393,
+          :sha256
+          "5a601825c7faa6003b50d340b3646c2f8796aa9d703eb8d75c370f2b7ebf397d",
+          :mtime-ms 1780175836977}
+         {:id :capability-star-map,
+          :path
+          "/home/joe/code/futon0/holes/missions/M-capability-star-map.graph.edn",
+          :where "scripts/futon2/report/war_machine.clj:718-719",
+          :exists? true,
+          :bytes 33776,
+          :sha256
+          "c8ddf2f06da43f3a186ec6dbedef69c9c7cbaec2776531383d5ab06ce33ff2a4",
+          :mtime-ms 1787133951406}
+         {:id :mission-fold-view,
+          :path "/home/joe/code/futon6/data/mission-fold-view.edn",
+          :where "scripts/futon2/report/war_machine.clj:734-736",
+          :exists? true,
+          :bytes 259757,
+          :sha256
+          "dbba0f794442079cbff2bc7b8411d5b9619ea7b6dd14b853065be4390423617f",
+          :mtime-ms 1780938739405}
+         {:id :mission-domain-ratified,
+          :path
+          "/home/joe/code/futon6/data/mission-domain-ratified.edn",
+          :where "scripts/futon2/report/war_machine.clj:734-736",
+          :exists? true,
+          :bytes 15718,
+          :sha256
+          "b1421801218c70f1ca1cd147108c9dc6daba2ff55c97edbecb3abe67e1756c38",
+          :mtime-ms 1780931012480}
+         {:id :forward-model-centrality,
+          :path
+          "/home/joe/code/futon7/holes/M-futon-forward-model.centrality.json",
+          :where "scripts/futon2/report/war_machine.clj:737-740",
+          :exists? true,
+          :bytes 25078,
+          :sha256
+          "7b930c01cff396860213dc4f415bdcd605f644b7d02357fe30da3eb1858d05e0",
+          :mtime-ms 1783970629902}
+         {:id :forward-model-roi,
+          :path
+          "/home/joe/code/futon7/holes/M-futon-forward-model.roi-results.edn",
+          :where "scripts/futon2/report/war_machine.clj:737-740",
+          :exists? true,
+          :bytes 5004,
+          :sha256
+          "9a7a2e24e659db0923814032d5cfc2fee809a33d609827daf5a73aa3ee1935f3",
+          :mtime-ms 1783970629907}
+         {:id :zaif-s4-ingest,
+          :path
+          "/home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn",
+          :where "scripts/futon2/report/war_machine.clj:1916-1920",
+          :exists? true,
+          :bytes 3321,
+          :sha256
+          "b85cb1dade5acecccfcb5188106a82908aa61a70f60b1f4b9f6af46873a5f2a9",
+          :mtime-ms 1788357292160}
+         {:id :curvature-artifact,
+          :path
+          "/home/joe/code/futon3c/holes/missions/M-substrate-metric.R2-curvature-full.json",
+          :where "src/futon2/aif2/tension.clj:178-182",
+          :exists? true,
+          :bytes 9877,
+          :sha256
+          "bf83aee85bb8348e5dfc14ab0fcd73d512cab3c59c295f2e0dcac05e48699695",
+          :mtime-ms 1780518500061}
+         {:id :holes-contract,
+          :path
+          "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json",
+          :where "src/futon2/aif/selection_rationale.clj:59-63",
+          :exists? true,
+          :bytes 38253,
+          :sha256
+          "4e1feed965e962dd3f4c033feaaaceeccda9890048c8e4487a65036fb3c7e5d8",
+          :mtime-ms 1788531250869}
+         {:id :control-map,
+          :path
+          "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn",
+          :where "scripts/futon2/run_tick_once.clj:182-183",
+          :exists? true,
+          :bytes 40866,
+          :sha256
+          "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
+          :mtime-ms 1788479241829}
+         {:id :c-vector-mess,
+          :path
+          "/home/joe/code/futon6/data/c-vector/c-entries.mess.edn",
+          :where "src/futon2/aif/c_vector.clj:218-224",
+          :exists? true,
+          :bytes 20354,
+          :sha256
+          "ffb40d5f9d3c026d41e1bd2b6047efcf9e5bddbf3dd1a8c7acc667e37fb2a4fd",
+          :mtime-ms 1782495328358}
+         {:id :c-vector-incomplete,
+          :path
+          "/home/joe/code/futon6/data/c-vector/c-entries.incomplete.edn",
+          :where "src/futon2/aif/c_vector.clj:218-224",
+          :exists? true,
+          :bytes 36576,
+          :sha256
+          "f6c3e137d721f9a4936a176d4991373b18b64fbdcc58b0e600944c006ac3c554",
+          :mtime-ms 1782495330798}
+         {:id :c-vector-yingvoice,
+          :path
+          "/home/joe/code/futon6/data/c-vector/c-entries.yingvoice.edn",
+          :where "src/futon2/aif/c_vector.clj:218-224",
+          :exists? true,
+          :bytes 135132,
+          :sha256
+          "84a0ed72aa7c277e702ec5699de2ba94c7c7d4f00fc414d3aa858c91a47eec4f",
+          :mtime-ms 1782495332460}
+         {:id :mana-snapshot,
+          :path "/home/joe/code/storage/futon0/mana-snapshot.json",
+          :where
+          "scripts/futon2/report/war_machine.clj:4055-4062,4159-4164",
+          :exists? true,
+          :bytes 36867,
+          :sha256
+          "8d681cb16babbc0ca3aedf01f4f87a1807163e239fdad3dbdb8d2d31016e6a15",
+          :mtime-ms 1788586609160}],
+        :mana-age
+        {:age-min 3.56345,
+         :threshold-min 60.0,
+         :stale? false,
+         :where
+         "scripts/futon2/report/war_machine.clj:4159-4164,5936-5949"},
+        :commit-census
+        {:since "2026-08-22",
+         :days 14,
+         :repos
+         [{:repo "futon0", :workstream :stack, :commits 61}
+          {:repo "futon1", :workstream :stack, :commits 0}
+          {:repo "futon1a", :workstream :stack, :commits 0}
+          {:repo "futon2", :workstream :stack, :commits 2285}
+          {:repo "futon3", :workstream :stack, :commits 233}
+          {:repo "futon3a", :workstream :stack, :commits 3}
+          {:repo "futon3b", :workstream :stack, :commits 1}
+          {:repo "futon3c", :workstream :stack, :commits 1139}
+          {:repo "futon4", :workstream :stack, :commits 65}
+          {:repo "futon5", :workstream :stack, :commits 11}
+          {:repo "futon5a", :workstream :stack, :commits 3}
+          {:repo "futon6", :workstream :mathematics, :commits 3}
+          {:repo "futon7", :workstream :portfolio, :commits 2}
+          {:repo "futon7a", :workstream :portfolio, :commits 3}
+          {:repo "vsat", :workstream :consulting, :commits 5}
+          {:repo "ukrn-services-simulation",
+           :workstream :consulting,
+           :commits 0}],
+         :by-workstream
+         {:stack 3801, :mathematics 3, :portfolio 5, :consulting 5},
+         :total 3814,
+         :percentages
+         {:stack 0.9965915049816466,
+          :mathematics 7.865757734661773E-4,
+          :portfolio 0.0013109596224436288,
+          :consulting 0.0013109596224436288},
+         :where
+         "war_machine.clj:2794-2801,3652-3668,3828-3836; observation.clj:53-56"},
+        :flip-readiness
+        {:sources
+         [{:path
+           "/home/joe/code/futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+           :mtime-ms 1788529783538,
+           :where "flip_readiness_check.bb:196",
+           :repo-head "a491b2d9bc6ca636b50f9a2bc053a08b294564d5",
+           :repo-rel
+           "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+           :env "CATALOG",
+           :repo-root "/home/joe/code/futon2",
+           :id :catalog,
+           :exists? true,
+           :last-commit "7157af97267e9a1874bb86752a40003d09ad0899",
+           :bytes 86862,
+           :sha256
+           "244becbeb00cae1775a50385557dc4442f10dd96f98834041bc5ff1fb15edf52",
+           :last-commit-at "2026-09-04T13:53:17+00:00",
+           :worktree-matches-commit? true,
+           :repo "futon2",
+           :committed-blob-sha1
+           "28b58c0b5c4b2297ef0e79446ee10a0d5d8faa7e",
+           :worktree-blob-sha1
+           "28b58c0b5c4b2297ef0e79446ee10a0d5d8faa7e"}
+          {:path
+           "/home/joe/code/futon2/holes/labs/wm-contract/variable-situation-accounting.edn",
+           :mtime-ms 1788585745264,
+           :where "flip_readiness_check.bb:197",
+           :repo-head "a491b2d9bc6ca636b50f9a2bc053a08b294564d5",
+           :repo-rel
+           "holes/labs/wm-contract/variable-situation-accounting.edn",
+           :env "ACCOUNTING",
+           :repo-root "/home/joe/code/futon2",
+           :id :accounting,
+           :exists? true,
+           :last-commit "82a18cfa0cc7f01a8aaacbb055f87e1623d7e6a5",
+           :bytes 55679,
+           :sha256
+           "3632fce88ca92b17d0d17141b4a4f3a86296381c8583a23ef96b660938b822eb",
+           :last-commit-at "2026-09-04T15:43:26+00:00",
+           :worktree-matches-commit? true,
+           :repo "futon2",
+           :committed-blob-sha1
+           "a6fda4d6f964904444d42efa7ca378bcfded0eb5",
+           :worktree-blob-sha1
+           "a6fda4d6f964904444d42efa7ca378bcfded0eb5"}
+          {:path
+           "/home/joe/code/futon2/holes/labs/wm-contract/runs/U27-hole-closability/audit.edn",
+           :mtime-ms 1788478626297,
+           :where "flip_readiness_check.bb:198",
+           :repo-head "a491b2d9bc6ca636b50f9a2bc053a08b294564d5",
+           :repo-rel
+           "holes/labs/wm-contract/runs/U27-hole-closability/audit.edn",
+           :env "HOLE_AUDIT",
+           :repo-root "/home/joe/code/futon2",
+           :id :hole-audit,
+           :exists? true,
+           :last-commit "f67a23fc6b02b9565d8853b3dddc2b11b28eefb6",
+           :bytes 58158,
+           :sha256
+           "9ec3f82c9974a14323e5b3b22ec42b1cc1aba8e69b146fdbf0bc59611ef3f7fa",
+           :last-commit-at "2026-09-03T23:39:25+00:00",
+           :worktree-matches-commit? true,
+           :repo "futon2",
+           :committed-blob-sha1
+           "9f2f1cc913d1463226c1ccba86c6e172adedb349",
+           :worktree-blob-sha1
+           "9f2f1cc913d1463226c1ccba86c6e172adedb349"}
+          {:path
+           "/home/joe/code/p4ng/empirics-futon/defect-repair-tally.edn",
+           :mtime-ms 1788479306261,
+           :where "flip_readiness_check.bb:199",
+           :repo-head "bb47e066d0b3014d0a741193b5935bab26a4486d",
+           :repo-rel "empirics-futon/defect-repair-tally.edn",
+           :env "TALLY",
+           :repo-root "/home/joe/code/p4ng",
+           :id :tally,
+           :exists? true,
+           :last-commit "e508eceb17519b40beb565c5d7145fbf210e1295",
+           :bytes 20701,
+           :sha256
+           "608752834e4a88e76c64542ea1c4f03000c2b7bd82192c52eeeaf9c2ac5be56c",
+           :last-commit-at "2026-09-03T23:50:15+00:00",
+           :worktree-matches-commit? true,
+           :repo "p4ng",
+           :committed-blob-sha1
+           "6eb6c36e8de46dc6d99160d1ae0296eef333e56d",
+           :worktree-blob-sha1
+           "6eb6c36e8de46dc6d99160d1ae0296eef333e56d"}
+          {:path
+           "/home/joe/code/p4ng/empirics-futon/wm-status-receipt.json",
+           :mtime-ms 1788475721837,
+           :where "flip_readiness_check.bb:200",
+           :repo-head "bb47e066d0b3014d0a741193b5935bab26a4486d",
+           :repo-rel "empirics-futon/wm-status-receipt.json",
+           :env "RECEIPT",
+           :repo-root "/home/joe/code/p4ng",
+           :id :receipt,
+           :exists? true,
+           :last-commit "90d58c02264a653c36223ac796abc79e718479b5",
+           :bytes 36314,
+           :sha256
+           "afe7b70d4e457de4f70f37d7b8bd51c07f6e2e29a2df2a6d6c879acd89f13187",
+           :last-commit-at "2026-09-03T22:50:47+00:00",
+           :worktree-matches-commit? true,
+           :repo "p4ng",
+           :committed-blob-sha1
+           "7092916fdb0e71a2abb705326cc1bf7062d6a9f4",
+           :worktree-blob-sha1
+           "7092916fdb0e71a2abb705326cc1bf7062d6a9f4"}
+          {:path
+           "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json",
+           :mtime-ms 1788531250869,
+           :where "flip_readiness_check.bb:201",
+           :repo-head "4bbc7111c4b6193e79c02d9d381377587271b56f",
+           :repo-rel "DarkTower/WarMachine/holes-contract.json",
+           :env "CONTRACT_JSON",
+           :repo-root "/home/joe/code/mathlib4",
+           :id :contract,
+           :exists? true,
+           :last-commit "4bbc7111c4b6193e79c02d9d381377587271b56f",
+           :bytes 38253,
+           :sha256
+           "4e1feed965e962dd3f4c033feaaaceeccda9890048c8e4487a65036fb3c7e5d8",
+           :last-commit-at "2026-09-04T14:14:10+00:00",
+           :worktree-matches-commit? true,
+           :repo "mathlib4",
+           :committed-blob-sha1
+           "1386f9b5f3b3823d24904fd3202c819d5626c4dd",
+           :worktree-blob-sha1
+           "1386f9b5f3b3823d24904fd3202c819d5626c4dd"}],
+         :per-node-git
+         [{:repo :futon2,
+           :root "/home/joe/code/futon2",
+           :head "a491b2d9bc6ca636b50f9a2bc053a08b294564d5",
+           :porcelain
+           ["M holes/labs/wm-contract/runs/U39-selection-retrospective/U39-SELECTION-RETROSPECTIVE.txt"
+            " M holes/labs/wm-contract/runs/U39-selection-retrospective/u39-measurements.edn"
+            " M holes/labs/wm-contract/u39_selection_retrospective.bb"
+            " M holes/labs/wm-contract/wm_step.sh"
+            " M src/futon2/aif/selection_gain.clj"
+            "?? holes/labs/wm-contract/runs/U59-outcome-vocabulary/"
+            "?? holes/labs/wm-contract/u59_outcome_vocabulary.clj"
+            "?? holes/labs/wm-contract/wm_step_observe.bb"
+            "?? holes/labs/zaif-harness/runs/build-loop.lock"
+            "?? holes/labs/zaif-harness/runs/build-loop.log"
+            "?? src/futon2/aif/realized_outcome.clj"],
+           :where "flip_readiness_check.bb:351-380"}
+          {:repo :futon3c,
+           :root "/home/joe/code/futon3c",
+           :head "d34a1ceb28ae9365100afa498e0e85e2422cfbd4",
+           :porcelain
+           ["M data/apm-campaigns/jit-all-open-v2/conditions.edn"],
+           :where "flip_readiness_check.bb:351-380"}],
+         :holes-lean-last-commit
+         {:repo "mathlib4",
+          :path "DarkTower/WarMachine/Holes.lean",
+          :commit "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+          :where
+          "flip_readiness_check.bb:240 -- the comparand C175 settled; NOT mathlib HEAD"},
+         :where "flip_readiness_check.bb:196-202,240,351-380",
+         :consumed-by
+         "bb flip_readiness_check.bb --as-of <world-record.edn>"},
+        :runtime-validation
+        {:catalog
+         {:path
+          "/home/joe/code/futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+          :mtime-ms 1788529783538,
+          :where "runtime_validation_check.bb:47",
+          :repo-head "a491b2d9bc6ca636b50f9a2bc053a08b294564d5",
+          :repo-rel
+          "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+          :env "CATALOG",
+          :repo-root "/home/joe/code/futon2",
+          :id :catalog,
+          :exists? true,
+          :last-commit "7157af97267e9a1874bb86752a40003d09ad0899",
+          :bytes 86862,
+          :sha256
+          "244becbeb00cae1775a50385557dc4442f10dd96f98834041bc5ff1fb15edf52",
+          :last-commit-at "2026-09-04T13:53:17+00:00",
+          :worktree-matches-commit? true,
+          :repo "futon2",
+          :committed-blob-sha1
+          "28b58c0b5c4b2297ef0e79446ee10a0d5d8faa7e",
+          :worktree-blob-sha1
+          "28b58c0b5c4b2297ef0e79446ee10a0d5d8faa7e"},
+         :pointers 181,
+         :pointer-repos
+         [{:repo "futon2",
+           :root "/home/joe/code/futon2",
+           :pointers 157,
+           :exists? true,
+           :head "a491b2d9bc6ca636b50f9a2bc053a08b294564d5",
+           :porcelain
+           ["M holes/labs/wm-contract/runs/U39-selection-retrospective/U39-SELECTION-RETROSPECTIVE.txt"
+            " M holes/labs/wm-contract/runs/U39-selection-retrospective/u39-measurements.edn"
+            " M holes/labs/wm-contract/u39_selection_retrospective.bb"
+            " M holes/labs/wm-contract/wm_step.sh"
+            " M src/futon2/aif/selection_gain.clj"
+            "?? holes/labs/wm-contract/runs/U59-outcome-vocabulary/"
+            "?? holes/labs/wm-contract/u59_outcome_vocabulary.clj"
+            "?? holes/labs/wm-contract/wm_step_observe.bb"
+            "?? holes/labs/zaif-harness/runs/build-loop.lock"
+            "?? holes/labs/zaif-harness/runs/build-loop.log"
+            "?? src/futon2/aif/realized_outcome.clj"]}
+          {:repo "futon3c",
+           :root "/home/joe/code/futon3c",
+           :pointers 11,
+           :exists? true,
+           :head "d34a1ceb28ae9365100afa498e0e85e2422cfbd4",
+           :porcelain
+           ["M data/apm-campaigns/jit-all-open-v2/conditions.edn"]}
+          {:repo "mathlib4",
+           :root "/home/joe/code/mathlib4",
+           :pointers 5,
+           :exists? true,
+           :head "4bbc7111c4b6193e79c02d9d381377587271b56f",
+           :porcelain []}
+          {:repo "p4ng",
+           :root "/home/joe/code/p4ng",
+           :pointers 8,
+           :exists? true,
+           :head "bb47e066d0b3014d0a741193b5935bab26a4486d",
+           :porcelain ["M wm-status.pdf"]}],
+         :where
+         "runtime_validation_check.bb:47,71,89-95; the repo set is derived from the catalogue's own pointers",
+         :consumed-by
+         "bb runtime_validation_check.bb --run-basis <run-id> (and the --deposit receipt's :run-keyed-basis)"},
+        :anticipation
+        {:path "/home/joe/code/calendar/events.edn",
+         :event-forms 4,
+         :note
+         "time-pressure is 0.0 when no event parses into the future inside the horizon (anticipation.clj:99-122); the tick's own record carries the realised value"}}

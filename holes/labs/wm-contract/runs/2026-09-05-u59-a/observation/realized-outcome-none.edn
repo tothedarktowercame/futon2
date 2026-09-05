@@ -1,0 +1,8 @@
+#:observation{:schema :wm/step-observation-v1,
+              :status :typed-absence,
+              :reason :no-previous-accepted-step,
+              :detail
+              "runs/2026-09-05-u59-a is the first accepted step of this pin, so there is no earlier decision to observe the outcome of. The pin's :pin/accepted-steps is the order; a second accepted step produces the first observation.",
+              :observed-at-run "2026-09-05-u59-a",
+              :observed-for-run nil,
+              :produced-by "holes/labs/wm-contract/wm_step_observe.bb"}

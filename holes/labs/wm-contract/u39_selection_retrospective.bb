@@ -22,13 +22,24 @@
 ;; only arithmetic is subtraction of two recorded numbers, and the controls pin
 ;; that the differences reproduce the recorded scores exactly.
 
-(require '[babashka.process :as process]
+(require '[babashka.classpath :as cp]
+         '[babashka.process :as process]
          '[clojure.edn :as edn]
          '[clojure.java.io :as io]
          '[clojure.string :as str]
          '[clojure.pprint :as pp])
 
 (def repo-root (str (System/getProperty "user.home") "/code/futon2"))
+
+;; THE OUTCOME ACCESSOR IS THE PRODUCTION ONE, not a copy of it (worklist
+;; :U59). This script used to mirror `war-machine/trace-outcome` with a comment
+;; pointing at the line it mirrored, and a mirror is a second thing to keep
+;; true: C511-repair-or-elaborate.md section 3 found three key vocabularies for
+;; one quantity precisely because every reader had its own spelling.
+;; `futon2.aif.realized-outcome` is pure Clojure with no JVM-only dependency, so
+;; babashka loads the same file the JVM does and the two cannot drift.
+(cp/add-classpath (str repo-root "/src"))
+(require '[futon2.aif.realized-outcome :as ro])
 (def out-dir (io/file repo-root "holes/labs/wm-contract/runs/U39-selection-retrospective"))
 
 ;; Old trace records carry tagged literals this script has no business
@@ -52,10 +63,11 @@
 
 (defn ranking [m] (get-in m [:decision :controller-ranking]))
 (defn has-ranking? [m] (boolean (seq (ranking m))))
-(defn trace-outcome
-  "The three places `war-machine/trace-outcome` looks (war_machine.clj:2328-2332)."
-  [m]
-  (or (:outcome m) (get-in m [:enactment :outcome]) (get-in m [:realized-outcome :outcome])))
+(def trace-outcome
+  "The categorical outcome of a record, from the one vocabulary
+   (`futon2.aif.realized-outcome/categorical-outcome`, which holds the three
+   places `war-machine/trace-outcome` looks). Same function, one definition."
+  ro/categorical-outcome)
 
 ;; ---------------------------------------------------------------------------
 ;; 1. Carrier census. The retrospective needs a rationale side and an outcome
@@ -327,11 +339,41 @@
          :source "runs/U42-producers/measurements.edn"}))
     {:status :absent :reason :run-not-in-u42-corpus}))
 
+(defn outcome-leg
+  "The OUTCOME leg: the realized outcome OBSERVED for the claim record's tick,
+   by the post-accept observation pass (`wm_step_observe.bb`), joined on
+   `:run/id`. Absent on every record of the live corpus and on every run
+   accepted before :U59, and the count of that absence is what made it a
+   measurement rather than a silence (C511 section 3)."
+  [observations claim-rec]
+  (if-let [o (get observations (:run/id claim-rec))]
+    {:status :measured
+     :outcome (:outcome o)
+     :scale (:scale o)
+     :expected-score (ro/expected-score o)
+     :realized-score (ro/realized-score o)
+     :vocabulary (ro/vocabulary o)
+     :dial (:outcome/basis o)
+     :observed-at-run (:observation/observed-at-run o)
+     :basis "runs/<observing run>/observation/realized-outcome-<observed run>.edn"}
+    {:status :absent
+     :reason :no-observation-names-this-tick
+     :would-need (str "an accepted step AFTER this one: the outcome of a decision does not exist "
+                      "when the decision is written, so it is observed one step later and joined "
+                      "by :run/id (wm_step.sh observe)")}))
+
 (defn retrospective-verdict
   "(b) The record. The verdict vocabulary is closed; the rule that assigns it is
-   DECLARED here and is the thing the registry entry registers as a free hand."
-  [claim claim-rec later-rec u42 top-k]
-  (let [ot (overtake claim-rec later-rec top-k)
+   DECLARED here and is the thing the registry entry registers as a free hand.
+
+   OBSERVATIONS is a map `{run-id <observation record>}` and defaults to empty,
+   which is the pre-:U59 behaviour exactly: no outcome leg, UPHELD unreachable."
+  ([claim claim-rec later-rec u42 top-k]
+   (retrospective-verdict claim claim-rec later-rec u42 top-k {}))
+  ([claim claim-rec later-rec u42 top-k observations]
+  (let [ol (outcome-leg observations claim-rec)
+        outcome-grounded? (= :grounded-change (:outcome ol))
+        ot (overtake claim-rec later-rec top-k)
         overtaken? (seq (:overtaken-by ot))
         readings (frequencies (map #(get-in % [:attribution :reading]) (:overtaken-by ot)))
         own-regret? (pos? (get readings :rival-improved-enough-on-its-own 0))
@@ -357,6 +399,7 @@
                            :reason :c-mis-reads-the-selected-mission-only
                            :detail "the readback is keyed to the tick's SELECTED mission, so two ticks that select different missions produce two different subjects and no movement"})}
       :non-progress np
+      :outcome ol
       :receipts {:status :absent
                  :reason :no-mission-to-receipt-carrier
                  :would-need "a carrier joining a commit/receipt to the mission that was held; U23 measured the two candidates -- flight-discharge :writer-exists-no-records (zero *.flight.edn under ~/code) and clocked-on, which records WHO clocked on and not WHAT landed"
@@ -364,23 +407,27 @@
      :verdict/overtake-readings readings
      :verdict/verdict
      (cond own-regret? :rationale-refuted
+           outcome-grounded? :rationale-upheld
            overtaken? :rationale-untestable
            :else :rationale-untestable)
      :verdict/verdict-reason
      (cond own-regret? :a-rejected-candidate-closed-the-recorded-margin-on-its-own-movement
+           outcome-grounded? :the-chosen-actions-observed-outcome-is-a-grounded-change
            overtaken? :overtake-attributable-to-the-chosen-candidates-own-non-progress-decay
+           (= :measured (:status ol)) :outcome-observed-and-not-a-grounded-change
            :else :no-leg-measurable)
      :verdict/verdict-rule
      {:name :declared-attributed-overtake
       :status :declared-not-ruled
       :scalars :none
-      :statement "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake that only happens because the chosen candidate was decayed for having been chosen measures the decay, not the rationale, and is UNTESTABLE. UPHELD requires an outcome leg, which no record in this corpus carries."
+      :statement "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake that only happens because the chosen candidate was decayed for having been chosen measures the decay, not the rationale, and is UNTESTABLE. UPHELD iff the refutation leg does not fire AND the outcome leg was OBSERVED to be a :grounded-change -- the chosen mission has strictly fewer open holes at the next accepted step. Refutation still wins over an upheld outcome: a rival that closed the recorded margin on its own movement refutes the claim about the RANKING whatever the chosen action then produced."
       :alternatives-not-taken
       {:overtake-dominant "any overtake refutes -- rejected here because on the recorded 09-02 pair it refutes every claim after one tick, since the chosen mission's mission-value-factor halves by construction"
        :weighted-legs "combine the four legs with declared weights -- rejected here because three of the four legs are typed absences on this corpus, so the weights would be unmeasurable"}}
      :verdict/basis
      ["[:ranked-actions] of both records" "[:decision :controller-ranking] of both records"
-      "runs/U42-producers/measurements.edn" "runs/U23-cascade-catalog/carrier-population.edn"]}))
+      "runs/U42-producers/measurements.edn" "runs/U23-cascade-catalog/carrier-population.edn"
+      "the observing run's observation/realized-outcome-<observed run>.edn, when one names this tick"]})))
 
 ;; ---------------------------------------------------------------------------
 ;; 5. The primitive regret signal, measured.
@@ -681,6 +728,47 @@
          (sort-by :timestamp)
          vec)))
 
+(defn run-observations
+  "The realized outcomes this run OBSERVED, from `runs/<run-id>/observation/`,
+   as a map keyed by the tick they are about. Empty for every run accepted
+   before :U59 and for the first accepted step of any pin, and empty is the
+   pre-:U59 behaviour exactly.
+
+   A `:typed-absence` observation (there was no previous accepted step, or a
+   leg could not be read) is NOT indexed: it names no tick, so it joins to
+   nothing. It is still written, and the receipt cites it, because a store that
+   merely lacked an observation would not say why."
+  [run-id]
+  (let [d (io/file (run-store-dir run-id) "observation")]
+    (if-not (.isDirectory d)
+      {}
+      (into {}
+            (keep (fn [^java.io.File f]
+                    (let [o (edn/read-string read-opts (slurp f))]
+                      (when-let [t (:observation/observed-for-tick o)] [t o])))
+                  (sort-by #(.getName ^java.io.File %)
+                           (filter #(and (.isFile ^java.io.File %)
+                                         (str/ends-with? (.getName ^java.io.File %) ".edn"))
+                                   (.listFiles d))))))))
+
+(defn observed-runs
+  "The run ids this run's observations are ABOUT -- the pair the observation
+   names. `wm_step.sh` runs one tick per step, so a run's own records never
+   hold two ranking-carrying records and this check deposited `:typed-absence`
+   by construction (C511-repair-or-elaborate.md section 3). The pairing is not
+   inferred here: the observation record says which run it observed, and it
+   says so because the pin said so (`:pin/accepted-steps`)."
+  [observations]
+  (vec (distinct (keep :observation/observed-for-run (vals observations)))))
+
+(defn paired-records
+  "The records this run is scored over: the runs its observations name, in
+   accepted order, then its own. With no observation this is exactly
+   `run-records`, so nothing about an already-deposited run moves."
+  [run-id observations]
+  (into (vec (mapcat run-records (observed-runs observations)))
+        (run-records run-id)))
+
 (defn assertion-holds?
   "Does the record support the claim's own assertion -- that the chosen action's
    G-core is BELOW each listed rejected candidate's, by :margin/total?
@@ -704,7 +792,7 @@
    declared in `retrospective-verdict`. A pair whose earlier claim is unsound at
    mint, or whose assertion the record contradicts, is refused at mint instead
    of scored."
-  [era u42 top-k source-file]
+  [era u42 top-k source-file observations]
   (vec (for [[claim-rec later-rec] (partition 2 1 era)
              :let [claim (rationale-claim claim-rec source-file 0 top-k)
                    sound? (= :sound (:status (:claim/soundness-at-mint claim)))
@@ -728,8 +816,15 @@
             :assertion asrt}
 
            :else
-           (let [v (retrospective-verdict claim claim-rec later-rec u42 top-k)]
-             {:claim-id (:claim/id claim)
+           (let [v (retrospective-verdict claim claim-rec later-rec u42 top-k observations)]
+             ;; The outcome keys are carried ONLY when this run observed
+             ;; something, and that placement is the whole care here: adding a
+             ;; key to the receipt of an already-deposited run turns its replay
+             ;; from :already-present into the append-only ledger's divergence
+             ;; refusal (run_era_ledger.bb:235-245, the trap :U58 named). With
+             ;; no observation the receipt is byte-identical to the committed
+             ;; one, and the negative controls assert exactly that.
+             (cond-> {:claim-id (:claim/id claim)
               :from (:run/id claim-rec) :to (:run/id later-rec)
               :at (:timestamp claim-rec)
               :verdict (:verdict/verdict v)
@@ -745,17 +840,22 @@
               :legs-measurable
               {:overtake true
                :c-mis (get-in v [:verdict/legs :c-mis :movement])
-               :receipts (get-in v [:verdict/legs :receipts :status])}})))))
+               :receipts (get-in v [:verdict/legs :receipts :status])}}
+               (seq observations)
+               (assoc :outcome-leg (get-in v [:verdict/legs :outcome]))))))))
 
 (defn deposit-receipt [run-id]
-  (let [records (run-records run-id)
+  (let [observations (run-observations run-id)
+        observed (observed-runs observations)
+        records (paired-records run-id observations)
         era (filterv has-ranking? records)
         u42 (edn/read-string (slurp (io/file repo-root "holes/labs/wm-contract/runs/U42-producers/measurements.edn")))
         source-file (first (mapv #(str/replace-first % (str repo-root "/") "")
                                  (run-trace-files run-id)))
-        verdicts (if (< (count era) 2) [] (pair-verdicts era u42 5 source-file))
+        verdicts (if (< (count era) 2) [] (pair-verdicts era u42 5 source-file observations))
         tally (into (sorted-map) (frequencies (map :verdict verdicts)))
-        refuted (filterv #(= :rationale-refuted (:verdict %)) verdicts)]
+        refuted (filterv #(= :rationale-refuted (:verdict %)) verdicts)
+        upheld (filterv #(= :rationale-upheld (:verdict %)) verdicts)]
     ;; array-map, not a literal: a map literal of this size is a hash-map and
     ;; would print in hash order, so the receipt would not be stable to read.
     (array-map
@@ -769,7 +869,7 @@
           "them, so this receipt is rewritten byte-identically on every deposit. That is what "
           "lets the deposit require it to be committed and unmodified, and lets the same deposit "
           "repeat as :already-present.")
-     :rule {:name :declared-attributed-overtake
+     :rule (cond-> {:name :declared-attributed-overtake
             :declared-at "holes/labs/wm-contract/u39_selection_retrospective.bb (retrospective-verdict)"
             :statement (str "REFUTED iff some candidate this claim rejected later out-ranked the "
                             "chosen one AND its own recorded movement alone would have closed the "
@@ -779,22 +879,53 @@
             :upheld-unreachable
             (str "UPHELD requires an outcome leg and no record in this corpus carries one, so "
                  "this check cannot deposit a green from the trace alone.")}
-     :run-store {:dir (str "holes/labs/wm-contract/runs/" run-id)
-                 :holds (run-store-files run-id)
-                 :tick-ids (run-tick-ids run-id)
-                 :traces (mapv #(str/replace-first % (str repo-root "/") "") (run-trace-files run-id))
-                 :records-of-this-run (count records)
-                 :records-carrying-a-ranking (count era)
-                 :pairs-evaluated (count verdicts)}
+             (seq observations)
+             (assoc :upheld-reached-how
+                    (str "UPHELD is reachable on this run: the outcome leg is an OBSERVATION taken "
+                         "at this accepted step about the previous one -- the chosen mission's own "
+                         ":open-hole-count on the two records -- and a :grounded-change with no "
+                         "refutation upholds. The clause above still describes the trace alone, "
+                         "which carries no outcome on any record: what changed is that the check "
+                         "no longer reads the trace alone.")))
+     :run-store (cond-> {:dir (str "holes/labs/wm-contract/runs/" run-id)
+                         :holds (run-store-files run-id)
+                         :tick-ids (run-tick-ids run-id)
+                         :traces (mapv #(str/replace-first % (str repo-root "/") "") (run-trace-files run-id))
+                         :records-of-this-run (count records)
+                         :records-carrying-a-ranking (count era)
+                         :pairs-evaluated (count verdicts)}
+                  (seq observed)
+                  (assoc :paired-with
+                         {:runs observed
+                          :why (str "wm_step.sh runs one tick per step, so a run's own records never "
+                                    "hold two ranking-carrying records and this check deposited "
+                                    ":typed-absence by construction. The pair is not inferred here: "
+                                    "this run's observation record names the run it observed, and it "
+                                    "names it because the pin's :pin/accepted-steps ordered them.")
+                          :records (mapv #(vector % (count (run-records %))) observed)}))
      :verdict-deposited (cond (< (count era) 2) :typed-absence
                               (seq refuted) :red
+                              (and (seq verdicts) (= (count upheld) (count verdicts))) :green
                               :else :typed-absence)
      :pair-verdicts verdicts
      :tally tally
      :outcome-side
-     {:records-with-a-trace-outcome (count (filter trace-outcome records))
-      :records-with-realized-outcome (count (filter :realized-outcome records))
-      :why-it-matters "the UPHELD branch needs one of these; the count is what makes its absence a measurement"}
+     (cond-> {:records-with-a-trace-outcome (count (filter trace-outcome records))
+              :records-with-realized-outcome (count (filter :realized-outcome records))
+              :why-it-matters "the UPHELD branch needs one of these; the count is what makes its absence a measurement"}
+       ;; Carried only when this run observed something, so the receipt of a run
+       ;; accepted before :U59 is byte-identical to its committed one and its
+       ;; replayed deposit stays :already-present rather than divergent.
+       (seq observations)
+       (assoc :observed-outcomes
+              {:count (count observations)
+               :for-ticks (vec (sort (keys observations)))
+               :outcomes (into (sorted-map) (frequencies (map :outcome (vals observations))))
+               :dir (str "holes/labs/wm-contract/runs/" run-id "/observation")
+               :produced-by "holes/labs/wm-contract/wm_step_observe.bb, run by wm_step.sh accept"
+               :note (str "the outcome of a decision does not exist when the decision is written, "
+                          "so it is not a key on the record: it is observed at the NEXT accepted "
+                          "step and joined by :run/id")}))
      :not-what-this-says
      (str "A :typed-absence here does NOT say the run's rationales held up. It says no leg of the "
           "declared rule was measurable on this run's records: no rejected candidate overtook the "
@@ -849,17 +980,44 @@
                "chose, not from the controller ranking it did not follow.")
 
           :else
-          (str "no pair of this run's " (:pairs-evaluated store) " can decide, tally "
-               (pr-str (:tally r))
-               ". No rejected candidate out-ranked the chosen one on its own movement, so the "
-               "refutation leg does not fire; and the rule's other outcome, UPHELD, is unreachable "
-               "on this corpus because it needs an outcome leg -- this run's records carry "
-               (get-in r [:outcome-side :records-with-a-trace-outcome])
-               " trace outcomes and " (get-in r [:outcome-side :records-with-realized-outcome])
-               " realized outcomes. So the check ran, both legs are typed, and neither can decide: "
-               "that is an absence with a reason, not a green.")))
+          (let [obs (get-in r [:outcome-side :observed-outcomes])]
+            (str "no pair of this run's " (:pairs-evaluated store) " can decide, tally "
+                 (pr-str (:tally r))
+                 ". No rejected candidate out-ranked the chosen one on its own movement, so the "
+                 "refutation leg does not fire; and "
+                 (if obs
+                   ;; The absence has a DIFFERENT reason once an observation
+                   ;; exists, and saying the old one would be false: UPHELD is
+                   ;; reachable here and did not fire, which is not the same
+                   ;; finding as UPHELD having no way to fire.
+                   (str "the rule's other outcome, UPHELD, WAS REACHABLE on this run and did not "
+                        "fire: " (:count obs) " observed outcome(s) "
+                        (pr-str (:outcomes obs)) " over the pair this run's observation names ("
+                        (pr-str (get-in r [:run-store :paired-with :runs]))
+                        "), and UPHELD requires a :grounded-change -- strictly fewer open holes on "
+                        "the chosen mission at this step than at the one that chose it. The "
+                        "observation is a measurement of the outcome, not of its absence: what is "
+                        "absent is a change for it to report. ")
+                   (str "the rule's other outcome, UPHELD, is unreachable "
+                        "on this corpus because it needs an outcome leg -- this run's records carry "
+                        (get-in r [:outcome-side :records-with-a-trace-outcome])
+                        " trace outcomes and " (get-in r [:outcome-side :records-with-realized-outcome])
+                        " realized outcomes. "))
+                 "So the check ran, both legs are typed, and neither can decide: "
+                 "that is an absence with a reason, not a green."))))
       :green
-      (str "every pair upheld: " (pr-str (:tally r))))))
+      (let [obs (get-in r [:outcome-side :observed-outcomes])]
+        (str "UPHELD, on an observed outcome: all " (:pairs-evaluated store)
+             " pair(s) of this run are :rationale-upheld by the declared rule "
+             ":declared-attributed-overtake -- no candidate the tick rejected closed the recorded "
+             "margin on its own movement, and the chosen action's outcome was OBSERVED to be a "
+             ":grounded-change. The observation is not read off the record: a decision's outcome "
+             "does not exist when the decision is written, so this run's accept observed the "
+             "PREVIOUS accepted run (" (pr-str (get-in r [:run-store :paired-with :runs]))
+             ") and joined it by :run/id -- " (:count obs) " observation(s), outcomes "
+             (pr-str (:outcomes obs)) ", in " (:dir obs) ". Tally " (pr-str (:tally r))
+             " over " (:records-carrying-a-ranking store) " records carrying a ranking, paired "
+             "across the two runs.")))))
 
 (defn deposit! [run-id]
   (let [r (deposit-receipt run-id)

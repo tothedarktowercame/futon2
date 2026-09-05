@@ -1,16 +1,16 @@
 U39 -- selection-rationale retrospective, design pass
 =====================================================
 
-corpus: 56 files, 885 records; ranking era 2026-08-30, 2026-08-31, 2026-09-01, 2026-09-02 (94 records)
+corpus: 57 files, 889 records; ranking era 2026-08-30, 2026-08-31, 2026-09-01, 2026-09-02, 2026-09-04 (98 records)
 
 1. CARRIER CENSUS
-   rationale side: controller-ranking 94, ranked-actions 885, exclusions 125
+   rationale side: controller-ranking 98, ranked-actions 889, exclusions 129
    outcome side:   realized-outcome 88, any trace outcome 0, R14-foldable 0
    records carrying BOTH sides: 0
 
 2. REFUSAL CHANNELS
-   admission: 376 refusals over 94 records, reasons {:mission-absent-from-capability-graph 376}
-   selection: {144 12, 145 79, 146 3} candidates per tick, no typed reason field
+   admission: 392 refusals over 98 records, reasons {:mission-absent-from-capability-graph 392}
+   selection: {144 12, 145 79, 146 7} candidates per tick, no typed reason field
 
 3. (a) THE CLAIM -- rc-4abad68c-5481-4402-8f0e-252add62c54b
    chosen {:type :advance-mission, :target "M-zaif-harness-v1"} controller-rank 1
@@ -45,6 +45,7 @@ corpus: 56 files, 885 records; ranking era 2026-08-30, 2026-08-31, 2026-09-01, 2
    2026-08-31  ticks 5   candidate-rows 720    decay {1.0 650, 0.5 3, 0.3333333333333333 1, 0.25 1}  chosen non-progress-count {0 3, 1 1, 2 1}  distinct missions 3  outcomes 0
    2026-09-01  ticks 79  candidate-rows 11455  decay {1.0 10349, 0.5 79}  chosen non-progress-count {0 79}  distinct missions 2  outcomes 0
    2026-09-02  ticks 3   candidate-rows 438    decay {1.0 396, 0.5 3}  chosen non-progress-count {0 3}  distinct missions 3  outcomes 0
+   2026-09-04  ticks 4   candidate-rows 584    decay {1.0 528, 0.5 4}  chosen non-progress-count {0 4}  distinct missions 2  outcomes 0
 
 6. (c) TENSION MINT
    M-zaif-harness-v1 was preferred over M-expressions-of-interest at 2026-09-02T14:00:29.357627605Z on a G-risk margin of 0.004028677703587391 nats; one tick later M-expressions-of-interest out-ranked it, and its own G-core had fallen by 0.005237160997353385 -- enough to close that margin without any help from the chosen candidate's non-progress decay.

@@ -176,14 +176,26 @@
     "M-zaif-harness-v1"
     "M-expressions-of-interest"],
    :distinct-selected 3,
+   :records-with-an-outcome 0}
+  {:day "2026-09-04",
+   :ticks 4,
+   :candidate-rows 584,
+   :decay-values {1.0 528, 0.5 4},
+   :chosen-non-progress-count {0 4},
+   :selected-targets
+   ["M-zaif-harness-v1"
+    "M-expressions-of-interest"
+    "M-zaif-harness-v1"
+    "M-expressions-of-interest"],
+   :distinct-selected 2,
    :records-with-an-outcome 0}],
  :section-2-refusal-channels
  {:admission
   {:carrier "[:policy-support-exclusions]",
-   :records-carrying 94,
-   :total-refusals 376,
-   :per-tick {4 94},
-   :reasons {:mission-absent-from-capability-graph 376},
+   :records-carrying 98,
+   :total-refusals 392,
+   :per-tick {4 98},
+   :reasons {:mission-absent-from-capability-graph 392},
    :scored? false,
    :targets
    ["futon4-d/mission/essays-diachronic-model"
@@ -192,9 +204,9 @@
     "futon6-d/mission/canon-fingerprint-store"]},
   :selection
   {:carrier "[:decision :controller-ranking] rank > chosen",
-   :records-carrying 94,
-   :candidates-per-tick {144 12, 145 79, 146 3},
-   :rejected-per-tick {143 12, 144 79, 145 3},
+   :records-carrying 98,
+   :candidates-per-tick {144 12, 145 79, 146 7},
+   :rejected-per-tick {143 12, 144 79, 145 7},
    :typed-reason? false,
    :note
    "a rejection has a MARGIN and a per-term decomposition on the record, and no reason field; the claim shape below is what turns the margin into a reason"}},
@@ -222,11 +234,11 @@
    :passes? true}},
  :corpus
  {:dir "data/wm-trace",
-  :files 56,
-  :records 885,
+  :files 57,
+  :records 889,
   :ranking-era-days
-  ["2026-08-30" "2026-08-31" "2026-09-01" "2026-09-02"],
-  :ranking-era-records 94},
+  ["2026-08-30" "2026-08-31" "2026-09-01" "2026-09-02" "2026-09-04"],
+  :ranking-era-records 98},
  :section-3a-rationale-claim
  #:claim{:rejected
          [{:margin/total 0.004028677703587391,
@@ -404,7 +416,8 @@
            ["[:ranked-actions] of both records"
             "[:decision :controller-ranking] of both records"
             "runs/U42-producers/measurements.edn"
-            "runs/U23-cascade-catalog/carrier-population.edn"],
+            "runs/U23-cascade-catalog/carrier-population.edn"
+            "the observing run's observation/realized-outcome-<observed run>.edn, when one names this tick"],
            :claim-id "rc-4abad68c-5481-4402-8f0e-252add62c54b",
            :window
            {:from "2026-09-02T14:00:29.357627605Z",
@@ -536,6 +549,11 @@
              :non-progress-decay 0.5,
              :basis
              "war_machine.clj:2312-2326 previous-selection-non-progress?, :2339-2356 recent-non-progress-count, :2290 non-progress-decay-k"},
+            :outcome
+            {:status :absent,
+             :reason :no-observation-names-this-tick,
+             :would-need
+             "an accepted step AFTER this one: the outcome of a decision does not exist when the decision is written, so it is observed one step later and joined by :run/id (wm_step.sh observe)"},
             :receipts
             {:status :absent,
              :reason :no-mission-to-receipt-carrier,
@@ -548,7 +566,7 @@
             :status :declared-not-ruled,
             :scalars :none,
             :statement
-            "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake that only happens because the chosen candidate was decayed for having been chosen measures the decay, not the rationale, and is UNTESTABLE. UPHELD requires an outcome leg, which no record in this corpus carries.",
+            "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake that only happens because the chosen candidate was decayed for having been chosen measures the decay, not the rationale, and is UNTESTABLE. UPHELD iff the refutation leg does not fire AND the outcome leg was OBSERVED to be a :grounded-change -- the chosen mission has strictly fewer open holes at the next accepted step. Refutation still wins over an upheld outcome: a rival that closed the recorded margin on its own movement refutes the claim about the RANKING whatever the chosen action then produced.",
             :alternatives-not-taken
             {:overtake-dominant
              "any overtake refutes -- rejected here because on the recorded 09-02 pair it refutes every claim after one tick, since the chosen mission's mission-value-factor halves by construction",
@@ -574,19 +592,19 @@
  :generated-by "holes/labs/wm-contract/u39_selection_retrospective.bb",
  :read-only true,
  :section-1-carrier-census
- {:files 56,
-  :records 885,
+ {:files 57,
+  :records 889,
   :rationale-side
-  {:controller-ranking 94,
-   :decision-explanation 98,
-   :selection-law 3,
-   :ranked-actions 885,
-   :policy-support-exclusions 125},
+  {:controller-ranking 98,
+   :decision-explanation 102,
+   :selection-law 7,
+   :ranked-actions 889,
+   :policy-support-exclusions 129},
   :outcome-side
   {:realized-outcome 88,
    :any-trace-outcome 0,
-   :selection-gain-state 125,
-   :selection-gain-samples {0 125}},
+   :selection-gain-state 129,
+   :selection-gain-samples {0 129}},
   :both-sides-on-one-record 0,
   :realized-outcome-key-shapes
   {[:expected-G :policy :realized-G :tick] 88},
@@ -815,5 +833,9 @@
    {:day "2026-09-02",
     :n 3,
     :controller-ranking 3,
+    :realized-outcome 0}
+   {:day "2026-09-04",
+    :n 4,
+    :controller-ranking 4,
     :realized-outcome 0}]},
  :row :U39}

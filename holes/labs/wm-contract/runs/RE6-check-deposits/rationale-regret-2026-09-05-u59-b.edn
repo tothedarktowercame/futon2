@@ -1,0 +1,143 @@
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE6,
+ :check :rationale-regret,
+ :run-id "2026-09-05-u59-b",
+ :produced-by
+ "holes/labs/wm-contract/u39_selection_retrospective.bb --deposit",
+ :deterministic
+ "No wall-clock field. Every number is read from a record or subtracted from two of them, so this receipt is rewritten byte-identically on every deposit. That is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present.",
+ :rule
+ {:name :declared-attributed-overtake,
+  :declared-at
+  "holes/labs/wm-contract/u39_selection_retrospective.bb (retrospective-verdict)",
+  :statement
+  "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake explained by the chosen candidate's own non-progress decay measures the decay, not the rationale, and is UNTESTABLE.",
+  :upheld-unreachable
+  "UPHELD requires an outcome leg and no record in this corpus carries one, so this check cannot deposit a green from the trace alone.",
+  :upheld-reached-how
+  "UPHELD is reachable on this run: the outcome leg is an OBSERVATION taken at this accepted step about the previous one -- the chosen mission's own :open-hole-count on the two records -- and a :grounded-change with no refutation upholds. The clause above still describes the trace alone, which carries no outcome on any record: what changed is that the check no longer reads the trace alone."},
+ :run-store
+ {:dir "holes/labs/wm-contract/runs/2026-09-05-u59-b",
+  :holds
+  ["README.md"
+   "battery.log"
+   "conformance.edn"
+   "delta.edn"
+   "normalized.edn"
+   "step.edn"
+   "tick-run-record-2026-09-05-62f229b5-14f2-442b-9358-d936e1dc05a5.edn"
+   "wm-trace-2026-09-05.edn"
+   "world-after.edn"
+   "world-before.edn"],
+  :tick-ids ["62f229b5-14f2-442b-9358-d936e1dc05a5"],
+  :traces
+  ["holes/labs/wm-contract/runs/2026-09-05-u59-b/wm-trace-2026-09-05.edn"],
+  :records-of-this-run 2,
+  :records-carrying-a-ranking 2,
+  :pairs-evaluated 1,
+  :paired-with
+  {:runs ["2026-09-05-u59-a"],
+   :why
+   "wm_step.sh runs one tick per step, so a run's own records never hold two ranking-carrying records and this check deposited :typed-absence by construction. The pair is not inferred here: this run's observation record names the run it observed, and it names it because the pin's :pin/accepted-steps ordered them.",
+   :records [["2026-09-05-u59-a" 1]]}},
+ :verdict-deposited :typed-absence,
+ :pair-verdicts
+ [{:legs-measurable
+   {:overtake true,
+    :c-mis
+    {:status :untestable,
+     :reason :c-mis-reads-the-selected-mission-only,
+     :detail
+     "the readback is keyed to the tick's SELECTED mission, so two ticks that select different missions produce two different subjects and no movement"},
+    :receipts :absent},
+   :claim-id "rc-feec6327-e0b0-41fc-9697-2fc46bff2830",
+   :reason
+   :overtake-attributable-to-the-chosen-candidates-own-non-progress-decay,
+   :from "feec6327-e0b0-41fc-9697-2fc46bff2830",
+   :at "2026-09-05T05:41:23.657016962Z",
+   :outcome-leg
+   {:observed-at-run "2026-09-05-u59-b",
+    :scale :g-core,
+    :basis
+    "runs/<observing run>/observation/realized-outcome-<observed run>.edn",
+    :outcome :grounded-no-change,
+    :status :measured,
+    :dial
+    {:dial :open-hole-count,
+     :target "M-zaif-harness-v1",
+     :at-decision 1,
+     :at-observation 1,
+     :vocabulary
+     "futon2.aif.full-loop-cohort/outcome vocabulary (full_loop_cohort.clj:31)",
+     :rule
+     "strictly fewer open holes on the chosen mission at the next accepted step => :grounded-change; otherwise :grounded-no-change. The dial is MISSION-SCOPED on purpose: the step world record is repo-wide and moves when anyone commits anything, so it cannot attribute a change to the action that was chosen."},
+    :expected-score 6.879411221866079,
+    :realized-score 7.013215250842563,
+    :vocabulary :v1},
+   :overtaken-by
+   [{:action
+     {:type :advance-mission, :target "M-distributed-frontiermath"},
+     :rank-at-claim 2,
+     :rank-later 2,
+     :margin-at-claim 0.052101904822166034,
+     :margin-later -0.08170212415431877,
+     :reading :chosen-decayed,
+     :rival-delta-G 0.0,
+     :chosen-delta-G 0.1338040289764848}
+    {:action {:type :advance-mission, :target "M-symbol-grounding"},
+     :rank-at-claim 3,
+     :rank-later 3,
+     :margin-at-claim 0.07921870121491281,
+     :margin-later -0.05458532776157199,
+     :reading :chosen-decayed,
+     :rival-delta-G 0.0,
+     :chosen-delta-G 0.1338040289764848}
+    {:action {:type :no-op},
+     :rank-at-claim 4,
+     :rank-later 4,
+     :margin-at-claim 0.08287054189392506,
+     :margin-later -0.050933487082559736,
+     :reading :chosen-decayed,
+     :rival-delta-G 0.0,
+     :chosen-delta-G 0.1338040289764848}
+    {:action {:type :advance-mission, :target "M-superpod-mark2"},
+     :rank-at-claim 5,
+     :rank-later 5,
+     :margin-at-claim 0.08584418451587794,
+     :margin-later -0.04795984446060686,
+     :reading :chosen-decayed,
+     :rival-delta-G 0.0,
+     :chosen-delta-G 0.1338040289764848}
+    {:action {:type :advance-mission, :target "M-futon-enrichment"},
+     :rank-at-claim 6,
+     :rank-later 6,
+     :margin-at-claim 0.11334043814490258,
+     :margin-later -0.020463590831582223,
+     :reading :chosen-decayed,
+     :rival-delta-G 0.0,
+     :chosen-delta-G 0.1338040289764848}],
+   :verdict :rationale-untestable,
+   :assertion
+   {:rejected-considered 5,
+    :min-margin 0.052101904822166034,
+    :chosen-controller-rank 1,
+    :holds? true},
+   :to "62f229b5-14f2-442b-9358-d936e1dc05a5",
+   :chosen {:type :advance-mission, :target "M-zaif-harness-v1"}}],
+ :tally {:rationale-untestable 1},
+ :outcome-side
+ {:records-with-a-trace-outcome 0,
+  :records-with-realized-outcome 0,
+  :why-it-matters
+  "the UPHELD branch needs one of these; the count is what makes its absence a measurement",
+  :observed-outcomes
+  {:count 1,
+   :for-ticks ["feec6327-e0b0-41fc-9697-2fc46bff2830"],
+   :outcomes {:grounded-no-change 1},
+   :dir "holes/labs/wm-contract/runs/2026-09-05-u59-b/observation",
+   :produced-by
+   "holes/labs/wm-contract/wm_step_observe.bb, run by wm_step.sh accept",
+   :note
+   "the outcome of a decision does not exist when the decision is written, so it is not a key on the record: it is observed at the NEXT accepted step and joined by :run/id"}},
+ :not-what-this-says
+ "A :typed-absence here does NOT say the run's rationales held up. It says no leg of the declared rule was measurable on this run's records: no rejected candidate overtook the chosen one on its own movement, and there is no outcome carrier that could uphold the claim instead."}

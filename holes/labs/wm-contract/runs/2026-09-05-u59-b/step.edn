@@ -1,0 +1,28 @@
+{:step/schema :wm/step-record-v1
+ :step/id "002-u59-b"
+ :step/work "/tmp/wm-step-u59"
+ :step/started-at "2026-09-05T05:43:03Z"
+ :step/ended-at "2026-09-05T05:44:12Z"
+ :step/tick-exit 0
+ :step/days 14
+ :step/run-id "62f229b5-14f2-442b-9358-d936e1dc05a5"
+ :step/pin-verify :ok
+ :step/pin-generation 1
+ :step/futon2-sha "a491b2d9bc6ca636b50f9a2bc053a08b294564d5"
+ :step/futon2-tree-dirty? true
+ :step/futon2-tree-dirty-files [" M holes/labs/wm-contract/aif-equations.edn" " M holes/labs/wm-contract/runs/U39-selection-retrospective/U39-SELECTION-RETROSPECTIVE.txt" " M holes/labs/wm-contract/runs/U39-selection-retrospective/u39-measurements.edn" " M holes/labs/wm-contract/runs/latest-conformance.edn" " M holes/labs/wm-contract/u39_selection_retrospective.bb" " M holes/labs/wm-contract/wm_step.sh" " M src/futon2/aif/selection_gain.clj" "?? holes/labs/wm-contract/runs/2026-09-05-u59-a/" "?? holes/labs/wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-05-u59-a.edn" "?? holes/labs/wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-05-u59-a.edn" "?? holes/labs/wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-05-u59-a.edn" "?? holes/labs/wm-contract/runs/RE6-check-deposits/rationale-regret-2026-09-05-u59-a.edn" "?? holes/labs/wm-contract/runs/RE6-check-deposits/runtime-validation-2026-09-05-u59-a.edn" "?? holes/labs/wm-contract/runs/RE6-check-deposits/tensions-cashed-2026-09-05-u59-a.edn" "?? holes/labs/wm-contract/runs/RE7-selection-discrimination/2026-09-05-u59-a/" "?? holes/labs/wm-contract/runs/U59-outcome-vocabulary/" "?? holes/labs/wm-contract/u59_outcome_vocabulary.clj" "?? holes/labs/wm-contract/wm_step_observe.bb" "?? holes/labs/zaif-harness/runs/build-loop.lock" "?? holes/labs/zaif-harness/runs/build-loop.log" "?? src/futon2/aif/realized_outcome.clj"]
+ :step/sandbox {:trace-dir "/tmp/wm-step-u59/sandbox/wm-trace"
+                :receipt-dir "/tmp/wm-step-u59/sandbox/receipts"
+                :rationale-dir "/tmp/wm-step-u59/sandbox/wm-trace/rationale"}
+ :step/live-data-written false
+ :step/run-lock :taken-and-released
+ :step/normalized-sha256 "9b4a93f30b6b8536b74ae3da658de2c5596ab07beec342764465d7d7d11bdbda"
+ :step/store-basis {:before {:base "http://127.0.0.1:7070" :count 213372 :max-at "2026-09-05T05:39:54.550776396Z" :at "2026-09-05T05:43:03Z"} :after {:base "http://127.0.0.1:7070" :count 213372 :max-at "2026-09-05T05:39:54.550776396Z" :at "2026-09-05T05:44:20Z"}}
+ :step/evidence {:mode :pinned-replay
+                 :cassette "pin/evidence-cassette.edn"
+                 :cassette-sha256 "91496ef0681f84df980dbcb1db4523e26b99fcde3239f1f2e6affa0afb73b692"
+                 :cassette-entries 7
+                 :log "cassette.log"
+                 :note "the evidence store is the one input C509 called unpinnable; the cassette pins its ANSWERS, reached through the existing FUTON3C_EVIDENCE_BASE seam (pattern_registry.clj:33-38)"}
+ :step/world {:before "world-before.edn" :after "world-after.edn"}
+ :step/note "the sandbox is restored from the pin before the tick, so two steps of the same pin are steps from the same state"}

@@ -1,0 +1,358 @@
+{:row :U59,
+ :generated-by "holes/labs/wm-contract/u59_outcome_vocabulary.clj",
+ :read-only true,
+ :schema-under-test :wm/realized-outcome-v1,
+ :vocabularies
+ {:v1 {:expected :expected-score, :realized :realized-score},
+  :july-2026-delta-g {:expected :expected-G, :realized :realized-G}},
+ :historical-vocabularies [:july-2026-delta-g],
+ :corpus {:dir "data/wm-trace", :files 57, :records 889},
+ :section-1-vocabulary-census
+ {:records 889,
+  :records-carrying-a-realized-outcome 88,
+  :by-vocabulary
+  {:july-2026-delta-g 77, :neither-leg-pair-readable 11},
+  :historical-and-now-readable 77,
+  :readable-by-the-old-key-test 0,
+  :records-with-a-categorical-outcome 0,
+  :mixed-vocabulary 0},
+ :section-1b-july-only
+ {:files
+  ["2026-07-01"
+   "2026-07-02"
+   "2026-07-03"
+   "2026-07-04"
+   "2026-07-05"
+   "2026-07-06"
+   "2026-07-09"
+   "2026-07-14"
+   "2026-07-15"
+   "2026-07-16"
+   "2026-07-17"
+   "2026-07-18"
+   "2026-07-19"
+   "2026-07-21"],
+  :census
+  {:records 186,
+   :records-carrying-a-realized-outcome 88,
+   :by-vocabulary
+   {:july-2026-delta-g 77, :neither-leg-pair-readable 11},
+   :historical-and-now-readable 77,
+   :readable-by-the-old-key-test 0,
+   :records-with-a-categorical-outcome 0,
+   :mixed-vocabulary 0}},
+ :section-2-gamma-folds-the-july-records
+ {:offered 88,
+  :folded 77,
+  :selection-gain-before 1.0,
+  :selection-gain-after 1.3375092522591208,
+  :mean-perf-after 0.4195488714331731,
+  :last-outcome-vocabulary :july-2026-delta-g,
+  :moved? true},
+ :section-2b-what-the-old-reader-did
+ {:folded 0,
+  :why
+  "the reader required :expected-score and :realized-score by key (selection_gain.clj:197-205 before this row) and every one of these records spells the same two legs :expected-G and :realized-G, so the fold returned the state unchanged on all of them. Nothing about the records changed; the reader did."},
+ :sequence
+ {:run-ids ["2026-09-05-u59-a" "2026-09-05-u59-b"],
+  :records 2,
+  :observations 1,
+  :observation-records
+  [{:tick "2026-09-05T05:41:23.657016962Z",
+    :schema :wm/realized-outcome-v1,
+    :observation/observed-for-tick
+    "feec6327-e0b0-41fc-9697-2fc46bff2830",
+    :scale :g-core,
+    :observation/produced-by
+    "holes/labs/wm-contract/wm_step_observe.bb",
+    :outcome :grounded-no-change,
+    :observation/schema :wm/step-observation-v1,
+    :policy "M-zaif-harness-v1",
+    :observation/status :observed,
+    :observation/world-context-not-the-basis
+    {:keys-moved
+     [:world/files
+      :world/flip-readiness
+      :world/mana-age
+      :world/runtime-validation],
+     :from "2026-09-05T05:40:22.968257810Z",
+     :to "2026-09-05T05:42:54.766870124Z"},
+    :observation/observed-at-run "2026-09-05-u59-b",
+    :observation/observed-for-run "2026-09-05-u59-a",
+    :observation/basis
+    ["[:decision :action] of the observed run's record"
+     "[:ranked-actions] :G-core of that action on BOTH records (same scorer, two times)"
+     "[:ranked-actions] :action :open-hole-count of that action on both records"],
+    :action {:type :advance-mission, :target "M-zaif-harness-v1"},
+    :outcome/basis
+    {:dial :open-hole-count,
+     :target "M-zaif-harness-v1",
+     :at-decision 1,
+     :at-observation 1,
+     :vocabulary
+     "futon2.aif.full-loop-cohort/outcome vocabulary (full_loop_cohort.clj:31)",
+     :rule
+     "strictly fewer open holes on the chosen mission at the next accepted step => :grounded-change; otherwise :grounded-no-change. The dial is MISSION-SCOPED on purpose: the step world record is repo-wide and moves when anyone commits anything, so it cannot attribute a change to the action that was chosen."},
+    :expected-score 6.879411221866079,
+    :observation/evaluated-against-tick
+    "62f229b5-14f2-442b-9358-d936e1dc05a5",
+    :realized-score 7.013215250842563}]},
+ :section-3-gamma-folds-the-observation
+ {:offered 1,
+  :folded 1,
+  :selection-gain-before 1.0,
+  :selection-gain-after 1.0,
+  :mean-perf-after nil,
+  :last-outcome-vocabulary nil,
+  :moved? false},
+ :section-4-decay-difference-on-the-sequence
+ {:flag-off
+  {:ranking-records 2,
+   :counts {0 2},
+   :decays {1.0 2},
+   :sum-of-counts 0},
+  :flag-on
+  {:ranking-records 2,
+   :counts {0 2},
+   :decays {1.0 2},
+   :sum-of-counts 0},
+  :identical? true,
+  :records-whose-decay-moved 0,
+  :moved [],
+  :observations-bound 1,
+  :not-enabled
+  "war-machine/*observed-outcomes* defaults to {} and no caller binds it. This function is the only binder in the repository, and it binds it to measure the difference, not to keep it. Flipping it is a decision, not a consequence of making the input readable (worklist :U59)."},
+ :section-4b-decay-difference-on-the-live-corpus
+ {:flag-off
+  {:ranking-records 98,
+   :counts {0 69, 1 29},
+   :decays {0.5 29, 1.0 69},
+   :sum-of-counts 29},
+  :flag-on
+  {:ranking-records 98,
+   :counts {0 69, 1 29},
+   :decays {0.5 29, 1.0 69},
+   :sum-of-counts 29},
+  :identical? true,
+  :records-whose-decay-moved 0,
+  :moved [],
+  :observations-bound 0,
+  :not-enabled
+  "war-machine/*observed-outcomes* defaults to {} and no caller binds it. This function is the only binder in the repository, and it binds it to measure the difference, not to keep it. Flipping it is a decision, not a consequence of making the input readable (worklist :U59)."},
+ :section-5-flag-off-equivalence
+ {:live-corpus
+  {:foldable-old 0,
+   :foldable-new 77,
+   :what-the-difference-is
+   "the ONLY difference between the two readers is the July spelling of the two numeric legs, which the old one could not read. The categorical answer is identical on every record, which is why the non-progress walk, the decay it feeds and every selection score are unchanged with the observed side-channel empty -- and it is empty on every path but the measurement in this file.",
+   :categorical-outcome-identical? true,
+   :non-nil-categorical-new 0,
+   :foldable-difference 77,
+   :non-nil-categorical-old 0,
+   :records 889,
+   :categorical-disagreements 0},
+  :sequence
+  {:foldable-old 0,
+   :foldable-new 0,
+   :what-the-difference-is
+   "the ONLY difference between the two readers is the July spelling of the two numeric legs, which the old one could not read. The categorical answer is identical on every record, which is why the non-progress walk, the decay it feeds and every selection score are unchanged with the observed side-channel empty -- and it is empty on every path but the measurement in this file.",
+   :categorical-outcome-identical? true,
+   :non-nil-categorical-new 0,
+   :foldable-difference 0,
+   :non-nil-categorical-old 0,
+   :records 2,
+   :categorical-disagreements 0}},
+ :section-4c-what-a-readable-grounded-change-would-do
+ {:moved
+  [{:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}
+   {:run-id nil,
+    :target "M-aif-policy-conditioned-eig",
+    :count-off 1,
+    :count-on 0,
+    :decay-off 0.5,
+    :decay-on 1.0}],
+  :records-whose-decay-moved 29,
+  :flag-off
+  {:ranking-records 98,
+   :counts {0 69, 1 29},
+   :decays {0.5 29, 1.0 69},
+   :sum-of-counts 29},
+  :what-this-is
+  "NOT an observation and not a proposal: every record is given a :grounded-change so the decay's SENSITIVITY to a readable outcome can be quantified. It is the upper bound of the difference -- no run of the machine would produce a grounded change on every tick -- and it is here because the two-step sequence's own observation is a :grounded-no-change, which moves nothing and so measures nothing. The 29 records that carry a non-progress count today carry it SOLELY because no outcome is readable: the walk reaches the previous selection of the same mission, cannot ask whether it progressed, and counts it as non-progress (war_machine.clj:2463-2474).",
+  :identical? false,
+  :flag-on
+  {:ranking-records 98,
+   :counts {0 98},
+   :decays {1.0 98},
+   :sum-of-counts 0},
+  :synthetic true,
+  :not-enabled
+  "war-machine/*observed-outcomes* defaults to {} and no caller binds it. This function is the only binder in the repository, and it binds it to measure the difference, not to keep it. Flipping it is a decision, not a consequence of making the input readable (worklist :U59).",
+  :observations-bound 37}}

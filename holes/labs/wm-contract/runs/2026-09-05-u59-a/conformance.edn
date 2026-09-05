@@ -1,0 +1,1 @@
+{:routes 1, :run "2026-09-05-u59-a", :checked-at "2026-09-05T05:42:30.107395850Z", :unmapped nil, :excluded [["R2" "R7"]], :trace "runs/2026-09-05-u59-a", :hops 9, :distinct 9, :drawn 22, :records 1, :unfired 19, :verdict :conformant, :ruling-unrealised [["R5" "R6"]], :selection-run-ids 1, :selection :by-run-id, :refutations nil, :sha "a491b2d"}

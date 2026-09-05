@@ -1,0 +1,80 @@
+{:reader
+ {:id :re7-controls,
+  :row :RE7,
+  :script "holes/labs/wm-contract/re7_selection_discrimination.bb"},
+ :run-id "2026-09-05-u59-b",
+ :controls
+ [[:positive/c1-the-trace-reproduces-every-recorded-tie
+   {:decisions
+    [{:tick "2026-09-05T05:43:20.776154102Z",
+      :recorded {:controller-rank 1, :tie-count 1, :tie-band [1 1]},
+      :recomputed {:controller-rank 1, :tie-count 1, :tie-band [1 1]},
+      :agrees? true}],
+    :pass? true,
+    :why
+    "the verdict is read from the rationale records and the census from the trace they name; without this the check could report a number it never read"}]
+  [:negative/c2-a-two-wide-tie-is-already-a-defect
+   {:verdict
+    {:verdict :defect,
+     :reason :chosen-inside-a-tie-wider-than-1,
+     :counts {:tiebreak 1}},
+    :pass? true,
+    :why
+    "the rule is `wider than 1`, not `wider than some large number` -- the smallest possible tie fires it, so the 55 in this run is a measurement and not the threshold"}]
+  [:positive/c3-a-one-wide-tie-is-green
+   {:verdict
+    {:verdict :green,
+     :reason :every-decision-uniquely-scored,
+     :counts {:discriminating 1}},
+    :pass? true,
+    :why
+    "without this C2 would pass for a rule that verdicts :defect on everything"}]
+  [:negative/c4-no-records-is-a-typed-absence-not-a-green
+   {:verdict
+    {:verdict :typed-absence,
+     :reason :no-rationale-records,
+     :counts {}},
+    :pass? true,
+    :why
+    "the honest store rule: a run whose rationale records are missing has not been shown to discriminate"}]
+  [:negative/c5-a-record-without-a-tie-datum-is-a-typed-absence
+   {:verdict
+    {:verdict :typed-absence,
+     :reason :decision-carries-no-tie-datum,
+     :counts {:absent 1}},
+    :pass? true,
+    :why
+    "`:controller-score-tie {:status :absent}` is not a tie of width 0; reading it as one would turn a missing measurement into a green"}]
+  [:negative/c6-one-tie-break-among-many-clean-decisions-still-reds-the-run
+   {:verdict
+    {:verdict :defect,
+     :reason :chosen-inside-a-tie-wider-than-1,
+     :counts {:discriminating 3, :tiebreak 1}},
+    :pass? true,
+    :why
+    "the verdict is over the run, so a single choice made by tie-break is the run's defect"}]
+  [:positive/c7-the-lean-literals-round-trip
+   {:decoded
+    [{:tick "2026-09-05T05:43:20.776154102Z",
+      :in-lean? true,
+      :count-in-lean? true}],
+    :distinct-ticks? true,
+    :pass? true,
+    :why
+    "what makes the emitted block a transcription rather than a retyping"}]
+  [:positive/c8-the-plateau-census-cannot-move-the-verdict
+   {:verdict-as-computed :green,
+    :verdict-with-census-perturbed :green,
+    :verdict-from-records-alone :green,
+    :widest-plateau-not-containing-choice 56,
+    :pass? true,
+    :why
+    "re5 is green while its field carries a 56-wide plateau the choice is not in; the census is reported so the green is not read as `the scoring discriminates`, and this shows the census is not an input to the verdict"}]
+  [:positive/c9-shared-definition-provenance
+   {:mode :this-block-defines-what-it-uses,
+    :defines-structure? true,
+    :defines-predicate? true,
+    :pass? true,
+    :why
+    "a block that emits its own definitions makes no reuse claim, and this shows it really emits them"}]],
+ :all-pass? true}

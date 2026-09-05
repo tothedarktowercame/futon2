@@ -66,7 +66,8 @@
    Contract: R14 (precision over policies) per `M-aif-wiring`. Structural
    template: `futon2.aif.precision` (R7). Sibling outcome-learner: R12
    `futon2.aif.intrinsic-values` (Beta-credit, per-action-class follow-through —
-   a DIFFERENT quantity than decision decisiveness).")
+   a DIFFERENT quantity than decision decisiveness)."
+  (:require [futon2.aif.realized-outcome :as ro]))
 
 ;; Window / burn-in.
 (def default-window-size 20)        ; match R7's rolling window
@@ -178,6 +179,19 @@
 
      {:policy <id> :expected-score <g> :realized-score <g'> :tick <enactment tick>}
 
+   THE LEGS ARE READ THROUGH `futon2.aif.realized-outcome`, not by key, so the
+   88 recorded July 2026 outcomes -- which spell the same two legs
+   `:expected-G` / `:realized-G` (data/wm-trace/wm-trace-2026-07-02.edn ..
+   -06.edn) -- fold here instead of being silently skipped. That was the third
+   of the three vocabularies C511-repair-or-elaborate.md section 3 measured;
+   this reader was the one that required (2) and got (1).
+
+   INERT ON THE LIVE PATH, so this is a reader repair and not a scoring change:
+   the field is ABSENT from every record the tick writes (its only producer,
+   `fold-realized/with-realized-outcome`, is reached from `enact.clj:329`, which
+   C509 measured as outside `run-tick-once`'s require closure), and an absent
+   field folds to the state unchanged under both the old test and this one.
+
    written by the enactor AT enactment and READ back here next tick (async-clean
    — never a synchronous cross-subsystem call). Both legs are the same
    coverage score, evaluated over the PREDICTED wiring
@@ -194,16 +208,19 @@
   ([gain-state realized-outcome]
    (fold-realized-outcome gain-state realized-outcome {}))
   ([gain-state realized-outcome opts]
-   (if (and (map? realized-outcome)
-            (number? (:expected-score realized-outcome))
-            (number? (:realized-score realized-outcome))
-            (not= (:tick realized-outcome) (:last-outcome-tick gain-state)))
-     (-> (observe-outcome gain-state
-                          (:expected-score realized-outcome)
-                          (:realized-score realized-outcome)
-                          opts)
-         (assoc :last-outcome-tick (:tick realized-outcome)))
-     gain-state)))
+   (let [vocab (ro/vocabulary realized-outcome)]
+     (if (and vocab
+              (not= (:tick realized-outcome) (:last-outcome-tick gain-state)))
+       (cond-> (-> (observe-outcome gain-state
+                                    (ro/expected-score realized-outcome)
+                                    (ro/realized-score realized-outcome)
+                                    opts)
+                   (assoc :last-outcome-tick (:tick realized-outcome)))
+         ;; Marked, not silent: a state folded from a retired spelling says so,
+         ;; so a replay over the July corpus is distinguishable from a live fold.
+         (contains? ro/historical-vocabularies vocab)
+         (assoc :last-outcome-vocabulary vocab))
+       gain-state))))
 
 (defn coerce-state
   "Schema guard for a selection gain-state read back from a persisted trace record.

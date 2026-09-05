@@ -6,6 +6,7 @@
 #   bash holes/labs/wm-contract/wm_step.sh reset <work-dir>
 #   bash holes/labs/wm-contract/wm_step.sh step  <work-dir> [label] [--allow-pin-drift]
 #   bash holes/labs/wm-contract/wm_step.sh accept <work-dir> <step-dir> [run-id]
+#   bash holes/labs/wm-contract/wm_step.sh observe <work-dir> <run-id> [--print]
 #   bash holes/labs/wm-contract/wm_step.sh determinism <work-dir>
 #   bash holes/labs/wm-contract/wm_step.sh compare <work-dir> <step-dir-a> <step-dir-b>
 #   bash holes/labs/wm-contract/wm_step.sh plant <work-dir> mu-uniform
@@ -55,6 +56,7 @@ LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$LAB/../../.." && pwd)"
 LIVE_TRACE="$ROOT/data/wm-trace"
 RECORDS="$LAB/wm_step_records.bb"
+OBSERVE="$LAB/wm_step_observe.bb"
 EVIDENCE="$LAB/wm_step_evidence.bb"
 EV_PORT="${FUTON_WM_STEP_PORT:-7099}"
 DAYS="${FUTON_WM_STEP_DAYS:-14}"
@@ -527,6 +529,16 @@ EOF
 
   say "accept: deposited $store"
 
+  # ---- observe the PREVIOUS accepted step's outcome -------------------------
+  # Between the store write and the battery, because the battery is what reads
+  # it: `:rationale-regret` needs the pair this observation names, and an
+  # observation written after the checks ran would be read for the first time
+  # on the deposit pass and so measure a different store than the first pass.
+  # A decision's outcome does not exist when the decision is made, so it cannot
+  # be a key on the record; it is observed one step later and joined by run id
+  # (worklist :U59, C511-repair-or-elaborate.md section 3).
+  bb "$OBSERVE" "$work" "$run_id" || say "accept: observation pass FAILED (not fatal; the store keeps no observation)"
+
   cmd_battery "$work" "$run_id"
 
   # ---- advance the pin ------------------------------------------------------
@@ -575,6 +587,18 @@ cmd_check() {
 }
 
 # --------------------------------------------------------------------------
+# observe: re-run the post-accept observation pass against an already-accepted
+# run, without accepting anything. Same record, byte-identical, whether it was
+# taken at accept time or replayed here -- the pin is the authority on which
+# run came before, and the pin does not move.
+# --------------------------------------------------------------------------
+cmd_observe() {
+  local work="$1" run_id="$2" ; shift 2 || true
+  [ -d "$LAB/runs/$run_id" ] || die "no run store at $LAB/runs/$run_id"
+  bb "$OBSERVE" "$work" "$run_id" "$@"
+}
+
+# --------------------------------------------------------------------------
 cmd_status() {
   local work="$1"
   [ -d "$work/pin" ] || die "no pin at $work/pin"
@@ -596,6 +620,7 @@ case "$CMD" in
   deposit) cmd_battery "$@" ;;
   compare) cmd_compare "$@" ;;
   check) cmd_check "$@" ;;
+  observe) cmd_observe "$@" ;;
   determinism) cmd_determinism "$@" ;;
   plant) cmd_plant "$@" ;;
   status) cmd_status "$@" ;;

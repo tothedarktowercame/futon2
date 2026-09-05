@@ -1,0 +1,200 @@
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE6,
+ :check :per-node-runtime-validation,
+ :run-id "2026-09-05-u59-b",
+ :produced-by
+ "holes/labs/wm-contract/runtime_validation_check.bb --deposit",
+ :deterministic
+ "No wall-clock field. This receipt is rewritten byte-identically on every deposit, which is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present.",
+ :run-store
+ {:dir "holes/labs/wm-contract/runs/2026-09-05-u59-b",
+  :exists? true,
+  :holds
+  ["README.md"
+   "battery.log"
+   "conformance.edn"
+   "delta.edn"
+   "normalized.edn"
+   "observation/realized-outcome-2026-09-05-u59-a.edn"
+   "rationale/rationale-2026-09-05-62f229b5-14f2-442b-9358-d936e1dc05a5.edn"
+   "step.edn"
+   "tick-run-record-2026-09-05-62f229b5-14f2-442b-9358-d936e1dc05a5.edn"
+   "u49/00-source.edn"
+   "u49/01-topology.edn"
+   "u49/02-routes.edn"
+   "u49/03-classification.edn"
+   "u49/04-controls.edn"
+   "u49/lean-block.lean"
+   "wm-trace-2026-09-05.edn"
+   "world-after.edn"
+   "world-before.edn"],
+  :runtime-validation-artifacts []},
+ :run-keyed-basis
+ {:schema :wm/runtime-validation-run-basis-v1,
+  :run-id "2026-09-05-u59-b",
+  :world-record
+  "holes/labs/wm-contract/runs/2026-09-05-u59-b/world-before.edn",
+  :produced-by "runtime_validation_check.bb run-keyed-basis (U58)",
+  :status :captured,
+  :catalog
+  {:path
+   "/home/joe/code/futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+   :repo "futon2",
+   :repo-rel
+   "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+   :sha256
+   "244becbeb00cae1775a50385557dc4442f10dd96f98834041bc5ff1fb15edf52",
+   :last-commit "7157af97267e9a1874bb86752a40003d09ad0899",
+   :committed-blob-sha1 "28b58c0b5c4b2297ef0e79446ee10a0d5d8faa7e",
+   :worktree-blob-sha1 "28b58c0b5c4b2297ef0e79446ee10a0d5d8faa7e",
+   :worktree-matches-commit? true},
+  :pointers 181,
+  :repos
+  [{:repo "futon2",
+    :pointers 157,
+    :head "a491b2d9bc6ca636b50f9a2bc053a08b294564d5",
+    :porcelain-lines 20}
+   {:repo "futon3c",
+    :pointers 11,
+    :head "d34a1ceb28ae9365100afa498e0e85e2422cfbd4",
+    :porcelain-lines 1}
+   {:repo "mathlib4",
+    :pointers 5,
+    :head "4bbc7111c4b6193e79c02d9d381377587271b56f",
+    :porcelain-lines 0}
+   {:repo "p4ng",
+    :pointers 8,
+    :head "bb47e066d0b3014d0a741193b5935bab26a4486d",
+    :porcelain-lines 1}],
+  :what-this-establishes
+  "the bytes of the catalogue this check validates, and the commit each repository its pointers reach stood at, AT THE RUN. A later reader can ask whether the tree it is resolving pointers against is that tree.",
+  :what-this-does-not-establish
+  "that the check's verdict is a property of the run. The catalogue carries no run identity and no tick writes into it, so the verdict here remains a property of the tree at deposit time; this basis names that tree's relation to the run's, it does not convert one into the other."},
+ :verdict-deposited :typed-absence,
+ :live-derivation
+ {:read-from
+  "the catalog and the source tree at deposit time, NOT the tree the run was taken at",
+  :artifact
+  "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
+  :counts-line
+  "COUNTS: 84 rows (59 per-node, 25 global-run) | nodes 19/19 | status exists=69 exists-but-stale=4 red=3 named-gap=8 | flips=7 | test namespaces 47/50 green | pointers=181",
+  :counts
+  {:exists 69,
+   :nodes-declared 19,
+   :flips 7,
+   :test-namespaces 50,
+   :pointers 181,
+   :global-run 25,
+   :test-namespaces-green 47,
+   :stale 4,
+   :rows 84,
+   :per-node 59,
+   :red 3,
+   :gap 8,
+   :nodes-covered 19},
+  :test-runs-recorded
+  {"contract-lint-test"
+   {:exit 0, :tests 6, :assertions 40, :at "2026-09-03"},
+   "control-map-lint-test"
+   {:exit 0, :tests 5, :assertions 22, :at "2026-09-03"},
+   "fold-realized-zero-coverage-test"
+   {:exit 0, :tests 0, :assertions 0, :at "2026-09-03"},
+   "futon2.aif.a4a-test"
+   {:exit 0, :tests 17, :assertions 57, :at "2026-09-03"},
+   "futon2.aif.belief-test"
+   {:exit 0, :tests 78, :assertions 2030, :at "2026-09-03"},
+   "futon2.aif.bmr-test"
+   {:exit 0, :tests 5, :assertions 15, :at "2026-09-03"},
+   "futon2.aif.close-loop-test"
+   {:exit 0, :tests 2, :assertions 13, :at "2026-09-03"},
+   "futon2.aif.efe-risk-mode-test"
+   {:exit 0, :tests 5, :assertions 24, :at "2026-09-03"},
+   "futon2.aif.efe-structural-pressure-mode-test"
+   {:exit 0, :tests 4, :assertions 46, :at "2026-09-03"},
+   "futon2.aif.efe-test"
+   {:exit 0, :tests 35, :assertions 137, :at "2026-09-03"},
+   "futon2.aif.enact-scheduled-path-test"
+   {:exit 0, :tests 5, :assertions 11, :at "2026-09-03"},
+   "futon2.aif.fold-realized-test"
+   {:exit 0, :tests 6, :assertions 51, :at "2026-09-03"},
+   "futon2.aif.forward-model-test"
+   {:exit 0, :tests 24, :assertions 72, :at "2026-09-03"},
+   "futon2.aif.free-energy-test"
+   {:exit 0, :tests 28, :assertions 162, :at "2026-09-03"},
+   "futon2.aif.habit-prior-test"
+   {:exit 0, :tests 6, :assertions 18, :at "2026-09-03"},
+   "futon2.aif.hierarchical-budget-test"
+   {:exit 0, :tests 8, :assertions 26, :at "2026-09-03"},
+   "futon2.aif.intrinsic-values-test"
+   {:exit 0, :tests 9, :assertions 46, :at "2026-09-03"},
+   "futon2.aif.invariant-model-test"
+   {:exit 0, :tests 7, :assertions 8, :at "2026-09-03"},
+   "futon2.aif.memory-contract-test"
+   {:exit 0, :tests 9, :assertions 43, :at "2026-09-03"},
+   "futon2.aif.mission-c-test"
+   {:exit 0, :tests 29, :assertions 2658, :at "2026-09-03"},
+   "futon2.aif.observation-test"
+   {:exit 0, :tests 6, :assertions 30, :at "2026-09-03"},
+   "futon2.aif.policy-free-energy-test"
+   {:exit 0, :tests 8, :assertions 19, :at "2026-09-03"},
+   "futon2.aif.policy-precision-test"
+   {:exit 0, :tests 25, :assertions 138, :at "2026-09-03"},
+   "futon2.aif.policy-test"
+   {:exit 0, :tests 54, :assertions 296, :at "2026-09-03"},
+   "futon2.aif.precision-test"
+   {:exit 0, :tests 24, :assertions 45, :at "2026-09-03"},
+   "futon2.aif.preferences-cdist-test"
+   {:exit 0, :tests 24, :assertions 814, :at "2026-09-03"},
+   "futon2.aif.preferences-test"
+   {:exit 0, :tests 5, :assertions 20, :at "2026-09-03"},
+   "futon2.aif.r17-offline-test"
+   {:exit 0, :tests 4, :assertions 20, :at "2026-09-03"},
+   "futon2.aif.r9-named-validation-test"
+   {:exit 0, :tests 7, :assertions 10, :at "2026-09-03"},
+   "futon2.aif.rollout-test"
+   {:exit 0, :tests 25, :assertions 236, :at "2026-09-03"},
+   "futon2.aif.selection-gain-test"
+   {:exit 0, :tests 22, :assertions 64, :at "2026-09-03"},
+   "futon2.aif.selection-score-readiness-test"
+   {:exit 0, :tests 19, :assertions 340, :at "2026-09-03"},
+   "futon2.aif.temporal-hierarchy-test"
+   {:exit 0, :tests 9, :assertions 37, :at "2026-09-03"},
+   "futon2.aif.trace-test"
+   {:exit 0, :tests 43, :assertions 131, :at "2026-09-03"},
+   "futon2.aif.tripwire-test"
+   {:exit 0, :tests 31, :assertions 68, :at "2026-09-03"},
+   "futon2.aif.zaif-full-loop-test"
+   {:exit 0, :tests 22, :assertions 232, :at "2026-09-03"},
+   "futon3c.agents.zai-api-test"
+   {:exit 0, :tests 20, :assertions 105, :at "2026-09-03"},
+   "futon3c.agents.zai-memory-tool-contract-test"
+   {:exit 0, :tests 20, :assertions 194, :at "2026-09-03"},
+   "futon3c.agents.zaif-controller-test"
+   {:exit 0, :tests 23, :assertions 95, :at "2026-09-03"},
+   "futon3c.agents.zaif-inputs-test"
+   {:exit 0, :tests 26, :assertions 99, :at "2026-09-03"},
+   "mutable-read-set-test"
+   {:exit 0, :tests 6, :assertions 22, :at "2026-09-03"},
+   "preemptive-repair-gate-test"
+   {:exit 1, :tests 2, :assertions 5, :at "2026-09-03"},
+   "preemptive-repair-lint-test"
+   {:exit 1, :tests 5, :assertions 16, :at "2026-09-03"},
+   "r2-channel-contract-test"
+   {:exit 0, :tests 6, :assertions 35, :at "2026-09-03"},
+   "r8-f-contract-test"
+   {:exit 0, :tests 13, :assertions 65, :at "2026-09-03"},
+   "r9-independence-test"
+   {:exit 0, :tests 2, :assertions 10, :at "2026-09-03"},
+   "run-tick-once-test"
+   {:exit 0, :tests 7, :assertions 21, :at "2026-09-03"},
+   "wm-operational-certificate-test"
+   {:exit 1, :tests 9, :assertions 35, :at "2026-09-03"},
+   "wm-preflight-test"
+   {:exit 0, :tests 2, :assertions 6, :at "2026-09-03"},
+   "wm-run-lock-test"
+   {:exit 0, :tests 10, :assertions 42, :at "2026-09-03"}},
+  :problems []},
+ :why-the-catalog-cannot-be-run-scoped
+ "the catalog carries no run identity: its rows are keyed by node and axis, its :test-runs are keyed by namespace with an :at date, and neither the catalog nor any row names a wm run-id. A tick writes nothing into it. So a verdict about a NAMED RUN cannot be read out of it, and this check has no as-of-run mode that could reconstruct one.",
+ :not-what-this-says
+ "The live derivation above is a property of the tree at deposit time. It is recorded so the absence is legible, and it is NOT the deposited verdict."}

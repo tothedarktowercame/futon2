@@ -1,0 +1,129 @@
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE3,
+ :check :contract-pin,
+ :run-id "2026-09-05-u59-b",
+ :produced-by "checks/contract_authority_current.clj --deposit",
+ :deterministic
+ "No wall-clock field: the observation interval and the event claim's interval are omitted here on purpose, so this receipt is rewritten byte-identically on every deposit. That is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present. The interval is still printed on stdout by an ordinary invocation.",
+ :run-store
+ {:dir "holes/labs/wm-contract/runs/2026-09-05-u59-b",
+  :exists? true,
+  :holds
+  ["README.md"
+   "battery.log"
+   "delta.edn"
+   "normalized.edn"
+   "observation/realized-outcome-2026-09-05-u59-a.edn"
+   "rationale/rationale-2026-09-05-62f229b5-14f2-442b-9358-d936e1dc05a5.edn"
+   "step.edn"
+   "tick-run-record-2026-09-05-62f229b5-14f2-442b-9358-d936e1dc05a5.edn"
+   "wm-trace-2026-09-05.edn"
+   "world-after.edn"
+   "world-before.edn"],
+  :mentions-of-contract
+  {"battery.log" ["contract-pin" "contract_authority_current.clj"],
+   "delta.edn" [":producer-contract" "contract" "contracts"],
+   "normalized.edn" [":producer-contract" "contract" "contracts"],
+   "observation/realized-outcome-2026-09-05-u59-a.edn"
+   ["wm-contract/wm_step_observe.bb"],
+   "rationale/rationale-2026-09-05-62f229b5-14f2-442b-9358-d936e1dc05a5.edn"
+   [":contract-id"
+    ":contract-sha"
+    ":producer-contract"
+    "holes-contract.json"],
+   "step.edn"
+   ["wm-contract/aif-equations.edn"
+    "wm-contract/runs/2026-09-05-u59-a/"
+    "wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/rationale-regret-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/runtime-validation-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/tensions-cashed-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE7-selection-discrimination/2026-09-05-u59-a/"
+    "wm-contract/runs/U39-selection-retrospective/U39-SELECTION-RETROSPECTIVE.txt"
+    "wm-contract/runs/U39-selection-retrospective/u39-measurements.edn"
+    "wm-contract/runs/U59-outcome-vocabulary/"
+    "wm-contract/runs/latest-conformance.edn"
+    "wm-contract/u39_selection_retrospective.bb"
+    "wm-contract/u59_outcome_vocabulary.clj"
+    "wm-contract/wm_step.sh"
+    "wm-contract/wm_step_observe.bb"],
+   "wm-trace-2026-09-05.edn"
+   [":producer-contract" "contract" "contracts"],
+   "world-after.edn"
+   [":contract"
+    ":holes-contract"
+    "holes-contract.json"
+    "wm-contract/aif-equations.edn"
+    "wm-contract/runs/2026-09-05-u59-a/"
+    "wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/rationale-regret-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/runtime-validation-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/tensions-cashed-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE7-selection-discrimination/2026-09-05-u59-a/"
+    "wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn"
+    "wm-contract/runs/U27-hole-closability/audit.edn"
+    "wm-contract/runs/U39-selection-retrospective/U39-SELECTION-RETROSPECTIVE.txt"
+    "wm-contract/runs/U39-selection-retrospective/u39-measurements.edn"
+    "wm-contract/runs/U59-outcome-vocabulary/"
+    "wm-contract/runs/latest-conformance.edn"
+    "wm-contract/u39_selection_retrospective.bb"
+    "wm-contract/u59_outcome_vocabulary.clj"
+    "wm-contract/variable-situation-accounting.edn"
+    "wm-contract/wm_step.sh"
+    "wm-contract/wm_step_observe.bb"],
+   "world-before.edn"
+   [":contract"
+    ":holes-contract"
+    "holes-contract.json"
+    "wm-contract/runs/2026-09-05-u59-a/"
+    "wm-contract/runs/RE3-check-deposits/contract-pin-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE3-check-deposits/flip-readiness-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/enumeration-completeness-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/rationale-regret-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/runtime-validation-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE6-check-deposits/tensions-cashed-2026-09-05-u59-a.edn"
+    "wm-contract/runs/RE7-selection-discrimination/2026-09-05-u59-a/"
+    "wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn"
+    "wm-contract/runs/U27-hole-closability/audit.edn"
+    "wm-contract/runs/U39-selection-retrospective/U39-SELECTION-RETROSPECTIVE.txt"
+    "wm-contract/runs/U39-selection-retrospective/u39-measurements.edn"
+    "wm-contract/runs/U59-outcome-vocabulary/"
+    "wm-contract/runs/latest-conformance.edn"
+    "wm-contract/u39_selection_retrospective.bb"
+    "wm-contract/u59_outcome_vocabulary.clj"
+    "wm-contract/variable-situation-accounting.edn"
+    "wm-contract/wm_step.sh"
+    "wm-contract/wm_step_observe.bb"]},
+  :recorded-authority-sought
+  "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+  :recorded-authority-appears-in-store? true,
+  :recorded-authority-appears-in
+  ["rationale/rationale-2026-09-05-62f229b5-14f2-442b-9358-d936e1dc05a5.edn"
+   "world-after.edn"
+   "world-before.edn"]},
+ :verdict-deposited :green,
+ :live-derivation
+ {:read-from
+  "the mathlib4 working tree at deposit time, NOT the tree the run was taken at",
+  :assertion
+  "the contract was generated from the current content of Holes.lean",
+  :pass? true,
+  :failures [],
+  :recorded-authority "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+  :holes-last-content-change
+  "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+  :recorded-holes-blob "d00dfab3f4e703832fc4b2c91f1af3e3d733b0ad",
+  :current-holes-blob "d00dfab3f4e703832fc4b2c91f1af3e3d733b0ad",
+  :mathlib-head "4bbc7111c4b6193e79c02d9d381377587271b56f",
+  :holes-clean? true,
+  :event-claim
+  {:claim :event-free,
+   :writer-fence {:status :absent, :reason :not-declared},
+   :event-free? :unverified,
+   :distinguishable-cause? false}},
+ :not-what-this-says
+ "The live derivation above is a property of the mathlib4 tree at deposit time. It is recorded so the absence is legible, and it is NOT the deposited verdict."}

@@ -1,0 +1,37 @@
+{:schema :wm/realized-outcome-v1,
+ :observation/schema :wm/step-observation-v1,
+ :observation/status :observed,
+ :observation/observed-at-run "2026-09-05-u59-b",
+ :observation/observed-for-run "2026-09-05-u59-a",
+ :observation/observed-for-tick "feec6327-e0b0-41fc-9697-2fc46bff2830",
+ :observation/evaluated-against-tick
+ "62f229b5-14f2-442b-9358-d936e1dc05a5",
+ :observation/produced-by "holes/labs/wm-contract/wm_step_observe.bb",
+ :observation/basis
+ ["[:decision :action] of the observed run's record"
+  "[:ranked-actions] :G-core of that action on BOTH records (same scorer, two times)"
+  "[:ranked-actions] :action :open-hole-count of that action on both records"],
+ :policy "M-zaif-harness-v1",
+ :action {:type :advance-mission, :target "M-zaif-harness-v1"},
+ :tick "2026-09-05T05:41:23.657016962Z",
+ :scale :g-core,
+ :expected-score 6.879411221866079,
+ :realized-score 7.013215250842563,
+ :outcome :grounded-no-change,
+ :outcome/basis
+ {:dial :open-hole-count,
+  :target "M-zaif-harness-v1",
+  :at-decision 1,
+  :at-observation 1,
+  :vocabulary
+  "futon2.aif.full-loop-cohort/outcome vocabulary (full_loop_cohort.clj:31)",
+  :rule
+  "strictly fewer open holes on the chosen mission at the next accepted step => :grounded-change; otherwise :grounded-no-change. The dial is MISSION-SCOPED on purpose: the step world record is repo-wide and moves when anyone commits anything, so it cannot attribute a change to the action that was chosen."},
+ :observation/world-context-not-the-basis
+ {:keys-moved
+  [:world/files
+   :world/flip-readiness
+   :world/mana-age
+   :world/runtime-validation],
+  :from "2026-09-05T05:40:22.968257810Z",
+  :to "2026-09-05T05:42:54.766870124Z"}}
