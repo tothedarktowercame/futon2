@@ -80,7 +80,7 @@ for fn in sorted(os.listdir(d)):
             fails.append((pid, "no conventions-note receipt citation"))
         if "P-assured-process" not in text:
             fails.append((pid, "no P-assured-process problem naming"))
-    elif SEC in ("problems", "war-room", "cascades", "futon-theory"):
+    elif SEC in BACKFILL_SECTIONS or SEC == "problems":
         if not (re.search(r"^@(source|why|how) .*source:", text, re.M)
                 or "@holds-at" in text
                 or "source:" in text):

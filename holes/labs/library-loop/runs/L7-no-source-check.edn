@@ -1,6 +1,6 @@
 ;; L6+ no-source check receipt. Deterministic, path-independent rerun.
 {:library-subdir "library"
- :library-git-sha "5c0b7371e819d61143cbc322d35a33b5288a8b3e"
+ :library-git-sha "d26ae2a0c1281045572dd71de55bda14798e811b"
  :search "corpus = every library/problems/*.flexiarg (legacy 6 + L5 dossier 20 incl. TRACE + L5 record/ruling 6), each with its own @holds-at tokens read from the file; per pattern in scope: (a) holds-token equality against every corpus node, (b) qualified pattern id searched in every corpus node's full text"
  :corpus-nodes [
   {:node "problems/commitment-temperature-is-instrumented-as-gain" :holds-at ["R14"]}

@@ -23,6 +23,7 @@ LIB = os.path.abspath(sys.argv[2] if len(sys.argv) > 2
                       else "/home/joe/code/futon3/library")
 TAG = sys.argv[3] if len(sys.argv) > 3 else "L6"
 
+RECEIPT = "L%s-no-source-check.edn" % TAG
 # Source corpus: every library/problems/*.flexiarg node with its own
 # @holds-at tokens and full text (same corpus and match rule as
 # runs/l6_no_source_check.py: holds-token equality, or the pattern's
@@ -92,8 +93,8 @@ for sec in SECTIONS:
                 add.append("@why %s (source: %s match against the problem corpus per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L6-no-source-check.edn; %s rationale-backfill, zai-1, 2026-09-05)"
                            % (m[0], m[1], TAG))
             else:
-                add.append("@why no problem-corpus source matched (@holds-at %s; holds-token and id-text searches over every library/problems node -- legacy 6, L5 dossier 20 incl. TRACE, L5 record/ruling 6 -- found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L6-no-source-check.edn. Rationale not invented (%s rationale-backfill, zai-1, 2026-09-05)"
-                           % (holds if holds else "absent", TAG))
+                add.append("@why no problem-corpus source matched (@holds-at %s; holds-token and id-text searches over every library/problems node -- legacy 6, L5 dossier 20 incl. TRACE, L5 record/ruling 6 -- found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/%s. Rationale not invented (%s rationale-backfill, zai-1, 2026-09-05)"
+                           % (holds if holds else "absent", RECEIPT, TAG))
         if not has_how:
             c = first_conclusion(lines)
             if c:
