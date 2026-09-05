@@ -87,14 +87,14 @@ for (fn, plist, res) in rows:
     base = L4_BASE.get(fn, -1)
     out.append("- `%s`: %d refused at L4 -> %d now (%+d); consulted %d."
                % (fn, base, nref, nref - base, ntot))
-out.append("\n## Refused patterns, named (harness cascade, all readings)\n")
+out.append("\n## Refused patterns, named (every cascade x every reading)\n")
 for (fn, plist, res) in rows:
-    if fn != "zaif-cascade.edn":
-        continue
+    out.append("### %s\n" % fn)
     for r in READINGS:
         code, nref, ntot, refused = res[r]
         out.append("- **%s**: %d refused -- %s" %
                    (r, nref, ", ".join(refused) if refused else "(none)"))
+    out.append("")
 out.append("\nStanding conclusion: after L5-L16 the served surface is still "
 "majority-refused under every reading except where the exotype cohort's "
 "shared grounding dominates (open/retrodiction whole-library cascades). "
