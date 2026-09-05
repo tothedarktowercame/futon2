@@ -919,3 +919,25 @@ the judgment of what constitutes a problem statement worth minting is
 the part Joe may want to shape before a loop runs it at scale. The
 library board rests drained (19 done) until then; the lane restarts
 with one mint.
+
+## Coordination incident, F8 slice 7 (2026-09-05 ~15:40) — borrowed caller ids and agent-grain cancel
+
+Sequence, per the seat's own heads-up bell and the job ledger: the F8
+work seat dispatched codex-9 `--from claude-1` (unregistered callers
+get no bellback routing, so it borrowed the owner's id); the bail-out
+bellback landed on claude-1, who dispatched a continuation; the seat's
+attempt to cancel its own redundant job took an agent-level interrupt
+that killed the OWNER'S running continuation instead — after that
+continuation had written both MachineDepth Lean modules (files kept,
+uncommitted, by the seat; seat re-ran a Lean-only packet to finish).
+Net: no work lost, one wasted round-trip, one mis-aimed interrupt.
+
+Two mechanism facts + PENDING MINT (U65, next pause): (a) loop seats
+need their own registered caller identity (or agency needs a
+from-without-bellback mode) so bail-outs route to the seat's recovery
+path, not the owner's session; (b) cancel interrupts at AGENT grain,
+not job grain — a "cancel the queued duplicate" can kill the agent's
+RUNNING job; the cancel API should take a job-id and refuse to
+interrupt a different job than named. Until U65 lands, the operating
+rule is in claude-1's memory: on an unrecognized bellback, check for a
+live seat before dispatching anything.
