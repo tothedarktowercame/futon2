@@ -1,0 +1,77 @@
+=== 1. SYMBOL CENSUS FROM aif-equations.edn ===
+file: /home/joe/code/futon2/holes/labs/wm-contract/aif-equations.edn
+defines   18 [:o :eps :Pi :F :F-pi :mu-next :mu :Q-o-pi :risk :ambiguity :G :pi :T :tau :Q-pi :u :a-conc :Delta-F]
+imports   22 [:world :o :mu :eps :eps0 :Pi :Q-o-pi :alpha :mu-next :A :B :pi :T :C :risk :ambiguity :E :G :tau :F-pi :Q-pi :a-conc]
+exogenous  7 [:A :B :C :E :alpha :eps0 :world]
+union     25 [:A :B :C :Delta-F :E :F :F-pi :G :Pi :Q-o-pi :Q-pi :T :a-conc :alpha :ambiguity :eps :eps0 :mu :mu-next :o :pi :risk :tau :u :world]
+imports neither defined nor exogenous: []
+
+=== 2. CASE-FOLD COLLISIONS WITHIN THE REGISTRY ===
+  pi       -> [:Pi :pi]
+collided fold keys: 1
+
+=== 3. GLOSSARY OCCURRENCES OF DECLARED BARE SYMBOLS ===
+file: /home/joe/code/p4ng/sec-glossary.tex
+  Pi       4 line(s): [15 17 19 39]
+  pi       7 line(s): [21 23 35 39 41 52 80]
+  A        4 line(s): [31 33 58 62]
+  T        2 line(s): [54 80]
+  H        3 line(s): [21 39 54]
+  F        5 line(s): [3 19 62 64 70]
+  G        9 line(s): [9 19 21 33 35 50 70 76 80]
+  C        2 line(s): [21 25]
+  B        3 line(s): [31 39 62]
+  E        6 line(s): [21 35 39 41 50 80]
+  U        2 line(s): [33 39]
+  o        6 line(s): [12 15 21 23 29 31]
+  u        1 line(s): [39]
+  tau      3 line(s): [35 50 80]
+  mu       2 line(s): [9 15]
+  alpha    1 line(s): [15]
+  gamma    0 line(s): []
+  beta     1 line(s): [66]
+  eps      2 line(s): [15 19]
+  L        2 line(s): [54 76]
+  S        5 line(s): [21 52 66 70 80]
+  g        2 line(s): [17 35]
+  rho      1 line(s): [52]
+  D        2 line(s): [21 31]
+  lambda   1 line(s): [52]
+
+=== 4. PARAGRAPH HEADS (for reading the occurrence lines) ===
+    5  Active Inference Framework.} Active inference is a theory of adaptive behaviour
+    7  Generative model.} A generative model is the system's story about how hidden ca
+    9  Belief state $\mu$.} The Greek letter $\mu$ names the system's current best est
+   12  Observation vector $o$.} An observation vector is a standardized summary of wha
+   15  Prediction error $\varepsilon$.} Prediction error is the gap between what the s
+   17  Precision $\Pi$.} Precision is confidence expressed as a weight.  A high-precis
+   19  Variational free energy $F$.} Variational free energy is a present-tense mismat
+   21  Expected free energy $G$.} Expected free energy is a future-tense action score:
+   23  Predictive outcome distribution $Q(o\mid\pi)$.} $Q(o\mid\pi)$ is the probabilit
+   25  Preference distribution $C$.} $C$ is the probability distribution over outcomes
+   27  Risk.} Risk is the expected cost of ending up in an unwanted state.  The implem
+   29  Ambiguity.} Ambiguity is uncertainty in the mapping from state to outcome.  The
+   31  Observation model $A$.} The observation model $A$ is the agent's theory of its 
+   33  Model uncertainty and EIG.} Expected information gain is an expectation of post
+   35  Softmax and controller calibration.} Softmax turns scores into a probability di
+   37  Pattern language / cascade.} A design pattern is a named response to a recurrin
+   39  Control states $U$ and the policy vocabulary.} In a discrete active-inference m
+   41  Policy prior $E$ and habit.} Canonical $E(\pi)$ is the prior probability of an 
+   52  Policy $\pi$.} In this paper, a policy $\pi$ is the active-inference name for a
+   54  Aliveness $L = T\cdot H$.} Salingaros's measure of a structure's ``life'' multi
+   56  Embedding space.} An embedding turns text into a point in a large numerical spa
+   58  Bayesian Model Reduction.} Bayesian Model Reduction asks whether a simpler mode
+   60  Dirichlet concentration parameters.} A Dirichlet distribution is a probability 
+   62  Log multivariate beta and $\Delta F$.} The log multivariate beta function is pa
+   64  Bayes factor threshold.} The threshold $\Delta F \le -3$\eqanchor{bmr-threshold
+   66  GFlowNet ``slush''.} A GFlowNet is a sampler that learns to generate many high-
+   68  Fold.} A fold is a checked construction plan.  It turns a sequence of patterns 
+   70  Act-gate.} The act-gate is the last check before anything runs: act if and only
+   72  EDN} EDN is a data notation from the Clojure ecosystem, similar in purpose to J
+   74  Substrate and Drawbridge.} The paper uses \emph{substrate} at two layers.  Subs
+   76  No self-certification.} No self-certification means the system cannot count evi
+   78  Demonstration Foundry and have--want arrows.} A have--want arrow says: here is 
+   80  Strategic mission selection.} The slow side of the hierarchy has a second grain
+   82  Clicks, attempts, and cohorts (measurement vocabulary).} The system itself runs
+   84  Revision (2026-08-31; cancellation boundary).} The cancellation outcome was add
+   86  A shared experimental substrate.} The mathematics learner and the War Machine a
