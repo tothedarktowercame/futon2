@@ -590,3 +590,36 @@ Realization under the :F gate, in dependency order:
 - F4 renders BOTH clauses' status: per-node alignment state (aligned /
   proxy-bound / unbuilt) in dependency order, replacing the flat
   closure counts as the paper's leading table.
+
+## The progressive-done ruling (Joe, 2026-09-05) — F6: a readiness scale replaces the {0,1}
+
+Verbatim: "those closures are DEFINITELY fake accounting. It's like
+saying I finished the shopping because I made a list, or went on a trip
+because I bought a ticket. Those are beginnings, not closures, and the
+{0,1} dichotomy may be what did it. all of the substantive issues
+probably need their own progress bar. 'witnessed' would be an early
+stage of readiness. It would be much harder to create a fake 'done' if
+the definition of done was explicit and progressive."
+
+- **F6 (:F — the readiness scale in the accounting registry; F4
+  renders what F6 defines):** replace the binary closed/open with an
+  ordered per-declaration scale, each rung naming the evidence TYPE
+  that reaches it, no rung skippable:
+  0 named (glossary paragraph) ->
+  1 type-transcribed (Lean carrier, matches glossary) ->
+  2 formula-transcribed (defining expression elaborates) ->
+  3 witnessed (a record exhibits the quantity at least once) ->
+  4 constructed (inhabitant built from machine state; bound parameters
+    and fixtures EXPLICITLY do not reach this rung) ->
+  5 wired (consumed on the live tick path, flip criteria executed) ->
+  6 validated (per-node simulation harness green -- F3) ->
+  7 run-correlated (catalogued check green across accepted runs).
+  Today's closure vocabulary maps to rungs 1-3 and is relabelled as
+  such (TRACE-box2-scores-accounting.md is the mapping's basis); the
+  scores bucket then reads as the greenfield it is. The accounting
+  regenerates with a stage column; the "closed" word disappears from
+  the registry (a stage is never "done", it is AT a rung). Negative
+  control: a planted fixture-inhabitant must be refused rung 4.
+- F4 amendment: the paper renders the stage distribution and the
+  17-row unbucketed hole list against this scale -- a progress bar per
+  substantive noun, exactly as ruled.
