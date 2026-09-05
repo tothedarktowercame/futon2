@@ -166,7 +166,9 @@
 (defn waits-on-joe
   "Rows only the operator can move, by the rule the voxterm backlog already
   applies (`voxterm/server.py`, `agency_backlog`): owned by Joe, parked
-  `:needs-joe`, or a `:J` judgement row that is not done."
+  `:needs-joe`, a `:J` judgement row that is not done, or a blocked row
+  whose `:blocker` text says its exit is a ruling (2026-09-05: four
+  ruling-blocked rows surfaced as one when only the first three were read)."
   [{:keys [name repo rel]}]
   (let [doc (read-edn-file (slurp (io/file repo rel)))]
     (vec (for [i (:items doc)
@@ -175,7 +177,10 @@
                :when (and (not= :done status)
                           (or (str/includes? owner "joe")
                               (= :needs-joe status)
-                              (= :J (:class i))))]
+                              (= :J (:class i))
+                              (and (= :blocked status)
+                                   (some? (re-find #"(?i)joe|ruling|reviewer decision"
+                                                   (str (:blocker i)))))))]
            {:board name :id (:id i) :status status :class (:class i)
             :statement (:statement i)}))))
 
