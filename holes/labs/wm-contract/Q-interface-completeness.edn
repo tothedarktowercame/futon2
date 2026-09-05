@@ -8,6 +8,12 @@
                               "Beta/Dirichlet structure-learning posteriors"]}
  :claim
  "Lean now CONSTRUCTS the predictive outcome kernel from belief/model/policy inputs (:F1 slice 1, mathlib4 824f67b5e2), but the War Machine has no concrete policy-grain binding to apply it at: its policy carrier, state space, belief reading and preference distribution are all still uninhabited. Runtime action-grain Gaussian prediction is a scoped proxy, not that construction and not bound to it."
+ :claim-amendments
+ [{:at "2026-09-05" :by ":F1 slice 3" :commit "futon2, this commit"
+   :amends "the last clause"
+   :was "Runtime action-grain Gaussian prediction is a scoped proxy, not that construction and not bound to it."
+   :now "The runtime now also carries the composition (futon2.aif.machine-q), transcribed from the Lean one and agreeing with it numerically, behind a default-off flag and with no reading bound anywhere in src/. The action-grain Gaussian is unchanged and is now REFUSED at the Q boundary rather than merely described as a proxy."
+   :what-did-not-move "The machine still has no policy-grain binding. A composition with no reading is a seam, not an inhabitant."}]
  :claim-superseded
  {:at "2026-09-05" :by :F1 :commit "mathlib4 824f67b5e2"
   :was "Lean defines the finite-support carrier and Q-consuming formulas, but the War Machine has no Lean construction of its predictive outcome kernel from belief/model/policy inputs and no concrete policy-grain binding. Runtime action-grain Gaussian prediction is a scoped proxy, not that missing construction."
@@ -21,7 +27,16 @@
    :sha256 "c49a36983a3d4f7a72d782a5ecf9825c95bac49c354cf9d80d574d522894e58a"}
   {:id :runtime-forward-model
    :path "/home/joe/code/futon2/src/futon2/aif/forward_model.clj"
-   :sha256 "14caaf3db19478267d5473ba48a565328d72d118289d4241b2d57c2177895227"}
+   :sha256 "073492ee1276a5f17fcaf994931a430e1f72551ec0d9a19d3c7042a6d74f17d0"
+   :re-pinned-at "2026-09-05"
+   :re-pinned-by ":F1 slice 3"
+   :prior-sha256 "14caaf3db19478267d5473ba48a565328d72d118289d4241b2d57c2177895227"
+   :re-pin-basis "The pin moved because THIS SLICE moved the file, and the whole change was read: it is four lines (forward_model.clj:22 the require, :359-366 the comment and the seam call, :367-368 the conditional assoc). Refreshing it certifies exactly one commit's worth of re-reading, which is the condition the C176 note attaches to a pin refresh."}
+  {:id :runtime-machine-q
+   :path "/home/joe/code/futon2/src/futon2/aif/machine_q.clj"
+   :sha256 "7e17c6c13d0f8ea758eaf0bced17ce70046897ecedbbb5d89fcae9f7682bddf0"
+   :pinned-at "2026-09-05"
+   :pin-basis "New in :F1 slice 3. Pinned as the source of the :runtime/Q-machine-construction row below, not as evidence that row read."}
   {:id :runtime-efe
    :path "/home/joe/code/futon2/src/futon2/aif/efe.clj"
    :sha256 "138c47f62715facfb7c156f53acd98c94a643d5d7f8a98410d81ebfc4e75c5dc"}
@@ -47,9 +62,18 @@
    :status :constructor-landed-machine-instance-missing
    :moved-by "mathlib4 824f67b5e2 (:F1 slice 1, 2026-09-05)"
    :required-signature "GenerativeModel + BeliefState + policy/cascade -> PredictiveOutcomeKernel"
-   :constructor "DarkTower.WarMachine.MachineQ.machinePredictiveOutcomeKernel (mathlib4 DarkTower/WarMachine/MachineQ.lean:187-198), non-private, arguments a GenerativeModel and a BeliefState, every row normalized by proof at MachineQ.lean:168-181. Q(s|pi) at MachineQ.lean:139-146, normalization at MachineQ.lean:122-134."
+   :constructor "DarkTower.WarMachine.MachineQ.machinePredictiveOutcomeKernel (mathlib4/DarkTower/WarMachine/MachineQ.lean:187-198), non-private, arguments a GenerativeModel and a BeliefState, every row normalized by proof at MachineQ.lean:168-181. Q(s|pi) at MachineQ.lean:139-146, normalization at MachineQ.lean:122-134."
    :blocker "The composition exists; nothing applies it at the machine's own grain. The four carriers a machine application needs -- policy family, state space, belief reading, preference distribution -- are separately uninhabited (FUNDAMENTALS.edn), so the only application in the corpus is over carriers declared for a demonstration (MachineQWitness.lean:218-232)."
    :blocker-superseded "No Lean definition composes transition and observation kernels over a concrete policy/cascade to construct Q(o|pi)."
+   :implementation-witness
+   {:declaration "DarkTower.WarMachine.MachineQ.machinePredictiveOutcomeKernel"
+    :at "mathlib4/DarkTower/WarMachine/MachineQ.lean:187-198"
+    :normalisation-proof "mathlib4/DarkTower/WarMachine/MachineQ.lean:168-181"
+    :law "mathlib4/DarkTower/WarMachine/MachineQ.lean:210-218 (rowsEqualOfEqualPlans)"
+    :axioms "propext, Classical.choice, Quot.sound; no sorryAx, re-checked at build time by the #guard_msgs block at MachineQ.lean:269-273. Receipt: runs/F1-machine-q/00-axiom-probe.edn."
+    :scope "The witness is the CONSTRUCTOR, not a machine instance. The :acceptance below is still :not-met."
+    :added-by ":F1 slice 3"
+    :why-added "REPAIR OF A SLICE-1 DEFECT, found by running the registry's own checker rather than by reading. checks/q_interface_completeness_check.clj:104-109 fails any row whose :status is not :missing and which carries no :implementation-witness. Slice 1 moved :status and did not add the key, so the registry was red at futon2 8e1012c1 with {:definition :lean/Q-machine-construction :error :completion-without-implementation-witness} -- measured by running the checker over the HEAD blob. Nothing new is claimed here: every pointer above is one slice 1 already recorded in :slice-review."}
    :acceptance "A non-toy machine instance is constructed from pinned model inputs and proves row normalization."
    :acceptance-status :not-met
    :falsifier "The constructor cannot elaborate for a declared machine policy, or its row mass differs from one."}
@@ -69,7 +93,24 @@
    :status :implemented-scoped
    :symbols ["forward-model/predict" "efe/compute-efe" "core-efe/g-efe"]
    :meaning "Per-action, per-channel Gaussian means/variances feed risk and ambiguity."
-   :limitation "Action grain, hand-scoped channel model; not a distribution over declared policy/cascade outcomes and not bound to Lean's machine Q."}
+   :limitation "Action grain, hand-scoped channel model; not a distribution over declared policy/cascade outcomes and not bound to Lean's machine Q."
+   :boundary-status "UNCHANGED AS AN OBJECT, refused as a Q since :F1 slice 3. machine_q.clj:102-110 recognises this row's shape (a :next-observation key, or a :mean/:variance pair) and refuses it :refusal/action-grain-gaussian-proxy. The proxy still runs and still feeds risk and ambiguity exactly as before; what changed is that handing it to a Q(o|pi) consumer now costs a typed refusal instead of passing. Measured: runs/F1-machine-q/01-runtime-seam.edn :boundary-refusals, first two entries, fed the live forward-model/predict output."}
+  {:id :runtime/Q-machine-construction
+   :status :composition-landed-default-off-no-reading
+   :landed-by "futon2 :F1 slice 3 (2026-09-05)"
+   :symbols ["machine-q/predicted-state-distribution" "machine-q/predictive-outcome-distribution"
+             "machine-q/predictive-outcome-kernel" "machine-q/seam-attachment"]
+   :meaning "The runtime transcription of MachineQ.lean's composition: belief reading -> transition kernel under the policy's planned step -> Q(s|pi) -> observation kernel -> Q(o|pi) over a declared finite outcome alphabet."
+   :at ["src/futon2/aif/machine_q.clj:336 Q(s|pi)"
+        "src/futon2/aif/machine_q.clj:356 Q(o|pi)"
+        "src/futon2/aif/machine_q.clj:374 all rows plus normalisation residuals"
+        "src/futon2/aif/machine_q.clj:422 the R4 seam"
+        "src/futon2/aif/forward_model.clj:366-368 its one call site"]
+   :agrees-with-lean "The runtime composition reproduces MachineQWitness.lean:234-243's row masses -- 25/64 and 11/64 at the ordinary-evidence outcome -- at maximum absolute difference 0.0, over the same declared carriers. Measured: runs/F1-machine-q/01-runtime-seam.edn :lean-agreement."
+   :boundary "src/futon2/aif/machine_q.clj:138 predictive-outcome-row! refuses the R4 Gaussian (:refusal/action-grain-gaussian-proxy), the hand-built survey fixture (:refusal/fixture-q-hand-built) and Q(pi) (:refusal/policy-selection-distribution), each with a typed reason on the ex-info. Ten fed objects and their verdicts, the last a positive control: runs/F1-machine-q/01-runtime-seam.edn :boundary-refusals."
+   :limitation "NO READING EXISTS AND NOTHING IN src/ BINDS ONE. machine-q/*seam-reading* is nil (machine_q.clj:81-92) and the flag is off (machine_q.clj:74-79, FUTON_WM_MACHINE_Q), so the composition has no live caller and no recorded number moves. The only reading in the tree is the test fixture at test/futon2/aif/machine_q_test.clj:20-68, which mirrors the Lean witness and inhabits nothing under the FUNDAMENTALS.edn criterion. This row records a SEAM, not a binding."
+   :normalisation-status "CHECKED PER CALL, NOT PROVED. Each row carries its :normalisation-residual; the general statement is Lean's (MachineQ.lean:168-181), and nothing here re-proves it."
+   :falsifier "A row the composition produces fails predictive-outcome-row!, or the runtime rows disagree with MachineQWitness.lean:234-243 on the same declared carriers."}
   {:id :runtime/Q-policy
    :status :distinct-object
    :symbol "policy/select-action"
@@ -246,6 +287,71 @@
    "gen_aif_dag.bb and gen_q_interface_table.bb not run; nothing regenerated into a publish (TN 9a)."
    "No source pin re-taken. The pins in :source-pins still name the 2026-09-04 shas; Holes.lean is byte-identical since, and the two new modules are not pinned here because they are this slice's own output rather than evidence it read."
    "The runtime leg of :F1 -- the R4 seam, the default-off flag, the boundary rejection of the Gaussian proxy and the two-point fixture -- is untouched."]}
+ :slice-reviews
+ [{:at "2026-09-05"
+   :row :F1
+   :slice "slice 3 of :F1 -- the runtime leg. Slice 1's review is the :slice-review block above and is not amended here. SLICE 2 (the machine-grain instance) IS NOT DONE and was not attempted: it needs the policy family named, which is a modelling ruling and is Joe's (proposals/STRAWMAN-M-aif-policy-conditioned-eig.md question 1). Slice 3 was taken because it is the next slice that does not wait on that ruling, not because slice 2 was judged unnecessary."
+   :commit "futon2, this commit"
+   :method "Transcribed MachineQ.lean's composition into Clojure, then checked the transcription against the Lean witness's own numbers rather than against its own expectations. Every number below is read off a run recorded in runs/F1-machine-q/01-runtime-seam.edn."
+   :what-landed
+   [{:what "the composition"
+     :at "src/futon2/aif/machine_q.clj:336, :356, :374"
+     :read "predicted-state-distribution is MachineQ.lean:139-146; predictive-outcome-distribution is MachineQ.lean:187-198; predictive-outcome-kernel returns every policy row with the normalisation residual it was accepted at. The residual is a RECEIPT about the rows computed, not a proof -- the general statement stays in Lean (MachineQ.lean:168-181) and this namespace says so in its own docstring (machine_q.clj:24-31)."}
+    {:what "the reading, as an obligation"
+     :at "src/futon2/aif/machine_q.clj:280 q-reading!, :230 generative-model!"
+     :read "The runtime form of QReading (MachineQ.lean:84-101). The two support hypotheses Lean takes as fields are CHECKED here instead (machine_q.clj:243-262): Lean may assume them because a caller must prove them; the runtime has to look. The belief-reading obligations are stated for every belief in Lean and cannot be checked that way in Clojure, so they are checked per call against the belief actually held (machine_q.clj:319-334) and a failing reading is refused, not renormalised."}
+    {:what "numerical agreement with the Lean witness"
+     :at "runs/F1-machine-q/01-runtime-seam.edn :lean-agreement"
+     :read "Over the same declared carriers, the runtime rows give 0.390625 and 0.171875 at the ordinary-evidence outcome against MachineQWitness.lean:234-243's 25/64 and 11/64: maximum absolute difference 0.0. This is the check that the transcription is of the same object and not of a lookalike."}
+    {:what "the negative control"
+     :at "runs/F1-machine-q/01-runtime-seam.edn :negative-control; test/futon2/aif/machine_q_test.clj:104"
+     :read "flatReading (MachineQWitness.lean:266-274) in the runtime: with both policies committing to :acquire the two rows COINCIDE, maximum absolute row difference 0.0. So the 0.21875 separation above is produced by the planned action and not by the machinery."}
+    {:what "the construction's law, executable"
+     :at "src/futon2/aif/machine_q.clj:398 rows-equal-for-equal-plans?"
+     :read "MachineQ.rowsEqualOfEqualPlans (MachineQ.lean:210-218) as a check rather than a theorem: pi reaches Q through plan pi and nowhere else. True under both the demonstration reading and the flat one. False would mean the runtime composition sees something about a policy that the Lean composition proves it cannot -- that is, that the two are not the same object."}
+    {:what "the boundary"
+     :at "src/futon2/aif/machine_q.clj:138 predictive-outcome-row!; runs/F1-machine-q/01-runtime-seam.edn :boundary-refusals"
+     :read "Ten objects fed, each with its verdict. The live forward-model/predict output and its :next-observation alone are both refused :refusal/action-grain-gaussian-proxy. mission-epistemic-value/binary-latent-model, at 0.5 and at its settled 1.0 arm, is refused :refusal/fixture-q-hand-built -- U24's survey path, which :F1 says to reject at the boundary rather than couple to. A :softmax-weights map and a bare distribution over action maps are refused :refusal/policy-selection-distribution. An unnormalised row, an out-of-alphabet outcome, a row omitting five declared outcomes, a negative mass, an empty row and a non-map each get their own reason. The tenth is a POSITIVE CONTROL: a row from the composition itself is accepted, so the boundary is not refusing everything."}
+    {:what "an alphabet gap is not a stated zero"
+     :at "src/futon2/aif/machine_q.clj:203-206"
+     :read ":refusal/outcome-missing-from-row. A row must state 0.0 for an outcome the model gives no mass, so that the mission's five typed absences (futon2/holes/missions/M-aif-policy-conditioned-eig.md:81) cannot be quietly dropped from a row and read back as normalised."}
+    {:what "the flag, and that off is byte-identical"
+     :at "src/futon2/aif/machine_q.clj:74 enabled?, :422 seam-attachment; src/futon2/aif/forward_model.clj:366-368"
+     :read "seam-attachment tests the flag and the reading BEFORE reading anything (machine_q.clj:428), so on the default path predict does one nil test and returns the map it returned before the seam existed. Measured three ways in runs/F1-machine-q/01-runtime-seam.edn :flag-off-control: no reading and no flag, a reading bound with the flag clear, and the flag set with no reading, all give the historical four keys; with both set the output equals the flag-off output with :machine-q removed, so the attachment is purely additive."}]
+   :what-moved
+   [{:id :runtime/Q-action-proxy :verdict :changed
+     :what-moved "Nothing about the object. A :boundary-status field records that its shape is now refused as a Q(o|pi) with a typed reason. Its :status, :meaning and :limitation are unchanged and the proxy still feeds risk and ambiguity exactly as before."}
+    {:id :lean/Q-machine-construction :verdict :repaired
+     :what-moved "An :implementation-witness was added. This is a REPAIR of slice 1, not new evidence: slice 1 moved :status off :missing without the key the registry's own checker requires alongside a non-:missing status (checks/q_interface_completeness_check.clj:104-109), so the registry was RED at futon2 8e1012c1. Every pointer in the new block is one slice 1 already recorded in :slice-review. :acceptance and :acceptance-status are untouched and still :not-met."}]
+   :what-was-added
+   [{:id :runtime/Q-machine-construction
+     :why "The runtime composition is a new object and needed a row of its own rather than a re-wording of :runtime/Q-action-proxy, which is a different thing that still exists."}]
+   :what-did-not-move
+   [{:id :Q/producer-to-risk :verdict :unchanged
+     :read "[:R4 :R5] still carries the proxy. The row's :next-action asks for a typed delivery with outcome domain, policy grain, normalisation receipt and source-model pin; the PRODUCER side of all four now exists (machine_q.clj:138, :374, the reading's :id, the :runtime-machine-q pin), and nothing is delivered to R5 -- no consumer reads the seam and src/ binds no reading. :runtime :proxy-only, :lean :parameter-only and :effect :underpowered stand as written."}
+    {:id :Q/to-EIG :verdict :unchanged
+     :read "The consumer end is still occupied by the fixture Q this row names. Slice 3 refuses that fixture at the machine-Q boundary but does not remove it from the survey path or put anything else there: mission_epistemic_value.clj:186-205 is untouched and its caller chain is untouched, which the survey and mission-EIG tests re-passing confirms."}
+    {:id :Q/in-belief :verdict :unchanged
+     :read "belief-distribution! (machine_q.clj:319) is where this join would be discharged, and it is a caller's obligation with no caller. The seam is named on both sides now; it is filled on neither."}
+    {:id :Q/in-candidates :verdict :unchanged
+     :read "The live candidate is still an action. seam-attachment matches the action against the reading's :plan (machine_q.clj:444) rather than receiving a policy, which is the same one-step projection Lean's plan field is, not a policy carrier."}
+    {:id :Q/in-policy-depth :verdict :unchanged
+     :read "The R13->R4 edge still carries an integer horizon. :plan is a one-step projection in the runtime exactly as in Lean; predict-multi-horizon (forward_model.clj:280) is untouched and the seam does not read the horizon."}
+    {:id :Q/risk-to-ranking :verdict :unchanged}
+    {:id :lean/Q-carrier :verdict :unchanged :read "No Lean file was touched in this slice."}
+    {:id :lean/Q-risk-consumer :verdict :unchanged :read "No Lean file was touched in this slice."}
+    {:id :lean/Q-eig-consumer :verdict :unchanged :read "No Lean file was touched in this slice."}
+    {:id :lean/Q-reference-fixture :verdict :unchanged :read "No Lean file was touched in this slice."}
+    {:id :runtime/Q-policy :verdict :unchanged
+     :read "policy.clj untouched. Q(pi) is now refused at the Q(o|pi) boundary (machine_q.clj:124-132), which corroborates this row's 'must not be offered as Q(o|pi)' rather than moving it."}]
+   :work-order-effect
+   "Unit 2 (:construct-machine-Q-in-Lean) gains its runtime counterpart; unit 3 (:specify-R13-R4-and-R4-R5) is HALF met and the half is the producer side -- a typed port with an outcome domain, a policy grain, a normalisation receipt and executable falsifiers exists at R4, and no consumer accepts it, so no edge is specified. Unit 1 (:name-policy-and-outcome-domain) is still open and is still Joe's; the outcome domain is settled by the mission's observation closure, the policy family is not."
+   :not-done
+   ["Slice 2, the machine-grain instance. It needs the policy family named."
+    "No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions. Nothing here is a ruling."
+    "gen_aif_dag.bb and gen_q_interface_table.bb not run; nothing regenerated into a publish (TN 9a)."
+    "src/ binds *seam-reading* nowhere; the composition has no live caller and no recorded number moves."
+    "REPORTED NOT REPAIRED: the three stale pointers the slice-1 :not-done and the U53 row already record are still stale. Only :runtime-forward-model was re-pinned here, and only because this slice moved that file."]}]
  :work-order
  [{:order 1 :unit :name-policy-and-outcome-domain
    :acceptance "One concrete policy/cascade and enumerable outcome space are declared; absences are typed."}

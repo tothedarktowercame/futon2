@@ -1,0 +1,109 @@
+{:schema :wm/machine-q-runtime-seam-v1,
+ :normalisation-residual {:acquisition 0.0, :review 0.0},
+ :normalisation-note
+ "A RECEIPT about these rows, not a proof. The general statement is MachineQ.predictiveOutcomeMass_sum (mathlib4/DarkTower/WarMachine/MachineQ.lean:168-181).",
+ :what-this-is
+ "Measured output of the runtime composition, produced by running it. Every number below is read off a call, not asserted.",
+ :policy-conditioned-difference
+ {:at :ordinary, :value 0.21875, :rows-differ true},
+ :not-done
+ ["Slice 2 -- the machine-grain instance -- is not done and is not attempted here. It needs the policy family named, which is a modelling ruling (STRAWMAN question 1)."
+  "No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions. Nothing here is a ruling."
+  "gen_aif_dag.bb and gen_q_interface_table.bb not run; nothing regenerated into a publish (TN 9a)."
+  "src/ binds *seam-reading* nowhere. The composition has no live caller and no live number moves; the only reading in the tree is the test fixture."
+  "The R13->R4 cascade payload is untouched: :plan is a one-step projection here exactly as in Lean."],
+ :lean-agreement
+ {:claim
+  "The runtime composition reproduces the Lean witness's row masses exactly.",
+  :lean-source
+  "mathlib4/DarkTower/WarMachine/MachineQWitness.lean:234-243 (demoOrdinaryRowMasses: 25/64 and 11/64)",
+  :measured
+  {:acquisition-ordinary 0.390625,
+   :review-ordinary 0.171875,
+   :lean-acquisition-ordinary 0.390625,
+   :lean-review-ordinary 0.171875,
+   :max-abs-difference 0.0}},
+ :rows
+ {:acquisition
+  {:conflict 0.078125,
+   :failure 0.125,
+   :missing 0.0625,
+   :no-result 0.21875,
+   :ordinary 0.390625,
+   :timeout 0.125},
+  :review
+  {:conflict 0.109375,
+   :failure 0.125,
+   :missing 0.0625,
+   :no-result 0.40625,
+   :ordinary 0.171875,
+   :timeout 0.125}},
+ :slice
+ "slice 3 of :F1 -- the runtime leg (R4 seam, default-off flag, boundary rejection). Slice 2, the machine-grain instance, is NOT done: it needs the policy family named, which is Joe's (proposals/STRAWMAN-M-aif-policy-conditioned-eig.md question 1).",
+ :at "2026-09-05",
+ :law-check
+ {:rows-equal-for-equal-plans-under-demo-reading true,
+  :rows-equal-for-equal-plans-under-flat-reading true},
+ :code
+ {:namespace "src/futon2/aif/machine_q.clj",
+  :composition
+  ["src/futon2/aif/machine_q.clj:336 predicted-state-distribution -- Q(s|pi)"
+   "src/futon2/aif/machine_q.clj:356 predictive-outcome-distribution -- Q(o|pi)"
+   "src/futon2/aif/machine_q.clj:374 predictive-outcome-kernel -- all rows plus residuals"],
+  :boundary "src/futon2/aif/machine_q.clj:138 predictive-outcome-row!",
+  :law "src/futon2/aif/machine_q.clj:398 rows-equal-for-equal-plans?",
+  :flag
+  "src/futon2/aif/machine_q.clj:74 enabled? -- FUTON_WM_MACHINE_Q, default false",
+  :seam
+  ["src/futon2/aif/machine_q.clj:422 seam-attachment"
+   "src/futon2/aif/forward_model.clj:366-368 the one call site, in predict"],
+  :fixture
+  "test/futon2/aif/machine_q_test.clj:20-68 -- the demonstration carriers, mirroring MachineQWitness.lean:56-215. A fixture; it inhabits nothing."},
+ :flag-off-control
+ {:default-keys
+  [":action" ":next-belief" ":next-observation" ":predicted-events"],
+  :flag-clear-with-reading-bound-keys
+  [":action" ":next-belief" ":next-observation" ":predicted-events"],
+  :flag-set-with-reading-bound-keys
+  [":action"
+   ":machine-q"
+   ":next-belief"
+   ":next-observation"
+   ":predicted-events"],
+  :off-equals-on-minus-attachment true,
+  :reads
+  "Off is the map predict returned before the seam existed: seam-attachment tests the flag before reading anything (src/futon2/aif/machine_q.clj:428). The attachment is purely additive."},
+ :boundary-refusals
+ [{:fed
+   "futon2.aif.forward-model/predict output (the live R4 Gaussian), src/futon2/aif/forward_model.clj:312",
+   :refusal :refusal/action-grain-gaussian-proxy}
+  {:fed "its :next-observation {:mean .. :variance ..} alone",
+   :refusal :refusal/action-grain-gaussian-proxy}
+  {:fed
+   "futon2.aif.mission-epistemic-value/binary-latent-model 0.5 -- U24's hand-built two-point survey Q, src/futon2/aif/mission_epistemic_value.clj:186-205",
+   :refusal :refusal/fixture-q-hand-built}
+  {:fed "binary-latent-model 1.0 (its settled one-observation arm)",
+   :refusal :refusal/fixture-q-hand-built}
+  {:fed
+   "a :softmax-weights map -- Q(pi), src/futon2/aif/policy.clj:669-671",
+   :refusal :refusal/policy-selection-distribution}
+  {:fed "a bare distribution over action maps",
+   :refusal :refusal/policy-selection-distribution}
+  {:fed "a row over the declared alphabet summing to 0.6",
+   :refusal :refusal/unnormalised}
+  {:fed "a row naming an outcome outside the declared alphabet",
+   :refusal :refusal/outcome-outside-declared-alphabet}
+  {:fed "a normalised row that omits five declared outcomes",
+   :refusal :refusal/outcome-missing-from-row,
+   :reads "An alphabet gap is not the same as a stated zero."}
+  {:fed
+   "a well-formed Q(o|pi) row from the composition itself (POSITIVE CONTROL)",
+   :refusal :accepted}],
+ :row :F1,
+ :negative-control
+ {:what
+  "flatReading (MachineQWitness.lean:266-274): both policies commit to :acquire.",
+  :rows-coincide true,
+  :max-abs-row-difference 0.0,
+  :reads
+  "The difference above is produced by the planned action, not by the composition."}}

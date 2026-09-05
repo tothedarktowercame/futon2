@@ -18,7 +18,8 @@
    posterior for the belief. The variance model is hand-tuned per
    action type — a placeholder for a learned variance model that would
    ship with R7 (adaptive precision) work."
-  (:require [futon2.aif.belief :as belief]))
+  (:require [futon2.aif.belief :as belief]
+            [futon2.aif.machine-q :as machine-q]))
 
 (declare predict)  ; v0.15: predict-multi-horizon (below can-execute?) calls predict (further below).
 
@@ -348,9 +349,21 @@
                                       {:status :absent
                                        :reason :deterministic-by-action-model})]))
          next-belief (belief/update-belief-batch (or belief {}) events
-                                                  belief-update-opts)]
-     {:next-observation {:mean next-mean :variance next-var
-                         :variance-status variance-status}
-      :next-belief next-belief
-      :action action
-      :predicted-events events})))
+                                                  belief-update-opts)
+         prediction {:next-observation {:mean next-mean :variance next-var
+                                        :variance-status variance-status}
+                     :next-belief next-belief
+                     :action action
+                     :predicted-events events}
+         ;; :F1 slice 3 -- the R4 machine-Q seam. `seam-attachment` returns nil
+         ;; unless FUTON_WM_MACHINE_Q=1 AND a caller has exhibited a QReading,
+         ;; and it checks both before reading anything, so on the default path
+         ;; this is one nil test and the map below is the map this function
+         ;; returned before the seam existed. The Gaussian pair above is NOT
+         ;; that kernel and is not offered as one: fed to
+         ;; `machine-q/predictive-outcome-row!` it is refused
+         ;; :refusal/action-grain-gaussian-proxy.
+         machine-q (machine-q/seam-attachment belief action)]
+     (if machine-q
+       (assoc prediction :machine-q machine-q)
+       prediction))))
