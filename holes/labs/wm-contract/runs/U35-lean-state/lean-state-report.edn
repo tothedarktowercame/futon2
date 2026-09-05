@@ -3,20 +3,20 @@
  {:ran? true,
   :method
   "lake env lean <module> run per module, fresh, in the corpus checkout",
-  :started-at "2026-09-03T23:37:10.862806703Z",
+  :started-at "2026-09-05T12:49:07.518754629Z",
   :nonzero-modules [],
-  :exit-zero 68,
+  :exit-zero 71,
   :exit-nonzero 0,
-  :wall-ms 100653,
+  :wall-ms 163749,
   :verdict :all-modules-elaborate-exit-zero,
   :error-diagnostics 0,
-  :finished-at "2026-09-03T23:38:51.515324565Z",
-  :modules-checked 68},
+  :finished-at "2026-09-05T12:51:51.267641139Z",
+  :modules-checked 71},
  :modules
  [{:path "DarkTower/WarMachine/ActGateNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1511,
+    :ms 1601,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -31,7 +31,7 @@
   {:path "DarkTower/WarMachine/AlivenessNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1538,
+    :ms 1586,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -46,7 +46,7 @@
   {:path "DarkTower/WarMachine/AmbiguityWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1603,
+    :ms 1609,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -61,7 +61,7 @@
   {:path "DarkTower/WarMachine/BayesFactorThresholdNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1495,
+    :ms 1713,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -76,7 +76,7 @@
   {:path "DarkTower/WarMachine/BayesFactorThresholdWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1575,
+    :ms 1704,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -91,7 +91,7 @@
   {:path "DarkTower/WarMachine/BayesianModelReductionNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1538,
+    :ms 1722,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -106,7 +106,7 @@
   {:path "DarkTower/WarMachine/BayesianModelReductionWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1546,
+    :ms 1614,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -121,7 +121,7 @@
   {:path "DarkTower/WarMachine/BeliefStateWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1564,
+    :ms 1585,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -136,7 +136,7 @@
   {:path "DarkTower/WarMachine/BeliefUpdateFalsifier.lean",
    :typecheck
    {:exit 0,
-    :ms 1596,
+    :ms 1663,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -151,7 +151,7 @@
   {:path "DarkTower/WarMachine/CascadeOrder.lean",
    :typecheck
    {:exit 0,
-    :ms 439,
+    :ms 482,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "bb614af5f54b6951b8b2bc58902c6239317f730083480be948bfc28e4bea2431"},
@@ -166,7 +166,7 @@
   {:path "DarkTower/WarMachine/ChannelWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1498,
+    :ms 1594,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -181,7 +181,7 @@
   {:path "DarkTower/WarMachine/CohortNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1494,
+    :ms 1698,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -196,7 +196,7 @@
   {:path "DarkTower/WarMachine/CommitmentTemperature.lean",
    :typecheck
    {:exit 0,
-    :ms 459,
+    :ms 571,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "71bfcbe4035734488d6d24fc2f3dd6717c9ea3deb92743b7810d75aefaf30512"},
@@ -211,7 +211,7 @@
   {:path "DarkTower/WarMachine/ContractEmitter.lean",
    :typecheck
    {:exit 0,
-    :ms 442,
+    :ms 464,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -226,7 +226,7 @@
   {:path "DarkTower/WarMachine/ControlVocabularyNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1521,
+    :ms 1584,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -241,7 +241,7 @@
   {:path "DarkTower/WarMachine/CoverageReport.lean",
    :typecheck
    {:exit 0,
-    :ms 499,
+    :ms 604,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "82be806520f42820e15347e97dff55c13f28f8d288edb4c04a7fa90f817b996d"},
@@ -257,7 +257,7 @@
    "DarkTower/WarMachine/DirichletConcentrationsEmptyNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1498,
+    :ms 1731,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -272,7 +272,7 @@
   {:path "DarkTower/WarMachine/DirichletConcentrationsNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1577,
+    :ms 1608,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -287,7 +287,7 @@
   {:path "DarkTower/WarMachine/DirichletConcentrationsWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1572,
+    :ms 1749,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -303,7 +303,7 @@
    "DarkTower/WarMachine/DirichletConcentrationsZeroNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1574,
+    :ms 1626,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -318,7 +318,7 @@
   {:path "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1610,
+    :ms 1609,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -333,7 +333,7 @@
   {:path "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1604,
+    :ms 1656,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -348,7 +348,7 @@
   {:path "DarkTower/WarMachine/FoldEscrowRecordWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1522,
+    :ms 1648,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -363,7 +363,7 @@
   {:path "DarkTower/WarMachine/FoldNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1488,
+    :ms 1705,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -378,7 +378,7 @@
   {:path "DarkTower/WarMachine/FoldWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1498,
+    :ms 1583,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -393,7 +393,7 @@
   {:path "DarkTower/WarMachine/GainChain.lean",
    :typecheck
    {:exit 0,
-    :ms 548,
+    :ms 621,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "6ea69ce1580c1e56674e87fce24ce5e7d5a787480db9dbd769940ac6e09af13a"},
@@ -408,7 +408,7 @@
   {:path "DarkTower/WarMachine/GenerativeModelNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1514,
+    :ms 1694,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -423,7 +423,7 @@
   {:path "DarkTower/WarMachine/GenerativeModelWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1552,
+    :ms 1767,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -438,7 +438,7 @@
   {:path "DarkTower/WarMachine/HaveWantArrowNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1498,
+    :ms 1717,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -453,7 +453,7 @@
   {:path "DarkTower/WarMachine/HaveWantArrowWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1491,
+    :ms 1703,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -468,28 +468,28 @@
   {:path "DarkTower/WarMachine/Holes.lean",
    :typecheck
    {:exit 0,
-    :ms 4385,
+    :ms 5256,
     :diagnostics {:error 0, :warning 10},
     :output-sha256
-    "5e807e6f6d994334a696369856ca64534787fa2aaffa52f177a41600a05d08fe"},
+    "a6ec38bcb2ae00b9ee237b0e370d8f4b4c19a9bce3fd3ebf78b4e3651d01c871"},
    :sorry-warnings 10,
-   :lines 7433,
+   :lines 7928,
    :module "DarkTower.WarMachine.Holes",
-   :declaration-total 226,
-   :bytes 293862,
+   :declaration-total 258,
+   :bytes 319612,
    :sha256
-   "1442c56e63a10b04ed8306a200855a316835ae74b2d76749343708f6ccd111a5",
+   "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
    :declarations
-   {:abbrev 18,
-    :def 119,
-    :inductive 20,
+   {:abbrev 19,
+    :def 137,
+    :inductive 23,
     :instance 1,
-    :structure 53,
-    :theorem 15}}
+    :structure 55,
+    :theorem 23}}
   {:path "DarkTower/WarMachine/LogMultivariateBetaWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1532,
+    :ms 1709,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -501,10 +501,40 @@
    :sha256
    "5bfc43eaa475cb94063459c1665c592d2b5abe290d77ccb5630d3b1b342e847a",
    :declarations {:def 3, :structure 1, :theorem 2}}
+  {:path "DarkTower/WarMachine/MachineQ.lean",
+   :typecheck
+   {:exit 0,
+    :ms 1710,
+    :diagnostics {:error 0, :warning 0},
+    :output-sha256
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+   :sorry-warnings 0,
+   :lines 287,
+   :module "DarkTower.WarMachine.MachineQ",
+   :declaration-total 14,
+   :bytes 14724,
+   :sha256
+   "d30b1bfceab5cccc214f95e6593318b0bd53f3a838482ad3f6b2af4fb41a91ed",
+   :declarations {:def 6, :structure 1, :theorem 7}}
+  {:path "DarkTower/WarMachine/MachineQWitness.lean",
+   :typecheck
+   {:exit 0,
+    :ms 2052,
+    :diagnostics {:error 0, :warning 0},
+    :output-sha256
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+   :sorry-warnings 0,
+   :lines 302,
+   :module "DarkTower.WarMachine.MachineQWitness",
+   :declaration-total 28,
+   :bytes 12043,
+   :sha256
+   "601445753f31a930acc5bc0f8b23d080a8c313e5f2c1b911d0578f97aeb587f3",
+   :declarations {:def 16, :inductive 4, :theorem 8}}
   {:path "DarkTower/WarMachine/MachineVocabularyWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1614,
+    :ms 1738,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -520,7 +550,7 @@
    "DarkTower/WarMachine/ModelReductionFreeEnergyChangeTypeNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1489,
+    :ms 1882,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -537,7 +567,7 @@
    "DarkTower/WarMachine/ModelReductionFreeEnergyChangeValueNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1539,
+    :ms 2662,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -554,7 +584,7 @@
    "DarkTower/WarMachine/ModelReductionFreeEnergyChangeWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1605,
+    :ms 2624,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -571,7 +601,7 @@
    "DarkTower/WarMachine/ModelUncertaintyEIGCollapsedNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1548,
+    :ms 2661,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -586,7 +616,7 @@
   {:path "DarkTower/WarMachine/ObservationKernelWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1587,
+    :ms 2842,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -601,7 +631,7 @@
   {:path "DarkTower/WarMachine/ObservationVectorOutcomeNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1500,
+    :ms 2671,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -616,7 +646,7 @@
   {:path "DarkTower/WarMachine/ObservationVectorPartialNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1518,
+    :ms 2648,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -631,7 +661,7 @@
   {:path "DarkTower/WarMachine/ObservationVectorWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1507,
+    :ms 2821,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -647,7 +677,7 @@
    "DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1507,
+    :ms 3112,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -664,7 +694,7 @@
    "DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1503,
+    :ms 3044,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -680,7 +710,7 @@
   {:path "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1522,
+    :ms 2912,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -695,7 +725,7 @@
   {:path "DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1501,
+    :ms 2893,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -711,7 +741,7 @@
    "DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1518,
+    :ms 3079,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -726,7 +756,7 @@
   {:path "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1507,
+    :ms 2898,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -741,7 +771,7 @@
   {:path "DarkTower/WarMachine/PolicyGrade.lean",
    :typecheck
    {:exit 0,
-    :ms 481,
+    :ms 1098,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "c2ef98bdfd205c22cd4e0f3c1b3933fa1b02863e56ee3cda3373921f136587aa"},
@@ -756,7 +786,7 @@
   {:path "DarkTower/WarMachine/PolicyPriorKernelNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1529,
+    :ms 2835,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -771,7 +801,7 @@
   {:path "DarkTower/WarMachine/PolicyPriorKernelWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1530,
+    :ms 3419,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -786,7 +816,7 @@
   {:path "DarkTower/WarMachine/PrecisionNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1493,
+    :ms 3455,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -801,7 +831,7 @@
   {:path "DarkTower/WarMachine/PrecisionWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1566,
+    :ms 3462,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -816,7 +846,7 @@
   {:path "DarkTower/WarMachine/PredictionErrorNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1498,
+    :ms 2896,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -831,7 +861,7 @@
   {:path "DarkTower/WarMachine/PredictionErrorWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1514,
+    :ms 3142,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -847,7 +877,7 @@
    "DarkTower/WarMachine/PredictiveOutcomeKernelSoftmaxNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1509,
+    :ms 3064,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -864,7 +894,7 @@
    "DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1517,
+    :ms 3122,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -880,7 +910,7 @@
   {:path "DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1503,
+    :ms 3282,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -895,7 +925,7 @@
   {:path "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1531,
+    :ms 3236,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -911,7 +941,7 @@
    "DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1530,
+    :ms 3176,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -928,7 +958,7 @@
    "DarkTower/WarMachine/PreferenceDistributionPragmaticCostNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1493,
+    :ms 3197,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -944,7 +974,7 @@
   {:path "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1523,
+    :ms 3402,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -956,10 +986,25 @@
    :sha256
    "2fc09f5fade7454388cd2fcb32c81b45813c048ff65c376483377a2b93efce80",
    :declarations {:def 4, :inductive 1, :theorem 1}}
+  {:path "DarkTower/WarMachine/Run4Preregistration.lean",
+   :typecheck
+   {:exit 0,
+    :ms 3074,
+    :diagnostics {:error 0, :warning 0},
+    :output-sha256
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+   :sorry-warnings 0,
+   :lines 209,
+   :module "DarkTower.WarMachine.Run4Preregistration",
+   :declaration-total 16,
+   :bytes 10872,
+   :sha256
+   "880dfab4dc37ddb42953cd80e309deb857f53ef8a2afd8de0dd616b2c91bc6fa",
+   :declarations {:def 3, :inductive 4, :structure 3, :theorem 6}}
   {:path "DarkTower/WarMachine/SoftmaxNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1542,
+    :ms 3290,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -974,7 +1019,7 @@
   {:path "DarkTower/WarMachine/SoftmaxWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1557,
+    :ms 3328,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -989,7 +1034,7 @@
   {:path "DarkTower/WarMachine/TransitionKernelBetaNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1489,
+    :ms 3283,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -1005,7 +1050,7 @@
    "DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1495,
+    :ms 3084,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -1020,7 +1065,7 @@
   {:path "DarkTower/WarMachine/TransitionKernelWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1560,
+    :ms 3108,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -1035,7 +1080,7 @@
   {:path "DarkTower/WarMachine/VariationalFreeEnergyNegative.lean",
    :typecheck
    {:exit 0,
-    :ms 1487,
+    :ms 3209,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -1050,7 +1095,7 @@
   {:path "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean",
    :typecheck
    {:exit 0,
-    :ms 1545,
+    :ms 3141,
     :diagnostics {:error 0, :warning 0},
     :output-sha256
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
@@ -1078,11 +1123,11 @@
    "wmRunsOnce"],
   :hole-constructors ["mkHole" "mkRefused"],
   :pin-state :current,
-  :holes-last-commit-sha "a3ae5084beb1c2d6b14ee1438df6830a4bbe68c0",
+  :holes-last-commit-sha "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
   :holes-without-a-sorry [],
   :note
   "The contract JSON is a committed emission pinned to one Holes.lean revision; :pin-state compares it to that source file's last commit (C175), while :corpus-git-sha reports mathlib HEAD for context. A hole without a `sorry` is a declaration stated as a Prop whose body is not itself a hole.",
-  :contract-git-sha "a3ae5084beb1c2d6b14ee1438df6830a4bbe68c0",
+  :contract-git-sha "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
   :in-contract-not-in-source [],
   :source-hole-count 10,
   :source-holes
@@ -1098,7 +1143,7 @@
    {:name "wmRunConformsToWiring", :constructor "mkHole"}
    {:name "wmRunsOnce", :constructor "mkHole"}],
   :in-source-not-in-contract [],
-  :corpus-git-sha "f16b389596562227ad0ef68d6b4f191fab7a0c45",
+  :corpus-git-sha "824f67b5e2c9fd7b0ef96c3e1a2eea96841528d5",
   :contract-path "mathlib4/DarkTower/WarMachine/holes-contract.json",
   :contract-holes
   ["C"
@@ -1298,29 +1343,28 @@
      :line 6957,
      :kind "def"}}]},
  :corpus
- {:modules 68,
+ {:modules 71,
   :lake-version
   "Lake version 5.0.0-src+fd00994 (Lean version 4.31.0-rc1)",
-  :source-lines 10469,
+  :source-lines 11762,
   :toolchain "leanprover/lean4:v4.31.0-rc1",
   :root "mathlib4/DarkTower/WarMachine",
   :worktree-clean? true,
-  :declaration-total 635,
-  :git-sha "f16b389596562227ad0ef68d6b4f191fab7a0c45",
+  :declaration-total 725,
+  :git-sha "824f67b5e2c9fd7b0ef96c3e1a2eea96841528d5",
   :declarations-by-kind
-  {:abbrev 21,
-   :def 342,
+  {:abbrev 22,
+   :def 385,
    :example 8,
-   :inductive 78,
+   :inductive 89,
    :instance 1,
-   :structure 81,
-   :theorem 104},
+   :structure 87,
+   :theorem 133},
   :out-of-scope
   {:darktower-sibling-modules 49,
    :note
    "DarkTower/*.lean outside WarMachine/ (APM and other lines) are not in this report's scope"},
-  :git-describe
-  "f16b389596 U47: re-emit holes-contract.json at Holes.lean authority a3ae5084be"},
+  :git-describe "824f67b5e2 F1 slice 1: construct Q(o|pi) in Lean"},
  :sorry-census
  {:source-token-count 10,
   :lean-reported-count 10,
@@ -1350,18 +1394,18 @@
     :line 7148,
     :text "def wmRunConformsToWiring : Prop := sorry"}
    {:path "DarkTower/WarMachine/Holes.lean",
-    :line 7181,
+    :line 7676,
     :text "def enactedEqualsSelectedWhenRankOneGated : Prop := sorry"}
    {:path "DarkTower/WarMachine/Holes.lean",
-    :line 7184,
+    :line 7679,
     :text "def dirichletAccumulationImportAbsent : Prop := sorry"}
    {:path "DarkTower/WarMachine/Holes.lean",
-    :line 7187,
+    :line 7682,
     :text "def policyPrecisionIsGammaFromBeta : Prop := sorry"}
    {:path "DarkTower/WarMachine/Holes.lean",
-    :line 7190,
+    :line 7685,
     :text "def policyPosteriorImportsPolicyF : Prop := sorry"}]},
- :as-of "2026-09-03T23:38:51.515324565Z",
+ :as-of "2026-09-05T12:51:51.267641139Z",
  :produced-by "futon2/holes/labs/wm-contract/lean_state_probe.bb",
  :axiom-census
  {:count 0,
@@ -1380,7 +1424,7 @@
   [{:name "HaveWantArrowState",
     :owner "sec-glossary.tex:78 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1389,7 +1433,7 @@
    {:name "HaveWantArrowComposition",
     :owner "sec-glossary.tex:78 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1398,7 +1442,7 @@
    {:name "ControlPolicy",
     :owner "sec-glossary.tex:39 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1407,7 +1451,7 @@
    {:name "AlivenessFactor",
     :owner "sec-glossary.tex:54 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1416,7 +1460,7 @@
    {:name "ActGateVerdict",
     :owner "sec-glossary.tex:70 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1425,7 +1469,7 @@
    {:name "Click",
     :owner "sec-glossary.tex:82 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1434,7 +1478,7 @@
    {:name "Attempt",
     :owner "sec-glossary.tex:82 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1443,7 +1487,7 @@
    {:name "cascadeGrainPi",
     :owner "sec-glossary.tex:52 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1452,7 +1496,7 @@
    {:name "observationKernelRowMass",
     :owner "sec-glossary.tex:31 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1461,7 +1505,7 @@
    {:name "beliefUpdate",
     :owner "sec-glossary.tex:9,15,17,19,31 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1470,7 +1514,7 @@
    {:name "modelReductionFreeEnergyChange",
     :owner "sec-glossary.tex:62 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1480,7 +1524,7 @@
     :owner
     "sec-glossary.tex paragraph:Observation vector o · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1489,7 +1533,7 @@
    {:name "PredictiveOutcomeKernel",
     :owner "sec-glossary.tex:23 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1498,7 +1542,7 @@
    {:name "ParameterPriorKernel",
     :owner "sec-glossary.tex:33 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1507,7 +1551,7 @@
    {:name "ParameterPosteriorKernel",
     :owner "sec-glossary.tex:33 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1516,7 +1560,7 @@
    {:name "TransitionKernel",
     :owner "sec-glossary.tex:7 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1525,7 +1569,7 @@
    {:name "PreferenceDistribution",
     :owner "sec-glossary.tex:25 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1534,7 +1578,7 @@
    {:name "observationEntropy",
     :owner "sec-glossary.tex:21,29 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1543,7 +1587,7 @@
    {:name "G_eq_expectedFreeEnergy",
     :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1552,7 +1596,7 @@
    {:name "ExpectedInformationGainValue",
     :owner "sec-glossary.tex:33 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1561,7 +1605,7 @@
    {:name "parameterInformationGain",
     :owner "sec-glossary.tex:33 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1570,7 +1614,7 @@
    {:name "modelUncertaintyBonus",
     :owner "sec-glossary.tex:33 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1579,7 +1623,7 @@
    {:name "generativeFactorMass",
     :owner "sec-glossary.tex:7 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1588,7 +1632,7 @@
    {:name "logMultivariateBeta",
     :owner "sec-glossary.tex:62 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1597,7 +1641,7 @@
    {:name "expectedFreeEnergy",
     :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1606,7 +1650,7 @@
    {:name "ambiguity",
     :owner "sec-glossary.tex:21,29 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1615,7 +1659,7 @@
    {:name "HaveWantArrow",
     :owner "sec-glossary.tex:78 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1624,7 +1668,7 @@
    {:name "Fold",
     :owner "sec-glossary.tex:68 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1642,7 +1686,7 @@
    {:name "FoldEscrowRecord.reconstructible",
     :owner "sec-glossary.tex:68 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-negative-space,
+    :content-status :record-negative-space,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1651,7 +1695,7 @@
    {:name "BeliefState",
     :owner "sec-glossary.tex:9 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1660,7 +1704,7 @@
    {:name "variationalFreeEnergy",
     :owner "sec-glossary.tex:19 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1669,7 +1713,7 @@
    {:name "PrecisionMap",
     :owner "sec-glossary.tex:17 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1678,7 +1722,7 @@
    {:name "predictionError",
     :owner "sec-glossary.tex:15 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1687,7 +1731,7 @@
    {:name "softmax",
     :owner "sec-glossary.tex:35 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1696,7 +1740,7 @@
    {:name "bayesFactorThreshold",
     :owner "sec-glossary.tex:64 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1705,7 +1749,7 @@
    {:name "bayesianModelReduction",
     :owner "sec-glossary.tex:58 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1714,7 +1758,7 @@
    {:name "DirichletConcentrations",
     :owner "sec-glossary.tex:60 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1723,7 +1767,7 @@
    {:name "observationKernel",
     :owner "sec-glossary.tex:31 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1732,7 +1776,7 @@
    {:name "predictiveOutcomeRisk",
     :owner "sec-glossary.tex:21,27 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1741,7 +1785,7 @@
    {:name "PolicyPriorKernel",
     :owner "sec-glossary.tex:41,7 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1750,7 +1794,7 @@
    {:name "ControlVocabulary",
     :owner "sec-glossary.tex:39 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1759,7 +1803,7 @@
    {:name "aliveness",
     :owner "sec-glossary.tex:54 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1768,7 +1812,7 @@
    {:name "actGate",
     :owner "sec-glossary.tex:70 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1777,7 +1821,7 @@
    {:name "Cohort",
     :owner "sec-glossary.tex:82 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1786,7 +1830,7 @@
    {:name "expectedInformationGain",
     :owner "sec-glossary.tex:33 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1795,7 +1839,7 @@
    {:name "GenerativeModel",
     :owner "sec-glossary.tex:7 · P-glossary-mathematics",
     :row-source :contract-declaration,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean
     {:found true,
      :path "DarkTower/WarMachine/Holes.lean",
@@ -1813,12 +1857,12 @@
    {:name "Observation vector o",
     :owner "sec-glossary.tex paragraph:Observation vector o",
     :row-source :glossary-paragraph,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean {:found false, :resolution :not-found}}
    {:name "Embedding space",
     :owner "sec-glossary.tex paragraph:Embedding space",
     :row-source :glossary-paragraph,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean {:found false, :resolution :not-found}}
    {:name "Active Inference Framework",
     :owner "sec-glossary.tex paragraph:Active Inference Framework",
@@ -1828,26 +1872,26 @@
    {:name "EDN",
     :owner "sec-glossary.tex paragraph:EDN",
     :row-source :glossary-paragraph,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean {:found false, :resolution :not-found}}
    {:name "Substrate and Drawbridge",
     :owner "sec-glossary.tex paragraph:Substrate and Drawbridge",
     :row-source :glossary-paragraph,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean {:found false, :resolution :not-found}}
    {:name "No self-certification",
     :owner "sec-glossary.tex paragraph:No self-certification",
     :row-source :glossary-paragraph,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean {:found false, :resolution :not-found}}
    {:name "Revision boundary",
     :owner "sec-glossary.tex paragraph:Revision boundary",
     :row-source :glossary-paragraph,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean {:found false, :resolution :not-found}}
    {:name "A shared experimental substrate",
     :owner
     "sec-glossary.tex paragraph:A shared experimental substrate",
     :row-source :glossary-paragraph,
-    :content-status :closed-by-record-with-witness,
+    :content-status :record-with-witness,
     :lean {:found false, :resolution :not-found}}]}}
