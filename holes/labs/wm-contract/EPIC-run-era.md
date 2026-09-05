@@ -560,3 +560,33 @@ mechanically. The prominent fundamentals block remains, derived from
 the same declarations. Acceptance gains: Box 2's "Free energies &
 scores" row shows its real gap count with no hand edit to any table;
 a negative control shows un-declaring one flips the row back.
+
+## THE CONTRACT, RESTATED (Joe, 2026-09-05) — governing text for all remaining work
+
+Verbatim: "I clearly stated that all nodes should be aligned with AIF
+formalism (terms and expressions) and built in dependency order...
+that was the contract, nothing more or less."
+
+Two clauses, both binding:
+1. **Alignment**: every node aligned with the AIF formalism's own terms
+   and expressions. A node scored over a proxy bound in place of an
+   absent noun is NOT aligned, whatever its declaration-closure status.
+2. **Dependency order**: build upstream terms before the nodes that
+   consume them. The drift to be repaired: the contract was
+   operationalized as a declaration-accounting substrate, and
+   accounting has no ordering clause — closable things closed first,
+   breadth-wise, inverting the commissioned order.
+
+Realization under the :F gate, in dependency order:
+- The seven census fundamentals are the ROOTS (Pi, Q(o|pi), Q(s|pi),
+  B, C, BeliefState->distribution, theta kernels). F1 builds them.
+- **The build order below the roots is DERIVED, not chosen**: the term-
+  dependency graph read off aif-equations.edn (which expressions
+  consume which terms) orders F3's per-node fan-out — R5 pilots
+  because its nouns are the roots' first consumers, and no node's
+  harness lands before the terms its expressions consume exist.
+  Deriving this graph joins F0's derivation proposal (the same
+  emission that marks fundamentals can emit term dependencies).
+- F4 renders BOTH clauses' status: per-node alignment state (aligned /
+  proxy-bound / unbuilt) in dependency order, replacing the flat
+  closure counts as the paper's leading table.
