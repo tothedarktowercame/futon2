@@ -1,0 +1,24 @@
+F8 leg 1 slice 3 -- production mu-next read back from futon2.aif.belief
+production calls: belief/r3d-aggregate-driver, belief/update-entity-belief (:aif), belief/entity-expected-health
+reproduced private arithmetic: war_machine.clj:6147-6187 (anneal, clamp, attribution)
+
+SCALAR / STRUCTURAL CASES (exact where delta is zero; otherwise tolerance 1e-12)
+multichannel driver       Lean 1/4  Clojure 0.25000000000000000  delta 0.0000000000000000
+all precisions x4 driver Lean 1/4  Clojure 0.25000000000000000  delta 0.0000000000000000
+single-channel driver     Lean 1    Clojure 1.0000000000000000  delta 0.0000000000000000
+single precision x4       Lean 4    Clojure 4.0000000000000000  delta 0.0000000000000000
+eventWeight d=1 step=0    Lean 1/10 Clojure 0.10000000000000000  delta 0.0000000000000000
+eventWeight d=1 step=1    Lean 1/15 Clojure 0.066666666666666680  delta 1.3877787807814457e-17
+eventWeight d=1 step=2    Lean 1/30 Clojure 0.033333333333333340  delta 6.9388939039072280e-18
+saturation d=50 step=0    Lean 1/10 Clojure 0.10000000000000000  delta 0.0000000000000000
+anneal step=3             Lean 0    Clojure 0.0000000000000000  delta 0.0000000000000000 (unreachable in the 0,1,2 loop)
+unknown aggregation status=:unknown reason=:no-channel-supplied driver-present=false
+kappa-zero no-op Lean exact; Clojure max component delta 2.7755575615628914e-17 (identity-B floating normalisation)
+
+CATEGORICAL HEALTH READBACK (tolerance 1.0E-12)
+uniform       Lean 4/7                 Clojure 0.57142857142857140 delta 0.0000000000000000
+strengthened  Lean 1431362/2193329     Clojure 0.65259794586220310 delta 0.0000000000000000
+foreclosed    Lean 10772591/21198491   Clojure 0.50817725657925370 delta 0.0000000000000000
+positive health delta 0.081169374433631700; negative health delta -0.063251314849317670; sum 0.017918059584314028 (not sign-symmetric)
+
+VERDICT: production matches every Lean reference (exact cases exact; categorical cases within 1e-12).
