@@ -1,0 +1,219 @@
+{:schema :wm/convergence-draft-v1
+ :as-of "2026-09-05"
+ :registry-basis "holes/labs/wm-contract/aif-equations.edn:1-173 (:id, :defines, :node, and :formal copied verbatim)"
+ :comparison-rule {:order [[:named :absent]
+                           [:type-transcribed :witnessed]
+                           [:formula-transcribed :constructed]]
+                   :basis "EPIC-run-era.md, The convergence ruling (2026-09-05); commissioned mechanical rules for CONVERGENCE-draft.edn"}
+ :name-hazard-basis "holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:127-129 (Pi, pi, gamma collision)"
+ :caveats
+ ["The Box-5 join is explicitly stale: p4ng/sec-lean-state-generated.tex:1-4 reports 2026-09-03T23:38:51Z, corpus f16b389596, live HEAD 824f67b5, pin STALE-PIN. These rows reproduce that join and do not refresh it."
+  "All rungs and leading-leg values are draft-mechanical pending F8 adjudication; :witnessed never means :constructed. Basis: the convergence ruling commissioned for this artifact."
+  "The R5 certificate is a node-simulation certificate over declared carriers, not a shipped-call-path witness: holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn :what-this-is and :not-done."
+  "R17 a-conc is marked runtime-witnessed only for the running concentration operation, with its class-(b) divergence preserved: FUNDAMENTALS.edn:296-298 and aif-equations.edn:162-168 say A4a accumulates a different capability-by-mission model, not the declared tick-model quantity."]
+ :rows
+ [{:id :observe
+   :defines :o
+   :node :R2
+   :formal "o_t <- structured observation of the world after action u_{t-1}"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:12 (observe / R2 / o / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:32-37; src/futon2/aif/observation.clj:103-146"}
+   :leading-leg :impl-ahead
+   :certificate :none}
+
+  {:id :prediction-error
+   :defines :eps
+   :node :R8
+   :formal "eps_k := o_k - mu_k"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:13 (prediction-error / R8 / eps / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:79-85; src/futon2/aif/free_energy.clj:203-218"}
+   :leading-leg :impl-ahead
+   :certificate :none}
+
+  {:id :precision
+   :defines :Pi
+   :node :R7
+   :formal "Pi_k := 1 / max(Var(eps_k), eps0)"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:14 (precision / R7 / Pi / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:133-138; src/futon2/aif/precision.clj:116-158"}
+   :leading-leg :impl-ahead
+   :certificate :none
+   :name-hazards [:pi :gamma]}
+
+  {:id :free-energy
+   :defines :F
+   :node :R8
+   :formal "F = 1/2 * mean_k (Pi_k eps_k^2)"
+   :spec-leg {:rung :formula-transcribed
+              :basis "p4ng/sec-lean-state-generated.tex:15 (variationalFreeEnergy def, Holes.lean:6828)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:98-103; src/futon2/aif/free_energy.clj:184-205"}
+   :leading-leg :spec-ahead
+   :certificate :none}
+
+  {:id :policy-free-energy
+   :defines :F-pi
+   :node :R8
+   :formal "F_pi := sum_k 1/2 ( ln(2 pi v_k(pi)) + (o_k - mu_k(pi))^2 / v_k(pi) )"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:16 (policy-free-energy / R8 / F-pi / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:86-91; src/futon2/aif/policy_free_energy.clj:41-82"}
+   :leading-leg :impl-ahead
+   :certificate :none}
+
+  {:id :belief-update
+   :defines :mu-next
+   :node :R3
+   :formal "mu <- mu + alpha Pi eps"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:17 (belief-update / R3 / mu-next / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r1-r3-r3a-batch3.md:77-82; src/futon2/aif/belief.clj:364-445"}
+   :leading-leg :impl-ahead
+   :certificate :none}
+
+  {:id :belief-state
+   :defines :mu
+   :node :R1
+   :formal "mu_t := the stored belief after the update at t-1"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:18 (belief-state / R1 / mu / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r1-r3-r3a-batch3.md:32-37; src/futon2/aif/belief.clj:62,364-445"}
+   :leading-leg :impl-ahead
+   :certificate :none}
+
+  {:id :forward-model
+   :defines :Q-o-pi
+   :node :R4
+   :formal "Q(o|pi) := sum_s A(o|s) Q(s|pi), Q(s|pi) rolled forward by B from mu over depth T"
+   :spec-leg {:rung :formula-transcribed
+              :basis "p4ng/sec-lean-state-generated.tex:19 (PredictiveOutcomeKernel abbrev, Holes.lean:6758)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:37-42,60-67; src/futon2/aif/forward_model.clj:279-324"}
+   :leading-leg :spec-ahead
+   :certificate :none}
+
+  {:id :risk
+   :defines :risk
+   :node :R5
+   :formal "risk(pi) := D_KL[Q(o|pi) || C]"
+   :spec-leg {:rung :formula-transcribed
+              :basis "p4ng/sec-lean-state-generated.tex:20 (predictiveOutcomeRisk def, Holes.lean:6867)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116; src/futon2/aif/efe.clj:842-872"}
+   :leading-leg :spec-ahead
+   :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn"
+                 :certifies "Against declared carriers, the risk node agrees with an independent KL reference, is nonnegative, and is zero at its own predictive row; it does not certify the shipped call path."
+                 :basis "runs/F3-node-sim/00-r5-pilot.edn :pilot/:checks and :what-this-is"}}
+
+  {:id :ambiguity
+   :defines :ambiguity
+   :node :R5
+   :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]"
+   :spec-leg {:rung :formula-transcribed
+              :basis "p4ng/sec-lean-state-generated.tex:21 (ambiguity def, Holes.lean:6880)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116; src/futon2/aif/efe.clj:842-872"}
+   :leading-leg :spec-ahead
+   :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn"
+                 :certifies "Against declared carriers, the ambiguity node agrees with an independent entropy reference and stays within the entropy range; the pilot also records that its two policies do not separate ambiguity."
+                 :basis "runs/F3-node-sim/00-r5-pilot.edn :pilot/:checks and :findings"}}
+
+  {:id :expected-free-energy
+   :defines :G
+   :node :R5
+   :formal "G(pi) := risk(pi) + ambiguity(pi)"
+   :spec-leg {:rung :formula-transcribed
+              :basis "p4ng/sec-lean-state-generated.tex:22 (expectedFreeEnergy def, Holes.lean:6887)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:109-116; src/futon2/aif/efe.clj:842-872"}
+   :leading-leg :spec-ahead
+   :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn"
+                 :certifies "Against declared carriers, the node emits exactly risk, ambiguity, and G and satisfies the two-term sum; four planted plausible wrong formulas are rejected."
+                 :basis "runs/F3-node-sim/00-r5-pilot.edn :pilot/:checks and :negative-controls"}}
+
+  {:id :policy-set
+   :defines :pi
+   :node :R6
+   :formal "pi ranges over the candidate action space"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:23 (policy-set / R6 / pi / not in Lean)"}
+   :impl-leg {:rung :absent
+              :basis "holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:143-147; holes/labs/wm-contract/FUNDAMENTALS.edn:243-272 (no runtime decision constructs and scores two admissible cascade policies)"}
+   :leading-leg :level
+   :certificate :none
+   :name-hazards [:Pi :gamma]}
+
+  {:id :depth
+   :defines :T
+   :node :R13
+   :formal "T := temporal policy depth (the range of the sums in Q(o|pi) and G)"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:24 (depth / R13 / T / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:91-97; src/futon2/aif/forward_model.clj:278-303"}
+   :leading-leg :impl-ahead
+   :certificate :none}
+
+  {:id :temperature
+   :defines :tau
+   :node :R14
+   :formal "tau := commitment temperature (inverse precision gamma of policy selection)"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:25 (temperature / R14 / tau / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:144-149; src/futon2/aif/policy.clj:77-95"}
+   :leading-leg :impl-ahead
+   :certificate :none}
+
+  {:id :policy-posterior
+   :defines :Q-pi
+   :node :R6
+   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau - F_pi(pi))"
+   :spec-leg {:rung :formula-transcribed
+              :basis "p4ng/sec-lean-state-generated.tex:27 (softmax def, Holes.lean:6960)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:132-138; src/futon2/aif/policy.clj:196-201,413-421"}
+   :leading-leg :spec-ahead
+   :certificate :none}
+
+  {:id :action
+   :defines :u
+   :node :R16
+   :formal "u_t := argmax_u sum_pi delta(u, pi_t) Q(pi)"
+   :spec-leg {:rung :named
+              :basis "p4ng/sec-lean-state-generated.tex:28 (action / R16 / u / not in Lean)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:31-36; src/futon2/aif/enact.clj:250-321"}
+   :leading-leg :impl-ahead
+   :certificate :none}
+
+  {:id :dirichlet-accumulation
+   :defines :a-conc
+   :node :R17
+   :formal "a = a + sum_tau o_tau (x) s_tau  (Dirichlet concentrations accumulated from observed outcome/state pairs)"
+   :spec-leg {:rung :formula-transcribed
+              :basis "p4ng/sec-lean-state-generated.tex:29 (DirichletConcentrations def, Holes.lean:6936)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:136-143; src/futon2/aif/a4a.clj:85-113; FUNDAMENTALS.edn:296-298 records that this is a different runtime model"}
+   :leading-leg :spec-ahead
+   :certificate :none}
+
+  {:id :model-reduction
+   :defines :Delta-F
+   :node :R17
+   :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A') over Dirichlet concentrations a (prior), A (posterior), a' (reduced prior); a reduction is accepted when Delta F <= -3"
+   :spec-leg {:rung :formula-transcribed
+              :basis "p4ng/sec-lean-state-generated.tex:30 (bayesFactorThreshold def, Holes.lean:6957)"}
+   :impl-leg {:rung :witnessed
+              :basis "holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:127-130,163-170; src/futon2/aif/bmr.clj:108-130"}
+   :leading-leg :spec-ahead
+   :certificate :none}]}
