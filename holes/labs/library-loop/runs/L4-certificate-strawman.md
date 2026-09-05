@@ -52,11 +52,11 @@ Library-wide refusal counts if construction refused today:
 
 | refusal rule | refused of 1264 |
 |---|---|
-| no authored `@why` at all | 1147 (90.8%) |
-| not @why-reachable, down, problems-only | 1259 |
-| not @why-reachable, down, problems+WR | 1204 |
-| not @why-reachable, up, problems | 1251 |
-| not @why-reachable, up, problems+WR | 1231 |
+| no authored `@why` at all | 1146 (90.7%) |
+| not @why-reachable, down, problems-only | 1258 |
+| not @why-reachable, down, problems+WR | 1203 |
+| not @why-reachable, up, problems | 1250 |
+| not @why-reachable, up, problems+WR | 1230 |
 
 Per-cascade versions of the same rule are in the receipt. Under every reading,
 rule (c) refuses **at least 95%** of the library and, per (a), most of each
