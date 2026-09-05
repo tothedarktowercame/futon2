@@ -1,4 +1,26 @@
 ;; F8 leg 1 slice 4: production policy-free-energy readback.
+;;
+;; Every `-expected` below is TRANSCRIBED FROM A LEAN STATEMENT, not derived a
+;; second time from the inputs -- otherwise a delta of 0.0 would only say that
+;; Clojure agrees with Clojure. The transcriptions, by name, in
+;; mathlib4/DarkTower/WarMachine/MachinePolicyFreeEnergyWitness.lean:
+;;   positive-expected      machineTwoChannelTotal   (the declared carrier,
+;;                          `machinePolicyFreeEnergy`, on this exact candidate)
+;;   floor-expected         absentZeroFloored
+;;   vector-expected-two    positiveVarianceContribution's shape at v = 1
+;;   tolerated / zero-reject / bare-zero-floor / negative
+;;                          toleratedDeterministicZero, rejectedDeterministicZero,
+;;                          bareZeroStillRejectsUnderFloor, negativeVarianceRejects
+;;   unscaled / by-tau      unscaledTauPair, scaledTauPair
+;; Only the transcendental factor log(2*pi*v) is evaluated here; the algebraic
+;; part of each term is the rational the Lean proves.
+;;
+;; WHICH ARM IS PRODUCTION: `f-pi-for-candidate`'s own default is
+;; `:absent-variance :reject`, but its only production caller,
+;; `f-pi-dark-readback`, passes `{:absent-variance :floor}`
+;; (futon2/scripts/futon2/report/war_machine.clj:528-533) and so takes the
+;; default `:variance-floor` 0.01. The `absent-floor` case below is therefore the
+;; production path and the `:reject` cases are the reachable-but-unused arm.
 (require '[clojure.java.io :as io]
          '[clojure.string :as str]
          '[futon2.aif.policy :as policy]
@@ -66,6 +88,8 @@
   ["F8 leg 1 slice 4 -- production F_pi readback"
    "production calls: f-pi-for-candidate, f-pi-vector, selection-scores"
    "Lean keeps log symbolic; complete floating terms compare at tolerance 1e-12"
+   "references transcribed from MachinePolicyFreeEnergyWitness (see header)"
+   "production arm is :absent-variance :floor (war_machine.clj:528-533), not the :reject default"
    (format "positive two-channel total actual %.17g expected %.17g delta %.17g"
            positive-result positive-expected (delta positive-result positive-expected))
    (str "zero tolerated status=" (:status tolerated) " value=" (:value tolerated))
