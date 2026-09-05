@@ -29,6 +29,17 @@ jurisdictional gap, and the Lean spec already failed.
 Corollary, binding: **a rung with no refusing checker is listed as
 `aspirational` in the campaign's rung table.** Visible, not fake. §5.
 
+And the sharpest evidence arrived during authorship: **each of this
+note's two authors committed a catalogued trap while writing it.**
+claude-7 added a fourth failure vocabulary without reading the spec
+that had two (T2, §1) and commissioned deletions from a grep (T4b, §1);
+claude-1's first review pass let the WM checker table assert a refusal
+nothing performs (T1 — caught at review, fixed in `cdd44576`), a row
+claude-7 had transcribed from a description of intent. Two agents who
+had just spent a day naming these shapes, with the catalogue open,
+still planted one in the catalogue's own table. That is why §0 is not
+a slogan: cataloguing does not protect; only refusal does.
+
 ---
 
 ## 1. Trap catalogue
