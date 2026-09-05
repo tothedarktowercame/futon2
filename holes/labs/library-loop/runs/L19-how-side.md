@@ -9,8 +9,11 @@ file modified. Deterministic; byte-identical rerun.
 |---|---|
 | patterns carrying @how | 542 |
 | @how annotation values total | 555 |
-| resolvable @how edges (value tokens that are pattern ids) | 32 |
-| patterns whose @how is entirely prose (no resolvable token) | 521 |
+| @how annotation VALUES that resolve (>= 1 token is a pattern id) | 21 |
+| @how annotation VALUES that do not resolve (pure prose) | 534 |
+| patterns carrying at least one resolving @how value | 21 |
+| distinct resolvable @how edges (pattern-id targets, deduped) | 32 |
+| patterns whose @how values are entirely prose (no resolvable token) | 521 |
 | distinct @how targets (mechanism patterns pointed at) | 25 |
 
 Note: the L3-L10 backfill wrote own-mechanism @how lines that quote the

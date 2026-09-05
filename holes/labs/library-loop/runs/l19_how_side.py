@@ -69,7 +69,11 @@ why, how = edges_of("why"), edges_of("how")
 how_vals = [(pid, v) for pid, anns in nodes.items() for v in anns.get("how", [])]
 how_total = len(how_vals)
 how_resolving = sum(1 for (pid, v) in how_vals
-                    for t in ref_tok.findall(v) if t in nodes and t != pid)
+                    if any(t in nodes and t != pid for t in ref_tok.findall(v)))
+how_nonresolving = how_total - how_resolving
+patterns_with_resolving = len({pid for (pid, v) in how_vals
+                               if any(t in nodes and t != pid
+                                      for t in ref_tok.findall(v))})
 # prose-only: @how values whose ref-shaped tokens all fail to resolve
 how_prose_files = {pid for pid in nodes
                    if nodes[pid].get("how")
@@ -149,8 +153,11 @@ A("| measure | count |")
 A("|---|---|")
 A("| patterns carrying @how | %d |" % len([n for n in nodes if nodes[n].get("how")]))
 A("| @how annotation values total | %d |" % how_total)
-A("| resolvable @how edges (value tokens that are pattern ids) | %d |" % len([1 for a, bs in how.items() for _ in bs]))
-A("| patterns whose @how is entirely prose (no resolvable token) | %d |" % len(how_prose_files))
+A("| @how annotation VALUES that resolve (>= 1 token is a pattern id) | %d |" % how_resolving)
+A("| @how annotation VALUES that do not resolve (pure prose) | %d |" % how_nonresolving)
+A("| patterns carrying at least one resolving @how value | %d |" % patterns_with_resolving)
+A("| distinct resolvable @how edges (pattern-id targets, deduped) | %d |" % len([1 for a, bs in how.items() for _ in bs]))
+A("| patterns whose @how values are entirely prose (no resolvable token) | %d |" % len(how_prose_files))
 A("| distinct @how targets (mechanism patterns pointed at) | %d |" % len(how_targets))
 A("\nNote: the L3-L10 backfill wrote own-mechanism @how lines that quote the")
 A("pattern's own conclusion -- by construction self-referential or prose, so")
