@@ -1,0 +1,265 @@
+{:schema :wm/cascade-policy-decision-v1,
+ :policy-grain :pattern-cascade,
+ :producer
+ "futon2/holes/labs/wm-contract/f7_cascade_policy_decision.clj",
+ :candidates
+ [{:H-coherence 0.891,
+   :policy-grain :pattern-cascade,
+   :coverage-reward 4.033,
+   :lambda 0.25,
+   :semilattice
+   {:descent
+    [["ai4ci/ai-core-function" "ai4ci/project-summary-core"]
+     ["devmap-coherence/next-steps-to-done"
+      "devmap-coherence/prototype-maturity-lifecycle"]
+     ["ai4ci/project-summary-core"
+      "devmap-coherence/next-steps-to-done"]
+     ["ai4ci/project-summary-core"
+      "stack-coherence/ready-blocked-triage"]
+     ["devmap-coherence/prototype-maturity-lifecycle"
+      "devmap-coherence/next-steps-to-done"]
+     ["stack-coherence/ready-blocked-triage"
+      "devmap-coherence/next-steps-to-done"]
+     ["stack-coherence/ready-blocked-triage"
+      "devmap-coherence/prototype-maturity-lifecycle"]],
+    :co_app
+    [["devmap-coherence/prototype-alignment-role"
+      "devmap-coherence/prototype-maturity-lifecycle"
+      1]
+     ["devmap-coherence/prototype-maturity-lifecycle"
+      "stack-coherence/ready-blocked-triage"
+      2]]},
+   :wholeness 7.904,
+   :candidate-source :coverage-saturation-frontier,
+   :mission "M-expressions-of-interest",
+   :prior-cost 43.736,
+   :shown
+   ["structure/interest-event-vocabulary"
+    "ai4ci/ai-core-function"
+    "vsatlas/proof-through-pilots"
+    "devmap-coherence/prototype-maturity-lifecycle"
+    "stack-coherence/ready-blocked-triage"
+    "ai4ci/project-summary-core"
+    "devmap-coherence/next-steps-to-done"
+    "devmap-coherence/prototype-alignment-role"
+    "vsatelier/annotation-as-commitment"
+    "iching/hexagram-43-guai"
+    "system-coherence/argue-empirically-not-persuasively"
+    "or2/shared-futures-beyond-atomised-incentives"
+    "library-coherence/llm-argument-scan"
+    "library-coherence/from-argument-to-pilot"
+    "contributing/devmap-contribution-protocol"
+    "iching/hexagram-13-tongren"
+    "plos-npt-with-small-n/site-case-data-display"
+    "pattern-discipline/conclusion-required-others-recommended"
+    "meta/layering-design-into-argument"
+    "iching/hexagram-05-xu"
+    "plos-npt-with-small-n/abstract-n-method-frame"
+    "ai4ci/dual-layer-proof-patterns"
+    "futon-theory/derive-exits-on-a-minted-sorry"],
+   :size 23,
+   :coverage-saturation-epsilon 0.1,
+   :T-intensity 8.873,
+   :truncated false,
+   :budget 40,
+   :psi
+   "expressions of interest — want: Expressions of Interest. have: MAP / DERIVE / ARGUE / VERIFY all complete 2026-05-11. INSTANTIATE *in progress* (encounter-first reordering): Anthropic EoI revised-draft landed 2026-05-13 as ",
+   :policy-key
+   [:pattern-cascade
+    "M-expressions-of-interest"
+    ["structure/interest-event-vocabulary"
+     "ai4ci/ai-core-function"
+     "vsatlas/proof-through-pilots"
+     "devmap-coherence/prototype-maturity-lifecycle"
+     "stack-coherence/ready-blocked-triage"
+     "ai4ci/project-summary-core"
+     "devmap-coherence/next-steps-to-done"
+     "devmap-coherence/prototype-alignment-role"
+     "vsatelier/annotation-as-commitment"
+     "iching/hexagram-43-guai"
+     "system-coherence/argue-empirically-not-persuasively"
+     "or2/shared-futures-beyond-atomised-incentives"
+     "library-coherence/llm-argument-scan"
+     "library-coherence/from-argument-to-pilot"
+     "contributing/devmap-contribution-protocol"
+     "iching/hexagram-13-tongren"
+     "plos-npt-with-small-n/site-case-data-display"
+     "pattern-discipline/conclusion-required-others-recommended"
+     "meta/layering-design-into-argument"
+     "iching/hexagram-05-xu"
+     "plos-npt-with-small-n/abstract-n-method-frame"
+     "ai4ci/dual-layer-proof-patterns"
+     "futon-theory/derive-exits-on-a-minted-sorry"]
+    {:co_app
+     [["devmap-coherence/prototype-alignment-role"
+       "devmap-coherence/prototype-maturity-lifecycle"
+       1]
+      ["devmap-coherence/prototype-maturity-lifecycle"
+       "stack-coherence/ready-blocked-triage"
+       2]],
+     :descent
+     [["ai4ci/ai-core-function" "ai4ci/project-summary-core"]
+      ["ai4ci/project-summary-core"
+       "devmap-coherence/next-steps-to-done"]
+      ["ai4ci/project-summary-core"
+       "stack-coherence/ready-blocked-triage"]
+      ["devmap-coherence/next-steps-to-done"
+       "devmap-coherence/prototype-maturity-lifecycle"]
+      ["devmap-coherence/prototype-maturity-lifecycle"
+       "devmap-coherence/next-steps-to-done"]
+      ["stack-coherence/ready-blocked-triage"
+       "devmap-coherence/next-steps-to-done"]
+      ["stack-coherence/ready-blocked-triage"
+       "devmap-coherence/prototype-maturity-lifecycle"]]}],
+   :cascade-score -6.901}
+  {:H-coherence 1.0,
+   :policy-grain :pattern-cascade,
+   :coverage-reward 0.14,
+   :lambda 0.25,
+   :semilattice {:descent [], :co_app []},
+   :wholeness 0.466,
+   :candidate-source :coverage-saturation-frontier,
+   :mission "M-expressions-of-interest",
+   :prior-cost 0.486,
+   :shown ["structure/interest-event-vocabulary"],
+   :size 1,
+   :coverage-saturation-epsilon 0.2,
+   :T-intensity 0.466,
+   :truncated false,
+   :budget 40,
+   :psi
+   "expressions of interest — want: Expressions of Interest. have: MAP / DERIVE / ARGUE / VERIFY all complete 2026-05-11. INSTANTIATE *in progress* (encounter-first reordering): Anthropic EoI revised-draft landed 2026-05-13 as ",
+   :policy-key
+   [:pattern-cascade
+    "M-expressions-of-interest"
+    ["structure/interest-event-vocabulary"]
+    {:co_app [], :descent []}],
+   :cascade-score 0.019}],
+ :not-done
+ ["Nothing is selected or enacted from this menu: the record is DARK."
+  "No cascade-prior state is persisted; the prior stays cold."
+  "The production lane is unchanged and still constructs one cascade per target."
+  "No ruling written: aif-equations.edn :choices and control-map-edges.edn :decisions untouched."],
+ :menu-status :candidate-menu,
+ :basis
+ {:trace-file "data/wm-trace/wm-trace-2026-09-04.edn",
+  :run-id "c149f9de-669c-4817-9b0e-ed4aad77db79",
+  :recorded-timestamp "2026-09-04T07:50:47.952039102Z",
+  :decision-target "M-expressions-of-interest",
+  :decision-type :advance-mission,
+  :decision-rationale
+  "mission substrate: Mission: Expressions of Interest [active; advance open holes]",
+  :trace-schema-version 26,
+  :recorded-git-sha "e05529437c79da3f63d01518defd8de225850e4e"},
+ :producer-contract
+ {:constructs-cascades? true,
+  :scores-cascades? true,
+  :selects-or-enacts? false,
+  :writes-machine-state? false,
+  :run-lock-taken? false,
+  :reads "data/wm-trace, read-only"},
+ :candidate-count 2,
+ :policy-choice? true,
+ :constructor
+ {:via "futon2.report.cascade-lane/cascade-policy-menu-for",
+  :at "futon2/scripts/futon2/report/cascade_lane.clj:102",
+  :psi-builder "futon2.report.cascade-lane/mission->psi",
+  :psi-builder-at "futon2/scripts/futon2/report/cascade_lane.clj:306",
+  :script "futon3a/holes/labs/M-memes-arrows/cascade_serve.py",
+  :epsilons [0.1 0.15 0.2],
+  :pool-budget 40,
+  :candidate-source :coverage-saturation-frontier},
+ :scorer
+ {:via "futon2.aif.cascade-prior/shadow-rank",
+  :at "futon2/src/futon2/aif/cascade_prior.clj:163",
+  :prior-state
+  {:policy-grain :pattern-cascade,
+   :class-count 0,
+   :samples 0,
+   :alpha 1.0,
+   :recency-decay :none},
+  :prior-note
+  "COLD. No cascade-prior state has ever been persisted, so ln E(pi) is uniform over the menu and the ranking is governed by the engineering score alone. That is honest: the habit leg has nothing to say yet."},
+ :psi
+ "expressions of interest — want: Expressions of Interest. have: MAP / DERIVE / ARGUE / VERIFY all complete 2026-05-11. INSTANTIATE *in progress* (encounter-first reordering): Anthropic EoI revised-draft landed 2026-05-13 as ",
+ :enacted? false,
+ :selection
+ {:status :dark-cascade-ranking,
+  :tau 1.0,
+  :candidate-count 2,
+  :ranked-candidates
+  [{:policy-key
+    [:pattern-cascade
+     "M-expressions-of-interest"
+     ["structure/interest-event-vocabulary"]
+     {:co_app [], :descent []}],
+    :coverage-saturation-epsilon 0.2,
+    :cascade-score 0.019,
+    :cascade-cost -0.019,
+    :cascade-prior-bias -0.6931471805599453,
+    :cascade-selection-weight 0.999013144904479,
+    :cascade-selection-score -0.6741471805599453}
+   {:policy-key
+    [:pattern-cascade
+     "M-expressions-of-interest"
+     ["structure/interest-event-vocabulary"
+      "ai4ci/ai-core-function"
+      "vsatlas/proof-through-pilots"
+      "devmap-coherence/prototype-maturity-lifecycle"
+      "stack-coherence/ready-blocked-triage"
+      "ai4ci/project-summary-core"
+      "devmap-coherence/next-steps-to-done"
+      "devmap-coherence/prototype-alignment-role"
+      "vsatelier/annotation-as-commitment"
+      "iching/hexagram-43-guai"
+      "system-coherence/argue-empirically-not-persuasively"
+      "or2/shared-futures-beyond-atomised-incentives"
+      "library-coherence/llm-argument-scan"
+      "library-coherence/from-argument-to-pilot"
+      "contributing/devmap-contribution-protocol"
+      "iching/hexagram-13-tongren"
+      "plos-npt-with-small-n/site-case-data-display"
+      "pattern-discipline/conclusion-required-others-recommended"
+      "meta/layering-design-into-argument"
+      "iching/hexagram-05-xu"
+      "plos-npt-with-small-n/abstract-n-method-frame"
+      "ai4ci/dual-layer-proof-patterns"
+      "futon-theory/derive-exits-on-a-minted-sorry"]
+     {:co_app
+      [["devmap-coherence/prototype-alignment-role"
+        "devmap-coherence/prototype-maturity-lifecycle"
+        1]
+       ["devmap-coherence/prototype-maturity-lifecycle"
+        "stack-coherence/ready-blocked-triage"
+        2]],
+      :descent
+      [["ai4ci/ai-core-function" "ai4ci/project-summary-core"]
+       ["ai4ci/project-summary-core"
+        "devmap-coherence/next-steps-to-done"]
+       ["ai4ci/project-summary-core"
+        "stack-coherence/ready-blocked-triage"]
+       ["devmap-coherence/next-steps-to-done"
+        "devmap-coherence/prototype-maturity-lifecycle"]
+       ["devmap-coherence/prototype-maturity-lifecycle"
+        "devmap-coherence/next-steps-to-done"]
+       ["stack-coherence/ready-blocked-triage"
+        "devmap-coherence/next-steps-to-done"]
+       ["stack-coherence/ready-blocked-triage"
+        "devmap-coherence/prototype-maturity-lifecycle"]]}],
+    :coverage-saturation-epsilon 0.1,
+    :cascade-score -6.901,
+    :cascade-cost 6.901,
+    :cascade-prior-bias -0.6931471805599453,
+    :cascade-selection-weight 9.86855095520908E-4,
+    :cascade-selection-score -7.594147180559945}],
+  :shadow-winner-policy-key
+  [:pattern-cascade
+   "M-expressions-of-interest"
+   ["structure/interest-event-vocabulary"]
+   {:co_app [], :descent []}],
+  :score-only-winner-policy-key
+  [:pattern-cascade
+   "M-expressions-of-interest"
+   ["structure/interest-event-vocabulary"]
+   {:co_app [], :descent []}],
+  :governed-by :cascade-score}}

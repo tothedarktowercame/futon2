@@ -242,8 +242,15 @@
 
   {:id :fundamental/machine-policy-carrier
    :name "Pi -- a machine policy carrier with two or more admissible rows"
-   :verdict :in
+   :verdict :out
    :known-candidate :no-swept
+   :criterion-leg-that-fails :lean
+   :id-note "This id keeps its :fundamental/ prefix while the other four :out entries carry :out/. Those four were MINTED :out at the F0 census; this one was minted :in and MOVED, and five places name it as it stands -- :prerequisites at FUNDAMENTALS.edn:108, :200 and :301, and prose at :432 and :476. Renaming would break five references to record nothing the :verdict does not already say."
+   :census-correction
+   {:at "2026-09-05, row :F7"
+    :was ":verdict :in, :runtime {:verdict :uninhabited}, on the basis 'The machine ranks single actions. The declared policy carrier is a cascade, and no code path builds two admissible cascades for one decision.'"
+    :now ":verdict :out, :criterion-leg-that-fails :lean. The runtime leg is inhabited by a decision record. The criterion is a conjunction -- uninhabited in BOTH Lean and the runtime -- and it is now broken on the runtime side."
+    :why "The entry's :falsifier is a statement about RUNS, and until :F1 slice 2 it had only ever been argued from code. f1_policy_family_census.bb ran it over the 889-decision corpus first and it did NOT fire (holes/labs/wm-contract/runs/F1-machine-q/02-policy-family-census.edn:55-58: 234 decisions carry an :apply-cascade candidate, :most-distinct-cascades-for-one-target-in-one-record 1, :records-with-two-or-more-cascades-for-one-target 0). :F7 then MADE it fire on recorded state, using the machine's own constructor and the machine's own scorer, and the entry moves on the record rather than on the reading."}
    :required-signature "a concrete PolicyIndex the machine constructs, with >= 2 rows for one decision, at the cascade grain the glossary declares"
    :lean
    {:verdict :uninhabited
@@ -254,22 +261,34 @@
       :read "wmCascadeDiffFixture : CascadeDiff Nat Int, built from private fixture sets (cascadeFixtureSelected :863, cascadeFixtureAuthored :867). Named a fixture in its own identifier."}
      {:what "every PolicyIndex instantiation" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6980-6981"
       :read "the only concrete policy types in the file are the private EIGCounterPolicy and EIGCounterParameter (one constructor each); everywhere else PolicyIndex is a bound type variable."}]
-    :basis "The grain is declared and no machine value of it exists."}
+    :basis "The grain is declared and no machine value of it exists. UNCHANGED BY :F7 -- nothing was built in Lean, and the runtime record is not a Lean value of cascadeGrainPi. This is now the leg that fails."}
    :runtime
-   {:verdict :uninhabited
+   {:verdict :inhabited
     :seam-read
-    [{:what "the cascade-grain prior says so itself" :at "futon2/src/futon2/aif/cascade_prior.clj:1-12"
-      :read "The namespace is deliberately pure and DARK: it does not construct, select, persist, or enact a cascade. Live use is valid only after the War Machine exposes two or more admissible cascades for the same selected mission and supplies an honest cascade-level score."
-      :note "This is the runtime stating the uninhabitance in its own words, and it is the strongest single piece of evidence in this census."}
-     {:what "what the machine actually scores" :at "futon2/src/futon2/aif/forward_model.clj:25-32"
-      :read "action-types is a 14-member set of single actions; the scored candidate is an action map {:type :target}, and policy.clj/select-action ranks efe/rank-actions output over those."}]
-    :basis "The machine ranks single actions. The declared policy carrier is a cascade, and no code path builds two admissible cascades for one decision."}
+    [{:what "the constructor of a same-mission menu" :at "futon2/scripts/futon2/report/cascade_lane.clj:102-144"
+      :read "cascade-policy-menu-for varies the coverage-saturation threshold around the production incumbent 0.15 and admits only COMPLETE (untruncated) policies at the constructor's pool ceiling, collapsing duplicate identities. It returns :policy-choice? true only at two or more. Its candidates are the same objects the production lane builds, from the same Python constructor."}
+     {:what "the scorer" :at "futon2/src/futon2/aif/cascade_prior.clj:163-207"
+      :read "shadow-rank refuses a menu of fewer than two policies (:176-179), attaches ln E(pi) over the concrete menu, enters the higher-is-better :cascade-score at the shared softmax seam through its negation, and reports which term governed. A mixed-mission menu fails closed at :138-141."}
+     {:what "the decision record, read rather than inferred" :at "futon2/holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:161"
+      :read ":candidate-count 2, :policy-choice? true for one selected mission -- M-expressions-of-interest, the target the machine committed to in recorded run c149f9de-669c-4817-9b0e-ed4aad77db79 (:144-153, data/wm-trace/wm-trace-2026-09-04.edn). The two policies differ in both pattern membership and wiring: 23 patterns with a 7-edge descent and 2 co_app edges at epsilon 0.10, 1 pattern with an empty semilattice at 0.20 (:5-137). Both carry a finite :cascade-score (-6.901 and 0.019) and both are ranked with normalized selection weights (:186-265)."}
+     {:what "the producer" :at "futon2/holes/labs/wm-contract/f7_cascade_policy_decision.clj:101-160"
+      :read "build-record reads one recorded decision by :run/id, takes the mission the machine committed to, builds |psi> with the live lane's own mission->psi (cascade_lane.clj:306), constructs, scores, and writes. It writes nothing under data/, takes no run lock, and sets :enacted? false."}
+     {:what "the namespace's own condition, re-read" :at "futon2/src/futon2/aif/cascade_prior.clj:1-12"
+      :read "'Live use is valid only after the War Machine exposes two or more admissible cascades for the same selected mission and supplies an honest cascade-level score.' Both clauses of that condition are met by the record above. What follows is that LIVE USE would now be valid, not that it has been taken -- and it has not been; see :what-is-still-open."
+      :note "This sentence was the strongest evidence for the old :uninhabited verdict. It is the same sentence, and it now reads the other way, because it states a CONDITION rather than a fact about the world."}]
+    :basis "A producer, a scorer and an actual record -- the standard :out/realized-outcome-channel closed its runtime leg by, and not a schema. The value exists at the declared cascade grain, for one decision the machine actually made."}
+   :what-is-still-open
+   ["NOTHING SELECTS OR ENACTS A CASCADE, and the entry does not claim it does. The record's :enacted? is false; the production lane still constructs ONE cascade per target (cascade_lane.clj:66-91 is called once per mission), cascade-policy-menu-for has no caller outside this producer and test/futon2/report/cascade_lane_policy_menu_test.clj, and the advisory lane that would carry cascades into a tick is off at scripts/futon2/run_tick_once.clj:255 (:include-advisory-lanes? false). The criterion this census applies is that a machine value of the carrier EXISTS, not that it is on the live path."
+    "THE HABIT LEG IS COLD. The record's prior state is the cold start (:samples 0, :class-count 0), so ln E(pi) is uniform over the menu and :governed-by is :cascade-score. No cascade-prior state has ever been persisted; M-wm-aif-policy-grain-compliance.md slice 3 is what would persist one."
+    "ONE DECISION, ONE MISSION. The frontier was run on the last decision in the corpus. What fraction of targets yield two or more complete distinct policies is not measured here, and the 889-record census measured the OTHER construction (the production lane's single cascade), so it does not answer this either."
+    "THE LEAN LEG IS UNTOUCHED. No value of cascadeGrainPi is built from machine data, which is why this entry is :out on a failing Lean leg rather than closed."]
    :depends ["Q(o|pi): a kernel indexed by a policy needs a policy index, and F1's acceptance requires at least two policy rows with a policy-conditioned difference"
              "Q(pi) = softmax(-G/tau): what is being ranked is what the softmax is over"
              "Q-interface-completeness.edn work-order unit 1, which puts naming this carrier BEFORE constructing Q"]
    :prerequisites []
    :worklist-row :F1
-   :falsifier "A runtime decision in which two or more cascades for one selected mission are constructed and scored, or a Lean value of cascadeGrainPi built from machine data."}
+   :verdict-note "The census's second moved entry, and the first that moved because a falsifier was RUN rather than because a reading was corrected. It moved on 2026-09-05 by row :F7, and the census entry it unblocks is not itself: :F1 slice 2 was set :blocked for want of a machine pi (02-policy-family-census.edn :conclusion), and this is the pi at the declared grain."
+   :falsifier "What would move this entry back IN is a reading showing the record was not produced as claimed -- that its candidates are hand-written rather than constructor output, or that its two policies are one policy counted twice, or that the run it cites committed to a different mission. holes/labs/wm-contract/f7_cascade_choice_check.bb decides exactly those, and p4ng/empirics-futon/negative_controls.sh section 12 runs it against thirteen ways of resembling a policy choice without being one. A Lean value of cascadeGrainPi built from machine data would close the remaining leg; it would not move this verdict, which is already :out."}
 
   {:id :fundamental/parameter-kernels
    :name "Q(theta|pi) and Q(theta|o,pi) -- the parameter prior and posterior, and the theta they range over"
@@ -467,13 +486,14 @@
     "futon2/src/futon2/aif/policy.clj:157-214 selection-scores, which divides G by whichever tau the mode produced"]
    :what-is-still-open "This is already a declared hole with its own record: policyPrecisionIsGammaFromBeta (Holes.lean:7681-7682, kind=hole), whose docstring carries the correction that the sentence 'no beta appears anywhere in the policy path' became false after RUN8. It is run-gated, not uninhabited: the DEFAULT is :spread and no persisted tick carries a carry-beta tau (the docstring records 18 :tau-source values in data/wm-trace/wm-trace-2026-09-01.edn, all :selection-gain-only, and S3's one live tau = beta tick ran under a write-suppressing preflight)."
    :falsifier "A persisted default-path tick carrying tau together with the beta it came from closes the Lean-side hole; nothing would move this entry back IN short of the :variational-beta-gamma branch being removed from policy.clj."}]
- :counts {:entries 11 :in 7 :out 4
+ :counts {:entries 11 :in 6 :out 5
           :known-candidates-adjudicated 3
           :known-candidates-in 2 :known-candidates-out 1
-          :new-from-the-sweep 5}
+          :new-from-the-sweep 5
+          :counts-note "7 :in / 4 :out at the F0 census (2026-09-05). :fundamental/machine-policy-carrier moved :in -> :out the same day by row :F7, on a decision record rather than on a re-reading; its own :census-correction carries the before and after. The known-candidate counts do not move: that entry came from the sweep, not from the three adjudicated candidates."}
 
  :reading
- "The seven fundamentals are not seven independent gaps. Six of them are the input list of the seventh: Q(o|pi) = A composed with B^pi applied to the belief, scored against C, over a policy index pi, and the census found that pi (:machine-policy-carrier), B at the controlled grain (:controlled-transition-kernel), the belief-to-state map (:belief-to-state-distribution), the intermediate Q(s|pi) (:policy-conditioned-state-predictive) and C at outcome grain (:machine-preference-distribution) are each missing on both sides. That is why the Q constructor has stayed missing through repeated audits: it is not one declaration that nobody wrote, it is a composition whose every argument is absent at the required grain. The parameter kernels are a second cluster, hanging off canonical EIG rather than off risk. THE ORDER THIS IMPLIES: name pi, then map belief into the model's state, then make B carry the action, and Q is then a definition rather than a research problem -- which is the order Q-interface-completeness.edn :work-order already gives, now with the reason for each step measured."
+ "The fundamentals are not independent gaps. They are the input list of Q(o|pi) = A composed with B^pi applied to the belief, scored against C, over a policy index pi, and the F0 census found that pi (:machine-policy-carrier), B at the controlled grain (:controlled-transition-kernel), the belief-to-state map (:belief-to-state-distribution), the intermediate Q(s|pi) (:policy-conditioned-state-predictive) and C at outcome grain (:machine-preference-distribution) were each missing on both sides -- five inputs and the constructor itself, seven entries with the parameter kernels. FOUR OF THOSE FIVE STILL ARE. Pi is not: it moved :out on 2026-09-05 by row :F7, on a decision record in which two distinct complete cascades for one selected mission are constructed and scored, so the first step of the order below has been taken at the runtime and not in Lean. That is why the Q constructor has stayed missing through repeated audits: it is not one declaration that nobody wrote, it is a composition whose every argument is absent at the required grain. The parameter kernels are a second cluster, hanging off canonical EIG rather than off risk. THE ORDER THIS IMPLIES: name pi, then map belief into the model's state, then make B carry the action, and Q is then a definition rather than a research problem -- which is the order Q-interface-completeness.edn :work-order already gives, now with the reason for each step measured. That order is why :F7 came before :F1 slice 2 rather than instead of it: the carrier is named, and the belief-to-state map and the action-carrying B are the two steps still open before Q is a definition."
 
  :derivation-proposal
  {:goal "This file is hand-kept. The ruling asks that the F-list be DERIVED from the Lean model. Proposed mechanism, NOT IMPLEMENTED here (F0 changes no code)."

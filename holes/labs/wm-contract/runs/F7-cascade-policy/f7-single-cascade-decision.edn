@@ -1,0 +1,77 @@
+{:schema :wm/cascade-policy-decision-v1,
+ :policy-grain :pattern-cascade,
+ :producer
+ "futon2/holes/labs/wm-contract/f7_cascade_policy_decision.clj",
+ :candidates
+ [{:H-coherence 1.0,
+   :policy-grain :pattern-cascade,
+   :coverage-reward 0.14,
+   :lambda 0.25,
+   :semilattice {:descent [], :co_app []},
+   :wholeness 0.466,
+   :candidate-source :coverage-saturation-frontier,
+   :mission "M-expressions-of-interest",
+   :prior-cost 0.486,
+   :shown ["structure/interest-event-vocabulary"],
+   :size 1,
+   :coverage-saturation-epsilon 0.15,
+   :T-intensity 0.466,
+   :truncated false,
+   :budget 40,
+   :psi
+   "expressions of interest — want: Expressions of Interest. have: MAP / DERIVE / ARGUE / VERIFY all complete 2026-05-11. INSTANTIATE *in progress* (encounter-first reordering): Anthropic EoI revised-draft landed 2026-05-13 as ",
+   :policy-key
+   [:pattern-cascade
+    "M-expressions-of-interest"
+    ["structure/interest-event-vocabulary"]
+    {:co_app [], :descent []}],
+   :cascade-score 0.019}],
+ :not-done
+ ["Nothing is selected or enacted from this menu: the record is DARK."
+  "No cascade-prior state is persisted; the prior stays cold."
+  "The production lane is unchanged and still constructs one cascade per target."
+  "No ruling written: aif-equations.edn :choices and control-map-edges.edn :decisions untouched."],
+ :menu-status :no-policy-choice,
+ :basis
+ {:trace-file "data/wm-trace/wm-trace-2026-09-04.edn",
+  :run-id "c149f9de-669c-4817-9b0e-ed4aad77db79",
+  :recorded-timestamp "2026-09-04T07:50:47.952039102Z",
+  :decision-target "M-expressions-of-interest",
+  :decision-type :advance-mission,
+  :decision-rationale
+  "mission substrate: Mission: Expressions of Interest [active; advance open holes]",
+  :trace-schema-version 26,
+  :recorded-git-sha "e05529437c79da3f63d01518defd8de225850e4e"},
+ :producer-contract
+ {:constructs-cascades? true,
+  :scores-cascades? false,
+  :selects-or-enacts? false,
+  :writes-machine-state? false,
+  :run-lock-taken? false,
+  :reads "data/wm-trace, read-only"},
+ :candidate-count 1,
+ :policy-choice? false,
+ :constructor
+ {:via "futon2.report.cascade-lane/cascade-policy-menu-for",
+  :at "futon2/scripts/futon2/report/cascade_lane.clj:102",
+  :psi-builder "futon2.report.cascade-lane/mission->psi",
+  :psi-builder-at "futon2/scripts/futon2/report/cascade_lane.clj:306",
+  :script "futon3a/holes/labs/M-memes-arrows/cascade_serve.py",
+  :epsilons [0.15],
+  :pool-budget 40,
+  :candidate-source :coverage-saturation-frontier},
+ :scorer
+ {:via "futon2.aif.cascade-prior/shadow-rank",
+  :at "futon2/src/futon2/aif/cascade_prior.clj:163",
+  :prior-state
+  {:policy-grain :pattern-cascade,
+   :class-count 0,
+   :samples 0,
+   :alpha 1.0,
+   :recency-decay :none},
+  :prior-note
+  "COLD. No cascade-prior state has ever been persisted, so ln E(pi) is uniform over the menu and the ranking is governed by the engineering score alone. That is honest: the habit leg has nothing to say yet."},
+ :psi
+ "expressions of interest — want: Expressions of Interest. have: MAP / DERIVE / ARGUE / VERIFY all complete 2026-05-11. INSTANTIATE *in progress* (encounter-first reordering): Anthropic EoI revised-draft landed 2026-05-13 as ",
+ :enacted? false,
+ :selection nil}
