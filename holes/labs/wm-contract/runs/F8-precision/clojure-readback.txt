@@ -1,0 +1,19 @@
+F8 leg 1 slice 1 -- production Pi read back from futon2.aif.precision
+source: futon2/src/futon2/aif/precision.clj (update-precision-state, :salience-mode :separate)
+lean:   mathlib4/DarkTower/WarMachine/MachinePrecisionWitness.lean
+
+defaults: window-size=20 min-variance=0.01 prior-variance=1.0 prior-strength=1.0 floor=0.1 cap=200.0 salience-mode=:separate
+
+lean theorem             n        lean     clojure (%.17g)          delta
+oneStillError            1        2        2.0000000000000000       0.0000000000000000
+threeStillErrors         3        4        4.0000000000000000       0.0000000000000000
+sevenStillErrors         7        8        8.0000000000000000       0.0000000000000000
+fifteenStillErrors       15       16       16.000000000000000       0.0000000000000000
+fullWindowOfStillErrors  20       21       21.000000000000000       0.0000000000000000
+windowBinds              25       21       21.000000000000000       0.0000000000000000
+unitError                1        1        1.0000000000000000       0.0000000000000000
+halfError                1        8/5      1.6000000000000000       0.0000000000000000
+tripleError              1        1/5      0.20000000000000000      0.0000000000000000
+floorIsReached           20       1/10     0.10000000000000000      0.0000000000000000
+
+VERDICT: every case matches its Lean rational EXACTLY (delta 0.0 on all 10).
