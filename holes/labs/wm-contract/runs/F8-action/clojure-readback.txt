@@ -1,7 +1,22 @@
 F8 leg 1 slice 9 -- production selected-action readback
-controllerHeadReference expected=:a actual=:a MATCH
-posteriorReference expected=:b actual=:b MATCH
-posteriorFallbackReference expected=:a actual=:a MATCH
-tiedArgmaxesDisagree last-max expected=:b actual=:b MATCH
-noOpCandidateSetsDiffer strategic expected=:a actual=:a MATCH
-VERDICT: production matches every measured Lean action witness.
+defaultRuleIsNotTheRegistryRule        default-selection-law          expected :controller-head           actual :controller-head           MATCH
+defaultRuleIsNotTheRegistryRule        default /= registry law        expected true                       actual true                       MATCH
+defaultRuleIsNotTheRegistryRule        selection-laws (closed set)    expected [:controller-head :full-score-posterior] actual [:controller-head :full-score-posterior] MATCH
+defaultSelectionIsTheHead              no boundary opt, no prior -> head expected :a                         actual :a                         MATCH
+controllerHeadReference                head law -> action             expected :a                         actual :a                         MATCH
+posteriorReference                     posterior law -> action        expected :b                         actual :b                         MATCH
+headAndPosteriorDisagree               the two laws differ            expected true                       actual true                       MATCH
+posteriorFallbackReference             posterior law, no F_pi         expected :a                         actual :a                         MATCH
+requestedPosteriorDependsOnFPiEntered  F_pi in vs out differ          expected true                       actual true                       MATCH
+requestedPosteriorCanBecomeHead        the record NAMES the fallback  expected {:requested :full-score-posterior, :applied :controller-head, :reason :no-f-pi-opts, :effect :fell-back-to-controller-head} actual {:requested :full-score-posterior, :applied :controller-head, :reason :no-f-pi-opts, :effect :fell-back-to-controller-head} MATCH
+selectionScore                         lnE - G/tau - F_pi at tau=1    expected [0.0 2.0]                  actual [0.0 2.0]                  MATCH
+posteriorOrderIsScoreOrder             argmax Q = argmax scores       expected 1                          actual 1                          MATCH
+fullScoreIsPosteriorArgmax             score 0 < score 1 and Q 0 < Q 1 expected [true true]                actual [true true]                MATCH
+tiedArgmaxesDisagree                   the scores really tie          expected [0.0 0.0]                  actual [0.0 0.0]                  MATCH
+tiedArgmaxesDisagree                   first-max arm (strategic)      expected :a                         actual :a                         MATCH
+tiedArgmaxesDisagree                   last-max arm (actuation)       expected :b                         actual :b                         MATCH
+habitPriorAloneMovesTheChoice          all priors zero                expected :a                         actual :a                         MATCH
+habitPriorAloneMovesTheChoice          one prior nonzero              expected :b                         actual :b                         MATCH
+noOpExclusionMovesTheChoice            strategic cannot see :no-op    expected :a                         actual :a                         MATCH
+noOpArgmaxAbstains                     actuation argmax IS :no-op -> abstain expected [:abstain :no-action-beats-no-op] actual [:abstain :no-action-beats-no-op] MATCH
+selectedAndEnactedDisagree             NOT MEASURED                   close-loop! is the mutating enactment boundary and is not called here; the first-passing-gate rule is stated from enact.clj:305,320 and enact.clj contains no reference to the judgement's :action (grep, 0 hits).
