@@ -1,0 +1,5 @@
+;; L13 negative control: a synthetic cascade that MUST be refused.
+;; Contains one reachable pattern (a problem node itself, reachable as a root
+;; under every reading) and one rationale-free pattern (iiching/exotype-000,
+;; an encoding record with no authored @why and no path to a problem node).
+["problems/r1-belief-state" "iiching/exotype-000"]
