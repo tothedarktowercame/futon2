@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """L6/L7/L8/L9/L10 RATIONALE BACKFILL (generalized L3 pilot form).
 
-Usage: l6_backfill.py SECTIONS_CSV [LIBRARY_DIR] [ROW_TAG]
+Usage: l6_backfill.py SECTIONS_CSV [LIBRARY_DIR] [ROW_TAG] [GROUND_SECTIONS_CSV]
+GROUND_SECTIONS_CSV (default "problems"): sections whose patterns form the
+grounding corpus (L8 uses "problems,futon-theory" per its row statement).
 SECTIONS_CSV e.g. "war-room,cascades,futon-theory".
 
 For every pattern in the given sections:
@@ -22,21 +24,24 @@ SECTIONS = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1
 LIB = os.path.abspath(sys.argv[2] if len(sys.argv) > 2
                       else "/home/joe/code/futon3/library")
 TAG = sys.argv[3] if len(sys.argv) > 3 else "L6"
-
 RECEIPT = "L%s-no-source-check.edn" % TAG
-# Source corpus: every library/problems/*.flexiarg node with its own
-# @holds-at tokens and full text (same corpus and match rule as
+# Source corpus: every node in the grounding sections (default: problems),
+# with its own @holds-at tokens and full text. L8 passes
+# "problems,futon-theory" per its row statement. Same match rule as
 # runs/l6_no_source_check.py: holds-token equality, or the pattern's
-# qualified id named in a node's text).
+# qualified id named in a node's text.
+GROUND_SECTIONS = [x.strip() for x in (sys.argv[4] if len(sys.argv) > 4
+                                       else "problems").split(",")]
 corpus = []
-_pdir = os.path.join(LIB, "problems")
-for _fn in sorted(os.listdir(_pdir)):
-    if _fn.endswith(".flexiarg"):
-        _pid = "problems/" + _fn[:-len(".flexiarg")]
-        _txt = open(os.path.join(_pdir, _fn), encoding="utf-8",
-                    errors="replace").read()
-        _holds = re.findall(r"^@holds-at\s+(\S+)", _txt, re.M)
-        corpus.append((_pid, _holds, _txt))
+for _sec in GROUND_SECTIONS:
+    _pdir = os.path.join(LIB, _sec)
+    for _fn in sorted(os.listdir(_pdir)):
+        if _fn.endswith(".flexiarg"):
+            _pid = _sec + "/" + _fn[:-len(".flexiarg")]
+            _txt = open(os.path.join(_pdir, _fn), encoding="utf-8",
+                        errors="replace").read()
+            _holds = re.findall(r"^@holds-at\s+(\S+)", _txt, re.M)
+            corpus.append((_pid, _holds, _txt))
 
 def corpus_match(pid, holds):
     for (nid, nholds, ntxt) in corpus:
@@ -93,8 +98,8 @@ for sec in SECTIONS:
                 add.append("@why %s (source: %s match against the problem corpus per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L6-no-source-check.edn; %s rationale-backfill, zai-1, 2026-09-05)"
                            % (m[0], m[1], TAG))
             else:
-                add.append("@why no problem-corpus source matched (@holds-at %s; holds-token and id-text searches over every library/problems node -- legacy 6, L5 dossier 20 incl. TRACE, L5 record/ruling 6 -- found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/%s. Rationale not invented (%s rationale-backfill, zai-1, 2026-09-05)"
-                           % (holds if holds else "absent", RECEIPT, TAG))
+                add.append("@why no problem-corpus source matched (@holds-at %s; holds-token and id-text searches over every node in [%s] found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/%s. Rationale not invented (%s rationale-backfill, zai-1, 2026-09-05)"
+                           % (holds if holds else "absent", " ".join(GROUND_SECTIONS), RECEIPT, TAG))
         if not has_how:
             c = first_conclusion(lines)
             if c:

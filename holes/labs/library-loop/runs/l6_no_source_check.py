@@ -25,6 +25,9 @@ LIB = os.path.abspath(sys.argv[2] if len(sys.argv) > 2
                       else "/home/joe/code/futon3/library")
 OUT = sys.argv[3] if len(sys.argv) > 3 else os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "L6-no-source-check.edn")
+# grounding corpus sections (default: problems; L8 passes problems,futon-theory)
+GROUND_SECTIONS = [x.strip() for x in (sys.argv[4] if len(sys.argv) > 4
+                                       else "problems").split(",")]
 
 def gitsha(d):
     repo = subprocess.run("git -C %s rev-parse --show-toplevel" % d,
@@ -33,16 +36,18 @@ def gitsha(d):
                            capture_output=True, text=True).stdout.strip(),
             os.path.relpath(d, repo))
 
-# corpus: every problems node with its holds-at tokens and full text
+# corpus: every node in the grounding sections with its holds-at tokens and
+# full text
 corpus = []
-pdir = os.path.join(LIB, "problems")
-for fn in sorted(os.listdir(pdir)):
-    if not fn.endswith(".flexiarg"):
-        continue
-    pid = "problems/" + fn[:-len(".flexiarg")]
-    txt = open(os.path.join(pdir, fn), encoding="utf-8", errors="replace").read()
-    holds = re.findall(r"^@holds-at\s+(\S+)", txt, re.M)
-    corpus.append((pid, holds, txt))
+for _sec in GROUND_SECTIONS:
+    _d = os.path.join(LIB, _sec)
+    for fn in sorted(os.listdir(_d)):
+        if not fn.endswith(".flexiarg"):
+            continue
+        pid = _sec + "/" + fn[:-len(".flexiarg")]
+        txt = open(os.path.join(_d, fn), encoding="utf-8", errors="replace").read()
+        holds = re.findall(r"^@holds-at\s+(\S+)", txt, re.M)
+        corpus.append((pid, holds, txt))
 
 def q(s):
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
@@ -68,7 +73,7 @@ sha, rel = gitsha(LIB)
 with open(OUT, "w") as f:
     f.write(";; L6+ no-source check receipt. Deterministic, path-independent rerun.\n")
     f.write("{:library-subdir %s\n :library-git-sha %s\n" % (q(rel), q(sha)))
-    f.write(" :search \"corpus = every library/problems/*.flexiarg (legacy 6 + L5 dossier 20 incl. TRACE + L5 record/ruling 6), each with its own @holds-at tokens read from the file; per pattern in scope: (a) holds-token equality against every corpus node, (b) qualified pattern id searched in every corpus node's full text\"\n")
+    f.write(" :search \"corpus = every *.flexiarg in the grounding sections [%s], each with its own @holds-at tokens read from the file; per pattern in scope: (a) holds-token equality against every corpus node, (b) qualified pattern id searched in every corpus node's full text\"\n" % " ".join(GROUND_SECTIONS))
     f.write(" :corpus-nodes [\n")
     for (pid, holds, _t) in corpus:
         f.write("  {:node %s :holds-at [%s]}\n" % (q(pid), " ".join(q(h) for h in holds)))

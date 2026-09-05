@@ -39,7 +39,9 @@ for fn in sorted(os.listdir(d)):
     # something this gate fails on (repairing them would restructure
     # patterns, outside a backfill row's scope).
     BACKFILL_SECTIONS = {"war-room", "cascades", "futon-theory",
-                         "ukrns", "snatch", "vsatlas", "storage"}
+                         "ukrns", "snatch", "vsatlas", "storage",
+                         "math-formalization", "math-formalization-CA",
+                         "math-informal", "math-strategy"}
     lines = open(os.path.join(d, fn), encoding="utf-8").read().splitlines()
     meta = {}
     nodes = []
