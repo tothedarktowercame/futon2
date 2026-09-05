@@ -52,6 +52,10 @@ publish() {
     else log "publish: build failed rc=$rc (see /tmp/wm-build-p4ng.log)"; fi
   else log "publish: held -- a registry row awaits review"; fi
 }
+# The morning bulletin (:B1). Generated HERE, at the loop's natural stop, and
+# not by a daemon: the digest of a session is due when the session ends. It is
+# idempotent, so both exits below may call it and only one writes.
+bulletin() { bash "$HERE/write-bulletin.sh" "$LOG"; }
 log "=== wm-build-loop start (work=$WORK_SEAT review=$REVIEW_SEAT) ==="
 i=0
 while [ $i -lt "$MAX_ITER" ]; do
@@ -68,7 +72,7 @@ while [ $i -lt "$MAX_ITER" ]; do
   next="$(bb "$HERE/build_step.bb" next-open)"; unrev="$(bb "$HERE/build_step.bb" unreviewed)"
   log "iteration $i: next-open=$next unreviewed=[$unrev] counts=$(bb "$HERE/build_step.bb" counts)"
   [ -z "$unrev" ] && stall_check "$(bb "$HERE/build_step.bb" stall-key)"
-  if [ "$next" = "NONE" ] && [ -z "$unrev" ]; then log "nothing open or unreviewed; done"; publish; notify "DONE: nothing open or unreviewed"; break; fi
+  if [ "$next" = "NONE" ] && [ -z "$unrev" ]; then log "nothing open or unreviewed; done"; publish; bulletin; notify "DONE: nothing open or unreviewed"; break; fi
   if [ "$next" != "NONE" ]; then
     # The loop chose the row (build_step.bb priorities); the prompt must say so,
     # or the seat takes the first open row in ledger order (iteration 1 took I1
@@ -86,4 +90,4 @@ while [ $i -lt "$MAX_ITER" ]; do
   publish
   sleep "$SLEEP"
 done
-log "=== wm-build-loop end after $i iterations ==="; notify "ended after $i iterations (MAX_ITER=$MAX_ITER or done)"
+log "=== wm-build-loop end after $i iterations ==="; bulletin; notify "ended after $i iterations (MAX_ITER=$MAX_ITER or done)"

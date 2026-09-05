@@ -66,6 +66,10 @@ preflight() { # returns via globals: MIDEDIT (futon3c tracked mods, newline list
   MIDEDIT="$(cd "$FUTON3C" && git status --porcelain | grep -v '^??' || true)"
   if [ -n "$MIDEDIT" ]; then log "pre-flight WARNING: futon3c tracked modifications (do-not-touch for this iteration): $(echo "$MIDEDIT" | tr '\n' ' ')"; fi
 }
+# The morning bulletin (:B1). The bulletin reads BOTH boards, so this lane
+# stopping on a day the wm-contract loop never ran must still produce one.
+# The generator is idempotent, so a day both loops finish writes once.
+bulletin() { bash "$HOME/code/futon2/holes/labs/wm-contract/write-bulletin.sh" "$LOG"; }
 log "=== zaif-build-loop start (work=$WORK_SEAT review=$REVIEW_SEAT max=$MAX_ITER) ==="
 i=0
 while [ $i -lt "$MAX_ITER" ]; do
@@ -80,7 +84,7 @@ while [ $i -lt "$MAX_ITER" ]; do
   next="$(bb "$HERE/zaif_step.bb" next-open)"; unrev="$(bb "$HERE/zaif_step.bb" unreviewed)"
   log "iteration $i: next-open=$next unreviewed=[$unrev] counts=$(bb "$HERE/zaif_step.bb" counts)"
   [ -z "$unrev" ] && stall_check "$(bb "$HERE/zaif_step.bb" stall-key)"
-  if [ "$next" = "NONE" ] && [ -z "$unrev" ]; then log "nothing open or unreviewed in this lane; done"; notify "DONE: nothing open or unreviewed in lane claude-2"; break; fi
+  if [ "$next" = "NONE" ] && [ -z "$unrev" ]; then log "nothing open or unreviewed in this lane; done"; bulletin; notify "DONE: nothing open or unreviewed in lane claude-2"; break; fi
   if [ "$next" != "NONE" ]; then
     preflight
     { echo "ROW TO DO THIS INVOCATION: $next -- the build loop chose it by priority; take this row and no other."
@@ -97,4 +101,4 @@ while [ $i -lt "$MAX_ITER" ]; do
   fi
   sleep "$SLEEP"
 done
-log "=== zaif-build-loop end after $i iterations ==="; notify "ended after $i iterations (MAX_ITER=$MAX_ITER or done)"
+log "=== zaif-build-loop end after $i iterations ==="; bulletin; notify "ended after $i iterations (MAX_ITER=$MAX_ITER or done)"
