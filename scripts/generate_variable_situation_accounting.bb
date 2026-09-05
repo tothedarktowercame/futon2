@@ -639,11 +639,11 @@
                               (nth rung-scale (inc (rung-index held)))
                               " -- no rung is reachable except over the one below it")
                          {:error :rung-skipped :name nm :rung rung :held held})))
-       (when (and (>= (rung-index rung) (rung-index :constructed))
+       (when (and (>= (rung-index rung) (rung-index :witnessed))
                   (not (machine-record? licence)))
          (throw (ex-info (str "declared rung " rung " for " nm " is licensed by " licence
                               ", which carries no run identity -- fixtures and bound "
-                              "parameters do not reach :constructed")
+                              "parameters do not reach :witnessed or above")
                          {:error :fixture-at-constructed :name nm :rung rung :licence licence})))
        [(conj ladder (assoc claim :evidence (:evidence claim :declared)
                             :why (or (:basis claim) "declared in the accounting generator")))
@@ -957,8 +957,11 @@
             :rung-licence-unresolvable)
     ;; (d) a rung that skips the one below it
     (expect "skipped rung accepted" [{:rung :constructed :licence record}] :rung-skipped)
-    ;; (e) THE FIXTURE REFUSAL: a fully-pointed, non-skipping :constructed whose
-    ;;     licence is a hand-derived reference fixture rather than machine state.
+    ;; (e) THE FIXTURE REFUSAL: fully-pointed, non-skipping :witnessed and
+    ;;     :constructed claims whose licence is a hand-derived reference fixture
+    ;;     rather than machine state.
+    (expect "fixture accepted at :witnessed"
+            [{:rung :witnessed :licence fixture}] :fixture-at-constructed)
     (expect "fixture accepted at :constructed"
             [witnessed {:rung :constructed :licence fixture}] :fixture-at-constructed)
     ;; (f) a declaration that retracts rather than licenses
