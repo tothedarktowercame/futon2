@@ -1,0 +1,40 @@
+=== 1. ROW SET AGAINST THE EQUATION REGISTRY ===
+ledger rows 18  registry equations 18  equal? true
+  ledger-only ()  registry-only ()
+
+=== 2. CAVEATS: THE SPEC SAYS THREE, THE FILE CARRIES N ===
+count 4
+  0 BOX-5 STALENESS STILL HOLDS: runs/U35-lean-state/lean-state-report.edn p
+  1 R5 CERTIFICATE LIMIT STILL HOLDS: runs/F3-node-sim/00-r5-pilot.edn is a 
+  2 R17 CLASS-(b) DIVERGENCE STILL HOLDS: aif-equations.edn:187-195 says A4a
+  3 The retired scalar F has no producer at HEAD (aif-equations.edn:92-101);
+FINDING if count is not 3: C531's slice-2 line says 'pin the three still-live caveats'.
+
+=== 3. LICENCES: RESOLVE, AND THE TWO RUN-IDENTITY TESTS ===
+licences 36  unresolved 0  f6-true 0  nested-only 1
+  :policy-set :impl-leg :constructed :ok :f6 false :nested true holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:146
+
+=== 4. THE RULE POINTERS THE LEDGER CITES, READ AT HEAD ===
+  :rung-rule :ok futon2/scripts/generate_variable_situation_accounting.bb:417-428
+  :rung-rule-limit :ok futon2/scripts/generate_variable_situation_accounting.bb:450-462
+  417-428 mentions run-identity-keys? true
+  450-462 defines machine-record?? true
+
+=== 5. IS THERE A CODE-BACKED AUTHORITY FOR 'ACCEPTED RUN'? ===
+  pin exists /home/joe/code/futon2/data/wm-step/w1/pin/pin.edn
+  wm_step_observe.bb:111 previous-accepted-run reads :pin/accepted-steps: true
+  accepted run ids [2026-09-04-009-det-b 2026-09-04-010-accepted]
+  ledger certificates declaring :accepted-run? true: 0
+  cert artifact :risk holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn resolves :ok exists true carries-run-identity-anywhere false in-pin-accepted false
+  cert artifact :ambiguity holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn resolves :ok exists true carries-run-identity-anywhere false in-pin-accepted false
+  cert artifact :expected-free-energy holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn resolves :ok exists true carries-run-identity-anywhere false in-pin-accepted false
+  SO: :accepted-run? is RECOMPUTABLE against the pin, not only declarable.
+
+=== 6. VERBATIM IDENTITY FIELDS AGAINST THE REGISTRY ===
+fields compared 54  drifted 0
+
+=== 7. RUNG VOCABULARY IN USE ===
+  scale [:named :type-transcribed :formula-transcribed :witnessed :constructed :wired :validated :run-correlated]
+  used  {:formula-transcribed 25, :named 3, :type-transcribed 7, :constructed 1}
+  off-scale ()
+  converged? true rows 0
