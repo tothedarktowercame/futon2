@@ -12,7 +12,8 @@
  :carrying-why-or-how-unique 99
  :grep-floor-command "cd $LIBRARY_SUBDIR && grep -rlE '@(why|how)' --include='*.flexiarg' ."
  :grep-floor-files 106
- :problem-nodes 6 ["problems/commitment-temperature-is-instrumented-as-gain", "problems/operator-turns-become-inference-observations", "problems/per-tick-mismatch-instruments-outer-loop-gain", "problems/refusal-prediction-error-v1--source-field-missing", "problems/satisfied-rungs-are-counted-and-surfaced", "problems/tension-proposes-candidates"]
+ :problem-nodes-count 6
+ :problem-nodes ["problems/commitment-temperature-is-instrumented-as-gain", "problems/operator-turns-become-inference-observations", "problems/per-tick-mismatch-instruments-outer-loop-gain", "problems/refusal-prediction-error-v1--source-field-missing", "problems/satisfied-rungs-are-counted-and-surfaced", "problems/tension-proposes-candidates"]
  :wr-nodes 28
  :why-reachable-up-from-problems 14
  :why-reachable-up-from-problems+wr 34

@@ -180,7 +180,7 @@ with open(os.path.join(OUT, "L1-census-receipt.edn"), "w") as f:
     f.write(" :grep-floor-command %s\n"
             % q("cd $LIBRARY_SUBDIR && grep -rlE '@(why|how)' --include='*.flexiarg' ." ))
     f.write(" :grep-floor-files %d\n" % floor_n)
-    f.write(" :problem-nodes %d %s\n" % (len(problems), str(problems).replace("'", '"')))
+    f.write(" :problem-nodes-count %d\n :problem-nodes %s\n" % (len(problems), str(problems).replace("'", '"')))
     f.write(" :wr-nodes %d\n" % len(wr))
     f.write(" :why-reachable-up-from-problems %d\n" % len(reachA1))
     f.write(" :why-reachable-up-from-problems+wr %d\n" % len(reachA2))
