@@ -1,0 +1,97 @@
+{:schema :wm/machine-q-policy-family-census-v1
+
+ :what-this-is
+ "Slice 2 of :F1 was attempted and did not land. This is the measurement that
+  establishes why, replacing the slice-3 prose claim ('BLOCKED on Joe naming
+  the policy family') with numbers. Every count below is produced by
+  holes/labs/wm-contract/f1_policy_family_census.bb over data/wm-trace, which
+  is read-only, takes no run lock and prints identically on an unchanged
+  corpus. Nothing here is a ruling: no entry was written to
+  aif-equations.edn :choices or control-map-edges.edn :decisions."
+
+ :question
+ "Slice 2 needs pi -- a machine policy carrier. The mission asks for one
+  narrow policy family whose outcomes already feed a Dirichlet count, and says
+  that if no current policy has that contract the correct result is to DEFINE
+  the evidence event first, not to synthesize probabilities from gap scores
+  (holes/missions/M-aif-policy-conditioned-eig.md:127-133). The Q audit puts
+  naming the carrier before constructing Q
+  (holes/labs/wm-contract/Q-interface-completeness.edn:185). So: does the
+  machine already produce a carrier, and does anything count outcomes under
+  it?"
+
+ :leg-1-scored-grain
+ {:carrier "futon2.aif.habit-prior/policy-key"
+  :at "src/futon2/aif/habit_prior.clj:27-38"
+  :counted-by "fold-record, src/futon2/aif/habit_prior.clj:81-84"
+  :measured {:records 889
+             :records-with-a-stable-policy-identity 889
+             :records-with-none 0
+             :distinct-policy-identities 18}
+  :is-a-dirichlet-count true
+  :what-it-counts
+  "SELECTIONS, not outcomes. The namespace states it: 'a learned habit/frequency
+   prior, not evidence that a policy is good' (src/futon2/aif/habit_prior.clj:13-14).
+   That object is E(pi) -- and slice 3 already REFUSES it at the Q boundary as
+   :refusal/policy-selection-distribution (src/futon2/aif/machine_q.clj:150,
+   raised at :179). So the machine's one live Dirichlet over a policy alphabet
+   is the one thing this row is required to reject as a Q."
+  :grain-note
+  "These 18 identities are SINGLE ACTIONS (the 14-member set at
+   src/futon2/aif/forward_model.clj:26-33), which is not the grain the glossary
+   declares for pi. Adopting them as pi is a grain ruling, and the subject of a
+   separate proposal (proposals/STRAWMAN-M-wm-aif-policy-grain-compliance.md)."}
+
+ :leg-2-declared-grain
+ {:carrier "the pattern-language cascade"
+  :declared-at "mathlib4/DarkTower/WarMachine/Holes.lean:7022"
+  :runtime-at "src/futon2/aif/cascade_prior.clj:1-12"
+  :census-entry "FUNDAMENTALS.edn:243-272, :fundamental/machine-policy-carrier, :uninhabited on both sides"
+  :what-was-new
+  "That entry's runtime basis is a CODE READ. Its own falsifier
+   (FUNDAMENTALS.edn:272) is a statement about runs -- 'a runtime decision in
+   which two or more cascades for one selected mission are constructed and
+   scored' -- and had never been run against the corpus. It was run here."
+  :measured {:records-carrying-an-apply-cascade-candidate 234
+             :most-apply-cascade-candidates-in-one-record 2
+             :most-distinct-cascades-for-one-target-in-one-record 1
+             :records-with-two-or-more-cascades-for-one-target 0}
+  :verdict :falsifier-does-not-fire
+  :reading
+  "Cascades are present in 234 of 889 decisions, so the probe is not blind: it
+   sees the object. What no decision offers is a CHOICE between two of them for
+   one mission, which is what a policy index needs. The census entry's
+   :uninhabited verdict is confirmed on the live corpus, not merely by reading."}
+
+ :leg-3-outcome-side
+ {:not-re-measured-here true
+  :covered-by "holes/labs/wm-contract/u56_outcome_census.bb, committed and re-run for this receipt"
+  :measured {:records 889
+             :reaching-a-categorical-outcome 0
+             :carrying-a-realized-outcome-record 88
+             :with-a-non-nil-realized-leg 85
+             :distinct-realized-outcome-key-sets 1}
+  :agrees-with "src/futon2/aif/realized_outcome.clj:107-113, which records 889 of 889 in its own docstring"
+  :reading
+  "The 88 are the July-2026 vocabulary {:policy :expected-G :realized-G :tick},
+   scalars at MISSION grain over 3 distinct :policy values. They are scores,
+   not events. Turning a score into an evidence event is a threshold, and the
+   mission names that as the thing not to do
+   (holes/missions/M-aif-policy-conditioned-eig.md:130-133). Capturing real
+   outcomes on the step path is :U59's build, itself :blocked."}
+
+ :conclusion
+ "No policy family in the machine meets the mission's stated precondition. The
+  scored grain has a live Dirichlet count of 889 selections over 18 identities
+  and zero outcomes counted under it; the declared grain has no admissible
+  second row in any of 889 decisions. Both exits out of slice 2 are rulings and
+  neither is this lane's to take: adopt the action grain as pi (a grain ruling,
+  and the object slice 3 refuses as a Q), or define the evidence event first
+  (STRAWMAN question 1 / hole 1, addressed to Joe). Slice 2 was not attempted
+  further and the row is set :blocked."
+
+ :not-done
+ ["No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions."
+  "gen_aif_dag.bb and gen_q_interface_table.bb not run; nothing regenerated into a publish (TN 9a)."
+  "No src/ change, no Lean change, no registry finding moved by this slice."
+  "The machine was not run and no run lock was taken; data/wm-trace was read only."]}
