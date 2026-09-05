@@ -450,7 +450,7 @@
 (defn machine-record?
   "True iff the artifact a licence names carries a run identity -- at the top
    level, or in a top-level sequence of maps. A hand-derived reference fixture
-   does not: holes/labs/wm-contract/act-gate-reference.edn:6 declares itself
+   does not: holes/labs/wm-contract/act-gate-reference.edn:5 declares itself
    :kind :hand-derived-from-record."
   [pointer]
   (if-let [[_ path] (re-matches pointer-re (str/trim (str pointer)))]
