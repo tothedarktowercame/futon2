@@ -614,9 +614,11 @@
 
    `f-pi-fields` is what `f-pi-dark-readback` returned; `ranked` is the field
    `select-action` will actually receive (`wm-admissible`), NOT the wider
-   `wm-ranked+cascades` the readback and the beta carry were computed over.
-   The two differ by `can-execute?`, so the join has to be done against the
-   selector's own list or the values would be misaligned with `g-totals`.
+   `wm-ranked` the readback and the beta carry were computed over. The two
+   differ by `can-execute?`, so the join has to be done against the selector's
+   own list or the values would be misaligned with `g-totals`. (Before :F9 the
+   readback ran over `wm-ranked+cascades`; on every recorded tick that field
+   equalled `wm-ranked`, because the advisory lane was off.)
 
    The readback is keyed by the PREVIOUS tick's rank/N and carries
    `:candidate-identity`; the join is by that identity, the same one the beta
@@ -6386,35 +6388,6 @@
         ;; silent fall to `default-mode-select`.
         wm-selection-law (arena-selection-law)
         _ (selection-law-preconditions! wm-selection-law)
-        ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
-        ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
-        ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
-        ;; verdict. They are APPENDED to the served ranked-actions (so wm-admissible/wm-decision
-        ;; — the WM's own auto-selection — are unaffected) and tagged :held-for-arming? true:
-        ;; the pilot can SELECT one as v and mint a consent gate over it, but EXECUTING it is
-        ;; Part B, held for operator arming (WM-I4). cascade-policies computed once, reused below.
-        cascade-policies (if include-advisory-lanes?
-                           (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
-                                 wm-ranked {:n 3 :budget 6})
-                                (catch Throwable _ []))
-                           [])
-        cascade-actions (mapv (fn [cp]
-                                (let [dF (:cascade-score cp) dG (:policy-rollout-score cp)
-                                      pass? (boolean (and dF (pos? dF) dG (neg? dG)))]
-                                  {:action {:type :apply-cascade
-                                            :target (:mission cp)
-                                            :rationale "apply the acquired cascade-policy (Car-3 / R16); execution HELD for operator arming"
-                                            :cascade {:shown (:shown cp) :wholeness (:wholeness cp)}
-                                            :act-gate {:cascade-score dF :coverage-score-delta dG :pass? pass?}}
-                                   :controller-score (or dG 0.0)
-                                   ;; D1b (M-evaluate-policies §8.2): the 0.0 fallback is
-                                   ;; load-bearing (IHTB-2) — the marker makes the constant
-                                   ;; self-describing instead of silently rank-neutral.
-                                   :score-provenance (if dG :rollout-dG :placeholder)
-                                   :held-for-arming? true}))
-                              cascade-policies)
-        wm-ranked+cascades (vec (map-indexed (fn [i e] (assoc e :rank (inc i)))
-                                             (into (vec wm-ranked) cascade-actions)))
         ;; RUN8 / stage S3. The F_pi readback and the beta carry are computed
         ;; HERE, BEFORE selection, because under
         ;; `FUTON_WM_TAU_MODE=variational-beta-gamma` the tick's own solved beta
@@ -6422,26 +6395,46 @@
         ;; nothing below reads them and they are, as in S2, merged onto the
         ;; judgement for persistence only -- the move is a reordering of pure
         ;; bindings, not a change to what they compute. They run after ranking
-        ;; because G is each candidate's own :controller-score, and on
-        ;; `wm-ranked+cascades` -- the SAME field the S2 dark carry used, so the
-        ;; beta series stays comparable across the two stages.
+        ;; because G is each candidate's own :controller-score.
+        ;;
+        ;; :F9 SETTLES WHICH FIELD THEY RUN OVER, which C475 6.2 asked for
+        ;; before the cascade block could move. It is `wm-ranked`, the machine's
+        ;; own EFE-ranked field -- NOT the cascade-augmented one, which from
+        ;; here on is built below `wm-decision` and so does not exist yet.
+        ;; Three reasons, in the order they bind:
+        ;;   (a) beta is the selection temperature under the variational mode,
+        ;;       and the pool it is solved over should be the pool selection
+        ;;       ranges over. `wm-admissible` -- what `select-action` receives,
+        ;;       and what `f-pi-posterior-opts` already joins against -- is
+        ;;       filtered from `wm-ranked`, and cascade rows are
+        ;;       `:held-for-arming? true`: never selectable, on any tick.
+        ;;   (b) it removes the cycle C474 5 warned of. With the cascade lane
+        ;;       constructed for the COMMITTED decision, a beta solved over
+        ;;       cascade rows would be a temperature that depends on the
+        ;;       decision it sets the temperature for.
+        ;;   (c) the S2/S3 beta series stays comparable, and by identity rather
+        ;;       than by assertion: every recorded tick ran with
+        ;;       `:include-advisory-lanes? false`, so `cascade-actions` was
+        ;;       always empty and `wm-ranked+cascades` was `wm-ranked` with the
+        ;;       ranks re-asserted. The field this now names is the field those
+        ;;       runs actually used.
         f-pi-dark-fields (when (or *f-pi-dark?* (= :variational-beta-gamma wm-tau-mode))
                            (f-pi-dark-readback prev-trace-record
-                                               wm-ranked+cascades
+                                               wm-ranked
                                                observation))
         beta-dark-fields (when (or *beta-dark?* (= :variational-beta-gamma wm-tau-mode))
                            (beta-dark-carry prev-trace-record
                                             f-pi-dark-fields
-                                            wm-ranked+cascades))
+                                            wm-ranked))
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
         ;; (composes with can-propose? at proposer-side); then run
         ;; deliberative select-action with default-mode-select as a
         ;; try/catch fallback for I6 compositional closure.
         wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
         ;; RUN9 / stage S4. Joined against `wm-admissible` and not against the
-        ;; wider `wm-ranked+cascades` the readback ran over, because this is
-        ;; the field `select-action` receives and `:f-pi-values` must align
-        ;; with its `g-totals`. Off unless FUTON_WM_FPI_POSTERIOR=1, and off
+        ;; wider `wm-ranked` the readback ran over, because this is the field
+        ;; `select-action` receives and `:f-pi-values` must align with its
+        ;; `g-totals`. Off unless FUTON_WM_FPI_POSTERIOR=1, and off
         ;; on any tick whose coverage is incomplete -- see
         ;; `f-pi-posterior-opts`.
         f-pi-posterior-fields (f-pi-posterior-opts f-pi-dark-fields
@@ -6551,6 +6544,50 @@
                 :counterfactuals
                 (:counterfactuals strategic-selection)
                 :actuation (:actuation strategic-selection)})
+        ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
+        ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
+        ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
+        ;; verdict. They are APPENDED to the served ranked-actions (so wm-admissible/wm-decision
+        ;; — the WM's own auto-selection — are unaffected) and tagged :held-for-arming? true:
+        ;; the pilot can SELECT one as v and mint a consent gate over it, but EXECUTING it is
+        ;; Part B, held for operator arming (WM-I4). cascade-policies computed once, reused below.
+        ;;
+        ;; :F9 MOVED THIS BLOCK HERE, BELOW `wm-decision`, and hands the lane the
+        ;; decision itself. Where it used to sit -- above `select-action` -- the
+        ;; only decision available to it was `(first ranked-actions)`, the
+        ;; RANKING's head, and `cascade-lane`'s own docstring said it was
+        ;; building for "what the machine decided". Over the 48 recorded
+        ;; S1b/S2/S4/S5 ticks those two targets disagree 48 times out of 48
+        ;; (`runs/F9-cascade-decision/00-corpus-target-gap.edn`), so the lane
+        ;; would have gated the wrong mission on every one of them. Constructing
+        ;; below the decision is what the 2026-07-06 operator ruling quoted at
+        ;; `cascade-lane/*gate-decision-target?*` asks for, and what Joe's
+        ;; 2026-08-30 "target first, then the cascade to match" asks for
+        ;; (`P-validated-R5.md`:414-415). Nothing here feeds selection: these
+        ;; rows are appended AFTER `wm-decision` is final, exactly as the
+        ;; `judge` docstring already promised.
+        cascade-policies (if include-advisory-lanes?
+                           (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
+                                 wm-ranked {:n 3 :budget 6 :decision wm-decision})
+                                (catch Throwable _ []))
+                           [])
+        cascade-actions (mapv (fn [cp]
+                                (let [dF (:cascade-score cp) dG (:policy-rollout-score cp)
+                                      pass? (boolean (and dF (pos? dF) dG (neg? dG)))]
+                                  {:action {:type :apply-cascade
+                                            :target (:mission cp)
+                                            :rationale "apply the acquired cascade-policy (Car-3 / R16); execution HELD for operator arming"
+                                            :cascade {:shown (:shown cp) :wholeness (:wholeness cp)}
+                                            :act-gate {:cascade-score dF :coverage-score-delta dG :pass? pass?}}
+                                   :controller-score (or dG 0.0)
+                                   ;; D1b (M-evaluate-policies §8.2): the 0.0 fallback is
+                                   ;; load-bearing (IHTB-2) — the marker makes the constant
+                                   ;; self-describing instead of silently rank-neutral.
+                                   :score-provenance (if dG :rollout-dG :placeholder)
+                                   :held-for-arming? true}))
+                              cascade-policies)
+        wm-ranked+cascades (vec (map-indexed (fn [i e] (assoc e :rank (inc i)))
+                                             (into (vec wm-ranked) cascade-actions)))
         habit-prior-state
         (when (= :learned-frequency habit-prior-source)
           ;; Do not train the scheduler-grain prior on strategic

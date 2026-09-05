@@ -1,0 +1,21 @@
+#:world-drift{:between
+              ["data/wm-step/w1/steps/016-f9-base-flagoff/world-before.edn"
+               "data/wm-step/w1/steps/018-f9-newcode-flagoff/world-before.edn"],
+              :moved
+              [{:id :mana-snapshot,
+                :path
+                "/home/joe/code/storage/futon0/mana-snapshot.json",
+                :a
+                "297c125dca25f3a1124f818befccc4d6e29656a18c9522b052bbeedc88e0f573",
+                :b
+                "42552a8186c1baf3ac111497241133e9457b50af892b2ad8191abde4773d1c3f"}],
+              :count 1,
+              :mana-age [3.9690833333333333 2.86905],
+              :mana-stale [false false],
+              :commit-census
+              {:total [3989 3989],
+               :moved [],
+               :note
+               "the four :*-pct observation channels are this census divided by its total (war_machine.clj:3828-3836); a census that moves moves the observation"},
+              :note
+              "a step cannot redirect these paths (C509 R7/R6), so it hashes them; the mana snapshot decides mode by AGE, not content (C509 T5)"}

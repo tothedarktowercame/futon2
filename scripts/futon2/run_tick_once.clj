@@ -252,7 +252,18 @@
   ([selector version-stamp run-id] (diagnostic-judge-opts selector version-stamp run-id nil))
   ([selector version-stamp run-id trace-dir]
    (cond-> {:trace? true
-            :include-advisory-lanes? false
+            ;; :F9, 2026-09-05. ON. Until this row the diagnostic tick ran with
+            ;; the advisory lane off, so `:cascade-policies` was `[]` on all 48
+            ;; recorded S1b/S2/S4/S5 ticks and the machine never constructed a
+            ;; cascade for anything it decided (C475 3). It is on now that the
+            ;; lane is constructed BELOW `wm-decision` and for the committed
+            ;; target (war_machine.clj `cascade-policies`). What this adds to a
+            ;; tick is read-only: the rows it appends to `:ranked-actions` are
+            ;; `:held-for-arming? true`, they are appended after `wm-decision`
+            ;; is final, and nothing selects or enacts them. What it costs is
+            ;; the cascade constructor -- a Python subprocess under a 30 s
+            ;; ceiling (`cascade_lane.clj`:20-35) -- per constructed target.
+            :include-advisory-lanes? true
             :step-portfolio? false
             :step-mission-detail-portfolio? false
             :eval-invariant-fallback? false

@@ -419,17 +419,27 @@
   true)
 
 (defn- decision-entry
-  "Extract the rank-1 decision entry from ranked-actions (ANY action type
-  with a :target). Returns nil when the first ranked action has no :target
-  or when rank-1 IS an :open-mission (handled by the existing filter, so
-  dedup is automatic)."
-  [ranked-actions]
-  (let [first-entry (first ranked-actions)
-        action-type (get-in first-entry [:action :type])
-        target      (get-in first-entry [:action :target])]
-    (when (and target
-               (not (#{:open-mission "open-mission"} action-type)))
-      first-entry)))
+  "The entry whose target the gate is to evaluate (ANY action type with a
+  :target). Returns nil when it has no :target, or when it IS an
+  :open-mission (handled by the existing filter, so dedup is automatic).
+
+  TWO SOURCES, AND WHICH ONE IS USED IS THE CALLER'S TO SAY (:F9). `decision`,
+  when supplied, is the tick's COMMITTED decision -- war-machine's
+  `wm-decision`, the same map it persists under `:decision`. Without it the
+  rank-1 entry of `ranked-actions` stands in, and rank-1 is the RANKING's head,
+  which is a different object: measured over the 48 recorded S1b/S2/S4/S5 ticks
+  the two disagree 48 times out of 48 (`C475-cascade-order-disposition.md` 3;
+  `runs/F9-cascade-decision/00-corpus-target-gap.edn`). The 2026-07-06 operator
+  ruling this namespace quotes at `*gate-decision-target?*` asks for the
+  committed one."
+  ([ranked-actions] (decision-entry ranked-actions nil))
+  ([ranked-actions decision]
+   (let [entry       (or decision (first ranked-actions))
+         action-type (get-in entry [:action :type])
+         target      (get-in entry [:action :target])]
+     (when (and target
+                (not (#{:open-mission "open-mission"} action-type)))
+       entry))))
 
 (defn cascade-lane
   "The v1 cascade lane: for the top-n :open-mission targets in ranked-actions, build the
@@ -437,9 +447,17 @@
    [{:mission :psi :size :wholeness :budget :truncated :shown [pattern-ids...]} ...].
    When *gate-decision-target?* is true (default, operator ruling 2026-07-06), entry #1
    is the judge's actual top decision (any action type with a :target), so the gate
-   checks what the machine decided -- not just the open-mission side-stream."
+   checks what the machine decided -- not just the open-mission side-stream.
+
+   `:decision` (:F9) supplies that decision explicitly: pass the committed
+   decision map (war-machine's `wm-decision`) and entry #1 is built for ITS
+   target. Omit it and the rank-1 entry of `ranked-actions` is used instead,
+   which is the pre-:F9 behaviour and the ranking's head rather than the
+   committed target. When the decision target is already one of the top-n
+   :open-mission entries the dedup keeps a single entry for it, so the target
+   is present in the returned list without being at index 0."
   ([ranked-actions] (cascade-lane ranked-actions {}))
-  ([ranked-actions {:keys [n budget] :or {n 3 budget default-budget}}]
+  ([ranked-actions {:keys [n budget decision] :or {n 3 budget default-budget}}]
    (let [build-entry (fn [e]
                        (let [m (get-in e [:action :target])
                              psi (str/trim (str (mission->psi m) " "
@@ -479,7 +497,7 @@
                          (keep build-entry)
                          vec)
          decision-entries (when *gate-decision-target?*
-                            (when-let [de (decision-entry ranked-actions)]
+                            (when-let [de (decision-entry ranked-actions decision)]
                               (let [dec-target (get-in de [:action :target])
                                     already-in? (some #(= (:mission %) dec-target) om-entries)]
                                 (when-not already-in?

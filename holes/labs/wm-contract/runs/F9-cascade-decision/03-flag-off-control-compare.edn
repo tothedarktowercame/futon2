@@ -1,0 +1,19 @@
+#:compare{:a
+          "data/wm-step/w1/steps/016-f9-base-flagoff/normalized.edn",
+          :b
+          "data/wm-step/w1/steps/018-f9-newcode-flagoff/normalized.edn",
+          :a-sha256
+          "dd2463575149e0298c20316995eb3eb950e676501ef5544c060c18c813c60dac",
+          :b-sha256
+          "98cb1d8861ec26d9f274025988af598a9de91b37ebde79e0c469b58a1f2344d7",
+          :forms [1 1],
+          :verdict :divergent,
+          :differing-paths
+          [{:path [:wm-version :git-dirty?],
+            :why :differs,
+            :a "false",
+            :b "true"}],
+          :excluded
+          {:anywhere [:startedAt :timestamp :run/id],
+           :in-route [:at :at_],
+           :where "C509-inter-tick-state-boundary.md, handoff item 4"}}

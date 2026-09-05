@@ -1,0 +1,18 @@
+{:ok-count 0,
+ :record-count 1,
+ :check :f9/cascade-target-equality,
+ :mode :decision,
+ :paths ["runs/F9-cascade-decision/016-f9-base-flagoff-delta.edn"],
+ :verdicts #:error{:no-cascade-constructed 1},
+ :rank1-equals-decision 1,
+ :verdict :fail,
+ :files ["runs/F9-cascade-decision/016-f9-base-flagoff-delta.edn"],
+ :results
+ [{:run-id "5024100a-4fcc-4b8c-b89d-0281f056c948",
+   :timestamp "2026-09-05T19:37:20.553139420Z",
+   :mode :decision,
+   :target "M-zaif-harness-v1",
+   :decision-target "M-zaif-harness-v1",
+   :rank1-target "M-zaif-harness-v1",
+   :cascade-missions [],
+   :verdict :error/no-cascade-constructed}]}
