@@ -1,0 +1,325 @@
+{:schema :wm/machine-grain-q-v1,
+ :producer "futon2/holes/labs/wm-contract/f1_machine_grain_q.clj",
+ :belief
+ {:strengthened 0.31729699116098653,
+  :addressed 0.09486175659867697,
+  :falsified 0.07320744260505195,
+  :reopened 0.10445037332579991,
+  :spawned 0.10445037332579991,
+  :refined 0.14067806337703845,
+  :foreclosed 0.16505499960664613},
+ :policies
+ [{:size 23,
+   :coverage-saturation-epsilon 0.1,
+   :cascade-score -6.901,
+   :policy-key-recorded
+   [:pattern-cascade
+    "M-expressions-of-interest"
+    ["structure/interest-event-vocabulary"
+     "ai4ci/ai-core-function"
+     "vsatlas/proof-through-pilots"
+     "devmap-coherence/prototype-maturity-lifecycle"
+     "stack-coherence/ready-blocked-triage"
+     "ai4ci/project-summary-core"
+     "devmap-coherence/next-steps-to-done"
+     "devmap-coherence/prototype-alignment-role"
+     "vsatelier/annotation-as-commitment"
+     "iching/hexagram-43-guai"
+     "system-coherence/argue-empirically-not-persuasively"
+     "or2/shared-futures-beyond-atomised-incentives"
+     "library-coherence/llm-argument-scan"
+     "library-coherence/from-argument-to-pilot"
+     "contributing/devmap-contribution-protocol"
+     "iching/hexagram-13-tongren"
+     "plos-npt-with-small-n/site-case-data-display"
+     "pattern-discipline/conclusion-required-others-recommended"
+     "meta/layering-design-into-argument"
+     "iching/hexagram-05-xu"
+     "plos-npt-with-small-n/abstract-n-method-frame"
+     "ai4ci/dual-layer-proof-patterns"
+     "futon-theory/derive-exits-on-a-minted-sorry"]
+    {:co_app
+     [["devmap-coherence/prototype-alignment-role"
+       "devmap-coherence/prototype-maturity-lifecycle"
+       1]
+      ["devmap-coherence/prototype-maturity-lifecycle"
+       "stack-coherence/ready-blocked-triage"
+       2]],
+     :descent
+     [["ai4ci/ai-core-function" "ai4ci/project-summary-core"]
+      ["ai4ci/project-summary-core"
+       "devmap-coherence/next-steps-to-done"]
+      ["ai4ci/project-summary-core"
+       "stack-coherence/ready-blocked-triage"]
+      ["devmap-coherence/next-steps-to-done"
+       "devmap-coherence/prototype-maturity-lifecycle"]
+      ["devmap-coherence/prototype-maturity-lifecycle"
+       "devmap-coherence/next-steps-to-done"]
+      ["stack-coherence/ready-blocked-triage"
+       "devmap-coherence/next-steps-to-done"]
+      ["stack-coherence/ready-blocked-triage"
+       "devmap-coherence/prototype-maturity-lifecycle"]]}],
+   :policy-key-recomputed
+   [:pattern-cascade
+    "M-expressions-of-interest"
+    ["structure/interest-event-vocabulary"
+     "ai4ci/ai-core-function"
+     "vsatlas/proof-through-pilots"
+     "devmap-coherence/prototype-maturity-lifecycle"
+     "stack-coherence/ready-blocked-triage"
+     "ai4ci/project-summary-core"
+     "devmap-coherence/next-steps-to-done"
+     "devmap-coherence/prototype-alignment-role"
+     "vsatelier/annotation-as-commitment"
+     "iching/hexagram-43-guai"
+     "system-coherence/argue-empirically-not-persuasively"
+     "or2/shared-futures-beyond-atomised-incentives"
+     "library-coherence/llm-argument-scan"
+     "library-coherence/from-argument-to-pilot"
+     "contributing/devmap-contribution-protocol"
+     "iching/hexagram-13-tongren"
+     "plos-npt-with-small-n/site-case-data-display"
+     "pattern-discipline/conclusion-required-others-recommended"
+     "meta/layering-design-into-argument"
+     "iching/hexagram-05-xu"
+     "plos-npt-with-small-n/abstract-n-method-frame"
+     "ai4ci/dual-layer-proof-patterns"
+     "futon-theory/derive-exits-on-a-minted-sorry"]
+    {:co_app
+     [["devmap-coherence/prototype-alignment-role"
+       "devmap-coherence/prototype-maturity-lifecycle"
+       1]
+      ["devmap-coherence/prototype-maturity-lifecycle"
+       "stack-coherence/ready-blocked-triage"
+       2]],
+     :descent
+     [["ai4ci/ai-core-function" "ai4ci/project-summary-core"]
+      ["ai4ci/project-summary-core"
+       "devmap-coherence/next-steps-to-done"]
+      ["ai4ci/project-summary-core"
+       "stack-coherence/ready-blocked-triage"]
+      ["devmap-coherence/next-steps-to-done"
+       "devmap-coherence/prototype-maturity-lifecycle"]
+      ["devmap-coherence/prototype-maturity-lifecycle"
+       "devmap-coherence/next-steps-to-done"]
+      ["stack-coherence/ready-blocked-triage"
+       "devmap-coherence/next-steps-to-done"]
+      ["stack-coherence/ready-blocked-triage"
+       "devmap-coherence/prototype-maturity-lifecycle"]]}],
+   :policy-key-agrees true}
+  {:size 1,
+   :coverage-saturation-epsilon 0.2,
+   :cascade-score 0.019,
+   :policy-key-recorded
+   [:pattern-cascade
+    "M-expressions-of-interest"
+    ["structure/interest-event-vocabulary"]
+    {:co_app [], :descent []}],
+   :policy-key-recomputed
+   [:pattern-cascade
+    "M-expressions-of-interest"
+    ["structure/interest-event-vocabulary"]
+    {:co_app [], :descent []}],
+   :policy-key-agrees true}],
+ :not-done
+ ["No src/, no Lean, no test change: the composition is used as slice 3 shipped it."
+  "No FUNDAMENTALS.edn verdict moves. :fundamental/controlled-transition-kernel stays :in, and this record is evidence for that entry rather than against it."
+  "No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions. Nothing here is a ruling."
+  "Nothing is selected, scored or enacted; the cascade prior is untouched and stays cold."
+  "gen_aif_dag.bb and gen_q_interface_table.bb not run; nothing regenerated into a publish (TN 9a)."
+  "*seam-reading* is still bound nowhere in src/: this script binds nothing and the R4 seam stays dark."],
+ :basis
+ {:trace-file "data/wm-trace/wm-trace-2026-09-04.edn",
+  :run-id "c149f9de-669c-4817-9b0e-ed4aad77db79",
+  :recorded-timestamp "2026-09-04T07:50:47.952039102Z",
+  :decision-target "M-expressions-of-interest",
+  :decision-type :advance-mission,
+  :menu
+  "holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn",
+  :menu-candidate-count 2,
+  :menu-policy-choice? true},
+ :producer-contract
+ {:constructs-cascades? false,
+  :selects-or-enacts? false,
+  :writes-machine-state? false,
+  :run-lock-taken? false,
+  :reads "data/wm-trace and two committed F7 receipts, read-only"},
+ :carriers
+ [{:carrier :state,
+   :provenance :machine-data,
+   :value "futon2.aif.belief/status-set -- 7 lifecycle statuses",
+   :at "futon2/src/futon2/aif/belief.clj:42"}
+  {:carrier :outcome-alphabet,
+   :provenance :machine-data,
+   :value "the 7 observed events A has rows for",
+   :at "futon2/src/futon2/aif/belief.clj:199-206"}
+  {:carrier :observation-kernel-A,
+   :provenance :machine-data,
+   :value
+   "futon2.aif.belief/observation-model-v1, transposed to {s {o mass}}",
+   :at "futon2/src/futon2/aif/belief.clj:199-206",
+   :census
+   "FUNDAMENTALS.edn :out/observation-kernel-instance -- runtime :inhabited"}
+  {:carrier :belief,
+   :provenance :machine-data,
+   :value
+   "the :mu-post of run c149f9de-669c-4817-9b0e-ed4aad77db79 -- 417 entities carrying 1 distinct posterior, so no entity is chosen",
+   :at "data/wm-trace/wm-trace-2026-09-04.edn :mu-post"}
+  {:carrier :policy,
+   :provenance :machine-data,
+   :value
+   "the two cascades of F7's menu, identified by futon2.aif.cascade-prior/policy-key recomputed here and compared with the recorded key",
+   :at
+   "futon2/holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn",
+   :census
+   "FUNDAMENTALS.edn :fundamental/machine-policy-carrier -- runtime :inhabited by F7"}
+  {:carrier :transition-kernel-B,
+   :provenance :machine-data-lifted,
+   :value
+   "futon2.aif.belief/transition-model-v1 (7x7 identity, no action index) under the constant lift B(s,u) = B(s)",
+   :at "futon2/src/futon2/aif/belief.clj:216-231",
+   :census
+   "FUNDAMENTALS.edn :fundamental/controlled-transition-kernel -- :in, uninhabited on BOTH legs",
+   :reads
+   "THIS IS THE ONE CARRIER THE MACHINE DOES NOT SUPPLY AT THE REQUIRED SIGNATURE. The lift is not a choice among several: it is the only one that adds no information to what belief.clj holds."}],
+ :slice
+ "slice 2 of :F1 -- the machine-grain Q(o|pi) instance over the cascades F7 constructed. Slices 1 (Lean) and 3 (runtime seam) are landed; this slice changes no src/, no Lean and no census verdict.",
+ :at "2026-09-05",
+ :machine-action-identity
+ {:policy-key [:advance-mission [:target "M-expressions-of-interest"]],
+  :via "futon2.aif.habit-prior/policy-key",
+  :at "futon2/src/futon2/aif/habit_prior.clj:29-38",
+  :reads
+  "Both cascades collapse to this one identity: the action grain excludes cascade payloads by design, which the docstring states."},
+ :finding
+ {:machine-grain-rows-differ false,
+  :max-abs-row-difference-machine 0.0,
+  :max-abs-row-difference-declared-control 0.021891808923863332,
+  :reads
+  "Arm 1 and arm 2 give the same rows for both cascades. Arm 2 is the isolation: the plans DIFFER there and the rows still coincide, so what is missing is B's dependence on u, not the plan's on pi. Arm 3 shows the composition separates policies as soon as B reads u."},
+ :boundary-repair
+ {:what
+  "predictive-outcome-row! threw ClassCastException instead of naming a reason, for any row carrying a non-numeric value.",
+  :found-by
+  "feeding the recorded :mu-post and an F7 cascade candidate to the boundary in this slice",
+  :cause
+  "the row sum was computed eagerly in the let, so `double` ran before the :refusal/non-probability-mass branch could fire",
+  :fix
+  "src/futon2/aif/machine_q.clj:204 -- the sum is a delay, forced only in the :refusal/unnormalised branch at :221-223",
+  :test
+  "test/futon2/aif/machine_q_test.clj:159 -- malformed-rows-are-refused-with-typed-reasons-test, two added assertions (a map mass and a string mass)",
+  :reads
+  "The two :refusal/untyped-throw verdicts this receipt would have recorded before the fix are why :F1's acceptance says TYPED refusal."},
+ :boundary-refusals
+ [{:fed
+   "the F7 menu's own selection weights {policy-key -> cascade-selection-weight} -- Q(pi) at the cascade grain, runs/F7-cascade-policy/f7-cascade-policy-decision.edn :selection",
+   :refusal :refusal/outcome-outside-declared-alphabet}
+  {:fed
+   "one F7 cascade candidate map (a policy, offered as if it were a distribution over outcomes)",
+   :refusal :refusal/non-probability-mass}
+  {:fed
+   "the recorded :mu-post -- {entity-id -> distribution over states}, the belief itself",
+   :refusal :refusal/non-probability-mass}
+  {:fed
+   "the recorded :observation -- the 14-channel observation vector",
+   :refusal :refusal/outcome-outside-declared-alphabet}
+  {:fed
+   "the recorded belief's single posterior -- a genuine distribution over the STATES, offered as a row over the OUTCOMES",
+   :refusal :accepted,
+   :reads
+   "ACCEPTED, and that is a limit of the boundary worth stating rather than a pass. The machine names its 7 observed events with the same 7 keywords as its lifecycle statuses (belief.clj:42 and belief.clj:199-206 have equal key sets), so a state distribution and an outcome row are indistinguishable to predictive-outcome-row!. The boundary checks shape, support and normalisation; it cannot check which carrier a well-formed row is over."}
+  {:fed
+   "the machine-grain row this script computed (POSITIVE CONTROL)",
+   :refusal :accepted}],
+ :row :F1,
+ :arms
+ [{:rows-coincide true,
+   :arm :machine-grain/machine-plan,
+   :normalisation-residual
+   {:pi-1 3.3306690738754696E-16, :pi-2 3.3306690738754696E-16},
+   :predicted-state-equals-belief true,
+   :max-abs-row-difference 0.0,
+   :law/rows-equal-for-equal-plans true,
+   :note
+   "plan(pi) is the machine's own action identity for this decision; both cascades plan the same step",
+   :rows
+   {:pi-1
+    {:addressed 0.13586935394880342,
+     :falsified 0.12268021398424199,
+     :foreclosed 0.14341337270268642,
+     :refined 0.14944351808372047,
+     :reopened 0.14167667254136745,
+     :spawned 0.13811935666891706,
+     :strengthened 0.16879751207026295},
+    :pi-2
+    {:addressed 0.13586935394880342,
+     :falsified 0.12268021398424199,
+     :foreclosed 0.14341337270268642,
+     :refined 0.14944351808372047,
+     :reopened 0.14167667254136745,
+     :spawned 0.13811935666891706,
+     :strengthened 0.16879751207026295}},
+   :plans-differ false}
+  {:rows-coincide true,
+   :arm :machine-grain/cascade-plan,
+   :normalisation-residual
+   {:pi-1 3.3306690738754696E-16, :pi-2 3.3306690738754696E-16},
+   :predicted-state-equals-belief true,
+   :max-abs-row-difference 0.0,
+   :law/rows-equal-for-equal-plans true,
+   :note
+   "each cascade plans itself; the plans differ and the machine's B ignores them",
+   :rows
+   {:pi-1
+    {:addressed 0.13586935394880342,
+     :falsified 0.12268021398424199,
+     :foreclosed 0.14341337270268642,
+     :refined 0.14944351808372047,
+     :reopened 0.14167667254136745,
+     :spawned 0.13811935666891706,
+     :strengthened 0.16879751207026295},
+    :pi-2
+    {:addressed 0.13586935394880342,
+     :falsified 0.12268021398424199,
+     :foreclosed 0.14341337270268642,
+     :refined 0.14944351808372047,
+     :reopened 0.14167667254136745,
+     :spawned 0.13811935666891706,
+     :strengthened 0.16879751207026295}},
+   :plans-differ true}
+  {:rows-coincide false,
+   :arm :machine-grain/declared-B,
+   :normalisation-residual
+   {:pi-1 3.3306690738754696E-16, :pi-2 4.440892098500626E-16},
+   :predicted-state-equals-belief true,
+   :max-abs-row-difference 0.021891808923863332,
+   :law/rows-equal-for-equal-plans true,
+   :note "DECLARED CONTROL. B reads u. Not an inhabitant of anything.",
+   :rows
+   {:pi-1
+    {:addressed 0.13586935394880342,
+     :falsified 0.12268021398424199,
+     :foreclosed 0.14341337270268642,
+     :refined 0.14944351808372047,
+     :reopened 0.14167667254136745,
+     :spawned 0.13811935666891706,
+     :strengthened 0.16879751207026295},
+    :pi-2
+    {:addressed 0.14115983217106548,
+     :falsified 0.13390651982753662,
+     :foreclosed 0.13808056351413484,
+     :refined 0.152040813704281,
+     :reopened 0.14671513034172573,
+     :spawned 0.1411914372948564,
+     :strengthened 0.1469057031463996}},
+   :plans-differ true}],
+ :negative-control
+ {:what
+  "F7's single-cascade record -- the production lane's own shape",
+  :at
+  "holes/labs/wm-contract/runs/F7-cascade-policy/f7-single-cascade-decision.edn",
+  :candidate-count 1,
+  :menu-status :no-policy-choice,
+  :policy-conditioning :unavailable-single-policy-menu,
+  :reads
+  "One policy is not a policy-conditioned anything. This is the receipt's classification of the record, not a machine_q refusal."}}

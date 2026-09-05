@@ -175,7 +175,22 @@
   (is (= :refusal/empty-support
          (refusal-of #(mq/predictive-outcome-row! {} alphabet))))
   (is (= :refusal/not-a-map
-         (refusal-of #(mq/predictive-outcome-row! [0.5 0.5] alphabet)))))
+         (refusal-of #(mq/predictive-outcome-row! [0.5 0.5] alphabet))))
+  (testing "a non-numeric mass is REFUSED, not a ClassCastException"
+    ;; The row sum used to be computed eagerly, so `double` on a map or a
+    ;; string threw before the reason could be named. :F1 slice 2 found it by
+    ;; feeding the recorded :mu-post (entity -> distribution) and an F7 cascade
+    ;; candidate to the boundary.
+    (is (= :refusal/non-probability-mass
+           (refusal-of #(mq/predictive-outcome-row!
+                         (assoc (zipmap alphabet (repeat (/ 1.0 7.0)))
+                                :ordinary {:strengthened 1.0})
+                         alphabet))))
+    (is (= :refusal/non-probability-mass
+           (refusal-of #(mq/predictive-outcome-row!
+                         (assoc (zipmap alphabet (repeat (/ 1.0 7.0)))
+                                :ordinary "M-expressions-of-interest")
+                         alphabet))))))
 
 (deftest model-and-reading-obligations-are-checked-test
   (testing "the support hypotheses QReading states (MachineQ.lean:98-101)"

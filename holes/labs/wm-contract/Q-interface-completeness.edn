@@ -34,8 +34,12 @@
    :re-pin-basis "The pin moved because THIS SLICE moved the file, and the whole change was read: it is four lines (forward_model.clj:22 the require, :359-366 the comment and the seam call, :367-368 the conditional assoc). Refreshing it certifies exactly one commit's worth of re-reading, which is the condition the C176 note attaches to a pin refresh."}
   {:id :runtime-machine-q
    :path "/home/joe/code/futon2/src/futon2/aif/machine_q.clj"
-   :sha256 "7e17c6c13d0f8ea758eaf0bced17ce70046897ecedbbb5d89fcae9f7682bddf0"
+   :sha256 "5ca91dd8065ce73ad8ada66e5c6bd1f5f0f462ab0920f9bd3415b3e35bbd9299"
    :pinned-at "2026-09-05"
+   :re-pinned-at "2026-09-05"
+   :re-pinned-by ":F1 slice 2"
+   :prior-sha256 "7e17c6c13d0f8ea758eaf0bced17ce70046897ecedbbb5d89fcae9f7682bddf0"
+   :re-pin-basis "The pin moved because THIS SLICE moved the file, and the whole change was read: the row-sum binding at machine_q.clj:204 became a delay and its two forcing sites at :221-223 got a deref, plus the comment saying why. Nothing else in the file changed. Same condition the :runtime-forward-model re-pin was taken under."
    :pin-basis "New in :F1 slice 3. Pinned as the source of the :runtime/Q-machine-construction row below, not as evidence that row read."}
   {:id :runtime-efe
    :path "/home/joe/code/futon2/src/futon2/aif/efe.clj"
@@ -351,7 +355,60 @@
     "No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions. Nothing here is a ruling."
     "gen_aif_dag.bb and gen_q_interface_table.bb not run; nothing regenerated into a publish (TN 9a)."
     "src/ binds *seam-reading* nowhere; the composition has no live caller and no recorded number moves."
-    "REPORTED NOT REPAIRED: the three stale pointers the slice-1 :not-done and the U53 row already record are still stale. Only :runtime-forward-model was re-pinned here, and only because this slice moved that file."]}]
+    "REPORTED NOT REPAIRED: the three stale pointers the slice-1 :not-done and the U53 row already record are still stale. Only :runtime-forward-model was re-pinned here, and only because this slice moved that file."]}
+  {:at "2026-09-05"
+   :row :F1
+   :slice "slice 2 of :F1 -- the machine-grain instance. The slice-3 entry above says slice 2 'needs the policy family named, which is Joe's'; that sentence is now HISTORY and is left as written. Joe closed the question on 2026-09-05 (aif-equations.edn :choices :policy-grain -- the grain is the cascade), :F7 then constructed and scored two distinct cascades for one recorded decision, and this slice ran the composition on them."
+   :commit "futon2, this commit"
+   :method "Ran src/futon2/aif/machine_q.clj -- unchanged except for one boundary repair described below -- on carriers the shipped code computes from machine data, and reported what the composition did rather than what it was expected to do. Every number is read off runs/F1-machine-q/03-machine-grain-q.edn, produced by holes/labs/wm-contract/f1_machine_grain_q.clj."
+   :what-landed
+   [{:what "the machine-grain instance"
+     :at "holes/labs/wm-contract/runs/F1-machine-q/03-machine-grain-q.edn"
+     :read "States, outcome alphabet and A are futon2.aif.belief's own (belief.clj:42, :199-206); the belief is the :mu-post of recorded run c149f9de-669c-4817-9b0e-ed4aad77db79 (417 entities carrying ONE distribution, so no entity is chosen); pi is the two cascades of runs/F7-cascade-policy/f7-cascade-policy-decision.edn, identified by cascade-prior/policy-key recomputed and compared against the recorded key. Only B is not supplied at the required signature."}
+    {:what "the finding, which is a coincidence and not a difference"
+     :at "runs/F1-machine-q/03-machine-grain-q.edn :arms, :finding"
+     :read "Q(o|pi) is CONSTANT in pi at the machine grain, max|row difference| 0.0. Two arms separate the two reasons it could be: under the machine's own action identity the two cascades plan the SAME step (habit_prior.clj:29-38 excludes cascade payloads by design), and under a plan where each cascade plans ITSELF the rows still coincide, because transition-model-v1 is 7x7 identity with no action index at all (belief.clj:216-231). So the missing object is B's dependence on u, not the plan's on pi. A third arm, labelled :declared-control and an inhabitant of nothing, gives B an action index and the rows separate (max|diff| 0.0219), which is what makes the coincidence a fact about the machine rather than about machine_q."}]
+   :what-moved
+   [{:id :runtime/Q-machine-construction
+     :verdict :unchanged
+     :read "The row is about the constructor, and the constructor is unchanged. What this slice adds is a run of it on machine carriers, which is evidence under the row rather than a move of it; :acceptance-status stays :not-met."}]
+   :what-did-not-move
+   [{:id :Q/in-belief :verdict :unchanged
+     :read "STILL UNCHANGED, and the reading is now sharper than 'no caller'. This slice IS a caller: belief-distribution! (machine_q.clj:319) was discharged against the machine's recorded :mu-post and the reading passed. But the caller is a lab script, not src/, and the join it made is belief -> the 7 lifecycle statuses, not belief -> the 14 observation channels this row's payload names. The row's :effect :underpowered stands."}
+    {:id :Q/in-candidates :verdict :unchanged
+     :read "The LIVE candidate is still an action: cascade-policy-menu-for has no caller outside F7's producer and its test (C515 s5 limit 1). This slice fed cascades to Q(o|pi) off a committed receipt, not off the live path."}
+    {:id :Q/to-EIG :verdict :unchanged
+     :read "Nothing was delivered to EIG. mission_epistemic_value.clj is untouched and no consumer reads these rows."}
+    {:id :Q/producer-to-risk :verdict :unchanged
+     :read "No consumer; src/ still binds *seam-reading* nowhere."}
+    {:id :Q/in-policy-depth :verdict :unchanged
+     :read ":plan is still a one-step projection; the cascade's construction order is inside the policy IDENTITY, not inside a horizon the seam reads."}
+    {:id :Q/risk-to-ranking :verdict :unchanged}
+    {:id :lean/Q-machine-construction :verdict :unchanged
+     :read "No Lean file was touched in this slice. The Lean leg's carriers are still declared for the witness."}
+    {:id :lean/Q-carrier :verdict :unchanged :read "No Lean file was touched in this slice."}
+    {:id :lean/Q-risk-consumer :verdict :unchanged :read "No Lean file was touched in this slice."}
+    {:id :lean/Q-eig-consumer :verdict :unchanged :read "No Lean file was touched in this slice."}
+    {:id :lean/Q-reference-fixture :verdict :unchanged :read "No Lean file was touched in this slice."}
+    {:id :runtime/Q-action-proxy :verdict :unchanged :read "forward_model.clj untouched."}
+    {:id :runtime/Q-policy :verdict :unchanged
+     :read "policy.clj untouched. F7's cascade-selection weights -- Q(pi) at the cascade grain -- were fed to the boundary as a control and refused."}]
+   :boundary-repair
+   {:what "predictive-outcome-row! threw ClassCastException instead of naming a reason, for any row carrying a non-numeric value"
+    :found-by "feeding the recorded :mu-post and an F7 cascade candidate to the boundary in this slice; both came back untyped"
+    :cause "the row sum was computed eagerly in the let binding, so `double` ran before the :refusal/non-probability-mass branch could fire"
+    :fix "src/futon2/aif/machine_q.clj:204 -- the sum is a delay, forced only in the :refusal/unnormalised branch at :221-223; both objects now refuse as :refusal/non-probability-mass"
+    :test "test/futon2/aif/machine_q_test.clj:159 -- two assertions added to malformed-rows-are-refused-with-typed-reasons-test (a map mass and a string mass)"}
+   :limit-found
+   {:what "the boundary cannot tell a state distribution from an outcome row"
+    :read "The machine names its 7 observed events with the same 7 keywords as its lifecycle statuses (belief.clj:42 and :199-206 have equal key sets), so the recorded belief posterior -- a genuine distribution over STATES -- is ACCEPTED as a row over the OUTCOMES. predictive-outcome-row! checks shape, support and normalisation; carrier identity is not among them and this receipt records the acceptance rather than dressing it as a pass."}
+   :not-done
+   ["No FUNDAMENTALS.edn verdict moves. :fundamental/controlled-transition-kernel stays :in, and this run is evidence FOR that entry: its uninhabitedness was read off the code, and is now measured on a run."
+    "No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions. Nothing here is a ruling, and arm 3's kernel is labelled a declared control everywhere it appears."
+    "Nothing selected, scored or enacted; the cascade prior is untouched and stays cold; no run lock, no tick, nothing written under data/."
+    "gen_aif_dag.bb and gen_q_interface_table.bb not run; nothing regenerated into a publish (TN 9a)."
+    "src/ still binds *seam-reading* nowhere. The caller in this slice is a lab script."
+    "No source pin re-taken: belief.clj was READ, not moved, and machine_q.clj's repair is this slice's own output rather than evidence it read."]}]
  :work-order
  [{:order 1 :unit :name-policy-and-outcome-domain
    :acceptance "One concrete policy/cascade and enumerable outcome space are declared; absences are typed."}

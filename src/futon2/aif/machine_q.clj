@@ -193,7 +193,15 @@
       (let [bad (remove (comp finite-nonneg? val) row)
             unknown (remove declared (keys row))
             missing (remove (set (keys row)) declared)
-            total (reduce + 0.0 (map (comp double val) row))]
+            ;; DELAYED, and that is the whole reason it is a delay: computed
+            ;; eagerly, `double` on a non-numeric value threw
+            ;; ClassCastException BEFORE the `bad` branch could name the
+            ;; reason, so a row of maps or strings left this function untyped
+            ;; -- against the docstring's promise and against :F1's
+            ;; acceptance. Found by :F1 slice 2 feeding the recorded :mu-post
+            ;; and an F7 cascade candidate to the boundary
+            ;; (runs/F1-machine-q/03-machine-grain-q.edn).
+            total (delay (reduce + 0.0 (map (comp double val) row)))]
         (cond
           (seq bad)
           (refuse! :refusal/non-probability-mass
@@ -210,9 +218,9 @@
                    "a Q(o|pi) row omits a declared outcome; zero mass must be stated"
                    {:outcomes (vec missing)})
 
-          (>= (Math/abs (- 1.0 total)) tolerance)
+          (>= (Math/abs (- 1.0 @total)) tolerance)
           (refuse! :refusal/unnormalised "a Q(o|pi) row does not sum to one"
-                   {:sum total :residual (Math/abs (- 1.0 total))})
+                   {:sum @total :residual (Math/abs (- 1.0 @total))})
 
           :else row)))))
 
