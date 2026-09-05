@@ -3,6 +3,7 @@
  :registry-basis "holes/labs/wm-contract/aif-equations.edn:74-200; :id, :defines, :node, and :formal transcribed from HEAD"
  :rung-order [:named :type-transcribed :formula-transcribed :witnessed :constructed :wired :validated :run-correlated]
  :rung-rule "scripts/generate_variable_situation_accounting.bb:417-428: :witnessed and higher require an exhibiting machine record carrying a run identity; every rung requires the preceding rung."
+ :rung-rule-limit "The F6 predicate that decides 'carries a run identity' reads only the top level of the artifact or a top-level sequence of maps (scripts/generate_variable_situation_accounting.bb:450-462). One licence in this ledger -- :policy-set's -- names an artifact whose run identity is one level down, so the predicate refuses a record that does carry one. The row says so at its own :basis rather than letting the rung rest on a rule it fails. No other row in this ledger reaches :witnessed, so this is the only place the limit bites today."
  :caveats
  ["BOX-5 STALENESS STILL HOLDS: runs/U35-lean-state/lean-state-report.edn predates the reviewed action and Dirichlet modules at mathlib4 4617204890 and 4d89779d08; registry :lean-at is current at aif-equations.edn:181-192, and the corpus was resolved at HEAD rather than silently taking the stale join."
   "R5 CERTIFICATE LIMIT STILL HOLDS: runs/F3-node-sim/00-r5-pilot.edn is a node simulation over declared carriers and says no shipped call path was wired; it carries no run identity, so it does not reach :witnessed under scripts/generate_variable_situation_accounting.bb:417-428."
@@ -78,7 +79,7 @@
   {:id :policy-set :defines :pi :node :R6
    :formal "pi ranges over the candidate action space"
    :spec-leg {:rung :named :licence "holes/labs/wm-contract/aif-equations.edn:158-160" :basis "No :lean identifier is declared; not found in the current equation-to-Lean join."}
-   :impl-leg {:rung :constructed :licence "holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:140-151" :basis "Run c149f9de-669c-4817-9b0e-ed4aad77db79 constructs and scores two distinct cascades for one mission; the receipt says production still constructs one per target."}
+   :impl-leg {:rung :constructed :licence "holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:146" :basis "Run c149f9de-669c-4817-9b0e-ed4aad77db79 constructs and scores two distinct cascades for one mission (candidates and menu at :140-151); the receipt says production still constructs one per target. THE RUN IDENTITY IS NESTED AND THE F6 PREDICATE DOES NOT REACH IT, stated rather than assumed away: :run-id sits at :basis :run-id, line 146, and machine-record? (scripts/generate_variable_situation_accounting.bb:450-462) reads only the top level or a top-level sequence of maps, so it answers false on this file. This rung is therefore licensed by the artifact at the line named, and NOT by that predicate. Whether the predicate should descend is a question for the slice-2 checker, not an answer written here."}
    :leading-leg :impl-ahead :certificate {:trailing-leg :spec :reason "No Lean policy-set carrier and no F3-form accepted-run equivalence certificate." :what-would-license "A Lean cascade-policy carrier and a refusing certificate tying its population to the F7 run."} :converged? false}
 
   {:id :depth :defines :T :node :R13

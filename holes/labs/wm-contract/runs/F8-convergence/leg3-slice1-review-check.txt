@@ -1,0 +1,77 @@
+=== A. VERBATIM FIELDS AGAINST aif-equations.edn AT HEAD ===
+rows 18, registry equations 18, ids equal: true
+
+=== B/C. EVERY :licence POINTER, AND THE MACHINE-RECORD TEST ===
+row                      leg    rung                   resolve       record?   licence
+:observe                 spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachineObservation.lean:58-84
+:observe                 impl   :formula-transcribed   ok            no        src/futon2/aif/observation.clj:103-146
+:prediction-error        spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachinePredictionError.lean:160-181
+:prediction-error        impl   :formula-transcribed   ok            no        src/futon2/aif/free_energy.clj:203-278
+:precision               spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachinePrecision.lean:101-104
+:precision               impl   :formula-transcribed   ok            no        src/futon2/aif/precision.clj:116-158
+:free-energy             spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/Holes.lean:6827-6831
+:free-energy             impl   :named                 ok            no        holes/labs/wm-contract/aif-equations.edn:92-101
+:policy-free-energy      spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachinePolicyFreeEnergy.lean:59-69
+:policy-free-energy      impl   :formula-transcribed   ok            no        src/futon2/aif/policy_free_energy.clj:41-144
+:belief-update           spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachineBeliefUpdate.lean:181-188
+:belief-update           impl   :type-transcribed      ok            no        src/futon2/aif/belief.clj:325-346
+:belief-state            spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachineBeliefState.lean:25-45
+:belief-state            impl   :type-transcribed      ok            no        src/futon2/aif/belief.clj:510-522
+:forward-model           spec   :type-transcribed      ok            no        mathlib4/DarkTower/WarMachine/Holes.lean:6757-6759
+:forward-model           impl   :formula-transcribed   ok            no        src/futon2/aif/machine_q.clj:336-374
+:risk                    spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/Holes.lean:6864-6871
+:risk                    impl   :formula-transcribed   ok            no        src/futon2/aif/node_sim.clj:241-255
+:ambiguity               spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/Holes.lean:6873-6884
+:ambiguity               impl   :formula-transcribed   ok            no        src/futon2/aif/node_sim.clj:232-255
+:expected-free-energy    spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/Holes.lean:6886-6891
+:expected-free-energy    impl   :formula-transcribed   ok            no        src/futon2/aif/node_sim.clj:241-255
+:policy-set              spec   :named                 ok            no        holes/labs/wm-contract/aif-equations.edn:158-160
+  NOTE :policy-set :impl-leg claims :constructed on a record whose run identity is NESTED -- the F6 predicate refuses it; the row must say so at its :basis
+:policy-set              impl   :constructed           ok            nested    holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:146
+:depth                   spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachineDepth.lean:133-150
+:depth                   impl   :type-transcribed      ok            no        src/futon2/aif/efe.clj:629-706
+:temperature             spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachineTemperature.lean:42-54
+:temperature             impl   :type-transcribed      ok            no        src/futon2/aif/policy.clj:77-146
+:policy-posterior        spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/Holes.lean:6959-6965
+:policy-posterior        impl   :formula-transcribed   ok            no        src/futon2/aif/policy.clj:157-235
+:action                  spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/MachineAction.lean:49-70
+:action                  impl   :type-transcribed      ok            no        src/futon2/aif/policy.clj:567-594
+:dirichlet-accumulation  spec   :type-transcribed      ok            no        mathlib4/DarkTower/WarMachine/Holes.lean:6935-6936
+:dirichlet-accumulation  impl   :named                 ok            no        holes/labs/wm-contract/aif-equations.edn:187-195
+:model-reduction         spec   :formula-transcribed   ok            no        mathlib4/DarkTower/WarMachine/Holes.lean:6949-6957
+:model-reduction         impl   :formula-transcribed   ok            no        src/futon2/aif/bmr.clj:108-134
+
+=== D. :leading-leg AGAINST THE TWO ADJUDICATED RUNGS ===
+  :observe                 spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+  :prediction-error        spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+  :precision               spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+  :free-energy             spec=:formula-transcribed   impl=:named                 marked=:spec-ahead  computed=:spec-ahead
+  :policy-free-energy      spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+  :belief-update           spec=:formula-transcribed   impl=:type-transcribed      marked=:spec-ahead  computed=:spec-ahead
+  :belief-state            spec=:formula-transcribed   impl=:type-transcribed      marked=:spec-ahead  computed=:spec-ahead
+  :forward-model           spec=:type-transcribed      impl=:formula-transcribed   marked=:impl-ahead  computed=:impl-ahead
+  :risk                    spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+  :ambiguity               spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+  :expected-free-energy    spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+  :policy-set              spec=:named                 impl=:constructed           marked=:impl-ahead  computed=:impl-ahead
+  :depth                   spec=:formula-transcribed   impl=:type-transcribed      marked=:spec-ahead  computed=:spec-ahead
+  :temperature             spec=:formula-transcribed   impl=:type-transcribed      marked=:spec-ahead  computed=:spec-ahead
+  :policy-posterior        spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+  :action                  spec=:formula-transcribed   impl=:type-transcribed      marked=:spec-ahead  computed=:spec-ahead
+  :dirichlet-accumulation  spec=:type-transcribed      impl=:named                 marked=:spec-ahead  computed=:spec-ahead
+  :model-reduction         spec=:formula-transcribed   impl=:formula-transcribed   marked=:level       computed=:level
+
+=== E. EVERY "no run identity" CLAIM, CHECKED AGAINST THE NAMED FILE ===
+  runs/F1-machine-q/01-runtime-seam.edn                exists=true  run-identity=false
+  runs/F8-action/clojure-readback.txt                  exists=true  run-identity=false
+  runs/F8-belief-update/clojure-readback.txt           exists=true  run-identity=false
+  runs/F8-depth/clojure-readback.txt                   exists=true  run-identity=false
+  runs/F8-observe/clojure-readback.txt                 exists=true  run-identity=false
+  runs/F8-precision/clojure-readback.txt               exists=true  run-identity=false
+  runs/F8-prediction-error/clojure-readback.txt        exists=true  run-identity=false
+  runs/U35-lean-state/lean-state-report.edn            exists=true  run-identity=false
+
+=== F. CERTIFICATE / :converged? COHERENCE ===
+  converged? true: 0 of 18
+
+review-check: 0 findings
