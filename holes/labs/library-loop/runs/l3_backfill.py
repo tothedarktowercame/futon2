@@ -30,9 +30,10 @@ BATCH = {"R1": "PROBLEMS-r1-r3-r3a-batch3.md", "R3": "PROBLEMS-r1-r3-r3a-batch3.
          "R16": "PROBLEMS-r16-r13-r14-batch4.md", "R13": "PROBLEMS-r16-r13-r14-batch4.md",
          "R14": "PROBLEMS-r16-r13-r14-batch4.md",
          "R9": "PROBLEMS-assurance-band-batch6.md", "R10": "PROBLEMS-assurance-band-batch6.md",
-         "R12": "PROBLEMS-assurance-band-batch6.md", "R20": "PROBLEMS-assurance-band-batch6.md"}
+         "R12": "PROBLEMS-assurance-band-batch6.md", "R20": "PROBLEMS-assurance-band-batch6.md",
+         "TRACE": "PROBLEMS-assurance-band-batch6.md"}
 
-def dossier_problem(node):
+def dossier_problem(node):  # node may be Rn or TRACE
     path = os.path.join(WM, BATCH[node])
     txt = open(path, encoding="utf-8").read()
     m = re.search(r"^## %s —.*?(?=^## )" % re.escape(node), txt, re.M | re.S)
@@ -63,7 +64,7 @@ for fn in sorted(os.listdir(AIF)):
         continue  # already backfilled (idempotent rerun)
     holds = None
     for ln in lines:
-        m = re.match(r"^@holds-at\s+(R[A-Za-z0-9]+)", ln)
+        m = re.match(r"^@holds-at\s+(R[A-Za-z0-9]+|TRACE)", ln)
         if m:
             holds = m.group(1)
             break

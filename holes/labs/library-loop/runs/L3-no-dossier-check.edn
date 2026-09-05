@@ -2,9 +2,9 @@
 {:aif-subdir "library/aif"
  :aif-git-sha "41448add834a75a65942b48f1206dac3e6553345"
  :wm-contract-subdir "holes/labs/wm-contract"
- :wm-contract-git-sha "475c964c452aa51943d31b368c76008d3be1a00d"
+ :wm-contract-git-sha "955d2c0686ea143f7ba771b26c6e60620066f958"
  :search "every *.flexiarg in aif-root scanned for line-leading @holds-at Rn tokens; dossier node set extracted from ^## Rn - headings across PROBLEMS-*.md in wm-contract-root"
- :dossier-nodes ["R1" "R10" "R11" "R12" "R13" "R14" "R15" "R16" "R17" "R2" "R20" "R3" "R3a" "R4" "R5" "R6" "R7" "R8" "R9"]
+ :dossier-nodes ["R1" "R10" "R11" "R12" "R13" "R14" "R15" "R16" "R17" "R2" "R20" "R3" "R3a" "R4" "R5" "R6" "R7" "R8" "R9" "TRACE"]
  :patterns [
   {:pattern "aif/admissibility" :holds-at [] :matched [] :no-dossier-match true}
   {:pattern "aif/belief-aware-risk-term" :holds-at [] :matched [] :no-dossier-match true}

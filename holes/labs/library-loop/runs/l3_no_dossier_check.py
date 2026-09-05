@@ -24,7 +24,7 @@ def gitsha(d):
             os.path.relpath(d, repo))
 
 dossier_nodes = sorted(set(re.findall(
-    r"^## (R[A-Za-z0-9]+) —", "\n".join(
+    r"^## (R[A-Za-z0-9]+|TRACE) —", "\n".join(
         open(os.path.join(WM, f), encoding="utf-8").read()
         for f in sorted(os.listdir(WM)) if f.startswith("PROBLEMS-")), re.M)))
 
@@ -38,7 +38,7 @@ for fn in sorted(os.listdir(AIF)):
     lines = open(os.path.join(AIF, fn), encoding="utf-8").read().splitlines()
     holds = []
     for ln in lines:
-        m = re.match(r"^@holds-at\s+(R[A-Za-z0-9]+)", ln)
+        m = re.match(r"^@holds-at\s+(R[A-Za-z0-9]+|TRACE)", ln)
         if m:
             holds.append(m.group(1))
     matched = [h for h in holds if h in dossier_nodes]
