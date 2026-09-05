@@ -536,3 +536,27 @@ Also binding, already in force: the dozen sign-off requests were the
 failure mode and stand withdrawn (autonomy ruling); RUN4 stays mooted
 -- F2's meter will simply report BLOCKED-ON [F1 ...] until the spine
 is real, which is the correct answer to "how far off".
+
+## Box-2 divergence (Joe, 2026-09-05) — F4 upgraded: declare the fundamentals INTO the contract
+
+Verbatim: "And yet Box 2, although it mentions 10 gaps lists 0 for the
+'Free energies & score' row. At this point your audit and the claimed
+live ledger diverge massively."
+
+Mechanism, confirmed at gen_model_coverage.py:38-55: Box 2 aggregates
+the variable-situation ledger, whose population is the contract's OWN
+declarations; a score declaration over Q-as-bound-parameter closes
+without a constructor existing, and the seven uninhabited fundamentals
+were never declared as contract variables, so the row truthfully
+reports 0 gaps in a closed world that excludes the gaps. Declaration-
+conformance rendered as if it were theory-inhabitation.
+
+**F4 is upgraded from a banner to a contract change:** the seven :in
+entries of FUNDAMENTALS.edn are declared as contract holes in
+Holes.lean (the H shape: an input the formalism requires that the code
+does not supply, each with a falsifier), so hole count 10 -> 17 and
+every downstream table (Box 2, coverage, lean-state) inherits the truth
+mechanically. The prominent fundamentals block remains, derived from
+the same declarations. Acceptance gains: Box 2's "Free energies &
+scores" row shows its real gap count with no hand edit to any table;
+a negative control shows un-declaring one flips the row back.
