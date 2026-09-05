@@ -45,9 +45,16 @@
 
 (defn attributed
   "The committed tensions this run can be read off, by the same substring test
-   u41_tension_ledger.bb:476-479 uses -- but scoped to ONE tension's own form
+   u41_tension_ledger.bb:571-573 uses -- but scoped to ONE tension's own form
    rather than to the whole ledger text, so the result is per-run rather than
-   per-ledger. Returns [{:id :status}]."
+   per-ledger. Returns [{:id :status}].
+
+   :U60 gave u41 that per-tension form as an API -- `attribute-tension:507-529`,
+   which prefers :tension/provenance :records and falls back to this substring
+   test -- so this copy is now a second implementation of the FALLBACK half. It
+   is left in place because this script is a U56 discovery record, not a
+   consumer of the deposit path; a reader comparing the two should expect them
+   to agree only on tensions that declare no runs."
   [run-id]
   (let [needles (cons run-id (run-tick-ids run-id))]
     (vec (for [t (:tensions tensions)

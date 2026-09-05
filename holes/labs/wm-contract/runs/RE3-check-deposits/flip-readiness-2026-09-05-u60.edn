@@ -1,0 +1,63 @@
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE3,
+ :check :flip-readiness,
+ :run-id "2026-09-05-u60",
+ :produced-by
+ "holes/labs/wm-contract/flip_readiness_check.bb --deposit",
+ :deterministic
+ "No wall-clock field. This receipt is rewritten byte-identically on every deposit, which is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present.",
+ :run-store
+ {:dir "holes/labs/wm-contract/runs/2026-09-05-u60",
+  :exists? true,
+  :holds
+  ["README.md"
+   "battery.log"
+   "delta.edn"
+   "normalized.edn"
+   "step.edn"
+   "tick-run-record-2026-09-05-3416e82b-771d-454d-8d4e-ae3d279cd23c.edn"
+   "wm-trace-2026-09-05.edn"
+   "world-after.edn"
+   "world-before.edn"],
+  :flip-readiness-artifacts []},
+ :verdict-deposited :typed-absence,
+ :live-derivation
+ {:read-from
+  "the tree at deposit time, NOT the tree the run was taken at",
+  :artifact
+  "holes/labs/wm-contract/runs/U32-flip-readiness/flip-readiness.edn",
+  :gate
+  {:flips 7,
+   :ready 0,
+   :blocked 7,
+   :lines
+   [:contract-pin
+    :box2-holes
+    :figure5-partials
+    :mission-gauges
+    :per-node-tests
+    :flag-chain]},
+  :verdicts
+  {:fpi-posterior
+   {:verdict :blocked, :blocked-on [:box2-holes :figure5-partials]},
+   :guide-gate
+   {:verdict :blocked,
+    :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+   :mission-c
+   {:verdict :blocked,
+    :blocked-on [:box2-holes :figure5-partials :mission-gauges]},
+   :selection-law
+   {:verdict :blocked,
+    :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+   :task-belief-ladder
+   {:verdict :blocked,
+    :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+   :tau-variational
+   {:verdict :blocked,
+    :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+   :zaif-u14e
+   {:verdict :blocked,
+    :blocked-on [:box2-holes :figure5-partials :flag-chain]}},
+  :problems []},
+ :not-what-this-says
+ "The live derivation above is a property of the tree at deposit time. It is recorded so the absence is legible, and it is NOT the deposited verdict."}

@@ -11,8 +11,11 @@
 ;; the run-era ledger is append-only (run_era_ledger.bb:241-243), so those rows
 ;; cannot be rewritten in any case.
 ;;
-;; The scan logic mirrors u41_tension_ledger.bb:467-484 and its green branch at
-;; :500-505: `(or run-id-appears-in-ledger? (seq tick-ids-appearing))`.
+;; The scan logic mirrors u41_tension_ledger.bb:549-581 and its green branch at
+;; :597-601: `(or run-id-appears-in-ledger? (seq tick-ids-appearing))`. (:U60
+;; moved both down the file and added a per-tension BASIS beside the scan,
+;; `run-attribution:531-547`; the green condition itself is unchanged, which is
+;; why this mirror still holds.)
 (require '[clojure.edn :as edn] '[clojure.java.io :as io] '[clojure.string :as str])
 
 (def lab (str (System/getProperty "user.home") "/code/futon2/holes/labs/wm-contract"))

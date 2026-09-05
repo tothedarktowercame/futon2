@@ -1,0 +1,558 @@
+{:statement
+ "The acceptance: what the ladder does to the recorded plateau, under each of the four kin relations U51 measured.",
+ :default-relation :k-doc-xref,
+ :under-the-default
+ {:s5
+  {:relation :k-doc-xref,
+   :recorded
+   {:width 55,
+    :ranks [73 127],
+    :score 5.055525524889362,
+    :distinct-mission-value-factors 1,
+    :distinct-controller-scores 1},
+   :after
+   {:members-refused 49,
+    :members-kept 6,
+    :rungs-of-kept {2 6},
+    :distinct-mission-value-factors 6,
+    :distinct-controller-scores 6,
+    :widest-remaining-tie-among-them 1}},
+  :re5
+  {:relation :k-doc-xref,
+   :recorded
+   {:width 56,
+    :ranks [75 130],
+    :score 3.5175439026866684,
+    :distinct-mission-value-factors 1,
+    :distinct-controller-scores 1},
+   :after
+   {:members-refused 49,
+    :members-kept 7,
+    :rungs-of-kept {2 7},
+    :distinct-mission-value-factors 7,
+    :distinct-controller-scores 7,
+    :widest-remaining-tie-among-them 1}},
+  :u60
+  {:relation :k-doc-xref,
+   :recorded
+   {:width 56,
+    :ranks [75 130],
+    :score 7.101287639270609,
+    :distinct-mission-value-factors 1,
+    :distinct-controller-scores 1},
+   :after
+   {:members-refused 49,
+    :members-kept 7,
+    :rungs-of-kept {2 7},
+    :distinct-mission-value-factors 7,
+    :distinct-controller-scores 7,
+    :widest-remaining-tie-among-them 1}}},
+ :under-each-relation
+ {:s5
+  {:k-doc-xref
+   {:relation :k-doc-xref,
+    :recorded
+    {:width 55,
+     :ranks [73 127],
+     :score 5.055525524889362,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 49,
+     :members-kept 6,
+     :rungs-of-kept {2 6},
+     :distinct-mission-value-factors 6,
+     :distinct-controller-scores 6,
+     :widest-remaining-tie-among-them 1},
+    :census {1 2, 3 99, 2 31, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 40, :widest 6, :ties-over-1 2}},
+   :k-produces
+   {:relation :k-produces,
+    :recorded
+    {:width 55,
+     :ranks [73 127],
+     :score 5.055525524889362,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 55,
+     :members-kept 0,
+     :rungs-of-kept {},
+     :distinct-mission-value-factors 0,
+     :distinct-controller-scores 0,
+     :widest-remaining-tie-among-them 0},
+    :census {1 2, 3 130, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 9, :widest 6, :ties-over-1 2}},
+   :k-repo
+   {:relation :k-repo,
+    :recorded
+    {:width 55,
+     :ranks [73 127],
+     :score 5.055525524889362,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 45,
+     :members-kept 10,
+     :rungs-of-kept {2 10},
+     :distinct-mission-value-factors 9,
+     :distinct-controller-scores 9,
+     :widest-remaining-tie-among-them 2},
+    :census {1 2, 3 98, 2 32, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 38, :widest 6, :ties-over-1 4}},
+   :k-type
+   {:relation :k-type,
+    :recorded
+    {:width 55,
+     :ranks [73 127],
+     :score 5.055525524889362,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 33,
+     :members-kept 22,
+     :rungs-of-kept {2 22},
+     :distinct-mission-value-factors 11,
+     :distinct-controller-scores 11,
+     :widest-remaining-tie-among-them 6},
+    :census {1 2, 2 77, 3 53, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 72, :widest 6, :ties-over-1 8}}},
+  :re5
+  {:k-doc-xref
+   {:relation :k-doc-xref,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 3.5175439026866684,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 49,
+     :members-kept 7,
+     :rungs-of-kept {2 7},
+     :distinct-mission-value-factors 7,
+     :distinct-controller-scores 7,
+     :widest-remaining-tie-among-them 1},
+    :census {1 3, 3 98, :out-of-scope 13, 2 32},
+    :field-width-census
+    {:distinct-scores 42, :widest 6, :ties-over-1 2}},
+   :k-produces
+   {:relation :k-produces,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 3.5175439026866684,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 56,
+     :members-kept 0,
+     :rungs-of-kept {},
+     :distinct-mission-value-factors 0,
+     :distinct-controller-scores 0,
+     :widest-remaining-tie-among-them 0},
+    :census {1 3, 3 130, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 10, :widest 6, :ties-over-1 2}},
+   :k-repo
+   {:relation :k-repo,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 3.5175439026866684,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 46,
+     :members-kept 10,
+     :rungs-of-kept {2 10},
+     :distinct-mission-value-factors 9,
+     :distinct-controller-scores 9,
+     :widest-remaining-tie-among-them 2},
+    :census {1 3, 3 98, :out-of-scope 13, 2 32},
+    :field-width-census
+    {:distinct-scores 39, :widest 6, :ties-over-1 4}},
+   :k-type
+   {:relation :k-type,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 3.5175439026866684,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 34,
+     :members-kept 22,
+     :rungs-of-kept {2 22},
+     :distinct-mission-value-factors 11,
+     :distinct-controller-scores 11,
+     :widest-remaining-tie-among-them 6},
+    :census {1 3, 2 77, :out-of-scope 13, 3 53},
+    :field-width-census
+    {:distinct-scores 73, :widest 6, :ties-over-1 8}}},
+  :u60
+  {:k-doc-xref
+   {:relation :k-doc-xref,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 7.101287639270609,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 49,
+     :members-kept 7,
+     :rungs-of-kept {2 7},
+     :distinct-mission-value-factors 7,
+     :distinct-controller-scores 7,
+     :widest-remaining-tie-among-them 1},
+    :census {1 3, 3 98, :out-of-scope 13, 2 32},
+    :field-width-census
+    {:distinct-scores 42, :widest 6, :ties-over-1 2}},
+   :k-produces
+   {:relation :k-produces,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 7.101287639270609,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 56,
+     :members-kept 0,
+     :rungs-of-kept {},
+     :distinct-mission-value-factors 0,
+     :distinct-controller-scores 0,
+     :widest-remaining-tie-among-them 0},
+    :census {1 3, 3 130, :out-of-scope 13},
+    :field-width-census
+    {:distinct-scores 10, :widest 6, :ties-over-1 2}},
+   :k-repo
+   {:relation :k-repo,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 7.101287639270609,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 46,
+     :members-kept 10,
+     :rungs-of-kept {2 10},
+     :distinct-mission-value-factors 9,
+     :distinct-controller-scores 9,
+     :widest-remaining-tie-among-them 2},
+    :census {1 3, 3 98, :out-of-scope 13, 2 32},
+    :field-width-census
+    {:distinct-scores 39, :widest 6, :ties-over-1 4}},
+   :k-type
+   {:relation :k-type,
+    :recorded
+    {:width 56,
+     :ranks [75 130],
+     :score 7.101287639270609,
+     :distinct-mission-value-factors 1,
+     :distinct-controller-scores 1},
+    :after
+    {:members-refused 34,
+     :members-kept 22,
+     :rungs-of-kept {2 22},
+     :distinct-mission-value-factors 11,
+     :distinct-controller-scores 11,
+     :widest-remaining-tie-among-them 6},
+    :census {1 3, 2 77, :out-of-scope 13, 3 53},
+    :field-width-census
+    {:distinct-scores 73, :widest 6, :ties-over-1 8}}}},
+ :relation-arms
+ {:s5
+  {:k-doc-xref
+   {:ladder-record
+    {:relation :k-doc-xref,
+     :relation-statement
+     "one document names the other mission, or both name a mission in common (the mission documents' own cross-references)",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 2, 3 99, 2 31, :out-of-scope 13},
+     :refused 99},
+    :plateau
+    {:score 130.2450086016297,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-doc-xref,
+    :scored-rows 46,
+    :width-census {:distinct-scores 40, :widest 6, :ties-over-1 2},
+    :refused 99,
+    :census {1 2, 3 99, 2 31, :out-of-scope 13}},
+   :k-produces
+   {:ladder-record
+    {:relation :k-produces,
+     :relation-statement
+     "shares a :produces entry of the capability-graph input recorded on the candidate",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 2, 3 130, :out-of-scope 13},
+     :refused 130},
+    :plateau
+    {:score 130.2450086016297,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-produces,
+    :scored-rows 15,
+    :width-census {:distinct-scores 9, :widest 6, :ties-over-1 2},
+    :refused 130,
+    :census {1 2, 3 130, :out-of-scope 13}},
+   :k-repo
+   {:ladder-record
+    {:relation :k-repo,
+     :relation-statement
+     "same home repository, read off :mission-path",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 2, 3 98, 2 32, :out-of-scope 13},
+     :refused 98},
+    :plateau
+    {:score 130.2450086016297,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-repo,
+    :scored-rows 47,
+    :width-census {:distinct-scores 38, :widest 6, :ties-over-1 4},
+    :refused 98,
+    :census {1 2, 3 98, 2 32, :out-of-scope 13}},
+   :k-type
+   {:ladder-record
+    {:relation :k-type,
+     :relation-statement "same action :type",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 2, 2 77, 3 53, :out-of-scope 13},
+     :refused 53},
+    :plateau
+    {:score 5.07543139268509,
+     :width 6,
+     :members
+     [[:advance-mission "M-librarian"]
+      [:advance-mission "M-propagators"]
+      [:advance-mission "M-xenotype-its"]
+      [:advance-mission "M-pheromone-field"]
+      [:advance-mission "M-smart-emacs-cursor"]
+      [:advance-mission "M-efe-bge-followon-actions"]]},
+    :relation :k-type,
+    :scored-rows 92,
+    :width-census {:distinct-scores 72, :widest 6, :ties-over-1 8},
+    :refused 53,
+    :census {1 2, 2 77, 3 53, :out-of-scope 13}}},
+  :re5
+  {:k-doc-xref
+   {:ladder-record
+    {:relation :k-doc-xref,
+     :relation-statement
+     "one document names the other mission, or both name a mission in common (the mission documents' own cross-references)",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 3, 3 98, :out-of-scope 13, 2 32},
+     :refused 98},
+    :plateau
+    {:score 128.321577302369,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-doc-xref,
+    :scored-rows 48,
+    :width-census {:distinct-scores 42, :widest 6, :ties-over-1 2},
+    :refused 98,
+    :census {1 3, 3 98, :out-of-scope 13, 2 32}},
+   :k-produces
+   {:ladder-record
+    {:relation :k-produces,
+     :relation-statement
+     "shares a :produces entry of the capability-graph input recorded on the candidate",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 3, 3 130, :out-of-scope 13},
+     :refused 130},
+    :plateau
+    {:score 128.321577302369,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-produces,
+    :scored-rows 16,
+    :width-census {:distinct-scores 10, :widest 6, :ties-over-1 2},
+    :refused 130,
+    :census {1 3, 3 130, :out-of-scope 13}},
+   :k-repo
+   {:ladder-record
+    {:relation :k-repo,
+     :relation-statement
+     "same home repository, read off :mission-path",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 3, 3 98, :out-of-scope 13, 2 32},
+     :refused 98},
+    :plateau
+    {:score 128.321577302369,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-repo,
+    :scored-rows 48,
+    :width-census {:distinct-scores 39, :widest 6, :ties-over-1 4},
+    :refused 98,
+    :census {1 3, 3 98, :out-of-scope 13, 2 32}},
+   :k-type
+   {:ladder-record
+    {:relation :k-type,
+     :relation-statement "same action :type",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 3, 2 77, :out-of-scope 13, 3 53},
+     :refused 53},
+    :plateau
+    {:score 3.5531453561242046,
+     :width 6,
+     :members
+     [[:advance-mission "M-librarian"]
+      [:advance-mission "M-propagators"]
+      [:advance-mission "M-xenotype-its"]
+      [:advance-mission "M-pheromone-field"]
+      [:advance-mission "M-smart-emacs-cursor"]
+      [:advance-mission "M-efe-bge-followon-actions"]]},
+    :relation :k-type,
+    :scored-rows 93,
+    :width-census {:distinct-scores 73, :widest 6, :ties-over-1 8},
+    :refused 53,
+    :census {1 3, 2 77, :out-of-scope 13, 3 53}}},
+  :u60
+  {:k-doc-xref
+   {:ladder-record
+    {:relation :k-doc-xref,
+     :relation-statement
+     "one document names the other mission, or both name a mission in common (the mission documents' own cross-references)",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 3, 3 98, :out-of-scope 13, 2 32},
+     :refused 98},
+    :plateau
+    {:score 131.90532103895293,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-doc-xref,
+    :scored-rows 48,
+    :width-census {:distinct-scores 42, :widest 6, :ties-over-1 2},
+    :refused 98,
+    :census {1 3, 3 98, :out-of-scope 13, 2 32}},
+   :k-produces
+   {:ladder-record
+    {:relation :k-produces,
+     :relation-statement
+     "shares a :produces entry of the capability-graph input recorded on the candidate",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 3, 3 130, :out-of-scope 13},
+     :refused 130},
+    :plateau
+    {:score 131.90532103895293,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-produces,
+    :scored-rows 16,
+    :width-census {:distinct-scores 10, :widest 6, :ties-over-1 2},
+    :refused 130,
+    :census {1 3, 3 130, :out-of-scope 13}},
+   :k-repo
+   {:ladder-record
+    {:relation :k-repo,
+     :relation-statement
+     "same home repository, read off :mission-path",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 3, 3 98, :out-of-scope 13, 2 32},
+     :refused 98},
+    :plateau
+    {:score 131.90532103895293,
+     :width 6,
+     :members
+     [[:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]
+      [:learn-action-class nil]]},
+    :relation :k-repo,
+    :scored-rows 48,
+    :width-census {:distinct-scores 39, :widest 6, :ties-over-1 4},
+    :refused 98,
+    :census {1 3, 3 98, :out-of-scope 13, 2 32}},
+   :k-type
+   {:ladder-record
+    {:relation :k-type,
+     :relation-statement "same action :type",
+     :generalization-discount 0.5,
+     :history-size 17,
+     :census {1 3, 2 77, :out-of-scope 13, 3 53},
+     :refused 53},
+    :plateau
+    {:score 7.136889092708159,
+     :width 6,
+     :members
+     [[:advance-mission "M-librarian"]
+      [:advance-mission "M-propagators"]
+      [:advance-mission "M-xenotype-its"]
+      [:advance-mission "M-pheromone-field"]
+      [:advance-mission "M-smart-emacs-cursor"]
+      [:advance-mission "M-efe-bge-followon-actions"]]},
+    :relation :k-type,
+    :scored-rows 93,
+    :width-census {:distinct-scores 73, :widest 6, :ties-over-1 8},
+    :refused 53,
+    :census {1 3, 2 77, :out-of-scope 13, 3 53}}}}}

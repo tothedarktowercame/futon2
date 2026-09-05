@@ -3,6 +3,11 @@
 ;;
 ;;   bb holes/labs/wm-contract/u41_tension_ledger.bb [outdir]
 ;;   bb holes/labs/wm-contract/u41_tension_ledger.bb --deposit <run-id>   (RE6)
+;;   bb holes/labs/wm-contract/u41_tension_ledger.bb --deposit <run-id> --dry-run
+;;
+;; FUTON_TENSION_LEDGER redirects every read and the append to another file, so
+;; a control can show what a mint does without writing the curated artifact.
+;; --deposit refuses while it is set.
 ;;
 ;; The report path is read-only over the ledger. `append-tension!` is the sole
 ;; write API: it validates the existing and proposed ledgers, adds exactly one
@@ -40,7 +45,18 @@
 (def repo-root ;; derived from the script location (holes/labs/wm-contract under the root) so a worktree run targets its own checkout -- U28z reviewer finding, 2026-09-03
   (-> (java.io.File. *file*) .getAbsoluteFile .getParentFile .getParentFile .getParentFile .getParentFile .getPath))
 (def lab (io/file repo-root "holes/labs/wm-contract"))
-(def ledger-path (io/file lab "tension-ledger.edn"))
+(def curated-ledger-path (io/file lab "tension-ledger.edn"))
+
+(def ledger-override
+  "FUTON_TENSION_LEDGER redirects every read AND the append to another file.
+   It exists because `append-tension!` writes, so a control that wants to show
+   what a mint does has no way to show it without either mutating the curated
+   artifact or reimplementing the writer. `--deposit` REFUSES while it is set
+   (see `deposit!`): a run-era row is a claim about the curated ledger, and a
+   deposit read off a planted copy would be a false one."
+  (System/getenv "FUTON_TENSION_LEDGER"))
+
+(def ledger-path (if ledger-override (io/file ledger-override) curated-ledger-path))
 
 (def terminal-statuses #{:cashed :refuted :dissolved})
 (def status-moving #{:carried :cashed :refuted :dissolved})
@@ -176,7 +192,8 @@
             defects (validate candidate)]
         (when (seq defects)
           (throw (ex-info "proposed tension append is invalid" {:defects defects})))
-        (let [tmp (io/file lab "tension-ledger.edn.u41-append")]
+        (let [tmp (io/file (.getParentFile (.getAbsoluteFile ledger-path))
+                           (str (.getName ledger-path) ".u41-append"))]
           (spit tmp (str (with-out-str (pp/pprint candidate))))
           (java.nio.file.Files/move
            (.toPath tmp) (.toPath ledger-path)
@@ -444,11 +461,21 @@
 ;; it. The deposit says that in a typed absence rather than depositing the
 ;; deposit-time fold under a run-id it has no claim to.
 ;;
-;; The shape that WOULD carry it exists and is unused: U39's tension mint
-;; payload writes :tension/provenance {:records [run-id run-id]}
-;; (u39_selection_retrospective.bb, section 6c). No committed tension was born
-;; that way -- all of them are :born-of :operator-dictation -- so the green
-;; branch below is reachable only once a run-born tension is minted.
+;; The shape that WOULD carry it exists: U39's tension mint payload writes
+;; :tension/provenance {:records [run-id run-id]} (u39_selection_retrospective.bb,
+;; section 6c), and since :U60 the ladder's producer mints it too
+;; (futon2.aif.task-belief-ladder/refusal-tension). :U60 wires the READ side to
+;; match: `run-attribution` below prefers that field and falls back to the
+;; substring scan for a tension that carries none, marking which is which.
+;;
+;; WHAT :U60 DID NOT DO, and the boundary is the point: it did not move the
+;; verdict. `:verdict-deposited` still reads exactly the two substring
+;; conditions it read before -- the run id or one of its tick ids appearing
+;; anywhere in the ledger text -- so a green is still green for the same reason
+;; and an absence for the same reason. What the deposit gained is a BASIS that
+;; says which tensions name the run and by what evidence. Whether a structural
+;; attribution should mean something different from a prose one is exactly the
+;; (A)/(B)/(C) ruling this row is forbidden to answer.
 ;;
 ;; A ledger defect or a failing control deposits :red whatever the run store
 ;; holds: that failure is about the tree the deposit is made from.
@@ -464,24 +491,94 @@
            (keep #(second (re-matches #"tick-run-record-\d{4}-\d{2}-\d{2}-(.+)\.edn" %)))
            sort vec))))
 
+(defn structured-run-keys
+  "The run identities a tension names STRUCTURALLY: `:tension/provenance
+   :records`. That is the field U39's mint payload has always written
+   (u39_selection_retrospective.bb section 6c) and the field the ladder's
+   producer now mints (`futon2.aif.task-belief-ladder/refusal-tension`).
+
+   STRINGS ONLY. A non-string entry is not a run id and is not coerced into one:
+   the point of a structured key is that a reader can tell what it holds, and a
+   keyword or a map in there is a defect to be seen rather than stringified into
+   a match."
+  [t]
+  (vec (filter string? (get-in t [:tension/provenance :records]))))
+
+(defn attribute-tension
+  "How this tension can be tied to a run, and whether it ties to THIS one.
+
+   STRUCTURED IS PREFERRED AND IS NOT BACKED UP BY PROSE. A tension carrying
+   `:records` has said which runs it is about; its pointers and its statement
+   are then context, and a run id that happens to appear in one of them is not a
+   second, weaker vote. A tension carrying none falls back to the substring scan
+   over its printed form -- which is what this check has always done, and which
+   is marked `:prose-scan` in the basis rather than presented as the same
+   evidence: a substring match cannot tell a run the tension is ABOUT from a run
+   it merely mentions."
+  [t sought]
+  (let [structured (structured-run-keys t)]
+    (if (seq structured)
+      (let [hits (vec (filter (set structured) sought))]
+        (array-map :tension (:tension/id t) :attribution :structural
+                   :declares structured :matched hits
+                   :names-this-run? (boolean (seq hits))))
+      (let [text (pr-str t)
+            hits (vec (filter #(str/includes? text %) sought))]
+        (array-map :tension (:tension/id t) :attribution :prose-scan
+                   :matched hits
+                   :names-this-run? (boolean (seq hits)))))))
+
+(defn run-attribution
+  "The per-tension basis: which tensions name this run, and by which method.
+   Ledger order, not sorted -- tension ids are keywords AND vectors here (the
+   zaif rung-3 mint's id is the refusal itself), so there is no total order to
+   sort by, and the ledger's own order is already deterministic."
+  [ledger run-id tick-ids]
+  (let [sought (into [run-id] tick-ids)
+        per (mapv #(attribute-tension % sought) (:tensions ledger))]
+    (array-map
+     :method
+     (str "prefer the structured field :tension/provenance :records; fall back to a substring "
+          "scan of the tension's printed form for a tension that carries none. The fallback is "
+          "marked :prose-scan and is what attributes every tension minted before the key existed.")
+     :sought sought
+     :fold (into (sorted-map) (frequencies (map :attribution per)))
+     :naming-this-run (filterv :names-this-run? per)
+     :per-tension per)))
+
 (defn run-provenance-scan
   "Everything in the ledger that could tie it to this run: the run-id itself,
    any of the run's tick ids, and the run-carrying fields the schema declares.
    A miss on all three is the typed absence's basis, stated as a measurement
-   rather than as an assertion about the schema."
+   rather than as an assertion about the schema.
+
+   `:run-attribution` (:U60) is carried ONLY when some tension names this run,
+   and that placement is the point rather than a detail: this receipt is
+   required to be committed and unmodified, and a deposit that rewrites the
+   receipt of an already-deposited run turns its replay from :already-present
+   into the append-only ledger's divergence refusal. A run no tension names
+   therefore gets the same eight fields it got before this row, byte for byte.
+   The map is built with `apply array-map` rather than as a literal because a
+   literal of nine pairs is a hash-map, which would print in hash order and move
+   every existing receipt."
   [ledger-text ledger run-id tick-ids]
   (let [event-keys (vec (sort (distinct (mapcat keys (:events ledger)))))
         tension-keys (vec (sort (distinct (mapcat keys (:tensions ledger)))))
-        run-ish (fn [ks] (vec (filter #(re-find #"(?i)run" (str %)) ks)))]
-    {:run-id-appears-in-ledger? (str/includes? ledger-text run-id)
-     :tick-ids-sought tick-ids
-     :tick-ids-appearing (vec (filter #(str/includes? ledger-text %) tick-ids))
-     :event-keys-in-use event-keys
-     :tension-keys-in-use tension-keys
-     :run-carrying-keys (vec (concat (run-ish event-keys) (run-ish tension-keys)))
-     :events-by-date (into (sorted-map) (frequencies (map :event/at (:events ledger))))
-     :tension-provenance-shapes
-     (vec (sort (distinct (map #(vec (sort (keys (:tension/provenance %)))) (:tensions ledger)))))}))
+        run-ish (fn [ks] (vec (filter #(re-find #"(?i)run" (str %)) ks)))
+        att (run-attribution ledger run-id tick-ids)]
+    (apply array-map
+           (concat
+            [:run-id-appears-in-ledger? (str/includes? ledger-text run-id)
+             :tick-ids-sought tick-ids
+             :tick-ids-appearing (vec (filter #(str/includes? ledger-text %) tick-ids))
+             :event-keys-in-use event-keys
+             :tension-keys-in-use tension-keys
+             :run-carrying-keys (vec (concat (run-ish event-keys) (run-ish tension-keys)))
+             :events-by-date (into (sorted-map) (frequencies (map :event/at (:events ledger))))
+             :tension-provenance-shapes
+             (vec (sort (distinct (map #(vec (sort (keys (:tension/provenance %)))) (:tensions ledger)))))]
+            (when (seq (:naming-this-run att))
+              [:run-attribution att])))))
 
 (defn deposit-receipt [run-id ledger defects statuses birth ctrls scan]
   ;; array-map, not a literal: a map literal of this size is a hash-map and
@@ -514,22 +611,58 @@
     :birth-rule-candidates (count (:candidates birth))
     :controls (into (sorted-map) (map (fn [[k v]] [k (:pass? v)])) ctrls)}
    :why-the-ledger-cannot-be-run-scoped
-   (str "no field of a tension or an event names a run: the keys in use are "
-        (pr-str (:event-keys-in-use scan)) " on events and "
-        (pr-str (:tension-keys-in-use scan)) " on tensions, of which "
-        (pr-str (:run-carrying-keys scan)) " carry a run. The nearest carrier is :event/at, "
-        "a DATE, and a date is not provenance: two lanes writing on the same day would both "
-        "match. U39's mint payload does carry :tension/provenance {:records [run-id ...]}, and "
-        "no committed tension was minted that way.")
+   (let [carriers (count (filter #(seq (structured-run-keys %)) (:tensions ledger)))]
+     (if (zero? carriers)
+       ;; VERBATIM the sentence this check has emitted since RE6, because it is
+       ;; still the true one while no tension carries the key, and every
+       ;; deposited receipt has to keep replaying byte-identically.
+       (str "no field of a tension or an event names a run: the keys in use are "
+            (pr-str (:event-keys-in-use scan)) " on events and "
+            (pr-str (:tension-keys-in-use scan)) " on tensions, of which "
+            (pr-str (:run-carrying-keys scan)) " carry a run. The nearest carrier is :event/at, "
+            "a DATE, and a date is not provenance: two lanes writing on the same day would both "
+            "match. U39's mint payload does carry :tension/provenance {:records [run-id ...]}, and "
+            "no committed tension was minted that way.")
+       (str carriers " of " (count (:tensions ledger)) " tension(s) name their runs structurally "
+            "at :tension/provenance :records, so the sentence this field carried before :U60 -- "
+            "that no field of a tension names a run -- is no longer true of the whole ledger. It "
+            "remains true of the other " (- (count (:tensions ledger)) carriers)
+            ": they are attributed, if at all, by the substring scan marked :prose-scan in "
+            ":run-attribution. The event schema still carries no run field; the keys in use are "
+            (pr-str (:event-keys-in-use scan)) " on events and "
+            (pr-str (:tension-keys-in-use scan)) " on tensions, of which "
+            (pr-str (:run-carrying-keys scan)) " carry a run in their own name.")))
    :not-what-this-says
    (str "The live derivation above is the fold of the ledger at deposit time, over tensions "
         "minted by operator dictation on 2026-09-02. It is recorded so the absence is legible, "
         "and it is NOT the deposited verdict.")))
 
+(defn attribution-note
+  "The one sentence :U60 adds to a row's notes, and only when there is an
+   attribution to name. Appended rather than woven in, so a row deposited
+   before this key existed keeps the notes it was deposited with -- the
+   run-era ledger compares an existing row's notes field by field."
+  [scan]
+  (when-let [att (:run-attribution scan)]
+    (let [naming (:naming-this-run att)
+          by-method (group-by :attribution naming)]
+      (str " ATTRIBUTION (:U60): " (count naming) " tension(s) name this run -- "
+           (str/join "; "
+                     (for [m [:structural :prose-scan]
+                           :when (seq (get by-method m))]
+                       (str (count (get by-method m)) " " (name m) " ("
+                            (str/join ", " (map #(pr-str (:tension %)) (get by-method m))) ")")))
+           ". :structural means the tension declares the run at :tension/provenance :records; "
+           ":prose-scan means the run id was found as a substring of the record and the tension "
+           "declares no runs. The ledger-wide fold is " (pr-str (:fold att))
+           ". This names WHICH tensions and by WHAT evidence; it does not change what the "
+           "verdict above asserts, which waits on the (A)/(B)/(C) ruling."))))
+
 (defn deposit-notes [run-id receipt]
   (let [d (:live-derivation receipt)
         scan (:run-provenance receipt)]
-    (case (:verdict-deposited receipt)
+    (str
+     (case (:verdict-deposited receipt)
       :typed-absence
       (str "the tension ledger records nothing about run " run-id ", and cannot: no tension "
            "and no event carries a run identity. Measured, not assumed -- the run-id string "
@@ -550,9 +683,24 @@
       :green
       (str "the ledger names this run: run-id in ledger? " (:run-id-appears-in-ledger? scan)
            ", tick ids appearing " (pr-str (:tick-ids-appearing scan))
-           "; status fold " (pr-str (:status-fold d)) ", cashed " (pr-str (:cashed d))))))
+           "; status fold " (pr-str (:status-fold d)) ", cashed " (pr-str (:cashed d))))
+     (attribution-note scan))))
 
-(defn deposit! [run-id]
+(defn deposit! [run-id dry-run?]
+  (when (and ledger-override (not dry-run?))
+    ;; FAIL CLOSED ON THE WRITE, NOT ON THE REPORT. A row is a claim about the
+    ;; curated ledger; deposited off a planted copy it would be a false one, and
+    ;; the receipt file would carry the copy's fold under the real run's id.
+    ;; --dry-run writes nothing anywhere, so it is allowed and BANNERED instead
+    ;; -- refusing it too would leave a control with no way to show what a mint
+    ;; does to the basis.
+    (println "u41_tension_ledger --deposit: REFUSED -- FUTON_TENSION_LEDGER is set to"
+             ledger-override)
+    (println "  a deposit is a claim about the curated ledger; unset the override and re-run")
+    (System/exit 3))
+  (when ledger-override
+    (println "LEDGER OVERRIDE:" ledger-override)
+    (println "  this is NOT a receipt for the curated tension ledger and may not be deposited"))
   (let [ledger-text (slurp ledger-path)
         ledger (edn/read-string ledger-text)
         defects (validate ledger)
@@ -563,6 +711,19 @@
         r (deposit-receipt run-id ledger defects statuses birth ctrls scan)
         rel (str "holes/labs/wm-contract/runs/RE6-check-deposits/tensions-cashed-" run-id ".edn")
         path (io/file repo-root rel)]
+    (when dry-run?
+      ;; The receipt and the notes, exhibited and NOT written. A run-era row is
+      ;; a claim about an ACCEPTED run, so this is how the citation for a run
+      ;; that has not been accepted -- or for one already deposited, whose
+      ;; receipt may not be rewritten -- is shown to a reviewer.
+      (pp/pprint r)
+      (println)
+      (println "NOTES:" (deposit-notes run-id r))
+      (when ledger-override
+        (println "LEDGER OVERRIDE:" ledger-override "-- see the banner above"))
+      (println "u41_tension_ledger --deposit --dry-run: verdict" (:verdict-deposited r)
+               "-- nothing written, ledger not touched")
+      (System/exit 0))
     (io/make-parents path)
     (spit path (with-out-str (pp/pprint r)))
     (println "u41_tension_ledger --deposit: receipt" rel)
@@ -589,8 +750,9 @@
 ;; the report and its side effects. The guard is babashka's own answer to
 ;; "am I the file that was invoked".
 (when (= *file* (System/getProperty "babashka.file"))
-  (if-let [run-id (second (drop-while #(not= "--deposit" %) *command-line-args*))]
-    (deposit! run-id)
+  (if-let [run-id (first (remove #(str/starts-with? % "--")
+                                 (rest (drop-while #(not= "--deposit" %) *command-line-args*))))]
+    (deposit! run-id (contains? (set *command-line-args*) "--dry-run"))
     (if (contains? (set *command-line-args*) "--deposit")
       (do (println "u41_tension_ledger --deposit needs a run-id") (System/exit 1))
       (apply -main *command-line-args*))))

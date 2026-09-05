@@ -408,17 +408,29 @@
 
    PURE: it BUILDS the pair. The append is `u41_tension_ledger.bb`'s
    `append-tension!`, called by the U52 producer -- the live tick path builds
-   refusal records and writes no ledger, see the U52 account."
-  [{:keys [subject-id refusals relation at by pointers carried-by] :as args}]
+   refusal records and writes no ledger, see the U52 account.
+
+   `:records` IS THE STRUCTURED RUN KEY (:U60). A run id passed here lands at
+   `:tension/provenance :records`, the field U39's mint payload already writes
+   (`u39_selection_retrospective.bb` section 6c) and the field u41's deposit
+   scan prefers over a substring scan of the record's prose. It is OMITTED WHEN
+   EMPTY rather than written as `[]`, and that is not tidiness: the two U52
+   tensions committed on 2026-09-04 were minted before this key existed, and
+   `append-tension!` refuses a replay whose payload differs from the committed
+   one by any key at all (it is `:already-present` only for an exact match). A
+   caller that passes no `:records` therefore reproduces the committed bytes and
+   replays as a no-op; a caller that passes one gets the structured key."
+  [{:keys [subject-id refusals relation at by pointers carried-by records] :as args}]
   (let [n (count refusals)
         refusal (refusal-payload args)
         id (keyword "wm-ladder" (str (name subject-id) "-zero-support"))]
     {:tension
      #:tension{:id id
                :status :carried
-               :provenance {:who (or by "U52 ladder rung-3 refusal mint")
-                            :when at
-                            :pointers (vec pointers)}
+               :provenance (cond-> {:who (or by "U52 ladder rung-3 refusal mint")
+                                    :when at
+                                    :pointers (vec pointers)}
+                             (seq records) (assoc :records (vec records)))
                :carried-by (or carried-by "M-wm-aif-policy-grain-compliance")
                :resolution-path
                "either a kin relation that reaches these candidates, or recorded material a construction could read (U51: :open-hole-count varies 0-24 over the plateau and enters no score), or the admission that the machine has no belief about them and should not be ranking them"

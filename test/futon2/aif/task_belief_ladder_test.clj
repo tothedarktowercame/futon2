@@ -168,3 +168,27 @@
         "u41 control 12: the statement is the in-record refusal read back verbatim")
     (is (= (:tension/id tension) (:event/tension event)))
     (is (seq (get-in tension [:tension/provenance :pointers])))))
+
+(deftest the-structured-run-key-is-carried-exactly-when-it-is-passed
+  ;; :U60. u41's deposit scan prefers :tension/provenance :records over a
+  ;; substring scan of the record's prose, so the producer has to write it. It
+  ;; is OMITTED rather than written as [] when the caller passes none, and that
+  ;; is the half worth a test: `append-tension!` is :already-present only for a
+  ;; payload matching the committed one exactly, so an unconditional key would
+  ;; turn the two U52 tensions committed on 2026-09-04 -- minted before this key
+  ;; existed -- from a documented replay into an identity-conflict refusal.
+  (let [{:keys [refusals]} (ladder/apply-ladder field (ctx-for :k-doc-xref))
+        args {:subject-id :test-field :refusals refusals :relation :k-doc-xref
+              :artifact "runs/U52-ladder/04-refusals.edn" :at "2026-09-05"
+              :pointers ["runs/U52-ladder/04-refusals.edn"]}
+        without (get-in (ladder/refusal-tension args) [:tension :tension/provenance])
+        with (get-in (ladder/refusal-tension (assoc args :records ["run-a" "run-b"]))
+                     [:tension :tension/provenance])]
+    (is (= #{:who :when :pointers} (set (keys without)))
+        "no :records key at all, not :records []")
+    (is (= ["run-a" "run-b"] (:records with)))
+    (is (= (dissoc with :records) without)
+        "passing the run key changes nothing else about the provenance")
+    (is (= without (get-in (ladder/refusal-tension (assoc args :records []))
+                           [:tension :tension/provenance]))
+        "an empty :records is the same as none: a caller with no run to name must not diverge the payload")))

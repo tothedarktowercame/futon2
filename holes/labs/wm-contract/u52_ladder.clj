@@ -53,14 +53,31 @@
 (defn read-trace [path]
   (edn/read-string read-opts (str "[" (slurp (str path)) "]")))
 
-(def fields
-  "The two recorded fields U51 partitioned, pinned by run id."
+(def pinned-fields
+  "The two recorded fields U51 partitioned, pinned by run id. Both were minted
+   into the tension ledger on 2026-09-04, before `:tension/provenance :records`
+   existed -- see `mint-payload` for why that has to be said here rather than
+   fixed silently."
   [{:id :s5
     :trace "holes/labs/wm-contract/runs/2026-09-01-s5/wm-trace-s5.edn"
-    :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8"}
+    :run-id "4e35e740-8c9f-42c1-b8a9-0cdfc024e9c8"
+    :minted-before-the-run-key true}
    {:id :re5
     :trace "holes/labs/wm-contract/runs/2026-09-04-re5/wm-trace-re5.edn"
-    :run-id "8ae111bc-d758-45f3-9c5b-f98832e10bb6"}])
+    :run-id "8ae111bc-d758-45f3-9c5b-f98832e10bb6"
+    :minted-before-the-run-key true}])
+
+(def fields
+  "The pinned fields, plus at most one MORE named in U52_EXTRA_FIELD as an EDN
+   map of the same shape ({:id :trace :run-id}). :U60 uses it to run the ladder
+   over a freshly stepped run and mint that run's tension with the structured
+   run key, without adding a third field to the committed two-field report --
+   the extra arm goes to whatever outdir the caller names. The pinned fields are
+   never dropped, so the extra arm is measured beside them, under the same
+   corpus, the same relation and the same controls."
+  (into pinned-fields
+        (when-let [s (System/getenv "U52_EXTRA_FIELD")]
+          [(edn/read-string s)])))
 
 (def trace-dir (str (System/getProperty "user.home") "/code/futon2/data/wm-trace"))
 
@@ -87,21 +104,28 @@
    :graph-feasibility-mode (:graph-feasibility-mode row)
    :time-pressure (double (or (:time-pressure row) 0.0))})
 
-(defn field-of [{:keys [id trace run-id]}]
+(defn field-of [{:keys [id trace run-id] :as declared}]
   (let [recs (read-trace trace)
         rec (first (filter #(= run-id (:run/id %)) recs))
         rows (vec (sort-by :rank (:ranked-actions rec)))]
     (when-not rec (throw (ex-info "run id not found in trace" {:field id :run-id run-id})))
-    {:id id
-     :trace trace
-     :run-id run-id
-     :timestamp (:timestamp rec)
-     :state {:observation (:observation rec) :belief (:mu-pre rec)}
-     :opts (efe-opts (first rows))
-     :rows rows
-     :candidates (mapv :action rows)
-     :chosen [(get-in rec [:decision :action :type])
-              (get-in rec [:decision :action :target])]}))
+    ;; MERGED ONTO THE DECLARATION, not built beside it: the declaration carries
+    ;; :minted-before-the-run-key and :artifact, which `mint-payload` reads, and
+    ;; a field map rebuilt from three keys silently dropped both -- so every
+    ;; field got the structured run key including the two already committed
+    ;; without it. Found by reading the payloads (:U60).
+    (merge
+     declared
+     {:id id
+      :trace trace
+      :run-id run-id
+      :timestamp (:timestamp rec)
+      :state {:observation (:observation rec) :belief (:mu-pre rec)}
+      :opts (efe-opts (first rows))
+      :rows rows
+      :candidates (mapv :action rows)
+      :chosen [(get-in rec [:decision :action :type])
+               (get-in rec [:decision :action :target])]})))
 
 (defn score-field
   "Controller score for every candidate, through `efe/compute-efe` -- the
@@ -350,18 +374,38 @@
 ;; the mint payloads (built here, appended by u52_mint_refusals.bb)
 ;; ---------------------------------------------------------------------------
 
+;; THE STRUCTURED RUN KEY IS NOT PASSED FOR AN ALREADY-MINTED FIELD (:U60), and
+;; the omission is derived from the field rather than decided here. `:s5` and
+;; `:re5` were minted into the tension ledger on 2026-09-04, before
+;; `:tension/provenance :records` existed; `append-tension!` is
+;; `:already-present` only for a payload that matches the committed one exactly,
+;; so adding the key to those two would turn `u52_mint_refusals.bb --append`
+;; from a documented no-op into the append-only ledger's identity-conflict
+;; refusal. Each field says for itself whether its tension is already committed
+;; (`:minted-before-the-run-key`), a NEW field carries the key, and control 8t
+;; checks that the omission set is exactly the tension ids the committed ledger
+;; already holds -- so the day one of these is re-minted under a new id the
+;; omission goes away without an edit here.
+
 (defn mint-payload [field arm]
   (ladder/refusal-tension
    {:subject-id (keyword (str (name (:id field)) "-" (subs (:run-id field) 0 8)))
     :refusals (:refusals (:result arm))
     :relation (:relation arm)
-    :artifact "futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
-    :at as-of
+    :records (when-not (:minted-before-the-run-key field) [(:run-id field)])
+    :artifact (or (:artifact field)
+                  "futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn")
+    ;; the field's own date, not the report's pinned `as-of`, when it has one:
+    ;; a tension minted from a run stepped on another day would otherwise be
+    ;; dated by when this report was written
+    :at (or (:at field) as-of)
     :by "U52 ladder rung-3 refusal mint"
     :carried-by "M-wm-aif-policy-grain-compliance"
-    :pointers ["futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn"
-               "futon2/holes/labs/wm-contract/C507-u52-three-rung-ladder.md"
-               (str "futon2/" (:trace field) " (run " (:run-id field) ")")]}))
+    :pointers (into (vec (:extra-pointers field))
+                    [(or (:artifact field)
+                         "futon2/holes/labs/wm-contract/runs/U52-ladder/04-refusals.edn")
+                     "futon2/holes/labs/wm-contract/C507-u52-three-rung-ladder.md"
+                     (str "futon2/" (:trace field) " (run " (:run-id field) ")")])}))
 
 ;; ---------------------------------------------------------------------------
 ;; main

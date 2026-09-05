@@ -1,0 +1,263 @@
+{:all-pass? false,
+ :per-field
+ {:s5
+  {:positive/out-of-scope-candidates-are-untouched
+   {:out-of-scope 13,
+    :in-field 13,
+    :changed 0,
+    :pass? true,
+    :why
+    "the ladder scores task belief about missions; :no-op, :address-sorry and :fire-pattern pass through with a scope marker and nothing else changed -- refusing them would remove the machine's fallback moves for a reason this row has not measured"},
+   :positive/constructed-is-marked-and-derived
+   {:rung-2 31,
+    :unmarked 0,
+    :without-provenance 0,
+    :pass? true,
+    :why
+    "the ruling: a constructed value is never passed off as observed, and its provenance points at the kin records it generalized from"},
+   :negative/planted-unknown-candidate-reaches-rung-3
+   {:classification #:task-belief{:rung 3, :support 0.0, :factor 0.0},
+    :pass? true,
+    :why
+    "U51's negative-1: a candidate of an unseen type, in a repository no candidate lives in, with no document, must reach rung 3"},
+   :positive/flag-off-is-the-identity
+   {:identical-object? true,
+    :refusals 0,
+    :ladder-record nil,
+    :pass? true,
+    :why
+    "with the declared input absent the SAME vector object comes back and no ladder record is attached, so the default tick cannot differ from a pre-U52 tick by construction rather than by comparison"},
+   :positive/case-history-wins
+   {:min-rung-1-factor 0.6857142857142857,
+    :max-rung-2-factor 0.4608,
+    :pass? true,
+    :why
+    "the ruling's first clause as an ORDERING PROPERTY OF THE ARITHMETIC, not a claim about it: with support n/(n+1) a rung-1 candidate scores at least 0.5 and the 0.5 generalization discount holds every constructed value strictly under 0.5"},
+   :positive/refusal-is-typed-and-grounded
+   {:refusals 99,
+    :census-rung-3 99,
+    :mistyped 53,
+    :ungrounded 53,
+    :pass? false,
+    :why
+    "every refusal carries the one typed reason and a `not found` basis naming where the ladder looked -- a refusal is distinguishable from a candidate nobody considered"},
+   :negative/empty-history-refuses-everything-in-scope
+   {:census {3 132, :out-of-scope 13},
+    :refused 132,
+    :pass? true,
+    :why
+    "with the case-history index emptied every in-scope candidate reaches rung 3, so the rung-1 and rung-2 answers are reading THAT index and not a field correlated with it"},
+   :positive/a-recorded-chosen-key-reaches-rung-1
+   {:chosen [:advance-mission "M-wm-aif-policy-grain-compliance"],
+    :decisions 44,
+    :rung 3,
+    :pass? false,
+    :why
+    "the key this very tick chose is in the corpus and must classify rung 1"},
+   :positive/the-same-plant-retyped-reaches-rung-2
+   {:classification
+    #:task-belief{:rung 2,
+                  :constructed true,
+                  :support 116.0,
+                  :factor 0.49572649572649574},
+    :pass? true,
+    :why
+    "U51's positive-4, and the reason the rung-3 answers mean anything: the SAME plant retyped classifies rung 2 under :k-type alone, so the classifier is not answering `nothing` because the candidate is unknown to it"},
+   :positive/plateau-is-drained
+   {:recorded-width 55,
+    :members-refused 49,
+    :members-kept 6,
+    :widest-remaining-tie 1,
+    :pass? true,
+    :why
+    "the acceptance is the plateau shrinking on the recorded field, not code landing: the widest tie AMONG THE RECORDED PLATEAU'S MEMBERS after the ladder must be strictly narrower than the recorded one"},
+   :positive/off-arm-reproduces-the-record
+   {:rows 145,
+    :max-abs-deviation 0.0,
+    :rows-differing 0,
+    :pass? true,
+    :why
+    "the replay scores through efe/compute-efe with the modes the row carries and reproduces every recorded controller score exactly -- so a difference in the ladder arm is the ladder's and not the replay's"},
+   :positive/distinct-factors-give-distinct-scores
+   {:subject :advance-mission,
+    :rows 33,
+    :distinct-factors 33,
+    :distinct-scores 33,
+    :collisions 0,
+    :pass? true,
+    :why
+    ":mission-value-factor reaches the controller score by exactly one path (forward-model/mission-value-factor into predict-effects :advance-mission), and over the :advance-mission rows the map from factor to score is injective BOTH WAYS -- so `the plateau is 8 values wide` and `8 distinct factors` are the same statement, and the plateau count is not an artefact of counting factors instead of scores"}},
+  :re5
+  {:positive/out-of-scope-candidates-are-untouched
+   {:out-of-scope 13,
+    :in-field 13,
+    :changed 0,
+    :pass? true,
+    :why
+    "the ladder scores task belief about missions; :no-op, :address-sorry and :fire-pattern pass through with a scope marker and nothing else changed -- refusing them would remove the machine's fallback moves for a reason this row has not measured"},
+   :positive/constructed-is-marked-and-derived
+   {:rung-2 32,
+    :unmarked 0,
+    :without-provenance 0,
+    :pass? true,
+    :why
+    "the ruling: a constructed value is never passed off as observed, and its provenance points at the kin records it generalized from"},
+   :negative/planted-unknown-candidate-reaches-rung-3
+   {:classification #:task-belief{:rung 3, :support 0.0, :factor 0.0},
+    :pass? true,
+    :why
+    "U51's negative-1: a candidate of an unseen type, in a repository no candidate lives in, with no document, must reach rung 3"},
+   :positive/flag-off-is-the-identity
+   {:identical-object? true,
+    :refusals 0,
+    :ladder-record nil,
+    :pass? true,
+    :why
+    "with the declared input absent the SAME vector object comes back and no ladder record is attached, so the default tick cannot differ from a pre-U52 tick by construction rather than by comparison"},
+   :positive/case-history-wins
+   {:min-rung-1-factor 0.375,
+    :max-rung-2-factor 0.4608,
+    :pass? false,
+    :why
+    "the ruling's first clause as an ORDERING PROPERTY OF THE ARITHMETIC, not a claim about it: with support n/(n+1) a rung-1 candidate scores at least 0.5 and the 0.5 generalization discount holds every constructed value strictly under 0.5"},
+   :positive/refusal-is-typed-and-grounded
+   {:refusals 98,
+    :census-rung-3 98,
+    :mistyped 53,
+    :ungrounded 53,
+    :pass? false,
+    :why
+    "every refusal carries the one typed reason and a `not found` basis naming where the ladder looked -- a refusal is distinguishable from a candidate nobody considered"},
+   :negative/empty-history-refuses-everything-in-scope
+   {:census {3 133, :out-of-scope 13},
+    :refused 133,
+    :pass? true,
+    :why
+    "with the case-history index emptied every in-scope candidate reaches rung 3, so the rung-1 and rung-2 answers are reading THAT index and not a field correlated with it"},
+   :positive/a-recorded-chosen-key-reaches-rung-1
+   {:chosen [:advance-mission "M-zaif-harness-v1"],
+    :decisions 3,
+    :rung 1,
+    :pass? true,
+    :why
+    "the key this very tick chose is in the corpus and must classify rung 1"},
+   :positive/the-same-plant-retyped-reaches-rung-2
+   {:classification
+    #:task-belief{:rung 2,
+                  :constructed true,
+                  :support 119.0,
+                  :factor 0.49583333333333335},
+    :pass? true,
+    :why
+    "U51's positive-4, and the reason the rung-3 answers mean anything: the SAME plant retyped classifies rung 2 under :k-type alone, so the classifier is not answering `nothing` because the candidate is unknown to it"},
+   :positive/plateau-is-drained
+   {:recorded-width 56,
+    :members-refused 49,
+    :members-kept 7,
+    :widest-remaining-tie 1,
+    :pass? true,
+    :why
+    "the acceptance is the plateau shrinking on the recorded field, not code landing: the widest tie AMONG THE RECORDED PLATEAU'S MEMBERS after the ladder must be strictly narrower than the recorded one"},
+   :positive/off-arm-reproduces-the-record
+   {:rows 146,
+    :max-abs-deviation 0.0,
+    :rows-differing 0,
+    :pass? true,
+    :why
+    "the replay scores through efe/compute-efe with the modes the row carries and reproduces every recorded controller score exactly -- so a difference in the ladder arm is the ladder's and not the replay's"},
+   :positive/distinct-factors-give-distinct-scores
+   {:subject :advance-mission,
+    :rows 35,
+    :distinct-factors 35,
+    :distinct-scores 35,
+    :collisions 0,
+    :pass? true,
+    :why
+    ":mission-value-factor reaches the controller score by exactly one path (forward-model/mission-value-factor into predict-effects :advance-mission), and over the :advance-mission rows the map from factor to score is injective BOTH WAYS -- so `the plateau is 8 values wide` and `8 distinct factors` are the same statement, and the plateau count is not an artefact of counting factors instead of scores"}},
+  :u60
+  {:positive/out-of-scope-candidates-are-untouched
+   {:out-of-scope 13,
+    :in-field 13,
+    :changed 0,
+    :pass? true,
+    :why
+    "the ladder scores task belief about missions; :no-op, :address-sorry and :fire-pattern pass through with a scope marker and nothing else changed -- refusing them would remove the machine's fallback moves for a reason this row has not measured"},
+   :positive/constructed-is-marked-and-derived
+   {:rung-2 32,
+    :unmarked 0,
+    :without-provenance 0,
+    :pass? true,
+    :why
+    "the ruling: a constructed value is never passed off as observed, and its provenance points at the kin records it generalized from"},
+   :negative/planted-unknown-candidate-reaches-rung-3
+   {:classification #:task-belief{:rung 3, :support 0.0, :factor 0.0},
+    :pass? true,
+    :why
+    "U51's negative-1: a candidate of an unseen type, in a repository no candidate lives in, with no document, must reach rung 3"},
+   :positive/flag-off-is-the-identity
+   {:identical-object? true,
+    :refusals 0,
+    :ladder-record nil,
+    :pass? true,
+    :why
+    "with the declared input absent the SAME vector object comes back and no ladder record is attached, so the default tick cannot differ from a pre-U52 tick by construction rather than by comparison"},
+   :positive/case-history-wins
+   {:min-rung-1-factor 0.375,
+    :max-rung-2-factor 0.4608,
+    :pass? false,
+    :why
+    "the ruling's first clause as an ORDERING PROPERTY OF THE ARITHMETIC, not a claim about it: with support n/(n+1) a rung-1 candidate scores at least 0.5 and the 0.5 generalization discount holds every constructed value strictly under 0.5"},
+   :positive/refusal-is-typed-and-grounded
+   {:refusals 98,
+    :census-rung-3 98,
+    :mistyped 53,
+    :ungrounded 53,
+    :pass? false,
+    :why
+    "every refusal carries the one typed reason and a `not found` basis naming where the ladder looked -- a refusal is distinguishable from a candidate nobody considered"},
+   :negative/empty-history-refuses-everything-in-scope
+   {:census {3 133, :out-of-scope 13},
+    :refused 133,
+    :pass? true,
+    :why
+    "with the case-history index emptied every in-scope candidate reaches rung 3, so the rung-1 and rung-2 answers are reading THAT index and not a field correlated with it"},
+   :positive/a-recorded-chosen-key-reaches-rung-1
+   {:chosen [:advance-mission "M-zaif-harness-v1"],
+    :decisions 3,
+    :rung 1,
+    :pass? true,
+    :why
+    "the key this very tick chose is in the corpus and must classify rung 1"},
+   :positive/the-same-plant-retyped-reaches-rung-2
+   {:classification
+    #:task-belief{:rung 2,
+                  :constructed true,
+                  :support 119.0,
+                  :factor 0.49583333333333335},
+    :pass? true,
+    :why
+    "U51's positive-4, and the reason the rung-3 answers mean anything: the SAME plant retyped classifies rung 2 under :k-type alone, so the classifier is not answering `nothing` because the candidate is unknown to it"},
+   :positive/plateau-is-drained
+   {:recorded-width 56,
+    :members-refused 49,
+    :members-kept 7,
+    :widest-remaining-tie 1,
+    :pass? true,
+    :why
+    "the acceptance is the plateau shrinking on the recorded field, not code landing: the widest tie AMONG THE RECORDED PLATEAU'S MEMBERS after the ladder must be strictly narrower than the recorded one"},
+   :positive/off-arm-reproduces-the-record
+   {:rows 146,
+    :max-abs-deviation 0.0,
+    :rows-differing 0,
+    :pass? true,
+    :why
+    "the replay scores through efe/compute-efe with the modes the row carries and reproduces every recorded controller score exactly -- so a difference in the ladder arm is the ladder's and not the replay's"},
+   :positive/distinct-factors-give-distinct-scores
+   {:subject :advance-mission,
+    :rows 35,
+    :distinct-factors 35,
+    :distinct-scores 35,
+    :collisions 0,
+    :pass? true,
+    :why
+    ":mission-value-factor reaches the controller score by exactly one path (forward-model/mission-value-factor into predict-effects :advance-mission), and over the :advance-mission rows the map from factor to score is injective BOTH WAYS -- so `the plateau is 8 values wide` and `8 distinct factors` are the same statement, and the plateau count is not an artefact of counting factors instead of scores"}}}}

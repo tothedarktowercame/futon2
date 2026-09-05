@@ -1,0 +1,45 @@
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE6,
+ :check :rationale-regret,
+ :run-id "2026-09-05-u60",
+ :produced-by
+ "holes/labs/wm-contract/u39_selection_retrospective.bb --deposit",
+ :deterministic
+ "No wall-clock field. Every number is read from a record or subtracted from two of them, so this receipt is rewritten byte-identically on every deposit. That is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present.",
+ :rule
+ {:name :declared-attributed-overtake,
+  :declared-at
+  "holes/labs/wm-contract/u39_selection_retrospective.bb (retrospective-verdict)",
+  :statement
+  "REFUTED iff some candidate this claim rejected later out-ranked the chosen one AND its own recorded movement alone would have closed the margin the claim asserted. An overtake explained by the chosen candidate's own non-progress decay measures the decay, not the rationale, and is UNTESTABLE.",
+  :upheld-unreachable
+  "UPHELD requires an outcome leg and no record in this corpus carries one, so this check cannot deposit a green from the trace alone."},
+ :run-store
+ {:dir "holes/labs/wm-contract/runs/2026-09-05-u60",
+  :holds
+  ["README.md"
+   "battery.log"
+   "conformance.edn"
+   "delta.edn"
+   "normalized.edn"
+   "step.edn"
+   "tick-run-record-2026-09-05-3416e82b-771d-454d-8d4e-ae3d279cd23c.edn"
+   "wm-trace-2026-09-05.edn"
+   "world-after.edn"
+   "world-before.edn"],
+  :tick-ids ["3416e82b-771d-454d-8d4e-ae3d279cd23c"],
+  :traces
+  ["holes/labs/wm-contract/runs/2026-09-05-u60/wm-trace-2026-09-05.edn"],
+  :records-of-this-run 1,
+  :records-carrying-a-ranking 1,
+  :pairs-evaluated 0},
+ :verdict-deposited :typed-absence,
+ :pair-verdicts [],
+ :tally {},
+ :outcome-side
+ {:records-with-a-trace-outcome 0,
+  :records-with-realized-outcome 0,
+  :why-it-matters
+  "the UPHELD branch needs one of these; the count is what makes its absence a measurement"},
+ :not-what-this-says
+ "A :typed-absence here does NOT say the run's rationales held up. It says no leg of the declared rule was measurable on this run's records: no rejected candidate overtook the chosen one on its own movement, and there is no outcome carrier that could uphold the claim instead."}

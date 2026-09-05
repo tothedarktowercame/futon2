@@ -1,0 +1,5 @@
+u52_mint_refusals: 1 payload(s) from holes/labs/wm-contract/runs/2026-09-05-u60/ladder/04-refusals.edn (field u60 only)  -> ledger /tmp/u60-ledger.edn
+  shape ok on all payloads
+  u60: 98 refusal(s) -> appended :wm-ladder/u60-3416e82b-zero-support
+  ledger validates after append ( 8 tensions )
+u52_mint_refusals: done (appended) 

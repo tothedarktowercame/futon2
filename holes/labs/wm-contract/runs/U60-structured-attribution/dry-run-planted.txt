@@ -1,0 +1,171 @@
+LEDGER OVERRIDE: /tmp/u60-ledger.edn
+  this is NOT a receipt for the curated tension ledger and may not be deposited
+{:schema :wm/run-era-deposit-receipt-v1,
+ :row :RE6,
+ :check :tensions-cashed,
+ :run-id "2026-09-05-u60",
+ :produced-by "holes/labs/wm-contract/u41_tension_ledger.bb --deposit",
+ :deterministic
+ "No wall-clock field. This receipt is rewritten byte-identically on every deposit, which is what lets the deposit require it to be committed and unmodified, and lets the same deposit repeat as :already-present.",
+ :run-provenance
+ {:run-id-appears-in-ledger? true,
+  :tick-ids-sought ["3416e82b-771d-454d-8d4e-ae3d279cd23c"],
+  :tick-ids-appearing ["3416e82b-771d-454d-8d4e-ae3d279cd23c"],
+  :event-keys-in-use
+  [:event/at
+   :event/by
+   :event/evidence
+   :event/id
+   :event/note
+   :event/row
+   :event/seq
+   :event/tension
+   :event/to-status
+   :event/type],
+  :tension-keys-in-use
+  [:tension/born-of
+   :tension/carried-by
+   :tension/id
+   :tension/minted-by
+   :tension/note
+   :tension/pattern-links
+   :tension/poles
+   :tension/provenance
+   :tension/refusal
+   :tension/resolution-key
+   :tension/resolution-path
+   :tension/statement
+   :tension/statement-source
+   :tension/statement-source-corrected-by
+   :tension/status],
+  :run-carrying-keys [],
+  :events-by-date
+  {"2026-09-02" 3, "2026-09-03" 10, "2026-09-04" 2, "2026-09-05" 1},
+  :tension-provenance-shapes
+  [[:pointers :when :who]
+   [:pointers :record-ids :when :who]
+   [:pointers :records :when :who]
+   [:how :pointers :retrofitted-by :when :who]],
+  :run-attribution
+  {:method
+   "prefer the structured field :tension/provenance :records; fall back to a substring scan of the tension's printed form for a tension that carries none. The fallback is marked :prose-scan and is what attributes every tension minted before the key existed.",
+   :sought ["2026-09-05-u60" "3416e82b-771d-454d-8d4e-ae3d279cd23c"],
+   :fold {:prose-scan 7, :structural 1},
+   :naming-this-run
+   [{:tension :wm-ladder/u60-3416e82b-zero-support,
+     :attribution :structural,
+     :declares ["3416e82b-771d-454d-8d4e-ae3d279cd23c"],
+     :matched ["3416e82b-771d-454d-8d4e-ae3d279cd23c"],
+     :names-this-run? true}],
+   :per-tension
+   [{:tension :zaif-v1/T1,
+     :attribution :prose-scan,
+     :matched [],
+     :names-this-run? false}
+    {:tension :zaif-v1/T2,
+     :attribution :prose-scan,
+     :matched [],
+     :names-this-run? false}
+    {:tension :zaif-v1/T3,
+     :attribution :prose-scan,
+     :matched [],
+     :names-this-run? false}
+    {:tension
+     [:refused-prediction
+      {:q-actand/refusal :q-actand/zero-support-after-kin-pool,
+       :grain :arm-session,
+       :actand {:route :actand, :correction-label true},
+       :action :retrieve,
+       :target :gold-judged,
+       :kin []}],
+     :attribution :prose-scan,
+     :matched [],
+     :names-this-run? false}
+    {:tension :programme/T5,
+     :attribution :prose-scan,
+     :matched [],
+     :names-this-run? false}
+    {:tension :wm-ladder/re5-8ae111bc-zero-support,
+     :attribution :prose-scan,
+     :matched [],
+     :names-this-run? false}
+    {:tension :wm-ladder/s5-4e35e740-zero-support,
+     :attribution :prose-scan,
+     :matched [],
+     :names-this-run? false}
+    {:tension :wm-ladder/u60-3416e82b-zero-support,
+     :attribution :structural,
+     :declares ["3416e82b-771d-454d-8d4e-ae3d279cd23c"],
+     :matched ["3416e82b-771d-454d-8d4e-ae3d279cd23c"],
+     :names-this-run? true}]}},
+ :verdict-deposited :green,
+ :live-derivation
+ {:read-from "the tension ledger at deposit time, which names no run",
+  :tensions 8,
+  :events 16,
+  :cashed [],
+  :controls
+  {:negative/a-mint-payload-missing-its-statement-is-refused true,
+   :negative/birth-rule-needs-two-distinct-contexts true,
+   :negative/fabricated-tension true,
+   :negative/mutated-ledger-is-refused-status-field true,
+   :negative/mutated-ledger-is-refused-unevidenced-status-move true,
+   :negative/planted-double-mint-is-refused true,
+   :negative/the-real-ledger-conforms true,
+   :positive/birth-rule-fires-on-a-corpus-that-satisfies-it true,
+   :positive/every-seed-carries-a-pointer true,
+   :positive/machine-born-statement-is-the-refusal-verbatim true,
+   :positive/u39-mint-payload-validates true,
+   :report/birth-rule-is-zero-today true},
+  :defects [],
+  :status-fold {:carried 8},
+  :artifact "holes/labs/wm-contract/tension-ledger.edn",
+  :birth-rule-candidates 0,
+  :statuses
+  [{:tension :zaif-v1/T1,
+    :status :carried,
+    :status-since "2026-09-02",
+    :moved-by-row nil}
+   {:tension :zaif-v1/T2,
+    :status :carried,
+    :status-since "2026-09-02",
+    :moved-by-row nil}
+   {:tension :zaif-v1/T3,
+    :status :carried,
+    :status-since "2026-09-02",
+    :moved-by-row nil}
+   {:tension
+    [:refused-prediction
+     {:q-actand/refusal :q-actand/zero-support-after-kin-pool,
+      :grain :arm-session,
+      :actand {:route :actand, :correction-label true},
+      :action :retrieve,
+      :target :gold-judged,
+      :kin []}],
+    :status :carried,
+    :status-since "2026-09-03",
+    :moved-by-row :U28z}
+   {:tension :programme/T5,
+    :status :carried,
+    :status-since "2026-09-03",
+    :moved-by-row :NOTE-aif-spec-gap}
+   {:tension :wm-ladder/re5-8ae111bc-zero-support,
+    :status :carried,
+    :status-since "2026-09-04",
+    :moved-by-row :U52}
+   {:tension :wm-ladder/s5-4e35e740-zero-support,
+    :status :carried,
+    :status-since "2026-09-04",
+    :moved-by-row :U52}
+   {:tension :wm-ladder/u60-3416e82b-zero-support,
+    :status :carried,
+    :status-since "2026-09-05",
+    :moved-by-row :U52}]},
+ :why-the-ledger-cannot-be-run-scoped
+ "1 of 8 tension(s) name their runs structurally at :tension/provenance :records, so the sentence this field carried before :U60 -- that no field of a tension names a run -- is no longer true of the whole ledger. It remains true of the other 7: they are attributed, if at all, by the substring scan marked :prose-scan in :run-attribution. The event schema still carries no run field; the keys in use are [:event/at :event/by :event/evidence :event/id :event/note :event/row :event/seq :event/tension :event/to-status :event/type] on events and [:tension/born-of :tension/carried-by :tension/id :tension/minted-by :tension/note :tension/pattern-links :tension/poles :tension/provenance :tension/refusal :tension/resolution-key :tension/resolution-path :tension/statement :tension/statement-source :tension/statement-source-corrected-by :tension/status] on tensions, of which [] carry a run in their own name.",
+ :not-what-this-says
+ "The live derivation above is the fold of the ledger at deposit time, over tensions minted by operator dictation on 2026-09-02. It is recorded so the absence is legible, and it is NOT the deposited verdict."}
+
+NOTES: the ledger names this run: run-id in ledger? true, tick ids appearing ["3416e82b-771d-454d-8d4e-ae3d279cd23c"]; status fold {:carried 8}, cashed [] ATTRIBUTION (:U60): 1 tension(s) name this run -- 1 structural (:wm-ladder/u60-3416e82b-zero-support). :structural means the tension declares the run at :tension/provenance :records; :prose-scan means the run id was found as a substring of the record and the tension declares no runs. The ledger-wide fold is {:prose-scan 7, :structural 1}. This names WHICH tensions and by WHAT evidence; it does not change what the verdict above asserts, which waits on the (A)/(B)/(C) ruling.
+LEDGER OVERRIDE: /tmp/u60-ledger.edn -- see the banner above
+u41_tension_ledger --deposit --dry-run: verdict :green -- nothing written, ledger not touched

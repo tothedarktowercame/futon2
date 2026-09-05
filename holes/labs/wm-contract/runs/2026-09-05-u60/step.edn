@@ -1,0 +1,28 @@
+{:step/schema :wm/step-record-v1
+ :step/id "001-u60-mint"
+ :step/work "/tmp/wm-step-u60"
+ :step/started-at "2026-09-05T06:12:05Z"
+ :step/ended-at "2026-09-05T06:13:34Z"
+ :step/tick-exit 0
+ :step/days 14
+ :step/run-id "3416e82b-771d-454d-8d4e-ae3d279cd23c"
+ :step/pin-verify :ok
+ :step/pin-generation 0
+ :step/futon2-sha "3c822747d53feeb103c260a2a5153383d0aa0d1f"
+ :step/futon2-tree-dirty? true
+ :step/futon2-tree-dirty-files [" M holes/labs/wm-contract/u41_tension_ledger.bb" " M holes/labs/wm-contract/u52_ladder.clj" " M holes/labs/wm-contract/u52_mint_refusals.bb" " M src/futon2/aif/task_belief_ladder.clj" "?? holes/labs/zaif-harness/runs/build-loop.lock" "?? holes/labs/zaif-harness/runs/build-loop.log"]
+ :step/sandbox {:trace-dir "/tmp/wm-step-u60/sandbox/wm-trace"
+                :receipt-dir "/tmp/wm-step-u60/sandbox/receipts"
+                :rationale-dir "/tmp/wm-step-u60/sandbox/wm-trace/rationale"}
+ :step/live-data-written false
+ :step/run-lock :taken-and-released
+ :step/normalized-sha256 "4ae9feec6daf8aae5c2a373582159e5dd8a7ac5f90b9474144afe2e73d360c45"
+ :step/store-basis {:before {:base "http://127.0.0.1:7070" :count 213392 :max-at "2026-09-05T06:09:46.991720810Z" :at "2026-09-05T06:12:05Z"} :after {:base "http://127.0.0.1:7070" :count 213392 :max-at "2026-09-05T06:09:46.991720810Z" :at "2026-09-05T06:13:42Z"}}
+ :step/evidence {:mode :pinned-replay
+                 :cassette "pin/evidence-cassette.edn"
+                 :cassette-sha256 "d21bee1b30b4bdbd5d9db5691773df88e6d94cfcb0f34d4c784ec8b92d00986c"
+                 :cassette-entries 7
+                 :log "cassette.log"
+                 :note "the evidence store is the one input C509 called unpinnable; the cassette pins its ANSWERS, reached through the existing FUTON3C_EVIDENCE_BASE seam (pattern_registry.clj:33-38)"}
+ :step/world {:before "world-before.edn" :after "world-after.edn"}
+ :step/note "the sandbox is restored from the pin before the tick, so two steps of the same pin are steps from the same state"}
