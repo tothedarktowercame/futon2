@@ -1,0 +1,174 @@
+{:stage "EVALUATE",
+ :negative-controls
+ {:plants
+  [{:id :unnormalised-a-row,
+    :result :caught,
+    :caught-by [:declared-model-validation]}
+   {:id :unnormalised-b-row,
+    :result :caught,
+    :caught-by [:declared-model-validation]}
+   {:id :rolls-t-minus-one,
+    :result :caught,
+    :caught-by [:reference-row]}
+   {:id :sums-over-outcomes-instead-of-states,
+    :result :caught,
+    :caught-by [:declared-model-validation]}
+   {:id :depth-zero-returns-mu,
+    :result :caught,
+    :caught-by [:reference-row]}
+   {:id :reference-reads-shipped-node,
+    :result :caught,
+    :caught-by [:reference-provenance]}],
+  :n 6,
+  :all-caught true},
+ :harness :v7-r4-node-sim,
+ :not-done
+ ["No live tick or run lock; trace data was read only."
+  "No source, registry, ledger, document, p4ng, or data file changed."
+  "No equation-level numerical equality is claimed between disjoint outcome and channel alphabets."],
+ :checks
+ [{:reference-source :carriers,
+   :outcome-mass 1.0,
+   :state-row {:s0 0.25, :s1 0.75},
+   :tolerance 1.0E-12,
+   :outcome-row {:good 0.375, :bad 0.625},
+   :state-mass 1.0,
+   :outcome-count 2,
+   :result :pass,
+   :id :declared-equation-produces-normalised-categorical,
+   :state-count 2}
+  {:multi-return-keys [:final-state :horizon-steps :trajectory],
+   :return-keys
+   [:action :next-belief :next-observation :predicted-events],
+   :reference-outcomes [:good :bad],
+   :next-observation-keys [:mean :variance :variance-status],
+   :alphabet-intersection [],
+   :final-state-keys [:belief :observation],
+   :reason :different-alphabets-and-types,
+   :trajectory-count 2,
+   :result :pass,
+   :id :shipped-return-is-a-channel-gaussian-not-declared-q,
+   :mean-channels [:sensor-x],
+   :mean-channel-count 1,
+   :can-read-as-reference false}
+  {:id :observation-prediction-does-not-read-belief,
+   :result :pass,
+   :single-observation-equal-under-belief-change true,
+   :single-belief-equal-under-belief-change false,
+   :single-observation-equal-under-observation-change false,
+   :multi-observation-trajectories-equal-under-belief-change true,
+   :multi-final-states-equal-under-belief-change false}
+  {:source-hits
+   ["src/futon2/aif/efe.clj:528::horizon-steps       — v0.15 opt-in multi-horizon scoring. When"
+    "src/futon2/aif/efe.clj:529:>= 2, uses `predict-multi-horizon` and"
+    "src/futon2/aif/efe.clj:579:time-pressure-scale horizon-steps belief-update-opts capability-graph"
+    "src/futon2/aif/efe.clj:629:multi (when (and horizon-steps (>= horizon-steps 2))"
+    "src/futon2/aif/efe.clj:630:(fm/predict-multi-horizon state action horizon-steps"
+    "src/futon2/aif/efe.clj:912::horizon-steps (when multi (:horizon-steps multi))"
+    "src/futon2/aif/forward_model.clj:24:(declare predict)  ; v0.15: predict-multi-horizon (below can-execute?) calls predict (further below)."
+    "src/futon2/aif/forward_model.clj:278:(def default-horizon-steps 3)"
+    "src/futon2/aif/forward_model.clj:280:(defn predict-multi-horizon"
+    "src/futon2/aif/forward_model.clj:288::horizon-steps  K}"
+    "src/futon2/aif/forward_model.clj:294:([state action] (predict-multi-horizon state action default-horizon-steps {}))"
+    "src/futon2/aif/forward_model.clj:295:([state action K] (predict-multi-horizon state action K {}))"
+    "src/futon2/aif/forward_model.clj:303::horizon-steps K}"
+    "src/futon2/aif/trace.clj:91:added `:horizon-steps`; v0.20 adds `:structural-pressure`.\""
+    "src/futon2/aif/trace.clj:137::controller-score :rank :time-pressure :horizon-steps])"
+    "scripts/futon2/report/war_machine.clj:6285:wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)"
+    "scripts/futon2/report/war_machine.clj:6329::horizon-steps wm-horizon-steps"
+    "scripts/wm_e6_shadow.clj:16:Opts fidelity: :time-pressure/:horizon-steps are read back from the"
+    "scripts/wm_e6_shadow.clj:73:hs (:horizon-steps (first prod))"
+    "scripts/wm_e6_shadow.clj:76:{:time-pressure tp :horizon-steps hs}))"
+    "scripts/wm_ihtb2_check.clj:42:hs (:horizon-steps (first (filter :G-risk prod-ranked)))"
+    "scripts/wm_ihtb2_check.clj:45:{:time-pressure tp :horizon-steps hs}))"
+    "scripts/wm_t_calibration.clj:62:hs (:horizon-steps (first prod))"
+    "scripts/wm_t_calibration.clj:65:{:time-pressure tp :horizon-steps hs}))"],
+   :recorded-horizon-value-distribution {3 32383, nil 85042},
+   :first-file "wm-trace-2026-05-18.edn",
+   :records-without-horizon-evidence 676,
+   :records-total 889,
+   :default-horizon 3,
+   :result :pass,
+   :id :depth-is-opt-in-and-corpus-shows-effective-history,
+   :last-file "wm-trace-2026-09-04.edn",
+   :recorded-effective-depth :mixed,
+   :records-with-multi-horizon-evidence 213,
+   :records-with-horizon-field 875,
+   :source-hit-count 24,
+   :source-search-roots ["src" "scripts" "checks"]}
+  {:id :live-and-predictive-dynamics-do-not-share-one-kernel,
+   :result :pass,
+   :search-patterns
+   ["predict-effects" "forward-model/predict" "fm/predict"],
+   :search-roots ["src" "scripts" "checks"],
+   :hit-count 33,
+   :hits
+   ["src/futon2/aif/code_build_match.clj:34::code-var 'futon2.aif.forward-model/predict"
+    "src/futon2/aif/efe.clj:477::prediction    <full forward-model/predict output>"
+    "src/futon2/aif/efe.clj:624:single-prediction (fm/predict state action belief-update-opts)"
+    "src/futon2/aif/efe.clj:630:(fm/predict-multi-horizon state action horizon-steps"
+    "src/futon2/aif/forward_model.clj:28:set means adding both a `predict-effects` multimethod arm (below)"
+    "src/futon2/aif/forward_model.clj:56:(defmulti ^:private predict-effects"
+    "src/futon2/aif/forward_model.clj:65:(defmethod predict-effects :no-op [_ _]"
+    "src/futon2/aif/forward_model.clj:129:(defmethod predict-effects :address-sorry"
+    "src/futon2/aif/forward_model.clj:142:(defmethod predict-effects :open-mission"
+    "src/futon2/aif/forward_model.clj:152:(defmethod predict-effects :advance-mission"
+    "src/futon2/aif/forward_model.clj:169:(defmethod predict-effects :close"
+    "src/futon2/aif/forward_model.clj:175:(defmethod predict-effects :close-mission [state action]"
+    "src/futon2/aif/forward_model.clj:176:(predict-effects state (assoc action :type :close)))"
+    "src/futon2/aif/forward_model.clj:178:(defmethod predict-effects :close-hole [state action]"
+    "src/futon2/aif/forward_model.clj:179:(predict-effects state (assoc action :type :close)))"
+    "src/futon2/aif/forward_model.clj:181:(defmethod predict-effects :survey"
+    "src/futon2/aif/forward_model.clj:187:(defmethod predict-effects :survey-mission [state action]"
+    "src/futon2/aif/forward_model.clj:188:(predict-effects state (assoc action :type :survey)))"
+    "src/futon2/aif/forward_model.clj:190:(defmethod predict-effects :apply-cascade"
+    "src/futon2/aif/forward_model.clj:196:(defmethod predict-effects :fire-pattern"
+    "src/futon2/aif/forward_model.clj:205:(defmethod predict-effects :learn-action-class"
+    "src/futon2/aif/forward_model.clj:216:(defmethod predict-effects :pursue"
+    "src/futon2/aif/forward_model.clj:222:(defmethod predict-effects :decompose"
+    "src/futon2/aif/forward_model.clj:334:(let [{:keys [obs-delta obs-variance events]} (predict-effects nil action)"
+    "src/futon2/aif/machine_q.clj:8:per-channel Gaussian `forward-model/predict` emits, and it is not the"
+    "src/futon2/aif/machine_q.clj:52:before reading anything, so `forward-model/predict` returns the map it"
+    "src/futon2/aif/machine_q.clj:103:\"The R4 action-grain Gaussian: `forward-model/predict`'s whole return, or its"
+    "src/futon2/aif/policy_free_energy.clj:60:this function can be called on WM data at all. `forward-model/predict`"
+    "src/futon2/aif/portfolio_action_proposer.clj:19:existing rank-actions / compute-efe / predict-effects pipeline prices"
+    "src/futon2/aif/portfolio_action_proposer.clj:23:with predict-effects arms, but can-execute? defaults to true only for"
+    "src/futon2/aif/survey_mission_value.clj:7:nothing about it was epistemic: its `predict-effects` arm delegates to"
+    "src/futon2/aif/task_belief_ladder.clj:29:consumed by `predict-effects :advance-mission`"
+    "scripts/wm_t_calibration.clj:81:(let [v (try (get-in (fm/predict wm-state c) [:next-observation :variance])"],
+   :live-dynamics
+   "src/futon2/aif/enact.clj:250-336 (enact! and close-loop!)",
+   :live-path-calls-predictive-kernel false}
+  {:id :machine-q-boundary-refuses-the-gaussian-proxy,
+   :result :pass,
+   :refusal
+   {:got :forward-model-prediction,
+    :why
+    "per-channel means and variances over observation channels, conditioned on an action, not a distribution over the declared outcome alphabet",
+    :refusal :refusal/action-grain-gaussian-proxy},
+   :records-total 889,
+   :records-with-machine-q 0}],
+ :node :R4,
+ :corpus
+ {:root "data/wm-trace",
+  :read-only true,
+  :file-count 57,
+  :record-count 889},
+ :reference-independence
+ "The categorical Q(s|pi) and Q(o|pi) references are computed only from R4-carriers.edn. futon2.aif.forward-model is called only for node-under-test observations.",
+ :carriers "holes/labs/wm-contract/sim/R4-carriers.edn",
+ :stage-at "p4ng/empirics-futon/control-stages.edn:21",
+ :slice 8,
+ :verdict :pass,
+ :declaration-sites
+ {:state-discard "src/futon2/aif/forward_model.clj:330-335",
+  :default-depth "src/futon2/aif/forward_model.clj:278",
+  :live-horizon "scripts/futon2/report/war_machine.clj:6283-6329",
+  :consumer "src/futon2/aif/efe.clj:623-635",
+  :registry "holes/labs/wm-contract/aif-equations.edn:126-130",
+  :multi "src/futon2/aif/forward_model.clj:280-310",
+  :machine-q-boundary "src/futon2/aif/machine_q.clj:138-180",
+  :predict "src/futon2/aif/forward_model.clj:312-369",
+  :live-dynamics "src/futon2/aif/enact.clj:250-336",
+  :symbols "holes/labs/wm-contract/aif-equations.edn:62-63"},
+ :row :V7}

@@ -1,0 +1,33 @@
+;; Independent categorical carrier for V7 slice 8, node R4.
+{:id :R4-carriers-v1 :node :R4 :row :V7 :slice 8
+ :states [:s0 :s1]
+ :outcomes [:good :bad]
+ :actions [:advance :hold]
+ :A {:s0 {:good 0.75 :bad 0.25}
+     :s1 {:good 0.25 :bad 0.75}}
+ :B {:advance {:s0 {:s0 0.5 :s1 0.5}
+               :s1 {:s0 0.0 :s1 1.0}}
+     :hold {:s0 {:s0 1.0 :s1 0.0}
+            :s1 {:s0 0.0 :s1 1.0}}}
+ :mu {:s0 1.0 :s1 0.0}
+ :pi [:advance :advance]
+ :T 2
+ :production
+ {:action {:type :no-op}
+  :state-a {:observation {:sensor-x 0.25}
+            :belief {"entity" {:spawned 1.0}}}
+  :state-b {:observation {:sensor-x 0.25}
+            :belief {"entity" {:strengthened 1.0}}}
+  :state-c {:observation {:sensor-x 0.75}
+            :belief {"entity" {:spawned 1.0}}}}
+ :declaration-sites
+ {:registry "holes/labs/wm-contract/aif-equations.edn:126-130"
+  :symbols "holes/labs/wm-contract/aif-equations.edn:62-63"
+  :default-depth "src/futon2/aif/forward_model.clj:278"
+  :multi "src/futon2/aif/forward_model.clj:280-310"
+  :predict "src/futon2/aif/forward_model.clj:312-369"
+  :state-discard "src/futon2/aif/forward_model.clj:330-335"
+  :consumer "src/futon2/aif/efe.clj:623-635"
+  :live-horizon "scripts/futon2/report/war_machine.clj:6283-6329"
+  :live-dynamics "src/futon2/aif/enact.clj:250-336"
+  :machine-q-boundary "src/futon2/aif/machine_q.clj:138-180"}}
