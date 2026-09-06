@@ -1073,3 +1073,39 @@ that."
   inapplicable-next-rung-witnessed / OWES-formula-transcription
   (the real deficit, counted and named). A planted def-with-equation
   marked inapplicable must be REFUSED (negative control).
+
+## The process-assurance track (Joe, 2026-09-06) — Box 12 becomes a parallel track on the zaif harness
+
+Verbatim: "Box 12 is also extremely incomplete. There are many items
+here not censused. And many at zero of seven exists, or one of seven
+exists. So I would suggest this Box 12 could be set up as a whole
+parallel track. We could use the Zaif harness machine for this
+because I think the zaif harness loop is quite related to closing
+the system over the operator... worth looking into considerably. In
+parallel to what we're doing with the other regular War Machine
+loop."
+
+- Box 12 = the R-node dossier summary table's process-assurance
+  column (sec-rnode-dossiers-generated.tex, from
+  ALIGN-rnode-process-census.md): the 7-stage operator-inclusive
+  lifecycle (commissioned/dispatched/parked/returned/checked/
+  recorded/surfaced) per control-stage node. State at census
+  (2026-09-05): 6 nodes censused (R16 5/7, TRACE 1/7, R9/R20 0/7
+  named-only checked, R10/R12 0/7), 14 loop-band nodes NOT censused.
+- The match is real, not nominal: the census's absent cells live in
+  futon3c's agency/social machinery ("generic machinery is not
+  credited as an R-node assurance" -- the work is node-LINKING it)
+  plus futon2's full-loop runner; futon3c is exactly the tree the
+  zaif-build-loop builds in, with its author!=reviewer seat law.
+- Track shape (discovery split from implementation, rows kept
+  one-node/one-cell-cluster): (1) census slice extending ALIGN to
+  the 14 uncensused loop-band nodes; then implementation rows per
+  ALIGN s3's blocking-cell list -- R9 checked (refusing
+  no-self-certification), R10 commissioned+dispatched, R12
+  returned+checked, R20 checked+surfaced, TRACE surfaced, R16
+  parked+surfaced.
+- EXECUTION: commissioned to claude-2 (zaif lane owner, reachable
+  again as of 2026-09-06 14:13Z) to seed its own board and run its
+  loop; claude-1 reviews the track design at the first pause.
+  Parallel to the wm loop; does NOT touch the run gate (the
+  eight-before-any-run ruling stands independently).
