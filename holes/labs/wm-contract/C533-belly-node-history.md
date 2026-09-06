@@ -121,6 +121,11 @@ The measured current CLI closure runs one JVM per tick, initializes the
 `defonce` atom afresh, and has no refresh caller, leaving `:entries []` and
 goal-outcome risk zero
 ([`holes/labs/wm-contract/C509-inter-tick-state-boundary.md:93-116`](C509-inter-tick-state-boundary.md)).
+Review re-run (2026-09-06): the same search also shows `cv/maybe-refresh!`
+called from `scripts/promote_c_entries.bb:94` and (as a `:refresh-fn` default)
+`src/futon2/aif/full_loop_runner.clj:2459`; both belong to the older
+in-process/ops paths, not the one-shot CLI closure, so the degradation
+finding is unchanged.
 
 The newest canonical evidence, `data/wm-trace/wm-trace-2026-09-04.edn` at
 `2026-09-04T07:46:52.742121237Z`, names both `:live-goal-outcomes` and
