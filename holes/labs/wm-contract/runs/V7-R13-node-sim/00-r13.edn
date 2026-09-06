@@ -1,0 +1,311 @@
+{:stage "SELECT",
+ :negative-controls
+ {:plants
+  [{:id :chains-k-minus-one,
+    :moved 0.17142857142857126,
+    :result :caught}
+   {:id :final-state-is-first-step,
+    :moved 0.32142857142857123,
+    :result :caught}
+   {:id :synthetic-selected-action-depth,
+    :before 213,
+    :after 214,
+    :moved 1,
+    :result :caught}
+   {:id :pinned-line-instead-of-derived-site,
+    :pinned-line 6283,
+    :pinned-text
+    ";; loaded events in horizon. Falls back to single-step if no",
+    :derived-line 6285,
+    :result :caught}],
+  :all-caught true},
+ :harness :v7-r13-node-sim,
+ :not-done
+ ["No live tick or run lock; trace files were read only."
+  "No production, registry, ledger, document, p4ng, Lean, or data file was modified."],
+ :checks
+ [{:id :trajectory-is-the-k-fold-composition,
+   :result :pass,
+   :comparisons
+   [{:k 1,
+     :max-deviation 0.0,
+     :exact? true,
+     :trajectory-count 1,
+     :horizon-steps 1}
+    {:k 2,
+     :max-deviation 0.0,
+     :exact? true,
+     :trajectory-count 2,
+     :horizon-steps 2}
+    {:k 3,
+     :max-deviation 0.0,
+     :exact? true,
+     :trajectory-count 3,
+     :horizon-steps 3}
+    {:k 5,
+     :max-deviation 0.0,
+     :exact? true,
+     :trajectory-count 5,
+     :horizon-steps 5}],
+   :basis "src/futon2/aif/forward_model.clj:280-310"}
+  {:id :g-terms-do-not-share-one-depth,
+   :result :pass,
+   :k3-minus-k1
+   {:G-ambiguity 0.0,
+    :G-risk -2.4115244739422366,
+    :homeostatic-pressure -0.23999999999999994,
+    :predictability-bonus 0.0},
+   :k1
+   {:G-risk 85.93781784285343,
+    :G-ambiguity -100.48350494781259,
+    :homeostatic-pressure 0.73,
+    :predictability-bonus 12.985000000000001},
+   :k3
+   {:G-risk 83.5262933689112,
+    :G-ambiguity -100.48350494781259,
+    :homeostatic-pressure 0.49000000000000005,
+    :predictability-bonus 12.985000000000001},
+   :basis "src/futon2/aif/efe.clj:623-706"}
+  {:id :epistemic-half-has-no-tau-sum,
+   :result :pass,
+   :trajectory-depth 3,
+   :variance-max-delta 0.0,
+   :variance-rows
+   [{:mathematics-pct 0.0,
+     :coupling-density 0.0,
+     :support-coverage 0.0,
+     :depositing-signal 0.0,
+     :loop-health 0.0,
+     :mission-health 0.005,
+     :portfolio-pct 0.0,
+     :ticks-firing-ratio 0.0,
+     :active-repo-ratio 0.0,
+     :attack-coverage 0.0,
+     :consulting-pct 0.0,
+     :sorry-count-norm 0.01,
+     :stack-pct 0.0}
+    {:mathematics-pct 0.0,
+     :coupling-density 0.0,
+     :support-coverage 0.0,
+     :depositing-signal 0.0,
+     :loop-health 0.0,
+     :mission-health 0.005,
+     :portfolio-pct 0.0,
+     :ticks-firing-ratio 0.0,
+     :active-repo-ratio 0.0,
+     :attack-coverage 0.0,
+     :consulting-pct 0.0,
+     :sorry-count-norm 0.01,
+     :stack-pct 0.0}
+    {:mathematics-pct 0.0,
+     :coupling-density 0.0,
+     :support-coverage 0.0,
+     :depositing-signal 0.0,
+     :loop-health 0.0,
+     :mission-health 0.005,
+     :portfolio-pct 0.0,
+     :ticks-firing-ratio 0.0,
+     :active-repo-ratio 0.0,
+     :attack-coverage 0.0,
+     :consulting-pct 0.0,
+     :sorry-count-norm 0.01,
+     :stack-pct 0.0}],
+   :derived-source-sites
+   {:state-blind-effects
+    [{:line 334,
+      :text
+      "(let [{:keys [obs-delta obs-variance events]} (predict-effects nil action)"}]},
+   :basis "src/futon2/aif/forward_model.clj:334-354"}
+  {:id :declared-depths-census,
+   :result :pass,
+   :depths
+   {:forward-default 3,
+    :rollout-default 2,
+    :live-conditional 3,
+    :efe-multi-threshold 2},
+   :derived-sites
+   {:forward-default
+    [{:line 278, :text "(def default-horizon-steps 3)"}],
+    :forward-composition
+    [{:line 280, :text "(defn predict-multi-horizon"}],
+    :state-blind-effects
+    [{:line 334,
+      :text
+      "(let [{:keys [obs-delta obs-variance events]} (predict-effects nil action)"}],
+    :efe-guard
+    [{:line 629,
+      :text "multi (when (and horizon-steps (>= horizon-steps 2))"}],
+    :rollout-default [{:line 474, :text "(defn- rollout-horizon"}],
+    :live-depth-binding
+    [{:line 6285,
+      :text
+      "wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)"}],
+    :live-depth-value [{:line 6287, :text "3)"}]},
+   :registry-pointers-still-land?
+   {:forward-default true,
+    :rollout-default true,
+    :live-conditional false,
+    :efe-guard true},
+   :basis "holes/labs/wm-contract/aif-equations.edn:161-166"}
+  {:id :requested-depth-of-one-is-not-a-depth,
+   :result :pass,
+   :none {:horizon nil, :score -18.86368710495916},
+   :one {:horizon nil, :score -18.86368710495916},
+   :three {:horizon 3, :score -21.563211578901395},
+   :none-minus-one 0.0,
+   :basis "src/futon2/aif/efe.clj:623-636"}
+  {:candidate-depth-distribution {3 32383},
+   :files-denominator 57,
+   :basis "src/futon2/aif/trace.clj:76-137",
+   :first-file-above-one "wm-trace-2026-05-19.edn",
+   :candidate-denominator 32383,
+   :by-file
+   [["wm-trace-2026-05-18.edn"
+     {:records 7, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-05-19.edn"
+     {:records 9, :records-with-depth 2, :selected-above-one 2}]
+    ["wm-trace-2026-05-21.edn"
+     {:records 13, :records-with-depth 13, :selected-above-one 13}]
+    ["wm-trace-2026-05-22.edn"
+     {:records 24, :records-with-depth 24, :selected-above-one 24}]
+    ["wm-trace-2026-05-23.edn"
+     {:records 24, :records-with-depth 24, :selected-above-one 24}]
+    ["wm-trace-2026-05-24.edn"
+     {:records 24, :records-with-depth 24, :selected-above-one 24}]
+    ["wm-trace-2026-05-25.edn"
+     {:records 21, :records-with-depth 21, :selected-above-one 21}]
+    ["wm-trace-2026-05-26.edn"
+     {:records 17, :records-with-depth 17, :selected-above-one 17}]
+    ["wm-trace-2026-05-27.edn"
+     {:records 9, :records-with-depth 9, :selected-above-one 9}]
+    ["wm-trace-2026-05-30.edn"
+     {:records 2, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-05-31.edn"
+     {:records 19, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-01.edn"
+     {:records 12, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-02.edn"
+     {:records 14, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-03.edn"
+     {:records 24, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-04.edn"
+     {:records 24, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-05.edn"
+     {:records 15, :records-with-depth 9, :selected-above-one 9}]
+    ["wm-trace-2026-06-06.edn"
+     {:records 24, :records-with-depth 24, :selected-above-one 24}]
+    ["wm-trace-2026-06-07.edn"
+     {:records 23, :records-with-depth 23, :selected-above-one 23}]
+    ["wm-trace-2026-06-08.edn"
+     {:records 24, :records-with-depth 23, :selected-above-one 23}]
+    ["wm-trace-2026-06-09.edn"
+     {:records 23, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-10.edn"
+     {:records 22, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-12.edn"
+     {:records 7, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-13.edn"
+     {:records 24, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-14.edn"
+     {:records 20, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-15.edn"
+     {:records 8, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-16.edn"
+     {:records 14, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-17.edn"
+     {:records 15, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-18.edn"
+     {:records 12, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-21.edn"
+     {:records 3, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-22.edn"
+     {:records 17, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-23.edn"
+     {:records 13, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-24.edn"
+     {:records 10, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-25.edn"
+     {:records 15, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-26.edn"
+     {:records 12, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-27.edn"
+     {:records 11, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-28.edn"
+     {:records 14, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-29.edn"
+     {:records 18, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-06-30.edn"
+     {:records 18, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-01.edn"
+     {:records 23, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-02.edn"
+     {:records 34, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-03.edn"
+     {:records 20, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-04.edn"
+     {:records 38, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-05.edn"
+     {:records 18, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-06.edn"
+     {:records 21, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-09.edn"
+     {:records 1, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-14.edn"
+     {:records 14, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-15.edn"
+     {:records 6, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-16.edn"
+     {:records 6, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-17.edn"
+     {:records 1, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-18.edn"
+     {:records 1, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-19.edn"
+     {:records 1, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-07-21.edn"
+     {:records 2, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-08-30.edn"
+     {:records 7, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-08-31.edn"
+     {:records 5, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-09-01.edn"
+     {:records 79, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-09-02.edn"
+     {:records 3, :records-with-depth 0, :selected-above-one 0}]
+    ["wm-trace-2026-09-04.edn"
+     {:records 4, :records-with-depth 0, :selected-above-one 0}]],
+   :selected-actions-above-one 213,
+   :result :pass,
+   :id :corpus-depth-era,
+   :records-denominator 889,
+   :records-with-candidate-depth 213,
+   :selected-action-denominator 889,
+   :last-file-above-one "wm-trace-2026-06-08.edn"}
+  {:id :lean-depth-readback-still-matches,
+   :result :pass,
+   :exit 0,
+   :before-sha
+   "44e3306827137cf5e32276ad7b2777a9de607456fe8d72aeba8c75779242e848",
+   :after-sha
+   "44e3306827137cf5e32276ad7b2777a9de607456fe8d72aeba8c75779242e848",
+   :expected-sha
+   "44e3306827137cf5e32276ad7b2777a9de607456fe8d72aeba8c75779242e848",
+   :byte-identical? true,
+   :basis "holes/labs/wm-contract/f8_depth_readback.clj:1-107"}],
+ :node :R13,
+ :corpus
+ {:root "data/wm-trace", :read-only true, :files 57, :records 889},
+ :reference-independence
+ "futon2.aif.forward-model/predict is the verified R4 primitive. The harness independently composes that primitive K times from R13-carriers.edn; predict-multi-horizon never supplies an expected value.",
+ :carriers "holes/labs/wm-contract/sim/R13-carriers.edn",
+ :stage-at "/home/joe/code/p4ng/empirics-futon/control-stages.edn:24",
+ :slice 11,
+ :verdict :pass,
+ :declaration-sites
+ {:registry "holes/labs/wm-contract/aif-equations.edn:161-166",
+  :forward-default "src/futon2/aif/forward_model.clj:278",
+  :forward-composition "src/futon2/aif/forward_model.clj:280-310",
+  :rollout-default "src/futon2/aif/rollout.clj:474-479",
+  :efe-guard "src/futon2/aif/efe.clj:623-636",
+  :live-depth "scripts/futon2/report/war_machine.clj:6282-6329"},
+ :row :V7}

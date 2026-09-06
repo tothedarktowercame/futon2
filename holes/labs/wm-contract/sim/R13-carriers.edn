@@ -1,0 +1,21 @@
+{:id :R13-carriers-v1
+ :node :R13
+ :depths [1 2 3 5]
+ :state
+ {:observation {:loop-health 0.9 :support-coverage 0.9 :attack-coverage 0.9
+                :mission-health 0.2 :stack-pct 0.2 :consulting-pct 0.25
+                :portfolio-pct 0.25 :mathematics-pct 0.2
+                :active-repo-ratio 0.8 :sorry-count-norm 0.85
+                :coupling-density 0.2 :ticks-firing-ratio 0.0
+                :depositing-signal 0.1}
+  :entities [:m1 :m2]}
+ :action {:type :address-sorry :target :m1}
+ :declared-depths {:live-conditional 3 :rollout-default 2
+                   :forward-default 3 :efe-multi-threshold 2}
+ :declaration-sites
+ {:registry "holes/labs/wm-contract/aif-equations.edn:161-166"
+  :forward-default "src/futon2/aif/forward_model.clj:278"
+  :forward-composition "src/futon2/aif/forward_model.clj:280-310"
+  :rollout-default "src/futon2/aif/rollout.clj:474-479"
+  :efe-guard "src/futon2/aif/efe.clj:623-636"
+  :live-depth "scripts/futon2/report/war_machine.clj:6282-6329"}}
