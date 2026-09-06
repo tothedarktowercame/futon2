@@ -1,0 +1,20 @@
+{:id :R14-carriers-v1
+ :node :R14
+ :g-totals [1.0 2.0 3.5 0.5]
+ :selection-gain 2.0
+ :variational-beta 0.25
+ :tau-min 0.01
+ :spread-k 5.0
+ :zero-prior-case {:ids [:a :b :c] :g [2.0 0.5 1.0] :log-priors [0.0 0.0 0.0]
+                   :temperatures [0.1 1.0 9.0]}
+ :habit-case {:ids [:cautious :habitual] :g [0.0 2.0] :log-priors [0.0 1.0]
+              :temperatures [0.5 8.0]}
+ :declaration-sites
+ {:registry "holes/labs/wm-contract/aif-equations.edn:167-172"
+  :adaptive "src/futon2/aif/policy.clj:33-45"
+  :temperature-source "src/futon2/aif/policy.clj:57-75"
+  :effective "src/futon2/aif/policy.clj:77-146"
+  :scores "src/futon2/aif/policy.clj:157-213"
+  :softmax "src/futon2/aif/policy.clj:215-235"
+  :gain "src/futon2/aif/selection_gain.clj:72-80"
+  :dossier "holes/labs/wm-contract/PROBLEMS-r16-r13-r14-batch4.md:120-170"}}
