@@ -1,0 +1,829 @@
+{:as-of
+ {:checks-dir "/home/joe/code/futon3/checks",
+  :cohort "/home/joe/code/futon3c/holes/zaif-cohort-a97J05.edn",
+  :cohort-agent "zai-4",
+  :cohort-turn "zai-turn-f1513520-b760-4b67-bbd1-b2941d3e0325",
+  :futon3-head "7c653bb",
+  :futon3c-head "a11496df",
+  :rule-table
+  "futon3c/scripts/zaif_cascade_gate.clj:205 -- read through the namespace, not copied"},
+ :carriage
+ {"alfworld-cascade.edn"
+  {:o4-recorded
+   :not-exercised-no-authority-gate-and-alfworld-is-not-installed,
+   :read? true,
+   :runs
+   {:widen-to-a-budget
+    {:members 6,
+     :members-basis :cascade-members,
+     :members-count-agrees? true,
+     :members-count-recorded 6,
+     :o4-recorded nil,
+     :rule-carrying-count 0,
+     :rule-carrying-members []},
+    :widen-to-the-marginal-gain-floor
+    {:members 3,
+     :members-basis :cascade-members,
+     :members-count-agrees? true,
+     :members-count-recorded 3,
+     :o4-recorded nil,
+     :rule-carrying-count 0,
+     :rule-carrying-members []}}},
+  "ants-cascade.edn"
+  {:o4-recorded
+   {:holds? true,
+    :precedence-changed? true,
+    :row
+    {:acting-order-after
+     [:ants/cargo-return-discipline
+      :ants/hunger-precision-coupling
+      :ants/white-space-scout
+      :ants/pheromone-trail-tuner],
+     :acting-order-before
+     [:ants/cargo-return-discipline
+      :ants/hunger-precision-coupling
+      :ants/pheromone-trail-tuner
+      :ants/white-space-scout],
+     :precedence-after
+     #:ants{:cargo-return-discipline 1,
+            :hunger-precision-coupling 2,
+            :pheromone-trail-tuner 4,
+            :white-space-scout 3},
+     :precedence-before
+     #:ants{:cargo-return-discipline 1,
+            :hunger-precision-coupling 2,
+            :pheromone-trail-tuner 3,
+            :white-space-scout 4},
+     :score-after 18.759999999999874,
+     :score-before 18.759999999999874},
+    :score-changed? false},
+   :read? true,
+   :runs
+   {:widen-to-a-budget
+    {:members 5,
+     :members-basis :cascade-members,
+     :members-count-agrees? true,
+     :members-count-recorded 5,
+     :o4-recorded nil,
+     :rule-carrying-count 0,
+     :rule-carrying-members []},
+    :widen-to-the-marginal-gain-floor
+    {:members 4,
+     :members-basis :cascade-members,
+     :members-count-agrees? true,
+     :members-count-recorded 4,
+     :o4-recorded nil,
+     :rule-carrying-count 0,
+     :rule-carrying-members []}}},
+  "construct-cascade.edn"
+  {:o4-recorded nil,
+   :read? true,
+   :runs
+   {:widen-to-a-budget
+    {:members 20,
+     :members-basis :selected-union-admitted,
+     :members-count-agrees? true,
+     :members-count-recorded 20,
+     :o4-recorded :not-exercised-nothing-is-played,
+     :rule-carrying-count 1,
+     :rule-carrying-members [:war-machine/ambient-pattern-retrieval]},
+    :widen-to-the-marginal-gain-floor
+    {:members 13,
+     :members-basis :selected-union-admitted,
+     :members-count-agrees? true,
+     :members-count-recorded 13,
+     :o4-recorded :not-exercised-nothing-is-played,
+     :rule-carrying-count 0,
+     :rule-carrying-members []}}},
+  "open-cascade-short-cue.edn"
+  {:o4-recorded :not-exercised-nothing-is-played,
+   :read? true,
+   :rule-ids-occurring-anywhere-in-the-file
+   [:math-strategy/missing-dependency-protocol
+    :war-machine/ambient-pattern-retrieval],
+   :runs :none},
+  "open-cascade.edn"
+  {:o4-recorded :not-exercised-nothing-is-played,
+   :read? true,
+   :rule-ids-occurring-anywhere-in-the-file
+   [:math-strategy/missing-dependency-protocol
+    :war-machine/ambient-pattern-retrieval],
+   :runs :none},
+  "retrodiction-cascade-per-clause.edn"
+  {:o4-recorded :not-exercised-nothing-is-played,
+   :read? true,
+   :rule-ids-occurring-anywhere-in-the-file
+   [:math-strategy/missing-dependency-protocol
+    :war-machine/ambient-pattern-retrieval],
+   :runs :none},
+  "retrodiction-cascade.edn"
+  {:o4-recorded :not-exercised-nothing-is-played,
+   :read? true,
+   :rule-ids-occurring-anywhere-in-the-file
+   [:math-strategy/missing-dependency-protocol
+    :war-machine/ambient-pattern-retrieval],
+   :runs :none},
+  "snatch-cascade.edn"
+  {:o4-recorded nil,
+   :read? true,
+   :rule-ids-occurring-anywhere-in-the-file [],
+   :runs :none},
+  "zaif-cascade.edn"
+  {:o4-recorded
+   :not-exercised-fewer-than-two-members-carry-a-play-grain-rule,
+   :read? true,
+   :runs
+   {:widen-to-a-budget
+    {:members 20,
+     :members-basis :cascade-members,
+     :members-count-agrees? true,
+     :members-count-recorded 20,
+     :o4-recorded nil,
+     :rule-carrying-count 1,
+     :rule-carrying-members
+     [:math-strategy/missing-dependency-protocol]},
+    :widen-to-the-marginal-gain-floor
+    {:members 17,
+     :members-basis :cascade-members,
+     :members-count-agrees? true,
+     :members-count-recorded 17,
+     :o4-recorded nil,
+     :rule-carrying-count 1,
+     :rule-carrying-members
+     [:math-strategy/missing-dependency-protocol]}}}},
+ :contention
+ {:contending-round-detail
+  [{:calls [:search :run_shell],
+    :has-transcript? true,
+    :has-v0? false,
+    :oracle-uncertain? false,
+    :paired? false,
+    :primary? false,
+    :round 3,
+    :thens
+    {:math-strategy/missing-dependency-protocol :retrieve,
+     :war-machine/ambient-pattern-retrieval :retrieve}}
+   {:calls [:run_shell :run_shell],
+    :has-transcript? true,
+    :has-v0? false,
+    :oracle-uncertain? true,
+    :paired? false,
+    :primary? false,
+    :round 4,
+    :thens
+    {:math-strategy/missing-dependency-protocol :act,
+     :war-machine/ambient-pattern-retrieval :retrieve}}
+   {:calls [:run_shell],
+    :has-transcript? true,
+    :has-v0? true,
+    :oracle-uncertain? true,
+    :paired? true,
+    :primary? false,
+    :round 7,
+    :thens
+    {:math-strategy/missing-dependency-protocol :yield,
+     :war-machine/ambient-pattern-retrieval :retrieve}}],
+  :contending-rounds [3 4 7],
+  :contending-rounds-in-primary [],
+  :contending-rounds-that-are-paired [7],
+  :denominators
+  {:paired 49,
+   :primary 29,
+   :with-a-transcript 102,
+   :with-a-v0-decision 50},
+  :live-round-counts
+  {:math-strategy/missing-dependency-protocol 3,
+   :war-machine/ambient-pattern-retrieval 102},
+  :live-rounds
+  {:math-strategy/missing-dependency-protocol [3 4 7],
+   :war-machine/ambient-pattern-retrieval
+   [1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+    11
+    12
+    13
+    14
+    15
+    16
+    17
+    18
+    19
+    20
+    21
+    22
+    23
+    24
+    25
+    26
+    27
+    28
+    29
+    30
+    31
+    32
+    33
+    34
+    35
+    36
+    37
+    38
+    39
+    40
+    41
+    42
+    43
+    44
+    45
+    46
+    47
+    48
+    49
+    50
+    51
+    52
+    53
+    54
+    55
+    56
+    57
+    58
+    59
+    60
+    61
+    62
+    63
+    64
+    65
+    66
+    67
+    68
+    69
+    70
+    71
+    72
+    73
+    74
+    75
+    76
+    77
+    78
+    79
+    80
+    81
+    82
+    83
+    84
+    85
+    86
+    87
+    88
+    89
+    90
+    91
+    92
+    93
+    94
+    95
+    96
+    97
+    98
+    99
+    100
+    101
+    102]},
+  :primary-rounds
+  [2
+   33
+   41
+   54
+   55
+   58
+   61
+   63
+   66
+   72
+   73
+   75
+   76
+   77
+   78
+   80
+   83
+   84
+   85
+   86
+   87
+   90
+   91
+   92
+   94
+   95
+   98
+   100
+   102],
+  :rounds 103,
+  :the-two-rules-emit-different-arms-on [4 7]},
+ :gate-status
+ {:gate-own-contention-over-cascade-members [],
+  :note
+  "the gate's coverage filters contention to rules the cascade contains, so it is empty while only one member carries a rule; this file's :contention drops that filter deliberately, because the question is what a cascade carrying both WOULD do",
+  :require-pass-verdict :rule-does-not-encode-an-authored-then,
+  :then-correspondence-failure-count 3,
+  :then-correspondence-failures
+  [{:rule :math-strategy/missing-dependency-protocol,
+    :span-inside-the-then-block? false,
+    :then-block [59 79],
+    :then-source
+    "math-strategy/missing-dependency-protocol.flexiarg:59-77"}
+   {:rule :agent/budget-bounds-exploration,
+    :span-inside-the-then-block? false,
+    :then-block [20 23],
+    :then-source "agent/budget-bounds-exploration.flexiarg:19-19"}
+   {:rule :agent/pause-is-not-failure,
+    :span-inside-the-then-block? false,
+    :then-block [20 23],
+    :then-source "agent/pause-is-not-failure.flexiarg:19-19"}]},
+ :max-rule-carrying-members-on-any-recorded-run 1,
+ :positive-control-identity-exchange
+ {:by-which-disjunct :precedence-unchanged,
+  :expected true,
+  :o4-holds? true},
+ :probe
+ {:arms
+  [{:acting-order-changed? false,
+    :deferred-rounds [],
+    :denominator :primary,
+    :o4-holds? false,
+    :precedence-changed? true,
+    :rounds 29,
+    :rounds-on-which-the-fired-rule-differs [],
+    :row
+    {:acting-order-after
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :acting-order-before
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :precedence-after [2 1],
+     :precedence-before [1 2],
+     :score-after 14,
+     :score-before 14},
+    :score-changed? false}
+   {:acting-order-changed? true,
+    :deferred-rounds [],
+    :denominator :paired,
+    :o4-holds? true,
+    :precedence-changed? true,
+    :rounds 49,
+    :rounds-on-which-the-fired-rule-differs [7],
+    :row
+    {:acting-order-after
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :math-strategy/missing-dependency-protocol
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :acting-order-before
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :precedence-after [2 1],
+     :precedence-before [1 2],
+     :score-after 33,
+     :score-before 34},
+    :score-changed? true}
+   {:acting-order-changed? true,
+    :deferred-rounds [],
+    :denominator :with-a-transcript,
+    :o4-holds? true,
+    :precedence-changed? true,
+    :rounds 102,
+    :rounds-on-which-the-fired-rule-differs [3 4 7],
+    :row
+    {:acting-order-after
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :math-strategy/missing-dependency-protocol
+      :math-strategy/missing-dependency-protocol
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :math-strategy/missing-dependency-protocol
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :acting-order-before
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :precedence-after [2 1],
+     :precedence-before [1 2],
+     :score-after 81,
+     :score-before 83},
+    :score-changed? true}],
+  :not-a-witness-because
+  "no recorded cascade carries both rule-bearing patterns (see :carriage), so there is no constructed cascade for this row to be OF; these are the numbers a construction that carried both would record, not a law witnessed on one",
+  :rules
+  [:war-machine/ambient-pattern-retrieval
+   :math-strategy/missing-dependency-protocol],
+  :what
+  "fo/o4-precedence-governance over the six numbers the precedence exchange of the two selected rules produces"},
+ :problems [],
+ :rule-table
+ {:counterfactual
+  [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+  :selected
+  [:math-strategy/missing-dependency-protocol
+   :war-machine/ambient-pattern-retrieval],
+  :then-correspondence
+  [{:counterfactual? false,
+    :encodes
+    "\"Search the library on every turn as a background process.\"",
+    :encoding-limit
+    "the THEN also says to display results, log the activation history, and tune retrieval from hot/cold zones. The zaif arm set has no term for any of those, so this rule encodes the search clause only and the rest is unencodable rather than encoded.",
+    :file-exists? true,
+    :pattern-id-matches-path? true,
+    :rule :war-machine/ambient-pattern-retrieval,
+    :span-inside-the-then-block? true,
+    :span-is-non-empty? true,
+    :then-block [15 18],
+    :then-source
+    "war-machine/ambient-pattern-retrieval.flexiarg:16-16"}
+   {:counterfactual? false,
+    :encodes
+    "\"Search once more against the installed source ... and look for an adapter to an existing theorem before building\"; \"Put exactly one `sorry` at the observed gap ... Beside that `sorry`, leave the consultation trail\"; \"stop researching once the misses repeat\"",
+    :encoding-limit nil,
+    :file-exists? true,
+    :pattern-id-matches-path? true,
+    :rule :math-strategy/missing-dependency-protocol,
+    :span-inside-the-then-block? false,
+    :span-is-non-empty? true,
+    :then-block [59 79],
+    :then-source
+    "math-strategy/missing-dependency-protocol.flexiarg:59-77"}
+   {:counterfactual? true,
+    :encodes
+    "\"When budget nears exhaustion, force a decision: commit to best-so-far, escalate to a supervisor, or explicitly expand scope with justification.\"",
+    :encoding-limit
+    "the THEN offers three terminal choices -- commit to best-so-far, escalate to a supervisor, expand scope with justification -- and asks for reset rules. The zaif arm set has a term for none of the three: :yield is the nearest to `commit to best-so-far`, :ask is the nearest to `escalate`, and nothing expresses `expand scope`. The 102 recorded rounds also cross continuation boundaries this file does not reconstruct, so `rounds-so-far` is rounds since the turn began and not rounds since the current budget window opened.",
+    :file-exists? true,
+    :pattern-id-matches-path? true,
+    :rule :agent/budget-bounds-exploration,
+    :span-inside-the-then-block? false,
+    :span-is-non-empty? false,
+    :then-block [20 23],
+    :then-source "agent/budget-bounds-exploration.flexiarg:19-19"}
+   {:counterfactual? true,
+    :encodes
+    "\"Treat 'pause and ask' as a first-class action with defined triggers: ... confidence below threshold, resource budget near exhaustion.\"",
+    :encoding-limit
+    "the THEN also requires the pause to carry a resumption payload (reason, missing info, requested decision, scope impact, confidence/budget snapshot). An arm choice carries none of that, so this rule encodes the trigger and not the payload.",
+    :file-exists? true,
+    :pattern-id-matches-path? true,
+    :rule :agent/pause-is-not-failure,
+    :span-inside-the-then-block? false,
+    :span-is-non-empty? false,
+    :then-block [20 23],
+    :then-source "agent/pause-is-not-failure.flexiarg:19-19"}]}}
