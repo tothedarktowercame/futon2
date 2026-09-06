@@ -1,0 +1,22 @@
+{:id :R6-carriers-v1
+ :node :R6
+ :g [0.5 2.0 3.0]
+ :tau 2.0
+ :log-priors [0.0 0.75 -0.25]
+ :f-pi [0.25 1.0 0.5]
+ :opts-off {:f-pi-policy-posterior? false}
+ :opts-unscaled {:f-pi-policy-posterior? true
+                 :f-pi-values [0.25 1.0 0.5]
+                 :f-pi-scaling :unscaled}
+ :opts-by-tau {:f-pi-policy-posterior? true
+               :f-pi-values [0.25 1.0 0.5]
+               :f-pi-scaling :by-tau}
+ :declaration-sites
+ {:habit-prior "holes/labs/wm-contract/aif-equations.edn:66"
+  :policy-set "holes/labs/wm-contract/aif-equations.edn:158-160"
+  :posterior "holes/labs/wm-contract/aif-equations.edn:173-181"
+  :scores "src/futon2/aif/policy.clj:157-213"
+  :softmax "src/futon2/aif/policy.clj:215-235"
+  :candidate-construction "scripts/futon2/report/war_machine.clj:6278-6304"
+  :controller-ranking "src/futon2/aif/policy.clj:495-501,636-640"
+  :strategic-call "scripts/futon2/report/war_machine.clj:6475-6481"}}

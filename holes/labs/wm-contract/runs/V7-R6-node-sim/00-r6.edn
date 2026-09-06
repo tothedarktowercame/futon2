@@ -1,0 +1,391 @@
+{:stage "SELECT",
+ :negative-controls
+ {:plants
+  [{:id :f-pi-divided-by-tau,
+    :counter :a2-max-deviation,
+    :moved 0.5,
+    :result :caught}
+   {:id :habit-prior-divided-by-tau,
+    :counter :a3-max-deviation,
+    :moved 0.375,
+    :result :caught}
+   {:id :synthetic-action-equals-posterior-argmax,
+    :counter :d3-agreement,
+    :before 0,
+    :after 1,
+    :moved 1,
+    :result :caught}],
+  :all-caught true},
+ :harness :v7-r6-node-sim,
+ :not-done
+ ["No live tick or run lock; trace files were read only."
+  "No production, registry, ledger, document, p4ng, Lean, or data file was modified."],
+ :checks
+ [{:id :posterior-agrees-with-independent-reference,
+   :result :pass,
+   :score-comparisons
+   [{:arity 3,
+     :node [-0.25 -0.25 -1.75],
+     :reference [-0.25 -0.25 -1.75],
+     :max-deviation 0.0}
+    {:arity 4,
+     :mode :off,
+     :node [-0.25 -0.25 -1.75],
+     :reference [-0.25 -0.25 -1.75],
+     :max-deviation 0.0}
+    {:arity 4,
+     :mode :unscaled,
+     :node [-0.5 -1.25 -2.25],
+     :reference [-0.5 -1.25 -2.25],
+     :max-deviation 0.0}],
+   :softmax-comparisons
+   [{:arity 2,
+     :node [0.5685464148510541 0.26856231005645526 0.1628912750924906],
+     :reference
+     [0.5685464148510541 0.26856231005645526 0.1628912750924906],
+     :max-deviation 0.0}
+    {:arity 3,
+     :node [0.4498162176582741 0.4498162176582741 0.10036756468345168],
+     :reference
+     [0.4498162176582741 0.4498162176582741 0.10036756468345168],
+     :max-deviation 0.0}
+    {:arity 4,
+     :mode :off,
+     :node [0.4498162176582741 0.4498162176582741 0.10036756468345168],
+     :reference
+     [0.4498162176582741 0.4498162176582741 0.10036756468345168],
+     :max-deviation 0.0}
+    {:arity 4,
+     :mode :unscaled,
+     :node [0.6074815620620584 0.2869539713249813 0.10556446661296022],
+     :reference
+     [0.6074815620620584 0.2869539713249813 0.10556446661296022],
+     :max-deviation 0.0}],
+   :tolerance 1.0E-12,
+   :basis "src/futon2/aif/policy.clj:157-235"}
+  {:id :f-pi-enters-unscaled,
+   :result :pass,
+   :tau 2.0,
+   :node-unscaled [-0.5 -1.25 -2.25],
+   :by-tau-counterfactual [-0.375 -0.75 -2.0],
+   :max-difference-from-by-tau 0.5,
+   :basis "src/futon2/aif/policy.clj:199-212"}
+  {:id :habit-prior-enters-unscaled,
+   :result :pass,
+   :tau 2.0,
+   :node-scores [-0.25 -0.25 -1.75],
+   :prior-divided-counterfactual [-0.25 -0.625 -1.625],
+   :max-difference-from-divided-prior 0.375,
+   :basis "src/futon2/aif/policy.clj:215-229"}
+  {:id
+   :candidate-space-has-runtime-constructors-but-no-single-r6-carrier,
+   :result :pass,
+   :search "propose-actions|action-proposer|wm-candidates|:candidates",
+   :hit-count 37,
+   :hits
+   [{:file "scripts/futon2/report/cascade_lane.clj",
+     :line 139,
+     :text ":candidates candidates"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 41,
+     :text "[futon2.aif.action-proposer :as ap]"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 1382,
+     :text "(:candidates snapshot)"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 2746,
+     :text
+     "ranking. Returns `{:candidates ... :refusals ... :census ... :ladder ...}`."}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 2760,
+     :text
+     "{:candidates candidates :refusals [] :census {} :ladder nil}"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 2766,
+     :text "{:candidates candidates"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 6267,
+     :text "wm-candidates (ap/compose-proposers"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 6289,
+     :text "(->> wm-candidates"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 6304,
+     :text "wm-enriched-candidates (:candidates wm-ladder)"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 6320,
+     :text ":candidates wm-enriched-candidates"}
+    {:file "src/futon2/aif/a4a_substrate.clj",
+     :line 201,
+     :text
+     "candidates (vec (:candidates (mission-entry deposit mission-id)))]"}
+    {:file "src/futon2/aif/action_proposer.clj",
+     :line 1,
+     :text "(ns futon2.aif.action-proposer"}
+    {:file "src/futon2/aif/adapters/ants.clj",
+     :line 9,
+     :text ":candidates []"}
+    {:file "src/futon2/aif/adapters/fulab.clj",
+     :line 220,
+     :text "candidates (:candidates context)"}
+    {:file "src/futon2/aif/adapters/fulab.clj",
+     :line 263,
+     :text "(let [candidates (vec (:candidates context))"}
+    {:file "src/futon2/aif/adapters/fulab.clj",
+     :line 301,
+     :text ":candidates candidates"}
+    {:file "src/futon2/aif/adapters/futon5_mca.clj",
+     :line 9,
+     :text ":candidates (:candidates context)"}
+    {:file "src/futon2/aif/evidence_emit.clj",
+     :line 61,
+     :text
+     ";; production). But the emitter only ever wrote action-grain fields (:G/:candidates),"}
+    {:file "src/futon2/aif/evidence_emit.clj",
+     :line 152,
+     :text
+     ":candidates (or (:candidates tick) (count (:ranked-actions tick)))"}
+    {:file "src/futon2/aif/full_loop_runner.clj",
+     :line 977,
+     :text ":action-proposer-registration"}
+    {:file "src/futon2/aif/full_loop_runner.clj",
+     :line 993,
+     :text
+     "[{:from :addressable-substrate-enumerator :to :action-proposer-registration}"}
+    {:file "src/futon2/aif/full_loop_runner.clj",
+     :line 994,
+     :text
+     "{:from :action-proposer-registration :to :instance-executability-check}"}
+    {:file "src/futon2/aif/intrinsic_values.clj",
+     :line 72,
+     :text
+     "the inner-loop action-proposer consults at recommendation time.\""}
+    {:file "src/futon2/aif/mission_control_graph.clj",
+     :line 151,
+     :text ":candidates candidates"}
+    {:file "src/futon2/aif/mission_registry.clj",
+     :line 21,
+     :text "[futon2.aif.action-proposer :as ap]"}
+    {:file "src/futon2/aif/pattern_registry.clj",
+     :line 20,
+     :text "[futon2.aif.action-proposer :as ap]"}
+    {:file "src/futon2/aif/portfolio_action_proposer.clj",
+     :line 1,
+     :text "(ns futon2.aif.portfolio-action-proposer"}
+    {:file "src/futon2/aif/portfolio_action_proposer.clj",
+     :line 47,
+     :text "(:require [futon2.aif.action-proposer :as ap]"}
+    {:file "src/futon2/aif/portfolio_action_proposer.clj",
+     :line 106,
+     :text "(def portfolio-action-proposer"}
+    {:file "src/futon2/aif/sorry_registry.clj",
+     :line 34,
+     :text "[futon2.aif.action-proposer :as ap]"}
+    {:file "src/futon2/aif/survey_mission_value.clj",
+     :line 6,
+     :text
+     "portfolio proposer landed (`futon2.aif.portfolio-action-proposer:50-60`), but"}
+    {:file "src/futon2/aif/survey_mission_value.clj",
+     :line 102,
+     :text
+     "`portfolio-action-proposer/*portfolio-proposer-active?*` is true (false by"}
+    {:file "src/futon2/aif/task_belief_ladder.clj",
+     :line 353,
+     :text
+     "{:candidates <in-scope candidates rescored, out-of-scope untouched in place>"}
+    {:file "src/futon2/aif/task_belief_ladder.clj",
+     :line 369,
+     :text
+     "(update :candidates conj (assoc action :task-belief/rung :out-of-scope))"}
+    {:file "src/futon2/aif/task_belief_ladder.clj",
+     :line 381,
+     :text "(update :candidates conj"}
+    {:file "src/futon2/aif/task_belief_ladder.clj",
+     :line 386,
+     :text "{:candidates [] :refusals [] :census {}}"}
+    {:file "src/futon2/aif/trace.clj",
+     :line 428,
+     :text ":candidates candidates"}],
+   :registry-limit
+   "holes/labs/wm-contract/aif-equations.edn:158-160 has no :code or :lean",
+   :problem-basis "holes/problems/P-validated-R5.md:381-393"}
+  {:fixture-expected
+   "e47a84973aa4ed0d2c998cb1d24abb3adaab08a15a370bdfec0a1b610edbaad3",
+   :declaration-mismatch-count 1,
+   :axiom-exit 0,
+   :basis "holes/labs/wm-contract/softmax-positive-receipt.edn:1",
+   :declaration-match-count 7,
+   :fixture-match? true,
+   :fixture-actual
+   "e47a84973aa4ed0d2c998cb1d24abb3adaab08a15a370bdfec0a1b610edbaad3",
+   :result :pass,
+   :id :lean-positive-receipt-revalidates,
+   :declaration-checks
+   [{:file "mathlib4/DarkTower/WarMachine/SoftmaxWitness.lean",
+     :declarations
+     [{:name "habit",
+       :expected
+       "cd83fca8c2349c08d6deaf9981c3549f6b4637abbcec18661da8ae4f0a3900df",
+       :actual
+       "cd83fca8c2349c08d6deaf9981c3549f6b4637abbcec18661da8ae4f0a3900df",
+       :match? true}
+      {:name "grade",
+       :expected
+       "cceec30587f2bb31716765b0f75cfea554b5862445271f698ac01178937dd134",
+       :actual
+       "cceec30587f2bb31716765b0f75cfea554b5862445271f698ac01178937dd134",
+       :match? true}
+      {:name "SoftmaxReference",
+       :expected
+       "8d3a717b49d176dc99fc76005338ead55b66499847b30df0a36691838a8186a5",
+       :actual
+       "8d3a717b49d176dc99fc76005338ead55b66499847b30df0a36691838a8186a5",
+       :match? true}
+      {:name "softmaxReference",
+       :expected
+       "230bfc235cdccd75ca38d50e6d49106d70bc7b36b586e47f20239c320f51066d",
+       :actual
+       "230bfc235cdccd75ca38d50e6d49106d70bc7b36b586e47f20239c320f51066d",
+       :match? true}
+      {:name "referenceWeights",
+       :expected
+       "050249f7cb89fcd14e879b3755e08c243dfb4733d0a9820d549d6324b412c0b8",
+       :actual
+       "050249f7cb89fcd14e879b3755e08c243dfb4733d0a9820d549d6324b412c0b8",
+       :match? true}
+      {:name "referenceNormalised",
+       :expected
+       "0a46ec44169323fc54b8dd3a70c1679bf3b1e3851b9c81b2fa5102ba4d7b7aee",
+       :actual
+       "0a46ec44169323fc54b8dd3a70c1679bf3b1e3851b9c81b2fa5102ba4d7b7aee",
+       :match? true}
+      {:name "lowerGradeHasHigherProbability",
+       :expected
+       "562cd729cb7154a3eb7332dffe1ca1e6c5ce52b414a6bd3a180ca4cd7c0d7b11",
+       :actual
+       "562cd729cb7154a3eb7332dffe1ca1e6c5ce52b414a6bd3a180ca4cd7c0d7b11",
+       :match? true}]}
+    {:file "mathlib4/DarkTower/WarMachine/Holes.lean",
+     :declarations
+     [{:name "softmax",
+       :expected
+       "6139b9daff43479000c4fee36e0aa26ab621b6f1dba17d8f2e2a6749b78ceaf9",
+       :actual
+       "ef7cca575379c0035425802ce31098f88de5172b72823a968b6b3b4aadcc7a04",
+       :match? false}]}],
+   :finding :positive-source-drift,
+   :elaboration-exit 0,
+   :elaboration-output "",
+   :axiom-output
+   "'DarkTower.WarMachine.SoftmaxWitness.referenceWeights' depends on axioms: [propext, Classical.choice, Quot.sound]"}
+  {:id :strategic-selector-receives-ranking-not-posterior,
+   :result :pass,
+   :stale-pointer-5438
+   "scripts/futon2/report/war_machine.clj:5438 is scan-aif-heads prose",
+   :stale-pointer-5406-5410
+   "scripts/futon2/report/war_machine.clj:5406-5410 is batch-pattern data",
+   :current-call "scripts/futon2/report/war_machine.clj:6475-6480",
+   :route "scripts/futon2/report/war_machine.clj:6481",
+   :crosses
+   {:controller-ranking true,
+    :selection-score true,
+    :tau false,
+    :posterior false},
+   :ranking-shape "src/futon2/aif/policy.clj:495-501,636-640"}
+  {:first-file "wm-trace-2026-05-18.edn",
+   :records-total 889,
+   :basis
+   "src/futon2/aif/policy.clj:664-670; scripts/futon2/report/war_machine.clj:6475-6481",
+   :representation-counts {:selection-score-equivalent 95},
+   :differ 95,
+   :by-file
+   [["wm-trace-2026-08-30.edn" {:n 7, :agree 0}]
+    ["wm-trace-2026-08-31.edn" {:n 5, :agree 0}]
+    ["wm-trace-2026-09-01.edn" {:n 76, :agree 0}]
+    ["wm-trace-2026-09-02.edn" {:n 3, :agree 0}]
+    ["wm-trace-2026-09-04.edn" {:n 4, :agree 0}]],
+   :result :pass,
+   :records-with-posterior-and-action 95,
+   :id :corpus-posterior-vs-recorded-action,
+   :last-file "wm-trace-2026-09-04.edn",
+   :files-total 57,
+   :agree 0}
+  {:id :f-pi-posterior-site-census,
+   :result :pass,
+   :search "f-pi-policy-posterior?",
+   :symbol-occurrence-count 15,
+   :symbol-occurrences
+   [{:file "scripts/futon2/report/war_machine.clj",
+     :line 655,
+     :text "{:f-pi-policy-posterior? false"}
+    {:file "scripts/futon2/report/war_machine.clj",
+     :line 681,
+     :text "{:f-pi-policy-posterior? true"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 169,
+     :text ":f-pi-policy-posterior?  flag, DEFAULT false"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 184,
+     :text
+     "([g-totals tau log-priors {:keys [f-pi-policy-posterior? f-pi-values"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 186,
+     :text ":or {f-pi-policy-posterior? false"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 191,
+     :text "_ (when (and f-pi-policy-posterior?"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 195,
+     :text "_ (when (and f-pi-policy-posterior?"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 199,
+     :text "f-terms (when f-pi-policy-posterior?"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 211,
+     :text "f-pi-policy-posterior?"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 565,
+     :text "[:f-pi-policy-posterior?"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 581,
+     :text
+     "f-pi-entered? (boolean (:f-pi-policy-posterior? f-pi-opts))"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 663,
+     :text ":applied? (boolean (:f-pi-policy-posterior? f-pi-opts)))"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 693,
+     :text "decided: `:f-pi-policy-posterior?`, `:f-pi-values`,"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 760,
+     :text "(when (and (:f-pi-policy-posterior? f-pi-opts)"}
+    {:file "src/futon2/aif/policy.clj",
+     :line 762,
+     :text
+     "(throw (ex-info (str \":f-pi-opts with :f-pi-policy-posterior? true requires \""}],
+   :application-site-count 1,
+   :application-sites
+   [{:file "src/futon2/aif/policy.clj",
+     :line 211,
+     :text "f-pi-policy-posterior?"}],
+   :claim-site "src/futon2/aif/policy.clj:545-553"}],
+ :node :R6,
+ :corpus
+ {:root "data/wm-trace", :read-only true, :files 57, :records 889},
+ :reference-independence
+ "Scores and softmax are derived only from R6-carriers.edn and the registry formal line; futon2.aif.policy is called only as the node under test.",
+ :carriers "holes/labs/wm-contract/sim/R6-carriers.edn",
+ :stage-at "/home/joe/code/p4ng/empirics-futon/control-stages.edn:23",
+ :slice 10,
+ :verdict :pass,
+ :declaration-sites
+ {:habit-prior "holes/labs/wm-contract/aif-equations.edn:66",
+  :policy-set "holes/labs/wm-contract/aif-equations.edn:158-160",
+  :posterior "holes/labs/wm-contract/aif-equations.edn:173-181",
+  :scores "src/futon2/aif/policy.clj:157-213",
+  :softmax "src/futon2/aif/policy.clj:215-235",
+  :candidate-construction
+  "scripts/futon2/report/war_machine.clj:6278-6304",
+  :controller-ranking "src/futon2/aif/policy.clj:495-501,636-640",
+  :strategic-call "scripts/futon2/report/war_machine.clj:6475-6481"},
+ :row :V7}
