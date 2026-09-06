@@ -30,16 +30,19 @@
      :text
      "    :weighted-legs \"Combine the four legs with declared weights. REJECTED HERE: three of the four legs are typed absences on this corpus, so the weights would be unmeasurable and would be fiat standing in for measurement.\""}],
    :citation-lands-on-plumbing? false}
-  {:id :route-tags-r20-to-metabolic-scan,
-   :result :pass,
+  {:census-pointer
+   "holes/labs/wm-contract/ALIGN-rnode-process-census.md:102 cites war_machine.clj:7055",
+   :census-pointer-still-lands? true,
+   :route-nodes [:R12 :R14 :R2 :R20 :R3 :R5 :R6 :R7 :R8 :TRACE],
+   :route-tag-site-count 10,
    :r20-site-count 1,
+   :result :pass,
+   :id :route-tags-r20-to-metabolic-scan,
+   :route-node-count 10,
    :r20-sites
    [{:line 7055,
      :text
-     "scan-route1 (route-tag scan-route0 :R20 \"futon2.report.war-machine/scan-metabolic-balance\")"}],
-   :route-tag-site-count 10,
-   :route-node-count 10,
-   :route-nodes [:R12 :R14 :R2 :R20 :R3 :R5 :R6 :R7 :R8 :TRACE]}
+     "scan-route1 (route-tag scan-route0 :R20 \"futon2.report.war-machine/scan-metabolic-balance\")"}]}
   {:first-file "wm-trace-2026-05-18.edn",
    :records-total 889,
    :records-with-r20-route 66,
@@ -84,6 +87,8 @@
    :unlinked-interoceptive-hit-count 63,
    :result :pass,
    :id :checking-is-named-only,
+   :unlinked-refusal-decision-search
+   "mode \\(cond over war_machine.clj -- the line is found, not pinned",
    :unlinked-refusal-decision-sites
    [{:line 5969,
      :text "mode (cond",

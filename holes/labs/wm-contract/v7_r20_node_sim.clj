@@ -107,15 +107,17 @@
   #"(?i)stop-the-line|metabolic-(?:balance|stale)|override-suppressed-reason")
 (def interoceptive-hits (source-hits (source-files ["scripts/futon2/report/war_machine.clj" "src/futon2/aif"])
                                      interoceptive-re))
+;; The refusal decision is FOUND, not pinned: war_machine.clj is under
+;; continuous edit, so a literal line number here would rot into a false
+;; :fail. The evidence window is derived from whatever line the search
+;; returns.
+(def refusal-decision-sites (source-hits [wm-file] #"mode\s+\(cond"))
+(def refusal-decision-line (:line (first refusal-decision-sites)))
 (def refusing-hits
-  (vec (filter #(and (= (.getCanonicalPath wm-file) (:file %))
-                      (<= 5969 (:line %) 5979))
-               interoceptive-hits)))
-(def refusal-decision-sites
-  (vec (filter #(and (= (.getCanonicalPath wm-file) (:file %))
-                      (= 5969 (:line %))
-                      (re-find #"mode\s+\(cond" (:text %)))
-               (source-hits [wm-file] #"mode\s+\(cond"))))
+  (vec (when refusal-decision-line
+         (filter #(and (= (.getCanonicalPath wm-file) (:file %))
+                       (<= refusal-decision-line (:line %) (+ refusal-decision-line 10)))
+                 interoceptive-hits))))
 (def r20-linked-refusing-hits
   (vec (filter #(re-find #":R20" (:text %)) refusing-hits)))
 
@@ -156,9 +158,14 @@
     :cited-lines-472-473 stale-citation-lines
     :citation-lands-on-plumbing? (boolean (some #(re-find #":plumbing" (:text %)) stale-citation-lines))}
    {:id :route-tags-r20-to-metabolic-scan
+    ;; The result is derived from what the file HAS (one R20 route site naming
+    ;; the metabolic scan). Whether that site still sits on the line the ALIGN
+    ;; census cites is reported separately, so a line shift reads as pointer
+    ;; drift rather than as the node's route tag disappearing.
     :result (if (and (= 1 (count r20-route-lines))
-                     (= 7055 (:line (first r20-route-lines)))
                      (str/includes? (:text (first r20-route-lines)) "scan-metabolic-balance")) :pass :fail)
+    :census-pointer "holes/labs/wm-contract/ALIGN-rnode-process-census.md:102 cites war_machine.clj:7055"
+    :census-pointer-still-lands? (= 7055 (:line (first r20-route-lines)))
     :r20-site-count (count r20-route-lines) :r20-sites r20-route-lines
     :route-tag-site-count (count route-lines) :route-node-count (count route-nodes)
     :route-nodes route-nodes}
@@ -176,6 +183,7 @@
     :node-link-search (str node-link-re) :node-link-hit-count (count node-link-hits)
     :node-link-hits node-link-hits
     :unlinked-interoceptive-hit-count (count interoceptive-hits)
+    :unlinked-refusal-decision-search "mode \\(cond over war_machine.clj -- the line is found, not pinned"
     :unlinked-refusal-decision-count (count refusal-decision-sites)
     :unlinked-refusal-decision-sites refusal-decision-sites
     :unlinked-refusal-evidence-line-count (count refusing-hits)
