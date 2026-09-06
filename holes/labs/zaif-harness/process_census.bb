@@ -136,6 +136,14 @@
 (defn- adjudication-for [node cell]
   (first (filter #(and (= node (:node %)) (= cell (:cell %))) (:adjudicated ledger))))
 
+(defn- route-hop-for
+  "An adjudication claude-1 made in ALIGN (d232ea06) covering a whole node's
+   route-hop cells. Consulted AFTER the per-cell adjudications above, so an
+   explicit [E-T]/[N20] reading always wins over the node-wide entry."
+  [node cell]
+  (first (filter #(and (= node (:node %)) (some #{cell} (:cells %)))
+                 (:route-hop-adjudicated ledger))))
+
 (defn- targeted-for [node cell]
   (first (filter #(and (= node (:node %)) (some #{cell} (:cells %))) (:targeted-absence ledger))))
 
@@ -151,7 +159,10 @@
         {:node node :cell cell :verdict :stale-adjudication :basis :pinned-adjudication
          :tag (:tag adj) :declared (:verdict adj)
          :pointers checks :stale (filterv (complement :ok?) checks)}))
-    (let [tgt (targeted-for node cell)
+    (if-let [rh (route-hop-for node cell)]
+      {:node node :cell cell :verdict (:verdict rh) :basis :route-hop-adjudicated
+       :authority (:authority rh) :hit (:hit rh)}
+      (let [tgt (targeted-for node cell)
           r (if tgt (rg (:pattern tgt) (:files tgt)) (node-link-search node))]
       (if (= :no-match (:status r))
         {:node node :cell cell :verdict :absent
@@ -159,7 +170,7 @@
          :tag (:tag tgt) :command (:command r) :hits 0 :untruncated true}
         {:node node :cell cell :verdict :hit-needs-adjudication
          :basis (if tgt :targeted-absence-search :node-link-search)
-         :command (:command r) :hits (:hits r) :untruncated true}))))
+         :command (:command r) :hits (:hits r) :untruncated true})))))
 
 (defn- declared-verdict [node cell]
   (if-let [adj (adjudication-for node cell)] (:verdict adj) :absent))

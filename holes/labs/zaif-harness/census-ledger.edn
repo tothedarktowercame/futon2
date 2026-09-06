@@ -86,7 +86,7 @@
        :provenance "v1's form plus the constructor-call form PA2z measured."
        :form-note "No backslash escapes: EDN rejects a \\( escape inside a string, and the right boundary is expressed as [^0-9A-Za-z-] rather than a word boundary so :R1 cannot match :R12. Every route-tag call site has a space and a via-string after the node keyword, so the trailing class always has something to match."
        :constructors-are-data
-       "The second form names its constructors EXPLICITLY rather than matching any call with a node keyword in it, which would match comments and unrelated maps and over-report. The constructor set was derived mechanically, not guessed: `rg -n ':node[[:space:]]+[a-z][a-z0-9-]*'` across the whole declared scope returns the {:node <param>} shape in four files, and only war_machine.clj:5868 (route-tag) binds a CONTROL-STAGE node that way -- node_sim.clj and hierarchical_budget.clj use :node for simulation and hierarchy nodes, a different concept, and full_loop_runner.clj:225-226 READS (:node from) rather than constructing a link. A new constructor is added here with its evidence, the same discipline as the adjudication ledger."
+       "The second form names its constructors EXPLICITLY rather than matching any call with a node keyword in it, which would match comments and unrelated maps and over-report. The constructor set was derived mechanically, not guessed: `rg -n ':node[[:space:]]+[a-z][a-z0-9-]*'` across the whole declared scope returns the {:node <param>} shape in four files, and only war_machine.clj:5868 (route-tag) binds a CONTROL-STAGE node that way -- hierarchical_budget.clj uses :node for a hierarchy node, a different concept, and full_loop_runner.clj:225-226 READS (:node from) rather than constructing a link. CORRECTION (2026-09-06, PA3z): an earlier version of this note said node_sim.clj also used :node for a different concept. That was too strong and is wrong -- node_sim.clj:327 genuinely carries {:node :R5 ...} for the control-stage R5. It does not affect the constructor derivation (node_sim defines no node-linking constructor; :327 is a literal map that v1's own form already catches), but the reason as stated was inaccurate and is corrected rather than quietly dropped. What is true of node_sim is different and is recorded in :known-false-positive-class below: it is a per-node SIMULATION harness that runs one node in isolation -- its own header states that no live tick is taken, no run lock, nothing written under the data directory (node_sim.clj:1-12), so its node linkage is a simulation declaration and not lifecycle conduct. A new constructor is added here with its evidence, the same discipline as the adjudication ledger."
        :scope-note "v2 searches the union of the v1 node-link paths and the paths ALIGN ALREADY DECLARED IT READ (:also-read). This is NOT a widening into new territory -- futon3 stays outside per claude-1's scope ruling of 2026-09-06 -- it is searching the files ALIGN's own section 1 says it read, with a pattern that can now see what is in them."}}
 
  ;; Nodes ALIGN censused. Everything not listed here is uncensused and is the
@@ -158,6 +158,66 @@
               {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2262 :to 2266 :expect "checkpoint"}
               {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2969 :to 2990 :expect "checkpoint"}
               {:file "futon2/src/futon2/aif/enact.clj" :from 5 :to 10 :expect "write-trace!"}]}]
+
+ ;; --------------------------------------------------------------------------
+ ;; KNOWN FALSE-POSITIVE CLASS (PA3z, 2026-09-06). The mirror of PA2z's
+ ;; false-negative finding, and it should be held with the same seriousness: an
+ ;; instrument that OVER-reports in prose is no more trustworthy than one that
+ ;; UNDER-reports in call arguments.
+ ;;
+ ;; Both pattern versions match inside DOCSTRINGS AND COMMENTS. Measured case:
+ ;; node_sim.clj:165 is `{:node :R5` occurring inside the docstring of
+ ;; `carriers!`, where it illustrates the shape of a carriers declaration. It is
+ ;; prose. It is not code, and it links nothing.
+ ;;
+ ;; NOT FIXED BY WIDENING OR NARROWING THE REGEX -- a regex cannot see the
+ ;; difference between a form and a docstring that contains one. The honest
+ ;; handling is the one this ledger already uses everywhere else: the mechanical
+ ;; layer reports a HIT, and a reading disposes of it. Recorded here so a future
+ ;; slice does not credit a cell from a docstring, and so the count of what the
+ ;; instrument cannot decide by itself stays visible rather than implied.
+ :known-false-positive-class
+ {:class :match-inside-docstring-or-comment
+  :measured-case "futon2/src/futon2/aif/node_sim.clj:165 -- {:node :R5 inside the carriers! docstring"
+  :affects [:v1 :v2]
+  :disposition "Reported as a hit; disposed of by reading, never auto-credited. See PA3z's slice artifact for the R5 adjudication."}
+
+ ;; --------------------------------------------------------------------------
+ ;; ROUTE-HOP ADJUDICATIONS (claude-1, 2026-09-06). Three adjudications, one
+ ;; authority, two consumers.
+ ;;
+ ;; PA1z's pattern-v2 negative control returned exit 4: 19 cells on R12, R20 and
+ ;; TRACE lost their mechanical absence basis, because the widened search DOES
+ ;; find node links for them where v1 found none. No verdict was reversed -- what
+ ;; was falsified was the stated BASIS, ALIGN's [A] line "returned no matches".
+ ;;
+ ;; claude-1 adjudicated it in ALIGN itself (futon2 d232ea06, the [A] basis
+ ;; amendment). THE ARGUMENT IS DELIBERATELY NOT RESTATED HERE. This ledger
+ ;; CITES that amendment the way the adjudications above cite ALIGN's readings:
+ ;; ALIGN is the census of record, this file is an instrument that follows it.
+ ;; Restating the reasoning would fork it, and a forked reason drifts exactly
+ ;; the way the pointer did.
+ ;;
+ ;; Cells already carrying an explicit adjudication above are NOT listed here and
+ ;; are not overridden -- TRACE :recorded stays [E-T] :exists, R20 :checked stays
+ ;; [N20] :named-only. 7 + 6 + 6 = 19, the exact count the control reported.
+ :route-hop-adjudicated
+ [{:node "R12" :verdict :absent
+   :cells [:commissioned :dispatched :parked :returned :checked :recorded :surfaced]
+   :authority "futon2 d232ea06 — ALIGN [A] basis amendment, 2026-09-06"
+   :hit "war_machine.clj:7063 (route-tag scan-route1 :R12 \"futon2.report.war-machine/scan-r12-apparatus\")"
+   :corroboration "live fixture 0a18c4f7-R12.edn :status :absent :reason :no-record-field"}
+  {:node "R20" :verdict :absent
+   :cells [:commissioned :dispatched :parked :returned :recorded :surfaced]
+   :authority "futon2 d232ea06 — ALIGN [A] basis amendment, 2026-09-06"
+   :hit "war_machine.clj:7055 (route-tag scan-route0 :R20 \"futon2.report.war-machine/scan-metabolic-balance\")"
+   :corroboration "live fixture 0a18c4f7-R20.edn :status :absent :reason :no-record-field"
+   :excluded-cell ":checked stays [N20] :named-only, adjudicated above"}
+  {:node "TRACE" :verdict :absent
+   :cells [:commissioned :dispatched :parked :returned :checked :surfaced]
+   :authority "futon2 d232ea06 — ALIGN [A] basis amendment, 2026-09-06"
+   :hit "war_machine.clj:6789 and full_loop_runner.clj:2409 — the latter a LITERAL {:node :TRACE ...} entry, i.e. v1's own form, invisible to v1 only because v1's SCOPE excluded futon2"
+   :excluded-cell ":recorded stays [E-T] :exists, adjudicated above — the route hop is exactly what [E-T] credits"}]
 
  ;; --------------------------------------------------------------------------
  ;; TARGETED ABSENCE SEARCHES. ALIGN established two R16 absences with a

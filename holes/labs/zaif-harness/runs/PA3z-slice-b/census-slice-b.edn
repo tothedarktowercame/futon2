@@ -1,0 +1,57 @@
+;; PA3z — census slice B: the EVALUATE and SELECT loop-band nodes.
+;; R4, R5 (EVALUATE); R6, R13, R14, R15, R11 (SELECT). 7 nodes x 7 = 49 cells.
+;;
+;; Run under PATTERN v2, which is why this slice is worth more than slice A's
+;; method alone. Under v1 the seven nodes would have returned 49/49 :absent.
+;; Under v2, THREE of them (R5, R6, R14) return node-link hits. Those are three
+;; nodes that v1 would have booked as fully absent without anyone noticing --
+;; the concrete payoff of claude-1's ruling to widen the instrument rather than
+;; have the lane owner read call sites by hand.
+
+{:schema :box12/census-slice-v1
+ :row :PA3z
+ :band :loop
+ :stages [:EVALUATE :SELECT]
+ :nodes ["R4" "R5" "R6" "R13" "R14" "R15" "R11"]
+ :pattern-version :v2
+ :v2-payoff "Under v1: 49/49 :absent, silently. Under v2: R5, R6 and R14 surface hits. The widening changed what three of seven nodes look like on their first census."
+
+ :s1-applicability
+ {:verdict "All seven nodes are NON-HANDOFF. The four handoff stages are :inapplicable, per the PA2z rule claude-1 approved."
+  :measurement "Per-node count of handoff-conduct lines (dispatch! | /api/alpha/bell | poll-job!) intersected with the node tag, over futon2/src/futon2/aif and war_machine.clj: R4 0, R5 0, R6 0, R13 0, R14 0, R15 0, R11 0. Untruncated counts."
+  :corroborates-ALIGN "ALIGN section 1 already recorded, from its own reading, that R6 'selects actions but does not dispatch or hand them off' and that R14's invoke-strategic-selection 'is an in-process function call, not an Agency invoke'. The mechanical discriminator reproduces both without being told them. That is the applicability rule agreeing with a hand reading on the two nodes where a hand reading exists."
+  :effect "28 of 49 cells :inapplicable (7 nodes x 4 handoff stages). 21 censusable."}
+
+ :s2-cells
+ [{:node "R4" :recorded :absent :checked :absent :surfaced :absent
+   :basis "No node link under v2 at all -- neither form, across the full v2 scope. Forward model computes and is not routed."}
+  {:node "R13" :recorded :absent :checked :absent :surfaced :absent :basis "No node link under v2."}
+  {:node "R15" :recorded :absent :checked :absent :surfaced :absent :basis "No node link under v2."}
+  {:node "R11" :recorded :absent :checked :absent :surfaced :absent :basis "No node link under v2."}
+
+  {:node "R6" :recorded :absent :checked :absent :surfaced :absent
+   :hit "war_machine.clj:6463 (route-tag route4 :R6 \"futon2.aif.policy/select-action\")"
+   :adjudication "ROUTE HOP. Disposed of by the rule claude-1 generalised from [E-T] and recorded in ALIGN's [A] basis amendment (futon2 d232ea06): a route hop appends {:node :via :at} to the route vector and establishes no lifecycle stage. Applying an established rule to a NEW node is this slice's reading to make; the rule itself is not re-derived here."
+   :note "The route hop names futon2.aif.policy/select-action -- so the record shows R6 ran, and nothing more. Exactly ALIGN's own prior finding."}
+
+  {:node "R14" :recorded :absent :checked :absent :surfaced :absent
+   :hit "war_machine.clj:6481 (route-tag route5 :R14 \"futon2.report.war-machine/invoke-...\")"
+   :adjudication "ROUTE HOP, same disposition as R6."
+   :note "Worth stating because the name invites the opposite reading: the via string contains `invoke-`, but ALIGN section 1 already measured that R14's invoke-strategic-selection is an IN-PROCESS FUNCTION CALL, not an Agency invoke. A route hop naming a function called `invoke-something` is not a dispatch. This is the one cell on the slice where the evidence could be misread at a glance in the direction of crediting it."}
+
+  {:node "R5" :recorded :absent :checked :absent :surfaced :absent
+   :hits ["futon2/src/futon2/aif/node_sim.clj:165 -- {:node :R5 INSIDE THE carriers! DOCSTRING"
+          "futon2/src/futon2/aif/node_sim.clj:327 -- {:R5 {:node :R5 :label \"Expected free energy core\" ...}}"
+          "futon2/scripts/futon2/report/war_machine.clj:6347 -- (route-tag route3 :R5 \"futon2.aif.efe/rank-actions\")"]
+   :adjudication "Three hits, none of them lifecycle conduct, and they fail for THREE DIFFERENT REASONS -- which is why this is the most instructive cell on the slice. (a) :165 is PROSE: the match is inside a docstring illustrating the shape of a carriers declaration. It is not code and links nothing; recorded in the ledger as :known-false-positive-class. (b) :327 is real R5-linked code, but node_sim is a per-node SIMULATION harness that runs one node in isolation -- its own header states no live tick is taken, no run lock, nothing written under the data directory. A simulation declaration is not process assurance for the node it simulates. (c) :6347 is a route hop, disposed of as R6 and R14 are."
+   :ledger-correction "This cell also corrected a claim I had committed. The ledger's constructor-derivation note said node_sim.clj 'uses :node for a different concept'. That is wrong -- node_sim.clj:327 genuinely carries the control-stage :R5. The constructor derivation is unaffected (node_sim defines no node-linking constructor, and :327 is a literal map v1's own form already catches), but the reason as stated was inaccurate and is corrected in place rather than quietly dropped."}]
+
+ :s3-instrument-finding
+ {:finding "BOTH PATTERN VERSIONS MATCH INSIDE DOCSTRINGS AND COMMENTS -- the mirror of PA2z's false-negative class, and it deserves the same seriousness. An instrument that OVER-reports in prose is no more trustworthy than one that UNDER-reports in call arguments."
+  :measured-case "node_sim.clj:165, {:node :R5 inside the carriers! docstring."
+  :not-a-regex-problem "This is NOT fixed by widening or narrowing the pattern: a regex cannot distinguish a form from a docstring that contains one. The honest handling is the one the ledger already uses everywhere -- the mechanical layer reports a HIT and a reading disposes of it. Recorded in the ledger as :known-false-positive-class so a later slice cannot credit a cell from prose, and so the count of what the instrument cannot decide by itself stays visible rather than implied."
+  :symmetry-worth-naming "PA2z found the instrument blind where linkage was real. PA3z finds it credulous where linkage is prose. Neither was visible from the 42 adjudicated cells, and both were found by running the instrument over nodes nobody had censused."}
+
+ :tally {:inapplicable 28 :running-code 0 :absent 21}
+ :denominator-note "21 censusable cells, not 49. Reporting 49 would have booked 28 phantom deficits."
+ :headline "ZERO running code across the entire EVALUATE and SELECT band. Slice A found four `recorded` cells carried by route-tag; slice B finds none -- R5, R6 and R14 are routed but nothing records their content, and R4, R13, R15 and R11 are not linked at all. The loop evaluates and selects with nothing recording what it evaluated, nothing refusing on it, and nothing surfacing it."}

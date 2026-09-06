@@ -136,25 +136,47 @@
   (.delete tmp))
 
 ;; ---------------------------------------------------------------------------
-(println "\n7. PATTERN v2 -- the widening, and the exit-4 it is currently reporting")
-;; claude-1 ruled (2026-09-06) that the pattern be WIDENED and VERSIONED rather
-;; than compensated for by the lane owner reading call sites by hand -- manual
-;; discrimination as standing policy would make the operator the instrument
-;; again, which is the failure PA1z exists to remove. v1 is frozen as the
-;; baseline; v2 adds the constructor-call form. This check PINS the measured
-;; difference so it cannot drift unnoticed while the adjudication is pending.
-(let [{:keys [exit data]} (run-census "--pattern" "v2")
-      dis (:disagreements data)
-      by-node (frequencies (map :node dis))]
-  (check "v2 sees linkage v1 cannot: 19 cells lose their mechanical absence" 19 (count dis))
-  (check "confined to the three route-tagged censused nodes" {"R12" 7 "R20" 6 "TRACE" 6} by-node)
-  ;; The distinction that matters: NOTHING is contradicted. Every one of the 19
-  ;; moves absent -> hit-needs-adjudication, i.e. "search can no longer establish
-  ;; absence here", never absent -> exists.
-  (check "every move is absent -> hit-needs-adjudication, no verdict reversed"
-         #{:hit-needs-adjudication} (set (map :verdict dis)))
-  (check "exits 4 (disagreement routed, not absorbed)" 4 exit)
-  (check "no stale adjudications under v2" [] (:stale data)))
+(println "\n7. PATTERN v2 -- widened, adjudicated, and now agreeing with v1")
+;; THIRD STATE OF THIS CHECK, and the history is the point. claude-1 ruled the
+;; pattern be widened and versioned rather than compensated for by hand. The v2
+;; negative control then came back EXIT 4 with 19 disagreements on R12/R20/TRACE
+;; -- not the clean diff anyone expected. Nothing was absorbed: no verdict had
+;; reversed, but the stated basis for those cells (ALIGN's [A] "returned no
+;; matches") was falsified, so it was routed as an exit-4. claude-1 adjudicated
+;; it in ALIGN (d232ea06) and this ledger now cites that amendment.
+;;
+;; So v2 reaching parity with v1 is EARNED, not assumed: the instrument was
+;; widened until it saw more, the extra sightings were adjudicated by the
+;; document's author, and only then did the two agree. Narrowing v2 back would
+;; have produced the same green with none of the knowledge.
+(let [v1 (run-census "--pattern" "v1")
+      v2 (run-census "--pattern" "v2")
+      tally (fn [r] (frequencies (map :verdict (:results (:data r)))))]
+  (check "v1 still exits 0" 0 (:exit v1))
+  (check "v2 exits 0 after the adjudications" 0 (:exit v2))
+  (check "both versions agree cell for cell"
+         (mapv (juxt :node :cell :verdict) (:results (:data v1)))
+         (mapv (juxt :node :cell :verdict) (:results (:data v2))))
+  (check "and on the tally" {:absent 34 :exists 6 :named-only 2} (tally v2))
+  (check "no disagreements left under v2" [] (:disagreements (:data v2))))
+
+(println "\n8. the 19 are adjudicated, NOT re-hidden")
+;; The distinction this check exists to protect: v2 must still SEE the route-hop
+;; hits and dispose of them by a cited adjudication. If a later edit narrowed the
+;; pattern or the scope instead, the tally above would still be green while the
+;; instrument had gone blind again -- so assert the basis, not just the verdict.
+(let [{:keys [data]} (run-census "--pattern" "v2")
+      adjudicated (filterv #(= :route-hop-adjudicated (:basis %)) (:results data))]
+  (check "19 cells disposed of by the route-hop adjudication" 19 (count adjudicated))
+  (check "confined to the three nodes" {"R12" 7 "R20" 6 "TRACE" 6}
+         (frequencies (map :node adjudicated)))
+  (check "every one cites ALIGN's amendment, not a restated argument" #{true}
+         (set (map #(boolean (re-find #"d232ea06" (str (:authority %)))) adjudicated)))
+  ;; The two cells the node-wide entry must NOT have swallowed.
+  (check "TRACE recorded still credited by [E-T]" [:exists :pinned-adjudication]
+         ((juxt :verdict :basis) (cell data "TRACE" :recorded)))
+  (check "R20 checked still [N20] named-only" [:named-only :pinned-adjudication]
+         ((juxt :verdict :basis) (cell data "R20" :checked))))
 
 (println)
 (if (seq @failures)
