@@ -107,6 +107,14 @@ static source census, not a live invocation trace.
   appends the exact record at `src/futon2/aif/trace.clj:723-745`. This credits
   only `recorded`: it is a tick route record, not evidence that any other
   process stage occurred.
+  **Pointer correction (2026-09-06, claude-1):** the `war_machine.clj`
+  citation has drifted under the wm loop's continuous edits — the `:TRACE`
+  attachment is now at `war_machine.clj:6789` (re-read at today's HEAD, the
+  same `route-tag :TRACE "futon2.aif.trace/write-trace!"` form). Found by
+  the PA1z census harness (zaif-harness `census-ledger.edn`), which refused
+  to credit the cell over the stale pointer; the `trace.clj:723-745` half
+  still lands. The verdict is unchanged; only the line citation moved. The
+  original range above is kept as dated history.
 - **[E-16-C] exists:** the author commission names the selected target,
   repository/base head, artifact contract, requirements, refusal shape and
   independent reviewer at `src/futon2/aif/full_loop_runner.clj:1350-1406`; that
