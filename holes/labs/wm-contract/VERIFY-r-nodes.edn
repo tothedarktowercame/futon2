@@ -37,7 +37,8 @@
   :pointer-drift "A registry :code or :basis pointer resolves to a line that no longer contains what the field claims."
   :cross-node-grain-mix "Two terms of one equation are evaluated at different values of a shared parameter inside a single call."
   :declared-source-not-read "An input the node's declared scope names is present in the node's own argument and is never read by it -- so the gap is at the node's binding form, not upstream of it."
-  :retired-quantity-still-required-elsewhere "A quantity the equations registry retired by ruling is still required, in its retired form, by a document the registry does not gate. The node satisfies the registry and fails that document, and nothing in either records the difference. Added by slice 3; the vocabulary is extended rather than a row rewritten."}
+  :retired-quantity-still-required-elsewhere "A quantity the equations registry retired by ruling is still required, in its retired form, by a document the registry does not gate. The node satisfies the registry and fails that document, and nothing in either records the difference. Added by slice 3; the vocabulary is extended rather than a row rewritten."
+  :graded-satisfied-on-an-unmet-criterion "A contract document records the node's operational criterion as SATISFIED, and neither clause of that criterion's own check holds: one is unmet by the carrier the node ships, and the other was graded at a date preceding the code that could satisfy it. The node meets its equations-registry row; it does not meet the document that grades it, and the document carries no record of the difference. Added by slice 4; the vocabulary is extended rather than a row rewritten."}
 
  :slices
  [{:slice 1 :node :R5 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
@@ -81,7 +82,28 @@
                  :receipt-sha256 "be449a55ccc12223e009e64eb883dbb328c4e5b9a31c54442cbd0efa88513769"
                  :no-src-change "Both files are lab artefacts. No futon2 src/ or scripts/ file was touched, so no futon2 test run is claimed."}
    :vocabulary-extended "This slice adds one key to :hole-types (:retired-quantity-still-required-elsewhere). No existing key was edited and no earlier row was touched."
-   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the replay and the two censuses. The files written by this slice are the harness, the carriers, the receipt, this matrix and the worklist row."}]
+   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the replay and the two censuses. The files written by this slice are the harness, the carriers, the receipt, this matrix and the worklist row."}
+  {:slice 4 :node :R1 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop), harness authored by codex-9 under bell invoke-1788710310625-13325-b804e4c9 and reviewed here"
+   :did "All four legs of :V7's per-node procedure. Leg (a) needed a new harness for the same reason slice 2 did -- R1's single registry row is :class :stack-defined and its :formal line is a BOUNDARY, not a formula (aif-equations.edn:119-121), so there is no equation to transcribe. What is checked instead is the CONSTRUCTION the node declares about itself -- the seven-member status set, the uniform prior, the three branches of the belief carry, the argmax/entropy pair the grading document offers as mean and precision -- against a reference built only from sim/R1-carriers.edn. The slice's weight is the production replay: every consecutive trace-record pair in the corpus re-derived against the declared reconciliation rule."
+   :author-not-reviewer "The harness, the carriers and the first receipt were authored by codex-9 (futon2 96931d85) from a written packet; this seat reviewed them and then fixed the one review finding directly rather than re-dispatching. THE FINDING: the replay reported 278355 survivor mismatches of 332199 with no characterisation, which reads as an 84%-wrong belief carry and is not what the corpus says. This seat had run its own probe before the bellback arrived, agreeing digit-for-digit on every reported total (332199 / 278355 / 434 / 18 / 0 / 889 records / 57 files), and that probe also established what the packet had not asked for: every one of the 278355 has a recorded prior equal to the uniform prior, i.e. the carry did not RUN, and they are all before 2026-07-14. The era split was added to the harness by this seat and the receipt re-run; the two independently-written probes agree on the split as well."
+   :ran ["clojure -M holes/labs/wm-contract/v7_r1_node_sim.clj (exit 0) -- 11 checks all pass, 10 planted wrong nodes all caught, and a replay of all 888 consecutive record pairs in the corpus"
+         "the same command a second time, and diff -q against the first receipt -- byte-identical, at the delivered state (sha256 0947863a...) and again after this seat's era-split edit (sha256 2bd8335e...)"
+         "clojure -M holes/labs/wm-contract/f8_belief_state_readback.clj (exit 0) -- leg (b); the script rewrites its own artefact, and diff against the copy taken before the run reported no difference, so the committed runs/F8-belief-state/clojure-readback.txt is unchanged at sha256 44034da92bbd0d63e5850a6cf5d657e0f4d6dc6bdfcf98f57f4dc9c2a2cdd51b -- the sha aif-equations.edn:125 claims"
+         "clj-kondo --lint holes/labs/wm-contract/v7_r1_node_sim.clj -- 0 errors, 0 warnings, at the reviewed state"
+         "emacs -Q --batch -l futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/v7_r1_node_sim.clj -- OK"
+         "clojure -e on Clojure's max-key over an array-map with two equal values -- returns the LATER key, which is the correction recorded below"
+         "bb p4ng/empirics-futon/pointer_check.bb -- 0 unresolved"
+         "bash p4ng/empirics-futon/negative_controls.sh"]
+   :new-harness {:runner "holes/labs/wm-contract/v7_r1_node_sim.clj"
+                 :carriers "holes/labs/wm-contract/sim/R1-carriers.edn"
+                 :receipt "holes/labs/wm-contract/runs/V7-R1-node-sim/00-r1.edn"
+                 :receipt-sha256 "2bd8335ebe85b7e24659fcc3c09848945860ced1f5aa396501a1d178fe5b2a60"
+                 :superseded-receipt-sha256 "0947863a013ad7e42796b776413173088f6d3c469f9a760f354c667aa30bd72c -- the delivered state, before this seat added the era split. Recorded so the two runs can be told apart rather than one silently replacing the other."
+                 :no-src-change "All three files are lab artefacts. No futon2 src/ or scripts/ file was touched, so no futon2 test run is claimed."}
+   :no-p4ng-change "No p4ng commit this slice. Every pointer written here resolves under the roots slices 1 and 2 put in the gate."
+   :vocabulary-extended "This slice adds one key to :hole-types (:graded-satisfied-on-an-unmet-criterion). No existing key was edited and no earlier row was touched."
+   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the replay. The files written by this slice are the harness, its carriers, its receipt, this matrix and the worklist row."}]
+
 
  :rows
  [{:node :R5
@@ -611,4 +633,167 @@
     "The F_pi flag chain was NOT exercised. The :f-pi-posterior census reads what past ticks recorded and makes no claim about what a tick today would record."
     "The eps replay covers the channels the corpus has records for. It says nothing about the six of fourteen channels that have no likelihood model and therefore produce no eps record at all (src/futon2/aif/belief.clj:919-934)."
     "Nothing was repaired. aif-equations.edn, sec-catalog.tex, docs/futon-aif-completeness.md, wr-overlay.edn and PROBLEMS-r2-r8-r7-batch2.md are all READ and left standing, with the drifts recorded above for the review that TN 9a gates registry edits behind."
+    "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}
+  {:node :R1
+   :slice 4
+   :label "Belief state"
+   :stage "BELIEVE"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:17"
+   :verdict :hole
+
+   :registry-row-is-met
+   "STATED FIRST, BECAUSE THE HOLE BELOW IS NOT AGAINST THE EQUATIONS REGISTRY. R1 has exactly ONE row in aif-equations.edn (:belief-state, :defines :mu, :node :R1, :class :stack-defined, aif-equations.edn:119-125; the search that establishes there is no second one is grep -n ':node :R1[^0-9]' over that file, which returns line 119 alone). It is :lean-status :closed, its readback re-ran green and byte-identical at this HEAD (leg (b)), and the carry it names agrees with an independent reference on every fixture and on 53807 production comparisons. THE ONE THING THE ROW GETS WRONG IT ALREADY RECORDS: its :formal line, 'mu_t := the stored belief after the update at t-1', is false as written -- mu_t is reconcile-belief-carry(fresh_t, mu-post_{t-1}) restricted to this tick's bootstrap domain -- and the registry's own :lean-note at aif-equations.edn:125 says so, in those terms, since :F8 leg 1 slice 6 on 2026-09-05. This slice re-derives that independently (check :formal-line-has-a-counterexample) rather than citing it, and records that the correction still lives only in the note: the :formal FIELD is unchanged, and it is the field the generated join reads."
+
+   :hole {:type :graded-satisfied-on-an-unmet-criterion
+          :statement "docs/futon-aif-completeness.md:49-68 is R1's operational criterion and it is graded '**Satisfied as of v0.2 (2026-05-17); operator-surface + symmetric bootstrap closed as of v0.9 (2026-05-18)**' at :55. Its operational check has two clauses (:53): 'Verify it has mean + variance fields per state dimension' and 'Verify it is updated tick-over-tick rather than recomputed.' NEITHER HOLDS. Clause one: the carrier has no such fields. It is a map entity-id -> normalised categorical over seven statuses, and the document itself offers most-likely-status as the 'mean' and entropy as the 'precision' (:61-62) -- both DERIVED on demand, and the pair does not determine the posterior, which the harness exhibits with two distinct normalised posteriors sharing a strict argmax and an identical entropy at delta 0.0. Clause two: the carry that makes the belief carried rather than recomputed did not exist on the date the grade claims. reconcile-belief-carry and its production call site both landed in futon2 ef1aa64c on 2026-07-09 -- seven and a half weeks after 2026-05-17 -- and the corpus shows its first realisation on 2026-07-14. Across the whole trace history 760 of 889 records were RECOMPUTED from the fresh uniform bootstrap, not carried; only 129 carry."
+          :basis ["docs/futon-aif-completeness.md:49-68 -- the criterion, the two-clause operational check at :53, and the 'Satisfied as of v0.2 (2026-05-17)' grade at :55"
+                  "docs/futon-aif-completeness.md:61-62 -- most-likely-status offered as the 'mean' and entropy as the 'precision'"
+                  "src/futon2/aif/belief.clj:447-452 (most-likely-status) and src/futon2/aif/belief.clj:454-462 (entropy) -- both computed from the posterior on call; neither is a stored field"
+                  "the :moment-pair-is-not-sufficient check of holes/labs/wm-contract/runs/V7-R1-node-sim/00-r1.edn -- two distinct posteriors, argmax :spawned on both, entropies equal at delta 0.0, both masses 1.0"
+                  "futon2 ef1aa64c (2026-07-09), 'R8: carry the strategic belief mu across ticks (close the seam)' -- the single commit that introduces src/futon2/aif/belief.clj:510-522 and scripts/futon2/report/war_machine.clj:6021-6026, found by git log -S'reconcile-belief-carry' on both paths"
+                  "the :totals key of holes/labs/wm-contract/runs/V7-R1-node-sim/00-r1.edn -- :pre-carry-pairs 759, :carry-era-pairs 129, :first-carry-era-file wm-trace-2026-07-14.edn, :carry-era-file-count 12 of 57"]
+          :measured-not-asserted "The era split is read off the corpus, not off a date typed in by hand: a record whose whole recorded prior equals the uniform prior received no carry. Every one of the 278355 survivor mismatches is of that kind (:survivor-mismatches-whose-prior-is-uniform 278355 = :survivor-mismatches 278355), and they are exactly the pre-2026-07-14 records."
+          :not-a-ruling "Whether R1's criterion should be restated to match the carrier the machine ships, or the carrier grown to meet the criterion, is Joe's. This row records that the document grades satisfied what its own check does not find, and that nothing in the document records the difference. Nothing is written to :choices or to :decisions."}
+
+   :the-carry-itself-is-right
+   "SAID PLAINLY, BECAUSE THE HOLE ABOVE COULD BE MISREAD AS ONE: where the carry runs, it is exactly correct. 53807 survivor comparisons over the 129 carry-era pairs, ZERO mismatches -- not a tolerance, equality of the recorded posterior maps. The reference is written from reconcile-belief-carry's DOCSTRING and lives in the harness; the carriers file supplies the status order and the fixtures, and futon2.aif.belief is only ever the node under test (holes/labs/wm-contract/v7_r1_node_sim.clj:14-20 and its :reference-independence receipt key). Ten planted wrong carries -- keeping vanished entities, dropping new ones, overwriting survivors, averaging, mishandling cold start, an unnormalised prior, a six-member status set, entropy in bits, an argmin, and a normalise that raises -- are ALL caught."
+
+   :stated-limits
+   [{:limit :two-of-the-three-carry-branches-have-almost-no-production-inhabitants
+     :statement "reconcile-belief-carry has three branches and the corpus exercises them 53807 / 1 / 0. Survivors: 53807 comparisons. Vanished-and-dropped: ONE entity, at the wm-trace-2026-07-14 -> wm-trace-2026-07-15 boundary. New-entity-gets-the-fresh-prior: ZERO, in the entire carry era -- the belief domain has not gained an entity on any tick since the carry shipped. The branch is covered by fixtures and by a planted control, and by nothing in production."
+     :where "the :carry-era-new-comparisons, :carry-era-dropped and :carry-era-survivor-comparisons keys of holes/labs/wm-contract/runs/V7-R1-node-sim/00-r1.edn"}
+
+    {:limit :the-re-entry-amnesia-is-real-in-the-code-and-has-never-happened
+     :statement "The sharpest consequence :F8 leg 1 slice 6 states for this node -- an entity out of the bootstrap domain for one tick returns at the uniform prior, its history irrecoverable -- is reproduced here in Clojure at HEAD (check :re-entry-loses-history: t0 peaked, t1 absent, t2 uniform) and has ZERO instances in the corpus. 889 records, :re-entry-count 0. The hazard is in the code; it has not fired. Recording it as measured absence rather than as a live defect is the honest reading, and it is the reason this is a limit and not the hole."
+     :where "the :re-entry-count and :re-entry-uniform-count keys of the receipt"}
+
+    {:limit :r1-runs-off-the-route-and-its-own-source-calls-it-r8
+     :statement "A reader at route grain cannot see R1 run. scripts/futon2/report/war_machine.clj carries TEN route-tag call sites, naming :R2 :R7 :R3 :R8 :R5 :R6 :R14 :TRACE :R20 :R12 (war_machine.clj:5937, :6245, :6246, :6252, :6347, :6463, :6481, :6789, :7055, :7063); none names :R1, and the belief construction at war_machine.clj:6021-6026 emits no tag. Worse for a reader: the three places the shipped source does name a node for this work all say R8 -- the docstring 'R8 belief carry' (src/futon2/aif/belief.clj:511), the tick comment 'carries across ticks (R8)' (scripts/futon2/report/war_machine.clj:5980-5981), and the commit that introduced both (ef1aa64c). p4ng/empirics-futon/control-stages.edn:16-17 puts R8 at 'Present-fit mismatch' in PERCEIVE and R1 at 'Belief state' in BELIEVE."
+     :not-repaired "Adding a route tag or correcting a docstring is a change to the machine, not a slice of :V7. Recorded. This is the same class slice 3 recorded for F_pi one node over."}
+
+    {:limit :the-recorded-prior-is-not-the-belief-the-update-loop-starts-from
+     :statement "The tick writes :mu-pre from wm-belief-pre (scripts/futon2/report/war_machine.clj:6702), which is the carry's output BEFORE the morning-brief fold; the R3 update loop starts from wm-belief-after-brief (war_machine.clj:6098), which is that fold's output (war_machine.clj:6033-6038, applying scripts/futon2/report/war_machine.clj:831-847). On any tick where a brief event applies, the recorded prior is not the belief the tick updated from. MEASURED, AND LATENT: 0 of 889 records carry a non-empty :morning-brief-events, so the discrepancy has never been realised. It is recorded because the replay above rests on :mu-pre meaning what it appears to mean, and that meaning is one applied brief event away from being wrong."
+     :where "the :recorded-prior-is-not-the-loop-s-starting-belief check of the receipt"}
+
+    {:limit :the-independent-reference-transcribes-the-priors-value-not-its-rule
+     :statement "sim/R1-carriers.edn declares :uniform-mass 0.14285714285714285 -- the double, transcribed from the declaration site -- rather than the rule '1/n over the status set' with n left to the reference. The reference is still independent of belief.clj (nothing in it calls the node to build a reference value, and the :uniform-prior-unnormalised plant is caught), but a reader should know the constant was read off rather than derived. Named because slice 3's eps reference was exact by construction and this one is not."}
+
+    {:limit :the-corpus-replay-checks-the-rule-and-not-the-domain
+     :statement "The replay re-derives, for every consecutive pair, whether survivors kept their carried posterior and whether new entities got the declared uniform prior. It CANNOT re-derive the fresh bootstrap that fixes the domain: that reads ~/code/futon5a/holes/stack-annotations.edn as it stood at each historical tick, and this tree has only today's copy (414 sections; the newest record's belief spans 417 entities, 414 string ids and 3 sorry keywords). So the replay is a check of the reconciliation RULE against the domain each tick actually recorded, not a check that the domain was right."}]
+
+   :legs
+   {:a
+    {:leg "enumerate the node's aif-equations rows and run them in the F3 node-sim harness against declared carriers with an independent reference"
+     :status :done-with-a-new-harness
+     :why-not-an-existing-harness "R1's one row is :class :stack-defined and its :formal line is a boundary, so there is nothing to transcribe: :F3's harness is written for R5's three equations, slice 2's for R2's channel table, slice 3's for R8's three producers. What R1 needs is a check of a CONSTRUCTION, which is what this harness is."
+     :equations [{:id :belief-state :formal "mu_t := the stored belief after the update at t-1" :at "aif-equations.edn:119-125" :eq "buckley2017 (stack-defined; a boundary, not a formula)" :state :shipped}]
+     :runner "holes/labs/wm-contract/v7_r1_node_sim.clj"
+     :carriers "holes/labs/wm-contract/sim/R1-carriers.edn"
+     :receipt "holes/labs/wm-contract/runs/V7-R1-node-sim/00-r1.edn"
+     :receipt-sha256 "2bd8335ebe85b7e24659fcc3c09848945860ced1f5aa396501a1d178fe5b2a60"
+     :byte-identical-on-re-run {:method "cp of the receipt to a temp path, re-run, diff -q; then sha256sum. Done at both states -- the delivered one and the reviewed one." :result :identical}
+     :the-subject-is-the-shipped-node
+     "The construction under test is the one the tick runs: scripts/futon2/report/war_machine.clj:6021-6026 builds the fresh bootstrap from src/futon2/aif/belief.clj:489-508 and, when belief/*carry-belief?* is on (default true, src/futon2/aif/belief.clj:995-1001), reconciles it against (:mu-post prev-trace-record) through src/futon2/aif/belief.clj:510-522. The corpus replay's subject is that call's OUTPUT as the tick recorded it (src/futon2/aif/trace.clj:541-542)."
+     :checks {:total 11 :pass 11 :fail 0
+              :fixture-checks 9
+              :carry-fixture-comparisons 3
+              :carry-fixture-max-deviation 0.0
+              :corpus-replay {:files 57 :records 889 :eligible-pairs 888 :skipped 0
+                              :survivor-comparisons 332199 :survivor-mismatches 278355
+                              :survivor-mismatches-whose-prior-is-uniform 278355
+                              :carry-era-pairs 129 :carry-era-survivor-comparisons 53807
+                              :carry-era-survivor-mismatches 0
+                              :carry-era-new-comparisons 0 :carry-era-dropped 1
+                              :pre-carry-pairs 759 :pre-carry-survivor-comparisons 278392
+                              :pre-carry-survivor-mismatches 278355 :pre-carry-new-comparisons 434
+                              :new-comparisons 434 :new-mismatches 0 :dropped-total 18
+                              :re-entry-count 0
+                              :first-file "wm-trace-2026-05-18.edn" :last-file "wm-trace-2026-09-04.edn"
+                              :first-carry-era-file "wm-trace-2026-07-14.edn"
+                              :reads "Not a fixture. Each consecutive record pair re-derived against the declared reconciliation rule from the records' own :mu-post and :mu-pre. The all-corpus mismatch count is a fact about the era before the carry existed, not about the rule; the carry-era count is the one that measures the rule, and it is 0 of 53807."}}
+     :independently-reproduced
+     "The reviewing seat wrote and ran its own probe before the authoring seat reported, and the two agree digit-for-digit on every published total -- 889 records, 57 files, 888 pairs, 332199 survivors, 278355 mismatches, 434 new, 0 new mismatches, 18 dropped, 0 re-entries, 0 records with a non-empty :morning-brief-events, and the 129/759 era split with its 2026-07-14 boundary. Two separately-written readers of the same corpus, not one reader run twice."
+     :planted-wrong-node-controls
+     {:n 10 :all-caught true
+      :reads "Each is a wrong R1 someone could write, and each must be caught by a check the SHIPPED node passes. The two corpus measurements are excluded from that set: a check the shipped node cannot fail cannot discriminate."
+      :caught [{:id :carry-keeps-vanished-entities :by [:carry-agrees-with-independent-reference :formal-line-has-a-counterexample :re-entry-loses-history]}
+               {:id :carry-drops-new-entities :by [:carry-agrees-with-independent-reference :formal-line-has-a-counterexample :re-entry-loses-history]}
+               {:id :carry-overwrites-survivor-with-the-fresh-prior :by [:carry-agrees-with-independent-reference :formal-line-has-a-counterexample :re-entry-loses-history]}
+               {:id :carry-averages-survivor-with-fresh :by [:carry-agrees-with-independent-reference :carry-performs-no-arithmetic :formal-line-has-a-counterexample :re-entry-loses-history]}
+               {:id :carry-ignores-cold-start :by [:carry-agrees-with-independent-reference]}
+               {:id :uniform-prior-unnormalised :by [:uniform-prior-is-normalised-over-the-declared-set]}
+               {:id :status-set-missing-reopened :by [:status-set-matches-declaration]}
+               {:id :entropy-in-bits-not-nats :by [:moment-pair-is-not-sufficient]}
+               {:id :most-likely-status-is-argmin :by [:moment-pair-is-not-sufficient]}
+               {:id :normalise-raises-on-zero-sum :by [:zero-sum-posterior-returns-uniform]}]
+      :the-one-that-looks-right "Planted control :normalise-raises-on-zero-sum makes normalise REFUSE a zero-sum posterior, which is what a careful reader would expect. The shipped node returns the uniform prior instead (src/futon2/aif/belief.clj:51-60, whose own comment calls it a floor against NaN propagation), so the plant is caught by the check that pins that behaviour. Recorded, not ruled on: a silent uniform is a degenerate posterior turned into a maximally uncertain one with nothing in the record to say it happened."
+      :at "holes/labs/wm-contract/v7_r1_node_sim.clj (the :plants vector), receipt key :negative-controls"}}
+
+    :b
+    {:leg "where an F8 Lean module exists, re-run the readback certificate"
+     :status :done
+     :certificates
+     [{:row :belief-state :lean "machineBeliefState"
+       :module "mathlib4/DarkTower/WarMachine/MachineBeliefState.lean (with MachineBeliefStateWitness.lean)"
+       :readback-script "holes/labs/wm-contract/f8_belief_state_readback.clj"
+       :artifact "holes/labs/wm-contract/runs/F8-belief-state/clojure-readback.txt"
+       :re-run "exit 0. The script REWRITES its artefact rather than only printing it (f8_belief_state_readback.clj:86-89), so byte-identity was established by copying the committed file aside first and diffing after: no difference, sha256 44034da92bbd0d63e5850a6cf5d657e0f4d6dc6bdfcf98f57f4dc9c2a2cdd51b, which is the sha aif-equations.edn:125 claims."
+       :verdict-line "'VERDICT: production matches every Lean reference' -- fourteen measured lines, including carry survivor/new/vanished true/true/false, carry equals neither input, cold start equals fresh, and the three-tick t0/t1/t2 composition"}]
+     :stated-limit "No Lean was elaborated by this slice. The row's :lean-status :closed is read from the registry; what was re-run is the Clojure side of the pair."}
+
+    :c
+    {:leg "where the node is plumbing/assurance, re-verify the ALIGN census's exists-cells at file:line"
+     :status :not-applicable
+     :statement "R1 is a loop-band node (p4ng/empirics-futon/control-stages.edn:17, :band :loop), not plumbing, and the ALIGN census names no R1 cell."
+     :search "grep -cE '\\bR1\\b' holes/labs/wm-contract/ALIGN-rnode-process-census.md -> 0, and grep -ci 'belief state' over the same file -> 0. The word-boundary form is used on purpose: a bare grep for R1 matches R10 through R19 and would have reported hits that are not R1's."}
+
+    :d
+    {:leg "check the node's known candidate holes from PROBLEMS-*.md -- confirmed or cleared with evidence"
+     :status :done
+     :dossier "holes/labs/wm-contract/PROBLEMS-r1-r3-r3a-batch3.md:11-55 (R1, 'Residual problems it does not solve')"
+     :candidates
+     [{:id :mu-is-runtime-inhabited-but-has-no-resolving-lean-site
+       :dossier-class :implementation-flaw
+       :dossier-claim "the equation join reports 'belief-state / R1 / mu / not in Lean' while runtime constructs the initial posterior and deterministic updates"
+       :dossier-at "PROBLEMS-r1-r3-r3a-batch3.md:32-38"
+       :verdict :cleared
+       :evidence ["p4ng/sec-lean-state-generated.tex:19 -- the regenerated table now reads 'belief-state & R1 & mu & machineBeliefState (abbrev) & MachineBeliefState.lean:25'"
+                  "aif-equations.edn:122-124 -- :lean 'machineBeliefState' :lean-status :closed, declared 2026-09-05 by :F8 leg 1 slice 6"
+                  "leg (b) above: the readback re-ran at this HEAD, exit 0, artefact byte-identical to the committed one"]
+       :note "The dossier was written against the join before the :F8 leg-1 slices; the generated table it cites now says the opposite. Same shape as the two R8 candidates slice 3 cleared."}
+
+      {:id :the-belief-carrier-and-the-generative-models-state-do-not-meet
+       :dossier-class :both
+       :dossier-claim "the runtime belief is a normalized distribution over seven entity lifecycle statuses while the generative model needs a distribution over its State; no map joins those carriers, and the nearest belief-to-channel predictors have no caller"
+       :dossier-at "PROBLEMS-r1-r3-r3a-batch3.md:39-45"
+       :verdict :confirmed-with-one-sub-claim-refuted
+       :evidence ["FUNDAMENTALS.edn:112-141 -- :fundamental/belief-to-state-distribution, :verdict :in, Lean side :uninhabited, runtime side :proxy-only. The head claim stands: no declaration maps BeliefState into the model's State, and the runtime carrier is a per-entity categorical over statuses."
+                  "src/futon2/aif/belief.clj:37-42 (the seven-member status set) against mathlib4 Holes.lean:6806-6808's channel-indexed BeliefState -- two different index sets, as aif-equations.edn:125 also records"]
+       :sub-claim-refuted "FUNDAMENTALS.edn's supporting line at belief.clj:640 -- 'COUNTED across futon2 src/, scripts/, checks/, test/ and holes/ ... NO caller' for the four predict-* functions -- is FALSE at HEAD, and this seat verified it directly rather than taking the :F8 note's word: src/futon2/aif/belief.clj:1199-1226 defines predict-observation, whose single-arity body calls all four at :1217-1220, and scripts/futon2/report/war_machine.clj:6101-6107 calls it in the three-arity form inside the R3 micro-step loop. The entry's :verdict :proxy-only is UNAFFECTED -- moment pairs over the channels with a likelihood model are still not a distribution over State. Only the sub-claim is wrong, and it carries :worklist-row :F1, so this row states it and leaves the file alone."}]
+
+     :candidates-the-dossier-does-not-name
+     [{:id :the-dossier-cites-the-r1-registry-row-at-a-line-that-is-now-r8s
+       :type :pointer-drift
+       :statement "PROBLEMS-r1-r3-r3a-batch3.md:24-25 cites 'holes/labs/wm-contract/aif-equations.edn:108-110' for R1's temporal identity. At HEAD :108-110 is inside the :policy-free-energy row, which is R8's. The :belief-state row is at aif-equations.edn:119-125. The prose the dossier quotes is correct; the pointer no longer reaches it."
+       :not-repaired "Editing the dossier is not in :V7's slice acceptance. Recorded for the review TN 9a gates."}
+
+      {:id :the-grading-document-is-stale-on-the-domain-it-reports
+       :type :grading-document-behind-the-code-it-grades
+       :statement "docs/futon-aif-completeness.md:66 says the belief 'now spans the same entity domain VSATARCS-side bootstraps from (35 string section-ids today) plus the meta-sorry's keyword id', and the caveat inside :70 names ONE keyword key. MEASURED at HEAD: the newest record's belief spans 417 entities -- 414 string section-ids and 3 sorry keywords -- and ~/code/futon5a/holes/stack-annotations.edn carries 414 sections. The document is wrong by an order of magnitude on one number and by two on the other. This is a second finding in the same document as the hole above, at a different line, and it is the same class slices 2 and 3 recorded for the same file."
+       :not-repaired "Recorded, not edited."}
+
+      {:id :the-registry-note-states-the-tie-rule-backwards
+       :type :false-sub-claim-in-a-registry-note
+       :statement "aif-equations.edn:125 argues that most-likely-status's strictness matters because max-key on a tie returns 'whichever entry max-key reaches first'. Clojure's max-key reduces with (if (> (k x) (k y)) x y), so on a tie it keeps the LATER entry. Probed directly: (key (apply max-key val (array-map :a 0.5 :b 0.5))) returns :b. THE NOTE'S CONCLUSION IS UNAFFECTED -- both collision posteriors have a strict maximum at :spawned, so no tie arises and the collision holds either way -- but the reason it gives for it is wrong."
+       :found-by "codex-9, as the one contradiction it reported against the packet it was given; verified here independently before being recorded."
+       :not-repaired "A registry edit sits behind the TN 9a review gate. Recorded."}]}}
+
+   :what-this-row-does-not-claim
+   ["Nothing here says the belief carry is wrong. Where it runs it is exactly right: 53807 production comparisons at zero mismatches, and ten planted wrong carries all caught."
+    "Nothing here says docs/futon-aif-completeness.md is wrong about what R1 SHOULD have. What is recorded is that it grades satisfied what its own two-clause check does not find, and carries no record of the difference."
+    "The all-corpus figure of 278355 survivor mismatches is NOT a defect rate. Every one of them is a record from before the carry existed, and the row would be misread if that number were quoted without the era split."
+    "The replay checks the reconciliation RULE, not the entity domain: the historical fresh bootstraps cannot be reconstructed from this tree."
+    "No live tick was run and no run lock was taken. data/wm-trace was opened for reading; nothing under data/ was written."
+    "No Lean was elaborated. Leg (b) re-runs the Clojure side of one pair; the row's :lean-status :closed is read from the registry."
+    "Nothing was repaired. aif-equations.edn, docs/futon-aif-completeness.md, FUNDAMENTALS.edn, PROBLEMS-r1-r3-r3a-batch3.md, belief.clj and war_machine.clj are all READ and left standing."
     "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}]}

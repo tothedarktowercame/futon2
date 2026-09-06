@@ -131,21 +131,49 @@
                    (let [survivors (sort-by pr-str (filter #(contains? pre %) (keys post)))
                          new (sort-by pr-str (remove #(contains? post %) (keys pre)))
                          dropped (sort-by pr-str (remove #(contains? pre %) (keys post)))
-                         sm (count (remove #(= (get post %) (get pre %)) survivors))
-                         nm (count (remove #(= uniform (get pre %)) new))]
+                         mismatched (remove #(= (get post %) (get pre %)) survivors)
+                         sm (count mismatched)
+                         ;; A survivor whose recorded prior is the UNIFORM prior did not
+                         ;; receive the carry at all: the tick recomputed from the fresh
+                         ;; bootstrap. Counting these separates "the carry ran and got a
+                         ;; different answer" from "the carry did not run".
+                         sm-uniform (count (filter #(= uniform (get pre %)) mismatched))
+                         nm (count (remove #(= uniform (get pre %)) new))
+                         ;; ERA: a record whose whole recorded prior is uniform is a
+                         ;; pre-carry record. The split is read off the corpus, not
+                         ;; off a date typed in by hand.
+                         carry-era? (not (every? #(= uniform %) (vals pre)))]
                      (-> acc
                          (update :eligible-pairs inc)
                          (update :survivor-comparisons + (count survivors))
                          (update :survivor-mismatches + sm)
+                         (update :survivor-mismatches-whose-prior-is-uniform + sm-uniform)
                          (update :new-comparisons + (count new))
                          (update :new-mismatches + nm)
                          (update :dropped-total + (count dropped))
+                         (update (if carry-era? :carry-era-pairs :pre-carry-pairs) inc)
+                         (update (if carry-era? :carry-era-survivor-comparisons
+                                     :pre-carry-survivor-comparisons) + (count survivors))
+                         (update (if carry-era? :carry-era-survivor-mismatches
+                                     :pre-carry-survivor-mismatches) + sm)
+                         (update (if carry-era? :carry-era-new-comparisons
+                                     :pre-carry-new-comparisons) + (count new))
+                         (update (if carry-era? :carry-era-dropped :pre-carry-dropped) + (count dropped))
+                         (update :carry-era-files (fn [v] (if carry-era? (conj v (:file b)) v)))
                          (update :pair-summary conj {:from (:file a) :from-index (:index a)
                                                     :to (:file b) :to-index (:index b)
+                                                    :carry-era? carry-era?
                                                     :survivors (count survivors) :survivor-mismatches sm
+                                                    :survivor-mismatches-whose-prior-is-uniform sm-uniform
                                                     :new (count new) :new-mismatches nm :dropped (count dropped)}))))))
         base {:eligible-pairs 0 :survivor-comparisons 0 :survivor-mismatches 0
-              :new-comparisons 0 :new-mismatches 0 :dropped-total 0 :skipped {} :pair-summary []}
+              :survivor-mismatches-whose-prior-is-uniform 0
+              :new-comparisons 0 :new-mismatches 0 :dropped-total 0 :skipped {} :pair-summary []
+              :carry-era-pairs 0 :pre-carry-pairs 0
+              :carry-era-survivor-comparisons 0 :pre-carry-survivor-comparisons 0
+              :carry-era-survivor-mismatches 0 :pre-carry-survivor-mismatches 0
+              :carry-era-new-comparisons 0 :pre-carry-new-comparisons 0
+              :carry-era-dropped 0 :pre-carry-dropped 0 :carry-era-files []}
         replay (reduce step base pairs)
         domain-records (filter #(map? (get-in % [:record :mu-pre])) corpus-records)
         entity-series (reduce (fn [m [i x]]
@@ -158,6 +186,9 @@
                      :uniform-return? (= uniform (get-in (nth domain-records y) [:record :mu-pre e]))})]
     (assoc replay :file-count (count (trace-files)) :record-count (count corpus-records)
            :first-file (some-> corpus-records first :file) :last-file (some-> corpus-records last :file)
+           :first-carry-era-file (first (:carry-era-files replay))
+           :last-carry-era-file (last (:carry-era-files replay))
+           :carry-era-file-count (count (distinct (:carry-era-files replay)))
            :re-entry-count (count reentries) :re-entry-uniform-count (count (filter :uniform-return? reentries))
            :re-entries (vec (sort-by (comp pr-str :entity) reentries)))))
 
@@ -183,7 +214,7 @@
 (def fixture-checks (node-checks shipped))
 (def corpus-check {:id :corpus-carry-replay :result :pass
                    :finding-policy "Mismatches are reported, not converted into a harness failure."
-                   :totals (dissoc replay :pair-summary :re-entries)
+                   :totals (dissoc replay :pair-summary :re-entries :carry-era-files)
                    :pair-summary (:pair-summary replay) :re-entries (:re-entries replay)})
 (def prior-check {:id :recorded-prior-is-not-the-loop-s-starting-belief :result :pass
                   :records-with-nonempty-morning-brief-events (count morning-records)
