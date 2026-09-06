@@ -1,0 +1,694 @@
+{:stage "SELECT",
+ :negative-controls
+ {:plants
+  [{:id :production-requirer, :detected 1, :result :caught}
+   {:id :trace-budget-witness, :detected 1, :result :caught}
+   {:id :r11-equation, :detected 1, :result :caught}
+   {:id :campaign-s-artifact, :detected 1, :result :caught}
+   {:id :stale-citation, :detected 1, :result :caught}],
+  :all-caught true},
+ :harness :v7-r11-node-sim,
+ :not-done
+ ["No equation reference exists for R11; this harness measures its process account and call graph."
+  "No live tick or run lock; trace files were read only."
+  "No production, registry, ledger, document, p4ng, Lean, or data file was modified."],
+ :checks
+ [{:id :registry-carries-no-r11-equation,
+   :result :pass,
+   :equation-row-count 0,
+   :all-r11-occurrences
+   [{:line 521,
+     :text ":plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]"}],
+   :plumbing-hits
+   [{:line 521,
+     :text ":plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]"}],
+   :basis "holes/labs/wm-contract/aif-equations.edn:520-521"}
+  {:files-searched 585,
+   :production-callers [],
+   :roots ["src" "scripts" "test" "checks" "holes"],
+   :hits
+   [{:line 43,
+     :text
+     "#\"futon2\\.aif\\.hierarchical-budget(?:-adapter)?|hierarchical-budget/(?:arbitrate)|(?:policy/)?select-budgeted-actions|(?:adapter/)?select-ranked-proposal-fields\")",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 53,
+     :text
+     "(str/includes? text \"select-budgeted-actions\"))) :policy-boundary",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 58,
+     :text
+     "(def boundary-def (matching-lines policy-file #\"defn select-budgeted-actions\"))",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 59,
+     :text
+     "(def boundary-call (matching-lines policy-file #\"hierarchical-budget/arbitrate\"))",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 60,
+     :text
+     "(def adapter-def (matching-lines adapter-file #\"defn select-ranked-proposal-fields\"))",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 63,
+     :text
+     "(re-find #\"select-budgeted-actions|select-ranked-proposal-fields\" (:text %)))",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 82,
+     :text
+     "(def adapter-declaration (declaration-lines adapter-file \"select-ranked-proposal-fields\"))",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 209,
+     :text ":text \"(policy/select-budgeted-actions hierarchy)\"}])",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 251,
+     :text
+     ":reason \"The policy boundary calls hierarchical-budget/arbitrate; close_loop calls fold-semilattice/semilattice-fold and never the arbiter.\"",
+     :file "holes/labs/wm-contract/v7_r11_node_sim.clj",
+     :class :this-harness}
+    {:line 1,
+     :text "(ns futon2.aif.hierarchical-budget",
+     :file "src/futon2/aif/hierarchical_budget.clj",
+     :class :own-namespace}
+    {:line 1,
+     :text "(ns futon2.aif.hierarchical-budget-adapter",
+     :file "src/futon2/aif/hierarchical_budget_adapter.clj",
+     :class :own-namespace}
+    {:line 9,
+     :text "(:require [futon2.aif.hierarchical-budget :as budget]))",
+     :file "src/futon2/aif/hierarchical_budget_adapter.clj",
+     :class :own-namespace}
+    {:line 74,
+     :text "(defn select-ranked-proposal-fields",
+     :file "src/futon2/aif/hierarchical_budget_adapter.clj",
+     :class :own-namespace}
+    {:line 21,
+     :text
+     "[futon2.aif.hierarchical-budget :as hierarchical-budget]))",
+     :file "src/futon2/aif/policy.clj",
+     :class :policy-boundary}
+    {:line 23,
+     :text "(defn select-budgeted-actions",
+     :file "src/futon2/aif/policy.clj",
+     :class :policy-boundary}
+    {:line 31,
+     :text "(hierarchical-budget/arbitrate hierarchy))",
+     :file "src/futon2/aif/policy.clj",
+     :class :policy-boundary}
+    {:line 1,
+     :text "(ns futon2.aif.hierarchical-budget-adapter-test",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 3,
+     :text "[futon2.aif.hierarchical-budget-adapter :as adapter]))",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 31,
+     :text
+     "(let [out (adapter/select-ranked-proposal-fields live-fields)]",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 44,
+     :text
+     "(let [out (adapter/select-ranked-proposal-fields live-fields)",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 64,
+     :text "(let [out (adapter/select-ranked-proposal-fields",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 75,
+     :text
+     "(let [out (adapter/select-ranked-proposal-fields live-fields)",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 83,
+     :text "(adapter/select-ranked-proposal-fields live-fields))",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 90,
+     :text "(adapter/select-ranked-proposal-fields",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 1,
+     :text "(ns futon2.aif.hierarchical-budget-test",
+     :file "test/futon2/aif/hierarchical_budget_test.clj",
+     :class :test}
+    {:line 3,
+     :text "[futon2.aif.hierarchical-budget :as budget]",
+     :file "test/futon2/aif/hierarchical_budget_test.clj",
+     :class :test}
+    {:line 85,
+     :text
+     "(let [out (policy/select-budgeted-actions contested-hierarchy)]",
+     :file "test/futon2/aif/hierarchical_budget_test.clj",
+     :class :test}],
+   :hit-count 27,
+   :result :pass,
+   :id :requirer-census,
+   :production-caller-count 0,
+   :finding :arbiter-not-reached-by-production-tick}
+  {:opt-in-kind :explicit-function-call,
+   :boundary-definition
+   [{:line 23, :text "(defn select-budgeted-actions"}],
+   :basis
+   "src/futon2/aif/policy.clj:20-31; src/futon2/aif/close_loop.clj:54-83",
+   :outside-test-opt-ins [],
+   :boundary-call
+   [{:line 31, :text "(hierarchical-budget/arbitrate hierarchy))"}],
+   :close-loop-r11-label
+   [{:line 54, :text "(def ^:dynamic *semilattice-fold?*"}],
+   :reason
+   "The policy boundary calls hierarchical-budget/arbitrate; close_loop calls fold-semilattice/semilattice-fold and never the arbiter.",
+   :close-loop-call [{:line 81, :text "(fs/semilattice-fold"}],
+   :test-opt-ins
+   [{:line 31,
+     :text
+     "(let [out (adapter/select-ranked-proposal-fields live-fields)]",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 44,
+     :text
+     "(let [out (adapter/select-ranked-proposal-fields live-fields)",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 64,
+     :text "(let [out (adapter/select-ranked-proposal-fields",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 75,
+     :text
+     "(let [out (adapter/select-ranked-proposal-fields live-fields)",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 83,
+     :text "(adapter/select-ranked-proposal-fields live-fields))",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 90,
+     :text "(adapter/select-ranked-proposal-fields",
+     :file "test/futon2/aif/hierarchical_budget_adapter_test.clj",
+     :class :test}
+    {:line 85,
+     :text
+     "(let [out (policy/select-budgeted-actions contested-hierarchy)]",
+     :file "test/futon2/aif/hierarchical_budget_test.clj",
+     :class :test}],
+   :result :pass,
+   :id :live-selection-boundary,
+   :adapter-boundary
+   [{:line 74, :text "(defn select-ranked-proposal-fields"}],
+   :same-mechanism? false}
+  {:adapter-output-keys-derived
+   [:a1
+    :action
+    :budget
+    :collective
+    :context
+    :cost
+    :fields
+    :campaign/id
+    :id
+    :input
+    :output
+    :planner-a
+    :proposals
+    :rank
+    :replay/receipt
+    :replay/receipt.
+    :root-id
+    :shared-budget
+    :utility
+    :schema/version],
+   :records-with-r11-evidence 0,
+   :records-with-r11-route 0,
+   :first-file "wm-trace-2026-05-18.edn",
+   :generic-budget-value-count 98,
+   :records-total 889,
+   :basis
+   "src/futon2/aif/hierarchical_budget.clj:157-213; src/futon2/aif/hierarchical_budget_adapter.clj:60-100",
+   :generic-budget-record-contexts
+   [{:file "wm-trace-2026-08-30.edn", :index 0}
+    {:file "wm-trace-2026-08-30.edn", :index 1}
+    {:file "wm-trace-2026-08-30.edn", :index 2}
+    {:file "wm-trace-2026-08-30.edn", :index 3}
+    {:file "wm-trace-2026-08-30.edn", :index 4}
+    {:file "wm-trace-2026-08-30.edn", :index 5}
+    {:file "wm-trace-2026-08-30.edn", :index 6}
+    {:file "wm-trace-2026-08-31.edn", :index 0}
+    {:file "wm-trace-2026-08-31.edn", :index 1}
+    {:file "wm-trace-2026-08-31.edn", :index 2}
+    {:file "wm-trace-2026-08-31.edn", :index 3}
+    {:file "wm-trace-2026-08-31.edn", :index 4}
+    {:file "wm-trace-2026-09-01.edn", :index 0}
+    {:file "wm-trace-2026-09-01.edn", :index 1}
+    {:file "wm-trace-2026-09-01.edn", :index 2}
+    {:file "wm-trace-2026-09-01.edn", :index 3}
+    {:file "wm-trace-2026-09-01.edn", :index 4}
+    {:file "wm-trace-2026-09-01.edn", :index 5}
+    {:file "wm-trace-2026-09-01.edn", :index 6}
+    {:file "wm-trace-2026-09-01.edn", :index 7}
+    {:file "wm-trace-2026-09-01.edn", :index 8}
+    {:file "wm-trace-2026-09-01.edn", :index 9}
+    {:file "wm-trace-2026-09-01.edn", :index 10}
+    {:file "wm-trace-2026-09-01.edn", :index 11}
+    {:file "wm-trace-2026-09-01.edn", :index 12}
+    {:file "wm-trace-2026-09-01.edn", :index 13}
+    {:file "wm-trace-2026-09-01.edn", :index 14}
+    {:file "wm-trace-2026-09-01.edn", :index 15}
+    {:file "wm-trace-2026-09-01.edn", :index 16}
+    {:file "wm-trace-2026-09-01.edn", :index 17}
+    {:file "wm-trace-2026-09-01.edn", :index 18}
+    {:file "wm-trace-2026-09-01.edn", :index 19}
+    {:file "wm-trace-2026-09-01.edn", :index 20}
+    {:file "wm-trace-2026-09-01.edn", :index 21}
+    {:file "wm-trace-2026-09-01.edn", :index 22}
+    {:file "wm-trace-2026-09-01.edn", :index 23}
+    {:file "wm-trace-2026-09-01.edn", :index 24}
+    {:file "wm-trace-2026-09-01.edn", :index 25}
+    {:file "wm-trace-2026-09-01.edn", :index 26}
+    {:file "wm-trace-2026-09-01.edn", :index 27}
+    {:file "wm-trace-2026-09-01.edn", :index 28}
+    {:file "wm-trace-2026-09-01.edn", :index 29}
+    {:file "wm-trace-2026-09-01.edn", :index 30}
+    {:file "wm-trace-2026-09-01.edn", :index 31}
+    {:file "wm-trace-2026-09-01.edn", :index 32}
+    {:file "wm-trace-2026-09-01.edn", :index 33}
+    {:file "wm-trace-2026-09-01.edn", :index 34}
+    {:file "wm-trace-2026-09-01.edn", :index 35}
+    {:file "wm-trace-2026-09-01.edn", :index 36}
+    {:file "wm-trace-2026-09-01.edn", :index 37}
+    {:file "wm-trace-2026-09-01.edn", :index 38}
+    {:file "wm-trace-2026-09-01.edn", :index 39}
+    {:file "wm-trace-2026-09-01.edn", :index 40}
+    {:file "wm-trace-2026-09-01.edn", :index 41}
+    {:file "wm-trace-2026-09-01.edn", :index 42}
+    {:file "wm-trace-2026-09-01.edn", :index 43}
+    {:file "wm-trace-2026-09-01.edn", :index 44}
+    {:file "wm-trace-2026-09-01.edn", :index 45}
+    {:file "wm-trace-2026-09-01.edn", :index 46}
+    {:file "wm-trace-2026-09-01.edn", :index 47}
+    {:file "wm-trace-2026-09-01.edn", :index 48}
+    {:file "wm-trace-2026-09-01.edn", :index 49}
+    {:file "wm-trace-2026-09-01.edn", :index 50}
+    {:file "wm-trace-2026-09-01.edn", :index 51}
+    {:file "wm-trace-2026-09-01.edn", :index 52}
+    {:file "wm-trace-2026-09-01.edn", :index 53}
+    {:file "wm-trace-2026-09-01.edn", :index 54}
+    {:file "wm-trace-2026-09-01.edn", :index 55}
+    {:file "wm-trace-2026-09-01.edn", :index 56}
+    {:file "wm-trace-2026-09-01.edn", :index 57}
+    {:file "wm-trace-2026-09-01.edn", :index 58}
+    {:file "wm-trace-2026-09-01.edn", :index 59}
+    {:file "wm-trace-2026-09-01.edn", :index 60}
+    {:file "wm-trace-2026-09-01.edn", :index 61}
+    {:file "wm-trace-2026-09-01.edn", :index 62}
+    {:file "wm-trace-2026-09-01.edn", :index 63}
+    {:file "wm-trace-2026-09-01.edn", :index 64}
+    {:file "wm-trace-2026-09-01.edn", :index 65}
+    {:file "wm-trace-2026-09-01.edn", :index 66}
+    {:file "wm-trace-2026-09-01.edn", :index 67}
+    {:file "wm-trace-2026-09-01.edn", :index 68}
+    {:file "wm-trace-2026-09-01.edn", :index 69}
+    {:file "wm-trace-2026-09-01.edn", :index 70}
+    {:file "wm-trace-2026-09-01.edn", :index 71}
+    {:file "wm-trace-2026-09-01.edn", :index 72}
+    {:file "wm-trace-2026-09-01.edn", :index 73}
+    {:file "wm-trace-2026-09-01.edn", :index 74}
+    {:file "wm-trace-2026-09-01.edn", :index 75}
+    {:file "wm-trace-2026-09-01.edn", :index 76}
+    {:file "wm-trace-2026-09-01.edn", :index 77}
+    {:file "wm-trace-2026-09-01.edn", :index 78}
+    {:file "wm-trace-2026-09-02.edn", :index 0}
+    {:file "wm-trace-2026-09-02.edn", :index 1}
+    {:file "wm-trace-2026-09-02.edn", :index 2}
+    {:file "wm-trace-2026-09-04.edn", :index 0}
+    {:file "wm-trace-2026-09-04.edn", :index 1}
+    {:file "wm-trace-2026-09-04.edn", :index 2}
+    {:file "wm-trace-2026-09-04.edn", :index 3}],
+   :parse-errors [],
+   :evidence-keys-searched
+   [:adapter/schema-version
+    :replay/receipt
+    :selection-boundary
+    :within-all-budgets?
+    :node-usage
+    :node-budgets
+    :oversubscribed-nodes],
+   :result :pass,
+   :generic-budget-is-not-counted-as-r11 true,
+   :id :corpus-census,
+   :arbiter-output-keys-derived
+   [:a1
+    :agent-a
+    :agent-b
+    :budget
+    :budget-invariant-violation
+    :children
+    :cost
+    :every-selected-cost-is-charged-at-every-ancestor
+    :exact-pareto-frontier-composition
+    :failure-kind
+    :hierarchical-shared-budget
+    :id
+    :invariant
+    :keys
+    :lexical-proposal-id
+    :maximum-utility
+    :method
+    :minimum-cost
+    :node
+    :node-budgets
+    :node-selection-limits
+    :node-usage
+    :oversubscribed-nodes
+    :proof
+    :proposal
+    :proposals
+    :rejection/reason
+    :rejected
+    :requested-usage
+    :root
+    :selected
+    :selected-ids
+    :selection-boundary
+    :shared-budget-arbitration
+    :tie-break
+    :total-cost
+    :total-utility
+    :utility
+    :within-all-budgets?],
+   :last-file "wm-trace-2026-09-04.edn",
+   :files-total 57}
+  {:narrative-hits
+   [{:file
+     "/home/joe/code/futon2/holes/labs/wm-contract/VERIFY-r-nodes.edn",
+     :ids
+     ["e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe"
+      "canary-0a33ac68-aa60-4018-a896-5643f259a2d4"
+      "wm-instrumented-S-20260821/r17-intertick"
+      "97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990"]}
+    {:file
+     "/home/joe/code/futon2/holes/labs/wm-contract/runs/V7-R15-node-sim/00-r15.edn",
+     :ids
+     ["e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe"
+      "canary-0a33ac68-aa60-4018-a896-5643f259a2d4"
+      "wm-instrumented-S-20260821/r17-intertick"
+      "97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990"]}
+    {:file "/home/joe/code/futon2/holes/labs/wm-contract/worklist.edn",
+     :ids ["wm-instrumented-S-20260821/r17-intertick"]}
+    {:file "/home/joe/code/p4ng/empirics.tex",
+     :ids
+     ["e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe"
+      "canary-0a33ac68-aa60-4018-a896-5643f259a2d4"
+      "wm-instrumented-S-20260821/r17-intertick"
+      "97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990"]}
+    {:file "/home/joe/code/p4ng/sec-discussion-patterns.tex",
+     :ids ["e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe"]}],
+   :identifiers
+   ["e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe"
+    "canary-0a33ac68-aa60-4018-a896-5643f259a2d4"
+    "wm-instrumented-S-20260821/r17-intertick"
+    "97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990"],
+   :files-searched 3510,
+   :structured-record-hits [],
+   :basis
+   "/home/joe/code/p4ng/sec-catalog.tex:243; /home/joe/code/p4ng/empirics-futon/empirics.tex:50",
+   :roots
+   ["/home/joe/code/futon2/holes"
+    "/home/joe/code/futon2/docs"
+    "/home/joe/code/p4ng"
+    "/home/joe/code/futon3c/holes"
+    "/home/joe/code/futon3c/docs"],
+   :result :pass,
+   :id :campaign-s-artifact,
+   :structured-record-hit-count 0,
+   :finding
+   :identifiers-found-only-inside-narrative-not-as-record-values,
+   :narrative-hit-count 5}
+  {:id :dossier-citation-freshness,
+   :result :pass,
+   :dossier-lines
+   [{:line 62, :text "## R11 — Hierarchical shared budget"}
+    {:line 63, :text ""}
+    {:line 64, :text "### The problem it solves"}
+    {:line 65, :text ""}
+    {:line 66,
+     :text
+     "R11 solves how locally factored proposals share a finite resource without"}
+    {:line 67,
+     :text
+     "silently oversubscribing it: the roster places **“Hierarchical shared budget”**"}
+    {:line 68,
+     :text
+     "in SELECT (`p4ng/empirics-futon/control-stages.edn:27`; control-stage"}
+    {:line 69,
+     :text
+     "numbering).  The operational criterion says that when multiple AIF agents act"}
+    {:line 70,
+     :text
+     "on shared state, a coordination layer must make their actions compose"}
+    {:line 71,
+     :text
+     "coherently (`docs/futon-aif-completeness.md:280-284`; contract R11).  The"}
+    {:line 72,
+     :text
+     "catalogue makes the resource invariant concrete: local agents propose inside"}
+    {:line 73,
+     :text
+     "sub-budgets and a coordinator arbitrates the shared consumable budget at every"}
+    {:line 74,
+     :text
+     "level (`p4ng/sec-catalog.tex:243`; catalogue R11).  The equation registry"}
+    {:line 75,
+     :text "contains no R11 equation and classifies it as plumbing"}
+    {:line 76,
+     :text
+     "(`holes/labs/wm-contract/aif-equations.edn:472-473`; control-stage R11).  R11"}
+    {:line 77,
+     :text
+     "therefore solves globally feasible selection without erasing local factoring:"}
+    {:line 78,
+     :text
+     "compare cheap local and expensive strategic moves on one budget, refuse"}
+    {:line 79,
+     :text "over-subscription, and record the arbitration boundary."}
+    {:line 80, :text ""}
+    {:line 81, :text "### Residual problems it does not solve"}
+    {:line 82, :text ""}
+    {:line 83,
+     :text
+     "- `:undetermined` — The operational criterion still says R11 is N/A because"}
+    {:line 84,
+     :text
+     "the WM is a single observer and the cyberants and VSATARCS surfaces do not"}
+    {:line 85,
+     :text
+     "coordinate writes (`docs/futon-aif-completeness.md:280-284`), whereas the"}
+    {:line 86,
+     :text
+     "catalogue records an exact-replaying Campaign S arbiter that spent all seven"}
+    {:line 87,
+     :text
+     "units without exceeding the budget (`p4ng/sec-catalog.tex:243`).  Without a"}
+    {:line 88,
+     :text
+     "source-authority join, the current scope and satisfaction status disagree."}
+    {:line 89,
+     :text
+     "- `:undetermined` — The factoring census lists R11 among the three unmapped"}
+    {:line 90,
+     :text
+     "mechanisms because no war-room failure forced a ruling about budgeted"}
+    {:line 91,
+     :text
+     "selection (`p4ng/empirics-futon/factoring-table.tex:32-36`).  This is a thin"}
+    {:line 92,
+     :text
+     "evidence base by design: it does not show the budget mechanism wrong, but it"}
+    {:line 93,
+     :text
+     "leaves its governing operational constraint unadjudicated."}
+    {:line 94,
+     :text
+     "- `:implementation-flaw` — The operational document's re-evaluation trigger is"}
+    {:line 95,
+     :text
+     "a second writer over the WM substrate, yet it records no shared belief state"}
+    {:line 96,
+     :text "or coordination between the named agent populations"}
+    {:line 97,
+     :text
+     "(`docs/futon-aif-completeness.md:282-284`).  Thus the general multi-agent"}
+    {:line 98,
+     :text
+     "composition problem remains unimplemented even if the narrower Campaign S"}
+    {:line 99, :text "ranked-field budget arbiter is accepted."}
+    {:line 100, :text ""}
+    {:line 101,
+     :text
+     "**Would we know? — existing budget checks, missing scope agreement.**"}
+    {:line 102,
+     :text
+     "`clojure -M:test -n futon2.aif.hierarchical-budget-test` and `clojure -M:test"}
+    {:line 103,
+     :text
+     "-n futon2.aif.hierarchical-budget-adapter-test` exercise over-subscription,"}
+    {:line 104,
+     :text
+     "every-level charging, malformed-input refusal, the live selection boundary,"}
+    {:line 105,
+     :text
+     "and exact replay.  Missing is a check joining those ranked fields to the"}
+    {:line 106,
+     :text
+     "contract's multiple-agent/shared-state criterion and its VSATARCS writer"}
+    {:line 107, :text "trigger; the disagreement is visible at"}
+    {:line 108,
+     :text
+     "`docs/futon-aif-completeness.md:280-284` and `p4ng/sec-catalog.tex:243`."}
+    {:line 109,
+     :text
+     "Absence search: `rg -n \"hierarchical-budget|shared budget|VSATARCS|cyberants|shared state|writer capability\""}
+    {:line 110,
+     :text "/home/joe/code/futon2/src /home/joe/code/futon2/test"}],
+   :stale-equation-citation
+   {:claimed "aif-equations.edn:472-473",
+    :actual
+    [{:line 472,
+      :text
+      "{:overtake-dominant \"Any overtake refutes. REJECTED HERE ON A MEASUREMENT, not on taste: on the recorded 2026-09-02 pair it refutes every claim after one tick, because the chosen mission's mission-value-factor halves by construction (0.59 to 0.295, non-progress-decay 1.0 to 0.5) while every rival's factor is byte-identical. Such a test measures the decay, not the rationale.\""}
+     {:line 473,
+      :text
+      ":weighted-legs \"Combine the four legs with declared weights. REJECTED HERE: three of the four legs are typed absences on this corpus, so the weights would be unmeasurable and would be fiat standing in for measurement.\""}],
+    :still-lands? false,
+    :current-plumbing
+    [{:line 521,
+      :text ":plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]"}]},
+   :fresh-pointers
+   {:contract
+    [{:line 280,
+      :text "### R11 — Hierarchical / multi-agent composition"}
+     {:line 281, :text ""}
+     {:line 282,
+      :text
+      "When multiple AIF agents act on shared state, a coordination layer ensures their actions compose coherently."}
+     {:line 283, :text ""}
+     {:line 284,
+      :text
+      "**This implementation.** **N/A at this scope.** The WM is a single observer of the futon stack. The cyberants AIF (`futon2/src/ants/aif/*`) is a separate agent population at a different scope; there is no shared belief state or composition between WM and cyberants. The current VSATARCS bridge is comparison-only: it reads WM trace and compares beliefs, but does not coordinate shared actions on shared state. **Re-evaluation trigger:** if VSATARCS gains writer capability over the same substrate the WM reads from (e.g. typed rewrites against `stack-annotations.edn`), or a third AIF surface appears at WM scope, R11 stops being N/A and needs an explicit coordination layer."}],
+    :catalogue
+    [{:line 243,
+      :text
+      "\\paragraph{Hierarchical, Budget-Aware Action Selection (R11).\\apparatusmark{}} \\textbf{If} you want collective action selection that respects budget constraints at every hierarchy level --- never recommending allocations that exceed the aggregate per-tick budget, and factoring in downstream and coordination costs. \\textbf{However} a naive union of independent selections leaves the budget invariant unenforced (over-subscription happens silently), while a single central coordinator throws away the value of local-agent factoring. \\textbf{Then} resolve conflicts explicitly at \\emph{each} hierarchy level: local agents propose within their sub-budgets, and a coordinator arbitrates the shared consumable budget across them. \\textbf{Because} budget is a shared consumable, and enforcing the invariant at every level is the only way to keep multi-agent selection both locally factored and globally feasible. This is the \\emph{resource} hierarchy --- how a shared per-tick budget is split across competing selections --- and it is orthogonal to the \\emph{temporal / abstraction} hierarchy of R13 (a strategic loop choosing the task, a tactical loop rolling out the pattern-cascade that enacts it); the two compose but are not the same pattern.  \\emph{Evidence:} the exact arbiter, mutually exclusive ranked-field adapter, over-subscription witnesses, and opt-in live selection boundary are tested together, including exact replay.  In Campaign S it selected one proposal from each live ranked field on both ticks, using all 7 units of the shared budget without exceeding it; exact replay reproduced both selections."}],
+    :factoring
+    [{:line 32, :text "\\paragraph{Unmapped.}"}
+     {:line 33, :text "\\begin{itemize}\\itemsep0pt"}
+     {:line 34,
+      :text
+      "\\item \\texttt{R10} --- Runs the machine on a schedule -- the cron entrypoint that makes the loop autonomous rather than operator-triggered. Currently off, because the machine is still being tuned; that is an operating state, not a defect, and it carries no ring in the figure. The No-Op Trap in its title is the failure it guards against: a scheduled run that fires, finds nothing it is willing to do, and reports success."}
+     {:line 35,
+      :text
+      "\\item \\texttt{R11} --- Chooses among candidate actions under a budget, across levels -- so that a cheap local move and an expensive strategic one are compared on the same scale rather than in separate queues. No war-room constraint governs it: nothing in the stack has yet gone wrong in a way that forced a ruling about budgeted selection."}
+     {:line 36,
+      :text
+      "\\item \\texttt{R19} --- Not missing -- deliberately relabelled. It is unmapped for a structural reason rather than an editorial one: preference is operator-supplied, and the operator is not in the model, so there is no node in the frame for it to terminate at. This is the subject of the operator section."}]}}
+  {:id :dossier-residuals,
+   :result :pass,
+   :scope-status-disagreement
+   {:contract :n/a-at-this-scope,
+    :catalogue-claim :campaign-s-exact-replay,
+    :campaign-record :not-found},
+   :factoring-residual
+   {:status :confirmed-unmapped,
+    :evidence
+    [{:line 32, :text "\\paragraph{Unmapped.}"}
+     {:line 33, :text "\\begin{itemize}\\itemsep0pt"}
+     {:line 34,
+      :text
+      "\\item \\texttt{R10} --- Runs the machine on a schedule -- the cron entrypoint that makes the loop autonomous rather than operator-triggered. Currently off, because the machine is still being tuned; that is an operating state, not a defect, and it carries no ring in the figure. The No-Op Trap in its title is the failure it guards against: a scheduled run that fires, finds nothing it is willing to do, and reports success."}
+     {:line 35,
+      :text
+      "\\item \\texttt{R11} --- Chooses among candidate actions under a budget, across levels -- so that a cheap local move and an expensive strategic one are compared on the same scale rather than in separate queues. No war-room constraint governs it: nothing in the stack has yet gone wrong in a way that forced a ruling about budgeted selection."}
+     {:line 36,
+      :text
+      "\\item \\texttt{R19} --- Not missing -- deliberately relabelled. It is unmapped for a structural reason rather than an editorial one: preference is operator-supplied, and the operator is not in the model, so there is no node in the frame for it to terminate at. This is the subject of the operator section."}]},
+   :general-multi-agent-composition
+   {:status :not-reached,
+    :production-arbiter-callers 0,
+    :contract-evidence
+    [{:line 280,
+      :text "### R11 — Hierarchical / multi-agent composition"}
+     {:line 281, :text ""}
+     {:line 282,
+      :text
+      "When multiple AIF agents act on shared state, a coordination layer ensures their actions compose coherently."}
+     {:line 283, :text ""}
+     {:line 284,
+      :text
+      "**This implementation.** **N/A at this scope.** The WM is a single observer of the futon stack. The cyberants AIF (`futon2/src/ants/aif/*`) is a separate agent population at a different scope; there is no shared belief state or composition between WM and cyberants. The current VSATARCS bridge is comparison-only: it reads WM trace and compares beliefs, but does not coordinate shared actions on shared state. **Re-evaluation trigger:** if VSATARCS gains writer capability over the same substrate the WM reads from (e.g. typed rewrites against `stack-annotations.edn`), or a third AIF surface appears at WM scope, R11 stops being N/A and needs an explicit coordination layer."}]},
+   :basis
+   "holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:83-99"}
+  {:carrier-like-definition-hits [],
+   :mathlib-files-searched 91,
+   :basis
+   "/home/joe/code/mathlib4/DarkTower/WarMachine; holes/labs/wm-contract/symbol-concordance.edn; /home/joe/code/p4ng/sec-lean-state-generated.tex",
+   :result :pass,
+   :id :lean-carrier-search,
+   :generated-state-hits [],
+   :finding :not-applicable-no-r11-budget-carrier-found,
+   :all-lean-text-hits
+   [{:line 7187,
+     :text "| R11",
+     :file "DarkTower/WarMachine/Holes.lean"}
+    {:line 7231,
+     :text "(.R11, .R16),",
+     :file "DarkTower/WarMachine/Holes.lean"}
+    {:line 7236,
+     :text "(.R6, .R11),",
+     :file "DarkTower/WarMachine/Holes.lean"}
+    {:line 7263,
+     :text "[{ edge := (.R11, .R16), grounds := [.ruling] },",
+     :file "DarkTower/WarMachine/Holes.lean"}],
+   :symbol-concordance-hits []}
+  {:id :band-assurance-census,
+   :result :pass,
+   :stage-hits
+   [{:line 27,
+     :text
+     "{:node \"R11\" :stage \"SELECT\" :band :loop :label \"Hierarchical shared budget\"}"}],
+   :align-search "R11",
+   :align-hit-count 0,
+   :align-hits [],
+   :finding :not-applicable-loop-band,
+   :basis
+   "/home/joe/code/p4ng/empirics-futon/control-stages.edn; holes/labs/wm-contract/ALIGN-rnode-process-census.md"}
+  {:id :negative-controls-discriminate,
+   :result :pass,
+   :plants
+   [{:id :production-requirer, :detected 1, :result :caught}
+    {:id :trace-budget-witness, :detected 1, :result :caught}
+    {:id :r11-equation, :detected 1, :result :caught}
+    {:id :campaign-s-artifact, :detected 1, :result :caught}
+    {:id :stale-citation, :detected 1, :result :caught}]}],
+ :node :R11,
+ :corpus
+ {:root "data/wm-trace",
+  :read-only true,
+  :file-count 57,
+  :record-count 889,
+  :parse-errors []},
+ :stage-at "/home/joe/code/p4ng/empirics-futon/control-stages.edn:27",
+ :slice 14,
+ :verdict :pass,
+ :account-sites
+ ["holes/labs/wm-contract/aif-equations.edn:520-521"
+  "src/futon2/aif/hierarchical_budget.clj:1-213"
+  "src/futon2/aif/hierarchical_budget_adapter.clj:1-109"
+  "holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:62-110"],
+ :row :V7}
