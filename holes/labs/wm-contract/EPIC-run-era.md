@@ -1049,3 +1049,27 @@ core is defined."
   split with a recommendation), F11 (find to the s3e interface over
   the library substrate), F12 (organise likewise; F7 as prototype).
   Process-predicate rows mint after the core three land.
+
+## The rung-ceiling refinement (Joe, 2026-09-06) — Box 5's 62 type-transcribed rows are ambiguous without a target column
+
+Verbatim: "it looks like Box 5 contains 62 items which are only type
+transcribed... It's not clear that the type transcribed items can
+just stay type transcribed, or if they also need to be formula
+transcribed. Like, if type transcribed is all they're going to be
+until we do the run, that's okay. But the Box 5 isn't clear about
+that."
+
+- Diagnosis: the readiness scale (F6) prints current rung without a
+  TARGET, so at-ceiling and below-ceiling are indistinguishable.
+  Structurally: formula-transcribed is INAPPLICABLE to pure
+  carrier/record declarations (structure/inductive with no defining
+  equation) -- their next real rung is witnessed+; the no-skipping
+  rule needs a per-kind applicability qualification, mechanically
+  derived, not hand-waved.
+- PENDING MINT at V7's pause (with F10-F12): the accounting
+  generator gains per-row :applicable-rungs (from declaration kind)
+  and :pre-run-ceiling (composing the closability fence); Box 5
+  reports the three-way split: at-pre-run-ceiling / formula-
+  inapplicable-next-rung-witnessed / OWES-formula-transcription
+  (the real deficit, counted and named). A planted def-with-equation
+  marked inapplicable must be REFUSED (negative control).
