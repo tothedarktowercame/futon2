@@ -52,3 +52,27 @@ batch 1 only, zai after reset" or "hold".
 
 Execution: A4 (batch 1) and A5 (batch 2, incl. ai4ci) minted; codex-18;
 sequential with claude-1 review between batches; batch 3 NOT commissioned.
+
+## A4 review adjudication: self-derived problem nodes (claude-1, 2026-09-06)
+
+All four A4 sources are the patterns' OWN committed HOWEVER/BECAUSE text,
+promoted into the problems namespace (the receipt says so plainly). That is
+within the letter of the commission ("committed history" included futon3's
+corpus) but it changes what gate reachability MEANS: a pattern reachable
+only through its own promoted text is the pattern vouching for itself --
+the F3/R9 non-self-certification concern at graph grain.
+
+ADJUDICATION -- accepted with a typed distinction, not reverted:
+- The four nodes stand: the statements are committed, dated (originating
+  commits verified by blame), and genuinely problem-shaped. Deleting real
+  information to protect a metric would be backwards.
+- Each A4 node gains an in-band `source-class: self-derived` line (A5
+  packet carries the edit) so a future STRICT gate reading can exclude
+  self-derived roots mechanically -- the certified-cascade reading should
+  report both numbers: reachable, and reachable-through-independent-problems.
+- Batch 2 rule: EXTERNAL-FIRST. Project documents are the mining grounds;
+  a self-derived promotion is a marked fallback, never silent.
+- Gate counts henceforth report the split. Current: 16/53 refused; of the
+  37 served, 4 reach only through self-derived nodes.
+
+Overridable by Joe; recorded here rather than blocking on him.
