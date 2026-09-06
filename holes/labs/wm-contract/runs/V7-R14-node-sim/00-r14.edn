@@ -14,6 +14,13 @@
     :corrupted-argmax :c,
     :reported-move true,
     :result :caught}
+   {:id :live-law-floor-inverted, :max-deviation 99.0, :result :caught}
+   {:id :spread-law-floor-inverted,
+    :max-deviation 404.9584062110553,
+    :result :caught}
+   {:id :recorded-scores-at-double-tau,
+    :max-deviation 69.63342948976228,
+    :result :caught}
    {:id :pinned-tau-mode-line,
     :pinned 865,
     :derived 857,
@@ -435,6 +442,91 @@
     5.598613858796297 1},
    :tau-source-denominator 32,
    :choice-differs-from-score-argmax 98}
+  {:id :the-live-law-reproduces-its-own-era-of-the-corpus,
+   :result :pass,
+   :records 129,
+   :max-deviation 0.0,
+   :census
+   {:records 129,
+    :era
+    {:files 12,
+     :first "wm-trace-2026-07-14.edn",
+     :last "wm-trace-2026-09-04.edn"},
+    :gain {1.0 129},
+    :samples {0 129},
+    :off-prior 0,
+    :burn-in 5,
+    :past-burn-in 0},
+   :basis
+   "src/futon2/aif/policy.clj:132-134; src/futon2/aif/selection_gain.clj:72-80"}
+  {:id :the-spread-law-reproduces-the-retired-carriers-era,
+   :result :pass,
+   :records 216,
+   :max-deviation 0.0,
+   :census
+   {:records 216,
+    :era
+    {:files 11,
+     :first "wm-trace-2026-06-27.edn",
+     :last "wm-trace-2026-07-09.edn"},
+    :gamma-distinct 28,
+    :gamma-min 0.5000000001423435,
+    :gamma-max 1.3459001920611886,
+    :off-prior 190,
+    :past-burn-in 204,
+    :state-shapes
+    {["error-history" "mean-error" "policy-precision" "samples"] 99,
+     ["last-outcome-tick"
+      "mean-perf"
+      "perf-history"
+      "policy-precision"
+      "samples"]
+     113,
+     ["mean-perf" "perf-history" "policy-precision" "samples"] 4}},
+   :key-paths
+   {:selection-gain
+    {[:decision :decision-explanation :selection-gain] 102,
+     [:decision :selection-gain] 129,
+     [:selection-gain :selection-gain] 129,
+     [:selection-gain] 129},
+    :samples
+    {[:decision :decision-explanation :habit-prior-stats :samples] 102,
+     [:habit-prior-state :samples] 129,
+     [:policy-precision :samples] 216,
+     [:selection-gain :samples] 129}},
+   :basis "src/futon2/aif/policy.clj:33-45,132-133"}
+  {:id :the-recorded-orderings-reproduce-and-the-dial-has-authority,
+   :result :pass,
+   :max-score-deviation 0.0,
+   :dial
+   {:argmax-moves-over-the-grid 98,
+    :argmax-moves-between-the-extremes 98,
+    :era
+    {:files 5,
+     :first "wm-trace-2026-08-30.edn",
+     :last "wm-trace-2026-09-04.edn"},
+    :recorded-tau {1.0 98},
+    :grid [0.01 0.1 0.5 1.0 2.0 5.0 14.6 100.0],
+    :argmax-moves-within-the-observed-range 2,
+    :observed-range [0.1 0.5 1.0 2.0 5.0 14.6],
+    :records 98,
+    :prior-vector-non-constant 98},
+   :habit-flags
+   {:habit-prior-applied? {false 98, true 31},
+    :habit-authority {:counterfactual-only 98},
+    :governed-by {:G 99, :habit-prior 3}},
+   :basis
+   "src/futon2/aif/policy.clj:208-213; p4ng/sec-catalog.tex:241"}
+  {:id :the-outcome-feed-stopped-before-the-live-carrier-existed,
+   :result :pass,
+   :feed
+   {:records 88,
+    :era
+    {:files 5,
+     :first "wm-trace-2026-07-02.edn",
+     :last "wm-trace-2026-07-06.edn"},
+    :all-before-the-live-carrier? true},
+   :basis "src/futon2/aif/selection_gain.clj:100-161"}
   {:record-denominator 889,
    :burn-in 5,
    :gain-left-prior? false,
@@ -453,7 +545,28 @@
      "(def default-min-history 5)         ; burn-in: selection gain ≡ 1.0 until this many samples"}]}],
  :node :R14,
  :corpus
- {:root "data/wm-trace", :read-only true, :files 57, :records 889},
+ {:root "data/wm-trace",
+  :read-only true,
+  :files 57,
+  :records 889,
+  :files-truncated-by-an-unreadable-form [],
+  :carrier-eras
+  {:selection-gain
+   {:files 12,
+    :first "wm-trace-2026-07-14.edn",
+    :last "wm-trace-2026-09-04.edn"},
+   :policy-precision
+   {:files 11,
+    :first "wm-trace-2026-06-27.edn",
+    :last "wm-trace-2026-07-09.edn"},
+   :realized-outcome
+   {:files 5,
+    :first "wm-trace-2026-07-02.edn",
+    :last "wm-trace-2026-07-06.edn"},
+   :recorded-orderings
+   {:files 5,
+    :first "wm-trace-2026-08-30.edn",
+    :last "wm-trace-2026-09-04.edn"}}},
  :reference-independence
  "All three expected temperature laws are computed from R14-carriers.edn and the registry/docstring formula; policy/effective-temperature supplies only node-under-test values.",
  :carriers "holes/labs/wm-contract/sim/R14-carriers.edn",
