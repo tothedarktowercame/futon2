@@ -1,0 +1,50 @@
+Box 12 process census -- NEGATIVE CONTROL over ALIGN's censused nodes
+census of record: futon2/holes/labs/wm-contract/ALIGN-rnode-process-census.md (2026-09-05)
+
+node    cell           verdict                  basis
+R9      commissioned   absent                   node-link-search
+R9      dispatched     absent                   node-link-search
+R9      parked         absent                   node-link-search
+R9      returned       absent                   node-link-search
+R9      checked        named-only               pinned-adjudication [N9]
+R9      recorded       absent                   node-link-search
+R9      surfaced       absent                   node-link-search
+R10     commissioned   absent                   node-link-search
+R10     dispatched     absent                   node-link-search
+R10     parked         absent                   node-link-search
+R10     returned       absent                   node-link-search
+R10     checked        absent                   node-link-search
+R10     recorded       absent                   node-link-search
+R10     surfaced       absent                   node-link-search
+R12     commissioned   absent                   node-link-search
+R12     dispatched     absent                   node-link-search
+R12     parked         absent                   node-link-search
+R12     returned       absent                   node-link-search
+R12     checked        absent                   node-link-search
+R12     recorded       absent                   node-link-search
+R12     surfaced       absent                   node-link-search
+R20     commissioned   absent                   node-link-search
+R20     dispatched     absent                   node-link-search
+R20     parked         absent                   node-link-search
+R20     returned       absent                   node-link-search
+R20     checked        named-only               pinned-adjudication [N20]
+R20     recorded       absent                   node-link-search
+R20     surfaced       absent                   node-link-search
+TRACE   commissioned   absent                   node-link-search
+TRACE   dispatched     absent                   node-link-search
+TRACE   parked         absent                   node-link-search
+TRACE   returned       absent                   node-link-search
+TRACE   checked        absent                   node-link-search
+TRACE   recorded       stale-adjudication       pinned-adjudication [E-T]
+TRACE   surfaced       absent                   node-link-search
+R16     commissioned   exists                   pinned-adjudication [E-16-C]
+R16     dispatched     exists                   pinned-adjudication [E-16-D]
+R16     parked         absent                   targeted-absence-search [A16]
+R16     returned       exists                   pinned-adjudication [E-16-R]
+R16     checked        exists                   pinned-adjudication [E-16-K]
+R16     recorded       exists                   pinned-adjudication [E-16-X]
+R16     surfaced       absent                   targeted-absence-search [A16]
+
+tally: {:absent 34, :exists 5, :named-only 2, :stale-adjudication 1} (42 cells)
+
+STALE ADJUDICATIONS -- these cells are NOT credited:

@@ -1,0 +1,121 @@
+#!/usr/bin/env bb
+;; process_census_test.bb -- acceptance for :PA1z.
+;;
+;; LIVE-PIN RULE (zaif-harness worklist.edn header): every pinned value below is
+;; CAPTURED VERBATIM from process_census.bb's own run of 2026-09-06, not authored
+;; by hand. The R16/:dispatched and R10/:checked records were lifted from
+;; `./process_census.bb --edn` and are reproduced here field for field.
+;;
+;; The two planted controls matter more than the pins. A harness that reports
+;; :absent is only worth reading if it can be shown to refuse -- so control 1
+;; corrupts a pinned pointer and requires the stale refusal, and control 2
+;; breaks the search scope and requires the run to die rather than report
+;; absence. Reading a tool failure as an absence is how a census invents
+;; evidence, and nothing in the output would have looked wrong.
+
+(require '[clojure.edn :as edn] '[clojure.java.shell :as shell]
+         '[clojure.java.io :as io] '[clojure.string :as str])
+
+(def here (.getParentFile (.getAbsoluteFile (io/file *file*))))
+(def script (str (io/file here "process_census.bb")))
+(def failures (atom []))
+
+(defn check [label expected actual]
+  (if (= expected actual)
+    (println "  PASS" label)
+    (do (println "  FAIL" label "\n    expected:" (pr-str expected) "\n    actual:  " (pr-str actual))
+        (swap! failures conj label))))
+
+(defn run-census [& extra]
+  (let [{:keys [exit out]} (apply shell/sh "bb" script "--edn" extra)]
+    {:exit exit :data (when-not (str/blank? out) (edn/read-string out))}))
+
+(defn cell [data node c]
+  (first (filter #(and (= node (:node %)) (= c (:cell %))) (:results data))))
+
+(println "process_census_test -- :PA1z acceptance")
+(println)
+
+;; ---------------------------------------------------------------------------
+(println "1. negative control over ALIGN's 42 censused cells")
+(let [{:keys [exit data]} (run-census)
+      tally (frequencies (map :verdict (:results data)))]
+  (check "42 cells derived" 42 (count (:results data)))
+  ;; ALIGN's matrix, reproduced: 34 absent, 5 exists, 2 named-only, and the one
+  ;; cell whose pointer has drifted since 2026-09-05.
+  (check "tally matches ALIGN" {:absent 34 :exists 5 :named-only 2 :stale-adjudication 1} tally)
+  (check "no disagreement with the census of record" [] (:disagreements data))
+  (check "exits 3 (stale adjudication refused, not papered over)" 3 exit))
+
+;; ---------------------------------------------------------------------------
+(println "\n2. live pin -- an :exists cell (R16 dispatched, [E-16-D])")
+(let [{:keys [data]} (run-census)
+      c (cell data "R16" :dispatched)]
+  (check "verdict" :exists (:verdict c))
+  (check "basis" :pinned-adjudication (:basis c))
+  (check "tag" "[E-16-D]" (:tag c))
+  ;; Pointer quoted verbatim from the harness run, per :PA1z acceptance.
+  (check "pointers all landed"
+         [{:ok? true :file "futon2/src/futon2/aif/full_loop_runner.clj" :from 755 :to 767 :expect "dispatch!"}
+          {:ok? true :file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2762 :to 2775 :expect "checkpoint"}]
+         (:pointers c)))
+
+;; ---------------------------------------------------------------------------
+(println "\n3. live pin -- an :absent cell (R10 checked)")
+(let [{:keys [data]} (run-census)
+      c (cell data "R10" :checked)]
+  (check "verdict" :absent (:verdict c))
+  (check "basis" :node-link-search (:basis c))
+  (check "zero hits" 0 (:hits c))
+  (check "enumeration declared untruncated" true (:untruncated c))
+  (check "command quoted verbatim"
+         "rg -n '(:node|:wm/node|:route/node|:control-node)[[:space:]]+:R10' futon3c/src/futon3c/agency futon3c/src/futon3c/social futon3c/src/futon3c/transport"
+         (:command c)))
+
+;; ---------------------------------------------------------------------------
+(println "\n4. live pin -- the drifted cell reports its own correction (TRACE recorded, [E-T])")
+(let [{:keys [data]} (run-census)
+      c (cell data "TRACE" :recorded)
+      bad (first (:stale c))]
+  (check "not credited" :stale-adjudication (:verdict c))
+  (check "ALIGN's declared verdict retained for the report" :exists (:declared c))
+  (check "why" :token-not-in-range (:why bad))
+  (check "the stale pointer" ["futon2/scripts/futon2/report/war_machine.clj" 6750 6759 ":TRACE"]
+         [(:file bad) (:from bad) (:to bad) (:expect bad)])
+  (check "token located, so drift is distinguished from deletion" [6789] (:token-found-at bad))
+  ;; The cell's OTHER pointer is fine; a partial stale must still refuse.
+  (check "second pointer still lands" true (:ok? (second (:pointers c)))))
+
+;; ---------------------------------------------------------------------------
+(println "\n5. PLANTED CONTROL -- a corrupted pointer must refuse")
+(let [led (edn/read-string (slurp (io/file here "census-ledger.edn")))
+      planted (update led :adjudicated
+                      (fn [as] (mapv (fn [a]
+                                       (if (and (= "R16" (:node a)) (= :dispatched (:cell a)))
+                                         (assoc-in a [:pointers 0 :expect] "this-token-is-not-in-that-range")
+                                         a))
+                                     as)))
+      tmp (io/file (System/getProperty "java.io.tmpdir") "pa1z-planted-ledger.edn")]
+  (spit tmp (pr-str planted))
+  (let [{:keys [exit data]} (run-census "--ledger" (str tmp))
+        c (cell data "R16" :dispatched)]
+    (check "planted cell is NOT credited" :stale-adjudication (:verdict c))
+    (check "its declared verdict is preserved for the report" :exists (:declared c))
+    (check "run exits 3" 3 exit))
+  (.delete tmp))
+
+;; ---------------------------------------------------------------------------
+(println "\n6. PLANTED CONTROL -- a broken scope must ERROR, never read as absence")
+(let [led (edn/read-string (slurp (io/file here "census-ledger.edn")))
+      planted (assoc-in led [:scope :node-link] ["futon3c/src/futon3c/no-such-directory"])
+      tmp (io/file (System/getProperty "java.io.tmpdir") "pa1z-planted-scope.edn")]
+  (spit tmp (pr-str planted))
+  (let [{:keys [exit out]} (shell/sh "bb" script "--edn" "--ledger" (str tmp))]
+    (check "exits 2 (error), NOT 0 with a page of :absent" 2 exit)
+    (check "produced no verdicts at all" true (str/blank? out)))
+  (.delete tmp))
+
+(println)
+(if (seq @failures)
+  (do (println "FAILED:" (count @failures) "--" (str/join ", " @failures)) (System/exit 1))
+  (do (println "All acceptance checks passed.") (System/exit 0)))

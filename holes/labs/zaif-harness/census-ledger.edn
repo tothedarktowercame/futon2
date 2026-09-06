@@ -1,0 +1,131 @@
+;; census-ledger.edn -- the ADJUDICATED cells of the Box 12 process census.
+;;
+;; Row :PA1z. Companion to process_census.bb, which is the instrument; this
+;; file is the data.
+;;
+;; WHY A LEDGER AT ALL. A cell verdict has two halves and only one of them is
+;; mechanical. That a node-link search returns NOTHING is a fact a script can
+;; establish and re-establish (ALIGN's [A] basis, and the bulk of the matrix:
+;; 34 of its 42 cells). That a particular piece of found code REFUSES or
+;; RECORDS at a particular lifecycle stage is a reading -- a person or an agent
+;; looked at `dispatch!` and judged it to be R16's dispatched cell. A harness
+;; that pretended to automate the reading would be inventing evidence.
+;;
+;; So the split: process_census.bb MECHANISES ABSENCE and PINS PRESENCE. Every
+;; :exists / :named-only verdict below is a reading lifted from
+;; holes/labs/wm-contract/ALIGN-rnode-process-census.md (claude-1's lab, census
+;; dated 2026-09-05), recorded here with the pointers that reading cited and,
+;; for each pointer, the TOKEN that pointer is supposed to be showing.
+;;
+;; THE REFUSAL THAT MAKES THIS A RUNG (N-process-trap-recording-conventions.md
+;; s0: a rung is only real where something refuses to advance without it). The
+;; harness re-reads every pinned range and looks for its declared token. If the
+;; token is not in the range, the adjudication is STALE and the harness REFUSES
+;; TO CREDIT THE CELL -- it does not quietly keep the old verdict, and it does
+;; not silently move the pointer. Prose pointers rot; this is the check that
+;; makes the rot visible. It is the same shape as worklist_check.bb's
+;; :review-covers signature rule, for the same reason.
+;;
+;; NOT A FORK OF ALIGN. ALIGN is the census of record and lives in claude-1's
+;; lab. This file is a transcription of its section 2 matrix plus the section 1
+;; pointers, kept so the verdicts can be re-checked mechanically. Where the two
+;; disagree, ALIGN wins on substance and the disagreement is REPORTED TO
+;; CLAUDE-1, never reconciled here in either direction (:PA1z statement).
+
+{:schema :box12/census-ledger-v1
+ :as-of "2026-09-06"
+ :row :PA1z
+ :census-of-record "futon2/holes/labs/wm-contract/ALIGN-rnode-process-census.md"
+ :census-of-record-dated "2026-09-05"
+ :roster "p4ng/empirics-futon/control-stages.edn"
+
+ ;; The seven operator-inclusive lifecycle stages, in order.
+ ;; Source: futon2/holes/problems/P-assured-process.md:55-63.
+ :cells [:commissioned :dispatched :parked :returned :checked :recorded :surfaced]
+
+ ;; The declared search scope, lifted verbatim from ALIGN section 1's closing
+ ;; paragraph. Stated as data so a later slice cannot widen the scope by
+ ;; accident and call the result comparable.
+ :scope {:node-link ["futon3c/src/futon3c/agency"
+                     "futon3c/src/futon3c/social"
+                     "futon3c/src/futon3c/transport"]
+         :also-read ["futon2/scripts/futon2/report/war_machine.clj"
+                     "futon2/src/futon2/aif"]
+         :not-searched "tests, git history, untracked stores, other Futon repositories, Emacs/voxterm presentation code, APM-specific namespaces outside the requested handoff machinery. Static source census, not a live invocation trace. (ALIGN section 1, verbatim scope statement.)"}
+
+ ;; The node-link pattern, verbatim from ALIGN section 1.
+ :node-link-pattern "(:node|:wm/node|:route/node|:control-node)[[:space:]]+:%s"
+
+ ;; Nodes ALIGN censused. Everything not listed here is uncensused and is the
+ ;; business of PA2z/PA3z/PA4z, not of this row.
+ :censused-nodes ["R9" "R10" "R12" "R20" "TRACE" "R16"]
+
+ ;; --------------------------------------------------------------------------
+ ;; ADJUDICATED CELLS. Only the 8 non-absent cells of ALIGN's 42 appear here;
+ ;; the other 34 are :absent and are re-established mechanically each run.
+ ;; --------------------------------------------------------------------------
+ ;; TOKEN DISCIPLINE (learned on this row's first run, recorded because it cost
+ ;; two false alarms). An :expect token must be lifted from what ALIGN ITSELF
+ ;; claims the pointer shows -- not guessed from the surrounding code. The first
+ ;; run flagged [E-16-K]:2991-3007 and [E-16-X] enact.clj:5-10 as stale; both
+ ;; pointers were fine and the TOKENS were wrong ("phase" and "R16", neither of
+ ;; which ALIGN ever claimed for those ranges; ALIGN cites enact.clj:1-16 for the
+ ;; node identification and :5-10 for the write-trace! seam). A harness whose
+ ;; false-alarm rate is high teaches its readers to ignore it, which is the exact
+ ;; failure N-process-trap-recording-conventions.md s0 warns about. So: token
+ ;; comes from the reading, and a stale report is checked by hand before it is
+ ;; believed.
+ :adjudicated
+ [{:node "R9" :cell :checked :verdict :named-only :tag "[N9]"
+   :reading "control-stages names R9 'No self-certification'; P-assured-process calls for author-never-closes-own-handoff as architecture. No node-linked refusing check was found."
+   :pointers [{:file "p4ng/empirics-futon/control-stages.edn" :from 43 :to 43 :expect "No self- certification"}
+              {:file "futon2/holes/problems/P-assured-process.md" :from 55 :to 63 :expect "commissioned"}]}
+
+  {:node "R20" :cell :checked :verdict :named-only :tag "[N20]"
+   :reading "control-stages names R20 'Interoceptive tripwires'. That names checking at the node level, but the [A] search found no R20-linked handoff checker."
+   :pointers [{:file "p4ng/empirics-futon/control-stages.edn" :from 41 :to 41 :expect "Interoceptive tripwires"}]}
+
+  {:node "TRACE" :cell :recorded :verdict :exists :tag "[E-T]"
+   :reading "The WM attaches :TRACE to :wm/route immediately before the write; trace/write-trace! constructs and appends the exact record. Credits ONLY recorded: a tick route record, not evidence that any other process stage occurred."
+   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6750 :to 6759 :expect ":TRACE"}
+              {:file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!"}]}
+
+  {:node "R16" :cell :commissioned :verdict :exists :tag "[E-16-C]"
+   :reading "The author commission names the selected target, repository/base head, artifact contract, requirements, refusal shape and independent reviewer; that exact prompt is passed to dispatch."
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 1350 :to 1406 :expect "author-prompt"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2740 :to 2761 :expect "dispatch!"}]}
+
+  {:node "R16" :cell :dispatched :verdict :exists :tag "[E-16-D]"
+   :reading "dispatch! submits agent, caller, mission id and prompt to Agency; the dispatch checkpoint records agent, job id, prompt reference and response."
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 755 :to 767 :expect "dispatch!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2762 :to 2775 :expect "checkpoint"}]}
+
+  {:node "R16" :cell :returned :verdict :exists :tag "[E-16-R]"
+   :reading "poll-job! returns only at an Agency terminal state, and the author boundary refuses to advance unless that returned state is done."
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 825 :to 849 :expect "poll-job!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2823 :to 2829 :expect "done"}]}
+
+  {:node "R16" :cell :checked :verdict :exists :tag "[E-16-K]"
+   :reading "After a distinct reviewer dispatch and return, approval requires a done review job, an :approve verdict and execution evidence; failure refuses advancement."
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2913 :to 2950 :expect "poll-job!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2950 :to 2968 :expect ":approve"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2991 :to 3007 :expect ":build-failed"}]}
+
+  {:node "R16" :cell :recorded :verdict :exists :tag "[E-16-X]"
+   :reading "Every phase emits start/end/error telemetry, and cohort runs append dispatch and build checkpoint cells. Separately the tick-side R16 implementation records typed attempt/results through TRACE."
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 169 :to 207 :expect "emit-phase!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2262 :to 2266 :expect "checkpoint"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2969 :to 2990 :expect "checkpoint"}
+              {:file "futon2/src/futon2/aif/enact.clj" :from 5 :to 10 :expect "write-trace!"}]}]
+
+ ;; --------------------------------------------------------------------------
+ ;; TARGETED ABSENCE SEARCHES. ALIGN established two R16 absences with a
+ ;; SECOND, narrower search rather than the node-link one, because the question
+ ;; there was not "is this node named" but "does this vocabulary appear at all".
+ ;; Recorded so those two cells are re-established the way they were made.
+ ;; --------------------------------------------------------------------------
+ :targeted-absence
+ [{:node "R16" :cells [:parked :surfaced] :tag "[A16]"
+   :pattern "park!|:parked|notify/discharged-at|bulletin"
+   :files ["futon2/src/futon2/aif/full_loop_runner.clj"]
+   :reading "Distinguishes the runner's typed stop-line/recovery records from a parked lifecycle transition, and its returned result from a recorded surfacing discharge."}]}

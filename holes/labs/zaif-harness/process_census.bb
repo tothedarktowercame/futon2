@@ -1,0 +1,190 @@
+#!/usr/bin/env bb
+;; process_census.bb -- the Box 12 process-assurance census, as an instrument.
+;;
+;; Row :PA1z (zaif-harness board). Data lives in census-ledger.edn; read its
+;; header first, it explains the mechanise-absence / pin-presence split and why
+;; the split is where it is.
+;;
+;; USAGE
+;;   ./process_census.bb                 # the negative control: re-derive
+;;                                       # ALIGN's 42 censused cells and diff
+;;   ./process_census.bb --node R2       # census one uncensused node (PA2z/3z/4z)
+;;   ./process_census.bb --edn           # machine-readable verdicts on stdout
+;;   ./process_census.bb --ledger P       # read the ledger from P (tests plant here)
+;;
+;; EXIT CODES (a rung is only real where something refuses -- see the ledger
+;; header, and N-process-trap-recording-conventions.md s0):
+;;   0  every adjudication still stands and the harness agrees with ALIGN
+;;   3  STALE ADJUDICATION -- a pinned pointer no longer shows its token. The
+;;      cell is NOT credited. Fix the pointer or re-adjudicate; do not paper.
+;;   4  DISAGREEMENT with the census of record. Route to claude-1 (whose lab
+;;      owns ALIGN). NEVER reconciled here in either direction.
+;;   2  a search ERRORED. Deliberately distinct from "found nothing": reading a
+;;      tool failure as an absence is how a census invents evidence.
+
+(require '[clojure.edn :as edn]
+         '[clojure.string :as str]
+         '[clojure.java.io :as io]
+         '[clojure.java.shell :as shell])
+
+(def ^:private args (set *command-line-args*))
+(def ^:private edn-out? (contains? args "--edn"))
+(def ^:private one-node (second (drop-while #(not= "--node" %) *command-line-args*)))
+
+(defn- die [code & msg]
+  (binding [*out* *err*] (apply println "process_census:" msg))
+  (System/exit code))
+
+;; Paths resolve against the CODE ROOT derived from this script's own location,
+;; never from the caller's cwd -- the C16 finding already recorded in
+;; worklist_check.bb, which cost a debugging session when a loop invoked a
+;; checker by absolute path from /tmp. The scope spans three sibling repos
+;; (futon2, futon3c, p4ng), so the root is the futon2 git root's PARENT.
+(def script-dir (.getParentFile (.getAbsoluteFile (io/file *file*))))
+(def code-root
+  (let [{:keys [exit out]} (shell/sh "git" "rev-parse" "--show-toplevel" :dir script-dir)]
+    (when-not (zero? exit) (die 2 "cannot find the futon2 git root from" (str script-dir)))
+    (.getParent (io/file (str/trim out)))))
+
+;; --ledger lets a test PLANT a corrupted ledger and prove the refusal refuses.
+;; Defaults to the real one beside this script.
+(def ^:private ledger-path
+  (or (second (drop-while #(not= "--ledger" %) *command-line-args*))
+      (str (io/file script-dir "census-ledger.edn"))))
+(def ledger (edn/read-string (slurp ledger-path)))
+(when-not (= :box12/census-ledger-v1 (:schema ledger)) (die 2 "unexpected ledger schema"))
+
+(defn- abs-path [rel] (str (io/file code-root rel)))
+
+;; ---------------------------------------------------------------------------
+;; Searching. rg exit 0 = matched, 1 = no match, 2 = error. Collapsing 1 and 2
+;; is the bug this function exists to prevent.
+;; ---------------------------------------------------------------------------
+(defn- rg [pattern paths]
+  (let [existing (filterv #(.exists (io/file (abs-path %))) paths)
+        missing  (remove #(.exists (io/file (abs-path %))) paths)]
+    (when (seq missing)
+      (die 2 "declared scope path does not exist:" (str/join ", " missing)
+           "-- the scope is stated in census-ledger.edn and a moved path must be"
+           "corrected there, not silently skipped"))
+    (let [{:keys [exit out err]} (apply shell/sh "rg" "-n" "--no-heading" pattern
+                                        (mapv abs-path existing))]
+      (case (int exit)
+        0 {:status :matched
+           :hits (mapv #(str/replace % (str code-root "/") "")
+                       (remove str/blank? (str/split-lines out)))
+           :command (str "rg -n '" pattern "' " (str/join " " existing))}
+        1 {:status :no-match :hits []
+           :command (str "rg -n '" pattern "' " (str/join " " existing))}
+        (die 2 "rg errored (exit" exit ") on pattern" (pr-str pattern) "--" (str/trim (str err))
+             "\n  A tool failure is NOT an absence. Nothing is credited from this run.")))))
+
+;; Truncation: rg is run without a head limit and the full output is counted,
+;; so every enumeration below can state that it was untruncated. (Board header,
+;; TRUNCATED-ENUMERATION RULE.)
+(defn- node-link-search [node]
+  (rg (format (:node-link-pattern ledger) node) (get-in ledger [:scope :node-link])))
+
+;; ---------------------------------------------------------------------------
+;; Pinned-pointer check. A pointer must still SHOW its declared token inside its
+;; declared line range, or the adjudication that cited it is stale.
+;; ---------------------------------------------------------------------------
+(defn- check-pointer [{:keys [file from to expect]}]
+  (let [f (io/file (abs-path file))]
+    (if-not (.exists f)
+      {:ok? false :why :file-missing :file file :expect expect}
+      (let [lines (vec (str/split-lines (slurp f)))
+            n (count lines)
+            in-range (subvec lines (max 0 (dec from)) (min n to))
+            found? (some #(str/includes? % expect) in-range)]
+        (if found?
+          {:ok? true :file file :from from :to to :expect expect}
+          ;; Locate the token elsewhere so a stale pointer carries its own
+          ;; correction rather than just a complaint.
+          (let [elsewhere (keep-indexed (fn [i l] (when (str/includes? l expect) (inc i))) lines)]
+            {:ok? false :why (if (> to n) :range-past-eof :token-not-in-range)
+             :file file :from from :to to :expect expect
+             :file-lines n
+             :token-found-at (vec (take 5 elsewhere))}))))))
+
+(defn- adjudication-for [node cell]
+  (first (filter #(and (= node (:node %)) (= cell (:cell %))) (:adjudicated ledger))))
+
+(defn- targeted-for [node cell]
+  (first (filter #(and (= node (:node %)) (some #{cell} (:cells %))) (:targeted-absence ledger))))
+
+;; ---------------------------------------------------------------------------
+;; One cell's verdict.
+;; ---------------------------------------------------------------------------
+(defn- verdict [node cell]
+  (if-let [adj (adjudication-for node cell)]
+    (let [checks (mapv check-pointer (:pointers adj))]
+      (if (every? :ok? checks)
+        {:node node :cell cell :verdict (:verdict adj) :basis :pinned-adjudication
+         :tag (:tag adj) :pointers checks}
+        {:node node :cell cell :verdict :stale-adjudication :basis :pinned-adjudication
+         :tag (:tag adj) :declared (:verdict adj)
+         :pointers checks :stale (filterv (complement :ok?) checks)}))
+    (let [tgt (targeted-for node cell)
+          r (if tgt (rg (:pattern tgt) (:files tgt)) (node-link-search node))]
+      (if (= :no-match (:status r))
+        {:node node :cell cell :verdict :absent
+         :basis (if tgt :targeted-absence-search :node-link-search)
+         :tag (:tag tgt) :command (:command r) :hits 0 :untruncated true}
+        {:node node :cell cell :verdict :hit-needs-adjudication
+         :basis (if tgt :targeted-absence-search :node-link-search)
+         :command (:command r) :hits (:hits r) :untruncated true}))))
+
+(defn- declared-verdict [node cell]
+  (if-let [adj (adjudication-for node cell)] (:verdict adj) :absent))
+
+;; ---------------------------------------------------------------------------
+;; Run
+;; ---------------------------------------------------------------------------
+(def nodes (if one-node [one-node] (:censused-nodes ledger)))
+(def control? (nil? one-node))
+(def results (vec (for [n nodes c (:cells ledger)] (verdict n c))))
+(def stale (filterv #(= :stale-adjudication (:verdict %)) results))
+(def disagreements
+  (when control?
+    (filterv (fn [r] (and (not= :stale-adjudication (:verdict r))
+                          (not= (declared-verdict (:node r) (:cell r)) (:verdict r))))
+             results)))
+
+(if edn-out?
+  (prn {:generated-by "process_census.bb" :row :PA1z
+        :mode (if control? :negative-control :census-slice)
+        :nodes nodes :results results
+        :stale stale :disagreements disagreements})
+  (do
+    (println "Box 12 process census --" (if control? "NEGATIVE CONTROL over ALIGN's censused nodes" (str "slice: " (str/join ", " nodes))))
+    (println "census of record:" (:census-of-record ledger) (str "(" (:census-of-record-dated ledger) ")"))
+    (println)
+    (printf "%-7s %-14s %-24s %s%n" "node" "cell" "verdict" "basis")
+    (doseq [r results]
+      (printf "%-7s %-14s %-24s %s%n" (:node r) (name (:cell r)) (name (:verdict r))
+              (str (name (:basis r)) (when (:tag r) (str " " (:tag r))))))
+    (println)
+    (let [tally (frequencies (map :verdict results))]
+      (println "tally:" (into (sorted-map) tally) (str "(" (count results) " cells)")))
+    (when (seq stale)
+      (println)
+      (println "STALE ADJUDICATIONS -- these cells are NOT credited:")
+      (doseq [s stale, p (:stale s)]
+        (printf "  %s %s %s: %s:%d-%d no longer shows %s (%s)%n"
+                (:node s) (name (:cell s)) (:tag s) (:file p) (:from p) (:to p)
+                (pr-str (:expect p)) (name (:why p)))
+        (when (seq (:token-found-at p))
+          (printf "      token is at line(s) %s -- pointer looks like drift, not deletion%n"
+                  (str/join ", " (:token-found-at p))))))
+    (when (seq disagreements)
+      (println)
+      (println "DISAGREEMENT WITH THE CENSUS OF RECORD -- route to claude-1, do not reconcile here:")
+      (doseq [d disagreements]
+        (printf "  %s %s: ALIGN says %s, harness says %s%n"
+                (:node d) (name (:cell d)) (name (declared-verdict (:node d) (:cell d))) (name (:verdict d)))))))
+
+(cond
+  (seq stale) (System/exit 3)
+  (seq disagreements) (System/exit 4)
+  :else (System/exit 0))
