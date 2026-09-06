@@ -964,3 +964,26 @@ catalogue documents. When Joe lands: either he says start (attended
 enough), or the morning session starts it with an operator awake.
 The bulletin (407+ commits) is the landing surface; needs-operator
 reads RUN4 alone, correctly.
+
+## The node-by-node verification ruling (Joe, 2026-09-06) — V7 sweep; RUN4 approval conditioned on it
+
+Verbatim: "I wonder if we should work through them systematically or
+if we should instead go node by node and verify the R nodes actually
+have what we think they should have inside them... I'd be happy to
+approve RUN4 if we know that there aren't massive holes in the
+system."
+
+- V7 minted: one node per slice, dependency order, each node through
+  the F3 harness (independent reference), the F8 readback where a
+  module exists, the census re-verification where assurance-band, and
+  the node's known candidate holes confirmed-or-cleared; typed
+  verdicts into VERIFY-r-nodes.edn. V8 minted: the closability-audit
+  refresh (RUN4's named blocker, stale contract).
+- RUN4 APPROVAL IS CONDITIONED, NOT GIVEN: Joe approves when the
+  matrix shows no :hole verdict of run-invalidating type and V8's
+  refresh is green. The approval word lands at that evidence, not
+  before. needs-operator keeps RUN4 until then, correctly.
+- Mint note: first mint collided with the historical V1-V6 ids;
+  worklist_check refused, the loop stopped safely on the invalid
+  ledger, renamed V7/V8. Duplicate-id refusal is worklist_check's,
+  not F5's -- jurisdiction fact worth remembering.
