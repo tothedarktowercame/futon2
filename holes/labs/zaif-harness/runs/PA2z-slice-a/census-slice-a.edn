@@ -1,0 +1,67 @@
+;; PA2z — census slice A: the PERCEIVE and BELIEVE loop-band nodes.
+;; R2, R8 (PERCEIVE); R1, R3, R3a, R7 (BELIEVE). 6 nodes x 7 stages = 42 cells.
+;;
+;; THE HARNESS'S NAIVE ANSWER WAS 42/42 :absent, AND THAT ANSWER IS WRONG TWICE.
+;; A uniform result means the instrument is not discriminating, so this slice
+;; did not record it. Both errors are stated below with the measurement that
+;; found them, because a slice that silently booked 42 absences would have
+;; inflated the track's headline deficit by 42 phantom cells.
+
+{:schema :box12/census-slice-v1
+ :row :PA2z
+ :band :loop
+ :stages [:PERCEIVE :BELIEVE]
+ :nodes ["R2" "R8" "R1" "R3" "R3a" "R7"]
+ :vocabulary "claude-1 approved 2026-09-06: :running-code / :operator-turn / :absent, plus :inapplicable introduced here (see s1)."
+
+ ;; --------------------------------------------------------------------------
+ :s1-applicability
+ {:finding "THE FOUR HANDOFF STAGES ARE INAPPLICABLE TO A NODE THAT NEVER HANDS OFF."
+  :argument "commissioned / dispatched / parked / returned describe work being handed to an actor and coming back. R2, R8, R1, R3, R3a and R7 are in-process computations inside one tick; there is no actor to commission and nothing to wait for. Asking whether R2's observation was `dispatched` is a category error, and answering `:absent` books a deficit that does not exist."
+  :mechanical-discriminator "A node is handoff-shaped iff its implementation carries handoff conduct. Measured: `rg -l 'dispatch!|/api/alpha/bell|poll-job!' futon2/src/futon2/aif futon2/scripts/futon2/report/war_machine.clj` returns exactly THREE files in the entire loop tree -- tripwire.clj, actuator_a3.clj, full_loop_runner.clj -- and NO slice-A node appears on any handoff-conduct line (per-node count: 0 for all six). Untruncated; rg -l and rg -c return complete counts."
+  :this-is-joes-box-5-ruling-again "Joe, 2026-09-06, on Box 5 (EPIC-run-era.md, 'The rung-ceiling refinement'): formula-transcribed is INAPPLICABLE to pure carrier/record declarations, and 'the no-skipping rule needs a per-kind applicability qualification, MECHANICALLY DERIVED, NOT HAND-WAVED.' Box 12 has the identical defect: it prints a 7-stage denominator for every node without asking whether all seven apply. The discriminator above is the mechanical derivation."
+  :split-is-per-stage-not-per-node "Do NOT mark a whole node inapplicable. checked / recorded / surfaced apply to EVERY node -- an in-process computation can still have its output checked, recorded and surfaced, and R2 in fact does have it recorded. Only the four handoff stages are inapplicable. Denominator for a non-handoff node is therefore 3, not 7."
+  :effect-on-this-slice "24 of 42 cells are :inapplicable (6 nodes x 4 handoff stages). 18 cells are genuinely censusable and are censused below."
+  :proposed-to-claude-1 "As with the :operator-turn vocabulary, :inapplicable is proposed, not retrofitted. ALIGN's 42 adjudicated cells are untouched: R16 and TRACE ARE handoff/record-shaped, and the assurance-band nodes are about assurance conduct, so all seven stages apply to them. This changes no existing verdict."}
+
+ ;; --------------------------------------------------------------------------
+ :s2-instrument-blind-spot
+ {:finding "ALIGN'S NODE-LINK PATTERN HAS A FALSE-NEGATIVE CLASS: node linkage expressed as a FUNCTION-CALL ARGUMENT rather than a literal map entry."
+  :measurement "war_machine.clj:5865 defines (route-tag route node via) -> (conj route {:node node :via via :at ...}). The node is a PARAMETER, so the source text at the call sites reads `(route-tag route0 :R2 \"futon2.aif.observation/observe\")` -- :5937 :R2, :6245 :R7, :6246 :R3, :6252 :R8. ALIGN's pattern `(:node|:wm/node|:route/node|:control-node)[[:space:]]+:(R2|R3|R7|R8)` matches ZERO of these: `rg -c` over war_machine.clj returns 0. Meanwhile `rg -o 'route-tag[^)]*:(R[0-9a-z]+)'` enumerates NINE distinct nodes routed this way: R2 R3 R5 R6 R7 R8 R12 R14 R20. Both commands complete; neither is head-limited."
+  :second-half-scope "Compounding it, ALIGN's node-link SCOPE is futon3c agency/social/transport, which does not contain war_machine.clj at all -- so even a pattern that matched would not have looked here. The scope is correct for assurance machinery and simply does not reach where loop-band nodes live."
+  :NO-ALIGN-VERDICT-CHANGES "Checked before claiming anything. Of the nine route-tagged nodes, only R12 and R20 are censused by ALIGN, and both are marked absent. Their live fixtures agree: 0a18c4f7-R12.edn and 0a18c4f7-R20.edn both carry :status :absent :reason :no-record-field -- the route NAMES them but no record field carries their content. So ALIGN's absent verdict for R12/R20 stands on its own evidence and survives the blind spot. R9 and R10 are not route-tagged at all. NOT an exit-4: no verdict disagrees."
+  :why-it-still-matters "PA3z's nodes (R4 R5 R6 R13 R14 R15 R11) include R5, R6 and R14, which ARE route-tagged. Run naively, PA3z would inherit the blind spot and book false absences. Routed to claude-1 as an instrument finding; the harness's pattern is lifted verbatim from ALIGN and this lane will not widen it unilaterally."}
+
+ ;; --------------------------------------------------------------------------
+ ;; The 18 censusable cells. `recorded` is where the discrimination lives, and
+ ;; the fixtures' own :basis field is what makes it possible.
+ ;; --------------------------------------------------------------------------
+ :s3-cells
+ [{:node "R2" :recorded :running-code
+   :evidence "war_machine.clj:5937 (route-tag route0 :R2 \"futon2.aif.observation/observe\"); route-tag:5865 writes {:node :R2 :via ... :at ...}; persisted by trace/write-trace! (trace.clj:723-745). Live fixture 0a18c4f7-R2.edn: :basis \"record :route R12->R2\", :status :present, 14 observation channels."
+   :checked :absent :surfaced :absent}
+  {:node "R8" :recorded :running-code
+   :evidence "war_machine.clj:6252 (route-tag route2 :R8 \"futon2.aif.free-energy/compute-prediction-error\"). Fixture present."
+   :checked :absent :surfaced :absent}
+  {:node "R3" :recorded :running-code
+   :evidence "war_machine.clj:6246 (route-tag :R3 \"futon2.report.war-machine/apply-arena-belief-events\"). Fixture present."
+   :checked :absent :surfaced :absent}
+  {:node "R7" :recorded :running-code
+   :evidence "war_machine.clj:6245 (route-tag :R7 \"futon2.aif.precision/update-precision-state\"). Fixture present."
+   :checked :absent :surfaced :absent}
+  {:node "R1" :recorded :absent
+   :finding "THE DATA IS RECORDED; THE NODE IS NOT. R1 has three fixtures and :status :present with a 417-entry :mu-pre value, but the fixture's own :basis reads \"record field; not a route hop\" -- the record carries mu-pre and NEVER NAMES R1. The node linkage was made by U12's extractor, not by running code. Under ALIGN's governing rule (generic machinery is not credited without a node link) that is :absent, and the fixture is honest enough to say so in its own provenance field. This is the sharpest case on the slice for why :basis has to be read rather than the fixture's existence counted."
+   :checked :absent :surfaced :absent}
+  {:node "R3a" :recorded :absent
+   :finding "NO FIXTURE AT ALL, and no route-tag call. R3a is the mediator node Joe drew by hand into the paper map (control-stages.edn:19 records the drawing at aif-control-map-paper.svg:123-125 superseding the generator entry). It is drawn, catalogued, and entirely unrecorded at runtime."
+   :checked :absent :surfaced :absent}]
+
+ :s4-checked-and-surfaced-basis
+ {:checked "`rg -n 'throw|refus|reject|invalid' war_machine.clj` intersected with a slice-A node tag returns 0 lines -- nothing refuses on any of these nodes' values. Two-layer calibration (R12) is the assurance node that would do this and ALIGN censuses it absent."
+  :surfaced "`rg -c 'notify/discharged-at|bulletin'` over war_machine.clj, observation.clj and precision.clj returns 0. Consistent with PA11z's independent finding that bulletin.clj carries zero job/dispatch/invoke references."
+  :scope-caveat "Both are searches over the loop implementation, not a live trace. A cell marked :absent here means 'no node-linked refusal or discharge found by those commands', not 'provably nowhere'."}
+
+ ;; --------------------------------------------------------------------------
+ :tally {:inapplicable 24 :running-code 4 :absent 14}
+ :denominator-note "18 censusable cells, not 42. Reporting 42 would have booked 24 phantom deficits."
+ :headline "Of 18 real cells, 4 are running code -- all of them `recorded`, all four by the same route-tag mechanism. Every `checked` and every `surfaced` cell on the PERCEIVE/BELIEVE band is absent: the loop observes and believes without anything refusing on those values or surfacing them."}
