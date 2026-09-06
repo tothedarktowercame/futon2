@@ -163,52 +163,8 @@
     :weighted-error 2.0,
     :per-call-precision nil,
     :per-call-precision-status {:status :absent, :reason :legacy-era}}}
-  {:id :production-M1,
-   :result :pass,
-   :measurement
-   {:records-total 889,
-    :records-with-precision-state 884,
-    :channel-set-distribution
-    {[:active-repo-ratio
-      :annotation-health
-      :attack-coverage
-      :coupling-density
-      :mission-health
-      :sorry-count-norm
-      :support-coverage
-      :ticks-firing-ratio]
-     741,
-     [:active-repo-ratio
-      :annotation-health
-      :attack-coverage
-      :mission-health
-      :sorry-count-norm
-      :support-coverage]
-     17,
-     [:active-repo-ratio
-      :annotation-health
-      :mission-health
-      :sorry-count-norm]
-     126},
-    :declared-eight
-    [:annotation-health
-     :sorry-count-norm
-     :mission-health
-     :active-repo-ratio
-     :support-coverage
-     :attack-coverage
-     :coupling-density
-     :ticks-firing-ratio]}}
-  {:id :production-M2,
-   :result :pass,
-   :measurement
-   {:channel-states 6534,
-    :min 1.0,
-    :max 105.0,
-    :at-floor 0,
-    :at-100 2192,
-    :above-21 5175}}
   {:id :production-M3,
+   :kind :measurement,
    :result :pass,
    :measurement
    {:channel-states 6534,
@@ -217,6 +173,7 @@
     :maximum 20,
     :filled-window 6262}}
   {:id :production-M4,
+   :kind :measurement,
    :result :pass,
    :measurement
    {:mismatch-count 5502,
@@ -1552,7 +1509,32 @@
       :max-deviation 102.98061982550186}],
     :mismatch-first-file "wm-trace-2026-05-18.edn",
     :comparisons 6534}}
+  {:id :production-M4b,
+   :kind :measurement,
+   :result :pass,
+   :measurement
+   {:subject "the 5502 M4 mismatches, attributed to a named producer",
+    :attributable-states 5494,
+    :variance-component-equals-superseded-sample-form 5494,
+    :precision-equals-bounded-variance-plus-need 5494,
+    :superseded-producer
+    "futon2 9d8f2dee^ src/futon2/aif/precision.clj `variance` (sample variance about the mean, /n) with :salience-mode :summed",
+    :replaced-by
+    "futon2 9d8f2dee (2026-07-14) 'Repair AIF controls and authoritative substrate wiring', which in ONE commit replaced `variance` with `regularized-error-variance` and flipped default-salience-mode :summed -> :separate",
+    :agreements-at-deviation-exactly-zero 1032,
+    :reading
+    "Where the corpus disagrees with the shipped map it agrees with the superseded one, on both counts, and where it agrees with the shipped map it agrees exactly and not within the tolerance."}}
+  {:id :production-M6,
+   :kind :measurement,
+   :result :pass,
+   :measurement
+   {:prediction-error-entries 6537,
+    :both-precisions 6531,
+    :differing 6531,
+    :ratio-min 0.9413873666230841,
+    :ratio-max 104.99961290921155}}
   {:id :production-M5,
+   :kind :measurement,
    :result :pass,
    :measurement
    {:disagreements 5596,
@@ -4668,17 +4650,64 @@
     :channel-comparisons 6526,
     :criterion
     "new history equals previous history plus exactly one appended error, bounded to the last 20",
+    :criterion-note
+    "This criterion is NOT what the machine claims. A tick runs up to three belief micro-steps and appends one error per step, so 5588 of the 5596 'disagreements' are three-append ticks (see :disagreements-by-micro-step-count). M5b states the relation the machine does claim.",
     :record-pairs 883,
     :disagreements-by-micro-step-count {0 8, 3 5588}}}
-  {:id :production-M6,
+  {:id :production-M5b,
+   :kind :measurement,
    :result :pass,
    :measurement
-   {:prediction-error-entries 6537,
-    :both-precisions 6531,
-    :differing 6531,
-    :ratio-min 0.9413873666230841,
-    :ratio-max 104.99961290921155}}
+   {:channel-comparisons 6526,
+    :criterion
+    "new history equals the previous history with k dropped from the front and j appended at the back, window-bounded -- the relation a multi-micro-step tick produces",
+    :violations 0,
+    :violations-by-file-channel [],
+    :dropped-distribution
+    {0 4246, 1 37, 2 2, 3 2207, 15 3, 17 13, 18 1, 20 17},
+    :appended-distribution {0 4039, 1 12, 2 7, 3 2468},
+    :non-trivial-carries 2469,
+    :reading
+    "This is the subject of the R7 operational check at futon2/docs/futon-aif-completeness.md:179 ('Verify it is updated tick-over-tick')."}}
+  {:id :production-M1,
+   :kind :measurement,
+   :result :pass,
+   :measurement
+   {:records-total 889,
+    :records-with-precision-state 884,
+    :channel-set-distribution
+    {[:active-repo-ratio
+      :annotation-health
+      :attack-coverage
+      :coupling-density
+      :mission-health
+      :sorry-count-norm
+      :support-coverage
+      :ticks-firing-ratio]
+     741,
+     [:active-repo-ratio
+      :annotation-health
+      :attack-coverage
+      :mission-health
+      :sorry-count-norm
+      :support-coverage]
+     17,
+     [:active-repo-ratio
+      :annotation-health
+      :mission-health
+      :sorry-count-norm]
+     126},
+    :declared-eight
+    [:annotation-health
+     :sorry-count-norm
+     :mission-health
+     :active-repo-ratio
+     :support-coverage
+     :attack-coverage
+     :coupling-density
+     :ticks-firing-ratio]}}
   {:id :production-M7,
+   :kind :measurement,
    :result :pass,
    :measurement
    {:channel-states 6534,
@@ -4690,7 +4719,17 @@
      :mission-health 882,
      :sorry-count-norm 784,
      :support-coverage 169,
-     :ticks-firing-ratio 643}}}],
+     :ticks-firing-ratio 643}}}
+  {:id :production-M2,
+   :kind :measurement,
+   :result :pass,
+   :measurement
+   {:channel-states 6534,
+    :min 1.0,
+    :max 105.0,
+    :at-floor 0,
+    :at-100 2192,
+    :above-21 5175}}],
  :node :R7,
  :corpus
  {:root "data/wm-trace",

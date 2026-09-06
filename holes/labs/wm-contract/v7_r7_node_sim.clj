@@ -19,6 +19,19 @@
       (let [mean (/ (reduce + xs) (count xs))]
         (/ (reduce + (map #(let [d (- % mean)] (* d d)) xs)) (dec (count xs))))))
 
+(defn superseded-variance
+  "The variance the pre-2026-07-14 producer computed, transcribed from
+   futon2 9d8f2dee^ src/futon2/aif/precision.clj `variance`: sample variance
+   about the mean, divided by n (NOT the Bessel-corrected n-1 of
+   `sample-variance` above, which exists only to discriminate references).
+   Used to attribute the corpus mismatch to a named producer rather than to
+   leave it as a shape."
+  [xs]
+  (let [n (count xs)]
+    (if (< n 2) 0.0
+        (let [mean (/ (reduce + xs) (double n))]
+          (/ (reduce + (map #(let [d (- % mean)] (* d d)) xs)) (double n))))))
+
 (defn reference-channel [previous new-error opts]
   (let [{:keys [window-size min-variance floor cap]} (merge defaults opts)
         appended (conj (vec (:error-history previous [])) (double new-error))
@@ -181,6 +194,49 @@
         carry-groups (->> carry-bad (group-by (juxt :file :channel :old-length :new-length))
                           (map (fn [[[f ch ol nl] xs]] {:file f :channel ch :old-length ol :new-length nl :count (count xs)}))
                           (sort-by (juxt :file (comp str :channel) :old-length :new-length)) vec)
+        ;; M4b: attribute the M4 mismatch to a NAMED superseded producer
+        ;; rather than leaving it as a shape. Two independent hypotheses,
+        ;; each transcribed from the pre-9d8f2dee tree, not from the node.
+        mismatch-states (mapv (fn [{:keys [file index channel]}]
+                                (get-in (first (filter #(and (= file (:file %)) (= index (:index %))) with-state))
+                                        [:record :precision-state channel]))
+                              mismatches)
+        sup-var-hits (count (filter (fn [s]
+                                      (let [h (:error-history s) vc (:variance-component s)]
+                                        (and (number? vc) (seq h)
+                                             (< (Math/abs (- (double vc)
+                                                             (/ 1.0 (max (superseded-variance h)
+                                                                         (:min-variance defaults)))))
+                                                1.0e-9))))
+                                    mismatch-states))
+        summed-hits (count (filter (fn [s]
+                                     (let [vc (:variance-component s) nd (:need-component s)]
+                                       (and (number? vc) (number? nd)
+                                            (< (Math/abs (- (double (:precision s))
+                                                            (min (:cap defaults)
+                                                                 (max (:floor defaults) (+ vc nd)))))
+                                               1.0e-9))))
+                                   mismatch-states))
+        attributable (count (filter (fn [s] (and (number? (:variance-component s)) (number? (:need-component s))))
+                                    mismatch-states))
+        exact-agreements (count (filter #(zero? (:deviation %)) (remove #(> (:deviation %) 1.0e-12) identity)))
+        ;; M5b: the carry relation the machine actually claims -- the previous
+        ;; history with k dropped from the front and j appended at the back,
+        ;; window-bounded. M5's one-append criterion is what the packet asked
+        ;; for and is not what a three-micro-step tick does.
+        carry-relation (fn [old new]
+                         (first (for [k (range 0 (inc (count old)))
+                                      :let [tail (subvec (vec old) k) n (count tail)]
+                                      :when (and (<= n (count new)) (= tail (vec (take n new))))]
+                                  {:dropped k :appended (- (count new) n) :overlap n})))
+        carry2 (vec (mapcat (fn [[a b]]
+                              (let [pa (get-in a [:record :precision-state]) pb (get-in b [:record :precision-state])]
+                                (for [ch (sort (set/intersection (set (keys pa)) (set (keys pb))))
+                                      :let [old (get-in pa [ch :error-history] []) new (get-in pb [ch :error-history] [])]]
+                                  (assoc (or (carry-relation old new) {:dropped :none :appended :none})
+                                         :file (:file b) :channel ch))))
+                            consecutive))
+        carry2-bad (filter #(= :none (:dropped %)) carry2)
         errors (vec (mapcat (fn [{:keys [file index record]}]
                               (map (fn [[ch e]] {:file file :index index :channel ch :entry e}) (:prediction-errors record))) records))
         both (filter #(and (number? (get-in % [:entry :precision])) (number? (get-in % [:entry :per-call-precision]))) errors)
@@ -207,7 +263,26 @@
           :disagreement-first-file (:file (first carry-bad)) :disagreement-last-file (:file (last carry-bad))
           :disagreements-by-micro-step-count (into (sorted-map) (frequencies (map :micro-steps carry-bad)))
           :disagreements-by-file-channel-and-length carry-groups
-          :criterion "new history equals previous history plus exactly one appended error, bounded to the last 20"}
+          :criterion "new history equals previous history plus exactly one appended error, bounded to the last 20"
+          :criterion-note "This criterion is NOT what the machine claims. A tick runs up to three belief micro-steps and appends one error per step, so 5588 of the 5596 'disagreements' are three-append ticks (see :disagreements-by-micro-step-count). M5b states the relation the machine does claim."}
+     :M4b {:subject "the 5502 M4 mismatches, attributed to a named producer"
+           :attributable-states attributable
+           :variance-component-equals-superseded-sample-form sup-var-hits
+           :precision-equals-bounded-variance-plus-need summed-hits
+           :superseded-producer "futon2 9d8f2dee^ src/futon2/aif/precision.clj `variance` (sample variance about the mean, /n) with :salience-mode :summed"
+           :replaced-by "futon2 9d8f2dee (2026-07-14) 'Repair AIF controls and authoritative substrate wiring', which in ONE commit replaced `variance` with `regularized-error-variance` and flipped default-salience-mode :summed -> :separate"
+           :agreements-at-deviation-exactly-zero exact-agreements
+           :reading "Where the corpus disagrees with the shipped map it agrees with the superseded one, on both counts, and where it agrees with the shipped map it agrees exactly and not within the tolerance."}
+     :M5b {:channel-comparisons (count carry2)
+           :criterion "new history equals the previous history with k dropped from the front and j appended at the back, window-bounded -- the relation a multi-micro-step tick produces"
+           :violations (count carry2-bad)
+           :violations-by-file-channel (vec (sort-by (juxt :file (comp str :channel))
+                                                     (map #(select-keys % [:file :channel]) carry2-bad)))
+           :dropped-distribution (into (sorted-map) (frequencies (map :dropped carry2)))
+           :appended-distribution (into (sorted-map) (frequencies (map :appended carry2)))
+           :non-trivial-carries (count (filter #(and (number? (:overlap %)) (pos? (:overlap %))
+                                                     (number? (:appended %)) (pos? (:appended %))) carry2))
+           :reading "This is the subject of the R7 operational check at futon2/docs/futon-aif-completeness.md:179 ('Verify it is updated tick-over-tick')."}
      :M6 {:prediction-error-entries (count errors) :both-precisions (count both)
           :differing (count (filter #(not= (get-in % [:entry :precision]) (get-in % [:entry :per-call-precision])) both))
           :ratio-min (when (seq ratios) (apply min ratios)) :ratio-max (when (seq ratios) (apply max ratios))}
@@ -216,7 +291,12 @@
 
 (def corpus (corpus-measurements))
 (def measurement-checks
-  (mapv (fn [[id m]] {:id (keyword (str "production-" (name id))) :result :pass :measurement m}) corpus))
+  ;; :kind :measurement -- these report what the corpus IS. Unlike the fixture
+  ;; checks above them, :pass here means "the measurement ran", not "the
+  ;; property holds"; each carries its own numbers and denominator.
+  (mapv (fn [[id m]] {:id (keyword (str "production-" (name id))) :kind :measurement
+                      :result :pass :measurement m})
+        corpus))
 
 (def plants
   [{:id :sample-variance-instead-of-regularized
