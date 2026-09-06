@@ -36,7 +36,8 @@
   :key-collision "Two different quantities are persisted under one key, so a reader of the trace cannot tell which one a record carries."
   :pointer-drift "A registry :code or :basis pointer resolves to a line that no longer contains what the field claims."
   :cross-node-grain-mix "Two terms of one equation are evaluated at different values of a shared parameter inside a single call."
-  :declared-source-not-read "An input the node's declared scope names is present in the node's own argument and is never read by it -- so the gap is at the node's binding form, not upstream of it."}
+  :declared-source-not-read "An input the node's declared scope names is present in the node's own argument and is never read by it -- so the gap is at the node's binding form, not upstream of it."
+  :retired-quantity-still-required-elsewhere "A quantity the equations registry retired by ruling is still required, in its retired form, by a document the registry does not gate. The node satisfies the registry and fails that document, and nothing in either records the difference. Added by slice 3; the vocabulary is extended rather than a row rewritten."}
 
  :slices
  [{:slice 1 :node :R5 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
@@ -62,7 +63,25 @@
                  :receipt "holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn"
                  :receipt-sha256 "1624feff25b93e006f257ec0bf08aeba125559e30282748ed57de08a6fe4119a"
                  :no-src-change "Both files are lab artefacts. No futon2 src/ or scripts/ file was touched, so no futon2 test run is claimed."}
-   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the output-history leg and no lock is taken because nothing here writes there. The files written by this slice are the harness, the carriers, the receipt, this matrix, the worklist row and p4ng/empirics-futon/pointer_check.bb."}]
+   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the output-history leg and no lock is taken because nothing here writes there. The files written by this slice are the harness, the carriers, the receipt, this matrix, the worklist row and p4ng/empirics-futon/pointer_check.bb."}
+
+  {:slice 3 :node :R8 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
+   :did "All four legs of :V7's per-node procedure. R8 is the first node with MORE THAN ONE registry row, and the three it has are in three different states -- one shipped, one retired with its producer deleted, one shipped behind a default-off flag -- so leg (a) is three checks and not one. A new harness was written; :F3's is bespoke to R5 and slice 2's to R2's channel table."
+   :ran ["clojure -M holes/labs/wm-contract/v7_r8_node_sim.clj (exit 0) -- 12 eps fixtures, 10 F_pi fixtures, 9 checks, 14 planted wrong producers, and a replay of the shipped eps producer against 6537 production channel records"
+         "the same command a second time, and diff -q against the first receipt -- byte-identical"
+         "clojure -M holes/labs/wm-contract/f8_prediction_error_readback.clj (exit 0) -- leg (b) for eps; diff -q against the committed runs/F8-prediction-error/clojure-readback.txt reported no difference"
+         "clojure -M holes/labs/wm-contract/f8_policy_free_energy_readback.clj (exit 0) -- leg (b) for F_pi; diff -q against the committed runs/F8-policy-free-energy/clojure-readback.txt reported no difference"
+         "clj-kondo --lint holes/labs/wm-contract/v7_r8_node_sim.clj -- 0 errors, 0 warnings"
+         "emacs -Q --batch -l futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/v7_r8_node_sim.clj -- OK"
+         "bb p4ng/empirics-futon/pointer_check.bb -- 0 unresolved"
+         "bash p4ng/empirics-futon/negative_controls.sh"]
+   :new-harness {:runner "holes/labs/wm-contract/v7_r8_node_sim.clj"
+                 :carriers "holes/labs/wm-contract/sim/R8-carriers.edn"
+                 :receipt "holes/labs/wm-contract/runs/V7-R8-node-sim/00-r8.edn"
+                 :receipt-sha256 "be449a55ccc12223e009e64eb883dbb328c4e5b9a31c54442cbd0efa88513769"
+                 :no-src-change "Both files are lab artefacts. No futon2 src/ or scripts/ file was touched, so no futon2 test run is claimed."}
+   :vocabulary-extended "This slice adds one key to :hole-types (:retired-quantity-still-required-elsewhere). No existing key was edited and no earlier row was touched."
+   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the replay and the two censuses. The files written by this slice are the harness, the carriers, the receipt, this matrix and the worklist row."}]
 
  :rows
  [{:node :R5
@@ -423,4 +442,173 @@
     "The 889-record range result is a statement about the inputs the node was given, not a proof that no input could take a channel out of range. The probe sweep answers that in the other direction and answers it differently: 12 of 14 channels leave the range when the input does."
     "The eleven :bounded-by-construction producer arguments in sim/R2-carriers.edn are code readings with file:line, not measurements and not proofs."
     "Nothing was repaired. observation.clj, aif-equations.edn, wr-overlay.edn, the F8 handoff summary and PROBLEMS-r2-r8-r7-batch2.md are all READ and left standing, with the three drifts recorded above for the review that TN 9a gates registry edits behind."
+    "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}
+  {:node :R8
+   :slice 3
+   :label "Present-fit mismatch"
+   :stage "PERCEIVE"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:16"
+   :verdict :hole
+   :registry-rows-all-met
+   "STATED FIRST, BECAUSE THE HOLE BELOW IS NOT AGAINST THE REGISTRY. R8 is the first node in this sweep with three equation rows, and all three are met. :prediction-error (aif-equations.edn:80-85) is shipped, route-tagged :R8 at scripts/futon2/report/war_machine.clj:6252, Lean-closed, its readback re-ran green this slice, it agreed with an exact-rational reference on all twelve fixtures at deviation 0.0, and its two identities were re-derived from 6537 production channel records at deviation 0.0. :free-energy (aif-equations.edn:92-101) is :status :retired by Joe's J2 ruling with :code 'NO PRODUCER AT HEAD', and the absence is real: the symbol resolves to nothing three ways. :policy-free-energy (aif-equations.edn:102-112) is shipped, Lean-closed, its readback re-ran green, and it took the declared branch on all ten fixtures. If the question were only 'does R8 have what the registry says', the answer for this node is yes."
+   :hole {:type :retired-quantity-still-required-elsewhere
+          :statement "The catalogue still asks R8 for the object the registry retired, and no record carries it. p4ng/sec-catalog.tex:202 states R8's invariant as 'one number per tick, computed from nothing but belief, observation, and trust', emitted 'in the per-tick trace beside the belief state'; futon2/docs/futon-aif-completeness.md:228 lists F among the fields each tick's record must contain. MEASURED OVER THE WHOLE CORPUS: 117 of 889 records ever carried a per-tick scalar, first written 2026-07-14 and last 2026-09-01, and the producer that wrote them was deleted by worklist :I5 slice (c) on 2026-09-01. F_pi is not that number and does not become it by being on the same node: it is one number PER CANDIDATE (145 of them on the three records where it applied), it takes no precision term at all -- its whole reduce body reads :prediction-mean, :prediction-variance, :variance-status and the observation, and nothing else (src/futon2/aif/policy_free_energy.clj:106-144), it scores the PREVIOUS tick's predictions against this tick's observation by an action-identity join (scripts/futon2/report/war_machine.clj:441-564), and it is default-off -- 3 of 889 records have it :present and :applied? true, 12 record :flag-off and 1 :incomplete-coverage. So the disagreement is between the registry and the catalogue, and neither document records that the other has moved."
+          :basis ["p4ng/sec-catalog.tex:202 -- the R8 paragraph and its 'Invariant to preserve: one number per tick'"
+                  "futon2/docs/futon-aif-completeness.md:226-241 -- the contract's R8 section; :228 names F among the required fields"
+                  "holes/labs/wm-contract/aif-equations.edn:93-100 -- the F row's :status :retired, its :code 'NO PRODUCER AT HEAD', and Joe's J2 :ruling record with its :discharged-by"
+                  "src/futon2/aif/free_energy.clj:7-12 (the deletion), src/futon2/aif/trace.clj:241-247 (revision 21 removing the scalar from the record), test/futon2/aif/free_energy_test.clj:293-301 (the absence asserted as a test)"
+                  "the :per-tick-scalar-census and :f-pi-posterior-census keys of holes/labs/wm-contract/runs/V7-R8-node-sim/00-r8.edn"
+                  "src/futon2/aif/policy_free_energy.clj:106-144 -- f-pi-for-candidate's reduce body; no precision term and no belief term appear in it"]
+          :ruling-condition-was-discharged
+          "This is NOT a claim that Joe's ruling was not honoured. His :consequence set the condition that the F row stays until its replacement is realised and consumed (aif-equations.edn:98), and the registry records RUN9/S4 discharging it: F_pi entered the live policy posterior on three ticks. What this row records is that the condition was about the REGISTRY's wiring, and the catalogue's invariant is about a different property -- one number, every tick, from belief, observation and trust -- which F_pi does not have and which nothing else in the tree now provides."
+          :not-a-ruling "Whether R8 should regain a per-tick present-fit scalar, or the catalogue paragraph should be restated to match the retirement, is Joe's. This row records that the two say different things and that nothing at HEAD satisfies the catalogue's version."}
+
+   :stated-limits
+   [{:limit :the-two-rows-on-this-node-disagree-about-a-negative-variance
+     :statement "R8's own two live producers take opposite decisions on the same defect, and the harness exhibits both in one run. eps SCORES a negative predicted variance: prediction-member checks finiteness and not sign (src/futon2/aif/free_energy.clj:191-201), so -4.0 is :present and the max at src/futon2/aif/free_energy.clj:270 floors it to min-variance, giving a record indistinguishable from one built on a variance of exactly zero except by reading :predicted-variance back out. F_pi REJECTS one, unconditionally, with :error :invalid-variance (src/futon2/aif/policy_free_energy.clj:120-122). Fixtures :present-negative-variance-scored and :negative-variance-rejects in holes/labs/wm-contract/sim/R8-carriers.edn are the two sides."
+     :first-recorded "aif-equations.edn:83 -- the :prediction-error row's :lean-note, by :F8 leg 1 slice 2 on 2026-09-05, which states the eps half as negativeVarianceIsNotRefused. What this slice adds is that the other row on the SAME NODE decides it the other way, and that the harness catches a producer that makes eps agree with F_pi (planted control :negative-variance-refused)."
+     :not-a-ruling "Which of the two is right is not decided here. What is recorded is that R8 does not have one answer."}
+
+    {:limit :f-pi-runs-off-the-route
+     :statement "The route a trace record carries names ten nodes, and the one :R8 entry names futon2.aif.free-energy/compute-prediction-error alone (scripts/futon2/report/war_machine.clj:6252). f-pi-vector's production caller emits no route tag: grep for route-tag over scripts/futon2/report/war_machine.clj returns ten call sites (:R20 :R12 :R2 :R7 :R3 :R8 :R5 :R6 :R14 :TRACE) and none of them names futon2.aif.policy-free-energy. So a reader working at route grain -- which is the grain p4ng/empirics-futon/control-map-edges.edn works at -- cannot see F_pi run even on the three ticks where it entered the posterior. The evidence that it ran on those ticks is in the decision's :f-pi-posterior envelope, not in :wm/route."
+     :where "the :f-pi-posterior-census key of holes/labs/wm-contract/runs/V7-R8-node-sim/00-r8.edn"
+     :not-repaired "Adding a route tag is a change to the machine, not a slice of :V7. Recorded."}
+
+    {:limit :the-scalar-was-first-written-on-the-day-its-reading-cadence-stopped
+     :statement "PROBLEMS-r2-r8-r7-batch2.md:93-96 carries the paper's finding that 'R8's daily gain-reading cadence stopped on 2026-07-14' (p4ng/sec-operator.tex:82-86; the badge is p4ng/empirics-futon/wr-overlay.edn:42, WR-27 :holds false, whose note says 'the per-tick mismatch IS the gain reading'). Measured against the corpus: the FIRST file carrying :variational-free-energy is data/wm-trace/wm-trace-2026-07-14.edn and the last is data/wm-trace/wm-trace-2026-09-01.edn. Trace revision 7, which added the scalar (src/futon2/aif/trace.clj:203), sits between revisions dated 2026-07-13 (src/futon2/aif/trace.clj:204-210). The per-tick present-fit number therefore began being written on the same day the cadence that would have read it stopped, and stopped being written seven weeks later; over its whole life it appears on 117 of the corpus's 889 records."
+     :where "the :per-tick-scalar-census and :files keys of holes/labs/wm-contract/runs/V7-R8-node-sim/00-r8.edn, with per-file sha256"
+     :and-the-tick-cadence-too "The corpus's own dates show the ticks lapsing as well, which is a different fact from the reading lapsing: 57 daily files, the last before the gap 2026-07-21 and the next 2026-08-30."}
+
+    {:limit :the-f-pi-reference-shares-its-logarithm-with-the-node
+     :statement "The eps reference is exact -- every fixture value is dyadic, evaluated in Clojure rationals, and compared at deviation 0.0 with the one named exception that the default min-variance 0.01 is not dyadic, so the floored cases divide by the same double the producer does. The F_pi reference cannot be exact, because ln(2 pi v) is transcendental. What is independent there is the ASSOCIATION: the reference sums the log-normalisers and the exact-rational normalised residuals separately and halves once (holes/labs/wm-contract/v7_r8_node_sim.clj:160-203), where the node accumulates the whole term per channel (src/futon2/aif/policy_free_energy.clj:140-142). That separates a missing 1/2, a missing 2 pi and an unnormalised residual -- the three planted controls prove it does -- and it cannot separate an error in java.lang.Math/log, which both sides call. The Lean witness is what states those terms algebraically, and leg (b) is where that side is re-run."}]
+
+   :legs
+   {:a
+    {:leg "enumerate the node's aif-equations rows and run them in the F3 node-sim harness against declared carriers with an independent reference"
+     :status :done-with-a-new-harness
+     :why-not-an-existing-harness "aif-equations gives R8 THREE rows, in three states, and neither existing harness fits: futon2.aif.node-sim is written for R5's three equations and slice 2's is written for R2's channel table. One of R8's rows also has no producer to run at all, so leg (a) for that row is an absence check rather than a comparison."
+     :equations [{:id :prediction-error :formal "eps_k := o_k - mu_k" :at "aif-equations.edn:80-85" :eq "buckley2017 eq. 45 error terms (reduction: no generalised coordinates)" :state :shipped}
+                 {:id :free-energy :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :at "aif-equations.edn:92-101" :eq "buckley2017 eq. 45 (reduction: 1/2 ln sigma terms dropped; mean over channels instead of sum)" :state :retired-producer-deleted}
+                 {:id :policy-free-energy :formal "F_pi := sum_k 1/2 ( ln(2 pi v_k(pi)) + (o_k - mu_k(pi))^2 / v_k(pi) )" :at "aif-equations.edn:102-112" :eq "parr2022 eq. B.9, p. 247" :state :shipped-flag-gated}]
+     :runner "holes/labs/wm-contract/v7_r8_node_sim.clj"
+     :carriers "holes/labs/wm-contract/sim/R8-carriers.edn"
+     :receipt "holes/labs/wm-contract/runs/V7-R8-node-sim/00-r8.edn"
+     :receipt-sha256 "be449a55ccc12223e009e64eb883dbb328c4e5b9a31c54442cbd0efa88513769"
+     :byte-identical-on-re-run {:method "cp of the receipt to a temp path, re-run, diff -q; then sha256sum" :result :identical}
+     :the-subject-is-the-shipped-node
+     "eps is the call path the machine runs: scripts/futon2/report/war_machine.clj:6110-6127 calls futon2.aif.free-energy/channel-prediction-error once per channel of futon2.aif.belief/channels-with-likelihood (src/futon2/aif/belief.clj:919-934, eight of the fourteen), and the route is tagged :R8 at scripts/futon2/report/war_machine.clj:6252. F_pi's production caller is f-pi-dark-readback (scripts/futon2/report/war_machine.clj:441-564), which calls f-pi-vector at scripts/futon2/report/war_machine.clj:528-533 with {:absent-variance :floor} -- so the floored arm, not the function's own :reject default, is the map the machine runs, and the fixtures check both."
+     :checks {:total 9 :pass 9 :fail 0
+              :eps-fixtures 12
+              :eps-exact-reference-comparisons 36
+              :eps-max-deviation 0.0
+              :f-pi-fixtures 10
+              :f-pi-comparisons 6
+              :f-pi-max-deviation-note "reported in the receipt's :f-pi-agrees-with-independent-association check, against tolerance 1.0e-12"
+              :corpus-replay {:error-identity-comparisons 6537 :error-max-deviation 0.0
+                              :per-call-precision-comparisons 6531 :per-call-precision-max-deviation 0.0
+                              :weighted-error-comparisons 6537 :weighted-error-max-deviation 0.0
+                              :reads "Not a fixture. Each recorded prediction-error entry re-derived from that record's OWN :observed, :predicted-mean and :predicted-variance and compared with what the tick wrote. 6484 of the 6537 predate the AC1 typed triple and carry no :status key; excluding them would have shrunk this leg to 53."}}
+     :planted-wrong-producer-controls
+     {:n 14 :all-caught true
+      :reads "Each is a wrong R8 someone could write, and each must be caught by a check the SHIPPED producer passes. The two censuses are excluded from that set, because a check the shipped node fails cannot discriminate between a right producer and a wrong one."
+      :caught [{:id :reversed-error :by [:eps-agrees-with-exact-reference]}
+               {:id :precision-is-the-variance :by [:eps-agrees-with-exact-reference]}
+               {:id :precision-without-the-floor :by [:eps-agrees-with-exact-reference]}
+               {:id :weighted-error-is-unweighted :by [:eps-agrees-with-exact-reference]}
+               {:id :absent-observation-scored-as-zero :by [:eps-status-matches-declaration]}
+               {:id :absence-dominates-refusal :by [:eps-status-matches-declaration]}
+               {:id :negative-variance-refused :by [:eps-status-matches-declaration :eps-agrees-with-exact-reference :eps-refusal-names-offending-members]}
+               {:id :contract-stamp-dropped :by [:eps-contract-stamped]}
+               {:id :f-pi-without-the-half :by [:f-pi-agrees-with-independent-association]}
+               {:id :f-pi-log-variance-only :by [:f-pi-agrees-with-independent-association]}
+               {:id :f-pi-residual-not-normalised :by [:f-pi-agrees-with-independent-association]}
+               {:id :f-pi-every-zero-floored :by [:f-pi-branch-matches-declaration :f-pi-agrees-with-independent-association]}
+               {:id :f-pi-negative-variance-scored :by [:f-pi-branch-matches-declaration]}
+               {:id :f-pi-skips-unmatched-channels :by [:f-pi-branch-matches-declaration]}]
+      :the-one-that-looks-right "Planted control :negative-variance-refused makes eps refuse a negative predicted variance, which is what a reader would expect and what the OTHER row on this node does. The harness catches it, which is what makes the asymmetry recorded above a fact about the shipped node rather than an opinion about it."
+      :at "holes/labs/wm-contract/v7_r8_node_sim.clj:455-578 (the fourteen planted producers), receipt key :negative-controls"}
+     :the-retired-row-has-no-comparison-to-make
+     {:check :retired-f-scalar-has-no-producer
+      :result :pass
+      :method "futon2.aif.free-energy/compute-variational-free-energy resolved three ways -- resolve, ns-resolve and a lookup in ns-publics -- all nil, and no var in the namespace has 'variational' in its name. The same assertion test/futon2/aif/free_energy_test.clj:293-301 makes, run here against the registry row rather than against the namespace's own test."}}
+
+    :b
+    {:leg "where an F8 Lean module exists, re-run the readback certificate"
+     :status :done
+     :statement "R8 is the first node in this sweep with TWO F8 modules, one per live row, and both readbacks re-ran green and byte-identical at this HEAD."
+     :certificates
+     [{:row :prediction-error :lean "machineChannelPredictionError"
+       :module "mathlib4/DarkTower/WarMachine/MachinePredictionError.lean"
+       :readback-script "holes/labs/wm-contract/f8_prediction_error_readback.clj"
+       :artifact "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt"
+       :re-run "exit 0; diff -q against the committed artifact reported no difference"
+       :verdict-line "every case matches its Lean statement EXACTLY (8/8 scored at delta 0.0, 5/5 typed outcomes, channel sets equal)"}
+      {:row :policy-free-energy :lean "machinePolicyFreeEnergy"
+       :module "mathlib4/DarkTower/WarMachine/MachinePolicyFreeEnergy.lean"
+       :readback-script "holes/labs/wm-contract/f8_policy_free_energy_readback.clj"
+       :artifact "holes/labs/wm-contract/runs/F8-policy-free-energy/clojure-readback.txt"
+       :re-run "exit 0; diff -q against the committed artifact reported no difference"
+       :verdict-line "every production case matches its Lean branch/reference"}]
+     :the-retired-row "The F row's :lean is variationalFreeEnergy at Holes.lean:6828 and it has no readback directory: ls holes/labs/wm-contract/runs/ | grep '^F8-' gives twelve, none for the variational scalar. That is consistent rather than a gap -- there is no Clojure side left to read back."
+     :stated-limit "No Lean was elaborated by this slice. The three rows' :lean-status :closed is read from the registry; what was re-run is the Clojure side of each pair."}
+
+    :c
+    {:leg "where the node is plumbing/assurance, re-verify the ALIGN census's exists-cells at file:line"
+     :status :not-applicable
+     :statement "R8 is an equation node, not plumbing: it carries three :class :theory-defined rows in aif-equations.edn. ALIGN-rnode-process-census.md names no R8 cell at all."
+     :search "grep -c 'R8' holes/labs/wm-contract/ALIGN-rnode-process-census.md -> 0"}
+
+    :d
+    {:leg "check the node's known candidate holes from PROBLEMS-*.md -- confirmed or cleared with evidence"
+     :status :done
+     :dossier "holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:77-97 (R8, 'Residual problems it does not solve')"
+     :candidates
+     [{:id :eps-runs-in-clojure-but-is-absent-from-lean
+       :dossier-class :implementation-flaw
+       :dossier-claim "the generated table marks the R8 row 'not in Lean / missing' while compute-prediction-error emits observed, predicted, variance, error, precision and weighted error"
+       :dossier-at "PROBLEMS-r2-r8-r7-batch2.md:79-85"
+       :verdict :cleared
+       :evidence ["p4ng/sec-lean-state-generated.tex:14 -- the regenerated table now reads 'prediction-error | R8 | eps | machineChannelPredictionError (def) | MachinePredictionError.lean:160'"
+                  "aif-equations.edn:82 -- :lean 'machineChannelPredictionError' :lean-status :closed, declared 2026-09-05 by :F8 leg 1 slice 2"
+                  "leg (b) above: the readback re-ran at this HEAD, exit 0, artifact byte-identical to the committed one"]
+       :note "The dossier was written against p4ng/sec-lean-state-generated.tex before the :F8 leg-1 slices; the generated table it cites now says the opposite."}
+
+      {:id :f-pi-is-runtime-inhabited-but-unformalized
+       :dossier-class :implementation-flaw
+       :dossier-claim "F-pi is likewise runtime-inhabited but unformalized; the missing formal carrier is an implementation defect on the proof side"
+       :dossier-at "PROBLEMS-r2-r8-r7-batch2.md:86-91"
+       :verdict :cleared
+       :evidence ["p4ng/sec-lean-state-generated.tex:17 -- 'policy-free-energy | R8 | F-pi | machinePolicyFreeEnergy (def) | MachinePolicyFreeEnergy.lean:59'"
+                  "aif-equations.edn:106 -- :lean 'machinePolicyFreeEnergy' :lean-status :closed, declared 2026-09-05 by :F8 leg 1 slice 4"
+                  "leg (b) above: the readback re-ran at this HEAD, exit 0, artifact byte-identical to the committed one"]}
+
+      {:id :a-diagnostic-not-read-on-its-declared-cadence
+       :dossier-class :implementation-flaw
+       :dossier-claim "R8's daily gain-reading cadence stopped on 2026-07-14 and the last outer-loop run was 2026-07-27; a computed diagnostic that is not read on its declared cadence does not solve the catalogue's validation and alarm problem"
+       :dossier-at "PROBLEMS-r2-r8-r7-batch2.md:92-96"
+       :verdict :confirmed-and-worse
+       :evidence ["p4ng/empirics-futon/wr-overlay.edn:42 -- the WR-27 badge on R8, :holds false, whose note says 'the per-tick mismatch IS the gain reading'"
+                  "p4ng/sec-operator.tex:82-86 -- the paper's own statement of the dates"
+                  "the :per-tick-scalar-census key of holes/labs/wm-contract/runs/V7-R8-node-sim/00-r8.edn -- 117 of 889 records ever carried the scalar, first file 2026-07-14, last file 2026-09-01, 47 of 57 files carry none"]
+       :note "Confirmed, and the measurement changes what the problem is. The dossier says a computed diagnostic is not being READ. At HEAD it is no longer COMPUTED: the producer was deleted on 2026-09-01 (src/futon2/aif/free_energy.clj:7-12), so the cadence has nothing left to read. That is the :hole above, reached from the dossier instead of from the catalogue."}]
+
+     :two-candidates-the-dossier-does-not-name
+     [{:id :the-doc-that-grades-r8-is-stale-in-both-directions
+       :type :grading-document-behind-the-code-it-grades
+       :statement "futon2/docs/futon-aif-completeness.md:226-241 is R8's operational criterion and it is now wrong on both sides. Its required-field list at :228 names F, which no record carries. Its 'Honest gap that remains' at :241 says 'prediction errors (eps per R8) aren't recorded because R3a ... is still partial. The schema will gain :prediction-errors when R3a lands' -- and :prediction-errors is on 887 of the corpus's 889 records, the earliest of them data/wm-trace/wm-trace-2026-05-18.edn. The row's grade is 'Satisfied as of v0.7 (2026-05-17)' and the summary table at :347 carries the same tick."
+       :not-repaired "The document is READ and left standing. Editing a contract document is not in :V7's slice acceptance; recorded for the review TN 9a gates. This is the same class slice 2 recorded one row over, at :72-78 of the same file."}
+
+      {:id :the-catalogue-and-the-registry-have-diverged-with-no-record
+       :type :two-documents-one-node
+       :statement "p4ng/sec-catalog.tex:202 and aif-equations.edn:92-101 now describe different R8s, and neither cites the other. The registry retired F with a full ruling record naming Joe, the date, the grounds and the discharge; the catalogue paragraph is unchanged and still states the retired object as R8's invariant to preserve. There is no entry in aif-equations.edn :choices or in p4ng/empirics-futon/control-map-edges.edn :decisions that reconciles them."
+       :where-this-would-go "A reconciliation is a ruling, so it goes in :choices or :decisions and is Joe's to write. This row only records that neither carries one."}]}}
+
+   :what-this-row-does-not-claim
+   ["Nothing here says the retirement of F was wrong, or that the catalogue is wrong. What is recorded is that the two documents ask for different things and that nothing at HEAD satisfies the catalogue's version."
+    "Nothing here says eps is RIGHT in the sense of being the error a strategic controller should compute -- only that it is the error the registry declares, that it agrees with an exact reference, and that 6537 production records reproduce from their own inputs."
+    "No live tick was run and no run lock was taken. data/wm-trace was opened for reading; nothing under data/ was written."
+    "No Lean was elaborated. Leg (b) re-runs the Clojure side of two pairs; the :lean-status :closed on all three rows is read from the registry."
+    "The F_pi flag chain was NOT exercised. The :f-pi-posterior census reads what past ticks recorded and makes no claim about what a tick today would record."
+    "The eps replay covers the channels the corpus has records for. It says nothing about the six of fourteen channels that have no likelihood model and therefore produce no eps record at all (src/futon2/aif/belief.clj:919-934)."
+    "Nothing was repaired. aif-equations.edn, sec-catalog.tex, docs/futon-aif-completeness.md, wr-overlay.edn and PROBLEMS-r2-r8-r7-batch2.md are all READ and left standing, with the drifts recorded above for the review that TN 9a gates registry edits behind."
     "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}]}

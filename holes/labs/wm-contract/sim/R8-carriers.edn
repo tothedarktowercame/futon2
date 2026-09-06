@@ -1,0 +1,184 @@
+;; sim/R8-carriers.edn -- declared carriers for :V7 slice 3, node R8
+;; ("Present-fit mismatch", PERCEIVE, p4ng/empirics-futon/control-stages.edn:16).
+;;
+;; R8 hosts THREE rows of holes/labs/wm-contract/aif-equations.edn, and they are
+;; in three different states, which is why this file has three fixture blocks
+;; rather than one:
+;;
+;;   :prediction-error   eps := o_k - mu_k          aif-equations.edn:80-85
+;;                       shipped, route-tagged :R8 at
+;;                       scripts/futon2/report/war_machine.clj:6252
+;;   :free-energy        F := 1/2 mean_k(Pi_k eps_k^2)   aif-equations.edn:92-101
+;;                       RETIRED, no producer at HEAD (Joe's J2 ruling; the
+;;                       producer was deleted by worklist :I5 slice (c))
+;;   :policy-free-energy F_pi                       aif-equations.edn:102-112
+;;                       shipped behind FUTON_WM_FPI_POSTERIOR, default off
+;;
+;; EVERY FIXTURE VALUE IS DYADIC, so the reference can be evaluated in exact
+;; rationals and compared against the producer's double with no tolerance --
+;; except the two places a non-dyadic constant is unavoidable and named:
+;; the default min-variance 0.01 (a decimal no double represents exactly) and
+;; ln(2 pi v) in F_pi, which is transcendental. Both are flagged on the fixture.
+{:id :R8-carriers-v1
+ :node :R8
+ :row :V7
+ :slice 3
+
+ :declaration-sites
+ {:eps-producer "src/futon2/aif/free_energy.clj:203-278 (compute-prediction-error)"
+  :eps-envelope-reader "src/futon2/aif/free_energy.clj:280-295 (channel-prediction-error)"
+  :eps-member-classifier "src/futon2/aif/free_energy.clj:191-201 (prediction-member)"
+  :eps-finite-guard "src/futon2/aif/free_energy.clj:182-189 (finite-double)"
+  :eps-contract-stamp "src/futon2/aif/free_energy.clj:176-180 (prediction-error-contract)"
+  :eps-tick-call "scripts/futon2/report/war_machine.clj:6110-6127"
+  :eps-route-tag "scripts/futon2/report/war_machine.clj:6252"
+  :eps-channel-set "src/futon2/aif/belief.clj:919-934 (channels-with-likelihood, eight of fourteen)"
+  :f-producer "aif-equations.edn:93-97 -- ':code NO PRODUCER AT HEAD'; the deletion is recorded at src/futon2/aif/free_energy.clj:7-12"
+  :f-record-removal "src/futon2/aif/trace.clj:241-247 (revision 21)"
+  :f-absence-test "test/futon2/aif/free_energy_test.clj:293-301"
+  :f-pi-producer "src/futon2/aif/policy_free_energy.clj:41-144 (f-pi-for-candidate)"
+  :f-pi-vector "src/futon2/aif/policy_free_energy.clj:146-151"
+  :f-pi-production-caller "scripts/futon2/report/war_machine.clj:441-564 (f-pi-dark-readback; the f-pi-vector call is at scripts/futon2/report/war_machine.clj:528-533)"
+  :f-pi-preconditions "scripts/futon2/report/war_machine.clj:286-317"
+  :catalogue-claim "p4ng/sec-catalog.tex:202 -- 'a single number, comparable across time ... one number per tick, computed from nothing but belief, observation, and trust'"
+  :contract-claim "futon2/docs/futon-aif-completeness.md:226-239 -- the per-tick record's named fields, F among them"}
+
+ ;; -------------------------------------------------------------------------
+ ;; eps. Each fixture is (observed, prediction, opts) and the status the
+ ;; DECLARATION requires -- read off the producer's own docstring contract
+ ;; (src/futon2/aif/free_energy.clj:204-237), not off its body.
+ ;; -------------------------------------------------------------------------
+ :eps-fixtures
+ [{:id :present-basic
+   :why "The registry form on a well-formed triple: eps = o - mu, precision = 1/v with v above the floor."
+   :observed 0.75 :prediction {:mean 0.5 :variance 0.25} :opts {}
+   :expect :present}
+
+  {:id :present-negative-error
+   :why "eps is signed. An observation below the prediction gives a negative error and a negative weighted error."
+   :observed 0.25 :prediction {:mean 0.75 :variance 0.5} :opts {}
+   :expect :present}
+
+  {:id :present-zero-variance-floored
+   :why "The eps0 floor. A likelihood reporting certainty gets 1/min-variance, not a division by zero."
+   :observed 0.5 :prediction {:mean 0.25 :variance 0.0} :opts {}
+   :expect :present
+   :non-dyadic "min-variance defaults to 0.01, which no double represents exactly; the reference divides by the same double."}
+
+  {:id :present-negative-variance-scored
+   :why "THE FINDING the :prediction-error row's :lean-note states (aif-equations.edn:83, negativeVarianceIsNotRefused): prediction-member checks FINITENESS and not sign, so a negative variance is :present and the max floors it. Recorded here as a measured fact, not as a gate."
+   :observed 0.5 :prediction {:mean 0.25 :variance -4.0} :opts {}
+   :expect :present
+   :non-dyadic "same 0.01 floor as :present-zero-variance-floored -- which is the point: the two agree."}
+
+  {:id :present-min-variance-opt
+   :why "The floor is an option, not a constant. A caller-supplied :min-variance above the reported variance takes the floor branch at a dyadic value, so this case is exact."
+   :observed 0.5 :prediction {:mean 0.0 :variance 0.001} :opts {:min-variance 0.5}
+   :expect :present}
+
+  {:id :absent-observation
+   :why "AC1: an observation nobody made is not an observation of zero. The record carries a reason and no numbers."
+   :observed nil :prediction {:mean 0.5 :variance 0.25} :opts {}
+   :expect :absent}
+
+  {:id :absent-carries-envelope-reason
+   :why "The reason travels with the record when the caller read it through an observation envelope."
+   :observed nil :prediction {:mean 0.5 :variance 0.25}
+   :opts {:observation-status {:reason :source-field-missing :paths [[:graph :summary]]} :channel :active-repo-ratio}
+   :expect :absent}
+
+  {:id :refused-missing-mean
+   :why "A likelihood that produced no mean is a producer defect and stays loud."
+   :observed 0.5 :prediction {:variance 0.25} :opts {}
+   :expect :refused}
+
+  {:id :refused-nil-variance
+   :why "Present-but-nil is :missing, and the record names the offending member."
+   :observed 0.5 :prediction {:mean 0.5 :variance nil} :opts {}
+   :expect :refused}
+
+  {:id :refused-infinite-variance
+   :why "finite-double separates :missing from :not-finite, because the refusal record has to say which happened."
+   :observed 0.5 :prediction {:mean 0.5 :variance ##Inf} :opts {}
+   :expect :refused}
+
+  {:id :refused-nonnumeric-observed
+   :why "A value the producer was GIVEN and cannot use is malformed, not absent."
+   :observed "0.5" :prediction {:mean 0.5 :variance 0.25} :opts {}
+   :expect :refused}
+
+  {:id :refusal-dominates-absence
+   :why "MachinePredictionErrorWitness.refusalDominatesAbsence: an unobserved channel whose likelihood ALSO failed is REFUSED, not omitted -- so a tick's omission count is not its count of unobserved channels."
+   :observed nil :prediction {:mean 0.5} :opts {}
+   :expect :refused}]
+
+ ;; -------------------------------------------------------------------------
+ ;; F_pi. Each fixture is (prediction, observation, opts) and the branch the
+ ;; declaration requires -- read off f-pi-for-candidate's docstring
+ ;; (src/futon2/aif/policy_free_energy.clj:42-82).
+ ;; -------------------------------------------------------------------------
+ :f-pi-fixtures
+ [{:id :two-channel-positive
+   :why "The registry form, summed over two channels with different variances."
+   :prediction {:prediction-mean {:a 0.5 :b 0.25} :prediction-variance {:a 0.25 :b 0.5}}
+   :observation {:a 0.75 :b 0.75} :opts {}
+   :expect :scored
+   :non-dyadic "ln(2 pi v) is transcendental; only the residual^2/v half is exact."}
+
+  {:id :one-channel-zero-residual
+   :why "A perfect fit still costs the log-normaliser: F_pi is not zero when the residual is."
+   :prediction {:prediction-mean {:a 0.5} :prediction-variance {:a 0.25}}
+   :observation {:a 0.5} :opts {}
+   :expect :scored}
+
+  {:id :absent-zero-floored
+   :why "PRODUCTION'S ARM. A zero the action model declared :absent carries no prediction; f-pi-dark-readback passes {:absent-variance :floor} (scripts/futon2/report/war_machine.clj:528-533), so the floor 0.01 is used."
+   :prediction {:prediction-mean {:a 0.5} :prediction-variance {:a 0.0}
+                :variance-status {:a {:status :absent :reason :deterministic-by-action-model}}}
+   :observation {:a 0.75} :opts {:absent-variance :floor}
+   :expect :scored
+   :non-dyadic "the 0.01 floor and the log."}
+
+  {:id :absent-zero-rejects-by-default
+   :why "The function's OWN default is :reject. The same fixture rejects without the caller's declaration -- which is why the arm production takes had to be checked and not assumed."
+   :prediction {:prediction-mean {:a 0.5} :prediction-variance {:a 0.0}
+                :variance-status {:a {:status :absent :reason :deterministic-by-action-model}}}
+   :observation {:a 0.75} :opts {}
+   :expect :rejected :error :deterministic-mismatch}
+
+  {:id :bare-zero-still-rejects-under-floor
+   :why "MachinePolicyFreeEnergyWitness.bareZeroStillRejectsUnderFloor: a zero with no :absent status is a real deterministic claim, and :floor does not rescue it."
+   :prediction {:prediction-mean {:a 0.5} :prediction-variance {:a 0.0}}
+   :observation {:a 0.75} :opts {:absent-variance :floor}
+   :expect :rejected :error :deterministic-mismatch}
+
+  {:id :bare-zero-within-tolerance-contributes-nothing
+   :why "A deterministic claim the observation meets contributes 0.0 rather than an infinite density."
+   :prediction {:prediction-mean {:a 0.5} :prediction-variance {:a 0.0}}
+   :observation {:a 0.5} :opts {}
+   :expect :scored}
+
+  {:id :zero-within-supplied-tolerance
+   :why ":deterministic-tolerance widens the band; the contribution is still exactly 0.0."
+   :prediction {:prediction-mean {:a 0.5} :prediction-variance {:a 0.0}}
+   :observation {:a 0.625} :opts {:deterministic-tolerance 0.25}
+   :expect :scored}
+
+  {:id :negative-variance-rejects
+   :why "varianceTrichotomy's first arm: a negative variance always rejects. Contrast :present-negative-variance-scored above -- the eps producer on the SAME node scores one."
+   :prediction {:prediction-mean {:a 0.5} :prediction-variance {:a -0.25}}
+   :observation {:a 0.75} :opts {}
+   :expect :rejected :error :invalid-variance}
+
+  {:id :channel-mismatch-rejects
+   :why "Missing or extra channels are rejected rather than skipped or filled with zero (src/futon2/aif/policy_free_energy.clj:23-38)."
+   :prediction {:prediction-mean {:a 0.5 :b 0.5} :prediction-variance {:a 0.25 :b 0.25}}
+   :observation {:a 0.75} :opts {}
+   :expect :rejected :error :channel-mismatch}
+
+  {:id :mixed-scored-and-deterministic
+   :why "One scored channel beside one absent-zero channel under :floor -- the shape a real tick takes, where 12 of 14 channels carry an action-model absent zero."
+   :prediction {:prediction-mean {:a 0.5 :b 0.25} :prediction-variance {:a 0.25 :b 0.0}
+                :variance-status {:b {:status :absent :reason :deterministic-by-action-model}}}
+   :observation {:a 0.75 :b 0.375} :opts {:absent-variance :floor}
+   :expect :scored}]}

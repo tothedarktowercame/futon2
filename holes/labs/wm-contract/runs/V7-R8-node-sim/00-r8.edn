@@ -1,0 +1,1237 @@
+{:stage "PERCEIVE",
+ :negative-controls
+ {:planted-producers
+  [{:id :reversed-error,
+    :why
+    "eps = mu - o. The sign of the miss is what R3 attributes by, so a reversed error moves belief the wrong way.",
+    :verdict :caught,
+    :caught-by [:eps-agrees-with-exact-reference]}
+   {:id :precision-is-the-variance,
+    :why
+    "The registry's Pi is the RECIPROCAL of the floored variance. A producer that stamps the variance itself is confidently backwards.",
+    :verdict :caught,
+    :caught-by [:eps-agrees-with-exact-reference]}
+   {:id :precision-without-the-floor,
+    :why
+    "1/v with no max. The eps0 floor is the whole content of the term at a certain likelihood.",
+    :verdict :caught,
+    :caught-by [:eps-agrees-with-exact-reference]}
+   {:id :weighted-error-is-unweighted,
+    :why
+    "R3b's precision-weighted error dropped back to the raw error -- the failure that would make R7 inert without any error message.",
+    :verdict :caught,
+    :caught-by [:eps-agrees-with-exact-reference]}
+   {:id :absent-observation-scored-as-zero,
+    :why
+    "The pre-AC1 producer: a channel this tick never observed scored against 0.0. Joe's 2026-09-02 ruling removed exactly this.",
+    :verdict :caught,
+    :caught-by [:eps-status-matches-declaration]}
+   {:id :absence-dominates-refusal,
+    :why
+    "The order of the two guards reversed: an unobserved channel whose likelihood ALSO failed would be quietly omitted instead of refusing the whole update.",
+    :verdict :caught,
+    :caught-by [:eps-status-matches-declaration]}
+   {:id :negative-variance-refused,
+    :why
+    "THE PLANT THAT LOOKS RIGHT. Refusing a negative predicted variance is what a reader would expect; the shipped producer scores it, because prediction-member checks finiteness and not sign (aif-equations.edn:83). The harness catches this plant, which is what makes the finding a fact about the shipped node rather than an opinion about it.",
+    :verdict :caught,
+    :caught-by
+    [:eps-status-matches-declaration
+     :eps-agrees-with-exact-reference
+     :eps-refusal-names-offending-members]}
+   {:id :contract-stamp-dropped,
+    :why
+    "A record with no producer contract cannot be told from a record written by a producer that predates the contract (C129).",
+    :verdict :caught,
+    :caught-by [:eps-contract-stamped]}
+   {:id :f-pi-without-the-half,
+    :why
+    "The 1/2 dropped. Every candidate's F_pi doubles, and B.9 subtracts it from the policy score.",
+    :verdict :caught,
+    :caught-by [:f-pi-agrees-with-independent-association]}
+   {:id :f-pi-log-variance-only,
+    :why
+    "ln(v) instead of ln(2 pi v): the Gaussian normaliser without its constant. Changes every total by a fixed per-channel offset, which a within-tick comparison would not reveal.",
+    :verdict :caught,
+    :caught-by [:f-pi-agrees-with-independent-association]}
+   {:id :f-pi-residual-not-normalised,
+    :why
+    "r^2 instead of r^2/v. The channel with the least confident prediction would count most, not least.",
+    :verdict :caught,
+    :caught-by [:f-pi-agrees-with-independent-association]}
+   {:id :f-pi-every-zero-floored,
+    :why
+    "The :floor arm applied to a BARE zero as well as to an action-model absent one -- the collapse the two-kinds-of-zero distinction exists to prevent.",
+    :verdict :caught,
+    :caught-by
+    [:f-pi-branch-matches-declaration
+     :f-pi-agrees-with-independent-association]}
+   {:id :f-pi-negative-variance-scored,
+    :why
+    "A negative variance scored on its magnitude instead of rejected. Contrast the eps producer on the same node, which scores one -- the two rows do not agree, and that is a fact about R8, not about this plant.",
+    :verdict :caught,
+    :caught-by [:f-pi-branch-matches-declaration]}
+   {:id :f-pi-skips-unmatched-channels,
+    :why
+    "Missing channels skipped instead of rejected -- a candidate scored on a subset of the evidence, which is how a partially-covered candidate would win a posterior it did not earn.",
+    :verdict :caught,
+    :caught-by [:f-pi-branch-matches-declaration]}],
+  :n 14,
+  :all-caught true,
+  :reads
+  "Each is a wrong R8 someone could write, and each must be caught by a check the SHIPPED producer passes. The two censuses below are excluded from that set, because they measure the node against a claim it does not meet and a check the shipped node fails cannot discriminate between a right producer and a wrong one."},
+ :harness :v7-r8-node-sim,
+ :f-pi
+ {:fixtures
+  [{:id :two-channel-positive,
+    :why
+    "The registry form, summed over two channels with different variances.",
+    :expect :scored,
+    :non-dyadic
+    "ln(2 pi v) is transcendental; only the residual^2/v half is exact."}
+   {:id :one-channel-zero-residual,
+    :why
+    "A perfect fit still costs the log-normaliser: F_pi is not zero when the residual is.",
+    :expect :scored}
+   {:id :absent-zero-floored,
+    :why
+    "PRODUCTION'S ARM. A zero the action model declared :absent carries no prediction; f-pi-dark-readback passes {:absent-variance :floor} (scripts/futon2/report/war_machine.clj:528-533), so the floor 0.01 is used.",
+    :expect :scored,
+    :non-dyadic "the 0.01 floor and the log."}
+   {:id :absent-zero-rejects-by-default,
+    :why
+    "The function's OWN default is :reject. The same fixture rejects without the caller's declaration -- which is why the arm production takes had to be checked and not assumed.",
+    :expect :rejected,
+    :error :deterministic-mismatch}
+   {:id :bare-zero-still-rejects-under-floor,
+    :why
+    "MachinePolicyFreeEnergyWitness.bareZeroStillRejectsUnderFloor: a zero with no :absent status is a real deterministic claim, and :floor does not rescue it.",
+    :expect :rejected,
+    :error :deterministic-mismatch}
+   {:id :bare-zero-within-tolerance-contributes-nothing,
+    :why
+    "A deterministic claim the observation meets contributes 0.0 rather than an infinite density.",
+    :expect :scored}
+   {:id :zero-within-supplied-tolerance,
+    :why
+    ":deterministic-tolerance widens the band; the contribution is still exactly 0.0.",
+    :expect :scored}
+   {:id :negative-variance-rejects,
+    :why
+    "varianceTrichotomy's first arm: a negative variance always rejects. Contrast :present-negative-variance-scored above -- the eps producer on the SAME node scores one.",
+    :expect :rejected,
+    :error :invalid-variance}
+   {:id :channel-mismatch-rejects,
+    :why
+    "Missing or extra channels are rejected rather than skipped or filled with zero (src/futon2/aif/policy_free_energy.clj:23-38).",
+    :expect :rejected,
+    :error :channel-mismatch}
+   {:id :mixed-scored-and-deterministic,
+    :why
+    "One scored channel beside one absent-zero channel under :floor -- the shape a real tick takes, where 12 of 14 channels carry an action-model absent zero.",
+    :expect :scored}],
+  :fixture-count 10,
+  :runs
+  [{:fixture :two-channel-positive,
+    :expect :scored,
+    :status :scored,
+    :error-key nil,
+    :total 1.1731562955694275,
+    :reference-total 1.1731562955694275,
+    :scored-channels 2}
+   {:fixture :one-channel-zero-residual,
+    :expect :scored,
+    :status :scored,
+    :error-key nil,
+    :total 0.2257913526447274,
+    :reference-total 0.22579135264472738,
+    :scored-channels 1}
+   {:fixture :absent-zero-floored,
+    :expect :scored,
+    :status :scored,
+    :error-key nil,
+    :total 1.741353440210627,
+    :reference-total 1.7413534402106272,
+    :scored-channels 1}
+   {:fixture :absent-zero-rejects-by-default,
+    :expect :rejected,
+    :status :rejected,
+    :error-key :deterministic-mismatch,
+    :total nil,
+    :reference-total nil,
+    :scored-channels nil}
+   {:fixture :bare-zero-still-rejects-under-floor,
+    :expect :rejected,
+    :status :rejected,
+    :error-key :deterministic-mismatch,
+    :total nil,
+    :reference-total nil,
+    :scored-channels nil}
+   {:fixture :bare-zero-within-tolerance-contributes-nothing,
+    :expect :scored,
+    :status :scored,
+    :error-key nil,
+    :total 0.0,
+    :reference-total 0.0,
+    :scored-channels 0}
+   {:fixture :zero-within-supplied-tolerance,
+    :expect :scored,
+    :status :scored,
+    :error-key nil,
+    :total 0.0,
+    :reference-total 0.0,
+    :scored-channels 0}
+   {:fixture :negative-variance-rejects,
+    :expect :rejected,
+    :status :rejected,
+    :error-key :invalid-variance,
+    :total nil,
+    :reference-total nil,
+    :scored-channels nil}
+   {:fixture :channel-mismatch-rejects,
+    :expect :rejected,
+    :status :rejected,
+    :error-key :channel-mismatch,
+    :total nil,
+    :reference-total nil,
+    :scored-channels nil}
+   {:fixture :mixed-scored-and-deterministic,
+    :expect :scored,
+    :status :scored,
+    :error-key nil,
+    :total -0.2516052071446456,
+    :reference-total -0.2516052071446455,
+    :scored-channels 2}]},
+ :what-this-is
+ "R8's three registry rows run against declared fixtures with independent references, plus a replay of the shipped eps producer against its own recorded output. The eps producer IS the shipped call path: scripts/futon2/report/war_machine.clj:6110-6127 calls futon2.aif.free-energy/channel-prediction-error per channel and the route is tagged :R8 at scripts/futon2/report/war_machine.clj:6252. F_pi is shipped behind a default-off flag. F has no producer at HEAD and the check is that its absence is real.",
+ :not-done
+ ["Only R8. The other control-stages nodes are later slices of their own, in aif-equations dependency order."
+  "No live tick, no run lock, nothing written under data/. The trace corpus is opened for reading."
+  "gen_aif_dag.bb not run; nothing regenerated into a publish (TN 9a)."
+  "aif-equations.edn is READ and not written."
+  "No Lean was elaborated. The :lean-status :closed on all three rows is read from the registry; leg (b) of :V7 re-runs the two Clojure readbacks, which is a different claim."
+  "The F_pi reference shares java.lang.Math/log with the node. What is independent there is the association and the 1/2, not the logarithm; the Lean witness is what states the log terms algebraically."
+  "The F_pi flag chain was NOT exercised: no tick ran, so the census of :f-pi-posterior below reads what past ticks recorded and makes no claim about what a tick today would record."],
+ :checks
+ [{:check :eps-status-matches-declaration,
+   :status :pass,
+   :reads
+   "Every fixture's typed status is the one the declaration requires.",
+   :mismatches []}
+  {:check :eps-agrees-with-exact-reference,
+   :status :pass,
+   :reads
+   "Exact-rational reference from the registry formal line; the comparison is at deviation 0.0, not a tolerance.",
+   :comparisons 15,
+   :max-deviation 0.0,
+   :worst
+   [{:fixture :present-basic, :key :error, :deviation 0.0}
+    {:fixture :present-basic, :key :precision, :deviation 0.0}
+    {:fixture :present-basic, :key :weighted-error, :deviation 0.0}]}
+  {:check :eps-absent-carries-no-numbers,
+   :status :pass,
+   :reads
+   "AC1: an observation nobody made is not an observation of zero. The record carries a reason and no numbers."}
+  {:check :eps-refusal-names-offending-members,
+   :status :pass,
+   :reads
+   "Every refusal names its offending members, and names the SAME ones the reference does."}
+  {:check :eps-contract-stamped,
+   :status :pass,
+   :reads
+   "src/futon2/aif/free_energy.clj:176-180 -- the stamp is on every record, scored, omitted or refused."}
+  {:check :f-pi-branch-matches-declaration,
+   :status :pass,
+   :reads
+   "varianceTrichotomy as the declaration states it: negative rejects, a bare zero rejects off tolerance, an action-model absent zero floors under :floor.",
+   :mismatches []}
+  {:check :f-pi-agrees-with-independent-association,
+   :status :pass,
+   :reads
+   "The reference sums the log-normalisers and the normalised residuals separately and halves once; the node accumulates per channel. Only the logarithm is shared.",
+   :comparisons 6,
+   :max-deviation 2.220446049250313E-16,
+   :tolerance 1.0E-12,
+   :worst
+   [{:fixture :absent-zero-floored, :deviation 2.220446049250313E-16}
+    {:fixture :mixed-scored-and-deterministic,
+     :deviation 1.1102230246251565E-16}
+    {:fixture :one-channel-zero-residual,
+     :deviation 2.7755575615628914E-17}]}
+  {:check :retired-f-scalar-has-no-producer,
+   :status :pass,
+   :reads
+   "aif-equations.edn:93 records ':code NO PRODUCER AT HEAD' for the F row. This resolves the symbol three ways and finds nothing, which is the same assertion test/futon2/aif/free_energy_test.clj:293-301 makes.",
+   :vars-in-namespace-matching-variational []}
+  {:check :corpus-replay-reproduces-recorded-eps,
+   :status :pass,
+   :reads
+   "The shipped producer's two own identities, re-derived from each production record's own inputs, at deviation 0.0.",
+   :error-comparisons 6537,
+   :error-max-deviation 0.0,
+   :per-call-precision-comparisons 6531,
+   :per-call-precision-max-deviation 0.0}],
+ :output-history
+ {:record-count 889,
+  :typed-present-channel-records 53,
+  :replay
+  {:reads
+   "Each recorded prediction-error entry re-derived from that record's OWN :observed, :predicted-mean and :predicted-variance, and compared with what the tick wrote. This is the shipped producer measured on production, not on a fixture.",
+   :error-identity {:n 6537, :max-deviation 0.0},
+   :per-call-precision-identity
+   {:n 6531,
+    :max-deviation 0.0,
+    :note
+    "1/max(v, 0.01) with the DEFAULT min-variance; a tick that passed another floor would show here."},
+   :weighted-error-identity
+   {:n 6537,
+    :max-deviation 0.0,
+    :note
+    "The :precision on the record is R7's Pi, which precision/weighted-error (src/futon2/aif/precision.clj:212-233) writes over the producer's per-call value. This identity therefore measures the OVERWRITE, and is reported as a finding rather than gated: it is R7's arithmetic on R8's error."}},
+  :f-pi-posterior-census
+  {:asks
+   "aif-equations.edn:111 -- :status :realised-flag-gated, :live-consumer :policy-posterior",
+   :by-status
+   {nil 873,
+    [:present nil] 3,
+    [:absent :incomplete-coverage] 1,
+    [:absent :flag-off] 12}},
+  :records-with-prediction-errors 887,
+  :root "data/wm-trace",
+  :per-tick-scalar-census
+  {:asks
+   "p4ng/sec-catalog.tex:202 -- R8 as 'a single number, comparable across time ... one number per tick'",
+   :records-carrying-variational-free-energy 117,
+   :first-file "data/wm-trace/wm-trace-2026-07-14.edn",
+   :last-file "data/wm-trace/wm-trace-2026-09-01.edn",
+   :files-with-none 47,
+   :producer-contracts
+   {nil 801,
+    :r8/stored-f-controller-v1 76,
+    :r8/retired-f-controller-v1 12}},
+  :files
+  [{:file "data/wm-trace/wm-trace-2026-05-18.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 7,
+    :f-pi-posterior-status {nil 7},
+    :records-with-prediction-errors 5,
+    :untyped-pre-ac1 14,
+    :sha256
+    "c0ca99acd3a856baa25c5cec479d2aa75d24e138e5ba053ee4b687c979d2c0f4",
+    :present-channel-records 14,
+    :producer-contracts {nil 7},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-19.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 9,
+    :f-pi-posterior-status {nil 9},
+    :records-with-prediction-errors 9,
+    :untyped-pre-ac1 36,
+    :sha256
+    "03ae679606669b46d6a4f5decf06e72ed2e7bea081e9bb43ca8b5970492560c9",
+    :present-channel-records 36,
+    :producer-contracts {nil 9},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-21.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 13,
+    :f-pi-posterior-status {nil 13},
+    :records-with-prediction-errors 13,
+    :untyped-pre-ac1 52,
+    :sha256
+    "1ebc49ee045020121bfeb27cf1c93d6fee95954a9770ab4103f348072f86cf78",
+    :present-channel-records 52,
+    :producer-contracts {nil 13},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-22.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 24,
+    :f-pi-posterior-status {nil 24},
+    :records-with-prediction-errors 24,
+    :untyped-pre-ac1 96,
+    :sha256
+    "93ec1642a93c28dfbfa7e3f985ff6d335f6702c2206d57f9eda2488f2cd62e3c",
+    :present-channel-records 96,
+    :producer-contracts {nil 24},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-23.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 24,
+    :f-pi-posterior-status {nil 24},
+    :records-with-prediction-errors 24,
+    :untyped-pre-ac1 96,
+    :sha256
+    "78fe7aaff4e9d3d38f0f4d761a972384e28e557252e47167e5270b6a90fe4a6f",
+    :present-channel-records 96,
+    :producer-contracts {nil 24},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-24.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 24,
+    :f-pi-posterior-status {nil 24},
+    :records-with-prediction-errors 24,
+    :untyped-pre-ac1 96,
+    :sha256
+    "169fa5ab04049df92f64e4ae27c9b76f27c4a663bff5b42a9a8e8e076bfb6c26",
+    :present-channel-records 96,
+    :producer-contracts {nil 24},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-25.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 21,
+    :f-pi-posterior-status {nil 21},
+    :records-with-prediction-errors 21,
+    :untyped-pre-ac1 84,
+    :sha256
+    "4dbe524209e4664bf45d0a9bc4f8f02ee7cfa8d1b7aaa43357898e00299f80fd",
+    :present-channel-records 84,
+    :producer-contracts {nil 21},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-26.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 17,
+    :f-pi-posterior-status {nil 17},
+    :records-with-prediction-errors 17,
+    :untyped-pre-ac1 84,
+    :sha256
+    "6dd57154cf77d74ea10f79f1f76ba788c0fd11255afd195112a8eea5520da2f5",
+    :present-channel-records 84,
+    :producer-contracts {nil 17},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-27.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 9,
+    :f-pi-posterior-status {nil 9},
+    :records-with-prediction-errors 9,
+    :untyped-pre-ac1 54,
+    :sha256
+    "15fc83235b3632cb3224cebb5171561602c56f4948915698764b051380b61584",
+    :present-channel-records 54,
+    :producer-contracts {nil 9},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-30.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 2,
+    :f-pi-posterior-status {nil 2},
+    :records-with-prediction-errors 2,
+    :untyped-pre-ac1 16,
+    :sha256
+    "39cd226f1d044a2b877fe4a062b1a6f51703800927f62de0ab12bc4aa94be5e4",
+    :present-channel-records 16,
+    :producer-contracts {nil 2},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-05-31.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 19,
+    :f-pi-posterior-status {nil 19},
+    :records-with-prediction-errors 19,
+    :untyped-pre-ac1 152,
+    :sha256
+    "61f237000f7ee16267de68e86e2ca66f570d6ded1570332e1e178a3892a93b06",
+    :present-channel-records 152,
+    :producer-contracts {nil 19},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-01.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 12,
+    :f-pi-posterior-status {nil 12},
+    :records-with-prediction-errors 12,
+    :untyped-pre-ac1 96,
+    :sha256
+    "97f4ea223d4b76dc805b1d6eadd23fd468c82a673e98f8870e15196963090a47",
+    :present-channel-records 96,
+    :producer-contracts {nil 12},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-02.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 14,
+    :f-pi-posterior-status {nil 14},
+    :records-with-prediction-errors 14,
+    :untyped-pre-ac1 112,
+    :sha256
+    "fb28f770fedbed721728a863c86a8e2ad35ed7d5691bf9d362811f8bb5e9f677",
+    :present-channel-records 112,
+    :producer-contracts {nil 14},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-03.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 24,
+    :f-pi-posterior-status {nil 24},
+    :records-with-prediction-errors 24,
+    :untyped-pre-ac1 192,
+    :sha256
+    "e3f025d0403b645fc6c3b00d6b26358ddf67e095f2fba4febd3adb9a53cc3596",
+    :present-channel-records 192,
+    :producer-contracts {nil 24},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-04.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 24,
+    :f-pi-posterior-status {nil 24},
+    :records-with-prediction-errors 24,
+    :untyped-pre-ac1 192,
+    :sha256
+    "56ff07b85416f70cc6ee202422dbf6eb88d9f1f36e13a8487ab1c4c8a6613d0a",
+    :present-channel-records 192,
+    :producer-contracts {nil 24},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-05.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 15,
+    :f-pi-posterior-status {nil 15},
+    :records-with-prediction-errors 15,
+    :untyped-pre-ac1 120,
+    :sha256
+    "4c0309f443f00087a0a53d0b04e74c1a7185439f8f4d0d91692d122991705cf1",
+    :present-channel-records 120,
+    :producer-contracts {nil 15},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-06.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 24,
+    :f-pi-posterior-status {nil 24},
+    :records-with-prediction-errors 24,
+    :untyped-pre-ac1 192,
+    :sha256
+    "8b15622786ee5a0214a2ac564a5106b05b707b3199c7a2d919177da89755edac",
+    :present-channel-records 192,
+    :producer-contracts {nil 24},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-07.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 23,
+    :f-pi-posterior-status {nil 23},
+    :records-with-prediction-errors 23,
+    :untyped-pre-ac1 184,
+    :sha256
+    "068acb1b71941f537569cf2d1e54cf7ecbe33aa392894a8885ebbc77f42dff0e",
+    :present-channel-records 184,
+    :producer-contracts {nil 23},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-08.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 24,
+    :f-pi-posterior-status {nil 24},
+    :records-with-prediction-errors 24,
+    :untyped-pre-ac1 192,
+    :sha256
+    "254dac37b010d883708cf0cd04614870a96e22246314bd45bf4d16879b1e3573",
+    :present-channel-records 192,
+    :producer-contracts {nil 24},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-09.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 23,
+    :f-pi-posterior-status {nil 23},
+    :records-with-prediction-errors 23,
+    :untyped-pre-ac1 184,
+    :sha256
+    "18bbeaa14c7b741a9edb18f7f8d7688af259d8eefd24fe80a3f9d7a9d73fd7b6",
+    :present-channel-records 184,
+    :producer-contracts {nil 23},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-10.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 22,
+    :f-pi-posterior-status {nil 22},
+    :records-with-prediction-errors 22,
+    :untyped-pre-ac1 176,
+    :sha256
+    "badf4f1fa6f366c0654eb16438599e792d76a6de44eacc09002f6af3d4e7003e",
+    :present-channel-records 176,
+    :producer-contracts {nil 22},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-12.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 7,
+    :f-pi-posterior-status {nil 7},
+    :records-with-prediction-errors 7,
+    :untyped-pre-ac1 56,
+    :sha256
+    "97cf83a7f617f6981da61252ee0b34fda569fc7e31ddcdb6cfaedc3f6fe335ee",
+    :present-channel-records 56,
+    :producer-contracts {nil 7},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-13.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 24,
+    :f-pi-posterior-status {nil 24},
+    :records-with-prediction-errors 24,
+    :untyped-pre-ac1 192,
+    :sha256
+    "676f19c4706e4de940d5fb392a5078149bedf6933110b480a2fd03b51465aaf9",
+    :present-channel-records 192,
+    :producer-contracts {nil 24},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-14.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 20,
+    :f-pi-posterior-status {nil 20},
+    :records-with-prediction-errors 20,
+    :untyped-pre-ac1 160,
+    :sha256
+    "031887f2fbcffe15ce9cb1e6a5e1712a1afd006842a261cf5243d895a65d8621",
+    :present-channel-records 160,
+    :producer-contracts {nil 20},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-15.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 8,
+    :f-pi-posterior-status {nil 8},
+    :records-with-prediction-errors 8,
+    :untyped-pre-ac1 64,
+    :sha256
+    "a537170ab42bafdb7d39269a9e9c37f7099fc77152433f6ae9fb59c0f0da7eb1",
+    :present-channel-records 64,
+    :producer-contracts {nil 8},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-16.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 14,
+    :f-pi-posterior-status {nil 14},
+    :records-with-prediction-errors 14,
+    :untyped-pre-ac1 112,
+    :sha256
+    "58f60fe91e34c58dcf71c584335ba3ba484bda0bcf902cf1c7937465ee61773d",
+    :present-channel-records 112,
+    :producer-contracts {nil 14},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-17.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 15,
+    :f-pi-posterior-status {nil 15},
+    :records-with-prediction-errors 15,
+    :untyped-pre-ac1 120,
+    :sha256
+    "2fbd2c3b5793b5c7c9ab199cf8adb68e17482f1f98a2fdec07561eec8d9115f6",
+    :present-channel-records 120,
+    :producer-contracts {nil 15},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-18.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 12,
+    :f-pi-posterior-status {nil 12},
+    :records-with-prediction-errors 12,
+    :untyped-pre-ac1 96,
+    :sha256
+    "123a70405acc97f58c8ce489f564a70cb1931600ad7ff9d2ed3018823aabd9ea",
+    :present-channel-records 96,
+    :producer-contracts {nil 12},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-21.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 3,
+    :f-pi-posterior-status {nil 3},
+    :records-with-prediction-errors 3,
+    :untyped-pre-ac1 24,
+    :sha256
+    "a38d588d3f773180385852570165ac218de538f87125594ec2b78cdf2c37323d",
+    :present-channel-records 24,
+    :producer-contracts {nil 3},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-22.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 17,
+    :f-pi-posterior-status {nil 17},
+    :records-with-prediction-errors 17,
+    :untyped-pre-ac1 136,
+    :sha256
+    "f8b2211535a69816de9331971e48e9c5d909c78df83d4f586c16f7ca2d1f1d49",
+    :present-channel-records 136,
+    :producer-contracts {nil 17},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-23.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 13,
+    :f-pi-posterior-status {nil 13},
+    :records-with-prediction-errors 13,
+    :untyped-pre-ac1 104,
+    :sha256
+    "ead3f793e91bf3b62f5fb912583695ba1e57db1da6442e3f56678c2417c72b84",
+    :present-channel-records 104,
+    :producer-contracts {nil 13},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-24.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 10,
+    :f-pi-posterior-status {nil 10},
+    :records-with-prediction-errors 10,
+    :untyped-pre-ac1 80,
+    :sha256
+    "6838cbfc07d9f3aa7fa6557cf40a7572398dbbc2d4352dd7630917794b3d1bfd",
+    :present-channel-records 80,
+    :producer-contracts {nil 10},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-25.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 15,
+    :f-pi-posterior-status {nil 15},
+    :records-with-prediction-errors 15,
+    :untyped-pre-ac1 120,
+    :sha256
+    "cf1dece9bddd978a5a25076ee145a1bb22cb33a8e80c49d4065736f54dc5846c",
+    :present-channel-records 120,
+    :producer-contracts {nil 15},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-26.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 12,
+    :f-pi-posterior-status {nil 12},
+    :records-with-prediction-errors 12,
+    :untyped-pre-ac1 96,
+    :sha256
+    "4c75926963cd2124567b734251c626efa1b4dc8b6724d6c2bddd0d869612b051",
+    :present-channel-records 96,
+    :producer-contracts {nil 12},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-27.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 11,
+    :f-pi-posterior-status {nil 11},
+    :records-with-prediction-errors 11,
+    :untyped-pre-ac1 88,
+    :sha256
+    "40ae814324bff4859e5faea2a022e17c173a35f1cfff4b66c94d426223cc8009",
+    :present-channel-records 88,
+    :producer-contracts {nil 11},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-28.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 14,
+    :f-pi-posterior-status {nil 14},
+    :records-with-prediction-errors 14,
+    :untyped-pre-ac1 112,
+    :sha256
+    "55bd67e1b0ecee2611d2e43273c04bc3e14bd63aa9ea77632bacaee110747759",
+    :present-channel-records 112,
+    :producer-contracts {nil 14},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-29.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 18,
+    :f-pi-posterior-status {nil 18},
+    :records-with-prediction-errors 18,
+    :untyped-pre-ac1 144,
+    :sha256
+    "1e1569051e691aca86d59ffea6de4077fdf461fa57a3fc4c81f05766dcddc242",
+    :present-channel-records 144,
+    :producer-contracts {nil 18},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-06-30.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 18,
+    :f-pi-posterior-status {nil 18},
+    :records-with-prediction-errors 18,
+    :untyped-pre-ac1 144,
+    :sha256
+    "43c07fa2a493bf9272802becd575f724686e13fbba5ad50acb4866e102174ca4",
+    :present-channel-records 144,
+    :producer-contracts {nil 18},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-07-01.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 23,
+    :f-pi-posterior-status {nil 23},
+    :records-with-prediction-errors 23,
+    :untyped-pre-ac1 184,
+    :sha256
+    "ac2949904c268fdacdbc176f237c66252c8e5fd377d8499b41adb81ad5ce875f",
+    :present-channel-records 184,
+    :producer-contracts {nil 23},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-07-02.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 34,
+    :f-pi-posterior-status {nil 34},
+    :records-with-prediction-errors 34,
+    :untyped-pre-ac1 272,
+    :sha256
+    "c2fe4e9493cc5f716579233075cb4c83735450f3e7648e7ebfa8afbe13efb921",
+    :present-channel-records 272,
+    :producer-contracts {nil 34},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-07-03.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 20,
+    :f-pi-posterior-status {nil 20},
+    :records-with-prediction-errors 20,
+    :untyped-pre-ac1 160,
+    :sha256
+    "5cae8b2b978646ce5b8b2a52bd47e56e1fb9fc5779d0a6216cfbbbb100b6c46a",
+    :present-channel-records 160,
+    :producer-contracts {nil 20},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-07-04.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 38,
+    :f-pi-posterior-status {nil 38},
+    :records-with-prediction-errors 38,
+    :untyped-pre-ac1 304,
+    :sha256
+    "f887895d29e8fe78ce5e9905e48acd4748fa953005cf94cf56c4ceb98893811b",
+    :present-channel-records 304,
+    :producer-contracts {nil 38},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-07-05.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 18,
+    :f-pi-posterior-status {nil 18},
+    :records-with-prediction-errors 18,
+    :untyped-pre-ac1 144,
+    :sha256
+    "1e49f622895d32fe8d1fb3218ed078de076b830be9f351c45f1091ad55558478",
+    :present-channel-records 144,
+    :producer-contracts {nil 18},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-07-06.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 21,
+    :f-pi-posterior-status {nil 21},
+    :records-with-prediction-errors 21,
+    :untyped-pre-ac1 168,
+    :sha256
+    "84e7253a2c6e2e983d481f021889f411482e3fb8ef7f57ac1e25cb0487902165",
+    :present-channel-records 168,
+    :producer-contracts {nil 21},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-07-09.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 1,
+    :f-pi-posterior-status {nil 1},
+    :records-with-prediction-errors 1,
+    :untyped-pre-ac1 8,
+    :sha256
+    "3c3f332d62de8381f38a0374f7a5bc727c457db0ef37f694aceb156561bc3749",
+    :present-channel-records 8,
+    :producer-contracts {nil 1},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-07-14.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 14,
+    :f-pi-posterior-status {nil 14},
+    :records-with-prediction-errors 14,
+    :untyped-pre-ac1 112,
+    :sha256
+    "8c56ef7fff91c683ed64bbd2d9b356c2357b5b5a9ba1d52e93b0a273579c95ea",
+    :present-channel-records 112,
+    :producer-contracts {nil 14},
+    :carries-variational-free-energy 14}
+   {:file "data/wm-trace/wm-trace-2026-07-15.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 6,
+    :f-pi-posterior-status {nil 6},
+    :records-with-prediction-errors 6,
+    :untyped-pre-ac1 48,
+    :sha256
+    "5294d067786e84b935e41b867f42e646c70c23e1d3f3afc23c83a70ea6c6f2a1",
+    :present-channel-records 48,
+    :producer-contracts {nil 6},
+    :carries-variational-free-energy 6}
+   {:file "data/wm-trace/wm-trace-2026-07-16.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 6,
+    :f-pi-posterior-status {nil 6},
+    :records-with-prediction-errors 6,
+    :untyped-pre-ac1 48,
+    :sha256
+    "5c4043d50ec8eea87351a69c1fefd50e62f15c905d2ce6a016aa039c9ced46a4",
+    :present-channel-records 48,
+    :producer-contracts {nil 6},
+    :carries-variational-free-energy 6}
+   {:file "data/wm-trace/wm-trace-2026-07-17.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 1,
+    :f-pi-posterior-status {nil 1},
+    :records-with-prediction-errors 1,
+    :untyped-pre-ac1 8,
+    :sha256
+    "d86f08745250371aa0106a310bffcf0a1a2345a52fdedf066bb91e5a8ad42bb4",
+    :present-channel-records 8,
+    :producer-contracts {nil 1},
+    :carries-variational-free-energy 1}
+   {:file "data/wm-trace/wm-trace-2026-07-18.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 1,
+    :f-pi-posterior-status {nil 1},
+    :records-with-prediction-errors 1,
+    :untyped-pre-ac1 8,
+    :sha256
+    "fd00d9da9ff7e6e965adafd8bc75739bdb28329b4f436fe5aeae4d837df15638",
+    :present-channel-records 8,
+    :producer-contracts {nil 1},
+    :carries-variational-free-energy 1}
+   {:file "data/wm-trace/wm-trace-2026-07-19.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 1,
+    :f-pi-posterior-status {nil 1},
+    :records-with-prediction-errors 1,
+    :untyped-pre-ac1 8,
+    :sha256
+    "ec16b3f217ac6d8c998fb162d456b41662920366f1f4190d9e1b007fd3f1d6de",
+    :present-channel-records 8,
+    :producer-contracts {nil 1},
+    :carries-variational-free-energy 1}
+   {:file "data/wm-trace/wm-trace-2026-07-21.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 2,
+    :f-pi-posterior-status {nil 2},
+    :records-with-prediction-errors 2,
+    :untyped-pre-ac1 16,
+    :sha256
+    "3d0910af1a7a1b5a49c879bdc82127038ca401f1343492e8abe217393f93d081",
+    :present-channel-records 16,
+    :producer-contracts {nil 2},
+    :carries-variational-free-energy 2}
+   {:file "data/wm-trace/wm-trace-2026-08-30.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 7,
+    :f-pi-posterior-status {nil 7},
+    :records-with-prediction-errors 7,
+    :untyped-pre-ac1 56,
+    :sha256
+    "708e89399de8173d208338885f8eabc17e723fa0906b59931f02e7a20c101421",
+    :present-channel-records 56,
+    :producer-contracts {nil 7},
+    :carries-variational-free-energy 7}
+   {:file "data/wm-trace/wm-trace-2026-08-31.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 5,
+    :f-pi-posterior-status {nil 5},
+    :records-with-prediction-errors 5,
+    :untyped-pre-ac1 40,
+    :sha256
+    "af50766f8a3d79d852fe6dc175cba59e61e6b6bc8bc08624b1d268b117d7283b",
+    :present-channel-records 40,
+    :producer-contracts {nil 3, :r8/stored-f-controller-v1 2},
+    :carries-variational-free-energy 5}
+   {:file "data/wm-trace/wm-trace-2026-09-01.edn",
+    :unreadable 0,
+    :typed-present 0,
+    :records 79,
+    :f-pi-posterior-status
+    {nil 70,
+     [:present nil] 3,
+     [:absent :incomplete-coverage] 1,
+     [:absent :flag-off] 5},
+    :records-with-prediction-errors 79,
+    :untyped-pre-ac1 632,
+    :sha256
+    "565690ac19245351272d8b8abe8a376d991847fcfce1f8bf4d9fa57fdb1116af",
+    :present-channel-records 632,
+    :producer-contracts
+    #:r8{:stored-f-controller-v1 74, :retired-f-controller-v1 5},
+    :carries-variational-free-energy 74}
+   {:file "data/wm-trace/wm-trace-2026-09-02.edn",
+    :unreadable 0,
+    :typed-present 21,
+    :records 3,
+    :f-pi-posterior-status {[:absent :flag-off] 3},
+    :records-with-prediction-errors 3,
+    :untyped-pre-ac1 0,
+    :sha256
+    "935dcb81af4a1e7c6373a3a95c5d7a06c14f31199cf16c35edfcf62ebfbab5f2",
+    :present-channel-records 21,
+    :producer-contracts #:r8{:retired-f-controller-v1 3},
+    :carries-variational-free-energy 0}
+   {:file "data/wm-trace/wm-trace-2026-09-04.edn",
+    :unreadable 0,
+    :typed-present 32,
+    :records 4,
+    :f-pi-posterior-status {[:absent :flag-off] 4},
+    :records-with-prediction-errors 4,
+    :untyped-pre-ac1 0,
+    :sha256
+    "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120",
+    :present-channel-records 32,
+    :producer-contracts #:r8{:retired-f-controller-v1 4},
+    :carries-variational-free-energy 0}],
+  :untyped-pre-ac1-channel-records 6484,
+  :present-channel-records 6537,
+  :read-only
+  "This leg opens the corpus for reading only. No run lock is taken because nothing here writes to data/.",
+  :file-count 57},
+ :node :R8,
+ :equations-registry
+ {:rows
+  [{:id :prediction-error,
+    :formal "eps_k := o_k - mu_k",
+    :class :theory-defined,
+    :imports [:o :mu],
+    :lean "machineChannelPredictionError",
+    :lean-status :closed,
+    :status nil,
+    :live-consumer nil}
+   {:id :free-energy,
+    :formal "F = 1/2 * mean_k (Pi_k eps_k^2)",
+    :class :theory-defined,
+    :imports [:Pi :eps],
+    :lean "variationalFreeEnergy",
+    :lean-status :closed,
+    :status :retired,
+    :live-consumer nil}
+   {:id :policy-free-energy,
+    :formal
+    "F_pi := sum_k 1/2 ( ln(2 pi v_k(pi)) + (o_k - mu_k(pi))^2 / v_k(pi) )",
+    :class :theory-defined,
+    :imports [:Q-o-pi :o],
+    :lean "machinePolicyFreeEnergy",
+    :lean-status :closed,
+    :status :realised-flag-gated,
+    :live-consumer :policy-posterior}],
+  :source "holes/labs/wm-contract/aif-equations.edn:80-112",
+  :note
+  "Three rows on one node, in three states: one shipped, one retired with its producer deleted, one shipped behind a default-off flag."},
+ :stage-at "p4ng/empirics-futon/control-stages.edn:16",
+ :slice 3,
+ :code
+ {:eps-call-site "scripts/futon2/report/war_machine.clj:6110-6127",
+  :f-retired
+  "src/futon2/aif/free_energy.clj:7-12 (the deletion), src/futon2/aif/trace.clj:241-247 (revision 21)",
+  :f-pi
+  "src/futon2/aif/policy_free_energy.clj:41-144 (f-pi-for-candidate), src/futon2/aif/policy_free_energy.clj:146-151 (f-pi-vector)",
+  :eps-route-tag "scripts/futon2/report/war_machine.clj:6252",
+  :f-pi-production-caller
+  "scripts/futon2/report/war_machine.clj:441-564",
+  :carriers "holes/labs/wm-contract/sim/R8-carriers.edn",
+  :reference "holes/labs/wm-contract/v7_r8_node_sim.clj:106-200",
+  :eps-envelope-reader
+  "src/futon2/aif/free_energy.clj:280-295 (channel-prediction-error)",
+  :runner "holes/labs/wm-contract/v7_r8_node_sim.clj",
+  :test
+  "test/futon2/aif/free_energy_test.clj, test/futon2/aif/policy_free_energy_test.clj",
+  :eps
+  "src/futon2/aif/free_energy.clj:203-278 (compute-prediction-error)"},
+ :verdict :pass,
+ :row :V7,
+ :eps
+ {:fixtures
+  [{:id :present-basic,
+    :why
+    "The registry form on a well-formed triple: eps = o - mu, precision = 1/v with v above the floor.",
+    :expect :present}
+   {:id :present-negative-error,
+    :why
+    "eps is signed. An observation below the prediction gives a negative error and a negative weighted error.",
+    :expect :present}
+   {:id :present-zero-variance-floored,
+    :why
+    "The eps0 floor. A likelihood reporting certainty gets 1/min-variance, not a division by zero.",
+    :expect :present,
+    :non-dyadic
+    "min-variance defaults to 0.01, which no double represents exactly; the reference divides by the same double."}
+   {:id :present-negative-variance-scored,
+    :why
+    "THE FINDING the :prediction-error row's :lean-note states (aif-equations.edn:83, negativeVarianceIsNotRefused): prediction-member checks FINITENESS and not sign, so a negative variance is :present and the max floors it. Recorded here as a measured fact, not as a gate.",
+    :expect :present,
+    :non-dyadic
+    "same 0.01 floor as :present-zero-variance-floored -- which is the point: the two agree."}
+   {:id :present-min-variance-opt,
+    :why
+    "The floor is an option, not a constant. A caller-supplied :min-variance above the reported variance takes the floor branch at a dyadic value, so this case is exact.",
+    :expect :present}
+   {:id :absent-observation,
+    :why
+    "AC1: an observation nobody made is not an observation of zero. The record carries a reason and no numbers.",
+    :expect :absent}
+   {:id :absent-carries-envelope-reason,
+    :why
+    "The reason travels with the record when the caller read it through an observation envelope.",
+    :expect :absent}
+   {:id :refused-missing-mean,
+    :why
+    "A likelihood that produced no mean is a producer defect and stays loud.",
+    :expect :refused}
+   {:id :refused-nil-variance,
+    :why
+    "Present-but-nil is :missing, and the record names the offending member.",
+    :expect :refused}
+   {:id :refused-infinite-variance,
+    :why
+    "finite-double separates :missing from :not-finite, because the refusal record has to say which happened.",
+    :expect :refused}
+   {:id :refused-nonnumeric-observed,
+    :why
+    "A value the producer was GIVEN and cannot use is malformed, not absent.",
+    :expect :refused}
+   {:id :refusal-dominates-absence,
+    :why
+    "MachinePredictionErrorWitness.refusalDominatesAbsence: an unobserved channel whose likelihood ALSO failed is REFUSED, not omitted -- so a tick's omission count is not its count of unobserved channels.",
+    :expect :refused}],
+  :fixture-count 12,
+  :runs
+  [{:expect :present,
+    :precision 4.0,
+    :reference-status :present,
+    :weighted-error 1.0,
+    :reason nil,
+    :offending [],
+    :status :present,
+    :error 0.25,
+    :exact-reference {:error 1/4, :precision 4N, :weighted-error 1N},
+    :fixture :present-basic}
+   {:expect :present,
+    :precision 2.0,
+    :reference-status :present,
+    :weighted-error -1.0,
+    :reason nil,
+    :offending [],
+    :status :present,
+    :error -0.5,
+    :exact-reference {:error -1/2, :precision 2N, :weighted-error -1N},
+    :fixture :present-negative-error}
+   {:expect :present,
+    :precision 100.0,
+    :reference-status :present,
+    :weighted-error 25.0,
+    :reason nil,
+    :offending [],
+    :status :present,
+    :error 0.25,
+    :exact-reference
+    {:error 1/4, :precision 100N, :weighted-error 25N},
+    :fixture :present-zero-variance-floored}
+   {:expect :present,
+    :precision 100.0,
+    :reference-status :present,
+    :weighted-error 25.0,
+    :reason nil,
+    :offending [],
+    :status :present,
+    :error 0.25,
+    :exact-reference
+    {:error 1/4, :precision 100N, :weighted-error 25N},
+    :fixture :present-negative-variance-scored}
+   {:expect :present,
+    :precision 2.0,
+    :reference-status :present,
+    :weighted-error 1.0,
+    :reason nil,
+    :offending [],
+    :status :present,
+    :error 0.5,
+    :exact-reference {:error 1/2, :precision 2N, :weighted-error 1N},
+    :fixture :present-min-variance-opt}
+   {:expect :absent,
+    :precision nil,
+    :reference-status :absent,
+    :weighted-error nil,
+    :reason :observation-absent,
+    :offending [],
+    :status :absent,
+    :error nil,
+    :exact-reference nil,
+    :fixture :absent-observation}
+   {:expect :absent,
+    :precision nil,
+    :reference-status :absent,
+    :weighted-error nil,
+    :reason :source-field-missing,
+    :offending [],
+    :status :absent,
+    :error nil,
+    :exact-reference nil,
+    :fixture :absent-carries-envelope-reason}
+   {:expect :refused,
+    :precision nil,
+    :reference-status :refused,
+    :weighted-error nil,
+    :reason :malformed-prediction-triple,
+    :offending [:mean],
+    :status :refused,
+    :error nil,
+    :exact-reference nil,
+    :fixture :refused-missing-mean}
+   {:expect :refused,
+    :precision nil,
+    :reference-status :refused,
+    :weighted-error nil,
+    :reason :malformed-prediction-triple,
+    :offending [:variance],
+    :status :refused,
+    :error nil,
+    :exact-reference nil,
+    :fixture :refused-nil-variance}
+   {:expect :refused,
+    :precision nil,
+    :reference-status :refused,
+    :weighted-error nil,
+    :reason :malformed-prediction-triple,
+    :offending [:variance],
+    :status :refused,
+    :error nil,
+    :exact-reference nil,
+    :fixture :refused-infinite-variance}
+   {:expect :refused,
+    :precision nil,
+    :reference-status :refused,
+    :weighted-error nil,
+    :reason :malformed-prediction-triple,
+    :offending [:observed],
+    :status :refused,
+    :error nil,
+    :exact-reference nil,
+    :fixture :refused-nonnumeric-observed}
+   {:expect :refused,
+    :precision nil,
+    :reference-status :refused,
+    :weighted-error nil,
+    :reason :malformed-prediction-triple,
+    :offending [:variance],
+    :status :refused,
+    :error nil,
+    :exact-reference nil,
+    :fixture :refusal-dominates-absence}]}}
