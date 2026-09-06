@@ -1014,3 +1014,38 @@ items cleared up."
 - PENDING MINT at V7's next pause: one discharge row per hole,
   wiring group first. RUN4 approval sentence becomes: the eight read
   discharged and V8 is green.
+
+## The core-three refinement (Joe, 2026-09-06) — C, find, organise are the fundamentals; the rest are process predicates
+
+Verbatim: "Like C, we've talked about considerably, I think, how
+that's meant to be defined. And some of these other predicates just
+look like kind of assurances about the model. So it looks to me like
+there's three fundamental ones: C, find, and organise. And then the
+rest of them are basically process variables or process predicates
+that could be worked out straightforwardly once everything in the
+core is defined."
+
+- SUPERSEDES the wiring-first ordering in the eight-before-any-run
+  entry: the core three (C, find, organise) lead; the five process
+  predicates (policyPosteriorImportsPolicyF, dirichletAccumulation-
+  ImportAbsent, policyPrecisionIsGammaFromBeta, enactedEquals...,
+  preferenceStackLiveRecorded) follow once the core is defined.
+- C's RECORDED definition material (the "we've talked about it"
+  corpus, gathered 2026-09-06): the :c-grain :choices observation --
+  C is a FAMILY indexed by loop grain; C_int (health channels) live,
+  C_mis (mission grain) built and dark; the two-C split is the one
+  genuinely open choice and is preference-shaped -- plus P-validated-
+  R5 s2a and s2a-prime (nonDegenerate: the outcome space includes
+  learning, stated refusably), and the FUNDAMENTALS entry.
+- find/organise: P-validated-R5 s3e IS the spec (interfaces in Lean
+  as sorried declarations; laws F1-F4/O1-O4; facades pre-refused).
+  THE TRACKS MERGE HERE, as the theory-track ruling predicted: the
+  library census graph + problem nodes + L13 reachability gate are
+  the Repository/standsOn substrate s3e requires, and F7's
+  constructor is the primary-method prototype ("take a collection of
+  design patterns and organize them into a cascade").
+- PENDING MINT at V7's pause: F10 (C -- consolidate the recorded
+  definition into the Lean C + runtime declaration; surface the two-C
+  split with a recommendation), F11 (find to the s3e interface over
+  the library substrate), F12 (organise likewise; F7 as prototype).
+  Process-predicate rows mint after the core three land.
