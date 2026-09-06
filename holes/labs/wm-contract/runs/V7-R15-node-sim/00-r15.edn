@@ -1,28 +1,54 @@
-{:stage "SELECT",
+{:truncated-trace-files [],
+ :stage "SELECT",
  :negative-controls
  {:plants
   [{:id :synthetic-slow-trace, :detected 1, :result :caught}
    {:id :synthetic-temporal-requirer, :detected 1, :result :caught}
-   {:id :synthetic-r15-equation, :detected 1, :result :caught}],
+   {:id :synthetic-r15-equation, :detected 1, :result :caught}
+   {:id :citation-inside-its-range-reads-current,
+    :expected :current,
+    :got :current,
+    :result :caught}
+   {:id :citation-whose-phrase-is-gone-reads-not-found,
+    :expected :phrase-not-found,
+    :got :phrase-not-found,
+    :result :caught}
+   {:id :keyword-quoted-in-a-string-is-prose,
+    :expected :prose,
+    :got :prose,
+    :result :caught}
+   {:id :keyword-carried-as-data-is-a-machine-record,
+    :expected :machine-record,
+    :got :machine-record,
+    :result :caught}
+   {:id :unparsable-artefact-is-reported-not-absorbed,
+    :expected :unparsed,
+    :got :unparsed,
+    :result :caught}
+   {:id :an-inference-require-would-be-seen,
+    :expected ["futon2.aif.efe"],
+    :got ["futon2.aif.efe"],
+    :result :caught}],
   :all-caught true},
  :harness :v7-r15-node-sim,
  :not-done
  ["No equation reference exists for R15; this harness measures its process account."
   "No carriers file is needed because no numerical reference is constructed."
   "No live tick or run lock; trace files were read only."
-  "No production, registry, ledger, document, p4ng, or data file was modified."],
+  "No production, registry, ledger, document, p4ng, or data file was modified."
+  "The slow-state census reads artefacts under holes, docs and p4ng. It does not read the futon3c or apm-lean trees, so an absence established here is an absence in the two repositories this row cites."],
  :checks
  [{:actual-flat-rollout-lines
    [{:line 476,
-     :text
-     "the older :depth option. This is still flat temporal rollout, not nested"}],
+     :text "flat temporal rollout, not nested fast/slow hierarchy"}],
    :equation-row-count 0,
    :basis "holes/labs/wm-contract/aif-equations.edn:373-376,521",
    :equation-search ":node :R15",
+   :cited-rollout-quoted-phrase
+   "flat temporal rollout, not nested fast/slow hierarchy",
    :hierarchical-budget-characterisation
    [{:line 1, :text "(ns futon2.aif.hierarchical-budget"}
-    {:line 2, :text "\"R11 hierarchical shared-budget arbitration."}
-    {:line 3, :text ""}],
+    {:line 2, :text "\"R11 hierarchical shared-budget arbitration."}],
    :result :pass,
    :id :registry-has-no-r15-equation,
    :cited-rollout-text
@@ -67,6 +93,9 @@
     {:line 376,
      :text
      ":statement \"One level is realised; R15 runs no equation and is listed under :plumbing.\"}"}],
+   :quoted-phrase-found-at
+   {:line 476,
+    :text "flat temporal rollout, not nested fast/slow hierarchy"},
    :cited-rollout-status :stale,
    :plumbing-lines
    [{:line 521,
@@ -81,36 +110,40 @@
    :registry-search "(?i)temporal[-_ ]hierarchy|temporal_hierarchy",
    :registry-hit-count 0,
    :basis "src/futon2/aif/temporal_hierarchy.clj:1-2"}
-  {:hit-line-count 37,
+  {:hit-line-count 38,
    :outside-namespace-test-and-harness [],
    :by-tree
    {:holes
-    {:line-count 7,
+    {:line-count 8,
      :files ["holes/labs/wm-contract/v7_r15_node_sim.clj"],
      :hits
-     [{:line 71,
+     [{:line 92,
        :text
        "(def slow-keys [:slow/mode :slow/intrinsics :slow/previous-mode])",
        :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
-      {:line 93,
+      {:line 187,
        :text
        "#\"futon2\\.aif\\.temporal-hierarchy|advance-slow-state|slow-context-from-intrinsics|:slow/mode|:slow/intrinsics|:slow/previous-mode\")",
        :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
-      {:line 116,
+      {:line 210,
        :text
        "(def advance-sites (matching-lines temporal-file #\"defn advance-slow-state\"))",
        :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
-      {:line 121,
-       :text
-       "#\"advanced the relevant slow posterior|parameterised Tick B|Beta\\(2,1\\)|:slow/previous-mode\")",
-       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
-      {:line 131,
+      {:line 355,
        :text "(def synthetic-record {:slow/mode :consolidation})",
        :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
-      {:line 133,
+      {:line 357,
        :text ":text \"[futon2.aif.temporal-hierarchy :as th]\"}])",
        :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
-      {:line 192,
+      {:line 370,
+       :text
+       "{:edn? true :parsed? true :forms [{:note \"prose that quotes :slow/mode in a string\"}]})",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
+      {:line 372,
+       :text
+       "{:edn? true :parsed? true :forms [{:slow/mode :consolidation}]})",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
+      {:line 504,
        :text
        ":slow-update-sites {:advance-slow-state advance-sites :beta-update beta-update-sites}",
        :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}]},
@@ -239,12 +272,14 @@
    :last-file "wm-trace-2026-09-04.edn",
    :files-total 57,
    :slow-state-file-spread [],
+   :files-truncated-by-an-unreadable-form [],
    :records-with-slow-state 0}
   {:upper-parameterises-fast-prior? true,
    :implementation-denial-of-full-nested-model
    [{:line 28,
      :text
      "- A full nested generative model where the slow loop runs its OWN EFE"}],
+   :inference-namespaces-required [],
    :slow-update-sites
    {:advance-slow-state
     [{:line 190, :text "(defn advance-slow-state"}],
@@ -255,28 +290,186 @@
    :slow-update-kind :witnessed-outcome-beta-counter,
    :id :contract-criterion-measured,
    :belief-propagated-by-own-generative-inference? false,
+   :namespaces-required
+   ["futon2.aif.intrinsic-values" "futon2.aif.rollout"],
+   :inference-namespace-search
+   "efe|free-energy|free_energy|precision|belief|inference|policy",
    :parameterisation-sites
    {:apply-slow-prior [{:line 111, :text "(defn apply-slow-prior"}],
     :hierarchical-rollout
     [{:line 165, :text "(defn hierarchical-rollout"}]}}
-  {:artifact-hit-count 0,
+  {:census-is-of-the-tree-at-run-time
+   "The mention list is a measurement of the working tree, so a later document that quotes the keys lengthens it. The finding is the machine-record count, which parsing keeps at what the machine actually wrote.",
+   :slow-key-search ":slow/(?:mode|intrinsics|previous-mode)",
+   :files-searched 1966,
+   :unparsed-count 0,
+   :prose-search
+   "advanced the relevant slow posterior|parameterised Tick B|Beta\\(2,1\\)",
    :basis "/home/joe/code/p4ng/sec-catalog.tex:245",
-   :roots
-   ["holes/labs/wm-contract/runs/**/*.edn"
-    "holes/labs/wm-contract/runs/**/*.txt"],
-   :search
-   "advanced the relevant slow posterior|parameterised Tick B|Beta\\(2,1\\)|:slow/previous-mode",
-   :artifact-hits [],
+   :roots ["holes" "docs" "/home/joe/code/p4ng"],
+   :machine-records [],
    :result :pass,
-   :id :campaign-s-artifact,
-   :recorded-numbers :not-found,
-   :finding :not-found}
+   :extensions "\\.(edn|txt|md|tex|json)$",
+   :id :campaign-s-record,
+   :machine-record-count 0,
+   :prose-hits
+   [{:file "holes/M-composition-aware-reward.md",
+     :line 120,
+     :text
+     "Beta(2,1) prior (0.693); the 0.406 cliff × w_rel 2.333 costs any second"}
+    {:file "holes/TN-gflownets-fable-review.md",
+     :line 283,
+     :text
+     "(futon3a lab): learned R̂ = reliability posteriors (Beta(2,1), flown-fold"}
+    {:file "holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md",
+     :line 41,
+     :text
+     "including a Beta(1,1) to Beta(2,1) slow-state update, but explicitly limits"}
+    {:file "/home/joe/code/p4ng/empirics.tex",
+     :line 50,
+     :text
+     "Campaign S supplied the first fully compliant two-tick witness.  It ran from 09:03:42 to 10:15:46 UTC and took 4,324,602~ms (72:05; receipt \\texttt{e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe}), closing \\texttt{:two-tick-evidence-complete}.  Tick A (attempt \\texttt{canary-0a33ac68-aa60-4018-a896-5643f259a2d4}, 3,450,231~ms, 57:30) selected \\texttt{inside-futon3c/M-single-locus} and \\texttt{rest-of-stack/M-distributed-frontiermath}: R11 used the full shared budget of 7 without exceeding it.  The FrontierMath author built an independent FM-001 SAT-encoding cross-check; review found that zero valid samples could pass vacuously, and amendment \\texttt{e72f7f3} refused non-positive and zero-valid-sample runs, passed a real five-sample replay and the full suite, and grounded in Futon6.  R12 recorded separate Layer~1 and independently witnessed Layer~2 passes.  R15 therefore advanced the relevant slow state from Beta(1,1) to Beta(2,1), with intrinsic probability moving from 0.5 to 0.6667, and changed mode from \\texttt{:exploration} to \\texttt{:consolidation}.  The inter-tick R17 run \\texttt{wm-instrumented-S-20260821/r17-intertick} froze corpus SHA-256 \\texttt{97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990}: 26 observations over seven capabilities generated 21 proposals, all accepted, collapsing to one concept in 20~ms.  Its exact replay was identical."}
+    {:file "/home/joe/code/p4ng/sec-catalog.tex",
+     :line 245,
+     :text
+     "\\paragraph{Hierarchical and Temporal Depth (R15).} \\textbf{If} a fast tactical loop acts inside a slower strategic loop. \\textbf{However} merely giving both levels a scalar score does not create a hierarchy. \\textbf{Then} make the coupling explicit: strategic selection fixes the tactical target; witnessed tactical outcomes update the next strategic calibration state; and longer policies use a \\emph{named} temporal discount of their own rather than overloading the commitment dial. \\textbf{Because} hierarchy is a relationship between levels and timescales, not a second use of the same score.  \\emph{Invariant to preserve:} each level has its own quantities, and no quantity does duty at two levels at once.  \\emph{Evidence:} the opt-in two-tick campaign records both levels separately, rejects unwitnessed learning, folds a grounded fast outcome into a Beta update of the slow state, and uses that state to parameterise the next fast rollout.  Campaign S supplied the live positive branch: Tick A's independently approved and grounded outcome advanced the relevant slow posterior from Beta(1,1) to Beta(2,1), changed the slow mode from exploration to consolidation, and parameterised Tick B under that new state.  This is evidence for the explicit coupling, not for a general nested generative model."}
+    {:file "/home/joe/code/p4ng/sec-discussion-patterns.tex",
+     :line 29,
+     :text
+     "posterior from Beta(1,1) to Beta(2,1) before the second tick."}
+    {:file "/home/joe/code/p4ng/sec-overview-plop.tex",
+     :line 66,
+     :text
+     "R15 & Run-evidenced & Tick A's witnessed success changed Beta(1,1) to Beta(2,1) and exploration to consolidation before Tick B. \\\\"}
+    {:file
+     "/home/joe/code/p4ng/vetting/C23-EMPIRICS-ABSENCE-AUDIT-2026-08-31.md",
+     :line 16,
+     :text
+     "| `:50–52` — Campaign S times/costs; Beta(1,1)→Beta(2,1), .5→.6667; structural counts; replay | **unaffected** | Discrete witnessed verdict update, direct counts, clocks, budgets, and replay. |"}],
+   :prose-hit-count 8,
+   :finding :no-machine-record-of-the-campaign-s-slow-state,
+   :files-mentioning-a-slow-key []}
+  {:this-sweep-s-bookkeeping
+   ["holes/labs/wm-contract/VERIFY-r-nodes.edn"
+    "holes/labs/wm-contract/runs/V7-R15-node-sim/00-r15.edn"
+    "holes/labs/wm-contract/worklist.edn"],
+   :narrative-line
+   [{:line 50,
+     :text
+     "Campaign S supplied the first fully compliant two-tick witness.  It ran from 09:03:42 to 10:15:46 UTC and took 4,324,602~ms (72:05; receipt \\texttt{e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe}), closing \\texttt{:two-tick-evidence-complete}.  Tick A (attempt \\texttt{canary-0a33ac68-aa60-4018-a896-5643f259a2d4}, 3,450,231~ms, 57:30) selected \\texttt{inside-futon3c/M-single-locus} and \\texttt{rest-of-stack/M-distributed-frontiermath}: R11 used the full shared budget of 7 without exceeding it.  The FrontierMath author built an independent FM-001 SAT-encoding cross-check; review found that zero valid samples could pass vacuously, and amendment \\texttt{e72f7f3} refused non-positive and zero-valid-sample runs, passed a real five-sample replay and the full suite, and grounded in Futon6.  R12 recorded separate Layer~1 and independently witnessed Layer~2 passes.  R15 therefore advanced the relevant slow state from Beta(1,1) to Beta(2,1), with intrinsic probability moving from 0.5 to 0.6667, and changed mode from \\texttt{:exploration} to \\texttt{:consolidation}.  The inter-tick R17 run \\texttt{wm-instrumented-S-20260821/r17-intertick} froze corpus SHA-256 \\texttt{97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990}: 26 observations over seven capabilities generated 21 proposals, all accepted, collapsing to one concept in 20~ms.  Its exact replay was identical."}],
+   :identifiers
+   ["e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe"
+    "canary-0a33ac68-aa60-4018-a896-5643f259a2d4"
+    "wm-instrumented-S-20260821/r17-intertick"
+    "97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990"],
+   :files-searched 1966,
+   :hits-in-records [],
+   :basis "/home/joe/code/p4ng/empirics.tex:50",
+   :identifier-count 4,
+   :roots ["holes" "docs" "/home/joe/code/p4ng"],
+   :result :pass,
+   :id :campaign-s-cited-identifiers,
+   :hits-in-narrative-prose
+   [{:file "/home/joe/code/p4ng/empirics.tex",
+     :line 50,
+     :text
+     "Campaign S supplied the first fully compliant two-tick witness.  It ran from 09:03:42 to 10:15:46 UTC and took 4,324,602~ms (72:05; receipt \\texttt{e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe}), closing \\texttt{:two-tick-evidence-complete}.  Tick A (attempt \\texttt{canary-0a33ac68-aa60-4018-a896-5643f259a2d4}, 3,450,231~ms, 57:30) selected \\texttt{inside-futon3c/M-single-locus} and \\texttt{rest-of-stack/M-distributed-frontiermath}: R11 used the full shared budget of 7 without exceeding it.  The FrontierMath author built an independent FM-001 SAT-encoding cross-check; review found that zero valid samples could pass vacuously, and amendment \\texttt{e72f7f3} refused non-positive and zero-valid-sample runs, passed a real five-sample replay and the full suite, and grounded in Futon6.  R12 recorded separate Layer~1 and independently witnessed Layer~2 passes.  R15 therefore advanced the relevant slow state from Beta(1,1) to Beta(2,1), with intrinsic probability moving from 0.5 to 0.6667, and changed mode from \\texttt{:exploration} to \\texttt{:consolidation}.  The inter-tick R17 run \\texttt{wm-instrumented-S-20260821/r17-intertick} froze corpus SHA-256 \\texttt{97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990}: 26 observations over seven capabilities generated 21 proposals, all accepted, collapsing to one concept in 20~ms.  Its exact replay was identical."}
+    {:file "/home/joe/code/p4ng/sec-discussion-patterns.tex",
+     :line 44,
+     :text
+     "\\texttt{e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe}.  The long wall time is part of"}],
+   :hits-in-this-sweep-s-own-bookkeeping [],
+   :finding :no-record-carries-either-cited-identifier}
+  {:declared-ns-is-in-the-requirer-census? true,
+   :basis
+   "holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn:601-609",
+   :entry-search ":id :n/R15-",
+   :declared-ns "futon2.aif.temporal-hierarchy-test",
+   :declared-ns-file "test/futon2/aif/temporal_hierarchy_test.clj",
+   :result :pass,
+   :id :registered-runtime-validation-is-a-test-of-this-namespace,
+   :entry
+   [{:line 601,
+     :text
+     "{:id :n/R15-temporal-hierarchy :axis :per-node :node :R15 :substrate :wm"}
+    {:line 602,
+     :text
+     ":validation \"The fast/slow temporal hierarchy is REAL, not cosmetic: changing the slow-loop state changes the fast loop's prior and its rollout decision; nil mode is regression-safe.\""}
+    {:line 603,
+     :text
+     ":evidence-kind :test-green :status :exists :binding :self-declared"}
+    {:line 604, :text ":ns \"futon2.aif.temporal-hierarchy-test\""}
+    {:line 605,
+     :text
+     ":pointer \"futon2/test/futon2/aif/temporal_hierarchy_test.clj:1-7\""}
+    {:line 606,
+     :text
+     ":also-pointers [\"futon2/test/futon2/aif/temporal_hierarchy_test.clj:28-105\"]"}
+    {:line 607, :text ":provenance :synthetic"}
+    {:line 608, :text ":gates-flip []"}
+    {:line 609,
+     :text
+     ":note \"The docstring names R15 and names its own load-bearing test. TN section 6 choice 5 records R15 as PLUMBING in the registry (single-level hierarchy), so this suite validates a mechanism the equations do not currently wire.\"}"}],
+   :and-nothing-outside-that-ns-requires-the-node true}
   {:id :negative-controls-detect-nonzero-cases,
    :result :pass,
+   :delivered-plants
+   [{:id :synthetic-slow-trace, :detected 1, :result :caught}
+    {:id :synthetic-temporal-requirer, :detected 1, :result :caught}
+    {:id :synthetic-r15-equation, :detected 1, :result :caught}],
+   :review-plants
+   [{:id :citation-inside-its-range-reads-current,
+     :expected :current,
+     :got :current,
+     :result :caught}
+    {:id :citation-whose-phrase-is-gone-reads-not-found,
+     :expected :phrase-not-found,
+     :got :phrase-not-found,
+     :result :caught}
+    {:id :keyword-quoted-in-a-string-is-prose,
+     :expected :prose,
+     :got :prose,
+     :result :caught}
+    {:id :keyword-carried-as-data-is-a-machine-record,
+     :expected :machine-record,
+     :got :machine-record,
+     :result :caught}
+    {:id :unparsable-artefact-is-reported-not-absorbed,
+     :expected :unparsed,
+     :got :unparsed,
+     :result :caught}
+    {:id :an-inference-require-would-be-seen,
+     :expected ["futon2.aif.efe"],
+     :got ["futon2.aif.efe"],
+     :result :caught}],
    :plants
    [{:id :synthetic-slow-trace, :detected 1, :result :caught}
     {:id :synthetic-temporal-requirer, :detected 1, :result :caught}
-    {:id :synthetic-r15-equation, :detected 1, :result :caught}]}],
+    {:id :synthetic-r15-equation, :detected 1, :result :caught}
+    {:id :citation-inside-its-range-reads-current,
+     :expected :current,
+     :got :current,
+     :result :caught}
+    {:id :citation-whose-phrase-is-gone-reads-not-found,
+     :expected :phrase-not-found,
+     :got :phrase-not-found,
+     :result :caught}
+    {:id :keyword-quoted-in-a-string-is-prose,
+     :expected :prose,
+     :got :prose,
+     :result :caught}
+    {:id :keyword-carried-as-data-is-a-machine-record,
+     :expected :machine-record,
+     :got :machine-record,
+     :result :caught}
+    {:id :unparsable-artefact-is-reported-not-absorbed,
+     :expected :unparsed,
+     :got :unparsed,
+     :result :caught}
+    {:id :an-inference-require-would-be-seen,
+     :expected ["futon2.aif.efe"],
+     :got ["futon2.aif.efe"],
+     :result :caught}]}],
  :node :R15,
  :corpus
  {:root "data/wm-trace",
