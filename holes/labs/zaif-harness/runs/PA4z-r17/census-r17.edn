@@ -1,0 +1,35 @@
+;; PA4z — R17, the node ALIGN named and then declined.
+;;
+;; ALIGN section 1, verbatim: "This yields R10, R12, R20, R17, R9 and TRACE at
+;; lines 39-44. The requested rows omit R17, so this census does too." That was
+;; a scope choice of the commissioning request, not a finding -- and it left the
+;; ASSURANCE band, the band whose entire job is process assurance, with an
+;; uncensused member. This row closes that declared hole.
+
+{:schema :box12/census-slice-v1
+ :row :PA4z
+ :node "R17"
+ :band :assurance
+ :stage "SELECT"
+ :label "Structure learning"
+ :catalogue "p4ng/empirics-futon/control-stages.edn:42"
+ :omission-provenance "ALIGN-rnode-process-census.md:22-23, quoted verbatim above. Recorded so this reads as closing a declared scope hole rather than as a correction to claude-1's work."
+ :pattern-version :v2
+
+ :result
+ {:cells {:commissioned :absent :dispatched :absent :parked :absent :returned :absent
+          :checked :absent :recorded :absent :surfaced :absent}
+  :tally {:absent 7}
+  :finding "R17 APPEARS NOWHERE IN THE DECLARED SCOPE AT ALL. Not merely unlinked -- absent. `rg -c ':R17\\b'` across war_machine.clj, futon2/src/futon2/aif, and futon3c's agency/social/transport returns zero matches, under v2's widened pattern and widened scope. The node exists as one catalogue row (control-stages.edn:42) and as nothing else the census can see."
+  :command "rg -c ':R17\\b' futon2/scripts/futon2/report/war_machine.clj futon2/src/futon2/aif futon3c/src/futon3c/agency futon3c/src/futon3c/social futon3c/src/futon3c/transport -- returns no matches; untruncated."}
+
+ ;; --------------------------------------------------------------------------
+ :applicability-is-UNDECIDABLE-here
+ {:finding "THE APPLICABILITY RULE CANNOT BE APPLIED TO R17, AND SAYING SO IS THE POINT."
+  :why "PA2z's discriminator derives handoff-shape FROM A NODE'S IMPLEMENTATION -- does its code carry dispatch!/bell/poll-job! conduct. R17 has no implementation in scope. You cannot derive a shape from absent code, and guessing one would be exactly the hand-waving Joe's Box-5 ruling forbids ('mechanically derived, not hand-waved')."
+  :so-what-is-the-denominator "UNSTATED, deliberately. For slice A and B the denominator is 3 because those nodes demonstrably do not hand off. For R17 it is 3 or 7 depending on a fact not in evidence. This row reports 7 :absent cells and declines to pick a denominator, because a denominator asserted without its basis is the same defect Box 12 had before PA2z -- just with a smaller number."
+  :distinct-from-the-other-zeros "R4, R13, R15 and R11 also score zero, but they have implementations that are simply not node-linked. R17 has nothing to link. Two different zeros, and a census that reported them identically would be hiding the difference."}
+
+ :what-this-means-for-the-band
+ {:observation "The assurance band is 6 nodes: R10, R12, R20, R17, R9, TRACE. With PA4z the band is fully censused for the first time. R17 is the only one of the six with no implementation whatsoever in the declared scope -- R9 and R20 are at least NAMED with conduct described (ALIGN's [N9] and [N20]), R10 and R12 have route hops or apparatus scans, TRACE records."
+  :not-overreaching "This row does NOT claim R17 is unimplemented in the system. It claims R17 is unimplemented WITHIN THE DECLARED CENSUS SCOPE, which is a smaller and checkable statement. futon3 and other trees stay outside per claude-1's standing scope ruling; if R17 lives somewhere outside, that is a scope question to raise, not a finding to assert here."}}
