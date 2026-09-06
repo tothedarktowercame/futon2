@@ -1,0 +1,982 @@
+{:stage "PERCEIVE",
+ :negative-controls
+ {:planted-nodes
+  [{:id :drops-annotation-health,
+    :statement
+    "Thirteen channels instead of fourteen -- the shape the trace corpus actually carries before v0.10, so it is a node that once existed.",
+    :verdict :caught,
+    :caught-by
+    [:channel-set-is-the-declared-fourteen
+     :node-agrees-with-independent-reference]}
+   {:id :inverted-active-repo-ratio,
+    :statement
+    "total/active instead of active/total. Both are ratios of the same two counts and both are 1.0 when the repos are all active, so a fixture where they differ is what separates them.",
+    :verdict :caught,
+    :caught-by [:node-agrees-with-independent-reference]}
+   {:id :uncapped-sorry-count-norm,
+    :statement
+    "open sorrys / 10 without the (min 1.0 ...). Identical on every input with fewer than ten open sorrys, which is most of them.",
+    :verdict :caught,
+    :caught-by [:node-agrees-with-independent-reference]}
+   {:id :coupling-density-over-n-squared,
+    :statement
+    "coupling edges / n^2 instead of / (n(n-1)/2). Same order of magnitude, always smaller, never negative -- no sign or range check can see it.",
+    :verdict :caught,
+    :caught-by [:node-agrees-with-independent-reference]}
+   {:id :ticks-firing-over-firing-plus-one,
+    :statement
+    "A smoothed firing ratio, firing/(firing+1), in place of firing/total. It is in [0,1) and monotone in the firing count, so it passes every range and shape check.",
+    :verdict :caught,
+    :caught-by [:node-agrees-with-independent-reference]}
+   {:id :absent-coerced-to-one,
+    :statement
+    "The absence envelope's promised coercion made to 1.0 rather than 0.0 -- a node that reads a missing source as full health instead of none.",
+    :verdict :caught,
+    :caught-by [:node-agrees-with-independent-reference]}
+   {:id :every-variant-observed,
+    :statement
+    "The numbers left exactly as the shipped node computes them, and every channel's provenance rewritten to :observed. This is the node that erases the measured-zero / substituted-zero distinction the envelope exists to keep, and no numeric check can see it.",
+    :verdict :caught,
+    :caught-by [:absent-source-is-tagged-absent]}],
+  :all-caught true,
+  :reads
+  "Each is a wrong R2 someone could write. A plant is caught only by a check the SHIPPED node passes -- the two declaration measurements above are excluded, because a check the shipped node fails cannot discriminate between a right node and a wrong one."},
+ :harness :v7-r2-node-sim,
+ :what-this-is
+ "One control-stages node run alone against declared fixtures, plus a read of its own output history. UNLIKE :F3's R5 pilot this IS the shipped call path: scripts/futon2/report/war_machine.clj:5936 calls futon2.aif.observation/observe and tags the route :R2 at scripts/futon2/report/war_machine.clj:5937. R2's registry row states a BOUNDARY and not a formula (aif-equations.edn:76), so what is checked is the shape the node declares about itself, not a transcription of an equation.",
+ :not-done
+ ["Only R2. The other control-stages nodes are later slices of their own, in aif-equations dependency order."
+  "No live tick, no run lock, nothing written under data/. The trace corpus is opened for reading."
+  "gen_aif_dag.bb not run; nothing regenerated into a publish (TN 9a)."
+  "aif-equations.edn is READ and not written."
+  "No Lean was elaborated. The :observe row's :lean-status :closed is read from the registry; leg (b) of :V7 re-runs the Clojure readback, which is a different claim."
+  "The reference is transcribed from the DECLARATION and cannot catch an error the declaration and the body share. The declared range is therefore checked by probe and by the output history instead, not by reference agreement."],
+ :checks
+ [{:check :channel-set-is-the-declared-fourteen,
+   :declared-count 14,
+   :status :pass,
+   :disagreements []}
+  {:check :node-agrees-with-independent-reference,
+   :fixtures-compared 16,
+   :comparisons 224,
+   :max-deviation 0.0,
+   :status :pass,
+   :disagreements []}
+  {:check :vector-is-declared-order-and-length,
+   :declared-order
+   [:loop-health
+    :support-coverage
+    :attack-coverage
+    :mission-health
+    :stack-pct
+    :consulting-pct
+    :portfolio-pct
+    :mathematics-pct
+    :active-repo-ratio
+    :sorry-count-norm
+    :coupling-density
+    :ticks-firing-ratio
+    :depositing-signal
+    :annotation-health],
+   :length 14,
+   :status :pass,
+   :disagreements []}
+  {:check :mismatched-envelope-is-refused,
+   :pairs-tested 16,
+   :status :pass,
+   :disagreements []}
+  {:check :absent-source-is-tagged-absent,
+   :channels-tested 12,
+   :status :pass,
+   :disagreements [],
+   :not-tested [:active-repo-ratio :coupling-density]}],
+ :output-history
+ {:out-of-range-observations [],
+  :records-without-observation 0,
+  :records-with-observation 889,
+  :independent-record-count
+  {:file ".lane-futility-index.edn",
+   :sha256
+   "37a9839acf1324a60c67fef9abf5b5e1cc9986884a5d56788182e9b831c643b1",
+   :record-count 889,
+   :agrees-with-scan true,
+   :reads
+   "The sweeper's index is derived from the same files, so this is a cross-check on the READ and not on the corpus: it says the line-by-line scan here did not drop or double-count a record."},
+  :out-of-range-count 0,
+  :unreadable-lines 0,
+  :per-channel
+  {:active-repo-ratio
+   {:n 889,
+    :min 0.47058823529411764,
+    :max 0.8125,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :annotation-health
+   {:n 887,
+    :min 0.9428571428571428,
+    :max 0.9951690821256038,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :attack-coverage
+   {:n 889,
+    :min 0.0,
+    :max 1.0,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :consulting-pct
+   {:n 889,
+    :min 0.0,
+    :max 0.2222222222222222,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :coupling-density
+   {:n 889,
+    :min 0.15441176470588236,
+    :max 0.5294117647058824,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :depositing-signal
+   {:n 889,
+    :min 0.0,
+    :max 0.0,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :loop-health
+   {:n 889,
+    :min 0.0,
+    :max 0.9089867184597494,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :mathematics-pct
+   {:n 889,
+    :min 7.980845969672786E-4,
+    :max 0.620414673046252,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :mission-health
+   {:n 889,
+    :min 0.0,
+    :max 0.393939393939394,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :portfolio-pct
+   {:n 889,
+    :min 0.0013301409949454642,
+    :max 0.5652173913043478,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :sorry-count-norm
+   {:n 889,
+    :min 0.0,
+    :max 0.8,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :stack-pct
+   {:n 889,
+    :min 0.15079365079365079,
+    :max 0.996969696969697,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :support-coverage
+   {:n 889,
+    :min 0.0,
+    :max 1.0,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true},
+   :ticks-firing-ratio
+   {:n 889,
+    :min 0.0,
+    :max 1.0,
+    :non-numeric 0,
+    :in-declaration true,
+    :declared-range [0.0 1.0],
+    :within-declared-range true}},
+  :root "data/wm-trace",
+  :files
+  [{:file "wm-trace-2026-05-18.edn",
+    :bytes 166189,
+    :sha256
+    "c0ca99acd3a856baa25c5cec479d2aa75d24e138e5ba053ee4b687c979d2c0f4",
+    :records-with-observation 7}
+   {:file "wm-trace-2026-05-19.edn",
+    :bytes 307015,
+    :sha256
+    "03ae679606669b46d6a4f5decf06e72ed2e7bea081e9bb43ca8b5970492560c9",
+    :records-with-observation 9}
+   {:file "wm-trace-2026-05-21.edn",
+    :bytes 1273930,
+    :sha256
+    "1ebc49ee045020121bfeb27cf1c93d6fee95954a9770ab4103f348072f86cf78",
+    :records-with-observation 13}
+   {:file "wm-trace-2026-05-22.edn",
+    :bytes 2364166,
+    :sha256
+    "93ec1642a93c28dfbfa7e3f985ff6d335f6702c2206d57f9eda2488f2cd62e3c",
+    :records-with-observation 24}
+   {:file "wm-trace-2026-05-23.edn",
+    :bytes 3426111,
+    :sha256
+    "78fe7aaff4e9d3d38f0f4d761a972384e28e557252e47167e5270b6a90fe4a6f",
+    :records-with-observation 24}
+   {:file "wm-trace-2026-05-24.edn",
+    :bytes 5186333,
+    :sha256
+    "169fa5ab04049df92f64e4ae27c9b76f27c4a663bff5b42a9a8e8e076bfb6c26",
+    :records-with-observation 24}
+   {:file "wm-trace-2026-05-25.edn",
+    :bytes 4679504,
+    :sha256
+    "4dbe524209e4664bf45d0a9bc4f8f02ee7cfa8d1b7aaa43357898e00299f80fd",
+    :records-with-observation 21}
+   {:file "wm-trace-2026-05-26.edn",
+    :bytes 4116151,
+    :sha256
+    "6dd57154cf77d74ea10f79f1f76ba788c0fd11255afd195112a8eea5520da2f5",
+    :records-with-observation 17}
+   {:file "wm-trace-2026-05-27.edn",
+    :bytes 2183456,
+    :sha256
+    "15fc83235b3632cb3224cebb5171561602c56f4948915698764b051380b61584",
+    :records-with-observation 9}
+   {:file "wm-trace-2026-05-30.edn",
+    :bytes 568147,
+    :sha256
+    "39cd226f1d044a2b877fe4a062b1a6f51703800927f62de0ab12bc4aa94be5e4",
+    :records-with-observation 2}
+   {:file "wm-trace-2026-05-31.edn",
+    :bytes 6026629,
+    :sha256
+    "61f237000f7ee16267de68e86e2ca66f570d6ded1570332e1e178a3892a93b06",
+    :records-with-observation 19}
+   {:file "wm-trace-2026-06-01.edn",
+    :bytes 3826242,
+    :sha256
+    "97f4ea223d4b76dc805b1d6eadd23fd468c82a673e98f8870e15196963090a47",
+    :records-with-observation 12}
+   {:file "wm-trace-2026-06-02.edn",
+    :bytes 4545920,
+    :sha256
+    "fb28f770fedbed721728a863c86a8e2ad35ed7d5691bf9d362811f8bb5e9f677",
+    :records-with-observation 14}
+   {:file "wm-trace-2026-06-03.edn",
+    :bytes 7795810,
+    :sha256
+    "e3f025d0403b645fc6c3b00d6b26358ddf67e095f2fba4febd3adb9a53cc3596",
+    :records-with-observation 24}
+   {:file "wm-trace-2026-06-04.edn",
+    :bytes 7786565,
+    :sha256
+    "56ff07b85416f70cc6ee202422dbf6eb88d9f1f36e13a8487ab1c4c8a6613d0a",
+    :records-with-observation 24}
+   {:file "wm-trace-2026-06-05.edn",
+    :bytes 4903000,
+    :sha256
+    "4c0309f443f00087a0a53d0b04e74c1a7185439f8f4d0d91692d122991705cf1",
+    :records-with-observation 15}
+   {:file "wm-trace-2026-06-06.edn",
+    :bytes 7561648,
+    :sha256
+    "8b15622786ee5a0214a2ac564a5106b05b707b3199c7a2d919177da89755edac",
+    :records-with-observation 24}
+   {:file "wm-trace-2026-06-07.edn",
+    :bytes 6179281,
+    :sha256
+    "068acb1b71941f537569cf2d1e54cf7ecbe33aa392894a8885ebbc77f42dff0e",
+    :records-with-observation 23}
+   {:file "wm-trace-2026-06-08.edn",
+    :bytes 6487057,
+    :sha256
+    "254dac37b010d883708cf0cd04614870a96e22246314bd45bf4d16879b1e3573",
+    :records-with-observation 24}
+   {:file "wm-trace-2026-06-09.edn",
+    :bytes 6179698,
+    :sha256
+    "18bbeaa14c7b741a9edb18f7f8d7688af259d8eefd24fe80a3f9d7a9d73fd7b6",
+    :records-with-observation 23}
+   {:file "wm-trace-2026-06-10.edn",
+    :bytes 6101465,
+    :sha256
+    "badf4f1fa6f366c0654eb16438599e792d76a6de44eacc09002f6af3d4e7003e",
+    :records-with-observation 22}
+   {:file "wm-trace-2026-06-12.edn",
+    :bytes 2064838,
+    :sha256
+    "97cf83a7f617f6981da61252ee0b34fda569fc7e31ddcdb6cfaedc3f6fe335ee",
+    :records-with-observation 7}
+   {:file "wm-trace-2026-06-13.edn",
+    :bytes 7126788,
+    :sha256
+    "676f19c4706e4de940d5fb392a5078149bedf6933110b480a2fd03b51465aaf9",
+    :records-with-observation 24}
+   {:file "wm-trace-2026-06-14.edn",
+    :bytes 5987738,
+    :sha256
+    "031887f2fbcffe15ce9cb1e6a5e1712a1afd006842a261cf5243d895a65d8621",
+    :records-with-observation 20}
+   {:file "wm-trace-2026-06-15.edn",
+    :bytes 2354299,
+    :sha256
+    "a537170ab42bafdb7d39269a9e9c37f7099fc77152433f6ae9fb59c0f0da7eb1",
+    :records-with-observation 8}
+   {:file "wm-trace-2026-06-16.edn",
+    :bytes 4084395,
+    :sha256
+    "58f60fe91e34c58dcf71c584335ba3ba484bda0bcf902cf1c7937465ee61773d",
+    :records-with-observation 14}
+   {:file "wm-trace-2026-06-17.edn",
+    :bytes 4339263,
+    :sha256
+    "2fbd2c3b5793b5c7c9ab199cf8adb68e17482f1f98a2fdec07561eec8d9115f6",
+    :records-with-observation 15}
+   {:file "wm-trace-2026-06-18.edn",
+    :bytes 3454645,
+    :sha256
+    "123a70405acc97f58c8ce489f564a70cb1931600ad7ff9d2ed3018823aabd9ea",
+    :records-with-observation 12}
+   {:file "wm-trace-2026-06-21.edn",
+    :bytes 856777,
+    :sha256
+    "a38d588d3f773180385852570165ac218de538f87125594ec2b78cdf2c37323d",
+    :records-with-observation 3}
+   {:file "wm-trace-2026-06-22.edn",
+    :bytes 4912616,
+    :sha256
+    "f8b2211535a69816de9331971e48e9c5d909c78df83d4f586c16f7ca2d1f1d49",
+    :records-with-observation 17}
+   {:file "wm-trace-2026-06-23.edn",
+    :bytes 3767010,
+    :sha256
+    "ead3f793e91bf3b62f5fb912583695ba1e57db1da6442e3f56678c2417c72b84",
+    :records-with-observation 13}
+   {:file "wm-trace-2026-06-24.edn",
+    :bytes 2890392,
+    :sha256
+    "6838cbfc07d9f3aa7fa6557cf40a7572398dbbc2d4352dd7630917794b3d1bfd",
+    :records-with-observation 10}
+   {:file "wm-trace-2026-06-25.edn",
+    :bytes 4354430,
+    :sha256
+    "cf1dece9bddd978a5a25076ee145a1bb22cb33a8e80c49d4065736f54dc5846c",
+    :records-with-observation 15}
+   {:file "wm-trace-2026-06-26.edn",
+    :bytes 3479288,
+    :sha256
+    "4c75926963cd2124567b734251c626efa1b4dc8b6724d6c2bddd0d869612b051",
+    :records-with-observation 12}
+   {:file "wm-trace-2026-06-27.edn",
+    :bytes 3195444,
+    :sha256
+    "40ae814324bff4859e5faea2a022e17c173a35f1cfff4b66c94d426223cc8009",
+    :records-with-observation 11}
+   {:file "wm-trace-2026-06-28.edn",
+    :bytes 4058491,
+    :sha256
+    "55bd67e1b0ecee2611d2e43273c04bc3e14bd63aa9ea77632bacaee110747759",
+    :records-with-observation 14}
+   {:file "wm-trace-2026-06-29.edn",
+    :bytes 5215323,
+    :sha256
+    "1e1569051e691aca86d59ffea6de4077fdf461fa57a3fc4c81f05766dcddc242",
+    :records-with-observation 18}
+   {:file "wm-trace-2026-06-30.edn",
+    :bytes 5214826,
+    :sha256
+    "43c07fa2a493bf9272802becd575f724686e13fbba5ad50acb4866e102174ca4",
+    :records-with-observation 18}
+   {:file "wm-trace-2026-07-01.edn",
+    :bytes 6678062,
+    :sha256
+    "ac2949904c268fdacdbc176f237c66252c8e5fd377d8499b41adb81ad5ce875f",
+    :records-with-observation 23}
+   {:file "wm-trace-2026-07-02.edn",
+    :bytes 9948504,
+    :sha256
+    "c2fe4e9493cc5f716579233075cb4c83735450f3e7648e7ebfa8afbe13efb921",
+    :records-with-observation 34}
+   {:file "wm-trace-2026-07-03.edn",
+    :bytes 5942484,
+    :sha256
+    "5cae8b2b978646ce5b8b2a52bd47e56e1fb9fc5779d0a6216cfbbbb100b6c46a",
+    :records-with-observation 20}
+   {:file "wm-trace-2026-07-04.edn",
+    :bytes 13206620,
+    :sha256
+    "f887895d29e8fe78ce5e9905e48acd4748fa953005cf94cf56c4ceb98893811b",
+    :records-with-observation 38}
+   {:file "wm-trace-2026-07-05.edn",
+    :bytes 6572127,
+    :sha256
+    "1e49f622895d32fe8d1fb3218ed078de076b830be9f351c45f1091ad55558478",
+    :records-with-observation 18}
+   {:file "wm-trace-2026-07-06.edn",
+    :bytes 7033436,
+    :sha256
+    "84e7253a2c6e2e983d481f021889f411482e3fb8ef7f57ac1e25cb0487902165",
+    :records-with-observation 21}
+   {:file "wm-trace-2026-07-09.edn",
+    :bytes 337767,
+    :sha256
+    "3c3f332d62de8381f38a0374f7a5bc727c457db0ef37f694aceb156561bc3749",
+    :records-with-observation 1}
+   {:file "wm-trace-2026-07-14.edn",
+    :bytes 5276670,
+    :sha256
+    "8c56ef7fff91c683ed64bbd2d9b356c2357b5b5a9ba1d52e93b0a273579c95ea",
+    :records-with-observation 14}
+   {:file "wm-trace-2026-07-15.edn",
+    :bytes 2271474,
+    :sha256
+    "5294d067786e84b935e41b867f42e646c70c23e1d3f3afc23c83a70ea6c6f2a1",
+    :records-with-observation 6}
+   {:file "wm-trace-2026-07-16.edn",
+    :bytes 2296437,
+    :sha256
+    "5c4043d50ec8eea87351a69c1fefd50e62f15c905d2ce6a016aa039c9ced46a4",
+    :records-with-observation 6}
+   {:file "wm-trace-2026-07-17.edn",
+    :bytes 401412,
+    :sha256
+    "d86f08745250371aa0106a310bffcf0a1a2345a52fdedf066bb91e5a8ad42bb4",
+    :records-with-observation 1}
+   {:file "wm-trace-2026-07-18.edn",
+    :bytes 405129,
+    :sha256
+    "fd00d9da9ff7e6e965adafd8bc75739bdb28329b4f436fe5aeae4d837df15638",
+    :records-with-observation 1}
+   {:file "wm-trace-2026-07-19.edn",
+    :bytes 410975,
+    :sha256
+    "ec16b3f217ac6d8c998fb162d456b41662920366f1f4190d9e1b007fd3f1d6de",
+    :records-with-observation 1}
+   {:file "wm-trace-2026-07-21.edn",
+    :bytes 830108,
+    :sha256
+    "3d0910af1a7a1b5a49c879bdc82127038ca401f1343492e8abe217393f93d081",
+    :records-with-observation 2}
+   {:file "wm-trace-2026-08-30.edn",
+    :bytes 3589077,
+    :sha256
+    "708e89399de8173d208338885f8eabc17e723fa0906b59931f02e7a20c101421",
+    :records-with-observation 7}
+   {:file "wm-trace-2026-08-31.edn",
+    :bytes 3072923,
+    :sha256
+    "af50766f8a3d79d852fe6dc175cba59e61e6b6bc8bc08624b1d268b117d7283b",
+    :records-with-observation 5}
+   {:file "wm-trace-2026-09-01.edn",
+    :bytes 81110863,
+    :sha256
+    "565690ac19245351272d8b8abe8a376d991847fcfce1f8bf4d9fa57fdb1116af",
+    :records-with-observation 79}
+   {:file "wm-trace-2026-09-02.edn",
+    :bytes 2286100,
+    :sha256
+    "935dcb81af4a1e7c6373a3a95c5d7a06c14f31199cf16c35edfcf62ebfbab5f2",
+    :records-with-observation 3}
+   {:file "wm-trace-2026-09-04.edn",
+    :bytes 3000420,
+    :sha256
+    "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120",
+    :records-with-observation 4}],
+  :read-only
+  "This leg opens the corpus for reading only. No run lock is taken because nothing here writes to data/.",
+  :channel-shapes
+  [{:channels
+    [:active-repo-ratio
+     :annotation-health
+     :attack-coverage
+     :consulting-pct
+     :coupling-density
+     :depositing-signal
+     :loop-health
+     :mathematics-pct
+     :mission-health
+     :portfolio-pct
+     :sorry-count-norm
+     :stack-pct
+     :support-coverage
+     :ticks-firing-ratio],
+    :channel-count 14,
+    :records 887,
+    :missing-from-declaration [],
+    :not-in-declaration [],
+    :first-file "wm-trace-2026-05-18.edn",
+    :last-file "wm-trace-2026-09-04.edn"}
+   {:channels
+    [:active-repo-ratio
+     :attack-coverage
+     :consulting-pct
+     :coupling-density
+     :depositing-signal
+     :loop-health
+     :mathematics-pct
+     :mission-health
+     :portfolio-pct
+     :sorry-count-norm
+     :stack-pct
+     :support-coverage
+     :ticks-firing-ratio],
+    :channel-count 13,
+    :records 2,
+    :missing-from-declaration [:annotation-health],
+    :not-in-declaration [],
+    :first-file "wm-trace-2026-05-18.edn",
+    :last-file "wm-trace-2026-05-18.edn"}],
+  :file-count 57},
+ :node :R2,
+ :equations-registry
+ {:rows
+  [{:id :observe,
+    :formal
+    "o_t <- structured observation of the world after action u_{t-1}",
+    :class :stack-defined,
+    :imports [:world],
+    :lean "machineObservation",
+    :lean-status :closed,
+    :code nil}],
+  :source "holes/labs/wm-contract/aif-equations.edn:74-79",
+  :note
+  "One row. It carries no :code field: the runtime sites are named in its :lean-note instead."},
+ :stage-at "p4ng/empirics-futon/control-stages.edn:15",
+ :fixtures
+ [{:id :empty,
+   :why
+   "The input the F8 readback measures: no key present at all. Every channel absent, every coordinate 0.0."}
+  {:id :complete,
+   :why
+   "Every declared source path present, with values chosen so that no two channels share a number and no channel sits at a cap -- an inverted numerator or a swapped denominator therefore shows up as a different number rather than as the same one."}
+  {:id :at-both-caps,
+   :why
+   "The two capped channels driven above their caps at once, plus a coupling count above the pair maximum. Distinguishes a node that caps from a node that does not."}
+  {:id :single-repo,
+   :why
+   "total-repos = 1, so the pair maximum n(n-1)/2 is zero and :coupling-density takes its guard branch while :active-repo-ratio does not."}
+  {:id :incomplete-summary,
+   :why
+   "A :summary map present but missing :total-repos. The envelope promises :coerced-to 0.0 at every absent channel; this is the input on which observe raises instead (observation.clj:129). The harness records the refusal rather than a value -- that IS the measurement."}
+  {:id :absent-loop-health,
+   :drops :loop-health,
+   :removed-paths [[:loop-health :overall]],
+   :shares-paths-with []}
+  {:id :absent-support-coverage,
+   :drops :support-coverage,
+   :removed-paths [[:support-attack :support-coverage]],
+   :shares-paths-with []}
+  {:id :absent-attack-coverage,
+   :drops :attack-coverage,
+   :removed-paths [[:support-attack :attack-coverage]],
+   :shares-paths-with []}
+  {:id :absent-mission-health,
+   :drops :mission-health,
+   :removed-paths [[:mission-triage :health]],
+   :shares-paths-with []}
+  {:id :absent-stack-pct,
+   :drops :stack-pct,
+   :removed-paths [[:graph :dynamics :commit-percentages :stack]],
+   :shares-paths-with []}
+  {:id :absent-consulting-pct,
+   :drops :consulting-pct,
+   :removed-paths [[:graph :dynamics :commit-percentages :consulting]],
+   :shares-paths-with []}
+  {:id :absent-portfolio-pct,
+   :drops :portfolio-pct,
+   :removed-paths [[:graph :dynamics :commit-percentages :portfolio]],
+   :shares-paths-with []}
+  {:id :absent-mathematics-pct,
+   :drops :mathematics-pct,
+   :removed-paths
+   [[:graph :dynamics :commit-percentages :mathematics]],
+   :shares-paths-with []}
+  {:id :absent-active-repo-ratio,
+   :drops :active-repo-ratio,
+   :removed-paths
+   [[:graph :summary :active-repos] [:graph :summary :total-repos]],
+   :shares-paths-with [:coupling-density]}
+  {:id :absent-sorry-count-norm,
+   :drops :sorry-count-norm,
+   :removed-paths [[:graph :summary :total-sorrys]],
+   :shares-paths-with []}
+  {:id :absent-coupling-density,
+   :drops :coupling-density,
+   :removed-paths
+   [[:graph :summary :coupling-edges] [:graph :summary :total-repos]],
+   :shares-paths-with [:active-repo-ratio]}
+  {:id :absent-ticks-firing-ratio,
+   :drops :ticks-firing-ratio,
+   :removed-paths
+   [[:graph :dynamics :ticks] [:graph :summary :ticks-firing]],
+   :shares-paths-with []}
+  {:id :absent-depositing-signal,
+   :drops :depositing-signal,
+   :removed-paths [[:frames :depositing-signal]],
+   :shares-paths-with []}
+  {:id :absent-annotation-health,
+   :drops :annotation-health,
+   :removed-paths [[:annotation-graph :health]],
+   :shares-paths-with []}],
+ :declaration-measurements
+ {:reads
+  "These two are NOT gates. They measure the shipped node against assertions the node makes about itself, and the shipped node does not satisfy them everywhere -- which is the content this slice is here to record. A planted node is therefore never allowed to be caught by them.",
+  :absence-coercion-promise
+  {:promised
+   "src/futon2/aif/observation.clj:70-74 -- every absent channel is written {:variant :absent :reason :source-field-missing :coerced-to 0.0}",
+   :channels
+   [{:channel :loop-health,
+     :removed-paths [[:loop-health :overall]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :support-coverage,
+     :removed-paths [[:support-attack :support-coverage]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :attack-coverage,
+     :removed-paths [[:support-attack :attack-coverage]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :mission-health,
+     :removed-paths [[:mission-triage :health]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :stack-pct,
+     :removed-paths [[:graph :dynamics :commit-percentages :stack]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :consulting-pct,
+     :removed-paths
+     [[:graph :dynamics :commit-percentages :consulting]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :portfolio-pct,
+     :removed-paths
+     [[:graph :dynamics :commit-percentages :portfolio]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :mathematics-pct,
+     :removed-paths
+     [[:graph :dynamics :commit-percentages :mathematics]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :active-repo-ratio,
+     :removed-paths
+     [[:graph :summary :active-repos] [:graph :summary :total-repos]],
+     :kept :broken-by-refusal,
+     :promised 0.0,
+     :outcome
+     {:status :threw,
+      :class "java.lang.NullPointerException",
+      :message
+      "Cannot invoke \"Object.getClass()\" because \"x\" is null"},
+     :collateral
+     [:annotation-health
+      :attack-coverage
+      :consulting-pct
+      :coupling-density
+      :depositing-signal
+      :loop-health
+      :mathematics-pct
+      :mission-health
+      :portfolio-pct
+      :sorry-count-norm
+      :stack-pct
+      :support-coverage
+      :ticks-firing-ratio],
+     :shares-paths-with [:coupling-density]}
+    {:channel :sorry-count-norm,
+     :removed-paths [[:graph :summary :total-sorrys]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :coupling-density,
+     :removed-paths
+     [[:graph :summary :coupling-edges]
+      [:graph :summary :total-repos]],
+     :kept :broken-by-refusal,
+     :promised 0.0,
+     :outcome
+     {:status :threw,
+      :class "java.lang.NullPointerException",
+      :message
+      "Cannot invoke \"Object.getClass()\" because \"x\" is null"},
+     :collateral
+     [:active-repo-ratio
+      :annotation-health
+      :attack-coverage
+      :consulting-pct
+      :depositing-signal
+      :loop-health
+      :mathematics-pct
+      :mission-health
+      :portfolio-pct
+      :sorry-count-norm
+      :stack-pct
+      :support-coverage
+      :ticks-firing-ratio],
+     :shares-paths-with [:active-repo-ratio]}
+    {:channel :ticks-firing-ratio,
+     :removed-paths
+     [[:graph :dynamics :ticks] [:graph :summary :ticks-firing]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :depositing-signal,
+     :removed-paths [[:frames :depositing-signal]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}
+    {:channel :annotation-health,
+     :removed-paths [[:annotation-graph :health]],
+     :kept true,
+     :promised 0.0,
+     :observed 0.0}],
+   :kept 12,
+   :broken [:active-repo-ratio :coupling-density]},
+  :declared-range
+  {:asserted-at
+   ["src/futon2/aif/observation.clj:5-7 (namespace docstring: 'a 14-channel observation vector in [0,1]')"
+    "src/futon2/aif/observation.clj:18-32 (every channel line carries [0,1] or an equivalent)"
+    "src/futon2/aif/observation.clj:104-105 (observe's docstring: 'channel-id -> [0,1] value')"],
+   :probe
+   {:input
+    {:loop-health {:overall 7.0},
+     :support-attack {:support-coverage 7.0, :attack-coverage -7.0},
+     :mission-triage {:health -7.0},
+     :graph
+     {:dynamics
+      {:commit-percentages
+       {:stack 7.0,
+        :consulting -7.0,
+        :portfolio 7.0,
+        :mathematics -7.0},
+       :ticks [{:fired? true}]},
+      :summary
+      {:active-repos 40,
+       :total-repos 4,
+       :coupling-edges 400,
+       :total-sorrys 400,
+       :ticks-firing 9}},
+     :frames {:depositing-signal 7.0},
+     :annotation-graph {:health -7.0}},
+    :channels
+    [{:channel :loop-health,
+      :declared-range [0.0 1.0],
+      :observed 7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :support-coverage,
+      :declared-range [0.0 1.0],
+      :observed 7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :attack-coverage,
+      :declared-range [0.0 1.0],
+      :observed -7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :mission-health,
+      :declared-range [0.0 1.0],
+      :observed -7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :stack-pct,
+      :declared-range [0.0 1.0],
+      :observed 7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :consulting-pct,
+      :declared-range [0.0 1.0],
+      :observed -7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :portfolio-pct,
+      :declared-range [0.0 1.0],
+      :observed 7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :mathematics-pct,
+      :declared-range [0.0 1.0],
+      :observed -7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :active-repo-ratio,
+      :declared-range [0.0 1.0],
+      :observed 10.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :sorry-count-norm,
+      :declared-range [0.0 1.0],
+      :observed 1.0,
+      :in-declared-range true,
+      :bounded-by :the-node,
+      :producer-range :bounded-by-the-node}
+     {:channel :coupling-density,
+      :declared-range [0.0 1.0],
+      :observed 1.0,
+      :in-declared-range true,
+      :bounded-by :the-node,
+      :producer-range :bounded-by-the-node}
+     {:channel :ticks-firing-ratio,
+      :declared-range [0.0 1.0],
+      :observed 9.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}
+     {:channel :depositing-signal,
+      :declared-range [0.0 1.0],
+      :observed 7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :unbounded-in-code}
+     {:channel :annotation-health,
+      :declared-range [0.0 1.0],
+      :observed -7.0,
+      :in-declared-range false,
+      :bounded-by :nothing-in-the-node,
+      :producer-range :bounded-by-construction}]},
+   :bounded-by-the-node [:coupling-density :sorry-count-norm],
+   :not-bounded-by-the-node
+   [:active-repo-ratio
+    :annotation-health
+    :attack-coverage
+    :consulting-pct
+    :depositing-signal
+    :loop-health
+    :mathematics-pct
+    :mission-health
+    :portfolio-pct
+    :stack-pct
+    :support-coverage
+    :ticks-firing-ratio],
+   :producer-range-census
+   {:active-repo-ratio
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3822-3823"},
+    :annotation-health
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:6844-6846"},
+    :attack-coverage
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3363-3366"},
+    :consulting-pct
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3863"},
+    :coupling-density
+    {:producer-range :bounded-by-the-node,
+     :producer-at "scripts/futon2/report/war_machine.clj:3824"},
+    :depositing-signal
+    {:producer-range :unbounded-in-code,
+     :producer-at "scripts/futon2/report/war_machine.clj:4042-4044"},
+    :loop-health
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3275-3277"},
+    :mathematics-pct
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3865"},
+    :mission-health
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3421-3426"},
+    :portfolio-pct
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3864"},
+    :sorry-count-norm
+    {:producer-range :bounded-by-the-node,
+     :producer-at "scripts/futon2/report/war_machine.clj:3826"},
+    :stack-pct
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3862"},
+    :support-coverage
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3359-3362"},
+    :ticks-firing-ratio
+    {:producer-range :bounded-by-construction,
+     :producer-at "scripts/futon2/report/war_machine.clj:3825"}}}},
+ :slice 2,
+ :code
+ {:node "src/futon2/aif/observation.clj:103-146 (observe)",
+  :envelope
+  "src/futon2/aif/observation.clj:84-101 (observation-envelope), src/futon2/aif/observation.clj:41-76 (channel-statuses)",
+  :vector-boundary
+  "src/futon2/aif/observation.clj:148-158 (sense->vector)",
+  :reference
+  "holes/labs/wm-contract/v7_r2_node_sim.clj:99-121 (the table interpreter) over sim/R2-carriers.edn :reference",
+  :runner "holes/labs/wm-contract/v7_r2_node_sim.clj",
+  :carriers "holes/labs/wm-contract/sim/R2-carriers.edn",
+  :call-site "scripts/futon2/report/war_machine.clj:5936-5937",
+  :test "test/futon2/aif/observation_test.clj"},
+ :verdict :pass,
+ :node-runs
+ [{:fixture :empty, :status :returned}
+  {:fixture :complete, :status :returned}
+  {:fixture :at-both-caps, :status :returned}
+  {:fixture :single-repo, :status :returned}
+  {:fixture :incomplete-summary,
+   :status :threw,
+   :class "java.lang.NullPointerException",
+   :message
+   "Cannot invoke \"Object.getClass()\" because \"x\" is null"}
+  {:fixture :absent-loop-health, :status :returned}
+  {:fixture :absent-support-coverage, :status :returned}
+  {:fixture :absent-attack-coverage, :status :returned}
+  {:fixture :absent-mission-health, :status :returned}
+  {:fixture :absent-stack-pct, :status :returned}
+  {:fixture :absent-consulting-pct, :status :returned}
+  {:fixture :absent-portfolio-pct, :status :returned}
+  {:fixture :absent-mathematics-pct, :status :returned}
+  {:fixture :absent-active-repo-ratio,
+   :status :threw,
+   :class "java.lang.NullPointerException",
+   :message
+   "Cannot invoke \"Object.getClass()\" because \"x\" is null"}
+  {:fixture :absent-sorry-count-norm, :status :returned}
+  {:fixture :absent-coupling-density,
+   :status :threw,
+   :class "java.lang.NullPointerException",
+   :message
+   "Cannot invoke \"Object.getClass()\" because \"x\" is null"}
+  {:fixture :absent-ticks-firing-ratio, :status :returned}
+  {:fixture :absent-depositing-signal, :status :returned}
+  {:fixture :absent-annotation-health, :status :returned}],
+ :fixture-count 19,
+ :row :V7}

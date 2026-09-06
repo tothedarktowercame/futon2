@@ -1,0 +1,286 @@
+;; R2-carriers.edn -- the declared carriers of node R2 (PERCEIVE, "Structured
+;; observation"), for worklist row :V7 slice 2.
+;;
+;; WHAT A "CARRIER" IS HERE, and it is not what it was for R5. R5's carriers
+;; (sim/R5-carriers.edn) are a state space, a policy family, a belief and a C:
+;; the arguments an equation needs. R2's registry row carries no equation --
+;; aif-equations.edn:76 states a BOUNDARY, "o_t <- structured observation of the
+;; world after action u_{t-1}" -- so what R2 declares about itself is not a
+;; formula but a SHAPE: fourteen named channels, each with a source path, a
+;; projection and a range. This file transcribes that shape from its declaration
+;; sites, and the harness (v7_r2_node_sim.clj) checks the shipped node against
+;; it.
+;;
+;; INDEPENDENCE, STATED EXACTLY. :reference below is transcribed from the
+;; DECLARATION -- the channel table (observation.clj:18-32), the requirement
+;; paths (observation.clj:49-65) and the docstrings -- and is evaluated by a
+;; generic interpreter in the harness. It is not a copy of observe's body: the
+;; body is a literal fourteen-key map (observation.clj:121-145) and this is a
+;; table. What that buys is real but bounded: it catches an arithmetic or
+;; source-path error in observe, and it does NOT catch an error shared by the
+;; declaration and the body, because both were written by the same hand. Every
+;; claim about the DECLARED RANGE is therefore checked separately, by probe, and
+;; against the shipped producer -- not by reference agreement.
+;;
+;; :producer names the code that actually supplies the channel's source field in
+;; a live scan, and :producer-range is a CODE-READING claim about that code, with
+;; the file:line that carries it. It is not a measurement. The measurement of the
+;; range is the trace-corpus leg of the harness, over the 889 observation vectors
+;; the shipped node has already written.
+;;
+;; NOT A RULING. Nothing here is written to aif-equations.edn :choices or to
+;; control-map-edges.edn :decisions.
+{:id :R2-carriers-v1
+ :node :R2
+ :for "worklist.edn :V7 slice 2 (2026-09-06)"
+ :registry-row "aif-equations.edn:74-79 -- the single :observe row, :class :stack-defined"
+
+ :declaration-sites
+ {:channel-table "src/futon2/aif/observation.clj:11-32 (observation-channels, the ordered vector)"
+  :requirement-paths "src/futon2/aif/observation.clj:48-65 (channel-statuses' requirements map)"
+  :absence-envelope "src/futon2/aif/observation.clj:66-76 (the {:variant :absent :reason :source-field-missing :coerced-to 0.0} record)"
+  :projection "src/futon2/aif/observation.clj:103-146 (observe)"
+  :vector-boundary "src/futon2/aif/observation.clj:148-158 (sense->vector, which refuses a non-matching envelope)"
+  :range-assertion ["src/futon2/aif/observation.clj:5-7 (namespace docstring: 'a 14-channel observation vector in [0,1]')"
+                    "src/futon2/aif/observation.clj:18-32 (every channel line carries [0,1] or an equivalent)"
+                    "src/futon2/aif/observation.clj:104-105 (observe's docstring: 'channel-id -> [0,1] value')"]
+  :call-site "scripts/futon2/report/war_machine.clj:5936 (obs/observe scan-data), route-tagged :R2 at scripts/futon2/report/war_machine.clj:5937"
+  :scan-data-assembly "scripts/futon2/report/war_machine.clj:7066-7086"}
+
+ ;; :reference is the spec the harness interprets. Kinds:
+ ;;   :path         value = (get-in data path default)
+ ;;   :ratio        value = num/den when den is present and positive, else default
+ ;;   :capped-scale value = min(cap, num/scale), num defaulting to 0
+ ;;   :capped-pair-density  den = n(n-1)/2 from :n; value = min(cap, num/den) when den > 0, else default
+ ;;   :capped-count-ratio   den = (count (get-in data den-path [])); value = num/den when den > 0, else default
+ :channels
+ [{:channel :loop-health
+   :declared-at "src/futon2/aif/observation.clj:18"
+   :declared-meaning "overall loop health [0,1] -- from holistic argument"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:loop-health :overall]]
+   :requirement-at "src/futon2/aif/observation.clj:49"
+   :projection-at "src/futon2/aif/observation.clj:121"
+   :reference {:kind :path :path [:loop-health :overall] :default 0.0}
+   :producer "futon2.report.war-machine/scan-loop-health"
+   :producer-at "scripts/futon2/report/war_machine.clj:3275-3277"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "overall is the arithmetic mean of arrow-health over the loop's arrows (war_machine.clj:3275-3277), and arrow-health is sqrt(freq * fresh) with freq = c/(c+10) in [0,1) and fresh = max(0, 1 - days/window) in [0,1] (war_machine.clj:3226-3233). A mean of values in [0,1) is in [0,1)."}
+
+  {:channel :support-coverage
+   :declared-at "src/futon2/aif/observation.clj:19"
+   :declared-meaning "S1-S5 evidence coverage [0,1] -- from holistic argument"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:support-attack :support-coverage]]
+   :requirement-at "src/futon2/aif/observation.clj:50"
+   :projection-at "src/futon2/aif/observation.clj:122"
+   :reference {:kind :path :path [:support-attack :support-coverage] :default 0.0}
+   :producer "futon2.report.war-machine/scan-support-attack"
+   :producer-at "scripts/futon2/report/war_machine.clj:3359-3362"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "(count (filter covered? support-claims)) / (count support-claims): a subset count over its own superset count, guarded by (seq support-claims)."}
+
+  {:channel :attack-coverage
+   :declared-at "src/futon2/aif/observation.clj:20"
+   :declared-meaning "A1-A4 evidence coverage [0,1] -- from holistic argument"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:support-attack :attack-coverage]]
+   :requirement-at "src/futon2/aif/observation.clj:51"
+   :projection-at "src/futon2/aif/observation.clj:123"
+   :reference {:kind :path :path [:support-attack :attack-coverage] :default 0.0}
+   :producer "futon2.report.war-machine/scan-support-attack"
+   :producer-at "scripts/futon2/report/war_machine.clj:3363-3366"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "the same subset-over-superset shape as :support-coverage, on the attack claims."}
+
+  {:channel :mission-health
+   :declared-at "src/futon2/aif/observation.clj:21"
+   :declared-meaning "mission triage health [0,1] -- from peripheral-aif"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:mission-triage :health]]
+   :requirement-at "src/futon2/aif/observation.clj:52"
+   :projection-at "src/futon2/aif/observation.clj:124"
+   :reference {:kind :path :path [:mission-triage :health] :default 0.0}
+   :producer "futon2.report.war-machine/scan-mission-triage"
+   :producer-at "scripts/futon2/report/war_machine.clj:3421-3426"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "max(0, completion-ratio - 0.5*abandon-penalty - 0.3*block-penalty) with completion-ratio = completed/total <= 1 and both penalties non-negative, so the value is in [0,1]."}
+
+  {:channel :stack-pct
+   :declared-at "src/futon2/aif/observation.clj:22"
+   :declared-meaning "stack commit % [0,1] -- from logic model / joe-hud"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:graph :dynamics :commit-percentages :stack]]
+   :requirement-at "src/futon2/aif/observation.clj:53"
+   :projection-at "src/futon2/aif/observation.clj:125"
+   :reference {:kind :path :path [:graph :dynamics :commit-percentages :stack] :default 0.0}
+   :producer "futon2.report.war-machine/scan-graph"
+   :producer-at "scripts/futon2/report/war_machine.clj:3862"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "stack-pct = (:stack ws-commits 0) / total-commits with total-commits = max(1, sum over all workstreams) (war_machine.clj:3861), so the numerator is one summand of the denominator. THE KEY IS A MISNOMER, NOT A SCALE ERROR: :commit-percentages holds ratios in [0,1], not percentages in [0,100], and the channel name :stack-pct and the declared meaning 'commit %' both read as percent."}
+
+  {:channel :consulting-pct
+   :declared-at "src/futon2/aif/observation.clj:23"
+   :declared-meaning "consulting commit % [0,1] -- from JSDQ"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:graph :dynamics :commit-percentages :consulting]]
+   :requirement-at "src/futon2/aif/observation.clj:54"
+   :projection-at "src/futon2/aif/observation.clj:126"
+   :reference {:kind :path :path [:graph :dynamics :commit-percentages :consulting] :default 0.0}
+   :producer "futon2.report.war-machine/scan-graph"
+   :producer-at "scripts/futon2/report/war_machine.clj:3863"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "one summand over the summed denominator, as :stack-pct."}
+
+  {:channel :portfolio-pct
+   :declared-at "src/futon2/aif/observation.clj:24"
+   :declared-meaning "portfolio commit % [0,1] -- from JSDQ"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:graph :dynamics :commit-percentages :portfolio]]
+   :requirement-at "src/futon2/aif/observation.clj:55"
+   :projection-at "src/futon2/aif/observation.clj:127"
+   :reference {:kind :path :path [:graph :dynamics :commit-percentages :portfolio] :default 0.0}
+   :producer "futon2.report.war-machine/scan-graph"
+   :producer-at "scripts/futon2/report/war_machine.clj:3864"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "one summand over the summed denominator, as :stack-pct."}
+
+  {:channel :mathematics-pct
+   :declared-at "src/futon2/aif/observation.clj:25"
+   :declared-meaning "mathematics commit % [0,1] -- from JSDQ"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:graph :dynamics :commit-percentages :mathematics]]
+   :requirement-at "src/futon2/aif/observation.clj:56"
+   :projection-at "src/futon2/aif/observation.clj:128"
+   :reference {:kind :path :path [:graph :dynamics :commit-percentages :mathematics] :default 0.0}
+   :producer "futon2.report.war-machine/scan-graph"
+   :producer-at "scripts/futon2/report/war_machine.clj:3865"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "one summand over the summed denominator, as :stack-pct."}
+
+  {:channel :active-repo-ratio
+   :declared-at "src/futon2/aif/observation.clj:26"
+   :declared-meaning "active repos / total repos [0,1] -- from logic model"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:graph :summary :active-repos] [:graph :summary :total-repos]]
+   :requirement-at "src/futon2/aif/observation.clj:57-58"
+   :projection-at "src/futon2/aif/observation.clj:129-132"
+   :reference {:kind :ratio
+               :num [:graph :summary :active-repos] :num-default 0
+               :den [:graph :summary :total-repos]
+               :default 0.0}
+   :producer "futon2.report.war-machine/graph-summary"
+   :producer-at "scripts/futon2/report/war_machine.clj:3822-3823"
+   :producer-range :bounded-by-construction
+   :producer-range-argument ":active-repos is (count (filter :active? repos)) and :total-repos is (count repos), so the numerator counts a subset of what the denominator counts."
+   :note "This is the only channel observe COMPUTES rather than passes through and does not cap, and the only one whose reference cannot be evaluated on an input the node accepts: observe reads (:total-repos summary) at observation.clj:129 with no default, so a present-but-incomplete summary raises before any of the fourteen coordinates is returned."}
+
+  {:channel :sorry-count-norm
+   :declared-at "src/futon2/aif/observation.clj:27"
+   :declared-meaning "open sorrys / 10 (capped at 1) -- from sorry topology"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:graph :summary :total-sorrys]]
+   :requirement-at "src/futon2/aif/observation.clj:59"
+   :projection-at "src/futon2/aif/observation.clj:133"
+   :reference {:kind :capped-scale :num [:graph :summary :total-sorrys] :num-default 0 :scale 10.0 :cap 1.0}
+   :producer "futon2.report.war-machine/graph-summary"
+   :producer-at "scripts/futon2/report/war_machine.clj:3826"
+   :producer-range :bounded-by-the-node
+   :producer-range-argument "The producer emits an unbounded count -- :total-sorrys is present-only, assoc'd from open-sorry-census (war_machine.clj:3826), and nothing there caps it. The upper bound comes from the node's own (min 1.0 ...) at observation.clj:133; the lower bound comes from the count being non-negative."}
+
+  {:channel :coupling-density
+   :declared-at "src/futon2/aif/observation.clj:28"
+   :declared-meaning "coupling edges / max edges [0,1] -- from temporal analysis"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:graph :summary :coupling-edges] [:graph :summary :total-repos]]
+   :requirement-at "src/futon2/aif/observation.clj:60-61"
+   :projection-at "src/futon2/aif/observation.clj:134-138"
+   :reference {:kind :capped-pair-density
+               :num [:graph :summary :coupling-edges] :num-default 0
+               :n [:graph :summary :total-repos] :n-default 0
+               :cap 1.0 :default 0.0}
+   :producer "futon2.report.war-machine/graph-summary"
+   :producer-at "scripts/futon2/report/war_machine.clj:3824"
+   :producer-range :bounded-by-the-node
+   :producer-range-argument "The producer emits (count coupling) with no relation to n(n-1)/2 enforced there. The upper bound comes from the node's own (min 1.0 ...) at observation.clj:137."
+   :note "Reads the SAME source key as :active-repo-ratio -- [:graph :summary :total-repos] -- but at observation.clj:134 with an explicit 0 default. The one-character difference between the two reads is what makes one channel total and the other partial."}
+
+  {:channel :ticks-firing-ratio
+   :declared-at "src/futon2/aif/observation.clj:29"
+   :declared-meaning "firing ticks / total ticks [0,1] -- from logic model"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:graph :dynamics :ticks] [:graph :summary :ticks-firing]]
+   :requirement-at "src/futon2/aif/observation.clj:62-63"
+   :projection-at "src/futon2/aif/observation.clj:139-143"
+   :reference {:kind :capped-count-ratio
+               :num [:graph :summary :ticks-firing] :num-default 0
+               :den-count [:graph :dynamics :ticks]
+               :default 0.0}
+   :producer "futon2.report.war-machine/graph-summary and scan-graph"
+   :producer-at "scripts/futon2/report/war_machine.clj:3825"
+   :producer-range :bounded-by-construction
+   :producer-range-argument ":ticks-firing is (count (filter :fired? tick-results)) (war_machine.clj:3825) and the denominator counts :ticks, which scan-graph sets to the same tick-results (war_machine.clj:3873) -- a subset count over its own superset count."}
+
+  {:channel :depositing-signal
+   :declared-at "src/futon2/aif/observation.clj:30"
+   :declared-meaning "depositing cardinal direction [0,1] -- from daily scan frames"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:frames :depositing-signal]]
+   :requirement-at "src/futon2/aif/observation.clj:64"
+   :projection-at "src/futon2/aif/observation.clj:119 (binding), src/futon2/aif/observation.clj:144 (use)"
+   :reference {:kind :path :path [:frames :depositing-signal] :default 0.0}
+   :producer "futon2.report.war-machine/scan-frames"
+   :producer-at "scripts/futon2/report/war_machine.clj:4042-4044"
+   :producer-range :unbounded-in-code
+   :producer-range-argument "THE ONE CHANNEL WHOSE DECLARED RANGE NO CODE IN THIS TREE ENFORCES. scan-frames reads (get cd :depositing 0.0) verbatim off :frame/cardinal-direction in a hand-authored EDN file under futon5a/data/frames/ (war_machine.clj:4012-4013, 4042-4044); it is not normalised, not clamped, and not schema-checked on the way in. The four files present today all write four cardinals summing to 1.0, so the convention holds by hand rather than by construction."}
+
+  {:channel :annotation-health
+   :declared-at "src/futon2/aif/observation.clj:31"
+   :declared-meaning "1 - (lift-anomalies / sections) -- from stack-annotations.edn (v0.10; R3a-likelihood-derived)"
+   :declared-range [0.0 1.0]
+   :requirement-paths [[:annotation-graph :health]]
+   :requirement-at "src/futon2/aif/observation.clj:65"
+   :projection-at "src/futon2/aif/observation.clj:120 (binding), src/futon2/aif/observation.clj:145 (use)"
+   :reference {:kind :path :path [:annotation-graph :health] :default 0.0}
+   :producer "futon2.report.war-machine/scan-annotation-graph"
+   :producer-at "scripts/futon2/report/war_machine.clj:6844-6846"
+   :producer-range :bounded-by-construction
+   :producer-range-argument "max(0, 1 - min(1, anomalies/sections)) is clamped on both sides at the producer, and the whole read is wrapped in a try that returns {:health 0.0} on any failure (war_machine.clj:6839, 6848-6849)."}]
+
+ ;; Fixtures. :complete is the one input on which every channel's declared source
+ ;; paths are present; the per-channel absence sweep is generated from it by the
+ ;; harness, one channel's requirement paths dissoc'd at a time.
+ :fixtures
+ [{:id :empty
+   :why "The input the F8 readback measures: no key present at all. Every channel absent, every coordinate 0.0."
+   :data {}}
+
+  {:id :complete
+   :why "Every declared source path present, with values chosen so that no two channels share a number and no channel sits at a cap -- an inverted numerator or a swapped denominator therefore shows up as a different number rather than as the same one."
+   :data {:loop-health {:overall 0.31}
+          :support-attack {:support-coverage 0.62 :attack-coverage 0.44}
+          :mission-triage {:health 0.27}
+          :graph {:dynamics {:commit-percentages {:stack 0.41 :consulting 0.22
+                                                  :portfolio 0.19 :mathematics 0.18}
+                             :ticks [{:fired? true} {:fired? true} {:fired? false} {:fired? false}
+                                     {:fired? false} {:fired? false} {:fired? false} {:fired? false}]}
+                  :summary {:active-repos 7 :total-repos 20 :coupling-edges 19
+                            :total-sorrys 3 :ticks-firing 2}}
+          :frames {:depositing-signal 0.05}
+          :annotation-graph {:health 0.83}}}
+
+  {:id :at-both-caps
+   :why "The two capped channels driven above their caps at once, plus a coupling count above the pair maximum. Distinguishes a node that caps from a node that does not."
+   :data {:graph {:summary {:active-repos 2 :total-repos 4 :coupling-edges 97
+                            :total-sorrys 37 :ticks-firing 0}
+                  :dynamics {:ticks []}}}}
+
+  {:id :single-repo
+   :why "total-repos = 1, so the pair maximum n(n-1)/2 is zero and :coupling-density takes its guard branch while :active-repo-ratio does not."
+   :data {:graph {:summary {:active-repos 1 :total-repos 1 :coupling-edges 0
+                            :total-sorrys 0 :ticks-firing 0}
+                  :dynamics {:ticks []}}}}
+
+  {:id :incomplete-summary
+   :why "A :summary map present but missing :total-repos. The envelope promises :coerced-to 0.0 at every absent channel; this is the input on which observe raises instead (observation.clj:129). The harness records the refusal rather than a value -- that IS the measurement."
+   :data {:graph {:summary {:active-repos 3}}}}]}

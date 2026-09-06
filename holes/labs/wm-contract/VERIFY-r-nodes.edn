@@ -35,7 +35,8 @@
   :uninhabited-carrier "An argument the equation requires has no inhabitant, in Lean or at runtime, other than a fixture."
   :key-collision "Two different quantities are persisted under one key, so a reader of the trace cannot tell which one a record carries."
   :pointer-drift "A registry :code or :basis pointer resolves to a line that no longer contains what the field claims."
-  :cross-node-grain-mix "Two terms of one equation are evaluated at different values of a shared parameter inside a single call."}
+  :cross-node-grain-mix "Two terms of one equation are evaluated at different values of a shared parameter inside a single call."
+  :declared-source-not-read "An input the node's declared scope names is present in the node's own argument and is never read by it -- so the gap is at the node's binding form, not upstream of it."}
 
  :slices
  [{:slice 1 :node :R5 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
@@ -45,7 +46,23 @@
          "clojure -M checks/ablation_exact_dyadic_witness.clj --negative (exit 0, planted degeneracy rejected)"
          "bb p4ng/empirics-futon/pointer_check.bb -- 1807 pointers in 6 files, 0 unresolved (1453 in 5 before this file was named in extra-paths)"
          "AIF_EXTRA=<tmp copy of this file, with the end of the src/futon2/aif/core_efe.clj:56-73 range rewritten to line 9999> bb p4ng/empirics-futon/pointer_check.bb -- the gate printed UNRESOLVED for that pointer, reason 'end beyond file', and exited 1. The negative control that shows this file is really inside the gate rather than merely listed in it. THE PLANTED POINTER IS DESCRIBED HERE RATHER THAN QUOTED: the gate scans every string in this file, so writing the bad pointer literally would plant it in the registry it is meant to guard -- which is how this slice found out the gate was working, one gate run before the commit."]
-   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. The only files written by this slice are this matrix, the worklist row and p4ng/empirics-futon/pointer_check.bb."}]
+   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. The only files written by this slice are this matrix, the worklist row and p4ng/empirics-futon/pointer_check.bb."}
+
+  {:slice 2 :node :R2 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
+   :did "All four legs of :V7's per-node procedure. Leg (a) needed a harness R2 did not have: :F3's is bespoke to R5, and R2's registry row states a BOUNDARY rather than a formula (aif-equations.edn:76), so there is no equation to transcribe. What was built instead checks the SHAPE the node declares about itself -- fourteen channels, their source paths, their projections and their range -- against the node the machine actually runs."
+   :ran ["clojure -M holes/labs/wm-contract/v7_r2_node_sim.clj (exit 0) -- 19 fixtures, 5 checks, 7 planted wrong nodes, and a read of the whole wm-trace observation history"
+         "the same command a second time, and diff -q against the first receipt -- byte-identical"
+         "clojure -M holes/labs/wm-contract/f8_observation_readback.clj (exit 0) -- leg (b), the F8 readback certificate re-run; diff -q against the committed runs/F8-observe/clojure-readback.txt reported no difference"
+         "clj-kondo --lint holes/labs/wm-contract/v7_r2_node_sim.clj -- 0 errors, 0 warnings"
+         "emacs -Q --batch -l futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/v7_r2_node_sim.clj -- OK"
+         "bb p4ng/empirics-futon/pointer_check.bb -- 1872 pointers in 6 files, 0 unresolved. The count is taken at the committed state of this file: an earlier reading of 1808 was taken before the rest of this slice's row was written, and this file is itself inside the gate, so its own pointers are in the total."
+         "bash p4ng/empirics-futon/negative_controls.sh"]
+   :new-harness {:runner "holes/labs/wm-contract/v7_r2_node_sim.clj"
+                 :carriers "holes/labs/wm-contract/sim/R2-carriers.edn"
+                 :receipt "holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn"
+                 :receipt-sha256 "1624feff25b93e006f257ec0bf08aeba125559e30282748ed57de08a6fe4119a"
+                 :no-src-change "Both files are lab artefacts. No futon2 src/ or scripts/ file was touched, so no futon2 test run is claimed."}
+   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the output-history leg and no lock is taken because nothing here writes there. The files written by this slice are the harness, the carriers, the receipt, this matrix, the worklist row and p4ng/empirics-futon/pointer_check.bb."}]
 
  :rows
  [{:node :R5
@@ -201,4 +218,209 @@
     "No live tick was run and no run lock was taken. Every number in :legs :a is from the F3 harness over sim/R5-carriers.edn; every number quoted from the U4 sweep is from that sweep's own artifact and was not re-derived here."
     "The U4 sweep was NOT re-run by this slice. Its result is cited from the registry row that carries it, with the artifact named; re-running an 882-tick corpus replay is not in this slice's acceptance."
     "No Lean was elaborated. The three Holes.lean carriers' :lean-status :closed is read from the registry, not re-checked by a lake build."
+    "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}
+  {:node :R2
+   :slice 2
+   :label "Structured observation"
+   :stage "PERCEIVE"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:15"
+   :verdict :hole
+   :hole {:type :declared-source-not-read
+          :statement "R2's own registry row is met: the boundary aif-equations.edn:76 states is implemented, the implementation is the one the machine runs, it has a Lean carrier and a green readback, and seven planted wrong versions of it were all caught. The claim that is NOT met is the catalogue's, and the gap is at the node's own binding form. p4ng/sec-catalog.tex:196 requires of R2 a 'typed, normalized feature map derived from session state'; scan-data carries :sessions (scripts/futon2/report/war_machine.clj:7071) and observe's destructuring names six keys -- loop-health, support-attack, mission-triage, graph, frames, annotation-graph (src/futon2/aif/observation.clj:116) -- so the operator's turns arrive in the node's argument and are dropped there. Not one of the fourteen channels' declared source paths (src/futon2/aif/observation.clj:48-65) reads a session, a turn or an operator field."
+          :basis ["src/futon2/aif/observation.clj:116 -- the destructuring form, six keys, :sessions not among them"
+                  "scripts/futon2/report/war_machine.clj:7066-7086 -- scan-data as assembled, with :sessions at scripts/futon2/report/war_machine.clj:7071"
+                  "src/futon2/aif/observation.clj:48-65 -- the fourteen channels' declared requirement paths; grep -n -i 'operator|turn|session' over src/futon2/aif/observation.clj returns only docstring prose, no path"
+                  "p4ng/empirics-futon/wr-overlay.edn:36 -- the WR-16 badge on R2, :holds false, established 2026-08-25"]
+          :not-a-ruling "Whether the observation model should take operator evidence, and what a turn would mean as a channel, is Joe's. This row records that scan-data offers the session state and the node does not read it."}
+
+   :stated-limits
+   [{:limit :the-declared-range-is-a-producer-property-not-a-node-guarantee
+     :statement "observation.clj asserts a [0,1] vector in three places (src/futon2/aif/observation.clj:5-7, every channel line at src/futon2/aif/observation.clj:18-32, and observe's docstring at src/futon2/aif/observation.clj:104-105) and the node enforces it at two channels: :sorry-count-norm by (min 1.0 ...) at src/futon2/aif/observation.clj:133 and :coupling-density by (min 1.0 ...) at src/futon2/aif/observation.clj:137. MEASURED, one probe per channel: 12 of 14 leave the range when the input does. THAT IS NOT THE WHOLE FACT. Of those twelve, eleven are bounded by construction at their SHIPPED producer -- a subset count over its own superset count, a summand over the sum it belongs to, or a clamp at the producer -- and the twelfth, :depositing-signal, is bounded by nothing in this tree. AND ON THE HISTORY THE NODE HAS ACTUALLY WRITTEN: 889 observation records across 57 daily files of data/wm-trace, every one of the fourteen channels inside [0,1], zero coordinates outside it."
+     :where "the :declaration-measurements and :output-history keys of holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn; the per-channel producer arguments with their file:line are in holes/labs/wm-contract/sim/R2-carriers.edn"
+     :producer-census {:bounded-by-the-node [:sorry-count-norm :coupling-density]
+                       :bounded-by-construction-at-the-producer [:loop-health :support-coverage :attack-coverage :mission-health
+                                                                 :stack-pct :consulting-pct :portfolio-pct :mathematics-pct
+                                                                 :active-repo-ratio :ticks-firing-ratio :annotation-health]
+                       :unbounded-in-code [:depositing-signal]}
+     :the-one-unbounded-channel "scan-frames reads (get cd :depositing 0.0) off :frame/cardinal-direction verbatim (scripts/futon2/report/war_machine.clj:4042-4044) out of hand-authored EDN under futon5a/data/frames (scripts/futon2/report/war_machine.clj:4012-4013). It is not normalised, not clamped and not schema-checked on the way in. The four frame files present today each write four cardinals summing to 1.0, so the convention holds by hand. Measured over the corpus, this channel is 0.0 in all 889 records."
+     :what-the-node-cites-as-its-own-model "observation.clj's namespace docstring names its pattern: 'cf. cyberants ants/aif/observe.clj -- same pattern, strategic domain' (src/futon2/aif/observation.clj:9). That sibling defines clamp01 (src/ants/aif/observe.clj:28-31) and the War Machine's observation layer has no equivalent. Recorded as the code fact it is; whether R2 should clamp is not decided here."}
+
+    {:limit :the-absence-coercion-promise-is-unobservable-at-two-channels
+     :statement "channel-statuses writes {:variant :absent :reason :source-field-missing :coerced-to 0.0} at every absent channel unconditionally (src/futon2/aif/observation.clj:70-74). SWEPT, one fixture per channel with that channel's declared paths removed: the promise is kept at 12 of 14. It is not broken by a wrong value at the other two -- it is UNOBSERVABLE there, because removing [:graph :summary :total-repos] makes observe raise at src/futon2/aif/observation.clj:129, where (:total-repos summary) is read with no default, before any of the fourteen coordinates is returned. :active-repo-ratio and :coupling-density both declare that path (src/futon2/aif/observation.clj:57-58 and src/futon2/aif/observation.clj:60-61), so the sweep loses both. The one-character difference is at src/futon2/aif/observation.clj:134, where :coupling-density reads the SAME key as (:total-repos summary 0), with a default."
+     :first-recorded "aif-equations.edn:78 -- the :observe row's :lean-note, by :F8 leg 1 slice 5 on 2026-09-05, which exhibits it at :active-repo-ratio. What this slice adds is the sweep: the promise is kept everywhere else, and the second channel it costs is named."
+     :where "the :absence-coercion-promise key of holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn, with the thrown class and message and the thirteen collateral channels"}
+
+    {:limit :the-reference-cannot-catch-an-error-the-declaration-shares
+     :statement "The independent reference is transcribed from the DECLARATION -- the channel table, the requirement paths and the docstrings -- and evaluated by a table interpreter (holes/labs/wm-contract/v7_r2_node_sim.clj:99-121), where observe's body is a literal fourteen-key map (src/futon2/aif/observation.clj:121-145). That catches an arithmetic or source-path error in the body. It cannot catch an error the declaration and the body share, because the same hand wrote both. The declared range is therefore not checked by reference agreement at all: it is checked by probe and against the node's own output history."}]
+
+   :legs
+   {:a
+    {:leg "enumerate the node's aif-equations rows and run them in the F3 node-sim harness against declared carriers with an independent reference"
+     :status :done-with-a-new-harness
+     :why-not-f3s-harness "aif-equations gives R2 exactly one row, :observe, :class :stack-defined, and its :formal line is a boundary and not a formula: 'o_t <- structured observation of the world after action u_{t-1}' (aif-equations.edn:76). There is nothing to transcribe, and futon2.aif.node-sim is written for R5's three equations. What replaces transcription is a check of the SHAPE the node declares about itself, run against the shipped node."
+     :equations [{:id :observe :formal "o_t <- structured observation of the world after action u_{t-1}"
+                  :at "aif-equations.edn:74-79" :class :stack-defined
+                  :carries-no-code-field "The row has no :code key; its runtime sites are named in its :lean-note instead (aif-equations.edn:78). C522's sweep counted it among the six rows that make no pointer claim."}]
+     :this-is-the-shipped-call-path
+     {:claim "UNLIKE the R5 pilot, this measures the node the machine runs. scripts/futon2/report/war_machine.clj:5936 calls futon2.aif.observation/observe on scan-data inside judge, and the next line tags the route :R2 (scripts/futon2/report/war_machine.clj:5937)."
+      :reads "The R5 slice's harness ran a lab reimplementation because the alphabet-grain R5 has no call path. R2 does, so nothing here needed to be simulated."}
+     :harness "holes/labs/wm-contract/v7_r2_node_sim.clj"
+     :carriers "holes/labs/wm-contract/sim/R2-carriers.edn"
+     :receipt "holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn"
+     :receipt-sha256 "1624feff25b93e006f257ec0bf08aeba125559e30282748ed57de08a6fe4119a"
+     :byte-identical-on-re-run {:method "run, cp the receipt to a temp path, run again, diff -q" :result :identical
+                                :why-it-holds "The receipt carries no wall-clock field, and the trace corpus it summarises is pinned in it by per-file sha256, so a receipt that changes says which file moved."}
+     :fixtures {:total 19
+                :declared 5
+                :generated 14
+                :generation "one per channel: the :complete fixture with that channel's declared requirement paths removed, so the absence envelope is exercised at every channel rather than at the one the F8 slice happened to probe"
+                :returned 16 :threw 3
+                :threw-are "the three fixtures that remove [:graph :summary :total-repos] -- :incomplete-summary, :absent-active-repo-ratio and :absent-coupling-density"}
+     :checks {:total 5 :pass 5
+              :list [:channel-set-is-the-declared-fourteen
+                     :node-agrees-with-independent-reference
+                     :vector-is-declared-order-and-length
+                     :mismatched-envelope-is-refused
+                     :absent-source-is-tagged-absent]
+              :node-versus-reference-max-deviation 0.0
+              :comparisons 224
+              :reads "Exact agreement, not agreement to a tolerance: every projection is a division or a pass-through of the same doubles, so the two routes produce the identical IEEE value."}
+     :declaration-measurements-are-not-checks
+     "Two further measurements -- the absence-coercion promise and the declared [0,1] range -- are recorded as findings and NOT as gates, and a planted node is never allowed to be caught by them. A check the shipped node fails cannot discriminate between a right node and a wrong one. Both are in :stated-limits above."
+     :planted-wrong-formula-controls
+     {:n 7 :all-caught true
+      :reads ":V7's acceptance asks for a planted control at least on the first slice. Seven are planted here rather than none, because a shape check that nothing has been shown to fail is not yet a gate. Each is a wrong R2 someone could write, and :caught-by names the checks that fired."
+      :caught [{:id :drops-annotation-health :by [:channel-set-is-the-declared-fourteen :node-agrees-with-independent-reference]
+                :note "Thirteen channels instead of fourteen -- a shape that really existed: 2 of the 889 archived records carry it."}
+               {:id :inverted-active-repo-ratio :by [:node-agrees-with-independent-reference]}
+               {:id :uncapped-sorry-count-norm :by [:node-agrees-with-independent-reference]}
+               {:id :coupling-density-over-n-squared :by [:node-agrees-with-independent-reference]}
+               {:id :ticks-firing-over-firing-plus-one :by [:node-agrees-with-independent-reference]
+                :note "firing/(firing+1) rather than firing/total: in [0,1), monotone in the firing count, invisible to every range and shape check."}
+               {:id :absent-coerced-to-one :by [:node-agrees-with-independent-reference]}
+               {:id :every-variant-observed :by [:absent-source-is-tagged-absent]
+                :note "The only plant no numeric check can see: the numbers left exactly as the shipped node computes them and every channel's provenance rewritten to :observed. It is caught by the envelope check alone, which is what the envelope is for."}]
+      :at "holes/labs/wm-contract/v7_r2_node_sim.clj:350-428 (the seven planted nodes), receipt key :negative-controls"}
+     :output-history
+     {:what "The declared range is a claim about production, so it was measured on production: every :observation map the node has written, read out of the trace store."
+      :corpus "data/wm-trace -- 57 files matching wm-trace-YYYY-MM-DD.edn, pinned in the receipt by per-file sha256"
+      :records 889
+      :cross-check "data/wm-trace/.lane-futility-index.edn carries :record-count 889, derived from the same files by the sweeper. It agrees with the line-by-line scan, which is a check on the READ and not on the corpus."
+      :coordinates-outside-declared-range 0
+      :channel-shapes [{:channels 14 :records 887 :first-file "wm-trace-2026-05-18.edn" :last-file "wm-trace-2026-09-04.edn"}
+                       {:channels 13 :records 2 :missing [:annotation-health] :only-file "wm-trace-2026-05-18.edn"}]
+      :reads "The R2 criterion the catalogue states is interface stability -- named bounded channels whose meaning and ordering do not drift between ticks (p4ng/sec-catalog.tex:196; docs/futon-aif-completeness.md:72-78). Over the whole history the shape drifts once, on the first day, and it is the v0.10 addition of :annotation-health that observation.clj:15-17 documents. Nothing in the corpus carries a channel the declaration does not, and no channel is out of range."
+      :stated-limit "This is a read of the trace store, not a tick. It says what the node HAS written, over the inputs it was actually given; it is not an argument that no input could take a channel out of range, which is what the probe sweep answers in the other direction."}
+     :read-only "data/wm-trace is opened for reading. No run lock is taken because nothing in this leg writes there; nothing under data/ was created or modified."}
+
+    :b
+    {:leg "where an F8 Lean module exists, re-run the readback certificate"
+     :status :done
+     :statement "R2 is the first node of this sweep to have one. :F8 leg 1 slice 5 declared machineObservation on 2026-09-05 and built a Clojure readback beside it; the readback was re-run at this slice's HEAD and its artifact is byte-for-byte the committed one."
+     :lean-carrier {:name "machineObservation"
+                    :at "mathlib4/DarkTower/WarMachine/MachineObservation.lean:58"
+                    :witness "mathlib4/DarkTower/WarMachine/MachineObservationWitness.lean"
+                    :registry "aif-equations.edn:77 -- :lean \"machineObservation\" :lean-status :closed; :lean-at aif-equations.edn:79"
+                    :not-re-elaborated "No lake build was run. The :closed status is read from the registry; what this leg re-runs is the Clojure side."}
+     :readback {:script "holes/labs/wm-contract/f8_observation_readback.clj"
+                :artifact "holes/labs/wm-contract/runs/F8-observe/clojure-readback.txt"
+                :sha256 "7d6e5528e8d6e1d824403519b485dee876b68021f0666a0fb537473f4cef19f8"
+                :exit 0
+                :verdict-line "VERDICT: production matches every named Lean witness; all numeric deltas are 0.0."
+                :method "cp of the committed artifact to a temp path, re-run, diff -q"
+                :result :byte-identical
+                :reads "Seventeen expectations, each transcribed in the script's header from a named Lean theorem rather than derived a second time from the inputs -- so a delta of 0.0 is not Clojure agreeing with Clojure."}
+     :finding-in-the-receipt-itself
+     {:id :the-handoff-summarys-pinned-sha-is-of-the-pre-review-artifact
+      :statement "runs/F8-observe/codex-handoff-summary.md:28 pins the readback at sha256 13306f7001e36cbe740ff5d58f28bb53e218bb5b1309be7fe8db3c230a71208b. No file in that directory has that hash. RESOLVED, not merely reported: it is the artifact as committed at futon2 402b8cfd (2026-09-05T15:01:20Z). The review repairs then added two lines -- the refused-pair coordinate agreement and the coupling-default unreachability, which are the EnvelopeMatches finding the registry note calls the review's sharpest -- and the artifact was re-committed at futon2 d7a274f7 (15:12:02Z) with sha256 7d6e5528e8d6e1d824403519b485dee876b68021f0666a0fb537473f4cef19f8. The summary's hash was not re-pinned."
+      :method "git show <sha>:holes/labs/wm-contract/runs/F8-observe/clojure-readback.txt | sha256sum, over both commits that touch the file"
+      :consequence "A reader checking the summary's hash against the file beside it finds a mismatch, and the honest reading of a mismatched hash is tampering. The artifact is fine and deterministic -- this slice re-ran it and got the committed bytes. Not repaired here: the summary is :F8's record and editing another row's receipt is not in :V7's acceptance."
+      :related "holes/labs/wm-contract/C385-recorded-hash-revalidation-census.md"}}
+
+    :c
+    {:leg "where the node is plumbing/assurance, re-verify the ALIGN census's exists-cells at file:line"
+     :status :not-applicable
+     :statement "R2 is a loop-band node, not assurance: p4ng/empirics-futon/control-stages.edn:15 gives it :band :loop. ALIGN-rnode-process-census.md scopes itself to the assurance band -- R10, R12, R20, R17, R9 and TRACE -- and names no R2 cell."
+     :search "grep -c 'R2\\b' holes/labs/wm-contract/ALIGN-rnode-process-census.md -> 0. The census's own scope statement is at ALIGN-rnode-process-census.md:16-23, which lists the roster it took and the two nodes it dropped."}
+
+    :d
+    {:leg "check the node's known candidate holes from PROBLEMS-*.md -- confirmed or cleared with evidence"
+     :status :done
+     :dossier "holes/labs/wm-contract/PROBLEMS-r2-r8-r7-batch2.md:30-54 (R2, 'Residual problems it does not solve' and its would-we-know bar)"
+     :candidates
+     [{:id :observation-has-no-lean-carrier
+       :dossier-class :implementation-flaw
+       :dossier-claim "Observation o is runtime-inhabited but has no Lean carrier or statement: the generated join reports 'observe / R2 / o / not in Lean', so the formalisation leg cannot state that the running value conforms to it."
+       :dossier-at "PROBLEMS-r2-r8-r7-batch2.md:32-37, and the bar at PROBLEMS-r2-r8-r7-batch2.md:45-54"
+       :verdict :cleared
+       :cleared-by "The dossier's own citation now says the opposite. p4ng/sec-lean-state-generated.tex line 13 reads: observe & R2 & o & machineObservation (def) & MachineObservation.lean:58. The join was regenerated at p4ng a38fb16 (2026-09-05T17:14:27Z) from the 2026-09-05T16:16:46Z lean-state report."
+       :evidence ["mathlib4/DarkTower/WarMachine/MachineObservation.lean:58 -- def machineObservation (values : Channel -> R) (variants : Channel -> MeasurementVariant) : ObservationVector x ObservationEnvelope"
+                  "aif-equations.edn:77 -- the row's :lean and :lean-status :closed, added by :F8 on 2026-09-05"
+                  "the readback re-run in leg (b): 17 expectations, every numeric delta 0.0, artifact byte-identical"]
+       :and-the-second-half-too "The dossier's bar asks for more than a carrier: 'a mirror check that the runtime channel set, bounds, and absence variants inhabit it'. MachineObservationWitness.lean is that mirror and the readback measures it -- with the two honest failures the registry note exhibits rather than assumes away, which is why BoundedObservation is stated as a PREDICATE an observation may or may not satisfy rather than as a refinement of the carrier."
+       :note "The dossier at PROBLEMS-r2-r8-r7-batch2.md:32-37 has not been edited to say this. Editing a problem dossier is not in :V7's acceptance; the correction is recorded here."}
+
+      {:id :operator-turns-persisted-and-never-read
+       :dossier-class :both
+       :dossier-claim "The operator's turns are persisted but never read into the observation vector; the paper records R2's war-room constraint as failing and connects this to the operator being absent from both observation and preferences. Both model extension and implementation are required."
+       :dossier-at "PROBLEMS-r2-r8-r7-batch2.md:38-43"
+       :verdict :confirmed
+       :hole-type :declared-source-not-read
+       :evidence ["src/futon2/aif/observation.clj:116 -- observe destructures six keys and :sessions is not one of them"
+                  "scripts/futon2/report/war_machine.clj:7071 -- :sessions IS in the scan-data the node is handed, assembled at scripts/futon2/report/war_machine.clj:7066-7086"
+                  "src/futon2/aif/observation.clj:48-65 -- no requirement path of any of the fourteen channels names a session, a turn or an operator field"
+                  "p4ng/empirics-futon/wr-overlay.edn:36 -- WR-16 on R2, :holds false, established 2026-08-25"
+                  "p4ng/sec-operator.tex:75-79 and :88-90 -- the paper's statement, and its reading that the operator's absence from C and from o is one hole seen from two ends"]
+       :what-this-slice-adds "The dossier says the turns are 'never read into the observation vector', which locates the gap somewhere between the store and the node. It is at the node: the session state is already in observe's argument. That is why the verdict type is :declared-source-not-read rather than an upstream absence."
+       :note "This is the :hole verdict of this row, reached from the dossier rather than from the code."}]
+
+     :basis-drift-found-in-the-badge-that-carries-the-confirmation
+     {:id :wr-16-badge-note-cites-a-file-that-is-not-r2-and-a-count-it-never-had
+      :type :pointer-drift
+      :statement "p4ng/empirics-futon/wr-overlay.edn:36 is the badge whose :holds false this slice confirms, and its stated basis is wrong twice: 'observe.clj wires ten channels, all mission-state'. R2's implementation is src/futon2/aif/observation.clj and it wires FOURTEEN (src/futon2/aif/observation.clj:11-32). There is no observe.clj under futon2/src/futon2/aif/; the only observe.clj SOURCE in futon2 is the cyberants sibling at src/ants/aif/observe.clj (target/classes/ants/aif/observe.clj is a build copy of that same file), which is not R2 and has no channels of this kind. The count was already fourteen when the badge was established on 2026-08-25: the last commit to touch observation.clj before that date is futon2 9e050358 (2026-05-25), and the channel vector there has fourteen entries."
+      :method "git show 9e050358:src/futon2/aif/observation.clj, counting the observation-channels vector; find over futon2 for observe.clj"
+      :the-verdict-stands "The badge says WR-16 does not hold at R2 and it does not hold. What is stale is the basis it cites, and the badge is what the figure caption in p4ng/sec-operator.tex renders."
+      :not-repaired "wr-overlay.edn is a p4ng registry read by gen_wr_overlay.bb; :V7 slice acceptance does not include registry edits and TN 9a gates them behind review. Recorded for that review."}}}
+
+   :new-findings-this-slice
+   [{:id :the-range-declaration-is-true-of-production-for-a-reason-the-node-does-not-supply
+     :type :declaration-held-up-by-something-other-than-what-declares-it
+     :statement "The [0,1] bound is asserted on the node and enforced at 2 of its 14 channels, and over 889 shipped observation records not one coordinate leaves the range. Both facts are solid and they are about different things: the range holds because eleven producers happen to be constructed as subset-over-superset counts, summands over their own sum, or producer-side clamps, and because the twelfth channel's hand-authored source has always written a number in range. Nothing states the invariant where a reader of observation.clj would look for it, and nothing would notice if a producer changed."
+     :basis "the :declared-range and :output-history keys of holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn; the eleven per-channel producer arguments with their file:line in holes/labs/wm-contract/sim/R2-carriers.edn"
+     :why-this-is-new ":F8 leg 1 slice 5 established that the bound is unenforced and gave three counterexamples (aif-equations.edn:78: :stack-pct 70.0, :loop-health -3.0, :active-repo-ratio 5.0). All three are inputs to observe, and this slice checked whether a shipped producer can present them: scripts/futon2/report/war_machine.clj:3862 divides stack commits by the summed total, so :stack-pct cannot be 70.0 from that path, scripts/futon2/report/war_machine.clj:3275-3277 averages arrow-health values in [0,1) (scripts/futon2/report/war_machine.clj:3226-3233), so :loop-health cannot be -3.0 from that path, and scripts/futon2/report/war_machine.clj:3822-3823 counts :active-repos as a filter of the repos :total-repos counts, so :active-repo-ratio cannot be 5.0 from that path. All three counterexamples are real about the node and none of the three is reachable through the machine."
+     :not-repaired "observation.clj is untouched. Whether R2 should clamp -- as the sibling it names as its own pattern does at src/ants/aif/observe.clj:28-31 -- is a change to the machine and is Joe's."}
+
+    {:id :one-missing-default-costs-two-channels-not-one
+     :type :partiality-propagates-through-a-total-return
+     :statement ":F8's slice recorded that :active-repo-ratio's missing default at src/futon2/aif/observation.clj:129 makes the other thirteen coordinates unobservable on the same input. The per-channel sweep here shows the cost inside R2's own contract: because :coupling-density DECLARES the same source path (src/futon2/aif/observation.clj:60-61), the absence envelope's promise cannot be exercised at that channel either. The promise is kept at 12 of 14 and broken at 0 of 14 -- what happens at the other two is not a wrong value but no value at all."
+     :basis "the :absence-coercion-promise key of holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn"}
+
+    {:id :the-shape-drifted-once-and-the-drift-is-documented
+     :type :interface-stability-measured-rather-than-asserted
+     :statement "R2's operational criterion is a fixed normalised shape with stable channel meanings (docs/futon-aif-completeness.md:72-78; p4ng/sec-catalog.tex:196). Over the whole trace store -- 889 records, 57 daily files, 2026-05-18 to 2026-09-04 -- there are exactly two channel sets: fourteen channels in 887 records and thirteen in 2, both of the latter on 2026-05-18, the thirteen missing :annotation-health. That is the v0.10 addition observation.clj:15-17 documents, and it is the whole drift. No record carries a channel the declaration does not."
+     :basis "the :output-history :channel-shapes key of holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn"
+     :reads "Stated as a measurement because the criterion is one: 'does not drift between ticks' is a claim about a record set, and the record set exists."}
+
+    {:id :the-contract-row-that-grades-r2-satisfied-is-pinned-at-thirteen-channels
+     :type :grading-document-behind-the-code-it-grades
+     :statement "docs/futon-aif-completeness.md:72-78 is where R2's operational criterion lives -- it is what PROBLEMS-r2-r8-r7-batch2.md:18-20 and :45-48 cite for the bar -- and its grade line makes three claims that are no longer true of the code. It says observation-channels 'declares 13 channels', and names them; there are FOURTEEN (src/futon2/aif/observation.clj:11-32) and the one it omits is :annotation-health. It says 'All channels return values in [0,1]'; the node enforces that at two of the fourteen, and this slice's probe takes twelve of them out of range. It says the schema is enforced by observation-channels-test with 'count = 13'; that test asserts 14 and asserts :annotation-health is present (test/futon2/aif/observation_test.clj:38-44), so the document and the test it cites disagree about the test. The grade on the row is **Satisfied**."
+     :basis ["docs/futon-aif-completeness.md:72-78 (the R2 row and its grade)"
+             "src/futon2/aif/observation.clj:11-32 (fourteen channels)"
+             "test/futon2/aif/observation_test.clj:38-44 (is (= 14 (count obs/observation-channels))), with the v0.10 note in its own testing string"
+             "the :declared-range probe in holes/labs/wm-contract/runs/V7-R2-node-sim/00-r2.edn"]
+     :dating "The document was last touched at futon2 b28ebf34 (2026-07-08). :annotation-health has been in observation.clj since futon2 9e050358 (2026-05-25), so the count was already one short when the row was last edited."
+     :why-it-matters-for-run4 "RUN4 approval reads this matrix for whether there are massive holes in the R nodes. It is worth separating what is wrong here: the CODE is in better shape than its grade says on the channel count, and in worse shape than its grade says on the bound. A **Satisfied** that is stale in both directions is not evidence either way."
+     :not-repaired "The document is READ and left standing. Editing a contract document is not in :V7's slice acceptance; recorded for the review TN 9a gates."}
+
+    {:id :a-shipped-node-is-a-different-kind-of-subject-than-a-lab-node
+     :type :method-note
+     :statement "Slice 1's R5 harness could only measure a transcription, because the alphabet-grain R5 has no call path. R2 has one (scripts/futon2/report/war_machine.clj:5936-5937), and that changes what a slice can produce: the planted controls are wrong versions of the code the machine runs, and the range and shape claims can be checked against what the node has already written rather than only against what it would do. Later slices should ask which of the two situations their node is in before choosing a harness."}]
+
+   :what-this-row-does-not-claim
+   ["Nothing here says the observation is RIGHT -- that the fourteen channels are the ones a strategic controller should have, or that their normalisations mean what their names say. What is checked is that the node has the shape it declares, and that the shape's stated properties hold or do not, each with a witness."
+    "No live tick was run and no run lock was taken. data/wm-trace was opened for reading; nothing under data/ was written."
+    "No Lean was elaborated. machineObservation's :lean-status :closed is read from the registry (aif-equations.edn:77); leg (b) re-runs the Clojure readback, which is the other side of the same pair and not the same claim."
+    "The 889-record range result is a statement about the inputs the node was given, not a proof that no input could take a channel out of range. The probe sweep answers that in the other direction and answers it differently: 12 of 14 channels leave the range when the input does."
+    "The eleven :bounded-by-construction producer arguments in sim/R2-carriers.edn are code readings with file:line, not measurements and not proofs."
+    "Nothing was repaired. observation.clj, aif-equations.edn, wr-overlay.edn, the F8 handoff summary and PROBLEMS-r2-r8-r7-batch2.md are all READ and left standing, with the three drifts recorded above for the review that TN 9a gates registry edits behind."
     "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}]}
