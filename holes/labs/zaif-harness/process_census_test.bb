@@ -37,8 +37,10 @@
 (println)
 
 ;; ---------------------------------------------------------------------------
-(println "1. negative control over ALIGN's 42 censused cells")
-(let [{:keys [exit data]} (run-census)
+(println "1. negative control over ALIGN's 42 censused cells, under PATTERN v1")
+;; v1 is pinned EXPLICITLY: it is what ALIGN's 42 were measured under, so it stays
+;; the comparability baseline even though the ledger now defaults to v2.
+(let [{:keys [exit data]} (run-census "--pattern" "v1")
       tally (frequencies (map :verdict (:results data)))]
   (check "42 cells derived" 42 (count (:results data)))
   ;; ALIGN's matrix, reproduced: 34 absent, 5 exists, 2 named-only, and the one
@@ -58,7 +60,7 @@
 
 ;; ---------------------------------------------------------------------------
 (println "\n2. live pin -- an :exists cell (R16 dispatched, [E-16-D])")
-(let [{:keys [data]} (run-census)
+(let [{:keys [data]} (run-census "--pattern" "v1")
       c (cell data "R16" :dispatched)]
   (check "verdict" :exists (:verdict c))
   (check "basis" :pinned-adjudication (:basis c))
@@ -71,7 +73,7 @@
 
 ;; ---------------------------------------------------------------------------
 (println "\n3. live pin -- an :absent cell (R10 checked)")
-(let [{:keys [data]} (run-census)
+(let [{:keys [data]} (run-census "--pattern" "v1")
       c (cell data "R10" :checked)]
   (check "verdict" :absent (:verdict c))
   (check "basis" :node-link-search (:basis c))
@@ -83,7 +85,7 @@
 
 ;; ---------------------------------------------------------------------------
 (println "\n4. live pin -- the repaired cell (TRACE recorded, [E-T])")
-(let [{:keys [data]} (run-census)
+(let [{:keys [data]} (run-census "--pattern" "v1")
       c (cell data "TRACE" :recorded)]
   ;; This cell is the harness's first real catch: its war_machine.clj citation
   ;; had drifted 6750-6759 -> 6789 under the wm loop's edits, the harness refused
@@ -117,13 +119,42 @@
 ;; ---------------------------------------------------------------------------
 (println "\n6. PLANTED CONTROL -- a broken scope must ERROR, never read as absence")
 (let [led (edn/read-string (slurp (io/file here "census-ledger.edn")))
-      planted (assoc-in led [:scope :node-link] ["futon3c/src/futon3c/no-such-directory"])
+      ;; Break EVERY scope key, not just v1's: the ledger now defaults to v2,
+      ;; which reads :v2-node-link. Planting into :node-link alone left the
+      ;; active search intact and this control silently passed nothing -- caught
+      ;; by the control itself when v2 landed, which is the argument for having
+      ;; it. A control that only guards the version you were thinking about is
+      ;; not a control.
+      planted (-> led
+                  (assoc-in [:scope :node-link] ["futon3c/src/futon3c/no-such-directory"])
+                  (assoc-in [:scope :v2-node-link] ["futon3c/src/futon3c/no-such-directory"]))
       tmp (io/file (System/getProperty "java.io.tmpdir") "pa1z-planted-scope.edn")]
   (spit tmp (pr-str planted))
   (let [{:keys [exit out]} (shell/sh "bb" script "--edn" "--ledger" (str tmp))]
     (check "exits 2 (error), NOT 0 with a page of :absent" 2 exit)
     (check "produced no verdicts at all" true (str/blank? out)))
   (.delete tmp))
+
+;; ---------------------------------------------------------------------------
+(println "\n7. PATTERN v2 -- the widening, and the exit-4 it is currently reporting")
+;; claude-1 ruled (2026-09-06) that the pattern be WIDENED and VERSIONED rather
+;; than compensated for by the lane owner reading call sites by hand -- manual
+;; discrimination as standing policy would make the operator the instrument
+;; again, which is the failure PA1z exists to remove. v1 is frozen as the
+;; baseline; v2 adds the constructor-call form. This check PINS the measured
+;; difference so it cannot drift unnoticed while the adjudication is pending.
+(let [{:keys [exit data]} (run-census "--pattern" "v2")
+      dis (:disagreements data)
+      by-node (frequencies (map :node dis))]
+  (check "v2 sees linkage v1 cannot: 19 cells lose their mechanical absence" 19 (count dis))
+  (check "confined to the three route-tagged censused nodes" {"R12" 7 "R20" 6 "TRACE" 6} by-node)
+  ;; The distinction that matters: NOTHING is contradicted. Every one of the 19
+  ;; moves absent -> hit-needs-adjudication, i.e. "search can no longer establish
+  ;; absence here", never absent -> exists.
+  (check "every move is absent -> hit-needs-adjudication, no verdict reversed"
+         #{:hit-needs-adjudication} (set (map :verdict dis)))
+  (check "exits 4 (disagreement routed, not absorbed)" 4 exit)
+  (check "no stale adjudications under v2" [] (:stale data)))
 
 (println)
 (if (seq @failures)

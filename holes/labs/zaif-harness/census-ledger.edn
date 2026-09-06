@@ -51,10 +51,43 @@
                      "futon3c/src/futon3c/transport"]
          :also-read ["futon2/scripts/futon2/report/war_machine.clj"
                      "futon2/src/futon2/aif"]
+         ;; v2's node-link search area: v1's paths + the already-declared
+         ;; also-read paths. No new territory.
+         :v2-node-link ["futon3c/src/futon3c/agency"
+                        "futon3c/src/futon3c/social"
+                        "futon3c/src/futon3c/transport"
+                        "futon2/scripts/futon2/report/war_machine.clj"
+                        "futon2/src/futon2/aif"]
          :not-searched "tests, git history, untracked stores, other Futon repositories, Emacs/voxterm presentation code, APM-specific namespaces outside the requested handoff machinery. Static source census, not a live invocation trace. (ALIGN section 1, verbatim scope statement.)"}
 
- ;; The node-link pattern, verbatim from ALIGN section 1.
- :node-link-pattern "(:node|:wm/node|:route/node|:control-node)[[:space:]]+:%s"
+ ;; --------------------------------------------------------------------------
+ ;; NODE-LINK PATTERNS, VERSIONED (claude-1 ruling, 2026-09-06, on PA2z's
+ ;; blind-spot finding). PA2z measured that v1 misses node linkage expressed as
+ ;; a FUNCTION-CALL ARGUMENT and so cannot see nine route-tagged nodes. The
+ ;; ruling was: widen the pattern rather than have the lane's operator read call
+ ;; sites by hand, because "a harness known to under-report, patched per-slice by
+ ;; the operator reading call sites, is precisely the hand-census failure mode
+ ;; PA1z was built to remove -- manual discrimination as standing policy would
+ ;; make you the instrument again."
+ ;;
+ ;; Both versions are kept. v1 is what ALIGN's 42 cells were measured under and
+ ;; is never edited; comparability is preserved by MEASUREMENT (re-run the 42
+ ;; under v2 and show a zero-verdict diff) rather than by freezing a known blind
+ ;; spot.
+ :pattern-version :v2
+ :node-link-patterns
+ {:v1 {:forms ["(:node|:wm/node|:route/node|:control-node)[[:space:]]+:%s"]
+       :scope-key :node-link
+       :provenance "Lifted verbatim from ALIGN section 1. The 42 adjudicated cells were measured under this and under this scope."
+       :known-limit "Matches only a LITERAL map entry. Blind to a node keyword passed as a call argument."}
+  :v2 {:forms ["(:node|:wm/node|:route/node|:control-node)[[:space:]]+:%s"
+               "route-tag[^)]*:%s[^0-9A-Za-z-]"]
+       :scope-key :v2-node-link
+       :provenance "v1's form plus the constructor-call form PA2z measured."
+       :form-note "No backslash escapes: EDN rejects a \\( escape inside a string, and the right boundary is expressed as [^0-9A-Za-z-] rather than a word boundary so :R1 cannot match :R12. Every route-tag call site has a space and a via-string after the node keyword, so the trailing class always has something to match."
+       :constructors-are-data
+       "The second form names its constructors EXPLICITLY rather than matching any call with a node keyword in it, which would match comments and unrelated maps and over-report. The constructor set was derived mechanically, not guessed: `rg -n ':node[[:space:]]+[a-z][a-z0-9-]*'` across the whole declared scope returns the {:node <param>} shape in four files, and only war_machine.clj:5868 (route-tag) binds a CONTROL-STAGE node that way -- node_sim.clj and hierarchical_budget.clj use :node for simulation and hierarchy nodes, a different concept, and full_loop_runner.clj:225-226 READS (:node from) rather than constructing a link. A new constructor is added here with its evidence, the same discipline as the adjudication ledger."
+       :scope-note "v2 searches the union of the v1 node-link paths and the paths ALIGN ALREADY DECLARED IT READ (:also-read). This is NOT a widening into new territory -- futon3 stays outside per claude-1's scope ruling of 2026-09-06 -- it is searching the files ALIGN's own section 1 says it read, with a pattern that can now see what is in them."}}
 
  ;; Nodes ALIGN censused. Everything not listed here is uncensused and is the
  ;; business of PA2z/PA3z/PA4z, not of this row.

@@ -11,6 +11,9 @@
 ;;   ./process_census.bb --node R2       # census one uncensused node (PA2z/3z/4z)
 ;;   ./process_census.bb --edn           # machine-readable verdicts on stdout
 ;;   ./process_census.bb --ledger P       # read the ledger from P (tests plant here)
+;;   ./process_census.bb --pattern v1     # force a pattern version (default: the
+;;                                       # ledger's :pattern-version). v1 is what
+;;                                       # ALIGN's 42 were measured under.
 ;;
 ;; EXIT CODES (a rung is only real where something refuses -- see the ledger
 ;; header, and N-process-trap-recording-conventions.md s0):
@@ -82,8 +85,31 @@
 ;; Truncation: rg is run without a head limit and the full output is counted,
 ;; so every enumeration below can state that it was untruncated. (Board header,
 ;; TRUNCATED-ENUMERATION RULE.)
+(def ^:private pattern-version
+  (or (some-> (second (drop-while #(not= "--pattern" %) *command-line-args*)) keyword)
+      (:pattern-version ledger)
+      :v1))
+(def ^:private pattern-spec
+  (or (get-in ledger [:node-link-patterns pattern-version])
+      (die 2 "ledger has no pattern version" pattern-version)))
+
+;; A version may carry SEVERAL forms (v2 = v1's literal-map form plus the
+;; constructor-call form). A node is linked if ANY form matches; the hits are
+;; merged so the report shows which form found what. Running every form even
+;; after one matches is deliberate -- the point of v2 is to see linkage v1
+;; misses, and that is only visible if both are evaluated.
 (defn- node-link-search [node]
-  (rg (format (:node-link-pattern ledger) node) (get-in ledger [:scope :node-link])))
+  (let [paths (get-in ledger [:scope (:scope-key pattern-spec)])
+        runs (mapv (fn [form] (assoc (rg (format form node) paths) :form form))
+                   (:forms pattern-spec))
+        matched (filterv #(= :matched (:status %)) runs)]
+    (if (seq matched)
+      {:status :matched
+       :hits (vec (distinct (mapcat :hits matched)))
+       :command (str/join " ; " (map :command runs))
+       :matched-forms (mapv :form matched)}
+      {:status :no-match :hits []
+       :command (str/join " ; " (map :command runs))})))
 
 ;; ---------------------------------------------------------------------------
 ;; Pinned-pointer check. A pointer must still SHOW its declared token inside its
@@ -152,13 +178,16 @@
              results)))
 
 (if edn-out?
-  (prn {:generated-by "process_census.bb" :row :PA1z
+  (prn {:generated-by "process_census.bb" :row :PA1z :pattern-version pattern-version
         :mode (if control? :negative-control :census-slice)
         :nodes nodes :results results
         :stale stale :disagreements disagreements})
   (do
     (println "Box 12 process census --" (if control? "NEGATIVE CONTROL over ALIGN's censused nodes" (str "slice: " (str/join ", " nodes))))
     (println "census of record:" (:census-of-record ledger) (str "(" (:census-of-record-dated ledger) ")"))
+    (println "node-link pattern:" (name pattern-version)
+             (str "(" (count (:forms pattern-spec)) " form(s), "
+                  (count (get-in ledger [:scope (:scope-key pattern-spec)])) " scope paths)"))
     (println)
     (printf "%-7s %-14s %-24s %s%n" "node" "cell" "verdict" "basis")
     (doseq [r results]
