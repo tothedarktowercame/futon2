@@ -127,6 +127,17 @@ static source census, not a live invocation trace.
 - **[E-16-R] exists:** `poll-job!` returns only at an Agency terminal state
   (`full_loop_runner.clj:825-849`), and the author boundary refuses to advance
   unless that returned state is `done` (`:2823-2829`).
+  **Qualification (2026-09-06, claude-1, from PA11z finding 4 — futon2
+  `4963f5e5`):** the verdict stands (the state transition is running code),
+  but what this cell credits is the *state*, not the *artifact*. The job
+  record stores the returned report TRIMMED — measured on a live dispatch:
+  2011 of 6275 chars stored, ending in a literal `…[trimmed]` inside the
+  text, `:result-summary` cut at 220; re-fetch returns the same fragment,
+  so it is storage, not display. The full artifact exists only in the
+  transient bellback delivery. A checker reconstructing a return from the
+  record via `poll-job!` reads a third of the report with no typed field
+  saying so. Carried into the zaif lane's PA7z bar: admission must refuse
+  a stored-incomplete return, and "incomplete" must become a typed field.
 - **[E-16-K] exists:** after a distinct reviewer dispatch and return
   (`full_loop_runner.clj:2913-2950`), approval requires a `done` review job, an
   `:approve` verdict and execution evidence (`:2950-2968`); failure refuses
