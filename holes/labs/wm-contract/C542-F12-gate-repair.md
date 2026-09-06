@@ -55,6 +55,16 @@ the only thing not gated. Every slice of every row is in that position; this is
 the first time it produced a red. Not fixed here — the fix is a change to the
 loop's step order or to the row-writing step, which is not this row's.
 
+**And it recurred inside this slice.** The `:progress` entry written for this
+slice cites the generator that derives the authority, `Emit.lean:52-62`, and
+`pointer_check` immediately reported it unresolved: the only mathlib4 root was
+`DarkTower/WarMachine/`, not `DarkTower/Contract/`. Thirteenth occurrence, found
+by the slice that had just written up the twelfth, before the ledger row was
+committed. `mathlib4/DarkTower/Contract/` is appended for the same reason
+(p4ng `b8afb80`), and the recurrence is the argument for reading that roots list
+as an allowlist with gaps rather than as a record of where pointers live: eleven
+prior slices each added the one directory they happened to cite.
+
 ## 2. Red two — C176 phase two, owed by the lane that changed the Lean
 
 `C541` §5 called this one "the contract regeneration workflow (`C176`), not this
@@ -165,7 +175,8 @@ measured (`C541` §2).
 
 ## 6. What was checked
 
-- `pointer_check.bb` before (1 unresolved) and after (0), plus the plant control.
+- `pointer_check.bb` before (2419/1) and after (2424/0, both roots and this
+  slice's own new pointers), plus the plant control.
 - `contract_authority_current.clj` before (2 failures), after (PASS), and its
   `--negative-control`.
 - `flip_readiness_check.bb` before (FAIL, 2 problems), after (PASS).
