@@ -68,7 +68,12 @@
       :never-delivered (vec (sort complement))}
      {:id :envelope-form-equals-scalar-form-on-a-present-channel
       :result (if (every? :equal? present-runs) :pass :fail)
-      :comparisons (count present-runs) :max-deviation (if (every? :equal? present-runs) 0.0 ##Inf)}
+      :comparisons (count present-runs)
+      ;; STRUCTURAL EQUALITY of the whole record, not a numeric deviation: the
+      ;; two forms must agree on every key, so there is no tolerance to report
+      ;; and no "max deviation 0.0" to read as an arithmetic result.
+      :comparison-kind :whole-record-equality
+      :unequal (mapv :id (remove :equal? present-runs))}
      {:id :absent-observation-omits-and-carries-the-envelopes-reason
       :result (if absence-ok? :pass :fail)
       :reasons-exercised (mapv :expect-reason absence-runs)
@@ -142,16 +147,29 @@
 
 (def corpus (corpus-measurements))
 (def corpus-checks
-  [{:id :production-channel-coverage-and-its-era :result :pass
-    :finding-policy "Coverage outside the declaration is reported, not tuned away."
+  ;; EVERY :result HERE IS DERIVED FROM THE MEASUREMENT BESIDE IT. An earlier
+  ;; state of this file wrote :result :pass as a literal on all four, so an
+  ;; injected mismatch (deviation 42.0, 7 channels outside the declaration, 99
+  ;; absent/refused entries) still reported :pass and still reached
+  ;; :verdict :pass. The numbers were right; the PASS was not evidence.
+  [{:id :production-channel-coverage-and-its-era
+    :result (if (zero? (:outside-declared-count (:coverage corpus))) :pass :fail)
+    :gated-on "no persisted channel outside the declared eight"
+    :finding-policy "The coverage DISTRIBUTION is reported, not gated -- six distinct sets is a finding, not a failure. What is gated is membership."
     :measurements (:coverage corpus)}
-   {:id :persisted-errors-are-the-terminal-micro-step :result :pass
+   {:id :persisted-errors-are-the-terminal-micro-step :result :measured
+    :measured-not-gated "There is no property here to fail: the trace stores one aggregate magnitude per step, so this reports how far the terminal step sits from step 0 and nothing about it can be wrong."
     :measurements (:terminal-step corpus)
     :limit "The trace stores aggregate per-step error magnitude, not each step's channel map; terminal channel identity is established by the cited return seam."}
-   {:id :weighted-error-identity-on-the-persisted-records :result :pass
-    :finding-policy "This is a measurement, overlapping slice 3 at record rather than micro-step grain."
+   {:id :weighted-error-identity-on-the-persisted-records
+    :result (if (and (zero? (:max-deviation (:weighted-identity corpus)))
+                     (empty? (:mismatches (:weighted-identity corpus)))) :pass :fail)
+    :gated-on "weighted-error = error x precision at deviation 0.0 on every comparable entry"
+    :finding-policy "Overlaps slice 3 at record rather than micro-step grain."
     :measurements (:weighted-identity corpus)}
-   {:id :no-persisted-record-carries-an-absent-or-refused-status :result :pass
+   {:id :no-persisted-record-carries-an-absent-or-refused-status
+    :result (if (zero? (:absent-or-refused (:typed-persistence corpus))) :pass :fail)
+    :gated-on "no persisted :prediction-errors entry carries :absent or :refused"
     :measurements (:typed-persistence corpus)}])
 
 (def plants
@@ -182,6 +200,23 @@
     :node (assoc shipped :scalar (fn [observed prediction opts]
                                    ((:scalar shipped) observed prediction (assoc opts :min-variance Double/MIN_VALUE))))}])
 
+(def discrimination-limits
+  ;; Plants the harness CANNOT catch, run and recorded rather than omitted.
+  ;; :sign-flipped-error above is caught only because it desynchronises the
+  ;; scalar form from the envelope form. This harness holds NO independent
+  ;; arithmetic reference for eps -- slice 3 (R8) owns that -- so a sign
+  ;; convention wrong in BOTH forms at once passes everything here.
+  [{:id :sign-flipped-in-both-forms
+    :note "The same flip as :sign-flipped-error, applied to the scalar AND the envelope, so the two stay in step."
+    :node (let [flip (fn [f] (fn [& args]
+                               (let [r (apply f args)]
+                                 (if (= :present (:status r))
+                                   (assoc r :error (- (:error r))
+                                            :weighted-error (- (:weighted-error r)))
+                                   r))))]
+            (assoc shipped :scalar (flip fe/compute-prediction-error)
+                           :envelope (flip fe/channel-prediction-error)))}])
+
 (def fixture-checks (component-checks shipped))
 (def checks (vec (concat fixture-checks corpus-checks)))
 (def plant-results
@@ -189,8 +224,15 @@
           (let [failed (mapv :id (filter #(= :fail (:result %)) (component-checks node)))]
             {:id id :result (if (seq failed) :caught :escaped) :caught-by failed
              :would-be-caught (boolean (seq failed))})) plants))
+(def limit-results
+  (mapv (fn [{:keys [id note node]}]
+          (let [failed (mapv :id (filter #(= :fail (:result %)) (component-checks node)))]
+            {:id id :note note :caught-by failed
+             :would-be-caught (boolean (seq failed))
+             :result (if (seq failed) :caught :escaped)}))
+        discrimination-limits))
 (def all-caught (every? #(= :caught (:result %)) plant-results))
-(def all-pass (every? #(= :pass (:result %)) checks))
+(def all-pass (every? #(contains? #{:pass :measured} (:result %)) checks))
 
 (def receipt
   {:harness :v7-r3a-node-sim :row :V7 :slice 6 :node :R3a :stage "BELIEVE"
@@ -200,7 +242,8 @@
    :declaration-sites (:declaration-sites carriers)
    :equation-registry {:rows 0 :evidence "grep -n ':node :R3a' holes/labs/wm-contract/aif-equations.edn returned no matches"}
    :checks checks :verdict (if all-pass :pass :fail)
-   :negative-controls {:plants plant-results :n (count plant-results) :all-caught all-caught}
+   :negative-controls {:plants plant-results :n (count plant-results) :all-caught all-caught
+                       :discrimination-limits limit-results}
    :corpus {:root "data/wm-trace" :read-only true :file-count (count (trace-files))
             :record-count (count corpus-records)}
    :not-done ["No epsilon arithmetic replay was used as R3a's principal check; slice 3 owns that arithmetic."
@@ -212,5 +255,6 @@
 (with-open [w (io/writer out)] (binding [*out* w] (pp/pprint receipt)))
 (doseq [c checks] (println (format "  %-62s %s" (name (:id c)) (name (:result c)))))
 (doseq [p plant-results] (println "  planted" (:id p) (:result p) (:caught-by p)))
+(doseq [l limit-results] (println "  discrimination-limit" (:id l) (:result l) "would-be-caught" (:would-be-caught l)))
 (println "  verdict" (:verdict receipt) "all-caught" all-caught "receipt" (str out))
 (System/exit (if (and all-pass all-caught) 0 1))

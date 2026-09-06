@@ -43,7 +43,14 @@
     [:envelope-form-equals-scalar-form-on-a-present-channel],
     :would-be-caught true}],
   :n 9,
-  :all-caught true},
+  :all-caught true,
+  :discrimination-limits
+  [{:id :sign-flipped-in-both-forms,
+    :note
+    "The same flip as :sign-flipped-error, applied to the scalar AND the envelope, so the two stay in step.",
+    :caught-by [],
+    :would-be-caught false,
+    :result :escaped}]},
  :harness :v7-r3a-node-sim,
  :not-done
  ["No epsilon arithmetic replay was used as R3a's principal check; slice 3 owns that arithmetic."
@@ -64,7 +71,8 @@
   {:id :envelope-form-equals-scalar-form-on-a-present-channel,
    :result :pass,
    :comparisons 3,
-   :max-deviation 0.0}
+   :comparison-kind :whole-record-equality,
+   :unequal []}
   {:id :absent-observation-omits-and-carries-the-envelopes-reason,
    :result :pass,
    :reasons-exercised [:source-field-missing :status-metadata-missing],
@@ -176,8 +184,9 @@
    :result-count 0}
   {:id :production-channel-coverage-and-its-era,
    :result :pass,
+   :gated-on "no persisted channel outside the declared eight",
    :finding-policy
-   "Coverage outside the declaration is reported, not tuned away.",
+   "The coverage DISTRIBUTION is reported, not gated -- six distinct sets is a finding, not a failure. What is gated is membership.",
    :measurements
    {:records 889,
     :distribution {0 2, 1 2, 4 127, 6 17, 7 3, 8 738},
@@ -191,7 +200,9 @@
     :outside-declared-count 0,
     :outside-declared []}}
   {:id :persisted-errors-are-the-terminal-micro-step,
-   :result :pass,
+   :result :measured,
+   :measured-not-gated
+   "There is no property here to fail: the trace stores one aggregate magnitude per step, so this reports how far the terminal step sits from step 0 and nothing about it can be wrong.",
    :measurements
    {:multi-step-records 878,
     :different-first-terminal 878,
@@ -202,8 +213,10 @@
    "The trace stores aggregate per-step error magnitude, not each step's channel map; terminal channel identity is established by the cited return seam."}
   {:id :weighted-error-identity-on-the-persisted-records,
    :result :pass,
+   :gated-on
+   "weighted-error = error x precision at deviation 0.0 on every comparable entry",
    :finding-policy
-   "This is a measurement, overlapping slice 3 at record rather than micro-step grain.",
+   "Overlaps slice 3 at record rather than micro-step grain.",
    :measurements
    {:entries 6537,
     :comparisons 6537,
@@ -211,6 +224,8 @@
     :mismatches []}}
   {:id :no-persisted-record-carries-an-absent-or-refused-status,
    :result :pass,
+   :gated-on
+   "no persisted :prediction-errors entry carries :absent or :refused",
    :measurements
    {:entries 6537,
     :status-distribution {nil 6484, :present 53},
