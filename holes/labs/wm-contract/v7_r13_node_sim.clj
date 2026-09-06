@@ -71,8 +71,63 @@
    :state-blind-effects (source-lines forward-file #"predict-effects nil action")
    :efe-guard (source-lines efe-file #"horizon-steps \(>= horizon-steps 2\)")
    :rollout-default (source-lines rollout-file #"defn- rollout-horizon")
-   :live-depth-binding (source-lines wm-file #"wm-horizon-steps \(when")
-   :live-depth-value (source-lines wm-file #"^\s+3\)$")})
+   :live-depth-binding (source-lines wm-file #"wm-horizon-steps \(when")})
+(def live-depth-binding-line (get-in derived-sites [:live-depth-binding 0 :line]))
+(def live-depth-value-site
+  ;; DERIVED RELATIVE TO THE BINDING. The first form of this site read
+  ;; `^\s+3\)$` over the whole of war_machine.clj -- a search whose answer is
+  ;; the file's FIRST bare `3)` wherever it is, so a new one above line 6287
+  ;; would silently retarget the census. Anchored to the binding instead: the
+  ;; first line at or after `wm-horizon-steps` whose whole text is a numeral
+  ;; and a close paren. :global-matches records how many such lines the file
+  ;; has, so the anchoring is visible rather than assumed.
+  (let [lines (map-indexed (fn [i l] {:line (inc i) :text (str/trim l)})
+                           (str/split-lines (slurp wm-file)))
+        numeral? #(re-matches #"\d+\)" (:text %))]
+    (assoc (first (filter #(and (>= (:line %) live-depth-binding-line) (numeral? %)) lines))
+           :anchored-at live-depth-binding-line
+           :global-matches (count (filter numeral? lines)))))
+(def registry-row
+  ;; R13's ONE equations-registry row, located by its :id and bounded by the
+  ;; next row's opening brace -- not by a pinned line range.
+  (let [lines (vec (str/split-lines (slurp (io/file lab "aif-equations.edn"))))
+        start (first (keep-indexed #(when (re-find #":id :depth :defines :T :node :R13" %2) %1) lines))
+        end (first (keep-indexed #(when (and (> %1 start) (re-find #"^\s+\{:id " %2)) %1) lines))]
+    {:from (inc start) :to end
+     :text (str/join "\n" (subvec lines start end))}))
+(def registry-code-ranges
+  ;; Every `file.clj:N` / `file.clj:N-M` pointer the row's :code field writes.
+  (vec (for [[_ f a b] (re-seq #"([a-z_0-9]+\.clj):(\d+)(?:-(\d+))?" (:text registry-row))]
+         {:file f :from (Long/parseLong a) :to (Long/parseLong (or b a))})))
+(def pointer-resolution
+  ;; MEASURED, not asserted. The delivered harness wrote this answer as a
+  ;; literal map ({:live-conditional false ...}), which records an opinion the
+  ;; harness cannot fail on. Each derived site is now asked whether it falls
+  ;; inside a range the registry itself declares for that file.
+  ;; :claimed? marks the sites the row's :code field itself points at. The
+  ;; composition's defn line is derived here but the registry names only its
+  ;; body (in the :lean-note), so it is measured and excluded from the finding
+  ;; rather than counted as drift the registry did not commit.
+  (mapv (fn [{:keys [site file line claimed?]}]
+          (let [ranges (filterv #(= file (:file %)) registry-code-ranges)
+                hit (first (filter #(<= (:from %) line (:to %)) ranges))]
+            {:site site :file file :derived-line line :registry-ranges ranges
+             :a-registry-code-claim? claimed?
+             :inside-a-declared-range? (boolean hit) :matching-range hit}))
+        [{:site :forward-default :file "forward_model.clj" :claimed? true
+          :line (get-in derived-sites [:forward-default 0 :line])}
+         {:site :forward-composition :file "forward_model.clj" :claimed? false
+          :line (get-in derived-sites [:forward-composition 0 :line])}
+         {:site :rollout-default :file "rollout.clj" :claimed? true
+          :line (get-in derived-sites [:rollout-default 0 :line])}
+         {:site :efe-guard :file "efe.clj" :claimed? true
+          :line (get-in derived-sites [:efe-guard 0 :line])}
+         {:site :live-depth-binding :file "war_machine.clj" :claimed? true
+          :line live-depth-binding-line}
+         {:site :live-depth-value :file "war_machine.clj" :claimed? true
+          :line (:line live-depth-value-site)}]))
+(def pointers-outside-their-declared-range
+  (vec (remove :inside-a-declared-range? (filter :a-registry-code-claim? pointer-resolution))))
 (def declared-depths
   {:forward-default fm/default-horizon-steps
    :rollout-default (#'rollout/rollout-horizon {})
@@ -103,6 +158,22 @@
 (def records-with-depth (filter :has-candidate-depth? depth-records))
 (def selected-above-one (filter #(and (:selected-depth %) (> (:selected-depth %) 1)) depth-records))
 (def candidate-values (vec (mapcat :candidate-values depth-records)))
+(def ranked-total (reduce + (map #(count (:ranked-actions %)) records)))
+(def candidate-depth-cells
+  ;; THREE-WAY, because `keep :horizon-steps` hides two different absences and
+  ;; leaves a distribution whose denominator is only the present values. A
+  ;; ranked candidate either carries no :horizon-steps key at all (the record
+  ;; predates the field), carries it as nil (the tick ran single-step), or
+  ;; carries a number. The first form of this census reported {3 32383} against
+  ;; a 32383 denominator, which cannot show that 85042 candidates ran at
+  ;; depth one.
+  (frequencies (mapcat (fn [r] (map (fn [ra] (cond (not (contains? ra :horizon-steps)) :key-absent
+                                                   (nil? (:horizon-steps ra)) :recorded-nil
+                                                   :else (:horizon-steps ra)))
+                                    (:ranked-actions r)))
+                       records)))
+(def records-with-the-key-present
+  (count (filter (fn [r] (some #(contains? % :horizon-steps) (:ranked-actions r))) records)))
 (def above-files (vec (distinct (map :file (filter #(some (fn [v] (> v 1)) (:candidate-values %)) depth-records)))))
 (def depth-by-file
   (->> depth-records (group-by :file)
@@ -110,6 +181,32 @@
                              :records-with-depth (count (filter :has-candidate-depth? xs))
                              :selected-above-one (count (filter #(and (:selected-depth %) (> (:selected-depth %) 1)) xs))}]))
        (sort-by first) vec))
+
+;; ---------------------------------------------------------------------------
+;; THE FINDING THE OTHER CHECKS CIRCLE, stated as a check of its own. R13's
+;; registry line asks for "the range of the SUMS in Q(o|pi) and G" and cites
+;; da Costa eq. 42's sum over tau; the catalogue asks for "adding up the costs
+;; of its steps with the later ones discounted" (p4ng/sec-catalog.tex:256).
+;; The machine has TWO depth mechanisms, and the one that adds up is not the
+;; one that chooses. Every clause below is a derived search or a corpus count.
+(def cascade-file (io/file "scripts/futon2/report/cascade_lane.clj"))
+(def efe-multi-reads (source-lines efe-file #"get-in multi |\(:horizon-steps multi\)"))
+(def efe-discount-hits (source-lines efe-file #"discount|gamma"))
+(def rollout-accumulator (source-lines rollout-file #"defn project-policy|S\(pi\)=sum gamma|\* discount gamma"))
+(def wm-rollout-hits (source-lines wm-file #"rollout/|futon2\.aif\.rollout"))
+(def cascade-rollout-hits (source-lines cascade-file #"futon2\.aif\.rollout|rollout/best-rollout"))
+(def wm-cascade-call (source-lines wm-file #"futon2\.report\.cascade-lane/cascade-lane"))
+(defn cascade-row? [ra] (= :apply-cascade (get-in ra [:action :type])))
+(def all-ranked (mapcat :ranked-actions records))
+(def cascade-rows (filterv cascade-row? all-ranked))
+(def records-with-cascade-rows (count (filter #(some cascade-row? (:ranked-actions %)) records)))
+(def cascade-decisions (count (filter #(= :apply-cascade (get-in % [:decision :action :type])) records)))
+(def cascade-files
+  (vec (distinct (map :source-file (filter #(some cascade-row? (:ranked-actions %)) records)))))
+(def cascade-score-provenance (frequencies (map :score-provenance cascade-rows)))
+(def synthetic-cascade-decision
+  {:source-file "synthetic.edn" :ranked-actions []
+   :decision {:action {:type :apply-cascade :target "M-synthetic"}}})
 
 (def artifact (io/file lab "runs/F8-depth/clojure-readback.txt"))
 (def expected-artifact-sha "44e3306827137cf5e32276ad7b2777a9de607456fe8d72aeba8c75779242e848")
@@ -143,7 +240,20 @@
    {:id :pinned-line-instead-of-derived-site
     :pinned-line 6283 :pinned-text (:text pinned-line-plant)
     :derived-line (get-in derived-sites [:live-depth-binding 0 :line])
-    :result (if (not= 6283 (get-in derived-sites [:live-depth-binding 0 :line])) :caught :escaped)}])
+    :result (if (not= 6283 (get-in derived-sites [:live-depth-binding 0 :line])) :caught :escaped)}
+   {:id :synthetic-cascade-row-recorded-as-the-decision
+    ;; The corpus clause of :the-summing-depth-is-not-on-the-selection-path is
+    ;; a zero, and a zero that no input can move is not a measurement. Injecting
+    ;; one record whose decision IS an :apply-cascade row must move it by one.
+    :counter :cascade-decisions :before cascade-decisions
+    :after (+ cascade-decisions
+              (count (filter #(= :apply-cascade (get-in % [:decision :action :type]))
+                             [synthetic-cascade-decision])))
+    :moved (count (filter #(= :apply-cascade (get-in % [:decision :action :type]))
+                          [synthetic-cascade-decision]))
+    :result (if (= 1 (count (filter #(= :apply-cascade (get-in % [:decision :action :type]))
+                                    [synthetic-cascade-decision])))
+              :caught :escaped)}])
 
 (def checks
   [{:id :trajectory-is-the-k-fold-composition
@@ -165,9 +275,15 @@
     :result (if (and (= {:forward-default 3 :rollout-default 2 :live-conditional 3 :efe-multi-threshold 2}
                         declared-depths)
                      (every? seq (vals derived-sites))) :pass :fail)
-    :depths declared-depths :derived-sites derived-sites
-    :registry-pointers-still-land? {:forward-default true :rollout-default true :live-conditional false :efe-guard true}
-    :basis "holes/labs/wm-contract/aif-equations.edn:161-166"}
+    :depths declared-depths
+    :derived-sites (assoc derived-sites :live-depth-value [live-depth-value-site])
+    :registry-row-at {:from (:from registry-row) :to (:to registry-row)}
+    :registry-code-ranges registry-code-ranges
+    :registry-pointer-resolution pointer-resolution
+    :pointers-outside-their-declared-range pointers-outside-their-declared-range
+    :finding (when (seq pointers-outside-their-declared-range)
+               :a-declared-range-stops-short-of-the-constant-it-cites)
+    :basis "holes/labs/wm-contract/aif-equations.edn -- the :depth row, located by :id"}
    {:id :requested-depth-of-one-is-not-a-depth
     :result (if (and (nil? (:horizon-steps none)) (nil? (:horizon-steps one))
                      (= (:controller-score none) (:controller-score one))
@@ -178,13 +294,48 @@
     :none-minus-one (- (:controller-score none) (:controller-score one))
     :basis "src/futon2/aif/efe.clj:623-636"}
    {:id :corpus-depth-era
-    :result (if (= (count candidate-values) (reduce + (vals (frequencies candidate-values)))) :pass :fail)
+    ;; The first form of this check compared (count candidate-values) with the
+    ;; sum of its own frequencies -- true of every vector, so the check could
+    ;; not fail. What it asserts now is that the three ways of counting the same
+    ;; corpus agree: the per-file rows reproduce both record totals, and the
+    ;; three-way candidate census accounts for every ranked candidate.
+    :result (if (and (pos? (count records))
+                     (= (count records) (reduce + (map (comp :records second) depth-by-file)))
+                     (= (count selected-above-one)
+                        (reduce + (map (comp :selected-above-one second) depth-by-file)))
+                     (= ranked-total (reduce + (vals candidate-depth-cells))))
+              :pass :fail)
     :records-denominator (count records) :files-denominator (count (trace-files))
-    :records-with-candidate-depth (count records-with-depth)
-    :candidate-denominator (count candidate-values) :candidate-depth-distribution (into (sorted-map) (frequencies candidate-values))
+    :records-with-a-candidate-above-depth-one (count records-with-depth)
+    :records-where-the-key-is-present records-with-the-key-present
+    :candidate-denominator ranked-total
+    :candidate-depth-cells (into (sorted-map-by #(compare (pr-str %1) (pr-str %2))) candidate-depth-cells)
+    :candidate-depth-distribution-of-present-values (into (sorted-map) (frequencies candidate-values))
     :selected-action-denominator (count records) :selected-actions-above-one (count selected-above-one)
     :first-file-above-one (first above-files) :last-file-above-one (last above-files)
     :by-file depth-by-file :basis "src/futon2/aif/trace.clj:76-137"}
+   {:id :the-summing-depth-is-not-on-the-selection-path
+    :result (if (and (seq efe-multi-reads) (empty? efe-discount-hits) (seq rollout-accumulator)
+                     (empty? wm-rollout-hits) (seq cascade-rollout-hits) (seq wm-cascade-call)
+                     (zero? cascade-decisions))
+              :pass :fail)
+    :what-compute-efe-reads-of-the-trajectory
+    {:sites efe-multi-reads
+     :reads "the final state's observation and the recorded :horizon-steps, and nothing else -- the K single-step predictions in :trajectory are computed and discarded"}
+    :discount-terms-in-efe {:search "discount|gamma" :hits efe-discount-hits :count (count efe-discount-hits)}
+    :the-accumulator-that-does-sum rollout-accumulator
+    :rollout-is-not-reached-from-the-tick
+    {:war-machine-hits wm-rollout-hits
+     :search "rollout/|futon2.aif.rollout over scripts/futon2/report/war_machine.clj"
+     :only-route wm-cascade-call
+     :and-that-lane-requires-it cascade-rollout-hits}
+    :corpus {:cascade-rows-in-rankings (count cascade-rows)
+             :records-carrying-one records-with-cascade-rows
+             :files (count cascade-files) :first-file (first cascade-files) :last-file (last cascade-files)
+             :ever-the-recorded-decision cascade-decisions
+             :decision-denominator (count records)
+             :score-provenance-on-those-rows cascade-score-provenance}
+    :basis "src/futon2/aif/efe.clj:629-635; src/futon2/aif/rollout.clj:487-540; scripts/futon2/report/cascade_lane.clj:381; scripts/futon2/report/war_machine.clj:6569-6588"}
    {:id :lean-depth-readback-still-matches
     :result (if (and (zero? (:exit readback-run)) (= before-sha after-sha expected-artifact-sha)) :pass :fail)
     :exit (:exit readback-run) :before-sha before-sha :after-sha after-sha :expected-sha expected-artifact-sha

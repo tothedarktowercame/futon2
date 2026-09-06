@@ -18,4 +18,7 @@
   :forward-composition "src/futon2/aif/forward_model.clj:280-310"
   :rollout-default "src/futon2/aif/rollout.clj:474-479"
   :efe-guard "src/futon2/aif/efe.clj:623-636"
-  :live-depth "scripts/futon2/report/war_machine.clj:6282-6329"}}
+  :live-depth "scripts/futon2/report/war_machine.clj:6285-6287"
+  :live-depth-consumer "scripts/futon2/report/war_machine.clj:6329"
+  :summing-depth "src/futon2/aif/rollout.clj:487-540"
+  :summing-depth-caller "scripts/futon2/report/cascade_lane.clj:381"}}

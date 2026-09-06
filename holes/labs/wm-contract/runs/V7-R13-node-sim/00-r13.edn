@@ -17,6 +17,12 @@
     :pinned-text
     ";; loaded events in horizon. Falls back to single-step if no",
     :derived-line 6285,
+    :result :caught}
+   {:id :synthetic-cascade-row-recorded-as-the-decision,
+    :counter :cascade-decisions,
+    :before 0,
+    :after 1,
+    :moved 1,
     :result :caught}],
   :all-caught true},
  :harness :v7-r13-node-sim,
@@ -116,13 +122,40 @@
       :text
       "(let [{:keys [obs-delta obs-variance events]} (predict-effects nil action)"}]},
    :basis "src/futon2/aif/forward_model.clj:334-354"}
-  {:id :declared-depths-census,
-   :result :pass,
+  {:pointers-outside-their-declared-range
+   [{:site :live-depth-value,
+     :file "war_machine.clj",
+     :derived-line 6287,
+     :registry-ranges
+     [{:file "war_machine.clj", :from 6283, :to 6285}
+      {:file "war_machine.clj", :from 6283, :to 6285}],
+     :a-registry-code-claim? true,
+     :inside-a-declared-range? false,
+     :matching-range nil}],
+   :basis
+   "holes/labs/wm-contract/aif-equations.edn -- the :depth row, located by :id",
+   :registry-row-at {:from 161, :to 166},
    :depths
    {:forward-default 3,
     :rollout-default 2,
     :live-conditional 3,
     :efe-multi-threshold 2},
+   :registry-code-ranges
+   [{:file "war_machine.clj", :from 6283, :to 6285}
+    {:file "rollout.clj", :from 474, :to 479}
+    {:file "forward_model.clj", :from 278, :to 278}
+    {:file "efe.clj", :from 629, :to 631}
+    {:file "efe.clj", :from 633, :to 636}
+    {:file "efe.clj", :from 641, :to 641}
+    {:file "forward_model.clj", :from 334, :to 334}
+    {:file "efe.clj", :from 611, :to 612}
+    {:file "efe.clj", :from 684, :to 685}
+    {:file "war_machine.clj", :from 6283, :to 6285}
+    {:file "rollout.clj", :from 474, :to 479}
+    {:file "forward_model.clj", :from 278, :to 278}
+    {:file "cascade_lane.clj", :from 381, :to 381}
+    {:file "rollout.clj", :from 694, :to 694}
+    {:file "forward_model.clj", :from 296, :to 310}],
    :derived-sites
    {:forward-default
     [{:line 278, :text "(def default-horizon-steps 3)"}],
@@ -140,13 +173,74 @@
     [{:line 6285,
       :text
       "wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)"}],
-    :live-depth-value [{:line 6287, :text "3)"}]},
-   :registry-pointers-still-land?
-   {:forward-default true,
-    :rollout-default true,
-    :live-conditional false,
-    :efe-guard true},
-   :basis "holes/labs/wm-contract/aif-equations.edn:161-166"}
+    :live-depth-value
+    [{:line 6287, :text "3)", :anchored-at 6285, :global-matches 3}]},
+   :result :pass,
+   :id :declared-depths-census,
+   :registry-pointer-resolution
+   [{:site :forward-default,
+     :file "forward_model.clj",
+     :derived-line 278,
+     :registry-ranges
+     [{:file "forward_model.clj", :from 278, :to 278}
+      {:file "forward_model.clj", :from 334, :to 334}
+      {:file "forward_model.clj", :from 278, :to 278}
+      {:file "forward_model.clj", :from 296, :to 310}],
+     :a-registry-code-claim? true,
+     :inside-a-declared-range? true,
+     :matching-range {:file "forward_model.clj", :from 278, :to 278}}
+    {:site :forward-composition,
+     :file "forward_model.clj",
+     :derived-line 280,
+     :registry-ranges
+     [{:file "forward_model.clj", :from 278, :to 278}
+      {:file "forward_model.clj", :from 334, :to 334}
+      {:file "forward_model.clj", :from 278, :to 278}
+      {:file "forward_model.clj", :from 296, :to 310}],
+     :a-registry-code-claim? false,
+     :inside-a-declared-range? false,
+     :matching-range nil}
+    {:site :rollout-default,
+     :file "rollout.clj",
+     :derived-line 474,
+     :registry-ranges
+     [{:file "rollout.clj", :from 474, :to 479}
+      {:file "rollout.clj", :from 474, :to 479}
+      {:file "rollout.clj", :from 694, :to 694}],
+     :a-registry-code-claim? true,
+     :inside-a-declared-range? true,
+     :matching-range {:file "rollout.clj", :from 474, :to 479}}
+    {:site :efe-guard,
+     :file "efe.clj",
+     :derived-line 629,
+     :registry-ranges
+     [{:file "efe.clj", :from 629, :to 631}
+      {:file "efe.clj", :from 633, :to 636}
+      {:file "efe.clj", :from 641, :to 641}
+      {:file "efe.clj", :from 611, :to 612}
+      {:file "efe.clj", :from 684, :to 685}],
+     :a-registry-code-claim? true,
+     :inside-a-declared-range? true,
+     :matching-range {:file "efe.clj", :from 629, :to 631}}
+    {:site :live-depth-binding,
+     :file "war_machine.clj",
+     :derived-line 6285,
+     :registry-ranges
+     [{:file "war_machine.clj", :from 6283, :to 6285}
+      {:file "war_machine.clj", :from 6283, :to 6285}],
+     :a-registry-code-claim? true,
+     :inside-a-declared-range? true,
+     :matching-range {:file "war_machine.clj", :from 6283, :to 6285}}
+    {:site :live-depth-value,
+     :file "war_machine.clj",
+     :derived-line 6287,
+     :registry-ranges
+     [{:file "war_machine.clj", :from 6283, :to 6285}
+      {:file "war_machine.clj", :from 6283, :to 6285}],
+     :a-registry-code-claim? true,
+     :inside-a-declared-range? false,
+     :matching-range nil}],
+   :finding :a-declared-range-stops-short-of-the-constant-it-cites}
   {:id :requested-depth-of-one-is-not-a-depth,
    :result :pass,
    :none {:horizon nil, :score -18.86368710495916},
@@ -154,11 +248,14 @@
    :three {:horizon 3, :score -21.563211578901395},
    :none-minus-one 0.0,
    :basis "src/futon2/aif/efe.clj:623-636"}
-  {:candidate-depth-distribution {3 32383},
+  {:records-with-a-candidate-above-depth-one 213,
+   :candidate-depth-distribution-of-present-values {3 32383},
    :files-denominator 57,
    :basis "src/futon2/aif/trace.clj:76-137",
+   :candidate-depth-cells
+   {3 32383, :key-absent 617, :recorded-nil 85042},
    :first-file-above-one "wm-trace-2026-05-19.edn",
-   :candidate-denominator 32383,
+   :candidate-denominator 118042,
    :by-file
    [["wm-trace-2026-05-18.edn"
      {:records 7, :records-with-depth 0, :selected-above-one 0}]
@@ -278,9 +375,50 @@
    :result :pass,
    :id :corpus-depth-era,
    :records-denominator 889,
-   :records-with-candidate-depth 213,
    :selected-action-denominator 889,
-   :last-file-above-one "wm-trace-2026-06-08.edn"}
+   :last-file-above-one "wm-trace-2026-06-08.edn",
+   :records-where-the-key-is-present 875}
+  {:id :the-summing-depth-is-not-on-the-selection-path,
+   :result :pass,
+   :what-compute-efe-reads-of-the-trajectory
+   {:sites
+    [{:line 634, :text "(get-in multi [:final-state :observation])"}
+     {:line 912,
+      :text ":horizon-steps (when multi (:horizon-steps multi))"}],
+    :reads
+    "the final state's observation and the recorded :horizon-steps, and nothing else -- the K single-step predictions in :trajectory are computed and discarded"},
+   :discount-terms-in-efe
+   {:search "discount|gamma", :hits [], :count 0},
+   :the-accumulator-that-does-sum
+   [{:line 487, :text "(defn project-policy"}
+    {:line 488,
+     :text
+     "\"Port of ukrn's path accumulator shape: S(pi)=sum gamma^t g(s_t)."}
+    {:line 532, :text "(* discount gamma)"}],
+   :rollout-is-not-reached-from-the-tick
+   {:war-machine-hits [],
+    :search
+    "rollout/|futon2.aif.rollout over scripts/futon2/report/war_machine.clj",
+    :only-route
+    [{:line 6570,
+      :text
+      "(try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)"}],
+    :and-that-lane-requires-it
+    [{:line 18, :text "[futon2.aif.rollout :as rollout])"}
+     {:line 381,
+      :text
+      "best (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9"}]},
+   :corpus
+   {:cascade-rows-in-rankings 450,
+    :records-carrying-one 234,
+    :files 15,
+    :first-file "wm-trace-2026-06-24.edn",
+    :last-file "wm-trace-2026-07-14.edn",
+    :ever-the-recorded-decision 0,
+    :decision-denominator 889,
+    :score-provenance-on-those-rows {nil 301, :placeholder 149}},
+   :basis
+   "src/futon2/aif/efe.clj:629-635; src/futon2/aif/rollout.clj:487-540; scripts/futon2/report/cascade_lane.clj:381; scripts/futon2/report/war_machine.clj:6569-6588"}
   {:id :lean-depth-readback-still-matches,
    :result :pass,
    :exit 0,
@@ -302,10 +440,13 @@
  :slice 11,
  :verdict :pass,
  :declaration-sites
- {:registry "holes/labs/wm-contract/aif-equations.edn:161-166",
+ {:summing-depth-caller "scripts/futon2/report/cascade_lane.clj:381",
+  :registry "holes/labs/wm-contract/aif-equations.edn:161-166",
   :forward-default "src/futon2/aif/forward_model.clj:278",
-  :forward-composition "src/futon2/aif/forward_model.clj:280-310",
-  :rollout-default "src/futon2/aif/rollout.clj:474-479",
   :efe-guard "src/futon2/aif/efe.clj:623-636",
-  :live-depth "scripts/futon2/report/war_machine.clj:6282-6329"},
+  :summing-depth "src/futon2/aif/rollout.clj:487-540",
+  :live-depth "scripts/futon2/report/war_machine.clj:6285-6287",
+  :live-depth-consumer "scripts/futon2/report/war_machine.clj:6329",
+  :forward-composition "src/futon2/aif/forward_model.clj:280-310",
+  :rollout-default "src/futon2/aif/rollout.clj:474-479"},
  :row :V7}
