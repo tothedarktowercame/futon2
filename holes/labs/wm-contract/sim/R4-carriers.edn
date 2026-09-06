@@ -13,7 +13,15 @@
  :pi [:advance :advance]
  :T 2
  :production
+ ;; REVIEW FIX (wm-build-work, slice 8): the delivered carrier exercised the
+ ;; node only under {:type :no-op}, whose predict-effects arm
+ ;; (forward_model.clj:65) returns an EMPTY observation delta -- so "the
+ ;; observation prediction is unchanged when the belief changes" held for the
+ ;; trivial reason that it is unchanged under everything. :acting-action adds an
+ ;; arm that DOES move the observation (forward_model.clj:129-141), so the
+ ;; belief-independence of the delta itself is what gets measured.
  {:action {:type :no-op}
+  :acting-action {:type :address-sorry :target "entity"}
   :state-a {:observation {:sensor-x 0.25}
             :belief {"entity" {:spawned 1.0}}}
   :state-b {:observation {:sensor-x 0.25}

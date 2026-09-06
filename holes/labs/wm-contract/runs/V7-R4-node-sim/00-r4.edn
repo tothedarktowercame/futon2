@@ -3,22 +3,34 @@
  {:plants
   [{:id :unnormalised-a-row,
     :result :caught,
-    :caught-by [:declared-model-validation]}
+    :caught-by [:declared-model-validation],
+    :evidence {:model-valid false}}
    {:id :unnormalised-b-row,
     :result :caught,
-    :caught-by [:declared-model-validation]}
+    :caught-by [:declared-model-validation],
+    :evidence {:model-valid false}}
    {:id :rolls-t-minus-one,
     :result :caught,
-    :caught-by [:reference-row]}
+    :caught-by [:reference-row],
+    :evidence
+    {:planted-row {:good 0.5, :bad 0.5},
+     :canonical-row {:good 0.375, :bad 0.625}}}
    {:id :sums-over-outcomes-instead-of-states,
     :result :caught,
-    :caught-by [:declared-model-validation]}
+    :caught-by [:declared-model-validation],
+    :evidence {:model-valid false}}
    {:id :depth-zero-returns-mu,
     :result :caught,
-    :caught-by [:reference-row]}
+    :caught-by [:reference-row],
+    :evidence
+    {:planted-row {:good 0.75, :bad 0.25},
+     :canonical-row {:good 0.375, :bad 0.625}}}
    {:id :reference-reads-shipped-node,
     :result :caught,
-    :caught-by [:reference-provenance]}],
+    :caught-by [:reference-provenance],
+    :evidence
+    {:built-row {:sensor-x 0.25},
+     :canonical-row {:good 0.375, :bad 0.625}}}],
   :n 6,
   :all-caught true},
  :harness :v7-r4-node-sim,
@@ -44,20 +56,36 @@
    :next-observation-keys [:mean :variance :variance-status],
    :alphabet-intersection [],
    :final-state-keys [:belief :observation],
-   :reason :different-alphabets-and-types,
+   :reason :disjoint-alphabets,
    :trajectory-count 2,
    :result :pass,
    :id :shipped-return-is-a-channel-gaussian-not-declared-q,
    :mean-channels [:sensor-x],
    :mean-channel-count 1,
+   :shipped-observation-mass 0.25,
    :can-read-as-reference false}
-  {:id :observation-prediction-does-not-read-belief,
-   :result :pass,
-   :single-observation-equal-under-belief-change true,
-   :single-belief-equal-under-belief-change false,
-   :single-observation-equal-under-observation-change false,
+  {:multi-final-states-equal-under-belief-change false,
    :multi-observation-trajectories-equal-under-belief-change true,
-   :multi-final-states-equal-under-belief-change false}
+   :acting-observation-delta-nonempty true,
+   :acting-observation-equal-under-belief-change true,
+   :single-observation-equal-under-belief-change true,
+   :result :pass,
+   :id :observation-prediction-does-not-read-belief,
+   :acting-multi-observation-equal-under-belief-change true,
+   :single-observation-equal-under-observation-change false,
+   :acting-action {:type :address-sorry, :target "entity"},
+   :single-belief-equal-under-belief-change false}
+  {:id :roll-forward-iterates-no-dynamics,
+   :result :pass,
+   :what
+   "REVIEW ADDITION (wm-build-work). FUNDAMENTALS.edn:169-176 states, as a consequence of the uncontrolled runtime B, that predict-multi-horizon 'chains the same action-delta K times; there is no dynamics to iterate'. That is a claim about the node, so it is MEASURED here rather than cited: the K-step final observation is compared against re-applying the SINGLE-step node to its own output K times with the belief held fixed. Equality means the roll-forward carries no state dynamics the single step does not already carry.",
+   :depth 2,
+   :iterated-single-step-observation
+   {:sensor-x 0.25, :sorry-count-norm 0.0, :mission-health 0.04},
+   :multi-horizon-final-observation
+   {:sensor-x 0.25, :sorry-count-norm 0.0, :mission-health 0.04},
+   :equal true,
+   :basis "holes/labs/wm-contract/FUNDAMENTALS.edn:169-176"}
   {:source-hits
    ["src/futon2/aif/efe.clj:528::horizon-steps       — v0.15 opt-in multi-horizon scoring. When"
     "src/futon2/aif/efe.clj:529:>= 2, uses `predict-multi-horizon` and"
@@ -85,9 +113,25 @@
     "scripts/wm_t_calibration.clj:65:{:time-pressure tp :horizon-steps hs}))"],
    :recorded-horizon-value-distribution {3 32383, nil 85042},
    :first-file "wm-trace-2026-05-18.edn",
+   :recorded-horizon-depths [3],
    :records-without-horizon-evidence 676,
    :records-total 889,
    :default-horizon 3,
+   :source-supplies-horizon
+   ["src/futon2/aif/efe.clj:528::horizon-steps       — v0.15 opt-in multi-horizon scoring. When"
+    "src/futon2/aif/efe.clj:912::horizon-steps (when multi (:horizon-steps multi))"
+    "src/futon2/aif/forward_model.clj:288::horizon-steps  K}"
+    "src/futon2/aif/forward_model.clj:303::horizon-steps K}"
+    "src/futon2/aif/trace.clj:91:added `:horizon-steps`; v0.20 adds `:structural-pressure`.\""
+    "src/futon2/aif/trace.clj:137::controller-score :rank :time-pressure :horizon-steps])"
+    "scripts/futon2/report/war_machine.clj:6329::horizon-steps wm-horizon-steps"
+    "scripts/wm_e6_shadow.clj:16:Opts fidelity: :time-pressure/:horizon-steps are read back from the"
+    "scripts/wm_e6_shadow.clj:73:hs (:horizon-steps (first prod))"
+    "scripts/wm_e6_shadow.clj:76:{:time-pressure tp :horizon-steps hs}))"
+    "scripts/wm_ihtb2_check.clj:42:hs (:horizon-steps (first (filter :G-risk prod-ranked)))"
+    "scripts/wm_ihtb2_check.clj:45:{:time-pressure tp :horizon-steps hs}))"
+    "scripts/wm_t_calibration.clj:62:hs (:horizon-steps (first prod))"
+    "scripts/wm_t_calibration.clj:65:{:time-pressure tp :horizon-steps hs}))"],
    :result :pass,
    :id :depth-is-opt-in-and-corpus-shows-effective-history,
    :last-file "wm-trace-2026-09-04.edn",
@@ -96,12 +140,7 @@
    :records-with-horizon-field 875,
    :source-hit-count 24,
    :source-search-roots ["src" "scripts" "checks"]}
-  {:id :live-and-predictive-dynamics-do-not-share-one-kernel,
-   :result :pass,
-   :search-patterns
-   ["predict-effects" "forward-model/predict" "fm/predict"],
-   :search-roots ["src" "scripts" "checks"],
-   :hit-count 33,
+  {:live-range-kernel-hits [],
    :hits
    ["src/futon2/aif/code_build_match.clj:34::code-var 'futon2.aif.forward-model/predict"
     "src/futon2/aif/efe.clj:477::prediction    <full forward-model/predict output>"
@@ -136,9 +175,16 @@
     "src/futon2/aif/survey_mission_value.clj:7:nothing about it was epistemic: its `predict-effects` arm delegates to"
     "src/futon2/aif/task_belief_ladder.clj:29:consumed by `predict-effects :advance-mission`"
     "scripts/wm_t_calibration.clj:81:(let [v (try (get-in (fm/predict wm-state c) [:next-observation :variance])"],
+   :search-roots ["src" "scripts" "checks"],
+   :hit-count 33,
+   :search-patterns
+   ["predict-effects" "forward-model/predict" "fm/predict"],
+   :result :pass,
+   :live-range {:file "src/futon2/aif/enact.clj", :from 250, :to 336},
+   :id :live-and-predictive-dynamics-do-not-share-one-kernel,
+   :live-path-calls-predictive-kernel false,
    :live-dynamics
-   "src/futon2/aif/enact.clj:250-336 (enact! and close-loop!)",
-   :live-path-calls-predictive-kernel false}
+   "src/futon2/aif/enact.clj:250-336 (enact! and close-loop!)"}
   {:id :machine-q-boundary-refuses-the-gaussian-proxy,
    :result :pass,
    :refusal
@@ -158,6 +204,18 @@
  "The categorical Q(s|pi) and Q(o|pi) references are computed only from R4-carriers.edn. futon2.aif.forward-model is called only for node-under-test observations.",
  :carriers "holes/labs/wm-contract/sim/R4-carriers.edn",
  :stage-at "p4ng/empirics-futon/control-stages.edn:21",
+ :review
+ {:by "wm-build-work (the reviewing seat), 2026-09-06",
+  :authored-by
+  "codex-9, bell invoke-1788718455975-13359-32467865, futon2 a53f991e",
+  :fixes
+  ["Check :shipped-return-is-a-channel-gaussian-not-declared-q carried a LITERAL :result :pass and a literal :can-read-as-reference false beside a computed :alphabet-intersection. Both are now derived from the shipped return's own key set and mass."
+   "Check :live-and-predictive-dynamics-do-not-share-one-kernel carried a literal :result :pass and a literal :live-path-calls-predictive-kernel false beside a computed hit list. Both are now derived from the hits that fall inside the declared live range."
+   "Check :depth-is-opt-in-and-corpus-shows-effective-history carried a literal :result :pass. It is now a cross-check between what the source supplies and what the corpus recorded, and fails if they disagree."
+   "The plant :reference-reads-shipped-node compared the literal :shipped-node against the literal :carriers -- a negative control that exercised nothing and could not fail. It now builds the wrong reference from the shipped node's own return and requires that it not reproduce the canonical row."
+   "The carrier exercised the node only under {:type :no-op}, whose predict-effects arm returns an EMPTY observation delta, so belief-independence of the observation held for the trivial reason that nothing moved it. An :acting-action arm that does move the observation was added and the belief-independence measured under it."],
+  :additions
+  ["Check :roll-forward-iterates-no-dynamics, which MEASURES the consequence FUNDAMENTALS.edn:169-176 asserts about the roll-forward instead of citing it."]},
  :slice 8,
  :verdict :pass,
  :declaration-sites
