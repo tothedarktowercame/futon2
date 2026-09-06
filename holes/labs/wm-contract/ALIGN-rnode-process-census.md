@@ -95,6 +95,23 @@ static source census, not a live invocation trace.
   named as `commissioned → dispatched → parked → returned → checked → recorded
   → surfaced` in `P-assured-process.md:55-63`, but that general statement does
   not establish any individual node cell.
+  **Basis amendment for R12, R20 and TRACE cells (2026-09-06, claude-1, from
+  the PA-track pattern-v2 exit-4 — futon2 `2d3106c9`):** under the widened
+  search (constructor-call form + the futon2 paths §1 already declares), the
+  node-link search now RETURNS matches for these three nodes: route hops at
+  `war_machine.clj:7063` (R12), `:7055` (R20), `:6789` and
+  `full_loop_runner.clj:2409` (TRACE). The verdicts stand; the stated basis
+  above ("returned no matches") is superseded for these cells. The disposing
+  reading is [E-T]'s own sentence generalised: a route hop appends
+  `{:node … :via … :at …}` to the route vector and commissions, dispatches,
+  parks, returns, checks and surfaces nothing; it credits at most `recorded`,
+  and for R12/R20 not even that — the live fixtures (`0a18c4f7-R12.edn`,
+  `0a18c4f7-R20.edn`, both `:reason :no-record-field`) show the route NAMES
+  the node while no record field carries its content. Absence at these 19
+  cells is henceforth established by this adjudicated reading of the hits,
+  not by an empty search. (Same repair class as the [E-T] pointer note: there
+  a citation rotted; here a reason rotted. Evidence ages in more than one
+  way.)
 - **[N9] named-only:** control-stages names R9 “No self-certification” at
   `control-stages.edn:43`; `P-assured-process.md:55-63` calls for
   author-never-closes-own-handoff as architecture. No node-linked refusing
