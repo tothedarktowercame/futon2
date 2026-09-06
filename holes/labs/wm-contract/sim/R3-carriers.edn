@@ -1,0 +1,58 @@
+;; Independent declaration transcription for V7 slice 5, node R3.
+{:id :R3-carriers-v1
+ :node :R3 :row :V7 :slice 5
+ :statuses [:spawned :refined :strengthened :addressed :falsified :foreclosed :reopened]
+ :channel-signs {:annotation-health 1.0 :sorry-count-norm -1.0 :mission-health 1.0
+                 :active-repo-ratio 1.0 :support-coverage 1.0 :attack-coverage 1.0
+                 :coupling-density 1.0 :ticks-firing-ratio 1.0}
+ :driver-fixtures
+ [{:id :balanced-dyadic
+   :errors {:annotation-health {:weighted-error 0.5 :precision 2.0}
+            :sorry-count-norm {:weighted-error 0.25 :precision 2.0}}}
+  {:id :unequal-precision-dyadic
+   :errors {:annotation-health {:weighted-error 0.75 :precision 3.0}
+            :mission-health {:weighted-error -0.25 :precision 1.0}}}]
+ :unknown-fixtures
+ [{:id :none :errors {} :reason :no-channel-supplied}
+  {:id :omitted :errors {:annotation-health {:status :absent}} :reason :every-channel-omitted}
+  {:id :rejected :errors {:annotation-health {:status :refused}} :reason :every-channel-rejected}
+  {:id :zero-precision :errors {:annotation-health {:weighted-error 0.5 :precision 0.0}}
+   :reason :no-positive-precision}]
+ :a-matrix {:diagonal-gain 2.0
+            :overrides {[:refined :spawned] 1.3
+                        [:strengthened :refined] 1.3
+                        [:addressed :refined] 1.3
+                        [:reopened :addressed] 1.3
+                        [:refined :reopened] 1.3
+                        [:strengthened :falsified] 0.7
+                        [:falsified :strengthened] 0.7
+                        [:addressed :foreclosed] 0.7
+                        [:foreclosed :addressed] 0.7}}
+ :transition :identity
+ :filter-fixtures
+ [{:id :kappa-zero :prior {:spawned 0.5 :refined 0.25 :strengthened 0.125
+                           :addressed 0.0625 :falsified 0.03125
+                           :foreclosed 0.015625 :reopened 0.015625}
+   :event {:type :strengthened :weight 0.0}}
+  {:id :unit-weight :prior {:spawned 0.5 :refined 0.25 :strengthened 0.125
+                            :addressed 0.0625 :falsified 0.03125
+                            :foreclosed 0.015625 :reopened 0.015625}
+   :event {:type :strengthened :weight 1.0}}
+  {:id :nonlinear-kappa :prior {:spawned 0.5 :refined 0.25 :strengthened 0.125
+                                :addressed 0.0625 :falsified 0.03125
+                                :foreclosed 0.015625 :reopened 0.015625}
+   :event {:type :strengthened :weight 3.0}}]
+ :health-weights {:strengthened 1.0 :addressed 1.0 :refined 0.5 :spawned 0.0
+                  :reopened 0.0 :foreclosed -0.5 :falsified -1.0}
+ :attribution {:beliefs {"low" {:spawned 1.0} "middle" {:refined 1.0}
+                                 "high" {:strengthened 1.0}}
+               :driver 0.5 :step 1 :max-steps 3.0 :scale 0.1}
+ :declaration-sites
+ {:registry "holes/labs/wm-contract/aif-equations.edn:113-117"
+  :alpha "holes/labs/wm-contract/aif-equations.edn:67"
+  :models "src/futon2/aif/belief.clj:95-226"
+  :filter "src/futon2/aif/belief.clj:297-346"
+  :health "src/futon2/aif/belief.clj:614-638"
+  :signs "src/futon2/aif/belief.clj:1003-1021"
+  :driver "src/futon2/aif/belief.clj:1122-1197"
+  :tick "scripts/futon2/report/war_machine.clj:6147-6190"}}

@@ -1,0 +1,146 @@
+{:stage "BELIEF UPDATE",
+ :negative-controls
+ {:plants
+  [{:id :unweighted-arithmetic-mean-driver,
+    :result :caught,
+    :caught-by
+    [:multichannel-driver-agrees-with-independent-reference
+     :driver-record-has-exactly-present-and-unknown-statuses]}
+   {:id :driver-drops-signs,
+    :result :caught,
+    :caught-by
+    [:multichannel-driver-agrees-with-independent-reference]}
+   {:id :driver-divides-by-channel-count,
+    :result :caught,
+    :caught-by
+    [:multichannel-driver-agrees-with-independent-reference
+     :driver-record-has-exactly-present-and-unknown-statuses]}
+   {:id :empty-driver-is-zero,
+    :result :caught,
+    :caught-by
+    [:driver-record-has-exactly-present-and-unknown-statuses]}
+   {:id :driver-imputes-refused-third-status,
+    :result :caught,
+    :caught-by
+    [:driver-record-has-exactly-present-and-unknown-statuses]}
+   {:id :filter-kappa-is-weight,
+    :result :caught,
+    :caught-by
+    [:categorical-filter-agrees-with-independent-tempered-bayes]}
+   {:id :filter-skips-predict-step,
+    :result :caught,
+    :caught-by
+    [:categorical-filter-agrees-with-independent-tempered-bayes]}
+   {:id :anneal-one-minus-step-over-two,
+    :result :caught,
+    :caught-by [:per-entity-attribution-mean-equals-event-weight]}],
+  :n 8,
+  :all-caught true},
+ :harness :v7-r3-node-sim,
+ :not-done
+ ["No production source, registry, ledger, documentation, or p4ng file changed."
+  "No live tick and no run lock; data/wm-trace was read only."
+  "Corpus mismatches are reported rather than made into a failing or tuned fixture check."],
+ :checks
+ [{:id :multichannel-driver-agrees-with-independent-reference,
+   :result :pass,
+   :comparisons 2,
+   :max-deviation 0.0,
+   :exact-dyadic true}
+  {:id :single-channel-driver-is-annotation-health-weighted-error,
+   :result :pass,
+   :actual 0.375,
+   :expected 0.375}
+  {:id :driver-record-has-exactly-present-and-unknown-statuses,
+   :result :pass,
+   :fixtures
+   [{:id :none,
+     :reason :no-channel-supplied,
+     :record
+     {:producer-contract :r3d-aggregate-driver/v1,
+      :mode :multichannel,
+      :status :unknown,
+      :reason :no-channel-supplied}}
+    {:id :omitted,
+     :reason :every-channel-omitted,
+     :record
+     {:producer-contract :r3d-aggregate-driver/v1,
+      :mode :multichannel,
+      :omitted
+      [{:channel :annotation-health,
+        :producer-contract :r3d-aggregate-driver/v1,
+        :status :omitted,
+        :reason :observation-absent}],
+      :status :unknown,
+      :reason :every-channel-omitted}}
+    {:id :rejected,
+     :reason :every-channel-rejected,
+     :record
+     {:producer-contract :r3d-aggregate-driver/v1,
+      :mode :multichannel,
+      :rejected
+      [{:channel :annotation-health,
+        :producer-contract :r3d-aggregate-driver/v1,
+        :status :rejected,
+        :reason :upstream-refusal}],
+      :status :unknown,
+      :reason :every-channel-rejected}}
+    {:id :zero-precision,
+     :reason :no-positive-precision,
+     :record
+     {:producer-contract :r3d-aggregate-driver/v1,
+      :mode :multichannel,
+      :status :unknown,
+      :reason :no-positive-precision}}]}
+  {:id :categorical-filter-agrees-with-independent-tempered-bayes,
+   :result :pass,
+   :comparisons 3,
+   :max-deviation 5.551115123125783E-17,
+   :kappa-zero-max-deviation 0.0,
+   :tolerance 1.0E-15}
+  {:max-deviation 0.0,
+   :min-individual-weight 0.0,
+   :entities 3,
+   :independent-reference-max-deviation 0.0,
+   :result :pass,
+   :id :per-entity-attribution-mean-equals-event-weight,
+   :mean-weight 0.03333333333333334,
+   :max-individual-weight 0.06666666666666668,
+   :event-weight 0.03333333333333334}
+  {:id :production-micro-step-replay,
+   :result :pass,
+   :finding-policy
+   "Corpus mismatches are retained as findings and do not tune the fixture gate.",
+   :measurements
+   {:anneal-mismatches [],
+    :anneal-max-deviation 0.0,
+    :entry-count 2634,
+    :distinct-steps [0 1 2],
+    :event-weight-comparisons 2622,
+    :event-weight-max-deviation 0.0,
+    :missing-aggregated-signed-error 12,
+    :event-weight-mismatches [],
+    :anneal-comparisons 2634,
+    :file-count 57}}],
+ :node :R3,
+ :corpus
+ {:root "data/wm-trace",
+  :read-only true,
+  :file-count 57,
+  :micro-step-entry-count 2634},
+ :reference-independence
+ "All driver, model, filter, annealing, health and attribution reference values are constructed only from R3-carriers.edn. futon2.aif.belief supplies only node-under-test values; war_machine arithmetic is transcribed only on the measured side.",
+ :carriers "holes/labs/wm-contract/sim/R3-carriers.edn",
+ :stage-at "p4ng/empirics-futon/control-stages.edn:18",
+ :slice 5,
+ :verdict :pass,
+ :declaration-sites
+ {:registry "holes/labs/wm-contract/aif-equations.edn:113-117",
+  :alpha "holes/labs/wm-contract/aif-equations.edn:67",
+  :models "src/futon2/aif/belief.clj:95-226",
+  :filter "src/futon2/aif/belief.clj:297-346",
+  :health "src/futon2/aif/belief.clj:614-638",
+  :signs "src/futon2/aif/belief.clj:1003-1021",
+  :driver "src/futon2/aif/belief.clj:1122-1197",
+  :tick "scripts/futon2/report/war_machine.clj:6147-6190"},
+ :row :V7}
