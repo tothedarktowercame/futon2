@@ -1,0 +1,117 @@
+{:as-of-recomputed
+ {:authored-why-edges 92,
+  :authored-why-how-edges 124,
+  :patterns 1238,
+  :sections 98},
+ :as-of-recorded
+ {:authored-why-edges 92,
+  :authored-why-how-edges 124,
+  :patterns 1239,
+  :sections 98},
+ :authored-edges
+ [[6 26]
+  [7 20]
+  [14 23]
+  [15 22]
+  [16 24]
+  [17 20]
+  [18 19]
+  [19 20]
+  [22 24]
+  [23 26]
+  [24 21]
+  [25 21]
+  [26 25]],
+ :basis
+ {:library-root "/tmp/f12-basis-1b8b1d1/library",
+  :record "/home/joe/code/futon3/checks/zaif-cascade.edn",
+  :run :widen-to-a-budget,
+  :sha "1b8b1d1"},
+ :counts
+ {:added-by-organise 0,
+  :admitted 9,
+  :authored-edges 13,
+  :bridges 7,
+  :closure 27,
+  :nodes 20,
+  :selected 11},
+ :encoding {:admitted-from 11, :nodes-below 20, :selected-below 11},
+ :fast-forward {:over-nodes [[18 19]], :over-selected []},
+ :index
+ [[0 :ai4ci/funding-justification]
+  [1 :aif/hierarchical-budget-aware-action-selection]
+  [2 :aif/status-gated-belief-update]
+  [3 :budgeted-action-selection/mana-gated-work]
+  [4 :equity/confident-adaptation-as-published]
+  [5 :equity/confident-adaptation-merged]
+  [6 :forward-model/graduate-strategy-by-outcome]
+  [7 :math-strategy/missing-dependency-protocol]
+  [8 :or3/ask-first-then-bring-the-expert]
+  [9 :or3/openness-without-exposure]
+  [10 :ukrns/publication-cadence]
+  [11 :agent/handoff-preserves-context]
+  [12 :agent/trail-enables-return]
+  [13 :ai4ci/ai-core-function]
+  [14 :aif/no-self-certification]
+  [15 :features/operator-turns-enter-the-observation-vector]
+  [16 :forward-model/inhabit-supplies-labels]
+  [17 :math-formalization-CA/measure-integration-api]
+  [18 :math-formalization-CV/frontier-bound-from-arc-hypotheses]
+  [19 :math-formalization-CV/holomorphic-disk-api]
+  [20 :math-informal/reduce-to-known-result]
+  [21 :war-room/wr-0-organise-without-apparatus]
+  [22
+   :war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels]
+  [23
+   :war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad]
+  [24 :war-room/wr-4-inhabit-before-building]
+  [25 :war-room/wr-8-typed-files-are-sources-of-truth]
+  [26 :war-room/wr-9-bites-empirical-or-logical]],
+ :lean
+ {:block-lines [924 1048],
+  :facts
+  {:admitted-below 20,
+   :admitted-from 11,
+   :authored-edges
+   [[6 26]
+    [7 20]
+    [14 23]
+    [15 22]
+    [16 24]
+    [17 20]
+    [18 19]
+    [19 20]
+    [22 24]
+    [23 26]
+    [24 21]
+    [25 21]
+    [26 25]],
+   :nodes-below 20,
+   :organised-over-nodes? true,
+   :selected-below 11},
+  :path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"},
+ :o4
+ {:note
+  "cascade-of sets both to [] for this run and carries no score (futon3:checks/construct_cascade.clj:402, fields at 420-421); no O4 is stated of the Lean fixture.",
+  :precedence-after [],
+  :precedence-before [],
+  :recorded
+  :not-exercised-fewer-than-two-members-carry-a-play-grain-rule},
+ :problems [],
+ :read-digest
+ {:reason
+  "read-digest hashes each entry's :file (futon3:checks/construct_cascade.clj:76), so it moves with the root path; and library/math-formalization takes untracked files from a live scribe (construct_cascade.clj:67-73). Not used as a check.",
+  :recorded
+  "6339933719779fb98455d5c6b859f30f4362330ec5a7af30cdddb9fdcea0c049",
+  :reproducible? false},
+ :untracked-probe
+ [{:file
+   "library/math-formalization-FA/lf-map-continuity-via-fixed-support-stages.flexiarg",
+   :fingerprint-unchanged? true,
+   :patterns 1239,
+   :sections 98}
+  {:file
+   "library/math-formalization/vanishing-derivative-limit-via-fixed-interval-slopes.flexiarg",
+   :fingerprint-unchanged? true,
+   :patterns 1239,
+   :sections 98}]}
