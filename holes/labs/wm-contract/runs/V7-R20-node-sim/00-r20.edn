@@ -1,0 +1,137 @@
+{:stage "EVALUATE",
+ :negative-controls
+ {:plants
+  [{:id :synthetic-r20-trace,
+    :route-count 1,
+    :attributable-count 1,
+    :result :caught}
+   {:id :synthetic-r20-source, :node-link-count 1, :result :caught}
+   {:id :synthetic-r20-surface, :surface-count 1, :result :caught}],
+  :all-caught true},
+ :harness :v7-r20-node-sim,
+ :not-done
+ ["No equation reference exists for R20; this harness measures its process account."
+  "No live tick or run lock; trace files were read only."
+  "No production, registry, ledger, document, p4ng, or data file was modified."],
+ :checks
+ [{:id :registry-has-no-r20-equation,
+   :result :pass,
+   :equation-row-count 0,
+   :equation-search ":node :R20",
+   :plumbing-hit-count 1,
+   :plumbing-hits
+   [{:line 521,
+     :text ":plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]"}],
+   :cited-lines-472-473
+   [{:line 472,
+     :text
+     "   {:overtake-dominant \"Any overtake refutes. REJECTED HERE ON A MEASUREMENT, not on taste: on the recorded 2026-09-02 pair it refutes every claim after one tick, because the chosen mission's mission-value-factor halves by construction (0.59 to 0.295, non-progress-decay 1.0 to 0.5) while every rival's factor is byte-identical. Such a test measures the decay, not the rationale.\""}
+    {:line 473,
+     :text
+     "    :weighted-legs \"Combine the four legs with declared weights. REJECTED HERE: three of the four legs are typed absences on this corpus, so the weights would be unmeasurable and would be fiat standing in for measurement.\""}],
+   :citation-lands-on-plumbing? false}
+  {:id :route-tags-r20-to-metabolic-scan,
+   :result :pass,
+   :r20-site-count 1,
+   :r20-sites
+   [{:line 7055,
+     :text
+     "scan-route1 (route-tag scan-route0 :R20 \"futon2.report.war-machine/scan-metabolic-balance\")"}],
+   :route-tag-site-count 10,
+   :route-node-count 10,
+   :route-nodes [:R12 :R14 :R2 :R20 :R3 :R5 :R6 :R7 :R8 :TRACE]}
+  {:first-file "wm-trace-2026-05-18.edn",
+   :records-total 889,
+   :records-with-r20-route 66,
+   :result :pass,
+   :id :corpus-has-no-r20-produced-record-field,
+   :last-file "wm-trace-2026-09-04.edn",
+   :files-total 57,
+   :attributable-keys-searched
+   [:metabolic-balance :metabolic-stale? :override-suppressed-reason],
+   :records-with-attributable-field 0}
+  {:unlinked-refusal-evidence-lines
+   [{:line 5970,
+     :text "(and metabolic-stale?",
+     :file
+     "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"}
+    {:line 5971,
+     :text "(= :stop-the-line metabolic-max-tier))",
+     :file
+     "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"}
+    {:line 5973,
+     :text "(= :stop-the-line metabolic-max-tier)",
+     :file
+     "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"}
+    {:line 5974,
+     :text ":stop-the-line",
+     :file
+     "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"}
+    {:line 5977,
+     :text "override-suppressed-reason (when (and metabolic-stale?",
+     :file
+     "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"}
+    {:line 5978,
+     :text "(= :stop-the-line metabolic-max-tier))",
+     :file
+     "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"}],
+   :r20-linked-refusal-site-count 0,
+   :unlinked-refusal-evidence-line-count 6,
+   :unlinked-refusal-decision-count 1,
+   :node-link-search
+   "(?i)(?::(?:node|wm/node|route/node|control-node)\\s+:R20|route-tag[^\\n]*:R20)",
+   :node-link-hit-count 1,
+   :unlinked-interoceptive-hit-count 63,
+   :result :pass,
+   :id :checking-is-named-only,
+   :unlinked-refusal-decision-sites
+   [{:line 5969,
+     :text "mode (cond",
+     :file
+     "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"}],
+   :node-link-hits
+   [{:line 7055,
+     :text
+     "scan-route1 (route-tag scan-route0 :R20 \"futon2.report.war-machine/scan-metabolic-balance\")",
+     :file
+     "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj"}]}
+  {:id :no-r20-attributed-surfacing,
+   :result :pass,
+   :surface-search
+   "(?i)bulletin|notify/discharged-at|park!|:parked|stop-line|summon",
+   :source-surface-hit-count 143,
+   :r20-attributed-source-surface-hit-count 0,
+   :r20-attributed-corpus-surface-count 0,
+   :surface-keys-searched
+   [:bulletin
+    :bulletins
+    :notify/discharged-at
+    :park
+    :parked
+    :stop-line
+    :stop-line-record
+    :summon]}
+  {:id :negative-controls-detect-nonzero-cases,
+   :result :pass,
+   :plants
+   [{:id :synthetic-r20-trace,
+     :route-count 1,
+     :attributable-count 1,
+     :result :caught}
+    {:id :synthetic-r20-source, :node-link-count 1, :result :caught}
+    {:id :synthetic-r20-surface, :surface-count 1, :result :caught}]}],
+ :node :R20,
+ :corpus
+ {:root "data/wm-trace",
+  :read-only true,
+  :file-count 57,
+  :record-count 889},
+ :stage-at "/home/joe/code/p4ng/empirics-futon/control-stages.edn:41",
+ :slice 9,
+ :verdict :pass,
+ :account-sites
+ ["/home/joe/code/p4ng/sec-catalog.tex:369"
+  "holes/labs/wm-contract/ALIGN-rnode-process-census.md:87"
+  "holes/labs/wm-contract/ALIGN-rnode-process-census.md:98-120"
+  "/home/joe/code/p4ng/R-concordance.md:41"],
+ :row :V7}
