@@ -987,3 +987,30 @@ system."
   worklist_check refused, the loop stopped safely on the invalid
   ledger, renamed V7/V8. Duplicate-id refusal is worklist_check's,
   not F5's -- jurisdiction fact worth remembering.
+
+## The eight-before-any-run ruling (Joe, 2026-09-06) — Box 6's substantive holes gate the first run
+
+Verbatim: "Some of those are more theoretical, like WM runs once and
+WM run conforms to wiring... But the other ones look like they're
+substantial issues in the model, and I don't really think it's
+necessarily worth running even once, until we get the other eight
+items cleared up."
+
+- SUPERSEDES the run-startable-anytime posture on RUN13: no run until
+  the eight non-run-witness holes of the contract (authority
+  69721b1268) are discharged. The run-witness pair (wmRunsOnce,
+  wmRunConformsToWiring) closes BY the eventually-approved run.
+- The eight, grouped by distance (mapping 2026-09-06):
+  WIRING (groundwork landed): policyPosteriorImportsPolicyF (F_pi
+  exists both legs; import missing -- J2's consequence),
+  dirichletAccumulationImportAbsent (Lean spec exists; runtime repair
+  specified), policyPrecisionIsGammaFromBeta (R14 authority seam),
+  enactedEqualsSelectedWhenRankOneGated (F9's stepped-run test green;
+  V8 re-types whether recorded evidence suffices).
+  MODEL: C (outcome-domain preference distribution at policy grain)
+  + preferenceStackLiveRecorded (R19; feeds C honestly -- coupled).
+  READ-FIRST: find, organise (P-validated-R5 s3e against F7's
+  landed constructor).
+- PENDING MINT at V7's next pause: one discharge row per hole,
+  wiring group first. RUN4 approval sentence becomes: the eight read
+  discharged and V8 is green.
