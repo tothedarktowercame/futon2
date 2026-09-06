@@ -14,9 +14,9 @@
  :declaration-sites
  {:habit-prior "holes/labs/wm-contract/aif-equations.edn:66"
   :policy-set "holes/labs/wm-contract/aif-equations.edn:158-160"
-  :posterior "holes/labs/wm-contract/aif-equations.edn:173-181"
+  :posterior "holes/labs/wm-contract/aif-equations.edn:173-178"
   :scores "src/futon2/aif/policy.clj:157-213"
   :softmax "src/futon2/aif/policy.clj:215-235"
-  :candidate-construction "scripts/futon2/report/war_machine.clj:6278-6304"
+  :candidate-construction "scripts/futon2/report/war_machine.clj:6267-6277"
   :controller-ranking "src/futon2/aif/policy.clj:495-501,636-640"
   :strategic-call "scripts/futon2/report/war_machine.clj:6475-6481"}}

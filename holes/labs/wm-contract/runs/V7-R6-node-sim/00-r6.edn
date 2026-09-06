@@ -9,10 +9,22 @@
     :counter :a3-max-deviation,
     :moved 0.375,
     :result :caught}
-   {:id :synthetic-action-equals-posterior-argmax,
+   {:id :synthetic-action-equals-persisted-posterior-argmax,
     :counter :d3-agreement,
+    :representation :persisted-posterior,
     :before 0,
     :after 1,
+    :moved 1,
+    :result :caught}
+   {:id :synthetic-action-equals-reconstructed-argmax,
+    :counter :d3-agreement,
+    :representation :selection-score-equivalent,
+    :before 0,
+    :after 1,
+    :moved 1,
+    :result :caught}
+   {:id :synthetic-declaration-body-edit,
+    :counter :b1-drift-locus,
     :moved 1,
     :result :caught}],
   :all-caught true},
@@ -211,6 +223,20 @@
    :problem-basis "holes/problems/P-validated-R5.md:381-393"}
   {:fixture-expected
    "e47a84973aa4ed0d2c998cb1d24abb3adaab08a15a370bdfec0a1b610edbaad3",
+   :drift-analysis
+   [{:parent-body-sha256
+     "a3f47d327ffb21cccc7625d04dd198f1c0998961f963e33932ad4dad3445e43a",
+     :parent-span-sha256
+     "6139b9daff43479000c4fee36e0aa26ab621b6f1dba17d8f2e2a6749b78ceaf9",
+     :body-unchanged-across-that-commit? true,
+     :locus :neighbour-docstring-inside-the-span,
+     :span-lines-at-head [6960 6967],
+     :span-last-moved-by "6dabfb686f9754454d7689dc5b5bc39ae08dcf0b",
+     :parent-span-matches-pin? true,
+     :head-body-sha256
+     "a3f47d327ffb21cccc7625d04dd198f1c0998961f963e33932ad4dad3445e43a",
+     :worktree-clean? true,
+     :declaration "softmax"}],
    :declaration-mismatch-count 1,
    :axiom-exit 0,
    :basis "holes/labs/wm-contract/softmax-positive-receipt.edn:1",
@@ -222,6 +248,8 @@
    :id :lean-positive-receipt-revalidates,
    :declaration-checks
    [{:file "mathlib4/DarkTower/WarMachine/SoftmaxWitness.lean",
+     :repo "mathlib4",
+     :path "DarkTower/WarMachine/SoftmaxWitness.lean",
      :declarations
      [{:name "habit",
        :expected
@@ -266,6 +294,8 @@
        "562cd729cb7154a3eb7332dffe1ca1e6c5ce52b414a6bd3a180ca4cd7c0d7b11",
        :match? true}]}
     {:file "mathlib4/DarkTower/WarMachine/Holes.lean",
+     :repo "mathlib4",
+     :path "DarkTower/WarMachine/Holes.lean",
      :declarations
      [{:name "softmax",
        :expected
@@ -273,7 +303,7 @@
        :actual
        "ef7cca575379c0035425802ce31098f88de5172b72823a968b6b3b4aadcc7a04",
        :match? false}]}],
-   :finding :positive-source-drift,
+   :finding :pinned-span-moved-outside-the-declaration-body,
    :elaboration-exit 0,
    :elaboration-output "",
    :axiom-output
@@ -289,31 +319,134 @@
    :crosses
    {:controller-ranking true,
     :selection-score true,
-    :tau false,
-    :posterior false},
+    :tau-value false,
+    :posterior-normalised false,
+    :tau-scaled-quantity true},
    :ranking-shape "src/futon2/aif/policy.clj:495-501,636-640"}
   {:first-file "wm-trace-2026-05-18.edn",
    :records-total 889,
    :basis
-   "src/futon2/aif/policy.clj:664-670; scripts/futon2/report/war_machine.clj:6475-6481",
-   :representation-counts {:selection-score-equivalent 95},
-   :differ 95,
+   "src/futon2/aif/policy.clj:664-670; scripts/futon2/report/war_machine.clj:6475-6481; src/futon2/aif/trace.clj:150-177",
+   :representation-counts
+   {:selection-score-equivalent 24, :persisted-posterior 74},
+   :differ 98,
+   :rank-of-recorded-action
+   {:n 98, :min 2, :median 116, :max 132, :rank-1-count 0},
    :by-file
-   [["wm-trace-2026-08-30.edn" {:n 7, :agree 0}]
-    ["wm-trace-2026-08-31.edn" {:n 5, :agree 0}]
-    ["wm-trace-2026-09-01.edn" {:n 76, :agree 0}]
-    ["wm-trace-2026-09-02.edn" {:n 3, :agree 0}]
-    ["wm-trace-2026-09-04.edn" {:n 4, :agree 0}]],
+   [["wm-trace-2026-08-30.edn"
+     {:n 7,
+      :agree 0,
+      :ranks-of-recorded-action [116 116 116 123 123 123 128]}]
+    ["wm-trace-2026-08-31.edn"
+     {:n 5, :agree 0, :ranks-of-recorded-action [116 123 127 132 132]}]
+    ["wm-trace-2026-09-01.edn"
+     {:n 79,
+      :agree 0,
+      :ranks-of-recorded-action
+      [77
+       77
+       77
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       81
+       116
+       116
+       116
+       124
+       124
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127
+       127]}]
+    ["wm-trace-2026-09-02.edn"
+     {:n 3, :agree 0, :ranks-of-recorded-action [2 3 125]}]
+    ["wm-trace-2026-09-04.edn"
+     {:n 4, :agree 0, :ranks-of-recorded-action [2 2 3 3]}]],
+   :persisted-by-candidate-id-count 74,
    :result :pass,
-   :records-with-posterior-and-action 95,
+   :records-with-posterior-and-action 98,
    :id :corpus-posterior-vs-recorded-action,
    :last-file "wm-trace-2026-09-04.edn",
    :files-total 57,
-   :agree 0}
-  {:id :f-pi-posterior-site-census,
-   :result :pass,
+   :persisted-softmax-weights-key-count 0,
+   :agree 0,
+   :cross-check-persisted-vs-reconstructed {true 71}}
+  {:symbol-occurrence-count 15,
+   :claim-site "src/futon2/aif/policy.clj:545-553",
    :search "f-pi-policy-posterior?",
-   :symbol-occurrence-count 15,
+   :derived-site-inside-registry-range? true,
+   :result :pass,
+   :id :f-pi-posterior-site-census,
+   :application-sites
+   [{:file "src/futon2/aif/policy.clj",
+     :line 211,
+     :text "f-pi-policy-posterior?",
+     :applies "(- (nth f-terms idx))))"}],
+   :application-site-count 1,
    :symbol-occurrences
    [{:file "scripts/futon2/report/war_machine.clj",
      :line 655,
@@ -363,12 +496,50 @@
      :line 762,
      :text
      "(throw (ex-info (str \":f-pi-opts with :f-pi-policy-posterior? true requires \""}],
-   :application-site-count 1,
-   :application-sites
-   [{:file "src/futon2/aif/policy.clj",
-     :line 211,
-     :text "f-pi-policy-posterior?"}],
-   :claim-site "src/futon2/aif/policy.clj:545-553"}],
+   :registry-code-range
+   {:claim
+    "holes/labs/wm-contract/aif-equations.edn:177 -- \"the score expression is at :208-213\"",
+    :from 208,
+    :to 213}}
+  {:ranked-action-types
+   {:learn-action-class 1640,
+    :no-op 889,
+    :address-sorry 3669,
+    :open-mission 53869,
+    :fire-pattern 1242,
+    :advance-mission 56283,
+    :apply-cascade 450},
+   :generated-and-excluded
+   {:count 516,
+    :by-proposer #:s1{:tension 516},
+    :by-reason {:mission-absent-from-capability-graph 516},
+    :by-action-type {:open-mission 516}},
+   :generator-built
+   {:file "src/futon2/aif2/tension.clj",
+    :line 1,
+    :text "(ns futon2.aif2.tension"},
+   :ranked-actions-by-proposer {nil 116715, :s1/tension 1327},
+   :chosen-actions-by-proposer {nil 845, :s1/tension 44},
+   :recorded-action-types
+   {:learn-action-class 146,
+    :address-sorry 459,
+    :open-mission 96,
+    :advance-mission 188},
+   :generator-wired
+   {:file "scripts/futon2/report/war_machine.clj",
+    :line 6275,
+    :text "(tension/tension-proposer)]"},
+   :claim-under-test
+   {:wr-19
+    {:file "/home/joe/code/p4ng/empirics-futon/wr-overlay.edn",
+     :line 40,
+     :text
+     "{:node \"R6\"  :wr \"WR-19\" :holds false :note \"tension must GENERATE, not only rank -- the candidate space is ranked, not proposed; tension-proposer unbuilt\"}"},
+    :problem-statement "holes/problems/P-validated-R5.md:381-393"},
+   :generator-alphabet
+   {:file "src/futon2/aif2/tension.clj", :line 36, :text "(def kappa"},
+   :result :pass,
+   :id :r6-find-generates-or-only-ranks}],
  :node :R6,
  :corpus
  {:root "data/wm-trace", :read-only true, :files 57, :records 889},
@@ -381,11 +552,11 @@
  :declaration-sites
  {:habit-prior "holes/labs/wm-contract/aif-equations.edn:66",
   :policy-set "holes/labs/wm-contract/aif-equations.edn:158-160",
-  :posterior "holes/labs/wm-contract/aif-equations.edn:173-181",
+  :posterior "holes/labs/wm-contract/aif-equations.edn:173-178",
   :scores "src/futon2/aif/policy.clj:157-213",
   :softmax "src/futon2/aif/policy.clj:215-235",
   :candidate-construction
-  "scripts/futon2/report/war_machine.clj:6278-6304",
+  "scripts/futon2/report/war_machine.clj:6267-6277",
   :controller-ranking "src/futon2/aif/policy.clj:495-501,636-640",
   :strategic-call "scripts/futon2/report/war_machine.clj:6475-6481"},
  :row :V7}
