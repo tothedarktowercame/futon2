@@ -1,0 +1,669 @@
+{:slice :F12-slice-1-census,
+ :what
+ "Where organise is witnessed today: Lean carriers and laws, the Clojure mirror, and the recorded cascades.",
+ :lean
+ {:file "mathlib4/DarkTower/WarMachine/Holes.lean",
+  :organise
+  {:decl-line 861,
+   :is-sorry? true,
+   :type "Cascade Policy → Set P → Repository P → Cascade P"},
+  :organise-term-references-outside-its-own-def
+  {:by-kind
+   {:doc-comment-prose [844 860 893 901 908],
+    :string-literal-name [7899]},
+   :term-reference-count 0},
+  :organise-in-hole-registry
+  {:line 7899,
+   :entry
+   "mkRefused \"organise\" \"P-validated-R5 §3e organise\" \"implementation, not a law\","},
+  :o-laws
+  {:O1
+   {:decl "organiseO1NodesRecorded",
+    :line 894,
+    :stated-of "wmCascadeDiffFixture",
+    :mentions-organise? false},
+   :O2
+   {:decl "organiseO2AuthoredReachability",
+    :line 902,
+    :stated-of "wmCascadeDiffFixture",
+    :mentions-organise? false},
+   :O3
+   {:decl "organiseO3FastForward",
+    :line 909,
+    :stated-of "wmCascadeDiffFixture",
+    :mentions-organise? false},
+   :O4
+   {:decl "organiseO4PrecedenceGovernance",
+    :line 916,
+    :stated-of "wmCascadeDiffFixture",
+    :mentions-organise? false}},
+  :fixture
+  {:line 872,
+   :carrier "CascadeDiff Nat Int",
+   :addedByOrganise "∅",
+   :admittedBy "∅",
+   :selected "cascadeFixtureSelected",
+   :nodes "cascadeFixtureSelected"},
+  :carriers
+  {:Cascade
+   {:line 29,
+    :fields
+    ["nodes" "addedByOrganise" "edges" "acyclic" "precedence"]},
+   :CascadeDiff
+   {:line 846,
+    :fields
+    ["selected"
+     "nodes"
+     "addedByOrganise"
+     "admittedBy"
+     "authoredEdges"
+     "organisedEdges"
+     "precedenceBefore"
+     "precedenceAfter"
+     "actingOrderBefore"
+     "actingOrderAfter"
+     "scoreBefore"
+     "scoreAfter"]},
+   :Repository
+   {:line 121, :fields ["patterns" "standsOn" "acyclic"]}}},
+ :clojure
+ {:file "futon3:checks/find_organise.clj",
+  :organise-line 305,
+  :arglist "[temperament selected repository]",
+  :admitted-by-line 337,
+  :construct-line 439,
+  :apply-edit-admits-line 422,
+  :reproduces-record-line 635,
+  :mutate-diff-line 679},
+ :recorded-cascades
+ [{:record "futon3/checks/construct-cascade.edn",
+   :status :read,
+   :repository {:patterns 1239, :authored-why-edges 92, :sections 98},
+   :tension :organise-the-library,
+   :runs
+   {:widen-to-a-budget
+    {:laws {:O1 true, :O2 true, :O3 true},
+     :cascade-nodes 20,
+     :cascade-edges 5,
+     :admitted-count 11,
+     :stop [:halted [:budget 20]]},
+    :widen-to-the-marginal-gain-floor
+    {:laws {:O1 true, :O2 true, :O3 true},
+     :cascade-nodes 13,
+     :cascade-edges 5,
+     :admitted-count 4,
+     :stop [:halted [:marginal-gain-floor 1.0]]}},
+   :o4 :absent,
+   :cascades-differ? true}
+  {:record "futon3/checks/zaif-cascade.edn",
+   :status :read,
+   :repository {:patterns 1239, :authored-why-edges 92, :sections 98},
+   :tension :the-seat-does-not-stop,
+   :runs
+   {:widen-to-a-budget
+    {:laws {:O1 true, :O2 true, :O3 true},
+     :cascade-nodes 20,
+     :cascade-edges 1,
+     :admitted-count 9,
+     :stop [:halted [:budget 20]]},
+    :widen-to-the-marginal-gain-floor
+    {:laws {:O1 true, :O2 true, :O3 true},
+     :cascade-nodes 17,
+     :cascade-edges 1,
+     :admitted-count 6,
+     :stop [:halted [:marginal-gain-floor 1.0]]}},
+   :o4
+   {:exercised? false,
+    :reason
+    :not-exercised-fewer-than-two-members-carry-a-play-grain-rule},
+   :cascades-differ? true}
+  {:record "futon3/checks/ants-cascade.edn",
+   :status :read,
+   :repository
+   {:patterns 5, :authored-why-edges 0, :sections [":ants"]},
+   :tension :the-colony-does-not-eat,
+   :runs
+   {:widen-to-a-budget
+    {:laws {:O1 true, :O2 true, :O3 true},
+     :cascade-nodes 5,
+     :cascade-edges 0,
+     :admitted-count 1,
+     :stop [:saturation]},
+    :widen-to-the-marginal-gain-floor
+    {:laws {:O1 true, :O2 true, :O3 true},
+     :cascade-nodes 4,
+     :cascade-edges 0,
+     :admitted-count 0,
+     :stop [:halted [:marginal-gain-floor 1.0]]}},
+   :o4
+   {:exercised? true,
+    :holds? true,
+    :precedence-changed? true,
+    :score-changed? false,
+    :acting-order-changed? true},
+   :cascades-differ? true}
+  {:record "futon3/checks/alfworld-cascade.edn",
+   :status :read,
+   :repository
+   {:patterns 10, :authored-why-edges 0, :sections [":alfworld"]},
+   :tension :the-step-budget-is-spent-finding-not-doing,
+   :runs
+   {:widen-to-a-budget
+    {:laws {:O1 true, :O2 true, :O3 true},
+     :cascade-nodes 6,
+     :cascade-edges 0,
+     :admitted-count 3,
+     :stop [:saturation]},
+    :widen-to-the-marginal-gain-floor
+    {:laws {:O1 true, :O2 true, :O3 true},
+     :cascade-nodes 3,
+     :cascade-edges 0,
+     :admitted-count 0,
+     :stop [:halted [:marginal-gain-floor 1.0]]}},
+   :o4
+   {:exercised? false,
+    :reason
+    :not-exercised-no-authority-gate-and-alfworld-is-not-installed},
+   :cascades-differ? true}
+  {:record "futon3/checks/snatch-cascade.edn",
+   :status :read,
+   :repository {:patterns nil, :authored-why-edges nil, :sections nil},
+   :tension nil,
+   :runs nil,
+   :o4 :absent,
+   :cascades-differ? nil}
+  {:record "futon3/checks/open-cascade.edn",
+   :status :read,
+   :repository
+   {:patterns nil,
+    :authored-why-edges nil,
+    :sections
+    [":agency"
+     ":agent"
+     ":ai4ci"
+     ":aif"
+     ":ants"
+     ":baldwin"
+     ":budgeted-action-selection"
+     ":campaign-coherence"
+     ":capability"
+     ":career-coherence"
+     ":cascades"
+     ":code-coherence"
+     ":collaboration-coherence"
+     ":contributing"
+     ":control"
+     ":coordination"
+     ":corps"
+     ":correspondence-coherence"
+     ":cycle-machine"
+     ":data-mining"
+     ":depositing"
+     ":devmap-coherence"
+     ":eight-gates"
+     ":enrichment"
+     ":eoi-engine"
+     ":equity"
+     ":exotic"
+     ":f6"
+     ":features"
+     ":forward-model"
+     ":futon-theory"
+     ":gauntlet"
+     ":hdm"
+     ":iching"
+     ":iiching"
+     ":invariant-coherence"
+     ":library-coherence"
+     ":math-formalization"
+     ":math-formalization-CA"
+     ":math-formalization-CV"
+     ":math-formalization-FA"
+     ":math-formalization-GN"
+     ":math-formalization-GR"
+     ":math-formalization-MG"
+     ":math-informal"
+     ":math-informal-CA"
+     ":math-informal-CO"
+     ":math-informal-CT"
+     ":math-informal-LO"
+     ":math-informal-NA"
+     ":math-informal-RA"
+     ":math-strategy"
+     ":measurement"
+     ":memory"
+     ":meta"
+     ":mission-coherence"
+     ":mmca"
+     ":musn"
+     ":nomad"
+     ":or2"
+     ":or3"
+     ":orchestration"
+     ":p4ng"
+     ":paramitas"
+     ":pattern-coherence"
+     ":pattern-discipline"
+     ":pattern-mining"
+     ":peeragogy"
+     ":peripherals"
+     ":plos-npt-with-small-n"
+     ":portal"
+     ":problems"
+     ":process-coherence"
+     ":proof-search"
+     ":realtime"
+     ":relationship-coherence"
+     ":repository-transition"
+     ":scan-coherence"
+     ":sidecar"
+     ":snatch"
+     ":social"
+     ":software-design"
+     ":stack-coherence"
+     ":storage"
+     ":structure"
+     ":system-coherence"
+     ":t3"
+     ":t4r"
+     ":ukrns"
+     ":vsatelier"
+     ":vsatlas"
+     ":vsatlatarium"
+     ":war-machine"
+     ":war-room"
+     ":workday"
+     ":workflow-coherence"
+     ":writing-coherence"
+     ":xed-roads"]},
+   :tension nil,
+   :runs nil,
+   :o4 {:exercised? false, :reason :not-exercised-nothing-is-played},
+   :cascades-differ? nil}
+  {:record "futon3/checks/open-cascade-short-cue.edn",
+   :status :read,
+   :repository
+   {:patterns nil,
+    :authored-why-edges nil,
+    :sections
+    [":agency"
+     ":agent"
+     ":ai4ci"
+     ":aif"
+     ":ants"
+     ":baldwin"
+     ":budgeted-action-selection"
+     ":campaign-coherence"
+     ":capability"
+     ":career-coherence"
+     ":cascades"
+     ":code-coherence"
+     ":collaboration-coherence"
+     ":contributing"
+     ":control"
+     ":coordination"
+     ":corps"
+     ":correspondence-coherence"
+     ":cycle-machine"
+     ":data-mining"
+     ":depositing"
+     ":devmap-coherence"
+     ":eight-gates"
+     ":enrichment"
+     ":eoi-engine"
+     ":equity"
+     ":exotic"
+     ":f6"
+     ":features"
+     ":forward-model"
+     ":futon-theory"
+     ":gauntlet"
+     ":hdm"
+     ":iching"
+     ":iiching"
+     ":invariant-coherence"
+     ":library-coherence"
+     ":math-formalization"
+     ":math-formalization-CA"
+     ":math-formalization-CV"
+     ":math-formalization-FA"
+     ":math-formalization-GN"
+     ":math-formalization-GR"
+     ":math-formalization-MG"
+     ":math-informal"
+     ":math-informal-CA"
+     ":math-informal-CO"
+     ":math-informal-CT"
+     ":math-informal-LO"
+     ":math-informal-NA"
+     ":math-informal-RA"
+     ":math-strategy"
+     ":measurement"
+     ":memory"
+     ":meta"
+     ":mission-coherence"
+     ":mmca"
+     ":musn"
+     ":nomad"
+     ":or2"
+     ":or3"
+     ":orchestration"
+     ":p4ng"
+     ":paramitas"
+     ":pattern-coherence"
+     ":pattern-discipline"
+     ":pattern-mining"
+     ":peeragogy"
+     ":peripherals"
+     ":plos-npt-with-small-n"
+     ":portal"
+     ":problems"
+     ":process-coherence"
+     ":proof-search"
+     ":realtime"
+     ":relationship-coherence"
+     ":repository-transition"
+     ":scan-coherence"
+     ":sidecar"
+     ":snatch"
+     ":social"
+     ":software-design"
+     ":stack-coherence"
+     ":storage"
+     ":structure"
+     ":system-coherence"
+     ":t3"
+     ":t4r"
+     ":ukrns"
+     ":vsatelier"
+     ":vsatlas"
+     ":vsatlatarium"
+     ":war-machine"
+     ":war-room"
+     ":workday"
+     ":workflow-coherence"
+     ":writing-coherence"
+     ":xed-roads"]},
+   :tension nil,
+   :runs nil,
+   :o4 {:exercised? false, :reason :not-exercised-nothing-is-played},
+   :cascades-differ? nil}
+  {:record "futon3/checks/retrodiction-cascade.edn",
+   :status :read,
+   :repository
+   {:patterns nil,
+    :authored-why-edges nil,
+    :sections
+    [":agency"
+     ":agent"
+     ":ai4ci"
+     ":aif"
+     ":ants"
+     ":baldwin"
+     ":budgeted-action-selection"
+     ":campaign-coherence"
+     ":capability"
+     ":career-coherence"
+     ":cascades"
+     ":code-coherence"
+     ":collaboration-coherence"
+     ":contributing"
+     ":control"
+     ":coordination"
+     ":corps"
+     ":correspondence-coherence"
+     ":cycle-machine"
+     ":data-mining"
+     ":depositing"
+     ":devmap-coherence"
+     ":eight-gates"
+     ":enrichment"
+     ":eoi-engine"
+     ":equity"
+     ":exotic"
+     ":f6"
+     ":features"
+     ":forward-model"
+     ":futon-theory"
+     ":gauntlet"
+     ":hdm"
+     ":iching"
+     ":iiching"
+     ":invariant-coherence"
+     ":library-coherence"
+     ":math-formalization"
+     ":math-formalization-CA"
+     ":math-formalization-CV"
+     ":math-formalization-FA"
+     ":math-formalization-GN"
+     ":math-formalization-GR"
+     ":math-formalization-MG"
+     ":math-informal"
+     ":math-informal-CA"
+     ":math-informal-CO"
+     ":math-informal-CT"
+     ":math-informal-LO"
+     ":math-informal-NA"
+     ":math-informal-RA"
+     ":math-strategy"
+     ":measurement"
+     ":memory"
+     ":meta"
+     ":mission-coherence"
+     ":mmca"
+     ":musn"
+     ":nomad"
+     ":or2"
+     ":or3"
+     ":orchestration"
+     ":p4ng"
+     ":paramitas"
+     ":pattern-coherence"
+     ":pattern-discipline"
+     ":pattern-mining"
+     ":peeragogy"
+     ":peripherals"
+     ":plos-npt-with-small-n"
+     ":portal"
+     ":problems"
+     ":process-coherence"
+     ":proof-search"
+     ":realtime"
+     ":relationship-coherence"
+     ":repository-transition"
+     ":scan-coherence"
+     ":sidecar"
+     ":snatch"
+     ":social"
+     ":software-design"
+     ":stack-coherence"
+     ":storage"
+     ":structure"
+     ":system-coherence"
+     ":t3"
+     ":t4r"
+     ":ukrns"
+     ":vsatelier"
+     ":vsatlas"
+     ":vsatlatarium"
+     ":war-machine"
+     ":war-room"
+     ":workday"
+     ":workflow-coherence"
+     ":writing-coherence"
+     ":xed-roads"]},
+   :tension nil,
+   :runs nil,
+   :o4 {:exercised? false, :reason :not-exercised-nothing-is-played},
+   :cascades-differ? nil}
+  {:record "futon3/checks/retrodiction-cascade-per-clause.edn",
+   :status :read,
+   :repository
+   {:patterns nil,
+    :authored-why-edges nil,
+    :sections
+    [":agency"
+     ":agent"
+     ":ai4ci"
+     ":aif"
+     ":ants"
+     ":baldwin"
+     ":budgeted-action-selection"
+     ":campaign-coherence"
+     ":capability"
+     ":career-coherence"
+     ":cascades"
+     ":code-coherence"
+     ":collaboration-coherence"
+     ":contributing"
+     ":control"
+     ":coordination"
+     ":corps"
+     ":correspondence-coherence"
+     ":cycle-machine"
+     ":data-mining"
+     ":depositing"
+     ":devmap-coherence"
+     ":eight-gates"
+     ":enrichment"
+     ":eoi-engine"
+     ":equity"
+     ":exotic"
+     ":f6"
+     ":features"
+     ":forward-model"
+     ":futon-theory"
+     ":gauntlet"
+     ":hdm"
+     ":iching"
+     ":iiching"
+     ":invariant-coherence"
+     ":library-coherence"
+     ":math-formalization"
+     ":math-formalization-CA"
+     ":math-formalization-CV"
+     ":math-formalization-FA"
+     ":math-formalization-GN"
+     ":math-formalization-GR"
+     ":math-formalization-MG"
+     ":math-informal"
+     ":math-informal-CA"
+     ":math-informal-CO"
+     ":math-informal-CT"
+     ":math-informal-LO"
+     ":math-informal-NA"
+     ":math-informal-RA"
+     ":math-strategy"
+     ":measurement"
+     ":memory"
+     ":meta"
+     ":mission-coherence"
+     ":mmca"
+     ":musn"
+     ":nomad"
+     ":or2"
+     ":or3"
+     ":orchestration"
+     ":p4ng"
+     ":paramitas"
+     ":pattern-coherence"
+     ":pattern-discipline"
+     ":pattern-mining"
+     ":peeragogy"
+     ":peripherals"
+     ":plos-npt-with-small-n"
+     ":portal"
+     ":problems"
+     ":process-coherence"
+     ":proof-search"
+     ":realtime"
+     ":relationship-coherence"
+     ":repository-transition"
+     ":scan-coherence"
+     ":sidecar"
+     ":snatch"
+     ":social"
+     ":software-design"
+     ":stack-coherence"
+     ":storage"
+     ":structure"
+     ":system-coherence"
+     ":t3"
+     ":t4r"
+     ":ukrns"
+     ":vsatelier"
+     ":vsatlas"
+     ":vsatlatarium"
+     ":war-machine"
+     ":war-room"
+     ":workday"
+     ":workflow-coherence"
+     ":writing-coherence"
+     ":xed-roads"]},
+   :tension nil,
+   :runs nil,
+   :o4 {:exercised? false, :reason :not-exercised-nothing-is-played},
+   :cascades-differ? nil}],
+ :f7-record
+ {:record
+  "futon2/holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn",
+  :candidate-count 2,
+  :candidate-keys
+  [":H-coherence"
+   ":T-intensity"
+   ":budget"
+   ":candidate-source"
+   ":cascade-score"
+   ":coverage-reward"
+   ":coverage-saturation-epsilon"
+   ":lambda"
+   ":mission"
+   ":policy-grain"
+   ":policy-key"
+   ":prior-cost"
+   ":psi"
+   ":semilattice"
+   ":shown"
+   ":size"
+   ":truncated"
+   ":wholeness"],
+  :o-law-fields-present [],
+  :o-law-fields-absent
+  [":added-by-organise"
+   ":admitted-by"
+   ":edges"
+   ":nodes"
+   ":precedence"
+   ":selected"]},
+ :rollup
+ {:O1
+  {:lean-stated-of "wmCascadeDiffFixture",
+   :lean-line 894,
+   :real-cascades-witnessing
+   ("futon3/checks/alfworld-cascade.edn"
+    "futon3/checks/ants-cascade.edn"
+    "futon3/checks/construct-cascade.edn"
+    "futon3/checks/zaif-cascade.edn")},
+  :O2
+  {:lean-stated-of "wmCascadeDiffFixture",
+   :lean-line 902,
+   :real-cascades-witnessing
+   ("futon3/checks/alfworld-cascade.edn"
+    "futon3/checks/ants-cascade.edn"
+    "futon3/checks/construct-cascade.edn"
+    "futon3/checks/zaif-cascade.edn")},
+  :O3
+  {:lean-stated-of "wmCascadeDiffFixture",
+   :lean-line 909,
+   :real-cascades-witnessing
+   ("futon3/checks/alfworld-cascade.edn"
+    "futon3/checks/ants-cascade.edn"
+    "futon3/checks/construct-cascade.edn"
+    "futon3/checks/zaif-cascade.edn")},
+  :O4
+  {:lean-stated-of "wmCascadeDiffFixture",
+   :lean-line 916,
+   :real-cascades-witnessing ("futon3/checks/ants-cascade.edn")}},
+ :library-wide-records
+ ["futon3/checks/construct-cascade.edn"
+  "futon3/checks/zaif-cascade.edn"]}
