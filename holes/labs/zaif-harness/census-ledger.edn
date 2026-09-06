@@ -87,7 +87,15 @@
 
   {:node "TRACE" :cell :recorded :verdict :exists :tag "[E-T]"
    :reading "The WM attaches :TRACE to :wm/route immediately before the write; trace/write-trace! constructs and appends the exact record. Credits ONLY recorded: a tick route record, not evidence that any other process stage occurred."
-   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6750 :to 6759 :expect ":TRACE"}
+   ;; POINTER RE-LIFTED 2026-09-06 from ALIGN's dated correction (futon2
+   ;; 4c400a62), after PA1z's first run refused to credit this cell: the
+   ;; war_machine.clj citation had drifted from :6750-6759 to :6789 under the wm
+   ;; loop's continuous edits. claude-1, the document's author, re-read the token
+   ;; at HEAD and corrected ALIGN; this ledger follows ALIGN rather than leading
+   ;; it. The verdict never moved -- only the line citation did. Expect this one
+   ;; to drift again: war_machine.clj is the most-edited file in the scope, which
+   ;; is precisely why the refusal is worth having.
+   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6789 :to 6789 :expect ":TRACE"}
               {:file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!"}]}
 
   {:node "R16" :cell :commissioned :verdict :exists :tag "[E-16-C]"

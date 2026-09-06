@@ -35,7 +35,7 @@ TRACE   dispatched     absent                   node-link-search
 TRACE   parked         absent                   node-link-search
 TRACE   returned       absent                   node-link-search
 TRACE   checked        absent                   node-link-search
-TRACE   recorded       stale-adjudication       pinned-adjudication [E-T]
+TRACE   recorded       exists                   pinned-adjudication [E-T]
 TRACE   surfaced       absent                   node-link-search
 R16     commissioned   exists                   pinned-adjudication [E-16-C]
 R16     dispatched     exists                   pinned-adjudication [E-16-D]
@@ -45,6 +45,4 @@ R16     checked        exists                   pinned-adjudication [E-16-K]
 R16     recorded       exists                   pinned-adjudication [E-16-X]
 R16     surfaced       absent                   targeted-absence-search [A16]
 
-tally: {:absent 34, :exists 5, :named-only 2, :stale-adjudication 1} (42 cells)
-
-STALE ADJUDICATIONS -- these cells are NOT credited:
+tally: {:absent 34, :exists 6, :named-only 2} (42 cells)

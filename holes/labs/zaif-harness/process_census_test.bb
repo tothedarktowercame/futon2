@@ -43,9 +43,18 @@
   (check "42 cells derived" 42 (count (:results data)))
   ;; ALIGN's matrix, reproduced: 34 absent, 5 exists, 2 named-only, and the one
   ;; cell whose pointer has drifted since 2026-09-05.
-  (check "tally matches ALIGN" {:absent 34 :exists 5 :named-only 2 :stale-adjudication 1} tally)
+  ;; 2026-09-06, SECOND STATE OF THIS CHECK. It first pinned
+  ;; {:absent 34 :exists 5 :named-only 2 :stale-adjudication 1} with exit 3 --
+  ;; the drifted [E-T] pointer. claude-1 (ALIGN's author) then corrected the
+  ;; citation (futon2 4c400a62) and the ledger re-lifted it, so the census is
+  ;; now whole. The expected values move because THE WORLD MOVED, and the git
+  ;; history of this file is the record of that; what must NOT happen is this
+  ;; check being loosened so that both states pass. Controls 5 and 6 below are
+  ;; what keep the refusal proven now that no live cell is stale.
+  (check "tally matches ALIGN" {:absent 34 :exists 6 :named-only 2} tally)
   (check "no disagreement with the census of record" [] (:disagreements data))
-  (check "exits 3 (stale adjudication refused, not papered over)" 3 exit))
+  (check "no stale adjudications" [] (:stale data))
+  (check "exits 0 (whole census, nothing refused)" 0 exit))
 
 ;; ---------------------------------------------------------------------------
 (println "\n2. live pin -- an :exists cell (R16 dispatched, [E-16-D])")
@@ -73,20 +82,21 @@
          (:command c)))
 
 ;; ---------------------------------------------------------------------------
-(println "\n4. live pin -- the drifted cell reports its own correction (TRACE recorded, [E-T])")
+(println "\n4. live pin -- the repaired cell (TRACE recorded, [E-T])")
 (let [{:keys [data]} (run-census)
-      c (cell data "TRACE" :recorded)
-      bad (first (:stale c))]
-  (check "not credited" :stale-adjudication (:verdict c))
-  (check "ALIGN's declared verdict retained for the report" :exists (:declared c))
-  (check "why" :token-not-in-range (:why bad))
-  (check "the stale pointer" ["futon2/scripts/futon2/report/war_machine.clj" 6750 6759 ":TRACE"]
-         [(:file bad) (:from bad) (:to bad) (:expect bad)])
-  (check "token located, so drift is distinguished from deletion" [6789] (:token-found-at bad))
-  ;; The cell's OTHER pointer is fine; a partial stale must still refuse.
-  (check "second pointer still lands" true (:ok? (second (:pointers c)))))
+      c (cell data "TRACE" :recorded)]
+  ;; This cell is the harness's first real catch: its war_machine.clj citation
+  ;; had drifted 6750-6759 -> 6789 under the wm loop's edits, the harness refused
+  ;; to credit it, ALIGN's author corrected the document, and the ledger followed.
+  ;; Pinning the corrected pointer here means a RE-drift is caught again rather
+  ;; than being absorbed as normal.
+  (check "credited again after the ALIGN correction" :exists (:verdict c))
+  (check "basis" :pinned-adjudication (:basis c))
+  (check "the re-lifted pointer, and the untouched second half"
+         [{:ok? true :file "futon2/scripts/futon2/report/war_machine.clj" :from 6789 :to 6789 :expect ":TRACE"}
+          {:ok? true :file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!"}]
+         (:pointers c)))
 
-;; ---------------------------------------------------------------------------
 (println "\n5. PLANTED CONTROL -- a corrupted pointer must refuse")
 (let [led (edn/read-string (slurp (io/file here "census-ledger.edn")))
       planted (update led :adjudicated

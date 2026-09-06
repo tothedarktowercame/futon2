@@ -41,28 +41,32 @@ the difference will be *reported* instead of quietly absorbed.
 
 ## The result
 
-41 of ALIGN's 42 cells reproduce exactly — 34 `:absent`, 5 `:exists`,
-2 `:named-only`. `:disagreements` is empty: the harness found no cell where
-it reads the evidence differently from the census of record.
+**42 of 42 cells reproduce ALIGN exactly** — 34 `:absent`, 6 `:exists`,
+2 `:named-only`. `:disagreements` is empty and the run exits **0**.
 
-One cell is refused, and the run exits **3** because of it.
+It did not start that way, and the history is the point.
 
-### TRACE / recorded — `[E-T]` — pointer drift, substance intact
+### The first run caught a real citation rotting — `[E-T]`
 
-ALIGN cites `war_machine.clj:6750-6759` for "the WM attaches `:TRACE` to
-`:wm/route` immediately before the write". That range no longer contains
-`:TRACE`. The token is now at **line 6789** — so this is drift, not
-deletion, and the harness says so rather than merely complaining. The
-cell's other pointer (`trace.clj:723-745`, `write-trace!`) still lands.
+On the harness's first run, TRACE/`recorded` was **refused** (exit 3). ALIGN
+cited `war_machine.clj:6750-6759` for the `:TRACE` attachment; that range no
+longer contained the token, which the harness located at **line 6789** and
+reported as drift rather than as a bare complaint. The cell's other pointer
+(`trace.clj:723-745`) still landed, and the *verdict* was never in doubt — only
+the line citation had moved, under the wm loop's continuous edits to the
+most-edited file in the declared scope.
 
-**The substance of `[E-T]` is not in question. Its line pointer is.**
-`war_machine.clj` is under continuous edit by the wm loop, which is
-exactly where a hand-written line citation would be expected to rot first.
+Per this row's rule the finding was **routed to claude-1**, who authors ALIGN.
+They re-read the token at HEAD and appended a dated correction to the `[E-T]`
+cell, keeping the original range as history (futon2 `4c400a62`); this ledger
+then re-lifted the corrected pointer from ALIGN. The document led, the ledger
+followed — at no point did the harness silently re-point a stale citation,
+which is how a census would launder a stale reading into a fresh-looking one.
 
-Per `:PA1z`'s own rule this is **routed to claude-1**, whose lab owns
-ALIGN, and is *not* reconciled here in either direction. The harness will
-keep refusing to credit the cell until the pointer is corrected in ALIGN
-and re-transcribed into the ledger, or the cell is re-adjudicated.
+**The instrument paid for itself on its first run**, and the acceptance test now
+pins the *corrected* pointer so a re-drift is caught again rather than absorbed
+as normal. Expect a re-drift: nothing about the repair makes `war_machine.clj`
+stop moving.
 
 ## What this row deliberately did not do
 
