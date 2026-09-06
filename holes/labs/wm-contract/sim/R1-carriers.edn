@@ -1,0 +1,35 @@
+;; Independent transcription for V7 slice 4, R1.  The harness constructs its
+;; references from this data; futon2.aif.belief is used only as the node under test.
+{:id :R1-carriers-v1
+ :node :R1
+ :row :V7
+ :slice 4
+ :status-order [:spawned :refined :strengthened :addressed :falsified :foreclosed :reopened]
+ :uniform-mass 0.14285714285714285
+ :declaration-sites
+ {:status-set "src/futon2/aif/belief.clj:37-42"
+  :uniform-prior "src/futon2/aif/belief.clj:44-49"
+  :normalise "src/futon2/aif/belief.clj:51-60"
+  :initial "src/futon2/aif/belief.clj:62-66"
+  :argmax "src/futon2/aif/belief.clj:447-452"
+  :entropy "src/futon2/aif/belief.clj:454-462"
+  :bootstrap "src/futon2/aif/belief.clj:489-508"
+  :carry "src/futon2/aif/belief.clj:510-522"
+  :carry-default "src/futon2/aif/belief.clj:995-1001"
+  :production-carry "scripts/futon2/report/war_machine.clj:6021-6026"
+  :morning-fold "scripts/futon2/report/war_machine.clj:6033-6038"
+  :update-start "scripts/futon2/report/war_machine.clj:6098"
+  :record-prior "scripts/futon2/report/war_machine.clj:6702"
+  :trace-fields "src/futon2/aif/trace.clj:541-542"}
+ :fixture-entities ["alpha" "beta"]
+ :peaked {:spawned 0.5 :refined 0.25 :strengthened 0.125 :addressed 0.0625
+          :falsified 0.03125 :foreclosed 0.015625 :reopened 0.015625}
+ :collision-a {:spawned 0.5 :refined 0.25 :strengthened 0.125 :addressed 0.0625
+               :falsified 0.03125 :foreclosed 0.015625 :reopened 0.015625}
+ :collision-b {:spawned 0.5 :refined 0.125 :strengthened 0.25 :addressed 0.0625
+               :falsified 0.03125 :foreclosed 0.015625 :reopened 0.015625}
+ :carry-fixtures
+ [{:id :cold-nil :fresh-entities ["new-a" "new-b"] :carried nil}
+  {:id :cold-empty :fresh-entities ["new-a"] :carried {}}
+  {:id :survivor-new-vanished :fresh-entities ["survivor" "new"]
+   :carried-entries {"survivor" :peaked "vanished" :peaked}}]}
