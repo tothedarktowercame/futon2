@@ -39,6 +39,7 @@
   :declared-source-not-read "An input the node's declared scope names is present in the node's own argument and is never read by it -- so the gap is at the node's binding form, not upstream of it."
   :retired-quantity-still-required-elsewhere "A quantity the equations registry retired by ruling is still required, in its retired form, by a document the registry does not gate. The node satisfies the registry and fails that document, and nothing in either records the difference. Added by slice 3; the vocabulary is extended rather than a row rewritten."
   :graded-satisfied-on-an-unmet-criterion "A contract document records the node's operational criterion as SATISFIED, and neither clause of that criterion's own check holds: one is unmet by the carrier the node ships, and the other was graded at a date preceding the code that could satisfy it. The node meets its equations-registry row; it does not meet the document that grades it, and the document carries no record of the difference. Added by slice 4; the vocabulary is extended rather than a row rewritten."}
+  :graded-on-a-superseded-implementation "A contract document grades the node satisfied on a description of an implementation the node no longer has. The grade is not merely optimistic: it is stale in BOTH directions at once -- it credits the node with less than it ships on some sub-properties and with more than it ships on another -- and the document records neither difference. Distinct from :graded-satisfied-on-an-unmet-criterion (slice 4), where the criterion's own clauses simply did not hold; here the clauses describe a version of the node that has been superseded in the tree. Added by slice 5; the vocabulary is extended rather than a row rewritten."
 
  :slices
  [{:slice 1 :node :R5 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
@@ -102,6 +103,27 @@
                  :no-src-change "All three files are lab artefacts. No futon2 src/ or scripts/ file was touched, so no futon2 test run is claimed."}
    :no-p4ng-change "No p4ng commit this slice. Every pointer written here resolves under the roots slices 1 and 2 put in the gate."
    :vocabulary-extended "This slice adds one key to :hole-types (:graded-satisfied-on-an-unmet-criterion). No existing key was edited and no earlier row was touched."
+   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the replay. The files written by this slice are the harness, its carriers, its receipt, this matrix and the worklist row."}
+  {:slice 5 :node :R3 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop), harness authored by codex-9 under bell invoke-1788712398413-13331-53a0d613 and reviewed here"
+   :did "All four legs of :V7's per-node procedure. Leg (a) needed a new harness for a third reason: R3's registry row IS a formula (aif-equations.edn:115, mu <- mu + alpha Pi eps), and the registry's own :lean-note at aif-equations.edn:117 has said since 2026-09-05 that it is NOT the map the machine runs. So there is a formula to transcribe and transcribing it would check nothing. What the harness checks instead is the composite the note names -- the signed precision-weighted driver, the tempered categorical filter, the anneal-and-clamp, and the per-entity attribution -- against a reference built only from sim/R3-carriers.edn. The slice's weight is the production replay: every micro-step entry the corpus has ever recorded, re-derived from its own fields."
+   :author-not-reviewer "The harness, the carriers and the first receipt were authored by codex-9 (futon2 c5397660) from a written packet; this seat reviewed them and fixed the review findings directly rather than re-dispatching. THE FINDING, and it is the same class the slice-4 review caught one node over: the replay established that the arithmetic is right and said nothing about what it is arithmetic ON. It reported ':missing-aggregated-signed-error 12' as a bare count and no measure of the driver's magnitude at all -- so a reader could not tell an update that moved by a graded amount from one that moved by its sign, because both are deviation 0.0. This seat had run its own probe before the bellback arrived, agreeing digit-for-digit on every reported total (57 files, 889 records, 2634 entries, 2622 with a driver, 12 without, steps [0 1 2], both identities at deviation 0.0), and that probe established what the packet had not asked for: 2232 of the 2622 saturate the clamp. Both measurements were added to the harness by this seat and the receipt re-run; the two independently-written probes agree on the saturation counts, the magnitude extremes and the file boundary. codex-9 also reported one contradiction against the packet, which is what the handoff is for: the mean-attribution claim is stated at war_machine.clj:6168-6169, not at the :6167-6172 the packet gave. Verified here and the packet's range is the one that was wrong. A SECOND REVIEW FINDING, on the plant table: one plant was named :filter-skips-predict-step and did not skip the predict step. It was renamed and the escape a real skip would achieve was measured into the receipt; see the :the-harness-cannot-detect-a-missing-prediction-step-and-says-so limit."
+   :ran ["clojure -M holes/labs/wm-contract/v7_r3_node_sim.clj (exit 0) -- 6 checks all pass, 8 planted wrong nodes all caught, and a replay of every micro-step entry in the corpus"
+         "the same command a second time, and diff -q against the first receipt -- byte-identical, at the delivered state (sha256 8d49767f...) and again after this seat's three added measurements (sha256 1bc75a3d...)"
+         "clojure -M holes/labs/wm-contract/f8_belief_update_readback.clj (exit 0) -- leg (b); the committed runs/F8-belief-update/clojure-readback.txt was copied aside first, and diff -q after the run reported no difference, sha256 c07332ddf32d929af42d41d3bf7e6a3dfda9f2c4712de4d80ab0f624f1f39784"
+         "clj-kondo --lint holes/labs/wm-contract/v7_r3_node_sim.clj -- 0 errors, 0 warnings, at the reviewed state"
+         "emacs -Q --batch -l futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/v7_r3_node_sim.clj -- OK"
+         "grep -cE '\\bR3\\b' holes/labs/wm-contract/ALIGN-rnode-process-census.md -- 0, which is leg (c)"
+         "grep -rn 'compute-free-energy' over src/ scripts/ test/ checks/ -- 0 hits, which is what makes the R3c pointer below a finding rather than an opinion"
+         "bb p4ng/empirics-futon/pointer_check.bb -- 0 unresolved"
+         "bash p4ng/empirics-futon/negative_controls.sh"]
+   :new-harness {:runner "holes/labs/wm-contract/v7_r3_node_sim.clj"
+                 :carriers "holes/labs/wm-contract/sim/R3-carriers.edn"
+                 :receipt "holes/labs/wm-contract/runs/V7-R3-node-sim/00-r3.edn"
+                 :receipt-sha256 "1bc75a3da4a029cff205c4a0e6202de21f6a3f7da308e7606685e2ec7bcb9230"
+                 :superseded-receipt-sha256 "8d49767ff4064a4272831d7d8534d02469c9118d880d3f04ba38febea4a1379b -- the delivered state, before this seat added the saturation and absent-key measurements. Recorded so the two runs can be told apart rather than one silently replacing the other."
+                 :no-src-change "All three files are lab artefacts. No futon2 src/ or scripts/ file was touched, so no futon2 test run is claimed."}
+   :no-p4ng-change "No p4ng commit this slice. Every pointer written here resolves under the roots slices 1 and 2 put in the gate."
+   :vocabulary-extended "This slice adds one key to :hole-types (:graded-on-a-superseded-implementation). No existing key was edited and no earlier row was touched."
    :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace is OPENED FOR READING by the replay. The files written by this slice are the harness, its carriers, its receipt, this matrix and the worklist row."}]
 
 
@@ -796,4 +818,144 @@
     "No live tick was run and no run lock was taken. data/wm-trace was opened for reading; nothing under data/ was written."
     "No Lean was elaborated. Leg (b) re-runs the Clojure side of one pair; the row's :lean-status :closed is read from the registry."
     "Nothing was repaired. aif-equations.edn, docs/futon-aif-completeness.md, FUNDAMENTALS.edn, PROBLEMS-r1-r3-r3a-batch3.md, belief.clj and war_machine.clj are all READ and left standing."
-    "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}]}
+    "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}
+  {:node :R3
+   :slice 5
+   :label "Belief update"
+   :stage "BELIEVE"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:18"
+   :verdict :hole
+
+   :registry-rows-and-what-they-say
+   "STATED FIRST, BECAUSE THE HOLE BELOW IS NOT AGAINST THE EQUATIONS REGISTRY. R3 has TWO entries in aif-equations.edn and no third: the equation :belief-update (:defines :mu-next, :class :theory-defined, :ref :buckley2017, aif-equations.edn:113-117) and the exogenous symbol :alpha, 'belief-update step size' (aif-equations.edn:67). The search that establishes there is no other is grep -n ':node :R3[^0-9a]' over that file, which returns lines 67 and 113 alone; the character class excludes R3a, which is a separate node and the next slice. THE EQUATION ROW'S :formal LINE IS FALSE AS WRITTEN AND THE REGISTRY SAYS SO AT LENGTH: 'mu <- mu + alpha Pi eps' (aif-equations.edn:115) is not the map the machine runs -- there is no real-valued mu that a step alpha Pi eps is added to -- and the row's own :lean-note has said this, in those terms and with a Lean counterexample named (registryAdditiveFormIsNotGeneral), since :F8 leg 1 slice 3 on 2026-09-05 (aif-equations.edn:117). This slice does not re-litigate that. It takes the note at its word about WHAT the machine runs -- a signed precision-weighted driver, a tempered categorical filter, an anneal-and-clamp, a per-entity attribution -- and checks that composite against an independent reference. The row is :lean-status :closed and its readback re-ran green and byte-identical at this HEAD (leg (b))."
+
+   :what-this-slice-adds-to-the-registry-note
+   "The :lean-note proves three properties of the path as POSSIBILITIES: the magnitude saturates, the multichannel flag changes the driver's units, and the anneal floor is unreachable. Lean can say a driver of 1 and a driver of 50 produce the same event weight; it cannot say which of the two production has. THE CORPUS SAYS. On the anneal floor the note and the corpus agree exactly -- production has only ever seen steps 0, 1 and 2, over all 2634 recorded micro-step entries. On the other two the corpus says the proved possibility is the NORMAL CASE and not an edge case, which is the substance of the first stated limit below."
+
+   :hole {:type :graded-on-a-superseded-implementation
+          :statement "docs/futon-aif-completeness.md:80-106 is R3's operational contract and it grades the node satisfied -- 'Satisfied for 4 of 14 channels with the remaining 10 logged as :prototyping-forward sorries (v0.11, 2026-05-18)' at :86, with a per-sub-property table at :88-102 carrying four ticks. The node it describes is not the node in the tree, and it is stale in BOTH directions at once. UNDER-REPORTED, TWICE. (1) The channel count: :86, :90 and :106 all say 4 of 14, and belief/channels-with-likelihood has held EIGHT since futon2 3667dcde (2026-05-30) added :ticks-firing-ratio (src/futon2/aif/belief.clj:933-934; the tick's own loop iterates that set at scripts/futon2/report/war_machine.clj:6114). (2) The aggregation: :102 says the belief-update event 'currently draws its sign and magnitude from :annotation-health alone' and that multi-channel sign-aggregation 'is deferred: the channels differ on whether high observed = healthy ... so a per-channel :health-sign is needed before signs can combine coherently'. That map exists -- belief/channel-health-signs, src/futon2/aif/belief.clj:1003-1021 -- and the aggregation it was needed for has been DEFAULT ON since futon2 b6242421 (2026-07-08). OVER-REPORTED, ONCE, and this is slice 3's hole type at a second location: the operational check at :84 requires 'VFE is reported per tick', and the per-tick variational free energy was removed on 2026-09-01 under Joe's J2 ruling (futon2 5a664114; src/futon2/aif/free_energy.clj:7-12 records the removal in the namespace docstring). The R3c line at :100 credits the sub-property to compute-free-energy, which has ZERO hits in src/, scripts/, test/ and checks/; the decomposition survives under a different name, futon2.aif.free-energy/compute-controller-diagnostics (src/futon2/aif/free_energy.clj:84), renamed by futon2 9d8f2dee on 2026-07-14, still writing the trace's :free-energy key (src/futon2/aif/trace.clj:548). THE STALENESS WAS KNOWN WHEN IT WAS MADE: the commit that wired the sign aggregation says so in its own subject line -- futon2 3347575c, 2026-07-08, 'R1+R3 disaggregation: 8/14 channels have likelihood (doc stale), sign-aggregation designed'. Two months later the document is unchanged and still carries the ticks."
+          :basis ["docs/futon-aif-completeness.md:86 -- the grade, 'Satisfied for 4 of 14 channels ... (v0.11, 2026-05-18)'"
+                  "docs/futon-aif-completeness.md:84 -- the operational check, including 'VFE is reported per tick'"
+                  "docs/futon-aif-completeness.md:90 and :106 -- the 4-of-14 count restated"
+                  "docs/futon-aif-completeness.md:100 -- R3c credited to compute-free-energy"
+                  "docs/futon-aif-completeness.md:102 -- R3d, ':annotation-health alone' and sign-aggregation 'deferred'"
+                  "src/futon2/aif/belief.clj:933-934 -- channels-with-likelihood, eight members; its docstring at :919-932 names the set literal as the count authority"
+                  "src/futon2/aif/belief.clj:1003-1021 -- channel-health-signs, the per-channel :health-sign the document says is needed"
+                  "src/futon2/aif/belief.clj:986-993 -- *r3d-multichannel?*, docstring 'default ON as of 2026-07-08, Joe-directed'"
+                  "scripts/futon2/report/war_machine.clj:6114 -- the tick's loop, iterating belief/channels-with-likelihood"
+                  "src/futon2/aif/free_energy.clj:7-12 -- the namespace docstring recording the removal of compute-variational-free-energy under Joe's J2 ruling"
+                  "src/futon2/aif/free_energy.clj:84 -- compute-controller-diagnostics, the surviving decomposition"
+                  "src/futon2/aif/trace.clj:548 -- the :free-energy trace key it still writes"
+                  "futon2 3667dcde (2026-05-30) 'Add ticks firing belief likelihood' -- the eighth channel"
+                  "futon2 b6242421 (2026-07-08) 'Arm all built-dark flags -> default ON (Joe-directed via claude-5)' -- the flag arming, found by git log -L 986,993:src/futon2/aif/belief.clj"
+                  "futon2 3347575c (2026-07-08) -- the commit subject that says '(doc stale)'"
+                  "futon2 5a664114 (2026-09-01) 'I5 slice (c): retire the R8 scalar F, retag R8 at eps'"
+                  "futon2 9d8f2dee (2026-07-14) -- the compute-free-energy -> compute-controller-diagnostics rename"]
+          :measured-not-asserted "The flag flip is not taken from the commit date. It is read off the corpus and the corpus puts it in the same place: the last file whose driver saturates is wm-trace-2026-07-06.edn and the first whose driver does not is wm-trace-2026-07-09.edn, with the arming commit dated 2026-07-08 between them. No file straddles the break -- the last saturated file's SMALLEST magnitude is 40.17 and the first unsaturated file's LARGEST is 0.065, a factor of about 600 across one gap in the file sequence."
+          :cross-reference "The VFE clause is the type slice 3 minted for R8 (:retired-quantity-still-required-elsewhere) appearing at a second document location. It is recorded here rather than re-typed: the same 2026-09-01 retirement is required in its retired form by p4ng/sec-catalog.tex:202 (slice 3's row) and by docs/futon-aif-completeness.md:84 and :228 (this row and slice 3's)."
+          :not-a-ruling "Whether the document should be brought to the node, or the grade withdrawn until it is, is Joe's. This row records that a contract document grades R3 satisfied on a description the tree superseded in three separate commits, and that nothing in the document records the difference. Nothing is written to :choices or to :decisions."}
+
+   :the-node-itself-is-arithmetically-right
+   "SAID PLAINLY, BECAUSE THE HOLE ABOVE COULD BE MISREAD AS ONE: nothing here says the belief update computes the wrong thing. The composite the registry's :lean-note describes is what the machine runs, and it agrees with an independent reference everywhere this slice can compare it -- the multichannel driver at deviation exactly 0.0 on exact dyadic fixtures, the single-channel driver exactly, all four :unknown reasons reproduced with no :driver on any of them, the tempered filter within 5.55e-17 against a tolerance of 1e-15 (and exactly 0.0 in the kappa(0) case where Bayes must leave the prior fixed), and the per-entity attribution's mean equal to the event weight at deviation 0.0. In production the two arithmetic identities hold on EVERY entry the corpus has: anneal-factor = max(0, 1 - step/3) at max deviation 0.0 over 2634, and event-weight = min(1,|driver|) x anneal x 0.1 at max deviation 0.0 over 2622. Eight planted wrong nodes -- an arithmetic-mean driver, a signless driver, a count-divisor driver, a zero-instead-of-unknown driver, an invented :refused third status, kappa = w, a filter that substitutes a non-identity prediction step, and an anneal of 1 - step/2 -- are ALL caught."
+
+   :stated-limits
+   [{:limit :the-clamp-discards-the-magnitude-on-85-percent-of-the-recorded-history
+     :statement "THE SHARPEST THING THE CORPUS SAYS ABOUT THIS NODE. base-weight is (min 1.0 aggregated-magnitude) (scripts/futon2/report/war_machine.clj:6160), so on any micro-step whose |driver| reaches 1 the size of the surprise is discarded and only its sign reaches belief. MEASURED over every micro-step entry ever recorded: 2232 of 2622 saturate -- 85.1%. The split is total and lands on the multichannel flag. Of the 2232 entries in the 43 files from wm-trace-2026-05-19.edn to wm-trace-2026-07-06.edn, ONE HUNDRED PERCENT saturate, with |driver| between 40.17 and 74.02; of the 390 entries in the 13 files from wm-trace-2026-07-09.edn to wm-trace-2026-09-04.edn, NONE do, with |driver| between 4.08e-4 and 0.226. THE REASON IS THE REGISTRY'S OWN LEAN PROPERTY, and this is the corpus measuring what Lean proved possible: the single-channel driver IS a channel's weighted error, error x precision with precision = 1/max(v,0.01) and so up to 100x, while the multichannel driver divides by the sum of the precisions, which cancels that scale (precisionScalesSingleChannel and precisionDividesOutInMultichannel, both named at aif-equations.edn:117). Arming the flag on 2026-07-08 therefore changed the driver's units by about three orders of magnitude, and with them changed the clamp from always-binding to never-binding. WHAT IT BEARS ON: p4ng/sec-catalog.tex:198 states R3's invariant as moving belief toward the observation 'only as far as the learning rate and the trust placed in that channel allow'. For 43 of the corpus's 57 files, neither the trust nor the size of the error reached belief -- only the sign did, and the event weight was exactly the anneal factor times 0.1 on every one of those steps."
+     :where "the :magnitude-saturation key of holes/labs/wm-contract/runs/V7-R3-node-sim/00-r3.edn, including its per-file table"
+     :not-repaired "Changing the clamp, or recording that the flag flip rescaled the driver, is a change to the machine or a ruling. Neither is a slice of :V7. Recorded."}
+
+    {:limit :the-typed-unknown-driver-has-never-fired-and-its-absence-encoding-is-era-dependent
+     :statement "AC2's :unknown driver -- the ruling's shape, where a tick with no contributing channel applies NO belief event rather than a fabricated zero -- has ZERO production inhabitants. The tick writes :aggregated-driver-unknown with the reason whenever the aggregator reports :unknown (scripts/futon2/report/war_machine.clj:6209-6211); that key occurs on 0 of 2634 micro-step entries. SEPARATELY, the code's stated rule for reading the absence does not hold over the whole corpus. The comment at scripts/futon2/report/war_machine.clj:6198-6200 says 'No key means the aggregator reported :unknown'. Twelve entries carry no :aggregated-signed-error, and none of them is an :unknown record: all twelve are in wm-trace-2026-05-19.edn (record indices 4-7, steps 0-2), none carries :aggregated-driver-unknown, and each carries :events-applied 47 with an :event-weight of exactly anneal x 0.1 -- so events WERE applied and the driver saturated, which is the opposite of what the rule would have a reader conclude. They predate the key. A reader applying HEAD's rule to the archive misreads twelve entries as refusals."
+     :where "the :absent-driver-key key of the receipt, which lists all twelve"}
+
+    {:limit :alpha-has-no-named-inhabitant
+     :statement "aif-equations.edn:67 declares :alpha as an exogenous symbol, 'belief-update step size', :class :stack-defined -- the War Machine supplies the content. What supplies it is the bare literal 0.1 inside an arithmetic expression (scripts/futon2/report/war_machine.clj:6161), with no var, no name and no docstring; grep over src/futon2/aif/belief.clj and scripts/futon2/report/war_machine.clj for learning-rate, r3-alpha and belief-alpha returns nothing. p4ng/sec-catalog.tex:198 asks for belief updates that are 'tunable (one learning rate; a separate trust setting per evidence channel)'. The per-channel trust is a named registry (R7); the one learning rate is a magic number. Stated, not repaired: naming it is a change to the machine."}
+
+    {:limit :the-fixture-leg-is-thin-and-the-production-leg-is-what-carries-the-slice
+     :statement "The fixture side is deliberately small: 2 driver comparisons, 3 filter comparisons and 3 attribution entities, against slice 2's 224 comparisons and slice 3's 36. It is exact where it can be -- the driver fixtures are dyadic and compare at 0.0 -- but it is a handful of cases, and the eight plants are what establish that those cases discriminate. The weight of this slice is the replay: 2634 entries re-derived from their own recorded fields, which is a check of the shipped tick and not of a fixture."}
+
+    {:limit :the-reference-transcribes-the-models-constants-not-their-rules
+     :statement "sim/R3-carriers.edn declares the observation model as a diagonal gain of 2.0 with nine named off-diagonal overrides, and the transition model as :identity -- the values, transcribed from src/futon2/aif/belief.clj:95-125 and :214-226, rather than the rules that generate them. The reference re-derives the CONSTRUCTION from those numbers (it materialises the dense matrix, column-normalises it and runs the tempered update itself, and futon2.aif.belief is never asked for a reference value), but a reader should know the constants were read off. This is the same limit slice 4 named for the uniform prior's value."}
+
+    {:limit :the-harness-cannot-detect-a-missing-prediction-step-and-says-so
+     :statement "FOUND BY THIS SEAT'S REVIEW OF THE DELIVERED HARNESS. One plant arrived named :filter-skips-predict-step, and it does not skip the predict step -- it substitutes a rotated prior (holes/labs/wm-contract/v7_r3_node_sim.clj:270-277, whose own comment said so). A plant that GENUINELY skipped it would escape: measured at 5.551115123125783E-17 against the harness's 1e-15 tolerance, because belief/transition-model-v1 is the 7x7 identity and B x q is then a no-op up to the noise of the multiply. The plant was renamed to :filter-substitutes-a-non-identity-prediction and the escape was added to the receipt as :discrimination-limit, with :would-be-caught false, so the plant table cannot be read as claiming a discrimination the harness does not have. THIS IS THE SAME FACT AS LEG (d)'s SECOND CANDIDATE, seen from the harness side: with no controlled B there is no dynamics to check, so an absent prediction step and a present one are the same function here."
+     :where "the :discrimination-limit key of the receipt"}
+
+    {:limit :the-replay-cannot-re-derive-the-driver-only-what-the-tick-did-with-it
+     :statement "The corpus records :aggregated-signed-error per micro-step but not the per-channel weighted errors and precisions that produced it, so the replay re-derives the anneal, the clamp and the event weight from each entry's own fields and CANNOT re-derive the aggregation itself from production inputs. The aggregation is checked on fixtures and by the plants only. This is weaker than slice 3's eps leg, where every input was on the record and 6537 values could be re-derived, and it is named for that contrast."}]
+
+   :legs
+   {:a
+    {:leg "enumerate the node's aif-equations rows and run them in the F3 node-sim harness against declared carriers with an independent reference"
+     :status :done-with-a-new-harness
+     :why-not-an-existing-harness "R3's row is a formula, and transcribing it would check nothing: the registry's own :lean-note says the formula is not the map the machine runs. :F3's harness is written for R5's three equations, slice 2's for R2's channel table, slice 3's for R8's producers, slice 4's for R1's carry. What R3 needs is a check of the COMPOSITE the note names, which is what this harness is."
+     :equations [{:id :belief-update :formal "mu <- mu + alpha Pi eps" :at "aif-equations.edn:113-117" :eq "buckley2017 eq. 59 (reduction: one gradient step with fixed step size alpha)" :state :shipped-as-a-different-map :note "The :formal line is false as written and aif-equations.edn:117 says so; see :registry-rows-and-what-they-say."}
+                 {:symbol :alpha :formal "belief-update step size" :at "aif-equations.edn:67" :class :stack-defined :state :inhabited-by-a-literal :note "See the :alpha-has-no-named-inhabitant limit."}]
+     :runner "holes/labs/wm-contract/v7_r3_node_sim.clj"
+     :carriers "holes/labs/wm-contract/sim/R3-carriers.edn"
+     :receipt "holes/labs/wm-contract/runs/V7-R3-node-sim/00-r3.edn"
+     :receipt-sha256 "1bc75a3da4a029cff205c4a0e6202de21f6a3f7da308e7606685e2ec7bcb9230"
+     :byte-identical-on-re-run {:method "cp of the receipt to a temp path, re-run, diff -q; then sha256sum. Done at both states -- the delivered one and the reviewed one." :result :identical}
+     :the-subject-is-the-shipped-node
+     "The composite under test is the one the tick runs: scripts/futon2/report/war_machine.clj:6097-6242 is the micro-step loop, :6114 computes the per-channel prediction errors over belief/channels-with-likelihood, :6149 calls belief/r3d-aggregate-driver, :6159-6161 anneal and clamp, :6174-6192 attribute per entity and apply, and :6246 emits the :R3 route tag naming futon2.report.war-machine/apply-arena-belief-events. The replay's subject is that loop's OUTPUT as the tick recorded it (:micro-step-trace, written through src/futon2/aif/trace.clj)."
+     :checks {:total 6 :pass 6 :fail 0
+              :driver-fixture-comparisons 2 :driver-fixture-max-deviation 0.0 :driver-fixtures-exact-dyadic true
+              :unknown-reason-fixtures 4
+              :filter-comparisons 3 :filter-max-deviation 5.551115123125783E-17 :filter-tolerance 1.0E-15
+              :filter-kappa-zero-max-deviation 0.0
+              :attribution-entities 3 :attribution-mean-deviation 0.0
+              :replay-entries 2634 :replay-anneal-comparisons 2634 :replay-anneal-max-deviation 0.0
+              :replay-event-weight-comparisons 2622 :replay-event-weight-max-deviation 0.0
+              :replay-distinct-steps [0 1 2] :replay-mismatches 0}
+     :negative-controls {:planted 8 :caught 8 :escaped 0}
+     :corpus {:root "data/wm-trace" :read-only true :file-count 57 :record-count 889
+              :records-with-a-micro-step-trace 878 :micro-step-entries 2634
+              :first-file "wm-trace-2026-05-18.edn" :last-file "wm-trace-2026-09-04.edn"}}
+
+    :b
+    {:leg "where an F8 Lean module exists, the readback certificate re-run"
+     :status :done
+     :module "machineBeliefUpdate, declared at aif-equations.edn:116 with :lean-status :closed"
+     :runner "holes/labs/wm-contract/f8_belief_update_readback.clj"
+     :artifact "holes/labs/wm-contract/runs/F8-belief-update/clojure-readback.txt"
+     :artifact-sha256 "c07332ddf32d929af42d41d3bf7e6a3dfda9f2c4712de4d80ab0f624f1f39784"
+     :result "exit 0. The script rewrites its own artefact, so byte-identity was established by copying the committed file aside before the run and diffing after: no difference. Its verdict line reads 'production matches every Lean reference (exact cases exact; categorical cases within 1e-12)', and it prints the sign-asymmetry the registry note states -- positive health delta +0.0811693744336317, negative -0.06325131484931767, sum +0.017918059584314028."
+     :not-claimed "No Lean was elaborated. This re-runs the Clojure side of the pair; the row's :lean-status :closed is read from the registry."}
+
+    :c
+    {:leg "where the node is plumbing/assurance, re-verify the ALIGN census's exists-cells at file:line and restate the named-only cells"
+     :status :not-applicable
+     :why "R3 is loop-band (p4ng/empirics-futon/control-stages.edn:18, :band :loop), and ALIGN-rnode-process-census.md names no R3 cell: grep -cE '\\bR3\\b' over that file returns 0. The word-boundary form is used on purpose, as in slice 4, because a bare R3 matches R3a."}
+
+    :d
+    {:leg "check the node's known candidate holes from PROBLEMS-*.md -- confirmed or cleared with evidence"
+     :status :done
+     :dossier "holes/labs/wm-contract/PROBLEMS-r1-r3-r3a-batch3.md:56-107"
+     :candidates
+     [{:id :mu-next-runtime-inhabited-but-absent-from-lean
+       :dossier-at "PROBLEMS-r1-r3-r3a-batch3.md:78-82"
+       :verdict :cleared
+       :basis "The dossier reads the generated join as 'belief-update / R3 / mu-next / not in Lean / missing' at p4ng/sec-lean-state-generated.tex:17-19. At HEAD that table's R3 line is p4ng/sec-lean-state-generated.tex:18 and it names machineBeliefUpdate (def) at MachineBeliefUpdate.lean:181. The carrier was declared by :F8 leg 1 slice 3 on 2026-09-05 (aif-equations.edn:116-117). Leg (b) above re-ran its readback green."}
+
+      {:id :no-machine-B-for-controlled-transition
+       :dossier-at "PROBLEMS-r1-r3-r3a-batch3.md:83-89"
+       :verdict :confirmed
+       :basis "belief/transition-model-v1 is the 7x7 IDENTITY and its docstring says so -- 'Identity means no explicit dynamics; the prior is the previous posterior' (src/futon2/aif/belief.clj:214-226). It is indexed by state alone, not by (state, action). It IS live: the filter's predict step is B x q (src/futon2/aif/belief.clj:297-308), and with this B it returns q unchanged. THE CONSEQUENCE WAS MEASURED HERE RATHER THAN ARGUED, and it is the reason this candidate is not merely a formal complaint: a filter that omits the predict step ENTIRELY differs from the shipped filter by 5.551115123125783E-17, against the harness's 1e-15 tolerance -- floating-point noise from a matrix multiply by the identity, and nothing else. There is no dynamics in this node for any check to detect. The nearest action-conditioned object, forward_model/predict-effects, has no state argument and returns no distribution over states."
+       :already-carried "This is FUNDAMENTALS.edn:143-176 (:fundamental/controlled-transition-kernel, :verdict :in, both sides :uninhabited), which carries :worklist-row :F1. Stated here with its pointers and left alone, as slice 4 did with that file's belief entry."}
+
+      {:id :aggregate-scoped-to-four-of-fourteen-channels-and-annotation-health-alone
+       :dossier-at "PROBLEMS-r1-r3-r3a-batch3.md:90-95"
+       :verdict :cleared-in-the-code-and-this-is-what-makes-the-hole
+       :basis "The dossier states this candidate by citing docs/futon-aif-completeness.md:86-106, so it inherits the document's staleness rather than measuring the node. At HEAD the scope is eight channels (src/futon2/aif/belief.clj:933-934, iterated at scripts/futon2/report/war_machine.clj:6114), the per-channel health direction the document says is needed exists (src/futon2/aif/belief.clj:1003-1021), and the aggregation has been default ON since 2026-07-08 (src/futon2/aif/belief.clj:986-993, futon2 b6242421). The candidate is cleared against the code and re-emerges as the :hole above against the document the candidate was read from."}]}}
+
+   :what-this-row-does-not-claim
+   ["Nothing here says the belief update computes the wrong thing. Every check and both production identities agree with an independent reference, and eight planted wrong nodes are caught."
+    "Nothing here says the saturation is a defect. It is the code the registry points at, the registry's Lean note names it as a proved property, and this row adds only that it is the normal case rather than an edge case. Whether the clamp should change is Joe's."
+    "Nothing here says docs/futon-aif-completeness.md is wrong about what R3 SHOULD have. What is recorded is that it grades R3 satisfied on a description three commits in this tree superseded, and that the document carries no record of the difference."
+    "The 85.1% saturation figure is NOT a defect rate. It is a statement about which of two flag settings the corpus was recorded under, and the two settings put the driver on scales three orders of magnitude apart."
+    "The replay checks what the tick DID with the driver, not the driver itself: the per-channel errors and precisions that produced each :aggregated-signed-error are not on the record."
+    "No live tick was run and no run lock was taken. data/wm-trace was opened for reading; nothing under data/ was written."
+    "No Lean was elaborated. Leg (b) re-runs the Clojure side of one pair; the row's :lean-status :closed is read from the registry."
+    "Nothing was repaired. aif-equations.edn, docs/futon-aif-completeness.md, p4ng/sec-catalog.tex, FUNDAMENTALS.edn, PROBLEMS-r1-r3-r3a-batch3.md, belief.clj and war_machine.clj are unchanged."
+    "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}
+]}
