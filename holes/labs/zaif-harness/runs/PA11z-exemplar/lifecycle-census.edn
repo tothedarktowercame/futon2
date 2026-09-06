@@ -1,0 +1,102 @@
+;; PA11z — the seven lifecycle stages of ONE REAL DISPATCH, measured.
+;;
+;; Not a source census. This is a LIVE TRACE of a dispatch that actually ran:
+;; job invoke-1788708049924-13300-38749afe, claude-2 -> codex-18, role
+;; library-annotator, commissioned against zaif-cascade's refusal frontier,
+;; 2026-09-06T15:20:49Z -> 15:23:15Z (2m26s, 16 tool events).
+;;
+;; VOCABULARY (claude-1 approved 2026-09-06, forward-only). ALIGN's cells are
+;; :exists / :named-only / :absent, which cannot tell "no code" apart from "a
+;; person is the code". Since Joe's question is whether the stages run RATHER
+;; THAN HIM DOING IT BY HAND, this census uses:
+;;   :running-code  — code did it, and here is the file:line of what refuses
+;;                    or records
+;;   :operator-turn — it happened, but only because an agent/operator turn did
+;;                    it by hand. Name the turn.
+;;   :absent        — nothing did it.
+;; :operator-turn is the quantity that closing-the-system-over-the-operator
+;; reduces. It is the headline number of this row.
+;;
+;; SCOPE OF SEARCH, stated because absence claims carry it: for each stage I
+;; read the job record, the live agent record, and the futon3c code on the path
+;; the dispatch actually took (transport/http.clj bell path). I did NOT
+;; exhaustively search every evidence store, and I did not instrument the JVM.
+;; A cell marked :absent here means "not on this path and not visible in those
+;; two records", not "provably nowhere".
+
+{:schema :box12/lifecycle-census-v1
+ :row :PA11z
+ :dispatch {:job-id "invoke-1788708049924-13300-38749afe"
+            :from "claude-2" :to "codex-18" :surface "bell"
+            :role "library-annotator"
+            :commissioned-for "zaif-cascade refusal frontier, 3 of 24 refused patterns"
+            :started "2026-09-06T15:20:49.924476296Z"
+            :finished "2026-09-06T15:23:15.141536726Z"
+            :tool-events 16
+            :outcome "1 of 3 patterns evidence-found with a proposed edge; 2 no-committed-source with loose candidates explicitly rejected. Report: annotator-report.md"}
+
+ :frontier {:cascade "futon3/checks/zaif-cascade.edn"
+            :reading "down-problems+wr (the L4 baseline)"
+            :graph "futon2/holes/labs/library-loop/runs/L18-graph.edn"
+            :futon3-head "50bd5309e8a64d0240eff6cf4d13aaf5a11a9611"
+            :result "gate: 24/53 refused, exit 1"
+            :reproduces "N-zai-roles-and-tools.md s1's 24/53 EXACTLY -- re-measured, not inherited"
+            :extraction "l17_advisory_report.py's cascade_patterns, reused verbatim for comparability"
+            :untruncated? true}
+
+ :stages
+ [{:stage :commissioned :verdict :operator-turn
+   :turn "claude-2 wrote the commission by hand (runs/PA11z-exemplar/commission-prompt.md): the target patterns, the evidence standard, the refusal shape, the do-not-commit boundary. Nothing generated or recorded any of it."
+   :finding "WORSE THAN ABSENT -- A SILENT NO-OP. The bell API ACCEPTS a `mission-id` field and returns accepted:true; I sent :mission-id \"PA11z-library-annotator-exemplar\". That string appears NOWHERE afterwards: not on the job record, and not on the live agent record while it was actively invoking. It is threaded into the invoke call (transport/http.clj:4284, agency/registry.clj:1723) but never persisted -- the job record template at transport/http.clj:1305-1315 has no mission-id field at all. So a dispatch cannot be traced back to what it was commissioned for."
+   :why-this-is-the-dangerous-kind "A missing feature is visible. A field that is accepted and discarded invites the belief that commission identity IS recorded, and nothing refuses to tell you otherwise."
+   :evidence ["dispatch-job-record.json (search for the mission-id string: absent)"
+              "futon3c/src/futon3c/transport/http.clj:1305-1315 (job record template)"
+              "futon3c/src/futon3c/transport/http.clj:4284, agency/registry.clj:1723 (threaded, not stored)"]}
+
+  {:stage :dispatched :verdict :running-code
+   :evidence ["futon3c/src/futon3c/transport/http.clj:~1305-1330 -- POST /api/alpha/bell mints the job, assigns job-id, appends the `accepted` event and returns {:accepted true :state \"queued\"}."]
+   :observed "accepted 15:20:49 -> running 15:20:52, job-id minted."
+   :caveat "On THIS path the dispatch RECORDS; it does not refuse. The typed refusal (`social-error :invalid-receipt` when a DispatchReceipt fails its shape) lives at social/dispatch.clj:238-266, which is the coordination-message path -- NOT the bell path this dispatch took. ALIGN's distinction holds: the machinery exists, and whether it is on your path is a separate question."}
+
+  {:stage :parked :verdict :absent
+   :finding "Nothing parked this dispatch. The caller polled the job to completion instead."
+   :evidence ["futon3c/src/futon3c/agency/parked_on.clj:332-395 -- park! exists and DOES refuse (throws on a non-canonical :timer-due-ms or :deadline-ms), but it is generic, carries no node link, and nothing on the bell path invokes it."]
+   :note "This is ALIGN's [A16] shape seen live: a real park facility, unreached by the path that needed it."}
+
+  {:stage :returned :verdict :running-code
+   :evidence ["The job reaches a terminal state observable by the caller: state done, finished-at 2026-09-06T15:23:15.141536726Z, followed by a delivery-recorded event; delivery {:status delivered :surface bell :destination \"caller claude-2 via /api/alpha/invoke/jobs/<id>\"}."]
+   :caveat "TERMINAL-CODE IS NULL EVEN ON SUCCESS. `state` carries the outcome and `terminal-code` stays nil, so a consumer that gates on a typed terminal code rather than on the state string gets nothing to gate on. Recorded, not filed as a defect -- it is the runner's shape, not this row's to change."}
+
+  {:stage :checked :verdict :operator-turn
+   :turn "claude-2 read the returned report and judged it (1 evidence-found with a verbatim quote and a syntax-matched proposed edge; 2 honest no-committed-source with two loose candidates explicitly rejected). That judgement is the only check that happened."
+   :finding "NOTHING ON THIS PATH REFUSES AN UNCHECKED RETURN. The job went to `done` and delivered with no checker between the return and the caller consuming it. R16's reviewer gate (full_loop_runner.clj:2950-2968, approval requires a done review job + :approve + execution evidence) is real but belongs to the full-loop actuator, not to a bell dispatch; and the zaif-build-loop's author!=reviewer law is asserted in a comment with nothing comparing the seats (PA5z)."
+   :evidence ["dispatch-job-record.json -- no check event between `done` and `delivery-recorded`"]}
+
+  {:stage :recorded :verdict :running-code
+   :evidence ["futon3c/src/futon3c/transport/http.clj:1324-1331 -- a durable coordination edge is recorded for EVERY job, keyed by job-id, with the comment stating it is deliberately not limited to wrapped social-dispatch invokes."
+              "futon3c/src/futon3c/social/coordination_ledger.clj:77-82 record-invoke-edge! appends to the evidence store."]
+   :caveat "BEST-EFFORT, NOT REFUSING. The call is wrapped in (try ... (catch Throwable _)) with the comment \"Never break the hot path\", so a recording failure is swallowed silently. An assurance cell whose recorder may fail without saying so is weaker than one that refuses -- worth carrying into PA6z/PA10z rather than inheriting. It also records from/to/surface/edge-id and NOT the commission, which is the :commissioned finding again from the other side."}
+
+  {:stage :surfaced :verdict :operator-turn
+   :turn "claude-2 is surfacing this dispatch by writing it into this artifact, the PA11z row, and a bell back to claude-1. Absent that turn, the dispatch completed and nobody would learn anything from it."
+   :finding "NOTHING SURFACES A COMPLETED DISPATCH. futon2/src/futon2/aif/bulletin.clj contains ZERO occurrences of job/dispatch/invoke (measured: `grep -c 'job\\|dispatch\\|invoke' src/futon2/aif/bulletin.clj` -> 0, untruncated). The bulletin surfaces commits, board deltas and waits-on-joe rows read from worklists (bulletin.clj:166-198) -- all of which reach it because an agent turn wrote them there."
+   :evidence ["futon2/src/futon2/aif/bulletin.clj:166-198 (what it does read)"
+              "grep count 0 for job/dispatch/invoke in that file"]}]
+
+ ;; --------------------------------------------------------------------------
+ ;; THE HEADLINE. Three of seven stages of a real dispatch are enacted by an
+ ;; operator turn. That is the number closing-the-system-over-the-operator has
+ ;; to move, and PA6z/PA10z's acceptance bar is now this list rather than prose.
+ ;; --------------------------------------------------------------------------
+ :tally {:running-code 3 :operator-turn 3 :absent 1}
+ :operator-turn-stages [:commissioned :checked :surfaced]
+ :running-code-stages [:dispatched :returned :recorded]
+ :absent-stages [:parked]
+
+ :gap-list-for-implementation-rows
+ [{:row :PA6z :cells [:commissioned :dispatched]
+   :bar "commissioned is :operator-turn AND its one machine affordance is a silent no-op -- the bar is that a commission identity SURVIVES onto the durable job record and can be read back, and that a dispatch with no commission identity is REFUSED rather than accepted. dispatched is already :running-code on this path, so PA6z's real work on that cell is the R10 node link plus moving the receipt refusal (dispatch.clj:238-266) onto the bell path."}
+  {:row :PA10z :cells [:parked :surfaced]
+   :bar "parked is :absent on this path though park! exists and refuses -- the bar is an R16-linked park transition actually reached by the runner. surfaced is :operator-turn with nothing in bulletin.clj reading dispatch state at all -- the bar is a discharge event that the bulletin/needs-joe channel reads WITHOUT an agent turn writing a worklist row first."}
+  {:row :PA5z :cells [:checked]
+   :bar "checked is :operator-turn: nothing refuses an unchecked return on the bell path. PA5z's seat-equality refusal is the first instance of the missing checker, and this dispatch is a second, wider one."}]}

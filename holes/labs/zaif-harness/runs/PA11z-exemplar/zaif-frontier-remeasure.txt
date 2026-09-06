@@ -1,0 +1,26 @@
+REFUSED: patterns not @why-reachable from a problem node (down-problems+wr):
+   agent/handoff-preserves-context
+   agent/trail-enables-return
+   ai4ci/ai-core-function
+   ai4ci/funding-justification
+   ai4ci/pilot-feasibility
+   aif/belief-aware-risk-term
+   aif/status-gated-belief-update
+   ants/pheromone-trail-tuner
+   budgeted-action-selection/mana-gated-work
+   cascades/declared-skeleton
+   control/effort-estimation
+   equity/confident-adaptation-as-published
+   equity/confident-adaptation-merged
+   equity/contribution-pathways
+   equity/contribution-pathways-merged
+   equity/protected-interaction-as-published
+   gauntlet/modeline-persists-across-worlds
+   gauntlet/teaching-inversion
+   hdm/non-capture
+   math-formalization-CA/measure-integration-api
+   math-formalization-CV/frontier-bound-from-arc-hypotheses
+   math-formalization-CV/holomorphic-disk-api
+   math-strategy/missing-dependency-protocol
+   ukrns/publication-cadence
+gate: 24/53 refused
