@@ -1,0 +1,297 @@
+{:stage "SELECT",
+ :negative-controls
+ {:plants
+  [{:id :synthetic-slow-trace, :detected 1, :result :caught}
+   {:id :synthetic-temporal-requirer, :detected 1, :result :caught}
+   {:id :synthetic-r15-equation, :detected 1, :result :caught}],
+  :all-caught true},
+ :harness :v7-r15-node-sim,
+ :not-done
+ ["No equation reference exists for R15; this harness measures its process account."
+  "No carriers file is needed because no numerical reference is constructed."
+  "No live tick or run lock; trace files were read only."
+  "No production, registry, ledger, document, p4ng, or data file was modified."],
+ :checks
+ [{:actual-flat-rollout-lines
+   [{:line 476,
+     :text
+     "the older :depth option. This is still flat temporal rollout, not nested"}],
+   :equation-row-count 0,
+   :basis "holes/labs/wm-contract/aif-equations.edn:373-376,521",
+   :equation-search ":node :R15",
+   :hierarchical-budget-characterisation
+   [{:line 1, :text "(ns futon2.aif.hierarchical-budget"}
+    {:line 2, :text "\"R11 hierarchical shared-budget arbitration."}
+    {:line 3, :text ""}],
+   :result :pass,
+   :id :registry-has-no-r15-equation,
+   :cited-rollout-text
+   [{:line 166, :text ""}
+    {:line 167,
+     :text
+     "`:refused` — a partial map with a numeric fallback: `:score` or `:prior` is"}
+    {:line 168,
+     :text
+     "present but is not a finite number (a string, a keyword, NaN, an infinity),"}
+    {:line 169,
+     :text
+     "or the move is not a map at all. `:offending` names the field and the value"}
+    {:line 170,
+     :text
+     "it was given. Absence and malformation are separated here exactly as they"}
+    {:line 171,
+     :text
+     "are in AC1's `free-energy/compute-prediction-error`: a producer that emitted"}
+    {:line 172,
+     :text
+     "no score has a gap; a producer that emitted \\\"0.4\\\" has a defect, and that"}
+    {:line 173, :text "has to stay loud.\""}
+    {:line 174, :text "[move]"}
+    {:line 175, :text "(if-not (map? move)"}
+    {:line 176, :text "{:producer-contract move-score-contract"}],
+   :hierarchy-lines
+   [{:line 373,
+     :text
+     ":hierarchy {:observed :single-level :status :observed-not-decided"}],
+   :cited-rollout-range "src/futon2/aif/rollout.clj:166-176",
+   :hierarchy-entry
+   [{:line 373,
+     :text
+     ":hierarchy {:observed :single-level :status :observed-not-decided"}
+    {:line 374,
+     :text
+     ":evidence \"rollout.clj:166-176 ('flat temporal rollout, not nested fast/slow hierarchy'); hierarchical_budget.clj exists but is not wired as a generative hierarchy (C448 5c.5)\""}
+    {:line 375,
+     :text
+     ":theory-alternative \"dacosta2020 A.4 deep temporal models\""}
+    {:line 376,
+     :text
+     ":statement \"One level is realised; R15 runs no equation and is listed under :plumbing.\"}"}],
+   :cited-rollout-status :stale,
+   :plumbing-lines
+   [{:line 521,
+     :text ":plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]"}]}
+  {:id :the-node-has-a-namespace-the-registry-does-not-cite,
+   :result :pass,
+   :namespace "src/futon2/aif/temporal_hierarchy.clj",
+   :namespace-r15-lines
+   [{:line 2,
+     :text
+     "\"R15 b3 — the fast/slow temporal HIERARCHY (the compositional-depth half)."}],
+   :registry-search "(?i)temporal[-_ ]hierarchy|temporal_hierarchy",
+   :registry-hit-count 0,
+   :basis "src/futon2/aif/temporal_hierarchy.clj:1-2"}
+  {:hit-line-count 37,
+   :outside-namespace-test-and-harness [],
+   :by-tree
+   {:holes
+    {:line-count 7,
+     :files ["holes/labs/wm-contract/v7_r15_node_sim.clj"],
+     :hits
+     [{:line 71,
+       :text
+       "(def slow-keys [:slow/mode :slow/intrinsics :slow/previous-mode])",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
+      {:line 93,
+       :text
+       "#\"futon2\\.aif\\.temporal-hierarchy|advance-slow-state|slow-context-from-intrinsics|:slow/mode|:slow/intrinsics|:slow/previous-mode\")",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
+      {:line 116,
+       :text
+       "(def advance-sites (matching-lines temporal-file #\"defn advance-slow-state\"))",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
+      {:line 121,
+       :text
+       "#\"advanced the relevant slow posterior|parameterised Tick B|Beta\\(2,1\\)|:slow/previous-mode\")",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
+      {:line 131,
+       :text "(def synthetic-record {:slow/mode :consolidation})",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
+      {:line 133,
+       :text ":text \"[futon2.aif.temporal-hierarchy :as th]\"}])",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}
+      {:line 192,
+       :text
+       ":slow-update-sites {:advance-slow-state advance-sites :beta-update beta-update-sites}",
+       :file "holes/labs/wm-contract/v7_r15_node_sim.clj"}]},
+    :src
+    {:line-count 13,
+     :files ["src/futon2/aif/temporal_hierarchy.clj"],
+     :hits
+     [{:line 1,
+       :text "(ns futon2.aif.temporal-hierarchy",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 32,
+       :text
+       "The two-tick campaign uses `advance-slow-state` below to close the minimal",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 39,
+       :text
+       "strategic context. The seam is `slow-context-from-intrinsics`.",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 68,
+       :text "(defn slow-context-from-intrinsics",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 82,
+       :text "(slow-context-from-intrinsics {}))",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 190,
+       :text "(defn advance-slow-state",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 193,
+       :text
+       "SLOW-STATE has `:slow/intrinsics`, in the same entry shape as",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 201,
+       :text
+       "posterior update and derives `:slow/mode` for the next fast tick.  This",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 214,
+       :text "(let [intrinsics (or (:slow/intrinsics slow-state) {})",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 230,
+       :text "next-mode (slow-context-from-intrinsics",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 232,
+       :text "{:slow/mode next-mode",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 233,
+       :text ":slow/intrinsics next-intrinsics",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}
+      {:line 234,
+       :text ":slow/previous-mode (:slow/mode slow-state)",
+       :file "src/futon2/aif/temporal_hierarchy.clj"}]},
+    :test
+    {:line-count 17,
+     :files ["test/futon2/aif/temporal_hierarchy_test.clj"],
+     :hits
+     [{:line 1,
+       :text "(ns futon2.aif.temporal-hierarchy-test",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 9,
+       :text "[futon2.aif.temporal-hierarchy :as th]))",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 112,
+       :text "(let [result (th/slow-context-from-intrinsics",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 117,
+       :text "(let [result (th/slow-context-from-intrinsics",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 122,
+       :text
+       "(let [result (th/slow-context-from-intrinsics {:intrinsics {}})]",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 152,
+       :text "(let [before {:slow/mode :exploration",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 153,
+       :text ":slow/intrinsics {}}",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 154,
+       :text "after (th/advance-slow-state",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 163,
+       :text "(is (= :exploration (:slow/previous-mode after)))",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 164,
+       :text "(is (= :exploitation (:slow/mode after)))",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 171,
+       :text "(get-in after [:slow/intrinsics :close-hole])))",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 178,
+       :text "(let [after (th/advance-slow-state",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 179,
+       :text "{:slow/mode :consolidation :slow/intrinsics {}}",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 185,
+       :text
+       "(is (= 1.0 (get-in after [:slow/intrinsics :advance-capability :alpha])))",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 186,
+       :text
+       "(is (= 2.0 (get-in after [:slow/intrinsics :advance-capability :beta])))",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 194,
+       :text "(th/advance-slow-state",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}
+      {:line 195,
+       :text "{:slow/mode :exploration :slow/intrinsics {}}",
+       :file "test/futon2/aif/temporal_hierarchy_test.clj"}]}},
+   :roots ["src" "scripts" "test" "checks" "holes"],
+   :search
+   "futon2\\.aif\\.temporal-hierarchy|advance-slow-state|slow-context-from-intrinsics|:slow/mode|:slow/intrinsics|:slow/previous-mode",
+   :result :pass,
+   :id :requirer-census,
+   :outside-namespace-test-and-harness-count 0,
+   :finding :not-wired-outside-own-test,
+   :file-count 3}
+  {:first-file "wm-trace-2026-05-18.edn",
+   :r15-route-file-spread [],
+   :records-total 889,
+   :basis "data/wm-trace/wm-trace-*.edn (read only)",
+   :records-with-r15-route 0,
+   :slow-keys-searched
+   [:slow/mode :slow/intrinsics :slow/previous-mode],
+   :result :pass,
+   :id :corpus-carries-no-slow-state,
+   :last-file "wm-trace-2026-09-04.edn",
+   :files-total 57,
+   :slow-state-file-spread [],
+   :records-with-slow-state 0}
+  {:upper-parameterises-fast-prior? true,
+   :implementation-denial-of-full-nested-model
+   [{:line 28,
+     :text
+     "- A full nested generative model where the slow loop runs its OWN EFE"}],
+   :slow-update-sites
+   {:advance-slow-state
+    [{:line 190, :text "(defn advance-slow-state"}],
+    :beta-update [{:line 217, :text "update (iv/next-update-record"}]},
+   :basis
+   "docs/futon-aif-completeness.md:434-439; src/futon2/aif/temporal_hierarchy.clj:1-39,190-237",
+   :result :pass,
+   :slow-update-kind :witnessed-outcome-beta-counter,
+   :id :contract-criterion-measured,
+   :belief-propagated-by-own-generative-inference? false,
+   :parameterisation-sites
+   {:apply-slow-prior [{:line 111, :text "(defn apply-slow-prior"}],
+    :hierarchical-rollout
+    [{:line 165, :text "(defn hierarchical-rollout"}]}}
+  {:artifact-hit-count 0,
+   :basis "/home/joe/code/p4ng/sec-catalog.tex:245",
+   :roots
+   ["holes/labs/wm-contract/runs/**/*.edn"
+    "holes/labs/wm-contract/runs/**/*.txt"],
+   :search
+   "advanced the relevant slow posterior|parameterised Tick B|Beta\\(2,1\\)|:slow/previous-mode",
+   :artifact-hits [],
+   :result :pass,
+   :id :campaign-s-artifact,
+   :recorded-numbers :not-found,
+   :finding :not-found}
+  {:id :negative-controls-detect-nonzero-cases,
+   :result :pass,
+   :plants
+   [{:id :synthetic-slow-trace, :detected 1, :result :caught}
+    {:id :synthetic-temporal-requirer, :detected 1, :result :caught}
+    {:id :synthetic-r15-equation, :detected 1, :result :caught}]}],
+ :node :R15,
+ :corpus
+ {:root "data/wm-trace",
+  :read-only true,
+  :file-count 57,
+  :record-count 889},
+ :carriers
+ {:used? false,
+  :reason :census-node-has-no-equation-or-numerical-reference},
+ :stage-at "/home/joe/code/p4ng/empirics-futon/control-stages.edn:26",
+ :slice 13,
+ :verdict :pass,
+ :account-sites
+ ["holes/labs/wm-contract/aif-equations.edn:373-376,521"
+  "/home/joe/code/p4ng/sec-catalog.tex:243,245"
+  "docs/futon-aif-completeness.md:434-439"
+  "src/futon2/aif/temporal_hierarchy.clj:1-39,190-237"],
+ :row :V7}
