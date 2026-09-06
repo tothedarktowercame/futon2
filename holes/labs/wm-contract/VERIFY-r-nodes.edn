@@ -1,0 +1,204 @@
+;; VERIFY-r-nodes.edn -- the node-by-node verification matrix of worklist row :V7.
+;;
+;; Commissioning ruling: Joe, 2026-09-06 -- "Go node by node and verify the R
+;; nodes actually have what we think they should have inside them ... I'd be
+;; happy to approve RUN4 if we know that there aren't massive holes"
+;; (worklist.edn :V7 :statement). This file is the answer RUN4 approval reads.
+;;
+;; APPEND-ONLY, ONE NODE PER SLICE, in aif-equations dependency order. A slice
+;; adds one map to :rows and one map to :slices; it does not edit an earlier
+;; row. If a later slice contradicts an earlier one, it appends a row carrying
+;; :supersedes with the earlier row's [:node :slice] pair, so the contradiction
+;; is readable rather than overwritten.
+;;
+;; EVERY CLAIM CARRIES A POINTER -- a file:line, a run-record path with a
+;; sha256, or the literal :not-found with the search that established the
+;; absence. This file is scanned by p4ng/empirics-futon/pointer_check.bb (it is
+;; named in that script's extra-paths), so a pointer written here that does not
+;; resolve fails the gate.
+;;
+;; NO RULINGS. Nothing here is written to aif-equations.edn :choices or to
+;; control-map-edges.edn :decisions. A :hole verdict records what the code and
+;; the registry say about each other; whether a hole should be filled, and how,
+;; is Joe's.
+{:schema :wm/verify-r-nodes-v1
+ :row :V7
+ :epic "EPIC-run-era.md"
+
+ :verdict-vocabulary
+ {:verified "Every equation the registry gives the node is implemented, the implementation was run, an independent reference reproduced it, and the node's known candidate holes were cleared with evidence."
+  :verified-with-stated-limits "As above, with named limits that do not change what is inside the node -- e.g. a check that ran on declared carriers rather than on a live field."
+  :hole "Something the registry says the node has, the node does not have; or the node has something the registry does not say it has. :type names which."}
+
+ :hole-types
+ {:declared-grain-not-implemented "The registry's equations are transcribed and correct, but no shipped call path evaluates them at the grain the registry declares; what ships computes a different object under the same name."
+  :uninhabited-carrier "An argument the equation requires has no inhabitant, in Lean or at runtime, other than a fixture."
+  :key-collision "Two different quantities are persisted under one key, so a reader of the trace cannot tell which one a record carries."
+  :pointer-drift "A registry :code or :basis pointer resolves to a line that no longer contains what the field claims."
+  :cross-node-grain-mix "Two terms of one equation are evaluated at different values of a shared parameter inside a single call."}
+
+ :slices
+ [{:slice 1 :node :R5 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
+   :did "Re-verification of the F3 node-sim certificate for R5, plus legs (b), (c) and (d) of :V7's per-node procedure. No new harness was written: F3's harness was re-run and its receipt compared byte-for-byte against the committed one."
+   :ran ["clojure -M holes/labs/wm-contract/f3_node_sim.clj (exit 0)"
+         "clojure -M checks/ablation_exact_dyadic_witness.clj (exit 0)"
+         "clojure -M checks/ablation_exact_dyadic_witness.clj --negative (exit 0, planted degeneracy rejected)"
+         "bb p4ng/empirics-futon/pointer_check.bb -- 1807 pointers in 6 files, 0 unresolved (1453 in 5 before this file was named in extra-paths)"
+         "AIF_EXTRA=<tmp copy of this file, with the end of the src/futon2/aif/core_efe.clj:56-73 range rewritten to line 9999> bb p4ng/empirics-futon/pointer_check.bb -- the gate printed UNRESOLVED for that pointer, reason 'end beyond file', and exited 1. The negative control that shows this file is really inside the gate rather than merely listed in it. THE PLANTED POINTER IS DESCRIBED HERE RATHER THAN QUOTED: the gate scans every string in this file, so writing the bad pointer literally would plant it in the registry it is meant to guard -- which is how this slice found out the gate was working, one gate run before the commit."]
+   :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. The only files written by this slice are this matrix, the worklist row and p4ng/empirics-futon/pointer_check.bb."}]
+
+ :rows
+ [{:node :R5
+   :slice 1
+   :label "Expected free energy core"
+   :stage "EVALUATE"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:22"
+   :verdict :hole
+   :hole {:type :declared-grain-not-implemented
+          :statement "The three equations aif-equations.edn gives R5 are transcribed correctly and now run under a gate -- but the only implementation of them in this tree is a harness, and the R5 the machine ships computes a different object. The registry's R5 is risk = D_KL[Q(o|pi) || C] over a distribution on a declared outcome alphabet; the live R5 is a weighted sum of per-channel Gaussian KLs over 13 declared channel ranges, and its ambiguity is a sum of per-channel Gaussian entropies. Neither can consume a distribution over the six declared outcomes, and none of the three registry rows carries a :code field naming a call path."
+          :basis ["aif-equations.edn:131-133 (:risk), aif-equations.edn:134-152 (:ambiguity), aif-equations.edn:153-158 (:expected-free-energy) -- no :code key on any of the three, unlike :forward-model at aif-equations.edn:126-130 and :depth at aif-equations.edn:161"
+                  "src/futon2/aif/core_efe.clj:56-73 (ambiguity, per-channel Gaussian entropies), src/futon2/aif/core_efe.clj:75-92 (risk, per-channel weighted Gaussian KL)"
+                  "src/futon2/aif/efe.clj:690-698 (channel-risk-terms, the live :kl risk over pref/current-C), src/futon2/aif/efe.clj:699-704 (the live ambiguity leg)"
+                  "src/futon2/aif/preferences.clj:9-24 (the 13 declared [lo hi] channel ranges the live C is built from)"]
+          :not-a-ruling "Whether the declared-alphabet R5 should be wired, or the registry re-stated at the channel grain, is Joe's. This row records that the two do not meet."}
+
+   :legs
+   {:a
+    {:leg "enumerate the node's aif-equations rows and run them in the F3 node-sim harness against declared carriers with an independent reference"
+     :status :done
+     :equations [{:id :risk :formal "risk(pi) := D_KL[Q(o|pi) || C]" :at "aif-equations.edn:131-133" :eq "dacosta2020 eq. 44"}
+                 {:id :ambiguity :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]" :at "aif-equations.edn:134-152" :eq "dacosta2020 eq. 45-48"}
+                 {:id :expected-free-energy :formal "G(pi) := risk(pi) + ambiguity(pi)" :at "aif-equations.edn:153-158" :eq "dacosta2020 eq. 42 without the novelty term"}]
+     :harness "src/futon2/aif/node_sim.clj:241 (r5, the node) against src/futon2/aif/node_sim.clj:278 (reference-r5, exact rationals with prime-factorised logarithms)"
+     :runner "holes/labs/wm-contract/f3_node_sim.clj"
+     :carriers "holes/labs/wm-contract/sim/R5-carriers.edn"
+     :receipt "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn"
+     :receipt-sha256 "cf371dd9f93c86cc8687f7a5e699151e143674995b67cda6c0daee3485ebac49"
+     :byte-identical-on-re-run
+     {:claim "The receipt this slice's run wrote is byte-for-byte the receipt committed at futon2 9a064902 by row :F3 on 2026-09-05. This is a stronger statement than two runs agreeing inside one invocation: nothing in src/futon2/aif/node_sim.clj, sim/R5-carriers.edn, aif-equations.edn's R5 rows or runs/F1-machine-q/01-runtime-seam.edn has moved the numbers in the intervening day."
+      :method "cp of the committed receipt to a temp path, re-run, diff -q; then sha256sum"
+      :result :identical}
+     :checks {:total 11 :pass 10 :finding 1
+              :finding-is :registry-imports
+              :node-versus-reference-max-deviation 4.440892098500626E-16
+              :kernel-reproduces-pinned-max-deviation 0.0
+              :f1-agreement-max-deviation 0.0}
+     :values {:risk {:acquisition 0.24393607778459092 :review 0.7566450629942134}
+              :ambiguity {:acquisition 1.4729377586898837 :review 1.4729377586898837}
+              :G {:acquisition 1.7168738364744747 :review 2.2295828216840974}}
+     :planted-wrong-formula-controls
+     {:n 5 :all-caught true
+      :reads "Required by :V7's acceptance for at least the first slice. Each planted node is a formula someone could write for R5; the reference and every law are computed from the carriers and never from the node, so a planted formula has nothing to hide behind."
+      :caught [{:id :reversed-kl :by [:node-agrees-with-reference]}
+               {:id :cross-entropy-for-risk :by [:node-agrees-with-reference :risk-zero-at-own-row]}
+               {:id :ambiguity-as-predictive-entropy :by [:node-agrees-with-reference]}
+               {:id :ambiguity-unweighted :by [:node-agrees-with-reference :ambiguity-in-entropy-range]}
+               {:id :g-as-risk-minus-ambiguity :by [:node-agrees-with-reference :two-term-core]}]
+      :at "holes/labs/wm-contract/f3_node_sim.clj:86-152 (the five planted nodes), receipt key :negative-controls"}
+     :stated-limit "The harness measures a TRANSCRIPTION against declared carriers. It is not a measurement of a shipped call path, and the carriers it declares -- the state space, the policy family, the belief reading and C -- inhabit nothing (holes/labs/wm-contract/FUNDAMENTALS.edn)."}
+
+    :b
+    {:leg "where an F8 Lean module exists, re-run the readback certificate"
+     :status :not-found
+     :statement "R5 has no F8 module and no readback certificate. The F8 leg built Machine*.lean modules with a Clojure readback for :precision, :prediction-error, :belief-update, :policy-free-energy, :observe, :belief-state, :depth, :temperature, :action, :dirichlet-accumulation and the concordance/convergence ledgers; none of the three R5 rows is among them."
+     :search "ls holes/labs/wm-contract/runs/ | grep '^F8-' -- 11 directories, none for risk, ambiguity or expected free energy; and no MachineRisk / MachineAmbiguity / MachineExpectedFreeEnergy under mathlib4/DarkTower/WarMachine/"
+     :what-exists-instead
+     {:lean-carriers [{:name "predictiveOutcomeRisk" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6867-6878" :registry-status :closed}
+                      {:name "ambiguity" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6880-6885" :registry-status :closed}
+                      {:name "expectedFreeEnergy" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6887-6893" :registry-status :closed}]
+      :witnesses ["mathlib4/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean"
+                  "mathlib4/DarkTower/WarMachine/AmbiguityWitness.lean"
+                  "mathlib4/DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean"]
+      :bridge "G_eq_expectedFreeEnergy at mathlib4/DarkTower/WarMachine/Holes.lean:6895-6906 -- the two readings of G (Holes.G := risk - eig, and risk + ambiguity) are bridged under stated hypotheses, which is the conflict aif-equations.edn:157 records"}
+     :substituted-check
+     {:what "The nearest runnable Lean-backed certificate R5 has is nonDegenerateAblationLaw, whose falsifier is R5's own: remove the epistemic term and the selection must change somewhere."
+      :ran ["clojure -M checks/ablation_exact_dyadic_witness.clj -> 'ablation-exact-dyadic: PASS claim=:content-current', exit 0"
+            "clojure -M checks/ablation_exact_dyadic_witness.clj --negative -> 'negative-control PASS (minimizer separation removed and rejected)', exit 0"]
+      :fixture "holes/labs/wm-contract/ablation-exact-dyadic.edn"
+      :fragment "checks/witness-fragments/nonDegenerateAblationLaw.edn (contract-sha 4bc55c5968bc4568610405660bdae4a98fcc06c5, :result :passed)"
+      :closed-by "holes/labs/wm-contract/C499-nondegenerate-ablation-close.md"
+      :stated-limit "This discharges the non-degeneracy predicate over a PINNED EXACT-DYADIC SCORE TABLE, not over a run. C499's own leg (1) records the persisted-run-record leg as inapplicable for this declaration. It is evidence that the ablation falsifier is stated and runnable, not evidence about a tick."}}
+
+    :c
+    {:leg "where the node is plumbing/assurance, re-verify the ALIGN census's exists-cells at file:line"
+     :status :not-applicable
+     :statement "R5 is an equation node, not plumbing: it carries three :class :theory-defined rows in aif-equations.edn. ALIGN-rnode-process-census.md names no R5 cell at all."
+     :search "grep -n 'R5' holes/labs/wm-contract/ALIGN-rnode-process-census.md -> 0 matches"}
+
+    :d
+    {:leg "check the node's known candidate holes from PROBLEMS-*.md -- confirmed or cleared with evidence"
+     :status :done
+     :dossier "holes/labs/wm-contract/PROBLEMS-r4-r5-r6-pilot.md:89-117 (R5, 'Residual problems it does not solve')"
+     :candidates
+     [{:id :eig-kernel-without-a-generative-experiment-model
+       :dossier-class :implementation-flaw
+       :dossier-claim "The mathematical EIG kernel exists, but the generative experiment model, Q(o|pi), and simulated posterior updates do not."
+       :dossier-at "PROBLEMS-r4-r5-r6-pilot.md:91-95"
+       :verdict :confirmed
+       :evidence ["holes/missions/M-aif-policy-conditioned-eig.md:36-38 -- futon2.aif.epistemic-value/expected-information-gain 'closes the arithmetic gap only. It does not supply Q(o|pi) or the simulated posterior updates.'"
+                  "holes/missions/M-aif-policy-conditioned-eig.md:177-180 -- 'Current honest status: The mathematical kernel exists. The generative experiment model does not.'"
+                  "aif-equations.edn:155 -- the :expected-free-energy row's :omits: da Costa eq. 42's novelty term -E[D_KL[Q(A|o,s)||Q(A)]] is absent, 'identically absent rather than approximated', because no Dirichlet Q(A) is live"]
+       :note "Unchanged at HEAD. The mission's :B2 section (2026-09-05) proposes instantiation work; nothing in it is built."}
+
+      {:id :theory-shaped-names-over-action-and-channel-grain-arguments
+       :dossier-class :both
+       :dossier-claim "The WM has neither a declared joint Outcome/C suitable for G(pi) nor a runtime Q conditioned on a cascade; current formulas have theory-shaped names but action- and channel-grain arguments."
+       :dossier-at "PROBLEMS-r4-r5-r6-pilot.md:96-101"
+       :verdict :confirmed
+       :hole-type :uninhabited-carrier
+       :evidence ["FUNDAMENTALS.edn:204-242 (:fundamental/machine-preference-distribution) -- :lean :verdict :uninhabited (Holes.lean:151-153 is a deliberate sorry; machineHasNoC at Holes.lean:7117-7120 proves the free-constant list is non-empty), :runtime :verdict :proxy-only ('a product of 13 independent per-channel densities over channel VALUE ranges, while the required object is one distribution over the vertex-tagged outcome domain. The gap here is grain, not existence')"
+                  "FUNDAMENTALS.edn:222-227 -- the four Lean inhabitants of C are all :class :fixture, three of them the R5 witnesses themselves"
+                  "src/futon2/aif/preferences.clj:235-285 (c-distribution, one channel at a time), read live through current-C at src/futon2/aif/preferences.clj:60-70"
+                  "aif-equations.edn:130 -- the :forward-model row's own note: 'Q-interface-completeness.edn records 2 missing wires for this row'"]
+       :note "This is the same fact the :hole verdict above records, reached from the carriers rather than from the call path. P-validated-R5.md:79-90 gives the forced order of definition -- Outcome -> C -> Cascade -> Policy -> Q(o|pi) -> G(pi) -> coverage -- and no step of it has been taken in src/."}
+
+      {:id :epistemic-term-that-never-changes-a-choice
+       :dossier-class :implementation-flaw
+       :dossier-claim "the named validation record says the WM's ambiguity term changed zero winners in the cited 674-tick measurement"
+       :dossier-at "PROBLEMS-r4-r5-r6-pilot.md:102-108, quoting holes/problems/P-validated-R5.md:148-170"
+       :verdict :cleared-as-stated-and-replaced-by-a-typed-result
+       :evidence ["aif-equations.edn:136-152 -- the :ambiguity row's :u4-discrimination-sweep (row :U4, report C487-u4-ambiguity-discrimination.md, script u4_ambiguity_sweep.clj, artifact U4-AMBIGUITY-SWEEP.txt byte-identical on two runs)"
+                  "aif-equations.edn:142 -- 'THE 674 WAS NOT REPRODUCED and is not the denominator: the archive holds 882 such records, and the badge's population is NOT FOUND -- facts-R5.md:458 carries the number with no pointer to a script or a record set.'"
+                  "aif-equations.edn:146 -- over 882 archived ticks, dropping the ambiguity leg moves the EFE-best entropy-carrying candidate on 51 ticks (5.78 percent), every one strict"
+                  "aif-equations.edn:147 -- zero on today's field (S2 20 ticks, S4 4 ticks, 79 archived ticks of 2026-09-01) at grain A, grain B and the B-prime bound, with lambda_break 1.0238 on every one of them"]
+       :what-replaces-it "The dossier's claim is false as stated -- the number it rests on has no reproducible population, and on the population that does exist the term discriminates. What survives is narrower and typed: on today's field the term changes nothing, and the reason is the forward model's variance coverage (:typed-outcome :a-discriminates-current-field-zero-is-forward-model-variance-coverage, aif-equations.edn:148), not C's flatness and not A's constancy."
+       :note "The dossier at PROBLEMS-r4-r5-r6-pilot.md:102-108 has not been edited to say this; it is left alone here, and the correction is recorded in this matrix. Editing a problem dossier is not in :V7's acceptance."}
+
+      {:id :r5-r13-grain-mix
+       :dossier-class :named-in-V7-statement
+       :dossier-claim ":V7's own statement names 'R5/R13 grain mix' as a known candidate hole for this node."
+       :dossier-at "worklist.edn :V7 :statement"
+       :verdict :confirmed
+       :hole-type :cross-node-grain-mix
+       :evidence ["src/futon2/aif/efe.clj:629-631 -- the multi-horizon path runs when horizon-steps >= 2"
+                  "src/futon2/aif/efe.clj:633-635 -- next-mean is the depth-K final-state observation when multi runs"
+                  "src/futon2/aif/efe.clj:636 -- next-var is ALWAYS (get-in single-prediction [:next-observation :variance]), the FIRST step's variance, whatever K is"
+                  "src/futon2/aif/efe.clj:699-704 -- the ambiguity leg is a function of next-var alone, so it sits at depth 1 while risk sits at depth K, inside one evaluation of G"
+                  "aif-equations.edn:161-166 (:depth) :lean-note -- gTermsDisagreeOnDepth states the disagreement as one proposition; MEASURED K=1 vs K=3, G-risk moves -2.4115244739422366 and G-ambiguity moves EXACTLY 0.0"]
+       :note "The R13 slice will re-verify this from the R13 side. Recorded here because it is a property of a single call to R5's G, not only of the depth parameter: two terms of G(pi) are evaluated at two values of T. The registry's :depth note also proves the mixing has no NUMERICAL consequence at HEAD (mixedDensityValuesCollapse), because the declared variance is state-blind -- the mixing is real and its effect on the number is nil."}]}}
+
+   :new-findings-this-slice
+   [{:id :registry-imports-disagreement-still-open
+     :type :registry-declares-a-symbol-the-transcription-does-not-read
+     :statement "aif-equations.edn:135 declares :ambiguity :imports [:Q-o-pi :A], but the row's own formal line reads Q(s|pi), the predicted STATE distribution, and never touches Q(o|pi). The harness reports this as the one :finding among its eleven checks. First recorded by row :F3 on 2026-09-05 (C513-F3-node-sim-r5.md, finding 1); re-confirmed unchanged at this slice's HEAD."
+     :basis "aif-equations.edn:135; src/futon2/aif/node_sim.clj:322 (:consumes); receipt key [:pilot :checks] entry :registry-imports -- {:only-in-registry #{:Q-o-pi} :only-in-harness #{:Q-s-pi}}"
+     :why-not-repaired "Q(s|pi) is an intermediate of the R4 composition (src/futon2/aif/machine_q.clj:336) that the registry gives no symbol, so there is nothing else the row could name. Minting a symbol is a registry edit and a registry edit is Joe's."}
+
+    {:id :key-collision-pointers-have-drifted
+     :type :pointer-drift
+     :statement "The :ambiguity row's :key-collision field cites efe.clj:680-682 for the :learn-action-class branch of g-ambig and efe.clj:678-679 for ambiguity-terms being {}. At futon2 HEAD those lines are inside the channel-risk-terms case form; the branch the field describes is at efe.clj:699-704. The field's content is correct and its pointers are about 21 lines stale."
+     :basis "aif-equations.edn:151 (the :key-collision field); src/futon2/aif/efe.clj:676-684 (what those lines hold at HEAD); src/futon2/aif/efe.clj:699-704 (the learn-action branch the field describes)"
+     :why-the-gate-did-not-catch-it "pointer_check.bb resolves that a file:line exists and is in range; it does not check that the pointed code says what the field claims -- its own header says so (p4ng/empirics-futon/pointer_check.bb:6-8). A stale-but-in-range pointer is exactly the case that passes."
+     :not-repaired "aif-equations.edn is READ and not written by this slice. TN-edge-review-aif-wiring.md 9a gates registry :code edits behind review; this is recorded for that review rather than applied."}
+
+    {:id :the-verification-matrix-was-outside-the-pointer-gate
+     :type :registry-not-named-in-the-checker
+     :statement "This file is a new registry whose entire content is pointers. pointer_check.bb's extra-paths is a hand-maintained list, and a registry nobody adds to it is a registry nobody checks -- the lesson its own comment records twice (the symbol concordance, then the convergence ledger). VERIFY-r-nodes.edn was added to that list by this slice rather than after the same thing had happened a third time."
+     :basis "p4ng/empirics-futon/pointer_check.bb:14-19 (the comment recording the symbol-concordance case), p4ng/empirics-futon/pointer_check.bb:31-39 (the convergence-ledger case), and the entry this slice added"}]
+
+   :what-this-row-does-not-claim
+   ["Nothing here says the machine computes the registry's R5. The pilot's numbers come from declared carriers; the live R5 runs at the per-channel Gaussian grain."
+    "No live tick was run and no run lock was taken. Every number in :legs :a is from the F3 harness over sim/R5-carriers.edn; every number quoted from the U4 sweep is from that sweep's own artifact and was not re-derived here."
+    "The U4 sweep was NOT re-run by this slice. Its result is cited from the registry row that carries it, with the artifact named; re-running an 882-tick corpus replay is not in this slice's acceptance."
+    "No Lean was elaborated. The three Holes.lean carriers' :lean-status :closed is read from the registry, not re-checked by a lake build."
+    "No ruling. Nothing was written to aif-equations.edn :choices or to control-map-edges.edn :decisions."]}]}
