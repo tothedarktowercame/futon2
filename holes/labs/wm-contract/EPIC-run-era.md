@@ -1109,3 +1109,22 @@ loop."
   loop; claude-1 reviews the track design at the first pause.
   Parallel to the wm loop; does NOT touch the run gate (the
   eight-before-any-run ruling stands independently).
+
+## The fundamentals-priority correction (Joe, 2026-09-06 evening) — F10/F11/F12 minted mid-V7, not at V7's pause
+
+Verbatim: "are these fundamentals even cued in the loop? Because I
+thought you had put them in there, and I thought the fundamentals were
+of the highest priority to sort out."
+
+- They were NOT queued: claude-1 had recorded them as PENDING MINT at
+  V7's pause (this ledger, two sections up) -- a sequencing choice the
+  operator's priority overrides. The loop's own prio function has had
+  F-class-first since :F0; the rows simply did not exist.
+- CORRECTED: F10 (C, defined -- slice 1 is Joe's outcome-domain decision
+  sheet), F12 (organise, built), F11 (find, built) minted :open, file
+  order F10 > F12 > F11, each :basis EPIC:1018 (the core-three ruling).
+  next-open now = F10. V7 (13 of ~20 nodes done, every verdict a typed
+  hole) resumes when the F rows are done or blocked; its remaining
+  slices lose nothing by waiting.
+- Board edit made in the inter-slice window (work seat exited, log
+  watcher confirmed) per the no-edits-while-seat-in-flight discipline.
