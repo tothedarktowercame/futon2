@@ -1,0 +1,273 @@
+{:stage "BELIEVE",
+ :negative-controls
+ {:plants
+  [{:id :seven-channel-projection,
+    :result :caught,
+    :caught-by [:channel-set-is-eight-of-fourteen],
+    :would-be-caught true}
+   {:id :nine-channel-projection,
+    :result :caught,
+    :caught-by [:channel-set-is-eight-of-fourteen],
+    :would-be-caught true}
+   {:id :absent-observation-substitutes-zero,
+    :result :caught,
+    :caught-by
+    [:envelope-form-equals-scalar-form-on-a-present-channel
+     :absent-observation-omits-and-carries-the-envelopes-reason],
+    :would-be-caught true}
+   {:id :absent-record-carries-error,
+    :result :caught,
+    :caught-by
+    [:absent-observation-omits-and-carries-the-envelopes-reason],
+    :would-be-caught true}
+   {:id :refusal-downgraded-to-absent,
+    :result :caught,
+    :caught-by [:model-failure-refuses-and-names-every-offender],
+    :would-be-caught true}
+   {:id :offending-names-only-first,
+    :result :caught,
+    :caught-by [:model-failure-refuses-and-names-every-offender],
+    :would-be-caught true}
+   {:id :refusal-does-not-empty-map,
+    :result :caught,
+    :caught-by [:any-refusal-empties-the-whole-error-map],
+    :would-be-caught true}
+   {:id :sign-flipped-error,
+    :result :caught,
+    :caught-by
+    [:envelope-form-equals-scalar-form-on-a-present-channel],
+    :would-be-caught true}
+   {:id :precision-without-minimum-variance-floor,
+    :result :caught,
+    :caught-by
+    [:envelope-form-equals-scalar-form-on-a-present-channel],
+    :would-be-caught true}],
+  :n 9,
+  :all-caught true},
+ :harness :v7-r3a-node-sim,
+ :not-done
+ ["No epsilon arithmetic replay was used as R3a's principal check; slice 3 owns that arithmetic."
+  "No production, registry, ledger, document, p4ng, or data file changed."
+  "No live tick and no run lock."],
+ :checks
+ [{:id :channel-set-is-eight-of-fourteen,
+   :result :pass,
+   :live-count 8,
+   :declared-count 14,
+   :never-delivered
+   [:consulting-pct
+    :depositing-signal
+    :loop-health
+    :mathematics-pct
+    :portfolio-pct
+    :stack-pct]}
+  {:id :envelope-form-equals-scalar-form-on-a-present-channel,
+   :result :pass,
+   :comparisons 3,
+   :max-deviation 0.0}
+  {:id :absent-observation-omits-and-carries-the-envelopes-reason,
+   :result :pass,
+   :reasons-exercised [:source-field-missing :status-metadata-missing],
+   :unconstructed-reasons [],
+   :runs
+   [{:id :source-field-missing,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :absent,
+      :absent-member :observed,
+      :reason :source-field-missing,
+      :paths [[:annotation-graph :health]]},
+     :expect-reason :source-field-missing}
+    {:id :status-metadata-missing,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :absent,
+      :absent-member :observed,
+      :reason :status-metadata-missing},
+     :expect-reason :status-metadata-missing}]}
+  {:id :model-failure-refuses-and-names-every-offender,
+   :result :pass,
+   :comparisons 8,
+   :absent-and-broken-status :refused,
+   :runs
+   [{:id :missing-mean,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :refused,
+      :reason :malformed-prediction-triple,
+      :offending [{:member :mean, :status :missing}]},
+     :expected #{:mean},
+     :actual #{:mean}}
+    {:id :nil-mean,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :refused,
+      :reason :malformed-prediction-triple,
+      :offending [{:member :mean, :status :missing}]},
+     :expected #{:mean},
+     :actual #{:mean}}
+    {:id :infinite-mean,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :refused,
+      :reason :malformed-prediction-triple,
+      :offending [{:member :mean, :status :not-finite, :value ##Inf}]},
+     :expected #{:mean},
+     :actual #{:mean}}
+    {:id :missing-variance,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :refused,
+      :reason :malformed-prediction-triple,
+      :offending [{:member :variance, :status :missing}]},
+     :expected #{:variance},
+     :actual #{:variance}}
+    {:id :nil-variance,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :refused,
+      :reason :malformed-prediction-triple,
+      :offending [{:member :variance, :status :missing}]},
+     :expected #{:variance},
+     :actual #{:variance}}
+    {:id :infinite-variance,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :refused,
+      :reason :malformed-prediction-triple,
+      :offending
+      [{:member :variance, :status :not-finite, :value ##Inf}]},
+     :expected #{:variance},
+     :actual #{:variance}}
+    {:id :both-missing,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :refused,
+      :reason :malformed-prediction-triple,
+      :offending
+      [{:member :mean, :status :missing}
+       {:member :variance, :status :missing}]},
+     :expected #{:mean :variance},
+     :actual #{:mean :variance}}
+    {:id :both-nonfinite,
+     :record
+     {:producer-contract :prediction-error/v1,
+      :channel :annotation-health,
+      :status :refused,
+      :reason :malformed-prediction-triple,
+      :offending
+      [{:member :mean, :status :not-finite, :value ##Inf}
+       {:member :variance, :status :not-finite, :value ##-Inf}]},
+     :expected #{:mean :variance},
+     :actual #{:mean :variance}}]}
+  {:id :any-refusal-empties-the-whole-error-map,
+   :result :pass,
+   :input-channels 8,
+   :refusals 1,
+   :result-count 0}
+  {:id :production-channel-coverage-and-its-era,
+   :result :pass,
+   :finding-policy
+   "Coverage outside the declaration is reported, not tuned away.",
+   :measurements
+   {:records 889,
+    :distribution {0 2, 1 2, 4 127, 6 17, 7 3, 8 738},
+    :first-file-at-count
+    {0 "wm-trace-2026-05-18.edn",
+     1 "wm-trace-2026-05-18.edn",
+     4 "wm-trace-2026-05-18.edn",
+     6 "wm-trace-2026-05-26.edn",
+     7 "wm-trace-2026-09-02.edn",
+     8 "wm-trace-2026-05-30.edn"},
+    :outside-declared-count 0,
+    :outside-declared []}}
+  {:id :persisted-errors-are-the-terminal-micro-step,
+   :result :pass,
+   :measurements
+   {:multi-step-records 878,
+    :different-first-terminal 878,
+    :difference-min -0.010355815188529793,
+    :difference-max 0.0012330139293520448,
+    :difference-mean -0.008910450309188928},
+   :limit
+   "The trace stores aggregate per-step error magnitude, not each step's channel map; terminal channel identity is established by the cited return seam."}
+  {:id :weighted-error-identity-on-the-persisted-records,
+   :result :pass,
+   :finding-policy
+   "This is a measurement, overlapping slice 3 at record rather than micro-step grain.",
+   :measurements
+   {:entries 6537,
+    :comparisons 6537,
+    :max-deviation 0.0,
+    :mismatches []}}
+  {:id :no-persisted-record-carries-an-absent-or-refused-status,
+   :result :pass,
+   :measurements
+   {:entries 6537,
+    :status-distribution {nil 6484, :present 53},
+    :absent-or-refused 0,
+    :prediction-triple-event-count 3,
+    :prediction-triple-status-distribution {:absent 3},
+    :prediction-triple-events
+    [{:producer-contract :prediction-error/v1,
+      :channel :sorry-count-norm,
+      :status :absent,
+      :absent-member :observed,
+      :reason :source-field-missing,
+      :paths [[:graph :summary :total-sorrys]],
+      :trace/file "wm-trace-2026-09-02.edn",
+      :trace/index 0}
+     {:producer-contract :prediction-error/v1,
+      :channel :sorry-count-norm,
+      :status :absent,
+      :absent-member :observed,
+      :reason :source-field-missing,
+      :paths [[:graph :summary :total-sorrys]],
+      :trace/file "wm-trace-2026-09-02.edn",
+      :trace/index 1}
+     {:producer-contract :prediction-error/v1,
+      :channel :sorry-count-norm,
+      :status :absent,
+      :absent-member :observed,
+      :reason :source-field-missing,
+      :paths [[:graph :summary :total-sorrys]],
+      :trace/file "wm-trace-2026-09-02.edn",
+      :trace/index 2}]}}],
+ :node :R3a,
+ :corpus
+ {:root "data/wm-trace",
+  :read-only true,
+  :file-count 57,
+  :record-count 889},
+ :reference-independence
+ "The 14-channel carrier, 8-channel projection and caller refusal rule come only from R3a-carriers.edn. Production vars supply only node-under-test results.",
+ :carriers "holes/labs/wm-contract/sim/R3a-carriers.edn",
+ :stage-at "p4ng/empirics-futon/control-stages.edn:19",
+ :equation-registry
+ {:rows 0,
+  :evidence
+  "grep -n ':node :R3a' holes/labs/wm-contract/aif-equations.edn returned no matches"},
+ :slice 6,
+ :verdict :pass,
+ :declaration-sites
+ {:terminal-record "scripts/futon2/report/war_machine.clj:6225-6237",
+  :likelihood-channels "src/futon2/aif/belief.clj:919-934",
+  :consumer-contract "src/futon2/aif/precision.clj:160-175",
+  :current-belief "scripts/futon2/report/war_machine.clj:6101-6107",
+  :observation-channels "src/futon2/aif/observation.clj:18-31",
+  :refusal-rule "scripts/futon2/report/war_machine.clj:6116-6128",
+  :envelope-producer "src/futon2/aif/free_energy.clj:280-295",
+  :scalar-producer "src/futon2/aif/free_energy.clj:203-278",
+  :r7-consumer "scripts/futon2/report/war_machine.clj:6132-6134",
+  :placement "p4ng/empirics-futon/control-stages.edn:19",
+  :projection "scripts/futon2/report/war_machine.clj:6113-6115"},
+ :row :V7}

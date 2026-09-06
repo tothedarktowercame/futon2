@@ -1,0 +1,42 @@
+;; Independent carrier transcription for V7 slice 6, mediator R3a.
+{:id :R3a-carriers-v1 :node :R3a :row :V7 :slice 6
+ :observation-channels
+ [:loop-health :support-coverage :attack-coverage :mission-health :stack-pct
+  :consulting-pct :portfolio-pct :mathematics-pct :active-repo-ratio
+  :sorry-count-norm :coupling-density :ticks-firing-ratio :depositing-signal
+  :annotation-health]
+ :likelihood-channels
+ [:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
+  :support-coverage :attack-coverage :coupling-density :ticks-firing-ratio]
+ :never-delivered
+ [:loop-health :stack-pct :consulting-pct :portfolio-pct :mathematics-pct
+  :depositing-signal]
+ :present-fixtures
+ [{:id :annotation-dyadic :channel :annotation-health :observed 0.75
+   :prediction {:mean 0.5 :variance 0.25}}
+  {:id :support-dyadic :channel :support-coverage :observed 0.25
+   :prediction {:mean 0.5 :variance 0.5}}
+  {:id :dyadic-variance-floor :channel :annotation-health :observed 0.75
+   :prediction {:mean 0.5 :variance 0.0} :opts {:min-variance 0.25}}]
+ :broken-models
+ [{:id :missing-mean :prediction {:variance 0.25} :offenders [:mean]}
+  {:id :nil-mean :prediction {:mean nil :variance 0.25} :offenders [:mean]}
+  {:id :infinite-mean :prediction {:mean ##Inf :variance 0.25} :offenders [:mean]}
+  {:id :missing-variance :prediction {:mean 0.5} :offenders [:variance]}
+  {:id :nil-variance :prediction {:mean 0.5 :variance nil} :offenders [:variance]}
+  {:id :infinite-variance :prediction {:mean 0.5 :variance ##Inf} :offenders [:variance]}
+  {:id :both-missing :prediction {} :offenders [:mean :variance]}
+  {:id :both-nonfinite :prediction {:mean ##Inf :variance ##-Inf}
+   :offenders [:mean :variance]}]
+ :declaration-sites
+ {:placement "p4ng/empirics-futon/control-stages.edn:19"
+  :observation-channels "src/futon2/aif/observation.clj:18-31"
+  :likelihood-channels "src/futon2/aif/belief.clj:919-934"
+  :scalar-producer "src/futon2/aif/free_energy.clj:203-278"
+  :envelope-producer "src/futon2/aif/free_energy.clj:280-295"
+  :current-belief "scripts/futon2/report/war_machine.clj:6101-6107"
+  :projection "scripts/futon2/report/war_machine.clj:6113-6115"
+  :refusal-rule "scripts/futon2/report/war_machine.clj:6116-6128"
+  :r7-consumer "scripts/futon2/report/war_machine.clj:6132-6134"
+  :terminal-record "scripts/futon2/report/war_machine.clj:6225-6237"
+  :consumer-contract "src/futon2/aif/precision.clj:160-175"}}
