@@ -45,3 +45,10 @@ start batch 1 now if waiting is worse than fidelity.
 
 **Answerable in one reply,** e.g.: "yes, batches 1-2, codex now" or "yes,
 batch 1 only, zai after reset" or "hold".
+
+## RULED (Joe, 2026-09-06, verbatim)
+
+"Let's run these on Codex only. Batches 1 and 2 both."
+
+Execution: A4 (batch 1) and A5 (batch 2, incl. ai4ci) minted; codex-18;
+sequential with claude-1 review between batches; batch 3 NOT commissioned.
