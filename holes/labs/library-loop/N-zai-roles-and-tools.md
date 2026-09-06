@@ -103,3 +103,38 @@ library-annotator against one cascade's refusal frontier, with all seven
 stages present as running code — as the concrete instance the abstract
 cells are measured against. One real dispatch that refuses and records
 beats six cells argued from prose.
+
+## 6. The operator-turn miner (Joe, 2026-09-06)
+
+Verbatim: "for the zaif loop... we would be mining the operator turns,
+looking for new ideas for harness tools and harness protocols that we
+could use in future Zaif runner applications."
+
+This closes a loop the note left open: sections 3-4 derived roles and
+tools from what the LOOP ROWS did by hand. The richer corpus is what the
+OPERATOR does by hand -- and PA11z just gave that corpus a measured
+meaning: the `:operator-turn` verdict marks lifecycle stages enacted only
+by turns. The miner is the discovery role over that quantity.
+
+- **Role: operator-turn-miner.** Sweep the recorded operator turns and
+  extract (a) recurring interventions -- things Joe does repeatedly that a
+  tool could refuse-or-record instead (each is a candidate harness tool,
+  and each maps onto an `:operator-turn` or `:absent` census cell);
+  (b) stated-but-unbuilt protocol ideas -- turns that describe a way of
+  working ("park on every dispatch", "decision sheets not counts") before
+  any code enforced it. Output: a candidate list with per-item verbatim
+  quotes and turn pointers, routed as PROPOSALS, never as board rows --
+  what becomes a tool is a lane-owner or operator decision.
+- **Corpus, in evidence order:** (1) the curated verbatims already in
+  EPIC-run-era.md and the rulings registries (cheap, high-signal);
+  (2) the raw session records under ~/.claude/projects/*/ where every
+  emacs-repl turn with Caller: joe is preserved per agent; (3) the
+  agency job prompts where operator text was forwarded. The miner cites
+  turn + date the way the annotator cites file:line.
+- **Join with Box-12:** the miner's finding rate should FALL as the
+  track closes cells -- interventions it keeps finding are cells the
+  track has not reached. That makes it a measuring instrument for the
+  same headline number, from the demand side.
+- **Runtime:** this one genuinely wants a zai seat (it is reading Joe's
+  prose, the role-fidelity case claude-2 named); schedule after the zai
+  quota reset 2026-09-08.
