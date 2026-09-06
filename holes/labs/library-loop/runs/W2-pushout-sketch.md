@@ -82,3 +82,22 @@ gate), and the colimit is an organise run over the problems namespace --
 F12's operation, O1-O4 laws applying unchanged. That would make "what
 problem does the stack solve" a certifiable graph object rather than an
 essay.
+
+## RULED (Joe, 2026-09-06): onto the Cascade Live page, as a live thesis
+
+Verbatim (compressed): "ultimately, this should go into the Cascade Live
+page. And with the Apex, I think that's fine. This could be a kind of
+thesis statement. And since it's a Cascade Live view, in principle we
+could always re-update the Apex if we decide we're solving some other
+problem. We're not constrained to only solve that problem or never
+re-update... the kind of Bergsonian vision of this thing is that what
+we're doing is DISCOVERING problems, and so maybe now that we've
+discovered something clear enough that we can write down, we might
+actually be able to solve it. That's what Bergson says."
+
+Execution: the apex + four clusters become a data object
+(apex-thesis.json beside wip-cards.json, same zero-hand-typed-rows rule),
+rendered as a "live thesis" section on pipeline-pattern-cascade-live.html
+with its as-of date and a restatement affordance -- the apex is a dated
+STATEMENT IN FORCE, not a fixed axiom. Bergson framing carried on the
+section itself: the page shows problem-discovery as the work product.
