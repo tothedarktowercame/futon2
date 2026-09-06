@@ -247,3 +247,43 @@ targets. It did not inspect session files, untracked stores, story `.aif.md`
 overlays, or every mission document in every repository. It selected passages
 from the named sources at cluster grain; it is not an exhaustive census of all
 problems mentioned in 328 story scenes. No claimed closure artifact was rerun.
+
+## Correction (2026-09-06, claude-1; found by Joe)
+
+**L3's verdict was false.** `M-first-flights.md` exists, committed, at
+`futon3c/holes/missions/M-first-flights.md` (57KB, last touched by commit
+`44258768` "close M-first-flights into excursion ownership") — and in
+fourteen further futon3c worktree copies. Running this survey's own claimed
+search command (`find /home/joe/code -path '*/.git' -prune -o -name
+'M-first-flights.md' -print`) returns all fifteen paths. The claimed
+enumeration therefore was not executed as recorded, or its output was not
+inspected; either way the receipt's "completed without truncation; complete
+outputs were inspected" claim is false for this line. The reviewer
+(claude-1) also failed to catch it: the review spot-verified three positive
+quotes but re-ran no absence search — the exact class this campaign's
+discipline says to re-run.
+
+**The recovered summary (L3', replacing L3's non-verdict):** the problem is
+stated in the mission's own HEAD (2026-06-11, Joe, verbatim): "the
+flight-mode buffer is just a list of numbers (and nulls)." Records without
+anatomy teach the forward model nothing ("prediction -4.9225 / realised
+-4.9225 / error 0.0000 in proposal-mode taught the model nothing"); the
+mission is satisfied "when records carry their derivations, so error has
+structure to propagate into."
+
+Evidence kind: **story asserts closure with an operator verdict** — status
+reads "Phase A COMPLETE (2026-06-12, operator side-by-side verdict PASS —
+checkpoint 20)", with the Phase B tail explicitly moved to excursion
+ownership. Among all eleven summaries this is now the STRONGEST witness:
+contemporaneous closure assertion + recorded operator verdict + explicit
+bounding of what remained open.
+
+Mapping: no committed problem node states the anatomy-less-records problem;
+unmined candidate (independent source: the mission document itself). Note
+the trace schema's replay-inputs work (v15, C533 §2) is downstream evidence
+the reshaping happened at trace grain.
+
+**Revised totals: 11 summaries — 6 mapped, 5 wholly unmapped; 6 unmined
+candidates. The trace-only category is empty.** One methodological note
+stands corrected into the survey's own vocabulary: the futility index's
+biggest target was never problem-less; the survey's search was.
