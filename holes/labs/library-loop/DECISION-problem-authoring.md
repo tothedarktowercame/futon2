@@ -76,3 +76,31 @@ ADJUDICATION -- accepted with a typed distinction, not reverted:
   37 served, 4 reach only through self-derived nodes.
 
 Overridable by Joe; recorded here rather than blocking on him.
+
+## Refinement (Joe, 2026-09-06): witnessed problems, not just stated ones
+
+Verbatim (compressed): problems ARE supposed to be encoded inside patterns,
+but the in-pattern HOWEVER/BECAUSE statements are "conceptual, or let's say
+theoretical... we don't necessarily know that we've actually solved that
+problem." For the what-problems-are-we-solving question, "take some
+patterns and look back and see, was there an actual solution?" -- at the
+level of MISSION CLUSTERS and historical work, "even if the specific
+patterns we used weren't cited in missions." Witnessing sources named:
+(1) the top half of the live cascade (mission clusters -- what problems
+were we solving there, and do the design patterns evidence them);
+(2) the what-problems-are-we-solving paper's clustered areas of endeavor;
+(3) vsat arcs -- "a live updating documentation surface for the whole
+futon stack" with contemporaneous summaries of what problems we felt we
+were solving (located: futon4/README-vsatarcs.md, reader over ~102
+scene-form stories in futon5a/holes/stories/, each with an .aif.edn
+annotation overlay).
+
+CONSEQUENCE. The problem graph gains a SECOND typed dimension, orthogonal
+to source-class: witness-class. A problem node is *stated* (its text
+exists, committed) vs *witnessed* (historical work evidences an actual
+solution, with pointers). This is the readiness ladder's formula-vs-
+witnessed distinction applied at problem grain, and it serves Joe's
+theory-track ruling ("mining the evidence landscape... what problems we
+have been solving historically"). Role: **solution-witness** (roles note
+section 7). Discovery round dispatched read-only; witnessing annotations
+only after review.

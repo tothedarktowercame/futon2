@@ -138,3 +138,19 @@ by turns. The miner is the discovery role over that quantity.
 - **Runtime:** this one genuinely wants a zai seat (it is reading Joe's
   prose, the role-fidelity case claude-2 named); schedule after the zai
   quota reset 2026-09-08.
+
+## 7. The solution-witness (Joe, 2026-09-06)
+
+The in-pattern problem statements are conceptual; whether the problem was
+ACTUALLY SOLVED is a separate, evidence-bearing question. The
+solution-witness role reconstructs, at mission-cluster grain, which
+problems historical work actually solved, and attaches witness pointers
+to problem nodes. Sources: cascade-live mission clusters; the
+what-problems-are-we-solving paper's endeavor clusters; the vsatarcs
+story anthology (futon5a/holes/stories/, contemporaneous, AIF-annotated).
+Vocabulary: witness-class stated | witnessed, orthogonal to source-class
+independent | self-derived. A node can be independent-but-unwitnessed
+(someone else stated it, nobody solved it) or self-derived-but-witnessed
+(the pattern stated its own problem AND the work record shows it solved) --
+the second is redeemed by evidence, which is the honest repair for the A4
+self-derivation concern.
