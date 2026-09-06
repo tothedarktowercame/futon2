@@ -1,0 +1,31 @@
+;; Independent carrier transcription for V7 slice 7, node R7.
+{:id :R7-carriers-v1 :node :R7 :row :V7 :slice 7
+ :defaults {:window-size 20 :min-variance 0.01 :initial-precision 1.0
+            :prior-variance 1.0 :prior-strength 1.0 :need-scale 5.0
+            :floor 0.1 :cap 200.0 :salience-mode :separate}
+ :likelihood-channels
+ [:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
+  :support-coverage :attack-coverage :coupling-density :ticks-firing-ratio]
+ :unclamped-fixtures
+ [{:id :zero-error :channel :annotation-health :history [0.0] :observed 0.75}
+  {:id :unit-error :channel :annotation-health :history [1.0] :observed 0.75}]
+ :floor-fixture {:channel :annotation-health :history [5.0] :observed 0.75}
+ :constant-fixture {:channel :annotation-health :history [1.0 1.0] :observed 0.75}
+ :wide-window-fixture {:window-size 200 :history-count 200 :error 0.0}
+ :window-fixture {:window-size 3 :prior-history [1.0 2.0 3.0] :new-error 4.0
+                  :expected [2.0 3.0 4.0]}
+ :need-fixture {:channel :annotation-health :error 0.5 :observed 0.0}
+ :declaration-sites
+ {:registry "holes/labs/wm-contract/aif-equations.edn:86-91"
+  :eps0 "holes/labs/wm-contract/aif-equations.edn:68"
+  :defaults "src/futon2/aif/precision.clj:42-55"
+  :field-status "src/futon2/aif/precision.clj:57-67"
+  :variance "src/futon2/aif/precision.clj:73-85"
+  :channel-update "src/futon2/aif/precision.clj:116-158"
+  :state-update "src/futon2/aif/precision.clj:160-193"
+  :weighted-error "src/futon2/aif/precision.clj:212-233"
+  :carry "scripts/futon2/report/war_machine.clj:6064-6066"
+  :tick "scripts/futon2/report/war_machine.clj:6130-6139"
+  :salience-resolver "scripts/futon2/report/war_machine.clj:849-855"
+  :emission "scripts/futon2/report/war_machine.clj:6228-6230"
+  :route "scripts/futon2/report/war_machine.clj:6244-6246"}}
