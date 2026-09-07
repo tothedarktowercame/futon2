@@ -1,0 +1,80 @@
+{:arm-declarations
+ {"FindExcludesRecordedZeroMass" 59,
+  "findAllBut" 72,
+  "findAllButConformant" 80,
+  "findAllButFailsReadingB" 207,
+  "findAllButFalsifiable" 111,
+  "findAllButPairDisagreesExactlyOnTheTwoZeroMassMembers" 225,
+  "findDischargeExists" 49,
+  "findDischargeExistsReadingA" 54,
+  "findDischargeExistsReadingB" 65,
+  "findDischargeNotUniqueReadingA" 120,
+  "findDischargeNotUniqueReadingB" 149,
+  "findOpaqueNoBody" 249,
+  "findOpaqueRefusing" 242,
+  "findReadingAWitnessesAgreeOnFloor" 186,
+  "findReadingBWitnessesAgreeOnFloor" 169,
+  "findRefusingExcludesRecordedZeroMass" 140,
+  "findRefusingMeetsConformanceAndReadingA" 20,
+  "findSilent" 26,
+  "findSilentNotConformant" 35,
+  "findSnatchRepositoryNonempty" 45,
+  "findTypeNonempty" 16,
+  "findTypeNonemptyInstance" 245},
+ :basis
+ {:arm-module "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean",
+  :dark-tower-root "mathlib4/DarkTower",
+  :holes "mathlib4/DarkTower/WarMachine/Holes.lean"},
+ :failures [],
+ :hygiene {:axiom 0, :native-decide 0, :sorry 0},
+ :inertness
+ {:lean-files-scanned 153,
+  :occurrences-by-kind {:code 1, :prose 25, :registry-literal 1},
+  :prose-occurrences
+  [{:file "mathlib4/DarkTower/ExotypeGridPreregistration.lean",
+    :line 74}
+   {:file "mathlib4/DarkTower/MemoryAblationPreregistration.lean",
+    :line 213}
+   {:file "mathlib4/DarkTower/MemoryAblationPreregistration.lean",
+    :line 546}
+   {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean", :line 3}
+   {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean", :line 5}
+   {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 17}
+   {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 107}
+   {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 191}
+   {:file "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean",
+    :line 3}
+   {:file "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean",
+    :line 6}
+   {:file "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean",
+    :line 19}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 263}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 266}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 271}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 275}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 279}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 284}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 286}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 350}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 769}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 893}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 942}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 943}
+   {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 7804}
+   {:file "mathlib4/DarkTower/WarMachine/MachineDepth.lean",
+    :line 258}],
+  :registry-literal-line 8020,
+  :term-references-to-find 0},
+ :opacity
+ {:declarations
+  [{:line 242, :declaration "findOpaqueRefusing", :bodiless? false}
+   {:line 249, :declaration "findOpaqueNoBody", :bodiless? true}]},
+ :record :F11-slice-3-discharge-arm,
+ :required-declarations-present true,
+ :row :F11,
+ :takes-no-ruling
+ "This check prices arms; it does not choose one. It says nothing about which reading of F4 is correct, about F2's receipt carrier, or about what should be done with the sorry at Holes.lean:264.",
+ :the-sorry {:line 264, :still-a-sorry? true}}
