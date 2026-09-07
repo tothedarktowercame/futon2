@@ -1,0 +1,195 @@
+{:attribution
+ {:admitted-patterns
+  [:agent/handoff-preserves-context
+   :agent/trail-enables-return
+   :ai4ci/ai-core-function
+   :aif/no-self-certification
+   :features/operator-turns-enter-the-observation-vector
+   :forward-model/inhabit-supplies-labels
+   :math-formalization-CA/measure-integration-api
+   :math-formalization-CV/frontier-bound-from-arc-hypotheses
+   :math-formalization-CV/holomorphic-disk-api],
+  :admitted-vertices [11 12 13 14 15 16 17 18 19],
+  :entries 20,
+  :expected-admitted [11 12 13 14 15 16 17 18 19],
+  :expected-found [0 1 2 3 4 5 6 7 8 9 10],
+  :found-vertices [0 1 2 3 4 5 6 7 8 9 10],
+  :recomputed-from [:runs :widen-to-a-budget :cascade :provenance],
+  :rule-ids [:widen-the-cascade-only-on-evidence]},
+ :basis
+ {:arm
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12AttributionArm.lean",
+  :checks-dir "/home/joe/code/futon3/checks",
+  :conformance
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean",
+  :d1-arms
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12D1Arms.lean",
+  :holes "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean",
+  :raw-record "/home/joe/code/futon3/checks/zaif-cascade.edn",
+  :run :widen-to-a-budget,
+  :slice-7
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean",
+  :transcription
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/F12-organise/01-zaif-transcription.edn",
+  :zaif-basis "1b8b1d1"},
+ :carriers
+ {:arm-one
+  ["acyclic"
+   "addedByOrganise"
+   "admittedBy"
+   "edges"
+   "nodes"
+   "precedence"
+   "selected"],
+  :cascade ["acyclic" "addedByOrganise" "edges" "nodes" "precedence"],
+  :cascade-diff
+  ["actingOrderAfter"
+   "actingOrderBefore"
+   "addedByOrganise"
+   "admittedBy"
+   "authoredEdges"
+   "nodes"
+   "organisedEdges"
+   "precedenceAfter"
+   "precedenceBefore"
+   "scoreAfter"
+   "scoreBefore"
+   "selected"],
+  :o4-fields-absent-from-arm-one
+  ["actingOrderAfter"
+   "actingOrderBefore"
+   "precedenceAfter"
+   "precedenceBefore"
+   "scoreAfter"
+   "scoreBefore"]},
+ :clauses
+ {:added-over-slice-7 [:oattr],
+  :attributing
+  {:o1
+   "∀ t sel repo prov, (f t sel repo prov).nodes = sel ∪ (f t sel repo prov).addedByOrganise ∪ (f t sel repo prov).admittedBy",
+   :o2
+   "∀ t sel repo prov u v, (f t sel repo prov).edges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo prov u v, (f t sel repo prov).edges u v ↔ fastForward (f t sel repo prov).nodes repo.standsOn u v",
+   :oattr
+   "∀ t sel repo prov, (f t sel repo prov).admittedBy = {p | (prov p).isSome}",
+   :osel "∀ t sel repo prov, (f t sel repo prov).selected = sel"},
+  :inherited-that-moved [],
+  :sans-attr
+  {:o1
+   "∀ t sel repo prov, (f t sel repo prov).nodes = sel ∪ (f t sel repo prov).addedByOrganise ∪ (f t sel repo prov).admittedBy",
+   :o2
+   "∀ t sel repo prov u v, (f t sel repo prov).edges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo prov u v, (f t sel repo prov).edges u v ↔ fastForward (f t sel repo prov).nodes repo.standsOn u v",
+   :osel "∀ t sel repo prov, (f t sel repo prov).selected = sel"},
+  :slice-7
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise ∪ (f t sel repo).admittedBy",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).edges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).edges u v ↔ fastForward (f t sel repo).nodes repo.standsOn u v",
+   :osel "∀ t sel repo, (f t sel repo).selected = sel"}},
+ :declarations
+ {:determined true,
+  :determined-at-the-record true,
+  :mirror-refuted true,
+  :policy-cascade true,
+  :predicate true,
+  :provenance-silent-on-selected true,
+  :provenance-support true,
+  :provenance-transcription true,
+  :review-agree-on-edges true,
+  :review-agree-on-nodes true,
+  :review-mirror-without-the-clause true,
+  :review-nonvacuity true,
+  :review-predicate-without-the-clause true,
+  :review-provenance-range true,
+  :review-split-survives true,
+  :review-temperament-refuted-generally true,
+  :review-witness-without-the-clause true,
+  :rule-inductive true,
+  :signature true,
+  :temperament-refuted true,
+  :witness true,
+  :witness-conformant true},
+ :organise-type
+ {:admitting "Cascade Policy → Set P → Repository P → ArmOneCascade P",
+  :attributing
+  "Cascade Policy → Set P → Repository P → (P → Option Rule) → ArmOneCascade P",
+  :expected-attributing
+  "Cascade Policy → Set P → Repository P → (P → Option Rule) → ArmOneCascade P",
+  :in-holes "Cascade Policy → Set P → Repository P → Cascade P"},
+ :pins
+ {"DarkTower/WarMachine/Holes.lean"
+  {:actual "61c4825dc3e373fd1b761b800814bf85f5770b88",
+   :expected "61c4825dc3e373fd1b761b800814bf85f5770b88"},
+  "DarkTower/WarMachine/holes-contract.json"
+  {:actual "50fa53469ab23c68e620aa2fd316315a9015dcb1",
+   :expected "50fa53469ab23c68e620aa2fd316315a9015dcb1"}},
+ :problems [],
+ :rule-grain
+ {:corpus
+  {"alfworld-cascade.edn"
+   {:admissions 3,
+    :provenance-maps 2,
+    :rule-ids [:widen-the-cascade-only-on-evidence]},
+   "ants-cascade.edn"
+   {:admissions 1,
+    :provenance-maps 2,
+    :rule-ids [:widen-the-cascade-only-on-evidence]},
+   "construct-cascade.edn"
+   {:admissions 0, :provenance-maps 0, :rule-ids []},
+   "open-cascade-short-cue.edn"
+   {:admissions 69,
+    :provenance-maps 10,
+    :rule-ids [:widen-the-cascade-only-on-evidence]},
+   "open-cascade.edn"
+   {:admissions 3,
+    :provenance-maps 10,
+    :rule-ids [:widen-the-cascade-only-on-evidence]},
+   "retrodiction-cascade-per-clause.edn"
+   {:admissions 57,
+    :provenance-maps 10,
+    :rule-ids [:widen-the-cascade-only-on-evidence]},
+   "retrodiction-cascade.edn"
+   {:admissions 65,
+    :provenance-maps 10,
+    :rule-ids [:widen-the-cascade-only-on-evidence]},
+   "snatch-cascade.edn"
+   {:admissions 0, :provenance-maps 0, :rule-ids []},
+   "zaif-cascade.edn"
+   {:admissions 15,
+    :provenance-maps 2,
+    :rule-ids [:widen-the-cascade-only-on-evidence]}},
+  :corpus-admissions 213,
+  :corpus-rule-ids [:widen-the-cascade-only-on-evidence],
+  :distinct-rule-ids-in-the-corpus 1,
+  :note
+  "every admission in every provenance map under futon3:checks names one rule id, so on all recorded data the attribution input is indistinguishable from a boolean admitted-or-not flag",
+  :records-without-provenance
+  ["construct-cascade.edn" "snatch-cascade.edn"]},
+ :temperament
+ {:keys
+  [:holds?
+   :same-shared-nodes?
+   :same-shared-precedence?
+   :same-shared-rules?
+   :shared-nodes
+   :stops
+   :stops-differ?],
+  :nodes [:halt-on-budget :widen-the-cascade-only-on-evidence],
+  :pattern-keyed-maps [],
+  :precedence
+  {:halt-on-budget 1, :widen-the-cascade-only-on-evidence 2},
+  :shared-nodes [:widen-the-cascade-only-on-evidence],
+  :stops [:halt-on-budget]},
+ :transcription
+ {:policy-cascade-nodes
+  ["haltOnBudget" "widenTheCascadeOnlyOnEvidence"],
+  :policy-cascade-precedence
+  ["haltOnBudget" "widenTheCascadeOnlyOnEvidence"],
+  :provenance-body
+  "if 11 ≤ n ∧ n < 20 then some .widenTheCascadeOnlyOnEvidence else none",
+  :rule-constructors ["haltOnBudget" "widenTheCascadeOnlyOnEvidence"]}}
