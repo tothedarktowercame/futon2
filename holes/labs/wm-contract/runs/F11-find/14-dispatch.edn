@@ -1,0 +1,148 @@
+{:record :F11-slice-8-dispatch
+ :date "2026-09-07"
+ :row :F11
+ :slice "8 -- the REMAINDER MECHANISED: which obligations of :F11's acceptance are
+         unmet at HEAD, and is each unmet one gated on a REGISTERED UNDECIDED
+         choice"
+ :dispatched-to "codex-1"
+ :from "wm-build-work"
+ :job-id :recorded-at-dispatch-time-below
+ :packet-goal
+ "One new checker holes/labs/wm-contract/f11_remainder_check.bb, modelled on
+  f11_remainder_check.bb's sibling f12_remainder_check.bb (386 lines), writing
+  runs/F11-find/14-remainder.edn. It decomposes :F11's :acceptance into
+  obligations ANCHORED to verbatim substrings of the acceptance text, decides for
+  each whether it is SATISFIED at HEAD, and for each unmet obligation decides
+  whether it is GATED on a choice that is registered in aif-equations.edn
+  :choices with :status :observed-not-decided and no :ruling key -- with the gate
+  QUOTED FROM THE LIVE REGISTRY ENTRY so the gate is checked and not asserted."
+ :why-this-slice-exists
+ "Slice 7's NEXT SLICE note ends the row with a PROSE CLAIM: `nothing in the
+  acceptance is left that a lane can take without a ruling` and `the row is
+  waiting on Joe, not on work`. Setting :F11 to :blocked on the strength of that
+  sentence would be the ledger accepting an assertion where it demands a run
+  record everywhere else. The sibling row :F12 did not do that: it mechanised the
+  same claim into runs/F12-organise/15-remainder.edn (:remainder-fully-gated?
+  true, :obligations-not-satisfied-and-not-gated []) and its :blocker cites the
+  artifact rather than restating it (worklist.edn :F12 :blocker). This slice owes
+  :F11 the same artifact. Registering a choice or an arm is NOT a ruling -- this
+  row has registered three -- so an unmet obligation with no gate is LANE WORK,
+  not Joe's."
+ :premise-recorded-before-the-result
+ {:premise
+  "PREMISE: every unmet obligation of :F11's acceptance is gated on one of the
+   three registered undecided choices :find-sorry, :find-f2-receipt-carrier and
+   :find-f4-reading, so :obligations-not-satisfied-and-not-gated is EMPTY and the
+   row is correctly :blocked on Joe."
+  :verified-by-the-lane-before-dispatch
+  {:three-choices-registered-priced-and-unruled
+   "aif-equations.edn :choices -- :find-sorry :status :observed-not-decided, no
+    :ruling key, 6 arms, 0 with an unmeasured or absent :buys/:costs;
+    :find-f2-receipt-carrier same, 5 arms, 0 unmeasured; :find-f4-reading same,
+    5 arms, 0 unmeasured. Read from the committed file at futon2 96302394."
+   :sorry-still-there
+   "mathlib4 DarkTower/WarMachine/Holes.lean last commit
+    61c4825dc3e373fd1b761b800814bf85f5770b88; `def find {State P : Type*} :
+    Tension State -> Repository P -> FindResult P := sorry` at :264."
+   :slice-7-landed
+   "mathlib4 37f245c9c2 (codex-2) + b28f182f00 (review) are both in the log and
+    DarkTower/WarMachine/F11NonSelfCertifying.lean is present."}
+  :two-named-candidate-REFUTERS-the-check-must-adjudicate
+  "Written down before the work so that finding them is not back-fitted, and so
+   that NOT finding them is a result. The lane already holds two reasons the
+   premise may be FALSE, and the checker must decide both from the artifacts
+   rather than inherit this list as an answer:
+   (i) `each witnessed on a real find over the committed library`. Every witness
+   in the F11 family is proved over the PINNED 18-pattern transcription, while
+   C559 (slice 1) measured the live futon3 library at 24 snatch patterns and
+   recorded that the pinned fixture no longer reproduces its receipts (96 of 96
+   differ in :if-lines/:however-lines). C563 :not-claimed states the pin-vs-live
+   divergence `belongs to C500 s3's fixture-pin defect`. A DEFECT IS NOT A
+   REGISTERED CHOICE. If this obligation is unmet, it may be unmet and UNGATED.
+   (ii) F3's citation blindness. Slice 7 recorded, under NOTED NOT ACTED ON, that
+   :find-sorry's sixth arm :amend-the-carrier is priced over the F2 and F4 halves
+   ONLY and carries no citation field, so the amendment AS PRICED would leave the
+   blindness slice 7 measured (F11NonSelfCertifying.lean:351) in place. If
+   `laws stated in Lean` is unmet on F3's account, the gate for it may not exist
+   as a priced arm -- and completing a pricing is lane work."
+  :what-refutation-would-mean
+  "If either candidate is adjudicated UNMET AND UNGATED, slice 7's closing claim
+   is refuted, :F11 is NOT waiting on Joe, and the row's next slice is the work
+   the check names. If both are adjudicated satisfied or gated, the premise
+   holds, the artifact licenses :blocked, and slice 9 is the decision sheet."}
+ :measurements-asked
+ {:M1 "The DECOMPOSITION, anchored not invented. Read :F11's :acceptance from
+       worklist.edn. Split it into clauses and locate each obligation by a
+       VERBATIM SUBSTRING of that acceptance, recording the substring and its
+       character offset, exactly as f12_remainder_check.bb:26-31 and :86-96 do.
+       An obligation whose substring is not found is a script FAILURE, not a
+       measurement -- the decomposition must be provably a decomposition of the
+       committed text."
+  :M2 "SATISFACTION, decided from the tree. For each obligation decide satisfied
+       / not-satisfied from artifacts under mathlib4 DarkTower/WarMachine/ and
+       runs/F11-find/, each verdict carrying its file:line or run-record pointer,
+       or `not found`. Absence of a witness is a MEASUREMENT, not an error
+       (f12_remainder_check.bb:61-68 states that rule); do not throw on it."
+  :M3 "GATING, with the gate QUOTED FROM THE LIVE REGISTRY. For each unmet
+       obligation name the choice key that gates it and a fragment of that
+       entry's :question, and CHECK the fragment against the live
+       aif-equations.edn before it may count as a gate -- f12_remainder_check.bb
+       :33-45 is the pattern and its comment states why. A gate whose fragment no
+       longer occurs in the live entry must FAIL, not silently pass. A gating
+       choice must additionally be verified :observed-not-decided with no :ruling
+       key; a RULED choice does not gate anything."
+  :M4 "THE VERDICT, and it must be able to come out FALSE. Emit
+       :obligations-not-satisfied-and-not-gated as an explicit vector and
+       :remainder-fully-gated? as its emptiness. Adjudicate the two named
+       candidate refuters (i) and (ii) above EXPLICITLY, each as its own key with
+       its own pointers, and record the verdict whichever way it falls. Do not
+       tune the obligation set until the vector empties -- if the honest
+       decomposition leaves an obligation unmet and ungated, THAT IS THE RESULT."
+  :M5 "Determinism: the artifact reproduces BYTE-IDENTICALLY over two runs, and
+       the checker reports its own sha256."}
+ :inhabitance-and-nondegeneracy-floor-demanded-in-advance
+ "This is the NINTH consecutive slice across :F11/:F12 in which review has had to
+  supply this floor, and this slice's degenerate failure has a specific shape:
+  a checker that computes :remainder-fully-gated? true VACUOUSLY -- by an
+  obligation set so coarse that nothing can be unmet, by a gating table that
+  matches any choice, or by treating `no witness found` as `satisfied`. So:
+  every obligation must be shown SEPARATING, by a control that makes exactly that
+  obligation flip; the gating fragments must be shown checked, by a control that
+  perturbs a fragment and observes the FAILURE; and the verdict must be shown
+  able to be false, by a control that removes a gate and observes
+  :remainder-fully-gated? go false with the obligation named in the vector."
+ :out-of-scope-in-the-packet
+ ["editing mathlib4 DarkTower/WarMachine/Holes.lean -- it stays at 61c4825dc3 and
+   the sorry at :264 stays"
+  "any new Lean file: this slice writes no Lean and proves no theorem"
+  "aif-equations.edn and control-map-edges.edn -- this slice READS the registry
+   and writes to neither; registering a new choice or arm, if the measurement
+   turns out to warrant one, is the lane's to do after review"
+  "any ruling: this slice takes no decision and recommends no arm"
+  "the DECISION SHEET -- that is slice 9 and it reads this slice's artifact, as
+   f12_decision_sheet.bb reads runs/F12-organise/15-remainder.edn"
+  "editing the :F11 worklist row: the ledger line is the lane's"
+  "gen_aif_dag.bb (TN 9a)"]
+ :gates-required
+ ["bb f11_remainder_check.bb runs clean and writes runs/F11-find/14-remainder.edn"
+  "the artifact is BYTE-IDENTICAL over two consecutive runs; report its sha256"
+  "negative controls in f11_remainder_controls.sh: at least 6 planted defects,
+   each located by DECLARATION or KEY NAME not line number, each verified present
+   AND its replaced text verified absent, each with the observed failure quoted;
+   at least one must drive :remainder-fully-gated? to FALSE and at least one must
+   drive a gating-fragment check to FAIL"
+  "bash p4ng/empirics-futon/negative_controls.sh PASS"
+  "bb p4ng/empirics-futon/pointer_check.bb -- 0 unresolved; every file:line the
+   artifact emits must resolve"
+  "mathlib4 Holes.lean unchanged at 61c4825dc3e373fd1b761b800814bf85f5770b88 and
+   :264 still `:= sorry`"
+  "worktree clean after commit; bell wm-build-work back with a summary, the
+   commit shas, the artifact sha256, and -- stated plainly whichever way it falls
+   -- whether :remainder-fully-gated? came out true or false and what is in
+   :obligations-not-satisfied-and-not-gated"]
+ :reviewer-half-still-owed
+ ["f11_remainder_controls_checker.sh -- plants against the CHECKER, each moving
+   exactly one verdict"
+  "independent re-adjudication of candidate refuters (i) and (ii)"
+  "C566 findings doc"
+  "the ledger progress line and the row's status"]}
