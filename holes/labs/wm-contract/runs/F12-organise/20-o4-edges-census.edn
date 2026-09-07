@@ -1,0 +1,505 @@
+{:any-record-carries-both-basis
+ [:construct
+  :zaif
+  :ants
+  :alfworld
+  :snatch
+  :open
+  :open-short-cue
+  :retrodiction
+  :retrodiction-per-clause
+  :mining-exemplar],
+ :any-record-carries-both? false,
+ :check :F12-o4-edges-census,
+ :disagreements-with-slice-1
+ [{:record-id :construct,
+   :slice-1
+   {:reading :absent,
+    :pointer
+    "futon2:holes/labs/wm-contract/runs/F12-organise/00-census.edn:96"},
+   :recomputed
+   {:reading :not-exercised,
+    :pointers
+    ["futon3:checks/construct-cascade.edn:187"
+     "futon3:checks/construct-cascade.edn:266"]},
+   :correct :recomputed,
+   :basis "run-record-id :construct"}],
+ :futon3-pin
+ {:value "cdb5e8a56fd907beb6a99f8b88af9de50ff93126",
+  :pointer "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:6"},
+ :gate-records
+ [{:record-id :zaif-gate,
+   :source "futon3c:holes/zaif-cascade-gate.edn",
+   :o4-locations ["[:o4]"],
+   :o4-pointers ["futon3c:holes/zaif-cascade-gate.edn:147"]}
+  {:record-id :zaif-gate-holdout,
+   :source "futon3c:holes/zaif-cascade-gate-holdout.edn",
+   :o4-locations ["[:o4]"],
+   :o4-pointers ["futon3c:holes/zaif-cascade-gate-holdout.edn:141"]}
+  {:record-id :cascade-authority-gate,
+   :source "futon2:holes/cascade-authority-gate.edn",
+   :o4-locations ["[:o4]"],
+   :o4-pointers ["futon2:holes/cascade-authority-gate.edn:1"]}],
+ :not-exercised-causes
+ {:not-exercised-fewer-than-two-members-carry-a-play-grain-rule
+  {:class :measured,
+   :pointer "futon3c/scripts/zaif_cascade_gate.clj:549-554"},
+  :not-exercised-nothing-is-played
+  {:class :unconditional,
+   :pointers
+   ["futon3:checks/construct_cascade.clj:735"
+    "futon3:checks/construct_open_cascade.clj:284"
+    "futon3:checks/construct_retrodiction_cascade.clj:335"]},
+  :not-exercised-no-authority-gate-and-alfworld-is-not-installed
+  {:class :unconditional,
+   :pointer "futon3:checks/construct_alfworld_cascade.clj:352"}},
+ :plants
+ [{:plant :reverse-o4,
+   :landed? true,
+   :verdict false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+  {:plant :move-o4,
+   :landed? true,
+   :verdict false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+  {:plant :zero-edge,
+   :landed? true,
+   :verdict false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+  {:plant :swap-counterfactual,
+   :landed? true,
+   :verdict false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+  {:plant :drop-record,
+   :landed? true,
+   :verdict false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+  {:plant :shift-pointer,
+   :landed? true,
+   :verdict false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}],
+ :premises
+ [{:id :i,
+   :holds? true,
+   :basis [:ants],
+   :pointers
+   ["futon3:checks/ants-cascade.edn:3"
+    "futon3:checks/ants-cascade.edn:79-105"]}
+  {:id :ii,
+   :holds? true,
+   :basis [:construct :snatch],
+   :pointers
+   ["futon2:holes/labs/wm-contract/runs/F12-organise/00-census.edn:96"
+    "futon3:checks/construct-cascade.edn:187"
+    "futon3:checks/construct-cascade.edn:266"
+    "futon2:holes/labs/wm-contract/runs/F12-organise/00-census.edn:173"]}
+  {:id :iii,
+   :holds? true,
+   :basis [:retrodiction],
+   :pointers
+   ["futon3:checks/retrodiction-cascade.edn:6742-6744"
+    "futon3:checks/retrodiction-cascade.edn:34090"]}
+  {:id :iv,
+   :holds? true,
+   :basis [:zaif :construct :open :retrodiction :alfworld],
+   :pointers
+   ["futon3c/scripts/zaif_cascade_gate.clj:549-554"
+    "futon3:checks/construct_cascade.clj:735"
+    "futon3:checks/construct_open_cascade.clj:284"
+    "futon3:checks/construct_retrodiction_cascade.clj:335"
+    "futon3:checks/construct_alfworld_cascade.clj:352"]}],
+ :records
+ [{:record-id :construct,
+   :source "futon3:checks/construct-cascade.edn",
+   :o4-shape
+   {:shape :not-exercised,
+    :recorded-reason :not-exercised-nothing-is-played,
+    :placement :per-run,
+    :key-paths
+    ["[:runs :widen-to-a-budget :o4]"
+     "[:runs :widen-to-the-marginal-gain-floor :o4]"],
+    :pointers
+    ["futon3:checks/construct-cascade.edn:187"
+     "futon3:checks/construct-cascade.edn:266"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path "[:runs :widen-to-a-budget :cascade-edges]",
+      :count 5,
+      :pointer "futon3:checks/construct-cascade.edn:183"}
+     {:key-path
+      "[:runs :widen-to-the-marginal-gain-floor :cascade-edges]",
+      :count 5,
+      :pointer "futon3:checks/construct-cascade.edn:262"}],
+    :counterfactual
+    [{:key-path
+      "[:runs :widen-to-a-budget :prior-separation :edges-if-the-prior-relation-were-used]",
+      :count 12,
+      :pointer "futon3:checks/construct-cascade.edn:191"}
+     {:key-path
+      "[:runs :widen-to-the-marginal-gain-floor :prior-separation :edges-if-the-prior-relation-were-used]",
+      :count 11,
+      :pointer "futon3:checks/construct-cascade.edn:270"}]},
+   :carries-both? false}
+  {:record-id :zaif,
+   :source "futon3:checks/zaif-cascade.edn",
+   :o4-shape
+   {:shape :not-exercised,
+    :recorded-reason
+    :not-exercised-fewer-than-two-members-carry-a-play-grain-rule,
+    :placement :top-level,
+    :key-paths ["[:o4]"],
+    :pointers ["futon3:checks/zaif-cascade.edn:167"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path "[:runs :widen-to-a-budget :cascade-edges]",
+      :count 1,
+      :pointer "futon3:checks/zaif-cascade.edn:298"}
+     {:key-path
+      "[:runs :widen-to-the-marginal-gain-floor :cascade-edges]",
+      :count 1,
+      :pointer "futon3:checks/zaif-cascade.edn:464"}],
+    :counterfactual
+    [{:key-path
+      "[:controls :degree-relation-authors-no-edge :edges-if-the-prior-relation-were-used]",
+      :count 28,
+      :pointer "futon3:checks/zaif-cascade.edn:19"}]},
+   :carries-both? false}
+  {:record-id :ants,
+   :source "futon3:checks/ants-cascade.edn",
+   :o4-shape
+   {:shape :exercised-with-before-after-pair,
+    :recorded-reason "not found",
+    :placement :top-level,
+    :key-paths ["[:o4]"],
+    :pointers ["futon3:checks/ants-cascade.edn:79"]},
+   :has-before-after-pair? true,
+   :before-after-key-path "[:o4 :row]",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path "[:runs :widen-to-a-budget :cascade-edges]",
+      :count 0,
+      :pointer "futon3:checks/ants-cascade.edn:144"}
+     {:key-path
+      "[:runs :widen-to-the-marginal-gain-floor :cascade-edges]",
+      :count 0,
+      :pointer "futon3:checks/ants-cascade.edn:187"}],
+    :counterfactual []},
+   :carries-both? false}
+  {:record-id :alfworld,
+   :source "futon3:checks/alfworld-cascade.edn",
+   :o4-shape
+   {:shape :not-exercised,
+    :recorded-reason
+    :not-exercised-no-authority-gate-and-alfworld-is-not-installed,
+    :placement :top-level,
+    :key-paths ["[:o4]"],
+    :pointers ["futon3:checks/alfworld-cascade.edn:178"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path "[:runs :widen-to-a-budget :cascade-edges]",
+      :count 0,
+      :pointer "futon3:checks/alfworld-cascade.edn:227"}
+     {:key-path
+      "[:runs :widen-to-the-marginal-gain-floor :cascade-edges]",
+      :count 0,
+      :pointer "futon3:checks/alfworld-cascade.edn:275"}],
+    :counterfactual []},
+   :carries-both? false}
+  {:record-id :snatch,
+   :source "futon3:checks/snatch-cascade.edn",
+   :o4-shape
+   {:shape :absent,
+    :recorded-reason "not found",
+    :placement :absent,
+    :key-paths ["not found"],
+    :pointers ["not found"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts {:per-run [], :counterfactual []},
+   :carries-both? false}
+  {:record-id :open,
+   :source "futon3:checks/open-cascade.edn",
+   :o4-shape
+   {:shape :not-exercised,
+    :recorded-reason :not-exercised-nothing-is-played,
+    :placement :top-level,
+    :key-paths ["[:o4]"],
+    :pointers ["futon3:checks/open-cascade.edn:31717"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path
+      "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:6459"}
+     {:key-path
+      "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:6504"}
+     {:key-path
+      "[:items :ticket/fail-invoke-error :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:12781"}
+     {:key-path
+      "[:items :ticket/fail-invoke-error :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:12804"}
+     {:key-path
+      "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:19079"}
+     {:key-path
+      "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:19108"}
+     {:key-path
+      "[:items :wm/I4 :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:25382"}
+     {:key-path
+      "[:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:25405"}
+     {:key-path
+      "[:items :wm/RUN4 :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:31676"}
+     {:key-path
+      "[:items :wm/RUN4 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade.edn:31699"}],
+    :counterfactual []},
+   :carries-both? false}
+  {:record-id :open-short-cue,
+   :source "futon3:checks/open-cascade-short-cue.edn",
+   :o4-shape
+   {:shape :not-exercised,
+    :recorded-reason :not-exercised-nothing-is-played,
+    :placement :top-level,
+    :key-paths ["[:o4]"],
+    :pointers ["futon3:checks/open-cascade-short-cue.edn:33472"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path
+      "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:6494"}
+     {:key-path
+      "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:6741"}
+     {:key-path
+      "[:items :ticket/fail-invoke-error :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:13074"}
+     {:key-path
+      "[:items :ticket/fail-invoke-error :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:13289"}
+     {:key-path
+      "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-a-budget :cascade :edges]",
+      :count 1,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:19688"}
+     {:key-path
+      "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 4,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:19877"}
+     {:key-path
+      "[:items :wm/I4 :runs :widen-to-a-budget :cascade :edges]",
+      :count 4,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:26388"}
+     {:key-path
+      "[:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 4,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:26617"}
+     {:key-path
+      "[:items :wm/RUN4 :runs :widen-to-a-budget :cascade :edges]",
+      :count 5,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:33058"}
+     {:key-path
+      "[:items :wm/RUN4 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 6,
+      :pointer "futon3:checks/open-cascade-short-cue.edn:33275"}],
+    :counterfactual []},
+   :carries-both? false}
+  {:record-id :retrodiction,
+   :source "futon3:checks/retrodiction-cascade.edn",
+   :o4-shape
+   {:shape :not-exercised,
+    :recorded-reason :not-exercised-nothing-is-played,
+    :placement :top-level,
+    :key-paths ["[:o4]"],
+    :pointers ["futon3:checks/retrodiction-cascade.edn:34090"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path
+      "[:items :ticket/agency-desktop-save :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/retrodiction-cascade.edn:6535"}
+     {:key-path
+      "[:items :ticket/agency-desktop-save :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 1,
+      :pointer "futon3:checks/retrodiction-cascade.edn:6742"}
+     {:key-path
+      "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade :edges]",
+      :count 1,
+      :pointer "futon3:checks/retrodiction-cascade.edn:13430"}
+     {:key-path
+      "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 2,
+      :pointer "futon3:checks/retrodiction-cascade.edn:13829"}
+     {:key-path
+      "[:items :wm/AC6 :runs :widen-to-a-budget :cascade :edges]",
+      :count 3,
+      :pointer "futon3:checks/retrodiction-cascade.edn:20580"}
+     {:key-path
+      "[:items :wm/AC6 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 3,
+      :pointer "futon3:checks/retrodiction-cascade.edn:20801"}
+     {:key-path
+      "[:items :wm/C23 :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/retrodiction-cascade.edn:27279"}
+     {:key-path
+      "[:items :wm/C23 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/retrodiction-cascade.edn:27488"}
+     {:key-path
+      "[:items :wm/D0 :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/retrodiction-cascade.edn:33812"}
+     {:key-path
+      "[:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer "futon3:checks/retrodiction-cascade.edn:34047"}],
+    :counterfactual []},
+   :carries-both? false}
+  {:record-id :retrodiction-per-clause,
+   :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+   :o4-shape
+   {:shape :not-exercised,
+    :recorded-reason :not-exercised-nothing-is-played,
+    :placement :top-level,
+    :key-paths ["[:o4]"],
+    :pointers
+    ["futon3:checks/retrodiction-cascade-per-clause.edn:33974"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path
+      "[:items :ticket/agency-desktop-save :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:6544"}
+     {:key-path
+      "[:items :ticket/agency-desktop-save :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 1,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:6751"}
+     {:key-path
+      "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade :edges]",
+      :count 1,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:13439"}
+     {:key-path
+      "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 2,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:13838"}
+     {:key-path
+      "[:items :wm/AC6 :runs :widen-to-a-budget :cascade :edges]",
+      :count 3,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:20589"}
+     {:key-path
+      "[:items :wm/AC6 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 3,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:20810"}
+     {:key-path
+      "[:items :wm/C23 :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:27268"}
+     {:key-path
+      "[:items :wm/C23 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:27379"}
+     {:key-path
+      "[:items :wm/D0 :runs :widen-to-a-budget :cascade :edges]",
+      :count 0,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:33696"}
+     {:key-path
+      "[:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade :edges]",
+      :count 0,
+      :pointer
+      "futon3:checks/retrodiction-cascade-per-clause.edn:33931"}],
+    :counterfactual []},
+   :carries-both? false}
+  {:record-id :mining-exemplar,
+   :source
+   "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn",
+   :o4-shape
+   {:shape :not-exercised,
+    :recorded-reason "not found",
+    :placement :top-level,
+    :key-paths ["[:o4]"],
+    :pointers
+    ["futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:70"]},
+   :has-before-after-pair? false,
+   :before-after-key-path "not found",
+   :cascade-edge-counts
+   {:per-run
+    [{:key-path "[:edges]",
+      :count 2,
+      :pointer
+      "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:33"}],
+    :counterfactual []},
+   :carries-both? false}],
+ :scope
+ {:records
+  ["futon3:checks/construct-cascade.edn"
+   "futon3:checks/zaif-cascade.edn"
+   "futon3:checks/ants-cascade.edn"
+   "futon3:checks/alfworld-cascade.edn"
+   "futon3:checks/snatch-cascade.edn"
+   "futon3:checks/open-cascade.edn"
+   "futon3:checks/open-cascade-short-cue.edn"
+   "futon3:checks/retrodiction-cascade.edn"
+   "futon3:checks/retrodiction-cascade-per-clause.edn"
+   "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn"],
+  :gate-records
+  ["futon3c:holes/zaif-cascade-gate.edn"
+   "futon3c:holes/zaif-cascade-gate-holdout.edn"
+   "futon2:holes/cascade-authority-gate.edn"],
+  :pointer
+  "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:8-25"},
+ :verdict true,
+ :what-an-exemplar-would-need
+ {:finding
+  "one recorded cascade must contain a real cascade edge and an O4 before/after precedence pair over the same members",
+  :edge-shape-pointer
+  "futon3:checks/retrodiction-cascade.edn:6742-6744",
+  :pair-shape-pointer "futon3:checks/ants-cascade.edn:93-102",
+  :measured-gate-pointer
+  "futon3c/scripts/zaif_cascade_gate.clj:549-554"}}
