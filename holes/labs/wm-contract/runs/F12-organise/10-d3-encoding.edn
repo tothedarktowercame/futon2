@@ -1,0 +1,273 @@
+{:arm-a-new-construction
+ {:max-rule-carrying-members 2,
+  :plant-verified? true,
+  :primary-acting-order-changed? false,
+  :primary-o4-holds? false,
+  :primary-rounds 29,
+  :primary-score-after 14,
+  :primary-score-before 14,
+  :stayed-the-same
+  {:cohort-rounds 103,
+   :primary-rounds 29,
+   :contending-primary-rounds []}},
+ :arm-b-new-play-grain-encoding
+ {:fifth-rule-found? true,
+  :primary-o4-moved-to :exercised-false,
+  :contentions
+  [{:round 3,
+    :rules
+    [:math-strategy/missing-dependency-protocol
+     :aif/status-gated-belief-update]}
+   {:round 4,
+    :rules
+    [:math-strategy/missing-dependency-protocol
+     :aif/status-gated-belief-update]}
+   {:round 7,
+    :rules
+    [:math-strategy/missing-dependency-protocol
+     :aif/status-gated-belief-update]}],
+  :then-correspondence-failure-count 3,
+  :contentions-in-primary [],
+  :o4-holds? false,
+  :live-rounds
+  [1
+   2
+   3
+   4
+   5
+   6
+   7
+   8
+   9
+   10
+   11
+   12
+   13
+   14
+   15
+   16
+   17
+   18
+   19
+   20
+   21
+   22
+   23
+   24
+   25
+   26
+   27
+   28
+   29
+   30
+   31
+   32
+   33
+   34
+   35
+   36
+   37
+   38
+   39
+   40
+   41
+   42
+   43
+   44
+   45
+   46
+   47
+   48
+   49
+   50
+   51
+   52
+   53
+   54
+   55
+   56
+   57
+   58
+   59
+   60
+   61
+   62
+   63
+   64
+   65
+   66
+   67
+   68
+   69
+   70
+   71
+   72
+   73
+   74
+   75
+   76
+   77
+   78
+   79
+   80
+   81
+   82
+   83
+   84
+   85
+   86
+   87
+   88
+   89
+   90
+   91
+   92
+   93
+   94
+   95
+   96
+   97
+   98
+   99
+   100
+   101
+   102],
+  :fifth-rule-id :aif/status-gated-belief-update,
+  :primary-o4-moved-from :not-exercised,
+  :live-primary-rounds
+  [2
+   33
+   41
+   54
+   55
+   58
+   61
+   63
+   66
+   72
+   73
+   75
+   76
+   77
+   78
+   80
+   83
+   84
+   85
+   86
+   87
+   90
+   91
+   92
+   94
+   95
+   98
+   100
+   102],
+  :rules-not-in-the-cascade
+  [:war-machine/ambient-pattern-retrieval
+   :agent/budget-bounds-exploration
+   :agent/pause-is-not-failure],
+  :plant-verified? true,
+  :primary-rounds 29,
+  :stayed-the-same
+  {:primary-rounds 29,
+   :then-correspondence-failure-count 3,
+   :rules-not-in-the-cascade-remains-nonempty? true},
+  :o4
+  {:acting-order-after
+   [:aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update],
+   :acting-order-before
+   [:aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update
+    :aif/status-gated-belief-update],
+   :exercised? true,
+   :precedence-after [3 8],
+   :precedence-before [8 3],
+   :score-after 15,
+   :score-before 15,
+   :score-is
+   "rounds on which the arm agrees with the transcript oracle"}},
+ :arm-c-refuse-both
+ {:record-files 9, :recorded-runs-exercising-o4 0, :rows []},
+ :negative-controls
+ [{:control :planted-rule-is-not-a-cascade-member,
+   :o4-exercised? false,
+   :plant-verified? true,
+   :verdict-moved-to :o4-not-exercised}
+  {:control :planted-rule-dead,
+   :observed-live-rounds [],
+   :plant-verified? true,
+   :verdict-moved-to :planted-rule-is-live-on-no-round}
+  {:control :existing-rule-made-primary-live,
+   :o4-holds? true,
+   :plant-verified? true,
+   :verdict-moved-to :primary-o4-true}
+  {:control :all-rules-fitted-to-members,
+   :plant-verified? true,
+   :rules-not-in-the-cascade [],
+   :verdict-moved-to :unfitting-guard-fires}],
+ :premises
+ {:max-rule-carrying-members 1,
+  :require-pass-verdict :rule-does-not-encode-an-authored-then,
+  :slice-3-byte-identical? true,
+  :then-correspondence-failures 3,
+  :unfitting-pointer-check
+  {:stated-lines [53 57],
+   :computed-lines [479 480],
+   :enforced-line 585}},
+ :problems []}
