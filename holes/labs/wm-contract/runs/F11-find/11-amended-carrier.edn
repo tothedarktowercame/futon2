@@ -1,0 +1,104 @@
+{:amendment-not-taken
+ {:file "mathlib4/DarkTower/WarMachine/Holes.lean",
+  :receipt-line 240,
+  :receipt-fields ["citesTextOrEdges" "scoreAlone"],
+  :find-result-line 247,
+  :find-result-fields ["absence" "receipts" "selected"],
+  :zero-mass-still-on-the-row-carrier
+  {:line 252,
+   :fields
+   ["absence"
+    "nonSelfCertifying"
+    "receipted"
+    "repository"
+    "scenario"
+    "selected"
+    "zeroMass"]}},
+ :arm-module
+ {:file "mathlib4/DarkTower/WarMachine/F11AmendedCarrier.lean",
+  :declarations 43},
+ :find-still-a-sorry
+ {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 264},
+ :findings [],
+ :joint-census
+ {:receipt
+  [{:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 67,
+    :carrier :receipt}],
+  :find-result
+  [{:file "mathlib4/DarkTower/WarMachine/F11AmendedCarrier.lean",
+    :line 51,
+    :carrier :find-result}
+   {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 76,
+    :carrier :find-result}
+   {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 121,
+    :carrier :find-result}
+   {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 143,
+    :carrier :find-result}
+   {:file "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean",
+    :line 27,
+    :carrier :find-result}
+   {:file "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean",
+    :line 76,
+    :carrier :find-result}
+   {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+    :line 22,
+    :carrier :find-result}
+   {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+    :line 144,
+    :carrier :find-result}],
+  :total 9,
+  :total-excluded-by-the-classification-rule
+  {:receipt-field-sites-excluded-by-a-receipt-data-marker 12,
+   :receipts-field-sites-excluded-by-a-receipt-data-marker 6,
+   :receipts-field-sites-excluded-by-a-zero-mass-marker 1}},
+ :readings
+ {:a
+  {:declaration "FindFalsifiable",
+   :file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+   :line 31,
+   :shape-holds true},
+  :b
+  {:declaration "FindExcludesRecordedZeroMass",
+   :file "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean",
+   :line 59,
+   :shape-holds true},
+  :c
+  {:declaration "FindRespectsZeroMass",
+   :file "mathlib4/DarkTower/WarMachine/F11F4Reading.lean",
+   :line 26,
+   :shape-holds true}},
+ :record :F11-slice-6-amended-carrier,
+ :recorded-designation
+ {:file "mathlib4/DarkTower/WarMachine/Holes.lean",
+  :line 342,
+  :scenarios 6,
+  :distinct-values
+  ["consultTheRemedyBeforeExiting"
+   "forcedPlayNeedsALossFloor"
+   "reEnterAfterObservedRepair"],
+  :arms
+  [{:scenario "g1Cautious",
+    :patterns ["consultTheRemedyBeforeExiting"]}
+   {:scenario "g1Sharer", :patterns ["consultTheRemedyBeforeExiting"]}
+   {:scenario "g1Snatcher",
+    :patterns ["consultTheRemedyBeforeExiting"]}
+   {:scenario "g2Snatcher",
+    :patterns ["consultTheRemedyBeforeExiting"]}
+   {:scenario "g4Snatcher", :patterns ["forcedPlayNeedsALossFloor"]}
+   {:scenario "g5Sharer", :patterns ["reEnterAfterObservedRepair"]}]},
+ :row :F11,
+ :slice 6,
+ :slice-4-benchmark
+ {:declaration "findRErasuresAreEqual",
+  :file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+  :line 186,
+  :is-an-erasure-equality true},
+ :todays-f2-states-presence-only
+ {:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+  :line 21,
+  :holds true},
+ :verdict :pass}
