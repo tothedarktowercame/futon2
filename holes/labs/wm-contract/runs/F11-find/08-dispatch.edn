@@ -1,0 +1,92 @@
+{:record :F11-slice-5-dispatch
+ :date "2026-09-07"
+ :row :F11
+ :slice "5 -- register WHICH READING F4 IS as a choice, with its arms priced"
+ :dispatched-to "codex-2"
+ :from "wm-build-work"
+ :job-id "invoke-1788783538793-13642-1f66ad26"
+ :packet-goal
+ "One new Lean file DarkTower/WarMachine/F11F4Reading.lean measuring what the
+  arms of the F4-reading question buy and cost, so :find-sorry's sixth arm
+  (:amend-the-carrier, registered at slice 3 with :buys :unmeasured /
+  :costs :unmeasured) stops being unpriced on its second and last half. Slice 4
+  registered the first half as :find-f2-receipt-carrier."
+ :why-this-and-not-both
+ "Slice 3's :progress named the next slice as `register the F2 receipt carrier
+  AND the F4 reading`; slice 4 split that at the `and` and took the carrier. This
+  is the other half, dispatched on its own for the same reason: slice 3 already
+  found the two F4 readings disagreeing in BOTH directions, so neither is
+  derivable from the other and pricing them alongside another question invites
+  one measurement to be assumed from the other."
+ :premise-recorded-before-the-result
+ {:the-gap
+  "P-validated-R5.md:488 states F4 as: `for a given tension there is at least one
+   pattern in the repository the finder must NOT return (a zero-mass pattern --
+   T1512Z applied to retrieval); a finder that can return anything for anything
+   is unfalsifiable.` Two formalisations of that sentence are already in the tree
+   and they are not equivalent. READING A, FindFalsifiable
+   (mathlib4 DarkTower/WarMachine/F11Conformance.lean:31), takes the excluded
+   pattern from the FINDER'S OWN OUTPUT: forall t repo, repo nonempty ->
+   exists p in repo.patterns, p not in (f t repo).selected. READING B,
+   FindExcludesRecordedZeroMass (mathlib4 DarkTower/WarMachine/
+   F11DischargeArm.lean:59), takes it from the RECORD: the patterns
+   futon3 checks/find_snatch.clj:25-31 declared zero-mass in advance are in the
+   repository and out of the selection. Slice 2 refuted A of the record's own
+   replay (F11Conformance.lean:207); slice 3 refuted B of a finder that satisfies
+   A (F11DischargeArm.lean:207). Neither entails the other."
+  :expected-third-reading
+  "The paper's `must not` is DEONTIC -- the designation of which pattern is
+   zero-mass comes from outside the finder, and reading A is the existential
+   collapse of it in which the finder is allowed to nominate the excluded pattern
+   AFTER the fact. Expected: a reading parameterised by a zero-mass designation
+   zm : State -> Set P, of which reading B is the instance at the RECORDED
+   designation, is what the sentence literally says, and reading A is strictly
+   weaker than it at every designation. If that is wrong -- if reading A fails to
+   follow from the parameterised form -- that is the measurement, not a defect.
+   Written here before the result so it cannot be back-fitted."
+  :expected-conjunction-cost
+  "A and B are expected to PULL IN OPPOSITE DIRECTIONS on this record, so that
+   requiring both costs the record's own selections. A asks the finder to exclude
+   something from EVERY repository, singletons included; the recorded replay
+   returns the whole of a repository holding only askForSurplusNotSurrender,
+   which every recorded scenario selects (F11Conformance.lean:207). B asks it to
+   exclude patterns that differ BY SCENARIO -- findSnatchZeroMass
+   (mathlib4 DarkTower/WarMachine/Holes.lean:342-348) takes THREE distinct values
+   over the six scenarios: consultTheRemedyBeforeExiting at g1Snatcher, g1Sharer,
+   g1Cautious and g2Snatcher, forcedPlayNeedsALossFloor at g4Snatcher,
+   reEnterAfterObservedRepair at g5Sharer -- so no single fixed exclusion
+   satisfies B across the six. Expected: on this record the
+   only finders satisfying A AND B are ones that drop recorded selections on some
+   input, findRefusing among them, and the conjunction arm's cost is therefore
+   that a conformant find can no longer replay the record. If a finder is found
+   that satisfies both AND reproduces every recorded selection, the expectation is
+   refuted and THAT is the slice's finding."
+  :inhabitance-floor-demanded-in-advance
+  "C561 section 7b records that six consecutive slices across :F11/:F12 needed
+   review to supply the same floor -- an agreement or disagreement claim witnessed
+   by a finder that excludes everything carries nothing, because one side of the
+   agreement is vacuous. C561 also records that ASKING for the floor in the packet
+   was not sufficient last time. So this packet states the floor as a property of
+   the witnesses rather than as an instruction: every claim that two readings
+   agree, disagree, or are ordered must be witnessed by finders that SELECT at
+   least one pattern on the recorded 18-pattern findSnatchRepository, and each
+   such witness must carry a theorem that its selection there is nonempty.
+   findRefusing and findSilent may appear only as the cheap-inhabitant baseline,
+   never as a side of an agreement."}
+ :out-of-scope-in-the-packet
+ ["the F2 receipt carrier (slice 4, already registered)"
+  "the sorry at Holes.lean:264 -- not discharged, Holes.lean not modified"
+  "pricing :find-sorry's sixth arm itself: both halves will be registered after
+   this slice, but aggregating them into that arm is a separate measurement"
+  "aif-equations.edn and every other registry: the entry is the lane's to write"
+  "any ruling: :status will be :observed-not-decided with no :ruling key"
+  "gen_aif_dag.bb (TN 9a)"]
+ :reviewer-half-still-owed
+ ["f11_f4_reading_check.bb -- a checker that fails if either reading's definition
+   moves under the entry, so the pricing cannot go stale silently"
+  "cross-check every Lean literal against futon3 checks/find-snatch.edn"
+  "runs/F11-find/09-f4-reading.edn"
+  "C563 findings doc"
+  "the :find-f4-reading entry in aif-equations.edn :choices, and the repair of
+   :find-sorry's :amend-the-carrier arm, which still says F4's reading is
+   unregistered"]}
