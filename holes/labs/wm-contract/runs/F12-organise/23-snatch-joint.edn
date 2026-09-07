@@ -12,12 +12,30 @@
  :findings [],
  :futon3-pin "cdb5e8a56fd907beb6a99f8b88af9de50ff93126",
  :mutation-plants
- [{:landed? true, :plant :empty-edge-set, :verdict-after false}
-  {:landed? true,
-   :plant :flatten-precedence-after,
+ [{:landed? true,
+   :perturbs
+   "the fixture: [:g4 :snatcher] :exchange-first :precedence set to the :patterns row's",
+   :plant :fixture-precedence-flattened,
    :verdict-after false}
-  {:landed? true, :plant :drop-scenario, :verdict-after false}
-  {:landed? true, :plant :repoint-census-gap, :verdict-after false}],
+  {:landed? true,
+   :perturbs
+   "the fixture: both policy rows of [:g1 :cautious] removed",
+   :plant :fixture-scenario-dropped,
+   :verdict-after false}
+  {:landed? true,
+   :perturbs
+   "the derived rows: the first row's organised edge set emptied before the booleans are computed",
+   :plant :derived-edges-emptied,
+   :verdict-after false}
+  {:landed? true,
+   :perturbs
+   "the census artifact's snatch row: :carries-both? set to true",
+   :plant :census-carries-both-flipped,
+   :verdict-after false}
+  {:landed? true,
+   :perturbs "the census pointer: :238-249 repointed to :1",
+   :plant :census-pointer-repointed,
+   :verdict-after false}],
  :record :F12-slice-8-snatch-joint-exemplar,
  :rows
  [{:acting-order-moved? true,
@@ -30,6 +48,7 @@
      :snatch/protect-the-unprotected-move]
     [:snatch/protect-the-unprotected-move
      :snatch/institutions-vary-by-position-and-force]],
+   :laws {:O1 true, :O2 true, :O3 true, :O4 true},
    :o4-holds? true,
    :precedence-moved? true,
    :reproduces-record? true,
@@ -47,6 +66,7 @@
      :snatch/protect-the-unprotected-move]
     [:snatch/protect-the-unprotected-move
      :snatch/institutions-vary-by-position-and-force]],
+   :laws {:O1 true, :O2 true, :O3 true, :O4 true},
    :o4-holds? true,
    :precedence-moved? true,
    :reproduces-record? true,
@@ -62,6 +82,7 @@
      :snatch/protect-the-unprotected-move]
     [:snatch/protect-the-unprotected-move
      :snatch/institutions-vary-by-position-and-force]],
+   :laws {:O1 true, :O2 true, :O3 true, :O4 true},
    :o4-holds? true,
    :precedence-moved? true,
    :reproduces-record? true,
@@ -83,6 +104,7 @@
      :snatch/protect-the-unprotected-move]
     [:snatch/protect-the-unprotected-move
      :snatch/institutions-vary-by-position-and-force]],
+   :laws {:O1 true, :O2 true, :O3 true, :O4 true},
    :o4-holds? true,
    :precedence-moved? true,
    :reproduces-record? true,
@@ -111,6 +133,7 @@
     [:snatch/revert-then-invert
      :snatch/institutions-vary-by-position-and-force]
     [:snatch/revert-then-invert :snatch/protect-the-unprotected-move]],
+   :laws {:O1 true, :O2 true, :O3 true, :O4 true},
    :o4-holds? true,
    :precedence-moved? true,
    :reproduces-record? true,
@@ -128,6 +151,7 @@
      :snatch/protect-the-unprotected-move]
     [:snatch/protect-the-unprotected-move
      :snatch/institutions-vary-by-position-and-force]],
+   :laws {:O1 true, :O2 true, :O3 true, :O4 true},
    :o4-holds? true,
    :precedence-moved? true,
    :reproduces-record? true,
