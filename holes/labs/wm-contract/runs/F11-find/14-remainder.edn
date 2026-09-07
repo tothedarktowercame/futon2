@@ -1,0 +1,171 @@
+{:acceptance
+ {:acceptance
+  "F2 falsifier reconciled first (documented against the current library state); then a conformant implementation at the s3e interface, laws stated in Lean, each witnessed on a real find over the committed library; discharge or amend the sorry at Holes.lean:264. Same gates as F12.",
+  :clause-count 3,
+  :clauses
+  ["F2 falsifier reconciled first (documented against the current library state)"
+   "then a conformant implementation at the s3e interface, laws stated in Lean, each witnessed on a real find over the committed library"
+   "discharge or amend the sorry at Holes.lean:264. Same gates as F12."],
+  :obligation-locations
+  {:conformant-implementation
+   {:offset 83,
+    :verbatim-substring
+    "a conformant implementation at the s3e interface"},
+   :f1-stated-in-lean
+   {:offset 133, :verbatim-substring "laws stated in Lean"},
+   :f2-content-stated-in-lean
+   {:offset 133, :verbatim-substring "laws stated in Lean"},
+   :f2-falsifier-reconciled
+   {:offset 0,
+    :verbatim-substring
+    "F2 falsifier reconciled first (documented against the current library state)"},
+   :f3-citation-stated-in-lean
+   {:offset 133, :verbatim-substring "laws stated in Lean"},
+   :f4-stated-in-lean
+   {:offset 133, :verbatim-substring "laws stated in Lean"},
+   :sorry
+   {:offset 212,
+    :verbatim-substring
+    "discharge or amend the sorry at Holes.lean:264"},
+   :witnessed-on-real-find-over-committed-library
+   {:offset 154,
+    :verbatim-substring
+    "each witnessed on a real find over the committed library"}}},
+ :controls
+ [{:after
+   {:obligations-not-satisfied-and-not-gated
+    [:f3-citation-stated-in-lean
+     :sorry
+     :witnessed-on-real-find-over-committed-library],
+    :remainder-fully-gated? false},
+   :before
+   {:obligations-not-satisfied-and-not-gated
+    [:f3-citation-stated-in-lean
+     :witnessed-on-real-find-over-committed-library],
+    :remainder-fully-gated? false},
+   :control :delete-sorry-gate,
+   :plant-verified? true}
+  {:after-hard-failure
+   "substring not found for :sorry/:find-sorry: \"WHAT IS DONE WITH THE SORRY\"",
+   :before :measurement-succeeds,
+   :control :perturb-gating-fragment,
+   :plant-verified? true}
+  {:after
+   {:satisfied-at-head? true,
+    :live-repository-count 18,
+    :pin-repository-count 18,
+    :receipt-differences 0},
+   :before
+   {:satisfied-at-head? false,
+    :live-repository-count 24,
+    :pin-repository-count 18,
+    :receipt-differences 96},
+   :control :make-live-fixture-match-pin,
+   :plant-verified? true}
+  {:after false,
+   :before true,
+   :control :replace-find-body,
+   :plant-verified? true}
+  {:after-hard-failure "expected 3 clauses, found 4",
+   :before :three-clauses,
+   :control :change-acceptance-clause-count,
+   :plant-verified? true}
+  {:after-hard-failure
+   "substring not found for :f3-citation-stated-in-lean/:find-sorry: \"citation field is not present\"",
+   :before :measurement-succeeds,
+   :control :invent-f3-gate,
+   :plant-verified? true}
+  {:after-hard-failure
+   "choice is not undecided and unruled: :find-sorry",
+   :before :measurement-succeeds,
+   :control :rule-a-gating-choice,
+   :plant-verified? true}],
+ :gating
+ {:conformant-implementation [],
+  :f1-stated-in-lean [],
+  :f2-content-stated-in-lean
+  [{:choice :find-f2-receipt-carrier,
+    :question-offset 0,
+    :question-substring
+    "WHAT DOES A `Receipt` HOLD, AND THEREFORE WHAT CAN F2 STATE?",
+    :ruling-key-present? false,
+    :status :observed-not-decided}],
+  :f2-falsifier-reconciled [],
+  :f3-citation-stated-in-lean [],
+  :f4-stated-in-lean
+  [{:choice :find-f4-reading,
+    :question-offset 0,
+    :question-substring "WHICH OF THREE READINGS IS F4?",
+    :ruling-key-present? false,
+    :status :observed-not-decided}],
+  :sorry
+  [{:choice :find-sorry,
+    :question-offset 0,
+    :question-substring "WHAT IS DONE WITH THE SORRY",
+    :ruling-key-present? false,
+    :status :observed-not-decided}],
+  :witnessed-on-real-find-over-committed-library []},
+ :obligations
+ {:candidate-refuters
+  {:f3-citation-blindness
+   {:adjudication :confirmed-unmet-and-ungated,
+    :pointers
+    ["/home/joe/code/mathlib4/DarkTower/WarMachine/F11NonSelfCertifying.lean:351"
+     "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/13-non-self-certifying.edn:114"],
+    :priced-amendment-includes-citation-field? false,
+    :registered-choice :not-found},
+   :pinned-versus-live-library
+   {:adjudication :confirmed-unmet-and-ungated,
+    :live-repository-count 24,
+    :pin-repository-count 18,
+    :pointer
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:13",
+    :receipt-differences 96}},
+  :conformant-implementation
+  {:pointers
+   ["/home/joe/code/mathlib4/DarkTower/WarMachine/F11Conformance.lean:21"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F11Conformance.lean:72"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F11Conformance.lean:81"],
+   :satisfied-at-head? true},
+  :f1-stated-in-lean
+  {:pointer
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/F11Conformance.lean:21",
+   :satisfied-at-head? true},
+  :f2-content-stated-in-lean
+  {:blindness-witness
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean:186",
+   :pointer
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/F11Conformance.lean:21",
+   :satisfied-at-head? false},
+  :f2-falsifier-reconciled
+  {:pointer
+   "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:3",
+   :satisfied-at-head? true},
+  :f3-citation-stated-in-lean
+  {:blindness-witness
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/F11NonSelfCertifying.lean:351",
+   :not-established-pointer
+   "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/13-non-self-certifying.edn:114",
+   :registry-choice-for-citation-field :not-found,
+   :satisfied-at-head? false},
+  :f4-stated-in-lean
+  {:pointer
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/F11F4Reading.lean:26",
+   :satisfied-at-head? false},
+  :sorry
+  {:body-is-still-sorry? true,
+   :file-line
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:264",
+   :satisfied-at-head? false},
+  :witnessed-on-real-find-over-committed-library
+  {:live-repository-count 24,
+   :pin-repository-count 18,
+   :pointer
+   "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:13",
+   :receipt-differences 96,
+   :satisfied-at-head? false}},
+ :obligations-not-satisfied-and-not-gated
+ [:f3-citation-stated-in-lean
+  :witnessed-on-real-find-over-committed-library],
+ :remainder-fully-gated? false,
+ :schema :f11/remainder-v1}
