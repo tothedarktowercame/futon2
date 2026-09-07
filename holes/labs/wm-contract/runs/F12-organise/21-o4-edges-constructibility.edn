@@ -136,39 +136,63 @@
  [{:plant :swap-carrier-same-count,
    :landed? true,
    :caught-by-validity-predicate? true,
+   :refused-for
+   [:carriers-disagree-with-the-source
+    :carrier-is-not-in-the-gate-rule-table
+    :carrier-is-not-a-member],
    :naive-count-only-would-catch? false,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:224-238"}
+  {:plant :carrier-not-a-member,
+   :landed? true,
+   :caught-by-validity-predicate? true,
+   :refused-for
+   [:carriers-disagree-with-the-source :carrier-is-not-a-member],
+   :naive-count-only-would-catch? false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:224-238"}
   {:plant :reverse-edge-same-count,
    :landed? true,
    :caught-by-validity-predicate? true,
+   :refused-for [:edges-disagree-with-the-source],
    :naive-count-only-would-catch? false,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:224-238"}
+  {:plant :drop-one-edge-of-two,
+   :landed? true,
+   :caught-by-validity-predicate? true,
+   :refused-for [:edges-disagree-with-the-source],
+   :naive-count-only-would-catch? true,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:224-238"}
   {:plant :concat-selected-into-members,
    :landed? true,
    :caught-by-validity-predicate? true,
+   :refused-for [:members-disagree-with-the-source],
    :naive-count-only-would-catch? true,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:224-238"}
   {:plant :shift-pointer,
    :landed? true,
    :caught-by-validity-predicate? true,
-   :naive-count-only-would-catch? true,
+   :refused-for [:edges-pointer-does-not-carry-the-key],
+   :naive-count-only-would-catch? false,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:224-238"}
   {:plant :change-o4,
    :landed? true,
    :caught-by-validity-predicate? true,
-   :naive-count-only-would-catch? true,
+   :refused-for [:o4-disagrees-with-the-source],
+   :naive-count-only-would-catch? false,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:224-238"}
   {:plant :drop-member-set,
    :landed? true,
    :caught-by-validity-predicate? true,
-   :naive-count-only-would-catch? true,
+   :refused-for [:member-set-rows-do-not-cover-the-source],
+   :naive-count-only-would-catch? false,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}],
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:224-238"}],
  :premises
  [{:id 1,
    :holds? true,
@@ -204,17 +228,26 @@
      :rule-table-carriers [],
      :structural-path "[:find]",
      :source "futon3:checks/construct-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 9,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :construct,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}],
+   :cascade-edges-key-lines
+   ["futon3:checks/construct-cascade.edn:183"
+    "futon3:checks/construct-cascade.edn:262"],
    :o4 :not-exercised-nothing-is-played,
    :o4-pointer "futon3:checks/construct-cascade.edn:266"}
   {:record-id :zaif,
@@ -241,14 +274,20 @@
      :rule-table-carriers [:math-strategy/missing-dependency-protocol],
      :structural-path "[:find]",
      :source "futon3:checks/zaif-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 11,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :zaif,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -262,8 +301,13 @@
      :rule-table-carriers [:math-strategy/missing-dependency-protocol],
      :structural-path "[:runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/zaif-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/zaif-cascade.edn:203",
      :candidate-status :gate-shaped,
      :members
@@ -290,6 +334,7 @@
      :meets-precondition-a? false,
      :record-id :zaif,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -304,8 +349,13 @@
      :structural-path
      "[:runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/zaif-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/zaif-cascade.edn:203",
      :candidate-status :gate-shaped,
      :members
@@ -329,9 +379,13 @@
      :meets-precondition-a? false,
      :record-id :zaif,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}],
+   :cascade-edges-key-lines
+   ["futon3:checks/zaif-cascade.edn:298"
+    "futon3:checks/zaif-cascade.edn:464"],
    :o4 :not-exercised-fewer-than-two-members-carry-a-play-grain-rule,
    :o4-pointer "futon3:checks/zaif-cascade.edn:167"}
   {:record-id :ants,
@@ -351,14 +405,20 @@
      :rule-table-carriers [],
      :structural-path "[:find]",
      :source "futon3:checks/ants-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 4,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :ants,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -372,8 +432,13 @@
      :rule-table-carriers [],
      :structural-path "[:runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/ants-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/ants-cascade.edn:117",
      :candidate-status :gate-shaped,
      :members
@@ -385,6 +450,7 @@
      :meets-precondition-a? false,
      :record-id :ants,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -399,8 +465,13 @@
      :structural-path
      "[:runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/ants-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/ants-cascade.edn:117",
      :candidate-status :gate-shaped,
      :members
@@ -411,9 +482,13 @@
      :meets-precondition-a? false,
      :record-id :ants,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}],
+   :cascade-edges-key-lines
+   ["futon3:checks/ants-cascade.edn:144"
+    "futon3:checks/ants-cascade.edn:187"],
    :o4
    {:holds? true,
     :precedence-changed? true,
@@ -458,14 +533,20 @@
      :rule-table-carriers [],
      :structural-path "[:find]",
      :source "futon3:checks/alfworld-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 3,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :alfworld,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -479,8 +560,13 @@
      :rule-table-carriers [],
      :structural-path "[:runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/alfworld-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/alfworld-cascade.edn:194",
      :candidate-status :gate-shaped,
      :members
@@ -493,6 +579,7 @@
      :meets-precondition-a? false,
      :record-id :alfworld,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -507,8 +594,13 @@
      :structural-path
      "[:runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/alfworld-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/alfworld-cascade.edn:194",
      :candidate-status :gate-shaped,
      :members
@@ -518,14 +610,19 @@
      :meets-precondition-a? false,
      :record-id :alfworld,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}],
+   :cascade-edges-key-lines
+   ["futon3:checks/alfworld-cascade.edn:227"
+    "futon3:checks/alfworld-cascade.edn:275"],
    :o4 :not-exercised-no-authority-gate-and-alfworld-is-not-installed,
    :o4-pointer "futon3:checks/alfworld-cascade.edn:178"}
   {:record-id :snatch,
    :source "futon3:checks/snatch-cascade.edn",
    :member-sets [],
+   :cascade-edges-key-lines [],
    :o4 "not found",
    :o4-pointer "not found"}
   {:record-id :open,
@@ -541,14 +638,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :ticket/cx-new-blocks-emacs :find]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -563,8 +666,13 @@
      :structural-path
      "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade.edn:6460",
      :candidate-status :gate-shaped,
      :members
@@ -573,6 +681,7 @@
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -587,14 +696,20 @@
      :structural-path
      "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -608,14 +723,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :ticket/fail-invoke-error :find]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -630,14 +751,20 @@
      :structural-path
      "[:items :ticket/fail-invoke-error :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -652,14 +779,20 @@
      :structural-path
      "[:items :ticket/fail-invoke-error :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -674,14 +807,20 @@
      :structural-path
      "[:items :ticket/jvm-provenance-before-multi-jvm :find]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -696,14 +835,20 @@
      :structural-path
      "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade.edn:6460",
      :candidate-status :gate-shaped,
      :members [:snatch/widen-the-cascade-only-on-evidence],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -718,14 +863,20 @@
      :structural-path
      "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -739,14 +890,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/I4 :find]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -761,14 +918,20 @@
      :structural-path
      "[:items :wm/I4 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -783,14 +946,20 @@
      :structural-path
      "[:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -804,14 +973,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/RUN4 :find]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -826,14 +1001,20 @@
      :structural-path
      "[:items :wm/RUN4 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -848,17 +1029,24 @@
      :structural-path
      "[:items :wm/RUN4 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}],
+   :cascade-edges-key-lines [],
    :o4 :not-exercised-nothing-is-played,
    :o4-pointer "futon3:checks/open-cascade.edn:31717"}
   {:record-id :open-short-cue,
@@ -874,14 +1062,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :ticket/cx-new-blocks-emacs :find]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -896,8 +1090,13 @@
      :structural-path
      "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -924,6 +1123,7 @@
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -938,14 +1138,20 @@
      :structural-path
      "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -967,14 +1173,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :ticket/fail-invoke-error :find]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 8,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -997,8 +1209,13 @@
      :structural-path
      "[:items :ticket/fail-invoke-error :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 8,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -1025,6 +1242,7 @@
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1047,8 +1265,13 @@
      :structural-path
      "[:items :ticket/fail-invoke-error :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 8,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -1063,6 +1286,7 @@
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1095,14 +1319,20 @@
      :structural-path
      "[:items :ticket/jvm-provenance-before-multi-jvm :find]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 18,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -1135,8 +1365,13 @@
      :structural-path
      "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 18,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -1165,6 +1400,7 @@
      :edges
      [[:aif/expected-free-energy-scorecard
        :war-room/wr-0-organise-without-apparatus]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1197,8 +1433,13 @@
      :structural-path
      "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 18,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -1237,6 +1478,7 @@
        :math-formalization/tactic-algebra-interference]
       [:math-formalization/minmax-normalization
        :math-formalization/tactic-algebra-interference]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1258,14 +1500,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/I4 :find]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 8,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -1288,8 +1536,13 @@
      :structural-path
      "[:items :wm/I4 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 8,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -1322,6 +1575,7 @@
        :snatch/have-a-temperament]
       [:snatch/widen-the-cascade-only-on-evidence
        :snatch/have-a-temperament]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1344,8 +1598,13 @@
      :structural-path
      "[:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 8,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -1370,6 +1629,7 @@
        :snatch/have-a-temperament]
       [:snatch/widen-the-cascade-only-on-evidence
        :snatch/have-a-temperament]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1397,14 +1657,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/RUN4 :find]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 14,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :open-short-cue,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -1433,8 +1699,13 @@
      :structural-path
      "[:items :wm/RUN4 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 14,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -1471,6 +1742,7 @@
        :war-room/wr-9-bites-empirical-or-logical]
       [:war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad
        :war-room/wr-9-bites-empirical-or-logical]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1499,8 +1771,13 @@
      :structural-path
      "[:items :wm/RUN4 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/open-cascade-short-cue.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 14,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
      :candidate-status :gate-shaped,
      :members
@@ -1540,9 +1817,11 @@
        :forward-model/graduate-strategy-by-outcome]
       [:war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad
        :war-room/wr-9-bites-empirical-or-logical]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}],
+   :cascade-edges-key-lines [],
    :o4 :not-exercised-nothing-is-played,
    :o4-pointer "futon3:checks/open-cascade-short-cue.edn:33472"}
   {:record-id :retrodiction,
@@ -1582,14 +1861,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :ticket/agency-desktop-save :find]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 24,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -1628,8 +1913,13 @@
      :structural-path
      "[:items :ticket/agency-desktop-save :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 24,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -1660,6 +1950,7 @@
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1698,8 +1989,13 @@
      :structural-path
      "[:items :ticket/agency-desktop-save :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 24,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -1738,6 +2034,7 @@
      :edges
      [[:cycle-machine/runtime-restoration
        :coordination/session-durability-check]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -1802,14 +2099,20 @@
      [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
      :structural-path "[:items :ticket/kangaroo-v1-pouch :find]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 50,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? true,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -1875,8 +2178,13 @@
      :structural-path
      "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 50,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -1935,6 +2243,7 @@
      :edges
      [[:aif/posterior-variance-as-epistemic-value
        :aif/structure-learning-by-model-reduction]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2000,8 +2309,13 @@
      :structural-path
      "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 50,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -2072,6 +2386,7 @@
        :aif/structure-learning-by-model-reduction]
       [:cycle-machine/runtime-restoration
        :cycle-machine/step-machine]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2097,14 +2412,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/AC6 :find]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 12,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -2131,8 +2452,13 @@
      :structural-path
      "[:items :wm/AC6 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 12,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -2165,6 +2491,7 @@
        :war-room/wr-19-tension-must-generate-not-only-rank]
       [:writing-coherence/meet-the-reader-where-they-are
        :system-coherence/argue-empirically-not-persuasively]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2191,8 +2518,13 @@
      :structural-path
      "[:items :wm/AC6 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 12,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -2225,6 +2557,7 @@
        :war-room/wr-19-tension-must-generate-not-only-rank]
       [:writing-coherence/meet-the-reader-where-they-are
        :system-coherence/argue-empirically-not-persuasively]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2239,14 +2572,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/C23 :find]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 1,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -2262,8 +2601,13 @@
      :structural-path
      "[:items :wm/C23 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 1,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -2287,6 +2631,7 @@
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2302,8 +2647,13 @@
      :structural-path
      "[:items :wm/C23 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 1,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -2311,6 +2661,7 @@
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2327,14 +2678,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/D0 :find]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 3,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -2352,8 +2709,13 @@
      :structural-path
      "[:items :wm/D0 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 3,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -2380,6 +2742,7 @@
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2397,8 +2760,13 @@
      :structural-path
      "[:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 3,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
      :candidate-status :gate-shaped,
      :members
@@ -2408,9 +2776,11 @@
      :meets-precondition-a? false,
      :record-id :retrodiction,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}],
+   :cascade-edges-key-lines [],
    :o4 :not-exercised-nothing-is-played,
    :o4-pointer "futon3:checks/retrodiction-cascade.edn:34090"}
   {:record-id :retrodiction-per-clause,
@@ -2451,14 +2821,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :ticket/agency-desktop-save :find]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 24,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -2498,8 +2874,13 @@
      :structural-path
      "[:items :ticket/agency-desktop-save :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 24,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -2531,6 +2912,7 @@
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2570,9 +2952,14 @@
      :structural-path
      "[:items :ticket/agency-desktop-save :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 24,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -2612,6 +2999,7 @@
      :edges
      [[:cycle-machine/runtime-restoration
        :coordination/session-durability-check]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2677,14 +3065,20 @@
      [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
      :structural-path "[:items :ticket/kangaroo-v1-pouch :find]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 50,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? true,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -2751,9 +3145,14 @@
      :structural-path
      "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 50,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -2813,6 +3212,7 @@
      :edges
      [[:aif/posterior-variance-as-epistemic-value
        :aif/structure-learning-by-model-reduction]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2879,9 +3279,14 @@
      :structural-path
      "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 50,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -2953,6 +3358,7 @@
        :aif/structure-learning-by-model-reduction]
       [:cycle-machine/runtime-restoration
        :cycle-machine/step-machine]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -2979,14 +3385,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/AC6 :find]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 12,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -3014,9 +3426,14 @@
      :structural-path
      "[:items :wm/AC6 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 12,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -3050,6 +3467,7 @@
        :war-room/wr-19-tension-must-generate-not-only-rank]
       [:writing-coherence/meet-the-reader-where-they-are
        :system-coherence/argue-empirically-not-persuasively]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -3077,9 +3495,14 @@
      :structural-path
      "[:items :wm/AC6 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 12,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -3113,6 +3536,7 @@
        :war-room/wr-19-tension-must-generate-not-only-rank]
       [:writing-coherence/meet-the-reader-where-they-are
        :system-coherence/argue-empirically-not-persuasively]],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -3126,14 +3550,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/C23 :find]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -3148,8 +3578,13 @@
      :structural-path
      "[:items :wm/C23 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -3165,6 +3600,7 @@
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -3179,14 +3615,20 @@
      :structural-path
      "[:items :wm/C23 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 0,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -3204,14 +3646,20 @@
      :rule-table-carriers [],
      :structural-path "[:items :wm/D0 :find]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 3,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status :gate-shaped,
      :members [],
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :selected}
@@ -3230,8 +3678,13 @@
      :structural-path
      "[:items :wm/D0 :runs :widen-to-a-budget :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 3,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -3259,6 +3712,7 @@
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}
@@ -3277,8 +3731,13 @@
      :structural-path
      "[:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade]",
      :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer "not found",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 3,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer
      "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
      :candidate-status :gate-shaped,
@@ -3289,9 +3748,11 @@
      :meets-precondition-a? false,
      :record-id :retrodiction-per-clause,
      :edges [],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon3c:scripts/zaif_cascade_gate.clj:444-445",
      :member-list-source :members}],
+   :cascade-edges-key-lines [],
    :o4 :not-exercised-nothing-is-played,
    :o4-pointer
    "futon3:checks/retrodiction-cascade-per-clause.edn:33974"}
@@ -3314,9 +3775,14 @@
      :structural-path "[]",
      :source
      "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn",
+     :precondition-b-scope-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:65",
      :edges-pointer
      "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:33",
+     :pointer-grain-pointer
+     "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:68-70",
      :selected-count 3,
+     :precondition-b-reads-only :edges-vector-under-this-node,
      :members-pointer "not found",
      :candidate-status
      :excluded-prose-attestations-not-gate-predicates,
@@ -3338,9 +3804,11 @@
        "holes/missions/M-wm-aif-policy-grain-compliance.md:119-132",
        :reading
        "The complete same-mission menu is constructed before ln E_cascade and cascade score rank it."}],
+     :pointer-grain :record-level-first-occurrence-of-the-key,
      :candidate-status-pointer
      "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:44-65",
      :member-list-source :members}],
+   :cascade-edges-key-lines [],
    :o4
    {:rule-bearing-members 3,
     :acting-order
@@ -3407,4 +3875,10 @@
    "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn"],
   :pointer
   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:8-19"},
+ :validity-predicate
+ {:kind :source-grounded,
+  :reads :the-record-files-plus-the-gate-rule-table,
+  :recomputes-the-report-and-compares? false,
+  :pointer
+  "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:153-208"},
  :verdict true}
