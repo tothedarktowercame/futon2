@@ -1,0 +1,148 @@
+{:arm-declarations
+ [{:kind :def, :name "ContentF2", :line 153}
+  {:kind :structure, :name "FindResultR", :line 131}
+  {:kind :def, :name "FindResultR.erase", :line 141}
+  {:kind :abbrev, :name "FindTypeR", :line 137}
+  {:kind :def, :name "ReceiptContentAttributed", :line 58}
+  {:kind :structure, :name "ReceiptWithAssertions", :line 73}
+  {:kind :structure, :name "RelationalReceipt", :line 96}
+  {:kind :theorem,
+   :name "assertionFieldsDoNotFixAttribution",
+   :line 87}
+  {:kind :def, :name "eraseFinder", :line 148}
+  {:kind :theorem, :name "findRErasuresAreEqual", :line 186}
+  {:kind :def, :name "findRFaithful", :line 159}
+  {:kind :theorem, :name "findRFaithfulContentF2", :line 222}
+  {:kind :theorem, :name "findRFaithfulErasureConformant", :line 196}
+  {:kind :def, :name "findRMisattributing", :line 172}
+  {:kind :theorem,
+   :name "findRMisattributingErasureConformant",
+   :line 217}
+  {:kind :theorem,
+   :name "findRMisattributingFailsContentF2",
+   :line 230}
+  {:kind :def, :name "findSnatchMisattributing", :line 18}
+  {:kind :theorem,
+   :name "findSnatchMisattributingConformant",
+   :line 26}
+  {:kind :theorem,
+   :name "findSnatchMisattributingFailsContentF2",
+   :line 63}
+  {:kind :theorem, :name "findSnatchMisattributingWitness", :line 46}
+  {:kind :def, :name "handCarriedReceipt", :line 102}
+  {:kind :theorem, :name "handCarriedReceiptHasRightClause", :line 110}
+  {:kind :def, :name "misattributedReceiptOwner", :line 14}
+  {:kind :def, :name "misattributedReceiptWithAssertions", :line 79}
+  {:kind :theorem,
+   :name "receiptContentAttributedHoldsOfEveryFinder",
+   :line 126}],
+ :basis
+ {:arm-module "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+  :arm-module-present? true,
+  :dark-tower-root "mathlib4/DarkTower",
+  :fixture "futon3/checks/find-snatch.edn",
+  :holes "mathlib4/DarkTower/WarMachine/Holes.lean"},
+ :carrier
+ {:carries-none-of-what-f2-asks? true,
+  :fields
+  [{:field "citesTextOrEdges", :type "Prop"}
+   {:field "scoreAlone", :type "Prop"}],
+  :structure-line 240,
+  :what-f2-asks-for
+  ["the acknowledged tension clause"
+   "the retrieval route"
+   "an as-of"]},
+ :failures [],
+ :hygiene {:axiom 0, :native-decide 0, :sorry 0},
+ :mechanical-cost
+ {:edit-sites
+  [{:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 67,
+    :in :named-type-form}
+   {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+    :line 80,
+    :in :named-type-form}
+   {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+    :line 103,
+    :in :named-type-form}
+   {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+    :line 166,
+    :in :anonymous-constructor-form}
+   {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+    :line 179,
+    :in :anonymous-constructor-form}
+   {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+    :line 225,
+    :in :anonymous-constructor-form}
+   {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean",
+    :line 234,
+    :in :anonymous-constructor-form}],
+  :edit-sites-outside-the-arm-module
+  [{:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 67,
+    :in :named-type-form}],
+  :excluded-files-declaring-their-own-receipt
+  ["mathlib4/DarkTower/APMCycleMachine.lean"],
+  :extending-structures ["ReceiptWithAssertions" "RelationalReceipt"],
+  :files-in-scope
+  ["mathlib4/DarkTower/MemoryArmPreregistration.lean"
+   "mathlib4/DarkTower/WarMachine/F11Conformance.lean"
+   "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean"
+   "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean"
+   "mathlib4/DarkTower/WarMachine/Holes.lean"],
+  :lean-files-scanned 154,
+  :named-type-construction-sites
+  [{:file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+    :line 66,
+    :kind :construction}],
+  :occurrences-by-kind
+  {:construction 1,
+   :declaration 1,
+   :derived-definition 1,
+   :extension 2,
+   :field-or-lemma-reference 5,
+   :field-or-signature 1,
+   :shadowed-type-parameter 1,
+   :shadowing-header 1},
+  :shadowed-type-parameter-occurrences
+  [{:file "mathlib4/DarkTower/WarMachine/Holes.lean",
+    :line 1209,
+    :kind :shadowed-type-parameter}]},
+ :record :F11-slice-4-receipt-carrier,
+ :required-declarations
+ ["ContentF2"
+  "FindResultR"
+  "ReceiptWithAssertions"
+  "RelationalReceipt"
+  "assertionFieldsDoNotFixAttribution"
+  "findRErasuresAreEqual"
+  "findRFaithfulContentF2"
+  "findRMisattributingErasureConformant"
+  "findRMisattributingFailsContentF2"
+  "findSnatchMisattributingConformant"
+  "findSnatchMisattributingWitness"
+  "handCarriedReceiptHasRightClause"
+  "receiptContentAttributedHoldsOfEveryFinder"],
+ :row :F11,
+ :takes-no-ruling
+ "This check prices a carrier amendment; it does not choose one. It says nothing about whether Receipt should be amended, nothing about F4's reading, and nothing about what should be done with the sorry at Holes.lean:264.",
+ :transcription
+ {:carries-a-warrant? false,
+  :fields
+  ["scenario"
+   "round"
+   "selected"
+   "receipted"
+   "nonSelfCertifying"
+   "absence"],
+  :row-literal-line 354},
+ :what-the-record-supplies
+ {:fixture-as-of "2734ac570ed78d9bf822a5013cc48e53e68c8ff9",
+  :per-receipt-as-of 0,
+  :receipt-keys ["however" "if" "route" "state-fields" "warrant"],
+  :receipts 96,
+  :repository-size 18,
+  :routes {:structured-antecedent 96},
+  :state-fields {:not-instrumented 96},
+  :warrant-keys
+  ["file" "however-lines" "however-text" "if-lines" "if-text"]}}
