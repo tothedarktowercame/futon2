@@ -132,7 +132,26 @@ the F11 question forming.
      25) — different π-recovery method, recorded not hidden.
 - D1's commissioned evidence is now COMPLETE (both halves). Ready to
   return to Joe for ruling alongside the spectral findings above.
-- Registry transcription: deferred with the ruling.
+- **Ruling: ADOPTED AS RECOMMENDED, WITH A LIVE-RUN RIDER (Joe,
+  2026-09-07, evening)** — the seed: `Obs organisations` := the fourteen
+  terminal flight dispositions with the nine unobserved carrying named
+  zero mass; `Obs evidence` := certification/update records, EIG-valued
+  plus the D2 epistemic-validity region; named-empty `Obs` slots at nouns
+  and verbs; C_int outside the sum; C_ser a named-empty organisations
+  region; the document graph recorded as the registry's planned
+  evolution (support structure for future regions), not a competing
+  domain — components/isolates treatment deferred to that step.
+- Joe's rider (near-verbatim): "if we're judging behavior based on
+  historical flights, that's not as good as running new information
+  through the system and showing that it has the expected good behavior.
+  But if we can get any use from the historical flights, we might as well
+  use them. However, it would be nice to complement that with **at least
+  one new end-to-end run of the relevant subcomponents**, so that we can
+  demonstrate performance and conformance of the system, as well as some
+  kind of historical relevance. Record it."
+- Registry transcription: D1+D2+D3 as one new `:choices :outcome-domain`
+  entry (the :policy-grain precedent — minted to hold a dictated ruling),
+  F10 `:needs-joe` → `:open`, applied in the next post-publish gap.
 
 ## 3. F10 / D2 — family of C's or one C over the tagged sum
 
