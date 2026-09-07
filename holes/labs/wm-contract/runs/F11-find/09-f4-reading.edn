@@ -1,0 +1,62 @@
+{:find-still-a-sorry
+ {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 264},
+ :findings [],
+ :mechanical-cost
+ {:reading-a
+  {:total 21,
+   :in-the-pricing-module 11,
+   :outside-the-pricing-module 10},
+  :reading-b
+  {:total 18,
+   :in-the-pricing-module 10,
+   :outside-the-pricing-module 8},
+  :reading-c
+  {:total 10,
+   :in-the-pricing-module 10,
+   :outside-the-pricing-module 0}},
+ :neither-reading-is-a-conjunct-of-conformant-find true,
+ :reading-a
+ {:declaration "FindFalsifiable",
+  :file "mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+  :line 31,
+  :forall-over-inputs-existential true},
+ :reading-b
+ {:declaration "FindExcludesRecordedZeroMass",
+  :file "mathlib4/DarkTower/WarMachine/F11DischargeArm.lean",
+  :line 59,
+  :record-grain true},
+ :reading-c
+ {:declaration "FindRespectsZeroMass",
+  :file "mathlib4/DarkTower/WarMachine/F11F4Reading.lean",
+  :line 26,
+  :designation-is-a-parameter true},
+ :record :F11-slice-5-f4-reading,
+ :record-f4-leg
+ {:file "futon3/checks/find_snatch.clj",
+  :zero-mass-table-line 25,
+  :membership-test-line 174,
+  :omission-test-line 175,
+  :throw-lines [106 176],
+  :second-exclusion-reason :not-found},
+ :recorded-designation
+ {:file "mathlib4/DarkTower/WarMachine/Holes.lean",
+  :line 342,
+  :scenarios 6,
+  :one-pattern-per-scenario true,
+  :distinct-values
+  ["consultTheRemedyBeforeExiting"
+   "forcedPlayNeedsALossFloor"
+   "reEnterAfterObservedRepair"],
+  :arms
+  [{:scenario "g1Cautious",
+    :patterns ["consultTheRemedyBeforeExiting"]}
+   {:scenario "g1Sharer", :patterns ["consultTheRemedyBeforeExiting"]}
+   {:scenario "g1Snatcher",
+    :patterns ["consultTheRemedyBeforeExiting"]}
+   {:scenario "g2Snatcher",
+    :patterns ["consultTheRemedyBeforeExiting"]}
+   {:scenario "g4Snatcher", :patterns ["forcedPlayNeedsALossFloor"]}
+   {:scenario "g5Sharer", :patterns ["reEnterAfterObservedRepair"]}]},
+ :row :F11,
+ :slice 5,
+ :verdict :pass}

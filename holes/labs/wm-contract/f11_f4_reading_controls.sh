@@ -62,4 +62,24 @@ plant m4-other-laws readingCAdmitsNothingFinder \
 plant m5-mechanical FindRespectsZeroMass \
   '∀ t repo, ∀ p' '∃ t repo, ∀ p'
 
-echo 'ALL 5 CONTROLS FAILED AS REQUIRED'
+# REVIEW ADDITIONS (:F11 slice 5 review). One plant per added declaration, on the
+# same terms as the five above: located by declaration name, planted text verified
+# present and replaced text verified absent on the planted line before building.
+
+# R1: the C-not-A separation must be at the RECORDED designation, not a vacuous one.
+# Dropping back to the empty designation is exactly the weakness this theorem repairs.
+plant r1-recorded-designation findRecordedReadingCDoesNotImplyReadingA \
+  'FindRespectsZeroMass findSnatchZeroMassSet findSnatchReplay' \
+  'FindRespectsZeroMass (fun _ => (∅ : Set SnatchPattern)) findSnatchReplay'
+
+# R2a: the record-grain containment is decided, not assumed.
+plant r2-record-containment findSnatchRecordedSelectionsAreInRepository \
+  'p ∈ snatchRepository' 'p ∉ snatchRepository'
+
+# R2b: the reproduction is of the record ON THE RECORDED REPOSITORY; on any other
+# pattern set the hybrid refuses, which is the cost this slice reports.
+plant r2-recorded-repository bothReadingFinderSelectionIsTheRecordedSelection \
+  '(findReplayRecordedElseRefuse t findSnatchRepository).selected' \
+  '(findReplayRecordedElseRefuse t findG1ZeroMassSingleton).selected'
+
+echo 'ALL 8 CONTROLS FAILED AS REQUIRED'
