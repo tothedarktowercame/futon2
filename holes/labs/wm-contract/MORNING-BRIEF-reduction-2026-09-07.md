@@ -69,3 +69,44 @@ this register becomes an exception sheet, bounded by construction.
 Full per-attempt class lists: derivable from `items/` by the recorded
 fields above; the steward's first receipt will pin them attempt by
 attempt with commit shas, so the sheet stays small here.
+
+## RULED AND APPLIED (same day)
+
+Joe, in session: "I agree with all of your suggestions. So basically we
+can deal with all 73 of those items in this turn because I accept your
+proposed strategy for processing them."
+
+**One correction found during application, stated before the numbers.**
+This sheet's class B ("28 :ok without witness") was a misparse: my
+first-pass regex matched `:outcome :ok` inside nested witness blobs, not
+the items' own top-level outcome. Read through the reader's actual keys,
+no item has outcome `:ok`. True populations: **A = 21** (all
+grounded-change, `:witness :resolved? true`), **C = 29** build-failed,
+**D = 23** infra/canary/bulletin, **B = 0**. Every item still falls under
+an accepted ruling (the phantom-B items are real C or D members), so no
+new ruling was needed; recorded here so the sheet does not overclaim.
+
+Application (all through `futon2.aif.morning-brief/review!` — validated
+answers, deterministic review-ids, immutable CREATE_NEW files; nothing
+hand-written):
+
+- **271 review records** written to `data/wm-morning-brief/reviews/`,
+  reviewer `joe`, each note carrying the class rationale + "Recorded by
+  claude-1 with Joe's imprimatur", answers per class:
+  A: feature-verdict `:accept-feature` (commit audited present in its
+  repo — all 21 found, zero exceptions), substantive-achievement `:yes`,
+  evidence-sufficiency `:sufficient`, selection-quality `:uncertain`
+  (honest: no July calibration basis).
+  C: feature-verdict `:reject`, substantive-achievement `:no`,
+  machine-response `:correct` (failure honestly recorded),
+  evidence-sufficiency `:sufficient` (the failure is fully evidenced).
+  D: feature-verdict `:reject` (nothing completed to accept),
+  substantive-achievement `:uncertain`, evidence-sufficiency
+  `:insufficient`, machine-response `:correct`.
+- **15 belief events minted, all `:strengthened`, all class A** — exactly
+  the belief-blocked set; C and D carry no entity targets so mint none,
+  as ruled. Events land at the war machine's next tick via
+  `unseen-belief-events`.
+- **Pending after: 0.** The DECISION-DUE component clears at the next
+  status run. The review files are machine-state (`data/` untracked,
+  append-only); this section is the committed record.
