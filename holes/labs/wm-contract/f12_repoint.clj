@@ -200,36 +200,53 @@
 
 (defn artifact-shorthand [text] (vec (filter :resolves-to-this-artifact? (shorthand-rows text))))
 
+(defn shorthand-state
+  "Which of the two literal sequences the file is carrying. `:unrecognised` is
+   the fail-closed branch: something other than this repair moved a shorthand."
+  [historic expected current]
+  (cond (empty? historic) :no-candidates
+        (= current historic) :pre-repair
+        (= current expected) :repaired
+        :else :unrecognised))
+
 (defn shorthand-audit
   "Shorthand citations of the artifact, mapped by the same key-path route as the
-   full-path ones. Only a citation already present BEFORE the reflow is a
-   candidate: a `:N` written after it was written against the current lines."
+   full-path ones. The CANDIDATE SET comes from the pre-reflow file: a `:N`
+   written after the reflow was written against the current lines and is not a
+   candidate. The mapping is therefore basis-only -- it depends on the two
+   artifact revisions and not on whether this repair has already run -- so the
+   record reproduces from the tree it describes. `:state` is the one field that
+   reads the tree, and it says which of the two literal sequences is there."
   [old-text new-text old-index new-index file]
   (let [historic (artifact-shorthand (git-show (str reflow "^:holes/labs/wm-contract/" file)))
-        current (artifact-shorthand (slurp (io/file root file)))
-        aligned? (= (mapv :citation historic) (mapv :citation current))]
-    {:file file
-     :pre-reflow-citations (mapv :citation historic)
-     :current-citations (mapv :citation current)
-     :pre-reflow-and-current-agree? aligned?
-     :audits (if-not aligned?
-               []
-               (mapv (fn [row]
+        audits (mapv (fn [row]
                        (let [a (mapping old-text new-text old-index new-index
                                         {:literal (:citation row) :span (:span row)})]
-                         (assoc a :citing-file file :at (:at row) :line (:line row)
+                         (assoc a :citing-file file :line (:line row)
                                 :new-shorthand (when (= 1 (count (:new-spans a)))
                                                  (str ":" (span-str (first (:new-spans a))))))))
-                     current))}))
+                     historic)
+        expected (mapv #(or (:new-shorthand %) (:old-citation %)) audits)
+        current (mapv :citation (artifact-shorthand (slurp (io/file root file))))
+        state (shorthand-state (mapv :citation historic) expected current)]
+    {:file file
+     :pre-reflow-citations (mapv :citation historic)
+     :repaired-citations expected
+     :state state
+     :audits audits}))
 
 (defn apply-shorthand!
   "Splice the repaired shorthands in by OFFSET, back to front, checking at each
-   one that the literal is still where the scan found it."
-  [file audits]
+   one that the literal is still where the scan of the CURRENT file found it.
+   A no-op unless the file is still carrying the pre-reflow sequence."
+  [file {:keys [state audits]}]
   (let [f (io/file root file)
         before (slurp f)
+        by-offset (when (= :pre-repair state)
+                    (let [rows (artifact-shorthand before)]
+                      (map (fn [row a] (assoc a :at (:at row))) rows audits)))
         edits (sort-by :at > (filter #(and (contains? #{:repointed :already-correct} (:verdict %))
-                                           (:new-shorthand %)) audits))
+                                           (:new-shorthand %)) by-offset))
         after (reduce (fn [t {:keys [at old-citation new-shorthand]}]
                         (let [end (+ at (count old-citation))]
                           (when-not (= old-citation (subs t at end))
@@ -240,7 +257,7 @@
         untouched (fn [t] (frequencies (map :citation (remove :resolves-to-this-artifact?
                                                               (shorthand-rows t)))))]
     (when-not (= before after) (spit f after))
-    {:file file :edits (count edits)
+    {:file file :state state :edits (count edits)
      :non-artifact-shorthand-unchanged? (= (untouched before) (untouched after))}))
 
 (defn controls [old-text new-text old-index new-index sample]
@@ -259,6 +276,12 @@
       :verified? (seq (citations (slurp (io/file root (first post-files)))))}
      {:control :identity :before :old-as-old :after (:verdict identity-result)
       :edits 0 :verified? (= :already-correct (:verdict identity-result))}
+     {:control :shorthand-sequence-plant :before :repaired
+      :after (shorthand-state [":1148"] [":1880"] [":9999"])
+      :verified? (= :unrecognised (shorthand-state [":1148"] [":1880"] [":9999"]))
+      :also-checked {:pre-repair (shorthand-state [":1148"] [":1880"] [":1148"])
+                     :repaired (shorthand-state [":1148"] [":1880"] [":1880"])
+                     :no-candidates (shorthand-state [] [] [])}}
      {:control :broken-key-path :before (:verdict sample)
       :after (:verdict (mapping old-text new-text old-index broken-index
                                 {:literal (:old-citation sample) :span (:old-span sample)}))
@@ -273,10 +296,7 @@
                                    (historic-citations file))) citing-files))
         repairable (filter #(contains? #{:repointed :already-correct} (:verdict %)) audits)
         shorthand (mapv #(shorthand-audit old-text new-text old-index new-index %) citing-files)
-        shorthand-applied (mapv (fn [{:keys [file]}]
-                                  {:file file :edits 0
-                                   :reason :out-of-scope-census-only})
-                                shorthand)
+        shorthand-applied (mapv #(apply-shorthand! (:file %) %) shorthand)
         _ (doseq [file citing-files
                   :let [rows (filter #(= file (:citing-file %)) repairable)
                         f (io/file root file)
@@ -310,11 +330,18 @@
                 :shorthand-applied shorthand-applied
                 :negative-controls (controls old-text new-text old-index new-index sample)
                 :needs-hand-check
-                (vec (filter #(contains? #{:needs-hand-check :non-contiguous} (:verdict %))
-                             audits)))]
+                (vec (concat
+                      (filter #(contains? #{:needs-hand-check :non-contiguous} (:verdict %)) audits)
+                      (mapcat #(filter (fn [a] (contains? #{:needs-hand-check :non-contiguous} (:verdict a)))
+                                       (:audits %)) shorthand)
+                      (for [x shorthand :when (= :unrecognised (:state x))]
+                        {:citing-file (:file x) :verdict :shorthand-sequence-unrecognised
+                         :pre-reflow-citations (:pre-reflow-citations x)
+                         :repaired-citations (:repaired-citations x)})
+                      (remove :non-artifact-shorthand-unchanged? shorthand-applied))))]
     (spit (io/file root output-rel) (with-out-str (pprint/pprint result)))
     (println "f12 repoint:" (:bucket-counts result)
              "shorthand" (frequencies (mapcat #(map :verdict (:audits %)) shorthand))
-             "edits" (mapv (juxt :file :edits) shorthand-applied)
+             "edits" (mapv (juxt :file :state :edits) shorthand-applied)
              "hand checks" (count (:needs-hand-check result)))
     (System/exit (if (seq (:needs-hand-check result)) 1 0))))

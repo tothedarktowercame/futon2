@@ -1946,6 +1946,14 @@
    :after :already-correct,
    :edits 0,
    :verified? true}
+  {:control :shorthand-sequence-plant,
+   :before :repaired,
+   :after :unrecognised,
+   :verified? true,
+   :also-checked
+   {:pre-repair :pre-repair,
+    :repaired :repaired,
+    :no-candidates :no-candidates}}
   {:control :broken-key-path,
    :before :repointed,
    :after :needs-hand-check,
@@ -1969,12 +1977,17 @@
    :different-at-same-lines 12}],
  :shorthand-applied
  [{:file "aif-equations.edn",
+   :state :no-candidates,
    :edits 0,
-   :reason :out-of-scope-census-only}
-  {:file "worklist.edn", :edits 0, :reason :out-of-scope-census-only}
+   :non-artifact-shorthand-unchanged? true}
+  {:file "worklist.edn",
+   :state :repaired,
+   :edits 0,
+   :non-artifact-shorthand-unchanged? true}
   {:file "C554-F12-d2-denominator.md",
+   :state :repaired,
    :edits 0,
-   :reason :out-of-scope-census-only}],
+   :non-artifact-shorthand-unchanged? true}],
  :shorthand-census
  [{:file "aif-equations.edn",
    :count 85,
@@ -6540,22 +6553,22 @@
      :resolves-to-this-artifact? false,
      :ambiguous? false}
     {:line 10,
-     :citation ":1148",
+     :citation ":1880",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
     {:line 10,
-     :citation ":3014",
+     :citation ":4899",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
     {:line 10,
-     :citation ":3485",
+     :citation ":6105",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
     {:line 11,
-     :citation ":3537",
+     :citation ":6157",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
@@ -6575,7 +6588,7 @@
      :resolves-to-this-artifact? false,
      :ambiguous? false}
     {:line 55,
-     :citation ":1071-1075",
+     :citation ":1214-1218",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
@@ -6600,32 +6613,32 @@
      :resolves-to-this-artifact? false,
      :ambiguous? false}
     {:line 118,
-     :citation ":1071-1075",
+     :citation ":1214-1218",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
     {:line 141,
-     :citation ":2909",
+     :citation ":4791",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
     {:line 143,
-     :citation ":2303",
+     :citation ":3767",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
     {:line 145,
-     :citation ":2842",
+     :citation ":4724",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
     {:line 147,
-     :citation ":2299",
+     :citation ":3763",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
     {:line 150,
-     :citation ":1149",
+     :citation ":1881",
      :antecedent "runs/F12-organise/11-d2-denominator.edn",
      :resolves-to-this-artifact? true,
      :ambiguous? false}
@@ -6847,14 +6860,74 @@
  :shorthand-repoint
  [{:file "aif-equations.edn",
    :pre-reflow-citations [],
-   :current-citations [],
-   :pre-reflow-and-current-agree? true,
+   :repaired-citations [],
+   :state :no-candidates,
    :audits []}
   {:file "worklist.edn",
    :pre-reflow-citations [":1148" ":3014" ":3485" ":3537"],
-   :current-citations [":1880" ":4899" ":6105" ":6157"],
-   :pre-reflow-and-current-agree? false,
-   :audits []}
+   :repaired-citations [":1880" ":4899" ":6105" ":6157"],
+   :state :repaired,
+   :audits
+   [{:new-citation "runs/F12-organise/11-d2-denominator.edn:1880",
+     :old-citation ":1148",
+     :unequal-paths [],
+     :new-content " :controls",
+     :new-shorthand ":1880",
+     :key-paths [[[:map-key :controls]]],
+     :new-spans [[1880 1880]],
+     :missing-paths [],
+     :enclosing-node-used nil,
+     :line 1385,
+     :citing-file "worklist.edn",
+     :verdict :repointed,
+     :old-span [1148 1148],
+     :old-content " :controls",
+     :mapped-spans-before-enclosing-node [[1880 1880]]}
+    {:new-citation "runs/F12-organise/11-d2-denominator.edn:4899",
+     :old-citation ":3014",
+     :unequal-paths [],
+     :new-content " :head-baseline",
+     :new-shorthand ":4899",
+     :key-paths [[[:map-key :head-baseline]]],
+     :new-spans [[4899 4899]],
+     :missing-paths [],
+     :enclosing-node-used nil,
+     :line 1385,
+     :citing-file "worklist.edn",
+     :verdict :repointed,
+     :old-span [3014 3014],
+     :old-content " :head-baseline",
+     :mapped-spans-before-enclosing-node [[4899 4899]]}
+    {:new-citation "runs/F12-organise/11-d2-denominator.edn:6105",
+     :old-citation ":3485",
+     :unequal-paths [],
+     :new-content " :head-gate-blocker",
+     :new-shorthand ":6105",
+     :key-paths [[[:map-key :head-gate-blocker]]],
+     :new-spans [[6105 6105]],
+     :missing-paths [],
+     :enclosing-node-used nil,
+     :line 1385,
+     :citing-file "worklist.edn",
+     :verdict :repointed,
+     :old-span [3485 3485],
+     :old-content " :head-gate-blocker",
+     :mapped-spans-before-enclosing-node [[6105 6105]]}
+    {:new-citation "runs/F12-organise/11-d2-denominator.edn:6157",
+     :old-citation ":3537",
+     :unequal-paths [],
+     :new-content " :problems [],",
+     :new-shorthand ":6157",
+     :key-paths [[:problems] [[:map-key :problems]]],
+     :new-spans [[6157 6157]],
+     :missing-paths [],
+     :enclosing-node-used nil,
+     :line 1385,
+     :citing-file "worklist.edn",
+     :verdict :repointed,
+     :old-span [3537 3537],
+     :old-content " :problems []}",
+     :mapped-spans-before-enclosing-node [[6157 6157]]}]}
   {:file "C554-F12-d2-denominator.md",
    :pre-reflow-citations
    [":1148"
@@ -6868,19 +6941,19 @@
     ":2842"
     ":2299"
     ":1149"],
-   :current-citations
-   [":1148"
-    ":3014"
-    ":3485"
-    ":3537"
-    ":1071-1075"
-    ":1071-1075"
-    ":2909"
-    ":2303"
-    ":2842"
-    ":2299"
-    ":1149"],
-   :pre-reflow-and-current-agree? true,
+   :repaired-citations
+   [":1880"
+    ":4899"
+    ":6105"
+    ":6157"
+    ":1214-1218"
+    ":1214-1218"
+    ":4791"
+    ":3767"
+    ":4724"
+    ":3763"
+    ":1881"],
+   :state :repaired,
    :audits
    [{:new-citation "runs/F12-organise/11-d2-denominator.edn:1880",
      :old-citation ":1148",
@@ -6893,7 +6966,6 @@
      :enclosing-node-used nil,
      :line 10,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 589,
      :verdict :repointed,
      :old-span [1148 1148],
      :old-content " :controls",
@@ -6909,7 +6981,6 @@
      :enclosing-node-used nil,
      :line 10,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 598,
      :verdict :repointed,
      :old-span [3014 3014],
      :old-content " :head-baseline",
@@ -6925,7 +6996,6 @@
      :enclosing-node-used nil,
      :line 10,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 607,
      :verdict :repointed,
      :old-span [3485 3485],
      :old-content " :head-gate-blocker",
@@ -6941,7 +7011,6 @@
      :enclosing-node-used nil,
      :line 11,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 616,
      :verdict :repointed,
      :old-span [3537 3537],
      :old-content " :problems []}",
@@ -6988,7 +7057,6 @@
      :enclosing-node-used nil,
      :line 55,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 3163,
      :verdict :repointed,
      :old-span [1071 1075],
      :old-content
@@ -7036,7 +7104,6 @@
      :enclosing-node-used nil,
      :line 118,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 6631,
      :verdict :repointed,
      :old-span [1071 1075],
      :old-content
@@ -7053,7 +7120,6 @@
      :enclosing-node-used nil,
      :line 141,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 7764,
      :verdict :repointed,
      :old-span [2909 2909],
      :old-content "  :rename-to-nonmember",
@@ -7069,7 +7135,6 @@
      :enclosing-node-used nil,
      :line 143,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 7904,
      :verdict :repointed,
      :old-span [2303 2303],
      :old-content "  :false-antecedent",
@@ -7085,7 +7150,6 @@
      :enclosing-node-used nil,
      :line 145,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 8053,
      :verdict :repointed,
      :old-span [2842 2842],
      :old-content "  :identity-precedence-exchange",
@@ -7101,7 +7165,6 @@
      :enclosing-node-used nil,
      :line 147,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 8198,
      :verdict :repointed,
      :old-span [2299 2299],
      :old-content "  :empty-denominator",
@@ -7117,7 +7180,6 @@
      :enclosing-node-used nil,
      :line 150,
      :citing-file "C554-F12-d2-denominator.md",
-     :at 8395,
      :verdict :repointed,
      :old-span [1149 1149],
      :old-content " {:all-rule-ids-fit-cascade",

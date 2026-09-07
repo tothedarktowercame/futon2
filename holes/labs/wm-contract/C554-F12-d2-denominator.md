@@ -7,8 +7,8 @@ artifact (`f12_d2_denominator_check.clj:16`, `:260-261`), and that artifact
 carries no `:choices`, `:decisions`, `:ruling` or `:chosen-arm` key — its five
 top-level keys are `:arm-b`, `:controls`, `:head-baseline`,
 `:head-gate-blocker`, `:problems`
-(`runs/F12-organise/11-d2-denominator.edn:1`, `:1148`, `:3014`, `:3485`,
-`:3537`). Every rule-table change is made in a temporary copy, read back, and
+(`runs/F12-organise/11-d2-denominator.edn:1`, `:1880`, `:4899`, `:6105`,
+`:6157`). Every rule-table change is made in a temporary copy, read back, and
 put first on a worker classpath (`f12_d2_denominator_check.clj:132-139`;
 `f12_d3_encoding_check.clj:35-53`).
 
@@ -52,7 +52,7 @@ two floors now read `:contention-measure :contending-rounds` for Arm B and
 both with `:arms-missing-the-contention-key []`, and the baseline's true
 contention rounds are **7** in paired-minus-primary and **3, 4** in
 transcript-minus-paired — the same rounds Arm B reports, previously shown as
-empty (`runs/F12-organise/11-d2-denominator.edn:5316-5320` and `:1071-1075`).
+empty (`runs/F12-organise/11-d2-denominator.edn:5316-5320` and `:1214-1218`).
 A `:problems` guard fires when the key is absent
 (`f12_d2_denominator_check.clj:231-234`), and its control is recorded under
 "Controls and gates" below. **The two measures are not interchangeable**
@@ -115,7 +115,7 @@ per-condition read-back is in run record `:head-gate-blocker/:rules`
    remains the primary 15→15. Its measured cost is two denominators and 73
    additional acting-order rounds (102 rather than 29), including the three
    contention rounds (`runs/F12-organise/11-d2-denominator.edn:1282-1879` and
-   `:1071-1075`, run records `:arm-b/:worker/:arms` and
+   `:1214-1218`, run records `:arm-b/:worker/:arms` and
    `:arm-b/:worker/:nested-round-set-floor`).
 2. Keep acting order and score on primary. Its measured cost is O4
    exercised-false: zero contentions, unchanged order, and 15→15 over 29 rounds
@@ -138,16 +138,16 @@ recorded under `:controls` in
 `runs/F12-organise/11-d2-denominator.edn:1880-4898`:
 
 1. Rename the fifth rule to a nonmember: the pair is absent and O4 moves to
-   not-exercised (`:rename-to-nonmember`, `:2909`).
+   not-exercised (`:rename-to-nonmember`, `:4791`).
 2. Make the planted antecedent false: contention becomes empty and the wider
-   O4 verdicts move true→false (`:false-antecedent`, `:2303`).
+   O4 verdicts move true→false (`:false-antecedent`, `:3767`).
 3. Use an identity precedence exchange: O4 moves false→true through its
-   unchanged-precedence disjunct (`:identity-precedence-exchange`, `:2842`).
+   unchanged-precedence disjunct (`:identity-precedence-exchange`, `:4724`).
 4. Force an empty denominator: the probe refuses with `:empty-denominator`
-   instead of returning vacuous true (`:empty-denominator`, `:2299`).
+   instead of returning vacuous true (`:empty-denominator`, `:3763`).
 5. Fit every rule ID to a cascade member: the read-back succeeds and
    `:rule-table-is-fitted-to-the-cascade` occurs in `require-pass!`'s failure
-   vector (`:all-rule-ids-fit-cascade`, `:1149`; the finding is built at
+   vector (`:all-rule-ids-fit-cascade`, `:1881`; the finding is built at
    `futon3c:scripts/zaif_cascade_gate.clj:585-586` and thrown at `:589-591`).
 
 A sixth control was run against the repair in the section above, in a temporary
