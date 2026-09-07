@@ -286,7 +286,29 @@ the F11 question forming.
 - Sheet: C558 §6, four arms. The only witness built so far is a lookup on
   the recorded input — the field CAN be filled consistently; nothing
   computes it.
-- **Ruling: PENDING**
+- **Ruling: ARM 4, `:support-grain-input`, WITH A DATA-AVAILABILITY RIDER
+  (Joe, 2026-09-07)** — the signature gains a `Set P` attribution input
+  (determination without over-committing to rule grain; inter-derivable
+  both ways, so the upgrade is an indicator instantiation later). The
+  attribution input joins the Score parameter in the same staged single
+  Holes.lean edit.
+- Joe's rider, beyond the structural decision (near-verbatim): the
+  one-distinct-rule-id corpus is "just a data availability problem...
+  that limitation needs to be addressed in order for any decision here to
+  be meaningful. Alongside that structural issue, we need to start to
+  populate the rules... my vision for how these cascades would work is
+  that they're actually complex... we need to start up a **new mining
+  loop** that actually goes and produces some historical cascades that we
+  can use as a source of data" — reconstituting the Cascade Live problem
+  hierarchies as cascades that solved them, per the mission-cloth
+  precedent, upgrading the library-loop/why-how machinery.
+- COMMISSIONED: `holes/labs/library-loop/MINING-historical-cascades.md` —
+  sources (W1's six mapped solutions first), product shape (futon3:checks
+  format, attested/documented rule interpretations, two-plus rule-bearing
+  members as the scarce target), discipline (mining not fitting; exemplar
+  before loop).
+- Registry transcription: joins the publish-window write (six rulings —
+  every C558 choice now decided).
 
 ## 10. (forming, not yet asked) F11 — the two readings of F4
 
