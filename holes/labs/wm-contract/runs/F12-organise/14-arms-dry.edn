@@ -1,1 +1,266 @@
-{:arms-dry? true, :arms-not-dry [], :choices {:organise-carrier {:all-arms-run? true, :arms [{:arm :widen-the-cascade-carrier, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :codomain-cascadediff, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :cascade-repository-pair, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :state-the-laws-of-the-function, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :function-with-the-result-widened, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :function-at-the-cascadediff-codomain, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true}], :arms-not-all-run? false, :status :observed-not-decided}, :organise-o3-field {:all-arms-run? true, :arms [{:arm :over-the-selected-set, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :over-the-node-set, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :over-the-nodes-organise-did-not-add, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true}], :arms-not-all-run? false, :status :observed-not-decided}, :organise-o4-after-the-law-encoding {:all-arms-run? true, :arms [{:arm :construct-a-cascade-that-selects-two-rule-bearing-patterns, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :encode-a-then-a-member-already-carries, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :refuse-both-after-the-law-interventions, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true}], :arms-not-all-run? false, :status :observed-not-decided}, :organise-o4-denominator {:all-arms-run? true, :arms [{:arm :over-the-primary-rounds, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :over-the-paired-rounds, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :over-the-transcript-rounds, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :over-the-full-play, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :split-acting-order-over-transcript-score-over-primary, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true}], :arms-not-all-run? false, :status :observed-not-decided}, :organise-sorry {:all-arms-run? true, :arms [{:arm :discharge-with-any-inhabitant, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :discharge-with-a-conformant-implementation, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :amend-to-an-existence-statement, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :seal-it-opaque, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :leave-it-refused, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :amend-the-type, :buys-is-measured? false, :costs-is-measured? false, :defers-to :organise-carrier, :run-by-is-measured? false}], :arms-not-all-run? false, :status :observed-not-decided}, :organise-third-origin {:all-arms-run? true, :arms [{:arm :pay-for-the-argument, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :attribution-is-free, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :read-it-off-the-temperament, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true} {:arm :support-grain-input, :buys-is-measured? true, :costs-is-measured? true, :run-by-is-measured? true}], :arms-not-all-run? false, :status :observed-not-decided}}, :choices-not-observed-not-decided [], :constructor {:added-by-organise-is-a-literal-empty-set? true, :entries {:added-by-organise {:file-line "/home/joe/code/futon3/checks/construct_cascade.clj:412", :literal-empty-collection? true, :source-text ":added-by-organise #{}", :value-source "#{}"}, :precedence-after {:file-line "/home/joe/code/futon3/checks/construct_cascade.clj:421", :literal-empty-collection? true, :source-text ":precedence-after []}))", :value-source "[]"}, :precedence-before {:file-line "/home/joe/code/futon3/checks/construct_cascade.clj:420", :literal-empty-collection? true, :source-text ":precedence-before []", :value-source "[]"}}, :precedence-after-is-a-literal-empty-vector? true, :precedence-before-is-a-literal-empty-vector? true}, :controls [{:after-arms-dry? false, :after-arms-not-dry [[:organise-carrier :widen-the-cascade-carrier :run-by-not-measured] [:organise-sorry :amend-the-type :deferred-choice-not-directly-measured]], :arm :widen-the-cascade-carrier, :before-arms-dry? true, :choice :organise-carrier, :control :run-by-not-run, :plant-verified? true} {:after [[:organise-carrier :control-status]], :before [], :choice :organise-carrier, :control :status-changed, :plant-verified? true} {:after false, :before true, :control :computed-added-by-organise, :plant-verified? true} {:after false, :before true, :control :line-inserted-above-then, :plant-verified? true, :rule :war-machine/ambient-pattern-retrieval} {:control :fifth-rule, :observed-failure "expected 4 rules, found 5", :plant-verified? true}], :cross-check {:agree? true, :prior-count 3, :prior-second-count 3, :recomputed-count 3}, :schema :f12/arms-dry-v1, :then-correspondence {:gate-condition-source-lines {:file-exists? [273 274], :pattern-id-matches-path? [290 291], :span-inside-the-then-block? [275 295], :span-is-non-empty? [296 298]}, :rules [{:actual-span-text "    Search the library on every turn as a background process. Display results as ambient notifications, log the activation history as evidence, and use the resulting hot-zone / cold-zone pattern to tune retrieval and train later pre-hoc prediction.", :conditions {:file-exists? true, :pattern-id-matches-path? true, :span-inside-the-then-block? true, :span-is-non-empty? true}, :rule :war-machine/ambient-pattern-retrieval, :then-block-lines [15 18], :then-source "war-machine/ambient-pattern-retrieval.flexiarg:16-16"} {:actual-span-text "  + THEN:\n      Search once more against the installed source with the library's naming\n      conventions, and look for an adapter to an existing theorem before\n      building. Scope whatever absence you then claim to the index you searched.\n\n      State the missing theorem as a signature. Put exactly one `sorry` at the\n      observed gap — not spread, not relocated — and preflight the file's\n      elaboration under its real build before counting holes at all, separating\n      dependency-build failures from source-statement failures.\n\n      Beside that `sorry`, leave the consultation trail: the bridge that is\n      needed, the nearest existing API, the searches that came back empty, and\n      the routes still open. Name the residual explicitly so the completed half\n      is not rebuilt — \"the circle identity is done; what remains is the measure-\n      theoretic bridge from circle averages to disk area.\"\n\n      Record repeated empty recalls as curriculum signal rather than as private\n      frustration, record surfaced-but-unrelated memories as honest non-use, and\n      stop researching once the misses repeat.", :conditions {:file-exists? true, :pattern-id-matches-path? true, :span-inside-the-then-block? false, :span-is-non-empty? true}, :rule :math-strategy/missing-dependency-protocol, :then-block-lines [59 79], :then-source "math-strategy/missing-dependency-protocol.flexiarg:59-77"} {:actual-span-text "", :conditions {:file-exists? true, :pattern-id-matches-path? true, :span-inside-the-then-block? false, :span-is-non-empty? false}, :rule :agent/budget-bounds-exploration, :then-block-lines [20 23], :then-source "agent/budget-bounds-exploration.flexiarg:19-19"} {:actual-span-text "", :conditions {:file-exists? true, :pattern-id-matches-path? true, :span-inside-the-then-block? false, :span-is-non-empty? false}, :rule :agent/pause-is-not-failure, :then-block-lines [20 23], :then-source "agent/pause-is-not-failure.flexiarg:19-19"}], :rules-failing-then-correspondence {:count 3, :ids [:math-strategy/missing-dependency-protocol :agent/budget-bounds-exploration :agent/pause-is-not-failure]}}}
+{:arms-dry? true,
+ :arms-not-dry [],
+ :choices
+ {:organise-carrier
+  {:all-arms-run? true,
+   :arms
+   [{:arm :widen-the-cascade-carrier,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :codomain-cascadediff,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :cascade-repository-pair,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :state-the-laws-of-the-function,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :function-with-the-result-widened,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :function-at-the-cascadediff-codomain,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}],
+   :arms-not-all-run? false,
+   :status :observed-not-decided},
+  :organise-o3-field
+  {:all-arms-run? true,
+   :arms
+   [{:arm :over-the-selected-set,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :over-the-node-set,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :over-the-nodes-organise-did-not-add,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}],
+   :arms-not-all-run? false,
+   :status :observed-not-decided},
+  :organise-o4-after-the-law-encoding
+  {:all-arms-run? true,
+   :arms
+   [{:arm :construct-a-cascade-that-selects-two-rule-bearing-patterns,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :encode-a-then-a-member-already-carries,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :refuse-both-after-the-law-interventions,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}],
+   :arms-not-all-run? false,
+   :status :observed-not-decided},
+  :organise-o4-denominator
+  {:all-arms-run? true,
+   :arms
+   [{:arm :over-the-primary-rounds,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :over-the-paired-rounds,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :over-the-transcript-rounds,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :over-the-full-play,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :split-acting-order-over-transcript-score-over-primary,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}],
+   :arms-not-all-run? false,
+   :status :observed-not-decided},
+  :organise-sorry
+  {:all-arms-run? true,
+   :arms
+   [{:arm :discharge-with-any-inhabitant,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :discharge-with-a-conformant-implementation,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :amend-to-an-existence-statement,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :seal-it-opaque,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :leave-it-refused,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :amend-the-type,
+     :buys-is-measured? false,
+     :costs-is-measured? false,
+     :defers-to :organise-carrier,
+     :run-by-is-measured? false}],
+   :arms-not-all-run? false,
+   :status :observed-not-decided},
+  :organise-third-origin
+  {:all-arms-run? true,
+   :arms
+   [{:arm :pay-for-the-argument,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :attribution-is-free,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :read-it-off-the-temperament,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}
+    {:arm :support-grain-input,
+     :buys-is-measured? true,
+     :costs-is-measured? true,
+     :run-by-is-measured? true}],
+   :arms-not-all-run? false,
+   :status :observed-not-decided}},
+ :choices-not-observed-not-decided [],
+ :constructor
+ {:added-by-organise-is-a-literal-empty-set? true,
+  :entries
+  {:added-by-organise
+   {:file-line
+    "/home/joe/code/futon3/checks/construct_cascade.clj:412",
+    :literal-empty-collection? true,
+    :source-text ":added-by-organise #{}",
+    :value-source "#{}"},
+   :precedence-after
+   {:file-line
+    "/home/joe/code/futon3/checks/construct_cascade.clj:421",
+    :literal-empty-collection? true,
+    :source-text ":precedence-after []}))",
+    :value-source "[]"},
+   :precedence-before
+   {:file-line
+    "/home/joe/code/futon3/checks/construct_cascade.clj:420",
+    :literal-empty-collection? true,
+    :source-text ":precedence-before []",
+    :value-source "[]"}},
+  :precedence-after-is-a-literal-empty-vector? true,
+  :precedence-before-is-a-literal-empty-vector? true},
+ :controls
+ [{:after-arms-dry? false,
+   :after-arms-not-dry
+   [[:organise-carrier :widen-the-cascade-carrier :run-by-not-measured]
+    [:organise-sorry
+     :amend-the-type
+     :deferred-choice-not-directly-measured]],
+   :arm :widen-the-cascade-carrier,
+   :before-arms-dry? true,
+   :choice :organise-carrier,
+   :control :run-by-not-run,
+   :plant-verified? true}
+  {:after [[:organise-carrier :control-status]],
+   :before [],
+   :choice :organise-carrier,
+   :control :status-changed,
+   :plant-verified? true}
+  {:after false,
+   :before true,
+   :control :computed-added-by-organise,
+   :plant-verified? true}
+  {:after false,
+   :before true,
+   :control :line-inserted-above-then,
+   :plant-verified? true,
+   :rule :war-machine/ambient-pattern-retrieval}
+  {:control :fifth-rule,
+   :observed-failure "expected 4 rules, found 5",
+   :plant-verified? true}],
+ :cross-check
+ {:agree? true,
+  :prior-count 3,
+  :prior-second-count 3,
+  :recomputed-count 3},
+ :schema :f12/arms-dry-v1,
+ :then-correspondence
+ {:gate-condition-source-lines
+  {:file-exists?
+   {:source-text
+    "                f (io/file library-root rel)\n                lines (when (.exists f) (vec (str/split-lines (slurp f))))",
+    :span [273 274]},
+   :pattern-id-matches-path?
+   {:source-text
+    "             :pattern-id-matches-path?\n             (= id (keyword (str/replace rel #\"\\.flexiarg$\" \"\")))",
+    :span [290 291]},
+   :span-inside-the-then-block?
+   {:source-text
+    "                then-line (when lines\n                            (first (keep-indexed (fn [i l] (when (re-find #\"^\\s*\\+ THEN:\" l) (inc i)))\n                                                 lines)))\n                next-block (when (and lines then-line)\n                             (or (first (keep-indexed\n                                         (fn [i l] (when (and (> (inc i) then-line)\n                                                              (re-find #\"^\\s*\\+ [A-Z-]+:\" l))\n                                                     (inc i)))\n                                         lines))\n                                 (inc (count lines))))]\n            (sorted-map\n             :rule id :counterfactual? (boolean counterfactual?)\n             :then-source then-source :encodes encodes\n             :encoding-limit (:encoding-limit (first (filter #(= id (:id %)) rule-table)))\n             :file-exists? (some? lines)\n             :pattern-id-matches-path?\n             (= id (keyword (str/replace rel #\"\\.flexiarg$\" \"\")))\n             :then-block [then-line next-block]\n             :span-inside-the-then-block?\n             (boolean (and then-line next-block from to\n                           (> from then-line) (< to next-block)))",
+    :span [275 295]},
+   :span-is-non-empty?
+   {:source-text
+    "             :span-is-non-empty?\n             (boolean (and lines from to (<= to (count lines))\n                           (seq (str/trim (str/join \" \" (subvec lines (dec from) to)))))))))",
+    :span [296 298]}},
+  :rules
+  [{:actual-span-text
+    "    Search the library on every turn as a background process. Display results as ambient notifications, log the activation history as evidence, and use the resulting hot-zone / cold-zone pattern to tune retrieval and train later pre-hoc prediction.",
+    :conditions
+    {:file-exists? true,
+     :pattern-id-matches-path? true,
+     :span-inside-the-then-block? true,
+     :span-is-non-empty? true},
+    :rule :war-machine/ambient-pattern-retrieval,
+    :then-block-lines [15 18],
+    :then-source
+    "war-machine/ambient-pattern-retrieval.flexiarg:16-16"}
+   {:actual-span-text
+    "  + THEN:\n      Search once more against the installed source with the library's naming\n      conventions, and look for an adapter to an existing theorem before\n      building. Scope whatever absence you then claim to the index you searched.\n\n      State the missing theorem as a signature. Put exactly one `sorry` at the\n      observed gap — not spread, not relocated — and preflight the file's\n      elaboration under its real build before counting holes at all, separating\n      dependency-build failures from source-statement failures.\n\n      Beside that `sorry`, leave the consultation trail: the bridge that is\n      needed, the nearest existing API, the searches that came back empty, and\n      the routes still open. Name the residual explicitly so the completed half\n      is not rebuilt — \"the circle identity is done; what remains is the measure-\n      theoretic bridge from circle averages to disk area.\"\n\n      Record repeated empty recalls as curriculum signal rather than as private\n      frustration, record surfaced-but-unrelated memories as honest non-use, and\n      stop researching once the misses repeat.",
+    :conditions
+    {:file-exists? true,
+     :pattern-id-matches-path? true,
+     :span-inside-the-then-block? false,
+     :span-is-non-empty? true},
+    :rule :math-strategy/missing-dependency-protocol,
+    :then-block-lines [59 79],
+    :then-source
+    "math-strategy/missing-dependency-protocol.flexiarg:59-77"}
+   {:actual-span-text "",
+    :conditions
+    {:file-exists? true,
+     :pattern-id-matches-path? true,
+     :span-inside-the-then-block? false,
+     :span-is-non-empty? false},
+    :rule :agent/budget-bounds-exploration,
+    :then-block-lines [20 23],
+    :then-source "agent/budget-bounds-exploration.flexiarg:19-19"}
+   {:actual-span-text "",
+    :conditions
+    {:file-exists? true,
+     :pattern-id-matches-path? true,
+     :span-inside-the-then-block? false,
+     :span-is-non-empty? false},
+    :rule :agent/pause-is-not-failure,
+    :then-block-lines [20 23],
+    :then-source "agent/pause-is-not-failure.flexiarg:19-19"}],
+  :rules-failing-then-correspondence
+  {:count 3,
+   :ids
+   [:math-strategy/missing-dependency-protocol
+    :agent/budget-bounds-exploration
+    :agent/pause-is-not-failure]}}}

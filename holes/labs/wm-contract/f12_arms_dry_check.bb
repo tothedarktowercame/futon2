@@ -2,6 +2,7 @@
 
 (require '[clojure.edn :as edn]
          '[clojure.java.io :as io]
+         '[clojure.pprint :as pp]
          '[clojure.string :as str])
 (import '[java.io PushbackReader]
         '[java.nio.file Files]
@@ -174,10 +175,19 @@
                          (:rule r)))]
       (sorted-map
        :gate-condition-source-lines
-       (sorted-map :file-exists? [273 274]
-                   :pattern-id-matches-path? [290 291]
-                   :span-inside-the-then-block? [275 295]
-                   :span-is-non-empty? [296 298])
+       ;; These spans are asserted, not derived: they name where the gate computes
+       ;; each condition. Carrying the text at each span is what makes the
+       ;; assertion checkable -- if the gate file shifts, the recorded text
+       ;; changes and this artifact stops reproducing, instead of the span
+       ;; quietly resolving to different code.
+       (let [gate-lines (vec (str/split-lines (slurp gate-path)))
+             at (fn [[from to]]
+                  (sorted-map :source-text (str/join "\n" (subvec gate-lines (dec from) to))
+                              :span [from to]))]
+         (sorted-map :file-exists? (at [273 274])
+                     :pattern-id-matches-path? (at [290 291])
+                     :span-inside-the-then-block? (at [275 295])
+                     :span-is-non-empty? (at [296 298])))
        :rules rows
        :rules-failing-then-correspondence
        (sorted-map :count (count failing) :ids failing)))))
@@ -200,6 +210,12 @@
 
 (defn write-edn! [f x]
   (spit f (str (pr-str x) "\n")))
+
+;; The published artifact is pretty-printed, as every sibling f12_*_check writes
+;; its run record: a claim in the ledger has to carry a file:line pointer, and a
+;; one-line artifact gives every claim the same pointer, :1.
+(defn write-artifact! [f x]
+  (spit f (with-out-str (pp/pprint x))))
 
 (defn controls [aif-path construct-path gate-path library-path baseline]
   (let [tmp (temp-dir)
@@ -294,7 +310,7 @@
   (let [out (env-file "F12_OUT" default-out)
         result (measure)]
     (.mkdirs (.getParentFile out))
-    (write-edn! out result)
+    (write-artifact! out result)
     (println (str out)))
   (catch Exception e
     (binding [*out* *err*]
