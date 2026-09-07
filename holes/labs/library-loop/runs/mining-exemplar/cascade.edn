@@ -1,0 +1,76 @@
+{:schema :historical-cascade-v1
+ :id :wm-policy-grain-dark-cascade-selection
+ :problem
+ {:id :wm-aif-policy-grain-compliance
+  :statement "The scheduler action and the paper-level cascade policy had different grains, and truncated construction could leave policy identity and policy score referring to different objects."
+  :source "holes/missions/M-wm-aif-policy-grain-compliance.md:12-26"
+  :solved-behaviour "Construct and rank a non-degenerate menu of complete same-mission cascade policies in dark mode."
+  :scope "This record does not claim live selection, persistence, enactment, or full mission closure."
+  :witness "holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:145-201"}
+ :source-pins
+ {:futon2 "5620ecd3bc33f4bf622f439e8c741708a28f4c59"
+  :futon3 "cdb5e8a56fd907beb6a99f8b88af9de50ff93126"}
+ :nodes
+ [{:pattern :aif/hierarchical-and-temporal-depth
+   :library-path "library/aif/hierarchical-and-temporal-depth.flexiarg"
+   :origin :selected
+   :witness "holes/missions/M-wm-aif-policy-grain-compliance.md:34-46"}
+  {:pattern :aif/candidate-pattern-action-space
+   :library-path "library/aif/candidate-pattern-action-space.flexiarg"
+   :origin :selected
+   :witness "holes/missions/M-wm-aif-policy-grain-compliance.md:91-125"}
+  {:pattern :aif/expected-free-energy-scorecard
+   :library-path "library/aif/expected-free-energy-scorecard.flexiarg"
+   :origin :selected
+   :witness "holes/missions/M-wm-aif-policy-grain-compliance.md:127-149"}]
+ :selected
+ [:aif/hierarchical-and-temporal-depth
+  :aif/candidate-pattern-action-space
+  :aif/expected-free-energy-scorecard]
+ :admitted []
+ :admission-note
+ "The mission names the hierarchy, candidate-menu contract, and separately named scoring terms in its plan. It does not record any library pattern being drawn in during execution, so no node is classified as admitted."
+ :edges
+ [{:from :aif/hierarchical-and-temporal-depth
+   :to :aif/candidate-pattern-action-space
+   :relation :requires-tactical-menu
+   :source "holes/missions/M-wm-aif-policy-grain-compliance.md:34-44"
+   :reading "The declared hierarchy constructs Pi_cascade(a) before tactical choice."}
+  {:from :aif/candidate-pattern-action-space
+   :to :aif/expected-free-energy-scorecard
+   :relation :precedes-ranking
+   :source "holes/missions/M-wm-aif-policy-grain-compliance.md:119-132"
+   :reading "The complete same-mission menu is constructed before ln E_cascade and cascade score rank it."}]
+ :rules
+ [{:id :construct-a-bounded-explicit-candidate-menu
+   :member :aif/candidate-pattern-action-space
+   :then-source "library/aif/candidate-pattern-action-space.flexiarg:26-27"
+   :interpretation-class :attested
+   :interpretation
+   "Construct a bounded candidate set with explicit inclusion and exclusion reasons."
+   :attestation "holes/missions/M-wm-aif-policy-grain-compliance.md:91-125"}
+  {:id :keep-hierarchical-quantities-distinct
+   :member :aif/hierarchical-and-temporal-depth
+   :then-source "library/aif/hierarchical-and-temporal-depth.flexiarg:32-38"
+   :interpretation-class :attested
+   :interpretation
+   "Strategic selection fixes the tactical target, and the tactical level uses separately named quantities."
+   :attestation "holes/missions/M-wm-aif-policy-grain-compliance.md:34-59"}
+  {:id :record-the-ranking-terms
+   :member :aif/expected-free-energy-scorecard
+   :then-source "library/aif/expected-free-energy-scorecard.flexiarg:27-28"
+   :interpretation-class :attested
+   :interpretation
+   "Keep scoring terms separately named and record the terms used for each candidate."
+   :attestation "holes/missions/M-wm-aif-policy-grain-compliance.md:56-69,127-149"}]
+ :precedence
+ {:aif/hierarchical-and-temporal-depth 1
+  :aif/candidate-pattern-action-space 2
+  :aif/expected-free-energy-scorecard 3}
+ :o4
+ {:rule-bearing-members 3
+  :acting-order
+  [:aif/hierarchical-and-temporal-depth
+   :aif/candidate-pattern-action-space
+   :aif/expected-free-energy-scorecard]
+  :basis "holes/missions/M-wm-aif-policy-grain-compliance.md:34-46,91-149"}}
