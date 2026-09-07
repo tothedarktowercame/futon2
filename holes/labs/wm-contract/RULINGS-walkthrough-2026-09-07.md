@@ -316,6 +316,24 @@ the F11 question forming.
 - Registry transcription: joins the publish-window write (six rulings —
   every C558 choice now decided).
 
+---
+
+## Transcription record (2026-09-07, 15:20:52 publish gap)
+
+- LANDED: futon2 `51f3546c`. All SIX C558 choices verified `:decided` with
+  `:ruling` maps in `aif-equations.edn` after the commit; F12 `:open` with
+  the original blocker in `:blocker-history`; `worklist_check` 183 OK,
+  counts moved {:blocked 3→2, :open 3→4}. The loop's very next iteration
+  picked `next-open=F12` (15:21:23) — slice 4, the exemplar build, runs
+  under these rulings.
+- Correction (follow-up, not amend): `51f3546c`'s message says "five
+  rulings" — the watcher shell kept its pre-edit text when the message was
+  updated mid-run — but six landed, verified structurally above.
+  `:organise-third-origin` (arm 4 + data-availability rider) is among them.
+- The 14:37 publish failure (`pointer_check` FAIL) is confirmed transient:
+  the 15:20:52 publish committed clean. Cause was the first watcher writing
+  the registry mid-pipeline; the post-publish-gap trigger removed that race.
+
 ## 10. (forming, not yet asked) F11 — the two readings of F4
 
 - Slices 2–3 showed the readings disagree in both directions on the record.
