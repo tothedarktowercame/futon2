@@ -63,7 +63,34 @@ the F11 question forming.
   `Obs organisations` := terminal flight dispositions (candidate D, the only
   one with a measured policy-conditional distribution);
   `Obs evidence` := certification/update records valued by EIG, no C.
-- **Ruling: PENDING**
+- **Ruling: PENDING-EVIDENCE (Joe, 2026-09-07)** — no ruling until a few
+  examples are computed. The direction is endorsed (the §5 seed plus
+  named-empty slots at nouns and verbs), but as the first direction for
+  *gathering evidence*, not as policy.
+- Joe's framing (near-verbatim):
+  - "Anything saying 'oh well, it's not computed yet' — that's not a reason
+    to prefer what's computed already. We need to develop some examples and
+    be generative in our thinking here."
+  - The risk of ruling now: "if we're computing over missions but we leave
+    out tickets, excursions — and if we are computing over preferences but
+    we leave out the complexity — ultimately we're going to become very
+    formulaic, rather than computing something over what's ultimately a
+    **graph structure**."
+  - Inspiring example: the memory white paper's use of a **graph Laplacian**
+    to measure properties of memory retrieval. "It's that kind of
+    computational approach — graph Laplacians or other similar things, over
+    the complex space of missions, tickets, excursions, problems — that
+    would allow this to really have a robust interpretation."
+  - "Right now, because of its complexity, I don't have any obvious examples
+    that I can rule on."
+- Evidence excursion (opened 2026-09-07): compute worked examples before
+  D1 returns to Joe —
+  1. a small KL[Q(o|π) ‖ C] worked example over the 14 flight dispositions
+     using the measured conditionals (claude-1, direct);
+  2. assemble the mission/ticket/excursion/problem graph from the futon
+     repos and compute Laplacian/spectral properties over it, in the style
+     of the memory white paper (dispatched).
+- Registry transcription: deferred with the ruling.
 
 ## 3. F10 / D2 — family of C's or one C over the tagged sum
 
