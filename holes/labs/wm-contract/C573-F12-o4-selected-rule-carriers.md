@@ -75,3 +75,58 @@ The unmutated verdict is true at
 This is a measurement only. It takes no ruling, changes no choice status, and
 does not modify the gate, any earlier signed artifact, Lean, or machine source.
 Unresolved source claims: not found.
+
+## Review (seat wm-build-work, 2026-09-07)
+
+Re-ran the checker twice: exit 0 both times, artifact byte-identical, sha256
+`8326eef1e35fa2f9d7053266869d15cf23aed6e926a3e24c24c33bb707b309f7`, matching the
+value the delivering seat reported. clj-kondo 0 errors 0 warnings;
+`check-parens.el` OK; negative_controls PASS (133 negative, 53 positive);
+pointer_check 3,555 pointers in 6 files, 0 unresolved.
+
+Read the gate rather than the report: `{:id` occurs exactly four times in
+`futon3c:scripts/zaif_cascade_gate.clj` (206, 218, 234, 249), so the checker's
+regex table parse is the rule table and nothing else, and the two
+`:counterfactual? true` keys sit at 235 and 250. The selection path was printed
+line by line — 412 `selected-rules`, 413 `cascade-rules`, 419
+`counterfactual-rules`, 444 `two`, 445 `o4-exercisable?` — and `two` is built
+from `cascade-rules`, so a member set whose only carriers are counterfactual
+reads `:exercised? false` at 549. The dispatching premise holds as recorded.
+
+The headline was re-measured here without the checker. A sweep of all ten pinned
+records collected every map anywhere in the tree carrying a sequential
+`:members` or `:selected` — a superset of the checker's `:find`/`:cascade`
+criterion — and found 71 such nodes, the same count as the artifact's 71 rows;
+the maximum non-counterfactual carrier count over all of them is 1, held by
+zaif's three member sets. Every occurrence of the four rule ids anywhere in the
+corpus was also listed: construct's five are in `:admitted`, `:scores-at-step-0`
+and `:record` rather than a member set, and open-short-cue's two are
+`:zero-mass-pattern` values. So `false` does not rest on the walk missing a
+node. This is the one claim the plant battery cannot reach: a member set the
+walk never visits cannot be planted by mutating the report, so it has to be
+checked against the records directly.
+
+One repair, made in review rather than re-dispatched: the carrier count was by
+occurrence, not by rule. The gate builds `two` by filtering the four-entry rule
+table, so an id contributes at most once no matter how often it appears in a
+member set; the checker counted list occurrences and would have read a member
+set that names one selected carrier twice as meeting precondition A. The three
+carrier expressions now count `distinct` ids
+(`futon2:holes/labs/wm-contract/f12_o4_selected_rule_carriers.bb:62-64`). No
+member set in this corpus repeats a carrier, so the artifact is unchanged —
+same sha — and the verdict is untouched; the fix removes a grain mismatch of
+exactly the kind this slice was dispatched to correct, not a wrong number.
+
+The correction is contained, which the review checked rather than assumed. The
+only readers of slice 6's two-carrier reading outside its own artifact and C572
+are this slice's checker and the F12 ledger row; a grep of the registries for
+the two counterfactual ids and for `kangaroo` returns nothing in
+`aif-equations.edn`, `p4ng/empirics-futon/control-map-edges.edn` or the F12
+decision sheet. The registry's own statement of this quantity is the opposite
+one and already agrees with this slice: `:organise-o4-denominator` says the
+maximum rule-carrying member count on any recorded run is 1
+(`futon2:holes/labs/wm-contract/aif-equations.edn:745`), citing
+`futon2:holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn:354`,
+where `:max-rule-carrying-members-on-any-recorded-run` is 1. So slice 6's
+reading was the outlier, no ruled or registered choice rests on it, and nothing
+in the registries needs repair.

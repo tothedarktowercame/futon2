@@ -59,9 +59,9 @@
         {:record-id (:id d) :source (source-name d) :structural-path (pr-str p)
          :member-list-source (if (and (empty? members) (= :find (last p))) :selected :members)
          :members member-list :member-count (count member-list)
-         :selected-rule-carriers (vec (filter selected-ids member-list))
-         :selected-rule-carrier-count (count (filter selected-ids member-list))
-         :meets-precondition-a-at-the-gate-grain? (>= (count (filter selected-ids member-list)) 2)}))))
+         :selected-rule-carriers (vec (distinct (filter selected-ids member-list)))
+         :selected-rule-carrier-count (count (distinct (filter selected-ids member-list)))
+         :meets-precondition-a-at-the-gate-grain? (>= (count (distinct (filter selected-ids member-list))) 2)}))))
 
 (def prior (edn/read-string (slurp prior-artifact)))
 (def prior-lines (ls (slurp prior-artifact)))
