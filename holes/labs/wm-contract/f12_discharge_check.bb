@@ -220,7 +220,7 @@
   (vec (for [[i l] (map-indexed vector arm-lines)
              :when (re-find #"^opaque \w+" l)]
          (sorted-map :line (inc i) :text (str/trim l)
-                     :carries-a-body? (boolean (str/includes? l ":="))))))
+                     :carries-a-body? (str/includes? l ":=")))))
 ;; The packet claimed `opaque` REQUIRES a body.  Review refuted that: a bodiless
 ;; `opaque` elaborates from a `Nonempty` instance, and the two routes are told
 ;; apart by `#print axioms` (none against `Classical.choice`).  So the module has
