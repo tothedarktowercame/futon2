@@ -1,6 +1,6 @@
 # C558 — F12 decision sheet
 
-This sheet presents the six registered `:F12` choices and the measurements of their arms. It is derived from `aif-equations.edn` and `runs/F12-organise/15-remainder.edn`.
+This sheet presents the six registered `:F12` choices and the measurements of their arms. It is derived from `aif-equations.edn`, `runs/F12-organise/14-arms-dry.edn` and `runs/F12-organise/15-remainder.edn`.
 
 It takes no ruling, recommends no arm, and changes neither a registry nor the Lean declaration.
 

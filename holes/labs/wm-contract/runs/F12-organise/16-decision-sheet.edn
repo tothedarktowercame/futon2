@@ -382,7 +382,17 @@
    "unresolved pointers: status-gated-belief-update.flexiarg:26-99999 (end-beyond-file)",
    :before "status-gated-belief-update.flexiarg:26-30",
    :control :flexiarg-range-out-of-bounds,
-   :plant-verified? true}],
+   :plant-verified? true}
+  {:after false,
+   :before true,
+   :control :arms-dry-verdict-flipped,
+   :plant-verified? true,
+   :sheet-states-flipped-value? true}
+  {:after false,
+   :before true,
+   :control :remainder-gated-verdict-flipped,
+   :plant-verified? true,
+   :sheet-states-flipped-value? true}],
  :gating
  {:conformant-implementation
   [{:choice :organise-sorry,

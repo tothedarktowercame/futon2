@@ -96,15 +96,22 @@
                        m citations))
              (zipmap choice-order (repeat [])) (:gating remainder)))
 
-(defn sheet-text [xs remainder]
+(defn sheet-text [xs remainder arms-dry]
   (let [gates (gates-by-choice remainder)
         obligations (:obligations remainder)]
+    ;; Both verdicts below are READ from the artifacts named beside them. They
+    ;; were string literals as delivered, which is the defect slice 23's review
+    ;; found one directory over: a premise the sheet rests on, stated in a form
+    ;; no state of the artifacts could have made false. If either flips, the
+    ;; sheet says so.
     (str "# C558 — F12 decision sheet\n\n"
          "This sheet presents the six registered `:F12` choices and the measurements of their arms. "
-         "It is derived from `aif-equations.edn` and `runs/F12-organise/15-remainder.edn`.\n\n"
+         "It is derived from `aif-equations.edn`, `runs/F12-organise/14-arms-dry.edn` "
+         "and `runs/F12-organise/15-remainder.edn`.\n\n"
          "It takes no ruling, recommends no arm, and changes neither a registry nor the Lean declaration.\n\n"
-         "- `runs/F12-organise/14-arms-dry.edn`: `:arms-dry? true`\n"
-         "- `runs/F12-organise/15-remainder.edn`: `:remainder-fully-gated? true`\n\n"
+         "- `runs/F12-organise/14-arms-dry.edn`: `:arms-dry? " (pr-str (:arms-dry? arms-dry)) "`\n"
+         "- `runs/F12-organise/15-remainder.edn`: `:remainder-fully-gated? "
+         (pr-str (:remainder-fully-gated? remainder)) "`\n\n"
          (apply str
                 (for [[idx k] (map-indexed vector choice-order)
                       :let [c (get xs k)
@@ -133,12 +140,13 @@
                                      "- Costs: " (shown (:costs a)) "\n"
                                      "- Run by: " (shown (:run-by a)) "\n\n")))))))))
 
-(defn measure [aif remainder-file]
+(defn measure [aif remainder-file arms-dry-file]
   (let [xs (choices aif)
         remainder (read-edn remainder-file)
-        text (sheet-text xs remainder)
+        arms-dry (read-edn arms-dry-file)
+        text (sheet-text xs remainder arms-dry)
         pointers (check-pointers text)]
-    {:choices xs :remainder remainder :text text :pointers pointers}))
+    {:choices xs :remainder remainder :arms-dry arms-dry :text text :pointers pointers}))
 
 (defn temp-dir [] (.toFile (Files/createTempDirectory "f12-sheet-" (make-array FileAttribute 0))))
 (defn write-edn [f x] (spit f (pprint-str x)))
@@ -150,7 +158,7 @@
     (when (neg? i) (throw (ex-info (str "control plant source not found: " old) {})))
     (str (subs s 0 i) new (subs s (+ i (count old))))))
 
-(defn controls [aif remainder-file baseline]
+(defn controls [aif remainder-file arms-dry-file baseline]
   (let [dir (temp-dir)
         reg (read-edn aif)
         rem (read-edn remainder-file)
@@ -170,25 +178,30 @@
                                         [o (vec (remove #(= :organise-carrier (:choice %)) cs))]))))
         f4 (io/file dir "ungated-remainder.edn")
         raw5 (replace-first (slurp aif) flex-old flex-new)
-        f5 (io/file dir "bad-flex-range.edn")]
+        f5 (io/file dir "bad-flex-range.edn")
+        dry (read-edn arms-dry-file)
+        dry6 (update dry :arms-dry? not)
+        f6 (io/file dir "flipped-arms-dry.edn")
+        rem7 (update rem :remainder-fully-gated? not)
+        f7 (io/file dir "flipped-gated.edn")]
     (write-edn f1 reg1) (write-edn f2 reg2) (write-edn f3 rem3) (write-edn f4 rem4)
-    (spit f5 raw5)
+    (spit f5 raw5) (write-edn f6 dry6) (write-edn f7 rem7)
     [(sorted-map :control :unresolvable-pointer
                  :plant-verified? (str/includes? (slurp f1) bad-pointer)
                  :before :measurement-succeeds
-                 :after-hard-failure (message #(measure f1 remainder-file)))
+                 :after-hard-failure (message #(measure f1 remainder-file arms-dry-file)))
      (sorted-map :control :f12-choice-deleted
                  :plant-verified? (not (contains? (:choices (read-edn f2)) :organise-third-origin))
                  :before (vec choice-order)
-                 :after-hard-failure (message #(measure f2 remainder-file)))
-     (let [after (measure aif f3)]
+                 :after-hard-failure (message #(measure f2 remainder-file arms-dry-file)))
+     (let [after (measure aif f3 arms-dry-file)]
        (sorted-map :control :obligation-satisfaction-flipped
                    :plant-verified? (not= (get-in rem [:obligations obligation :satisfied-at-head?])
                                           (get-in (read-edn f3) [:obligations obligation :satisfied-at-head?]))
                    :before (get-in rem [:obligations obligation :satisfied-at-head?])
                    :after (get-in rem3 [:obligations obligation :satisfied-at-head?])
                    :sheet-line-moved? (not= (:text baseline) (:text after))))
-     (let [after (measure aif f4)]
+     (let [after (measure aif f4 arms-dry-file)]
        (sorted-map :control :choice-gating-deleted
                    :plant-verified? (every? #(not= :organise-carrier (:choice %))
                                             (mapcat val (:gating (read-edn f4))))
@@ -198,20 +211,42 @@
      (sorted-map :control :flexiarg-range-out-of-bounds
                  :plant-verified? (str/includes? (slurp f5) flex-new)
                  :before flex-old
-                 :after-hard-failure (message #(measure f5 remainder-file)))]))
+                 :after-hard-failure (message #(measure f5 remainder-file arms-dry-file)))
+     ;; The two controls below are what make the sheet's headline verdicts
+     ;; measurements rather than assertions: each flips one artifact's verdict
+     ;; and requires the emitted sheet to say the flipped value.
+     (let [after (measure aif remainder-file f6)]
+       (sorted-map :control :arms-dry-verdict-flipped
+                   :plant-verified? (not= (:arms-dry? dry) (:arms-dry? (read-edn f6)))
+                   :before (:arms-dry? dry)
+                   :after (:arms-dry? dry6)
+                   :sheet-states-flipped-value? (str/includes?
+                                                 (:text after)
+                                                 (str ":arms-dry? " (pr-str (:arms-dry? dry6)) "`"))))
+     (let [after (measure aif f7 arms-dry-file)]
+       (sorted-map :control :remainder-gated-verdict-flipped
+                   :plant-verified? (not= (:remainder-fully-gated? rem)
+                                          (:remainder-fully-gated? (read-edn f7)))
+                   :before (:remainder-fully-gated? rem)
+                   :after (:remainder-fully-gated? rem7)
+                   :sheet-states-flipped-value? (str/includes?
+                                                 (:text after)
+                                                 (str ":remainder-fully-gated? "
+                                                      (pr-str (:remainder-fully-gated? rem7)) "`"))))]))
 
 (defn -main []
   (let [aif (env-file "AIF_EQ" (io/file lab "aif-equations.edn"))
         remainder-file (env-file "F12_REMAINDER" (io/file lab "runs/F12-organise/15-remainder.edn"))
         sheet (env-file "F12_SHEET_OUT" (io/file lab "C558-F12-decision-sheet.md"))
         run (env-file "F12_RUN_OUT" (io/file lab "runs/F12-organise/16-decision-sheet.edn"))
-        m (measure aif remainder-file)
-        cs (controls aif remainder-file m)
+        arms-dry-file (env-file "F12_ARMS_DRY" (io/file lab "runs/F12-organise/14-arms-dry.edn"))
+        m (measure aif remainder-file arms-dry-file)
+        cs (controls aif remainder-file arms-dry-file m)
         gaps (sorted-map :measurement-that-separates-them [:organise-sorry]
                          :other-required-fields [])
         record (sorted-map
                 :arms-dry-artifact "runs/F12-organise/14-arms-dry.edn"
-                :arms-dry? true
+                :arms-dry? (:arms-dry? (:arms-dry m))
                 :choice-order choice-order
                 :choices (into (sorted-map) (:choices m))
                 :controls cs
@@ -224,7 +259,7 @@
                                    :unresolved [])
                 :registry-field-gaps gaps
                 :remainder-artifact "runs/F12-organise/15-remainder.edn"
-                :remainder-fully-gated? true)]
+                :remainder-fully-gated? (:remainder-fully-gated? (:remainder m)))]
     (spit sheet (:text m))
     (spit run (pprint-str record))
     (println (str "f12_decision_sheet: wrote " sheet " and " run
