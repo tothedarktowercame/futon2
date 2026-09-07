@@ -28,12 +28,29 @@
  [{:plant :flat-precedence, :landed? true, :verdict false}
   {:plant :flat-acting, :landed? true, :verdict false}
   {:plant :sorry, :landed? true, :verdict false}
-  {:plant :shift-pointer, :landed? true, :verdict false}],
+  {:plant :shift-pointer, :landed? true, :verdict false}
+  {:plant :swap-pointer, :landed? true, :verdict false}],
  :pointer-spans
  {:actual
-  #{"108" "93-97" "72-76" "83-87" "98-102" "103-104" "88-92" "2"},
+  {"antsActingOrderAfter" #{"83-87"},
+   "antsActingOrderBefore" #{"88-92"},
+   "antsAdmitted" #{"108"},
+   "antsPrecedenceAfter" #{"93-97"},
+   "antsPrecedenceBefore" #{"98-102"},
+   "antsRepo" #{"2"},
+   "antsScore" #{"103-104"},
+   "antsSelected" #{"72-76"},
+   "module-header" #{"108" "72-76"}},
   :expected
-  #{"108" "93-97" "72-76" "83-87" "98-102" "103-104" "88-92" "2"},
+  {"antsActingOrderAfter" #{"83-87"},
+   "antsActingOrderBefore" #{"88-92"},
+   "antsAdmitted" #{"108"},
+   "antsPrecedenceAfter" #{"93-97"},
+   "antsPrecedenceBefore" #{"98-102"},
+   "antsRepo" #{"2"},
+   "antsScore" #{"103-104"},
+   "antsSelected" #{"72-76"},
+   "module-header" #{"108" "72-76"}},
   :match? true},
  :record-assertions
  {:o4-holds true,
