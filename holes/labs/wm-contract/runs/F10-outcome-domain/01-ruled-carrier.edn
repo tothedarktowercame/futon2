@@ -1,0 +1,101 @@
+{:check :F10-ruled-carrier,
+ :facts
+ {:all-members
+  ["abstained"
+   "agentUnavailable"
+   "artifactOnly"
+   "buildFailed"
+   "cancelled"
+   "dispatchFailed"
+   "groundedChange"
+   "groundedNoChange"
+   "guardrailRefusal"
+   "incomplete"
+   "noSelection"
+   "substrateUnavailable"],
+  :authority-keywords
+  [:abstained
+   :agent-unavailable
+   :artifact-only
+   :build-failed
+   :cancelled
+   :dispatch-failed
+   :grounded-change
+   :grounded-no-change
+   :guardrail-refusal
+   :incomplete
+   :no-selection
+   :substrate-unavailable],
+  :constructors
+  ["abstained"
+   "agentUnavailable"
+   "artifactOnly"
+   "buildFailed"
+   "cancelled"
+   "dispatchFailed"
+   "groundedChange"
+   "groundedNoChange"
+   "guardrailRefusal"
+   "incomplete"
+   "noSelection"
+   "substrateUnavailable"],
+  :declared-positive-masses
+  {"agentUnavailable" 0.125,
+   "buildFailed" 0.125,
+   "groundedChange" 0.5,
+   "incomplete" 0.125,
+   "noSelection" 0.125},
+  :expected-constructors
+  ["abstained"
+   "agentUnavailable"
+   "artifactOnly"
+   "buildFailed"
+   "cancelled"
+   "dispatchFailed"
+   "groundedChange"
+   "groundedNoChange"
+   "guardrailRefusal"
+   "incomplete"
+   "noSelection"
+   "substrateUnavailable"],
+  :expected-positive-masses
+  {"agentUnavailable" 0.125,
+   "buildFailed" 0.125,
+   "groundedChange" 0.5,
+   "incomplete" 0.125,
+   "noSelection" 0.125},
+  :forbidden-counts {:axiom 0, :native-decide 0, :sorry 0},
+  :named-zeros-declared
+  ["abstained"
+   "artifactOnly"
+   "cancelled"
+   "dispatchFailed"
+   "groundedNoChange"
+   "guardrailRefusal"
+   "substrateUnavailable"],
+  :named-zeros-derived
+  ["abstained"
+   "artifactOnly"
+   "cancelled"
+   "dispatchFailed"
+   "groundedNoChange"
+   "guardrailRefusal"
+   "substrateUnavailable"],
+  :observed-declared
+  ["agentUnavailable"
+   "buildFailed"
+   "groundedChange"
+   "incomplete"
+   "noSelection"],
+  :observed-source
+  ["agentUnavailable"
+   "buildFailed"
+   "groundedChange"
+   "incomplete"
+   "noSelection"]},
+ :plants
+ [{:plant :drop-constructor, :landed? true, :verdict false}
+  {:plant :zero-into-positive-set, :landed? true, :verdict false}
+  {:plant :change-mass, :landed? true, :verdict false}
+  {:plant :append-sorry, :landed? true, :verdict false}],
+ :verdict true}
