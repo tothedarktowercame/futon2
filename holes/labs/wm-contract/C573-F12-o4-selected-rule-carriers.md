@@ -82,7 +82,7 @@ Re-ran the checker twice: exit 0 both times, artifact byte-identical, sha256
 `8326eef1e35fa2f9d7053266869d15cf23aed6e926a3e24c24c33bb707b309f7`, matching the
 value the delivering seat reported. clj-kondo 0 errors 0 warnings;
 `check-parens.el` OK; negative_controls PASS (133 negative, 53 positive);
-pointer_check 3,555 pointers in 6 files, 0 unresolved.
+pointer_check 3,571 pointers in 6 files, 0 unresolved.
 
 Read the gate rather than the report: `{:id` occurs exactly four times in
 `futon3c:scripts/zaif_cascade_gate.clj` (206, 218, 234, 249), so the checker's
