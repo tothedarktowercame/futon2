@@ -51,20 +51,42 @@
    :control :perturb-gating-fragment,
    :plant-verified? true}
   {:after
-   {:satisfied-at-head? true,
-    :live-repository-count 18,
-    :pin-repository-count 18,
-    :receipt-differences 0},
+   {:adjudication :refuted-obligation-met-at-head,
+    :obligation
+    {:satisfied-at-head? true,
+     :live-repository-count 18,
+     :pin-repository-count 18,
+     :receipt-differences 0}},
    :before
-   {:satisfied-at-head? false,
-    :live-repository-count 24,
-    :pin-repository-count 18,
-    :receipt-differences 96},
+   {:adjudication :confirmed-unmet-and-ungated,
+    :obligation
+    {:satisfied-at-head? false,
+     :live-repository-count 24,
+     :pin-repository-count 18,
+     :receipt-differences 96}},
    :control :make-live-fixture-match-pin,
    :plant-verified? true}
-  {:after false,
-   :before true,
+  {:after {:body-is-still-sorry? false, :satisfied-at-head? true},
+   :before {:body-is-still-sorry? true, :satisfied-at-head? false},
    :control :replace-find-body,
+   :plant-verified? true}
+  {:after
+   {:adjudication :refuted-obligation-met-at-head,
+    :citation-carried-as-data :carried,
+    :satisfied-at-head? true,
+    :vector [:witnessed-on-real-find-over-committed-library]},
+   :before
+   {:adjudication :confirmed-unmet-and-ungated,
+    :citation-carried-as-data :not-found,
+    :satisfied-at-head? false,
+    :vector
+    [:f3-citation-stated-in-lean
+     :witnessed-on-real-find-over-committed-library]},
+   :control :add-citation-field-to-receipt,
+   :plant-verified? true}
+  {:after {:readings-present-count 1, :satisfied-at-head? true},
+   :before {:readings-present-count 3, :satisfied-at-head? false},
+   :control :collapse-f4-readings,
    :plant-verified? true}
   {:after-hard-failure "expected 3 clauses, found 4",
    :before :three-clauses,
@@ -109,6 +131,7 @@
  {:candidate-refuters
   {:f3-citation-blindness
    {:adjudication :confirmed-unmet-and-ungated,
+    :citation-carried-as-data :not-found,
     :pointers
     ["/home/joe/code/mathlib4/DarkTower/WarMachine/F11NonSelfCertifying.lean:351"
      "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/13-non-self-certifying.edn:114"],
@@ -118,8 +141,10 @@
    {:adjudication :confirmed-unmet-and-ungated,
     :live-repository-count 24,
     :pin-repository-count 18,
-    :pointer
-    "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:13",
+    :pointers
+    ["/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:22"
+     "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:23"
+     "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:14"],
     :receipt-differences 96}},
   :conformant-implementation
   {:pointers
@@ -134,8 +159,13 @@
   :f2-content-stated-in-lean
   {:blindness-witness
    "/home/joe/code/mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean:186",
+   :f2-asks-carried-as-data
+   {:acknowledged-clause :not-found,
+    :as-of :not-found,
+    :retrieval-route :not-found},
    :pointer
    "/home/joe/code/mathlib4/DarkTower/WarMachine/F11Conformance.lean:21",
+   :receipt-data-fields [],
    :satisfied-at-head? false},
   :f2-falsifier-reconciled
   {:pointer
@@ -144,13 +174,33 @@
   :f3-citation-stated-in-lean
   {:blindness-witness
    "/home/joe/code/mathlib4/DarkTower/WarMachine/F11NonSelfCertifying.lean:351",
+   :citation-carried-as-data :not-found,
    :not-established-pointer
    "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/13-non-self-certifying.edn:114",
+   :receipt-data-fields [],
+   :receipt-fields ["citesTextOrEdges" "scoreAlone"],
    :registry-choice-for-citation-field :not-found,
    :satisfied-at-head? false},
   :f4-stated-in-lean
   {:pointer
    "/home/joe/code/mathlib4/DarkTower/WarMachine/F11F4Reading.lean:26",
+   :readings
+   [{:declaration "FindFalsifiable",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/F11Conformance.lean:31",
+     :present? true,
+     :reading :reading-a}
+    {:declaration "FindExcludesRecordedZeroMass",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/F11DischargeArm.lean:59",
+     :present? true,
+     :reading :reading-b}
+    {:declaration "FindRespectsZeroMass",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/F11F4Reading.lean:26",
+     :present? true,
+     :reading :reading-c}],
+   :readings-present-count 3,
    :satisfied-at-head? false},
   :sorry
   {:body-is-still-sorry? true,
@@ -160,8 +210,10 @@
   :witnessed-on-real-find-over-committed-library
   {:live-repository-count 24,
    :pin-repository-count 18,
-   :pointer
-   "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:13",
+   :pointers
+   ["/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:22"
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:23"
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/02-reconciliation.edn:14"],
    :receipt-differences 96,
    :satisfied-at-head? false}},
  :obligations-not-satisfied-and-not-gated
