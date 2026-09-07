@@ -1,0 +1,234 @@
+{:check :F10-live-run,
+ :facts
+ {:computed-seed
+  {:mass-sum 1N,
+   :support
+   #{:grounded-change
+     :artifact-only
+     :build-failed
+     :grounded-no-change
+     :abstained
+     :incomplete
+     :guardrail-refusal
+     :dispatch-failed
+     :no-selection
+     :agent-unavailable
+     :cancelled
+     :substrate-unavailable},
+   :authority
+   #{:grounded-change
+     :artifact-only
+     :build-failed
+     :grounded-no-change
+     :abstained
+     :incomplete
+     :guardrail-refusal
+     :dispatch-failed
+     :no-selection
+     :agent-unavailable
+     :cancelled
+     :substrate-unavailable},
+   :named-zero-dispositions
+   #{:artifact-only
+     :grounded-no-change
+     :abstained
+     :guardrail-refusal
+     :dispatch-failed
+     :cancelled
+     :substrate-unavailable},
+   :named-zero-count 7,
+   :zero-masses? true},
+  :declaration
+  {:folds
+   [{:layer/id :ruled-outcome-c,
+     :folded? false,
+     :in-ruled-sum :yes,
+     :source :owner-ruling}
+    {:layer/id :c-int,
+     :folded? true,
+     :in-ruled-sum :no,
+     :source :runtime}
+    {:layer/id :c-ser,
+     :folded? false,
+     :in-ruled-sum :yes,
+     :source :owner-ruling}
+    {:layer/id :c-mis,
+     :folded? false,
+     :in-ruled-sum :undeclared,
+     :source :runtime-dark}],
+   :support
+   #{:grounded-change
+     :artifact-only
+     :build-failed
+     :grounded-no-change
+     :abstained
+     :incomplete
+     :guardrail-refusal
+     :dispatch-failed
+     :no-selection
+     :agent-unavailable
+     :cancelled
+     :substrate-unavailable},
+   :mass
+   {:grounded-change 1/2,
+    :artifact-only 0,
+    :build-failed 1/8,
+    :grounded-no-change 0,
+    :abstained 0,
+    :incomplete 1/8,
+    :guardrail-refusal 0,
+    :dispatch-failed 0,
+    :no-selection 1/8,
+    :agent-unavailable 1/8,
+    :cancelled 0,
+    :substrate-unavailable 0}},
+  :fold-map
+  {:ruled-outcome-c
+   {:layer/id :ruled-outcome-c,
+    :source :owner-ruling,
+    :author "Joseph Corneli",
+    :basis "futon2:holes/labs/wm-contract/aif-equations.edn:211-214",
+    :folded? false,
+    :in-ruled-sum :yes,
+    :site "futon2:src/futon2/aif/ruled_outcome_c.clj"},
+   :c-int
+   {:layer/id :c-int,
+    :source :runtime,
+    :author "futon2.aif.preferences",
+    :basis "futon2:src/futon2/aif/preferences.clj:9-24",
+    :folded? true,
+    :in-ruled-sum :no,
+    :site "futon2:src/futon2/aif/preferences.clj:9-24"},
+   :c-ser
+   {:layer/id :c-ser,
+    :source :owner-ruling,
+    :author "Joseph Corneli",
+    :basis
+    "futon2:holes/labs/wm-contract/C537-serendipity-shapes-C.md:49-59",
+    :folded? false,
+    :in-ruled-sum :yes,
+    :site "named-empty organisations-support region"},
+   :c-mis
+   {:layer/id :c-mis,
+    :source :runtime-dark,
+    :author "futon2.aif.mission-c",
+    :basis "futon2:src/futon2/aif/mission_c.clj:377,422,500,558",
+    :folded? false,
+    :in-ruled-sum :undeclared,
+    :site "futon2:src/futon2/aif/mission_c.clj",
+    :owed
+    "A ruling must decide whether mission-grain C is a region of the tagged sum or a second C outside it."}},
+  :run
+  {:trace-path "data/wm-trace/wm-trace-2026-09-07.edn",
+   :observed-run-ids
+   #{"f24ccb9f-50ca-4654-aa3c-bedfe66eeaea"
+     "36820e88-3d68-499d-b359-2d8dbe9743de"
+     "85cb5a19-d053-4aa7-a7ad-f667f5e4321d"},
+   :utc-end "2026-09-07T23:12:22.838749091Z",
+   :trace-sha256
+   "71bc68e5504f850e8f1dfac0b76ae3292b0a78f3e28a5f552dde5b55901d3381",
+   :expected-run-ids
+   #{"f24ccb9f-50ca-4654-aa3c-bedfe66eeaea"
+     "36820e88-3d68-499d-b359-2d8dbe9743de"
+     "85cb5a19-d053-4aa7-a7ad-f667f5e4321d"},
+   :git-shas #{"3f1ef0d7827bc03bc96e95506d10c543ef48ee3b"},
+   :tick-count 3,
+   :lock-holder
+   {:pid 2664957,
+    :agent "codex-17",
+    :host "zone",
+    :sha "3f1ef0d7827bc03bc96e95506d10c543ef48ee3b",
+    :token "37857be0-bf64-4282-bae7-cdb4bf77b6e9",
+    :taken-at "2026-09-07T23:08:19.882739361Z",
+    :released-observed-at "2026-09-07T23:15:48Z",
+    :lock-absent-after-run? true},
+   :substrate-7071-probe
+   {:at "before-run",
+    :curl-exit 7,
+    :http-code "000",
+    :finding :connection-refused},
+   :utc-start "2026-09-07T23:09:01.901362921Z"},
+  :ticks
+  [{:c-entries nil,
+    :floor
+    #{{:layer/id :floor,
+       :basis
+       "src/futon2/aif/preferences.clj sha256 22ae618a61cb3a4198b431cac214390337e29a01017ef302feb02618ef41e86a; ranges introduced by commit 135efdff5483dd297ce8b3670fe041b4283e6e92",
+       :folded? true,
+       :site "src/futon2/aif/efe.clj:601-614,725-733"}},
+    :layer-ids
+    #{:capability-zone-load
+      :live-goal-outcomes
+      :habit-prior
+      :c-vector-overlays
+      :floor},
+    :preference-stack-status :partial,
+    :rank-count 147,
+    :timestamp "2026-09-07T23:09:01.901362921Z",
+    :wm-git-sha "3f1ef0d7827bc03bc96e95506d10c543ef48ee3b",
+    :run/id "85cb5a19-d053-4aa7-a7ad-f667f5e4321d"}
+   {:c-entries nil,
+    :floor
+    #{{:layer/id :floor,
+       :basis
+       "src/futon2/aif/preferences.clj sha256 22ae618a61cb3a4198b431cac214390337e29a01017ef302feb02618ef41e86a; ranges introduced by commit 135efdff5483dd297ce8b3670fe041b4283e6e92",
+       :folded? true,
+       :site "src/futon2/aif/efe.clj:601-614,725-733"}},
+    :layer-ids
+    #{:capability-zone-load
+      :live-goal-outcomes
+      :habit-prior
+      :c-vector-overlays
+      :floor},
+    :preference-stack-status :partial,
+    :rank-count 147,
+    :timestamp "2026-09-07T23:10:42.541389731Z",
+    :wm-git-sha "3f1ef0d7827bc03bc96e95506d10c543ef48ee3b",
+    :run/id "f24ccb9f-50ca-4654-aa3c-bedfe66eeaea"}
+   {:c-entries nil,
+    :floor
+    #{{:layer/id :floor,
+       :basis
+       "src/futon2/aif/preferences.clj sha256 22ae618a61cb3a4198b431cac214390337e29a01017ef302feb02618ef41e86a; ranges introduced by commit 135efdff5483dd297ce8b3670fe041b4283e6e92",
+       :folded? true,
+       :site "src/futon2/aif/efe.clj:601-614,725-733"}},
+    :layer-ids
+    #{:capability-zone-load
+      :live-goal-outcomes
+      :habit-prior
+      :c-vector-overlays
+      :floor},
+    :preference-stack-status :partial,
+    :rank-count 147,
+    :timestamp "2026-09-07T23:12:22.838749091Z",
+    :wm-git-sha "3f1ef0d7827bc03bc96e95506d10c543ef48ee3b",
+    :run/id "36820e88-3d68-499d-b359-2d8dbe9743de"}]},
+ :per-check
+ {:c-int-floor-attested true,
+  :c-mis-runtime-dark true,
+  :c-ser-absent-live true,
+  :ruled-outcome-c-absent-live true,
+  :run-identity true,
+  :seeded-c-live-valid true},
+ :plants
+ [{:plant :declare-ruled-folded,
+   :landed? true,
+   :verdict false,
+   :failed-checks [:ruled-outcome-c-absent-live]}
+  {:plant :declare-c-int-unfolded,
+   :landed? true,
+   :verdict false,
+   :failed-checks [:c-int-floor-attested]}
+  {:plant :mutate-seeded-mass,
+   :landed? true,
+   :verdict false,
+   :failed-checks [:seeded-c-live-valid]}
+  {:plant :inject-live-ruled-layer,
+   :landed? true,
+   :verdict false,
+   :failed-checks [:ruled-outcome-c-absent-live]}
+  {:plant :wrong-run-identity,
+   :landed? true,
+   :verdict false,
+   :failed-checks [:run-identity]}],
+ :verdict true}
