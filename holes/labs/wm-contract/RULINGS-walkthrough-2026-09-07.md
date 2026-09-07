@@ -99,7 +99,42 @@ the F11 question forming.
   partition; recommended) / arm 3 (one domain, rest typed-absent).
   Also settles which Lean surface the model keeps
   (`Holes.lean:151` per-vertex C vs `:6778` single PreferenceDistribution).
-- **Ruling: PENDING**
+- **Ruling: ARM 2, WITH AN EXTENSION (Joe, 2026-09-07)** — one C over the
+  tagged sum, the family as support partition. AND: **lift the
+  evidence-vertex exclusion.** The evidence vertex may carry preference
+  mass — specifically a preference for *epistemologically valid* evidence.
+- Joe's framing (near-verbatim):
+  - Origin of the whole futon-2026 War Machine rebuild: "we had gathered
+    evidence that the machine wrestled, but we never gathered evidence that
+    it was running according to any model that had been validated, and that
+    was an oversight. So there's a clear preference there for finding
+    evidence that is epistemologically valid."
+  - Go proverbs vs AlphaZero: the proverbs are not encoded, AlphaZero
+    rediscovers them; "they are not necessarily hard and fast rules, but
+    they are backed up by evidence."
+  - The risk of keeping the exclusion: "a different version of the dark room
+    problem, where we have loads of preferences that are effectively
+    internal to the system, and no preference is related to its actual
+    performance or our grasp and understanding of that performance."
+- Interaction with D3 and §2a′, as claude-1 reads the two rulings together
+  (flag if wrong): D3's occasion/update distinction *stands* — C_ser still
+  prefers occasions at the organisations vertex, and mass on raw
+  "having learned" is still the greed §2a′ warned about. What is amended is
+  §2a′'s *blanket* "no C at evidence": the evidence vertex now gets a named
+  support region whose preferred object is **epistemic validity** — being in
+  the state where the machine's evidence about its own performance is valid
+  (model-conformance witnessed, not just activity recorded) — which is a
+  preference about the *relation between record and reality*, not a reward
+  for information gain. EIG remains the value of learning; the C-region is
+  for the validity of what is learned from.
+- Lean consequence: this lands cleanly on arm 2's carrier — the single
+  kernel at `Holes.lean:6778` carries no evidence-exclusion hypothesis; it
+  was the *per-vertex* surface (`:151`, the one arm 2 drops) that excluded
+  evidence by hypothesis. So the exclusion-lift removes a tension rather
+  than creating one.
+- Registry transcription: with D1/D3, one publish-window write. The §2a′
+  amendment to P-validated-R5 must be a dated follow-up section in that
+  file (never a silent edit), citing this ruling.
 
 ## 4. F12 / `:organise-carrier` — which carrier the O-laws are stated of
 
