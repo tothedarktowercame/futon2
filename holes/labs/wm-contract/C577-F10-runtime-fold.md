@@ -31,17 +31,42 @@ the corresponding Lean fold boundary is
 ## What is measured
 
 The checker walks every regular file under `src/` and `scripts/`, excludes the
-declaration itself, and selects files containing its namespace name
-(`futon2:holes/labs/wm-contract/f10_runtime_fold_check.bb:35-42`).  The result
+declaration itself BY ITS OWN `ns` FORM rather than by path, and selects files
+containing its namespace name
+(`futon2:holes/labs/wm-contract/f10_runtime_fold_check.bb:35-52`).  The result
 is an empty caller vector
 (`futon2:holes/labs/wm-contract/runs/F10-outcome-domain/02-runtime-fold.edn:82`).
 The validity predicate ties that emptiness directly to `:folded? false`, so a
 new runtime caller makes this declaration fail validation
-(`futon2:holes/labs/wm-contract/f10_runtime_fold_check.bb:74-95`).
+(`futon2:holes/labs/wm-contract/f10_runtime_fold_check.bb:101-102`, one named
+conjunct among the fourteen at
+`futon2:holes/labs/wm-contract/f10_runtime_fold_check.bb:84-114`).
 
-The artifact also measures twelve-wide runtime/Lean correspondence, no
-retyped named-zero vocabulary, and five mutation verdicts false
-(`futon2:holes/labs/wm-contract/runs/F10-outcome-domain/02-runtime-fold.edn:54-104`).
+The artifact also measures twelve-wide runtime/Lean correspondence
+(`futon2:holes/labs/wm-contract/runs/F10-outcome-domain/02-runtime-fold.edn:54-80`),
+no retyped named-zero vocabulary
+(`futon2:holes/labs/wm-contract/runs/F10-outcome-domain/02-runtime-fold.edn:83`),
+each of the fourteen named checks true
+(`futon2:holes/labs/wm-contract/runs/F10-outcome-domain/02-runtime-fold.edn:98-112`),
+and five mutation verdicts false, each with the checks it moved
+(`futon2:holes/labs/wm-contract/runs/F10-outcome-domain/02-runtime-fold.edn:113-133`).
+
+## What the controls establish, and what the first version of them did not
+
+`futon2:holes/labs/wm-contract/f10_runtime_fold_controls.sh` plants into a copy
+of the declaration and points the checker at it through `F10RF_NS`.  Each of the
+five plants must move EXACTLY the checks named beside it, read off the
+checker's `FAILED-CHECKS:` line
+(`futon2:holes/labs/wm-contract/f10_runtime_fold_check.bb:146-149`), and the
+NULL CONTROL -- an unmutated copy through the same route -- must be ACCEPTED
+(`futon2:holes/labs/wm-contract/f10_runtime_fold_controls.sh:24-35`).
+
+As first written, this slice's three controls asserted only a nonzero exit, and
+an unmutated copy produced one too: the caller scan excluded the declaration by
+PATH, so with `F10RF_NS` on a copy the real
+`futon2:src/futon2/aif/ruled_outcome_c.clj` counted as a caller of itself and
+every control was rejected for that reason rather than for its plant.  Found and
+repaired in review, 2026-09-07.
 
 ## Deliberately not declared
 

@@ -95,10 +95,40 @@
     :cancelled
     :substrate-unavailable},
   :support-width 12},
+ :per-check
+ {:c-int-outside true,
+  :c-mis-undeclared true,
+  :c-ser-in-sum true,
+  :derived-zeros true,
+  :fold-bases true,
+  :fold-entry-ids true,
+  :folded-claim-matches-callers true,
+  :lean-correspondence true,
+  :mass-sum true,
+  :no-retyped-zeros true,
+  :positive-masses true,
+  :ruled-in-sum true,
+  :support-is-authority true,
+  :support-width true},
  :plants
- [{:plant :narrow-support-to-five, :landed? true, :verdict false}
-  {:plant :change-mass, :landed? true, :verdict false}
-  {:plant :retype-one-named-zero, :landed? true, :verdict false}
-  {:plant :claim-folded-without-callers, :landed? true, :verdict false}
-  {:plant :move-c-int-into-sum, :landed? true, :verdict false}],
+ [{:plant :narrow-support-to-five,
+   :landed? true,
+   :verdict false,
+   :moved [:support-is-authority :support-width]}
+  {:plant :change-mass,
+   :landed? true,
+   :verdict false,
+   :moved [:mass-sum :positive-masses]}
+  {:plant :retype-one-named-zero,
+   :landed? true,
+   :verdict false,
+   :moved [:no-retyped-zeros]}
+  {:plant :claim-folded-without-callers,
+   :landed? true,
+   :verdict false,
+   :moved [:folded-claim-matches-callers]}
+  {:plant :move-c-int-into-sum,
+   :landed? true,
+   :verdict false,
+   :moved [:c-int-outside]}],
  :verdict true}

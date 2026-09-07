@@ -6,7 +6,7 @@
          '[clojure.set :as set]
          '[clojure.string :as str])
 
-(def repo (System/getProperty "user.dir"))
+(def repo "/home/joe/code/futon2")
 (defn env-path [k fallback] (or (System/getenv k) (str repo "/" fallback)))
 (def ns-path (env-path "F10RF_NS" "src/futon2/aif/ruled_outcome_c.clj"))
 (def cohort-path (env-path "F10RF_COHORT" "src/futon2/aif/full_loop_cohort.clj"))
@@ -32,13 +32,23 @@
   (let [[h & t] (str/split (name k) #"-")]
     (apply str h (map str/capitalize t))))
 
+(def ns-declaration
+  "The declaration file EXCLUDES ITSELF BY ITS OWN `ns` FORM, not by path.
+   Excluding it by path identity against `ns-path` made every control vacuous:
+   with `F10RF_NS` pointed at a mutated copy the real
+   `src/futon2/aif/ruled_outcome_c.clj` was no longer excluded, so it counted as
+   a caller and the checker rejected the mutant for that reason rather than for
+   the plant.  An unmutated copy was rejected too (review, 2026-09-07)."
+  #"\(ns\s+futon2\.aif\.ruled-outcome-c(?![-A-Za-z0-9])")
+
 (defn callers []
   (->> ["src" "scripts"]
        (mapcat #(file-seq (fs/file repo %)))
        (filter fs/regular-file?)
-       (remove #(= (str (fs/absolutize %)) (str (fs/absolutize ns-path))))
-       (filter #(str/includes? (slurp %) "ruled-outcome-c"))
-       (map #(str (fs/relativize repo %)))
+       (map (juxt identity slurp))
+       (filter (fn [[_ text]] (and (str/includes? text "ruled-outcome-c")
+                                   (not (re-find ns-declaration text)))))
+       (map (fn [[file _]] (str (fs/relativize repo file))))
        sort vec))
 
 (defn fold-entry [entries id]
@@ -71,35 +81,45 @@
      :fold-entries (mapv #(fold-entry entries %)
                          [:ruled-outcome-c :c-int :c-ser :c-mis]))))
 
-(defn verdict [f]
+(defn checks
+  "Every conjunct, named, so a control can assert WHICH one its plant moved
+   instead of reading a bare nonzero exit."
+  [f]
   (let [folds (into {} (map (juxt :layer/id identity) (:fold-entries f)))
         ruled (get folds :ruled-outcome-c)]
-    (and (= (:declared-positive-masses f) (:expected-positive-masses f))
-         (= 1 (:mass-sum f))
-         (= (:authority-keywords f) (:support f))
-         (= (count (:authority-keywords f)) (:support-width f))
-         (= (set/difference (:authority-keywords f)
-                            (set (keys (:declared-positive-masses f))))
-            (:derived-named-zeros f))
-         (empty? (:retyped-named-zeros f))
-         (= (get-in f [:lean-correspondence :runtime])
-            (get-in f [:lean-correspondence :lean]))
-         (= (empty? (:measured-callers f)) (false? (:folded? ruled)))
-         (= #{:ruled-outcome-c :c-int :c-ser :c-mis}
-            (set (map :layer/id (:fold-entries f))))
-         (every? #(and (string? (:basis %)) (not (str/blank? (:basis %))))
-                 (:fold-entries f))
-         (= :yes (:in-ruled-sum ruled))
-         (= :no (get-in folds [:c-int :in-ruled-sum]))
-         (= :yes (get-in folds [:c-ser :in-ruled-sum]))
-         (= :undeclared (get-in folds [:c-mis :in-ruled-sum])))))
+    (sorted-map
+     :positive-masses (= (:declared-positive-masses f) (:expected-positive-masses f))
+     :mass-sum (= 1 (:mass-sum f))
+     :support-is-authority (= (:authority-keywords f) (:support f))
+     :support-width (= (count (:authority-keywords f)) (:support-width f))
+     :derived-zeros (= (set/difference (:authority-keywords f)
+                                       (set (keys (:declared-positive-masses f))))
+                       (:derived-named-zeros f))
+     :no-retyped-zeros (empty? (:retyped-named-zeros f))
+     :lean-correspondence (= (get-in f [:lean-correspondence :runtime])
+                             (get-in f [:lean-correspondence :lean]))
+     :folded-claim-matches-callers (= (empty? (:measured-callers f))
+                                      (false? (:folded? ruled)))
+     :fold-entry-ids (= #{:ruled-outcome-c :c-int :c-ser :c-mis}
+                        (set (map :layer/id (:fold-entries f))))
+     :fold-bases (every? #(and (string? (:basis %)) (not (str/blank? (:basis %))))
+                         (:fold-entries f))
+     :ruled-in-sum (= :yes (:in-ruled-sum ruled))
+     :c-int-outside (= :no (get-in folds [:c-int :in-ruled-sum]))
+     :c-ser-in-sum (= :yes (get-in folds [:c-ser :in-ruled-sum]))
+     :c-mis-undeclared (= :undeclared (get-in folds [:c-mis :in-ruled-sum])))))
+
+(defn failing [f] (vec (sort (keys (remove val (checks f))))))
+
+(defn verdict [f] (every? true? (vals (checks f))))
 
 (defn update-fold [f id k v]
   (update f :fold-entries
           #(mapv (fn [entry] (if (= id (:layer/id entry)) (assoc entry k v) entry)) %)))
 
 (defn plant [name f mutated]
-  {:plant name :landed? (not= f mutated) :verdict (verdict mutated)})
+  {:plant name :landed? (not= f mutated) :verdict (verdict mutated)
+   :moved (vec (sort (remove (set (failing f)) (failing mutated))))})
 
 (let [f (facts)
       one-zero (first (:derived-named-zeros f))
@@ -116,11 +136,14 @@
                      (update-fold f :c-int :in-ruled-sum :yes))]
       report (sorted-map :check :F10-runtime-fold
                          :facts f
+                         :per-check (checks f)
                          :plants plants
                          :verdict (and (verdict f)
                                        (every? #(and (:landed? %) (false? (:verdict %))) plants)))]
   (if (:verdict report)
     (do (fs/create-dirs (fs/parent artifact))
         (spit artifact (with-out-str (pp/pprint report))))
-    (do (binding [*out* *err*] (pp/pprint report))
+    (do (binding [*out* *err*]
+          (pp/pprint report)
+          (println "FAILED-CHECKS:" (str/join " " (failing f))))
         (System/exit 1))))
