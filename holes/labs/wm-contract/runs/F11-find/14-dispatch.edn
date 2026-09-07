@@ -6,7 +6,7 @@
          choice"
  :dispatched-to "codex-1"
  :from "wm-build-work"
- :job-id :recorded-at-dispatch-time-below
+ :job-id "invoke-1788790055541-13752-6a1c2cf5"
  :packet-goal
  "One new checker holes/labs/wm-contract/f11_remainder_check.bb, modelled on
   f11_remainder_check.bb's sibling f12_remainder_check.bb (386 lines), writing
