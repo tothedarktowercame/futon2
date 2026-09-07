@@ -1,0 +1,159 @@
+{:basis
+ {:admitting-arm
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean",
+  :arm
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean",
+  :arms "/home/joe/code/mathlib4/DarkTower/WarMachine/F12D1Arms.lean",
+  :checks "/home/joe/code/futon3/checks",
+  :conformance
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean",
+  :construct "/home/joe/code/futon3/checks/construct_cascade.clj",
+  :find-organise "/home/joe/code/futon3/checks/find_organise.clj",
+  :holes "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"},
+ :carriers
+ {:arm-one
+  ["acyclic"
+   "addedByOrganise"
+   "admittedBy"
+   "edges"
+   "nodes"
+   "precedence"
+   "selected"],
+  :cascade ["acyclic" "addedByOrganise" "edges" "nodes" "precedence"],
+  :cascade-diff
+  ["actingOrderAfter"
+   "actingOrderBefore"
+   "addedByOrganise"
+   "admittedBy"
+   "authoredEdges"
+   "nodes"
+   "organisedEdges"
+   "precedenceAfter"
+   "precedenceBefore"
+   "scoreAfter"
+   "scoreBefore"
+   "selected"],
+  :o4-statable-at ["CascadeDiff"],
+  :repository ["acyclic" "patterns" "standsOn"],
+  :three-way-o1-statable-at ["ArmOneCascade" "CascadeDiff"]},
+ :clauses
+ {:full
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise ∪ (f t sel repo).admittedBy",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).organisedEdges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).organisedEdges u v ↔ fastForward (f t sel repo).nodes repo.standsOn u v",
+   :o4
+   "∀ t sel repo, (f t sel repo).precedenceBefore ≠ (f t sel repo).precedenceAfter → (f t sel repo).actingOrderBefore ≠ (f t sel repo).actingOrderAfter ∨ (f t sel repo).scoreBefore ≠ (f t sel repo).scoreAfter",
+   :oauth "∀ t sel repo, (f t sel repo).authoredEdges = repo.standsOn",
+   :osel "∀ t sel repo, (f t sel repo).selected = sel"},
+  :full-vs-sans-o4 [:o4],
+  :full-vs-sans-oauth [:oauth],
+  :mentioning-result-authored-edges [:oauth],
+  :sans-o4
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise ∪ (f t sel repo).admittedBy",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).organisedEdges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).organisedEdges u v ↔ fastForward (f t sel repo).nodes repo.standsOn u v",
+   :oauth "∀ t sel repo, (f t sel repo).authoredEdges = repo.standsOn",
+   :osel "∀ t sel repo, (f t sel repo).selected = sel"},
+  :sans-oauth
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise ∪ (f t sel repo).admittedBy",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).organisedEdges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).organisedEdges u v ↔ fastForward (f t sel repo).nodes repo.standsOn u v",
+   :o4
+   "∀ t sel repo, (f t sel repo).precedenceBefore ≠ (f t sel repo).precedenceAfter → (f t sel repo).actingOrderBefore ≠ (f t sel repo).actingOrderAfter ∨ (f t sel repo).scoreBefore ≠ (f t sel repo).scoreAfter",
+   :osel "∀ t sel repo, (f t sel repo).selected = sel"},
+  :value-grain-o2-reads-the-field true},
+ :declarations
+ {:all-four-laws true,
+  :nonvacuity-edge true,
+  :nonvacuity-unauthored true,
+  :o4-counterexample true,
+  :o4-counterexample-not-conformant true,
+  :o4-counterexample-other-clauses true,
+  :o4-vacuity-exposed true,
+  :o4-vacuous-general true,
+  :o4-variant true,
+  :o4-variant-conformant true,
+  :o4-variant-conformant-sans true,
+  :oauth-drift-at-recorded-edge true,
+  :oauth-drift-conformant-sans true,
+  :oauth-drift-not-conformant true,
+  :oauth-drift-witness true,
+  :oauth-refutation true,
+  :predicate true,
+  :predicate-sans-o4 true,
+  :predicate-sans-oauth true,
+  :recorded-admitted true,
+  :recorded-nodes true,
+  :recorded-selected true,
+  :review-pin true,
+  :review-pin-agrees true,
+  :review-pin-conformant true,
+  :review-pin-repairs true,
+  :review-score-comparand true,
+  :review-score-empty true,
+  :witness true,
+  :witness-conformant true},
+ :o4
+ {:clojure-first-disjunct-is-negated-antecedent true,
+  :clojure-law
+  "(or (= precedence-before precedence-after) (not= acting-order-before acting-order-after) (not= score-before score-after)))",
+  :producer-writes-empty-literals true,
+  :rows
+  [{:o4 :declined,
+    :reason
+    :not-exercised-no-authority-gate-and-alfworld-is-not-installed,
+    :record "alfworld-cascade.edn"}
+   {:acting-order-moves? true,
+    :antecedent-true? true,
+    :clause-satisfied? true,
+    :non-vacuous? true,
+    :o4 :row,
+    :record "ants-cascade.edn",
+    :score-moves? false}
+   {:o4 :absent, :record "construct-cascade.edn"}
+   {:o4 :declined,
+    :reason :not-exercised-nothing-is-played,
+    :record "open-cascade-short-cue.edn"}
+   {:o4 :declined,
+    :reason :not-exercised-nothing-is-played,
+    :record "open-cascade.edn"}
+   {:o4 :declined,
+    :reason :not-exercised-nothing-is-played,
+    :record "retrodiction-cascade-per-clause.edn"}
+   {:o4 :declined,
+    :reason :not-exercised-nothing-is-played,
+    :record "retrodiction-cascade.edn"}
+   {:o4 :absent, :record "snatch-cascade.edn"}
+   {:o4 :declined,
+    :reason
+    :not-exercised-fewer-than-two-members-carry-a-play-grain-rule,
+    :record "zaif-cascade.edn"}],
+  :sweep
+  {:antecedent-true-on ["ants-cascade.edn"],
+   :declined-with-a-reason 6,
+   :no-o4-key 2,
+   :non-vacuous-on ["ants-cascade.edn"],
+   :records 9,
+   :with-a-row 1,
+   :zaif
+   {:o4 :declined,
+    :reason
+    :not-exercised-fewer-than-two-members-carry-a-play-grain-rule,
+    :record "zaif-cascade.edn"}}},
+ :organise-type
+ {:arm-two
+  "Cascade Policy → Set P → Repository P → CascadeDiff P Score",
+  :arm-two-uses-in-the-arm-file 15,
+  :expected-arm-two
+  "Cascade Policy → Set P → Repository P → CascadeDiff P Score",
+  :in-holes "Cascade Policy → Set P → Repository P → Cascade P"},
+ :problems []}
