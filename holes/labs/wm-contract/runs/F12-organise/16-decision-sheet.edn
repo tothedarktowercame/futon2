@@ -1,0 +1,573 @@
+{:arms-dry-artifact "runs/F12-organise/14-arms-dry.edn",
+ :arms-dry? true,
+ :choice-order
+ [:organise-carrier
+  :organise-sorry
+  :organise-o3-field
+  :organise-o4-denominator
+  :organise-o4-after-the-law-encoding
+  :organise-third-origin],
+ :choices
+ {:organise-carrier
+  {:all-arms-run
+   "2026-09-07, F12 slice 13 (C551): the sixth arm, registered by C550 as :not-run with both fields :unmeasured, is run and carries measured :buys and :costs. NO RULING IS TAKEN AND NONE IS IMPLIED -- :status is still :observed-not-decided and there is no :ruling key. Every arm of this choice now carries a measured cost and the payments still differ in kind, so what a slice can add to D1 is exhausted; the choice is Joe's.",
+   :not-claimed
+   "NO RULING IS TAKEN AND NONE IS IMPLIED: :status is :observed-not-decided and there is no :ruling key. This entry chooses no carrier, discharges and amends nothing -- the sorry at mathlib4/DarkTower/WarMachine/Holes.lean:861 is untouched, and mathlib4 git log -1 still reads 61c4825dc3 on Holes.lean and 50fa53469a on holes-contract.json. It says nothing about D2 (which denominator O4's acting order is read over), about D3, about the third-origin choice registered as :organise-third-origin, or about the O3 field question registered as :organise-o3-field: arms four and five each carry BOTH O3 readings, so registering them here does not decide the field. The `O4 unstatable` rows are claims about which fields a structure has, not claims about whether O4 is true. UPDATED 2026-09-07 BY SLICE 13: the sixth arm is no longer unrun, so this entry now carries an :all-arms-run key as its two sibling F12 entries do; what that key records is that no slice has anything left to run on this choice, NOT that the choice is settled.",
+   :what-would-change-the-measurement
+   "TWO THINGS, and neither is producible from the code as it stands. (1) A library-scale recorded run whose precedence moves, which is what would let arm two's and arm six's extra law be exercised where the other arms are instantiated: futon3:checks/construct_cascade.clj:402 writes :precedence-before [] and :precedence-after [] as literals (futon3:checks/construct_cascade.clj:420-421) and carries no score, so the constructor cannot produce one -- and holes/labs/wm-contract/f12_cascadediff_check.bb FAILS if that literal ever becomes computed, because the vacuity finding would then be stale. The corpus is not empty of such a run: futon3:checks/ants-cascade.edn carries one, at five patterns rather than library scale, so the missing thing is a library-scale one and not the shape. (2) An implementation that COMPUTES admittedBy rather than looking it up on the recorded input, which is what would move arm five's second cost; that is the same absence :organise-third-origin measures. UPDATED 2026-09-07 BY SLICE 13: the row this text called blank is now filled, and filling it did not change what separates the other five arms.",
+   :evidence
+   "holes/labs/wm-contract/C551-F12-cascadediff-arm.md; holes/labs/wm-contract/runs/F12-organise/08-cascadediff-arm.edn; holes/labs/wm-contract/C550-F12-carrier-choice.md; holes/labs/wm-contract/C543-F12-d1-arms-run.md; holes/labs/wm-contract/C544-F12-organise-function-conformance.md; holes/labs/wm-contract/C545-F12-admitting-arm.md; holes/labs/wm-contract/C539-F12-organise-census.md; holes/labs/wm-contract/runs/F12-organise/03-d1-arms.edn; holes/labs/wm-contract/runs/F12-organise/04-conformance.edn; holes/labs/wm-contract/runs/F12-organise/05-admitting-arm.edn",
+   :question
+   "WHICH CARRIER are O1-O4 stated of? organise returns a Cascade (mathlib4/DarkTower/WarMachine/Holes.lean:861), and Cascade carries nodes, addedByOrganise, edges, acyclic and precedence (mathlib4/DarkTower/WarMachine/Holes.lean:29-34) -- none of `selected`, none of `admittedBy`, and none of the six before/after fields O4 reads. The four laws as proved today are proved of a CascadeDiff VALUE instead (mathlib4/DarkTower/WarMachine/Holes.lean:846-858, fixture at mathlib4/DarkTower/WarMachine/Holes.lean:974), so what organise is declared to return and what the laws are stated of are two different types. This is D1, raised at C539 section 4. It blocks slice 4 -- implementing organise and discharging or amending the sorry at mathlib4/DarkTower/WarMachine/Holes.lean:861 -- because an implementation has to return one of these carriers.",
+   :registered-by [:claude-wm-edge],
+   :status :observed-not-decided,
+   :at "2026-09-07",
+   :measurement-that-separates-them
+   "NO ARM STATES ALL FOUR LAWS OF ONE CARRIER WITHOUT PAYING, AND THE PAYMENTS DIFFER IN KIND RATHER THAN IN SIZE -- an extra hypothesis (arm one), a type parameter the interface does not declare (arm two), a law that cannot be written (arms one, three, four, five for O4; arm three for O1), or an origin that is statable and undetermined (arm five). RECOMPUTED, NOT CITED: on 2026-09-07 the three checkers that measure these arms were re-run and each PASSes and regenerates its artifact byte-identically -- holes/labs/wm-contract/f12_d1_arms_check.bb (03-d1-arms.edn), holes/labs/wm-contract/f12_conformance_check.bb (04-conformance.edn), holes/labs/wm-contract/f12_admitting_check.bb (05-admitting-arm.edn). What they establish, and why the table above is a measurement rather than a reading: the three carriers' field lists are read out of Holes.lean and F12D1Arms.lean rather than transcribed (Cascade five fields, ArmOneCascade seven, CascadeDiff twelve), so every `O4 is unstatable here` row is checked; each arm's signature is read out of its own file and compared with organise's own type (:organise-type in 04-conformance.edn and 05-admitting-arm.edn), so no arm's verdict can quietly be a verdict about a different interface; both O3 readings are read out and differ in exactly the fastForward argument and agree in o1 and o2, so arms four and five are not tacitly deciding the field question; and the recorded numbers every arm is instantiated at -- twenty nodes, eleven selected, nine admitted, thirteen authored edges, a 27-vertex closure -- agree with slice 2's derivation at futon3 1b8b1d1 in every arm file.",
+   :row :F12,
+   :arms
+   [{:arm :widen-the-cascade-carrier,
+     :run-by
+     "F12 slice 5 (C543 sections 3 and 4a); mathlib4 cde38a4b2e + e77f73b679",
+     :what-it-is
+     "ArmOneCascade (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:74-81): Cascade's five fields plus `selected` and `admittedBy`. The arm's signature widens the FIRST argument as well as the result (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:84), which is what separates it from arm five.",
+     :buys
+     "O1 becomes writable of what organise returns, and is proved on the recorded run with nine of the twenty nodes coming from admittedBy rather than the C59 fixture's selected u empty u empty (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:98).",
+     :costs
+     "THE WIDENED CARRIER STILL HAS ONE EDGE FIELD AND NO AUTHORED RELATION, so O2 and O3 cannot be stated of it alone: both take the repository as an extra hypothesis (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:106 and mathlib4/DarkTower/WarMachine/F12D1Arms.lean:113 each carry `hrepo`). The arm needs arm three's pairing for two of the three laws it was meant to fix. O4 stays unstatable: all six O4 fields are absent from ArmOneCascade, recomputed into holes/labs/wm-contract/runs/F12-organise/05-admitting-arm.edn (:carriers :o4-fields-absent-from-arm-one)."}
+    {:arm :codomain-cascadediff,
+     :run-by
+     "F12 slices 2 and 5 (C543 sections 3 and 4b); mathlib4 61c4825dc3, cde38a4b2e + e77f73b679",
+     :what-it-is
+     "retype the result to CascadeDiff P Score (mathlib4/DarkTower/WarMachine/Holes.lean:846-858); the signature is mathlib4/DarkTower/WarMachine/F12D1Arms.lean:119.",
+     :buys
+     "THE ONLY SELF-SUFFICIENT VALUE CARRIER: authoredEdges and organisedEdges are separate fields, so O1, O2 and O3 need nothing supplied alongside and are already proved of the recorded run (mathlib4/DarkTower/WarMachine/Holes.lean:993, mathlib4/DarkTower/WarMachine/Holes.lean:1004, mathlib4/DarkTower/WarMachine/Holes.lean:1014). It is also the only carrier at which O4 is statable at all.",
+     :costs
+     "A `Score` TYPE PARAMETER THE DECLARED SIGNATURE DOES NOT HAVE (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:119 against mathlib4/DarkTower/WarMachine/Holes.lean:861), and the extra law it makes room for is UNEXERCISED ON THE RUN EVERY ARM IS INSTANTIATED AT: all three before/after pairs are flat on the zaif run (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:123, mathlib4/DarkTower/WarMachine/F12D1Arms.lean:129, mathlib4/DarkTower/WarMachine/F12D1Arms.lean:134), because futon3:checks/construct_cascade.clj:402 writes both precedence vectors as [] (futon3:checks/construct_cascade.clj:420-421) and carries no score. UNEXERCISED IS NOT UNEXERCISABLE and the difference is worth keeping: O4 is discharged on the C59 fixture, whose precedence does move (mathlib4/DarkTower/WarMachine/Holes.lean:916-921), and one of the nine recorded cascades carries a satisfied O4 row -- futon3:checks/ants-cascade.edn:79-105, read out of the record today: :precedence-changed? true, the acting order moves (pheromone-trail-tuner and white-space-scout swap), :score-changed? false, so the disjunction holds on its left. Whether that record's acting order is the denominator O4 means is D2's question and not this one."}
+    {:arm :cascade-repository-pair,
+     :run-by
+     "F12 slice 5 (C543 sections 3 and 4c); mathlib4 cde38a4b2e + e77f73b679",
+     :what-it-is
+     "leave both carriers alone and state the laws of a Cascade-plus-Repository pair (mathlib4/DarkTower/WarMachine/Holes.lean:29-34 and mathlib4/DarkTower/WarMachine/Holes.lean:121-124).",
+     :buys
+     "O2 and O3 proved directly, with no extra hypothesis and no carrier edit (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:152, mathlib4/DarkTower/WarMachine/F12D1Arms.lean:158), and neither is a statement about an empty edge relation: the recorded edge 18-19 is inhabited (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:165) and the unauthored pair 0-1 is refuted (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:174).",
+     :costs
+     "O1 IS NOT WRITABLE AT ALL -- neither carrier has `selected` and neither has anywhere for `admittedBy` (Repository is patterns, standsOn, acyclic: mathlib4/DarkTower/WarMachine/Holes.lean:121-124) -- and the one substitution the pair makes available is REFUTED ON THE RECORD rather than left as a doubt: Repository.patterns is the 27-vertex closure and not the cascade's twenty nodes, with vertex 26 the witness (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:180). O4 unstatable. So under this arm O1's third origin has nowhere to live, which is the gap the :LA2 amendment added the field to close (mathlib4/DarkTower/WarMachine/Holes.lean:833-845)."}
+    {:arm :state-the-laws-of-the-function,
+     :run-by "F12 slice 6 (C544); mathlib4 0c5745c39e + 0691f74e48",
+     :what-it-is
+     "NO CARRIER EDIT: state conformance of a FUNCTION at the declared type (mathlib4/DarkTower/WarMachine/F12Conformance.lean:19, predicate at mathlib4/DarkTower/WarMachine/F12Conformance.lean:23-28), where `sel` and `repo` are arguments rather than fields. It is a fourth framing next to C539 section 4's three arms rather than a fourth arm of the same kind: the arms ask which carrier holds the laws and this asks whether they need one.",
+     :buys
+     "THE CARRIER QUESTION DISAPPEARS FOR TWO OF THE FOUR LAWS. O2 and O3 need neither the extra hypothesis arm one pays nor the pairing arm three pays, because the repository is already an argument. Swappability is witnessed rather than asserted: two implementations at the exact signature are both conformant (mathlib4/DarkTower/WarMachine/F12Conformance.lean:59 proved at mathlib4/DarkTower/WarMachine/F12Conformance.lean:68, and mathlib4/DarkTower/WarMachine/F12Conformance.lean:77 proved at mathlib4/DarkTower/WarMachine/F12Conformance.lean:86) and differ on the recorded inputs at vertex 26 (mathlib4/DarkTower/WarMachine/F12Conformance.lean:107).",
+     :costs
+     "O1 LOSES ITS THIRD ORIGIN -- the two-way union is all that is writable -- and the loss is measured, not described: any conformant f returning the recorded twenty files all nine policy-admitted nodes under addedByOrganise (mathlib4/DarkTower/WarMachine/F12Conformance.lean:123), which is the misattribution the :LA2 amendment added admittedBy to prevent (mathlib4/DarkTower/WarMachine/Holes.lean:833-845). The unconditional half: the up-closure temperament cannot reach admitted vertex 11 at all (mathlib4/DarkTower/WarMachine/F12Conformance.lean:216), and the up-closure of the recorded selected set is exactly {20, 21, 25, 26} with no edge from a selected node into an admitted one -- recomputed 2026-09-07 into holes/labs/wm-contract/runs/F12-organise/04-conformance.edn (:up-closure-of-selected). O4 stays unstatable, and that claim is a measurement rather than a comment: the checker reads Cascade's field list out of the source as {acyclic, addedByOrganise, edges, nodes, precedence} with all six O4 fields absent (same artifact)."}
+    {:arm :function-with-the-result-widened,
+     :run-by "F12 slice 7 (C545); mathlib4 7d4f6ffca3 + acb4e95bcf",
+     :what-it-is
+     "the function framing with the RESULT carrier alone widened to ArmOneCascade (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:17), the argument list of mathlib4/DarkTower/WarMachine/Holes.lean:861 unchanged -- which is what separates it from arm one, whose signature also widened the first argument.",
+     :buys
+     "THE THIRD ORIGIN BECOMES STATABLE: O1 is the three-way law (mathlib4/DarkTower/WarMachine/Holes.lean:893-897 at the value grain), and O2 and O3 discharge at the recorded repository with no extra hypothesis (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:33, mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:40). A witness returns exactly the nine recorded admissions in admittedBy and exactly the recorded twenty nodes, and is conformant on all four clauses (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:73, mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:79, mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:63).",
+     :costs
+     "STATABLE IS NOT DETERMINED: a mirror files the same nine nodes under addedByOrganise, leaves admittedBy empty, is conformant (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:87, mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:98), agrees on nodes and on the whole edge relation (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:108, mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:114) and differs at recorded vertex 11 (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:120). That undetermination is the choice registered separately as :organise-third-origin, and this arm is where it comes from. Two further costs. The clause list grows by one over the function framing -- `osel`, which pins the widened selected field to the argument (recomputed into holes/labs/wm-contract/runs/F12-organise/05-admitting-arm.edn, :clauses :added-over-slice-6). And the only witness anyone has built for the third origin is a lookup on the recorded input, `if sel = d1Selected then d1Admitted else empty` (same artifact, :witness :shape :recorded-lookup-table), so what it establishes is that the field CAN be filled consistently, not that anything computes it. O4 still unstatable: the six fields are absent from ArmOneCascade too."}
+    {:arm :function-at-the-cascadediff-codomain,
+     :run-by "F12 slice 13 (C551); mathlib4 dc3ab3bf98 + bea1e26583",
+     :what-it-is
+     "the two halves nobody had put together: conformance of a FUNCTION (arm four) whose result is a CascadeDiff (arm two), at the already-written signature mathlib4/DarkTower/WarMachine/F12D1Arms.lean:119. WHEN C550 REGISTERED THIS ARM THAT ABBREV WAS MENTIONED BY NO THEOREM IN ANY F12 MODULE, so what the build checked of it was well-formedness; the predicate is mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:16 and the abbrev is now used 15 times in that file, recomputed by holes/labs/wm-contract/f12_cascadediff_check.bb rather than counted (:organise-type :arm-two-uses-in-the-arm-file).",
+     :buys
+     "ALL FOUR LAWS JOINTLY STATABLE AND JOINTLY DISCHARGED OF ONE WITNESS at the recorded inputs, with no hrepo hypothesis of the kind arm one pays (mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:266 against mathlib4/DarkTower/WarMachine/F12D1Arms.lean:106 and mathlib4/DarkTower/WarMachine/F12D1Arms.lean:113). The O4 half is unique to the carrier and that is a measurement, not a reading: four field lists are read out of their own sources -- Cascade five, Repository three, ArmOneCascade seven, CascadeDiff twelve -- and the six O4 fields are present in CascadeDiff and in nothing else (holes/labs/wm-contract/runs/F12-organise/08-cascadediff-arm.edn :carriers :o4-statable-at). O1 is three-way and identical to slice 7's clause; O3 takes the node-set reading, so this arm does not tacitly decide :organise-o3-field.",
+     :costs
+     "TWO, AND NEITHER IS THE ONE THE DISPATCH EXPECTED. (1) THE SCORE PARAMETER IS NOT NOTATION: at Score := Empty this arm's type has NO INHABITANTS (mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:292), because a total function at the signature must produce two Score values on inputs that carry none, while organise's declared type is inhabited at the same argument types (mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:300). The witness therefore takes [Inhabited Score] and writes default twice. (2) THE EXTRA LAW IS SATISFIED VACUOUSLY ON THE RUN EVERY D1 ARM IS INSTANTIATED AT, measured three ways rather than assumed: generally over every function (mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:100), by a second conformant witness whose acting order and score both move with the precedence flat (mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:129, mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:161), and over the corpus -- nine cascade records under futon3:checks, EXACTLY ONE (futon3:checks/ants-cascade.edn) carrying an O4 row whose antecedent is true, six declining with a reason and two carrying no :o4 key, with the zaif run among the six that decline. THE CLAUSE IS NOT VACUOUS IN GENERAL and that is proved rather than said: a counterexample moving its precedence with acting order and score flat satisfies every other clause and is not conformant (mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:184 and mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:196), which locates the failure at O4 alone. Nor is the vacuity an artefact of the Lean transcription: the Clojure law it mirrors is a disjunction whose first disjunct is the negated antecedent (futon3:checks/find_organise.clj:531), read out of the source by the checker. A THIRD THING IS NOT A COST AND SAYING SO IS PART OF THE RESULT: CascadeDiff is the only carrier with its own authoredEdges field, and dropping the clause that pins it does NOT let O2/O3 be satisfied against an invented relation, because both read the repository ARGUMENT (mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:218). What the clause does is pin a result field no other clause reads -- any function conformant without it is conformant under an overwrite that changes none of the other eleven fields (mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:306, mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:312, mathlib4/DarkTower/WarMachine/F12CascadeDiffArm.lean:340) -- where the value-grain O2 at mathlib4/DarkTower/WarMachine/Holes.lean:1004 DOES read the field, having no repository in scope. Both facts are checked textually and not asserted.",
+     :why-it-was-named-not-run
+     "C550 section 3 registered it :buys :unmeasured :costs :unmeasured rather than counting it among the five run arms, on the ground that registering D1 with five arms and calling them all would be the overstatement the entry exists to avoid. Slice 13 ran it. What it found is that the arm does deliver the joint statability the entry credited it with, and that its price is not the one C550 guessed: C550 named the vacuous O4 as the suspected cost and that is confirmed, but the Score parameter turns out to buy emptiness at some instantiations rather than mere notation, and the authoredEdges field the dispatch expected to be a self-certification hazard is not one."}]},
+  :organise-o3-field
+  {:all-arms-run
+   "2026-09-07, F12 slice 11. The two readings the sources carry were run by slices 2, 6 and 7; the third reading is run by slice 11 in mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean. NO RULING IS TAKEN AND NONE IS IMPLIED. What remains for a slice to run on this choice is nothing; what would change the measurement is a producer, named above.",
+   :not-claimed
+   "This entry says nothing about D1 (which CARRIER the four O-laws are stated of), about D2, about D3, or about the third-origin choice registered separately as :organise-third-origin. It takes no ruling: :status is :observed-not-decided and there is no :ruling key. The sorry at mathlib4/DarkTower/WarMachine/Holes.lean:861 is neither discharged nor amended by it.",
+   :what-would-change-the-measurement
+   "a recorded cascade in which organise's own closure contributes a fast-forward endpoint. That needs a producer that populates :added-by-organise; futon3:checks/construct_cascade.clj:412 writes #{} as a literal and futon3:checks/construct_open_cascade.clj:145 reads that same value, so today there is none. The up-closure temperament named at mathlib4/DarkTower/WarMachine/Holes.lean:861 is the one that would (mathlib4/DarkTower/WarMachine/F12Conformance.lean:116 adds recorded vertex 26 through authored edge 6-26), and it is not what any recorded run ran.",
+   :evidence
+   "holes/labs/wm-contract/C549-F12-o3-field-arm.md; holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn; holes/labs/wm-contract/f12_o3_field_check.bb; holes/labs/wm-contract/C540-F12-zaif-cascadediff-witness.md; holes/labs/wm-contract/C544-F12-organise-function-conformance.md; holes/labs/wm-contract/C545-F12-admitting-arm.md",
+   :question
+   "O3 says organise's edges are exactly the authored fast-forwards. WHICH SET the fast-forward quantifies over is not determined by the theory and the sources disagree: mathlib4/DarkTower/WarMachine/Holes.lean:909 quantifies over `.selected`, while the Clojure law futon3:checks/find_organise.clj:529 and the constructor that builds the edges futon3:checks/construct_cascade.clj:415 both quantify over `nodes`. On the C59 fixture (mathlib4/DarkTower/WarMachine/Holes.lean:872) nodes = selected, so the two are one proposition and the file never had to choose; on the recorded zaif run they are not (mathlib4/DarkTower/WarMachine/Holes.lean:1034). Slice 2 recorded the disagreement and left it. This entry registers it with its arms named, each run.",
+   :registered-by [:claude-wm-edge],
+   :status :observed-not-decided,
+   :at "2026-09-07",
+   :measurement-that-separates-them
+   "NO RECORDED CASCADE SEPARATES THE NODE-SET READING FROM THE NO-BOOTSTRAP READING, and the reason is the constructor rather than the runs. Recomputed 2026-09-07 by holes/labs/wm-contract/f12_o3_field_check.bb into holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn: over the 52 O1-shaped cascades in the nine records slice 1's census names, 0 carry an edge running through a node organise added, which is exactly the condition under which the two readings differ. Eight cascades DO carry a non-empty :added-by-organise, all eight in futon3:checks/snatch-cascade.edn, and in all eight that set is DISJOINT from the cascade's own :nodes and the cascade carries no :edges -- so the field there does not denote O1's second origin and cannot exercise the question. The sole producer of an O1-shaped cascade fixes the field to a literal empty set (futon3:checks/construct_cascade.clj:412), so no run of it can separate them: the separating witness has to be CONSTRUCTED, and slice 11 constructs it in Lean. THE SELECTED READING, by contrast, is separated by the recorded data alone (mathlib4/DarkTower/WarMachine/Holes.lean:1034).",
+   :row :F12,
+   :arms
+   [{:arm :over-the-selected-set,
+     :buys
+     "organise cannot justify an edge by anything it did itself: the endpoints are the caller's, so the law is not self-referential in any reading. It is also the only one of the three that needs no field the declared carrier lacks.",
+     :costs
+     "REFUTED ON THE RECORDED RUN, which is the strongest fact any arm of this choice carries. The one edge the zaif run records runs 18-19 and both endpoints were ADMITTED rather than selected, so fast-forward over the 11 selected is empty and the reading contradicts the record (mathlib4/DarkTower/WarMachine/Holes.lean:1034). At the function carrier the same cost is a theorem about every conformant implementation, not about one: no conformant f returns the recorded edge on the recorded selected input (mathlib4/DarkTower/WarMachine/F12Conformance.lean:141), and the same implementation does return it once all twenty nodes are supplied (mathlib4/DarkTower/WarMachine/F12Conformance.lean:149) -- so it is the missing origin and not the edge law that puts the run out of reach. At the admitting carrier the reading leaves the recorded organised edge set EMPTY (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:262).",
+     :run-by
+     "F12 slices 2, 6 and 7; mathlib4 61c4825dc3, 0c5745c39e, 0691f74e48, 7d4f6ffca3, acb4e95bcf",
+     :what-it-is
+     "fast-forward over the set organise was HANDED -- `.selected` at the value carrier (mathlib4/DarkTower/WarMachine/Holes.lean:909), `sel` at the function carrier (mathlib4/DarkTower/WarMachine/F12Conformance.lean:23). This is what the Lean file has said since before the row opened."}
+    {:arm :over-the-node-set,
+     :buys
+     "it is the only reading the recorded run satisfies. O3 is proved of the zaif fixture in this form (mathlib4/DarkTower/WarMachine/Holes.lean:1014), and it agrees with the code that produced the record, so the Lean law and its Clojure mirror are one proposition rather than two.",
+     :costs
+     "ORGANISE MAY USE ITS OWN ADDITIONS AS FAST-FORWARD ENDPOINTS, so the law is partly self-justifying: organise adds a node, authors an edge through it, and O3 confirms the edge because the node organise added is in `nodes`. Constructed and machine-checked at mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:101 -- on the recorded inputs a node-set-conformant implementation (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:72) returns the edge 26-25, and BOTH its endpoints are nodes organise itself added (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:90). The cost is not visible on any recorded run: see :measurement-that-separates-them.",
+     :run-by
+     "F12 slices 2, 6 and 11; mathlib4 61c4825dc3, 0c5745c39e, 1e6625bbf6",
+     :what-it-is
+     "fast-forward over everything the cascade ended up containing -- `nodes`. This is what the running Clojure does: futon3:checks/find_organise.clj:529 states the law over `nodes` and futon3:checks/construct_cascade.clj:415 builds the edges the same way."}
+    {:arm :over-the-nodes-organise-did-not-add,
+     :buys
+     "the self-justification is closed by construction: the implementation that exhibits it is node-set conformant and NOT no-bootstrap conformant, refuted on the recorded inputs at the edge 26-25 (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:119), because outside its organise-added field precisely the caller's selection remains (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:81). And it costs the recorded run NOTHING at the value carrier: `addedByOrganise` is empty in both recorded fixtures (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:25, mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:38), so the O3 already proved of the zaif fixture IS its no-bootstrap O3 (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:52), on an edge relation shown inhabited rather than assumed (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:186).",
+     :costs
+     "THE READING IS ONE PROPOSITION WITH TWO CONTENTS, and which it has is decided by D1 rather than by this choice. At CascadeDiff the field is `selected ∪ admittedBy`, which is the whole recorded node set (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:46), and the recorded edge 18-19 is inside it (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:200). At the function carrier `Cascade` (mathlib4/DarkTower/WarMachine/Holes.lean:29-35) has no `admittedBy` field, so the same reading is just the caller's selection and NO conformant function returns the recorded edge on the recorded selected input (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:172) -- the selected arm's cost, inherited. Stated against overstating it: on the recorded selected input the no-bootstrap relation is EMPTY (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:128), so the separation above is checked against a relation shown inhabited on a constructed input (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:162) and not on a recorded one.",
+     :run-by "F12 slice 11 (C549); mathlib4 1e6625bbf6 + 28c518612a",
+     :what-it-is
+     "the no-bootstrap reading: fast-forward over the nodes that came in from OUTSIDE organise -- `nodes \\ addedByOrganise` at the function carrier (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:16) and `selected ∪ admittedBy` at CascadeDiff. It refuses the node-set arm's self-justification without giving up the admitted origin the selected arm gives up."}]},
+  :organise-o4-after-the-law-encoding
+  {:all-arms-run
+   "2026-09-07, F12 slice 18. All three arms C541 section 4's D3 names -- the two after-the-law routes and the refusal -- carry measured :buys and :costs, each run by slice 15 (futon2 652f4805) with its plant read back before the worker that measured it. Arm B additionally carries slice 16's measurements at the three non-primary denominators (futon2 23f22dc5). One gap is named rather than hidden and is recorded under :what-would-change-the-measurement: arm A was measured at the primary denominator only. NO RULING IS TAKEN AND NONE IS IMPLIED -- :status is still :observed-not-decided and there is no :ruling key.",
+   :not-claimed
+   "NO RULING IS TAKEN AND NONE IS IMPLIED: :status is :observed-not-decided and there is no :ruling key. This entry does not say that an after-the-law encoding is admissible or that it is not; it says what each of the three answers is measured to cost. It does NOT restate the un-fitting guard: C541 section 4 says that restatement is owed IF the answer is yes, and no answer is taken here, so the guard stands as written at futon3c:scripts/zaif_cascade_gate.clj:53-57. It takes no position on the gate's :rule-does-not-encode-an-authored-then failure, which belongs to whoever owns that table. It says nothing about D1 (which carrier the four O-laws are stated of, registered as :organise-carrier), about D2 (which denominator O4 is read over, registered as :organise-o4-denominator), about the third origin (:organise-third-origin), about the O3 field question (:organise-o3-field), or about the sorry (:organise-sorry), which at mathlib4/DarkTower/WarMachine/Holes.lean:861 is still neither discharged nor amended. Registering this choice ran no machine and wrote no source file: the arms were run by slice 15, which made every plant in a temporary copy and left futon3c:scripts/zaif_cascade_gate.clj and every file under futon3:checks/ unmodified.",
+   :what-would-change-the-measurement
+   "A RECORDED RUN IN WHICH TWO RULE-BEARING PATTERNS BOTH ACT, PRODUCED BY THE GATE RATHER THAN BY A PLANT -- which would settle D3 by making it moot rather than by answering it, since every number above other than arm C's comes from a temporary copy. That needs the THEN-correspondence failure repaired by whoever owns the rule table, 3 of 4 at HEAD (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:264-272). Short of that, two measurements would move this entry: arm A run at the paired, transcript and full-play denominators, which no artifact carries (holes/labs/wm-contract/f12_d3_encoding_check.clj:109 reads the primary arm alone), and a construction on which the two member-carried rules contend INSIDE the primary cohort, which neither arm supplies -- arm A gives zero primary contentions (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:12) and arm B gives three, all outside it (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:30).",
+   :evidence
+   "holes/labs/wm-contract/C553-F12-d3-encoding.md; holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn; holes/labs/wm-contract/f12_d3_encoding_check.clj; holes/labs/wm-contract/C541-F12-o4-reachability.md; holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn; holes/labs/wm-contract/C554-F12-d2-denominator.md; holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn",
+   :question
+   "O4 says that where the precedence changed, the acting order or the score changed with it (futon3:checks/find_organise.clj:531-538). Exercising it needs a cascade two of whose members carry rules, and no recorded run has one: the maximum rule-carrying member count over the nine records is 1 (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:265). Reaching two therefore means changing the apparatus after the law is already written -- either a construction over a tension chosen so the find selects two rule-bearing patterns, or a new play-grain encoding of a THEN a member already carries -- or refusing both and leaving O4 unexercised. The zaif rule table's whole standing is that it was committed before the run and not fitted to it, and its STATED un-fitting guard covers fitting to a WIN: `a table written to make the cascade win would not carry rules for patterns the cascade does not contain` (futon3c:scripts/zaif_cascade_gate.clj:53-57), computed by membership (futon3c:scripts/zaif_cascade_gate.clj:479-480) and failing only when that collection is empty (futon3c:scripts/zaif_cascade_gate.clj:585). It says nothing about fitting to a LAW, which is the intervention this question is about. This is D3, raised at C541 section 4 with two routes and the refusal. This entry registers all three with what each is measured to cost.",
+   :registered-by [:claude-wm-edge],
+   :status :observed-not-decided,
+   :at "2026-09-07",
+   :measurement-that-separates-them
+   "THE ARMS SEPARATE ON WHETHER O4 BECOMES EXERCISABLE, NOT ON WHETHER IT BECOMES TRUE -- no arm produces a true O4 at the denominator the gate grades. Arm A moves the carrying count 1 -> 2 and leaves the primary verdict false with zero contending primary rounds (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:2, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:5, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:12); arm B moves the status :not-exercised -> :exercised-false (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:136, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:15); arm C leaves zero (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:246). THE ONE PLANT THAT DOES MOVE THE PRIMARY VERDICT TO TRUE IS A NEGATIVE CONTROL, NOT AN ARM: broadening an existing member-carried rule so it is live on primary rounds gives :primary-o4-true (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:256-259, planted at holes/labs/wm-contract/f12_d3_encoding_check.clj:160-165), and it is in the control set precisely because it is the edit that would make the law pass. So on everything measured, D3 and D2 are not independent: an affirmative D3 buys a TRUE O4 only if D2 also reads the law off a denominator wider than primary, where arm B gives true three times over (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1396, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1562, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:802). Three further controls fix what each measurement is sensitive to, each plant read back before its worker ran (holes/labs/wm-contract/f12_d3_encoding_check.clj:35-40, hard-failing at holes/labs/wm-contract/f12_d3_encoding_check.clj:210-216): renaming the fifth rule to a nonmember returns O4 to :not-exercised (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:248-251), killing its antecedent takes it from 102 live rounds to none (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:252-255), and fitting every rule id to a member fires the un-fitting guard (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:260-263).",
+   :row :F12,
+   :arms
+   [{:arm :construct-a-cascade-that-selects-two-rule-bearing-patterns,
+     :run-by "F12 slice 15 (C553); futon2 652f4805",
+     :what-it-is
+     "C541 section 4's first route -- change WHAT THE FIND SELECTS. Measured by planting the second rule-bearing pattern, war-machine/ambient-pattern-retrieval, into the marginal-gain-floor arm of a TEMPORARY COPY of the cascade record and bumping that run's member count, then re-running slice 3's reachability report against the copy (holes/labs/wm-contract/f12_d3_encoding_check.clj:89-104, holes/labs/wm-contract/f12_d3_encoding_check.clj:106-121). The plant is read back and cross-checked against the member count before the arm is measured (holes/labs/wm-contract/f12_d3_encoding_check.clj:102-104).",
+     :buys
+     "THE PRECONDITION, AND ONLY THAT. The maximum rule-carrying member count moves 1 -> 2 (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:2 against the premise at holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:265), so slice 3's :not-a-witness blocker -- no constructor selected both patterns, so there is no cascade for an O4 row to be OF -- is the one thing this arm removes.",
+     :costs
+     "IT BUYS NO WITNESS. Over the same 29 primary rounds the primary O4 is still FALSE: the acting order does not change and the score stands at 14 -> 14, with zero contending primary rounds (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:4-8, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:12). Nothing else moves either -- the cohort still carries 103 rounds and the primary denominator still 29 (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:10-11). So answering D3 in the affirmative on this route leaves O4 exactly where it was unless D2 moves off the primary denominator too, which is a second choice (:organise-o4-denominator) and not this one. UNMEASURED AND NOT GUESSED: this arm was run at the primary denominator alone (holes/labs/wm-contract/f12_d3_encoding_check.clj:109), so what it would give at paired, transcript or full play is not recorded anywhere -- unlike the arm below, which slice 16 did carry to the other three."}
+    {:arm :encode-a-then-a-member-already-carries,
+     :run-by
+     "F12 slice 15 (C553); futon2 652f4805. Slice 16 (C554; futon2 23f22dc5) then measured THE SAME ENCODING at the other three denominators, using this arm's rule value rather than copying it (holes/labs/wm-contract/f12_d2_denominator_check.clj:190-192, holes/labs/wm-contract/f12_d3_encoding_check.clj:24-31).",
+     :what-it-is
+     "C541 section 4's second route -- change WHAT A SELECTED MEMBER CAN DO. A fifth rule is added to the play-grain rule table encoding the authored THEN of aif/status-gated-belief-update, a pattern the cascade ALREADY carries, citing the span futon3:library/aif/status-gated-belief-update.flexiarg:26-30; the plant goes into a temporary copy of the gate placed first on the worker's classpath and is read back before the worker runs (holes/labs/wm-contract/f12_d3_encoding_check.clj:24-33, holes/labs/wm-contract/f12_d3_encoding_check.clj:35-40, holes/labs/wm-contract/f12_d3_encoding_check.clj:42-53, holes/labs/wm-contract/f12_d3_encoding_check.clj:146-148).",
+     :buys
+     "IT IS THE ONLY ARM THAT MAKES O4 EXERCISABLE AT ALL. The primary O4 status moves :not-exercised -> :exercised-false (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:136, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:15, exercised? true at holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:238); the fifth rule is live on 102 rounds including all 29 primary ones (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:32-134, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:137-166); and the two member-carried rules contend on rounds 3, 4 and 7 (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:16-28), the first contention between two rules the cascade actually carries -- slice 3's contention at the same rounds dropped the membership filter deliberately, because only one member carried a rule and the gate's own contention over members is empty (holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn:335-337, holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn:186). AT EVERY DENOMINATOR OTHER THAN PRIMARY THE SAME ENCODING GIVES O4 TRUE: paired, contention at round 7, score 15 -> 15, true by the acting-order disjunct alone (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1389, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1394-1398); transcript, contention at 3, 4 and 7 with the score moving 20 -> 19 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1555, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1560-1564, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1878-1879); full play, the same contention with the score at 21 -> 20 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:794-804, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1119-1120). Every non-primary TRUE that :organise-o4-denominator records as its Arm B rests on THIS arm being admitted.",
+     :costs
+     "THE VERDICT IT MAKES POSSIBLE IS FALSE WHERE THE GATE GRADES. At the primary denominator the precedence exchange [8 3] -> [3 8] changes neither the acting order -- the before and after vectors are identical, each 29 entries of the fifth rule alone, the other member-carried rule firing on no primary round (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:178-207, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:208-237, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:239-240) -- nor the score, 15 -> 15 (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:241-242), so O4 does not hold (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:31) and all three contentions fall outside the cohort (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:30). AND THE STATED UN-FITTING GUARD DOES NOT FIRE ON IT, which is a cost and not a clearance: three rules remain outside the cascade after the plant (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:167-170, holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:176) and the guard fails only on an empty collection (futon3c:scripts/zaif_cascade_gate.clj:585), so the one intervention D3 is about passes a guard written about a different one. That the guard CAN fire is checked rather than assumed -- fitting every rule id to a cascade member empties the collection and fires it (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:260-263). This is why an affirmative answer on this route owes the restatement C541 section 4 names, and the restatement is not written here."}
+    {:arm :refuse-both-after-the-law-interventions,
+     :run-by
+     "F12 slice 15 (C553); futon2 652f4805 (holes/labs/wm-contract/f12_d3_encoding_check.clj:123-132)",
+     :what-it-is
+     "take neither route: witness O4 only from what the corpus already records, and leave it unexercised until a run the gate itself produces exercises it.",
+     :buys
+     "the rule table keeps the property its whole standing rests on -- committed before the run, not touched to make a law testable -- and it is the only arm under which no number in this entry comes from a plant.",
+     :costs
+     "ZERO EXERCISE, MEASURED AND NOT ASSUMED: across the same nine cascade records the runs exercising O4 number 0 and the row list is empty (holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:245-246), recomputed by walking every :o4 map in every record rather than read off a summary field (holes/labs/wm-contract/f12_d3_encoding_check.clj:123-132). AND THE ROUTE THAT WOULD PRODUCE AN EXERCISE WITHOUT A PLANT IS CLOSED AT HEAD, independently of this choice: require-pass! (futon3c:scripts/zaif_cascade_gate.clj:565) aborts with :rule-does-not-encode-an-authored-then for 3 of 4 rules, the finding built at futon3c:scripts/zaif_cascade_gate.clj:579-582 and thrown at futon3c:scripts/zaif_cascade_gate.clj:589-591, recomputed into holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn:264-272. So refusing both arms is not a wait with a known end: it is a wait on a rule table that is not :F12's to repair."}]},
+  :organise-o4-denominator
+  {:all-arms-run
+   "2026-09-07, F12 slice 20, registering the run slice 19 made (futon2 3c0ad833). ALL FIVE ARMS NOW CARRY MEASURED :buys AND :costs. Slice 17 registered four and named the fifth as unrun together with what running it would take -- one more denominator spec reading the two fields from two round sets (holes/labs/wm-contract/f12_d2_denominator_check.clj:20-23, holes/labs/wm-contract/f12_d2_denominator_check.clj:44-71) -- and slice 19 built exactly that (holes/labs/wm-contract/f12_d2_denominator_check.clj:88-138) and ran it on both constructions, the acceptance run printing :problems [] (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6157). THIS KEY REPLACES :arms-not-all-run, WHICH SLICE 19'S OWN RUN MADE FALSE and which C555 named as the stale claim rather than leaving it to be found. The fifth arm's verdicts are pinned like the other arms' so a later run reports a move instead of silently restating today's numbers (holes/labs/wm-contract/f12_d2_denominator_check.clj:376-379), and three plants each move the acceptance run off PASS: reading the score over the acting-order round set (holes/labs/wm-contract/f12_d2_denominator_check.clj:380-387), giving the identity collapse a paired order side (holes/labs/wm-contract/f12_d2_denominator_check.clj:388-392), and making the forced-empty side non-empty (holes/labs/wm-contract/f12_d2_denominator_check.clj:98-101, holes/labs/wm-contract/f12_d2_denominator_check.clj:393-395). STILL NO ARM IS PREFERRED and no verdict is taken on O4 itself; :status remains :observed-not-decided and there is no :ruling key.",
+   :not-claimed
+   "NO RULING IS TAKEN AND NONE IS IMPLIED: :status is :observed-not-decided and there is no :ruling key. This entry does not say O4 holds or that it fails -- every verdict above is a verdict AT a denominator, and the entry's content is that they differ. It says nothing about D1 (which carrier the four O-laws are stated of, registered as :organise-carrier), about D3 (whether an O4 witness may be reached by an encoding written after the law, registered as :organise-o4-after-the-law-encoding), about the third origin (:organise-third-origin), about the O3 field question (:organise-o3-field), or about the sorry (:organise-sorry), which at mathlib4/DarkTower/WarMachine/Holes.lean:861 is still neither discharged nor amended. It takes no position on the gate's :rule-does-not-encode-an-authored-then failure, which belongs to whoever owns that table. Registering this choice ran no machine and wrote no source file: the first four arms were run by slice 16 and the fifth by slice 19, and this entry only records them. NOR IS THE FIFTH ARM PREFERRED BY BEING LAST: five measured arms are five verdicts AT a reading.",
+   :what-would-change-the-measurement
+   "A RECORDED RUN IN WHICH TWO RULE-BEARING PATTERNS BOTH ACT -- which would move every arm's numbers off a plant and onto the corpus. The maximum rule-carrying member count on any recorded run is 1 (holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn), and the gate that would produce such a run does not pass at HEAD: require-pass! aborts with :rule-does-not-encode-an-authored-then for three of four rules, with :file-exists? and :pattern-id-matches-path? true for all four and :span-inside-the-then-block? false for three (futon3c:scripts/zaif_cascade_gate.clj:579-582, thrown at futon3c:scripts/zaif_cascade_gate.clj:589-591, recomputed into holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6105-6156), and that rule table is not :F12's to repair. Until then, whether a plant may supply the second rule at all is D3's question, measured by slice 15 into holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn and registered by slice 18 as :organise-o4-after-the-law-encoding, whose Arm B is where every non-primary TRUE recorded above comes from.",
+   :evidence
+   "holes/labs/wm-contract/C554-F12-d2-denominator.md; holes/labs/wm-contract/C555-F12-d2-fifth-arm.md; holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn; holes/labs/wm-contract/f12_d2_denominator_check.clj; holes/labs/wm-contract/C541-F12-o4-reachability.md; holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn; holes/labs/wm-contract/C553-F12-d3-encoding.md",
+   :question
+   "O4 is a three-way disjunction -- the precedence did not change, OR the acting order changed, OR the score changed (futon3:checks/find_organise.clj:531-538) -- and it does not say WHICH ROUNDS the acting order and the score are read over. The gate's agreement number is computed over the primary cohort because a comparison needs a determined oracle label, but O4 makes no reference to an oracle: an acting order is something the cascade does whether or not the record can grade it. The denominator is therefore free, and it is not a free hand that leaves the verdict alone -- on the recorded run one and the same precedence exchange over one and the same rule pair gives O4 FALSE over the 29 primary rounds and TRUE over the 49 paired and the 102 transcript rounds (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4903-4907, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4976-4980, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5089-5093). This is D2, raised at C541 section 4 with three options. This entry registers those options with what each is measured to cost, and adds the fourth the checker ran.",
+   :registered-by [:claude-wm-edge],
+   :status :observed-not-decided,
+   :at "2026-09-07",
+   :measurement-that-separates-them
+   "THE DENOMINATOR ALONE DECIDES THE VERDICT, AND NO RECORDED RUN EXERCISES O4 AT ALL. Over the nine cascade records slice 1's census names, ZERO carry a run in which both rule-bearing patterns are members (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5379), so every number above other than the HEAD baseline comes from a planted fifth rule. What separates the arms is that the round sets NEST -- primary inside paired inside transcript (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5323-5324) -- and the contention lies exactly in the differences: round 7 in paired-minus-primary, rounds 3 and 4 in transcript-minus-paired, on the baseline measure (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5319-5320) and on Arm B's (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1217-1218) alike. On Arm B, with one precedence exchange over one rule pair, the four single-denominator arms return FALSE, TRUE, TRUE, TRUE in denominator order (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1290, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1396, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1562, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:802), each recomputed by fo/o4-precedence-governance rather than read from a stored field (holes/labs/wm-contract/f12_d2_denominator_check.clj:71). ONE READING CAUTION THE ARTIFACT CARRIES: the baseline arms and the Arm-B worker report contention under DIFFERENT KEYS -- :rounds-on-which-the-fired-rule-differs and :contending-rounds -- and the floor records which one it read rather than assuming they are one measure (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5318, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1216, key taken as an argument at holes/labs/wm-contract/f12_d2_denominator_check.clj:78-94). WHAT THE ARMS CANNOT SAY, AND WHAT ONE CONTROL SLICE 19 RAN DOES: the transcript arm's TRUE fires BOTH disjuncts -- :acting-order-changed? true with the score moving 83 -> 81 at HEAD (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5087-5090, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5303-5305) and the same pair on Arm B with 20 -> 19 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1555, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1562-1564, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1878-1879) -- so it cannot say whether the score alone would carry it. The MIRROR of the fifth arm -- acting order over the 29 primary rounds, score over the 102 transcript ones -- gives O4 TRUE on both constructions where the primary arm gives FALSE, on :disjuncts-that-hold [:score-changed] with the acting order unmoved (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:7447-7450 with scores 83 -> 81 at holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:7514-7515; holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6686-6688, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6720 with scores 20 -> 19 at holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6890-6891), and :construction-can-separate-them? true on both (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6905-6912, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6170-6179). So the primary arm's FALSE depends on BOTH fields being read over the primary rounds, not on the acting order alone. THE MIRROR IS NOT A SIXTH ARM AND IS NOT OFFERED AS ONE: C541 section 4 names three options, nobody proposed this reading, and it was run to test whether a split can separate a verdict at all (holes/labs/wm-contract/f12_d2_denominator_check.clj:180). Whether a reading no one proposed belongs among D2's options is not a slice's to say.",
+   :row :F12,
+   :arms
+   [{:arm :over-the-primary-rounds,
+     :run-by
+     "F12 slices 3 and 16 (C541 section 2, C554); futon2 23f22dc5",
+     :what-it-is
+     "read both the acting order and the score over the rounds the gate grades -- the primary cohort, `reach/primary?` (holes/labs/wm-contract/f12_d2_denominator_check.clj:21), 29 rounds (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4906).",
+     :buys
+     "the O4 verdict and the gate's agreement number are read over the same rounds, and it is the only arm all of whose rounds carry a determined oracle label. It is also the smallest denominator, so a TRUE here would be the strongest of the four.",
+     :costs
+     "O4 IS FALSE HERE ON BOTH CONSTRUCTIONS ANYONE HAS BUILT, and false for the same reason each time -- the contention is real and lies outside the cohort. At HEAD the exchange leaves the acting order unchanged and the score at 14 -> 14 over the 29 rounds, with no round on which the fired rule differs (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4901, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4904-4907, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4971-4972). On Arm B -- slice 15's fifth rule, encoding the authored THEN of aif/status-gated-belief-update, the one construction on which two member-carried rules DO contend -- the primary cohort still carries zero contending rounds and the score still stands at 15 -> 15, so O4 is false again (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1283, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1288-1290, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1387-1388), on a row whose precedence really did move from [1 2] to [2 1] (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1385-1386). The contention it excludes is one round away: round 7 lies in paired and not in primary and carries contention on both measures (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5319, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1217)."}
+    {:arm :over-the-paired-rounds,
+     :run-by
+     "F12 slices 3 and 16 (C541 section 2, C554); futon2 23f22dc5",
+     :what-it-is
+     "read both over the rounds the record pairs, `g/paired?` (holes/labs/wm-contract/f12_d2_denominator_check.clj:22), 49 rounds (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4979). NOT ONE OF THE THREE OPTIONS C541 SECTION 4 NAMED -- it is a denominator the checker ran, and it is registered because it is the cheapest arm on which O4 is exercised and true.",
+     :buys
+     "THE SMALLEST DENOMINATOR ON WHICH O4 HOLDS, and it holds on both constructions. At HEAD the fired rule differs on round 7 and the score moves 34 -> 33, so both the acting-order and the score disjunct fire (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4974-4980, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5084-5085). On Arm B the acting order changes at round 7 with the score unmoved at 15 -> 15 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1389, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1394-1398, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1553-1554), so on that construction the verdict rests on the acting-order disjunct ALONE -- which is the disjunct the question is about.",
+     :costs
+     "IT IS TWENTY ROUNDS WIDER THAN THE COHORT THE GATE GRADES and the question does not name it: 20 of its 49 rounds are outside primary (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1219-1220), and C541 section 4 offered primary, transcript-and-primary split, and full play. Choosing it means answering D2 with a denominator no one proposed, which is a defensible answer and not a free one. Its TRUE at HEAD is also the weakest of the three baseline verdicts in one respect that is measured rather than argued: on Arm B its score does not move, so the whole verdict is the acting order at a single round (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1394-1395)."}
+    {:arm :over-the-transcript-rounds,
+     :run-by
+     "F12 slices 3 and 16 (C541 section 2 option (i) AS RUN, C554); futon2 23f22dc5",
+     :what-it-is
+     "read both over every round carrying a transcript, `:has-transcript?` (holes/labs/wm-contract/f12_d2_denominator_check.clj:23), 102 rounds (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5092). THIS IS NOT C541's OPTION (i) AS WRITTEN, which split the two readings; the split is the fifth arm below, run by slice 19.",
+     :buys
+     "the widest measured contention and both disjuncts firing on both constructions: at HEAD the fired rule differs on rounds 3, 4 and 7 and the score moves 83 -> 81 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5087-5093, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5303-5304); on Arm B contention at the same rounds 3, 4 and 7 with the score moving 20 -> 19 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1555, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1560-1564, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1878-1879). It is the only denominator on which the score disjunct fires under BOTH constructions, so the verdict does not hang on one disjunct.",
+     :costs
+     "73 OF ITS 102 ROUNDS ARE OUTSIDE THE COHORT THE GATE GRADES -- the round sets nest, primary inside paired inside transcript (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5323-5324), and the transcript arm admits 102 where primary admits 29 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5092, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4906). What it buys in exercise it pays for in rounds no agreement number covers. And its verdict disagrees with the primary arm's on every construction measured, which is not a defect of the arm but is the whole content of the question: the two contending rounds it adds over paired are 3 and 4 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5320, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1218)."}
+    {:arm :over-the-full-play,
+     :run-by
+     "F12 slice 16 (C541 section 2 option (iii), C554); futon2 23f22dc5",
+     :what-it-is
+     "state O4 of the whole play and report the denominator with it -- every round in the record, 103 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:909), computed by the arm-B worker rather than as one of the three denominator specs (holes/labs/wm-contract/f12_d2_denominator_check.clj:20-23).",
+     :buys
+     "no round is excluded, so the verdict needs no cohort argument at all -- the one thing none of the other three arms can say. On Arm B O4 holds with contention at rounds 3, 4 and 7 and the score moving 21 -> 20 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:794-804, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1119-1120).",
+     :costs
+     "IT IS MEASURED ON ONE CONSTRUCTION ONLY. The HEAD baseline reports three arms -- primary, paired, transcript -- and carries no full-play key (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4901, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:4974, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5087), so what this arm does at HEAD is unmeasured and the entry does not guess it. It also adds exactly ONE round over the transcript denominator, 103 against 102 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:909, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1668), and on Arm B that round changes nothing: the contending rounds are 3, 4 and 7 under both (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:796, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:1556). So on everything measured it is the transcript arm plus a round, and it is registered separately because C541 named it and because its cohort argument is different, not because a number separates it."}
+    {:arm :split-acting-order-over-transcript-score-over-primary,
+     :run-by
+     "F12 slice 19 (C541 section 4 option (i) AS WRITTEN, C555); futon2 3c0ad833",
+     :what-it-is
+     "C541 section 4 option (i) AS WRITTEN: read the acting order over the transcript rounds and the score over the primary ones. It is the option that takes the gate's point -- a score is graded against an oracle label and an acting order is not -- at face value. NO ARM ABOVE COULD EXPRESS IT: each builds ONE round set from its keep? and reads both fields off it (holes/labs/wm-contract/f12_d2_denominator_check.clj:44-71), so the four are four denominators and not four readings; the split spec takes two predicates, one per field (holes/labs/wm-contract/f12_d2_denominator_check.clj:88-138), and with the two equal it is that arm's own row, which the identity control checks rather than assumes (holes/labs/wm-contract/f12_d2_denominator_check.clj:181, holes/labs/wm-contract/f12_d2_denominator_check.clj:388-392). As run: 102 acting-order rounds against 29 score rounds (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6186-6188).",
+     :buys
+     "NOTHING OVER THE TRANSCRIPT ARM ON EITHER CONSTRUCTION, which is measured rather than predicted. O4 HOLDS ON BOTH and on the same single disjunct: at HEAD :o4-holds? true with :disjuncts-that-hold [:acting-order-changed] and the primary score unmoved at 14 -> 14 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:7021-7023, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:7233-7234); on Arm B the same, with the primary score at 15 -> 15 (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6187, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6293, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6536-6537). So its TRUE rests on the acting-order disjunct alone, which is the transcript arm's own disjunct, and the score half of the split contributes nothing to either verdict. WHAT IT DOES BUY IS A STATEMENT AND NOT A NUMBER: the score is read over the 29 rounds the gate grades, so the objection that a score needs a determined oracle label is answered without moving the acting order off the transcript -- which is exactly the point C541 section 4 wrote the option to take.",
+     :costs
+     "IT IS THE TRANSCRIPT ARM'S VERDICT WITH A NARROWER SCORE, AND NO CONSTRUCTION ANYONE HAS BUILT CAN TELL THE TWO APART. Slice 17 stated the separation condition; it is now a recorded field value rather than an argument: :construction-can-separate-them? false with :why-not :acting-order-moves-so-o4-holds-on-that-disjunct-alone on both constructions (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6896-6902 at HEAD, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6160-6169 on Arm B), recomputed against the parent arms at holes/labs/wm-contract/f12_d2_denominator_check.clj:140-171 rather than restated. Separating them needs a construction whose transcript acting order does NOT move, and neither measured construction supplies one (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:7020-7023, holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:6182-6188). It also inherits the transcript arm's cost on the half it reads there: 73 of its 102 acting-order rounds lie outside the cohort the gate grades, the round sets nesting primary inside paired inside transcript (holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn:5323-5324)."}]},
+  :organise-sorry
+  {:all-arms-run
+   "2026-09-07, F12 slice 14 (C552): the five arms that are this entry's carry measured :buys and :costs; the sixth points at :organise-carrier, where its arms are run. NO RULING IS TAKEN AND NONE IS IMPLIED -- :status is :observed-not-decided and there is no :ruling key. mathlib4 git log -1 still reads 61c4825dc3 on Holes.lean and 50fa53469a on holes-contract.json.",
+   :not-claimed
+   "NO RULING IS TAKEN AND NONE IS IMPLIED. This entry does not say the sorry should be discharged, amended, sealed or left; it says what each costs. The sorry at mathlib4/DarkTower/WarMachine/Holes.lean:861 is untouched by the slice that registered it. It says nothing about D2 (which denominator O4's acting order is read over), about D3, about the third-origin choice registered as :organise-third-origin, about the O3 field question registered as :organise-o3-field -- both existence and both non-uniqueness results are stated separately under each reading precisely so that this entry does not decide it -- or about the carrier question registered as :organise-carrier.",
+   :what-would-change-the-measurement
+   "A RECORDED RUN IN WHICH ORGANISE ADDS A NODE TO THE CASCADE. That is what would let the corpus tell the two conformant discharges apart, and it is what the sole producer cannot emit: futon3:checks/construct_cascade.clj:412 writes :added-by-organise as an empty set literal, and holes/labs/wm-contract/f12_discharge_check.bb FAILS if that literal ever becomes computed, because the zero above would then be stale. The eight non-empty organise-added sets in the corpus are all in futon3:checks/snatch-cascade.edn and are disjoint from their own cascades' nodes, which slice 11 established means the field there does not denote O1's second origin.",
+   :evidence
+   "holes/labs/wm-contract/C552-F12-discharge-arm.md; holes/labs/wm-contract/runs/F12-organise/09-discharge-arm.edn; holes/labs/wm-contract/C539-F12-organise-census.md; holes/labs/wm-contract/C544-F12-organise-function-conformance.md",
+   :question
+   "WHAT IS DONE WITH THE SORRY at mathlib4/DarkTower/WarMachine/Holes.lean:861? The declaration is a total function `Cascade Policy -> Set P -> Repository P -> Cascade P` whose body is `sorry`, and whose docstring at mathlib4/DarkTower/WarMachine/Holes.lean:860 calls it a DELIBERATE IMPLEMENTATION REFUSAL on the ground that the recorded O1-O4 instance `does not select one canonical implementation`. Slice 1 established the sorry is INERT: no term in any DarkTower module references `organise`, so discharging it changes no proof obligation. What the arms below differ over is therefore not whether a proof gets easier; it is what the declaration SAYS afterwards.",
+   :registered-by [:claude-wm-edge],
+   :status :observed-not-decided,
+   :at "2026-09-07",
+   :row :F12,
+   :arms
+   [{:arm :discharge-with-any-inhabitant,
+     :run-by "F12 slice 14 (C552); mathlib4 26092af4f2 + 38a34f286a",
+     :what-it-is
+     "Replace the sorry with any total term. `organiseEmpty` (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:24) returns the empty cascade whatever it is handed.",
+     :buys
+     "THE SORRY GOES AND NOTHING ELSE HAPPENS. The type is inhabited with no assumptions (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:28), so the sorry was never standing in for an empty type -- which is what makes the other arms' costs the real subject.",
+     :costs
+     "THE RESULTING DECLARATION IS REFUTED BY THE O-LAWS ON THE RECORDED INPUTS, under both readings of O3: mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:32 and mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:40. So this arm converts a declaration that proves nothing into one that is false of the record, which is worse than the sorry and not merely equal to it."}
+    {:arm :discharge-with-a-conformant-implementation,
+     :run-by
+     "F12 slice 6 (C544) built the witnesses; F12 slice 14 (C552) states the existence and the non-uniqueness; mathlib4 26092af4f2 + 38a34f286a",
+     :what-it-is
+     "Replace the sorry with a term the O-laws accept -- `organiseSelectedOnly` (mathlib4/DarkTower/WarMachine/F12Conformance.lean:59) or `organiseUpClosure` (mathlib4/DarkTower/WarMachine/F12Conformance.lean:77), each a total function at organise's own type.",
+     :buys
+     "A CONFORMANT DISCHARGE EXISTS AND THE EXISTENCE IS PROVED SEPARATELY UNDER EACH O3 READING, so taking this arm does not tacitly decide the choice registered as :organise-o3-field: mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:48 and mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:53.",
+     :costs
+     "IT SELECTS ONE IMPLEMENTATION, WHICH IS THE THING THE DOCSTRING REFUSES -- and the refusal is now a PROVED FACT rather than a stated one. Under the selected reading the laws admit two functions that return different node sets on the recorded zaif inputs (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:84, difference from mathlib4/DarkTower/WarMachine/F12Conformance.lean:107); under the node-set reading they admit two more (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:93), which needed a second witness of its own because `organiseUpClosure` is refuted there (mathlib4/DarkTower/WarMachine/F12Conformance.lean:173). The difference is located rather than merely exhibited: both node-reading witnesses return every recorded selected node (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:111), so they disagree about O1's SECOND origin and nothing else, and each side of the disagreement is inhabited on the record (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:120, mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:127, mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:133) without the edge relation being total (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:140). AND NO RECORDED RUN COULD SETTLE IT: over the nine cascade records under futon3:checks, 52 O1-shaped cascades carry 8 with a non-empty organise-added set, all 8 in futon3:checks/snatch-cascade.edn, and ZERO in which a node organise added is a node of the cascade -- recomputed into holes/labs/wm-contract/runs/F12-organise/09-discharge-arm.edn, with the constructor's empty literal at futon3:checks/construct_cascade.clj:412 read out so the emptiness is a fact about the producer and not about which runs happened to be recorded."}
+    {:arm :amend-to-an-existence-statement,
+     :run-by
+     "F12 slice 14 (C552) proves the content; the edit to Holes.lean is NOT applied",
+     :what-it-is
+     "Replace the refused `def organise ... := sorry` with the conformance predicate plus `exists f, Conformant f` -- the shape the acceptance's own swappability clause asks for, `implementation conformance, not identity`.",
+     :buys
+     "ITS WHOLE CONTENT IS ALREADY PROVED and needs no new mathematics: existence under each reading (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:48, mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:53) and non-uniqueness under each (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:84, mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:93). It removes the sorry while saying exactly what the docstring says, instead of contradicting it.",
+     :costs
+     "TWO, AND ONE OF THEM IS OUTSIDE THIS ROW. It turns `organise` from a term into a proposition, so anything applying `organise` would have to eliminate an existential -- which costs nothing today, since slice 1 found zero term references to it anywhere in DarkTower, and would cost whatever the first consumer costs. And editing Holes.lean moves the contract twice over: the authority is derived as `git log -1 -- Holes.lean` (mathlib4/DarkTower/Contract/Emit.lean:52-62), so the amendment requires the C176 regeneration slice 4 had to perform after slice 2, AND the hole registry in the same file carries `organise` as a refusal (mathlib4/DarkTower/WarMachine/Holes.lean:8025), which an amendment has to restate rather than leave saying `implementation, not a law` of a declaration that is no longer an implementation. That is why this slice proved the content in a separate module and left Holes.lean untouched."}
+    {:arm :seal-it-opaque,
+     :run-by
+     "F12 slice 14 (C552), and the dispatch packet's premise about this arm was REFUTED; mathlib4 26092af4f2 + 38a34f286a",
+     :what-it-is
+     "Replace the sorry with an `opaque` declaration, keeping the refusal and removing the sorry token.",
+     :buys
+     "THE SORRY GOES WITH NO IMPLEMENTATION CHOSEN -- which is NOT what the packet expected. The packet claimed `opaque` requires a body, so that this arm would be the previous one in disguise; it does not. `organiseOpaqueNoBody` (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:271) elaborates with no body at all, from the inhabitance instance at mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:262, and removing that instance is what makes it fail. What separates the two routes is their AXIOM FOOTPRINT and it is machine-readable: `#print axioms` reports NO axioms for the body-carrying `organiseOpaqueZaif` (mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:256) and `Classical.choice` for the bodiless one.",
+     :costs
+     "NOTHING ABOUT THE VALUE SURVIVES THE SEAL, so no O-law can be witnessed of the declaration at all -- this arm keeps the refusal's content and gives up its evidence, where the conformant-discharge arm gives up the refusal and keeps the evidence. The body-carrying route additionally seals a specific term, and the only term anyone has to seal here is `organiseEmpty`, which mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:32 refutes."}
+    {:arm :leave-it-refused,
+     :run-by
+     "F12 slice 1 (C539) measured its cost; unchanged by every slice since",
+     :what-it-is "Do nothing to the declaration.",
+     :buys
+     "NOTHING MOVES, and the cost of that is smaller than it looks: the sorry is INERT. Recomputed at slice 14 rather than copied from slice 1, because six F12 modules have been added since it was measured: over all of mathlib4/DarkTower there are still ZERO term references to `organise`. Every occurrence outside the declaration itself is prose in a doc-comment or module header, plus one string literal in the hole registry (mathlib4/DarkTower/WarMachine/Holes.lean:8025, `mkRefused \"organise\"`; slice 1 recorded that literal at :7899 and the file has grown since). So no proof obligation anywhere depends on it.",
+     :costs
+     "THE MODULE KEEPS REPORTING IT. `lake build DarkTower.WarMachine.F12DischargeArm` emits `declaration uses sorry` for mathlib4/DarkTower/WarMachine/Holes.lean:861 alongside nine others in the same file, so any sorry census over Holes.lean counts it, and the acceptance's clause stays open indefinitely."}
+    {:arm :amend-the-type,
+     :run-by :not-here,
+     :what-it-is
+     "Change what `organise` returns, so the laws can be stated of it. This is D1, and it is REGISTERED SEPARATELY as :organise-carrier with six arms, all run.",
+     :buys :see-organise-carrier,
+     :costs :see-organise-carrier,
+     :why-not-run-here
+     "Not this entry's to run and not restated here: duplicating that entry's measured payments under a second key would make one choice look like two. What this entry adds is that the type amendment and the sorry are SEPARABLE -- every other arm above removes the sorry without touching the type, and :organise-carrier's arms are about the type whether or not the sorry moves."}]},
+  :organise-third-origin
+  {:all-arms-run
+   "2026-09-07, F12 slice 10: every arm now carries a measured cost. NO RULING IS TAKEN AND NONE IS IMPLIED -- :status is still :observed-not-decided and there is no :ruling key. What the fourth arm changed is that the free hand C547 section 6 named inside the pay arm is no longer unmeasured.",
+   :not-claimed
+   "This entry says nothing about D1 (which carrier the four O-laws are stated of), D2 (which denominator O4's acting order is read over), D3 (whether an O4 witness may be reached by an encoding written after the law), or the O3 field question (mathlib4/DarkTower/WarMachine/Holes.lean:1034). O4 is still not stateable at the arm carrier: ArmOneCascade has none of its six fields.",
+   :what-would-change-the-measurement
+   "a recorded run in which two policy-grain rules each admit at least one pattern. The maximum rule-carrying member count on any recorded run is 1 (holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn), and the gate that would produce such a run does not pass at HEAD -- require-pass! aborts with :rule-does-not-encode-an-authored-then for three of four rules (futon3c:scripts/zaif_cascade_gate.clj:579-582), a table :F12 does not own.",
+   :evidence
+   "holes/labs/wm-contract/C547-F12-choice-point.md; holes/labs/wm-contract/C548-F12-support-grain-arm.md; holes/labs/wm-contract/C543-F12-d1-arms-run.md; holes/labs/wm-contract/C544-F12-organise-function-conformance.md; holes/labs/wm-contract/C545-F12-admitting-arm.md; holes/labs/wm-contract/C546-F12-attribution-arm.md; holes/labs/wm-contract/runs/F12-organise/06-attribution-arm.edn",
+   :question
+   "O1 gives a cascade node three origins and organise's declared type takes no input that determines the third. `organise : Cascade Policy -> Set P -> Repository P -> Cascade P := sorry` (mathlib4/DarkTower/WarMachine/Holes.lean:861); the third origin `admittedBy` was added by the :LA2 field amendment (mathlib4/DarkTower/WarMachine/Holes.lean:833-845). The free hand: does the signature gain an attribution input that pins admittedBy, or does the declaration record that the attribution is free? Both arms are RUN, each in a Lean module that touches no existing declaration.",
+   :registered-by [:claude-wm-edge],
+   :status :observed-not-decided,
+   :at "2026-09-07",
+   :measurement-that-separates-them
+   "THE RECORDED DATA CANNOT EXERCISE THE GRAIN THE PAY ARM BUYS ITS DETERMINATION AT. Recomputed 2026-09-07 by re-running holes/labs/wm-contract/f12_attribution_check.bb (PASS, artifact byte-identical to the committed one): over the nine cascade records under futon3:checks, 213 admissions, seven records carrying provenance, two carrying none (construct-cascade.edn, snatch-cascade.edn), and ONE distinct rule id in the whole corpus, :widen-the-cascade-only-on-evidence. So no recorded run distinguishes an emitting-rule attribution from a boolean admitted-or-not flag.",
+   :row :F12,
+   :arms
+   [{:arm :pay-for-the-argument,
+     :run-by
+     "F12 slice 8 (C547 section 3); mathlib4 0251291563 + 4930505dc1",
+     :what-it-is
+     "one input added to the declared type -- `P -> Option Rule` (mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:48-49) -- and one conformance clause `oattr` pinning admittedBy to that input's support (mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:63-64).",
+     :buys
+     "the third origin is determined: any two conformant functions agree on admittedBy at every input (mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:128), and every conformant function returns the nine recorded admissions (mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:138).",
+     :costs
+     "a fourth argument the declaration does not have, and a determination that is a projection of it rather than a property the interface gained: at the ENLARGED argument list, two functions conformant on the four laws still disagree on admission until the clause is added (mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:208). It also overturns a proved result -- the slice-7 mirror, conformant at mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:98, is refuted at mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:119."}
+    {:arm :attribution-is-free,
+     :run-by
+     "F12 slices 6 and 7 (C547 section 4); mathlib4 0c5745c39e, 0691f74e48, 7d4f6ffca3, acb4e95bcf",
+     :what-it-is
+     "the declared argument list kept, and the declaration amended to say the laws do not fix the attribution. Two sub-arms by carrier.",
+     :buys
+     "no argument is paid for, and the O-laws stay statable of the function as slice 6 states them (mathlib4/DarkTower/WarMachine/F12Conformance.lean:23-37).",
+     :costs
+     "WITH an admittedBy field (mathlib4/DarkTower/WarMachine/F12D1Arms.lean:74-82) the attribution is undetermined: a conformant function files all nine recorded admissions under addedByOrganise, leaves admittedBy empty, and satisfies all four clauses (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:98). WITHOUT one (Cascade as declared, mathlib4/DarkTower/WarMachine/Holes.lean:29-34) it is worse than undetermined -- every recorded admission is FORCED under addedByOrganise (mathlib4/DarkTower/WarMachine/F12Conformance.lean:123), which is the misattribution the :LA2 amendment added the field to prevent."}
+    {:arm :read-it-off-the-temperament,
+     :run-by "F12 slice 8 (C547 section 4)",
+     :what-it-is
+     "organise already takes the policy-grain cascade, so reading the attribution off it would cost no argument.",
+     :buys
+     "nothing: REFUTED. The two slice-7 witnesses disagree on admittedBy for EVERY temperament (mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:230), and the proof never reads the temperament's fields -- Cascade Policy carries rule ids and nothing mapping a rule to the patterns it admitted.",
+     :costs
+     "n/a -- this arm is closed by the refutation, not by a choice."}
+    {:arm :support-grain-input,
+     :run-by "F12 slice 10 (C548); mathlib4 60cab98ab3",
+     :what-it-is
+     "the pay arm with a `Set P` attribution input instead of a rule-keyed map (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:24), and the same one added clause, now equality with that argument (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:38). It is a free hand INSIDE the pay arm: the clause reads only the support, {p | (prov p).isSome} (mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:63-64); the determination discharges by rw on that clause alone and never eliminates Rule (mathlib4/DarkTower/WarMachine/F12AttributionArm.lean:128); and the field it pins is a Set P for a reason the source states (mathlib4/DarkTower/WarMachine/Holes.lean:833-845).",
+     :buys
+     "THE SAME DETERMINATION ON A SMALLER INPUT. Any two conformant functions agree on admittedBy at every input (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:82), and the two arms are inter-derivable: support conformance transfers forward through support erasure (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:137), and rule-grain conformance transfers back through an indicator at ANY named rule (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:263), instantiated at the single rule id the recorded corpus carries (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:277). Handed the support of the recorded provenance map, every conformant function returns the nine recorded admissions (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:240).",
+     :costs
+     "THE SAME FOURTH ARGUMENT -- this arm is cheaper in grain, not in argument count -- and the same price statement holds: at the enlarged argument list without the clause, two functions conformant on the four laws agree on nodes and on an inhabited edge relation and still disagree on admission at vertex 11 (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:114, non-vacuity at mathlib4/DarkTower/WarMachine/F12SupportArm.lean:227). WHAT THE SMALLER INPUT LOSES IS NOT VISIBLE IN admittedBy: for any conformant rule-grain function, equal supports force equal admittedBy (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:167), and on the recorded run no conformant function distinguishes the recorded provenance from a counterfactual relabelling to the stop rule with the same support (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:186). Stated against overstating it: the rule grain IS readable by a conformant function in another field -- a witness filing the stop-labelled subset under addedByOrganise conforms (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:205), returns the same nodes as the natural witness (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:292), and differs from it only on the counterfactual input, never on the recorded one (mathlib4/DarkTower/WarMachine/F12SupportArm.lean:216)."}]}},
+ :controls
+ [{:after-hard-failure
+   "unresolved pointers: Holes.lean:999999 (end-beyond-file)",
+   :before :measurement-succeeds,
+   :control :unresolvable-pointer,
+   :plant-verified? true}
+  {:after-hard-failure
+   "F12 choice set mismatch; missing [:organise-third-origin], unexpected []",
+   :before
+   [:organise-carrier
+    :organise-sorry
+    :organise-o3-field
+    :organise-o4-denominator
+    :organise-o4-after-the-law-encoding
+    :organise-third-origin],
+   :control :f12-choice-deleted,
+   :plant-verified? true}
+  {:after true,
+   :before false,
+   :control :obligation-satisfaction-flipped,
+   :plant-verified? true,
+   :sheet-line-moved? true}
+  {:after [],
+   :before
+   [:laws-stated-against-cascade-carrier
+    :laws-witnessed-on-real-cascade],
+   :control :choice-gating-deleted,
+   :plant-verified? true,
+   :sheet-reports-gates-nothing? true}
+  {:after-hard-failure
+   "unresolved pointers: status-gated-belief-update.flexiarg:26-99999 (end-beyond-file)",
+   :before "status-gated-belief-update.flexiarg:26-30",
+   :control :flexiarg-range-out-of-bounds,
+   :plant-verified? true}],
+ :gating
+ {:conformant-implementation
+  [{:choice :organise-sorry,
+    :question-offset 77,
+    :question-substring "The declaration is a total function"}],
+  :laws-stated-against-cascade-carrier
+  [{:choice :organise-carrier,
+    :question-offset 0,
+    :question-substring "WHICH CARRIER are O1-O4 stated of?"}],
+  :laws-witnessed-on-real-cascade
+  [{:choice :organise-carrier,
+    :question-offset 328,
+    :question-substring
+    "The four laws as proved today are proved of a CascadeDiff VALUE instead"}],
+  :sorry
+  [{:choice :organise-sorry,
+    :question-offset 0,
+    :question-substring "WHAT IS DONE WITH THE SORRY"}],
+  :swappability
+  [{:choice :organise-sorry,
+    :question-offset 352,
+    :question-substring
+    "does not select one canonical implementation"}]},
+ :obligations
+ {:conformant-implementation
+  {:pointers
+   ["/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean:23"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean:59"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:21"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:52"],
+   :satisfied-at-head? true},
+  :laws-stated-against-cascade-carrier
+  {:laws
+   [{:carrier :CascadeDiff,
+     :declaration "organiseO1NodesRecorded",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:894",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o1}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO2AuthoredReachability",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:902",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o2}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO3FastForward",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:909",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o3}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO4PrecedenceGovernance",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:916",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o4}],
+   :satisfied-at-head? false},
+  :laws-witnessed-on-real-cascade
+  {:c59-laws
+   [{:carrier :CascadeDiff,
+     :declaration "organiseO1NodesRecorded",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:894",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o1}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO2AuthoredReachability",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:902",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o2}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO3FastForward",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:909",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o3}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO4PrecedenceGovernance",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:916",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o4}],
+   :real-cascade-fixture-kinds [:zaif-1239-pattern-transcription],
+   :satisfied-at-head? false,
+   :witnesses-by-law
+   {:o1
+    {:real-cascade-witness? true,
+     :witnessing-fixture-kinds
+     [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+    :o2
+    {:real-cascade-witness? true,
+     :witnessing-fixture-kinds
+     [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+    :o3
+    {:real-cascade-witness? true,
+     :witnessing-fixture-kinds
+     [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+    :o4
+    {:real-cascade-witness? false,
+     :witnessing-fixture-kinds [:c59-hand-fixture]}},
+   :zaif-cross-check
+   {:agree? true,
+    :artifact
+    {:admitted 9, :authored-edges 13, :nodes 20, :selected 11},
+    :artifact-basis-patterns 1239,
+    :lean-source
+    {:admitted 9, :authored-edges 13, :nodes 20, :selected 11}},
+   :zaif-laws
+   [{:carrier :CascadeDiff,
+     :declaration "organiseO1NodesRecordedZaif",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:993",
+     :fixture "wmZaifCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:974",
+     :fixture-kind :zaif-1239-pattern-transcription,
+     :law :o1}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO2AuthoredReachabilityZaif",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:1004",
+     :fixture "wmZaifCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:974",
+     :fixture-kind :zaif-1239-pattern-transcription,
+     :law :o2}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO3FastForwardZaif",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:1014",
+     :fixture "wmZaifCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:974",
+     :fixture-kind :zaif-1239-pattern-transcription,
+     :law :o3}
+    {:declaration "organiseO4PrecedenceGovernanceZaif",
+     :file-line :not-found,
+     :fixture "wmZaifCascadeDiffFixture",
+     :fixture-kind :not-found,
+     :law :o4}]},
+  :sorry
+  {:acceptance-line-agrees? true,
+   :body-is-still-sorry? true,
+   :file-line
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:861",
+   :satisfied-at-head? false},
+  :swappability
+  {:pointers
+   ["/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean:107"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:93"],
+   :satisfied-at-head? true}},
+ :pointer-coverage
+ {:extensions ["bb" "clj" "edn" "flexiarg" "lean" "md"],
+  :note
+  "Stricter than pointer_check.bb:237, whose regex covers only clj, lean and edn.",
+  :pointer-count 358,
+  :unresolved []},
+ :registry-field-gaps
+ {:measurement-that-separates-them [:organise-sorry],
+  :other-required-fields []},
+ :remainder-artifact "runs/F12-organise/15-remainder.edn",
+ :remainder-fully-gated? true}
