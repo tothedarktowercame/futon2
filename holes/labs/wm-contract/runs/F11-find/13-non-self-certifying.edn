@@ -1,0 +1,117 @@
+{:record :F11-slice-7-non-self-certifying
+ :date "2026-09-07"
+ :row :F11
+ :slice "7 -- F3 stated of the finder and measured against the record"
+ :dispatch "runs/F11-find/12-dispatch.edn"
+ :job-id "invoke-1788787984911-13717-3a5b64a0"
+ :dispatched-to "codex-2"
+ :commits {:build "mathlib4 37f245c9c235410001106f3966fbd8c2d554ee5d (codex-2)"
+           :review "mathlib4 b28f182f00"}
+ :module {:file "mathlib4/DarkTower/WarMachine/F11NonSelfCertifying.lean"
+          :lines 479
+          :declarations 48}
+
+ :carrier-as-it-stands
+ {:receipt {:file "mathlib4/DarkTower/WarMachine/Holes.lean" :line 240
+            :fields ["citesTextOrEdges" "scoreAlone"]
+            :both-are-props-the-finder-fills true}
+  :non-self-certifying {:line 244 :body "citesTextOrEdges ∧ ¬ scoreAlone"}
+  :row-literal {:file "mathlib4/DarkTower/WarMachine/Holes.lean" :line 354
+                :fields ["absence" "nonSelfCertifying" "receipted" "round"
+                         "scenario" "selected"]
+                :warrant-field :absent
+                :route-field :absent
+                :as-of-field :absent}
+  :relational-receipt {:file "mathlib4/DarkTower/WarMachine/F11ReceiptCarrier.lean" :line 95
+                       :fields ["acknowledgedClause" "asOf" "retrievalRoute"]
+                       :citation-field :absent}}
+
+ :the-record
+ {:fixture "futon3/checks/find-snatch.edn"
+  :sha256 "839897ef8fe44952403700bd237389449ae4735d3da7df8239b1b94dc7ef4dfa"
+  :receipts 96
+  :routes {:structured-antecedent 96}
+  :score-alone 0
+  :warrant-fields-present {:file 96 :if-lines 96 :if-text 96
+                           :however-lines 96 :however-text 96}
+  :warrant-is-the-patterns-own-file 96
+  :columns-coincide {:selected=receipted true :receipted=nonSelfCertifying true
+                     :over-rounds 34}}
+
+ :two-f3-predicates-in-the-code
+ {:check {:file "futon3/checks/find_snatch.clj" :lines "167-171" :conjuncts 2
+          :body "(not= :score-alone (:route receipt)) AND (string? (get-in receipt [:warrant :file]))"}
+  :organise-column {:file "futon3/checks/find_organise.clj" :lines "567-571" :conjuncts 4
+                    :adds ["(vector? (get-in receipt [:warrant :if-lines]))"
+                           "(string? (get-in receipt [:warrant :if-text]))"]}
+  :lean-column-producer {:file "futon2/holes/labs/wm-contract/u46_find_transcribe.bb"
+                         :lines "113-121" :transcribes :the-check-two-conjunct-reading}
+  :they-agree-on-the-record :by-both-being-true-of-all-96}
+
+ :measurements
+ {:M1 {:claim "Today's F3 is SELF-ASSERTED: a finder that fills both Props with True/False and carries no citation satisfies F1-F3 while selecting on the recorded repository."
+       :pointers ["F11NonSelfCertifying.lean:27" "F11NonSelfCertifying.lean:42"
+                  "F11NonSelfCertifying.lean:51"]
+       :verdict :held}
+  :M2 {:claim "The faithful and the MISCITING finder are EQUAL after erasure to today's FindResult, so no predicate on that carrier separates a finder that cites the selected pattern's text from one that cites another pattern's."
+       :pointers ["F11NonSelfCertifying.lean:274" "F11NonSelfCertifying.lean:288"
+                  "F11NonSelfCertifying.lean:351" "F11NonSelfCertifying.lean:393"]
+       :verdict :held
+       :note "REVIEW REPAIR. The dispatched module proved this of `findRFaithful`/`findRMisattributing` (F11ReceiptCarrier.lean:158-186), which differ in `acknowledgedClause` -- F2's datum -- over a carrier with no citation field. That is slice 4's result re-exported. The citing carrier and its two finders are the review's addition."}
+  :M3 {:claim "The two-conjunct and four-conjunct readings are NOT equivalent, and the record cannot arbitrate: both are true of all 96 receipts."
+       :pointers ["F11NonSelfCertifying.lean:116" "F11NonSelfCertifying.lean:121"
+                  "F11NonSelfCertifying.lean:134" "F11NonSelfCertifying.lean:153"]
+       :verdict :held
+       :note "REVIEW REPAIR. The dispatched theorem quantified over the 34 rounds and over each row's receipted members and then used NEITHER bound variable -- its body was a constant about a hand-authored literal whose file was the fixture path and whose if-text was invented. Replaced by the statement of the one receipt it is about, with that receipt transcribed field by field from the fixture, plus the prose finding below."}
+  :M4 {:claim "An attribution-aware F3 -- the citation is the selected pattern's -- separates the two finders, and today's Receipt cannot carry it: the separation is lost under erasure."
+       :pointers ["F11NonSelfCertifying.lean:267" "F11NonSelfCertifying.lean:317"
+                  "F11NonSelfCertifying.lean:325" "F11NonSelfCertifying.lean:393"]
+       :verdict :held
+       :note "REVIEW REPAIR, same cause as M2: the dispatched `AttributedF3` compared `acknowledgedClause`, which is F2's ask, and its two theorems were slice 4's verbatim. Kept under its true name `ClauseAttributedF2` (F11NonSelfCertifying.lean:219) so the substitution stays auditable."}
+  :M5 {:claim "F3 and F2 are independent in the LAW in both directions: a score-alone finder satisfies F2 and refutes F3; a receiptless finder satisfies F3 vacuously and refutes F2."
+       :pointers ["F11NonSelfCertifying.lean:400" "F11NonSelfCertifying.lean:427"
+                  "F11NonSelfCertifying.lean:444" "F11NonSelfCertifying.lean:462"]
+       :verdict :held
+       :note "The F3-satisfying side is VACUOUS by construction (no receipts), which is the honest content of that direction."}}
+
+ :review-findings
+ [{:id :R1
+   :finding "The delivered M2/M4 witnesses were slice 4's. `RelationalReceipt` (F11ReceiptCarrier.lean:95-99) carries clause, route and as-of and NO citation field, so a finder that names the wrong CLAUSE is not a finder that cites the wrong TEXT. Fixed in review by building the citing carrier (F11NonSelfCertifying.lean:240-261) and its two finders, and proving the erasure equality there (:351). This is a SECOND blindness on a SECOND field, not slice 4's re-exported."}
+  {:id :R2
+   :finding "`recordedRounds_pass_both_f3_readings` bound `row` and `p` and used neither: a constant dressed as a decide over the record. Replaced (:153) and the reason stated as a finding: `FindSnatchRowLit` (Holes.lean:354-361) carries no warrant, route or as-of field, so NO theorem over `findSnatchRounds` can decide either F3 reading. The record's F3 data is exactly what the transcription drops."}
+  {:id :R3
+   :finding "The dispatched report says the record could have exhibited either M5 separation. It could not. The `nonSelfCertifying` column is a FILTER of the receipts map (u46_find_transcribe.bb:113-121), so it is a subset of `receipted` by construction and a round witnessing F3-without-receipted cannot be produced at all. Corrected in the module's prose."}
+  {:id :R4
+   :finding "REVIEW ADDITION: on the record `selected = receipted = nonSelfCertifying` in all 34 rounds (F11NonSelfCertifying.lean:200), not just the two columns the transcriber reports. So the record separates NO two of F1, F2 and F3, and every separation in the module is carried by a constructed finder."}
+  {:id :R5
+   :finding "Two of the REVIEW'S OWN first-draft controls did not fail and were discarded and replaced, which is the rule the packet demanded of the build: `ifLines := some (15, 16)` on `twoOnlyWarrant` left F3Four false (the witness still separated the readings), and `row.receipted = row.receipted` WEAKENS the theorem and therefore compiles. Both replacements are recorded in the control script's comments."}
+  {:id :R6
+   :finding "The checker's `find`-is-still-a-sorry leg read line 264 by index; a control that inserted one line above it read as a discharged sorry. Re-anchored to the declaration (f11_non_self_certifying_check.bb), which is the C559 line-shift defect class caught inside this slice's own apparatus."}]
+
+ :gates
+ {:lake-build {:target "DarkTower.WarMachine.F11NonSelfCertifying" :exit 0 :jobs 2707
+               :warnings-from-the-new-module 0}
+  :axioms {:declarations 48 :axiom-free 19 :with-axioms 29
+           :axiom-sets ["propext" "propext, Classical.choice, Quot.sound"]
+           :sorryAx 0}
+  :forbidden-tokens {:sorry 0 :axiom 0 :native_decide 0}
+  :holes-lean {:pin "61c4825dc3e373fd1b761b800814bf85f5770b88" :line-264 ":= sorry"}
+  :checker {:script "f11_non_self_certifying_check.bb" :verdict :pass :findings 0
+            :byte-identical-over-two-runs true
+            :sha256 "f9237fa5ed48f90a4aba73c292640a50caed80827f2b321d3f6b234d77b978f4"}
+  :lean-controls {:script "f11_non_self_certifying_controls.sh" :plants 11
+                  :all-failed-as-required true}
+  :checker-controls {:script "f11_non_self_certifying_controls_checker.sh" :plants 6
+                     :each-moved-exactly-one-verdict true
+                     :note "the fixture plant trips :fixture-sha-moved first, since any edit to the pinned file moves its sha before it moves the citation fact"}}
+
+ :dispatch-premises
+ {:expected-blindness :held
+  :expected-two-versus-four :held
+  :expected-non-buy :held
+  :note "No premise in 12-dispatch.edn was refuted. What the review changed is not a premise but the WITNESSES: the blindness premise was about the citation and was delivered proved of the acknowledged clause."}
+
+ :not-established
+ ["whether F3 should be the two-conjunct or the four-conjunct reading -- the record cannot arbitrate and no ruling is taken here"
+  "whether the citing carrier should be adopted -- this slice registers no choice; :find-sorry's :amend-the-carrier arm is priced over the F2 and F4 halves and does NOT include a citation field"]
+ :findings []}
