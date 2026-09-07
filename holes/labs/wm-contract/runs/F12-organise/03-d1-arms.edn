@@ -1,0 +1,49 @@
+{:arms
+ {:arm-1-widen-cascade
+  {:carrier true,
+   :fixture true,
+   :o1 true,
+   :o2 true,
+   :o3 true,
+   :organise-type true},
+  :arm-2-cascadediff-codomain
+  {:o4-acting-order-flat true,
+   :o4-antecedent true,
+   :o4-score-flat true,
+   :organise-type true},
+  :arm-3-cascade-repository-pair
+  {:cascade true,
+   :non-vacuity-edge-exists true,
+   :non-vacuity-no-unauthored-edge true,
+   :o1-substitution-refuted true,
+   :o2 true,
+   :o3 true,
+   :repository true}},
+ :basis
+ {:arm-file
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12D1Arms.lean",
+  :record
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/F12-organise/01-zaif-transcription.edn",
+  :run :widen-to-a-budget,
+  :zaif-basis "1b8b1d1"},
+ :facts
+ {:admitted-below 20,
+  :admitted-from 11,
+  :authored-edges
+  [[6 26]
+   [7 20]
+   [14 23]
+   [15 22]
+   [16 24]
+   [17 20]
+   [18 19]
+   [19 20]
+   [22 24]
+   [23 26]
+   [24 21]
+   [25 21]
+   [26 25]],
+  :closure-below 27,
+  :nodes-below 20,
+  :selected-below 11},
+ :problems []}
