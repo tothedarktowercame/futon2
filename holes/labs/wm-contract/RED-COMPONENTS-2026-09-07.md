@@ -40,9 +40,27 @@ PrecisionMap, DirichletConcentrations, bayesFactorThreshold,
 HaveWantArrow, Fold, modelReductionFreeEnergyChange, and now most of the
 rest. This is also the root of most of workspace-gate's failures (item 7).
 
-Route: mechanical — re-run the binder against current code and let the
-honest freshness verdict win. One small worklist row; because the count
-is growing ~5/day, this row is the best value-per-slice on this page.
+Route: ~~mechanical rerun-and-rebind~~ **REFUTED by the steward probe,
+2026-09-07 evening** (codex-6, job invoke-1788811257574-14075-72532a2b;
+reviewed as a real gate: I re-ran the softmax check myself and reproduced
+its FAIL at exit 1, confirmed zero commits and untouched fragments via
+git). All five probed declarations' check entrypoints exit 1 with
+`:positive-source-drift`: their positive-proof receipts pin per-declaration
+sha256 of the Lean declaration TEXT, and the F8/F12 Lean work moved that
+text. There is no recapture tooling — resolving the drift means
+re-verifying, per declaration, that the current Lean text still proves
+what the receipt claims, then re-emitting the receipt, then rebinding the
+fragment. **This is item 2's failure generalized to the whole family**:
+items 1 and 2 share one root — the attestation layer (receipts +
+fragments) has no path by which the loop's own Lean edits re-attest what
+they move. The probe's batch-2 procedure (in its report) is correct for
+declarations whose checks pass; none of the probed five qualifies yet.
+Design question for Joe, raised in REGISTER-STEWARDS.md terms: a trailing
+re-attestation steward will chase this forever at ~5 declarations/day;
+the alternative is at-source discipline — any slice that edits a Lean
+declaration with a positive receipt re-emits that receipt inside the same
+slice, gated. Steward for the backlog, discipline for the flow, is the
+recommendation.
 
 ## 2. futon2-suite (exit 125, 1 failure) — stale-attestation
 
