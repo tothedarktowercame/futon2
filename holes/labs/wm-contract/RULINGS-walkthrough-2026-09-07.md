@@ -23,7 +23,38 @@ the F11 question forming.
   *occasion* (anomaly-on-the-board, organisations vertex), not the *update*
   (having-learned, evidence vertex).
 - Blocks: D1 and D2.
-- **Ruling: PENDING**
+- **Ruling: OPTION 1 (Joe, 2026-09-07)** — adopt the reconciliation: C_ser's
+  preferred object is the *occasion* (organisations vertex), not the *update*
+  (evidence vertex). §2a′ stands; C537 stands.
+- Joe's framing, to carry into D1/D2 and beyond (near-verbatim):
+  - Preferences are complex and can be broken down multiple ways across
+    multiple layers — cf. the Buddhist four frames of reference, mapped
+    across the tetrahedral vertices (nouns, verbs, organisations, evidence):
+    "we could have preferences related to all four components and indeed even
+    how they orchestrate or work together in workflows."
+  - Dark-room problem: doing nothing to avoid surprise fails because it is
+    "detrimental to everything the agent realizes it is working on or
+    interested in — and it would be a huge surprise to find oneself stuck and
+    trapped in a dark room." Serendipity has to be organized in terms of what
+    surprisal is *on*.
+  - Design patterns each deal with a tension/problem; "finding these
+    interesting tensions is where value is born."
+  - Eating-own-tail: the tail is the discrepancy between the system's
+    behavior and some model of it — "organize and understand that
+    discrepancy, not deny it and not avoid it, but use it to fuel the next
+    layer of learning." Serendipity systems: see discrepant information, then
+    try to make sense of it.
+  - Scope of this ruling: "what we're doing now is not solving that once and
+    for all, but creating something like a **preference registry** and
+    seeding it with some content that would allow us to get moving." New
+    preferences can then be formed, registered, and moved around — which is
+    meta-preference: which preference do we prefer at a given moment.
+  - Meta-preference is "kind of the dual of policy." AlphaZero already dealt
+    with this — policy layer vs valuation/reward layer; worth rethinking the
+    above in those terms.
+- Registry transcription: to be written into `aif-equations.edn :choices`
+  together with D1 and D2 once all three are ruled (one publish-window
+  write, transcribed at Joe's word).
 
 ## 2. F10 / D1 — the outcome domain (which `Obs v` declarations)
 
