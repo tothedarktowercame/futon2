@@ -70,6 +70,118 @@
          :score-changed? (not= (:score-before row) (:score-after row))
          :o4-holds? (fo/o4-precedence-governance row))))))
 
+;; ---------------------------------------------------------------------------
+;; The fifth arm: C541 section 4's option (i) AS WRITTEN.
+;;
+;; `arm` builds ONE round set from its `keep?` and reads both the acting order
+;; and the score off it (`:44-71`), so no arm above can express a reading that
+;; takes the two fields from two different round sets.  Option (i) as C541
+;; writes it is exactly that: the acting order over the rounds that carry a
+;; transcript, the score over the primary ones.  Slice 17 recorded this arm as
+;; NOT RUN and named what running it would take -- "one more denominator spec
+;; that reads the two fields from two round sets"
+;; (`aif-equations.edn :choices :organise-o4-denominator :arms-not-all-run`).
+;; This is that spec.  It chooses nothing: it measures a fifth verdict beside
+;; the four already measured.
+;; ---------------------------------------------------------------------------
+
+(defn split-arm
+  "The six numbers of an O4 row with the acting order read over the rounds
+   `order-keep?` admits and the score over the rounds `score-keep?` admits.
+   With the two predicates equal this is `arm`'s row, which the identity
+   control checks rather than assumes."
+  [rules ids sits order-label order-keep? score-label score-keep?]
+  (let [label (keyword (str "split-" (name order-label) "-order-"
+                            (name score-label) "-score"))
+        order-rounds (vec (filter order-keep? sits))
+        score-rounds (vec (filter score-keep? sits))]
+    (if (or (empty? order-rounds) (empty? score-rounds))
+      (sorted-map :denominator label :refused? true :reason :empty-denominator
+                  :empty-sides (vec (concat (when (empty? order-rounds) [order-label])
+                                            (when (empty? score-rounds) [score-label]))))
+      (let [before {(first ids) 1 (second ids) 2}
+            after {(first ids) 2 (second ids) 1}
+            plays-before (g/play rules before sits)
+            plays-after (g/play rules after sits)
+            kept (fn [plays keep?]
+                   (keep-indexed (fn [i play] (when (keep? (nth sits i)) play)) plays))
+            agree (fn [plays] (:agree (#'g/agreement plays sits score-keep?)))
+            row (sorted-map
+                 :precedence-before (mapv before ids)
+                 :precedence-after (mapv after ids)
+                 :acting-order-before (reach/acting-order (kept plays-before order-keep?))
+                 :acting-order-after (reach/acting-order (kept plays-after order-keep?))
+                 :score-before (agree plays-before)
+                 :score-after (agree plays-after))
+            order-changed? (not= (:acting-order-before row) (:acting-order-after row))
+            score-changed? (not= (:score-before row) (:score-after row))]
+        (sorted-map
+         :denominator label
+         :acting-order-over order-label
+         :score-over score-label
+         :acting-order-rounds (count order-rounds)
+         :acting-order-round-ids (mapv :round order-rounds)
+         :score-rounds (count score-rounds)
+         :score-round-ids (mapv :round score-rounds)
+         :rule-ids (vec ids)
+         :row row
+         :acting-order-changed? order-changed?
+         :score-changed? score-changed?
+         ;; O4 is a disjunction, so a TRUE says nothing about WHICH disjunct
+         ;; carried it -- and for a split the two live disjuncts are read over
+         ;; two different round sets, which is the whole question.
+         :disjuncts-that-hold
+         (vec (concat (when (= (:precedence-before row) (:precedence-after row))
+                        [:precedence-unchanged])
+                      (when order-changed? [:acting-order-changed])
+                      (when score-changed? [:score-changed])))
+         :o4-holds? (fo/o4-precedence-governance row))))))
+
+(defn split-comparison
+  "What the split's row is MADE of, recomputed against the single-denominator
+   arms rather than argued.  The split shares O4's acting-order disjunct with
+   the arm at `:acting-order-over` and its score disjunct with the arm at
+   `:score-over`, so its two field pairs must be those two arms' field pairs
+   exactly; a mismatch means it read a round set neither arm reads.  A missing
+   parent arm is reported, not read as a nil."
+  [split arms]
+  (let [by (into {} (map (juxt :denominator identity) arms))
+        o (get by (:acting-order-over split))
+        s (get by (:score-over split))
+        pair (fn [row ks] (mapv row ks))
+        order-ks [:acting-order-before :acting-order-after]
+        score-ks [:score-before :score-after]]
+    (sorted-map
+     :acting-order-arm (:acting-order-over split)
+     :score-arm (:score-over split)
+     :parent-arms-missing (vec (concat (when-not o [(:acting-order-over split)])
+                                       (when-not s [(:score-over split)])))
+     :acting-order-identical-to-that-arm?
+     (when o (= (pair (:row split) order-ks) (pair (:row o) order-ks)))
+     :score-identical-to-that-arm?
+     (when s (= (pair (:row split) score-ks) (pair (:row s) score-ks)))
+     :verdict-same-as-the-acting-order-arm? (when o (= (:o4-holds? split) (:o4-holds? o)))
+     :verdict-same-as-the-score-arm? (when s (= (:o4-holds? split) (:o4-holds? s)))
+     ;; Slice 17's separation condition, evaluated on THIS construction instead
+     ;; of being restated: the split can differ from the acting-order arm only
+     ;; where that arm's acting order does not move, since a moved acting order
+     ;; satisfies O4 on that disjunct alone whatever the score does.
+     :construction-can-separate-them? (when o (not (:acting-order-changed? o)))
+     :why-not (when (and o (:acting-order-changed? o))
+                :acting-order-moves-so-o4-holds-on-that-disjunct-alone))))
+
+(defn splits
+  "The four split readings this file measures for one construction: option (i)
+   as written, its mirror, the identity collapse that must reproduce `arm`, and
+   a forced-empty side that must refuse rather than return a vacuous true."
+  [rules ids sits]
+  (sorted-map
+   :as-written (split-arm rules ids sits :with-a-transcript :has-transcript? :primary reach/primary?)
+   :mirror (split-arm rules ids sits :primary reach/primary? :with-a-transcript :has-transcript?)
+   :identity-collapse (split-arm rules ids sits :primary reach/primary? :primary reach/primary?)
+   :forced-empty-score-side (split-arm rules ids sits :with-a-transcript :has-transcript?
+                                       :forced-empty (constantly false))))
+
 ;; `contention-key` is passed rather than assumed: the worker's arms carry
 ;; `:contending-rounds` (both rules live) and the reachability report's arms
 ;; carry `:rounds-on-which-the-fired-rule-differs` (the outcome differs). They
@@ -109,6 +221,7 @@
         identity-row (when pair-found?
                        (:row (row-for rules sits reach/primary? identity-before identity-before)))
         empty-arm (when pair-found? (arm rules sits :forced-empty (constantly false)))
+        split (when pair-found? (splits rules pair-ids sits))
         report (g/report g/cohort-path)
         pass (try (g/require-pass! report) {:passed? true}
                   (catch clojure.lang.ExceptionInfo e
@@ -124,6 +237,9 @@
                          (sorted-map :row identity-row
                                      :o4-holds? (fo/o4-precedence-governance identity-row)))
      :empty-denominator-control empty-arm
+     :splits split
+     :split-comparison (when pair-found? (split-comparison (:as-written split) arms))
+     :mirror-split-comparison (when pair-found? (split-comparison (:mirror split) arms))
      :gate-controls (select-keys (:controls report)
                                 [:rules-in-the-cascade :rules-not-in-the-cascade
                                  :then-correspondence])
@@ -140,17 +256,26 @@
 
 (defn baseline []
   (let [r (reach/report)
-        arms (get-in r [:probe :arms])]
+        arms (get-in r [:probe :arms])
+        ;; The HEAD split is measured over the rules the baseline probe itself
+        ;; exchanges (`f12_o4_reachability.clj:145-151`, `:266-299`), not over
+        ;; `pair-ids`: the second of those is slice 15's planted fifth rule and
+        ;; is absent from the table at HEAD.
+        sits (g/situations (edn/read-string (slurp reach/cohort-path)))
+        head-ids (mapv :id reach/selected-rules)
+        head-splits (splits reach/selected-rules head-ids sits)]
     (sorted-map
      :arms arms
+     :rules head-ids
+     :splits head-splits
+     :split-comparison (split-comparison (:as-written head-splits) arms)
+     :mirror-split-comparison (split-comparison (:mirror head-splits) arms)
      :nested-round-set-floor
      (nested-floor (mapv #(assoc % :round-ids
                                 (case (:denominator %)
                                   :primary (get-in r [:contention :primary-rounds])
-                                  :paired (mapv :round (filter g/paired?
-                                                              (g/situations (edn/read-string (slurp reach/cohort-path)))))
-                                  :with-a-transcript (mapv :round (filter :has-transcript?
-                                                                         (g/situations (edn/read-string (slurp reach/cohort-path)))))))
+                                  :paired (mapv :round (filter g/paired? sits))
+                                  :with-a-transcript (mapv :round (filter :has-transcript? sits))))
                          arms)
                    :rounds-on-which-the-fired-rule-differs)
      :recorded-carriage (sorted-map
@@ -243,12 +368,45 @@
                 [:identity-control-did-not-move])
               (when-not (true? (get-in b [:empty-denominator-control :refused?]))
                 [:empty-denominator-was-not-refused])
+              ;; The fifth arm's guards.  Its verdicts are pinned like the other
+              ;; arms' so a later re-run reports a move instead of silently
+              ;; restating this slice's numbers.
+              (when-not (= 2 (count reach/selected-rules))
+                [:head-rule-pair-is-not-two])
+              (when-not (= [true true]
+                           [(get-in base [:splits :as-written :o4-holds?])
+                            (get-in b [:splits :as-written :o4-holds?])])
+                [:split-verdict-moved])
+              (for [[k cmp] [[:head-baseline (:split-comparison base)]
+                             [:head-baseline-mirror (:mirror-split-comparison base)]
+                             [:arm-b (:split-comparison b)]
+                             [:arm-b-mirror (:mirror-split-comparison b)]]
+                    :when (not (and (true? (:acting-order-identical-to-that-arm? cmp))
+                                    (true? (:score-identical-to-that-arm? cmp))
+                                    (empty? (:parent-arms-missing cmp))))]
+                [:split-does-not-compose-its-parents k])
+              (for [[k sp] [[:head-baseline (:splits base)] [:arm-b (:splits b)]]
+                    :when (not= (:row (:identity-collapse sp))
+                                (:row (first (filter #(= :primary (:denominator %))
+                                                     (if (= k :arm-b) b-arms base-arms)))))]
+                [:split-identity-collapse-is-not-the-primary-arm k])
+              (for [[k sp] [[:head-baseline (:splits base)] [:arm-b (:splits b)]]
+                    :when (not (true? (:refused? (:forced-empty-score-side sp))))]
+                [:split-empty-side-was-not-refused k])
               (when-not (some #(= :rule-table-is-fitted-to-the-cascade (:finding %))
                               (get-in fitted [:worker :require-pass :failures]))
                 [:unfitting-guard-did-not-fire])))]
     (sorted-map
      :head-baseline base
      :arm-b treatment
+     :split-denominator (sorted-map
+                         :what "C541 section 4 option (i) as written -- the acting order over the transcript rounds, the score over the primary ones -- measured on both constructions beside the four single-denominator arms"
+                         :head-baseline (sorted-map :splits (:splits base)
+                                                    :as-written (:split-comparison base)
+                                                    :mirror (:mirror-split-comparison base))
+                         :arm-b (sorted-map :splits (get-in treatment [:worker :splits])
+                                            :as-written (get-in treatment [:worker :split-comparison])
+                                            :mirror (get-in treatment [:worker :mirror-split-comparison])))
      :head-gate-blocker (correspondence-summary)
      :controls controls
      :problems problems)))
