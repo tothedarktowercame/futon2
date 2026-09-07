@@ -1,0 +1,49 @@
+{:check :F12-ants-exemplar,
+ :conformance
+ {:clause-use #{"o1" "oattr" "oauth" "o4" "o3" "osel" "o2"},
+  :unchanged? true,
+  :new-structure-count 0,
+  :reuses-sans-o4? true},
+ :forbidden {:sorry 0, :axiom 0, :native-decide 0},
+ :holes-lean-head "61c4825dc3e373fd1b761b800814bf85f5770b88",
+ :index-map
+ #:ants{:cargo-return-discipline 0,
+        :hunger-precision-coupling 1,
+        :pheromone-trail-tuner 2,
+        :white-space-scout 3,
+        :baseline-cyber-ant 4},
+ :orders
+ {:record-through-map
+  {:precedence-before [0 1 2 3],
+   :precedence-after [0 1 3 2],
+   :acting-before [0 1 2 3],
+   :acting-after [0 1 3 2]},
+  :lean
+  {:precedence-before [0 1 2 3],
+   :precedence-after [0 1 3 2],
+   :acting-before [0 1 2 3],
+   :acting-after [0 1 3 2]},
+  :match? true},
+ :plants
+ [{:plant :flat-precedence, :landed? true, :verdict false}
+  {:plant :flat-acting, :landed? true, :verdict false}
+  {:plant :sorry, :landed? true, :verdict false}
+  {:plant :shift-pointer, :landed? true, :verdict false}],
+ :pointer-spans
+ {:actual
+  #{"108" "93-97" "72-76" "83-87" "98-102" "103-104" "88-92" "2"},
+  :expected
+  #{"108" "93-97" "72-76" "83-87" "98-102" "103-104" "88-92" "2"},
+  :match? true},
+ :record-assertions
+ {:o4-holds true,
+  :precedence-changed true,
+  :score-unchanged true,
+  :authored-why-edges-zero true},
+ :ruled-clause-source-present? true,
+ :scores
+ {:record ("18.759999999999874" "18.759999999999874"),
+  :rat-numerator "18759999999999874",
+  :rat-denominator "1000000000000000",
+  :match? true},
+ :verdict true}
