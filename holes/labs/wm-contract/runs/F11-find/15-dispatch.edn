@@ -1,0 +1,189 @@
+{:record :F11-slice-9-dispatch
+ :date "2026-09-07"
+ :row :F11
+ :slice "9 -- the F3 CITATION FIELD priced as a registrable choice: what would have
+         to carry the citation for F3 to state WHICH text a receipt cites, and
+         what does each carrier cost"
+ :dispatched-to "codex-2"
+ :from "wm-build-work"
+ :job-id "PENDING -- filled in by the lane at dispatch"
+ :packet-goal
+ "One new Lean module mathlib4 DarkTower/WarMachine/F11CitationField.lean pricing
+  the arms of a NOT-YET-REGISTERED choice -- what carries F3's citation datum --
+  plus one checker holes/labs/wm-contract/f11_citation_field_check.bb writing
+  runs/F11-find/16-citation-field.edn, modelled on f11_f4_reading_check.bb and
+  f11_non_self_certifying_check.bb. The REGISTRY ENTRY ITSELF IS NOT THIS
+  PACKET'S: registering :find-f3-citation-field in aif-equations.edn :choices is
+  the lane's after review, exactly as slice 8's packet said of any new choice."
+ :why-this-slice-exists
+ "Slice 8 (C566, runs/F11-find/14-remainder.edn) mechanised :F11's remainder and
+  refuted slice 7's closing prose claim. It reports :remainder-fully-gated? false
+  with :obligations-not-satisfied-and-not-gated
+  [:f3-citation-stated-in-lean :witnessed-on-real-find-over-committed-library].
+  Two unmet obligations, NEITHER gated on a registered undecided choice, so both
+  are lane work and not Joe's.
+  THIS SLICE TAKES THE FIRST AND NOT THE SECOND, and the reason is the handoff
+  rule rather than a judgement about which matters more: slice 8's NEXT SLICE
+  note joins them with `or`, and they are two handoffs with a review between. The
+  second one -- the pin-vs-live divergence, 18 transcribed patterns against 24
+  committed (runs/F11-find/02-reconciliation.edn:22-23) -- is C500 s3's deferred
+  fixture-pin defect, it re-transcribes futon3 checks/find-snatch.edn into
+  mathlib4 Holes.lean and so moves the pinned contract source every slice of this
+  row has held at 61c4825dc3, and :U46 (the row that produced that transcription)
+  is :done. It is a cross-repository job with its own acceptance and it is not
+  this one.
+  What this slice takes is contained: slice 7 measured F3's blindness
+  (mathlib4 DarkTower/WarMachine/F11NonSelfCertifying.lean:345-357 --
+  findCErasuresAreEqual: a finder citing each selected pattern's own text and one
+  citing another recorded pattern's are EQUAL after erasure to today's
+  FindResult, so no predicate on that carrier separates them) and recorded, under
+  NOTED NOT ACTED ON, that :find-sorry's sixth arm :amend-the-carrier is priced
+  over the F2 and F4 halves ONLY. Slice 8 confirmed independently that no
+  :choices entry in aif-equations.edn poses the citation field as a question.
+  A measured blindness that no registered question covers is precisely what
+  :choices exists for under TN-edge-review-aif-wiring.md §1.3."
+ :premise-recorded-before-the-result
+ {:premise
+  "PREMISE: F3's citation datum is a THIRD AND INDEPENDENT field. The amendment
+   as priced by slice 6 -- structure AmendedReceipt
+   (mathlib4 DarkTower/WarMachine/F11AmendedCarrier.lean:18-21), which extends
+   Receipt with acknowledgedClause, retrievalRoute and asOf -- does NOT buy F3's
+   citation separation, so registering the citation field adds a question and
+   does not re-export one already registered. If the premise holds, the sixth arm
+   is priced over two of three halves and slice 10 can price it over all three."
+  :verified-by-the-lane-before-dispatch
+  {:no-registered-question
+   "aif-equations.edn :choices at futon2 4db776b7 carries :find-sorry,
+    :find-f2-receipt-carrier (aif-equations.edn:816) and :find-f4-reading
+    (aif-equations.edn:852) and no entry whose :question is the citation datum;
+    slice 8's checker emits :registry-choice-for-citation-field :not-found."
+   :the-blindness-is-measured-not-asserted
+   "mathlib4 DarkTower/WarMachine/F11NonSelfCertifying.lean:351
+    (findCErasuresAreEqual) and :267-269 (CitesTheSelectedPattern), landed at
+    mathlib4 37f245c9c2 + b28f182f00."
+   :sorry-still-there
+   "mathlib4 DarkTower/WarMachine/Holes.lean last commit
+    61c4825dc3e373fd1b761b800814bf85f5770b88; `def find {State P : Type*} :
+    Tension State -> Repository P -> FindResult P := sorry` at :264."}
+  :named-candidate-REFUTER-the-module-must-adjudicate
+  "Written down before the work so that finding it is not back-fitted, and so that
+   NOT finding it is a result. THE PREMISE MAY BE FALSE AT THE INSTANTIATION THE
+   PRICED MODULE ACTUALLY USES. `AmendedReceipt`'s acknowledgedClause is typed by
+   a parameter Clause; slice 6 instantiates Clause := SnatchPattern and sets
+   `acknowledgedClause := p`, the SELECTED PATTERN ITSELF
+   (mathlib4 DarkTower/WarMachine/F11AmendedCarrier.lean:106-114), and separates
+   the faithful from the misattributing finder on exactly that field
+   (:259 amendedReceiptDataSeparates). If that separation already does F3's WHICH,
+   then the citation field is NOT a third question but the F2 field read a second
+   way, and the honest result is that what wants registering is WHICH ASK the one
+   field answers -- not a new carrier. Slice 7's review is the reason to doubt it
+   in the other direction: it found the dispatched AttributedF3 was slice 4's
+   ContentF2 renamed with slice 4's theorems verbatim beneath it, and kept that
+   failure auditable as ClauseAttributedF2
+   (mathlib4 DarkTower/WarMachine/F11NonSelfCertifying.lean:219). ADJUDICATE IT IN
+   LEAN, in both directions, and record the verdict whichever way it falls."
+  :what-refutation-would-mean
+  "If the refuter is CONFIRMED -- the priced acknowledgedClause field, at the
+   instantiation slice 6 uses, separates the citing from the misciting finder --
+   then :find-sorry's sixth arm is NOT missing a half and slice 8's
+   :f3-citation-stated-in-lean is unmet for a different reason than slice 7 gave.
+   That is a result, not a failure of the packet, and it changes what the lane
+   registers."}
+ :measurements-asked
+ {:M1 "THE CARRIERS, each INHABITED BY A FINDER, not by a hand-built receipt.
+       Slice 4's review had to strengthen exactly this (a Prop carries no WHICH,
+       and a hand-built receipt is not a finder). For each candidate carrier of
+       the citation datum, give a finder over the recorded repository
+       (findSnatchRepository, mathlib4 DarkTower/WarMachine/F11Conformance.lean
+       :35-38) and prove its selection NONEMPTY on a named recorded input before
+       any claim about it counts."
+  :M2 "THE SEPARATION, and its ERASURE. For each carrier that claims to buy
+       something, prove BOTH that it separates a citing from a misciting finder
+       AND that the two are EQUAL after erasure to today's FindResult -- the pair
+       is what makes it a BUY rather than a difference (the shape at
+       mathlib4 DarkTower/WarMachine/F11AmendedCarrier.lean:340 and :351). A
+       separation without its erasure is not a measurement of today's carrier."
+  :M3 "THE REFUTER, ADJUDICATED IN LEAN IN BOTH DIRECTIONS. Does the priced
+       AmendedReceipt (mathlib4 DarkTower/WarMachine/F11AmendedCarrier.lean:18-21)
+       at slice 6's instantiation state CitesTheSelectedPattern
+       (mathlib4 DarkTower/WarMachine/F11NonSelfCertifying.lean:267-269)? Prove
+       it or refute it. Then ask the independence question the other way: is
+       there a finder pair separated by the citation datum and NOT by the
+       acknowledged clause, and a pair separated by the acknowledged clause and
+       NOT by the citation datum? Two theorems, one each way, or a proof that one
+       direction fails."
+  :M4 "WHAT THE RECORD CAN AND CANNOT FILL, recomputed from the fixture and not
+       inherited. futon3 checks/find-snatch.edn (sha256
+       839897ef8fe44952403700bd237389449ae4735d3da7df8239b1b94dc7ef4dfa) carries
+       96 receipts each with a :warrant of :file, :if-lines, :if-text,
+       :however-lines, :however-text. State, by counting from the fixture: how
+       many warrants name the SELECTED pattern's own file, how many distinct
+       :if-text values there are, and whether any receipt's warrant names a file
+       that is not the selected pattern's. C559's line-shift finding says carry
+       the TEXTS and not the line numbers -- test that claim against the fixture
+       rather than repeating it."
+  :M5 "THE MECHANICAL COST, counted SITE BY SITE and not estimated. Slice 6's
+       review had to correct slice 4's site count (7 -> 9, and the boundary under
+       which `outside the pricing modules` is true). Enumerate every construction
+       site of `Receipt` and `FindResult` under mathlib4 DarkTower/, name each by
+       file:line, and state which are inside the F11 pricing family and which are
+       not, under a boundary you state explicitly."
+  :M6 "Determinism: runs/F11-find/16-citation-field.edn reproduces
+       BYTE-IDENTICALLY over two runs, and the checker reports its own sha256."}
+ :inhabitance-and-nondegeneracy-floor-demanded-in-advance
+ "This is the TENTH consecutive slice across :F11/:F12 in which review has had to
+  supply this floor, and this slice's degenerate failures have three specific
+  shapes, each of which has actually happened on this row:
+  (a) A SEPARATION PROVED AT A VACUOUS PARAMETER -- slice 5's C-not-A separation
+  was proved at the EMPTY designation, so the floor was met by every finder and
+  evaded by the parameter. Every separation here must be witnessed on the
+  RECORDED repository at a NAMED recorded pattern, with the selection proved
+  nonempty there.
+  (b) A PREDICATE TAKEN FROM OUTSIDE THE FINDER -- slice 4's central refutation
+  was not one, because ReceiptContentAttributed took its owner from outside, so
+  at the identity it held of every finder in the type. Every predicate here must
+  be stated of the FINDER'S OWN OUTPUT, as CitesTheSelectedPattern is
+  (mathlib4 DarkTower/WarMachine/F11NonSelfCertifying.lean:267-269).
+  (c) A RENAMED THEOREM -- slice 7's delivered AttributedF3 was slice 4's
+  ContentF2 renamed with slice 4's theorems verbatim beneath it. If a declaration
+  here restates one that already exists in the F11 family, SAY SO in its
+  docstring and name the one it restates; do not re-export it as new.
+  And a plant that does not fail is not a control: slice 6's review discarded one
+  of its own and slice 7's review discarded two. Verify every plant."
+ :out-of-scope-in-the-packet
+ ["mathlib4 DarkTower/WarMachine/Holes.lean -- it stays at
+   61c4825dc3e373fd1b761b800814bf85f5770b88 and the sorry at :264 stays"
+  "aif-equations.edn and control-map-edges.edn -- this packet READS the registry
+   and writes to NEITHER. Registering :find-f3-citation-field is the lane's after
+   review, as slice 8's packet said of any new choice"
+  "any ruling: this slice takes no decision and recommends no arm. :status will be
+   :observed-not-decided with no :ruling key when the lane registers it"
+  "the pin-vs-live divergence and any re-transcription of the 24-pattern committed
+   library -- that is the OTHER unmet obligation and it is not this handoff"
+  "editing the :F11 worklist row: the ledger line is the lane's"
+  "gen_aif_dag.bb (TN 9a)"]
+ :gates-required
+ ["lake build exits 0 on the changed module with no warning from it"
+  "#print axioms over EVERY declaration the module adds: 0 sorryAx; report the
+   count and how many are axiom-free"
+  "0 sorry / axiom / native_decide in the module's code (docstrings may name them)"
+  "bb f11_citation_field_check.bb runs clean and writes
+   runs/F11-find/16-citation-field.edn BYTE-IDENTICAL over two runs; report sha256"
+  "f11_citation_field_controls.sh: at least 6 Lean plants, EACH LOCATED BY
+   DECLARATION NAME and not by line number (the C559 line-shift class), each
+   verifying the planted text present AND the replaced text absent ON THE PLANTED
+   LINE, each with the observed failure quoted"
+  "bash p4ng/empirics-futon/negative_controls.sh PASS"
+  "bb p4ng/empirics-futon/pointer_check.bb -- 0 unresolved; every file:line the
+   artifact and the module docstrings emit must resolve"
+  "worktree clean after commit; bell wm-build-work back with a summary, the commit
+   shas, the artifact sha256, and -- stated plainly whichever way it falls --
+   whether the named refuter was CONFIRMED or REFUTED"]
+ :reviewer-half-still-owed
+ ["f11_citation_field_controls_checker.sh -- plants against the CHECKER, each
+   moving EXACTLY ONE verdict"
+  "independent re-adjudication of the named refuter"
+  "the aif-equations.edn :choices registration, with the registry proved EQUAL to
+   HEAD outside the new key, both ways"
+  "C567 findings doc"
+  "the ledger progress line and the row's status"]}
