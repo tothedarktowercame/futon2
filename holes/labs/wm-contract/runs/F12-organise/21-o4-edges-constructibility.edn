@@ -1,0 +1,3410 @@
+{:any-member-set-meets-both-preconditions? true,
+ :blocking-reason-per-candidate
+ [{:record-id :retrodiction,
+   :structural-path
+   "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade]",
+   :what-the-record-says-about-o4 :not-exercised-nothing-is-played,
+   :o4-pointer "futon3:checks/retrodiction-cascade.edn:34090",
+   :what-is-missing :an-o4-play-measurement-for-this-member-set,
+   :emitter-class :unconditional-constructor-literal,
+   :emitter-pointer
+   "futon3:checks/construct_retrodiction_cascade.clj:335"}
+  {:record-id :retrodiction,
+   :structural-path
+   "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade]",
+   :what-the-record-says-about-o4 :not-exercised-nothing-is-played,
+   :o4-pointer "futon3:checks/retrodiction-cascade.edn:34090",
+   :what-is-missing :an-o4-play-measurement-for-this-member-set,
+   :emitter-class :unconditional-constructor-literal,
+   :emitter-pointer
+   "futon3:checks/construct_retrodiction_cascade.clj:335"}
+  {:record-id :retrodiction-per-clause,
+   :structural-path
+   "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade]",
+   :what-the-record-says-about-o4 :not-exercised-nothing-is-played,
+   :o4-pointer
+   "futon3:checks/retrodiction-cascade-per-clause.edn:33974",
+   :what-is-missing :an-o4-play-measurement-for-this-member-set,
+   :emitter-class :unconditional-constructor-literal,
+   :emitter-pointer
+   "futon3:checks/construct_retrodiction_cascade.clj:335"}
+  {:record-id :retrodiction-per-clause,
+   :structural-path
+   "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade]",
+   :what-the-record-says-about-o4 :not-exercised-nothing-is-played,
+   :o4-pointer
+   "futon3:checks/retrodiction-cascade-per-clause.edn:33974",
+   :what-is-missing :an-o4-play-measurement-for-this-member-set,
+   :emitter-class :unconditional-constructor-literal,
+   :emitter-pointer
+   "futon3:checks/construct_retrodiction_cascade.clj:335"}],
+ :check :F12-o4-edges-constructibility,
+ :futon3-pin
+ {:value "cdb5e8a56fd907beb6a99f8b88af9de50ff93126",
+  :pointer
+  "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:6"},
+ :member-sets-meeting-both
+ [{:member-count 50,
+   :gate-pair-shape :vectors,
+   :rule-table-carriers
+   [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+   :structural-path
+   "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade]",
+   :what-the-record-says-about-o4 :not-exercised-nothing-is-played,
+   :slice-5-map-pair-census-would-see-it? false,
+   :emitter-pointer
+   "futon3:checks/construct_retrodiction_cascade.clj:335",
+   :o4-pointer "futon3:checks/retrodiction-cascade.edn:34090",
+   :emitter-class :unconditional-constructor-literal,
+   :gate-pair-shape-pointer
+   "futon3c:scripts/zaif_cascade_gate.clj:555-558",
+   :slice-5-shape-pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:53-57",
+   :record-id :retrodiction,
+   :edges
+   [[:aif/posterior-variance-as-epistemic-value
+     :aif/structure-learning-by-model-reduction]],
+   :what-is-missing :an-o4-play-measurement-for-this-member-set}
+  {:member-count 60,
+   :gate-pair-shape :vectors,
+   :rule-table-carriers
+   [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+   :structural-path
+   "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade]",
+   :what-the-record-says-about-o4 :not-exercised-nothing-is-played,
+   :slice-5-map-pair-census-would-see-it? false,
+   :emitter-pointer
+   "futon3:checks/construct_retrodiction_cascade.clj:335",
+   :o4-pointer "futon3:checks/retrodiction-cascade.edn:34090",
+   :emitter-class :unconditional-constructor-literal,
+   :gate-pair-shape-pointer
+   "futon3c:scripts/zaif_cascade_gate.clj:555-558",
+   :slice-5-shape-pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:53-57",
+   :record-id :retrodiction,
+   :edges
+   [[:aif/posterior-variance-as-epistemic-value
+     :aif/structure-learning-by-model-reduction]
+    [:cycle-machine/runtime-restoration :cycle-machine/step-machine]],
+   :what-is-missing :an-o4-play-measurement-for-this-member-set}
+  {:member-count 50,
+   :gate-pair-shape :vectors,
+   :rule-table-carriers
+   [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+   :structural-path
+   "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade]",
+   :what-the-record-says-about-o4 :not-exercised-nothing-is-played,
+   :slice-5-map-pair-census-would-see-it? false,
+   :emitter-pointer
+   "futon3:checks/construct_retrodiction_cascade.clj:335",
+   :o4-pointer
+   "futon3:checks/retrodiction-cascade-per-clause.edn:33974",
+   :emitter-class :unconditional-constructor-literal,
+   :gate-pair-shape-pointer
+   "futon3c:scripts/zaif_cascade_gate.clj:555-558",
+   :slice-5-shape-pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:53-57",
+   :record-id :retrodiction-per-clause,
+   :edges
+   [[:aif/posterior-variance-as-epistemic-value
+     :aif/structure-learning-by-model-reduction]],
+   :what-is-missing :an-o4-play-measurement-for-this-member-set}
+  {:member-count 60,
+   :gate-pair-shape :vectors,
+   :rule-table-carriers
+   [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+   :structural-path
+   "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade]",
+   :what-the-record-says-about-o4 :not-exercised-nothing-is-played,
+   :slice-5-map-pair-census-would-see-it? false,
+   :emitter-pointer
+   "futon3:checks/construct_retrodiction_cascade.clj:335",
+   :o4-pointer
+   "futon3:checks/retrodiction-cascade-per-clause.edn:33974",
+   :emitter-class :unconditional-constructor-literal,
+   :gate-pair-shape-pointer
+   "futon3c:scripts/zaif_cascade_gate.clj:555-558",
+   :slice-5-shape-pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:53-57",
+   :record-id :retrodiction-per-clause,
+   :edges
+   [[:aif/posterior-variance-as-epistemic-value
+     :aif/structure-learning-by-model-reduction]
+    [:cycle-machine/runtime-restoration :cycle-machine/step-machine]],
+   :what-is-missing :an-o4-play-measurement-for-this-member-set}],
+ :plants
+ [{:plant :swap-carrier-same-count,
+   :landed? true,
+   :caught-by-validity-predicate? true,
+   :naive-count-only-would-catch? false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+  {:plant :reverse-edge-same-count,
+   :landed? true,
+   :caught-by-validity-predicate? true,
+   :naive-count-only-would-catch? false,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+  {:plant :concat-selected-into-members,
+   :landed? true,
+   :caught-by-validity-predicate? true,
+   :naive-count-only-would-catch? true,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+  {:plant :shift-pointer,
+   :landed? true,
+   :caught-by-validity-predicate? true,
+   :naive-count-only-would-catch? true,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+  {:plant :change-o4,
+   :landed? true,
+   :caught-by-validity-predicate? true,
+   :naive-count-only-would-catch? true,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}
+  {:plant :drop-member-set,
+   :landed? true,
+   :caught-by-validity-predicate? true,
+   :naive-count-only-would-catch? true,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:151-164"}],
+ :premises
+ [{:id 1,
+   :holds? true,
+   :pointer "futon3c:scripts/zaif_cascade_gate.clj:206-249"}
+  {:id 2, :holds? true, :pointer "futon3:checks/zaif-cascade.edn:167"}
+  {:id 3,
+   :holds? true,
+   :pointer "futon3:checks/retrodiction-cascade.edn:34090"}
+  {:id 4,
+   :holds? true,
+   :pointer
+   "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:44-65"}],
+ :records
+ [{:record-id :construct,
+   :source "futon3:checks/construct-cascade.edn",
+   :member-sets
+   [{:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:coordination/pattern-search-protocol
+      :devmap-coherence/prototype-alignment-embedding
+      :futon-theory/derive-exits-on-a-minted-sorry
+      :or2/two-joes-one-mandate
+      :plos-npt-with-small-n/venue-register-boundary
+      :sidecar/artifact-entity-mention-grounding
+      :snatch/have-a-temperament
+      :snatch/widen-the-cascade-only-on-evidence
+      :writing-coherence/citation-density-load-bearing-claim],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/construct-cascade.edn:96",
+     :rule-table-carriers [],
+     :structural-path "[:find]",
+     :source "futon3:checks/construct-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 9,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :construct,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}],
+   :o4 :not-exercised-nothing-is-played,
+   :o4-pointer "futon3:checks/construct-cascade.edn:266"}
+  {:record-id :zaif,
+   :source "futon3:checks/zaif-cascade.edn",
+   :member-sets
+   [{:rule-table-carrier-count 1,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:ai4ci/funding-justification
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/status-gated-belief-update
+      :budgeted-action-selection/mana-gated-work
+      :equity/confident-adaptation-as-published
+      :equity/confident-adaptation-merged
+      :forward-model/graduate-strategy-by-outcome
+      :math-strategy/missing-dependency-protocol
+      :or3/ask-first-then-bring-the-expert
+      :or3/openness-without-exposure
+      :ukrns/publication-cadence],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/zaif-cascade.edn:148",
+     :rule-table-carriers [:math-strategy/missing-dependency-protocol],
+     :structural-path "[:find]",
+     :source "futon3:checks/zaif-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 11,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :zaif,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 1,
+     :member-count 20,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [:math-strategy/missing-dependency-protocol],
+     :structural-path "[:runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/zaif-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/zaif-cascade.edn:203",
+     :candidate-status :gate-shaped,
+     :members
+     [:agent/handoff-preserves-context
+      :agent/trail-enables-return
+      :ai4ci/ai-core-function
+      :ai4ci/funding-justification
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/no-self-certification
+      :aif/status-gated-belief-update
+      :budgeted-action-selection/mana-gated-work
+      :equity/confident-adaptation-as-published
+      :equity/confident-adaptation-merged
+      :features/operator-turns-enter-the-observation-vector
+      :forward-model/graduate-strategy-by-outcome
+      :forward-model/inhabit-supplies-labels
+      :math-formalization-CA/measure-integration-api
+      :math-formalization-CV/frontier-bound-from-arc-hypotheses
+      :math-formalization-CV/holomorphic-disk-api
+      :math-strategy/missing-dependency-protocol
+      :or3/ask-first-then-bring-the-expert
+      :or3/openness-without-exposure
+      :ukrns/publication-cadence],
+     :meets-precondition-a? false,
+     :record-id :zaif,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 1,
+     :member-count 17,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [:math-strategy/missing-dependency-protocol],
+     :structural-path
+     "[:runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/zaif-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/zaif-cascade.edn:203",
+     :candidate-status :gate-shaped,
+     :members
+     [:ai4ci/funding-justification
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/no-self-certification
+      :aif/status-gated-belief-update
+      :budgeted-action-selection/mana-gated-work
+      :equity/confident-adaptation-as-published
+      :equity/confident-adaptation-merged
+      :features/operator-turns-enter-the-observation-vector
+      :forward-model/graduate-strategy-by-outcome
+      :forward-model/inhabit-supplies-labels
+      :math-formalization-CA/measure-integration-api
+      :math-formalization-CV/frontier-bound-from-arc-hypotheses
+      :math-formalization-CV/holomorphic-disk-api
+      :math-strategy/missing-dependency-protocol
+      :or3/ask-first-then-bring-the-expert
+      :or3/openness-without-exposure
+      :ukrns/publication-cadence],
+     :meets-precondition-a? false,
+     :record-id :zaif,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}],
+   :o4 :not-exercised-fewer-than-two-members-carry-a-play-grain-rule,
+   :o4-pointer "futon3:checks/zaif-cascade.edn:167"}
+  {:record-id :ants,
+   :source "futon3:checks/ants-cascade.edn",
+   :member-sets
+   [{:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:ants/cargo-return-discipline
+      :ants/hunger-precision-coupling
+      :ants/pheromone-trail-tuner
+      :ants/white-space-scout],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/ants-cascade.edn:72",
+     :rule-table-carriers [],
+     :structural-path "[:find]",
+     :source "futon3:checks/ants-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 4,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :ants,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 5,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path "[:runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/ants-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/ants-cascade.edn:117",
+     :candidate-status :gate-shaped,
+     :members
+     [:ants/baseline-cyber-ant
+      :ants/cargo-return-discipline
+      :ants/hunger-precision-coupling
+      :ants/pheromone-trail-tuner
+      :ants/white-space-scout],
+     :meets-precondition-a? false,
+     :record-id :ants,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 4,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/ants-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/ants-cascade.edn:117",
+     :candidate-status :gate-shaped,
+     :members
+     [:ants/cargo-return-discipline
+      :ants/hunger-precision-coupling
+      :ants/pheromone-trail-tuner
+      :ants/white-space-scout],
+     :meets-precondition-a? false,
+     :record-id :ants,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}],
+   :o4
+   {:holds? true,
+    :precedence-changed? true,
+    :row
+    {:acting-order-after
+     [:ants/cargo-return-discipline
+      :ants/hunger-precision-coupling
+      :ants/white-space-scout
+      :ants/pheromone-trail-tuner],
+     :acting-order-before
+     [:ants/cargo-return-discipline
+      :ants/hunger-precision-coupling
+      :ants/pheromone-trail-tuner
+      :ants/white-space-scout],
+     :precedence-after
+     #:ants{:cargo-return-discipline 1,
+            :hunger-precision-coupling 2,
+            :pheromone-trail-tuner 4,
+            :white-space-scout 3},
+     :precedence-before
+     #:ants{:cargo-return-discipline 1,
+            :hunger-precision-coupling 2,
+            :pheromone-trail-tuner 3,
+            :white-space-scout 4},
+     :score-after 18.759999999999874,
+     :score-before 18.759999999999874},
+    :score-changed? false},
+   :o4-pointer "futon3:checks/ants-cascade.edn:79"}
+  {:record-id :alfworld,
+   :source "futon3:checks/alfworld-cascade.edn",
+   :member-sets
+   [{:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:alfworld/object-location-priors
+      :alfworld/single-carry-economy
+      :alfworld/systematic-search-fallback],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/alfworld-cascade.edn:172",
+     :rule-table-carriers [],
+     :structural-path "[:find]",
+     :source "futon3:checks/alfworld-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 3,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :alfworld,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 6,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path "[:runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/alfworld-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/alfworld-cascade.edn:194",
+     :candidate-status :gate-shaped,
+     :members
+     [:alfworld/admissible-commands-are-ground-truth
+      :alfworld/object-location-priors
+      :alfworld/search-dominates-execution
+      :alfworld/single-carry-economy
+      :alfworld/systematic-search-fallback
+      :alfworld/verb-to-appliance-mapping],
+     :meets-precondition-a? false,
+     :record-id :alfworld,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 3,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/alfworld-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/alfworld-cascade.edn:194",
+     :candidate-status :gate-shaped,
+     :members
+     [:alfworld/object-location-priors
+      :alfworld/single-carry-economy
+      :alfworld/systematic-search-fallback],
+     :meets-precondition-a? false,
+     :record-id :alfworld,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}],
+   :o4 :not-exercised-no-authority-gate-and-alfworld-is-not-installed,
+   :o4-pointer "futon3:checks/alfworld-cascade.edn:178"}
+  {:record-id :snatch,
+   :source "futon3:checks/snatch-cascade.edn",
+   :member-sets [],
+   :o4 "not found",
+   :o4-pointer "not found"}
+  {:record-id :open,
+   :source "futon3:checks/open-cascade.edn",
+   :member-sets
+   [{:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path "[:items :ticket/cx-new-blocks-emacs :find]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 2,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/open-cascade.edn:6460",
+     :candidate-status :gate-shaped,
+     :members
+     [:math-formalization/rewrite-orientation
+      :math-strategy/proof-architecture],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path "[:items :ticket/fail-invoke-error :find]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/fail-invoke-error :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/fail-invoke-error :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/jvm-provenance-before-multi-jvm :find]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 1,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/open-cascade.edn:6460",
+     :candidate-status :gate-shaped,
+     :members [:snatch/widen-the-cascade-only-on-evidence],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/I4 :find]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/I4 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/RUN4 :find]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/RUN4 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/RUN4 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}],
+   :o4 :not-exercised-nothing-is-played,
+   :o4-pointer "futon3:checks/open-cascade.edn:31717"}
+  {:record-id :open-short-cue,
+   :source "futon3:checks/open-cascade-short-cue.edn",
+   :member-sets
+   [{:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path "[:items :ticket/cx-new-blocks-emacs :find]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/measurement-window-hygiene
+      :campaign-coherence/cross-mission-escrow
+      :collaboration-coherence/determined-fork-proto-psr
+      :collaboration-coherence/magical-thinking
+      :collaboration-coherence/misunderstanding-power-laws
+      :collaboration-coherence/stasis
+      :cycle-machine/job-port
+      :cycle-machine/step-machine
+      :data-mining/the-first-checkpoint-is-a-quality-probe
+      :depositing/grant-to-pitch
+      :eight-gates/roll-back-hold
+      :eight-gates/ward-off-boundary
+      :futon-theory/coordination-protocol
+      :futon-theory/progress-signal
+      :iching/hexagram-05-xu
+      :invariant-coherence/bounded-disposition
+      :musn/off-trail-budget
+      :or3/borrow-a-training-network
+      :peeragogy/creating-a-guide
+      :snatch/escalate-only-as-far-as-you-can-lose],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/cx-new-blocks-emacs :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:invariant-coherence/bounded-disposition
+      :invariant-coherence/subsumption-witness
+      :math-informal-CT/factor-and-lift
+      :math-informal-LO/complexity-classification
+      :math-strategy/characterization-result
+      :mmca/eye-before-metric
+      :peeragogy/par
+      :plos-npt-with-small-n/coding-reliability-stated],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path "[:items :ticket/fail-invoke-error :find]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 8,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:invariant-coherence/bounded-disposition
+      :invariant-coherence/subsumption-witness
+      :math-informal-CT/factor-and-lift
+      :math-informal-LO/complexity-classification
+      :math-strategy/characterization-result
+      :mmca/eye-before-metric
+      :peeragogy/par
+      :plos-npt-with-small-n/coding-reliability-stated],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/fail-invoke-error :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 8,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/niche-construction
+      :baldwin/two-claims-not-one
+      :cascades/edges-earn-permanence
+      :cascades/the-slice-is-the-unit-of-use
+      :code-coherence/dead-code-hygiene
+      :contributing/stack-scan-logging-protocol
+      :control/agential-oss-infrastructure
+      :control/effort-estimation
+      :data-mining/golden-is-curated-not-raw
+      :depositing/grant-to-pitch
+      :invariant-coherence/bounded-disposition
+      :invariant-coherence/subsumption-witness
+      :math-informal-CT/factor-and-lift
+      :math-informal-LO/complexity-classification
+      :math-strategy/characterization-result
+      :mmca/eye-before-metric
+      :peeragogy/par
+      :plos-npt-with-small-n/coding-reliability-stated],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 8,
+     :meets-both? false,
+     :selected
+     [:invariant-coherence/bounded-disposition
+      :invariant-coherence/subsumption-witness
+      :math-informal-CT/factor-and-lift
+      :math-informal-LO/complexity-classification
+      :math-strategy/characterization-result
+      :mmca/eye-before-metric
+      :peeragogy/par
+      :plos-npt-with-small-n/coding-reliability-stated],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/fail-invoke-error :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 8,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:invariant-coherence/bounded-disposition
+      :invariant-coherence/subsumption-witness
+      :math-informal-CT/factor-and-lift
+      :math-informal-LO/complexity-classification
+      :math-strategy/characterization-result
+      :mmca/eye-before-metric
+      :peeragogy/par
+      :plos-npt-with-small-n/coding-reliability-stated],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:campaign-coherence/campaign-as-temporary-institution
+      :eoi-engine/tension-cv-shape
+      :equity/contribution-pathways
+      :equity/contribution-pathways-as-published
+      :equity/contribution-pathways-merged
+      :invariant-coherence/protocol-family-naming
+      :math-formalization/minmax-normalization
+      :math-informal-CO/count-over-a-decomposition
+      :math-informal-CT/compare-universal-properties
+      :math-informal-LO/complexity-classification
+      :memory/surface-the-closed-set
+      :peeragogy/heartbeat
+      :peripherals/read-only-first-then-extend
+      :realtime/branch-parallelism
+      :relationship-coherence/co-created-project
+      :ukrns/open-the-triangle
+      :war-room/wr-0-organise-without-apparatus
+      :war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/jvm-provenance-before-multi-jvm :find]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 18,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:campaign-coherence/campaign-as-temporary-institution
+      :eoi-engine/tension-cv-shape
+      :equity/contribution-pathways
+      :equity/contribution-pathways-as-published
+      :equity/contribution-pathways-merged
+      :invariant-coherence/protocol-family-naming
+      :math-formalization/minmax-normalization
+      :math-informal-CO/count-over-a-decomposition
+      :math-informal-CT/compare-universal-properties
+      :math-informal-LO/complexity-classification
+      :memory/surface-the-closed-set
+      :peeragogy/heartbeat
+      :peripherals/read-only-first-then-extend
+      :realtime/branch-parallelism
+      :relationship-coherence/co-created-project
+      :ukrns/open-the-triangle
+      :war-room/wr-0-organise-without-apparatus
+      :war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern],
+     :meets-precondition-b? true,
+     :edge-count 1,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :selected-count 18,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/expected-free-energy-scorecard
+      :campaign-coherence/campaign-as-temporary-institution
+      :cycle-machine/runtime-restoration
+      :eoi-engine/tension-cv-shape
+      :equity/contribution-pathways
+      :equity/contribution-pathways-as-published
+      :equity/contribution-pathways-merged
+      :invariant-coherence/protocol-family-naming
+      :math-formalization/minmax-normalization
+      :math-informal-CO/count-over-a-decomposition
+      :math-informal-CT/compare-universal-properties
+      :math-informal-LO/complexity-classification
+      :memory/surface-the-closed-set
+      :peeragogy/heartbeat
+      :peripherals/read-only-first-then-extend
+      :realtime/branch-parallelism
+      :relationship-coherence/co-created-project
+      :ukrns/open-the-triangle
+      :war-room/wr-0-organise-without-apparatus
+      :war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges
+     [[:aif/expected-free-energy-scorecard
+       :war-room/wr-0-organise-without-apparatus]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 24,
+     :meets-both? false,
+     :selected
+     [:campaign-coherence/campaign-as-temporary-institution
+      :eoi-engine/tension-cv-shape
+      :equity/contribution-pathways
+      :equity/contribution-pathways-as-published
+      :equity/contribution-pathways-merged
+      :invariant-coherence/protocol-family-naming
+      :math-formalization/minmax-normalization
+      :math-informal-CO/count-over-a-decomposition
+      :math-informal-CT/compare-universal-properties
+      :math-informal-LO/complexity-classification
+      :memory/surface-the-closed-set
+      :peeragogy/heartbeat
+      :peripherals/read-only-first-then-extend
+      :realtime/branch-parallelism
+      :relationship-coherence/co-created-project
+      :ukrns/open-the-triangle
+      :war-room/wr-0-organise-without-apparatus
+      :war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern],
+     :meets-precondition-b? true,
+     :edge-count 4,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/jvm-provenance-before-multi-jvm :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :selected-count 18,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/expected-free-energy-scorecard
+      :aif/term-to-channel-traceability
+      :campaign-coherence/campaign-as-temporary-institution
+      :cycle-machine/runtime-restoration
+      :eoi-engine/tension-cv-shape
+      :equity/contribution-pathways
+      :equity/contribution-pathways-as-published
+      :equity/contribution-pathways-merged
+      :features/emit-per-tick-mismatch
+      :invariant-coherence/protocol-family-naming
+      :math-formalization/binder-expression-mismatch
+      :math-formalization/minmax-normalization
+      :math-formalization/tactic-algebra-interference
+      :math-informal-CO/count-over-a-decomposition
+      :math-informal-CT/compare-universal-properties
+      :math-informal-LO/complexity-classification
+      :memory/surface-the-closed-set
+      :peeragogy/heartbeat
+      :peripherals/read-only-first-then-extend
+      :realtime/branch-parallelism
+      :relationship-coherence/co-created-project
+      :ukrns/open-the-triangle
+      :war-room/wr-0-organise-without-apparatus
+      :war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges
+     [[:aif/expected-free-energy-scorecard
+       :war-room/wr-0-organise-without-apparatus]
+      [:features/emit-per-tick-mismatch
+       :war-room/wr-0-organise-without-apparatus]
+      [:math-formalization/binder-expression-mismatch
+       :math-formalization/tactic-algebra-interference]
+      [:math-formalization/minmax-normalization
+       :math-formalization/tactic-algebra-interference]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:futon-theory/derive-exits-on-a-minted-sorry
+      :math-informal/the-diagonal-argument
+      :math-informal-CA/epsilon-of-room
+      :math-strategy/non-circularity-check
+      :mmca/perceivable-target
+      :scan-coherence/mission-anchored-scan
+      :snatch/widen-the-cascade-only-on-evidence
+      :war-room/wr-20-action-class-inventory-becomes-data],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/I4 :find]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 8,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:futon-theory/derive-exits-on-a-minted-sorry
+      :math-informal/the-diagonal-argument
+      :math-informal-CA/epsilon-of-room
+      :math-strategy/non-circularity-check
+      :mmca/perceivable-target
+      :scan-coherence/mission-anchored-scan
+      :snatch/widen-the-cascade-only-on-evidence
+      :war-room/wr-20-action-class-inventory-becomes-data],
+     :meets-precondition-b? true,
+     :edge-count 4,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/I4 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :selected-count 8,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:agent/environment-over-optimization
+      :ai4ci/ai-method-role
+      :aif/decomposed-prediction-noise
+      :aif/off-continuity-null-discriminates
+      :cascades/declared-skeleton
+      :forward-model/graduate-strategy-by-outcome
+      :forward-model/the-forward-model-is-a-pattern-cascade
+      :futon-theory/derive-exits-on-a-minted-sorry
+      :math-informal/the-diagonal-argument
+      :math-informal-CA/epsilon-of-room
+      :math-strategy/non-circularity-check
+      :mmca/perceivable-target
+      :process-coherence/is-this-even-a-problem
+      :realtime/loop-success-signals
+      :scan-coherence/mission-anchored-scan
+      :snatch/have-a-temperament
+      :snatch/lead-with-the-exchange-rule
+      :snatch/play-the-authored-order-first
+      :snatch/widen-the-cascade-only-on-evidence
+      :war-room/wr-20-action-class-inventory-becomes-data],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges
+     [[:snatch/have-a-temperament :cascades/declared-skeleton]
+      [:snatch/lead-with-the-exchange-rule :snatch/have-a-temperament]
+      [:snatch/play-the-authored-order-first
+       :snatch/have-a-temperament]
+      [:snatch/widen-the-cascade-only-on-evidence
+       :snatch/have-a-temperament]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 12,
+     :meets-both? false,
+     :selected
+     [:futon-theory/derive-exits-on-a-minted-sorry
+      :math-informal/the-diagonal-argument
+      :math-informal-CA/epsilon-of-room
+      :math-strategy/non-circularity-check
+      :mmca/perceivable-target
+      :scan-coherence/mission-anchored-scan
+      :snatch/widen-the-cascade-only-on-evidence
+      :war-room/wr-20-action-class-inventory-becomes-data],
+     :meets-precondition-b? true,
+     :edge-count 4,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :selected-count 8,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:cascades/declared-skeleton
+      :futon-theory/derive-exits-on-a-minted-sorry
+      :math-informal/the-diagonal-argument
+      :math-informal-CA/epsilon-of-room
+      :math-strategy/non-circularity-check
+      :mmca/perceivable-target
+      :scan-coherence/mission-anchored-scan
+      :snatch/have-a-temperament
+      :snatch/lead-with-the-exchange-rule
+      :snatch/play-the-authored-order-first
+      :snatch/widen-the-cascade-only-on-evidence
+      :war-room/wr-20-action-class-inventory-becomes-data],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges
+     [[:snatch/have-a-temperament :cascades/declared-skeleton]
+      [:snatch/lead-with-the-exchange-rule :snatch/have-a-temperament]
+      [:snatch/play-the-authored-order-first
+       :snatch/have-a-temperament]
+      [:snatch/widen-the-cascade-only-on-evidence
+       :snatch/have-a-temperament]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:aif/evidence-precision-registry
+      :aif/no-self-certification
+      :aif/status-gated-belief-update
+      :budgeted-action-selection/mana-gated-work
+      :control/agential-pattern-hygiene
+      :equity/visible-impact-merged
+      :forward-model/graduate-strategy-by-outcome
+      :pattern-coherence/evidence-alignment
+      :plos-npt-with-small-n/abstract-n-method-frame
+      :system-coherence/tag-evidence-by-timescale
+      :ukrns/design-state-lineage
+      :ukrns/model-recompute-schedule
+      :ukrns/open-the-triangle
+      :war-room/wr-4-inhabit-before-building],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/RUN4 :find]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "not found",
+     :selected-count 14,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:aif/evidence-precision-registry
+      :aif/no-self-certification
+      :aif/status-gated-belief-update
+      :budgeted-action-selection/mana-gated-work
+      :control/agential-pattern-hygiene
+      :equity/visible-impact-merged
+      :forward-model/graduate-strategy-by-outcome
+      :pattern-coherence/evidence-alignment
+      :plos-npt-with-small-n/abstract-n-method-frame
+      :system-coherence/tag-evidence-by-timescale
+      :ukrns/design-state-lineage
+      :ukrns/model-recompute-schedule
+      :ukrns/open-the-triangle
+      :war-room/wr-4-inhabit-before-building],
+     :meets-precondition-b? true,
+     :edge-count 5,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/RUN4 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :selected-count 14,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/evidence-precision-registry
+      :aif/no-self-certification
+      :aif/status-gated-belief-update
+      :aif/term-to-channel-traceability
+      :aif/two-layer-calibration
+      :budgeted-action-selection/mana-gated-work
+      :control/agential-pattern-hygiene
+      :equity/visible-impact-merged
+      :forward-model/graduate-strategy-by-outcome
+      :forward-model/inhabit-supplies-labels
+      :forward-model/reward-supersedes-evidence
+      :pattern-coherence/evidence-alignment
+      :plos-npt-with-small-n/abstract-n-method-frame
+      :system-coherence/tag-evidence-by-timescale
+      :ukrns/design-state-lineage
+      :ukrns/model-recompute-schedule
+      :ukrns/open-the-triangle
+      :war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad
+      :war-room/wr-4-inhabit-before-building
+      :war-room/wr-9-bites-empirical-or-logical],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges
+     [[:aif/no-self-certification
+       :war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad]
+      [:forward-model/graduate-strategy-by-outcome
+       :war-room/wr-9-bites-empirical-or-logical]
+      [:forward-model/inhabit-supplies-labels
+       :war-room/wr-4-inhabit-before-building]
+      [:forward-model/reward-supersedes-evidence
+       :war-room/wr-9-bites-empirical-or-logical]
+      [:war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad
+       :war-room/wr-9-bites-empirical-or-logical]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 21,
+     :meets-both? false,
+     :selected
+     [:aif/evidence-precision-registry
+      :aif/no-self-certification
+      :aif/status-gated-belief-update
+      :budgeted-action-selection/mana-gated-work
+      :control/agential-pattern-hygiene
+      :equity/visible-impact-merged
+      :forward-model/graduate-strategy-by-outcome
+      :pattern-coherence/evidence-alignment
+      :plos-npt-with-small-n/abstract-n-method-frame
+      :system-coherence/tag-evidence-by-timescale
+      :ukrns/design-state-lineage
+      :ukrns/model-recompute-schedule
+      :ukrns/open-the-triangle
+      :war-room/wr-4-inhabit-before-building],
+     :meets-precondition-b? true,
+     :edge-count 6,
+     :selected-pointer "futon3:checks/open-cascade-short-cue.edn:6620",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/RUN4 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/open-cascade-short-cue.edn",
+     :edges-pointer "futon3:checks/open-cascade-short-cue.edn:6494",
+     :selected-count 14,
+     :members-pointer "futon3:checks/open-cascade-short-cue.edn:6495",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/evidence-precision-registry
+      :aif/no-self-certification
+      :aif/status-gated-belief-update
+      :aif/term-to-channel-traceability
+      :aif/two-layer-calibration
+      :budgeted-action-selection/mana-gated-work
+      :control/agential-pattern-hygiene
+      :equity/visible-impact-merged
+      :forward-model/graduate-strategy-by-outcome
+      :forward-model/inhabit-supplies-labels
+      :forward-model/reward-supersedes-evidence
+      :forward-model/seal-the-graduation-criteria
+      :pattern-coherence/evidence-alignment
+      :plos-npt-with-small-n/abstract-n-method-frame
+      :system-coherence/tag-evidence-by-timescale
+      :ukrns/design-state-lineage
+      :ukrns/model-recompute-schedule
+      :ukrns/open-the-triangle
+      :war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad
+      :war-room/wr-4-inhabit-before-building
+      :war-room/wr-9-bites-empirical-or-logical],
+     :meets-precondition-a? false,
+     :record-id :open-short-cue,
+     :edges
+     [[:aif/no-self-certification
+       :war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad]
+      [:forward-model/graduate-strategy-by-outcome
+       :war-room/wr-9-bites-empirical-or-logical]
+      [:forward-model/inhabit-supplies-labels
+       :war-room/wr-4-inhabit-before-building]
+      [:forward-model/reward-supersedes-evidence
+       :war-room/wr-9-bites-empirical-or-logical]
+      [:forward-model/seal-the-graduation-criteria
+       :forward-model/graduate-strategy-by-outcome]
+      [:war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad
+       :war-room/wr-9-bites-empirical-or-logical]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}],
+   :o4 :not-exercised-nothing-is-played,
+   :o4-pointer "futon3:checks/open-cascade-short-cue.edn:33472"}
+  {:record-id :retrodiction,
+   :source "futon3:checks/retrodiction-cascade.edn",
+   :member-sets
+   [{:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:agent/environment-over-optimization
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path "[:items :ticket/agency-desktop-save :find]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 24,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 24,
+     :meets-both? false,
+     :selected
+     [:agent/environment-over-optimization
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/agency-desktop-save :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 24,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:agent/environment-over-optimization
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 30,
+     :meets-both? false,
+     :selected
+     [:agent/environment-over-optimization
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change],
+     :meets-precondition-b? true,
+     :edge-count 1,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/agency-desktop-save :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :selected-count 24,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:agent/environment-over-optimization
+      :aif/expected-free-energy-scorecard
+      :aif/off-continuity-null-discriminates
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :coordination/session-durability-check
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :forward-model/seal-the-graduation-criteria
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :problems/commitment-temperature-is-instrumented-as-gain
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change
+      :war-room/wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges
+     [[:cycle-machine/runtime-restoration
+       :coordination/session-durability-check]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 2,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-entropy-as-ambiguity
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers
+     [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+     :structural-path "[:items :ticket/kangaroo-v1-pouch :find]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 50,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? true,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 2,
+     :member-count 50,
+     :meets-both? true,
+     :selected
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-entropy-as-ambiguity
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-b? true,
+     :edge-count 1,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers
+     [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+     :structural-path
+     "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :selected-count 50,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-entropy-as-ambiguity
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-a? true,
+     :record-id :retrodiction,
+     :edges
+     [[:aif/posterior-variance-as-epistemic-value
+       :aif/structure-learning-by-model-reduction]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 2,
+     :member-count 60,
+     :meets-both? true,
+     :selected
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-entropy-as-ambiguity
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-b? true,
+     :edge-count 2,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers
+     [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+     :structural-path
+     "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :selected-count 50,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/decomposed-prediction-noise
+      :aif/free-energy-as-tick-scalar
+      :aif/grounded-actuation-not-reobservation
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-coding-belief-update
+      :aif/predictive-entropy-as-ambiguity
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/structured-observation-vector
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :cycle-machine/runtime-restoration
+      :cycle-machine/step-machine
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :forward-model/seal-the-graduation-criteria
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :problems/satisfied-rungs-are-counted-and-surfaced
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-a? true,
+     :record-id :retrodiction,
+     :edges
+     [[:aif/posterior-variance-as-epistemic-value
+       :aif/structure-learning-by-model-reduction]
+      [:cycle-machine/runtime-restoration
+       :cycle-machine/step-machine]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:aif/admissibility
+      :aif/measurement-window-hygiene
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :ukrns/worked-contrast
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/AC6 :find]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 12,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:aif/admissibility
+      :aif/measurement-window-hygiene
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :ukrns/worked-contrast
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-b? true,
+     :edge-count 3,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/AC6 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :selected-count 12,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/admissibility
+      :aif/candidate-pattern-action-space
+      :aif/grounded-actuation-not-reobservation
+      :aif/measurement-window-hygiene
+      :aif/niche-construction
+      :aif/predictive-entropy-as-ambiguity
+      :aif/shared-kernel-predictive-forward-model
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :problems/tension-proposes-candidates
+      :system-coherence/argue-empirically-not-persuasively
+      :ukrns/worked-contrast
+      :war-room/wr-19-tension-must-generate-not-only-rank
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges
+     [[:aif/candidate-pattern-action-space
+       :war-room/wr-19-tension-must-generate-not-only-rank]
+      [:problems/tension-proposes-candidates
+       :war-room/wr-19-tension-must-generate-not-only-rank]
+      [:writing-coherence/meet-the-reader-where-they-are
+       :system-coherence/argue-empirically-not-persuasively]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:aif/admissibility
+      :aif/measurement-window-hygiene
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :ukrns/worked-contrast
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-b? true,
+     :edge-count 3,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/AC6 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "futon3:checks/retrodiction-cascade.edn:6535",
+     :selected-count 12,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/admissibility
+      :aif/candidate-pattern-action-space
+      :aif/grounded-actuation-not-reobservation
+      :aif/measurement-window-hygiene
+      :aif/niche-construction
+      :aif/predictive-entropy-as-ambiguity
+      :aif/shared-kernel-predictive-forward-model
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :problems/tension-proposes-candidates
+      :system-coherence/argue-empirically-not-persuasively
+      :ukrns/worked-contrast
+      :war-room/wr-19-tension-must-generate-not-only-rank
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges
+     [[:aif/candidate-pattern-action-space
+       :war-room/wr-19-tension-must-generate-not-only-rank]
+      [:problems/tension-proposes-candidates
+       :war-room/wr-19-tension-must-generate-not-only-rank]
+      [:writing-coherence/meet-the-reader-where-they-are
+       :system-coherence/argue-empirically-not-persuasively]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:baldwin/choose-the-heritable-unit-where-invariance-lives],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/C23 :find]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 1,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 17,
+     :meets-both? false,
+     :selected
+     [:baldwin/choose-the-heritable-unit-where-invariance-lives],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/C23 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 1,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:baldwin/ablation-axes-must-not-disable-the-instrument
+      :baldwin/choose-the-heritable-unit-where-invariance-lives
+      :cascades/the-slice-is-the-unit-of-use
+      :control/agential-efficiency-measurement
+      :data-mining/fan-out-independent-runs-across-devices
+      :data-mining/seed-the-run-for-a-fair-ablation
+      :eight-gates/an-push
+      :futon-theory/crime-relocates-to-a-scarcer-witness
+      :math-formalization-CV/holomorphic-disk-api
+      :mmca/instrument-horizon-must-match-system
+      :mmca/verified-but-idle-link
+      :relationship-coherence/absence-as-spaciousness
+      :relationship-coherence/rupture-repair
+      :snatch/revert-then-invert
+      :ukrns/calibrate-impact-promises-to-current-indicator-capacity
+      :ukrns/model-recompute-schedule
+      :war-room/wr-9-bites-empirical-or-logical],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 1,
+     :meets-both? false,
+     :selected
+     [:baldwin/choose-the-heritable-unit-where-invariance-lives],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/C23 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 1,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:baldwin/choose-the-heritable-unit-where-invariance-lives],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:math-informal-CT/check-it-on-generators
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/D0 :find]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 3,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:math-informal-CT/check-it-on-generators
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/D0 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 3,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:agent/handoff-preserves-context
+      :ai4ci/ai-core-function
+      :aif/belief-state-operational-hypotheses
+      :aif/term-to-channel-traceability
+      :control/effort-estimation
+      :coordination/assignment-binding
+      :gauntlet/placenta-transfer
+      :iiching/TEMPLATE
+      :invariant-coherence/state-snapshot-witness
+      :math-formalization-FA/inner-product-space-api
+      :math-informal/construct-auxiliary-object
+      :math-informal-CT/check-it-on-generators
+      :memory/name-a-reusable-artifact
+      :musn/plan-before-tool
+      :or3/plural-value-accounting
+      :orchestration/consent-gate
+      :peeragogy/check-in-rhythm
+      :peeragogy/polling-for-ideas
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 3,
+     :meets-both? false,
+     :selected
+     [:math-informal-CT/check-it-on-generators
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "futon3:checks/retrodiction-cascade.edn:6661",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade.edn",
+     :edges-pointer "not found",
+     :selected-count 3,
+     :members-pointer "futon3:checks/retrodiction-cascade.edn:6536",
+     :candidate-status :gate-shaped,
+     :members
+     [:math-informal-CT/check-it-on-generators
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-a? false,
+     :record-id :retrodiction,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}],
+   :o4 :not-exercised-nothing-is-played,
+   :o4-pointer "futon3:checks/retrodiction-cascade.edn:34090"}
+  {:record-id :retrodiction-per-clause,
+   :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+   :member-sets
+   [{:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:agent/environment-over-optimization
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path "[:items :ticket/agency-desktop-save :find]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 24,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 24,
+     :meets-both? false,
+     :selected
+     [:agent/environment-over-optimization
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/agency-desktop-save :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 24,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:agent/environment-over-optimization
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 30,
+     :meets-both? false,
+     :selected
+     [:agent/environment-over-optimization
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change],
+     :meets-precondition-b? true,
+     :edge-count 1,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :ticket/agency-desktop-save :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :selected-count 24,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:agent/environment-over-optimization
+      :aif/expected-free-energy-scorecard
+      :aif/off-continuity-null-discriminates
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :coordination/capability-gate
+      :coordination/session-durability-check
+      :cycle-machine/runtime-restoration
+      :equity/contribution-pathways
+      :equity/contribution-pathways-merged
+      :equity/protected-interaction-as-published
+      :equity/protected-interaction-merged
+      :equity/visible-impact
+      :forward-model/seal-the-graduation-criteria
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/placenta-transfer
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :invariant-coherence/reachable-from-boot
+      :memory/no-tightening-while-held
+      :memory/verify-in-the-serving-process
+      :paramitas/persistence
+      :peripherals/hot-reload-as-default-fix-path
+      :peripherals/read-existing-seam-before-implementing
+      :problems/commitment-temperature-is-instrumented-as-gain
+      :social/idempotent-handoff
+      :ukrns/distinguish-delivery-from-practice-change
+      :war-room/wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges
+     [[:cycle-machine/runtime-restoration
+       :coordination/session-durability-check]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 2,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-entropy-as-ambiguity
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers
+     [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+     :structural-path "[:items :ticket/kangaroo-v1-pouch :find]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 50,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? true,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 2,
+     :member-count 50,
+     :meets-both? true,
+     :selected
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-entropy-as-ambiguity
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-b? true,
+     :edge-count 1,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers
+     [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+     :structural-path
+     "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :selected-count 50,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-entropy-as-ambiguity
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-a? true,
+     :record-id :retrodiction-per-clause,
+     :edges
+     [[:aif/posterior-variance-as-epistemic-value
+       :aif/structure-learning-by-model-reduction]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 2,
+     :member-count 60,
+     :meets-both? true,
+     :selected
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/free-energy-as-tick-scalar
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-entropy-as-ambiguity
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-b? true,
+     :edge-count 2,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers
+     [:agent/budget-bounds-exploration :agent/pause-is-not-failure],
+     :structural-path
+     "[:items :ticket/kangaroo-v1-pouch :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :selected-count 50,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:agency/delivery-receipt
+      :agency/self-attribution
+      :agency/single-routing-authority
+      :agency/state-atomicity
+      :agent/budget-bounds-exploration
+      :agent/environment-over-optimization
+      :agent/evidence-over-assertion
+      :agent/intent-handshake-is-binding
+      :agent/pause-is-not-failure
+      :agent/scope-before-action
+      :agent/state-is-hypothesis
+      :agent/trail-enables-return
+      :ai4ci/umbrella
+      :aif/admissibility
+      :aif/decomposed-prediction-noise
+      :aif/free-energy-as-tick-scalar
+      :aif/grounded-actuation-not-reobservation
+      :aif/hierarchical-budget-aware-action-selection
+      :aif/niche-construction
+      :aif/posterior-variance-as-epistemic-value
+      :aif/predictive-coding-belief-update
+      :aif/predictive-entropy-as-ambiguity
+      :aif/scheduled-observer-entrypoint
+      :aif/shared-kernel-predictive-forward-model
+      :aif/status-gated-belief-update
+      :aif/structure-learning-by-model-reduction
+      :aif/structured-observation-vector
+      :aif/temporal-depth-beyond-greedy
+      :ants/cargo-return-discipline
+      :control/agential-pattern-hygiene
+      :coordination/capability-gate
+      :cycle-machine/authority-port
+      :cycle-machine/job-port
+      :cycle-machine/runtime-restoration
+      :cycle-machine/step-machine
+      :equity/confident-adaptation
+      :equity/protected-interaction
+      :f6/graph-enhanced-evaluation
+      :forward-model/seal-the-graduation-criteria
+      :futon-theory/coordination-protocol
+      :gauntlet/aif-as-environment-not-instruction
+      :gauntlet/co-presence-over-co-location
+      :gauntlet/modeline-persists-across-worlds
+      :gauntlet/placenta-transfer
+      :gauntlet/teaching-inversion
+      :gauntlet/umwelt-not-architecture
+      :gauntlet/world-is-hypergraph
+      :memory/verify-in-the-serving-process
+      :meta/baldwin-ratchet-defeats-darkroom
+      :musn/tool-name-hygiene
+      :peripherals/constrained-execution-envelope
+      :peripherals/pilot-plus-ground-control
+      :peripherals/read-only-first-then-extend
+      :problems/satisfied-rungs-are-counted-and-surfaced
+      :social/explicit-exit-over-abandonment
+      :social/idempotent-handoff
+      :social/scope-bounded-handoff
+      :war-machine/coordination-bottleneck
+      :war-room/wr-4-inhabit-before-building
+      :writing-coherence/throat-clearing-close],
+     :meets-precondition-a? true,
+     :record-id :retrodiction-per-clause,
+     :edges
+     [[:aif/posterior-variance-as-epistemic-value
+       :aif/structure-learning-by-model-reduction]
+      [:cycle-machine/runtime-restoration
+       :cycle-machine/step-machine]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:aif/admissibility
+      :aif/measurement-window-hygiene
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :ukrns/worked-contrast
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/AC6 :find]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 12,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:aif/admissibility
+      :aif/measurement-window-hygiene
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :ukrns/worked-contrast
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-b? true,
+     :edge-count 3,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/AC6 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :selected-count 12,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/admissibility
+      :aif/candidate-pattern-action-space
+      :aif/grounded-actuation-not-reobservation
+      :aif/measurement-window-hygiene
+      :aif/niche-construction
+      :aif/predictive-entropy-as-ambiguity
+      :aif/shared-kernel-predictive-forward-model
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :problems/tension-proposes-candidates
+      :system-coherence/argue-empirically-not-persuasively
+      :ukrns/worked-contrast
+      :war-room/wr-19-tension-must-generate-not-only-rank
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges
+     [[:aif/candidate-pattern-action-space
+       :war-room/wr-19-tension-must-generate-not-only-rank]
+      [:problems/tension-proposes-candidates
+       :war-room/wr-19-tension-must-generate-not-only-rank]
+      [:writing-coherence/meet-the-reader-where-they-are
+       :system-coherence/argue-empirically-not-persuasively]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:aif/admissibility
+      :aif/measurement-window-hygiene
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :ukrns/worked-contrast
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-b? true,
+     :edge-count 3,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/AC6 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6544",
+     :selected-count 12,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:aif/admissibility
+      :aif/candidate-pattern-action-space
+      :aif/grounded-actuation-not-reobservation
+      :aif/measurement-window-hygiene
+      :aif/niche-construction
+      :aif/predictive-entropy-as-ambiguity
+      :aif/shared-kernel-predictive-forward-model
+      :aif/temporal-depth-beyond-greedy
+      :budgeted-action-selection/mana-gated-work
+      :collaboration-coherence/navel-gazing
+      :equity/protected-interaction
+      :f6/learning-event-detection
+      :iching/hexagram-20-guan
+      :peeragogy/newcomer
+      :peripherals/inhabitation-feeds-evolution
+      :problems/tension-proposes-candidates
+      :system-coherence/argue-empirically-not-persuasively
+      :ukrns/worked-contrast
+      :war-room/wr-19-tension-must-generate-not-only-rank
+      :writing-coherence/meet-the-reader-where-they-are],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges
+     [[:aif/candidate-pattern-action-space
+       :war-room/wr-19-tension-must-generate-not-only-rank]
+      [:problems/tension-proposes-candidates
+       :war-room/wr-19-tension-must-generate-not-only-rank]
+      [:writing-coherence/meet-the-reader-where-they-are
+       :system-coherence/argue-empirically-not-persuasively]],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/C23 :find]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 8,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/C23 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:baldwin/ablation-axes-must-not-disable-the-instrument
+      :data-mining/fan-out-independent-runs-across-devices
+      :data-mining/seed-the-run-for-a-fair-ablation
+      :eight-gates/an-push
+      :math-formalization-CV/holomorphic-disk-api
+      :mmca/instrument-horizon-must-match-system
+      :relationship-coherence/absence-as-spaciousness
+      :snatch/revert-then-invert],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected [],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer "not found",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/C23 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 0,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:math-informal-CT/check-it-on-generators
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path "[:items :wm/D0 :find]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 3,
+     :members-pointer "not found",
+     :candidate-status :gate-shaped,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :selected}
+    {:rule-table-carrier-count 0,
+     :member-count 20,
+     :meets-both? false,
+     :selected
+     [:math-informal-CT/check-it-on-generators
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/D0 :runs :widen-to-a-budget :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 3,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:agent/handoff-preserves-context
+      :ai4ci/ai-core-function
+      :aif/belief-state-operational-hypotheses
+      :aif/term-to-channel-traceability
+      :control/effort-estimation
+      :coordination/assignment-binding
+      :gauntlet/placenta-transfer
+      :iiching/TEMPLATE
+      :invariant-coherence/state-snapshot-witness
+      :math-formalization-FA/inner-product-space-api
+      :math-informal/construct-auxiliary-object
+      :math-informal-CT/check-it-on-generators
+      :memory/name-a-reusable-artifact
+      :musn/plan-before-tool
+      :or3/plural-value-accounting
+      :orchestration/consent-gate
+      :peeragogy/check-in-rhythm
+      :peeragogy/polling-for-ideas
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}
+    {:rule-table-carrier-count 0,
+     :member-count 3,
+     :meets-both? false,
+     :selected
+     [:math-informal-CT/check-it-on-generators
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-b? false,
+     :edge-count 0,
+     :selected-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6670",
+     :rule-table-carriers [],
+     :structural-path
+     "[:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade]",
+     :source "futon3:checks/retrodiction-cascade-per-clause.edn",
+     :edges-pointer "not found",
+     :selected-count 3,
+     :members-pointer
+     "futon3:checks/retrodiction-cascade-per-clause.edn:6545",
+     :candidate-status :gate-shaped,
+     :members
+     [:math-informal-CT/check-it-on-generators
+      :system-coherence/plan-as-enumeration
+      :vsatelier/session-as-rehearsal],
+     :meets-precondition-a? false,
+     :record-id :retrodiction-per-clause,
+     :edges [],
+     :candidate-status-pointer
+     "futon3c:scripts/zaif_cascade_gate.clj:444-445",
+     :member-list-source :members}],
+   :o4 :not-exercised-nothing-is-played,
+   :o4-pointer
+   "futon3:checks/retrodiction-cascade-per-clause.edn:33974"}
+  {:record-id :mining-exemplar,
+   :source
+   "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn",
+   :member-sets
+   [{:rule-table-carrier-count 0,
+     :member-count 0,
+     :meets-both? false,
+     :selected
+     [:aif/hierarchical-and-temporal-depth
+      :aif/candidate-pattern-action-space
+      :aif/expected-free-energy-scorecard],
+     :meets-precondition-b? true,
+     :edge-count 2,
+     :selected-pointer
+     "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:16",
+     :rule-table-carriers [],
+     :structural-path "[]",
+     :source
+     "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn",
+     :edges-pointer
+     "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:33",
+     :selected-count 3,
+     :members-pointer "not found",
+     :candidate-status
+     :excluded-prose-attestations-not-gate-predicates,
+     :members [],
+     :meets-precondition-a? false,
+     :record-id :mining-exemplar,
+     :edges
+     [{:from :aif/hierarchical-and-temporal-depth,
+       :to :aif/candidate-pattern-action-space,
+       :relation :requires-tactical-menu,
+       :source
+       "holes/missions/M-wm-aif-policy-grain-compliance.md:34-44",
+       :reading
+       "The declared hierarchy constructs Pi_cascade(a) before tactical choice."}
+      {:from :aif/candidate-pattern-action-space,
+       :to :aif/expected-free-energy-scorecard,
+       :relation :precedes-ranking,
+       :source
+       "holes/missions/M-wm-aif-policy-grain-compliance.md:119-132",
+       :reading
+       "The complete same-mission menu is constructed before ln E_cascade and cascade score rank it."}],
+     :candidate-status-pointer
+     "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:44-65",
+     :member-list-source :members}],
+   :o4
+   {:rule-bearing-members 3,
+    :acting-order
+    [:aif/hierarchical-and-temporal-depth
+     :aif/candidate-pattern-action-space
+     :aif/expected-free-energy-scorecard],
+    :basis
+    "holes/missions/M-wm-aif-policy-grain-compliance.md:34-46,91-149"},
+   :o4-pointer
+   "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn:70"}],
+ :rule-table
+ {:ids
+  [:war-machine/ambient-pattern-retrieval
+   :math-strategy/missing-dependency-protocol
+   :agent/budget-bounds-exploration
+   :agent/pause-is-not-failure],
+  :count 4,
+  :library-patterns
+  [{:id :war-machine/ambient-pattern-retrieval,
+    :path
+    "futon3:library/war-machine/ambient-pattern-retrieval.flexiarg",
+    :exists? true,
+    :line-count 22,
+    :basis
+    "futon3@cdb5e8a56fd907beb6a99f8b88af9de50ff93126:library/war-machine/ambient-pattern-retrieval.flexiarg"}
+   {:id :math-strategy/missing-dependency-protocol,
+    :path
+    "futon3:library/math-strategy/missing-dependency-protocol.flexiarg",
+    :exists? true,
+    :line-count 95,
+    :basis
+    "futon3@cdb5e8a56fd907beb6a99f8b88af9de50ff93126:library/math-strategy/missing-dependency-protocol.flexiarg"}
+   {:id :agent/budget-bounds-exploration,
+    :path "futon3:library/agent/budget-bounds-exploration.flexiarg",
+    :exists? true,
+    :line-count 32,
+    :basis
+    "futon3@cdb5e8a56fd907beb6a99f8b88af9de50ff93126:library/agent/budget-bounds-exploration.flexiarg"}
+   {:id :agent/pause-is-not-failure,
+    :path "futon3:library/agent/pause-is-not-failure.flexiarg",
+    :exists? true,
+    :line-count 30,
+    :basis
+    "futon3@cdb5e8a56fd907beb6a99f8b88af9de50ff93126:library/agent/pause-is-not-failure.flexiarg"}],
+  :definition-pointers
+  ["futon3c:scripts/zaif_cascade_gate.clj:206"
+   "futon3c:scripts/zaif_cascade_gate.clj:218"
+   "futon3c:scripts/zaif_cascade_gate.clj:234"
+   "futon3c:scripts/zaif_cascade_gate.clj:249"],
+  :precondition-pointer
+  "futon3c:scripts/zaif_cascade_gate.clj:444-445"},
+ :scope
+ {:source :slice-5-corpus-restated,
+  :records
+  ["futon3:checks/construct-cascade.edn"
+   "futon3:checks/zaif-cascade.edn"
+   "futon3:checks/ants-cascade.edn"
+   "futon3:checks/alfworld-cascade.edn"
+   "futon3:checks/snatch-cascade.edn"
+   "futon3:checks/open-cascade.edn"
+   "futon3:checks/open-cascade-short-cue.edn"
+   "futon3:checks/retrodiction-cascade.edn"
+   "futon3:checks/retrodiction-cascade-per-clause.edn"
+   "futon2:holes/labs/library-loop/runs/mining-exemplar/cascade.edn"],
+  :pointer
+  "futon2:holes/labs/wm-contract/f12_o4_edges_constructibility.bb:8-19"},
+ :verdict true}
