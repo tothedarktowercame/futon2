@@ -145,7 +145,22 @@ the F11 question forming.
   differ in kind (extra hypothesis / undeclared Score parameter / unwritable
   law / undetermined third origin).
 - Unblocks (with #5): F12 slice 4.
-- **Ruling: PENDING**
+- **Ruling: ARM 6, `:function-at-the-cascadediff-codomain`, WITH AN EXEMPLAR
+  PROVISO (Joe, 2026-09-07)** — "given the complexity entailed, we need to
+  find an example... let's see if it even works at all in principle, once,
+  on something. We'll try to build to this specification and then see how
+  it looks after that."
+- Reading: the ruling chooses the carrier (all four laws jointly stated and
+  discharged at the function-at-CascadeDiff signature), and commissions a
+  build-to-spec exemplar before the choice is treated as validated. The
+  natural exemplar is exactly what C558 §1 says would change the
+  measurement: a real recorded run whose precedence moves and carries a
+  score (the producer at futon3:checks/construct_cascade.clj:402 writes []
+  literals today), exercised through a conformant implementation at the
+  arm-6 signature — O4 non-vacuous on a run rather than only on the C59
+  fixture and the ants record. F12 slice 4, once unblocked, is the
+  designated place for that build.
+- Registry transcription: with #5, as the pair that unblocks F12.
 
 ## 5. F12 / `:organise-sorry` — what is done with the sorry at `Holes.lean:861`
 
