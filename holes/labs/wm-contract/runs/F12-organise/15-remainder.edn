@@ -79,6 +79,54 @@
      :declaration "organiseO4PrecedenceGovernance",
      :law :o4}],
    :control :law-carrier-restated,
+   :plant-verified? true}
+  {:after
+   {:satisfied-at-head? true,
+    :witnesses-by-law
+    {:o1
+     {:real-cascade-witness? true,
+      :witnessing-fixture-kinds
+      [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+     :o2
+     {:real-cascade-witness? true,
+      :witnessing-fixture-kinds
+      [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+     :o3
+     {:real-cascade-witness? true,
+      :witnessing-fixture-kinds
+      [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+     :o4
+     {:real-cascade-witness? true,
+      :witnessing-fixture-kinds
+      [:c59-hand-fixture :zaif-1239-pattern-transcription]}}},
+   :before
+   {:satisfied-at-head? false,
+    :witnesses-by-law
+    {:o1
+     {:real-cascade-witness? true,
+      :witnessing-fixture-kinds
+      [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+     :o2
+     {:real-cascade-witness? true,
+      :witnessing-fixture-kinds
+      [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+     :o3
+     {:real-cascade-witness? true,
+      :witnessing-fixture-kinds
+      [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+     :o4
+     {:real-cascade-witness? false,
+      :witnessing-fixture-kinds [:c59-hand-fixture]}}},
+   :control :zaif-o4-witness-planted,
+   :plant-verified? true}
+  {:after
+   {:obligations-not-satisfied-and-not-gated
+    [:laws-witnessed-on-real-cascade],
+    :remainder-fully-gated? false},
+   :before
+   {:obligations-not-satisfied-and-not-gated [],
+    :remainder-fully-gated? true},
+   :control :real-cascade-gating-mapping-deleted,
    :plant-verified? true}],
  :gating
  {:conformant-implementation
@@ -188,7 +236,24 @@
      "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
      :fixture-kind :c59-hand-fixture,
      :law :o4}],
-   :satisfied-at-head? true,
+   :real-cascade-fixture-kinds [:zaif-1239-pattern-transcription],
+   :satisfied-at-head? false,
+   :witnesses-by-law
+   {:o1
+    {:real-cascade-witness? true,
+     :witnessing-fixture-kinds
+     [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+    :o2
+    {:real-cascade-witness? true,
+     :witnessing-fixture-kinds
+     [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+    :o3
+    {:real-cascade-witness? true,
+     :witnessing-fixture-kinds
+     [:c59-hand-fixture :zaif-1239-pattern-transcription]},
+    :o4
+    {:real-cascade-witness? false,
+     :witnessing-fixture-kinds [:c59-hand-fixture]}},
    :zaif-cross-check
    {:agree? true,
     :artifact
@@ -224,7 +289,11 @@
      "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:974",
      :fixture-kind :zaif-1239-pattern-transcription,
      :law :o3}
-    {:declaration :not-found, :law :o4}]},
+    {:declaration "organiseO4PrecedenceGovernanceZaif",
+     :file-line :not-found,
+     :fixture "wmZaifCascadeDiffFixture",
+     :fixture-kind :not-found,
+     :law :o4}]},
   :sorry
   {:acceptance-line-agrees? true,
    :body-is-still-sorry? true,

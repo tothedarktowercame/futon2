@@ -58,12 +58,19 @@
                     (sorted-map :line (inc i) :source-text line)))
                 (str/split-lines (slurp path))))
 
-(defn one-line! [path pattern label]
+(defn maybe-one-line
+  "Nil when the declaration is absent; throws when it is ambiguous. The absent
+  case is a MEASUREMENT (a law with no witness), not a script failure."
+  [path pattern label]
   (let [hits (vec (line-hits path pattern))]
-    (when-not (= 1 (count hits))
-      (throw (ex-info (str "expected one " label ", found " (count hits)) {})))
-    (assoc (first hits) :file-line (str (.getCanonicalPath (io/file path)) ":"
-                                        (:line (first hits))))))
+    (when (< 1 (count hits))
+      (throw (ex-info (str "expected at most one " label ", found " (count hits)) {})))
+    (when-let [hit (first hits)]
+      (assoc hit :file-line (str (.getCanonicalPath (io/file path)) ":" (:line hit))))))
+
+(defn one-line! [path pattern label]
+  (or (maybe-one-line path pattern label)
+      (throw (ex-info (str "expected one " label ", found 0") {}))))
 
 (defn acceptance-measure [worklist-path]
   (let [w (edn/read-string (slurp worklist-path))
@@ -93,7 +100,13 @@
   [[:o1 "organiseO1NodesRecorded" "organiseO1NodesRecordedZaif"]
    [:o2 "organiseO2AuthoredReachability" "organiseO2AuthoredReachabilityZaif"]
    [:o3 "organiseO3FastForward" "organiseO3FastForwardZaif"]
-   [:o4 "organiseO4PrecedenceGovernance" nil]])
+   [:o4 "organiseO4PrecedenceGovernance" "organiseO4PrecedenceGovernanceZaif"]])
+
+(def real-cascade-fixture-kinds
+  "Fixture kinds that count as a REAL constructed cascade for the acceptance's
+  \"F7 record or fresh construction from the library\" clause. The C59 fixture is
+  hand-derived (`Holes.lean:871` doc comment) and is deliberately not in this set."
+  #{:zaif-1239-pattern-transcription})
 
 (defn fixture-carrier [holes-path fixture]
   (let [row (one-line! holes-path
@@ -105,15 +118,25 @@
                 :declaration fixture
                 :file-line (:file-line row))))
 
-(defn law-row [holes-path law declaration fixture fixture-kind]
-  (let [decl (one-line! holes-path (re-pattern (str "^def " declaration "(?:\\s|$)")) declaration)
-        carrier (fixture-carrier holes-path fixture)]
-    (sorted-map :carrier (:carrier carrier)
-                :declaration declaration
-                :file-line (:file-line decl)
+(defn law-row
+  "The declaration's absence is recorded, not thrown: a law with no witness on
+  this fixture is exactly what the real-cascade obligation has to be able to see."
+  [holes-path law declaration fixture fixture-kind]
+  (if-let [decl (maybe-one-line holes-path
+                                (re-pattern (str "^def " declaration "(?:\\s|$)"))
+                                declaration)]
+    (let [carrier (fixture-carrier holes-path fixture)]
+      (sorted-map :carrier (:carrier carrier)
+                  :declaration declaration
+                  :file-line (:file-line decl)
+                  :fixture fixture
+                  :fixture-file-line (:file-line carrier)
+                  :fixture-kind fixture-kind
+                  :law law))
+    (sorted-map :declaration declaration
+                :file-line :not-found
                 :fixture fixture
-                :fixture-file-line (:file-line carrier)
-                :fixture-kind fixture-kind
+                :fixture-kind :not-found
                 :law law)))
 
 (defn parse-int-after [text pattern label]
@@ -148,11 +171,23 @@
                           (law-row holes-path law decl "wmCascadeDiffFixture" :c59-hand-fixture))
                         law-specs)
         zaif-laws (mapv (fn [[law _ decl]]
-                          (if decl
-                            (law-row holes-path law decl "wmZaifCascadeDiffFixture"
-                                     :zaif-1239-pattern-transcription)
-                            (sorted-map :declaration :not-found :law law)))
+                          (law-row holes-path law decl "wmZaifCascadeDiffFixture"
+                                   :zaif-1239-pattern-transcription))
                         law-specs)
+        ;; Which fixture kinds witness each law, read off the two rows rather
+        ;; than assumed from the size of the law table.
+        witnesses-by-law
+        (into (sorted-map)
+              (for [[law _ _] law-specs]
+                (let [kinds (into (sorted-set)
+                                  (comp (filter #(= law (:law %)))
+                                        (map :fixture-kind)
+                                        (remove #(= :not-found %)))
+                                  (concat main-laws zaif-laws))]
+                  [law (sorted-map
+                        :real-cascade-witness?
+                        (boolean (some real-cascade-fixture-kinds kinds))
+                        :witnessing-fixture-kinds (vec kinds))])))
         conformance-predicate (one-line! conformance-path
                                          #"^structure ConformantOrganiseSelected\s"
                                          "ConformantOrganiseSelected")
@@ -177,7 +212,14 @@
                  :satisfied-at-head? (every? #(= :Cascade (:carrier %)) main-laws))
      :laws-witnessed-on-real-cascade
      (sorted-map :c59-laws main-laws
-                 :satisfied-at-head? (= 4 (count main-laws))
+                 :real-cascade-fixture-kinds (vec real-cascade-fixture-kinds)
+                 ;; "each law witnessed on a REAL constructed cascade": every
+                 ;; law in the table needs a witness on a fixture transcribed
+                 ;; from a recorded cascade. The C59 fixture is hand-derived and
+                 ;; does not discharge this, so a law witnessed only there fails.
+                 :satisfied-at-head? (every? :real-cascade-witness?
+                                             (vals witnesses-by-law))
+                 :witnesses-by-law witnesses-by-law
                  :zaif-cross-check (zaif-cross-check holes-path zaif-path)
                  :zaif-laws zaif-laws)
      :sorry
@@ -273,7 +315,16 @@
                                    "def wmCascadeDiffFixture : CascadeDiff Nat Int"
                                    "def wmCascadeDiffFixture : Cascade Nat")
         _ (spit c5-holes c5-text)
-        c5-planted (str/includes? (slurp c5-holes) "def wmCascadeDiffFixture : Cascade Nat")]
+        c5-planted (str/includes? (slurp c5-holes) "def wmCascadeDiffFixture : Cascade Nat")
+        c6-holes (io/file tmp "Holes-zaif-o4.lean")
+        _ (spit c6-holes (str (slurp holes)
+                              "\ndef organiseO4PrecedenceGovernanceZaif : True := trivial\n"))
+        c6-planted (boolean (re-find #"(?m)^def organiseO4PrecedenceGovernanceZaif"
+                                     (slurp c6-holes)))
+        c7-table (dissoc gating-table :laws-witnessed-on-real-cascade)
+        c7-planted (not (contains? c7-table :laws-witnessed-on-real-cascade))
+        witness-keys [:satisfied-at-head? :witnesses-by-law]
+        verdict-keys [:obligations-not-satisfied-and-not-gated :remainder-fully-gated?]]
     [(control-result :gating-mapping-deleted c1-planted
                      (select-keys baseline [:remainder-fully-gated?
                                             :obligations-not-satisfied-and-not-gated])
@@ -300,7 +351,17 @@
                      #(mapv
                        (fn [law] (select-keys law [:carrier :declaration :law]))
                        (get-in (core worklist aif c5-holes gating-table)
-                               [:obligations :laws-stated-against-cascade-carrier :laws])))]))
+                               [:obligations :laws-stated-against-cascade-carrier :laws])))
+     (control-result :zaif-o4-witness-planted c6-planted
+                     (select-keys (get-in baseline
+                                          [:obligations :laws-witnessed-on-real-cascade])
+                                  witness-keys)
+                     #(select-keys (get-in (core worklist aif c6-holes gating-table)
+                                           [:obligations :laws-witnessed-on-real-cascade])
+                                   witness-keys))
+     (control-result :real-cascade-gating-mapping-deleted c7-planted
+                     (select-keys baseline verdict-keys)
+                     #(select-keys (core worklist aif holes c7-table) verdict-keys))]))
 
 (defn measure []
   (let [worklist (env-file "F12_WORKLIST" default-worklist)
