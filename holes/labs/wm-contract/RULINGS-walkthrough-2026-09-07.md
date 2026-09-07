@@ -231,7 +231,27 @@ the F11 question forming.
 ## 7. F12 / `:organise-o4-denominator` — which rounds O4's acting order is read over
 
 - Sheet: C558 §4, five arms.
-- **Ruling: PENDING**
+- **Ruling: ARM 5, `:split-acting-order-over-transcript-score-over-primary`
+  (Joe, 2026-09-07)** — C541 §4 option (i) as written: score over the
+  gate-graded rounds (evidence against a determined oracle label), acting
+  order over every transcript round (behavior the cascade does whether or
+  not the record grades it).
+- Joe's framing (near-verbatim): the escalating scales of things-unchanged
+  are "an opportunity to learn something as we go... the system is
+  ultimately going to create an escalating chain of warnings and errors or
+  other signals — 'nothing has changed over this very long epoch' would be
+  the ultimate one — so we better just shut this whole thing down and wait
+  for someone to get us unstuck. Arm 5 seems to allow not only a complex
+  orchestration across those layers, but also some opportunity for tuning
+  and learning at the meta level what works. Arm 5 gets us unstuck now and
+  creates the possibility for further development later."
+- Consequence carried into slice 4: include the separating construction if
+  reachable (transcript acting order unmoved while the score moves), since
+  arm 5 is currently observationally equivalent to the transcript arm.
+  This ruling does NOT decide item 8 — every non-primary TRUE measured so
+  far rests on the plant item 8 is about.
+- Registry transcription: joins the publish-window write (script extended
+  before the watcher fired).
 
 ## 8. F12 / `:organise-o4-after-the-law-encoding`
 
