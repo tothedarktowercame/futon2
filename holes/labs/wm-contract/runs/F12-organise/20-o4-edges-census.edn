@@ -57,33 +57,51 @@
  [{:plant :reverse-o4,
    :landed? true,
    :verdict false,
+   :caught-by-validity-predicate? true,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}
   {:plant :move-o4,
    :landed? true,
    :verdict false,
+   :caught-by-validity-predicate? true,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}
   {:plant :zero-edge,
    :landed? true,
    :verdict false,
+   :caught-by-validity-predicate? true,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}
   {:plant :swap-counterfactual,
    :landed? true,
    :verdict false,
+   :caught-by-validity-predicate? true,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}
   {:plant :drop-record,
    :landed? true,
    :verdict false,
+   :caught-by-validity-predicate? true,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}
   {:plant :shift-pointer,
    :landed? true,
    :verdict false,
+   :caught-by-validity-predicate? true,
    :pointer
-   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}],
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}
+  {:plant :count-mode-edge-zero,
+   :landed? true,
+   :verdict false,
+   :caught-by-validity-predicate? true,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}
+  {:plant :flip-disagreement,
+   :landed? true,
+   :verdict false,
+   :caught-by-validity-predicate? true,
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}],
  :premises
  [{:id :i,
    :holds? true,
@@ -493,7 +511,7 @@
    "futon3c:holes/zaif-cascade-gate-holdout.edn"
    "futon2:holes/cascade-authority-gate.edn"],
   :pointer
-  "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:8-25"},
+  "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:8-22"},
  :verdict true,
  :what-an-exemplar-would-need
  {:finding
@@ -502,4 +520,13 @@
   "futon3:checks/retrodiction-cascade.edn:6742-6744",
   :pair-shape-pointer "futon3:checks/ants-cascade.edn:93-102",
   :measured-gate-pointer
-  "futon3c/scripts/zaif_cascade_gate.clj:549-554"}}
+  "futon3c/scripts/zaif_cascade_gate.clj:549-554",
+  :pair-shape-scope
+  {:recognised-shape
+   "a map :precedence-before and a map :precedence-after over the same key set",
+   :pointer
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:53-57",
+   :not-recognised
+   "the one place O4 is measured rather than declared refused emits the pair as two vectors, so a cascade exercised through that gate would be read here as carrying no pair until the shape is widened",
+   :not-recognised-pointer
+   "futon3c/scripts/zaif_cascade_gate.clj:555-558"}}}

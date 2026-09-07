@@ -31,10 +31,12 @@
    :not-exercised-no-authority-gate-and-alfworld-is-not-installed
    {:class :unconditional :pointer "futon3:checks/construct_alfworld_cascade.clj:352"}})
 
-(defn read-source [{:keys [repo path]}]
-  (if (= repo :futon3)
-    (:out (sh/sh "git" "-C" (str root "/futon3") "show" (str pin ":" path)))
-    (slurp (str root "/" (name repo) "/" path))))
+(def read-source
+  (memoize (fn [{:keys [repo path]}]
+             (if (= repo :futon3)
+               (:out (sh/sh "git" "-C" (str root "/futon3") "show" (str pin ":" path)))
+               (slurp (str root "/" (name repo) "/" path))))))
+(def parse-source (memoize (fn [d] (edn/read-string (read-source d)))))
 (defn pointer-prefix [{:keys [repo path]}] (str (name repo) ":" path ":"))
 (defn lines [s] (str/split-lines s))
 (defn matching-lines [s re]
@@ -90,7 +92,7 @@
      :counterfactual (mapv #(assoc %1 :pointer (or %2 "not found")) counter
                            (pointers-for d text #":edges-if-the-prior-relation-were-used(?:\s|$)"))}))
 (defn record-fact [d]
-  (let [text (read-source d) data (edn/read-string text) o4 (o4-fact d text data)
+  (let [text (read-source d) data (parse-source d) o4 (o4-fact d text data)
         edges (edge-facts d text data) pair? (comparable? data)
         any-edge? (some pos? (map :count (:per-run edges)))]
     {:record-id (:id d) :source (str (name (:repo d)) ":" (:path d))
@@ -102,10 +104,41 @@
      :cascade-edge-counts edges
      :carries-both? (boolean (and pair? any-edge?))}))
 (defn gate-fact [d]
-  (let [text (read-source d) data (edn/read-string text)]
+  (let [text (read-source d) data (parse-source d)]
     {:record-id (:id d) :source (str (name (:repo d)) ":" (:path d))
      :o4-locations (mapv (comp pstr first) (values-at data :o4))
      :o4-pointers (let [p (pointers-for d text #":o4(?:\s|$)")] (if (seq p) p ["not found"]))}))
+
+(defn declaration-of [id]
+  (first (filter #(= id (:id %)) (concat corpus gates))))
+(defn line-at [ptr]
+  (let [[repo path line] (str/split ptr #":")
+        n (some-> line (str/split #"-") first parse-long)]
+    (when (and repo path n)
+      (nth (lines (read-source {:repo (keyword repo) :path path})) (dec n) nil))))
+(defn grounded? [ptr re]
+  (or (= "not found" ptr)
+      (boolean (some->> (line-at ptr) (re-find re)))))
+(defn pointer-grounding
+  "Each recorded pointer is resolved in its own source file and the cited line must
+   still carry the key the pointer is recorded under.  This reads the sources, not
+   the report, so a shifted or invented pointer fails here rather than only failing
+   the comparison with the fresh derivation."
+  [r]
+  (concat
+   (for [row (:records r) p (get-in row [:o4-shape :pointers])] (grounded? p #":o4(?:\s|$)"))
+   (for [row (:records r) o (get-in row [:cascade-edge-counts :per-run])]
+     (grounded? (:pointer o) #":(?:cascade-)?edges(?:\s|$)"))
+   (for [row (:records r) o (get-in row [:cascade-edge-counts :counterfactual])]
+     (grounded? (:pointer o) #":edges-if-the-prior-relation-were-used(?:\s|$)"))
+   (for [row (:gate-records r) p (:o4-pointers row)] (grounded? p #":o4(?:\s|$)"))))
+(defn counts-agree-with-source?
+  "The recorded edge counts are recomputed from the record's own bytes."
+  [row]
+  (if-let [d (declaration-of (:record-id row))]
+    (= (mapv :count (get-in row [:cascade-edge-counts :per-run]))
+       (mapv :count (:per-run (edge-facts d (read-source d) (parse-source d)))))
+    false))
 
 (defn valid? [r]
   (and (= 10 (count (:records r))) (= (set (map :id corpus)) (set (map :record-id (:records r))))
@@ -121,7 +154,10 @@
        (= :not-exercised (get-in r [:disagreements-with-slice-1 0 :recomputed :reading]))
        (every? #(or (= "not found" %) (re-find #":\d+(?:-\d+)?$" %))
                (concat (mapcat #(get-in % [:o4-shape :pointers]) (:records r))
-                       (mapcat :o4-pointers (:gate-records r))))))
+                       (mapcat :o4-pointers (:gate-records r))))
+       (= :recomputed (get-in r [:disagreements-with-slice-1 0 :correct]))
+       (every? true? (pointer-grounding r))
+       (every? counts-agree-with-source? (:records r))))
 
 (defn base-report []
   (let [rs (mapv record-fact corpus)]
@@ -129,7 +165,7 @@
      :check :F12-o4-edges-census
      :scope {:records (mapv #(str (name (:repo %)) ":" (:path %)) corpus)
              :gate-records (mapv #(str (name (:repo %)) ":" (:path %)) gates)
-             :pointer "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:8-25"}
+             :pointer "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:8-22"}
      :futon3-pin {:value pin :pointer "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:6"}
      :records rs
      :gate-records (mapv gate-fact gates)
@@ -164,7 +200,12 @@
      {:finding "one recorded cascade must contain a real cascade edge and an O4 before/after precedence pair over the same members"
       :edge-shape-pointer "futon3:checks/retrodiction-cascade.edn:6742-6744"
       :pair-shape-pointer "futon3:checks/ants-cascade.edn:93-102"
-      :measured-gate-pointer "futon3c/scripts/zaif_cascade_gate.clj:549-554"})))
+      :measured-gate-pointer "futon3c/scripts/zaif_cascade_gate.clj:549-554"
+      :pair-shape-scope
+      {:recognised-shape "a map :precedence-before and a map :precedence-after over the same key set"
+       :pointer "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:53-57"
+       :not-recognised "the one place O4 is measured rather than declared refused emits the pair as two vectors, so a cascade exercised through that gate would be read here as carrying no pair until the shape is widened"
+       :not-recognised-pointer "futon3c/scripts/zaif_cascade_gate.clj:555-558"}})))
 
 (defn assoc-plant [r kind]
   (case kind
@@ -175,20 +216,30 @@
                                   (get-in r [:records 0 :cascade-edge-counts :counterfactual 0 :count]))
     :drop-record (update r :records pop)
     :shift-pointer (assoc-in r [:records 0 :o4-shape :pointers 0]
-                             "futon3:checks/construct-cascade.edn:188")))
+                             "futon3:checks/construct-cascade.edn:188")
+    :count-mode-edge-zero (assoc-in r [:records 0 :cascade-edge-counts :per-run 0 :count] 0)
+    :flip-disagreement (assoc-in r [:disagreements-with-slice-1 0 :correct] :slice-1)))
 (defn plant-verdict [base planted]
-  ;; Each control also compares the planted measurement to a fresh derivation,
-  ;; so plausible but false replacements cannot satisfy the checker.
+  ;; :verdict is the checker's acceptance of a planted report.  Its second conjunct
+  ;; is false for every landed plant by construction -- a mutated report is not the
+  ;; report the run derived -- so :verdict alone says no more than :landed? does.
+  ;; :caught-by-validity-predicate? is the column that discriminates: it is what
+  ;; valid? makes of the planted report on its own, and it is recorded per plant.
   (and (valid? planted) (= planted base)))
 
 (let [base (base-report)
       plants (mapv (fn [k] (let [p (assoc-plant base k)]
                              {:plant k :landed? (not= p base)
                               :verdict (plant-verdict base p)
-                              :pointer "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:169-183"}))
-                   [:reverse-o4 :move-o4 :zero-edge :swap-counterfactual :drop-record :shift-pointer])
-      report (assoc base :plants plants :verdict (and (valid? base)
-                                                       (every? #(and (:landed? %) (false? (:verdict %))) plants)))]
+                              :caught-by-validity-predicate? (not (valid? p))
+                              :pointer "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:210-228"}))
+                   [:reverse-o4 :move-o4 :zero-edge :swap-counterfactual :drop-record
+                    :shift-pointer :count-mode-edge-zero :flip-disagreement])
+      report (assoc base :plants plants
+                    :verdict (and (valid? base)
+                                  (every? #(and (:landed? %) (false? (:verdict %))
+                                                (true? (:caught-by-validity-predicate? %)))
+                                          plants)))]
   (when-not (:verdict report)
     (binding [*out* *err*] (pp/pprint report)) (System/exit 1))
   (.mkdirs (.getParentFile (java.io.File. out)))
