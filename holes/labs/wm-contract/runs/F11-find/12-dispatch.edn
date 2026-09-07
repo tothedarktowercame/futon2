@@ -1,0 +1,145 @@
+{:record :F11-slice-7-dispatch
+ :date "2026-09-07"
+ :row :F11
+ :slice "7 -- F3 stated of the finder and measured against the record's non-self-certifying COLUMN"
+ :dispatched-to "codex-2"
+ :from "wm-build-work"
+ :job-id "PENDING -- filled in by the lane after the bell returns"
+ :packet-goal
+ "One new Lean file DarkTower/WarMachine/F11NonSelfCertifying.lean measuring what
+  `Receipt.nonSelfCertifying` (mathlib4 DarkTower/WarMachine/Holes.lean:244-245)
+  can and cannot state, against the two things the record actually decides F3 by.
+  Slice 4 did this for F2 (the blindness is in the CARRIER: the faithful and the
+  misattributing finder are EQUAL after erasure,
+  mathlib4 DarkTower/WarMachine/F11ReceiptCarrier.lean:186). F3 has never been
+  measured that way. It is the one half of the acceptance a lane can still do
+  without a ruling from Joe, because it registers no choice and removes no sorry."
+ :why-this-is-a-measurement-and-not-a-summary
+ "The transcriber already reports that on this record the non-self-certifying set
+  IS the receipted set in all 34 rows (futon2 u46_find_transcribe.bb:49-52 and
+  :336-347), and Holes.lean:273's docstring repeats it. That is a fact about the
+  COLUMN. It is NOT the measurement asked here, and restating it is the failure
+  mode this packet is written against. What is unmeasured is whether the LAW, as
+  the carrier states it, can tell apart two finders the record cannot: F3's own
+  wording at futon2 holes/problems/P-validated-R5.md:487 says a receipt cites
+  `the pattern's text`, and neither the Lean predicate nor either Clojure
+  predicate compares the cited text to the pattern it is a receipt FOR."
+ :premise-recorded-before-the-result
+ {:what-the-carrier-says
+  "`Receipt` (mathlib4 DarkTower/WarMachine/Holes.lean:240-242) is two Props,
+   citesTextOrEdges and scoreAlone; `Receipt.nonSelfCertifying` (:244-245) is
+   citesTextOrEdges AND NOT scoreAlone. Both are Props the FINDER fills, so a
+   finder asserts its own non-self-certification -- the shape slice 6 named when
+   it found F4-as-a-conjunct self-certifying (F11AmendedCarrier.lean:358-440)."
+  :what-the-record-decides-it-by
+  "TWO different predicates, in the same repository, and they are not the same
+   predicate. (a) The CHECK's F3 leg, futon3 checks/find_snatch.clj:167-171:
+   route is not :score-alone AND (string? warrant.file) -- two conjuncts.
+   (b) The COLUMN's producer for find_organise's own table, futon3
+   checks/find_organise.clj:567-571: the same two AND (vector? warrant.if-lines)
+   AND (string? warrant.if-text) -- four conjuncts. (c) The producer of the LEAN
+   literal's nonSelfCertifying column, futon2 u46_find_transcribe.bb:113-121,
+   transcribes (a), the two-conjunct one, NOT (b). MEASURED ON THE PINNED FIXTURE
+   (futon3 checks/find-snatch.edn, sha256 839897ef...): all 96 receipts carry
+   :route :structured-antecedent, 0 carry :score-alone, and all 96 carry a
+   warrant with :file, :if-lines, :if-text, :however-lines and :however-text -- so
+   (a) and (b) agree on this record by both being true everywhere, and the record
+   cannot tell which predicate F3 is."
+  :expected-blindness
+  "EXPECTED: `nonSelfCertifying` is blind to the WHICH in exactly the way slice 4
+   found presence-F2 blind to the WHICH of the acknowledged clause. The warrant is
+   the selected pattern's own file BY CONSTRUCTION in the producer (find_organise
+   builds it as `warrant repository id` at :250 from `(get-in repository
+   [:entries id])` at :216-220), so on the record every citation is self-owned;
+   but nothing in (a), (b) or the Lean predicate COMPARES the citation's owner to
+   the pattern the receipt is for. So a MISCITING finder -- receipts whose warrant
+   is another repository pattern's text -- is expected to satisfy F1, F2 and F3 and
+   to be indistinguishable from the faithful finder after erasure to today's
+   Receipt. If it is distinguishable, the expectation is refuted and THAT is the
+   finding. Written before the work so it cannot be back-fitted."
+  :expected-two-versus-four
+  "EXPECTED: the two-conjunct and four-conjunct readings of F3 are NOT equivalent
+   as predicates, and the record cannot separate them because it satisfies both
+   everywhere. So the difference between (a) and (b) is a live divergence in the
+   code that no committed evidence bears on. If a receipt in the record fails (b)
+   while passing (a), the expectation is refuted and the row is the measurement."
+  :expected-non-buy
+  "EXPECTED: F3 does not force a finder to cite anything real. A finder whose
+   receipts set citesTextOrEdges := True and scoreAlone := False satisfies F3 for
+   every selection, so F3 as carried costs a finder nothing. Asked as a
+   measurement because it is what stops F3 from being read as the law that makes
+   receipts mean something."}
+ :measurements-asked
+ {:M1 "State F3 of the FINDER at today's carrier and prove the self-certification
+       shape: exhibit a conformant finder whose receipts assert both Props with no
+       citation behind them, and prove it satisfies F1-F3 on the recorded
+       18-pattern repository while selecting a nonempty set there."
+  :M2 "The misciting finder. Build a faithful finder and a finder whose receipts
+       carry ANOTHER recorded pattern's warrant, both selecting nonempty on the
+       recorded repository. Prove both conformant (F1-F3), and prove they are
+       EQUAL after erasure to today's FindResult -- or refute that equality. This
+       is the F3 analogue of F11ReceiptCarrier.lean:186 and must be stated the
+       same way, of the finder's own output."
+  :M3 "The two-versus-four divergence, in Lean. Model the record's warrant as
+       DATA (file, if-lines, if-text present-or-not) and state both F3 readings --
+       the check's two conjuncts (find_snatch.clj:167-171) and find_organise's four
+       (find_organise.clj:567-571). Prove they are NOT equivalent as predicates by
+       exhibiting a receipt that passes one and fails the other, AND prove that on
+       the recorded 34 rows both hold of every receipted pattern, so the record
+       does not arbitrate."
+  :M4 "The attribution version of F3, stated of the finder's own output and NOT
+       of anything outside it (slice 4's review found a predicate that took its
+       owner from outside the finder and so held of every finder --
+       F11ReceiptCarrier.lean:126 keeps that failure auditable; do not repeat it).
+       Prove it separates the faithful from the misciting finder, and prove that
+       today's Receipt cannot carry it -- i.e. that the separation is lost under
+       erasure."
+  :M5 "Is F3 independent of F2 in the LAW, given that its column is not
+       independent of F2's on the record? Exhibit a finder satisfying F2 and
+       refuting F3, and one satisfying F3 and refuting F2, or prove one cannot
+       exist. Report which of the two the record could have witnessed and did
+       not."}
+ :inhabitance-and-nondegeneracy-floor-demanded-in-advance
+ "This is the EIGHTH consecutive slice across :F11/:F12 in which review has had to
+  supply this floor. Slice 5 evaded it through a PARAMETER (the C-not-A separation
+  proved at the empty designation); slice 6's review had to discard one of its own
+  plants that did not fail. So: every separation, agreement or equality claim must
+  be witnessed by finders that SELECT at least one pattern on the recorded
+  18-pattern findSnatchRepository (mathlib4 Holes.lean, the transcribed
+  `snatchRepository`), each carrying its OWN theorem that its selection there is
+  nonempty. A refusing or silent finder may appear only as the cheap-inhabitant
+  baseline, never as a side of an agreement or an equality. Every claim about the
+  record's rows must be `decide`d over the transcribed literals, not asserted in a
+  docstring."
+ :out-of-scope-in-the-packet
+ ["editing mathlib4 DarkTower/WarMachine/Holes.lean -- it stays at 61c4825dc3 and
+   the sorry at :264 stays"
+  "discharging the sorry, and re-pricing any of :find-sorry's six arms"
+  "aif-equations.edn and every other registry: the entry, if one is warranted, is
+   the lane's to write"
+  "any ruling: this slice registers no choice and takes no decision"
+  "gen_aif_dag.bb (TN 9a)"
+  "editing futon3 checks/find_snatch.clj or checks/find_organise.clj -- the
+   two-versus-four divergence is to be MEASURED, not repaired"]
+ :gates-required
+ ["lake build DarkTower.WarMachine.F11NonSelfCertifying: exit 0, 0 warnings from
+   the new module"
+  "#print axioms over EVERY declaration in the module; report the count, the
+   axiom-free count, and 0 sorryAx"
+  "0 sorry, 0 axiom, 0 native_decide in the module"
+  "Holes.lean unchanged at 61c4825dc3e373fd1b761b800814bf85f5770b88 and :264 still
+   `:= sorry`"
+  "every Lean literal taken from the record cross-checked against futon3
+   checks/find-snatch.edn"
+  "negative controls: at least 5 planted defects, each located by DECLARATION NAME
+   not line number, each verified present AND its replaced text verified absent ON
+   THE PLANTED LINE, each with the observed failure quoted"
+  "worktree clean after commit; bell wm-build-work back with a summary and commit
+   shas"]
+ :reviewer-half-still-owed
+ ["f11_non_self_certifying_check.bb, with a checker-plant script whose plants each
+   move exactly one verdict"
+  "cross-check of every Lean literal against futon3 checks/find-snatch.edn"
+  "runs/F11-find/13-non-self-certifying.edn"
+  "C565 findings doc"
+  "the ledger progress line"]}
