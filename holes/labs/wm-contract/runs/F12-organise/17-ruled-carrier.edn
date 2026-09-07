@@ -1,0 +1,18 @@
+{:check :F12-ruled-carrier,
+ :clauses ["o1" "o2" "o3" "o4" "oattr" "oauth" "osel"],
+ :declaration-count 21,
+ :forbidden-counts {:axiom 0, :native-decide 0, :sorry 0},
+ :holes-lean-head "61c4825dc3e373fd1b761b800814bf85f5770b88",
+ :o3 {:no-bootstrap-difference? true, :node-set-reading? false},
+ :plants
+ [{:plant :remove-oattr, :verdict false}
+  {:plant :node-set-o3, :verdict false}
+  {:plant :insert-sorry, :verdict false}],
+ :signatures
+ {:arm-four
+  "Cascade Policy → Set P → Repository P → Set P → ArmOneCascade P",
+  :arm-six
+  "Cascade Policy → Set P → Repository P → CascadeDiff P Score",
+  :ruled
+  "Cascade Policy → Set P → Repository P → Set P → CascadeDiff P Score"},
+ :verdict true}
