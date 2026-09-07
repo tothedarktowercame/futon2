@@ -27,20 +27,22 @@ halves already re-measured (receipts under /tmp/futon-bounded-tests/,
 stamp 1788810006) and the per-component diagnoses below used those and
 direct re-runs of the underlying checks.
 
-## 1. strict-lint (exit 1) — stale-attestation
+## 1. strict-lint (exit 1) — stale-attestation, WIDENING
 
-Signature (2026-09-03 strict report `/tmp/wm-status-strict-1788475216.edn`):
-structural `:pass? true`, but `:bindings-fresh? false` — **18 declarations
-stale**, remediation `{:rerun-and-rebind 18}`, zero uninspectable. The 18
-are the core AIF vocabulary: softmax, variationalFreeEnergy, GenerativeModel,
-expectedInformationGain, ambiguity, actGate, aliveness, the four kernels
-(Predictive/Parameter/Transition/PolicyPrior/observation), PrecisionMap,
-DirichletConcentrations, bayesFactorThreshold, HaveWantArrow, Fold,
-modelReductionFreeEnergyChange. The bound Clojure code drifted under them
-(the loop's own productive edits).
+Fresh run 2026-09-07T19:40Z: **stale=37, conformant=3** (2026-09-03 had
+stale=18, conformant=7 — the drift roughly doubled in four days as the
+loop kept editing the bound code). Zero uninspectable, zero
+bound-to-false; remediation class is still `rerun-and-rebind` throughout.
+The stale set is the core AIF vocabulary: softmax, variationalFreeEnergy,
+GenerativeModel, expectedInformationGain, ambiguity, actGate, aliveness,
+the kernels (Predictive/Parameter/Transition/PolicyPrior/observation),
+PrecisionMap, DirichletConcentrations, bayesFactorThreshold,
+HaveWantArrow, Fold, modelReductionFreeEnergyChange, and now most of the
+rest. This is also the root of most of workspace-gate's failures (item 7).
 
 Route: mechanical — re-run the binder against current code and let the
-honest freshness verdict win. One small worklist row.
+honest freshness verdict win. One small worklist row; because the count
+is growing ~5/day, this row is the best value-per-slice on this page.
 
 ## 2. futon2-suite (exit 125, 1 failure) — stale-attestation
 
@@ -122,13 +124,32 @@ exact classification counts and clears-when tied to any count moving.
 Writing the acceptance is a policy act — proposed here, not done; needs
 Joe's nod.
 
-## 7. workspace-gate (exit 1) — by-design (mid-work dirt), verify then accept
+## 7. workspace-gate (exit 1) — mostly downstream of item 1, not just dirt
 
-futon2 and p4ng measured dirty at report time — expected while the loop
-and lanes are writing. Before accepting: one pass over the actual dirt to
-confirm it is all work-in-flight (no orphaned junk like stray .bak files);
-then either an accepted-red entry scoped to dirty-while-loop-runs, or a
-gate refinement that distinguishes tracked-dirty from untracked-orphan.
+Corrected against the fresh 2026-09-07T19:40Z run (the Sep 3 receipt only
+carried the exit code): **57 of 161 executable checks fail**, and the
+failing set is the per-declaration equation-check family — softmax,
+variational-free-energy, ambiguity, fold, the kernels, act-gate,
+aliveness … exit 1, with their c-series companion controls (c157–c332)
+exit 2 — i.e. the same stale-bindings root cause as strict-lint (item 1),
+counted again check by check. On top of that the run carries
+`:verdict-qualification :repository-basis-moved`: futon2, p4ng and futon3c
+all committed during the 8-minute measurement (the loop published
+mid-run), so the event-free claim fails distinguishably. Expect item 1's
+rebind to clear most of this component; re-measure in a quiet window
+before treating any remainder as its own defect. The mid-work-dirty part
+(tracked-dirty trees while the loop runs) is still the accepted-red
+candidate it was.
+
+## 9. morning-brief decisions — Joe-facing backlog, DECISION-DUE
+
+Not red in the Sep 3 receipt (the component only checks readability), but
+the fresh run surfaces the state behind it: **73 pending attempts awaiting
+operator judgments, 15 of them belief-learning-blocked** (outstanding
+fields: evidence-sufficiency, feature-verdict, machine-response,
+selection-quality, substantive-achievement; most cost audit-only). This is
+a decision queue for Joe, not lane work — recorded here so the count is
+visible; the 15 belief-blocked ones are the subset with a live cost.
 
 ## 8. preemptive-repair gate (build-gate test red) — genuine-debt, one finding
 
@@ -141,6 +162,25 @@ cites a path a fresh clone will not have. Fix is small but has two honest
 arms (re-track the generated file vs annotate the citation as
 generated-not-committed) and the lint's convention decides which; a
 one-slice row, not a blind edit.
+
+## 10. Box 2 and Box 7 (Joe, same conversation) — queued as U66/U67/U68
+
+Box 2 (glossary coverage): regenerated every publish but from
+`variable-situation-accounting.edn` with `:as-of 2026-09-03` — faithful
+render of a stale derivation; U66 re-derives it via its generator. Box 7
+(equations–Lean join, "2 missing"): `:action` is not actually missing —
+the registry closed it 2026-09-05 (`machineAction`, F8 slice 9) and the
+U35 reviewer's own record reads "17 of 18 declared and 17 resolving";
+the box renders 16-of-18 from the STALE-PIN 09-05 probe report. U67
+re-runs the probe; U68 builds the one genuine gap, a Lean carrier for
+`:policy-set` (R6, π), reconciled with the F12 ruled signature's Set P
+argument. Rows appended in the post-publish gap.
+
+## Green movement worth noting (fresh run vs Sep 3)
+
+Contract holes 14 → 10 (closed 110 → 114); absence-lint now PASS with 0
+findings; obligations and lanes PASS; contract pin fresh. The reds above
+are the residue, not the trend.
 
 ## Sequencing
 
