@@ -1,0 +1,48 @@
+{:record :F11-slice-2-dispatch
+ :date "2026-09-07"
+ :row :F11
+ :slice "2 -- the conformant implementation at the s3e interface"
+ :dispatched-to "codex-1"
+ :from "wm-build-work"
+ :job-id "invoke-1788778380949-13609-30c7276b"
+ :packet-goal
+ "One new Lean file DarkTower/WarMachine/F11Conformance.lean stating
+  P-validated-R5 3e's F1-F4 of the find FUNCTION applied to its arguments,
+  with two-plus conformant implementations witnessed on the recorded snatch
+  find, parallel to F12Conformance.lean (:F12 slice 6, C544)."
+ :premise-recorded-before-the-result
+ {:why-a-new-file
+  "Holes.lean:266-283 states F1-F4 of a FindReceiptRow, not of find. The row
+   predicates were narrowed there by the 2026-08-31 scope amendment precisely
+   because `find` at Holes.lean:264 is a deliberate refusal and no serialized
+   evidence could quantify over it. Stating the laws of a FUNCTION variable is
+   the move C544 made for organise, and it is what the :F11 acceptance means by
+   `a conformant implementation at the s3e interface`."
+  :expected-asymmetry
+  "F1-F3 should state at the function grain unchanged: Repository.patterns,
+   FindResult.receipts and FindResult.absence are all in scope. F4 should NOT:
+   FindResult has no zeroMass field (Holes.lean:261-264 carries selected,
+   receipts, absence only), so F4 has to be a predicate on the finder over its
+   inputs rather than a conjunct of a per-result conformance structure. This is
+   the find-side analogue of C544 s2's O1/O4 rows, where `admittedBy` and the
+   score fields had nowhere to live. It is written down HERE, before the result,
+   so that the packet's own expectation cannot be back-fitted to whatever comes
+   back."
+  :expected-measurement
+  "3e's implementation table lists hand-authored Snatch as `find trivial --
+   identity on the twelve`. An identity finder should satisfy F1-F3 and refute
+   F4 (`a finder that can return anything for anything is unfalsifiable`). If it
+   does, the table lists an implementation that the laws do not admit at this
+   grain -- a measurement, not a ruling."}
+ :out-of-scope-in-the-packet
+ ["the sorry at Holes.lean:264 (not discharged, Holes.lean not modified)"
+  "futon2 and futon3 (reviewer's half: ledger, checker, run record, findings)"
+  "gen_aif_dag.bb (TN 9a)"
+  "any ruling"]
+ :reviewer-half-still-owed
+ ["f11_conformance_check.bb -- read FindType out of F11Conformance.lean and
+   find's type out of Holes.lean:264 and compare, so signature drift cannot pass
+   silently (the F12 checker's discipline, C544 s2)"
+  "cross-check every Lean literal against the recorded fixture"
+  "runs/F11-find/04-conformance.edn"
+  "C560 findings doc"]}
