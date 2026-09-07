@@ -20,12 +20,12 @@ same exchange of `war-machine/ambient-pattern-retrieval` and
 true over **49 paired** rounds, and true over **102 transcript** rounds. The
 acting order changes on none, round 7, and rounds 3/4/7 respectively; scores are
 14→14, 34→33, and 83→81
-(`runs/F12-organise/11-d2-denominator.edn:3015-3420`, run record
+(`runs/F12-organise/11-d2-denominator.edn:4900-5305`, run record
 `:head-baseline/:arms`). No number moved.
 
 The nine recorded cascade files still contain **zero** runs carrying both
 rule-bearing patterns
-(`runs/F12-organise/11-d2-denominator.edn:3484`, run record
+(`runs/F12-organise/11-d2-denominator.edn:5379`, run record
 `:head-baseline/:recorded-carriage`). Thus the old `:not-a-witness` blocker
 still holds. The Arm-B results below say what a construction carrying two
 rule-bearing members **would** record; they are not a recorded cascade witness.
@@ -52,7 +52,7 @@ two floors now read `:contention-measure :contending-rounds` for Arm B and
 both with `:arms-missing-the-contention-key []`, and the baseline's true
 contention rounds are **7** in paired-minus-primary and **3, 4** in
 transcript-minus-paired — the same rounds Arm B reports, previously shown as
-empty (`runs/F12-organise/11-d2-denominator.edn:3421-3425` and `:1071-1075`).
+empty (`runs/F12-organise/11-d2-denominator.edn:5316-5320` and `:1071-1075`).
 A `:problems` guard fires when the key is absent
 (`f12_d2_denominator_check.clj:231-234`), and its control is recorded under
 "Controls and gates" below. **The two measures are not interchangeable**
@@ -74,7 +74,7 @@ new member-carried `aif/status-gated-belief-update` rule
 | transcript | 102 | 3, 4, 7 | changes at 3, 4, 7 | 20→19 | true |
 
 These rows, including the complete acting-order vectors before and after, are
-in `runs/F12-organise/11-d2-denominator.edn:5-602`, run record
+in `runs/F12-organise/11-d2-denominator.edn:1282-1879`, run record
 `:arm-b/:worker/:arms`. Each verdict is recomputed by
 `fo/o4-precedence-governance`; none is read from a stored `:o4` field
 (`f12_d2_denominator_check.clj:71`).
@@ -85,7 +85,7 @@ with the same precedence maps, so only the admitted round set differs
 (`f12_d2_denominator_check.clj:44-71`, the `before`/`after` maps at `:49-50`
 and the round filter at `:46`). Round **7** lies in paired but not primary and
 carries contention; rounds **3 and 4** lie in transcript but not paired and
-carry contention (`runs/F12-organise/11-d2-denominator.edn:1071-1075`, run
+carry contention (`runs/F12-organise/11-d2-denominator.edn:1214-1218`, run
 record `:arm-b/:worker/:nested-round-set-floor`).
 
 ## The other blocker at HEAD
@@ -93,7 +93,7 @@ record `:arm-b/:worker/:nested-round-set-floor`).
 `require-pass!` (`futon3c:scripts/zaif_cascade_gate.clj:565`) still aborts with
 `:rule-does-not-encode-an-authored-then` for **3 of 4** rules: the finding is
 built at `futon3c:scripts/zaif_cascade_gate.clj:579-582` and thrown at
-`:589-591` (`runs/F12-organise/11-d2-denominator.edn:3485-3536`, run record
+`:589-591` (`runs/F12-organise/11-d2-denominator.edn:6105-6156`, run record
 `:head-gate-blocker`). Re-reading each cited span through
 `then-correspondence` gives:
 
@@ -106,7 +106,7 @@ built at `futon3c:scripts/zaif_cascade_gate.clj:579-582` and thrown at
 
 For all four, `:file-exists?` and `:pattern-id-matches-path?` are true; the
 per-condition read-back is in run record `:head-gate-blocker/:rules`
-(`runs/F12-organise/11-d2-denominator.edn:3500-3536`).
+(`runs/F12-organise/11-d2-denominator.edn:6120-6156`).
 
 ## Three arms, with measured costs
 
@@ -114,18 +114,18 @@ per-condition read-back is in run record `:head-gate-blocker/:rules`
    makes the acting-order half true by admitting rounds 3/4/7, while the score
    remains the primary 15→15. Its measured cost is two denominators and 73
    additional acting-order rounds (102 rather than 29), including the three
-   contention rounds (`runs/F12-organise/11-d2-denominator.edn:5-602` and
+   contention rounds (`runs/F12-organise/11-d2-denominator.edn:1282-1879` and
    `:1071-1075`, run records `:arm-b/:worker/:arms` and
    `:arm-b/:worker/:nested-round-set-floor`).
 2. Keep acting order and score on primary. Its measured cost is O4
    exercised-false: zero contentions, unchanged order, and 15→15 over 29 rounds
-   (`runs/F12-organise/11-d2-denominator.edn:1163`, run record
+   (`runs/F12-organise/11-d2-denominator.edn:3175`, run record
    `:arm-b/:worker/:arms`, denominator `:primary`).
 3. State O4 over the full play and report its denominator. Over **103** rounds
    O4 is true, contention and fired-rule differences are rounds 3/4/7, and the
    score is 21→20. Its measured cost relative to transcript is one extra round
    and a differently counted score (21→20 rather than 20→19)
-   (`runs/F12-organise/11-d2-denominator.edn:607-933`, run record
+   (`runs/F12-organise/11-d2-denominator.edn:794-1120`, run record
    `:arm-b/:worker/:full-play`).
 
 No arm is chosen.
@@ -135,7 +135,7 @@ No arm is chosen.
 All plants were read back before worker execution
 (`f12_d2_denominator_check.clj:132-139`). The five verdict-moving controls are
 recorded under `:controls` in
-`runs/F12-organise/11-d2-denominator.edn:1148-3013`:
+`runs/F12-organise/11-d2-denominator.edn:1880-4898`:
 
 1. Rename the fifth rule to a nonmember: the pair is absent and O4 moves to
    not-exercised (`:rename-to-nonmember`, `:2909`).
@@ -158,7 +158,7 @@ the run, moves the acceptance run from `PASS {:problems []}` to
 repair the same absence produced two empty vectors and `PASS`.
 
 The acceptance run prints `PASS` with `:problems []`
-(`runs/F12-organise/11-d2-denominator.edn:3537`); two unchanged-tree runs
+(`runs/F12-organise/11-d2-denominator.edn:6157`); two unchanged-tree runs
 produce a byte-identical artifact, sha256
 `e166e4df22c98887020cd06db0b2842eb8b195f127e8e0ba4f9ab511e4b1d5e9`
 (written at `f12_d2_denominator_check.clj:260-261`).
