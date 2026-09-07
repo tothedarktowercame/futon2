@@ -1,0 +1,104 @@
+{:check :F10-runtime-fold,
+ :facts
+ {:authority-keywords
+  #{:grounded-change
+    :artifact-only
+    :build-failed
+    :grounded-no-change
+    :abstained
+    :incomplete
+    :guardrail-refusal
+    :dispatch-failed
+    :no-selection
+    :agent-unavailable
+    :cancelled
+    :substrate-unavailable},
+  :declared-positive-masses
+  {:grounded-change 1/2,
+   :agent-unavailable 1/8,
+   :build-failed 1/8,
+   :incomplete 1/8,
+   :no-selection 1/8},
+  :derived-named-zeros
+  #{:artifact-only
+    :grounded-no-change
+    :abstained
+    :guardrail-refusal
+    :dispatch-failed
+    :cancelled
+    :substrate-unavailable},
+  :expected-positive-masses
+  {:agent-unavailable 1/8,
+   :build-failed 1/8,
+   :grounded-change 1/2,
+   :incomplete 1/8,
+   :no-selection 1/8},
+  :fold-entries
+  [{:layer/id :ruled-outcome-c,
+    :in-ruled-sum :yes,
+    :folded? false,
+    :basis "futon2:holes/labs/wm-contract/aif-equations.edn:211-214"}
+   {:layer/id :c-int,
+    :in-ruled-sum :no,
+    :folded? true,
+    :basis "futon2:src/futon2/aif/preferences.clj:9-24"}
+   {:layer/id :c-ser,
+    :in-ruled-sum :yes,
+    :folded? false,
+    :basis
+    "futon2:holes/labs/wm-contract/C537-serendipity-shapes-C.md:49-59"}
+   {:layer/id :c-mis,
+    :in-ruled-sum :undeclared,
+    :folded? false,
+    :basis "futon2:src/futon2/aif/mission_c.clj:377,422,500,558"}],
+  :lean-correspondence
+  {:runtime
+   #{"artifactOnly"
+     "guardrailRefusal"
+     "buildFailed"
+     "noSelection"
+     "abstained"
+     "incomplete"
+     "cancelled"
+     "dispatchFailed"
+     "substrateUnavailable"
+     "groundedNoChange"
+     "groundedChange"
+     "agentUnavailable"},
+   :lean
+   #{"artifactOnly"
+     "guardrailRefusal"
+     "buildFailed"
+     "noSelection"
+     "abstained"
+     "incomplete"
+     "cancelled"
+     "dispatchFailed"
+     "substrateUnavailable"
+     "groundedNoChange"
+     "groundedChange"
+     "agentUnavailable"}},
+  :mass-sum 1N,
+  :measured-callers [],
+  :retyped-named-zeros #{},
+  :support
+  #{:grounded-change
+    :artifact-only
+    :build-failed
+    :grounded-no-change
+    :abstained
+    :incomplete
+    :guardrail-refusal
+    :dispatch-failed
+    :no-selection
+    :agent-unavailable
+    :cancelled
+    :substrate-unavailable},
+  :support-width 12},
+ :plants
+ [{:plant :narrow-support-to-five, :landed? true, :verdict false}
+  {:plant :change-mass, :landed? true, :verdict false}
+  {:plant :retype-one-named-zero, :landed? true, :verdict false}
+  {:plant :claim-folded-without-callers, :landed? true, :verdict false}
+  {:plant :move-c-int-into-sum, :landed? true, :verdict false}],
+ :verdict true}
