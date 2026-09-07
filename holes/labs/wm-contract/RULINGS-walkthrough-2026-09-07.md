@@ -106,8 +106,32 @@ the F11 question forming.
   and receipt.md byte-identical, graph.edn differed in exactly one line
   (the futon2 HEAD pin, which their own commit had advanced) — content
   deterministic; commit touched only runs/D1-evidence/.
-- Still owed before D1 returns to Joe: the small worked KL example
-  (half 1, claude-1 direct).
+- Evidence half 1 LANDED (claude-1 direct, 2026-09-07):
+  `runs/D1-evidence/kl_worked_example.py` → `kl-worked-example.edn`,
+  recomputed from `data/wm-full-loop` (86 attempt dirs; 68 (π,o) pairs +
+  14 no-recoverable-π + 4 no-outcome = the NOTE's 82 closed attempts,
+  reconciled). Findings:
+  1. Only **5 of the 14 named dispositions occur** in this corpus slice
+     (:grounded-change :build-failed :no-selection :incomplete
+     :agent-unavailable) — the domain is declared wider than the data yet
+     inhabits.
+  2. Q(o|π) genuinely discriminates: learn-action-class is 85%
+     :no-selection; repair-machine-failure and advance-mission are
+     build-failed-heavy with ~0.33–0.39 grounded-change;
+     P(grounded-change | repair-machine-failure) = 0.3929 = 11/28,
+     matching the NOTE exactly.
+  3. **The choice of C flips the policy ranking** — under C-uniform,
+     :address-sorry ranks LAST (KL 1.61); under a seeded C with mass on
+     :grounded-change it ranks SECOND (0.69) and :learn-action-class
+     drops to last. C placement is a real lever, not decoration — which
+     is what makes the preference registry consequential.
+  4. Honest caveat: :address-sorry is n=2 (Q = 1.0 grounded-change on two
+     samples), and its swing between rankings is the n=2-not-a-rate bound
+     made visible. Two small divergences from the NOTE's quoted rates
+     (advance-mission 6 pairs here vs 8 there; learn-action-class 26 vs
+     25) — different π-recovery method, recorded not hidden.
+- D1's commissioned evidence is now COMPLETE (both halves). Ready to
+  return to Joe for ruling alongside the spectral findings above.
 - Registry transcription: deferred with the ruling.
 
 ## 3. F10 / D2 — family of C's or one C over the tagged sum

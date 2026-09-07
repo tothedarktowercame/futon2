@@ -1,0 +1,15 @@
+{:schema :kl-worked-example-v1
+ :recomputed-from "data/wm-full-loop (86 attempt dirs walked, sorted)"
+ :pairs 68 :no-recoverable-pi 14 :no-outcome 4
+ :policies [:address-sorry :advance-mission :learn-action-class :repair-machine-failure]
+ :outcomes [:agent-unavailable :build-failed :grounded-change :incomplete :no-selection]
+ :q-by-policy {:address-sorry {:agent-unavailable 0.000000 :build-failed 0.000000 :grounded-change 1.000000 :incomplete 0.000000 :no-selection 0.000000}
+   :advance-mission {:agent-unavailable 0.000000 :build-failed 0.500000 :grounded-change 0.333333 :incomplete 0.166667 :no-selection 0.000000}
+   :learn-action-class {:agent-unavailable 0.000000 :build-failed 0.000000 :grounded-change 0.115385 :incomplete 0.038462 :no-selection 0.846154}
+   :repair-machine-failure {:agent-unavailable 0.035714 :build-failed 0.571429 :grounded-change 0.392857 :incomplete 0.000000 :no-selection 0.000000}}
+ :c-candidates {:C-uniform {:agent-unavailable 0.200000 :build-failed 0.200000 :grounded-change 0.200000 :incomplete 0.200000 :no-selection 0.200000}
+                :C-seeded {:agent-unavailable 0.125000 :build-failed 0.125000 :grounded-change 0.500000 :incomplete 0.125000 :no-selection 0.125000}}
+ :risk {:C-seeded {:address-sorry 0.693147 :advance-mission 0.605939 :learn-action-class 1.403648 :repair-machine-failure 0.728988}
+        :C-uniform {:address-sorry 1.609438 :advance-mission 0.598034 :learn-action-class 1.093602 :repair-machine-failure 0.803600}}
+ :ranking {:C-seeded [:advance-mission :address-sorry :repair-machine-failure :learn-action-class] :C-uniform [:advance-mission :repair-machine-failure :learn-action-class :address-sorry]}
+ :not-claimed "The seeded C is an illustration of a registry seed, not a ruling; no registry is touched. Attempts without recoverable pi are counted, not dropped silently."}
