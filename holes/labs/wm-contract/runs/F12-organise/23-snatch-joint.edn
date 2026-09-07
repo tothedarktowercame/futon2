@@ -1,0 +1,152 @@
+{:any-row-carries-edges-and-a-moved-precedence? true,
+ :census-gap
+ {:before-after-key-path "not found",
+  :carries-both? false,
+  :cascade-edge-key-paths [],
+  :has-before-after-pair? false,
+  :o4-key-paths ["not found"],
+  :o4-shape :absent,
+  :pointers
+  ["futon2:holes/labs/wm-contract/runs/F12-organise/20-o4-edges-census.edn:238-249"
+   "futon2:holes/labs/wm-contract/f12_o4_edges_census.bb:8-22"]},
+ :findings [],
+ :futon3-pin "cdb5e8a56fd907beb6a99f8b88af9de50ff93126",
+ :mutation-plants
+ [{:landed? true, :plant :empty-edge-set, :verdict-after false}
+  {:landed? true,
+   :plant :flatten-precedence-after,
+   :verdict-after false}
+  {:landed? true, :plant :drop-scenario, :verdict-after false}
+  {:landed? true, :plant :repoint-census-gap, :verdict-after false}],
+ :record :F12-slice-8-snatch-joint-exemplar,
+ :rows
+ [{:acting-order-moved? true,
+   :carries-edges-and-a-moved-precedence? true,
+   :edge-count 3,
+   :edges
+   [[:snatch/an-unmodelled-response-stops-the-line
+     :snatch/protect-the-unprotected-move]
+    [:snatch/probe-before-committing
+     :snatch/protect-the-unprotected-move]
+    [:snatch/protect-the-unprotected-move
+     :snatch/institutions-vary-by-position-and-force]],
+   :o4-holds? true,
+   :precedence-moved? true,
+   :reproduces-record? true,
+   :scenario [:g1 :cautious],
+   :score-after 0,
+   :score-before 0,
+   :score-moved? false}
+  {:acting-order-moved? true,
+   :carries-edges-and-a-moved-precedence? true,
+   :edge-count 3,
+   :edges
+   [[:snatch/escalate-only-as-far-as-you-can-lose
+     :snatch/protect-the-unprotected-move]
+    [:snatch/probe-before-committing
+     :snatch/protect-the-unprotected-move]
+    [:snatch/protect-the-unprotected-move
+     :snatch/institutions-vary-by-position-and-force]],
+   :o4-holds? true,
+   :precedence-moved? true,
+   :reproduces-record? true,
+   :scenario [:g1 :sharer],
+   :score-after 15,
+   :score-before 15,
+   :score-moved? false}
+  {:acting-order-moved? true,
+   :carries-edges-and-a-moved-precedence? true,
+   :edge-count 2,
+   :edges
+   [[:snatch/probe-before-committing
+     :snatch/protect-the-unprotected-move]
+    [:snatch/protect-the-unprotected-move
+     :snatch/institutions-vary-by-position-and-force]],
+   :o4-holds? true,
+   :precedence-moved? true,
+   :reproduces-record? true,
+   :scenario [:g1 :snatcher],
+   :score-after -5,
+   :score-before -5,
+   :score-moved? false}
+  {:acting-order-moved? true,
+   :carries-edges-and-a-moved-precedence? true,
+   :edge-count 5,
+   :edges
+   [[:snatch/forced-play-needs-a-loss-floor
+     :snatch/preserve-the-right-to-abstain]
+    [:snatch/preserve-the-right-to-abstain
+     :snatch/institutions-vary-by-position-and-force]
+    [:snatch/preserve-the-right-to-abstain
+     :snatch/protect-the-unprotected-move]
+    [:snatch/probe-before-committing
+     :snatch/protect-the-unprotected-move]
+    [:snatch/protect-the-unprotected-move
+     :snatch/institutions-vary-by-position-and-force]],
+   :o4-holds? true,
+   :precedence-moved? true,
+   :reproduces-record? true,
+   :scenario [:g2 :snatcher],
+   :score-after -10,
+   :score-before -10,
+   :score-moved? false}
+  {:acting-order-moved? true,
+   :carries-edges-and-a-moved-precedence? true,
+   :edge-count 10,
+   :edges
+   [[:snatch/consult-the-remedy-before-exiting
+     :snatch/mark-without-force]
+    [:snatch/consult-the-remedy-before-exiting
+     :snatch/revert-then-invert]
+    [:snatch/mark-without-force
+     :snatch/institutions-vary-by-position-and-force]
+    [:snatch/mark-without-force :snatch/protect-the-unprotected-move]
+    [:snatch/probe-before-committing
+     :snatch/protect-the-unprotected-move]
+    [:snatch/protect-the-unprotected-move
+     :snatch/institutions-vary-by-position-and-force]
+    [:snatch/re-enter-after-observed-repair
+     :snatch/consult-the-remedy-before-exiting]
+    [:snatch/re-enter-after-observed-repair :snatch/revert-then-invert]
+    [:snatch/revert-then-invert
+     :snatch/institutions-vary-by-position-and-force]
+    [:snatch/revert-then-invert :snatch/protect-the-unprotected-move]],
+   :o4-holds? true,
+   :precedence-moved? true,
+   :reproduces-record? true,
+   :scenario [:g4 :snatcher],
+   :score-after -5,
+   :score-before 3,
+   :score-moved? true}
+  {:acting-order-moved? true,
+   :carries-edges-and-a-moved-precedence? true,
+   :edge-count 3,
+   :edges
+   [[:snatch/escalate-only-as-far-as-you-can-lose
+     :snatch/protect-the-unprotected-move]
+    [:snatch/probe-before-committing
+     :snatch/protect-the-unprotected-move]
+    [:snatch/protect-the-unprotected-move
+     :snatch/institutions-vary-by-position-and-force]],
+   :o4-holds? true,
+   :precedence-moved? true,
+   :reproduces-record? true,
+   :scenario [:g5 :sharer],
+   :score-after 15,
+   :score-before 15,
+   :score-moved? false}],
+ :rows-carrying-both
+ [[:g1 :cautious]
+  [:g1 :sharer]
+  [:g1 :snatcher]
+  [:g2 :snatcher]
+  [:g4 :snatcher]
+  [:g5 :sharer]],
+ :rows-total 6,
+ :rows-where-the-score-moved [[:g4 :snatcher]],
+ :source-pointers
+ ["futon3:checks/find_organise.clj:603-633"
+  "futon3:checks/snatch-cascade.edn:84"
+  "futon3:checks/snatch-cascade.edn:210-211"
+  "futon3:checks/find-organise.edn:62-64"],
+ :verdict :pass}
