@@ -1,0 +1,786 @@
+{:basis
+ {:census
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/F12-organise/00-census.edn",
+  :futon3 "/home/joe/code/futon3",
+  :records
+  ["futon3/checks/alfworld-cascade.edn"
+   "futon3/checks/ants-cascade.edn"
+   "futon3/checks/construct-cascade.edn"
+   "futon3/checks/open-cascade-short-cue.edn"
+   "futon3/checks/open-cascade.edn"
+   "futon3/checks/retrodiction-cascade-per-clause.edn"
+   "futon3/checks/retrodiction-cascade.edn"
+   "futon3/checks/snatch-cascade.edn"
+   "futon3/checks/zaif-cascade.edn"]},
+ :non-empty-added-sets
+ [{:added-count 2,
+   :added-disjoint-from-nodes? true,
+   :added-inside-nodes 0,
+   :at [:scenarios 0],
+   :carries-edges? false,
+   :edge-count 0,
+   :edges-touching-an-added-node 0,
+   :node-count 2,
+   :record "futon3/checks/snatch-cascade.edn",
+   :separates-the-two-readings? false}
+  {:added-count 2,
+   :added-disjoint-from-nodes? true,
+   :added-inside-nodes 0,
+   :at [:scenarios 1],
+   :carries-edges? false,
+   :edge-count 0,
+   :edges-touching-an-added-node 0,
+   :node-count 2,
+   :record "futon3/checks/snatch-cascade.edn",
+   :separates-the-two-readings? false}
+  {:added-count 2,
+   :added-disjoint-from-nodes? true,
+   :added-inside-nodes 0,
+   :at [:scenarios 2],
+   :carries-edges? false,
+   :edge-count 0,
+   :edges-touching-an-added-node 0,
+   :node-count 2,
+   :record "futon3/checks/snatch-cascade.edn",
+   :separates-the-two-readings? false}
+  {:added-count 4,
+   :added-disjoint-from-nodes? true,
+   :added-inside-nodes 0,
+   :at [:scenarios 3],
+   :carries-edges? false,
+   :edge-count 0,
+   :edges-touching-an-added-node 0,
+   :node-count 3,
+   :record "futon3/checks/snatch-cascade.edn",
+   :separates-the-two-readings? false}
+  {:added-count 3,
+   :added-disjoint-from-nodes? true,
+   :added-inside-nodes 0,
+   :at [:scenarios 4],
+   :carries-edges? false,
+   :edge-count 0,
+   :edges-touching-an-added-node 0,
+   :node-count 3,
+   :record "futon3/checks/snatch-cascade.edn",
+   :separates-the-two-readings? false}
+  {:added-count 2,
+   :added-disjoint-from-nodes? true,
+   :added-inside-nodes 0,
+   :at [:scenarios 5],
+   :carries-edges? false,
+   :edge-count 0,
+   :edges-touching-an-added-node 0,
+   :node-count 2,
+   :record "futon3/checks/snatch-cascade.edn",
+   :separates-the-two-readings? false}
+  {:added-count 2,
+   :added-disjoint-from-nodes? true,
+   :added-inside-nodes 0,
+   :at [:scenarios 7],
+   :carries-edges? false,
+   :edge-count 0,
+   :edges-touching-an-added-node 0,
+   :node-count 2,
+   :record "futon3/checks/snatch-cascade.edn",
+   :separates-the-two-readings? false}
+  {:added-count 2,
+   :added-disjoint-from-nodes? true,
+   :added-inside-nodes 0,
+   :at [:scenarios 11],
+   :carries-edges? false,
+   :edge-count 0,
+   :edges-touching-an-added-node 0,
+   :node-count 2,
+   :record "futon3/checks/snatch-cascade.edn",
+   :separates-the-two-readings? false}],
+ :per-record
+ [{:cascades [],
+   :o1-shaped-cascades 0,
+   :record "futon3/checks/alfworld-cascade.edn",
+   :status :read}
+  {:cascades [],
+   :o1-shaped-cascades 0,
+   :record "futon3/checks/ants-cascade.edn",
+   :status :read}
+  {:cascades [],
+   :o1-shaped-cascades 0,
+   :record "futon3/checks/construct-cascade.edn",
+   :status :read}
+  {:cascades
+   [{:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/cx-new-blocks-emacs
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/cx-new-blocks-emacs
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/fail-invoke-error
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/fail-invoke-error
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 8,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/jvm-provenance-before-multi-jvm
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 1,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/jvm-provenance-before-multi-jvm
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 4,
+     :edges-touching-an-added-node 0,
+     :node-count 24,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/I4 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 4,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade],
+     :carries-edges? true,
+     :edge-count 4,
+     :edges-touching-an-added-node 0,
+     :node-count 12,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/RUN4 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 5,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :wm/RUN4
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 6,
+     :edges-touching-an-added-node 0,
+     :node-count 21,
+     :record "futon3/checks/open-cascade-short-cue.edn",
+     :separates-the-two-readings? false}],
+   :o1-shaped-cascades 10,
+   :record "futon3/checks/open-cascade-short-cue.edn",
+   :status :read}
+  {:cascades
+   [{:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/cx-new-blocks-emacs
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 2,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/cx-new-blocks-emacs
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/fail-invoke-error
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/fail-invoke-error
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/jvm-provenance-before-multi-jvm
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 1,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/jvm-provenance-before-multi-jvm
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/I4 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/RUN4 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :wm/RUN4
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/open-cascade.edn",
+     :separates-the-two-readings? false}],
+   :o1-shaped-cascades 10,
+   :record "futon3/checks/open-cascade.edn",
+   :status :read}
+  {:cascades
+   [{:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/agency-desktop-save
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 24,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/agency-desktop-save
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 1,
+     :edges-touching-an-added-node 0,
+     :node-count 30,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/kangaroo-v1-pouch
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 1,
+     :edges-touching-an-added-node 0,
+     :node-count 50,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/kangaroo-v1-pouch
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 2,
+     :edges-touching-an-added-node 0,
+     :node-count 60,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/AC6 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 3,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items :wm/AC6 :runs :widen-to-the-marginal-gain-floor :cascade],
+     :carries-edges? true,
+     :edge-count 3,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/C23 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 8,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items :wm/C23 :runs :widen-to-the-marginal-gain-floor :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 0,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/D0 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 3,
+     :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+     :separates-the-two-readings? false}],
+   :o1-shaped-cascades 10,
+   :record "futon3/checks/retrodiction-cascade-per-clause.edn",
+   :status :read}
+  {:cascades
+   [{:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/agency-desktop-save
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 24,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/agency-desktop-save
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 1,
+     :edges-touching-an-added-node 0,
+     :node-count 30,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/kangaroo-v1-pouch
+      :runs
+      :widen-to-a-budget
+      :cascade],
+     :carries-edges? true,
+     :edge-count 1,
+     :edges-touching-an-added-node 0,
+     :node-count 50,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items
+      :ticket/kangaroo-v1-pouch
+      :runs
+      :widen-to-the-marginal-gain-floor
+      :cascade],
+     :carries-edges? true,
+     :edge-count 2,
+     :edges-touching-an-added-node 0,
+     :node-count 60,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/AC6 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 3,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items :wm/AC6 :runs :widen-to-the-marginal-gain-floor :cascade],
+     :carries-edges? true,
+     :edge-count 3,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/C23 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 17,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items :wm/C23 :runs :widen-to-the-marginal-gain-floor :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 1,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:items :wm/D0 :runs :widen-to-a-budget :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 20,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at
+     [:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade],
+     :carries-edges? true,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 3,
+     :record "futon3/checks/retrodiction-cascade.edn",
+     :separates-the-two-readings? false}],
+   :o1-shaped-cascades 10,
+   :record "futon3/checks/retrodiction-cascade.edn",
+   :status :read}
+  {:cascades
+   [{:added-count 2,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 0],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 2,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 2,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 1],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 2,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 2,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 2],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 2,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 4,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 3],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 3,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 3,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 4],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 3,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 2,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 5],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 2,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 6],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 1,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 2,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 7],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 2,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 8],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 1,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 9],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 1,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 0,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 10],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 1,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}
+    {:added-count 2,
+     :added-disjoint-from-nodes? true,
+     :added-inside-nodes 0,
+     :at [:scenarios 11],
+     :carries-edges? false,
+     :edge-count 0,
+     :edges-touching-an-added-node 0,
+     :node-count 2,
+     :record "futon3/checks/snatch-cascade.edn",
+     :separates-the-two-readings? false}],
+   :o1-shaped-cascades 12,
+   :record "futon3/checks/snatch-cascade.edn",
+   :status :read}
+  {:cascades [],
+   :o1-shaped-cascades 0,
+   :record "futon3/checks/zaif-cascade.edn",
+   :status :read}],
+ :problems [],
+ :producer
+ {:added-by-organise-sites
+  [{:line 412, :text ":added-by-organise #{}"}],
+  :file "futon3/checks/construct_cascade.clj",
+  :fixed-to-a-literal-empty-set? true},
+ :rollup
+ {:o1-shaped-cascades 52,
+  :records 9,
+  :separating-the-two-readings 0,
+  :whose-added-set-is-disjoint-from-its-own-nodes 8,
+  :with-a-non-empty-added-set 8},
+ :separating-cascades [],
+ :slice :F12-slice-11,
+ :what
+ "which set O3's fast-forward quantifies over: whether any recorded cascade separates the node-set reading from the no-bootstrap reading"}

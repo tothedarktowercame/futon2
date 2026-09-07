@@ -537,7 +537,51 @@
    :not-claimed "This entry says nothing about D1 (which carrier the four O-laws are stated of), D2 (which denominator O4's acting order is read over), D3 (whether an O4 witness may be reached by an encoding written after the law), or the O3 field question (mathlib4/DarkTower/WarMachine/Holes.lean:1034). O4 is still not stateable at the arm carrier: ArmOneCascade has none of its six fields."
    :evidence "holes/labs/wm-contract/C547-F12-choice-point.md; holes/labs/wm-contract/C548-F12-support-grain-arm.md; holes/labs/wm-contract/C543-F12-d1-arms-run.md; holes/labs/wm-contract/C544-F12-organise-function-conformance.md; holes/labs/wm-contract/C545-F12-admitting-arm.md; holes/labs/wm-contract/C546-F12-attribution-arm.md; holes/labs/wm-contract/runs/F12-organise/06-attribution-arm.edn"
    :all-arms-run "2026-09-07, F12 slice 10: every arm now carries a measured cost. NO RULING IS TAKEN AND NONE IS IMPLIED -- :status is still :observed-not-decided and there is no :ruling key. What the fourth arm changed is that the free hand C547 section 6 named inside the pay arm is no longer unmeasured."
-   :registered-by [:claude-wm-edge] :at "2026-09-07" :row :F12}}
+   :registered-by [:claude-wm-edge] :at "2026-09-07" :row :F12}
+
+  :organise-o3-field
+  {:all-arms-run
+   "2026-09-07, F12 slice 11. The two readings the sources carry were run by slices 2, 6 and 7; the third reading is run by slice 11 in mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean. NO RULING IS TAKEN AND NONE IS IMPLIED. What remains for a slice to run on this choice is nothing; what would change the measurement is a producer, named above.",
+   :arms
+   [{:arm :over-the-selected-set,
+     :buys
+     "organise cannot justify an edge by anything it did itself: the endpoints are the caller's, so the law is not self-referential in any reading. It is also the only one of the three that needs no field the declared carrier lacks.",
+     :costs
+     "REFUTED ON THE RECORDED RUN, which is the strongest fact any arm of this choice carries. The one edge the zaif run records runs 18-19 and both endpoints were ADMITTED rather than selected, so fast-forward over the 11 selected is empty and the reading contradicts the record (mathlib4/DarkTower/WarMachine/Holes.lean:1034). At the function carrier the same cost is a theorem about every conformant implementation, not about one: no conformant f returns the recorded edge on the recorded selected input (mathlib4/DarkTower/WarMachine/F12Conformance.lean:141), and the same implementation does return it once all twenty nodes are supplied (mathlib4/DarkTower/WarMachine/F12Conformance.lean:149) -- so it is the missing origin and not the edge law that puts the run out of reach. At the admitting carrier the reading leaves the recorded organised edge set EMPTY (mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:262).",
+     :run-by "F12 slices 2, 6 and 7; mathlib4 61c4825dc3, 0c5745c39e, 0691f74e48, 7d4f6ffca3, acb4e95bcf",
+     :what-it-is
+     "fast-forward over the set organise was HANDED -- `.selected` at the value carrier (mathlib4/DarkTower/WarMachine/Holes.lean:909), `sel` at the function carrier (mathlib4/DarkTower/WarMachine/F12Conformance.lean:23). This is what the Lean file has said since before the row opened."}
+    {:arm :over-the-node-set,
+     :buys
+     "it is the only reading the recorded run satisfies. O3 is proved of the zaif fixture in this form (mathlib4/DarkTower/WarMachine/Holes.lean:1014), and it agrees with the code that produced the record, so the Lean law and its Clojure mirror are one proposition rather than two.",
+     :costs
+     "ORGANISE MAY USE ITS OWN ADDITIONS AS FAST-FORWARD ENDPOINTS, so the law is partly self-justifying: organise adds a node, authors an edge through it, and O3 confirms the edge because the node organise added is in `nodes`. Constructed and machine-checked at mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:101 -- on the recorded inputs a node-set-conformant implementation (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:72) returns the edge 26-25, and BOTH its endpoints are nodes organise itself added (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:90). The cost is not visible on any recorded run: see :measurement-that-separates-them.",
+     :run-by "F12 slices 2, 6 and 11; mathlib4 61c4825dc3, 0c5745c39e, 1e6625bbf6",
+     :what-it-is
+     "fast-forward over everything the cascade ended up containing -- `nodes`. This is what the running Clojure does: futon3:checks/find_organise.clj:529 states the law over `nodes` and futon3:checks/construct_cascade.clj:415 builds the edges the same way."}
+    {:arm :over-the-nodes-organise-did-not-add,
+     :buys
+     "the self-justification is closed by construction: the implementation that exhibits it is node-set conformant and NOT no-bootstrap conformant, refuted on the recorded inputs at the edge 26-25 (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:119), because outside its organise-added field precisely the caller's selection remains (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:81). And it costs the recorded run NOTHING at the value carrier: `addedByOrganise` is empty in both recorded fixtures (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:25, mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:38), so the O3 already proved of the zaif fixture IS its no-bootstrap O3 (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:52), on an edge relation shown inhabited rather than assumed (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:186).",
+     :costs
+     "THE READING IS ONE PROPOSITION WITH TWO CONTENTS, and which it has is decided by D1 rather than by this choice. At CascadeDiff the field is `selected ∪ admittedBy`, which is the whole recorded node set (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:46), and the recorded edge 18-19 is inside it (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:200). At the function carrier `Cascade` (mathlib4/DarkTower/WarMachine/Holes.lean:29-35) has no `admittedBy` field, so the same reading is just the caller's selection and NO conformant function returns the recorded edge on the recorded selected input (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:172) -- the selected arm's cost, inherited. Stated against overstating it: on the recorded selected input the no-bootstrap relation is EMPTY (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:128), so the separation above is checked against a relation shown inhabited on a constructed input (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:162) and not on a recorded one.",
+     :run-by "F12 slice 11 (C549); mathlib4 1e6625bbf6 + 28c518612a",
+     :what-it-is
+     "the no-bootstrap reading: fast-forward over the nodes that came in from OUTSIDE organise -- `nodes \\ addedByOrganise` at the function carrier (mathlib4/DarkTower/WarMachine/F12O3FieldArm.lean:16) and `selected ∪ admittedBy` at CascadeDiff. It refuses the node-set arm's self-justification without giving up the admitted origin the selected arm gives up."}],
+   :at "2026-09-07",
+   :evidence
+   "holes/labs/wm-contract/C549-F12-o3-field-arm.md; holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn; holes/labs/wm-contract/f12_o3_field_check.bb; holes/labs/wm-contract/C540-F12-zaif-cascadediff-witness.md; holes/labs/wm-contract/C544-F12-organise-function-conformance.md; holes/labs/wm-contract/C545-F12-admitting-arm.md",
+   :measurement-that-separates-them
+   "NO RECORDED CASCADE SEPARATES THE NODE-SET READING FROM THE NO-BOOTSTRAP READING, and the reason is the constructor rather than the runs. Recomputed 2026-09-07 by holes/labs/wm-contract/f12_o3_field_check.bb into holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn: over the 52 O1-shaped cascades in the nine records slice 1's census names, 0 carry an edge running through a node organise added, which is exactly the condition under which the two readings differ. Eight cascades DO carry a non-empty :added-by-organise, all eight in futon3:checks/snatch-cascade.edn, and in all eight that set is DISJOINT from the cascade's own :nodes and the cascade carries no :edges -- so the field there does not denote O1's second origin and cannot exercise the question. The sole producer of an O1-shaped cascade fixes the field to a literal empty set (futon3:checks/construct_cascade.clj:412), so no run of it can separate them: the separating witness has to be CONSTRUCTED, and slice 11 constructs it in Lean. THE SELECTED READING, by contrast, is separated by the recorded data alone (mathlib4/DarkTower/WarMachine/Holes.lean:1034).",
+   :not-claimed
+   "This entry says nothing about D1 (which CARRIER the four O-laws are stated of), about D2, about D3, or about the third-origin choice registered separately as :organise-third-origin. It takes no ruling: :status is :observed-not-decided and there is no :ruling key. The sorry at mathlib4/DarkTower/WarMachine/Holes.lean:861 is neither discharged nor amended by it.",
+   :question
+   "O3 says organise's edges are exactly the authored fast-forwards. WHICH SET the fast-forward quantifies over is not determined by the theory and the sources disagree: mathlib4/DarkTower/WarMachine/Holes.lean:909 quantifies over `.selected`, while the Clojure law futon3:checks/find_organise.clj:529 and the constructor that builds the edges futon3:checks/construct_cascade.clj:415 both quantify over `nodes`. On the C59 fixture (mathlib4/DarkTower/WarMachine/Holes.lean:872) nodes = selected, so the two are one proposition and the file never had to choose; on the recorded zaif run they are not (mathlib4/DarkTower/WarMachine/Holes.lean:1034). Slice 2 recorded the disagreement and left it. This entry registers it with its arms named, each run.",
+   :registered-by [:claude-wm-edge],
+   :row :F12,
+   :status :observed-not-decided,
+   :what-would-change-the-measurement
+   "a recorded cascade in which organise's own closure contributes a fast-forward endpoint. That needs a producer that populates :added-by-organise; futon3:checks/construct_cascade.clj:412 writes #{} as a literal and futon3:checks/construct_open_cascade.clj:145 reads that same value, so today there is none. The up-closure temperament named at mathlib4/DarkTower/WarMachine/Holes.lean:861 is the one that would (mathlib4/DarkTower/WarMachine/F12Conformance.lean:116 adds recorded vertex 26 through authored edge 6-26), and it is not what any recorded run ran."}
+  }
 
  ;; Theory imports the code does not realise (C448 5b). Recorded here until a
  ;; Holes.lean declaration carries each.
