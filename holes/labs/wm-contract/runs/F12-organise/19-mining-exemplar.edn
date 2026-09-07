@@ -1,0 +1,140 @@
+{:check :F12-mining-exemplar,
+ :conformance
+ {:ruled-clause-set-used #{"o1" "oattr" "oauth" "o4" "o3" "osel" "o2"},
+  :all-seven-used? true,
+  :new-conformant-structure-count 0,
+  :uses-sans-o3? true,
+  :uses-sans-o4? true,
+  :sans-o3-defined-in-ruled? true,
+  :sans-o4-defined-in-ruled? true},
+ :forbidden {:sorry 0, :axiom 0, :native-decide 0},
+ :holes-lean-head "61c4825dc3e373fd1b761b800814bf85f5770b88",
+ :library-edge-absence
+ {:patterns
+  [{:member :aif/hierarchical-and-temporal-depth,
+    :file-exists? true,
+    :why-how-targets
+    ["R15" "own" "problems/r15-hierarchy-and-timescale"],
+    :see-also-targets
+    ["aif/temporal-depth-beyond-greedy"
+     "aif/hierarchical-budget-aware-action-selection"
+     "aif/policy-precision-commitment-temperature"]}
+   {:member :aif/candidate-pattern-action-space,
+    :file-exists? true,
+    :why-how-targets
+    ["war-room/wr-19-tension-must-generate-not-only-rank"
+     "R6"
+     "own"
+     "problems/r6-candidate-action-space-and-selection"
+     "problems/tension-proposes-candidates"],
+    :see-also-targets ["aif/evidence-precision-registry"]}
+   {:member :aif/expected-free-energy-scorecard,
+    :file-exists? true,
+    :why-how-targets
+    ["war-room/wr-27-a-loop-is-born-instrumented-for-its-gain"
+     "R5"
+     "own"
+     "problems/g-over-cascade-is-undefined"
+     "problems/r5-expected-free-energy-core"
+     "problems/satisfied-rungs-are-counted-and-surfaced"
+     "problems/catalogue-r5-efe-label-auditability"],
+    :see-also-targets []}],
+  :why-how-internal-targets [],
+  :no-library-edge-among-members? true},
+ :plants
+ [{:plant :reverse-recorded-edge,
+   :mutation-target :lean,
+   :landed? true,
+   :citation-multiset-unchanged? nil,
+   :verdict false}
+  {:plant :permute-transcribed-precedence,
+   :mutation-target :lean,
+   :landed? true,
+   :citation-multiset-unchanged? nil,
+   :verdict false}
+  {:plant :exchange-declaration-citations,
+   :mutation-target :lean,
+   :landed? true,
+   :citation-multiset-unchanged? true,
+   :verdict false}
+  {:plant :shift-declaration-citation,
+   :mutation-target :lean,
+   :landed? true,
+   :citation-multiset-unchanged? nil,
+   :verdict false}
+  {:plant :append-sorry,
+   :mutation-target :lean,
+   :landed? true,
+   :citation-multiset-unchanged? nil,
+   :verdict false}
+  {:plant :then-span-outside-block,
+   :mutation-target :record,
+   :landed? true,
+   :citation-multiset-unchanged? nil,
+   :verdict false}],
+ :pointer-bindings
+ {:actual
+  {"miningActingOrder" #{"70-76" "72-75"},
+   "miningAdmitted" #{"30-32"},
+   "miningPrecedence" #{"66-69"},
+   "miningRepo" #{"34-43"},
+   "miningSelected" #{"26-29"},
+   "module-header" #{"13-25"}},
+  :expected
+  {"miningActingOrder" #{"70-76" "72-75"},
+   "miningAdmitted" #{"30-32"},
+   "miningPrecedence" #{"66-69"},
+   "miningRepo" #{"34-43"},
+   "miningSelected" #{"26-29"},
+   "module-header" #{"13-25"}},
+  :match? true},
+ :source-pins
+ {:futon2 "5620ecd3bc33f4bf622f439e8c741708a28f4c59",
+  :futon3 "cdb5e8a56fd907beb6a99f8b88af9de50ff93126"},
+ :then-correspondence
+ [{:file-exists? true,
+   :member :aif/candidate-pattern-action-space,
+   :pattern-id-matches-path? true,
+   :rule :construct-a-bounded-explicit-candidate-menu,
+   :span-inside-marker-inclusive? true,
+   :span-inside-zaif-strict? false,
+   :span-is-exactly-the-then-block? true,
+   :span-is-non-empty? true,
+   :then-block [26 27],
+   :then-source
+   "library/aif/candidate-pattern-action-space.flexiarg:26-27"}
+  {:file-exists? true,
+   :member :aif/hierarchical-and-temporal-depth,
+   :pattern-id-matches-path? true,
+   :rule :keep-hierarchical-quantities-distinct,
+   :span-inside-marker-inclusive? true,
+   :span-inside-zaif-strict? false,
+   :span-is-exactly-the-then-block? true,
+   :span-is-non-empty? true,
+   :then-block [32 38],
+   :then-source
+   "library/aif/hierarchical-and-temporal-depth.flexiarg:32-38"}
+  {:file-exists? true,
+   :member :aif/expected-free-energy-scorecard,
+   :pattern-id-matches-path? true,
+   :rule :record-the-ranking-terms,
+   :span-inside-marker-inclusive? true,
+   :span-inside-zaif-strict? false,
+   :span-is-exactly-the-then-block? true,
+   :span-is-non-empty? true,
+   :then-block [27 28],
+   :then-source
+   "library/aif/expected-free-energy-scorecard.flexiarg:27-28"}],
+ :transcription
+ {:index-map
+  #:aif{:hierarchical-and-temporal-depth 0,
+        :candidate-pattern-action-space 1,
+        :expected-free-energy-scorecard 2},
+  :selected {:record #{0 1 2}, :lean #{0 1 2}},
+  :admitted {:record #{}, :lean-empty? true},
+  :edges {:record [[0 1] [1 2]], :lean [[0 1] [1 2]]},
+  :precedence {:record [0 1 2], :lean [0 1 2]},
+  :acting-order {:record [0 1 2], :lean [0 1 2]},
+  :score-keys-found [],
+  :score-type-unit? true},
+ :verdict true}
