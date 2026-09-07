@@ -4,7 +4,7 @@
  :slice "7 -- F3 stated of the finder and measured against the record's non-self-certifying COLUMN"
  :dispatched-to "codex-2"
  :from "wm-build-work"
- :job-id "PENDING -- filled in by the lane after the bell returns"
+ :job-id "invoke-1788787984911-13717-3a5b64a0"
  :packet-goal
  "One new Lean file DarkTower/WarMachine/F11NonSelfCertifying.lean measuring what
   `Receipt.nonSelfCertifying` (mathlib4 DarkTower/WarMachine/Holes.lean:244-245)
