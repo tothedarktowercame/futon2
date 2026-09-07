@@ -1,0 +1,634 @@
+{:check "f12_discharge_check.bb",
+ :conformance-theorems
+ {"organiseByTemperamentNodes"
+  ["organiseByTemperamentNodesConformant"],
+  "organiseByTemperamentSelected"
+  ["organiseByTemperamentSelectedConformant"],
+  "organiseEmpty"
+  ["organiseEmptyNotConformantNodes"
+   "organiseEmptyNotConformantSelected"],
+  "organiseNodesUpClosure" ["organiseNodesUpClosureConformantNodes"],
+  "organiseSelectedOnly"
+  ["organiseSelectedOnlyConformant"
+   "organiseSelectedOnlyConformantNodes"],
+  "organiseUpClosure"
+  ["organiseUpClosureConformant"
+   "organiseUpClosureNotConformantNodes"]},
+ :corpus
+ {:cascades-that-tell-the-two-discharges-apart 0,
+  :cascades-with-a-non-empty-added-set 8,
+  :o1-shaped-cascades 52,
+  :per-record
+  [{:cascades [],
+    :o1-shaped-cascades 0,
+    :record "alfworld-cascade.edn"}
+   {:cascades [], :o1-shaped-cascades 0, :record "ants-cascade.edn"}
+   {:cascades [],
+    :o1-shaped-cascades 0,
+    :record "construct-cascade.edn"}
+   {:cascades
+    [{:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/cx-new-blocks-emacs
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 20,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/cx-new-blocks-emacs
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 0,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/fail-invoke-error
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 20,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/fail-invoke-error
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 8,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/jvm-provenance-before-multi-jvm
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 20,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/jvm-provenance-before-multi-jvm
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 24,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/I4 :runs :widen-to-a-budget :cascade],
+      :node-count 20,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade],
+      :node-count 12,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/RUN4 :runs :widen-to-a-budget :cascade],
+      :node-count 20,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :wm/RUN4
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 21,
+      :record "open-cascade-short-cue.edn",
+      :tells-the-two-discharges-apart? false}],
+    :o1-shaped-cascades 10,
+    :record "open-cascade-short-cue.edn"}
+   {:cascades
+    [{:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/cx-new-blocks-emacs
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 2,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/cx-new-blocks-emacs
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 0,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/fail-invoke-error
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 0,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/fail-invoke-error
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 0,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/jvm-provenance-before-multi-jvm
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 1,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/jvm-provenance-before-multi-jvm
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 0,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/I4 :runs :widen-to-a-budget :cascade],
+      :node-count 0,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items :wm/I4 :runs :widen-to-the-marginal-gain-floor :cascade],
+      :node-count 0,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/RUN4 :runs :widen-to-a-budget :cascade],
+      :node-count 0,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :wm/RUN4
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 0,
+      :record "open-cascade.edn",
+      :tells-the-two-discharges-apart? false}],
+    :o1-shaped-cascades 10,
+    :record "open-cascade.edn"}
+   {:cascades
+    [{:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/agency-desktop-save
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 24,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/agency-desktop-save
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 30,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/kangaroo-v1-pouch
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 50,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/kangaroo-v1-pouch
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 60,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/AC6 :runs :widen-to-a-budget :cascade],
+      :node-count 20,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :wm/AC6
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 20,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/C23 :runs :widen-to-a-budget :cascade],
+      :node-count 8,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :wm/C23
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 0,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/D0 :runs :widen-to-a-budget :cascade],
+      :node-count 20,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade],
+      :node-count 3,
+      :record "retrodiction-cascade-per-clause.edn",
+      :tells-the-two-discharges-apart? false}],
+    :o1-shaped-cascades 10,
+    :record "retrodiction-cascade-per-clause.edn"}
+   {:cascades
+    [{:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/agency-desktop-save
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 24,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/agency-desktop-save
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 30,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/kangaroo-v1-pouch
+       :runs
+       :widen-to-a-budget
+       :cascade],
+      :node-count 50,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :ticket/kangaroo-v1-pouch
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 60,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/AC6 :runs :widen-to-a-budget :cascade],
+      :node-count 20,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :wm/AC6
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 20,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/C23 :runs :widen-to-a-budget :cascade],
+      :node-count 17,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items
+       :wm/C23
+       :runs
+       :widen-to-the-marginal-gain-floor
+       :cascade],
+      :node-count 1,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:items :wm/D0 :runs :widen-to-a-budget :cascade],
+      :node-count 20,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at
+      [:items :wm/D0 :runs :widen-to-the-marginal-gain-floor :cascade],
+      :node-count 3,
+      :record "retrodiction-cascade.edn",
+      :tells-the-two-discharges-apart? false}],
+    :o1-shaped-cascades 10,
+    :record "retrodiction-cascade.edn"}
+   {:cascades
+    [{:added-count 2,
+      :added-inside-nodes 0,
+      :at [:scenarios 0],
+      :node-count 2,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 2,
+      :added-inside-nodes 0,
+      :at [:scenarios 1],
+      :node-count 2,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 2,
+      :added-inside-nodes 0,
+      :at [:scenarios 2],
+      :node-count 2,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 4,
+      :added-inside-nodes 0,
+      :at [:scenarios 3],
+      :node-count 3,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 3,
+      :added-inside-nodes 0,
+      :at [:scenarios 4],
+      :node-count 3,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 2,
+      :added-inside-nodes 0,
+      :at [:scenarios 5],
+      :node-count 2,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:scenarios 6],
+      :node-count 1,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 2,
+      :added-inside-nodes 0,
+      :at [:scenarios 7],
+      :node-count 2,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:scenarios 8],
+      :node-count 1,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:scenarios 9],
+      :node-count 1,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 0,
+      :added-inside-nodes 0,
+      :at [:scenarios 10],
+      :node-count 1,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}
+     {:added-count 2,
+      :added-inside-nodes 0,
+      :at [:scenarios 11],
+      :node-count 2,
+      :record "snatch-cascade.edn",
+      :tells-the-two-discharges-apart? false}],
+    :o1-shaped-cascades 12,
+    :record "snatch-cascade.edn"}
+   {:cascades [], :o1-shaped-cascades 0, :record "zaif-cascade.edn"}],
+  :producer
+  {:added-by-organise-sites
+   [{:line 412, :text ":added-by-organise #{}"}],
+   :path "futon3:checks/construct_cascade.clj",
+   :writes-an-empty-literal? true},
+  :records
+  ["alfworld-cascade.edn"
+   "ants-cascade.edn"
+   "construct-cascade.edn"
+   "open-cascade-short-cue.edn"
+   "open-cascade.edn"
+   "retrodiction-cascade-per-clause.edn"
+   "retrodiction-cascade.edn"
+   "snatch-cascade.edn"
+   "zaif-cascade.edn"],
+  :where-the-added-sets-live ["snatch-cascade.edn"]},
+ :failures [],
+ :module
+ {:declaration-count 28,
+  :declaration-lines
+  {"nonTrivialPolicyCascade" 148,
+   "organiseByTemperamentNodes" 198,
+   "organiseByTemperamentNodesConformant" 204,
+   "organiseByTemperamentNodesReadsTemperament" 230,
+   "organiseByTemperamentSelected" 156,
+   "organiseByTemperamentSelectedConformant" 162,
+   "organiseByTemperamentSelectedReadsTemperament" 188,
+   "organiseDischargeExistsNodes" 53,
+   "organiseDischargeExistsSelected" 48,
+   "organiseDischargeNotUniqueNodes" 93,
+   "organiseDischargeNotUniqueSelected" 84,
+   "organiseDischargeWitnessesAgreeOnSelected" 111,
+   "organiseEmpty" 24,
+   "organiseEmptyCascade" 16,
+   "organiseEmptyNotConformantNodes" 40,
+   "organiseEmptyNotConformantSelected" 32,
+   "organiseNodesUpClosure" 62,
+   "organiseNodesUpClosureAddsZaifVertex" 120,
+   "organiseNodesUpClosureConformantNodes" 71,
+   "organiseNodesUpClosureEdgeExists" 127,
+   "organiseNodesUpClosureNoUnauthoredEdge" 140,
+   "organiseOpaqueNoBody" 271,
+   "organiseOpaqueZaif" 256,
+   "organiseSelectedOnlyIgnoresTemperament" 240,
+   "organiseSelectedOnlyNoSuchEdge" 133,
+   "organiseTypeNonempty" 28,
+   "organiseTypeNonemptyInstance" 262,
+   "upClosureNodesSet" 58},
+  :declarations
+  ["nonTrivialPolicyCascade"
+   "organiseByTemperamentNodes"
+   "organiseByTemperamentNodesConformant"
+   "organiseByTemperamentNodesReadsTemperament"
+   "organiseByTemperamentSelected"
+   "organiseByTemperamentSelectedConformant"
+   "organiseByTemperamentSelectedReadsTemperament"
+   "organiseDischargeExistsNodes"
+   "organiseDischargeExistsSelected"
+   "organiseDischargeNotUniqueNodes"
+   "organiseDischargeNotUniqueSelected"
+   "organiseDischargeWitnessesAgreeOnSelected"
+   "organiseEmpty"
+   "organiseEmptyCascade"
+   "organiseEmptyNotConformantNodes"
+   "organiseEmptyNotConformantSelected"
+   "organiseNodesUpClosure"
+   "organiseNodesUpClosureAddsZaifVertex"
+   "organiseNodesUpClosureConformantNodes"
+   "organiseNodesUpClosureEdgeExists"
+   "organiseNodesUpClosureNoUnauthoredEdge"
+   "organiseOpaqueNoBody"
+   "organiseOpaqueZaif"
+   "organiseSelectedOnlyIgnoresTemperament"
+   "organiseSelectedOnlyNoSuchEdge"
+   "organiseTypeNonempty"
+   "organiseTypeNonemptyInstance"
+   "upClosureNodesSet"],
+  :declares-its-own-signature? false,
+  :forbidden-tokens
+  {:axiom {:anywhere 0, :in-code 0},
+   :native_decide {:anywhere 0, :in-code 0},
+   :sorry {:anywhere 1, :in-code 0}},
+  :opaque-declarations
+  [{:carries-a-body? true,
+    :line 256,
+    :text
+    "opaque organiseOpaqueZaif : OrganiseType Unit Nat := organiseEmpty"}
+   {:carries-a-body? false,
+    :line 271,
+    :text "opaque organiseOpaqueNoBody : OrganiseType Unit Nat"}],
+  :organise-type-uses 13,
+  :path "mathlib4/DarkTower/WarMachine/F12DischargeArm.lean",
+  :required-missing [],
+  :required-present
+  ["nonTrivialPolicyCascade"
+   "organiseByTemperamentNodes"
+   "organiseByTemperamentNodesConformant"
+   "organiseByTemperamentNodesReadsTemperament"
+   "organiseByTemperamentSelected"
+   "organiseByTemperamentSelectedConformant"
+   "organiseByTemperamentSelectedReadsTemperament"
+   "organiseDischargeExistsNodes"
+   "organiseDischargeExistsSelected"
+   "organiseDischargeNotUniqueNodes"
+   "organiseDischargeNotUniqueSelected"
+   "organiseDischargeWitnessesAgreeOnSelected"
+   "organiseEmpty"
+   "organiseEmptyCascade"
+   "organiseEmptyNotConformantNodes"
+   "organiseEmptyNotConformantSelected"
+   "organiseNodesUpClosure"
+   "organiseNodesUpClosureAddsZaifVertex"
+   "organiseNodesUpClosureConformantNodes"
+   "organiseNodesUpClosureEdgeExists"
+   "organiseNodesUpClosureNoUnauthoredEdge"
+   "organiseOpaqueNoBody"
+   "organiseOpaqueZaif"
+   "organiseSelectedOnlyIgnoresTemperament"
+   "organiseSelectedOnlyNoSuchEdge"
+   "organiseTypeNonempty"
+   "organiseTypeNonemptyInstance"
+   "upClosureNodesSet"]},
+ :non-uniqueness
+ {"organiseDischargeNotUniqueNodes"
+  {:line 93,
+   :witnesses ["organiseNodesUpClosure" "organiseSelectedOnly"]},
+  "organiseDischargeNotUniqueSelected"
+  {:line 84, :witnesses ["organiseSelectedOnly" "organiseUpClosure"]}},
+ :slice ":F12 slice 14",
+ :sorry
+ {:declared-at "mathlib4/DarkTower/WarMachine/Holes.lean:861",
+  :docstring-at "mathlib4/DarkTower/WarMachine/Holes.lean:860",
+  :docstring-claims
+  {:hole-intentionally true,
+   :no-canonical-implementation true,
+   :refusal-marker true,
+   :temperament-is-where-the-datum-lives true,
+   :two-policies-named true},
+  :module-signature
+  "Cascade Policy → Set P → Repository P → Cascade P",
+  :module-signature-is-organises? true,
+  :type "Cascade Policy → Set P → Repository P → Cascade P"},
+ :verdict :PASS,
+ :what "what discharging the sorry at Holes.lean:861 costs"}
