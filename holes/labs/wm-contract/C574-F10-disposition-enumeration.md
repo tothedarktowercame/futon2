@@ -183,3 +183,48 @@ unchanged — only the line numbers moved.
 Census only. Nothing was run, no registry or Lean file was written, and the
 `Q(o|π)` gap named in the ruling's `:consequence` (Q over dispositions must still
 be built; F1's blocker is B's dependence on u) is untouched by this sheet.
+
+## 10. The fourteen, traced (claude-1, 2026-09-07 evening — dated follow-up)
+
+Joe declined to choose among section 8's candidates, and correctly: "Either
+we can trace it properly. Or we can't. So, I'm not going to guess." Traced:
+
+The origin note (p4ng ceb20a7, sole commit, 2026-08-27T14:56Z) was BORN
+saying "fourteen" over a sixteen-name list — the list never grew under the
+sentence. But the note names its source: `full_loop_runner.clj`. At the
+futon2 revision current when the note was written (453cedfa,
+2026-08-27T12:27Z), `grep -o ':outcome :[a-z-]*' | sort -u` over that file
+returns EXACTLY FOURTEEN names:
+
+    :agent-unavailable :artifact-only :build-failed :cohort-complete
+    :construction-failed :dispatch-failed :error :grounded-no-change
+    :grounding-failed :guardrail-refusal :incomplete :ok
+    :policy-nondiscrimination :substrate-unavailable
+
+The note's printed sixteen is exactly these fourteen plus
+`:grounded-change` and `:no-selection` — two genuine outcomes that reach
+records via variables (e.g. full_loop_runner.clj:3096 selects between the
+grounded pair), so a literal grep misses them. **The "fourteen" is a count
+of literal keyword occurrences, not of a vocabulary.** It excludes two
+real outcomes for a syntactic reason and includes `:cohort-complete`
+(scheduler-level, disqualified by full_loop_cohort.clj's own docstring),
+`:ok` (disqualified by the origin note itself at :85) and `:error`. No
+reading of it is a domain; section 6's fifteen candidate sets were
+readings of an artifact.
+
+Consequence (per Joe's trace-or-clear instruction, no enumeration
+judgment made by anyone): the enumeration authority for Obs organisations
+is the machine's own gated vocabulary, `outcome-kinds`
+(full_loop_cohort.clj:31-33, TWELVE members, the set enforced at :317 and
+tripwire.clj:189). The five observed dispositions are all members; SEVEN
+carry named zero mass. The ruling's "fourteen ... nine" receives a dated
+correction in `aif-equations.edn :choices :outcome-domain` citing this
+section; the support widens later only by a change to the gate itself,
+which is a machine edit with its own review, not a registry edit.
+
+Recorded, not resolved here: the runner at HEAD can emit literal outcomes
+the cohort gate does not admit (`:policy-nondiscrimination` among them),
+and July-era morning-brief items carry outcomes from an older runner
+(`:agent-job-stalled`, `:agent-job-timeout`) outside both sets. That
+runner/gate seam is a code-consistency finding for a worklist row, not
+part of the enumeration.
