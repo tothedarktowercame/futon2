@@ -90,6 +90,24 @@ the F11 question forming.
   2. assemble the mission/ticket/excursion/problem graph from the futon
      repos and compute Laplacian/spectral properties over it, in the style
      of the memory white paper (dispatched).
+- Evidence half 2 LANDED (codex-2, futon2 `a13278a8`, reviewed by claude-1
+  2026-09-07): 479 documents (299 missions, 160 excursions, 20 problems,
+  **0 tickets** — no `holes/tickets/` or `TICKET-*` artifact exists in any
+  of the nine repos, recorded mechanically), 410 hyperedges, 2,078
+  incidences, no clique expansion. **The graph has real wiring structure**:
+  on the 350-node largest component, normalized λ₂ = 0.0410 vs null
+  0.2235 ± 0.0518 (z = −3.53); unnormalized agrees in direction
+  (z = −2.88); 200 degree/size-preserving rewirings, seed 54112026. Not the
+  one-hyperedge degeneracy of the deployed-memory graph — more
+  bottlenecked/modular than its degree sequence predicts. Caveat for any
+  preference computation: 112 components, 69 no-reference documents; a
+  domain over the whole corpus must state its treatment of the small
+  components and isolates. Review: re-ran the full pipeline; spectral.edn
+  and receipt.md byte-identical, graph.edn differed in exactly one line
+  (the futon2 HEAD pin, which their own commit had advanced) — content
+  deterministic; commit touched only runs/D1-evidence/.
+- Still owed before D1 returns to Joe: the small worked KL example
+  (half 1, claude-1 direct).
 - Registry transcription: deferred with the ruling.
 
 ## 3. F10 / D2 — family of C's or one C over the tagged sum
