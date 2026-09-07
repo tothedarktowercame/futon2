@@ -1,0 +1,280 @@
+{:basis
+ {:conformance-file
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F11Conformance.lean",
+  :holes "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean",
+  :live-rerun
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/01-find-snatch-live.edn",
+  :pin-as-of "2734ac570ed78d9bf822a5013cc48e53e68c8ff9",
+  :pinned-fixture "/home/joe/code/futon3/checks/find-snatch.edn"},
+ :conformant-find-fields
+ ["f1Containment"
+  "f1TypedAbsence"
+  "f2Receipted"
+  "f3NonSelfCertifying"],
+ :declarations
+ {:f4-on-recorded-repository true,
+  :f4-separate true,
+  :measurement-declared-zero-mass true,
+  :measurement-forall-reading-refuted true,
+  :measurement-identity-unfalsifiable true,
+  :non-vacuity true,
+  :predicate true,
+  :receipted-bridge true,
+  :receipted-column true,
+  :repository-carrier true,
+  :selected-column true,
+  :signature true,
+  :structured-receipt true,
+  :swappability true,
+  :witness-identity true,
+  :witness-identity-conformant true,
+  :witness-refusing true,
+  :witness-refusing-conformant true,
+  :witness-refusing-falsifiable true,
+  :witness-replay true,
+  :witness-replay-conformant true,
+  :witness-replay-receipts-partial true,
+  :zero-mass-nonempty true},
+ :find-receipt-row-fields
+ ["absence"
+  "nonSelfCertifying"
+  "receipted"
+  "repository"
+  "scenario"
+  "selected"
+  "zeroMass"],
+ :find-result-fields ["absence" "receipts" "selected"],
+ :find-type
+ {:in-holes "Tension State → Repository P → FindResult P",
+  :in-slice "Tension State → Repository P → FindResult P"},
+ :named-snatch-constructors
+ ["askForSurplusNotSurrender" "consultTheRemedyBeforeExiting"],
+ :pin-vs-live
+ {:live-as-of "e58576cec0f14c3da4667ed452d522c561487ee8",
+  :live-only-patterns
+  ["grimCutsTheCascadeAndNeverWidensIt"
+   "haveATemperament"
+   "leadWithTheExchangeRule"
+   "playTheAuthoredOrderFirst"
+   "promoteTheRemedyBeforeTheExit"
+   "widenTheCascadeOnlyOnEvidence"],
+  :live-repository-count 24,
+  :note
+  "C559 s3: the pin and the live re-run differ in receipt line coordinates only; the repository grew 18 -> 24.  The Lean transcription is at the pin, so the pin is what gates here.",
+  :pin-as-of "2734ac570ed78d9bf822a5013cc48e53e68c8ff9",
+  :pin-repository-count 18,
+  :selected-unions-agree? true,
+  :zero-mass-agree? true},
+ :problems [],
+ :reads-the-fixture-defs
+ {:findSnatchScenarios true,
+  :findSnatchZeroMass true,
+  :snatchRepository true},
+ :receipt-fields ["citesTextOrEdges" "scoreAlone"],
+ :repository
+ ["aFreeMarkIsAlwaysWorthAssigning"
+  "acceptAnOfferThatBeatsHolding"
+  "anUnmodelledResponseStopsTheLine"
+  "askForSurplusNotSurrender"
+  "consultTheRemedyBeforeExiting"
+  "escalateOnlyAsFarAsYouCanLose"
+  "exchangeWhenBothSidesGain"
+  "forcedPlayNeedsALossFloor"
+  "institutionsVaryByPositionAndForce"
+  "markWithoutForce"
+  "nonBindingTalkStillMovesPlay"
+  "preserveTheRightToAbstain"
+  "priceTheFinalRoundAsFinal"
+  "probeBeforeCommitting"
+  "protectTheUnprotectedMove"
+  "reEnterAfterObservedRepair"
+  "revertThenInvert"
+  "useTalkToMakeATestableOffer"],
+ :scenarios
+ [{:receipted
+   ["anUnmodelledResponseStopsTheLine"
+    "askForSurplusNotSurrender"
+    "exchangeWhenBothSidesGain"
+    "probeBeforeCommitting"],
+   :repository-without-receipt
+   ["aFreeMarkIsAlwaysWorthAssigning"
+    "acceptAnOfferThatBeatsHolding"
+    "consultTheRemedyBeforeExiting"
+    "escalateOnlyAsFarAsYouCanLose"
+    "forcedPlayNeedsALossFloor"
+    "institutionsVaryByPositionAndForce"
+    "markWithoutForce"
+    "nonBindingTalkStillMovesPlay"
+    "preserveTheRightToAbstain"
+    "priceTheFinalRoundAsFinal"
+    "protectTheUnprotectedMove"
+    "reEnterAfterObservedRepair"
+    "revertThenInvert"
+    "useTalkToMakeATestableOffer"],
+   :scenario "g1/cautious",
+   :selected
+   ["anUnmodelledResponseStopsTheLine"
+    "askForSurplusNotSurrender"
+    "exchangeWhenBothSidesGain"
+    "probeBeforeCommitting"],
+   :selected-minus-receipted [],
+   :zero-mass "consultTheRemedyBeforeExiting",
+   :zero-mass-in-repository? true,
+   :zero-mass-selected? false}
+  {:receipted
+   ["askForSurplusNotSurrender"
+    "escalateOnlyAsFarAsYouCanLose"
+    "exchangeWhenBothSidesGain"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"],
+   :repository-without-receipt
+   ["aFreeMarkIsAlwaysWorthAssigning"
+    "acceptAnOfferThatBeatsHolding"
+    "anUnmodelledResponseStopsTheLine"
+    "consultTheRemedyBeforeExiting"
+    "forcedPlayNeedsALossFloor"
+    "institutionsVaryByPositionAndForce"
+    "markWithoutForce"
+    "nonBindingTalkStillMovesPlay"
+    "preserveTheRightToAbstain"
+    "protectTheUnprotectedMove"
+    "reEnterAfterObservedRepair"
+    "revertThenInvert"
+    "useTalkToMakeATestableOffer"],
+   :scenario "g1/sharer",
+   :selected
+   ["askForSurplusNotSurrender"
+    "escalateOnlyAsFarAsYouCanLose"
+    "exchangeWhenBothSidesGain"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"],
+   :selected-minus-receipted [],
+   :zero-mass "consultTheRemedyBeforeExiting",
+   :zero-mass-in-repository? true,
+   :zero-mass-selected? false}
+  {:receipted
+   ["askForSurplusNotSurrender"
+    "exchangeWhenBothSidesGain"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"],
+   :repository-without-receipt
+   ["aFreeMarkIsAlwaysWorthAssigning"
+    "acceptAnOfferThatBeatsHolding"
+    "anUnmodelledResponseStopsTheLine"
+    "consultTheRemedyBeforeExiting"
+    "escalateOnlyAsFarAsYouCanLose"
+    "forcedPlayNeedsALossFloor"
+    "institutionsVaryByPositionAndForce"
+    "markWithoutForce"
+    "nonBindingTalkStillMovesPlay"
+    "preserveTheRightToAbstain"
+    "protectTheUnprotectedMove"
+    "reEnterAfterObservedRepair"
+    "revertThenInvert"
+    "useTalkToMakeATestableOffer"],
+   :scenario "g1/snatcher",
+   :selected
+   ["askForSurplusNotSurrender"
+    "exchangeWhenBothSidesGain"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"],
+   :selected-minus-receipted [],
+   :zero-mass "consultTheRemedyBeforeExiting",
+   :zero-mass-in-repository? true,
+   :zero-mass-selected? false}
+  {:receipted
+   ["askForSurplusNotSurrender"
+    "exchangeWhenBothSidesGain"
+    "forcedPlayNeedsALossFloor"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"],
+   :repository-without-receipt
+   ["aFreeMarkIsAlwaysWorthAssigning"
+    "acceptAnOfferThatBeatsHolding"
+    "anUnmodelledResponseStopsTheLine"
+    "consultTheRemedyBeforeExiting"
+    "escalateOnlyAsFarAsYouCanLose"
+    "institutionsVaryByPositionAndForce"
+    "markWithoutForce"
+    "nonBindingTalkStillMovesPlay"
+    "preserveTheRightToAbstain"
+    "protectTheUnprotectedMove"
+    "reEnterAfterObservedRepair"
+    "revertThenInvert"
+    "useTalkToMakeATestableOffer"],
+   :scenario "g2/snatcher",
+   :selected
+   ["askForSurplusNotSurrender"
+    "exchangeWhenBothSidesGain"
+    "forcedPlayNeedsALossFloor"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"],
+   :selected-minus-receipted [],
+   :zero-mass "consultTheRemedyBeforeExiting",
+   :zero-mass-in-repository? true,
+   :zero-mass-selected? false}
+  {:receipted
+   ["aFreeMarkIsAlwaysWorthAssigning"
+    "askForSurplusNotSurrender"
+    "consultTheRemedyBeforeExiting"
+    "exchangeWhenBothSidesGain"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"
+    "reEnterAfterObservedRepair"],
+   :repository-without-receipt
+   ["acceptAnOfferThatBeatsHolding"
+    "anUnmodelledResponseStopsTheLine"
+    "escalateOnlyAsFarAsYouCanLose"
+    "forcedPlayNeedsALossFloor"
+    "institutionsVaryByPositionAndForce"
+    "markWithoutForce"
+    "nonBindingTalkStillMovesPlay"
+    "preserveTheRightToAbstain"
+    "protectTheUnprotectedMove"
+    "revertThenInvert"
+    "useTalkToMakeATestableOffer"],
+   :scenario "g4/snatcher",
+   :selected
+   ["aFreeMarkIsAlwaysWorthAssigning"
+    "askForSurplusNotSurrender"
+    "consultTheRemedyBeforeExiting"
+    "exchangeWhenBothSidesGain"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"
+    "reEnterAfterObservedRepair"],
+   :selected-minus-receipted [],
+   :zero-mass "forcedPlayNeedsALossFloor",
+   :zero-mass-in-repository? true,
+   :zero-mass-selected? false}
+  {:receipted
+   ["askForSurplusNotSurrender"
+    "escalateOnlyAsFarAsYouCanLose"
+    "exchangeWhenBothSidesGain"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"
+    "useTalkToMakeATestableOffer"],
+   :repository-without-receipt
+   ["aFreeMarkIsAlwaysWorthAssigning"
+    "acceptAnOfferThatBeatsHolding"
+    "anUnmodelledResponseStopsTheLine"
+    "consultTheRemedyBeforeExiting"
+    "forcedPlayNeedsALossFloor"
+    "institutionsVaryByPositionAndForce"
+    "markWithoutForce"
+    "nonBindingTalkStillMovesPlay"
+    "preserveTheRightToAbstain"
+    "protectTheUnprotectedMove"
+    "reEnterAfterObservedRepair"
+    "revertThenInvert"],
+   :scenario "g5/sharer",
+   :selected
+   ["askForSurplusNotSurrender"
+    "escalateOnlyAsFarAsYouCanLose"
+    "exchangeWhenBothSidesGain"
+    "priceTheFinalRoundAsFinal"
+    "probeBeforeCommitting"
+    "useTalkToMakeATestableOffer"],
+   :selected-minus-receipted [],
+   :zero-mass "reEnterAfterObservedRepair",
+   :zero-mass-in-repository? true,
+   :zero-mass-selected? false}]}
