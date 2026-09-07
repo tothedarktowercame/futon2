@@ -63,6 +63,22 @@ positive facts through the same route and requires structural equality
 (`futon2:checks/fold_c_witness.clj:71-94`); it passed with identical empty
 runtime and Lean folded sets.
 
+## Gate registration (added in review, 2026-09-07)
+
+As first committed, `checks/fold_c_witness.clj` was a new file under `checks/`
+that the workspace gate's completeness alarm did not classify, so the
+`:check-inventory` step reported it as unknown and the gate exited 1
+(`futon2:checks/wm_workspace_gate.clj:278-285`).  The check was also run by no
+gate at all, so the registry's `:result :passed` — the very field the F6 ladder
+reads to license `:formula-transcribed` — stood as an assertion rather than as
+something a gate re-establishes.
+
+Both are now closed the way every other witness in the registry is: the file is
+classified (`futon2:checks/wm_workspace_gate.clj:252`), the positive check runs
+as a gate step beside `fold_witness.clj`
+(`futon2:checks/wm_workspace_gate.clj:309`), and the two Lean rejections run as
+control steps (`futon2:checks/wm_workspace_gate.clj:545-548`).
+
 ## Deliberately not declared
 
 The fixture explicitly limits itself to a declaration witness with no run

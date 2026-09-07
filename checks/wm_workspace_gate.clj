@@ -249,7 +249,7 @@
     "control_map_figure_agreement_check.clj" "control_map_lint.clj"
     "control_organization_check.clj" "expected_free_energy_witness.clj"
     "expected_information_gain_witness.clj" "fold_turn_quarantine_check.clj"
-    "fold_witness.clj"
+    "fold_witness.clj" "fold_c_witness.clj"
     "generative_model_witness.clj" "holder_check.clj"
     "have_want_arrow_witness.clj"
     "hyper_edge_domain_range_check.clj" "hyper_edge_exemplar_check.clj"
@@ -306,6 +306,7 @@
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
+   {:name :fold-c :argv ["bb" "checks/fold_c_witness.clj"]}
    {:name :belief-state :argv ["bb" "checks/belief_state_witness.clj"]}
    {:name :observation-vector :argv ["bb" "checks/observation_vector_witness.clj"]}
    {:name :channel-vocabulary :argv ["bb" "checks/channel_witness.clj"]}
@@ -542,6 +543,10 @@
     :argv ["bb" "checks/have_want_arrow_witness.clj" "--negative-control"]}
    {:name :c172-missing-policy-holes
     :argv ["bb" "checks/fold_witness.clj" "--negative-control"]}
+   {:name :c578-order-insensitive-fold
+    :argv ["bb" "checks/fold_c_witness.clj" "--negative-order"]}
+   {:name :c578-unfolded-layer-leaves-base
+    :argv ["bb" "checks/fold_c_witness.clj" "--negative-folded"]}
    {:name :c174-reconstructible-quarantine-member
     :argv ["bb" "-cp" "src:." "checks/fold_turn_quarantine_check.clj"
            "--negative-reconstructible-member"]}
