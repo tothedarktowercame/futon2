@@ -1,0 +1,241 @@
+{:acceptance
+ {:acceptance
+  "A conformant implementation at the s3e interface with the four O-laws stated in Lean against the existing Cascade carrier and each law witnessed on a REAL constructed cascade (F7 record or fresh construction from the library); discharge or amend the sorry at Holes.lean:861; swappability clause honoured (implementation conformance, not identity). Gates: clj-kondo 0/0, check-parens, lake build on touched Lean, negative_controls, pointer_check.",
+  :clause-count 3,
+  :clauses
+  ["A conformant implementation at the s3e interface with the four O-laws stated in Lean against the existing Cascade carrier and each law witnessed on a REAL constructed cascade (F7 record or fresh construction from the library)"
+   "discharge or amend the sorry at Holes.lean:861"
+   "swappability clause honoured (implementation conformance, not identity)."],
+  :gate-tail-offset 348,
+  :obligation-locations
+  {:conformant-implementation
+   {:offset 0,
+    :verbatim-substring
+    "A conformant implementation at the s3e interface"},
+   :laws-stated-against-cascade-carrier
+   {:offset 54,
+    :verbatim-substring
+    "the four O-laws stated in Lean against the existing Cascade carrier"},
+   :laws-witnessed-on-real-cascade
+   {:offset 126,
+    :verbatim-substring
+    "each law witnessed on a REAL constructed cascade"},
+   :sorry
+   {:offset 227,
+    :verbatim-substring
+    "discharge or amend the sorry at Holes.lean:861"},
+   :swappability
+   {:offset 275, :verbatim-substring "swappability clause honoured"}}},
+ :controls
+ [{:after
+   {:remainder-fully-gated? false,
+    :obligations-not-satisfied-and-not-gated [:sorry]},
+   :before
+   {:remainder-fully-gated? true,
+    :obligations-not-satisfied-and-not-gated []},
+   :control :gating-mapping-deleted,
+   :plant-verified? true}
+  {:after-hard-failure
+   "substring not found for :sorry/:organise-sorry: \"WHAT IS DONE WITH THE SORRY\"",
+   :before :measurement-succeeds,
+   :control :registry-substring-perturbed,
+   :plant-verified? true}
+  {:after
+   {:acceptance-line-agrees? true,
+    :body-is-still-sorry? false,
+    :satisfied-at-head? true},
+   :before
+   {:acceptance-line-agrees? true,
+    :body-is-still-sorry? true,
+    :satisfied-at-head? false},
+   :control :organise-body-replaced,
+   :plant-verified? true}
+  {:after-hard-failure "expected 3 clauses, found 4",
+   :before :three-clauses,
+   :control :acceptance-clause-added,
+   :plant-verified? true}
+  {:after
+   [{:carrier :Cascade,
+     :declaration "organiseO1NodesRecorded",
+     :law :o1}
+    {:carrier :Cascade,
+     :declaration "organiseO2AuthoredReachability",
+     :law :o2}
+    {:carrier :Cascade, :declaration "organiseO3FastForward", :law :o3}
+    {:carrier :Cascade,
+     :declaration "organiseO4PrecedenceGovernance",
+     :law :o4}],
+   :before
+   [{:carrier :CascadeDiff,
+     :declaration "organiseO1NodesRecorded",
+     :law :o1}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO2AuthoredReachability",
+     :law :o2}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO3FastForward",
+     :law :o3}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO4PrecedenceGovernance",
+     :law :o4}],
+   :control :law-carrier-restated,
+   :plant-verified? true}],
+ :gating
+ {:conformant-implementation
+  [{:choice :organise-sorry,
+    :question-offset 77,
+    :question-substring "The declaration is a total function"}],
+  :laws-stated-against-cascade-carrier
+  [{:choice :organise-carrier,
+    :question-offset 0,
+    :question-substring "WHICH CARRIER are O1-O4 stated of?"}],
+  :laws-witnessed-on-real-cascade
+  [{:choice :organise-carrier,
+    :question-offset 328,
+    :question-substring
+    "The four laws as proved today are proved of a CascadeDiff VALUE instead"}],
+  :sorry
+  [{:choice :organise-sorry,
+    :question-offset 0,
+    :question-substring "WHAT IS DONE WITH THE SORRY"}],
+  :swappability
+  [{:choice :organise-sorry,
+    :question-offset 352,
+    :question-substring
+    "does not select one canonical implementation"}]},
+ :obligations
+ {:conformant-implementation
+  {:pointers
+   ["/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean:23"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean:59"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:21"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean:52"],
+   :satisfied-at-head? true},
+  :laws-stated-against-cascade-carrier
+  {:laws
+   [{:carrier :CascadeDiff,
+     :declaration "organiseO1NodesRecorded",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:894",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o1}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO2AuthoredReachability",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:902",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o2}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO3FastForward",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:909",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o3}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO4PrecedenceGovernance",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:916",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o4}],
+   :satisfied-at-head? false},
+  :laws-witnessed-on-real-cascade
+  {:c59-laws
+   [{:carrier :CascadeDiff,
+     :declaration "organiseO1NodesRecorded",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:894",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o1}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO2AuthoredReachability",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:902",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o2}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO3FastForward",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:909",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o3}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO4PrecedenceGovernance",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:916",
+     :fixture "wmCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:872",
+     :fixture-kind :c59-hand-fixture,
+     :law :o4}],
+   :satisfied-at-head? true,
+   :zaif-cross-check
+   {:agree? true,
+    :artifact
+    {:admitted 9, :authored-edges 13, :nodes 20, :selected 11},
+    :artifact-basis-patterns 1239,
+    :lean-source
+    {:admitted 9, :authored-edges 13, :nodes 20, :selected 11}},
+   :zaif-laws
+   [{:carrier :CascadeDiff,
+     :declaration "organiseO1NodesRecordedZaif",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:993",
+     :fixture "wmZaifCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:974",
+     :fixture-kind :zaif-1239-pattern-transcription,
+     :law :o1}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO2AuthoredReachabilityZaif",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:1004",
+     :fixture "wmZaifCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:974",
+     :fixture-kind :zaif-1239-pattern-transcription,
+     :law :o2}
+    {:carrier :CascadeDiff,
+     :declaration "organiseO3FastForwardZaif",
+     :file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:1014",
+     :fixture "wmZaifCascadeDiffFixture",
+     :fixture-file-line
+     "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:974",
+     :fixture-kind :zaif-1239-pattern-transcription,
+     :law :o3}
+    {:declaration :not-found, :law :o4}]},
+  :sorry
+  {:acceptance-line-agrees? true,
+   :body-is-still-sorry? true,
+   :file-line
+   "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:861",
+   :satisfied-at-head? false},
+  :swappability
+  {:pointers
+   ["/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean:107"
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/F12DischargeArm.lean:93"],
+   :satisfied-at-head? true}},
+ :obligations-not-satisfied-and-not-gated [],
+ :remainder-fully-gated? true,
+ :schema :f12/remainder-v1}
