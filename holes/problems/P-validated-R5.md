@@ -495,6 +495,23 @@ receipts what fired. `find-snatch` now rejects the 21 antecedent mismatches rath
 than treating receipt presence as sufficient. The four `findF*` bindings remain
 stale until the representations are reconciled and the strengthened check passes.
 
+**Reconciled (2026-09-07, C559, worklist `:F11` slice 1).** The antecedent above
+is discharged and this paragraph's last sentence no longer holds. The two
+representations were merged into one carried object — `find_snatch.clj:47-71`
+evaluates the *authored* antecedent through `find-organise`, and
+`find_snatch.clj:148-155` throws on residual drift rather than printing a count
+— and the four bindings were renewed as Lean theorems on 2026-09-03 (C500):
+`wmFindSnatchF1Containment` (`Holes.lean:776`), `wmFindSnatchF2Receipted`
+(`:788`), `wmFindSnatchF3NonSelfCertifying` (`:803`), `wmFindSnatchF4Falsifiable`
+(`:817`). Re-measured against the current library (futon3 `7c653bb`,
+`library/snatch` at 24 patterns): drift mismatches 0, F4 6/6, exit 0. What has
+since gone stale is not the reconciliation but the fixture *pin* — 96 of 96
+recorded receipts now differ from `futon3:checks/find-snatch.edn` in
+`:if-lines`/`:however-lines` alone, no clause text, warrant file or route having
+moved (`runs/F11-find/02-reconciliation.edn`); no line number is transcribed into
+Lean, so the four theorems are unaffected. C500 §3's fixture-pin defect is the
+open one.
+
 **Laws on `organise`**:
 - O1 *nodes are the input*: `cascade.nodes = selected` (with up-closure under `standsOn` recorded as *added by organise*, not as found — §2.1d's "the cascade of a run is the up-closure").
 - O2 *edges are authored*: `cascade.edges ⊆ Reach repo.standsOn` restricted to `nodes` — never inferred from similarity, co-occurrence or prose (§2.1d, "edges are authored; the sub-graph is derived").
