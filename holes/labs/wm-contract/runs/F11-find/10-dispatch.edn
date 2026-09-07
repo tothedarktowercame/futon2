@@ -1,0 +1,123 @@
+{:record :F11-slice-6-dispatch
+ :date "2026-09-07"
+ :row :F11
+ :slice "6 -- price :find-sorry's sixth arm :amend-the-carrier AS ONE THING"
+ :dispatched-to "codex-1"
+ :from "wm-build-work"
+ :job-id "PENDING -- filled in at review from the bell response"
+ :packet-goal
+ "One new Lean file DarkTower/WarMachine/F11AmendedCarrier.lean measuring what
+  amending the carrier BUYS and COSTS taken as a single arm, so that
+  :find-sorry's sixth arm stops reading :buys :unmeasured / :costs :unmeasured.
+  Slice 4 registered the F2 half (:find-f2-receipt-carrier, five arms priced);
+  slice 5 registered the F4 half (:find-f4-reading, five arms priced). Neither
+  entry says what the two amendments do TOGETHER, which is the whole of what is
+  still missing."
+ :why-this-is-a-measurement-and-not-a-summary
+ "The reason the arm still reads :unmeasured has changed twice and now reads
+  `nobody has aggregated them`. Aggregation could be a paraphrase of the two
+  entries, and if it is, the arm should stay :unmeasured and the slice should
+  say so. The claim that makes it a measurement is that the joint cost is NOT
+  the sum of the halves and the joint buy is NOT the union: the two amendments
+  land on two structures in ONE file, and the F4 half's amendment moves what
+  the F2 half's amendment is defined over. Whether that is true is what the
+  packet asks."
+ :premise-recorded-before-the-result
+ {:the-two-halves-as-they-stand
+  "F2 half: `structure Receipt` (mathlib4 DarkTower/WarMachine/Holes.lean:240-242)
+   carries citesTextOrEdges and scoreAlone, so ConformantFind.f2Receipted states
+   receipt PRESENCE only; slice 4's finding is that the blindness is in the
+   CARRIER, since the misattributing and the faithful finder are EQUAL after
+   erasure to today's FindResult
+   (mathlib4 DarkTower/WarMachine/F11ReceiptCarrier.lean:186).
+   F4 half: `structure FindResult` (mathlib4 DarkTower/WarMachine/Holes.lean:247-250)
+   carries selected/receipts/absence and no zeroMass -- that field is on the ROW
+   carrier FindReceiptRow (mathlib4 DarkTower/WarMachine/Holes.lean:252-259) --
+   which is why F4 is a predicate over a finder's INPUTS and not a conjunct of
+   ConformantFind, and slice 5's finding is that its three readings form a
+   lattice in which C is strictly stronger than B and A is incomparable with C
+   in both directions."
+  :expected-interaction
+  "EXPECTED: the two halves are not independent, and the dependence runs one way.
+   Adding the zero-mass designation to what `find` RETURNS internalises reading A
+   and only reading A -- A is the reading in which the excluded pattern comes
+   from the finder's own output, and a field the finder fills is by construction
+   the finder's own nomination. Reading C takes the designation from OUTSIDE the
+   finder (mathlib4 DarkTower/WarMachine/F11F4Reading.lean:26-29), so no field on
+   FindResult can carry it, and reading B takes it from the record. So the carrier
+   amendment is expected to buy F4-as-a-conjunct at the price of fixing F4 at its
+   weakest reading, which is the one slice 5 measured as incomparable with the
+   deontic one. If instead a FindResult field can carry C without the finder
+   nominating, the expectation is refuted and THAT is the slice's finding.
+   Written before the work so it cannot be back-fitted."
+  :expected-subadditive-cost
+  "EXPECTED: the joint cost is strictly less than the sum of the halves on the
+   regeneration leg and equal to the sum on the proof leg. The contract authority
+   is derived as `git log -1 -- Holes.lean`
+   (mathlib4 DarkTower/Contract/Emit.lean:52-62), so an amendment to Receipt and
+   an amendment to FindResult in the same file pay the C176 regeneration ONCE, not
+   twice; and slice 4's edit-site census (7 construction sites, ONE outside the
+   pricing modules) is expected to be the SAME 7 for the joint amendment rather
+   than 7+n, because FindResult.receipts is typed by Receipt and the sites that
+   build one build the other. If the joint census is larger than the F2 census,
+   the expectation is refuted and the number is the measurement."
+  :expected-non-buy
+  "EXPECTED: the joint amendment does NOT buy a find that finds something. Slice 5
+   proved every reading admits a conformant finder that finds nothing, C for every
+   designation (mathlib4 DarkTower/WarMachine/F11F4Reading.lean:323-343). The
+   amended carrier is expected to admit one too, so the sixth arm is expected to
+   share the limit every other arm has. This is asked as a measurement because it
+   is what stops the arm from being priced as a fix for the thing it does not fix."}
+ :measurements-asked
+ {:M1 "Define the amended carrier in the new module (do NOT edit Holes.lean):
+       an AmendedReceipt carrying slice 4's three asks as DATA, and an
+       AmendedFindResult whose receipts are typed by it and which carries a
+       zero-mass field. State F1-F4 of a finder at the amended type. Prove or
+       refute: F4 becomes a conjunct of the amended ConformantFind, and if it
+       does, WHICH reading it is -- state the relation to A, B and C by proof in
+       each direction, at the RECORDED designation, not at a vacuous one."
+  :M2 "Does the amended carrier separate finders that today's carrier cannot?
+       Slice 4's erasure-equality (F11ReceiptCarrier.lean:186) is the benchmark:
+       exhibit the same two finders at the amended type and prove they are NOT
+       equal there, or prove they still are. Do the same for a pair separated
+       only by the zero-mass field."
+  :M3 "Are the two amendments independent in what they buy? Exhibit a pair of
+       finders the receipt-data field separates and the zero-mass field does not,
+       and a pair the other way round -- or prove one of those pairs cannot exist.
+       This is the aggregation claim: if each half separates exactly what the
+       other does, the arm is one amendment, not two."
+  :M4 "The joint mechanical cost, RECOMPUTED not copied: over all Lean files
+       under mathlib4/DarkTower, count the construction sites of Receipt and of
+       FindResult (anonymous-constructor form included -- slice 4's review found
+       a census that missed it, 2 -> 7) that the JOINT amendment would have to
+       edit, and how many are outside the pricing modules. Report the number and
+       the file:line of every site."
+  :M5 "Does the amended carrier admit a conformant finder that selects nothing?
+       Prove it or refute it, at the amended type, under the amended F4."}
+ :inhabitance-and-nondegeneracy-floor-demanded-in-advance
+ "This is the SEVENTH consecutive slice across :F11/:F12 in which review has had
+  to supply this floor, and slice 5's review found the failure in a new place:
+  the C-not-A separation was proved at the EMPTY designation, where C is vacuous,
+  so a floor stated of the FINDERS was met by every finder and evaded by the
+  PARAMETER. So the floor is stated here of BOTH: every separation, ordering or
+  agreement claim must be witnessed by finders that SELECT at least one pattern
+  on the recorded 18-pattern findSnatchRepository, each carrying its own theorem
+  that its selection there is nonempty; AND every claim about a parameterised
+  reading must be instantiated at a designation carrying its own theorem that it
+  is nonempty on the recorded repository. findRefusing and findSilent may appear
+  only as the cheap-inhabitant baseline, never as a side of an agreement."
+ :out-of-scope-in-the-packet
+ ["editing mathlib4 DarkTower/WarMachine/Holes.lean -- it stays at 61c4825dc3
+   and the sorry at :264 stays"
+  "discharging the sorry, and re-pricing the five arms that are already priced"
+  "aif-equations.edn and every other registry: the entry is the lane's to write"
+  "any ruling: :status stays :observed-not-decided with no :ruling key"
+  "gen_aif_dag.bb (TN 9a)"]
+ :reviewer-half-still-owed
+ ["f11_amended_carrier_check.bb, with Lean plants located by DECLARATION NAME
+   and checker plants each moving exactly one verdict"
+  "cross-check every Lean literal against futon3 checks/find-snatch.edn"
+  "runs/F11-find/11-amended-carrier.edn"
+  "C564 findings doc"
+  "the repair of :find-sorry's :amend-the-carrier arm in aif-equations.edn --
+   :buys and :costs, or a recorded reason they stay :unmeasured"]}
