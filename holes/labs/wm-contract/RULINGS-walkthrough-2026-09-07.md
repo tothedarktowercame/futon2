@@ -307,6 +307,12 @@ the F11 question forming.
   format, attested/documented rule interpretations, two-plus rule-bearing
   members as the scarce target), discipline (mining not fitting; exemplar
   before loop).
+- EXEMPLAR LANDED AND REVIEWED (codex-18, futon2 `e059f0a5`): the dark
+  policy-grain compliance solution as a cascade — 3 rule-bearing members
+  with attested interpretations (corpus max was 1), all witness pointers
+  verified at pins, admitted-set honesty kept. Format HOLDS; two format
+  notes (THEN-span convention, admission-evidence standard) and the zai
+  loop role spec recorded in the MINING note.
 - Registry transcription: joins the publish-window write (six rulings —
   every C558 choice now decided).
 
