@@ -1,0 +1,117 @@
+{:basis
+ {:arm
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12AdmittingArm.lean",
+  :arms "/home/joe/code/mathlib4/DarkTower/WarMachine/F12D1Arms.lean",
+  :conformance
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean",
+  :holes "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean",
+  :record
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/F12-organise/01-zaif-transcription.edn",
+  :run :widen-to-a-budget,
+  :zaif-basis "1b8b1d1"},
+ :carriers
+ {:arm-one
+  ["acyclic"
+   "addedByOrganise"
+   "admittedBy"
+   "edges"
+   "nodes"
+   "precedence"
+   "selected"],
+  :cascade ["acyclic" "addedByOrganise" "edges" "nodes" "precedence"],
+  :cascade-diff
+  ["actingOrderAfter"
+   "actingOrderBefore"
+   "addedByOrganise"
+   "admittedBy"
+   "authoredEdges"
+   "nodes"
+   "organisedEdges"
+   "precedenceAfter"
+   "precedenceBefore"
+   "scoreAfter"
+   "scoreBefore"
+   "selected"],
+  :o1-origins-present-in-arm-one
+  ["addedByOrganise" "admittedBy" "selected"],
+  :o4-fields-absent-from-arm-one
+  ["actingOrderAfter"
+   "actingOrderBefore"
+   "precedenceAfter"
+   "precedenceBefore"
+   "scoreAfter"
+   "scoreBefore"]},
+ :clauses
+ {:added-over-slice-6 [:osel],
+  :admitting-nodes-reading
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise ∪ (f t sel repo).admittedBy",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).edges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).edges u v ↔ fastForward (f t sel repo).nodes repo.standsOn u v",
+   :osel "∀ t sel repo, (f t sel repo).selected = sel"},
+  :admitting-selected-reading
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise ∪ (f t sel repo).admittedBy",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).edges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).edges u v ↔ fastForward sel repo.standsOn u v",
+   :osel "∀ t sel repo, (f t sel repo).selected = sel"},
+  :readings-differ-only-in [:o3],
+  :slice-6-nodes-reading
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).edges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).edges u v ↔ fastForward (f t sel repo).nodes repo.standsOn u v"}},
+ :declarations
+ {:agree-on-edges true,
+  :agree-on-nodes true,
+  :o1-nodes-are-the-twenty true,
+  :o1-third-origin-nine true,
+  :o2-at-recorded-repo true,
+  :o3-at-recorded-repo true,
+  :predicate-nodes-reading true,
+  :predicate-selected-reading true,
+  :recorded-lookup true,
+  :review-conformant-selected-reading true,
+  :review-conformant-selected-reading-mirror true,
+  :review-nonvacuity true,
+  :review-rank-zero true,
+  :review-selected-reading-edges-empty true,
+  :review-split-selected-reading true,
+  :review-witness-selected-reading true,
+  :review-witness-selected-reading-mirror true,
+  :signature true,
+  :split true,
+  :split-general true,
+  :witness-admitting true,
+  :witness-admitting-conformant true,
+  :witness-mirror true,
+  :witness-mirror-conformant true},
+ :edges
+ {:over-nodes [[18 19]],
+  :over-selected [],
+  :recomputed-from :authored-edges,
+  :record-over-nodes [[18 19]]},
+ :organise-type
+ {:expected-arm
+  "Cascade Policy → Set P → Repository P → ArmOneCascade P",
+  :in-arm "Cascade Policy → Set P → Repository P → ArmOneCascade P",
+  :in-holes "Cascade Policy → Set P → Repository P → Cascade P"},
+ :problems [],
+ :vertex-count 27,
+ :vertices
+ {:nonvacuity-edge [18 19],
+  :nonvacuity-edge-authored? true,
+  :nonvacuity-edge-endpoints-nodes? [true true],
+  :nonvacuity-edge-endpoints-selected? [false false],
+  :split-witness 11,
+  :split-witness-admitted? true,
+  :split-witness-selected? false},
+ :witness
+ {:admitted-lookup "if sel = d1Selected then d1Admitted else ∅",
+  :shape :recorded-lookup-table}}
