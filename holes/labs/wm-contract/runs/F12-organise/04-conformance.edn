@@ -1,0 +1,78 @@
+{:basis
+ {:conformance-file
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/F12Conformance.lean",
+  :holes "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean",
+  :record
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/F12-organise/01-zaif-transcription.edn",
+  :run :widen-to-a-budget,
+  :zaif-basis "1b8b1d1"},
+ :cascade-diff-fields
+ ["actingOrderAfter"
+  "actingOrderBefore"
+  "addedByOrganise"
+  "admittedBy"
+  "authoredEdges"
+  "nodes"
+  "organisedEdges"
+  "precedenceAfter"
+  "precedenceBefore"
+  "scoreAfter"
+  "scoreBefore"
+  "selected"],
+ :cascade-fields
+ ["acyclic" "addedByOrganise" "edges" "nodes" "precedence"],
+ :conformance-predicates
+ {:nodes-reading
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).edges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).edges u v ↔ fastForward (f t sel repo).nodes repo.standsOn u v"},
+  :selected-reading
+  {:o1
+   "∀ t sel repo, (f t sel repo).nodes = sel ∪ (f t sel repo).addedByOrganise",
+   :o2
+   "∀ t sel repo u v, (f t sel repo).edges u v → Reach repo.standsOn u v",
+   :o3
+   "∀ t sel repo u v, (f t sel repo).edges u v ↔ fastForward sel repo.standsOn u v"}},
+ :declarations
+ {:lemma-fastforward-acyclic true,
+  :lemma-reach-trans true,
+  :measurement-admitted-indistinguishable true,
+  :measurement-edge-returns-with-input true,
+  :measurement-selected-reading-blocks-edge true,
+  :o1-non-vacuity true,
+  :policy-inhabitant true,
+  :predicate-nodes-reading true,
+  :predicate-selected-reading true,
+  :signature true,
+  :swappability true,
+  :witness-one true,
+  :witness-one-conformant true,
+  :witness-two true,
+  :witness-two-conformant true},
+ :o4-fields-absent-from-cascade
+ ["actingOrderAfter"
+  "actingOrderBefore"
+  "precedenceAfter"
+  "precedenceBefore"
+  "scoreAfter"
+  "scoreBefore"],
+ :organise-type
+ {:in-holes "Cascade Policy → Set P → Repository P → Cascade P",
+  :in-slice "Cascade Policy → Set P → Repository P → Cascade P"},
+ :problems [],
+ :up-closure-of-selected
+ {:adds [20 21 25 26],
+  :admitted-reached [],
+  :edges-from-selected-into-admitted [],
+  :up-closure [0 1 2 3 4 5 6 7 8 9 10 20 21 25 26]},
+ :vertices
+ {:fast-forward-over-selected [],
+  :organised-edge [18 19],
+  :organised-edge-endpoints-selected? [false false],
+  :swappability-source-edge [6 26],
+  :swappability-source-selected? true,
+  :swappability-witness 26,
+  :swappability-witness-is-node? false}}
