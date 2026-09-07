@@ -198,8 +198,10 @@ beyond the file left `pointer_check` at 0 unresolved, because its pointer regex
 needs the file name on each citation. C544 §5 recorded the same thing and spelled
 its eleven citations out; this row was written in the short form anyway and only
 the plant caught it. All fifteen are now spelled out (2471 → 2487 pointers), and
-the same plant against the rewritten row reports `UNRESOLVED
-F12AdmittingArm.lean:88888 (end beyond file)`.
+the same plant against the rewritten row — one citation rewritten to line 88888
+— reports `UNRESOLVED … (end beyond file)`. The file name is deliberately not
+repeated in that sentence: written out in full it would itself be scanned as a
+pointer, which is how this check first came back red.
 
 ## 10. Where this leaves the row
 
