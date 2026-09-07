@@ -256,7 +256,30 @@ the F11 question forming.
 ## 8. F12 / `:organise-o4-after-the-law-encoding`
 
 - Sheet: C558 §5, three arms.
-- **Ruling: PENDING**
+- **Ruling: ARM B, `:encode-a-then-a-member-already-carries`, ADMISSIBLE AS
+  MARKED INSTRUMENTATION, WITH THREE RIDERS (Joe, 2026-09-07)** —
+  (1) provenance marking is the rule (planted encodings labeled
+  constructed-instrumentation, never corpus facts); (2) the owed un-fitting
+  guard restatement gets written (scope extended to say when
+  fitting-to-a-law is admissible); (3) the real fix is generative rather
+  than a table repair.
+- Joe's framing (near-verbatim): "the cascades are meant to correspond to
+  production rule systems... patterns should have THEN statements
+  available, which are authored and which can be adapted into production
+  rules through an **attested interpretation**, or, if it's not attested,
+  a **documented interpretation**... We're not tuning to a win; we're
+  tuning to a law, or a structural requirement of how the system works. At
+  the same time, we do need to exercise that and come up with some
+  examples." On rider 3 specifically: it "really shouldn't be too hard" to
+  chain cascades to two rule-bearing members now — the fresh @why/@how
+  edges and the new problems sub-library give material "tuned to the very
+  work that occupies us in this particular project."
+- Examples excursion (opened, same shape as D1's): construct at least one
+  two-rule-bearing cascade from the committed library, each rule's
+  interpretation attested or documented; joins the slice-4 exemplar's
+  scope or runs beside it.
+- Registry transcription: joins the publish-window write (five rulings
+  total; watcher re-armed on the post-publish gap after the 14:37 race).
 
 ## 9. F12 / `:organise-third-origin` — what fills `admittedBy`
 
