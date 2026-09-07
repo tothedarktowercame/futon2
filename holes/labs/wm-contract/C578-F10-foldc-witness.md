@@ -77,7 +77,7 @@ Both are now closed the way every other witness in the registry is: the file is
 classified (`futon2:checks/wm_workspace_gate.clj:252`), the positive check runs
 as a gate step beside `fold_witness.clj`
 (`futon2:checks/wm_workspace_gate.clj:309`), and the two Lean rejections run as
-control steps (`futon2:checks/wm_workspace_gate.clj:545-548`).
+control steps (`futon2:checks/wm_workspace_gate.clj:546-549`).
 
 ## Deliberately not declared
 
