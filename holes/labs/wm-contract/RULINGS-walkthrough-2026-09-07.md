@@ -212,7 +212,21 @@ the F11 question forming.
 ## 6. F12 / `:organise-o3-field` — which field O3 reads over
 
 - Sheet: C558 §3, three arms.
-- **Ruling: PENDING**
+- **Ruling: ARM 3, `:over-the-nodes-organise-did-not-add` (Joe, 2026-09-07)**
+  — the no-bootstrap reading, accepted on claude-1's recommendation. At the
+  ruled CascadeDiff carrier the set is `selected ∪ admittedBy`, so the
+  recorded run stays a witness (edge 18-19 endpoints are admitted) while
+  the node-set reading's self-justification (edge 26-25) is refused by
+  construction. Consequence: the slice-4 exemplar restates arm 6's O3
+  clause in no-bootstrap form (slice-11 predicate, no new mathematics).
+- Joe's addition on item 5's meta-pattern: the meta node is still the meta
+  level; the ruling itself — the deferral, and how the build is sequenced —
+  is a design pattern to write. DONE:
+  `futon3 library/problems/contract-edits-wait-for-their-exemplar.flexiarg`
+  (futon3 `cdb5e8a`, parse gate 60/0): registry now, exemplar next,
+  contract edit once.
+- Registry transcription: joins #4 and #5 in the same publish-window write
+  (watcher extended before it fired).
 
 ## 7. F12 / `:organise-o4-denominator` — which rounds O4's acting order is read over
 
