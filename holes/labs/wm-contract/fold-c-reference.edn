@@ -1,0 +1,7 @@
+{:schema :fold-c-reference/v1
+ :ruled-domain :F10/SeedObs
+ :runtime-folded-layer-ids []
+ :base-at-grounded-change 3
+ :ordered-example {:add-then-double 8
+                   :double-then-add 7}
+ :evidence-limit :declaration-witness-no-run-identity}

@@ -187,6 +187,34 @@
   :result :passed,
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/fold-reference.edn"}}
+ {:witnesses "foldC",
+  :positive-evidence-scope
+  "Elaborates foldC on the F10 ruled carrier and proves empty-stack identity plus observable left-fold order; carries no run identity.",
+  :expected-rejection
+  {:mode :lean-error-substrings,
+   :controls
+   [{:fixture "DarkTower/WarMachine/FoldCOrderNegative.lean",
+     :claim :ordered-fold-is-not-order-insensitive}
+    {:fixture "DarkTower/WarMachine/FoldCFoldedNegative.lean",
+     :claim :unfolded-layer-does-not-leave-base-unchanged}]},
+  :contract-sha
+  "db123e92336f23939dc053c54c887ba0bb3122073a0a969bae923bd4fec8d763",
+  :run-sha
+  "cf318f67dd17deacc906dcdd5666f0ee9c2c691ec520ae5be3839aef188026f3",
+  :check
+  {:repo "futon2",
+   :path "checks/fold_c_witness.clj",
+   :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/fold-c-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :positive-evidence-limit :construction-or-projection-only,
+  :recorded-at "2026-09-07T00:00:00Z",
+  :result :passed,
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/fold-c-reference.edn"}}
  {:witnesses "FoldEscrowRecord",
   :check
   {:repo "futon2",
