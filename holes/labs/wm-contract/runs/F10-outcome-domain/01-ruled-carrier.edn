@@ -92,10 +92,24 @@
    "buildFailed"
    "groundedChange"
    "incomplete"
-   "noSelection"]},
+   "noSelection"],
+  :support-members
+  ["abstained"
+   "agentUnavailable"
+   "artifactOnly"
+   "buildFailed"
+   "cancelled"
+   "dispatchFailed"
+   "groundedChange"
+   "groundedNoChange"
+   "guardrailRefusal"
+   "incomplete"
+   "noSelection"
+   "substrateUnavailable"]},
  :plants
  [{:plant :drop-constructor, :landed? true, :verdict false}
   {:plant :zero-into-positive-set, :landed? true, :verdict false}
   {:plant :change-mass, :landed? true, :verdict false}
+  {:plant :narrow-support, :landed? true, :verdict false}
   {:plant :append-sorry, :landed? true, :verdict false}],
  :verdict true}

@@ -69,5 +69,40 @@ meaning is described at `holes/labs/wm-contract/C537-serendipity-shapes-C.md:49-
 This slice declares the carrier and seed only.  It does not attest the evidence
 vocabulary, build `Q`, amend `Holes.lean`, validate the seed by a live run, or
 make a registry decision (`holes/labs/wm-contract/worklist.edn:1377-1381`).
-The checker records four landed false-verdict plants under artifact `:plants`;
+The checker records five landed false-verdict plants under artifact `:plants`;
 the elaboration controls separately reject three type/proof mutations.
+
+## Review additions (claude, 2026-09-07)
+
+Three docstring pointers were repaired in place, each of which resolved under
+`p4ng/empirics-futon/pointer_check.bb` while aiming at the wrong text, because
+that checker matches a pointer's BASENAME against a roots allowlist
+(`p4ng/empirics-futon/pointer_check.bb:315-318`) and never reads the directory
+the pointer names.  `src/futon2/tripwire.clj:189` was written for a file that
+lives at `src/futon2/aif/tripwire.clj:189`; `holes/problems/P-validated-R5.md:129-131`
+stopped one line short of the "has no money vertex (that is VSAT's)" clause it
+cited, which is at `holes/problems/P-validated-R5.md:132`; and the two-phase
+precedent was cited at `mathlib4:DarkTower/WarMachine/F12RuledCarrier.lean:66-70`,
+the conformance-proof fields, rather than at the staged existential
+`mathlib4:DarkTower/WarMachine/F12RuledCarrier.lean:72-76`.  The first two came
+into the Lean file from the dispatch packet, which named `tripwire.clj:189` and
+`F12RuledCarrier.lean:66-70` without a directory or a re-read.
+
+The support's WIDTH was not gated by either gate, and the sheet claimed it
+(the paragraph above beginning "The single `PreferenceDistribution`").  Narrowing
+`seed.support` from `FlightDisposition.all` to `observedDispositions` and
+adjusting the `normalised` proof's simp set to match elaborates clean
+(`lake env lean` exit 0) and left the checker's verdict `true`: the five
+remaining masses still sum to 1, so `normalised` is not a width constraint.  A
+five-member support would mean the seven named zeros sit OUTSIDE the support
+rather than inside it at mass zero, which is the distinction
+`C574-F10-disposition-enumeration.md:127-135` turns on — outside the support,
+`predictiveOutcomeRisk`'s side-condition never reaches them and the seven
+obligations quietly disappear.  The checker now resolves the support through
+whichever list the `support` field maps over
+(`holes/labs/wm-contract/f10_ruled_carrier_check.bb:33-41`), requires it to equal
+the twelve authority constructors
+(`holes/labs/wm-contract/f10_ruled_carrier_check.bb:80`), and plants exactly that
+narrowing as a fifth control
+(`holes/labs/wm-contract/f10_ruled_carrier_check.bb:100-106`).  The updated
+checker exits 1 on the mutant that previously passed both gates.

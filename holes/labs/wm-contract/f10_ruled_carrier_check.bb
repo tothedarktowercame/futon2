@@ -30,6 +30,16 @@
   (->> (body-between s (str "def " decl ".*?:=") "\n\n")
        (re-seq #"\.([A-Za-z][A-Za-z0-9]*)") (map second) vec))
 
+(defn support-members
+  "The support's members, resolved through whichever declared list the `support`
+   field maps over.  Without this the support's WIDTH is ungated: narrowing it to
+   the five observed dispositions keeps `normalised` true (the five masses still
+   sum to 1), so neither this checker nor `lake env lean` objected."
+  [s]
+  (if-let [decl (second (re-find #"support := fun _ => ([A-Za-z][A-Za-z0-9.]*)\.map organisationOutcome" s))]
+    (set (list-members s decl))
+    #{}))
+
 (defn mass-map [s]
   (into {} (for [[_ d n] (re-seq #"⟨\.organisations, \.([A-Za-z]+)⟩ => 1 / ([0-9]+)" s)]
              [d (double (/ 1 (parse-long n)))])))
@@ -45,12 +55,14 @@
         all-members (set (list-members lean "FlightDisposition.all"))
         observed-decl (set (list-members lean "observedDispositions"))
         zeros-decl (set (list-members lean "namedZeroDispositions"))
-        masses (mass-map lean)]
+        masses (mass-map lean)
+        support-decl (support-members lean)]
     (sorted-map
       :authority-keywords (vec (sort authority))
       :expected-constructors (vec (sort expected))
       :constructors (vec (sort constructors))
       :all-members (vec (sort all-members))
+      :support-members (vec (sort support-decl))
       :observed-source (vec (sort observed))
       :observed-declared (vec (sort observed-decl))
       :named-zeros-derived (vec (sort (set/difference expected observed)))
@@ -65,6 +77,7 @@
 (defn verdict [f]
   (and (= (:constructors f) (:expected-constructors f))
        (= (:all-members f) (:expected-constructors f))
+       (= (:support-members f) (:expected-constructors f))
        (= (:observed-declared f) (:observed-source f))
        (= (:named-zeros-declared f) (:named-zeros-derived f))
        (= (:declared-positive-masses f) (:expected-positive-masses f))
@@ -84,6 +97,12 @@
                :verdict (verdict (facts (str/replace-first lean
                                      "⟨.organisations, .groundedChange⟩ => 1 / 2"
                                      "⟨.organisations, .groundedChange⟩ => 1 / 3") cohort seed))}
+              {:plant :narrow-support
+               :landed? (str/includes? lean "support := fun _ => FlightDisposition.all.map organisationOutcome")
+               :verdict (verdict (facts (str/replace-first lean
+                                     "support := fun _ => FlightDisposition.all.map organisationOutcome"
+                                     "support := fun _ => observedDispositions.map organisationOutcome")
+                                        cohort seed))}
               {:plant :append-sorry :landed? true
                :verdict (verdict (facts (str lean "\ntheorem planted : True := by sorry\n") cohort seed))}]
       report (sorted-map :check :F10-ruled-carrier :facts base :plants plants
