@@ -26,13 +26,14 @@
                 (if (= :RUN (:class i)) 0 1)])
 (def cmd (first *command-line-args*))
 (case cmd
-  ;; stall-key: id + status + progress content of the next-open row, so a
-  ;; one-slice-per-invocation row that is COMMITTING slices does not read as
-  ;; stalled (library loop false-stalled on L5 after 3 healthy slices,
-  ;; 2026-09-01 20:34).
+  ;; stall-key: id + status + progress AND evidence content of the next-open
+  ;; row, so a one-slice-per-invocation row that is COMMITTING slices does not
+  ;; read as stalled (library loop false-stalled on L5 after 3 healthy slices,
+  ;; 2026-09-01 20:34; wm loop false-stalled on F12 after 3 healthy slices
+  ;; that recorded into :evidence, 2026-09-07 00:44).
   "stall-key" (println (or (some->> (first (sort-by prio (filter loopable? items)))
                                     ((fn [i] (str (name (:id i)) ":" (name (:status i)) ":"
-                                                  (hash (select-keys i [:progress :slice-b2a :slice-b2b]))))))
+                                                  (hash (select-keys i [:progress :evidence :slice-b2a :slice-b2b]))))))
                            "NONE"))
   "next-open" (println (or (some-> (first (sort-by prio (filter loopable? items))) :id name) "NONE"))
   "unreviewed" (println (str/join " " (map (comp name :id) (filter #(= :done-unreviewed (:status %)) items))))
