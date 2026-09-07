@@ -1,0 +1,70 @@
+{:record :F11-slice-4-dispatch
+ :date "2026-09-07"
+ :row :F11
+ :slice "4 -- register the F2 RECEIPT CARRIER as a choice, with its arms priced"
+ :dispatched-to "codex-1"
+ :from "wm-build-work"
+ :job-id "invoke-1788781868606-13613-bd22e508"
+ :packet-goal
+ "One new Lean file DarkTower/WarMachine/F11ReceiptCarrier.lean measuring what
+  the arms of the receipt-carrier question buy and cost, so the :find-sorry
+  entry's sixth arm (:amend-the-carrier, :buys :unmeasured / :costs :unmeasured
+  as registered at slice 3) stops being unpriced on this half."
+ :why-this-and-not-both
+ "Slice 3's :progress named the next slice as `register the F2 receipt carrier
+  AND the F4 reading`. That is two nouns joined by `and`, which CLAUDE.md's
+  handoff rule reads as two handoffs with a review between them. This slice
+  takes the F2 carrier only; F4's reading is slice 5. Splitting them also keeps
+  the packet honest: pricing the two together invites the measurement of one to
+  be assumed from the other, and slice 3 already found that the two F4 readings
+  disagree in both directions."
+ :premise-recorded-before-the-result
+ {:the-gap
+  "P-validated-R5.md:486 asks each selected pattern's receipt to carry three
+   things -- the acknowledged tension clause (IF/HOWEVER overlap), the retrieval
+   route, and an as-of. `structure Receipt` (mathlib4 DarkTower/WarMachine/
+   Holes.lean:240-242) carries `citesTextOrEdges : Prop` and `scoreAlone : Prop`
+   and none of the three, which is why ConformantFind.f2Receipted
+   (F11Conformance.lean:25-26) states receipt PRESENCE only. The record does
+   carry them: per-receipt :route, :if, :however and
+   :warrant {:file :if-lines :if-text :however-lines :however-text} in futon3
+   checks/find-snatch.edn at futon3 7c653bb."
+  :expected-measurement
+  "A finder that receipts every selected pattern with ANOTHER pattern's warrant
+   should satisfy ConformantFind exactly as stated -- including
+   f3NonSelfCertifying, since `citesTextOrEdges := True` and
+   `scoreAlone := False` are satisfiable by a misattributed warrant -- and
+   should be refuted only once F2 states receipt CONTENT. If that holds, the
+   cost of the do-nothing arm is not that F2 is weak in the abstract but that it
+   admits a NAMED finder whose receipts are for the wrong patterns."
+  :expected-asymmetry
+  "Adding the three requirements to `Receipt` AS PROPS is expected to buy
+   nothing over doing nothing, because a Prop field asserts that something is
+   the case without carrying WHICH -- the same misattributing finder should
+   satisfy it by setting each Prop to True. If that is right, the arms are not
+   ordered by how much they add to the structure but by whether what they add is
+   DATA the law can compare against the tension. Written here before the result
+   so the packet's expectation cannot be back-fitted."
+  :the-inhabitance-question-is-separate
+  "A law nothing satisfies costs differently from one the record already meets.
+   The packet requires establishing FIRST whether any warrant text, route or
+   as-of is transcribed into Lean at all -- slice 1 recorded that FindSnatchRowLit
+   (Holes.lean:354-361) carries scenario/round/selected/receipted/
+   nonSelfCertifying/absence -- and, if they are not, pricing the data arm as
+   `requires a new transcription of N warrants` rather than inhabiting the
+   stronger law with a witness that pretends the record is already in Lean."}
+ :out-of-scope-in-the-packet
+ ["the F4 reading (slice 5)"
+  "the sorry at Holes.lean:264 -- not discharged, Holes.lean not modified"
+  "aif-equations.edn and every other registry: the entry is the lane's to write"
+  "any ruling: :status will be :observed-not-decided with no :ruling key"
+  "gen_aif_dag.bb (TN 9a)"]
+ :reviewer-half-still-owed
+ ["f11_receipt_carrier_check.bb -- a checker that fails if Receipt's field list
+   in Holes.lean changes under the entry, so the pricing cannot go stale silently"
+  "cross-check every Lean literal against futon3 checks/find-snatch.edn"
+  "runs/F11-find/07-receipt-carrier.edn"
+  "C562 findings doc"
+  "the :find-f2-receipt-carrier entry in aif-equations.edn :choices, and the
+   repair of :find-sorry's :amend-the-carrier arm, which currently says both
+   carrier questions are unregistered"]}
