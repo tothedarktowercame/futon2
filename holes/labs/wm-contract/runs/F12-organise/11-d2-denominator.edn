@@ -1,0 +1,3537 @@
+{:arm-b
+ {:plant {:verified? true},
+  :process-exit 0,
+  :worker
+  {:arms
+   [{:acting-order-changed? false,
+     :contending-rounds [],
+     :rule-ids
+     [:math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update],
+     :contending-round-count 0,
+     :rounds-on-which-fired-rule-differs [],
+     :o4-holds? false,
+     :score-changed? false,
+     :denominator :primary,
+     :round-ids
+     [2
+      33
+      41
+      54
+      55
+      58
+      61
+      63
+      66
+      72
+      73
+      75
+      76
+      77
+      78
+      80
+      83
+      84
+      85
+      86
+      87
+      90
+      91
+      92
+      94
+      95
+      98
+      100
+      102],
+     :rounds 29,
+     :row
+     {:acting-order-after
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :acting-order-before
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :precedence-after [2 1],
+      :precedence-before [1 2],
+      :score-after 15,
+      :score-before 15}}
+    {:acting-order-changed? true,
+     :contending-rounds [7],
+     :rule-ids
+     [:math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update],
+     :contending-round-count 1,
+     :rounds-on-which-fired-rule-differs [7],
+     :o4-holds? true,
+     :score-changed? false,
+     :denominator :paired,
+     :round-ids
+     [2
+      6
+      7
+      9
+      30
+      33
+      39
+      41
+      45
+      49
+      52
+      54
+      55
+      58
+      61
+      63
+      65
+      66
+      72
+      73
+      74
+      75
+      76
+      77
+      78
+      79
+      80
+      81
+      82
+      83
+      84
+      85
+      86
+      87
+      88
+      89
+      90
+      91
+      92
+      93
+      94
+      95
+      96
+      97
+      98
+      99
+      100
+      101
+      102],
+     :rounds 49,
+     :row
+     {:acting-order-after
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :acting-order-before
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :precedence-after [2 1],
+      :precedence-before [1 2],
+      :score-after 15,
+      :score-before 15}}
+    {:acting-order-changed? true,
+     :contending-rounds [3 4 7],
+     :rule-ids
+     [:math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update],
+     :contending-round-count 3,
+     :rounds-on-which-fired-rule-differs [3 4 7],
+     :o4-holds? true,
+     :score-changed? true,
+     :denominator :with-a-transcript,
+     :round-ids
+     [1
+      2
+      3
+      4
+      5
+      6
+      7
+      8
+      9
+      10
+      11
+      12
+      13
+      14
+      15
+      16
+      17
+      18
+      19
+      20
+      21
+      22
+      23
+      24
+      25
+      26
+      27
+      28
+      29
+      30
+      31
+      32
+      33
+      34
+      35
+      36
+      37
+      38
+      39
+      40
+      41
+      42
+      43
+      44
+      45
+      46
+      47
+      48
+      49
+      50
+      51
+      52
+      53
+      54
+      55
+      56
+      57
+      58
+      59
+      60
+      61
+      62
+      63
+      64
+      65
+      66
+      67
+      68
+      69
+      70
+      71
+      72
+      73
+      74
+      75
+      76
+      77
+      78
+      79
+      80
+      81
+      82
+      83
+      84
+      85
+      86
+      87
+      88
+      89
+      90
+      91
+      92
+      93
+      94
+      95
+      96
+      97
+      98
+      99
+      100
+      101
+      102],
+     :rounds 102,
+     :row
+     {:acting-order-after
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :acting-order-before
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :math-strategy/missing-dependency-protocol
+       :math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :precedence-after [2 1],
+      :precedence-before [1 2],
+      :score-after 19,
+      :score-before 20}}],
+   :empty-denominator-control
+   {:denominator :forced-empty,
+    :reason :empty-denominator,
+    :refused? true},
+   :full-play
+   {:acting-order-changed? true,
+    :contending-rounds [3 4 7],
+    :rule-ids
+    [:math-strategy/missing-dependency-protocol
+     :aif/status-gated-belief-update],
+    :contending-round-count 3,
+    :rounds-on-which-fired-rule-differs [3 4 7],
+    :o4-holds? true,
+    :score-changed? true,
+    :denominator :full-play,
+    :round-ids
+    [1
+     2
+     3
+     4
+     5
+     6
+     7
+     8
+     9
+     10
+     11
+     12
+     13
+     14
+     15
+     16
+     17
+     18
+     19
+     20
+     21
+     22
+     23
+     24
+     25
+     26
+     27
+     28
+     29
+     30
+     31
+     32
+     33
+     34
+     35
+     36
+     37
+     38
+     39
+     40
+     41
+     42
+     43
+     44
+     45
+     46
+     47
+     48
+     49
+     50
+     51
+     52
+     53
+     54
+     55
+     56
+     57
+     58
+     59
+     60
+     61
+     62
+     63
+     64
+     65
+     66
+     67
+     68
+     69
+     70
+     71
+     72
+     73
+     74
+     75
+     76
+     77
+     78
+     79
+     80
+     81
+     82
+     83
+     84
+     85
+     86
+     87
+     88
+     89
+     90
+     91
+     92
+     93
+     94
+     95
+     96
+     97
+     98
+     99
+     100
+     101
+     102
+     103],
+    :rounds 103,
+    :row
+    {:acting-order-after
+     [:aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update],
+     :acting-order-before
+     [:aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :math-strategy/missing-dependency-protocol
+      :math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update],
+     :precedence-after [2 1],
+     :precedence-before [1 2],
+     :score-after 20,
+     :score-before 21}},
+   :gate-controls
+   {:rules-in-the-cascade
+    [:math-strategy/missing-dependency-protocol
+     :aif/status-gated-belief-update],
+    :rules-not-in-the-cascade
+    [:war-machine/ambient-pattern-retrieval
+     :agent/budget-bounds-exploration
+     :agent/pause-is-not-failure],
+    :then-correspondence
+    [{:encodes
+      "\"Search the library on every turn as a background process.\"",
+      :encoding-limit
+      "the THEN also says to display results, log the activation history, and tune retrieval from hot/cold zones. The zaif arm set has no term for any of those, so this rule encodes the search clause only and the rest is unencodable rather than encoded.",
+      :then-source
+      "war-machine/ambient-pattern-retrieval.flexiarg:16-16",
+      :rule :war-machine/ambient-pattern-retrieval,
+      :span-inside-the-then-block? true,
+      :pattern-id-matches-path? true,
+      :then-block [15 18],
+      :span-is-non-empty? true,
+      :counterfactual? false,
+      :file-exists? true}
+     {:encodes
+      "\"Search once more against the installed source ... and look for an adapter to an existing theorem before building\"; \"Put exactly one `sorry` at the observed gap ... Beside that `sorry`, leave the consultation trail\"; \"stop researching once the misses repeat\"",
+      :encoding-limit nil,
+      :then-source
+      "math-strategy/missing-dependency-protocol.flexiarg:59-77",
+      :rule :math-strategy/missing-dependency-protocol,
+      :span-inside-the-then-block? false,
+      :pattern-id-matches-path? true,
+      :then-block [59 79],
+      :span-is-non-empty? true,
+      :counterfactual? false,
+      :file-exists? true}
+     {:encodes
+      "\"When budget nears exhaustion, force a decision: commit to best-so-far, escalate to a supervisor, or explicitly expand scope with justification.\"",
+      :encoding-limit
+      "the THEN offers three terminal choices -- commit to best-so-far, escalate to a supervisor, expand scope with justification -- and asks for reset rules. The zaif arm set has a term for none of the three: :yield is the nearest to `commit to best-so-far`, :ask is the nearest to `escalate`, and nothing expresses `expand scope`. The 102 recorded rounds also cross continuation boundaries this file does not reconstruct, so `rounds-so-far` is rounds since the turn began and not rounds since the current budget window opened.",
+      :then-source "agent/budget-bounds-exploration.flexiarg:19-19",
+      :rule :agent/budget-bounds-exploration,
+      :span-inside-the-then-block? false,
+      :pattern-id-matches-path? true,
+      :then-block [20 23],
+      :span-is-non-empty? false,
+      :counterfactual? true,
+      :file-exists? true}
+     {:encodes
+      "\"Treat 'pause and ask' as a first-class action with defined triggers: ... confidence below threshold, resource budget near exhaustion.\"",
+      :encoding-limit
+      "the THEN also requires the pause to carry a resumption payload (reason, missing info, requested decision, scope impact, confidence/budget snapshot). An arm choice carries none of that, so this rule encodes the trigger and not the payload.",
+      :then-source "agent/pause-is-not-failure.flexiarg:19-19",
+      :rule :agent/pause-is-not-failure,
+      :span-inside-the-then-block? false,
+      :pattern-id-matches-path? true,
+      :then-block [20 23],
+      :span-is-non-empty? false,
+      :counterfactual? true,
+      :file-exists? true}
+     {:encodes
+      "Apply update-mu using the post-step state when observation remains available.",
+      :encoding-limit
+      "The zaif arm set has no belief-update term; :act records only that the authored THEN calls for an update.",
+      :then-source "aif/status-gated-belief-update.flexiarg:26-30",
+      :rule :aif/status-gated-belief-update,
+      :span-inside-the-then-block? true,
+      :pattern-id-matches-path? true,
+      :then-block [25 32],
+      :span-is-non-empty? true,
+      :counterfactual? false,
+      :file-exists? true}]},
+   :identity-control
+   {:o4-holds? true,
+    :row
+    {:acting-order-after
+     [:aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update],
+     :acting-order-before
+     [:aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update
+      :aif/status-gated-belief-update],
+     :precedence-after [1 2],
+     :precedence-before [1 2],
+     :score-after 15,
+     :score-before 15}},
+   :nested-round-set-floor
+   {:arms-missing-the-contention-key [],
+    :contention-measure :contending-rounds,
+    :contentions-in-paired-minus-primary [7],
+    :contentions-in-transcript-minus-paired [3 4],
+    :paired-minus-primary
+    [6 7 9 30 39 45 49 52 65 74 79 81 82 88 89 93 96 97 99 101],
+    :paired-subset-of-with-a-transcript? true,
+    :primary-subset-of-paired? true,
+    :transcript-minus-paired
+    [1
+     3
+     4
+     5
+     8
+     10
+     11
+     12
+     13
+     14
+     15
+     16
+     17
+     18
+     19
+     20
+     21
+     22
+     23
+     24
+     25
+     26
+     27
+     28
+     29
+     31
+     32
+     34
+     35
+     36
+     37
+     38
+     40
+     42
+     43
+     44
+     46
+     47
+     48
+     50
+     51
+     53
+     56
+     57
+     59
+     60
+     62
+     64
+     67
+     68
+     69
+     70
+     71]},
+   :pair-found? true,
+   :require-pass
+   {:passed? false,
+    :finding :rule-does-not-encode-an-authored-then,
+    :failures
+    [{:where :controls,
+      :finding :rule-does-not-encode-an-authored-then,
+      :rule :math-strategy/missing-dependency-protocol}
+     {:where :controls,
+      :finding :rule-does-not-encode-an-authored-then,
+      :rule :agent/budget-bounds-exploration}
+     {:where :controls,
+      :finding :rule-does-not-encode-an-authored-then,
+      :rule :agent/pause-is-not-failure}]}}},
+ :controls
+ {:all-rule-ids-fit-cascade
+  {:plant {:verified? true},
+   :process-exit 0,
+   :worker
+   {:arms
+    [{:acting-order-changed? false,
+      :contending-rounds [],
+      :rule-ids
+      [:math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update],
+      :contending-round-count 0,
+      :rounds-on-which-fired-rule-differs [],
+      :o4-holds? false,
+      :score-changed? false,
+      :denominator :primary,
+      :round-ids
+      [2
+       33
+       41
+       54
+       55
+       58
+       61
+       63
+       66
+       72
+       73
+       75
+       76
+       77
+       78
+       80
+       83
+       84
+       85
+       86
+       87
+       90
+       91
+       92
+       94
+       95
+       98
+       100
+       102],
+      :rounds 29,
+      :row
+      {:acting-order-after
+       [:aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update],
+       :acting-order-before
+       [:aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update],
+       :precedence-after [2 1],
+       :precedence-before [1 2],
+       :score-after 15,
+       :score-before 15}}
+     {:acting-order-changed? true,
+      :contending-rounds [7],
+      :rule-ids
+      [:math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update],
+      :contending-round-count 1,
+      :rounds-on-which-fired-rule-differs [7],
+      :o4-holds? true,
+      :score-changed? false,
+      :denominator :paired,
+      :round-ids
+      [2
+       6
+       7
+       9
+       30
+       33
+       39
+       41
+       45
+       49
+       52
+       54
+       55
+       58
+       61
+       63
+       65
+       66
+       72
+       73
+       74
+       75
+       76
+       77
+       78
+       79
+       80
+       81
+       82
+       83
+       84
+       85
+       86
+       87
+       88
+       89
+       90
+       91
+       92
+       93
+       94
+       95
+       96
+       97
+       98
+       99
+       100
+       101
+       102],
+      :rounds 49,
+      :row
+      {:acting-order-after
+       [:aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update],
+       :acting-order-before
+       [:aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :math-strategy/missing-dependency-protocol
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update],
+       :precedence-after [2 1],
+       :precedence-before [1 2],
+       :score-after 15,
+       :score-before 15}}
+     {:acting-order-changed? true,
+      :contending-rounds [3 4 7],
+      :rule-ids
+      [:math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update],
+      :contending-round-count 3,
+      :rounds-on-which-fired-rule-differs [3 4 7],
+      :o4-holds? true,
+      :score-changed? true,
+      :denominator :with-a-transcript,
+      :round-ids
+      [1
+       2
+       3
+       4
+       5
+       6
+       7
+       8
+       9
+       10
+       11
+       12
+       13
+       14
+       15
+       16
+       17
+       18
+       19
+       20
+       21
+       22
+       23
+       24
+       25
+       26
+       27
+       28
+       29
+       30
+       31
+       32
+       33
+       34
+       35
+       36
+       37
+       38
+       39
+       40
+       41
+       42
+       43
+       44
+       45
+       46
+       47
+       48
+       49
+       50
+       51
+       52
+       53
+       54
+       55
+       56
+       57
+       58
+       59
+       60
+       61
+       62
+       63
+       64
+       65
+       66
+       67
+       68
+       69
+       70
+       71
+       72
+       73
+       74
+       75
+       76
+       77
+       78
+       79
+       80
+       81
+       82
+       83
+       84
+       85
+       86
+       87
+       88
+       89
+       90
+       91
+       92
+       93
+       94
+       95
+       96
+       97
+       98
+       99
+       100
+       101
+       102],
+      :rounds 102,
+      :row
+      {:acting-order-after
+       [:aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update],
+       :acting-order-before
+       [:aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :math-strategy/missing-dependency-protocol
+        :math-strategy/missing-dependency-protocol
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :math-strategy/missing-dependency-protocol
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update
+        :aif/status-gated-belief-update],
+       :precedence-after [2 1],
+       :precedence-before [1 2],
+       :score-after 19,
+       :score-before 20}}],
+    :empty-denominator-control
+    {:denominator :forced-empty,
+     :reason :empty-denominator,
+     :refused? true},
+    :full-play
+    {:acting-order-changed? true,
+     :contending-rounds [3 4 7],
+     :rule-ids
+     [:math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update],
+     :contending-round-count 3,
+     :rounds-on-which-fired-rule-differs [3 4 7],
+     :o4-holds? true,
+     :score-changed? true,
+     :denominator :full-play,
+     :round-ids
+     [1
+      2
+      3
+      4
+      5
+      6
+      7
+      8
+      9
+      10
+      11
+      12
+      13
+      14
+      15
+      16
+      17
+      18
+      19
+      20
+      21
+      22
+      23
+      24
+      25
+      26
+      27
+      28
+      29
+      30
+      31
+      32
+      33
+      34
+      35
+      36
+      37
+      38
+      39
+      40
+      41
+      42
+      43
+      44
+      45
+      46
+      47
+      48
+      49
+      50
+      51
+      52
+      53
+      54
+      55
+      56
+      57
+      58
+      59
+      60
+      61
+      62
+      63
+      64
+      65
+      66
+      67
+      68
+      69
+      70
+      71
+      72
+      73
+      74
+      75
+      76
+      77
+      78
+      79
+      80
+      81
+      82
+      83
+      84
+      85
+      86
+      87
+      88
+      89
+      90
+      91
+      92
+      93
+      94
+      95
+      96
+      97
+      98
+      99
+      100
+      101
+      102
+      103],
+     :rounds 103,
+     :row
+     {:acting-order-after
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :acting-order-before
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :math-strategy/missing-dependency-protocol
+       :math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :precedence-after [2 1],
+      :precedence-before [1 2],
+      :score-after 20,
+      :score-before 21}},
+    :gate-controls
+    {:rules-in-the-cascade
+     [:aif/no-self-certification
+      :math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update],
+     :rules-not-in-the-cascade [],
+     :then-correspondence
+     [{:encodes
+       "\"Search the library on every turn as a background process.\"",
+       :encoding-limit
+       "the THEN also says to display results, log the activation history, and tune retrieval from hot/cold zones. The zaif arm set has no term for any of those, so this rule encodes the search clause only and the rest is unencodable rather than encoded.",
+       :then-source
+       "war-machine/ambient-pattern-retrieval.flexiarg:16-16",
+       :rule :aif/no-self-certification,
+       :span-inside-the-then-block? true,
+       :pattern-id-matches-path? false,
+       :then-block [15 18],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}
+      {:encodes
+       "\"Search once more against the installed source ... and look for an adapter to an existing theorem before building\"; \"Put exactly one `sorry` at the observed gap ... Beside that `sorry`, leave the consultation trail\"; \"stop researching once the misses repeat\"",
+       :encoding-limit nil,
+       :then-source
+       "math-strategy/missing-dependency-protocol.flexiarg:59-77",
+       :rule :math-strategy/missing-dependency-protocol,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? true,
+       :then-block [59 79],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}
+      {:encodes
+       "\"When budget nears exhaustion, force a decision: commit to best-so-far, escalate to a supervisor, or explicitly expand scope with justification.\"",
+       :encoding-limit
+       "the THEN offers three terminal choices -- commit to best-so-far, escalate to a supervisor, expand scope with justification -- and asks for reset rules. The zaif arm set has a term for none of the three: :yield is the nearest to `commit to best-so-far`, :ask is the nearest to `escalate`, and nothing expresses `expand scope`. The 102 recorded rounds also cross continuation boundaries this file does not reconstruct, so `rounds-so-far` is rounds since the turn began and not rounds since the current budget window opened.",
+       :then-source "agent/budget-bounds-exploration.flexiarg:19-19",
+       :rule :aif/hierarchical-budget-aware-action-selection,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? false,
+       :then-block [20 23],
+       :span-is-non-empty? false,
+       :counterfactual? true,
+       :file-exists? true}
+      {:encodes
+       "\"Treat 'pause and ask' as a first-class action with defined triggers: ... confidence below threshold, resource budget near exhaustion.\"",
+       :encoding-limit
+       "the THEN also requires the pause to carry a resumption payload (reason, missing info, requested decision, scope impact, confidence/budget snapshot). An arm choice carries none of that, so this rule encodes the trigger and not the payload.",
+       :then-source "agent/pause-is-not-failure.flexiarg:19-19",
+       :rule :budgeted-action-selection/mana-gated-work,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? false,
+       :then-block [20 23],
+       :span-is-non-empty? false,
+       :counterfactual? true,
+       :file-exists? true}
+      {:encodes
+       "Apply update-mu using the post-step state when observation remains available.",
+       :encoding-limit
+       "The zaif arm set has no belief-update term; :act records only that the authored THEN calls for an update.",
+       :then-source "aif/status-gated-belief-update.flexiarg:26-30",
+       :rule :aif/status-gated-belief-update,
+       :span-inside-the-then-block? true,
+       :pattern-id-matches-path? true,
+       :then-block [25 32],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}]},
+    :identity-control
+    {:o4-holds? true,
+     :row
+     {:acting-order-after
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :acting-order-before
+      [:aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update
+       :aif/status-gated-belief-update],
+      :precedence-after [1 2],
+      :precedence-before [1 2],
+      :score-after 15,
+      :score-before 15}},
+    :nested-round-set-floor
+    {:arms-missing-the-contention-key [],
+     :contention-measure :contending-rounds,
+     :contentions-in-paired-minus-primary [7],
+     :contentions-in-transcript-minus-paired [3 4],
+     :paired-minus-primary
+     [6 7 9 30 39 45 49 52 65 74 79 81 82 88 89 93 96 97 99 101],
+     :paired-subset-of-with-a-transcript? true,
+     :primary-subset-of-paired? true,
+     :transcript-minus-paired
+     [1
+      3
+      4
+      5
+      8
+      10
+      11
+      12
+      13
+      14
+      15
+      16
+      17
+      18
+      19
+      20
+      21
+      22
+      23
+      24
+      25
+      26
+      27
+      28
+      29
+      31
+      32
+      34
+      35
+      36
+      37
+      38
+      40
+      42
+      43
+      44
+      46
+      47
+      48
+      50
+      51
+      53
+      56
+      57
+      59
+      60
+      62
+      64
+      67
+      68
+      69
+      70
+      71]},
+    :pair-found? true,
+    :require-pass
+    {:passed? false,
+     :finding :rule-does-not-encode-an-authored-then,
+     :failures
+     [{:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :aif/no-self-certification}
+      {:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :math-strategy/missing-dependency-protocol}
+      {:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :aif/hierarchical-budget-aware-action-selection}
+      {:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :budgeted-action-selection/mana-gated-work}
+      {:where :controls,
+       :finding :rule-table-is-fitted-to-the-cascade}]}}},
+  :empty-denominator
+  {:denominator :forced-empty,
+   :reason :empty-denominator,
+   :refused? true},
+  :false-antecedent
+  {:plant {:verified? true},
+   :process-exit 0,
+   :worker
+   {:arms
+    [{:acting-order-changed? false,
+      :contending-rounds [],
+      :rule-ids
+      [:math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update],
+      :contending-round-count 0,
+      :rounds-on-which-fired-rule-differs [],
+      :o4-holds? false,
+      :score-changed? false,
+      :denominator :primary,
+      :round-ids
+      [2
+       33
+       41
+       54
+       55
+       58
+       61
+       63
+       66
+       72
+       73
+       75
+       76
+       77
+       78
+       80
+       83
+       84
+       85
+       86
+       87
+       90
+       91
+       92
+       94
+       95
+       98
+       100
+       102],
+      :rounds 29,
+      :row
+      {:acting-order-after [],
+       :acting-order-before [],
+       :precedence-after [2 1],
+       :precedence-before [1 2],
+       :score-after 14,
+       :score-before 14}}
+     {:acting-order-changed? false,
+      :contending-rounds [],
+      :rule-ids
+      [:math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update],
+      :contending-round-count 0,
+      :rounds-on-which-fired-rule-differs [],
+      :o4-holds? false,
+      :score-changed? false,
+      :denominator :paired,
+      :round-ids
+      [2
+       6
+       7
+       9
+       30
+       33
+       39
+       41
+       45
+       49
+       52
+       54
+       55
+       58
+       61
+       63
+       65
+       66
+       72
+       73
+       74
+       75
+       76
+       77
+       78
+       79
+       80
+       81
+       82
+       83
+       84
+       85
+       86
+       87
+       88
+       89
+       90
+       91
+       92
+       93
+       94
+       95
+       96
+       97
+       98
+       99
+       100
+       101
+       102],
+      :rounds 49,
+      :row
+      {:acting-order-after
+       [:math-strategy/missing-dependency-protocol],
+       :acting-order-before
+       [:math-strategy/missing-dependency-protocol],
+       :precedence-after [2 1],
+       :precedence-before [1 2],
+       :score-after 33,
+       :score-before 33}}
+     {:acting-order-changed? false,
+      :contending-rounds [],
+      :rule-ids
+      [:math-strategy/missing-dependency-protocol
+       :aif/status-gated-belief-update],
+      :contending-round-count 0,
+      :rounds-on-which-fired-rule-differs [],
+      :o4-holds? false,
+      :score-changed? false,
+      :denominator :with-a-transcript,
+      :round-ids
+      [1
+       2
+       3
+       4
+       5
+       6
+       7
+       8
+       9
+       10
+       11
+       12
+       13
+       14
+       15
+       16
+       17
+       18
+       19
+       20
+       21
+       22
+       23
+       24
+       25
+       26
+       27
+       28
+       29
+       30
+       31
+       32
+       33
+       34
+       35
+       36
+       37
+       38
+       39
+       40
+       41
+       42
+       43
+       44
+       45
+       46
+       47
+       48
+       49
+       50
+       51
+       52
+       53
+       54
+       55
+       56
+       57
+       58
+       59
+       60
+       61
+       62
+       63
+       64
+       65
+       66
+       67
+       68
+       69
+       70
+       71
+       72
+       73
+       74
+       75
+       76
+       77
+       78
+       79
+       80
+       81
+       82
+       83
+       84
+       85
+       86
+       87
+       88
+       89
+       90
+       91
+       92
+       93
+       94
+       95
+       96
+       97
+       98
+       99
+       100
+       101
+       102],
+      :rounds 102,
+      :row
+      {:acting-order-after
+       [:math-strategy/missing-dependency-protocol
+        :math-strategy/missing-dependency-protocol
+        :math-strategy/missing-dependency-protocol],
+       :acting-order-before
+       [:math-strategy/missing-dependency-protocol
+        :math-strategy/missing-dependency-protocol
+        :math-strategy/missing-dependency-protocol],
+       :precedence-after [2 1],
+       :precedence-before [1 2],
+       :score-after 34,
+       :score-before 34}}],
+    :empty-denominator-control
+    {:denominator :forced-empty,
+     :reason :empty-denominator,
+     :refused? true},
+    :full-play
+    {:acting-order-changed? false,
+     :contending-rounds [],
+     :rule-ids
+     [:math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update],
+     :contending-round-count 0,
+     :rounds-on-which-fired-rule-differs [],
+     :o4-holds? false,
+     :score-changed? false,
+     :denominator :full-play,
+     :round-ids
+     [1
+      2
+      3
+      4
+      5
+      6
+      7
+      8
+      9
+      10
+      11
+      12
+      13
+      14
+      15
+      16
+      17
+      18
+      19
+      20
+      21
+      22
+      23
+      24
+      25
+      26
+      27
+      28
+      29
+      30
+      31
+      32
+      33
+      34
+      35
+      36
+      37
+      38
+      39
+      40
+      41
+      42
+      43
+      44
+      45
+      46
+      47
+      48
+      49
+      50
+      51
+      52
+      53
+      54
+      55
+      56
+      57
+      58
+      59
+      60
+      61
+      62
+      63
+      64
+      65
+      66
+      67
+      68
+      69
+      70
+      71
+      72
+      73
+      74
+      75
+      76
+      77
+      78
+      79
+      80
+      81
+      82
+      83
+      84
+      85
+      86
+      87
+      88
+      89
+      90
+      91
+      92
+      93
+      94
+      95
+      96
+      97
+      98
+      99
+      100
+      101
+      102
+      103],
+     :rounds 103,
+     :row
+     {:acting-order-after
+      [:math-strategy/missing-dependency-protocol
+       :math-strategy/missing-dependency-protocol
+       :math-strategy/missing-dependency-protocol],
+      :acting-order-before
+      [:math-strategy/missing-dependency-protocol
+       :math-strategy/missing-dependency-protocol
+       :math-strategy/missing-dependency-protocol],
+      :precedence-after [2 1],
+      :precedence-before [1 2],
+      :score-after 35,
+      :score-before 35}},
+    :gate-controls
+    {:rules-in-the-cascade
+     [:math-strategy/missing-dependency-protocol
+      :aif/status-gated-belief-update],
+     :rules-not-in-the-cascade
+     [:war-machine/ambient-pattern-retrieval
+      :agent/budget-bounds-exploration
+      :agent/pause-is-not-failure],
+     :then-correspondence
+     [{:encodes
+       "\"Search the library on every turn as a background process.\"",
+       :encoding-limit
+       "the THEN also says to display results, log the activation history, and tune retrieval from hot/cold zones. The zaif arm set has no term for any of those, so this rule encodes the search clause only and the rest is unencodable rather than encoded.",
+       :then-source
+       "war-machine/ambient-pattern-retrieval.flexiarg:16-16",
+       :rule :war-machine/ambient-pattern-retrieval,
+       :span-inside-the-then-block? true,
+       :pattern-id-matches-path? true,
+       :then-block [15 18],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}
+      {:encodes
+       "\"Search once more against the installed source ... and look for an adapter to an existing theorem before building\"; \"Put exactly one `sorry` at the observed gap ... Beside that `sorry`, leave the consultation trail\"; \"stop researching once the misses repeat\"",
+       :encoding-limit nil,
+       :then-source
+       "math-strategy/missing-dependency-protocol.flexiarg:59-77",
+       :rule :math-strategy/missing-dependency-protocol,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? true,
+       :then-block [59 79],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}
+      {:encodes
+       "\"When budget nears exhaustion, force a decision: commit to best-so-far, escalate to a supervisor, or explicitly expand scope with justification.\"",
+       :encoding-limit
+       "the THEN offers three terminal choices -- commit to best-so-far, escalate to a supervisor, expand scope with justification -- and asks for reset rules. The zaif arm set has a term for none of the three: :yield is the nearest to `commit to best-so-far`, :ask is the nearest to `escalate`, and nothing expresses `expand scope`. The 102 recorded rounds also cross continuation boundaries this file does not reconstruct, so `rounds-so-far` is rounds since the turn began and not rounds since the current budget window opened.",
+       :then-source "agent/budget-bounds-exploration.flexiarg:19-19",
+       :rule :agent/budget-bounds-exploration,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? true,
+       :then-block [20 23],
+       :span-is-non-empty? false,
+       :counterfactual? true,
+       :file-exists? true}
+      {:encodes
+       "\"Treat 'pause and ask' as a first-class action with defined triggers: ... confidence below threshold, resource budget near exhaustion.\"",
+       :encoding-limit
+       "the THEN also requires the pause to carry a resumption payload (reason, missing info, requested decision, scope impact, confidence/budget snapshot). An arm choice carries none of that, so this rule encodes the trigger and not the payload.",
+       :then-source "agent/pause-is-not-failure.flexiarg:19-19",
+       :rule :agent/pause-is-not-failure,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? true,
+       :then-block [20 23],
+       :span-is-non-empty? false,
+       :counterfactual? true,
+       :file-exists? true}
+      {:encodes
+       "Apply update-mu using the post-step state when observation remains available.",
+       :encoding-limit
+       "The zaif arm set has no belief-update term; :act records only that the authored THEN calls for an update.",
+       :then-source "aif/status-gated-belief-update.flexiarg:26-30",
+       :rule :aif/status-gated-belief-update,
+       :span-inside-the-then-block? true,
+       :pattern-id-matches-path? true,
+       :then-block [25 32],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}]},
+    :identity-control
+    {:o4-holds? true,
+     :row
+     {:acting-order-after [],
+      :acting-order-before [],
+      :precedence-after [1 2],
+      :precedence-before [1 2],
+      :score-after 14,
+      :score-before 14}},
+    :nested-round-set-floor
+    {:arms-missing-the-contention-key [],
+     :contention-measure :contending-rounds,
+     :contentions-in-paired-minus-primary [],
+     :contentions-in-transcript-minus-paired [],
+     :paired-minus-primary
+     [6 7 9 30 39 45 49 52 65 74 79 81 82 88 89 93 96 97 99 101],
+     :paired-subset-of-with-a-transcript? true,
+     :primary-subset-of-paired? true,
+     :transcript-minus-paired
+     [1
+      3
+      4
+      5
+      8
+      10
+      11
+      12
+      13
+      14
+      15
+      16
+      17
+      18
+      19
+      20
+      21
+      22
+      23
+      24
+      25
+      26
+      27
+      28
+      29
+      31
+      32
+      34
+      35
+      36
+      37
+      38
+      40
+      42
+      43
+      44
+      46
+      47
+      48
+      50
+      51
+      53
+      56
+      57
+      59
+      60
+      62
+      64
+      67
+      68
+      69
+      70
+      71]},
+    :pair-found? true,
+    :require-pass
+    {:passed? false,
+     :finding :rule-does-not-encode-an-authored-then,
+     :failures
+     [{:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :math-strategy/missing-dependency-protocol}
+      {:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :agent/budget-bounds-exploration}
+      {:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :agent/pause-is-not-failure}]}}},
+  :identity-precedence-exchange
+  {:o4-holds? true,
+   :row
+   {:acting-order-after
+    [:aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update],
+    :acting-order-before
+    [:aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update
+     :aif/status-gated-belief-update],
+    :precedence-after [1 2],
+    :precedence-before [1 2],
+    :score-after 15,
+    :score-before 15}},
+  :rename-to-nonmember
+  {:plant {:verified? true},
+   :process-exit 0,
+   :worker
+   {:arms
+    [{:denominator :primary,
+      :o4-exercised? false,
+      :reason :rule-pair-not-found}
+     {:denominator :paired,
+      :o4-exercised? false,
+      :reason :rule-pair-not-found}
+     {:denominator :with-a-transcript,
+      :o4-exercised? false,
+      :reason :rule-pair-not-found}],
+    :empty-denominator-control nil,
+    :full-play nil,
+    :gate-controls
+    {:rules-in-the-cascade
+     [:math-strategy/missing-dependency-protocol],
+     :rules-not-in-the-cascade
+     [:war-machine/ambient-pattern-retrieval
+      :agent/budget-bounds-exploration
+      :agent/pause-is-not-failure
+      :problems/r3-belief-update],
+     :then-correspondence
+     [{:encodes
+       "\"Search the library on every turn as a background process.\"",
+       :encoding-limit
+       "the THEN also says to display results, log the activation history, and tune retrieval from hot/cold zones. The zaif arm set has no term for any of those, so this rule encodes the search clause only and the rest is unencodable rather than encoded.",
+       :then-source
+       "war-machine/ambient-pattern-retrieval.flexiarg:16-16",
+       :rule :war-machine/ambient-pattern-retrieval,
+       :span-inside-the-then-block? true,
+       :pattern-id-matches-path? true,
+       :then-block [15 18],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}
+      {:encodes
+       "\"Search once more against the installed source ... and look for an adapter to an existing theorem before building\"; \"Put exactly one `sorry` at the observed gap ... Beside that `sorry`, leave the consultation trail\"; \"stop researching once the misses repeat\"",
+       :encoding-limit nil,
+       :then-source
+       "math-strategy/missing-dependency-protocol.flexiarg:59-77",
+       :rule :math-strategy/missing-dependency-protocol,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? true,
+       :then-block [59 79],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}
+      {:encodes
+       "\"When budget nears exhaustion, force a decision: commit to best-so-far, escalate to a supervisor, or explicitly expand scope with justification.\"",
+       :encoding-limit
+       "the THEN offers three terminal choices -- commit to best-so-far, escalate to a supervisor, expand scope with justification -- and asks for reset rules. The zaif arm set has a term for none of the three: :yield is the nearest to `commit to best-so-far`, :ask is the nearest to `escalate`, and nothing expresses `expand scope`. The 102 recorded rounds also cross continuation boundaries this file does not reconstruct, so `rounds-so-far` is rounds since the turn began and not rounds since the current budget window opened.",
+       :then-source "agent/budget-bounds-exploration.flexiarg:19-19",
+       :rule :agent/budget-bounds-exploration,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? true,
+       :then-block [20 23],
+       :span-is-non-empty? false,
+       :counterfactual? true,
+       :file-exists? true}
+      {:encodes
+       "\"Treat 'pause and ask' as a first-class action with defined triggers: ... confidence below threshold, resource budget near exhaustion.\"",
+       :encoding-limit
+       "the THEN also requires the pause to carry a resumption payload (reason, missing info, requested decision, scope impact, confidence/budget snapshot). An arm choice carries none of that, so this rule encodes the trigger and not the payload.",
+       :then-source "agent/pause-is-not-failure.flexiarg:19-19",
+       :rule :agent/pause-is-not-failure,
+       :span-inside-the-then-block? false,
+       :pattern-id-matches-path? true,
+       :then-block [20 23],
+       :span-is-non-empty? false,
+       :counterfactual? true,
+       :file-exists? true}
+      {:encodes
+       "Apply update-mu using the post-step state when observation remains available.",
+       :encoding-limit
+       "The zaif arm set has no belief-update term; :act records only that the authored THEN calls for an update.",
+       :then-source "aif/status-gated-belief-update.flexiarg:26-30",
+       :rule :problems/r3-belief-update,
+       :span-inside-the-then-block? true,
+       :pattern-id-matches-path? false,
+       :then-block [25 32],
+       :span-is-non-empty? true,
+       :counterfactual? false,
+       :file-exists? true}]},
+    :identity-control nil,
+    :nested-round-set-floor nil,
+    :pair-found? false,
+    :require-pass
+    {:passed? false,
+     :finding :rule-does-not-encode-an-authored-then,
+     :failures
+     [{:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :math-strategy/missing-dependency-protocol}
+      {:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :agent/budget-bounds-exploration}
+      {:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :agent/pause-is-not-failure}
+      {:where :controls,
+       :finding :rule-does-not-encode-an-authored-then,
+       :rule :problems/r3-belief-update}]}}}},
+ :head-baseline
+ {:arms
+  [{:acting-order-changed? false,
+    :deferred-rounds [],
+    :denominator :primary,
+    :o4-holds? false,
+    :precedence-changed? true,
+    :rounds 29,
+    :rounds-on-which-the-fired-rule-differs [],
+    :row
+    {:acting-order-after
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :acting-order-before
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :precedence-after [2 1],
+     :precedence-before [1 2],
+     :score-after 14,
+     :score-before 14},
+    :score-changed? false}
+   {:acting-order-changed? true,
+    :deferred-rounds [],
+    :denominator :paired,
+    :o4-holds? true,
+    :precedence-changed? true,
+    :rounds 49,
+    :rounds-on-which-the-fired-rule-differs [7],
+    :row
+    {:acting-order-after
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :math-strategy/missing-dependency-protocol
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :acting-order-before
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :precedence-after [2 1],
+     :precedence-before [1 2],
+     :score-after 33,
+     :score-before 34},
+    :score-changed? true}
+   {:acting-order-changed? true,
+    :deferred-rounds [],
+    :denominator :with-a-transcript,
+    :o4-holds? true,
+    :precedence-changed? true,
+    :rounds 102,
+    :rounds-on-which-the-fired-rule-differs [3 4 7],
+    :row
+    {:acting-order-after
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :math-strategy/missing-dependency-protocol
+      :math-strategy/missing-dependency-protocol
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :math-strategy/missing-dependency-protocol
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :acting-order-before
+     [:war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval
+      :war-machine/ambient-pattern-retrieval],
+     :precedence-after [2 1],
+     :precedence-before [1 2],
+     :score-after 81,
+     :score-before 83},
+    :score-changed? true}],
+  :nested-round-set-floor
+  {:arms-missing-the-contention-key [],
+   :contention-measure :rounds-on-which-the-fired-rule-differs,
+   :contentions-in-paired-minus-primary [7],
+   :contentions-in-transcript-minus-paired [3 4],
+   :paired-minus-primary
+   [6 7 9 30 39 45 49 52 65 74 79 81 82 88 89 93 96 97 99 101],
+   :paired-subset-of-with-a-transcript? true,
+   :primary-subset-of-paired? true,
+   :transcript-minus-paired
+   [1
+    3
+    4
+    5
+    8
+    10
+    11
+    12
+    13
+    14
+    15
+    16
+    17
+    18
+    19
+    20
+    21
+    22
+    23
+    24
+    25
+    26
+    27
+    28
+    29
+    31
+    32
+    34
+    35
+    36
+    37
+    38
+    40
+    42
+    43
+    44
+    46
+    47
+    48
+    50
+    51
+    53
+    56
+    57
+    59
+    60
+    62
+    64
+    67
+    68
+    69
+    70
+    71]},
+  :recorded-carriage {:records-checked 9, :runs-carrying-both []}},
+ :head-gate-blocker
+ {:failure-count 3,
+  :require-pass
+  {:passed? false,
+   :finding :rule-does-not-encode-an-authored-then,
+   :failures
+   [{:where :controls,
+     :finding :rule-does-not-encode-an-authored-then,
+     :rule :math-strategy/missing-dependency-protocol}
+    {:where :controls,
+     :finding :rule-does-not-encode-an-authored-then,
+     :rule :agent/budget-bounds-exploration}
+    {:where :controls,
+     :finding :rule-does-not-encode-an-authored-then,
+     :rule :agent/pause-is-not-failure}]},
+  :rules
+  [{:conditions
+    {:file-exists? true,
+     :pattern-id-matches-path? true,
+     :span-inside-the-then-block? true,
+     :span-is-non-empty? true},
+    :failed-conditions [],
+    :rule :war-machine/ambient-pattern-retrieval,
+    :then-source
+    "war-machine/ambient-pattern-retrieval.flexiarg:16-16"}
+   {:conditions
+    {:file-exists? true,
+     :pattern-id-matches-path? true,
+     :span-inside-the-then-block? false,
+     :span-is-non-empty? true},
+    :failed-conditions [:span-inside-the-then-block?],
+    :rule :math-strategy/missing-dependency-protocol,
+    :then-source
+    "math-strategy/missing-dependency-protocol.flexiarg:59-77"}
+   {:conditions
+    {:file-exists? true,
+     :pattern-id-matches-path? true,
+     :span-inside-the-then-block? false,
+     :span-is-non-empty? false},
+    :failed-conditions
+    [:span-inside-the-then-block? :span-is-non-empty?],
+    :rule :agent/budget-bounds-exploration,
+    :then-source "agent/budget-bounds-exploration.flexiarg:19-19"}
+   {:conditions
+    {:file-exists? true,
+     :pattern-id-matches-path? true,
+     :span-inside-the-then-block? false,
+     :span-is-non-empty? false},
+    :failed-conditions
+    [:span-inside-the-then-block? :span-is-non-empty?],
+    :rule :agent/pause-is-not-failure,
+    :then-source "agent/pause-is-not-failure.flexiarg:19-19"}]},
+ :problems []}
