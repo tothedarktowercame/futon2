@@ -150,7 +150,15 @@ lines 153, 264, 861, 7240, 7263, 7274, 7802, 7805, 7808, 7811). `#print axioms`
 over all 37 declarations, the list generated from the file rather than by hand:
 0 `sorryAx`; 17 depend on no axioms, 20 on `propext`/`Classical.choice`/`Quot.sound`.
 0 occurrences of `sorry`, `axiom` or `native_decide` in the file.
-`negative_controls.sh` and `pointer_check.bb` — see the ledger row. No Clojure and
+`negative_controls.sh` PASS (133 negative, 53 positive). `pointer_check.bb`: 2578
+pointers in 6 files, 0 unresolved. One valid pointer is deliberately NOT in
+pointer-syntax in the ledger row: `mathlib4/DarkTower/` is not on `pointer_check.bb`'s
+roots allowlist (`p4ng/empirics-futon/pointer_check.bb:53`, which carries
+`mathlib4/DarkTower/WarMachine/` but not its parent), so a `file:line` citation of
+`MemoryArmPreregistration.lean` reports as unresolved although the file exists and the
+lines are right. Appending that root is a p4ng edit this row does not own; the exact
+columns are in §5 above, and this paragraph is here so the next slice that needs a
+pointer into `DarkTower/` appends the root rather than dodging it again. No Clojure and
 no Lisp touched, so no clj-kondo or check-parens subject. No `gen_aif_dag.bb`
 (TN §9a). No machine run, so no run-lock.
 
