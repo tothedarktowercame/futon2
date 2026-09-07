@@ -179,6 +179,39 @@
   "worktree clean after commit; bell wm-build-work back with a summary, the commit
    shas, the artifact sha256, and -- stated plainly whichever way it falls --
    whether the named refuter was CONFIRMED or REFUTED"]
+ :re-dispatch-after-a-bail-out
+ {:what-happened
+  "The FIRST dispatch of this slice (job-id invoke-1788792540444-13779-65b98c62,
+   codex-2, 2026-09-07T14:49:01Z -> 14:49:45Z, 44 seconds) came back with no work
+   and no commits: `I did not have enough execution time to implement and
+   validate those without weakening the acceptance criteria`. Both mathlib4 and
+   futon2 were verified untouched by the lane afterwards (mathlib4 at b28f182f00,
+   futon2 clean but for an unrelated workflow-report.edn edit). THE SEAT WAS
+   RIGHT AND THE PACKET WAS WRONG: M1-M6 asked for a Lean module AND a checker
+   AND a fixture census AND a site-by-site construction census in one bell, which
+   is the `and between two nouns` symptom the handoff rule names. Declining
+   rather than delivering a weakened version is the behaviour the floor asks for."
+  :the-narrowing
+  "The SECOND dispatch asks for M3 ALONE -- the named refuter adjudicated in Lean,
+   in both directions -- in one new file, with the M1/M2 floor applying to that
+   adjudication only. M4 (the fixture census) has been done by the LANE instead
+   and its result is below. M5 (the site census) and the checker are deferred:
+   they are a later slice's or the lane's, and this slice's registry entry will
+   say which of its claims are Lean-proved and which are lane-measured."
+  :M4-done-by-the-lane-not-the-seat
+  "Measured directly from futon3 checks/find-snatch.edn, sha256 839897ef... (the
+   pinned value, verified unchanged; futon3 HEAD cdb5e8a). 96 receipts over 33
+   receipt-carrying rounds of 34; 11 distinct pattern ids receipted; warrant :file
+   is the selected pattern's own file in 96 of 96; ONE distinct :route across all
+   96; every warrant carries exactly :file :if-lines :if-text :however-lines
+   :however-text. THE FINDING: :if-text and the receipted pattern id are IN
+   BIJECTION over all 96 receipts, checked BOTH ways, and pid likewise determines
+   :if-lines. So in this record a citation datum typed as TEXT carries exactly the
+   information `citedText := p` carries, and the record cannot separate `cites the
+   selected pattern's TEXT` from `names the selected PATTERN`. Any arm whose buy is
+   `the text rather than the identifier` is UNWITNESSED by this record, and C559's
+   `carry the texts, not the line numbers` is a claim about DRIFT and not about
+   discriminating power."}
  :reviewer-half-still-owed
  ["f11_citation_field_controls_checker.sh -- plants against the CHECKER, each
    moving EXACTLY ONE verdict"
