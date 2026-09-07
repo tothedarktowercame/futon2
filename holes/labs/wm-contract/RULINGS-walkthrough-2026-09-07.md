@@ -190,7 +190,24 @@ the F11 question forming.
   (content already proved) / seal-opaque (evidence lost) / leave-refused
   (census line stays) / amend-the-type (= #4).
 - Unblocks (with #4): F12 slice 4.
-- **Ruling: PENDING**
+- **Ruling: DESTINATION AMEND-TO-EXISTENCE AT THE ARM-6 SIGNATURE, STAGED
+  (Joe, 2026-09-07)** — Joe accepted claude-1's staged plan: the sorry's
+  destination is the arm-6 conformance predicate plus `∃ f, Conformant f`
+  (content already proved; preserves the docstring's refusal as a theorem);
+  operationally the declaration stays refused until the slice-4 exemplar
+  validates arm 6, so the Holes.lean/contract edit happens once, after the
+  build-to-spec look.
+- Joe's addition (near-verbatim): "when we put in a refusal, what we're
+  really doing is alluding to a new design pattern, and we should write
+  that down, probably in our problems library, with the typical
+  if-however-then format. I can see the logic of that here, although I'm
+  not going to spell it out in detail."
+- DONE: the pattern is authored —
+  `futon3 library/problems/deliberate-refusals-allude-to-unwritten-patterns.flexiarg`
+  (futon3 `524fa95`, parse gate 59/0), source-class self-derived, with the
+  organise refusal as the witnessed instance and the elaboration marked as
+  claude-1's.
+- Registry transcription: with #4, as the pair that unblocks F12.
 
 ## 6. F12 / `:organise-o3-field` — which field O3 reads over
 
