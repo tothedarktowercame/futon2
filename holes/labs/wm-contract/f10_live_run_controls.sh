@@ -54,11 +54,35 @@ set -e
 [ "$rc" -eq 1 ] && [[ "$out" == *'FAILED-CHECKS: :ruled-outcome-c-absent-live'* ]]
 echo 'CONTROL injected-live-layer REJECTED moved=[:ruled-outcome-c-absent-live]'
 
+# Trace plant, added in review: remove the floor layer from the trace itself.
+# Before the `seq` repair in the checker this copy PASSED -- the artifact
+# carried :floor #{} and :c-int-floor-attested stayed true, so the check's one
+# positive claim about the live run was satisfied by its own absence. The
+# declaration-copy control above cannot reach this: it moves the same conjunct
+# through the :folded? flag and never touches the trace.
+cp "$trace" "$tmp/no-floor.edn"
+python3 - "$tmp/no-floor.edn" <<'PY'
+import pathlib,sys
+p=pathlib.Path(sys.argv[1]); s=p.read_text(); old=':layer/id :floor'; before=s.count(old)
+assert before > 0; p.write_text(s.replace(old, ':layer/id :floor-renamed'))
+t=p.read_text(); assert ':layer/id :floor-renamed' in t and t.count(old+',') == 0
+PY
+nfsh=$(sha256sum "$tmp/no-floor.edn" | cut -d' ' -f1)
+set +e
+out=$(F10LR_TRACE="$tmp/no-floor.edn" F10LR_TRACE_SHA="$nfsh" F10LR_ARTIFACT="$tmp/out.edn" bb "$checker" 2>&1); rc=$?
+set -e
+[ "$rc" -eq 1 ] && [[ "$out" == *'FAILED-CHECKS: :c-int-floor-attested'* ]]
+echo 'CONTROL absent-floor-layer REJECTED moved=[:c-int-floor-attested]'
+
 set +e
 out=$(F10LR_TRACE="$repo/data/wm-trace/wm-trace-2026-09-04.edn" F10LR_ARTIFACT="$tmp/out.edn" bb "$checker" 2>&1); rc=$?
 set -e
-[ "$rc" -eq 1 ] && [[ "$out" == *'FAILED-CHECKS: :run-identity'* ]]
-echo 'CONTROL prior-trace REJECTED moved=[:run-identity]'
+# Two checks move here, not one, and the second is the repair showing its work:
+# the 2026-09-04 trace selects none of these run ids, so the tick list is empty,
+# and an empty tick list can no longer satisfy :c-int-floor-attested vacuously.
+# Before the repair this control moved :run-identity alone.
+[ "$rc" -eq 1 ] && [[ "$out" == *'FAILED-CHECKS: :c-int-floor-attested :run-identity'* ]]
+echo 'CONTROL prior-trace REJECTED moved=[:c-int-floor-attested :run-identity]'
 
 after=$(sha256sum "$artifact" | cut -d' ' -f1)
 [ "$before" = "$after" ]

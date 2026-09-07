@@ -54,6 +54,13 @@
      :c-entries (:c-entries tick)
      :preference-stack-status (get-in tick [:preference-stack :status])
      :rank-count (count (get-in tick [:preference-stack :by-rank]))
+     ;; :partial is a status, not a number.  Review of this slice: the
+     ;; by-rank split is 146 present / 1 absent on all three ticks, so the
+     ;; partiality is one ranked action, not most of them.
+     :ranks-present (count (filter #(= :present (:status %))
+                                   (get-in tick [:preference-stack :by-rank])))
+     :ranks-absent (count (filter #(= :absent (:status %))
+                                  (get-in tick [:preference-stack :by-rank])))
      :layer-ids (set (map :layer/id ls))
      :floor (set (map #(select-keys % [:layer/id :basis :folded? :site])
                       (filter #(= :floor (:layer/id %)) ls))))))
@@ -96,15 +103,23 @@
 (defn checks [f]
   (let [ticks (:ticks f) folds (:fold-map f)
         ids #(get % :layer-ids)
-        floor-ok? (fn [p] (every? #(and (:folded? %)
-                                        (str/includes? (:basis %) "src/futon2/aif/preferences.clj"))
-                                  (:floor p)))]
+        ;; The `seq` is the whole point.  Without it this conjunct -- the only
+        ;; POSITIVE claim the check makes about the live run -- is satisfied by
+        ;; an empty floor set: renaming :floor throughout a trace copy left
+        ;; `:floor #{}` in the artifact and the checker still printed PASS.
+        ;; The declaration-side control below never caught that, because it
+        ;; moves this check through the :folded? flag and never touches the
+        ;; trace.  Reviewed and repaired 2026-09-07.
+        floor-ok? (fn [p] (and (seq (:floor p))
+                               (every? #(and (:folded? %)
+                                             (str/includes? (:basis %) "src/futon2/aif/preferences.clj"))
+                                       (:floor p))))]
     (sorted-map
      :ruled-outcome-c-absent-live
      (and (false? (get-in folds [:ruled-outcome-c :folded?]))
           (every? #(not (contains? (ids %) :ruled-outcome-c)) ticks))
      :c-int-floor-attested
-     (and (true? (get-in folds [:c-int :folded?])) (every? floor-ok? ticks))
+     (and (true? (get-in folds [:c-int :folded?])) (seq ticks) (every? floor-ok? ticks))
      :c-mis-runtime-dark
      (and (= :runtime-dark (get-in folds [:c-mis :source]))
           (every? #(empty? (:c-entries %)) ticks))
@@ -148,7 +163,7 @@
   (if (:verdict report)
     (do (fs/create-dirs (fs/parent artifact-path))
         (spit artifact-path (with-out-str (pp/pprint report)))
-        (println "F10 LIVE RUN PASS ticks=3 controls=5"))
+        (println "F10 LIVE RUN PASS ticks=3 in-memory-plants=5"))
     (do (binding [*out* *err*]
           (pp/pprint report)
           (println "FAILED-CHECKS:" (str/join " " (failed f))))

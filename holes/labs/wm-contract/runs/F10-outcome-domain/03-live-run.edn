@@ -164,6 +164,8 @@
       :floor},
     :preference-stack-status :partial,
     :rank-count 147,
+    :ranks-absent 1,
+    :ranks-present 146,
     :timestamp "2026-09-07T23:09:01.901362921Z",
     :wm-git-sha "3f1ef0d7827bc03bc96e95506d10c543ef48ee3b",
     :run/id "85cb5a19-d053-4aa7-a7ad-f667f5e4321d"}
@@ -182,6 +184,8 @@
       :floor},
     :preference-stack-status :partial,
     :rank-count 147,
+    :ranks-absent 1,
+    :ranks-present 146,
     :timestamp "2026-09-07T23:10:42.541389731Z",
     :wm-git-sha "3f1ef0d7827bc03bc96e95506d10c543ef48ee3b",
     :run/id "f24ccb9f-50ca-4654-aa3c-bedfe66eeaea"}
@@ -200,6 +204,8 @@
       :floor},
     :preference-stack-status :partial,
     :rank-count 147,
+    :ranks-absent 1,
+    :ranks-present 146,
     :timestamp "2026-09-07T23:12:22.838749091Z",
     :wm-git-sha "3f1ef0d7827bc03bc96e95506d10c543ef48ee3b",
     :run/id "36820e88-3d68-499d-b359-2d8dbe9743de"}]},
