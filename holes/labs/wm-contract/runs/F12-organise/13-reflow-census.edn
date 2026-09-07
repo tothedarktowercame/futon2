@@ -1,0 +1,163 @@
+{:all-controls-believable? true,
+ :dir "holes/labs/wm-contract/runs/F12-organise",
+ :per-file
+ [{:path "holes/labs/wm-contract/runs/F12-organise/00-census.edn",
+   :commits-newest-first ["b451e0eadf6238cb8500b83d88a4cdfbd8c86581"],
+   :commit-count 1,
+   :introduced-at "b451e0eadf6238cb8500b83d88a4cdfbd8c86581",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 669,
+   :since-introduction {:verdict :byte-identical, :lines 669}}
+  {:path
+   "holes/labs/wm-contract/runs/F12-organise/01-zaif-transcription.edn",
+   :commits-newest-first ["3fe286bdb4525fbe107e889c4589dcad5461ecd3"],
+   :commit-count 1,
+   :introduced-at "3fe286bdb4525fbe107e889c4589dcad5461ecd3",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 117,
+   :since-introduction {:verdict :byte-identical, :lines 117}}
+  {:path
+   "holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn",
+   :commits-newest-first ["2cf1b2fc3ad120275056c5832b81e83d59851fd6"],
+   :commit-count 1,
+   :introduced-at "2cf1b2fc3ad120275056c5832b81e83d59851fd6",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 829,
+   :since-introduction {:verdict :byte-identical, :lines 829}}
+  {:path "holes/labs/wm-contract/runs/F12-organise/03-d1-arms.edn",
+   :commits-newest-first ["a4a39938092cd2bde0c66a74bcfe49b995f8dac4"],
+   :commit-count 1,
+   :introduced-at "a4a39938092cd2bde0c66a74bcfe49b995f8dac4",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 49,
+   :since-introduction {:verdict :byte-identical, :lines 49}}
+  {:path "holes/labs/wm-contract/runs/F12-organise/04-conformance.edn",
+   :commits-newest-first ["bb4126170aeceb028af564a53eda7206d76038cb"],
+   :commit-count 1,
+   :introduced-at "bb4126170aeceb028af564a53eda7206d76038cb",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 78,
+   :since-introduction {:verdict :byte-identical, :lines 78}}
+  {:path
+   "holes/labs/wm-contract/runs/F12-organise/05-admitting-arm.edn",
+   :commits-newest-first ["d3089da4887bbdfe38d45b27b2197574e207b22f"],
+   :commit-count 1,
+   :introduced-at "d3089da4887bbdfe38d45b27b2197574e207b22f",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 117,
+   :since-introduction {:verdict :byte-identical, :lines 117}}
+  {:path
+   "holes/labs/wm-contract/runs/F12-organise/06-attribution-arm.edn",
+   :commits-newest-first ["a218d6305a37ce2cec74232e4d1d0e70f985af2f"],
+   :commit-count 1,
+   :introduced-at "a218d6305a37ce2cec74232e4d1d0e70f985af2f",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 195,
+   :since-introduction {:verdict :byte-identical, :lines 195}}
+  {:path "holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn",
+   :commits-newest-first ["0e384ec215db58ebfa002900a734be8499a666e0"],
+   :commit-count 1,
+   :introduced-at "0e384ec215db58ebfa002900a734be8499a666e0",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 786,
+   :since-introduction {:verdict :byte-identical, :lines 786}}
+  {:path
+   "holes/labs/wm-contract/runs/F12-organise/08-cascadediff-arm.edn",
+   :commits-newest-first ["71d573b7bd480bacf9a8d27070b8f673b63f0e36"],
+   :commit-count 1,
+   :introduced-at "71d573b7bd480bacf9a8d27070b8f673b63f0e36",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 159,
+   :since-introduction {:verdict :byte-identical, :lines 159}}
+  {:path
+   "holes/labs/wm-contract/runs/F12-organise/09-discharge-arm.edn",
+   :commits-newest-first ["feb1cfc6ea384208f11d8fec723b24176e3efd4f"],
+   :commit-count 1,
+   :introduced-at "feb1cfc6ea384208f11d8fec723b24176e3efd4f",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 634,
+   :since-introduction {:verdict :byte-identical, :lines 634}}
+  {:path "holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn",
+   :commits-newest-first ["652f4805c93c674cffd8e702c3fc6307915db7b6"],
+   :commit-count 1,
+   :introduced-at "652f4805c93c674cffd8e702c3fc6307915db7b6",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 273,
+   :since-introduction {:verdict :byte-identical, :lines 273}}
+  {:path
+   "holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn",
+   :commits-newest-first
+   ["3c0ad833a508285c0a6e1ad8774a3132009235e9"
+    "23f22dc55bd0a1486e9183e97514fcfeba882260"],
+   :commit-count 2,
+   :introduced-at "23f22dc55bd0a1486e9183e97514fcfeba882260",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 7626,
+   :since-introduction
+   {:verdict :reflow-plus-additions,
+    :lines-before 3537,
+    :lines-after 7626,
+    :entries-added 17,
+    :every-line-moved? true}}
+  {:path "holes/labs/wm-contract/runs/F12-organise/12-repoint.edn",
+   :commits-newest-first
+   ["e61e6d5bcc1b9c42a86617bd52535ebfc556bcd6"
+    "075e127c4f7d48915a947129e49695e70f3fbb15"],
+   :commit-count 2,
+   :introduced-at "075e127c4f7d48915a947129e49695e70f3fbb15",
+   :full-history-commit-set-agrees? true,
+   :lines-at-head 7186,
+   :since-introduction
+   {:verdict :values-changed, :lines-before 7124, :lines-after 7186}}],
+ :not-claimed
+ ["This census is over runs/F12-organise/ only, which is the population C556 asked about."
+  "Byte-identical since introduction means no citation of that file CAN have drifted; it does not mean the citations of it were ever correct."
+  "A file's pointers could still be wrong for reasons other than a reflow -- miscopied at writing time -- which this census does not test."],
+ :artifacts-changed-since-introduction
+ ["holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn"
+  "holes/labs/wm-contract/runs/F12-organise/12-repoint.edn"],
+ :artifacts-byte-identical-since-introduction
+ ["holes/labs/wm-contract/runs/F12-organise/00-census.edn"
+  "holes/labs/wm-contract/runs/F12-organise/01-zaif-transcription.edn"
+  "holes/labs/wm-contract/runs/F12-organise/02-o4-reachability.edn"
+  "holes/labs/wm-contract/runs/F12-organise/03-d1-arms.edn"
+  "holes/labs/wm-contract/runs/F12-organise/04-conformance.edn"
+  "holes/labs/wm-contract/runs/F12-organise/05-admitting-arm.edn"
+  "holes/labs/wm-contract/runs/F12-organise/06-attribution-arm.edn"
+  "holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn"
+  "holes/labs/wm-contract/runs/F12-organise/08-cascadediff-arm.edn"
+  "holes/labs/wm-contract/runs/F12-organise/09-discharge-arm.edn"
+  "holes/labs/wm-contract/runs/F12-organise/10-d3-encoding.edn"],
+ :artifacts-tracked 13,
+ :controls
+ [{:control :identity,
+   :path "holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn",
+   :result :byte-identical,
+   :expect :byte-identical}
+  {:control :reflow-plant,
+   :path "holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn",
+   :plant-landed? true,
+   :lines-before 786,
+   :lines-after 993,
+   :result :reflow-only,
+   :expect :reflow-only,
+   :believable? true}
+  {:control :value-plant,
+   :path "holes/labs/wm-contract/runs/F12-organise/07-o3-field.edn",
+   :key-changed :non-empty-added-sets,
+   :plant-landed? true,
+   :result :values-changed,
+   :expect :values-changed,
+   :believable? true}
+  {:control :known-reflow-is-detected,
+   :path
+   "holes/labs/wm-contract/runs/F12-organise/11-d2-denominator.edn",
+   :result :reflow-plus-additions,
+   :expect :reflow-plus-additions,
+   :believable? true}],
+ :head "e61e6d5bcc1b9c42a86617bd52535ebfc556bcd6",
+ :repo "futon2",
+ :question-from
+ "holes/labs/wm-contract/C556-F12-artifact-pointer-drift.md:126-129",
+ :what
+ "F12 slice 21 census: which runs/F12-organise/ artifacts changed after the commit that introduced them"}
