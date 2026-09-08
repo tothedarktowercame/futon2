@@ -32,6 +32,8 @@
             [futon2.aif.free-energy :as fe]
             [futon2.aif.preferences :as pref]
             [futon2.aif.c-vector :as cv]
+            [futon2.aif.disposition-risk :as disposition]
+            [futon2.aif.ruled-outcome-c :as ruled]
             [futon2.aif.move-class-intensity :as move-intensity]))
 
 (defn- ambiguity
@@ -587,7 +589,9 @@
                          structural-pressure-mode move-class-intensity-mode
                          predictability-control-mode homeostatic-control-mode
                          graph-feasibility-mode
-                         move-class-intensity-weight survey-eig-weight]
+                         move-class-intensity-weight survey-eig-weight
+                         ruled-outcome-c-enabled? disposition-kernel
+                         ruled-outcome-c-weight seeded-c]
                   :or {info-weight default-info-weight
                        survey-eig-weight default-survey-eig-weight
                        survival-weight default-survival-weight
@@ -618,6 +622,9 @@
                        graph-feasibility-mode legacy-graph-feasibility-mode
                        move-class-intensity-mode :off
                        move-class-intensity-weight 1.0
+                       ruled-outcome-c-enabled? false
+                       ruled-outcome-c-weight 1.0
+                       seeded-c ruled/seeded-c
                        kl-channel-weights default-kl-channel-weights
                        c-temperature pref/default-c-temperature}}]
    (let [belief-update-opts (or belief-update-opts {})
@@ -693,9 +700,17 @@
                    [ch (* (double (get pref/pragmatic-weights ch 0.0))
                           (double gap))])))
          channel-risk (reduce + 0.0 (vals channel-risk-terms))
+	         disposition-risk (when ruled-outcome-c-enabled?
+	                            (disposition/disposition-risk
+	                             next-mean disposition-kernel seeded-c))
+	         ruled-outcome-c-contribution
+	         (if disposition-risk
+	           (* (double ruled-outcome-c-weight) disposition-risk)
+	           0.0)
 	         ;; foldC layer ids: :floor from channel-risk + :capability-zone-load
-	         ;; from zone-risk compose here as the recorded C-risk prefix.
-	         g-risk (+ channel-risk zone-risk)
+	         ;; from zone-risk and :ruled-outcome-c from the disposition bridge
+	         ;; compose here as the recorded C-risk prefix.
+	         g-risk (+ channel-risk zone-risk ruled-outcome-c-contribution)
          ambiguity-terms (if learn-action?
                            {}
                            (ambiguity-by-channel next-var ambiguity-mode))
@@ -868,6 +883,8 @@
 	       {:action action
 	        :prediction prediction
 	        :G-risk g-risk
+	        :G-ruled-outcome-c ruled-outcome-c-contribution
+	        :predicted-disposition-risk disposition-risk
 	        :G-ambiguity g-ambig
         :predictability-bonus g-info
         :homeostatic-pressure g-survival

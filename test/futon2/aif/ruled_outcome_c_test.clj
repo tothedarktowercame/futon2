@@ -25,4 +25,9 @@
   (is (every? #(and (string? (:basis %)) (not (str/blank? (:basis %))))
               ruled/fold-declaration))
   (is (= :no (:in-ruled-sum
-              (first (filter #(= :c-int (:layer/id %)) ruled/fold-declaration))))))
+              (first (filter #(= :c-int (:layer/id %)) ruled/fold-declaration)))))
+  (let [layer (first (filter #(= :ruled-outcome-c (:layer/id %))
+                             ruled/fold-declaration))]
+    (is (true? (:folded? layer)))
+    (is (= "futon2:holes/labs/wm-contract/RULINGS-walkthrough-2026-09-08.md:101-112"
+           (:ruling layer)))))

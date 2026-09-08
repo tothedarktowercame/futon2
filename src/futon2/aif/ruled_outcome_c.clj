@@ -1,6 +1,5 @@
 (ns futon2.aif.ruled-outcome-c
-  "Data declaration for the ruled outcome preference surface.  This namespace
-   deliberately has no scoring or tick integration."
+  "The ruled outcome preference surface and its EFE-fold declaration."
   (:require [clojure.set :as set]
             [futon2.aif.full-loop-cohort :as cohort]))
 
@@ -57,9 +56,10 @@
     :source :owner-ruling
     :author "Joseph Corneli"
     :basis "futon2:holes/labs/wm-contract/aif-equations.edn:211-214"
-    :folded? false
+    :folded? true
     :in-ruled-sum :yes
-    :site "futon2:src/futon2/aif/ruled_outcome_c.clj"}
+    :site "futon2:src/futon2/aif/efe.clj"
+    :ruling "futon2:holes/labs/wm-contract/RULINGS-walkthrough-2026-09-08.md:101-112"}
    {:layer/id :c-int
     :source :runtime
     :author "futon2.aif.preferences"
