@@ -164,6 +164,33 @@
   {:repo "futon2",
    :path
    "holes/labs/wm-contract/dirichlet-concentrations-reference.edn"}}
+ {:witnesses "dirichletAccumulationImportAbsent",
+  :positive-evidence-scope
+  "Digest-pinned finite production-source census: no caller carries the tick observation or belief into the R17 concentration sinks. This is repository evidence, not a proof over future code.",
+  :expected-rejection
+  {:mode :synthetic-tick-to-concentration-import,
+   :command
+   ["bb"
+    "checks/dirichlet_accumulation_import_absence.clj"
+    "--negative-tick-import"],
+   :exact-cause :tick-model-import-reaches-r17},
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+  :check
+  {:repo "futon2",
+   :path "checks/dirichlet_accumulation_import_absence.clj",
+   :entrypoint "-main"},
+  :report
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/dirichlet-accumulation-import-absence.edn",
+   :schema :dirichlet-accumulation-import-absence/v1},
+  :positive-evidence-limit :content-current-source-census,
+  :recorded-at "2026-09-08T00:00:00Z",
+  :result :passed,
+  :control
+  {:kind :in-memory-synthetic-edge,
+   :writes-live-state? false,
+   :expected-cause :tick-model-import-reaches-r17}}
  {:witnesses "Fold",
   :positive-evidence-scope
   "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
