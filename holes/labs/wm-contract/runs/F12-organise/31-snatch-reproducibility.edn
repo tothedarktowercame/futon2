@@ -1,0 +1,15 @@
+{:check :F12-snatch-reproducibility-warm-up
+ :futon3-commit "c0baeca"
+ :scenario [:g4 :snatcher]
+ :producer "futon3:checks/find_organise.clj:330-344"
+ :ruled-o3-check "futon3:checks/find_organise.clj:528-534"
+ :recorded-row-test "futon3:test/futon3/find_organise_test.clj:25-33"
+ :added-by-organise-non-empty? true
+ :organised-edges
+ [[:snatch/re-enter-after-observed-repair
+   :snatch/consult-the-remedy-before-exiting]]
+ :edge-count 1
+ :old-bootstrap-edge-set-rejected? true
+ :tests {:tests 3 :assertions 6 :failures 0 :errors 0}
+ :clj-kondo {:errors 0 :warnings 0}
+ :check-parens :ok}
