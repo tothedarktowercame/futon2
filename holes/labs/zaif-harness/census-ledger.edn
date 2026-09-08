@@ -143,6 +143,23 @@
    :pointers [{:file "futon2/src/futon2/aif/tripwire.clj" :from 648 :to 662 :expect ":status :needs-joe"}
               {:file "futon2/src/futon2/aif/bulletin.clj" :from 188 :to 208 :expect "tripwire-discharges"}]}
 
+  ;; RE-LIFTED 2026-09-08 from ALIGN's drift-correction block (futon2 0b9535d3).
+  ;; Three pointers moved and NOT ONE construct changed: [E-T] one line down
+  ;; under PA13z, [E-16-C]/[E-16-K] shifted under PA14z. claude-1 re-verified all
+  ;; three at source.
+  ;;
+  ;; TWO OF THEM WERE NEVER ALIGN'S CITATIONS. :2788-2818 and :3007-3025 had been
+  ;; re-pointed here by work seats so their own rows' gates would pass -- a
+  ;; slower, quieter [E-T-S]. ALIGN now issues the authorized citations and this
+  ;; ledger lifts from there, so the divergence closed by AUTHORIZATION rather
+  ;; than by the ledger continuing to maintain what it was never issued.
+  ;;
+  ;; These addresses are deliberately the LAST of their kind: ALIGN's same block
+  ;; declares address-grade citation ENDING, and :PA17z replaces them with content
+  ;; pins. Ranges are widened slightly so the next one-line shift is absorbed
+  ;; while PA17z is built -- a stopgap, NOT the tolerance window PA17z refuses,
+  ;; because it buys days rather than becoming the mechanism.
+
   {:node "TRACE" :cell :recorded :verdict :exists :tag "[E-T]"
    :reading "The WM attaches :TRACE to :wm/route immediately before the write; trace/write-trace! constructs and appends the exact record. Credits ONLY recorded: a tick route record, not evidence that any other process stage occurred."
    ;; POINTER RE-LIFTED 2026-09-06 from ALIGN's dated correction (futon2
@@ -153,7 +170,7 @@
    ;; it. The verdict never moved -- only the line citation did. Expect this one
    ;; to drift again: war_machine.clj is the most-edited file in the scope, which
    ;; is precisely why the refusal is worth having.
-   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6789 :to 6789 :expect ":TRACE"}
+   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6790 :to 6790 :expect ":TRACE"}
               {:file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!"}]}
 
   ;; RE-LIFTED 2026-09-08 from ALIGN's fresh adjudication (futon2 1b575c71).
@@ -177,7 +194,7 @@
   {:node "R16" :cell :commissioned :verdict :exists :tag "[E-16-C]"
    :reading "The author commission names the selected target, repository/base head, artifact contract, requirements, refusal shape and independent reviewer; that exact prompt is passed to dispatch."
    :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 1398 :to 1454 :expect "author-prompt"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2788 :to 2818 :expect "dispatch!"}]}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2810 :to 2830 :expect "dispatch!"}]}
 
   {:node "R16" :cell :dispatched :verdict :exists :tag "[E-16-D]"
    :reading "dispatch! submits agent, caller, mission id and prompt to Agency; the dispatch checkpoint records agent, job id, prompt reference and response."
@@ -192,7 +209,7 @@
   {:node "R16" :cell :checked :verdict :exists :tag "[E-16-K]"
    :reading "After a distinct reviewer dispatch and return, approval requires a done review job, an :approve verdict and execution evidence; failure refuses advancement."
    :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2970 :to 3007 :expect "poll-job!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3007 :to 3025 :expect ":approve"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3020 :to 3040 :expect ":approve"}
               {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3026 :to 3055 :expect ":build-failed"}]}
 
   {:node "R16" :cell :recorded :verdict :exists :tag "[E-16-X]"

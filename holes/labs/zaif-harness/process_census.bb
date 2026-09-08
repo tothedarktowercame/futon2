@@ -259,8 +259,15 @@
   (if-let [adj (adjudication-for node cell)]
     (let [checks (mapv check-pointer (:pointers adj))]
       (if (every? :ok? checks)
-        {:node node :cell cell :verdict (:verdict adj) :basis :pinned-adjudication
-         :tag (:tag adj) :pointers checks}
+        ;; :authority and :qualification travel WITH the verdict, not just in the
+        ;; ledger. A consumer that sees only :exists cannot tell a cell its census
+        ;; of record adjudicated from one a work seat credited itself -- which is
+        ;; the [E-T-S] fault, and the reason PA16z exists. Carrying the provenance
+        ;; into the result is what lets a check assert it.
+        (cond-> {:node node :cell cell :verdict (:verdict adj) :basis :pinned-adjudication
+                 :tag (:tag adj) :pointers checks}
+          (:authority adj)     (assoc :authority (:authority adj))
+          (:qualification adj) (assoc :qualification (:qualification adj)))
         {:node node :cell cell :verdict :stale-adjudication :basis :pinned-adjudication
          :tag (:tag adj) :declared (:verdict adj)
          :pointers checks :stale (filterv (complement :ok?) checks)}))
