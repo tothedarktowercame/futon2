@@ -157,7 +157,11 @@
    :conflict "Holes.G := risk - eig over a generic Policy; G_eq_expectedFreeEnergy bridges the two under stated assumptions (glossary-formal-lines.md, G entry)"}
   {:id :policy-set :defines :pi :node :R6 :class :stack-defined :ref :friston2017
    :imports []
-   :formal "pi ranges over the candidate action space"}
+   :formal "pi ranges over the candidate action space"
+   :lean "machinePolicySet"
+   :lean-status :closed
+   :lean-at "mathlib4 738cae3a54 (F12RuledCarrier.lean, MachinePolicySet.lean)"
+   :lean-note "CARRIER DECLARED 2026-09-08 by :U68, independently reviewed by zai-1 under Agency job invoke-1788857703186-14750-435bc1ba with no changes requested. CandidateActionSpace is the existing Set P argument of F12's ruled organise signature, now named at mathlib4:DarkTower/WarMachine/F12RuledCarrier.lean:16-22 rather than duplicated. machinePolicySet maps the ranked List Candidate consumed by select-action to that carrier (mathlib4:DarkTower/WarMachine/MachinePolicySet.lean:19-22). selectionPolicySet keeps the three production dispatches distinct: strategic controller-head reads the ranked list, strategic full-score-posterior reads the scored list, actuation reads ranked with zero priors and scored with a nonzero prior (mathlib4:DarkTower/WarMachine/MachinePolicySet.lean:24-37; futon2:src/futon2/aif/policy.clj:567-594,672-862). The production fixture witnesses all three branches as the same two action identities at mathlib4:DarkTower/WarMachine/MachinePolicySet.lean:47-67. This states what the selector ranges over; it changes no production source and writes no ruling."}
   {:id :depth :defines :T :node :R13 :class :theory-defined :ref :dacosta2020
    :imports []
    :formal "T := temporal policy depth (the range of the sums in Q(o|pi) and G)" :eq "dacosta2020 eq. 42 (sum over τ)" :code "war_machine.clj:6283-6285 (3 when an anticipation snapshot loads); rollout.clj:474-479 (rollout-horizon, default 2); forward_model.clj:278 (default-horizon-steps 3); efe.clj:629-631 (horizon-steps >= 2 selects the multi-horizon path)"
