@@ -1,5 +1,26 @@
 # Apparatus design principles — index
 
+**Status: PROMOTED (Joe's ruling 2026-09-08), after the APM repair-program
+field trial.** Evidence: the scoring ledger,
+`futon3c/holes/technotes/TN-apm-principle-scoring-ledger.md` @ b0c36489 —
+13 principles, 21 scoring occasions (earned/partial/misled tallied per
+principle; two honest misleads kept prominent), plus four uncovered
+findings and a four-instance instrument-error lesson (a negative result is
+only evidence if the instrument could have produced a positive one). Trial amendments landed in the pattern texts (P2 second
+signature: a vocabulary member nothing can produce; P6: an
+arbitrarily-movable deadline is not a bound; P7: commissioned by mutation;
+P8: extends to fences — observation against live data, not agreement with
+a declaration). A 15th pattern was discovered BY the trial and joins the
+set: `repairs-name-defects-not-neighborhoods` (a repair citation names the
+checkable defect it closes; the forward hedge is the violation's primary
+signature). One filing is flagged as a judgment call rather than a settled
+fit (claude-5, entry 14): P2's second signature — coverage resembling
+capability — may belong under monitors-measure-the-work or
+new-failure-class-is-a-design-defect instead; recorded here so the choice
+is visible, not implied.
+
+Original charter below, kept as written.
+
 **Status: PROPOSED, pending Joe's ruling.** Extracted 2026-09-08 from the APM
 failure record at Joe's instruction; drafted by claude-9, redlined by claude-1
 (bell `invoke-1788833602062-14401-acca3986`), agreed between them with no open
@@ -35,6 +56,7 @@ Primary evidence: `futon3c/holes/T-apm-recurring-failure-end-to-end.md`
 | 12 | `new-failure-class-is-a-design-defect` | census closed and shrinking; new class → one-layer-down elimination; growth rate reported |
 | 13 | `the-system-stops-on-schedule` | scheduled halts; defect register is the work queue between waves |
 | 14 | `pin-moves-with-the-population` | the hand that moves a pinned population carries the re-pin, in the same change |
+| 15 | `repairs-name-defects-not-neighborhoods` | a repair citation names the checkable defect it closes, never the commit it landed near; a forward hedge is an admission (added post-trial, 2026-09-08) |
 
 (#3 was merged into #9 during the redline; numbering kept for traceability to
 the drafting thread.)
