@@ -1,0 +1,13 @@
+{:source "holes/labs/wm-contract/runs/D1-evidence/kl-worked-example.edn:11"
+ :claims [{:claim/type :preference
+           :disposition :grounded-change
+           :proposed-mass 1/2
+           :citation "holes/labs/wm-contract/runs/D1-evidence/kl-worked-example.edn:11"}
+          {:claim/type :preference
+           :disposition :agent-unavailable
+           :proposed-mass 1/8
+           :citation "holes/labs/wm-contract/runs/D1-evidence/kl-worked-example.edn:11"}
+          {:claim/type :observation
+           :disposition :build-failed
+           :proposed-mass 3/4
+           :citation "holes/labs/wm-contract/C591-C-as-calculation-proposal.md:51-60"}]}
