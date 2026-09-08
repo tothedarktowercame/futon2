@@ -20,7 +20,7 @@ exists.
 |---|---|
 | `holes/labs/wm-contract/harvest_refusals.bb` | the harvester |
 | `holes/labs/wm-contract/PROPOSED-ROWS.md` | generated; one proposal per (site, reason) class |
-| `holes/labs/wm-contract/refusal-sweep-state.edn` | generated; watermarks and cumulative per-class counts |
+| generated-not-committed: `holes/labs/wm-contract/refusal-sweep-state.edn` | generated cursor; watermarks and cumulative per-class counts; recreated by every publish and intentionally absent from a fresh clone (`810d8ca4`) |
 | `futon3/checks/library_graph_lint.clj` | the `@draft` quarantine, four laws |
 | `futon3/flexiarg-directives.edn` | `:draft` registered `:standard` |
 | `futon3/README-flexiarg.md` §5a | the quarantine table, written where `@why-posthoc`'s is |

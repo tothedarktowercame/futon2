@@ -173,7 +173,7 @@ visible; the 15 belief-blocked ones are the subset with a live cost.
 
 The entire red is one artefact-boundary finding:
 `C484-refusal-harvester.md:23` cites
-`holes/labs/wm-contract/refusal-sweep-state.edn`, which exists on disk
+generated-not-committed: `holes/labs/wm-contract/refusal-sweep-state.edn`, which exists on disk
 (regenerated at every publish by the harvester) but is **not tracked** —
 it was tracked once (810d8ca4) and later dropped, so the committed doc
 cites a path a fresh clone will not have. Fix is small but has two honest

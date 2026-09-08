@@ -13,6 +13,17 @@
                [{:repo :fixture :path "test/x.clj"
                  :text "(is (= 3 (count timestamp-records))) ; era :v2"}]))))
 
+(deftest generated-not-committed-citations-are-explicit-and-path-scoped
+  (let [root "/home/joe/code/futon2"
+        target "holes/labs/wm-contract/refusal-sweep-state.edn"
+        row {:repo :futon2 :root root :path "fixture.md"
+             :text (str "generated-not-committed: `" target "`")}]
+    (is (empty? (lint/artefact-findings [row])))
+    (let [finding (first (lint/artefact-findings
+                          [(assoc row :text (str "State: `" target "`"))]))]
+      (is (= :citation-to-untracked-path (:finding finding)))
+      (is (= target (:target finding))))))
+
 (deftest specimen-region-is-explicit-and-line-preserving
   (let [raw (str "before\nPREEMPTIVE-REPAIR-SPECIMENS-BEGIN\n"
                  "findings=3; process exit 0\n"

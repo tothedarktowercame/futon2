@@ -49,6 +49,8 @@
   (vec (mapcat #(matches % #"(?is)(?:mismatch(?:es)?|findings?)\s*[:=]?\s*[1-9][0-9]*.{0,180}?exit(?:ed|\s+code)?\s*0|exit(?:ed|\s+code)?\s*0.{0,180}?(?:mismatch(?:es)?|findings?)\s*[:=]?\s*[1-9][0-9]*" :nonzero-finding-zero-exit) rows)))
 
 (def path-token #"`((?:checks|holes|src|test|vetting|empirics)/[^` :]+\.[A-Za-z0-9]+)`")
+(def generated-not-committed-token
+  #"generated-not-committed:\s*`((?:checks|holes|src|test|vetting|empirics)/[^` :]+\.[A-Za-z0-9]+)`")
 (defn- tracked? [root rel]
   (zero? (:exit (shell {:out :string :err :string :continue true}
                        "git" "-C" root "ls-files" "--error-unmatch" rel))))
@@ -57,11 +59,15 @@
    (concat
     (mapcat
      (fn [{:keys [repo root path text]}]
-       (for [{:keys [start groups]} (matcher-results path-token text)
+       (let [generated (set (map (comp first :groups)
+                                 (matcher-results generated-not-committed-token text)))]
+         (for [{:keys [start groups]} (matcher-results path-token text)
              :let [rel (first groups)]
-             :when (and (fs/exists? (fs/path root rel)) (not (tracked? root rel)))]
-         {:repo repo :path path :line (line-no text start)
-          :finding :citation-to-untracked-path :target rel})) rows)
+             :when (and (fs/exists? (fs/path root rel))
+                        (not (tracked? root rel))
+                        (not (contains? generated rel)))]
+           {:repo repo :path path :line (line-no text start)
+            :finding :citation-to-untracked-path :target rel}))) rows)
     ;; Prose may legitimately describe the staging/publishing distinction.  Only
     ;; executable shell is suspect, and only when its publication assertion is
     ;; in the same local branch as --stage.
