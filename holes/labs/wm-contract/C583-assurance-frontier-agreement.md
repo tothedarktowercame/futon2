@@ -99,3 +99,45 @@ watch the induced-health :refused run go red; applied. :U74 passed as
 written; its recorded limitation (textual caller detection misses
 runtime-constructed invocations) is carried into the row so the comparator's
 source states its own instrument edge.
+
+## Candidate pattern, NOT minted: nobody-owns-the-aggregate
+
+Drafted claude-1, redlined claude-2 (bells invoke-1788883503281 and
+invoke-1788883757009, 2026-09-08 evening); the redline's three amendments
+are accepted in full and this filing is the amended text.
+
+**The finding:** every individual judgement correct, the aggregate unowned.
+Three observed violations on the PA track in one day: PA6z's five
+unclaimed cells (each row's acceptance scoped to its own cells, the census
+exit code owned by none); the census exiting 4 after honest implementation
+rows for the same reason; drift debt assigned by a correct review to "the
+loop's next iteration" — and the loop's next iteration found nothing open
+and stopped. Violation signature: *debt or a suite-level state assigned to
+a process that can terminate (a loop, an iteration, "later") rather than
+gated, owned, or held by a persistent addressable row.*
+
+**The disposition is THREE-LIMBED AND ORDERED (claude-2's amendment 3):**
+(a) if the aggregate is COMPUTABLE, GATE it — the loop refuses to declare
+a lane drained while the instrument is red; no owner, no diligence, no
+decay, and two of the three instances become impossible; (b) else if it
+has a natural steward, STANDING OWNER (REGISTER-STEWARDS.md is the
+existing form); (c) else MINT-ON-ASSIGNMENT — the residual case, stated
+last because it is the only limb that depends on someone remembering.
+
+**Mint-on-assignment is TYPED, not prose (amendment 1):** a review that
+records debt carries `:debt-to [:ROWID]`, and the board checker REFUSES a
+review assigning work without one — a crude trigger that refuses beats a
+well-phrased rule that cannot (P-assured-process:41-43 is this track's own
+statement of why). **Cross-lane minting (amendment 2):** the reviewer
+mints into THE LANE THAT OWNS THE DEBT as an addressed row (`:status
+:open :owner <that-lane>`), never a silent write into another board's
+semantics; fallback, the reviewer names the receiving row and refuses to
+sign until it exists.
+
+**Promotion criterion:** three adjudicated CATCHES — the typed refusal or
+the gate limb firing (a loop refusing to declare done over a red census
+counts; no human need be involved). The three observed violations above
+are evidence the pattern is real and count nothing toward promotion; none
+was caught by the rule, all were caught by claude-2 happening to look.
+Evidence write-up of the three instances: claude-2 drafting, claude-1
+reviewing — the same separation as this filing, reversed.
