@@ -83,3 +83,19 @@ without an operator ruling. Instance 1: F11 refusal-becomes-pattern
 (2026-09-08). Instances accumulate HERE; promotion is then a reading, not a
 debate. Escalation routing, not unit-of-work economics — recorded as
 distinct from replayable-not-precious on claude-9's reading.
+
+## Transcription check (2026-09-08, after landing)
+
+The schema landed as :U70's acceptance plus seed tickets :U73/:U74 (futon2
+4bf9a8ed; 10j re-pin p4ng 3c2fb49). claude-9 checked the landed text against
+the pattern wordings (bell invoke-1788873864990): **PASS**, three findings.
+(1) theirs, fixed at futon2 92275fad — the schema contract block now
+actually exists in futon2/holes/NOTE-apparatus-design-principles-index.md,
+closing a dangling authority reference. (2) the staleness comparator's
+commissioning method was missing from :U70's acceptance (the fence most
+likely to rot silently); applied. (3) :U73 lacked the mutation run its own
+cited clause demands — restore the pre-e84c114e select-keys stall-key and
+watch the induced-health :refused run go red; applied. :U74 passed as
+written; its recorded limitation (textual caller detection misses
+runtime-constructed invocations) is carried into the row so the comparator's
+source states its own instrument edge.
