@@ -109,7 +109,17 @@
  ;; comes from the reading, and a stale report is checked by hand before it is
  ;; believed.
  :adjudicated
- [{:node "R10" :cell :commissioned :verdict :exists :tag "[E-10-C]"
+ [{:node "R12" :cell :returned :verdict :exists :tag "[E-12-R]"
+   :reading "Calibration admission refuses a return unless its R12 commission identity matches, then records the tied returned artifact in the admission receipt."
+   :pointers [{:file "futon2/src/futon2/aif/calibration_admission.clj" :from 7 :to 24 :expect ":r12/untied-return"}
+              {:file "futon2/src/futon2/aif/calibration_admission.clj" :from 35 :to 39 :expect ":returned"}]}
+
+  {:node "R12" :cell :checked :verdict :exists :tag "[E-12-K]"
+   :reading "Calibration admission refuses a missing, mismatched, or non-approving R12 check and records the approving check before returning admitted."
+   :pointers [{:file "futon2/src/futon2/aif/calibration_admission.clj" :from 25 :to 33 :expect ":r12/unchecked-return"}
+              {:file "futon2/src/futon2/aif/calibration_admission.clj" :from 39 :to 43 :expect ":checked"}]}
+
+  {:node "R10" :cell :commissioned :verdict :exists :tag "[E-10-C]"
    :reading "run-scheduled-dispatch! refuses a scheduled run without a named commission, attaches :node :R10 before dispatch, and records that linked commission with the receipt."
    :pointers [{:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 92 :to 105 :expect "linked-commission"}
               {:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 121 :to 125 :expect ":commission"}]}
