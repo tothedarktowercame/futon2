@@ -132,6 +132,37 @@ meaning, not only for pointer resolution):**
     :serves-cells [:checked :surfaced]}` and
   `{:sites ["src/futon2/aif/bulletin.clj:190-208"]
     :serves-cells [:surfaced]}` (R20);
+**[E-T-S] TRACE surfaced adjudication (2026-09-08, claude-1, from claude-2's
+self-certification finding, bell invoke-1788882522014):**
+
+- **The governance fact first, because it must not be laundered:** the
+  census-ledger carried a TRACE-surfaced credit from PA9z's work seat
+  (futon2 `dfe4dcfd`) until this adjudication — written straight into the
+  instrument's data on a reading this census of record never made, while
+  the ledger's own header says its cells ARE this document's cells
+  transcribed. For that interval the instrument certified itself: R9's
+  problem one layer up, inside the thing built to detect R9's problem, the
+  second instance of the shape beside PA5z's refusal. The credit below is
+  examined fresh at source, not ratified.
+- **[E-T-S] surfaced exists, on the post-PA13z channel:**
+  `trace-discharges` (`src/futon2/aif/bulletin.clj:212-236`, moved from
+  `:344` by PA13z `d17f1088` — drift instance three of that signature,
+  caught by the harness) reads persisted `:TRACE` route hops;
+  `untriaged-traces` (`:278-287`) subtracts the append-only discharge
+  ledger (`append-trace-review!` `:265`, refuses duplicate dispositions)
+  and delivers count + oldest-date into the bulletin as its own field,
+  split from the decision sheet. QUALIFICATION: surfacing is
+  AGGREGATE-grain — per-record surfacing carries no answerable question
+  until PA14z's reason field lands at the write site; what running code
+  surfaces today is the queue's existence, size and age, which is the
+  grain the triage note specified.
+- **:serves-cells (TRACE):**
+  `{:sites ["src/futon2/aif/war_machine.clj:6750-6759"
+            "src/futon2/aif/trace.clj:723-745"]
+    :serves-cells [:recorded]}` and
+  `{:sites ["src/futon2/aif/bulletin.clj:212-287"]
+    :serves-cells [:surfaced]}`.
+
   `{:sites ["src/futon2/aif/full_loop_runner.clj:141-182"
             "src/futon2/aif/full_loop_runner.clj:2362-2379"
             "src/futon2/aif/full_loop_runner.clj:2430"]
@@ -146,7 +177,7 @@ meaning, not only for pointer resolution):**
 | R10 — Scheduled entrypoint | exists [E-10-C] | exists [E-10-D] | absent [A-10] | absent [A-10] | absent [A-10] | absent [A-10] | absent [A-10] |
 | R12 — Two-layer calibration | absent [A] | absent [A] | absent [A] | exists [E-12-R] | exists [E-12-K] | absent [A] | absent [A] |
 | R20 — Interoceptive tripwires | absent [A] | absent [A] | absent [A] | absent [A] | exists [E20-C] | absent [A] | exists [E20-S] |
-| TRACE — WM trace store | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | exists [E-T] | absent [A] |
+| TRACE — WM trace store | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | exists [E-T] | exists [E-T-S] |
 | R16 — Grounded actuation | exists [E-16-C] | exists [E-16-D] | exists [E-16-P] | exists [E-16-R] | exists [E-16-K] | exists [E-16-X] | exists [E-16-S] |
 
 ### Cell evidence
