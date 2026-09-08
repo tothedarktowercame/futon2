@@ -3,6 +3,29 @@
    score the resulting distribution against the ruled outcome preference."
   (:require [clojure.set :as set]))
 
+(def producer-contract :disposition-risk/v1)
+
+(defn seeded-c-record
+  "Classify the ruled preference input without supplying a default. A caller
+   that enables disposition risk must provide the seed it intends to score
+   against; absence is data, not permission to invent preference masses."
+  [opts required?]
+  (let [present? (contains? opts :seeded-c)
+        seeded-c (:seeded-c opts)]
+    (if (some? seeded-c)
+      {:producer-contract producer-contract
+       :status :present
+       :field :seeded-c
+       :value seeded-c}
+      {:producer-contract producer-contract
+       :status :absent
+       :reason :seeded-c-not-supplied
+       :required? (boolean required?)
+       :absent [{:field :seeded-c :key-present? present?}]})))
+
+(defn seeded-c-events [record]
+  (if (= :present (:status record)) [] [record]))
+
 (defn- refuse! [reason data]
   (throw (ex-info (name reason) (assoc data :reason reason :refused? true))))
 

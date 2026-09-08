@@ -18,6 +18,7 @@
 (def opts
   {:ruled-outcome-c-enabled? true
    :disposition-kernel kernel
+   :seeded-c ruled/seeded-c
    :ambiguity-mode :variance-sum
    :risk-mode :hinge})
 
@@ -28,6 +29,24 @@
     (is (= positive (:action (first ranked))))
     (is (< (:G-ruled-outcome-c (first ranked))
            (:G-ruled-outcome-c (second ranked))))))
+
+(deftest t2-absent-seeded-c-refuses-selection
+  (doseq [[label absent-opts key-present?]
+          [["missing key" (dissoc opts :seeded-c) false]
+           ["nil value" (assoc opts :seeded-c nil) true]]]
+    (testing label
+      (let [ranked (efe/rank-actions state [{:type :no-op}] absent-opts)
+            [record :as events] (:disposition-risk-events (meta ranked))]
+        (is (= [] ranked) "no policy is chosen or ranked")
+        (is (true? (:refused? (meta ranked))))
+        (is (= 1 (count events)))
+        (is (= :absent (:status record)))
+        (is (= :disposition-risk/v1 (:producer-contract record)))
+        (is (= :seeded-c-not-supplied (:reason record)))
+        (is (true? (:required? record)))
+        (is (not (contains? record :value)) "no preference masses are invented")
+        (is (= [{:field :seeded-c :key-present? key-present?}]
+               (:absent record)))))))
 
 (deftest t3-support-and-named-zeros-are-enforced
   (testing "zero Q mass over every named zero is a finite KL"

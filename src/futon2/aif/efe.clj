@@ -33,7 +33,6 @@
             [futon2.aif.preferences :as pref]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.disposition-risk :as disposition]
-            [futon2.aif.ruled-outcome-c :as ruled]
             [futon2.aif.move-class-intensity :as move-intensity]))
 
 (defn- ambiguity
@@ -624,7 +623,6 @@
                        move-class-intensity-weight 1.0
                        ruled-outcome-c-enabled? false
                        ruled-outcome-c-weight 1.0
-                       seeded-c ruled/seeded-c
                        kl-channel-weights default-kl-channel-weights
                        c-temperature pref/default-c-temperature}}]
    (let [belief-update-opts (or belief-update-opts {})
@@ -975,12 +973,23 @@
   ([state candidate-actions opts]
    (let [{:keys [included excluded]}
          (partition-policy-support (:capability-graph opts) candidate-actions opts)
-         ranked (->> included
-                     (map #(compute-efe state % opts))
-                     (sort-by :controller-score)
-                     (map-indexed (fn [i e] (assoc e :rank (inc i))))
-                     vec)]
-     (with-meta ranked {:policy-support/excluded (vec excluded)}))))
+         seed-required? (and (:ruled-outcome-c-enabled? opts) (seq included))
+         seed-record (when (:ruled-outcome-c-enabled? opts)
+                       (disposition/seeded-c-record opts seed-required?))
+         refusal? (and seed-required? (= :absent (:status seed-record)))
+         ranked (if refusal?
+                  []
+                  (->> included
+                       (map #(compute-efe state % opts))
+                       (sort-by :controller-score)
+                       (map-indexed (fn [i e] (assoc e :rank (inc i))))
+                       vec))]
+     (with-meta ranked
+       {:policy-support/excluded (vec excluded)
+        :disposition-risk-events (if seed-record
+                                   (disposition/seeded-c-events seed-record)
+                                   [])
+        :refused? refusal?}))))
 
 (defn rank-star-map-actions
   "Rank candidate actions after applying the INV-G selector gate. Unsafe pursuit,
