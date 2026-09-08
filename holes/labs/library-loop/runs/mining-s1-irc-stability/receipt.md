@@ -26,10 +26,11 @@ the restated statement this pass:
   THEN's own terms (overload/dropped-lines with tuning/backpressure), and the
   bridge named as the mission's reading, not the THEN's claim.
 - **`:transcript` added** (finding 3 of the M3 review, generalised): the
-  committed history futon3c b1208d65 (2026-02-20, plan with the pattern
+  committed history futon3c b1208d65 (2026-02-15, plan with the pattern
   cross-reference table) -> F1-F6 implementation -> 0f55ac8d (2026-02-23,
-  close), plus the preceding transport commits 29d18a9a and 1530126f named in
-  the mission's own relationship section. All shas/dates from git at pin
+  close), plus the post-close transport commits 1530126f (2026-02-24) and
+  29d18a9a (2026-03-05), dated AFTER the close and recorded as follow-on
+  work, not predecessors (transcript corrected per reopen review 2026-09-08). All shas/dates from git at pin
   f3534b93, re-run this invocation.
 - THEN spans remain content lines only (`:19`; marker `+ THEN:` at `:18`
   excluded) — verified by grep at pin ab277bdd.
