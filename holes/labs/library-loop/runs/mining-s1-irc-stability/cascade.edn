@@ -1,0 +1,78 @@
+{:schema :historical-cascade-v1
+ :id :s1-irc-stability-transport-context-cascade
+ :problem
+ {:id :s1-irc-transport-stability
+  :statement "Drop-outs, duplicate messages, and re-connect races produce evidence gaps; a transport that silently drops messages is a transport that silently loses context."
+  :source "futon5a/holes/stories/leaf-5.md:31-35 (survey witness runs/W1-witness-survey.md:37-51)"
+  :solved-behaviour "The IRC server survives real-world conditions: server-initiated PING/PONG reaps zombie connections (F1), no reader thread blocks indefinitely (F2), no exception is silently discarded (F3), reconnecting clients reclaim their nick (F4), one stalled agent cannot block the relay (F5), and shutdown is coordinated (F6)."
+  :scope "This record covers the six fixed failure modes of the IRC server adapter at mission closure (2026-02-23). It does not claim client-side reconnection, TLS, rate limiting, or federation, and it does not claim sustained operator-confirmed use without drop-outs, which the story scene sets as the closure bar (leaf-5.md:44-45)."
+  :witness "futon3c/holes/missions/M-IRC-stability.md:302-310 (Completion, 2026-02-23: all 6 failure modes implemented, 16 stability tests)"}
+ :source-pins
+ {:futon2 "2ec9c19fd14ddc6a2fc4ef19eefc2f93142751a2"
+  :futon3 "ab277bdd6b6aa3f587e09625c750d258d61a7f92"
+  :futon3c "b0c3648965d3e75acf199b09967609353d9023ad"
+  :futon5a "futon5a committed history; witness file leaf-5.md at the survey pin"}
+ :nodes
+ [{:pattern :realtime/liveness-heartbeats
+   :library-path "library/realtime/liveness-heartbeats.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-IRC-stability.md:37-40 (F1 names the pattern) and :93 (cross-ref table row)"}
+  {:pattern :realtime/listener-leases
+   :library-path "library/realtime/listener-leases.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-IRC-stability.md:97 (cross-ref table row: zombie connections reaped, not left indefinitely)"}
+  {:pattern :realtime/loop-failure-signals
+   :library-path "library/realtime/loop-failure-signals.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-IRC-stability.md:96 (cross-ref table row: errors surface at the layer that caused them)"}]
+ :selected
+ [:realtime/liveness-heartbeats
+  :realtime/listener-leases
+  :realtime/loop-failure-signals]
+ :admitted []
+ :admission-note
+ "All three patterns are named in the mission's plan before implementation began (M-IRC-stability.md:91-98, committed with the mission at futon3c b1208d65, 2026-02-20) and none is recorded as drawn in during execution, so no node is classified as admitted. TWO PATTERN REFERENCES IN THE PLAN HAVE NO LIBRARY NODE: realtime/connection-state-machine and realtime/reconnect-with-backoff (M-IRC-stability.md:94-95) do not exist under library/ at the futon3 pin (grep over library/ returns nothing), so they are recorded here rather than minted as nodes -- this cascade cites only patterns that exist at the pin."
+ :edges
+ [{:from :realtime/liveness-heartbeats
+   :to :realtime/listener-leases
+   :relation :detection-precedes-expiry
+   :source "futon3c/holes/missions/M-IRC-stability.md:37-40,97 and src/futon3c/transport/irc.clj:391-410,629-643"
+   :reading "The keepalive loop's PING/PONG stall detection is what fires the reap: liveness detection decides WHICH lease is expired (keepalive-reap at irc.clj:404), and nick-ghost?/kill-ghost! (irc.clj:219-235,274-275) expire the stale instance on reclaim."}
+  {:from :realtime/listener-leases
+   :to :realtime/loop-failure-signals
+   :relation :expiry-surfaces-as-evidence
+   :source "futon3c/holes/missions/M-IRC-stability.md:96 and src/futon3c/transport/irc.clj:45,404-409,639-643"
+   :reading "Reaping, ghost-killing, and keepalive errors are emitted as evidence tensions through emit-error-evidence! rather than swallowed -- the mission's F3 invariant that no exception is silently discarded anywhere in irc.clj."}]
+ :rules
+ [{:id :require-server-initiated-liveness-probes
+   :member :realtime/liveness-heartbeats
+   :then-source "library/realtime/liveness-heartbeats.flexiarg:19"
+   :interpretation-class :attested
+   :interpretation
+   "Require heartbeats with sequence/activity context; a stalled instance (missed PONG beyond the timeout, no traffic resetting the timer) must be flagged with the reason and reconnected or shut down."
+   :attestation "futon3c/holes/missions/M-IRC-stability.md:37-40 (F1 'Pattern: realtime/liveness-heartbeats -- server MUST initiate periodic probes') and :112-135 (the implemented keepalive loop: interval, timeout, any-traffic reset); irc.clj:629-643,415-425; irc_test.clj:409+ (section 11)"}
+  {:id :expire-stale-instances-not-silently-keep-them
+   :member :realtime/listener-leases
+   :then-source "library/realtime/listener-leases.flexiarg:19"
+   :interpretation-class :attested
+   :interpretation
+   "Versioned listener identities with expiry: zombie connections are reaped and ghosts killed on nick reclaim, not left indefinitely competing for the nick."
+   :attestation "futon3c/holes/missions/M-IRC-stability.md:97 (cross-ref: 'Zombie connections should be reaped, not left indefinitely') and :73-82 (F4 nick reclaim: detect ghost, kill old, register new); irc.clj:219-235,274-275,391-410"}
+  {:id :surface-loop-failures-as-evidence
+   :member :realtime/loop-failure-signals
+   :then-source "library/realtime/loop-failure-signals.flexiarg:19"
+   :interpretation-class :attested
+   :interpretation
+   "Failures in the transport loop are flagged and recorded (evidence tensions), not silently discarded."
+   :attestation "futon3c/holes/missions/M-IRC-stability.md:96 (cross-ref: 'Errors must surface at the layer that caused them, not be swallowed') and :138-161 (F3: replace every silent catch with evidence emission); irc.clj:45,404-409,639-643; irc_test.clj:610+ (relay timeout emits tension evidence)"}]
+ :precedence
+ {:realtime/liveness-heartbeats 1
+  :realtime/listener-leases 2
+  :realtime/loop-failure-signals 3}
+ :o4
+ {:rule-bearing-members 3
+  :acting-order
+  [:realtime/liveness-heartbeats
+   :realtime/listener-leases
+   :realtime/loop-failure-signals]
+  :basis "futon3c/holes/missions/M-IRC-stability.md:37-40,91-98,112-161; src/futon3c/transport/irc.clj:45,219-235,274-275,391-410,415-425,509,629-652"}}
