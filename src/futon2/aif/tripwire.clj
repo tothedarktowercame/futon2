@@ -631,9 +631,36 @@
                report)]
           (when (str/blank? (str report-path))
             (throw (ex-info "Trip report writer returned no artifact path" {})))
-          (handle-action! opts report report-path))
+          (handle-action! opts report report-path)
+          {:report report :report-path report-path})
         (catch Throwable e
           (stderr! "trip report action failed; runner remains untouched" e))))))
+
+(defn check!
+  "Run one interoceptive check at the R20 boundary.  A violation returns a
+  refusing result and durably records the discharge that the bulletin reads;
+  a clear check returns an explicit pass.  Unlike `observe!`, this is an
+  admission boundary, so persistence failure is allowed to refuse the call."
+  [opts wire-id observation]
+  (let [witnesses (evaluate-wire wire-id observation)]
+    (if (empty? witnesses)
+      {:node :R20 :tripwire/check :passed :trip/wire-id wire-id}
+      (let [trip-id (or (:trip/id observation) (str "trip-" (UUID/randomUUID)))
+            discharge {:node :R20
+                       :tripwire/check :refused
+                       :trip/wire-id wire-id
+                       :trip/id trip-id
+                       :status :needs-joe
+                       :class :J
+                       :statement (str "R20 tripwire " (name wire-id)
+                                       " refused the transition")
+                       :blocker "Tripwire refusal requires investigation and discharge"
+                       :trip/witnesses witnesses}
+            report-path (write-trip-report!
+                         (or (:tripwire/report-root opts) default-trip-root)
+                         (assoc discharge :trip/action :discharge
+                                          :trip/observation observation))]
+        (assoc discharge :trip/report-path report-path)))))
 
 (defn- phase-budget [opts record]
   (or (get (:tripwire/phase-budgets-ms opts) (:phase record))

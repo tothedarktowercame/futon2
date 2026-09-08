@@ -232,6 +232,20 @@
     (is (string? (get-in @finding [:failure-data :trip/id])))
     (is (= "/tmp/trip-stop.edn" (get-in @finding [:backtrace :trip-report])))))
 
+(deftest r20-check-returns-a-refusal-result
+  ;; Live record 0a18c4f7-R20.edn pins these values verbatim: :status :absent,
+  ;; :reason :no-record-field.  The new boundary replaces that recorded absence.
+  (let [root (temp-dir)
+        result (tripwire/check! {:tripwire/report-root (.getPath root)}
+                                :T1
+                                {:trip/id "0a18c4f7-R20-test"
+                                 :runner/dispatched-turns 2
+                                 :agency/dispatch-count 1})]
+    (is (= {:node :R20 :tripwire/check :refused :status :needs-joe}
+           (select-keys result [:node :tripwire/check :status])))
+    (is (= :turn-conservation
+           (-> result :trip/witnesses first :kind)))))
+
 (deftest park-and-summon-builds-background-join-and-roster-checked-bell
   (let [finding (atom nil)
         park (atom nil)

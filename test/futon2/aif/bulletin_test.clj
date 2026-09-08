@@ -115,6 +115,23 @@
       (is (= (bulletin/render facts)
              (bulletin/render (bulletin/collect-facts cfg "2026-03-02")))))))
 
+(deftest recorded-r20-discharge-enters-the-existing-bulletin-channel
+  ;; Live record 0a18c4f7-R20.edn pins these values verbatim: :status :absent,
+  ;; :reason :no-record-field.  This fixture proves the replacement is recorded.
+  (let [root (temp-dir "bulletin-tripwire")
+        _ (spit (io/file root "trip-live-pin.edn")
+                (pr-str {:node :R20 :tripwire/check :refused
+                         :trip/id "trip-live-pin" :status :needs-joe :class :J
+                         :statement "R20 tripwire T1 refused the transition"}))
+        rows (bulletin/tripwire-discharges (.getPath root))]
+    (is (= [{:board "R20-tripwire" :id "trip-live-pin"
+             :status :needs-joe :class :J
+             :statement "R20 tripwire T1 refused the transition"
+             :record (.getPath (io/file root "trip-live-pin.edn"))}]
+           rows))
+    (is (= :needs-joe (:status (first rows)))
+        "the discharge is re-read from its append-only record, not emitted")))
+
 (deftest a-day-with-no-new-facts-regenerates-to-the-same-bytes
   (testing "generate! twice: identical file, and the second run does not rewrite"
     (let [repo (fixture-repo)
@@ -284,4 +301,3 @@
                                         (slurp (:registry bulletin/default-config)))
                                        [:choices (:choice %)])))
                   (:adopted facts))))))
-

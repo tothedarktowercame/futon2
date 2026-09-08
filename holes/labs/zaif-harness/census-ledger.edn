@@ -134,9 +134,14 @@
    :pointers [{:file "p4ng/empirics-futon/control-stages.edn" :from 43 :to 43 :expect "No self- certification"}
               {:file "futon2/holes/problems/P-assured-process.md" :from 55 :to 63 :expect "commissioned"}]}
 
-  {:node "R20" :cell :checked :verdict :named-only :tag "[N20]"
-   :reading "control-stages names R20 'Interoceptive tripwires'. That names checking at the node level, but the [A] search found no R20-linked handoff checker."
-   :pointers [{:file "p4ng/empirics-futon/control-stages.edn" :from 41 :to 41 :expect "Interoceptive tripwires"}]}
+  {:node "R20" :cell :checked :verdict :exists :tag "[E20-C]"
+   :reading "The R20 admission boundary returns :tripwire/check :refused when a wire produces a witness."
+   :pointers [{:file "futon2/src/futon2/aif/tripwire.clj" :from 639 :to 658 :expect ":tripwire/check :refused"}]}
+
+  {:node "R20" :cell :surfaced :verdict :exists :tag "[E20-S]"
+   :reading "The refusal is an append-only trip record carrying :needs-joe, and the existing bulletin collector re-reads those records into its waits-on-Joe section."
+   :pointers [{:file "futon2/src/futon2/aif/tripwire.clj" :from 648 :to 662 :expect ":status :needs-joe"}
+              {:file "futon2/src/futon2/aif/bulletin.clj" :from 188 :to 208 :expect "tripwire-discharges"}]}
 
   {:node "TRACE" :cell :recorded :verdict :exists :tag "[E-T]"
    :reading "The WM attaches :TRACE to :wm/route immediately before the write; trace/write-trace! constructs and appends the exact record. Credits ONLY recorded: a tick route record, not evidence that any other process stage occurred."

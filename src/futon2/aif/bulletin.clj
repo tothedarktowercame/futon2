@@ -42,6 +42,7 @@
    :run-era-ledger (str home "/code/futon2/holes/labs/wm-contract/run-era-ledger.edn")
    :runs-repo (str home "/code/futon2")
    :runs-rel "holes/labs/wm-contract/runs"
+   :tripwire-root "/home/joe/code/futon2/data/wm-tripwires/trips"
    :out-dir (str home "/code/futon2/holes/labs/wm-contract/bulletins")
    :bulletin-rel-dir "holes/labs/wm-contract/bulletins"
    :brief-root brief/default-root})
@@ -184,6 +185,28 @@
            {:board name :id (:id i) :status status :class (:class i)
             :statement (:statement i)}))))
 
+(defn tripwire-discharges
+  "Recorded R20 refusals shaped for the existing waits-on-Joe bulletin section."
+  [root]
+  (let [dir (when root (io/file root))]
+    (if-not (and dir (.isDirectory dir))
+      []
+      (->> (.listFiles dir)
+           (filter #(and (.isFile %) (str/ends-with? (.getName %) ".edn")))
+           (keep (fn [f]
+                   (when-let [record (read-edn-file (slurp f))]
+                     (when (and (= :R20 (:node record))
+                                (= :refused (:tripwire/check record))
+                                (= :needs-joe (:status record)))
+                       {:board "R20-tripwire"
+                        :id (:trip/id record)
+                        :status (:status record)
+                        :class (:class record)
+                        :statement (:statement record)
+                        :record (.getPath f)}))))
+           (sort-by :id)
+           vec))))
+
 ;; ------------------------------------------------------- registries and runs
 
 (defn ledger-deposits
@@ -285,7 +308,8 @@
                                repo-commits)
                          [])
         deltas (mapv #(board-delta % date) (:boards cfg))
-        joe (vec (mapcat waits-on-joe (:boards cfg)))
+        joe (vec (concat (mapcat waits-on-joe (:boards cfg))
+                         (tripwire-discharges (:tripwire-root cfg))))
         deposits (ledger-deposits (:run-era-ledger cfg) date)
         adopted (machine-adopted (:registry cfg) date)
         runs (experiments cfg runs-commits)]
