@@ -140,3 +140,27 @@ bulletin decision sheet despite its own surface-only-when-READY contract —
 run4_readiness.bb said BLOCKED-ON [regenerates lean-probe closability-audit]
 at walkthrough time. The bulletin's sheet should read readiness before listing
 an :owner :joe row; queued as agent work.)
+
+## Item 9 — PA17z and PA5z: settled by standing principle, ratified by delegation
+
+> "I'm happy to go with your recommendations if you think that those are the
+> right recommendations to make. But... In general, these look like ones that
+> would be settled by standard principles. So for example, yes, author is not
+> equal to reviewer is a standard principle around here. And we shouldn't just
+> suddenly start making exceptions in the middle of work."
+
+PA17z (content pins, v2 pointer schema) and PA5z (census scope v3 to include
+the lane harness, so the seat-coincidence refusal can land) proceed on
+claude-1's recommendations. The ruling of record is the PRINCIPLE, not the
+particulars: author != reviewer is standing law and mid-work exceptions are
+not made — which decides PA5z's fork (grow the scope, never weaken the
+acceptance) without any operator preference being consulted.
+
+ROUTING FINDING, same exchange: both rows reached Joe's sheet because their
+blocker text was ruling-SHAPED while their content was principle-settleable.
+Joe: "I'm not quite sure why they're coming to me for approval, because they
+have effectively nothing to do with me or my opinions about anything." The
+needs-joe channel should ask "does an existing recorded principle decide
+this?" before surfacing; only genuine preference/priority/scope-of-authority
+questions are his. Queued alongside the RUN4 readiness-before-surfacing
+defect from Item 8's postscript.
