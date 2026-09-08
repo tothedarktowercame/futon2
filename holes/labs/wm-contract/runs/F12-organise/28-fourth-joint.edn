@@ -1,0 +1,39 @@
+{:finding :fourth-row-also-loses-every-recorded-edge,
+ :findings [],
+ :fourth-joint
+ {:added-by-organise
+  [:snatch/institutions-vary-by-position-and-force
+   :snatch/protect-the-unprotected-move],
+  :added-count 2,
+  :recorded-edge-count 3,
+  :recorded-edges
+  [[:snatch/escalate-only-as-far-as-you-can-lose
+    :snatch/protect-the-unprotected-move]
+   [:snatch/probe-before-committing
+    :snatch/protect-the-unprotected-move]
+   [:snatch/protect-the-unprotected-move
+    :snatch/institutions-vary-by-position-and-force]],
+  :ruled-recorded-edge-count 0,
+  :ruled-recorded-edges [],
+  :scenario [:g1 :sharer],
+  :selected
+  [:snatch/escalate-only-as-far-as-you-can-lose
+   :snatch/probe-before-committing]},
+ :futon3-pin "f8dd164bdc7f20a160b5e6b758d71532be65ca1e",
+ :lean-declarations
+ ["organiseSnatchG1SharerConformant"
+  "snatchG1SharerNoRecordedEdgeSurvives"
+  "snatchG1SharerRecordedEdgeCount"
+  "organiseSnatchG1SharerNotEdge618"],
+ :mutation-plants
+ [{:landed? true, :plant :added-emptied, :verdict-after false}
+  {:landed? true, :plant :survivor-invented, :verdict-after false}
+  {:landed? true,
+   :plant :lean-declaration-absent,
+   :verdict-after false}],
+ :record :F12-slice-14-fourth-joint,
+ :source-pointers
+ ["futon3:checks/find_organise.clj:603-633"
+  "futon2:holes/labs/wm-contract/runs/F12-organise/23-snatch-joint.edn:111-168"
+  "mathlib4:DarkTower/WarMachine/F12FourthSnatchExemplar.lean:13-57"],
+ :verdict :pass}
