@@ -1,0 +1,46 @@
+{
+  "command": "clojure -X:test",
+  "failure-resource-correlation": {
+    "command-exit": 1,
+    "limitation": "run-level correlation cannot identify which test caused resource pressure",
+    "native-thread-exhaustion": true,
+    "pids-events-max-delta": 4,
+    "resource-status": "dirty",
+    "scope": "whole-run-not-per-test"
+  },
+  "finished-at": "2026-09-08T16:56:27.867381+00:00",
+  "inner-exit": 1,
+  "job-id": "bounded-1788886563555-U77-futon3",
+  "native-thread-markers": [
+    "[23.817s][warning][os,thread] Failed to start thread \"Unknown thread\" - pthread_create failed (EAGAIN) for attributes: stacksize: 1024k, guardsize: 0k, detached.",
+    "[23.817s][warning][os,thread] Failed to start the native thread for java.lang.Thread \"Thread-1038\""
+  ],
+  "outer-exit": 125,
+  "pids-events-max-after": 4,
+  "pids-events-max-before": 0,
+  "pids-events-max-delta": 4,
+  "pids-peak": 1280,
+  "reason": "resource-limit-failure",
+  "repository-basis-finish": {
+    "dirty": true,
+    "head": "72d134b85f70918ff5dc656c6e8016f43027948d",
+    "readable": true,
+    "tracked-diff-sha256": "a97be9814b5f20d187bc3a8a4341b082ac322b032f40d263bb0357d1923f3cac",
+    "tracked-dirty": true,
+    "tree-sha": "5b1c086af853662b5189e90e2027df2097a1c629"
+  },
+  "repository-basis-stable": true,
+  "repository-basis-start": {
+    "dirty": true,
+    "head": "72d134b85f70918ff5dc656c6e8016f43027948d",
+    "readable": true,
+    "tracked-diff-sha256": "a97be9814b5f20d187bc3a8a4341b082ac322b032f40d263bb0357d1923f3cac",
+    "tracked-dirty": true,
+    "tree-sha": "5b1c086af853662b5189e90e2027df2097a1c629"
+  },
+  "resource-status": "dirty",
+  "schema": "futon-bounded-test-v1",
+  "started-at": "2026-09-08T16:56:03.600896+00:00",
+  "tasks-max": 1280,
+  "verdict": "fail"
+}
