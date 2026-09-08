@@ -7,7 +7,7 @@
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "918c416d07ccc51c86b3d0664cca47622d4abe908ff10b1467ef3af64f099f9b"},
+  "bc0b388e4a587f1067bc6f3dba40057f6106675804fae0f83b7dce7674ab9550"},
  :axes
  {:content-status
   [:named-only
@@ -1212,7 +1212,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:702",
+     :licence "futon2/checks/witness-registry.edn:700",
      :evidence :passing-witness-check,
      :why
      "witness check checks/model_reduction_free_energy_change_witness.clj passed"}],
@@ -1238,7 +1238,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:297",
+     :licence "futon2/checks/witness-registry.edn:295",
      :evidence :passing-witness-check,
      :why
      "witness check checks/observation_vector_witness.clj passed"}],
@@ -1267,7 +1267,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:432",
+     :licence "futon2/checks/witness-registry.edn:430",
      :evidence :passing-witness-check,
      :why
      "witness check checks/predictive_outcome_kernel_witness.clj passed"}],
@@ -1293,7 +1293,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:356",
+     :licence "futon2/checks/witness-registry.edn:354",
      :evidence :passing-witness-check,
      :why
      "witness check checks/parameter_prior_kernel_witness.clj passed"}],
@@ -1319,7 +1319,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:326",
+     :licence "futon2/checks/witness-registry.edn:324",
      :evidence :passing-witness-check,
      :why
      "witness check checks/parameter_posterior_kernel_witness.clj passed"}],
@@ -1345,7 +1345,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:510",
+     :licence "futon2/checks/witness-registry.edn:508",
      :evidence :passing-witness-check,
      :why
      "witness check checks/transition_kernel_witness.clj passed"}],
@@ -1371,7 +1371,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:480",
+     :licence "futon2/checks/witness-registry.edn:478",
      :evidence :passing-witness-check,
      :why
      "witness check checks/preference_distribution_witness.clj passed"}],
@@ -1552,7 +1552,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:685",
+     :licence "futon2/checks/witness-registry.edn:683",
      :evidence :passing-witness-check,
      :why
      "witness check checks/log_multivariate_beta_witness.clj passed"}],
@@ -1578,7 +1578,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:629",
+     :licence "futon2/checks/witness-registry.edn:627",
      :evidence :passing-witness-check,
      :why
      "witness check checks/expected_free_energy_witness.clj passed"}],
@@ -1604,7 +1604,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:566",
+     :licence "futon2/checks/witness-registry.edn:564",
      :evidence :passing-witness-check,
      :why "witness check checks/ambiguity_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -1630,7 +1630,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:253",
+     :licence "futon2/checks/witness-registry.edn:251",
      :evidence :passing-witness-check,
      :why "witness check checks/have_want_arrow_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -1680,7 +1680,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:218",
+     :licence "futon2/checks/witness-registry.edn:216",
      :evidence :passing-witness-check,
      :why
      "witness check checks/fold_turn_quarantine_check.clj passed against a pinned source"}],
@@ -1753,7 +1753,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:538",
+     :licence "futon2/checks/witness-registry.edn:536",
      :evidence :passing-witness-check,
      :why
      "witness check checks/variational_free_energy_witness.clj passed"}],
@@ -1779,7 +1779,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:411",
+     :licence "futon2/checks/witness-registry.edn:409",
      :evidence :passing-witness-check,
      :why "witness check checks/precision_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -1805,7 +1805,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:787",
+     :licence "futon2/checks/witness-registry.edn:785",
      :evidence :passing-witness-check,
      :why "witness check checks/prediction_error_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -1831,7 +1831,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:904",
+     :licence "futon2/checks/witness-registry.edn:902",
      :evidence :passing-witness-check,
      :why "witness check checks/softmax_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -1856,7 +1856,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:582",
+     :licence "futon2/checks/witness-registry.edn:580",
      :evidence :passing-witness-check,
      :why
      "witness check checks/bayes_factor_threshold_witness.clj passed"}],
@@ -1882,7 +1882,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:605",
+     :licence "futon2/checks/witness-registry.edn:603",
      :evidence :passing-witness-check,
      :why
      "witness check checks/bayesian_model_reduction_witness.clj passed"}],
@@ -1960,7 +1960,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:277",
+     :licence "futon2/checks/witness-registry.edn:275",
      :evidence :passing-witness-check,
      :why
      "witness check checks/observation_kernel_witness.clj passed"}],
@@ -1986,7 +1986,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:462",
+     :licence "futon2/checks/witness-registry.edn:460",
      :evidence :passing-witness-check,
      :why
      "witness check checks/predictive_outcome_risk_witness.clj passed"}],
@@ -2012,7 +2012,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:386",
+     :licence "futon2/checks/witness-registry.edn:384",
      :evidence :passing-witness-check,
      :why
      "witness check checks/policy_prior_kernel_witness.clj passed"}],
@@ -2145,7 +2145,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:646",
+     :licence "futon2/checks/witness-registry.edn:644",
      :evidence :passing-witness-check,
      :why
      "witness check checks/expected_information_gain_witness.clj passed"}],
@@ -2171,7 +2171,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:231",
+     :licence "futon2/checks/witness-registry.edn:229",
      :evidence :passing-witness-check,
      :why "witness check checks/generative_model_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -2196,7 +2196,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:729",
+     :licence "futon2/checks/witness-registry.edn:727",
      :evidence :passing-witness-check,
      :why
      "witness check checks/model_uncertainty_eig_witness.clj passed against a pinned source"}],
@@ -2222,7 +2222,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:769",
+     :licence "futon2/checks/witness-registry.edn:767",
      :evidence :passing-witness-check,
      :why "witness check checks/cascade_diff_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -2247,7 +2247,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:769",
+     :licence "futon2/checks/witness-registry.edn:767",
      :evidence :passing-witness-check,
      :why "witness check checks/cascade_diff_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -2272,7 +2272,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:769",
+     :licence "futon2/checks/witness-registry.edn:767",
      :evidence :passing-witness-check,
      :why "witness check checks/cascade_diff_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -2297,7 +2297,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:769",
+     :licence "futon2/checks/witness-registry.edn:767",
      :evidence :passing-witness-check,
      :why "witness check checks/cascade_diff_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -2365,7 +2365,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:755",
+     :licence "futon2/checks/witness-registry.edn:753",
      :evidence :passing-witness-check,
      :why
      "witness check checks/ablation_exact_dyadic_witness.clj passed"}],
@@ -2412,7 +2412,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:664",
+     :licence "futon2/checks/witness-registry.edn:662",
      :evidence :passing-witness-check,
      :why
      "witness check checks/find_snatch.clj passed against a pinned source"}],
@@ -2438,7 +2438,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:664",
+     :licence "futon2/checks/witness-registry.edn:662",
      :evidence :passing-witness-check,
      :why
      "witness check checks/find_snatch.clj passed against a pinned source"}],
@@ -2464,7 +2464,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:664",
+     :licence "futon2/checks/witness-registry.edn:662",
      :evidence :passing-witness-check,
      :why
      "witness check checks/find_snatch.clj passed against a pinned source"}],
@@ -2490,7 +2490,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:664",
+     :licence "futon2/checks/witness-registry.edn:662",
      :evidence :passing-witness-check,
      :why
      "witness check checks/find_snatch.clj passed against a pinned source"}],
@@ -2537,7 +2537,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:866",
+     :licence "futon2/checks/witness-registry.edn:864",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_proof_receipt_check.clj passed against a pinned source"}],
@@ -2563,7 +2563,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:965",
+     :licence "futon2/checks/witness-registry.edn:963",
      :evidence :passing-witness-check,
      :why "witness check checks/r9_independence.clj passed"}],
    :content-status :record-with-witness,
@@ -2588,7 +2588,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:965",
+     :licence "futon2/checks/witness-registry.edn:963",
      :evidence :passing-witness-check,
      :why "witness check checks/r9_independence.clj passed"}],
    :content-status :record-with-witness,
@@ -2613,7 +2613,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:887",
+     :licence "futon2/checks/witness-registry.edn:885",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
@@ -2639,7 +2639,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:887",
+     :licence "futon2/checks/witness-registry.edn:885",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
@@ -2665,7 +2665,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:887",
+     :licence "futon2/checks/witness-registry.edn:885",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
@@ -2691,7 +2691,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:829",
+     :licence "futon2/checks/witness-registry.edn:827",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r2_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -2717,7 +2717,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:829",
+     :licence "futon2/checks/witness-registry.edn:827",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r2_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -2743,7 +2743,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:848",
+     :licence "futon2/checks/witness-registry.edn:846",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -2769,7 +2769,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:848",
+     :licence "futon2/checks/witness-registry.edn:846",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -2795,7 +2795,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:848",
+     :licence "futon2/checks/witness-registry.edn:846",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
