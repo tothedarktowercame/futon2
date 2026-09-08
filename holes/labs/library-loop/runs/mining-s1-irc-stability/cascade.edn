@@ -9,9 +9,9 @@
   :witness "futon3c/holes/missions/M-IRC-stability.md:302-310 (Completion, 2026-02-23: all 6 failure modes implemented, 16 stability tests)"}
  :source-pins
  {:futon2 "5c8bed246fcf0219854f1c5bc2155306e985ee12"
-  :futon3 "ab277bdd6b6aa3f587e09625c750d25a7f92"
+  :futon3 "ab277bdd6b6aa3f587e09625c750d258d61a7f92"
   :futon3c "f3534b93d0fd5ee6437b4c38645a793270a36a03"
-  :futon5a "9fc6f96b11ed61749fe09cc8a5e07124c2e0f428 (last commit touching holes/stories/leaf-5.md, 2026-05-03)"}
+  :futon5a "9fc6f96b11ed61749fe09cc8a5e07724c2e0f428 (last commit touching holes/stories/leaf-5.md, 2026-05-03)"}
  :nodes
  [{:pattern :realtime/liveness-heartbeats
    :library-path "library/realtime/liveness-heartbeats.flexiarg"
