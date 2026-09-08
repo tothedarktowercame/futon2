@@ -1344,9 +1344,11 @@
                     "wm-trace-bytes-b" (into-array java.nio.file.attribute.FileAttribute [])))
         fixed-ts "2026-09-04T00:00:00Z"
         stable (fn [path]
-                 (clojure.string/replace
-                  (slurp path)
-                  #":timestamp \"[^\"]+\"" (str ":timestamp \"" fixed-ts "\"")))
+                 (-> (slurp path)
+                     (clojure.string/replace
+                      #":timestamp \"[^\"]+\"" (str ":timestamp \"" fixed-ts "\""))
+                     (clojure.string/replace
+                      #":at \"[^\"]+\"" (str ":at \"" fixed-ts "\""))))
         path-a (trace/write-trace! judge-output :dir dir-a :date-str "2026-09-04")
         written-b (trace/write-trace! judge-output :dir dir-b :date-str "2026-09-04"
                                       :return-record? true)]

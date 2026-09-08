@@ -110,7 +110,11 @@
           ;; `(trace/wm-version-of record)` recovers the stamp built above.
           judgement (assoc judgement :wm-version
                            (assoc version-stamp :live-wire? wired?))
-          trace-path (trace/write-trace! judgement)]
+          trace-path (trace/write-trace!
+                      (assoc judgement :trace/reason
+                             {:kind :routing-rule
+                              :rule :scheduled-run-persisted
+                              :question "Does this scheduled judgement require operator review?"}))]
       (when (evidence-emit/enabled?)
         (evidence-emit/emit! (assoc (trace/trace-record judgement)
                                     :belly (count (:entries belly)))))

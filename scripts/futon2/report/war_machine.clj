@@ -6786,7 +6786,12 @@
         result0 (carry-enumeration-completeness result0-unasserted)
         result
         (if trace?
-          (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]
+          (let [result (-> result0
+                           (update :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")
+                           (assoc :trace/reason
+                                  {:kind :routing-rule
+                                   :rule :scheduled-war-machine-tick
+                                   :question "Does this tick require operator review?"}))]
             ;; RE4: a rationale-store failure is reported under its OWN key.
             ;; Folding it into :trace-write-failed would tell a reader (and
             ;; `run-tick-once`, which reads that key) that the trace did not

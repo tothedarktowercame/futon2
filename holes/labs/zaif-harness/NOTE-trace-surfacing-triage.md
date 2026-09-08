@@ -41,3 +41,23 @@ one map with `:record/id`, `:disposition`, `:at`, and `:by`. The append function
 refuses incomplete entries and any second disposition for an existing record
 id; existing forms are never rewritten. Bulletin collection subtracts every
 record id present in this ledger from the surfaced-untriaged summary.
+
+## TRACE reason write discipline
+
+`futon2.aif.trace/write-trace!` now guarantees that every newly persisted
+record has a `:TRACE` hop with a `:reason`. Production callers name their
+routing rule and the operator question. Older or direct callers are recorded
+with `:rule :trace-route-reason-missing`, an explicit machine-triage reason
+whose question asks which producer rule should replace it; such records do not
+silently become operator work.
+
+Caller enumeration used:
+
+`rg -n --glob '*.clj' '(trace/)?write-trace!' src scripts test`
+
+The output was not truncated. Production calls are the war-machine helper in
+`scripts/futon2/report/war_machine.clj`, the scheduled runner in
+`scripts/wm_scheduled_run.clj`, and the full-loop runner in
+`src/futon2/aif/full_loop_runner.clj`; the remaining calls are tests,
+documentation strings, or the unrelated local test helper in
+`selection_authoring_coupling_test.clj`.

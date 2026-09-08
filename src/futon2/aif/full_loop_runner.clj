@@ -2693,7 +2693,11 @@
           ;; has been demonstrated. Failed selections remain fully auditable
           ;; in the cohort and stop-line finding, but cannot reinforce E(pi).
           (let [trace-path (when-not repair-action?
-                             ((or (:trace-fn opts) trace/write-trace!) judgement))]
+                             ((or (:trace-fn opts) trace/write-trace!)
+                              (assoc judgement :trace/reason
+                                     {:kind :routing-rule
+                                      :rule :constructed-selection-persisted
+                                      :question "Does the constructed selection require operator review?"})))]
           (checkpoint! :construction
                        (term {:mission (str target)
                               :cascade (select-keys construction

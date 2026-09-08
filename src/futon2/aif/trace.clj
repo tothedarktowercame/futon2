@@ -301,8 +301,13 @@
          enumeration was complete\" -- the second would be a false clean bill,
          and only the version separates them. It declares nothing about
          selection: the record is attached after the decision and no selection
-         path reads it."
-  26)
+         path reads it.
+    27 - every write carries a :TRACE route hop whose :reason names either the
+         routing rule and answerable operator question, or the explicit
+         :trace-route-reason-missing machine-triage rule. The writer supplies
+         this invariant, including for callers that predate reasoned routes
+         (PA14z, 2026-09-08)."
+  27)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the
@@ -720,6 +725,26 @@
     (:wm-version judge-output)
     (assoc :wm-version (:wm-version judge-output)))))
 
+(def ^:private missing-trace-reason
+  {:kind :machine-triage
+   :rule :trace-route-reason-missing
+   :question "Which producer routing rule should replace this missing TRACE reason?"})
+
+(defn- reasoned-trace-route
+  [judge-output]
+  (let [reason (or (:trace/reason judge-output) missing-trace-reason)
+        route (vec (:wm/route judge-output))
+        trace-index (first (keep-indexed (fn [i hop]
+                                           (when (= :TRACE (:node hop)) i))
+                                         route))]
+    (if (some? trace-index)
+      (assoc-in route [trace-index :reason]
+                (or (get-in route [trace-index :reason]) reason))
+      (conj route {:node :TRACE
+                   :via "futon2.aif.trace/write-trace!"
+                   :at (str (Instant/now))
+                   :reason reason}))))
+
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to
    the daily trace file. Creates the trace directory if absent. Returns
@@ -735,7 +760,13 @@
   [judge-output & {:keys [dir date-str return-record?]
                    :or {dir default-trace-dir
                         date-str (today-date-string)}}]
-  (let [record (trace-record judge-output)
+  (let [judge-output (cond-> (assoc judge-output
+                                    :wm/route
+                                    (reasoned-trace-route judge-output))
+                       (:wm-version judge-output)
+                       (assoc-in [:wm-version :trace-schema-version]
+                                 trace-schema-version))
+        record (trace-record judge-output)
         path (daily-path dir date-str)
         written-path (do
                        (io/make-parents path)
