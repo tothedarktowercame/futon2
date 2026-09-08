@@ -31,14 +31,15 @@ RUN4 certificates        GREEN
 RUN4 definitions-intact  GREEN
 RUN4 wiring-pin          GREEN
 RUN4 run-pins            GREEN
-RUN4 regenerates         GREEN
-RUN4 lean-probe          GREEN
+RUN4 regenerates         BLOCKED-ON [1]
+RUN4 lean-probe          BLOCKED-ON [1]
 RUN4 hole-open           GREEN
-RUN4 closability-audit   BLOCKED-ON [3]
+RUN4 closability-audit   BLOCKED-ON [2]
 RUN4 invalidators        GREEN
-VERDICT: BLOCKED-ON [closability-audit]
-  - closability-audit: the closability audit was derived at contract 6de47bd (:as-of 2026-09-03) while the live authority is 69721b1 -- its readiness typings are about a different contract
-  - closability-audit: the closability audit types wmRunConformsToWiring :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole
+VERDICT: BLOCKED-ON [regenerates lean-probe closability-audit]
+  - regenerates: the committed manifest does not regenerate byte-identically: 00-source.edn 04-controls.edn
+  - lean-probe: the axiom probe was taken at a different Holes.lean than the live one (:stale) -- re-run --probe
+  - closability-audit: the closability audit types wmRunConformsToWiring :readiness :witnessed-and-held-open (:closability :run-gated) -- RUN4's row names this hole
   - closability-audit: the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole
 ```
 <!-- END run4_readiness -->

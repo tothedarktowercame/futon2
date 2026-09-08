@@ -13,16 +13,17 @@
    "2026-09-05-u60" :green},
   :censuses-identical
   "both certified runs walk the same nine-hop route and their censuses agree hop for hop (runs/RE5-run-conformance/certificate.edn :limits) -- two runs agreeing about a route they were always going to take is one measurement repeated, not two"},
- :emitted-at "2026-09-05",
+ :emitted-at "2026-09-08",
  :lines
  {:regenerates
   {:certificates
    [{:run "2026-09-01-s5", :exit 0, :differing []}
     {:run "2026-09-04-re5", :exit 0, :differing []}],
    :manifest-exit 0,
-   :manifest-differing [],
-   :verdict :green,
-   :blocked-on []},
+   :manifest-differing ["00-source.edn" "04-controls.edn"],
+   :verdict :blocked,
+   :blocked-on
+   ["the committed manifest does not regenerate byte-identically: 00-source.edn 04-controls.edn"]},
   :invalidators
   {:declared
    [:r16-base-drawing-stroke
@@ -37,22 +38,17 @@
    :blocked-on []},
   :closability-audit
   {:audit "runs/U27-hole-closability/audit.edn",
-   :audit-as-of "2026-09-03",
-   :audit-authority "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
-   :live-authority "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+   :audit-as-of "2026-09-08",
+   :audit-authority "e239086a44147f14defc88e74a662a2cd4487e67",
+   :live-authority "e239086a44147f14defc88e74a662a2cd4487e67",
    :rows
    {"enactedEqualsSelectedWhenRankOneGated"
-    {:closability :run-gated,
-     :readiness :not-ready,
-     :hole-class :open-bound},
+    {:closability :run-gated, :readiness :not-ready},
     "wmRunConformsToWiring"
-    {:closability :run-gated,
-     :readiness :not-ready,
-     :hole-class :permanent-external-attestation}},
+    {:closability :run-gated, :readiness :witnessed-and-held-open}},
    :verdict :blocked,
    :blocked-on
-   ["the closability audit was derived at contract 6de47bd (:as-of 2026-09-03) while the live authority is 69721b1 -- its readiness typings are about a different contract"
-    "the closability audit types wmRunConformsToWiring :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"
+   ["the closability audit types wmRunConformsToWiring :readiness :witnessed-and-held-open (:closability :run-gated) -- RUN4's row names this hole"
     "the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"]},
   :run-pins
   {:runs
@@ -77,9 +73,9 @@
   :hole-open
   {:declaration "wmRunConformsToWiring",
    :kind "hole",
-   :contract-authority "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+   :contract-authority "e239086a44147f14defc88e74a662a2cd4487e67",
    :holes-last-content-change
-   "69721b1268b7eb4bcefb1a4a7a812af4eb922a86",
+   "e239086a44147f14defc88e74a662a2cd4487e67",
    :comparand
    "the last commit that touched Holes.lean, not mathlib HEAD (C175)",
    :verdict :green,
@@ -91,9 +87,9 @@
    :live-prereg
    "880dfab4dc37ddb42953cd80e309deb857f53ef8a2afd8de0dd616b2c91bc6fa",
    :live-holes
-   "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
+   "0410f61ddb95f058bc33610f22c5783d87827d7b996fba4e846b1b463a1ab5fe",
    :build :ok,
-   :verdict :green,
+   :verdict :blocked,
    :taken-at-holes
    "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
    :sorry-in-module 0,
@@ -104,7 +100,8 @@
     {:name "run4CertifiedRe5Census", :axioms []}
     {:name "wmRun4PreregCensus", :axioms []}
     {:name "wmRun4InvalidatorsTouchingDefinitions", :axioms []}],
-   :blocked-on []},
+   :blocked-on
+   ["the axiom probe was taken at a different Holes.lean than the live one (:stale) -- re-run --probe"]},
   :wiring-pin
   {:pinned
    "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
@@ -141,7 +138,7 @@
    :blocked-on []}},
  :manifest
  "futon2/holes/labs/wm-contract/runs/F2-run4-preregistration",
- :summary "BLOCKED-ON [closability-audit]",
+ :summary "BLOCKED-ON [regenerates lean-probe closability-audit]",
  :verdict :blocked,
  :accepts-nothing
  "This artifact performs no acceptance and writes no ruling. READY means the evidence an acceptance needs is intact and current; it is not permission, and it does not say which run qualifies.",
@@ -160,6 +157,7 @@
  :subject {:board "wm-contract", :item :RUN4},
  :row :F2,
  :blocked-on
- ["closability-audit: the closability audit was derived at contract 6de47bd (:as-of 2026-09-03) while the live authority is 69721b1 -- its readiness typings are about a different contract"
-  "closability-audit: the closability audit types wmRunConformsToWiring :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"
+ ["regenerates: the committed manifest does not regenerate byte-identically: 00-source.edn 04-controls.edn"
+  "lean-probe: the axiom probe was taken at a different Holes.lean than the live one (:stale) -- re-run --probe"
+  "closability-audit: the closability audit types wmRunConformsToWiring :readiness :witnessed-and-held-open (:closability :run-gated) -- RUN4's row names this hole"
   "closability-audit: the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"]}

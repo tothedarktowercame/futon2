@@ -1,468 +1,136 @@
-{:findings
- [{:id :F1,
-   :statement
-   "There is no checked criterion for hole -> closed. C141 read the checkers and found that `closed-by-record` is assigned from the contract `kind` field alone: contract_lint.clj types every kind=\"closed\" declaration :closed-by-record before authority, binding freshness, fixture shape or result are considered, and holder_check.clj checks only that the owner's final segment reduces to a live registry key. No check reads a record. So the transition is written by whoever edits Holes.lean, and nothing downstream can tell a supported close from an unsupported one.",
-   :pointers
-   ["futon2 holes/labs/wm-contract/C141-closed-by-record-audit.md:5-30"
-    "futon2 checks/contract_lint.clj"
-    "futon2 checks/holder_check.clj"]}
-  {:id :F2,
-   :statement
-   "A proven pinned obligation was DEMOTED to a hole in the same commit that proved it. mathlib4 86186c3744 (\"Prove exact recorded ablation minimizers\", 2026-08-31) adds theorem wmRecordedAblationNonDegenerate -- a complete Lean proof of nonDegenerateAblationLaw over the pinned exact-dyadic table -- and in the same diff moves the declaration from mkClosed to mkHole. So \"the pinned instance is proven in Lean\" is demonstrably NOT this contract's close criterion; something else is meant by the evidence obligation, and it is not written down. This is the single fact that decides the audit: the one hole whose declared evidence is fully discharged was deliberately left open by the declaration's author.",
-   :pointers
-   ["mathlib4 86186c3744"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:217 (the theorem)"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:188 (the predicate, docstring: \"tracks the pinned exact-dyadic ablation instance as an evidence obligation rather than treating definition as discharge\")"],
-   :resolved
-   "2026-09-03, by :J9 and :U45. The fact stands as recorded -- 86186c3744 did both things in one diff -- and the gap it names (no stated criterion, so a reader cannot tell a hole waiting for evidence from a hole waiting for nothing) is closed by the criterion in futon2 holes/labs/wm-contract/RUNBOOK.md. The declaration is closed at mathlib4 4bc55c5968 with the docstring naming each leg, and the demotion stands in history as the pre-criterion state rather than being amended away."}
-  {:id :F3,
-   :statement
-   "The `falsifier` field means two different things across the 15 holes, and for H3/H4 it names the CONFIRMING observation rather than a falsifying one. On twelve holes the field states what would refute the claim (wmRunsOnce: \"no tick-entry invocation completes with a TickRunRecord\"; findF2Receipted: \"selected pattern lacks receipt\"; dirichletAccumulationImportAbsent, whose docstring says outright \"the claim held open is the ABSENCE\": \"a code path from the tick model's o or mu into R17's concentrations\"). On policyPrecisionIsGammaFromBeta the field reads \"a run record in which tau is set by the beta update from G and pi\" and on policyPosteriorImportsPolicyF \"a run record in which Q(pi) is computed with an F_pi term\" -- each of which would make the named claim TRUE. Both docstrings say \"this is the claim held open\", so the claims are positive and the fields describe their discharge. This matters now rather than in the abstract, because H4's named observation is on persisted record (see :H4 below): under one reading the record closes the hole by witness, under the other it refutes it, and the two dispositions are opposite.",
-   :pointers
-   ["mathlib4 DarkTower/WarMachine/Holes.lean:6647-6648"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:6650-6651"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:6644-6645 (the contrasting ABSENCE wording)"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:6869-6870 (the two mkHole rows)"],
-   :resolved
-   "RESOLVED 2026-09-03 by :J10 and :U47. Joe ruled the field an AUTHORING ERROR -- twelve of fifteen holes use the falsifier as a genuine refutation, so H3/H4 were the anomaly -- and both fields are corrected to the absence form at mathlib4 a3ae5084be, in the docstring annotation and in the mkHole registry row, re-emitted into holes-contract.json at f16b389596. H3 now reads \"no run record carries tau together with the beta it was derived from\"; H4 reads \"no default-path run record's Q(pi) carries a per-policy F term -- F_pi reaching the posterior only under FUTON_WM_FPI_POSTERIOR=1\", scoped to the default path because the flagged path's record already exists. Both strings carry the correction dated in the field itself, the wmRunsOnce precedent for an amended falsifier. The opposite-dispositions problem this finding named is thereby settled in the WITNESS direction: the S4 record discharges the evidence field and no longer also satisfies the falsifier. Nothing remains."}
-   {:id :F4,
-    :statement
-    "Four of the pointers inside the H3/H4 hole docstrings no longer resolve to what they claim, and one of the claims they support is now false of the code. This is the U29 defect class (drifted pointers, re-resolved through the generator) occurring INSIDE Holes.lean, which U29's scope -- variable-situation-accounting.edn -- does not cover. Checked line by line against the current tree: policy.clj:242-245 and :242-246, cited by BOTH H3 and H4 as the policy score seam, now land on gap-report, an unrelated helper that enumerates :learn-action-class recommendations; the score expression is selection-scores at policy.clj:157 (\"THE ONE PLACE THE SCORE EXPRESSION IS WRITTEN\"), normalised by softmax-weights at :215. war_machine.clj:4450-4451, cited by H4 as where the Laplace channel F is bound, now lands in an unrelated report-prose block; the binding is free-energy (fe/compute-controller-diagnostics observation) at :5543. war_machine.clj:4452, cited as the :R8 route tag, is likewise stale; the tag is at :5857 and now names futon2.aif.free-energy/compute-prediction-error rather than the compute-variational-free-energy the 2026-08-30 receipt recorded. war_machine.clj:4753, cited as the F's one downstream appearance, lands on an unrelated manifest read. ONE POINTER IN THIS FAMILY STILL HOLDS: selection_gain.clj:187-193, cited by H3, still reads \"the field is ABSENT today, sim-only\" -- so the drift is not uniform and each pointer has to be checked rather than the family re-resolved by offset. AND THE CLAIM MOVED, not just its address: H4's docstring says of the policy score \"there is no F term in it, and no free-energy symbol anywhere in the scoring path\". policy.clj:158 now writes the score as \"ln E(a) - G(a)/tau [- F_pi(a)]\" and :184 takes :f-pi-policy-posterior? and :f-pi-values as options, both landed by RUN9/I2 after the docstring was written. The F_pi term is default-off, so the docstring's sentence is true of the default path and false of the seam -- and the docstring makes no such distinction.",
-    :pointers
-    ["futon2 src/futon2/aif/policy.clj:157-162 (selection-scores, the current score seam)"
-     "futon2 src/futon2/aif/policy.clj:184-190 (the f-pi options arity)"
-     "futon2 src/futon2/aif/policy.clj:215-235 (softmax-weights)"
-     "futon2 src/futon2/aif/policy.clj:242-246 (gap-report: what the cited range now holds)"
-     "futon2 scripts/futon2/report/war_machine.clj:5543 (the Laplace F binding)"
-     "futon2 scripts/futon2/report/war_machine.clj:5857 (the :R8 route tag)"
-     "futon2 src/futon2/aif/selection_gain.clj:187-193 (the one pointer of the family that still holds)"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:6647 (H3 docstring)"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:6650 (H4 docstring)"],
-    :resolved
-    "RESOLVED 2026-09-03 by :J10 and :U47, at mathlib4 a3ae5084be -- with three corrections to THIS FINDING'S OWN re-resolutions, because they were re-verified at source rather than carried. (1) TWO OF THE THREE TARGETS THIS ROW NAMED HAD THEMSELVES DRIFTED by the time :U47 ran, by +230 lines, futon2 6ca58f3 (:U28) having grown war_machine.clj in between: the Laplace F binding is at :5773 and not :5543, the :R8 route tag at :6087 and not :5857. That is the row's own lesson recurring inside its own repair, and it is why the pointers were re-read rather than copied out of :J10. (2) THE SUBJECT OF THE WAR_MACHINE FAMILY IS GONE: the Laplace-channel scalar F was RETIRED on 2026-09-01 by worklist I5 slice (c) under Joe's J2 ruling (futon2 5a66411; free_energy.clj:7-12 records why). So :5773 binds the controller-diagnostics map that used to carry it, :6087's tag names futon2.aif.free-energy/compute-prediction-error -- epsilon, not the removed compute-variational-free-energy -- and :6472 (this row's un-re-resolved :4753) puts that same diagnostics map on the report, not the scalar. The docstring says so, and states the discrepancy the retirement leaves standing: p4ng/empirics-futon/control-map-edges.edn:140-144 and futon2 edge-census.edn:82 still record the R3->R8 hop :via compute-variational-free-energy, correctly, because that is what was measured against tick-run-record-2026-08-30.edn; C473 section 1 reports it unrepaired. (3) H3'S POINTER RE-RESOLVES ELSEWHERE THAN :J10 SAID. :J10 sent both H3 and H4 to the selection-scores seam at policy.clj:157, which is right for H4's sentence (the policy SCORE) and wrong for H3's, whose sentence is about the tau LAW: that is effective-temperature at policy.clj:77-145, whose DEFAULT :spread mode computes tau_eff = tau_spread / g at :133. Sending it to :157 would have left a pointer that does not support the sentence it sits in. NEWLY FOUND AND NOT REPAIRED: H3 carries this finding's own second half -- \"No beta appears anywhere in the policy path\" is false of the current tree, since effective-temperature's :variational-beta-gamma mode sets tau = beta (policy.clj:101-105, :135-144) and policy_precision/carry-beta supplies it with its provenance (:544-560), both landed by RUN8/I1 after the docstring was written; it is true of the DEFAULT :spread path. :J10 enumerated the scoping for H4's sentence and not for H3's, so :U47 states it in the docstring and leaves the sentence standing rather than scoping a sentence the owner did not rule on."}],
- :schema :wm/hole-closability-audit-v1,
- :counts
- {:rows 16,
-  :contract-declarations 15,
-  :glossary-side 1,
-  :closability {:pre-run-closable 9, :run-gated 7},
-  :contract-declaration-closability {:pre-run-closable 9, :run-gated 6},
-  :readiness {:not-ready 13, :contested 2, :witnessed-and-held-open 1},
-  :closed-by-this-audit 0,
-  :as-audited "Every count in this map is the audit's own, at 2026-09-03 against contract 6de47bd050; they are NOT re-derived when a row later takes a verdict. See :verdicts-since for what has moved, and variable-situation-accounting.edn for the live counts.",
-  :verdicts-since
-  [{:name "nonDegenerateAblationLaw", :was :contested, :now :closed-under-criterion,
-    :by :U45, :at "2026-09-03",
-    :effect "contract holes 15 -> 14; accounting :open-hole rows 16 -> 15; declaration fence :pre-run-closable 9 -> 8"}
-   {:name "findF1Containment", :was :not-ready, :now :closed-under-criterion,
-    :by :U46, :at "2026-09-03",
-    :effect "the four find rows moved together on one transcription; the aggregate effect is recorded on findF4Falsifiable"}
-   {:name "findF2Receipted", :was :not-ready, :now :closed-under-criterion,
-    :by :U46, :at "2026-09-03",
-    :effect "as findF1Containment"}
-   {:name "findF3NonSelfCertifying", :was :not-ready, :now :closed-under-criterion,
-    :by :U46, :at "2026-09-03",
-    :effect "as findF1Containment"}
-   {:name "findF4Falsifiable", :was :not-ready, :now :closed-under-criterion,
-    :by :U46, :at "2026-09-03",
-    :effect "the four together: contract holes 14 -> 10 and closed 110 -> 114 with the declaration population unchanged at 124; accounting :open-hole rows 15 -> 11 and :proven-against-pinned-source 11 -> 15; declaration fence :pre-run-closable 8 -> 4"}
-   {:name "policyPosteriorImportsPolicyF", :was :contested, :now :witnessed-under-flag,
-    :by :U47, :at "2026-09-03",
-    :effect "NO COUNT MOVES. The hole stays open and stays :run-gated, so contract holes remain 10, closed 114, accounting :open-hole rows 11 and the declaration fence 4/6. What moved is the readiness axis, which gains :witnessed-under-flag as a fourth value; findings :F3 and :F4 are resolved on the same ruling."}
-   {:name "policyPrecisionIsGammaFromBeta", :was :not-ready, :now :not-ready,
-    :by :U47, :at "2026-09-03",
-    :effect "NO COUNT MOVES and no readiness change -- recorded because J10 dispositioned it by name and a silent row would read as an unruled one. Its falsifier field is corrected on the same commit and its :verdict records why the disposition shape it was given cannot yet apply: no persisted record exists to witness under."}]},
- :closability-axis [:pre-run-closable :run-gated],
+{:schema :wm/hole-closability-audit-v2,
+ :as-of "2026-09-08",
  :authority
  {:contract-file "mathlib4/DarkTower/WarMachine/holes-contract.json",
-  :contract-git-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
-  :contract-declarations 124,
-  :contract-holes 15,
-  :accounting "futon2/holes/labs/wm-contract/variable-situation-accounting.edn",
-  :accounting-open-hole-rows 16},
- :item :U27,
- :raised-rows [:J9 :J10],
+  :contract-git-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+  :contract-sha256
+  "7b41d69121ba82ef7c4bb8b9c305a756d9825418f73f3a534fb8bbc54d8cb170",
+  :accounting
+  "futon2/holes/labs/wm-contract/variable-situation-accounting.edn",
+  :accounting-open-hole-rows 11},
+ :counts
+ {:rows 11,
+  :contract-declarations 10,
+  :glossary-side 1,
+  :closability {:pre-run-closable 4, :run-gated 7},
+  :readiness
+  {:not-ready 8, :witnessed-and-held-open 2, :witnessed-under-flag 1}},
  :rows
- [{:closability-basis
-   "Nothing in the §5 split needs a tick: C_int is data today and C_mis is built. What is missing is Lean text and an owner's amendment.",
-   :hole-class :deliberate-implementation-refusal,
-   :name "C",
-   :remaining-evidence
-   "The refusal's stated ground is \"no observation selects C\", and U12 MEASURED that ground still holding at mission grain: one risk_mis value 4.539889921682063E-5 across all 133 mission actions on each clocked tick, the clocked mission indistinguishable from the other 132, and all three 2026-09-02 records :absent (:no-active-clock, twice :no-measurable-criteria). FUTON_WM_MISSION_C is off. So the design input exists and the discriminating observation does not. Closing also needs the §5 split written in Lean, which is the owner's (P-validated-R5 §2a) scope amendment, not this row's.",
-   :readiness :not-ready,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 153, :docstring-line 152},
+ [{:name "C",
+   :row-source :contract-declaration,
    :area :preferences,
    :closability :pre-run-closable,
-   :declared-close-path
-   "DESIGN-c-vector.md §5: the hole is \"the channel-grain half stated too widely\"; the repair is to SPLIT the declaration into C_int : Channel -> Density (exists as data today) and C_mis : Mission -> Criterion -> Density with the factored-product composition and :unmeasurable as a typed constructor. Owner unchanged; §5 is the design input the sorry was waiting for.",
+   :readiness :not-ready,
    :owner "P-validated-R5 §2a",
-   :evidence-that-exists
-   ["futon2 holes/labs/wm-contract/DESIGN-c-vector.md:113-124 (the intended Lean shape)"
-    "futon2 src/futon2/aif/mission_c.clj:246-268, :270-315, :317-336, :338-376 (C_mis in code, U11)"
-    "futon2 src/futon2/aif/preferences.clj:193 (C_int's declared distribution shapes)"
-    "futon2 holes/labs/wm-contract/runs/U12-c-mis-falsifier/ (the falsifier run over the three 2026-09-02 records)"]}
-  {:closability-basis "Lean proof plus a fixture check; no tick is involved anywhere in it.",
-   :hole-class :witnessed-instance-obligation,
-   :name "nonDegenerateAblationLaw",
-   :remaining-evidence
-   "AS AUDITED 2026-09-03: nothing is missing on the evidence side -- the pinned instance is proven in Lean AND bound by a passing check with a rejecting negative control. It was contested rather than ready because of finding :F2 -- the declaration was moved mkClosed -> mkHole in the same commit that added the proof (mathlib4 86186c3744). Closing it there would have reversed the declaration author's decision on no new evidence, which is a ruling. Raised as worklist row :J9. RESOLVED the same day: J9 ruled the criterion and dispositioned this hole by name, and :U45 executed the close. Nothing remains.",
-   :readiness :closed-under-criterion,
-   :verdict
-   {:verdict :closed-under-criterion,
-    :at "2026-09-03",
-    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\" (futon2 a2641b3), which dispositions this declaration by name: it MEETS the criterion now and closes.",
-    :legs
-    {:leg-1-persisted-record
-     {:status :inapplicable,
-      :why "The declared observation is a recorded score table, not a run observation, so the run leg does not apply here rather than being met. The pinned fixture is an exact-dyadic transcription of the snatcher-dominant/g1 case of the persisted record futon3 checks/ablation-snatch.edn; all ten scores (five policies x G and risk) were decoded and compared against that record for :U45 and are equal."}
-     :leg-2-rejecting-witness
-     {:status :met,
-      :why "checks/ablation_exact_dyadic_witness.clj exits 0 over the fixture and its --negative mode -- which removes the minimizer separation -- is rejected. Re-run for :U45 and re-stamped at the current contract sha 4bc55c5968bc4568610405660bdae4a98fcc06c5."}
-     :leg-3-lean-transcription
-     {:status :met,
-      :why "theorem wmRecordedAblationNonDegenerate proves the predicate over the pinned exact-dyadic table, no sorry."}},
-    :executed-by :U45,
-    :pointers
-    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion and this hole's disposition)"
-     "mathlib4 4bc55c5968 (hole -> closed, docstring naming each leg)"
-     "mathlib4 e4a8ac81cb (contract re-emitted; 15 -> 14 holes)"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:229 theorem wmRecordedAblationNonDegenerate"
-     "futon2 checks/witness-fragments/nonDegenerateAblationLaw.edn (:contract-sha 4bc55c5968...)"
-     "futon3 checks/ablation-snatch.edn (the persisted record the fixture transcribes)"]},
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 188, :docstring-line 187},
+   :basis
+   "The DESIGN-c-vector.md §5 split (C_int / C_mis) is an owner amendment (P-validated-R5 §2a); nothing in it needs a tick. The refusal's ground still holds as measured: U12 found one risk_mis value across all 133 mission actions and all three 2026-09-02 records :absent.",
+   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8026"]}
+  {:name "find",
+   :row-source :contract-declaration,
    :area :demo,
    :closability :pre-run-closable,
-   :declared-close-path
-   "Docstring: \"The definition is complete, but the contract tracks the pinned exact-dyadic ablation instance as an evidence obligation rather than treating definition as discharge.\" Evidence: ExactDyadicAblationTable.",
-   :owner "P-validated-R5 §2a′",
-   :evidence-that-exists
-   ["mathlib4 DarkTower/WarMachine/Holes.lean:217-233 theorem wmRecordedAblationNonDegenerate -- a complete Lean proof of the predicate over the pinned table, no sorry"
-    "futon2 checks/witness-registry.edn:727-740 -- checks/ablation_exact_dyadic_witness.clj over ablation-exact-dyadic.edn, :result :passed, :contract-sha 6de47bd0 (fresh), --negative rejected"
-    "futon2 holes/labs/wm-contract/ablation-exact-dyadic.edn (fixture, sha256 pinned in the docstring)"]}
-  {:closability-basis "A refusal over a definition. No tick bears on it.",
-   :hole-class :deliberate-implementation-refusal,
-   :name "find",
-   :remaining-evidence
-   "An owner's ruling that overturns the refusal by naming a canonical implementation. No record can supply that; the refusal is the record.",
    :readiness :not-ready,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 264, :docstring-line 263},
-   :area :demo,
-   :closability :pre-run-closable,
-   :declared-close-path
-   "None declared. evidence and falsifier both read \"REFUSED -- this is an implementation, not a law\". C114: closing requires either defining a canonical find and proving the laws -- overturning the standing refusal -- or dated scope amendments, which is what F1-F4 got instead.",
    :owner "P-validated-R5 §3e find",
-   :evidence-that-exists
-   ["futon3 checks/find_organise.clj (the Clojure mirror the docstring names, which fires nothing)"
-    "futon2 holes/labs/wm-contract/C114-nine-bound-source-holes.md:27-40"]}
-  {:closability-basis "A transcription and a decidable proof over a pinned fixture.",
-   :hole-class :witnessed-instance-obligation,
-   :name "findF1Containment",
-   :remaining-evidence
-   "RESOLVED 2026-09-03 by :U46. What was missing was the Lean value: the name occurred at its definition (:267) and its registry row only. The pinned FindReceiptRow is now transcribed (SnatchPattern, snatchRepository, FindSnatchScenario, findSnatchZeroMass, FindSnatchRowLit and the two tables, Holes.lean:284-693, generated from the fixture by futon2 holes/labs/wm-contract/u46_find_transcribe.bb), and wmFindSnatchF1Containment proves the predicate over it by decide. The stale binding this row flagged is also repaired: the fragment was at contract-sha f812795ca6 and is re-run and re-stamped at 0bab8f813f. Nothing remains.",
-   :readiness :closed-under-criterion,
-   :verdict
-   {:verdict :closed-under-criterion,
-    :at "2026-09-03",
-    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\", which dispositions these four declarations by name: they close by transcribing the pinned FindReceiptRow into Lean and proving by decide.",
-    :legs
-    {:leg-1-persisted-record {:status :inapplicable, :why "The declared observation is a recorded find-receipt table over authored library text, not a run observation, so the run leg does not apply here rather than being met. What backs the fixture was checked rather than assumed for :U46: futon3 checks/find_snatch.clj was re-run and its drift check reports 0 mismatches against the authored antecedents, and the recorded rows reproduce -- a re-run today writes byte-identical :scenarios, :laws and :drift. STATED, because it is the one thing this leg does not give: the check REWRITES checks/find-snatch.edn, and today it writes sha256 08a0c3e7... rather than the pinned 839897ef..., because library/snatch grew from 18 to 24 patterns. The pinned file, restored, is what the Lean literal transcribes; the 18-member repository is the stronger F1 statement. See C500 section 3."},
-     :leg-2-rejecting-witness {:status :met, :why "futon3 checks/find_snatch.clj exits 0 over the pinned fixture and all five controls are rejected -- --negative-f1 (a selection member outside the repository), --negative-f2 (the first selected pattern's receipt dropped), --negative-f3 (a receipt rewritten to score-alone), --negative-f4 (the recorded omitted member struck from the repository) and --negative (antecedent drift). All re-run for :U46, and futon2 checks/witness-fragments/findF1Containment.edn re-stamped to contract-sha 0bab8f813f so leg (2) holds at the sha the contract now records. Two pins in that fragment were stale and were corrected from the re-run rather than carried: :run-sha 594127059d and :live-invariant :check-sha ab2b290d, the latter predating futon3 4e1c410446 (2026-09-02), which moved the check onto the generic find/organise path."},
-     :leg-3-lean-transcription {:status :met, :why "theorem wmFindSnatchF1Containment (Holes.lean:776) proves findF1Containment for all 34 transcribed rounds by decide, no sorry. f1Ok is the decidable form and findF1Containment_toRow its soundness against the set-level declaration, so the decision is about the recorded rows and not merely about lists."}},
-    :executed-by :U46,
-    :pointers
-    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion, which dispositions F1-F4 by name)"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:776 theorem wmFindSnatchF1Containment"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:378 findSnatchRounds (34 transcribed rounds) and :626 findSnatchScenarios (6 transcribed scenarios)"
-     "mathlib4 057e5eccbd (contract re-emitted; holes 14 -> 10)"
-     "futon2 holes/labs/wm-contract/u46_find_transcribe.bb (the generator) and runs/U46-find-rows/ (its artifacts)"
-     "futon2 checks/witness-fragments/findF1Containment.edn (:contract-sha 0bab8f813f...)"
-     "futon3 checks/find-snatch.edn (the pinned record, sha256 839897ef...)"]},
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 267, :docstring-line 266},
+   :basis
+   "A standing implementation refusal; an owner ruling closes it, no record can.",
+   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8028"]}
+  {:name "organise",
+   :row-source :contract-declaration,
    :area :demo,
    :closability :pre-run-closable,
-   :declared-close-path
-   "SCOPE AMENDMENT 2026-08-31 already narrowed the predicate from a universal over opaque find to \"exactly the recorded-row invariant\". The remaining obligation is the pinned FindReceiptRow itself (futon3:checks/find-snatch.edn, fixture-sha256 839897ef...).",
-   :owner "P-validated-R5 §3e F1",
-   :evidence-that-exists
-   ["futon2 checks/witness-registry.edn:636-656 -- futon3 checks/find_snatch.clj over checks/find-snatch.edn, :result :passed, F1/F2/F3/F4 independent negative controls"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:267-269 (the narrowed predicate, defined, no sorry)"]}
-  {:closability-basis "A transcription and a decidable proof over a pinned fixture.",
-   :hole-class :witnessed-instance-obligation,
-   :name "findF2Receipted",
-   :remaining-evidence
-   "RESOLVED 2026-09-03 by :U46, on the table findF1Containment's close generated; wmFindSnatchF2Receipted (Holes.lean:788) instantiates it. Nothing remains.",
-   :readiness :closed-under-criterion,
-   :verdict
-   {:verdict :closed-under-criterion,
-    :at "2026-09-03",
-    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\", which dispositions these four declarations by name: they close by transcribing the pinned FindReceiptRow into Lean and proving by decide.",
-    :legs
-    {:leg-1-persisted-record {:status :inapplicable, :why "The declared observation is a recorded find-receipt table over authored library text, not a run observation, so the run leg does not apply here rather than being met. What backs the fixture was checked rather than assumed for :U46: futon3 checks/find_snatch.clj was re-run and its drift check reports 0 mismatches against the authored antecedents, and the recorded rows reproduce -- a re-run today writes byte-identical :scenarios, :laws and :drift. STATED, because it is the one thing this leg does not give: the check REWRITES checks/find-snatch.edn, and today it writes sha256 08a0c3e7... rather than the pinned 839897ef..., because library/snatch grew from 18 to 24 patterns. The pinned file, restored, is what the Lean literal transcribes; the 18-member repository is the stronger F1 statement. See C500 section 3."},
-     :leg-2-rejecting-witness {:status :met, :why "futon3 checks/find_snatch.clj exits 0 over the pinned fixture and all five controls are rejected -- --negative-f1 (a selection member outside the repository), --negative-f2 (the first selected pattern's receipt dropped), --negative-f3 (a receipt rewritten to score-alone), --negative-f4 (the recorded omitted member struck from the repository) and --negative (antecedent drift). All re-run for :U46, and futon2 checks/witness-fragments/findF1Containment.edn re-stamped to contract-sha 0bab8f813f so leg (2) holds at the sha the contract now records. Two pins in that fragment were stale and were corrected from the re-run rather than carried: :run-sha 594127059d and :live-invariant :check-sha ab2b290d, the latter predating futon3 4e1c410446 (2026-09-02), which moved the check onto the generic find/organise path."},
-     :leg-3-lean-transcription {:status :met, :why "theorem wmFindSnatchF2Receipted (Holes.lean:788) proves findF2Receipted for all 34 transcribed rounds by decide, no sorry."}},
-    :executed-by :U46,
-    :pointers
-    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion, which dispositions F1-F4 by name)"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:788 theorem wmFindSnatchF2Receipted"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:378 findSnatchRounds (34 transcribed rounds) and :626 findSnatchScenarios (6 transcribed scenarios)"
-     "mathlib4 057e5eccbd (contract re-emitted; holes 14 -> 10)"
-     "futon2 holes/labs/wm-contract/u46_find_transcribe.bb (the generator) and runs/U46-find-rows/ (its artifacts)"
-     "futon2 checks/witness-fragments/findF1Containment.edn (:contract-sha 0bab8f813f...)"
-     "futon3 checks/find-snatch.edn (the pinned record, sha256 839897ef...)"]},
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 272, :docstring-line 271},
-   :area :demo,
-   :closability :pre-run-closable,
-   :declared-close-path
-   "As findF1Containment: the recorded-row invariant over the pinned FindReceiptRow.",
-   :owner "P-validated-R5 §3e F2",
-   :evidence-that-exists
-   ["futon2 checks/witness-registry.edn:636-656 (same binding, same passing controls)"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:272-273"]}
-  {:closability-basis "A transcription and a decidable proof over a pinned fixture.",
-   :hole-class :witnessed-instance-obligation,
-   :name "findF3NonSelfCertifying",
-   :remaining-evidence
-   "RESOLVED 2026-09-03 by :U46; wmFindSnatchF3NonSelfCertifying (Holes.lean:803) instantiates it. One thing the close does NOT establish, recorded on the verdict: over this record F3's set is F2's set, so the proof adds no discrimination beyond F2 and the rejecting control is what carries it.",
-   :readiness :closed-under-criterion,
-   :verdict
-   {:verdict :closed-under-criterion,
-    :at "2026-09-03",
-    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\", which dispositions these four declarations by name: they close by transcribing the pinned FindReceiptRow into Lean and proving by decide.",
-    :legs
-    {:leg-1-persisted-record {:status :inapplicable, :why "The declared observation is a recorded find-receipt table over authored library text, not a run observation, so the run leg does not apply here rather than being met. What backs the fixture was checked rather than assumed for :U46: futon3 checks/find_snatch.clj was re-run and its drift check reports 0 mismatches against the authored antecedents, and the recorded rows reproduce -- a re-run today writes byte-identical :scenarios, :laws and :drift. STATED, because it is the one thing this leg does not give: the check REWRITES checks/find-snatch.edn, and today it writes sha256 08a0c3e7... rather than the pinned 839897ef..., because library/snatch grew from 18 to 24 patterns. The pinned file, restored, is what the Lean literal transcribes; the 18-member repository is the stronger F1 statement. See C500 section 3."},
-     :leg-2-rejecting-witness {:status :met, :why "futon3 checks/find_snatch.clj exits 0 over the pinned fixture and all five controls are rejected -- --negative-f1 (a selection member outside the repository), --negative-f2 (the first selected pattern's receipt dropped), --negative-f3 (a receipt rewritten to score-alone), --negative-f4 (the recorded omitted member struck from the repository) and --negative (antecedent drift). All re-run for :U46, and futon2 checks/witness-fragments/findF1Containment.edn re-stamped to contract-sha 0bab8f813f so leg (2) holds at the sha the contract now records. Two pins in that fragment were stale and were corrected from the re-run rather than carried: :run-sha 594127059d and :live-invariant :check-sha ab2b290d, the latter predating futon3 4e1c410446 (2026-09-02), which moved the check onto the generic find/organise path."},
-     :leg-3-lean-transcription {:status :met, :why "theorem wmFindSnatchF3NonSelfCertifying (Holes.lean:803) proves findF3NonSelfCertifying for all 34 transcribed rounds by decide, no sorry. BOUNDED, and said in the docstring rather than left for a reader: on this record the recorded non-self-certifying set EQUALS the recorded receipted set in every one of the 34 rows -- every receipt is :structured-antecedent with a warrant file -- so F3 discriminates nothing here that F2 does not, and what separates them is the --negative-f3 control rather than the evidence."}},
-    :executed-by :U46,
-    :pointers
-    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion, which dispositions F1-F4 by name)"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:803 theorem wmFindSnatchF3NonSelfCertifying"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:378 findSnatchRounds (34 transcribed rounds) and :626 findSnatchScenarios (6 transcribed scenarios)"
-     "mathlib4 057e5eccbd (contract re-emitted; holes 14 -> 10)"
-     "futon2 holes/labs/wm-contract/u46_find_transcribe.bb (the generator) and runs/U46-find-rows/ (its artifacts)"
-     "futon2 checks/witness-fragments/findF1Containment.edn (:contract-sha 0bab8f813f...)"
-     "futon3 checks/find-snatch.edn (the pinned record, sha256 839897ef...)"]},
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 276, :docstring-line 275},
-   :area :demo,
-   :closability :pre-run-closable,
-   :declared-close-path
-   "As findF1Containment: the recorded-row invariant over the pinned FindReceiptRow.",
-   :owner "P-validated-R5 §3e F3",
-   :evidence-that-exists
-   ["futon2 checks/witness-registry.edn:636-656 (same binding, same passing controls)"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:276-277"]}
-  {:closability-basis "A transcription and a decidable proof over a pinned fixture.",
-   :hole-class :witnessed-instance-obligation,
-   :name "findF4Falsifiable",
-   :remaining-evidence
-   "RESOLVED 2026-09-03 by :U46. The docstring wording this row quoted -- \"the pinned row remains deliberately tracked as an evidence obligation\" -- is removed at mathlib4 0bab8f813f, because the obligation is discharged; what would still refute the claim is the falsifier field. wmFindSnatchF4Falsifiable proves it over all six recorded scenarios. Nothing remains.",
-   :readiness :closed-under-criterion,
-   :verdict
-   {:verdict :closed-under-criterion,
-    :at "2026-09-03",
-    :criterion "futon2 holes/labs/wm-contract/RUNBOOK.md, section \"What ends a `closed-by-record` evidence obligation (J9 ruling, Joe, 2026-09-03)\", which dispositions these four declarations by name: they close by transcribing the pinned FindReceiptRow into Lean and proving by decide.",
-    :legs
-    {:leg-1-persisted-record {:status :inapplicable, :why "The declared observation is a recorded find-receipt table over authored library text, not a run observation, so the run leg does not apply here rather than being met. What backs the fixture was checked rather than assumed for :U46: futon3 checks/find_snatch.clj was re-run and its drift check reports 0 mismatches against the authored antecedents, and the recorded rows reproduce -- a re-run today writes byte-identical :scenarios, :laws and :drift. STATED, because it is the one thing this leg does not give: the check REWRITES checks/find-snatch.edn, and today it writes sha256 08a0c3e7... rather than the pinned 839897ef..., because library/snatch grew from 18 to 24 patterns. The pinned file, restored, is what the Lean literal transcribes; the 18-member repository is the stronger F1 statement. See C500 section 3."},
-     :leg-2-rejecting-witness {:status :met, :why "futon3 checks/find_snatch.clj exits 0 over the pinned fixture and all five controls are rejected -- --negative-f1 (a selection member outside the repository), --negative-f2 (the first selected pattern's receipt dropped), --negative-f3 (a receipt rewritten to score-alone), --negative-f4 (the recorded omitted member struck from the repository) and --negative (antecedent drift). All re-run for :U46, and futon2 checks/witness-fragments/findF1Containment.edn re-stamped to contract-sha 0bab8f813f so leg (2) holds at the sha the contract now records. Two pins in that fragment were stale and were corrected from the re-run rather than carried: :run-sha 594127059d and :live-invariant :check-sha ab2b290d, the latter predating futon3 4e1c410446 (2026-09-02), which moved the check onto the generic find/organise path."},
-     :leg-3-lean-transcription {:status :met, :why "theorem wmFindSnatchF4Falsifiable (Holes.lean:817) proves findF4Falsifiable for all 6 transcribed scenarios by decide, no sorry, at the :selected-union grain find_snatch.clj:172-177 uses; the per-round statement is weaker and follows. f4Ok discharges the existential and the repository.Nonempty conjunct from the same recorded member, which is the degeneracy C70 and C85 named."}},
-    :executed-by :U46,
-    :pointers
-    ["futon2 holes/labs/wm-contract/RUNBOOK.md (the J9 criterion, which dispositions F1-F4 by name)"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:817 theorem wmFindSnatchF4Falsifiable"
-     "mathlib4 DarkTower/WarMachine/Holes.lean:378 findSnatchRounds (34 transcribed rounds) and :626 findSnatchScenarios (6 transcribed scenarios)"
-     "mathlib4 057e5eccbd (contract re-emitted; holes 14 -> 10)"
-     "futon2 holes/labs/wm-contract/u46_find_transcribe.bb (the generator) and runs/U46-find-rows/ (its artifacts)"
-     "futon2 checks/witness-fragments/findF1Containment.edn (:contract-sha 0bab8f813f...)"
-     "futon3 checks/find-snatch.edn (the pinned record, sha256 839897ef...)"]},
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 280, :docstring-line 279},
-   :area :demo,
-   :closability :pre-run-closable,
-   :declared-close-path
-   "SCOPE AMENDMENT 2026-08-31 narrowed it to ONE pinned FindReceiptRow. Docstring: \"The predicate is defined, while its pinned row remains deliberately tracked as an evidence obligation\" -- the same wording nonDegenerateAblationLaw carries, and that one has its proof and stayed a hole (:F2).",
-   :owner "P-validated-R5 §3e F4",
-   :evidence-that-exists
-   ["futon2 checks/witness-registry.edn:636-656 (same binding; the note records that --negative removal of the recorded omitted member is rejected)"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:280-282"]}
-  {:closability-basis
-   "\"Running\" here is checks/playout_snatch.clj firing patterns, not a War Machine tick. Nothing in it needs the live loop.",
-   :hole-class :deliberate-implementation-refusal,
-   :name "organise",
-   :remaining-evidence
-   "LA2's decision from a running policy-grain rule. Named in the declaration itself; not this row's to take.",
    :readiness :not-ready,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 322, :docstring-line 321},
-   :area :demo,
-   :closability :pre-run-closable,
-   :declared-close-path
-   "The docstring names its own gate and gives it away: \"The STATUS does not move with the type: whether the refusal weakens to definable is LA2's to decide from a running policy-grain rule, not this amendment's.\" So the close is LA2's decision, and the TYPE AMENDMENT 2026-09-02 that made the temperament an argument was explicit about not moving it.",
    :owner "P-validated-R5 §3e organise",
-   :evidence-that-exists
-   ["futon3 checks/find_organise.clj organise (reads the temperament's closure policy and precedence, fires nothing)"
-    "futon3 checks/playout_snatch.clj (fires two of library/snatch's six policy-grain patterns through construct)"
-    "mathlib4 DarkTower/WarMachine/Holes.lean:354-360 (organiseO1NodesRecorded's three-way union, the :LA2 amendment)"]}
-  {:closability-basis "The claim quantifies over running instances; only a record shows one.",
-   :hole-class :permanent-external-attestation,
+   :basis
+   "The declaration names its own gate: whether the refusal weakens to definable is LA2's to decide from a running policy-grain rule. That running is checks/playout_snatch.clj, not a tick.",
+   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8033"]}
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8045"],
+   :row-source :contract-declaration,
    :name "preferenceStackLiveRecorded",
-   :remaining-evidence
-   "The C_mis half of door 7's condition. The live path carries the C_int stack (five layers, present on all three 2026-09-02 records) and NO mission-c records: the string \"mission-c-readback\" does not occur in wm-trace-2026-09-02.edn (the only mission-c* match is mission-coherence-patterns, 21 occurrences, unrelated), U12 computed the readback OVER the records rather than reading it off them, and FUTON_WM_MISSION_C is off. So what remains is exactly: a tick with an active clocked mission whose criteria are measurable, with mission-c records persisted onto the trace. Whether that closes the hole or only strengthens its witness is the C114-vs-door-7 disagreement above, which this audit does not rule.",
+   :basis
+   "The claim quantifies over running instances. The C_int half is on all three 2026-09-02 records; mission-c-readback occurs zero times in wm-trace-2026-09-02.edn. Whether the C_mis half would CLOSE it is unsettled: the Lean docstring says PERMANENT (C114) and DESIGN-c-vector.md door 7 says close-by-record.",
    :readiness :not-ready,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6575, :docstring-line 6574},
    :area :preferences,
    :closability :run-gated,
-   :declared-close-path
-   "TWO DOCUMENTS, AND THEY DO NOT SAY THE SAME THING. The Lean docstring says PERMANENT EXTERNAL ATTESTATION and that C114 \"considered and declined narrowing\", because a theorem over one pinned witness would prove a pinned instance rather than the world-level claim. DESIGN-c-vector.md §4 door 7 says instead: \"the C_mis records U11 writes are exactly the live preference-stack evidence the attestation wants; close-by-record once U11's records exist on a real tick\". U13 recorded that path as NOTED, not taken -- and it is not written at the Lean hole, which still carries only the C114 sentence.",
    :owner "P-R19-preferences-open §gate",
-   :evidence-that-exists
-   ["futon2 checks/witness-registry.edn:781-800 -- checks/preference_stack_binding_check.clj over PreferenceStackWitness.edn, :result :passed"
-    "futon2 data/wm-trace/wm-trace-2026-09-02.edn -- all three records carry :preference-stack {:status :present :scope :all-ranked-actions :candidate-count 146} with five layers, each layer/id carrying :source, :author, :basis, :folded?, :site"
-    "futon2 holes/labs/wm-contract/DESIGN-c-vector.md:105-112 (door 7)"],
    :runtime-evidence
-   "A trace record carrying mission-c criteria records alongside its existing :preference-stack -- i.e. a tick where mission-c-readback is neither :no-active-clock nor :no-measurable-criteria."}
-  {:closability-basis
-   "The claim is that an invocation happened; only a run record can say so.",
-   :hole-class :permanent-external-attestation,
+   "A trace record carrying mission-c criteria records beside its :preference-stack -- a tick whose mission-c-readback is neither :no-active-clock nor :no-measurable-criteria."}
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8046"],
+   :row-source :contract-declaration,
    :name "wmRunsOnce",
-   :remaining-evidence
-   "NOTHING on the evidence side, and more evidence does not help. The witness passes; the three 2026-09-02 receipts and the four S4 receipts are further instances of the same kind, not a change of kind. The hole stays open because the Lean proposition is world-level and C114 declined to narrow it to a pinned receipt. Only a scope amendment moves it, and that amendment would state a different claim -- which is C114's whole point.",
+   :basis
+   "Run-gated here does NOT mean awaiting a run. The witness passes; the hole stays open because the Lean proposition is world-level and C114 declined to narrow it to a pinned receipt.",
    :readiness :witnessed-and-held-open,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6598, :docstring-line 6597},
    :area :run,
    :closability :run-gated,
-   :declared-close-path
-   "C114 §external: \"occurrence of a completed tick is a fact about the world. Lean cannot derive that an invocation happened. TickRunWitness is the right and only evidence for the current claim, so the sorry is permanent.\" The Lean docstring repeats it.",
-   :owner "Joe 2026-08-31 · run-at-least-once",
-   :evidence-that-exists
-   ["futon2 checks/witness-registry.edn:917-936 -- checks/wm_runs_once_witness.clj over tick-run-record-2026-08-30.edn, :result :passed"
-    "futon2 holes/labs/wm-contract/tick-run-record-2026-08-30.edn (the pinned receipt)"
-    "futon2 holes/labs/wm-contract/tick-run-record-2026-09-02-0a18c4f7-758e-400a-8223-9c52edf07450.edn and the 4abad68c / 801976e7 siblings -- three further receipts of the same shape, 9 hops each, committed with this audit"
-    "futon2 holes/labs/wm-contract/runs/2026-09-01-s4/ -- four more tick-run-records from the S4 stage run"],
+   :owner
+   "record: futon2:holes/problems/BUILD-packets/WM-RUN1.md · Joe 2026-08-31 · run-at-least-once",
    :runtime-evidence
-   "A completed tick leaving a TickRunRecord. It exists, repeatedly. Read :readiness before reading this row's fence side: run-gated here does NOT mean awaiting a run."}
-  {:closability-basis
-   "The claim compares an observed route with the drawn wiring; the route only exists in a record.",
-   :hole-class :permanent-external-attestation,
+   "A completed tick leaving a TickRunRecord. IT EXISTS -- the pinned 2026-08-30 receipt, three 2026-09-02 receipts, four more from the S4 stage run."}
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8047"],
+   :row-source :contract-declaration,
    :name "wmRunConformsToWiring",
-   :remaining-evidence
-   "The topology the run would be judged against has not been re-synced yet: worklist :U29 (22 drifted accounting pointers) and :U31 (five locations carrying :reason :engine-returned-nil, which has zero code occurrences) are both still :open, and TN §11 R3 asks conformance against the checked topology including the seven retired and eight added edges. The 2026-09-02 receipts still read 6 of 9 hops unmapped against 21 drawn edges -- the same figure the 2026-08-30 receipt gave -- so nothing has moved on this since the pin.",
-   :readiness :not-ready,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6609, :docstring-line 6608},
+   :basis
+   "RUN-GATED, NOT PERMANENT -- the owner refused the permanent-attestation reading on 2026-09-03 and C114's decline of the pinned transcription is superseded by that ruling. The s5 certificate does not close it and is not claimed to: the ruling reserves mkClosed for Joe's acceptance. Two limits the certificate states about itself rather than leaving to a reader: 5 of the 9 distinct hops are drawn only because a previous route MEASUREMENT put them on the :route-measured-drawn layer, and 19 of the 22 drawn edges never fired, so what is proved is that the run stayed inside the union of the two layers.",
+   :readiness :witnessed-and-held-open,
    :area :run,
    :closability :run-gated,
-   :declared-close-path
-   "TN-edge-review §11 R4 states it directly: \"wmRunConformsToWiring closes by record or is refuted\" -- against the R2/R3 validation run, ~20 shadow ticks on the CURRENT topology, every recorded hop an edge of the checked topology and no retired edge traversed. C114 §external says the Lean sorry is permanent regardless, for the same reason as wmRunsOnce.",
-   :owner "Joe 2026-08-31 · organisation evidence",
-   :evidence-that-exists
-   ["futon2 checks/witness-registry.edn:897-916 -- checks/wm_route_conformance.clj over tick-run-record-2026-08-30.edn, :result :passed, WM-RUN2 9/9 mapped (3 original, 6 measured), negative control appends R99->R100 and is rejected"
-    "futon2 holes/labs/wm-contract/tick-run-record-2026-09-02-0a18c4f7-758e-400a-8223-9c52edf07450.edn -- :route-verdict {:hops 9 :conformant 3 :unmapped 6 :drawn-edges-fired 3 :drawn-edges-total 21}, the same 3/9 as 2026-08-30"],
+   :owner
+   "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · organisation evidence",
    :runtime-evidence
-   "TN §11 R2's run: ~20 shadow ticks, current code, records carrying the route, judged by R3 against the re-synced topology (so :U31 first)."}
-  {:closability-basis
-   "The bound is a conditional over runs whose antecedent has never occurred.",
-   :hole-class :open-bound,
+   "A CERTIFICATE OVER A QUALIFYING RUN, and the certificate is what ends it (Joe's RUN4 ruling, 2026-09-03; executed by :U49): a run's reassembled route and the Figure 4 edge layers transcribed into Lean and conformance proved by decide. The machinery exists and is exercised -- mathlib4 wmS5RunConformsToDrawnWiring over runs/2026-09-01-s5 (futon2 5a66411; 4 routes, 36 hops, 9 distinct, 0 refutations, 0 unmapped), with wmS5RouteCensus deciding its numbers, both at 0 axioms. WHICH run qualifies is Joe's call at certificate time, so what is outstanding is an acceptance, not a build."}
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8049"],
+   :row-source :contract-declaration,
    :name "enactedEqualsSelectedWhenRankOneGated",
-   :remaining-evidence
-   "No record since the pin carries the enactment half at all: \":realized-outcome\" occurs 0 times in wm-trace-2026-09-01.edn (158 :decision occurrences), 0 times in wm-trace-2026-09-02.edn (6), and 0 times in runs/2026-09-01-s4/wm-trace-s4.edn (8). The S-stage runs are shadow runs, so they cannot produce the antecedent by construction.",
+   :basis
+   "The antecedent has never occurred on record, and no record since the pin carries the enactment half at all: :realized-outcome occurs 0 times in the 09-01, 09-02 and S4 traces. The S-stage runs are shadow runs, so they cannot produce it by construction.",
    :readiness :not-ready,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6642, :docstring-line 6641},
    :area :run,
    :closability :run-gated,
-   :declared-close-path
-   "The docstring says what is needed and why nothing else will do: the ANTECEDENT HAS NEVER OCCURRED ON RECORD. In all 50 comparable records the act gates run over two missions and the rank-1 selection M-first-flights is not among them, so the rank-1 selection passes its gate in ZERO of 50 -- \"the bound is vacuously unfalsified rather than supported\". \"Deciding this needs a run that produces the antecedent at all.\"",
    :owner "wm-organization · TN-edge-review worklist H1b",
-   :evidence-that-exists
-   ["mathlib4 DarkTower/WarMachine/Holes.lean:6631 (the comparable population: exactly two trace files join a selection to an enactment)"
-    "futon2 src/futon2/aif/full_loop_runner.clj:870-873 (selected-entry enacts the recorded selection)"
-    "futon2 src/futon2/aif/enact.clj:287-316 (close-loop! takes the first passing gate in ranking order; nothing enforces that the two meet)"],
    :runtime-evidence
-   "A run record in which the rank-1 selection passes its OWN act gate and the record also carries the enacted action (:realized-outcome), so the two halves join. TN §11 R4 lists it: \"H1b's bound tested on fresh records\"."}
-  {:closability-basis
-   "An absence over code paths. It is settled by reading the source tree, and a run could only ever falsify it, never establish it.",
-   :hole-class :open-bound,
-   :name "dirichletAccumulationImportAbsent",
-   :remaining-evidence
-   "The walk has been DONE and written down in prose with pointers; what does not exist is an executable binding of it. \"dirichletAccumulationImportAbsent\" does not occur in checks/witness-registry.edn, so unlike every closed declaration in this contract there is no check, no fixture and no negative control -- and an absence claim without a rejecting control is the shape this lab treats as unproven. What is needed: a checker that walks DirichletConcentrations back to its feeders and fails if any path reaches the tick model's o or mu, with a negative control that plants such a path and is rejected.",
-   :readiness :not-ready,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6645, :docstring-line 6644},
+   "A record joining a rank-1 selection that passes its OWN act gate to the enacted action."}
+  {:name "dirichletAccumulationImportAbsent",
+   :row-source :contract-declaration,
    :area :learning,
    :closability :pre-run-closable,
-   :declared-close-path
-   "The declaration names its own evidence: \"a provenance walk from DirichletConcentrations back to its producer -- name the feeder, grep the store, find the writer\". The claim held open is the ABSENCE: no path carries the tick model's o or mu into R17's concentrations.",
+   :readiness :not-ready,
    :owner "wm-organization · TN-edge-review worklist H2",
-   :evidence-that-exists
-   ["futon2 src/futon2/aif/a4a_substrate.clj:46-60 (read-corpus, the only non-test feeder; reads :capability/* hyperedges from the substrate over Drawbridge)"
-    "futon2 src/futon2/aif/actuator_a3.clj:31, :68, :486-487 (the writer of those hyperedges)"
-    "futon2 src/futon2/aif/a4a.clj:2-6 (\"demo-validated until real :capability/* production writes flow\")"
-    "futon2 holes/TN-edge-review-aif-wiring.md:352-372 (§9a: the walk, and the correction of §9's wrong claim that it read TRACE)"]}
-  {:closability-basis "The claim is about what a run's precision is set by.",
-   :hole-class :open-bound,
+   :basis
+   "An absence over code paths, settled by reading the tree; a run could only falsify it. The provenance walk is done and written down (TN §9a) but not bound: the name does not occur in checks/witness-registry.edn, so there is no check, no fixture and no rejecting control.",
+   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8050"]}
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8051"],
+   :row-source :contract-declaration,
    :name "policyPrecisionIsGammaFromBeta",
-   :remaining-evidence
-   "THE WIRING EXISTS AND THE RECORD DOES NOT, and the distinction is the point. S3 is explicitly \"a REPLAY, not a 20-tick stage run\" (runs/2026-09-01-s3/README.md:3); its one live tau = beta tick came from run8_s3_preflight.clj, which suppresses every write except the run lock (:28-54), so nothing was persisted. Checked against the store: wm-trace-2026-09-01.edn carries 18 :tau-source values and every one is :selection-gain-only, and the reported tau 1.0364669814843985 occurs 0 times in that file. runs/2026-09-01-s3/ holds ARMS.txt and README.md and no trace. So: a stage run on the variational mode with writes enabled, leaving records that carry :tau beside :tau-source :converged-posterior. The mode is default-off, which is a second question the record alone does not settle.",
+   :basis
+   "The wiring exists and the record does not: S3 is a replay, its one live tau = beta tick ran under a write-suppressing preflight, and all 18 :tau-source values in wm-trace-2026-09-01.edn are :selection-gain-only. :J10 (Joe 2026-09-03) gave it H4's disposition shape and :U47 corrected its falsifier field to the absence form (mathlib4 a3ae5084be); with no persisted record at all there is nothing for it to be witnessed under, so it stays :not-ready rather than moving with H4.",
    :readiness :not-ready,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6648, :docstring-line 6647},
    :area :policy,
    :closability :run-gated,
-   :declared-close-path
-   "Declared evidence: \"a run record carrying tau together with the beta it was derived from\". The falsifier field named the SAME observation (finding :F3); corrected 2026-09-03 by :J10/:U47 to the absence form, \"no run record carries tau together with the beta it was derived from\" (mathlib4 a3ae5084be).",
-   :verdict
-   {:disposition :run-gated
-    :by :J10 :at "2026-09-03" :executed-by :U47
-    :why "Joe's J10 gave H3 H4's disposition SHAPE and the contrast is what made the pair worth ruling together: H3's wiring exists and no persisted record does, so there is nothing yet for it to be witnessed under, under a flag or otherwise. It stays :run-gated / :not-ready and closes on the record its :runtime-evidence field names."
-    :pointers ["futon2 data/wm-trace/wm-trace-2026-09-01.edn (18 :tau-source values, all :selection-gain-only; the reported tau 1.0364669814843985 occurs 0 times)"
-               "futon2 holes/labs/wm-contract/run8_s3_preflight.clj:28-54 (the write-suppressing preflight S3's one live tau = beta tick ran under)"
-               "futon2 holes/labs/wm-contract/runs/2026-09-01-s3/README.md:3 (\"a REPLAY, not a 20-tick stage run\")"
-               "mathlib4 DarkTower/WarMachine/Holes.lean:7186 (the corrected docstring), :7422 (the corrected mkHole row)"]},
-   :owner "wm-organization · TN-edge-review worklist H3 (Joe's J1 ruling)",
-   :evidence-that-exists
-   ["futon2 src/futon2/aif/policy.clj:76-145 (effective-temperature, the closed dispatch; FUTON_WM_TAU_MODE=variational-beta-gamma gives tau = beta, gamma = 1/beta)"
-    "futon2 src/futon2/aif/policy.clj:56-75 (temperature-source puts the LAW that produced tau on the decision beside :tau, per tick)"
-    "futon2 src/futon2/aif/policy_precision.clj:544-560 (carry-beta always yields a finite positive beta and says which source)"
-    "futon2 holes/labs/wm-contract/C469-s3-live-tau.md (RUN8/S3: one live tick selected at tau = beta = 1.0364669814843985, :tau-source :converged-posterior, gamma = 0.9648160702310347)"],
+   :owner
+   "wm-organization · TN-edge-review worklist H3 (Joe's J1 ruling)",
    :runtime-evidence
-   "A persisted trace record carrying :tau with :tau-source naming carry-beta's :beta-source (the LAW that produced it), from a tick run under FUTON_WM_TAU_MODE=variational-beta-gamma with writes enabled."}
-  {:closability-basis "The claim is about what a run's policy posterior imports.",
-   :hole-class :open-bound,
+   "A PERSISTED record carrying :tau with :tau-source naming carry-beta's :beta-source, from a tick under FUTON_WM_TAU_MODE=variational-beta-gamma with writes enabled."}
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8052"],
+   :row-source :contract-declaration,
    :name "policyPosteriorImportsPolicyF",
-   :verdict
-   {:disposition :witnessed-under-flag
-    :by :J10 :at "2026-09-03" :executed-by :U47
-    :why "RULED. The contest was a wording defect, not an evidential one: with the falsifier corrected to the absence form the S4 record is a WITNESS and not a refutation, so the two opposite dispositions collapse to one. What it witnesses is the FLAGGED path -- FUTON_WM_FPI_POSTERIOR is read from the environment and default-off -- so the hole is held open :run-gated and closes on a default-path persisted record carrying the term, or if the flag is ruled default-on, which is its own ruling."
-    :pointers ["futon2 holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn (3 of 4 ticks :f-pi-posterior :status :present :applied? true; the 4th :status :absent :reason :incomplete-coverage rather than imputing)"
-               "futon2 scripts/futon2/report/war_machine.clj:199-219 (*f-pi-posterior?*, read from FUTON_WM_FPI_POSTERIOR, default-off)"
-               "futon2 src/futon2/aif/policy.clj:158 (the score, ln E - G/tau [- F_pi]), :184-186 (the f-pi options arity)"
-               "futon2 holes/labs/wm-contract/C470-s4-live-f-pi.md (RUN9's replay control reproduces each record's own posterior at delta 0.0)"
-               "mathlib4 DarkTower/WarMachine/Holes.lean:7189 (the corrected docstring), :7423 (the corrected mkHole row)"]},
-   :remaining-evidence
-   "THIS IS THE ONE HOLE WHOSE NAMED OBSERVATION IS ALREADY ON PERSISTED RECORD. Q(pi) was computed with a per-policy F term on three of four S4 ticks, scored against persisted predictions, and the replay control reproduces each record's own posterior at delta 0.0. What the record does NOT settle is what that means for the declaration, and there are two readings with opposite dispositions (finding :F3): as a discharge it closes the hole by witness; as the stated falsifier it refutes it, which under this contract's own precedent is ALSO a close (mkRefutedByRecord, used for enactedActionEqualsSelected on 2026-09-01). A third consideration neither field mentions: FUTON_WM_FPI_POSTERIOR is default-off, so the record shows what the machine does under a flag, not what it does. Contested; raised as worklist row :J10. Not forced either way here. RULED 2026-09-03 -- see :verdict above; this field is the state at audit time and is not rewritten.",
+   :basis
+   "RULED :J10 (Joe 2026-09-03), executed by :U47. The contest is settled and it was a wording defect, not an evidential one: the falsifier field named the CONFIRMING observation, word for word what the evidence field asks for, and is corrected to the absence form at mathlib4 a3ae5084be -- so the S4 record is a WITNESS and not a refutation. What it witnesses is the FLAGGED path (FUTON_WM_FPI_POSTERIOR is read from the environment and default-off, war_machine.clj:199-219), so the hole stays open :run-gated and closes on a default-path persisted record carrying the term -- or if the flag is ruled default-on, which is its own ruling.",
    :readiness :witnessed-under-flag,
-   :lean {:file "mathlib4/DarkTower/WarMachine/Holes.lean", :line 6651, :docstring-line 6650},
    :area :policy,
    :closability :run-gated,
-   :declared-close-path
-   "Declared evidence: \"a run record whose Q(pi) carries a per-policy F term alongside E and G\". See finding :F3: the falsifier field names the same observation, so the two fields point opposite ways.",
-   :owner "wm-organization · TN-edge-review worklist H4 (Joe's J2 ruling)",
-   :evidence-that-exists
-   ["futon2 holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn -- 3 of 4 records carry :f-pi-posterior {:coverage :complete, :join-key :action-type-and-target, :candidate-count 145, :uncovered-count 0, :status :present, :scaling :unscaled, :applied? true} with :f-pi-min/-max, and per-candidate :f-pi-by-candidate-id values; the 4th records {:status :absent, :reason :incomplete-coverage, :uncovered-count 1, :applied? false} rather than imputing"
-    "futon2 holes/labs/wm-contract/runs/2026-09-01-s4/README.md (four ticks, one run lock, run/ids dd00675b 73282cf8 200b894f 5bd37efe)"
-    "futon2 scripts/futon2/report/war_machine.clj:123-155 (f-pi-posterior-preconditions!) and :5095-5096 (the call site, joined against wm-admissible)"
-    "futon2 src/futon2/aif/policy.clj:413-421 (the decision echoes the caller's envelope with :applied? from the flag it used)"],
+   :owner
+   "wm-organization · TN-edge-review worklist H4 (Joe's J2 ruling)",
    :runtime-evidence
-   "A run record whose Q(pi) carries the per-policy F term. It EXISTS (runs/2026-09-01-s4/wm-trace-s4.edn, 3 of 4 ticks); the open question is its disposition, not its production."}
-  {:closability-basis "The claim is about the live selection layer.",
-   :hole-class :glossary-side-hole,
+   "A DEFAULT-PATH record whose Q(pi) carries the per-policy F term. The FLAGGED-path record exists: runs/2026-09-01-s4/wm-trace-s4.edn, 3 of 4 ticks with :f-pi-posterior :applied? true."}
+  {:pointers
+   ["futon2/holes/missions/M-wm-strategic-mission-selection.md:1"],
+   :row-source :glossary-paragraph,
    :name "Strategic mission selection",
-   :remaining-evidence
-   "The principled layer is not built. The one component with code behind it is C_mis, and U12 measured that component non-discriminating on the corpus as it stands.",
+   :basis
+   "sec-glossary.tex:80's claim is about what the implementation represents on the live path, so a unit test of the layer would not discharge it. Glossary-side, not a contract declaration.",
    :readiness :not-ready,
-   :lean nil,
    :area :policy,
    :closability :run-gated,
-   :declared-close-path
-   "Not a contract declaration -- promoted from :named-only by U14 (NOTE-glossary-only-triage.md disposition 8) and reported outside the declaration columns. sec-glossary.tex:80 calls the live three-factor additive mission value a set of \"surrogates for outer-loop structure that the implementation has not yet represented\" and specs the principled layer: reason-bearing policy support, predicted mission outcomes in a forward model and G_S, proposal potentials, a separate habit E_S, hierarchical Q(pi_S), Q(pi_T|pi_S).",
    :owner "futon2/holes/missions/M-wm-strategic-mission-selection.md",
-   :evidence-that-exists
-   ["futon2 holes/M-wm-three-factor-mission-value.md (the current additive model)"
-    "futon2 src/futon2/aif/mission_control_graph.clj (the dark schema kernel)"
-    "futon2 holes/labs/wm-contract/DESIGN-c-vector.md:70-93 (§3: the risk term of G_S is KL(Q(o|pi) || C_mis), so U11-U13 build a component of it)"],
    :runtime-evidence
-   "A trace record in which the mission value carried is the principled one -- G_S over forward-model predicted mission outcomes with its own habit E_S -- rather than the three-factor additive surrogate. The glossary paragraph's claim is about what the implementation represents on the live path, so a unit test of the layer would not discharge it."}],
- :as-of "2026-09-03"}
+   "A record in which the mission value carried is the principled one -- G_S over forward-model predicted mission outcomes with its own habit E_S -- rather than the three-factor additive surrogate."}]}

@@ -839,7 +839,7 @@
                     glossary-rows)
         rows (vec (concat declared named))]
     {:schema :wm/variable-situation-accounting-v1
-     :as-of "2026-09-03"
+     :as-of "2026-09-08"
      :authority {:contract-git-sha (get-in contract [:source :git-sha])
                  :contract-sha256 (sha256 contract-file)
                  :glossary-sha256 (sha256 glossary-file)
