@@ -156,10 +156,23 @@
    :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6789 :to 6789 :expect ":TRACE"}
               {:file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!"}]}
 
-  {:node "TRACE" :cell :surfaced :verdict :exists :tag "[E-T-S]"
-   :reading "The bulletin re-reads persisted records whose route contains :TRACE and shapes them for its existing waits-on-Joe channel, retaining the trace file citation."
-   :pointers [{:file "futon2/src/futon2/aif/bulletin.clj" :from 211 :to 240 :expect "trace-discharges"}
-              {:file "futon2/src/futon2/aif/bulletin.clj" :from 344 :to 347 :expect "trace-discharges"}]}
+  ;; RE-LIFTED 2026-09-08 from ALIGN's fresh adjudication (futon2 1b575c71).
+   ;; PROVENANCE MATTERS HERE MORE THAN USUAL. This entry existed in this file
+   ;; from PA9z (dfe4dcfd) until that adjudication WITHOUT any ALIGN counterpart
+   ;; -- a work seat crediting a cell into the instrument's data on a reading the
+   ;; census of record had never made. PA15z's sweep found it; the pointer was
+   ;; deliberately NOT re-pointed at the time, because a fresher pointer would
+   ;; have made an unbacked credit harder to notice, not easier. claude-1 then
+   ;; verified the channel at HEAD and the cell EARNS the credit -- but by fresh
+   ;; adjudication, with the unauthorised interval recorded in ALIGN first, so
+   ;; nothing is laundered. The standing check that makes this mechanical is
+   ;; :PA16z.
+   {:node "TRACE" :cell :surfaced :verdict :exists :tag "[E-T-S]"
+   :authority "futon2 1b575c71 — ALIGN [E-T-S], adjudicated at source 2026-09-08"
+   :reading "trace-discharges reads persisted :TRACE route hops; untriaged-traces subtracts the append-only discharge ledger (append-trace-review! refuses duplicate dispositions) and delivers count + oldest-date as its own bulletin field, split from the decision sheet."
+   :qualification "SURFACING IS AGGREGATE-GRAIN, per ALIGN. What running code surfaces is the queue's existence, size and age -- not per-record surfacing, which carries no answerable question until PA14z's reason field lands at the write site. The cell is credited at the grain the triage note specified, and the qualification travels with it so a later reader does not over-read it."
+   :pointers [{:file "futon2/src/futon2/aif/bulletin.clj" :from 212 :to 236 :expect "trace-discharges"}
+              {:file "futon2/src/futon2/aif/bulletin.clj" :from 278 :to 287 :expect "untriaged-traces"}]}
 
   {:node "R16" :cell :commissioned :verdict :exists :tag "[E-16-C]"
    :reading "The author commission names the selected target, repository/base head, artifact contract, requirements, refusal shape and independent reviewer; that exact prompt is passed to dispatch."
@@ -269,6 +282,11 @@
    :sites ["src/futon2/aif/tripwire.clj:639-662"
            "src/futon2/aif/bulletin.clj:190-208"]
    :serves-cells [:checked :surfaced]}
+  {:node "TRACE" :authority "futon2 1b575c71"
+   :sites ["src/futon2/aif/bulletin.clj:212-287"]
+   :serves-cells [:surfaced]
+   :lifted-partially-and-here-is-why
+   "ALIGN's TRACE declaration also names a :recorded pair, {:sites [\"src/futon2/aif/war_machine.clj:6750-6759\" \"src/futon2/aif/trace.clj:723-745\"] :serves-cells [:recorded]}. THAT PAIR IS NOT LIFTED, and the discrepancy is reported rather than silently corrected: war_machine.clj does not live at src/futon2/aif/ -- its path is scripts/futon2/report/war_machine.clj -- and :6750-6759 is the range [E-T] DRIFTED OFF on this harness's very first run (corrected to :6789 in ALIGN 4c400a62). Lifting it as written would declare sites that match nothing, which is worse than not declaring them: it would look like coverage. Lifting a fixed version would be this lane editing claude-1's reading, which is the line held since [E-T]. Nothing is lost meanwhile -- TRACE :recorded is pinned by [E-T] and the node's remaining cells are route-hop-adjudicated, both of which take precedence over this mechanism, so the missing declaration is currently inert. Flagged to claude-1."}
   {:node "R16" :authority "futon2 e53f1e26"
    :sites ["src/futon2/aif/full_loop_runner.clj:141-182"
            "src/futon2/aif/full_loop_runner.clj:2362-2379"

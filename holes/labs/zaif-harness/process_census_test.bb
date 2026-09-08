@@ -37,7 +37,28 @@
 (println)
 
 ;; ---------------------------------------------------------------------------
-(println "1. the census as it stands -- and it stands at EXIT 3, deliberately")
+;; TREE GUARD. This suite reads the same working tree the census does, and this
+;; checkout is shared with live build loops. Asserting pass or fail over files
+;; another seat is mid-edit produces a verdict about nothing -- a half-written
+;; file is indistinguishable from a rotted pointer, which is exactly the defect
+;; that put the tree guard into process_census.bb in the first place.
+;;
+;; So the suite REFUSES TO RUN rather than guessing, and exits 3: NOT pass (0),
+;; NOT fail (1). A silent SKIP at exit 0 would let a runner read "green" off work
+;; that never happened, which is the failure this board calls
+;; success-must-not-resemble-failure.
+(let [{:keys [exit]} (shell/sh "bb" script "--edn")]
+  (when (= 5 exit)
+    (println "NOT RUN -- the read scope has uncommitted modifications.")
+    (println "The census refuses over a moving tree (exit 5) and so does its suite.")
+    (println "Re-run when the tree is clean; this is exit 3: neither pass nor fail.")
+    (let [{:keys [err]} (shell/sh "bb" script)]
+      (println) (println (str/trim (str err))))
+    (System/exit 3)))
+
+
+;; ---------------------------------------------------------------------------
+(println "1. the census as it stands -- back to EXIT 0, and how it got there matters")
 ;; FOURTH STATE OF THIS SUITE. It has pinned, in order: ALIGN's 42 with a
 ;; drifted [E-T]; the repaired 42; the v2 widening and its exit-4; and now the
 ;; census AFTER PA6z-PA10z built real boundaries. :exists went 6 -> 14 because
@@ -45,47 +66,51 @@
 ;; adjudicated in ALIGN (2a495a7d, e53f1e26) after claude-1 re-read the source
 ;; for meaning, not merely for pointer resolution.
 ;;
-;; The suite pins exit 3, NOT exit 0, and that is the point of this state: one
-;; adjudication is stale and MUST STAY UNCREDITED until its owner rules. A
-;; suite that went green here would be hiding the only live finding on the board.
+;; The previous state of this suite pinned EXIT 3 on purpose, because [E-T-S]
+;; was stale AND unbacked and had to stay uncredited until its owner ruled.
+;; It now pins exit 0 -- but NOT because the pointer was quietly re-lifted.
+;; claude-1 verified the channel at HEAD and adjudicated the cell afresh
+;; (1b575c71), recording the unauthorised interval in ALIGN FIRST so nothing was
+;; laundered. Green here is earned; green would have been available two turns
+;; earlier by re-pointing a line number, and that is exactly the move this lane
+;; refused.
 (let [v1 (run-census "--pattern" "v1")
       v2 (run-census "--pattern" "v2")]
   (check "v1 and v2 agree cell for cell"
          (mapv (juxt :node :cell :verdict) (:results (:data v1)))
          (mapv (juxt :node :cell :verdict) (:results (:data v2))))
-  (check "tally" {:absent 26 :named-only 1 :exists 14 :stale-adjudication 1}
+  (check "tally" {:absent 26 :named-only 1 :exists 15}
          (frequencies (map :verdict (:results (:data v2)))))
   (check "no disagreement with the census of record" [] (:disagreements (:data v2)))
-  (check "exits 3 -- one stale adjudication, refused not papered over" 3 (:exit v2)))
+  (check "exits 0 -- the stale cell was adjudicated at source, not re-pointed" 0 (:exit v2)))
 
-(println "\n2. the one stale cell is [E-T-S], and it is a GOVERNANCE finding, not just drift")
-;; Two things are wrong with this cell and only one of them is a rotted pointer.
-;;   (i) DRIFT: PA13z (futon2 d17f1088) split TRACE triage out of the decision
-;;       sheet and moved `trace-discharges` from :344 to :212. Routine, and the
-;;       harness reports it with the correction, as it did for [E-T].
-;;   (ii) THE REAL ONE: [E-T-S] has NO ALIGN COUNTERPART. A mechanical sweep of
-;;       every adjudication tag against the census of record finds exactly one
-;;       with no mention -- this one. It was written straight into the
-;;       instrument's data by PA9z's work seat (dfe4dcfd), crediting TRACE
-;;       `surfaced` on a reading the census owner never made. This ledger's own
-;;       header says the adjudicated cells ARE ALIGN's cells transcribed.
-;;       An instrument that can credit a cell its census of record never
-;;       adjudicated is self-certifying -- R9's problem, one layer up, in the
-;;       thing built to detect R9's problem.
-;; So the pointer is NOT quietly re-lifted to :212. That would launder an
-;; unbacked adjudication into a fresh-looking one, which is precisely what this
-;; lane refused to do for [E-T]. Routed to claude-1: adjudicate it in ALIGN and
-;; the ledger re-lifts, or the entry comes out.
+(println "\n2. [E-T-S] -- credited now, with its governance history pinned so it cannot be forgotten")
+;; This cell was, for a while, the instrument certifying itself: PA9z's work seat
+;; wrote a pinned adjudication crediting TRACE :surfaced straight into
+;; census-ledger.edn with NO ALIGN counterpart, and it stood from dfe4dcfd until
+;; PA15z's sweep found it. claude-1 then verified the channel at HEAD and ruled
+;; the cell EARNS the credit -- by fresh adjudication, with the unauthorised
+;; interval recorded in ALIGN first.
+;;
+;; So the check asserts the AUTHORITY, not just the verdict. A future edit that
+;; re-credited this cell without an ALIGN citation would restore the exact fault,
+;; and a verdict-only assertion would sail straight past it. :PA16z makes this
+;; mechanical for every tag; until then, this pin is the guard for the one tag
+;; that actually got caught.
 (let [{:keys [data]} (run-census "--pattern" "v2")
-      c (cell data "TRACE" :surfaced)
-      bad (first (:stale c))]
-  (check "not credited" :stale-adjudication (:verdict c))
+      c (cell data "TRACE" :surfaced)]
+  (check "credited" :exists (:verdict c))
   (check "tag" "[E-T-S]" (:tag c))
-  (check "why" :token-not-in-range (:why bad))
-  (check "the rotted pointer" ["futon2/src/futon2/aif/bulletin.clj" 344 347 "trace-discharges"]
-         [(:file bad) (:from bad) (:to bad) (:expect bad)])
-  (check "harness supplies the correction rather than only complaining" [212 284]
-         (:token-found-at bad)))
+  (check "cites ALIGN's fresh adjudication, not a restated argument" true
+         (boolean (re-find #"1b575c71" (str (:authority c)))))
+  (check "pointers at the post-PA13z channel, both landing"
+         [{:ok? true :file "futon2/src/futon2/aif/bulletin.clj" :from 212 :to 236 :expect "trace-discharges"}
+          {:ok? true :file "futon2/src/futon2/aif/bulletin.clj" :from 278 :to 287 :expect "untriaged-traces"}]
+         (:pointers c))
+  ;; ALIGN qualifies the credit as AGGREGATE-grain; the qualification travels
+  ;; with the cell so a later reader cannot over-read it as per-record surfacing.
+  (check "the aggregate-grain qualification travels with the credit" true
+         (boolean (re-find #"(?i)aggregate-grain" (str (:qualification c))))))
 
 (println "\n3. live pin -- an :exists cell whose pointers moved and were followed")
 ;; R16 :dispatched was pinned at :755-767/:2762-2775 when this suite was

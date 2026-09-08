@@ -63,6 +63,59 @@
 ;; Searching. rg exit 0 = matched, 1 = no match, 2 = error. Collapsing 1 and 2
 ;; is the bug this function exists to prevent.
 ;; ---------------------------------------------------------------------------
+(defn- all-read-paths
+  "Every path this census reads: the declared search scopes (all versions) plus
+   the file of every adjudication pointer. A pointer file is as much an input as
+   a scope path -- the three spurious stales that prompted this were pointer
+   files, not scope directories."
+  []
+  (distinct
+   ;; :scope also carries :not-searched, which is prose rather than a path list --
+   ;; mapcat over a string yields characters, so take only the vector values.
+   (concat (mapcat val (filter (comp vector? val) (:scope ledger)))
+           (keep :file (mapcat :pointers (:adjudicated ledger))))))
+
+;; ---------------------------------------------------------------------------
+;; TREE CLEANLINESS. Added 2026-09-08 after this harness reported three spurious
+;; stale adjudications: war_machine.clj and full_loop_runner.clj were MID-EDIT in
+;; the working tree by another seat's row, and the census read them anyway.
+;;
+;; The census reads the WORKING TREE, not a committed tree. On a shared live
+;; checkout that makes every result non-reproducible and, worse, indistinguishable
+;; from a real finding -- a half-written file looks exactly like a rotted pointer.
+;; The zaif-build-loop already refuses to run over someone's uncommitted board
+;; edits; the instrument that audits the loop had no such rule, which is the
+;; funnier version of the same omission.
+;;
+;; So: a census over a dirty read-scope REFUSES (exit 5) and names the files.
+;; --allow-dirty runs anyway and stamps :tree-dirty into the output, so a result
+;; taken knowingly over a moving tree still says so in its own artifact rather
+;; than looking like a clean one.
+(def ^:private allow-dirty? (some #{"--allow-dirty"} *command-line-args*))
+
+(defn- dirty-files
+  "Tracked modifications anywhere the census reads. Repo-rooted, so a path under
+   futon2 is checked against futon2's index and futon3c's against futon3c's."
+  []
+  (let [repos (distinct (keep #(first (str/split % #"/")) (all-read-paths)))]
+    (vec (mapcat
+          (fn [repo]
+            (let [dir (io/file code-root repo)]
+              (when (.exists dir)
+                (let [{:keys [out]} (shell/sh "git" "-C" (str dir) "status" "--porcelain")]
+                  (->> (str/split-lines (or out ""))
+                       (remove str/blank?)
+                       (keep (fn [l]
+                               (let [st (subs l 0 (min 2 (count l)))
+                                     f  (str/trim (subs l (min 3 (count l))))]
+                                 (when-not (str/starts-with? st "??")
+                                   (let [rel (str repo "/" f)]
+                                     (when (some #(or (str/starts-with? rel %)
+                                                      (str/starts-with? % rel))
+                                                 (all-read-paths))
+                                       rel)))))))))))
+          repos))))
+
 (defn- rg [pattern paths]
   (let [existing (filterv #(.exists (io/file (abs-path %))) paths)
         missing  (remove #(.exists (io/file (abs-path %))) paths)]
@@ -189,6 +242,19 @@
 ;; ---------------------------------------------------------------------------
 ;; One cell's verdict.
 ;; ---------------------------------------------------------------------------
+(defn- guard-tree! []
+  (let [dirty (dirty-files)]
+    (when (seq dirty)
+      (if allow-dirty?
+        (binding [*out* *err*]
+          (println "process_census: WARNING tree is dirty and --allow-dirty was given;"
+                   "the result is stamped :tree-dirty --" (str/join ", " dirty)))
+        (die 5 "read scope has uncommitted modifications, so a census now would not be"
+             "reproducible and a half-written file is indistinguishable from a rotted"
+             "pointer:" (str/join ", " dirty)
+             "-- commit or stash, or pass --allow-dirty to record a knowingly-dirty run")))
+    dirty))
+
 (defn- verdict [node cell]
   (if-let [adj (adjudication-for node cell)]
     (let [checks (mapv check-pointer (:pointers adj))]
@@ -222,6 +288,9 @@
 ;; ---------------------------------------------------------------------------
 (def nodes (if one-node [one-node] (:censused-nodes ledger)))
 (def control? (nil? one-node))
+;; Refuse BEFORE measuring, not after: a census computed over a moving tree is
+;; not worth reporting even with a warning attached.
+(def tree-dirty (guard-tree!))
 (def results (vec (for [n nodes c (:cells ledger)] (verdict n c))))
 (def stale (filterv #(= :stale-adjudication (:verdict %)) results))
 (def disagreements
@@ -232,12 +301,15 @@
 
 (if edn-out?
   (prn {:generated-by "process_census.bb" :row :PA1z :pattern-version pattern-version
+        :tree-dirty tree-dirty
         :mode (if control? :negative-control :census-slice)
         :nodes nodes :results results
         :stale stale :disagreements disagreements})
   (do
     (println "Box 12 process census --" (if control? "NEGATIVE CONTROL over ALIGN's censused nodes" (str "slice: " (str/join ", " nodes))))
     (println "census of record:" (:census-of-record ledger) (str "(" (:census-of-record-dated ledger) ")"))
+    (when (seq tree-dirty)
+      (println "TREE DIRTY (--allow-dirty):" (str/join ", " tree-dirty)))
     (println "node-link pattern:" (name pattern-version)
              (str "(" (count (:forms pattern-spec)) " form(s), "
                   (count (get-in ledger [:scope (:scope-key pattern-spec)])) " scope paths)"))
