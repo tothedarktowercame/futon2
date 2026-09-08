@@ -164,3 +164,18 @@ needs-joe channel should ask "does an existing recorded principle decide
 this?" before surfacing; only genuine preference/priority/scope-of-authority
 questions are his. Queued alongside the RUN4 readiness-before-surfacing
 defect from Item 8's postscript.
+
+## Item 10 — F10 decision (iii): the rider REQUIRES canonical Q(o|pi) scoring
+
+> "Yes, require canonical."
+
+The demonstration run's performance half is measured on the machine's real
+predictive scorer (:forward-model, forward_model.clj:280-369), not a proxy —
+same substance-over-letter ground as Item 6. FLAG CARRIED WITH THE RULING:
+the canonical scorer path has standing F8 findings stated in Lean and left
+for the I-track (gTermsDisagreeOnDepth: risk and homeostatic pressure at
+depth K while ambiguity and the predictability bonus are frozen at depth 1;
+epistemicTermsAreHorizonBlind: predicted variance is state-blind; four call
+sites declare depths 2/3/3/5). The demonstration inherits these documented
+properties; if an I-track fix later changes the scorer's depth semantics,
+the demonstration is re-run rather than grandfathered.
