@@ -45,7 +45,19 @@
       (let [s (slurp path)
             hdr (str "{:id " (:id r) " :class " (:class r) " :status :blocked")
             _ (when-not (str/includes? s hdr) (throw (ex-info "row header not found" {:id (:id r)})))
-            s2 (str/replace-first s hdr (str "{:id " (:id r) " :class " (:class r) " :status :open :unblocked-by \"zaif-build-loop: depends-on all :done\""))]
+            ;; Only MINT :unblocked-by if the row does not already carry one.
+            ;; This is textual surgery on EDN, so an unconditional insert
+            ;; produces a DUPLICATE KEY on any row that already declares the
+            ;; field -- and EDN refuses a map with duplicate keys, so the whole
+            ;; ledger stops parsing and the loop halts with "ledger invalid
+            ;; after work". That happened on 2026-09-08 to PA5z-PA10z, whose
+            ;; :unblocked-by had been hand-written when the rows were seeded.
+            ;; The provenance is the loop's to write, but the guard belongs
+            ;; here: a tool that corrupts the file it edits when its input is
+            ;; merely unexpected is not safe to run unattended.
+            s2 (str/replace-first s hdr (str "{:id " (:id r) " :class " (:class r) " :status :open"
+                                             (when-not (:unblocked-by r)
+                                               " :unblocked-by \"zaif-build-loop: depends-on all :done\"")))]
         (spit path s2)
         (println "unblocked" (name (:id r))))))
   (do (println "usage: zaif_step.bb next-open|unblock|unreviewed|counts|stall-key") (System/exit 2)))
