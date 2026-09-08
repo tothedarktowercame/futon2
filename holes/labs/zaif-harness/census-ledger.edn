@@ -156,6 +156,11 @@
    :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6789 :to 6789 :expect ":TRACE"}
               {:file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!"}]}
 
+  {:node "TRACE" :cell :surfaced :verdict :exists :tag "[E-T-S]"
+   :reading "The bulletin re-reads persisted records whose route contains :TRACE and shapes them for its existing waits-on-Joe channel, retaining the trace file citation."
+   :pointers [{:file "futon2/src/futon2/aif/bulletin.clj" :from 211 :to 240 :expect "trace-discharges"}
+              {:file "futon2/src/futon2/aif/bulletin.clj" :from 344 :to 347 :expect "trace-discharges"}]}
+
   {:node "R16" :cell :commissioned :verdict :exists :tag "[E-16-C]"
    :reading "The author commission names the selected target, repository/base head, artifact contract, requirements, refusal shape and independent reviewer; that exact prompt is passed to dispatch."
    :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 1350 :to 1406 :expect "author-prompt"}

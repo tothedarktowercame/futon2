@@ -43,6 +43,7 @@
    :runs-repo (str home "/code/futon2")
    :runs-rel "holes/labs/wm-contract/runs"
    :tripwire-root "/home/joe/code/futon2/data/wm-tripwires/trips"
+   :trace-root "/home/joe/code/futon2/data/wm-trace"
    :out-dir (str home "/code/futon2/holes/labs/wm-contract/bulletins")
    :bulletin-rel-dir "holes/labs/wm-contract/bulletins"
    :brief-root brief/default-root})
@@ -207,6 +208,38 @@
            (sort-by :id)
            vec))))
 
+(defn trace-discharges
+  "Persisted TRACE route records shaped for the existing waits-on-Joe section.
+  The record itself is the substrate; `:record` keeps the channel's citation
+  tied to the file from which the event was re-read."
+  [root]
+  (let [dir (when root (io/file root))]
+    (if-not (and dir (.isDirectory dir))
+      []
+      (->> (.listFiles dir)
+           (filter #(and (.isFile %) (str/ends-with? (.getName %) ".edn")))
+           (mapcat (fn [f]
+                     (with-open [r (java.io.PushbackReader. (io/reader f))]
+                       (loop [records []]
+                         (let [record (edn/read {:eof ::eof
+                                                :default (fn [tag value]
+                                                           {:trace/edn-tag tag
+                                                            :trace/value value})}
+                                               r)]
+                           (if (= ::eof record)
+                             records
+                             (recur
+                              (cond-> records
+                                (some #(= :TRACE (:node %)) (:wm/route record))
+                                (conj {:board "TRACE"
+                                       :id (or (:run/id record) (:timestamp record))
+                                       :status :needs-joe
+                                       :class :J
+                                       :statement "TRACE record surfaced for operator review"
+                                       :record (.getPath f)})))))))))
+           (sort-by :id)
+           vec))))
+
 ;; ------------------------------------------------------- registries and runs
 
 (defn ledger-deposits
@@ -309,7 +342,8 @@
                          [])
         deltas (mapv #(board-delta % date) (:boards cfg))
         joe (vec (concat (mapcat waits-on-joe (:boards cfg))
-                         (tripwire-discharges (:tripwire-root cfg))))
+                         (tripwire-discharges (:tripwire-root cfg))
+                         (trace-discharges (:trace-root cfg))))
         deposits (ledger-deposits (:run-era-ledger cfg) date)
         adopted (machine-adopted (:registry cfg) date)
         runs (experiments cfg runs-commits)]

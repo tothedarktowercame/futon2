@@ -70,6 +70,7 @@
    :run-era-ledger (str (.getPath (io/file dir "ledger.edn")))
    :runs-repo dir
    :runs-rel "holes/labs/demo/runs"
+   :trace-root (str dir "/data/wm-trace")
    :out-dir out-dir
    :bulletin-rel-dir "holes/labs/demo/bulletins"
    :brief-root brief-root
@@ -131,6 +132,25 @@
            rows))
     (is (= :needs-joe (:status (first rows)))
         "the discharge is re-read from its append-only record, not emitted")))
+
+(deftest recorded-trace-enters-the-existing-bulletin-channel
+  ;; Live record wm-trace-2026-09-07.edn, run id
+  ;; 36820e88-3d68-499d-b359-2d8dbe9743de pins verbatim its :timestamp and
+  ;; final :wm/route hop below. The fixture is self-contained because campaign
+  ;; data is not present in every worktree.
+  (let [root (temp-dir "bulletin-trace")
+        path (io/file root "wm-trace-2026-09-07.edn")
+        record {:timestamp "2026-09-07T23:12:22.838749091Z"
+                :run/id "36820e88-3d68-499d-b359-2d8dbe9743de"
+                :wm/route [{:node :TRACE
+                            :via "futon2.aif.trace/write-trace!"
+                            :at "2026-09-07T23:12:22.837095336Z"}]}
+        _ (spit path (str (pr-str record) "\n"))]
+    (is (= [{:board "TRACE" :id (:run/id record)
+             :status :needs-joe :class :J
+             :statement "TRACE record surfaced for operator review"
+             :record (.getPath path)}]
+           (bulletin/trace-discharges (.getPath root))))))
 
 (deftest a-day-with-no-new-facts-regenerates-to-the-same-bytes
   (testing "generate! twice: identical file, and the second run does not rewrite"
