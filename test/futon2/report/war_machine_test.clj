@@ -1948,18 +1948,16 @@
   "Outside this repo, so its absence skips rather than fails."
   "/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md")
 
-(deftest mission-c-declared-gauges-carry-the-eoi-non-bindings-test
+(deftest mission-c-declared-gauges-carry-the-eoi-producer-bindings-test
   (let [g (get wm/mission-c-declared-gauges "M-expressions-of-interest")]
     (testing "one entry per criterion, keyed the way the markdown reader numbers
               them, because the mission document names none of its criteria"
       (is (= #{:criterion-1 :criterion-2 :criterion-3
                :criterion-4 :criterion-5 :criterion-6}
              (set (keys g)))))
-    (testing "and every one of them BINDS NOTHING and says what would have to
-              exist -- the U18 :undeclared-observable -> named-producer move for
-              a criterion where not even the observable can be named"
-      (is (every? #(not (contains? % :observable)) (vals g))
-          "no observable is claimed, so none can be read as a binding")
+    (testing "each criterion names its U79 producer while retaining the input inventory"
+      (is (= 6 (count (set (map :observable (vals g))))))
+      (is (every? keyword? (map :observable (vals g))))
       (is (every? #(string? (:would-need (:no-producer %))) (vals g)))
       (is (every? #(string? (:because (:no-producer %))) (vals g)))
       (is (every? #(str/includes? (:because (:no-producer %))
@@ -1981,15 +1979,14 @@
       (is (= 0 (:measurable-count r))
           "the honest number: declaring that nothing reads a criterion is not a
            reading of it")
-      (is (= #{:no-producer} (set (map :reason (:unmeasurable r)))))
+      (is (= #{:undeclared-observable} (set (map :reason (:unmeasurable r)))))
       (is (= :absent (:status r)))
       (is (= :no-measurable-criteria (:reason r)))
       (is (not (contains? r :risk-mis-per-criterion)))
       (testing "and the record shows the seam was consulted rather than silent"
         (is (= 6 (count (:declared-gauges r))))
-        (is (= #{:no-producer} (set (vals (:declared-gauges r))))
-            "a criterion read and not bound is distinguishable on the record
-             from one bound to an observable")))))
+        (is (= 6 (count (set (vals (:declared-gauges r)))))
+            "each criterion is bound to its own producer observable")))))
 
 ;; ---------------------------------------------------------------------------
 ;; U21 (from zaif S4) — selection -> clocking, the same-tick half. The focus is

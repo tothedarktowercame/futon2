@@ -148,22 +148,49 @@
 (deftest reading-supplies-only-what-was-measured
   (let [r (gauges/reading)]
     (is (= gauges/version (:version r)))
-    (is (= 3 (count (:records r))) "one record per declared producer")
+    (is (= 9 (count (:records r))) "one record per declared producer")
     (is (= (set (keys gauges/producers))
            (set (map :observable (:records r)))))
     (is (= {:worklist-acceptance-state 1.0
             :reporting-gate-test-result 0.0
             :registry-gap-list-present 0.0}
            (:observables r))
-        "the three observables the U18 gauges name, as measured today")))
+        "the U18 observables measure; all six U79 branches report typed absence")))
 
 (deftest an-absent-producer-supplies-no-key
   (binding [gauges/*repo-root* (empty-tree)]
     (let [r (gauges/reading)]
-      (is (= 3 (count (:records r))))
+      (is (= 9 (count (:records r))))
       (is (every? #(= :absent (:status %)) (:records r)))
       (is (= {} (:observables r))
           "nothing is supplied, so every criterion stays :undeclared-observable
            exactly as it was before this namespace existed")
       (is (every? :would-need (:records r))
           "each absence names what would have to exist"))))
+
+(deftest all-six-eoi-producer-branches-are-runnable
+  (let [records (mapv gauges/eoi-criterion-reading
+                      (keys gauges/eoi-producer-inventory))]
+    (is (= 6 (count records)))
+    (is (= (set (keys gauges/eoi-producer-inventory))
+           (set (map :observable records))))
+    (is (every? #(= :producer-input-not-declared (:reason %)) records))
+    (is (every? :basis records))
+    (is (every? :would-need records))))
+
+(deftest eoi-producer-measured-false-and-true-branches
+  (let [root (empty-tree)
+        observable :eoi-prior-constrains-drafting
+        paths {:self-note-path "self-note.edn"
+               :drafting-occasion-ledger "drafting.edn"}]
+    (doseq [[_ path] paths]
+      (spit (io/file root path) (pr-str {:criterion-holds? false})))
+    (binding [gauges/*repo-root* root gauges/*eoi-producer-inputs* paths]
+      (let [r (gauges/eoi-criterion-reading observable)]
+        (is (= :measured (:status r)))
+        (is (= 0.0 (:value r)))
+        (is (= 2 (count (:sources r))))))
+    (doseq [[_ path] paths]
+      (spit (io/file root path) (pr-str {:criterion-holds? true})))
+    (binding [gauges/*repo-root* root gauges/*eoi-producer-inputs* paths]
+      (is (= 1.0 (:value (gauges/eoi-criterion-reading observable)))))))

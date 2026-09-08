@@ -39,7 +39,7 @@
             [clojure.java.io :as io])
   (:import [java.security MessageDigest]))
 
-(def version :mission-gauges/v1)
+(def version :mission-gauges/v2)
 
 (def ^:dynamic *repo-root*
   "The futon2 checkout the artifacts are read from. Same convention as
@@ -241,13 +241,107 @@
                                    :gap-lists-found-not-registry-pointed unpointed))})))))
 
 ;; ---------------------------------------------------------------------------
+;; U79 -- M-expressions-of-interest producer inventory.
+
+(def eoi-producer-inventory
+  "The six producer branches required by the mission's six completion
+   criteria.  These are deliberately contracts, not guesses at answers.  Each
+   names the records from which a future boolean can be computed and the
+   mission lines that require them.  A branch with no declared input path
+   returns typed absence; it never turns an unrecorded human judgement into
+   zero."
+  {:eoi-prior-constrains-drafting
+   {:criterion :criterion-1 :basis "futon5a/holes/missions/M-expressions-of-interest.md:174"
+    :requires [:self-note-path :drafting-occasion-ledger]
+    :would-need "a declared self-note path and dated drafting ledger recording reread and constrained booleans"}
+   :eoi-basin-geometry-live
+   {:criterion :criterion-2 :basis "futon5a/holes/missions/M-expressions-of-interest.md:177"
+    :requires [:basin-register-path :basin-liveness-verdicts-path]
+    :would-need "a declared basin register with satisfies/forecloses/costs fields and recorded liveness verdicts"}
+   :eoi-template-artifacts-really
+   {:criterion :criterion-3 :basis "futon5a/holes/missions/M-expressions-of-interest.md:181"
+    :requires [:artifact-register-path :really-verdicts-path]
+    :would-need "a per-artifact template-conformance record and Joe-entered really? verdict"}
+   :eoi-hyperreal-brief-nonforeclosure
+   {:criterion :criterion-4 :basis "futon5a/holes/missions/M-expressions-of-interest.md:183"
+    :requires [:hyperreal-brief-path :nonforeclosure-verdict-path]
+    :would-need "a declared brief path, page-equivalent measurement, and recorded non-foreclosure judgement"}
+   :eoi-diagnoses-speech-acts
+   {:criterion :criterion-5 :basis "futon5a/holes/missions/M-expressions-of-interest.md:185"
+    :requires [:gary-diagnosis-path :bristol-diagnosis-path]
+    :would-need "declared Gary and Bristol diagnosis paths, each with a Template speech-act attribution"}
+   :eoi-generative-new-basin
+   {:criterion :criterion-6 :basis "futon5a/holes/missions/M-expressions-of-interest.md:188"
+    :requires [:basin-register-path :basin-baseline-path]
+    :would-need "a dated basin register and declared baseline from which previously-unnamed is computed"}})
+
+(def ^:dynamic *eoi-producer-inputs*
+  "Declared input paths for the EOI producer branches.  Empty until the
+   mission names authorities; tests bind this map to exercise the measured
+   branch without granting fixture paths production authority."
+  {})
+
+(defn eoi-criterion-reading
+  "Run one EOI producer branch. Input records are EDN maps. A complete set of
+   readable inputs must carry a boolean `:criterion-holds?`; disagreement or a
+   missing verdict is absence rather than a fabricated value."
+  [observable]
+  (let [{:keys [criterion basis requires would-need] :as contract}
+        (get eoi-producer-inventory observable)
+        paths (select-keys *eoi-producer-inputs* requires)]
+    (cond
+      (nil? contract)
+      (absent observable :eoi/unknown :unknown-producer
+              "an observable in eoi-producer-inventory" {})
+
+      (not= (set requires) (set (keys paths)))
+      (absent observable (keyword "eoi" (str (name observable) "-v1"))
+              :producer-input-not-declared would-need
+              {:criterion criterion :basis basis :requires requires
+               :declared-inputs (into (sorted-map) paths)})
+
+      :else
+      (let [reads (mapv (fn [k]
+                          (assoc (slurp-edn (get paths k)) :input k))
+                        requires)
+            failed (first (remove :ok reads))
+            verdicts (mapv #(get-in % [:value :criterion-holds?]) reads)]
+        (cond
+          failed
+          (absent observable (keyword "eoi" (str (name observable) "-v1"))
+                  (:reason failed) would-need
+                  {:criterion criterion :basis basis
+                   :sources (mapv #(select-keys % [:input :path :sha256 :reason]) reads)})
+
+          (not (every? boolean? verdicts))
+          (absent observable (keyword "eoi" (str (name observable) "-v1"))
+                  :input-carries-no-verdict would-need
+                  {:criterion criterion :basis basis
+                   :sources (mapv #(select-keys % [:input :path :sha256]) reads)})
+
+          (not (apply = verdicts))
+          (absent observable (keyword "eoi" (str (name observable) "-v1"))
+                  :input-verdicts-disagree would-need
+                  {:criterion criterion :basis basis :verdicts verdicts
+                   :sources (mapv #(select-keys % [:input :path :sha256]) reads)})
+
+          :else
+          (measured observable (keyword "eoi" (str (name observable) "-v1"))
+                    (if (first verdicts) 1.0 0.0)
+                    {:criterion criterion :basis basis
+                     :sources (mapv #(select-keys % [:input :path :sha256]) reads)}))))))
+
+;; ---------------------------------------------------------------------------
 
 (def producers
   "Observable -> producer fn. The set is closed: an observable a gauge names
    and this map does not carry has no producer, and says so by being absent."
-  {:worklist-acceptance-state worklist-acceptance-state
-   :reporting-gate-test-result reporting-gate-test-result
-   :registry-gap-list-present registry-gap-list-present})
+  (merge {:worklist-acceptance-state worklist-acceptance-state
+          :reporting-gate-test-result reporting-gate-test-result
+          :registry-gap-list-present registry-gap-list-present}
+         (into {} (map (fn [observable]
+                         [observable #(eoi-criterion-reading observable)]))
+               (keys eoi-producer-inventory))))
 
 (defn reading
   "Run every producer. `:observables` carries ONLY the measured values, so an

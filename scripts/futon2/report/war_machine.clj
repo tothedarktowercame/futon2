@@ -2079,11 +2079,9 @@
    gauge-supplied binding can never be mistaken on the record for a declaration
    the mission document made itself.
 
-   U28: a mission's entry may also hold `:no-producer` rows, which bind NOTHING
-   and say why (`mission-c/apply-gauge`). M-expressions-of-interest is six of
-   them and no bindings — see `expressions-of-interest-gauges` above for the
-   finding. The `:binary` sentence above is about the bound rows only; a
-   `:no-producer` row declares no observable, so there is nothing to binarize."
+   U28 recorded six `:no-producer` rows. U79 gives each one a distinct producer
+   observable while retaining U28's input inventory. Until the mission declares
+   those inputs, the producers emit typed absence and no value enters C_mis."
   {"M-zaif-harness-v1"
    (into {} (for [[ingest-id doc-id g] zaif-harness-v1-gauges
                   id [ingest-id doc-id]]
@@ -2091,8 +2089,14 @@
                          :spec {:becomes 1 :observable-kind :binary}
                          :declared-in "scripts/futon2/report/war_machine.clj mission-c-declared-gauges")]))
    "M-expressions-of-interest"
-   (into {} (for [[id g] expressions-of-interest-gauges]
-              [id (assoc g :declared-in "scripts/futon2/report/war_machine.clj mission-c-declared-gauges")]))})
+   (into {} (for [[id g] expressions-of-interest-gauges
+                  :let [observable (some (fn [[observable contract]]
+                                           (when (= id (:criterion contract)) observable))
+                                         mission-gauges/eoi-producer-inventory)]]
+              [id (assoc g
+                         :observable observable
+                         :spec {:becomes 1 :observable-kind :binary}
+                         :declared-in "scripts/futon2/report/war_machine.clj mission-c-declared-gauges")]))})
 
 (defn- mission-action?
   [entry]
