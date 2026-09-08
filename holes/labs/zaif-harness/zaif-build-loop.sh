@@ -20,7 +20,10 @@ LOG="$HERE/runs/build-loop.log"; mkdir -p "$HERE/runs"
 # the healthy instance needs no bell about it.
 exec 9>"$HERE/runs/build-loop.lock"
 if ! flock -n 9; then echo "another zaif-build-loop holds runs/build-loop.lock; exiting"; exit 0; fi
-WORK_SEAT="${WORK_SEAT:-codex}"; REVIEW_SEAT="${REVIEW_SEAT:-claude}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-40}"
+# Review seat flipped claude -> zai 2026-09-08 (Joe: push Codex/zai usage,
+# stop burning Claude; PLAN-4day-leverage-2026-09-08.md). claude stays an
+# explicit override: REVIEW_SEAT=claude ./zaif-build-loop.sh
+WORK_SEAT="${WORK_SEAT:-codex}"; REVIEW_SEAT="${REVIEW_SEAT:-zai}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-40}"
 FUTON3C="$HOME/code/futon3c"
 log() { echo "[$(date -u '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 # Every way out bells claude-2 (lane owner) with the reason and the log tail,
@@ -47,6 +50,7 @@ run_seat() { # $1 seat, $2 prompt file, $3 label
   case "$seat" in
     claude) (cd "$HOME/code" && timeout 7200 claude -p --permission-mode bypassPermissions "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
     codex)  (cd "$HOME/code" && timeout 5400 codex exec --skip-git-repo-check --sandbox danger-full-access "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
+    zai)    (cd "$HOME/code" && timeout 5400 python3 futon3c/scripts/agency_send.py --from zaif-build-loop --to zai-1 --kind whistle < "$prompt" >> "$LOG" 2>&1) ;;
     *) log "unknown seat $seat"; return 2 ;;
   esac
   local rc=$?; log "$label: $seat exit=$rc"; return $rc

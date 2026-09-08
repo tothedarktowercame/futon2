@@ -9,9 +9,12 @@
 (def cmd (first *command-line-args*))
 (case cmd
   "next-open" (println (or (some-> (first (filter loopable? items)) :id name) "NONE"))
+  ;; stall-key hashes the WHOLE row (wm loop e84c114e, 2026-09-08): the
+  ;; select-keys form lost the same race three times across the two loops --
+  ;; a slice recorded into a key the list did not name and three healthy
+  ;; iterations read as a stall. Any row edit is evidence of life.
   "stall-key" (println (or (some-> (first (filter loopable? items))
-                                    ((fn [i] (str (name (:id i)) ":" (name (:status i)) ":"
-                                                  (hash (select-keys i [:progress :evidence]))))))
+                                    ((fn [i] (str (name (:id i)) ":" (name (:status i)) ":" (hash i)))))
                            "NONE"))
   "unreviewed" (println (str/join " " (map (comp name :id) (filter #(= :done-unreviewed (:status %)) items))))
   "counts" (println (frequencies (map :status items)))
