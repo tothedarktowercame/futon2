@@ -97,3 +97,46 @@ recommendation fixes the ORDER; it does not choose the boundary. F10 stays
 requires canonical Q(o|pi) scoring, alongside), and per the Item-3
 meta-pattern the boundary question should arrive back at Joe with the
 evidence that decides it, not as a bare choice.
+
+## Item 6 — F10 decision (i): the seed is computed in the EFE FOLD
+
+> "So this is very simple because I agree with you. The Fe fold is what we
+> really need."
+
+(Evening walkthrough, claude-1 surface.) Decision (i) of C580 §5 is ruled:
+`:ruled-outcome-c` enters the EFE fold as a live preference layer that shapes
+policy selection — the substance ("the machine acts on C"), not the
+terminal-close letter. Consequences: the `:folded? false` declaration at
+src/futon2/aif/ruled_outcome_c.clj:56-62 is to be flipped BY THE IMPLEMENTING
+SLICE with this ruling as its citation, and the fold grain is that slice's
+first design question, returned with evidence if it is itself ruling-shaped.
+Decision (iii) — whether the rider requires canonical Q(o|pi) scoring — was
+NOT covered by this exchange (the recommendation Joe accepted was about (i)
+only) and remains open; F10's blocker narrows to (iii) plus the fold
+implementation.
+
+## Item 7 — F11: extend the Lean find interface
+
+> "And we want the signature extended."
+
+The Holes.lean Tension/Repository interface is to grow the matching and
+receipt operations the executable warrant requires (find_organise.clj:227-253:
+caller-supplied `fires?` predicate; receipts that cannot drop :route or
+:warrant). Lean edits are Joe's by name, so the extension arrives as a DRAFT
+for Joe's review: C590-F11-find-signature-draft.md. F11 unblocks into the
+draft-review slice.
+
+## Item 8 — F12: the three futon3 inputs are committed as-is
+
+> "And we should commit the files as is."
+
+Committed unmodified as futon3 2695419 (two untracked flexiargs plus the
+modified patterns-index.tsv). The cascade constructor's live-corpus read now
+has a committed basis; F12 unblocks into the naturalistic-exemplar slice
+against that commit.
+
+(Also surfaced during the same walkthrough, not a ruling: RUN4 appeared on the
+bulletin decision sheet despite its own surface-only-when-READY contract —
+run4_readiness.bb said BLOCKED-ON [regenerates lean-probe closability-audit]
+at walkthrough time. The bulletin's sheet should read readiness before listing
+an :owner :joe row; queued as agent work.)
