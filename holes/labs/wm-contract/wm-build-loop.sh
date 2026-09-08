@@ -77,7 +77,7 @@ publish() {
     grep -E 'negative_controls|figure-4a-generator|gate' /tmp/wm-build-p4ng.log | tee -a "$LOG"
     if [ $rc -eq 0 ]; then
       (cd "$HOME/code/p4ng" && git add -A aif-control-map-live.svg aif-control-map-live.pdf empirics-futon/aif-conformance.edn aif-equation-dag.svg aif-equation-dag.pdf sec-*-generated.tex war-room-tetrahedron.svg war-room-tetrahedron.pdf defect-repair-tally.svg defect-repair-tally.pdf 2>/dev/null; git diff --cached --quiet || git commit -q -m "futon-2026: regenerate (wm-build-loop, ledger clear)" ) && log "publish: committed"
-      (cd "$HOME/code/futon2" && git add holes/labs/wm-contract/workflow-report.edn 2>/dev/null; git diff --cached --quiet || git commit -q -m "wm-contract: workflow-report snapshot (wm-build-loop)")
+      (cd "$HOME/code/futon2" && git add holes/labs/wm-contract/workflow-report.edn holes/labs/wm-contract/variable-situation-accounting.edn holes/labs/wm-contract/PROPOSED-ROWS.md 2>/dev/null; git diff --cached --quiet || git commit -q -m "wm-contract: publish-generated snapshots (wm-build-loop)")
     else log "publish: build failed rc=$rc (see /tmp/wm-build-p4ng.log)"; fi
   else log "publish: held -- a registry row awaits review"; fi
 }
