@@ -1,0 +1,16 @@
+{:schema :wm/u71-re-attestation-gate-v1
+ :item :U71
+ :ordinary-path {:entry "holes/labs/wm-contract/worklist_check.bb:231"
+                 :checker "holes/labs/wm-contract/positive_receipt_reattestation_check.bb:43"}
+ :live-census {:receipt-files 33
+               :known-stale-declaration-pins 33
+               :unexpected-drift 0
+               :known-set "holes/labs/wm-contract/positive-receipt-known-stale.edn:1"}
+ :commissioned-control
+ {:script "holes/labs/wm-contract/positive_receipt_reattestation_controls.sh:1"
+  :fresh-control :passed
+  :plant "theorem declaredVocabulary declaration text changed without changing channel-positive-receipt.edn"
+  :plant-pointer "holes/labs/wm-contract/positive_receipt_reattestation_controls.sh:13"
+  :observed :rejected
+  :diagnostics ["UNATTESTED-DRIFT" "moved without a re-emitted receipt"]}
+ :publish-path "p4ng/empirics-futon/negative_controls.sh:18"}

@@ -228,6 +228,18 @@
         (doseq [l (remove str/blank? (str/split-lines (str err)))] (binding [*out* *err*] (println l)))
         (die "the contract-fidelity gate refused this ledger (:F5)")))))
 
+;; U71: receipt hashes make declaration drift visible on the same ordinary
+;; path every build seat runs. U72 owns the enumerated backlog; any other hash
+;; mismatch is a new declaration edit without re-attestation and is fatal.
+(let [checker (str script-dir "/positive_receipt_reattestation_check.bb")]
+  (when (.exists (io/file checker))
+    (let [{:keys [exit out err]} (shell/sh "bb" checker :dir script-dir)]
+      (doseq [l (remove str/blank? (str/split-lines (str out)))] (println l))
+      (when-not (zero? exit)
+        (doseq [l (remove str/blank? (str/split-lines (str err)))]
+          (binding [*out* *err*] (println l)))
+        (die "the positive-receipt re-attestation gate refused this tree (:U71)")))))
+
 (def by-status (frequencies (map :status (:items w))))
 (println (format "worklist_check: %d items OK; %s; %d signed registry entries verified unchanged since signature, %d superseded and skipped, %d declared :covers-key :none, %d signed registry rows carry no :covers-key and are NOT checked"
                  (count (:items w)) (pr-str by-status)
