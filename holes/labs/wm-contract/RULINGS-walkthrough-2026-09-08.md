@@ -316,3 +316,25 @@ flagged not decided: the live Vertex type (Holes.lean) is
 people/money/organisations/evidence, while Joe cites the tetrahedral model
 as nouns/verbs/organization/evidence — which is canonical, and is the
 divergence itself a row?
+
+## Item 16 — the NEW tetrahedral vertex model is canonical
+
+> "It's the new tetrahedral one that I want to use. The other one is a
+> specialization of that, as I think you can see. The generalization to the
+> new model is something I came up with that we were using in this paper, and
+> it's based on an earlier model, which was itself an adaptation of something
+> from Aaron Krowne, who founded PlanetMath, and it's written up in his
+> master's thesis, I believe. But for our purposes, the new version is
+> probably going to be more useful."
+
+(Transcript said "Crown"; recorded as Aaron Krowne, PlanetMath founder.)
+Canonical: NOUNS / VERBS / ORGANIZATION / EVIDENCE. The
+people-money-organisations(-evidence) reading is a SPECIALIZATION of it,
+via Joe's earlier model adapting Krowne's. Consequence: the live Lean
+Vertex inductive (Holes.lean: people | money | organisations | evidence)
+implements the specialization, not the canon — a divergence with scope
+(the C signature's v != evidence premise, Outcome = Sigma Obs, seeded-C
+vertex attachments, the paper's tetrahedron figure). The v != evidence
+exclusion survives unchanged under either model since both carry the
+evidence vertex. Reconciliation is a minted row, not a casual edit: the
+Vertex change is Joe-gated Lean surgery rippling through the contract.
