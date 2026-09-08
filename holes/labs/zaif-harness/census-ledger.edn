@@ -109,7 +109,17 @@
  ;; comes from the reading, and a stale report is checked by hand before it is
  ;; believed.
  :adjudicated
- [{:node "R9" :cell :checked :verdict :named-only :tag "[N9]"
+ [{:node "R10" :cell :commissioned :verdict :exists :tag "[E-10-C]"
+   :reading "run-scheduled-dispatch! refuses a scheduled run without a named commission, attaches :node :R10 before dispatch, and records that linked commission with the receipt."
+   :pointers [{:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 92 :to 105 :expect "linked-commission"}
+              {:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 121 :to 125 :expect ":commission"}]}
+
+  {:node "R10" :cell :dispatched :verdict :exists :tag "[E-10-D]"
+   :reading "The scheduled boundary refuses an absent or R10-unlinked dispatch receipt and persists the validated receipt joined to its commission identity."
+   :pointers [{:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 104 :to 113 :expect ":r10/unlinked-dispatch-receipt"}
+              {:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 121 :to 128 :expect ":dispatch/receipt"}]}
+
+  {:node "R9" :cell :checked :verdict :named-only :tag "[N9]"
    :reading "control-stages names R9 'No self-certification'; P-assured-process calls for author-never-closes-own-handoff as architecture. No node-linked refusing check was found."
    :pointers [{:file "p4ng/empirics-futon/control-stages.edn" :from 43 :to 43 :expect "No self- certification"}
               {:file "futon2/holes/problems/P-assured-process.md" :from 55 :to 63 :expect "commissioned"}]}
