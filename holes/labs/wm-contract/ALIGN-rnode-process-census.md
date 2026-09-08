@@ -77,12 +77,43 @@ untracked stores, other Futon repositories, Emacs/voxterm presentation code,
 or APM-specific namespaces outside the requested handoff machinery. This is a
 static source census, not a live invocation trace.
 
+**R10 adjudication (2026-09-08, claude-1, from PA6z landing and the census
+exit-4 claude-2 reported — the node-link search establishes NODE linkage,
+not CELL linkage, and PA6z's three real `:node :R10` sites made that
+coarseness visible for the first time):**
+
+- **[E-10-C] commissioned exists:** `run-scheduled-dispatch!`
+  (`futon3c:src/futon3c/social/coordination_ledger.clj:101`) refuses
+  `:r10/invalid-commission` absent a commission identity. NOTE FOR PA15z:
+  this boundary carries NO `:process/stage` tag, so a stage-tag-only
+  crediting rule would uncredit a genuinely established cell — mechanism
+  (b) corroborates, never decides alone.
+- **[E-10-D] dispatched exists:** the evidence body writes `:node :R10
+  :process/stage :dispatched` (`coordination_ledger.clj:121-122`), and the
+  receipt must echo `:node` and `:commission/id` or
+  `:r10/unlinked-dispatch-receipt` refuses (`:111`). Live pin: dispatch
+  record `invoke-1788708049924-13300-38749afe`, commission
+  `PA11z-library-annotator-exemplar`.
+- **[A-10] parked, returned, checked, recorded, surfaced remain absent:**
+  commissioning and dispatching a job parks, returns, checks, records and
+  surfaces nothing; the only `:process/stage` in the declared scope is
+  `:dispatched` (exactly one occurrence), and the three `:node :R10` hits
+  (`coordination_ledger.clj:89,104,121`) serve the two credited cells
+  only. Verified against the source this adjudication, not inherited.
+- **:serves-cells declaration, for PA15z mechanism (a):**
+  `{:sites ["futon3c:src/futon3c/social/coordination_ledger.clj:89"
+            "futon3c:src/futon3c/social/coordination_ledger.clj:104"
+            "futon3c:src/futon3c/social/coordination_ledger.clj:121"]
+    :serves-cells [:commissioned :dispatched]}` — a node-link hit at these
+  sites spills into no other cell. The census may keep exiting 4 until
+  PA15z consumes this; that exit is the instrument telling the truth.
+
 ## 2. Matrix
 
 | control-stages node | commissioned | dispatched | parked | returned | checked | recorded | surfaced |
 |---|---|---|---|---|---|---|---|
 | R9 — No self-certification | absent [A] | absent [A] | absent [A] | absent [A] | named-only [N9] | absent [A] | absent [A] |
-| R10 — Scheduled entrypoint | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] |
+| R10 — Scheduled entrypoint | exists [E-10-C] | exists [E-10-D] | absent [A-10] | absent [A-10] | absent [A-10] | absent [A-10] | absent [A-10] |
 | R12 — Two-layer calibration | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] |
 | R20 — Interoceptive tripwires | absent [A] | absent [A] | absent [A] | absent [A] | named-only [N20] | absent [A] | absent [A] |
 | TRACE — WM trace store | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | exists [E-T] | absent [A] |
@@ -173,8 +204,9 @@ consumes it. The direct missing cells are:
 
 - **R9 — checked:** its “No self-certification” claim needs a recorded second
   actor/checker that refuses self-closure. Today it is named-only.
-- **R10 — commissioned and dispatched:** a scheduled entrypoint needs a
-  commission identity and dispatch receipt tied to R10; both are absent.
+- **R10 — commissioned and dispatched:** ESTABLISHED 2026-09-08 (PA6z; see
+  [E-10-C]/[E-10-D] adjudication above). The node's remaining missing cells
+  are the five ruled absent under [A-10].
 - **R12 — returned and checked:** calibration work needs its returned artifact
   tied to the commission and checked before its result is admitted; both are
   absent.
