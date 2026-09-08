@@ -54,3 +54,6 @@ Trail status: the searches above are the complete commands run; no truncation
 (`grep -rn` over library/ for the two absent ids returned the three hits and
 two misses shown in the first-pass receipt; this pass re-ran the THEN grep and
 the git log only, both complete).
+
+Reviewer correction: the complete `rg -c '\(deftest' test/futon3c/transport/irc_test.clj`
+count at the pinned futon3c tree is 34, correcting the transcript's prior 35.
