@@ -7,7 +7,7 @@
   :glossary-sha256
   "d7ec5b68d1049a86d7a6c3c71eb61f50eb0e351a1d2d212affa6e5636032260f",
   :witness-registry-sha256
-  "bc0b388e4a587f1067bc6f3dba40057f6106675804fae0f83b7dce7674ab9550"},
+  "edfd45881b6a33c7a4af9bebc1d90728d021c47fa578349f769bfd875fe200cb"},
  :axes
  {:content-status
   [:named-only
@@ -54,6 +54,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §2.1d"}
   {:rung :type-transcribed,
@@ -76,6 +77,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e"}
   {:rung :type-transcribed,
@@ -99,6 +101,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:78 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -122,6 +125,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:78 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -145,6 +149,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :policy,
    :owner "sec-glossary.tex:39 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -167,6 +172,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:54 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -189,6 +195,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:70 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -213,6 +220,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "sec-glossary.tex:82 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -237,6 +245,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "sec-glossary.tex:82 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -259,6 +268,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e"}
   {:rung :type-transcribed,
@@ -281,6 +291,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3d"}
   {:rung :type-transcribed,
@@ -303,6 +314,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3"}
   {:rung :type-transcribed,
@@ -325,6 +337,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by [:U87],
    :area :demo,
    :owner "P-validated-R5 §2a"}
   {:rung :type-transcribed,
@@ -347,6 +360,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §2a′"}
   {:rung :type-transcribed,
@@ -369,6 +383,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §2a′"}
   {:rung :type-transcribed,
@@ -391,6 +406,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e O3"}
   {:rung :type-transcribed,
@@ -413,6 +429,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 S1"}
   {:rung :type-transcribed,
@@ -435,6 +452,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 2"}
   {:rung :type-transcribed,
@@ -457,6 +475,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 1–2"}
   {:rung :type-transcribed,
@@ -479,6 +498,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 3"}
   {:rung :type-transcribed,
@@ -501,6 +521,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 3"}
   {:rung :type-transcribed,
@@ -523,6 +544,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R8 §solved 1 (iii) evidence"}
   {:rung :type-transcribed,
@@ -545,6 +567,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R8 §solved 1 (iii) evidence"}
   {:rung :type-transcribed,
@@ -567,6 +590,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R8 §solved 1 (iii) evidence"}
   {:rung :type-transcribed,
@@ -589,6 +613,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 2 (declaration source)"}
   {:rung :type-transcribed,
@@ -611,6 +636,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 2 (per-row declarations)"}
   {:rung :type-transcribed,
@@ -634,6 +660,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner
    "record: futon2:holes/problems/BUILD-packets/WM-RUN1.md · Joe 2026-08-31 · runs-once receipt"}
@@ -658,6 +685,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner
    "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · route tracer"}
@@ -681,6 +709,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :type-transcribed,
@@ -703,6 +732,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §tetrahedron"}
   {:rung :type-transcribed,
@@ -725,6 +755,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "R19-preference-stack.edn @ dc1dac8"}
   {:rung :type-transcribed,
@@ -747,6 +778,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "R19-preference-stack.edn @ dc1dac8"}
   {:rung :type-transcribed,
@@ -769,6 +801,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §gate"}
   {:rung :type-transcribed,
@@ -791,6 +824,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :formula-transcribed,
@@ -812,10 +846,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:190",
+     :licence "futon2/checks/witness-registry.edn:217",
      :evidence :passing-witness-check,
      :why "witness check checks/fold_c_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :type-transcribed,
@@ -838,6 +873,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §tetrahedron"}
   {:rung :type-transcribed,
@@ -860,6 +896,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :type-transcribed,
@@ -882,6 +919,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :type-transcribed,
@@ -904,6 +942,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :type-transcribed,
@@ -926,6 +965,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :type-transcribed,
@@ -948,6 +988,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :type-transcribed,
@@ -970,6 +1011,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :preferences,
    :owner "P-R19-preferences-open §principle"}
   {:rung :type-transcribed,
@@ -992,6 +1034,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "delivery-lifecycle §0.6"}
   {:rung :type-transcribed,
@@ -1014,6 +1057,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "delivery-lifecycle §0.10"}
   {:rung :type-transcribed,
@@ -1036,6 +1080,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "delivery-lifecycle §0.10"}
   {:rung :type-transcribed,
@@ -1058,6 +1103,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R2 §solved 1"}
   {:rung :type-transcribed,
@@ -1080,6 +1126,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R2 §solved 1"}
   {:rung :type-transcribed,
@@ -1102,6 +1149,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R8 §solved 1"}
   {:rung :type-transcribed,
@@ -1124,6 +1172,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R8 §solved 1"}
   {:rung :type-transcribed,
@@ -1146,6 +1195,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :policy,
    :owner "sec-glossary.tex:52 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1168,6 +1218,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:31 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1190,6 +1241,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:9,15,17,19,31 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1212,11 +1264,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:700",
+     :licence "futon2/checks/witness-registry.edn:727",
      :evidence :passing-witness-check,
      :why
      "witness check checks/model_reduction_free_energy_change_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :learning,
    :owner "sec-glossary.tex:62 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1238,11 +1291,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:295",
+     :licence "futon2/checks/witness-registry.edn:322",
      :evidence :passing-witness-check,
      :why
      "witness check checks/observation_vector_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner
    "sec-glossary.tex paragraph:Observation vector o · P-glossary-mathematics"}
@@ -1267,11 +1321,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:430",
+     :licence "futon2/checks/witness-registry.edn:457",
      :evidence :passing-witness-check,
      :why
      "witness check checks/predictive_outcome_kernel_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:23 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1293,11 +1348,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:354",
+     :licence "futon2/checks/witness-registry.edn:381",
      :evidence :passing-witness-check,
      :why
      "witness check checks/parameter_prior_kernel_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1319,11 +1375,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:324",
+     :licence "futon2/checks/witness-registry.edn:351",
      :evidence :passing-witness-check,
      :why
      "witness check checks/parameter_posterior_kernel_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1345,11 +1402,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:508",
+     :licence "futon2/checks/witness-registry.edn:535",
      :evidence :passing-witness-check,
      :why
      "witness check checks/transition_kernel_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:7 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1371,11 +1429,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:478",
+     :licence "futon2/checks/witness-registry.edn:505",
      :evidence :passing-witness-check,
      :why
      "witness check checks/preference_distribution_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :preferences,
    :owner "sec-glossary.tex:25 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1398,6 +1457,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:21,29 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1420,6 +1480,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1442,6 +1503,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1464,6 +1526,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1486,6 +1549,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1508,6 +1572,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:7 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1530,6 +1595,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e O1–O4"}
   {:rung :formula-transcribed,
@@ -1552,11 +1618,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:683",
+     :licence "futon2/checks/witness-registry.edn:710",
      :evidence :passing-witness-check,
      :why
      "witness check checks/log_multivariate_beta_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :learning,
    :owner "sec-glossary.tex:62 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1578,11 +1645,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:627",
+     :licence "futon2/checks/witness-registry.edn:654",
      :evidence :passing-witness-check,
      :why
      "witness check checks/expected_free_energy_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:21,27,29 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1604,10 +1672,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:564",
+     :licence "futon2/checks/witness-registry.edn:591",
      :evidence :passing-witness-check,
      :why "witness check checks/ambiguity_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:21,29 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1630,10 +1699,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:251",
+     :licence "futon2/checks/witness-registry.edn:278",
      :evidence :passing-witness-check,
      :why "witness check checks/have_want_arrow_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:78 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1655,10 +1725,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:167",
+     :licence "futon2/checks/witness-registry.edn:194",
      :evidence :passing-witness-check,
      :why "witness check checks/fold_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:68 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1680,11 +1751,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:216",
+     :licence "futon2/checks/witness-registry.edn:243",
      :evidence :passing-witness-check,
      :why
      "witness check checks/fold_turn_quarantine_check.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:68 · P-glossary-mathematics"}
   {:rung :type-transcribed,
@@ -1707,6 +1779,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:68 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1732,6 +1805,7 @@
      :evidence :passing-witness-check,
      :why "witness check checks/belief_state_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:9 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1753,11 +1827,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:536",
+     :licence "futon2/checks/witness-registry.edn:563",
      :evidence :passing-witness-check,
      :why
      "witness check checks/variational_free_energy_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:19 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1779,10 +1854,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:409",
+     :licence "futon2/checks/witness-registry.edn:436",
      :evidence :passing-witness-check,
      :why "witness check checks/precision_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:17 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1805,10 +1881,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:785",
+     :licence "futon2/checks/witness-registry.edn:812",
      :evidence :passing-witness-check,
      :why "witness check checks/prediction_error_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:15 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1831,10 +1908,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:902",
+     :licence "futon2/checks/witness-registry.edn:929",
      :evidence :passing-witness-check,
      :why "witness check checks/softmax_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:35 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1856,11 +1934,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:580",
+     :licence "futon2/checks/witness-registry.edn:607",
      :evidence :passing-witness-check,
      :why
      "witness check checks/bayes_factor_threshold_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :learning,
    :owner "sec-glossary.tex:64 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1882,11 +1961,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:603",
+     :licence "futon2/checks/witness-registry.edn:630",
      :evidence :passing-witness-check,
      :why
      "witness check checks/bayesian_model_reduction_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :learning,
    :owner "sec-glossary.tex:58 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1914,6 +1994,7 @@
      :why
      "witness check checks/dirichlet_concentrations_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :learning,
    :owner "sec-glossary.tex:60 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1939,6 +2020,7 @@
      :evidence :passing-witness-check,
      :why "witness check checks/channel_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R2 §solved 1 (Channel)"}
   {:rung :formula-transcribed,
@@ -1960,11 +2042,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:275",
+     :licence "futon2/checks/witness-registry.edn:302",
      :evidence :passing-witness-check,
      :why
      "witness check checks/observation_kernel_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:31 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -1986,11 +2069,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:460",
+     :licence "futon2/checks/witness-registry.edn:487",
      :evidence :passing-witness-check,
      :why
      "witness check checks/predictive_outcome_risk_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:21,27 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2012,11 +2096,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:384",
+     :licence "futon2/checks/witness-registry.edn:411",
      :evidence :passing-witness-check,
      :why
      "witness check checks/policy_prior_kernel_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :policy,
    :owner "sec-glossary.tex:41,7 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2044,6 +2129,7 @@
      :why
      "witness check checks/machine_vocabulary_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :policy,
    :owner "sec-glossary.tex:39 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2070,6 +2156,7 @@
      :why
      "witness check checks/machine_vocabulary_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:54 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2096,6 +2183,7 @@
      :why
      "witness check checks/machine_vocabulary_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "sec-glossary.tex:70 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2124,6 +2212,7 @@
      :why
      "witness check checks/machine_vocabulary_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :records,
    :owner "sec-glossary.tex:82 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2145,11 +2234,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:644",
+     :licence "futon2/checks/witness-registry.edn:671",
      :evidence :passing-witness-check,
      :why
      "witness check checks/expected_information_gain_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2171,10 +2261,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:229",
+     :licence "futon2/checks/witness-registry.edn:256",
      :evidence :passing-witness-check,
      :why "witness check checks/generative_model_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex:7 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2196,11 +2287,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:727",
+     :licence "futon2/checks/witness-registry.edn:754",
      :evidence :passing-witness-check,
      :why
      "witness check checks/model_uncertainty_eig_witness.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :scores,
    :owner "sec-glossary.tex:33 · P-glossary-mathematics"}
   {:rung :formula-transcribed,
@@ -2222,10 +2314,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:767",
+     :licence "futon2/checks/witness-registry.edn:794",
      :evidence :passing-witness-check,
      :why "witness check checks/cascade_diff_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e O1"}
   {:rung :formula-transcribed,
@@ -2247,10 +2340,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:767",
+     :licence "futon2/checks/witness-registry.edn:794",
      :evidence :passing-witness-check,
      :why "witness check checks/cascade_diff_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e O2"}
   {:rung :formula-transcribed,
@@ -2272,10 +2366,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:767",
+     :licence "futon2/checks/witness-registry.edn:794",
      :evidence :passing-witness-check,
      :why "witness check checks/cascade_diff_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e O3"}
   {:rung :formula-transcribed,
@@ -2297,10 +2392,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:767",
+     :licence "futon2/checks/witness-registry.edn:794",
      :evidence :passing-witness-check,
      :why "witness check checks/cascade_diff_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e O4 and S-G4"}
   {:rung :type-transcribed,
@@ -2323,6 +2419,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 S1"}
   {:rung :named,
@@ -2343,6 +2440,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
+   :carried-by [:F10 :U87 :RUN4],
    :area :preferences,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §2a"}
@@ -2365,11 +2463,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:753",
+     :licence "futon2/checks/witness-registry.edn:780",
      :evidence :passing-witness-check,
      :why
      "witness check checks/ablation_exact_dyadic_witness.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §2a′"}
   {:rung :named,
@@ -2390,6 +2489,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
+   :carried-by [:F11],
    :area :demo,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §3e find"}
@@ -2412,11 +2512,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:662",
+     :licence "futon2/checks/witness-registry.edn:689",
      :evidence :passing-witness-check,
      :why
      "witness check checks/find_snatch.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e F1"}
   {:rung :formula-transcribed,
@@ -2438,11 +2539,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:662",
+     :licence "futon2/checks/witness-registry.edn:689",
      :evidence :passing-witness-check,
      :why
      "witness check checks/find_snatch.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e F2"}
   {:rung :formula-transcribed,
@@ -2464,11 +2566,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:662",
+     :licence "futon2/checks/witness-registry.edn:689",
      :evidence :passing-witness-check,
      :why
      "witness check checks/find_snatch.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e F3"}
   {:rung :formula-transcribed,
@@ -2490,11 +2593,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:662",
+     :licence "futon2/checks/witness-registry.edn:689",
      :evidence :passing-witness-check,
      :why
      "witness check checks/find_snatch.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §3e F4"}
   {:rung :named,
@@ -2515,6 +2619,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
+   :carried-by [:F12],
    :area :demo,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §3e organise"}
@@ -2537,11 +2642,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:864",
+     :licence "futon2/checks/witness-registry.edn:891",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_proof_receipt_check.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 3"}
   {:rung :formula-transcribed,
@@ -2563,10 +2669,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:963",
+     :licence "futon2/checks/witness-registry.edn:990",
      :evidence :passing-witness-check,
      :why "witness check checks/r9_independence.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 2"}
   {:rung :formula-transcribed,
@@ -2588,10 +2695,11 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:963",
+     :licence "futon2/checks/witness-registry.edn:990",
      :evidence :passing-witness-check,
      :why "witness check checks/r9_independence.clj passed"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 2"}
   {:rung :formula-transcribed,
@@ -2613,11 +2721,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:885",
+     :licence "futon2/checks/witness-registry.edn:912",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 3"}
   {:rung :formula-transcribed,
@@ -2639,11 +2748,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:885",
+     :licence "futon2/checks/witness-registry.edn:912",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 2"}
   {:rung :formula-transcribed,
@@ -2665,11 +2775,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:885",
+     :licence "futon2/checks/witness-registry.edn:912",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R9 §solved 2 (per-row declarations)"}
   {:rung :formula-transcribed,
@@ -2691,11 +2802,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:827",
+     :licence "futon2/checks/witness-registry.edn:854",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r2_pinned_snapshot_witness.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R2 §solved 1"}
   {:rung :formula-transcribed,
@@ -2717,11 +2829,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:827",
+     :licence "futon2/checks/witness-registry.edn:854",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r2_pinned_snapshot_witness.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R2 §solved 1"}
   {:rung :formula-transcribed,
@@ -2743,11 +2856,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:846",
+     :licence "futon2/checks/witness-registry.edn:873",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R8 §solved 1"}
   {:rung :formula-transcribed,
@@ -2769,11 +2883,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:846",
+     :licence "futon2/checks/witness-registry.edn:873",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R8 §solved 1"}
   {:rung :formula-transcribed,
@@ -2795,11 +2910,12 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:846",
+     :licence "futon2/checks/witness-registry.edn:873",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
    :content-status :proven-against-pinned-source,
+   :carried-by :unowned,
    :area :records,
    :owner "P-R8 §solved 1 (iii)"}
   {:rung :named,
@@ -2820,6 +2936,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
+   :carried-by [:U80],
    :area :preferences,
    :closability :run-gated,
    :owner "P-R19-preferences-open §gate",
@@ -2844,6 +2961,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-and-held-open,
    :content-status :open-hole,
+   :carried-by :unowned,
    :area :run,
    :closability :run-gated,
    :owner
@@ -2869,6 +2987,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-and-held-open,
    :content-status :open-hole,
+   :carried-by [:RUN4 :U80],
    :area :run,
    :closability :run-gated,
    :owner
@@ -2895,6 +3014,7 @@
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
+   :carried-by :unowned,
    :area :run,
    :owner
    "wm-organization · TN-edge-review worklist H1 (refuted), H1b"}
@@ -2916,6 +3036,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
+   :carried-by [:U80],
    :area :run,
    :closability :run-gated,
    :owner "wm-organization · TN-edge-review worklist H1b",
@@ -2939,6 +3060,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
+   :carried-by [:U80],
    :area :learning,
    :closability :pre-run-closable,
    :owner "wm-organization · TN-edge-review worklist H2"}
@@ -2960,6 +3082,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
+   :carried-by [:U80],
    :area :policy,
    :closability :run-gated,
    :owner
@@ -2984,6 +3107,7 @@
      :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-under-flag,
    :content-status :open-hole,
+   :carried-by [:U80],
    :area :policy,
    :closability :run-gated,
    :owner
@@ -3013,6 +3137,7 @@
      :evidence :glossary-paragraph,
      :why "the glossary paragraph"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex paragraph:Observation vector o"}
   {:rung :named,
@@ -3035,6 +3160,7 @@
      :evidence :glossary-paragraph,
      :why "the glossary paragraph"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :belief,
    :owner "sec-glossary.tex paragraph:Embedding space"}
   {:rung :named,
@@ -3054,6 +3180,7 @@
      :evidence :glossary-paragraph,
      :why "the glossary paragraph"}],
    :content-status :framing,
+   :carried-by :unowned,
    :area :framing,
    :owner "sec-glossary.tex paragraph:Active Inference Framework"}
   {:rung :named,
@@ -3076,6 +3203,7 @@
      :evidence :glossary-paragraph,
      :why "the glossary paragraph"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :records,
    :owner "sec-glossary.tex paragraph:EDN"}
   {:rung :named,
@@ -3098,6 +3226,7 @@
      :evidence :glossary-paragraph,
      :why "the glossary paragraph"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :records,
    :owner "sec-glossary.tex paragraph:Substrate and Drawbridge"}
   {:rung :named,
@@ -3137,6 +3266,7 @@
    :caveat-note
    "ADDITIVE (worklist :U20, 2026-09-03): the row stays closed on the witnesses above; this field records a live counter-instance and its repair, both dated 2026-09-02. THE COUNTER-INSTANCE: the APM promotion path carries a receipt field named :receipt/independent-review? that asserted the property instead of computing it. Five guide-path writers set it to the literal true (live_learning_phases.clj:618, :635, :1252, :1342 and learning_loop_dry_run.clj:43), and the gate that consults it -- guide-snapshot-evidence-valid? at frame_cycle_handlers.clj:20-25, branched at :193 -- asks only that it be true, so those receipts satisfied it vacuously. Three countdown writers do compute it, as a depositor-versus-reviewer seat-string comparison (countdown_control.clj:1101-1104, called at :1168, :1241, :1320), and two refusals can actually fire on the result (:zai-scribe-reviewer-is-depositor at :1250-1251, :guide-promotion-reviewer-is-depositor at :1326-1327): weak evidence, since distinct seat strings are not independence and no adjudicator rerun is witnessed, but not vacuous. The reviewer's first reading -- hardcoded true at every site -- was overclaimed from a truncated grep and is corrected inside U12-r9-finding.md; the two-population account is the corrected census, and it is that corrected version this caveat carries. THE REPAIR (U14 (a)-(d)): (a) a typed checked-handoff verdict event whose validator computes the grade and returns :r9/worker-authored-verdict-refused when the author seat equals the worker seat, and :r9/verdict-event-malformed when a seat is missing or blank (checked_handoff.clj:37-84); (b) the compared seats persisted onto the receipt, so a later grade re-derives from the strings the comparison consumed (countdown_control.clj:1101-1104); (c) :receipt/independence :asserted-unverified written alongside the legacy boolean at the five constant sites, with a closed grade vocabulary and a typed refusal for anything outside it (frame_cycle_handlers.clj:13-18, :197-200); (d) grade-receipt, which lets persisted seats override an asserted field and floors every pre-migration receipt at :ungradeable-legacy regardless of the boolean's value (checked_handoff.clj:85-122). WHAT THE REPAIR DOES NOT YET DO: no production code calls the validator -- searching futon3c src/ for checked-handoff returns only the namespace itself -- so :adjudicator-rerun-witnessed is reachable from tests only and no live verdict has passed through the author-equals-worker refusal; the dated flip of the five constant booleans is held for Joe. This caveat asserts no new witness for the row and changes no count.",
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :assurance,
    :owner "sec-glossary.tex paragraph:No self-certification"}
   {:rung :named,
@@ -3163,6 +3293,7 @@
      :why "held open by a named record"}],
    :readiness :not-ready,
    :content-status :open-hole,
+   :carried-by :unowned,
    :area :policy,
    :closability :run-gated,
    :owner "futon2/holes/missions/M-wm-strategic-mission-selection.md",
@@ -3189,6 +3320,7 @@
      :evidence :glossary-paragraph,
      :why "the glossary paragraph"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :records,
    :owner "sec-glossary.tex paragraph:Revision boundary"}
   {:rung :named,
@@ -3211,6 +3343,7 @@
      :evidence :glossary-paragraph,
      :why "the glossary paragraph"}],
    :content-status :record-with-witness,
+   :carried-by :unowned,
    :area :records,
    :owner
    "sec-glossary.tex paragraph:A shared experimental substrate"}],

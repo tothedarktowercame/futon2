@@ -21,6 +21,8 @@
 (def contract-file (io/file "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"))
 (def glossary-file (io/file "/home/joe/code/p4ng/sec-glossary.tex"))
 (def witness-file (io/file root "checks/witness-registry.edn"))
+(def worklist-file (io/file (or (System/getenv "WM_WORKLIST")
+                                (str (io/file root "holes/labs/wm-contract/worklist.edn")))))
 (def output-file (io/file root "holes/labs/wm-contract/variable-situation-accounting.edn"))
 (def lean-file (io/file "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"))
 ;; Licences are written relative to ~/code so one resolver checks every one of
@@ -29,6 +31,47 @@
 (def lean-rel "mathlib4/DarkTower/WarMachine/Holes.lean")
 (def witness-rel "futon2/checks/witness-registry.edn")
 (def glossary-rel "p4ng/sec-glossary.tex")
+
+(defn regex-quote [s] (java.util.regex.Pattern/quote (str s)))
+
+(defn carrying-tickets
+  "Join variable names to live, non-J worklist packets using U85's subject
+   rule: an explicitly leading subject, or every named member of a multi-name
+   I/RUN packet. Results are dependency-first and then ticket-id ordered."
+  [names]
+  (let [items (:items (edn/read-string (slurp worklist-file)))
+        idx (into {} (map (juxt :id identity) items))
+        depth (memoize
+               (fn depth [id]
+                 (if-let [deps (seq (:depends-on (idx id)))]
+                   (inc (apply max (map depth deps)))
+                   0)))
+        live (filter #(and (#{:open :blocked} (:status %))
+                           (not= :J (:class %))) items)
+        mentioned
+        (fn [item]
+          (let [text (str/join " " (map #(str (get item % ""))
+                                         [:statement :acceptance :blocker]))]
+            (set (filter #(re-find (re-pattern
+                                    (str "(?<![A-Za-z0-9_])" (regex-quote %)
+                                         "(?![A-Za-z0-9_])")) text)
+                         names))))
+        pairs
+        (mapcat
+         (fn [item]
+           (let [hits (mentioned item)
+                 statement (str (:statement item))
+                 subjects (set (filter #(re-find (re-pattern
+                                                  (str "^" (regex-quote %) "\\s*,"))
+                                                statement) hits))
+                 subjects (if (and (#{:I :RUN} (:class item)) (>= (count hits) 2))
+                            (into subjects hits) subjects)]
+             (map (fn [name] [name (:id item)]) subjects)))
+         live)]
+    (into {}
+          (for [[name ids] (group-by first pairs)]
+            [name (->> ids (map second) distinct
+                       (sort-by (juxt depth str)) vec)]))))
 
 (def area-names
   {:belief #{"GenerativeModel" "generativeFactorMass" "TransitionKernel" "BeliefState" "ObservationVector"
@@ -837,7 +880,14 @@
                             with-closability
                             (with-rung #(glossary-ladder g)))))
                     glossary-rows)
-        rows (vec (concat declared named))]
+        uncarried-rows (vec (concat declared named))
+        carriers (carrying-tickets (map :name uncarried-rows))
+        rows (mapv (fn [row]
+                     (assoc row :carried-by
+                            (if-let [ids (seq (get carriers (:name row)))]
+                              (vec ids)
+                              :unowned)))
+                   uncarried-rows)]
     {:schema :wm/variable-situation-accounting-v1
      :as-of "2026-09-08"
      :authority {:contract-git-sha (get-in contract [:source :git-sha])
