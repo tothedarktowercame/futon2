@@ -20,4 +20,4 @@ changing the receipt, and requires `UNATTESTED-DRIFT` plus the re-emission
 diagnostic (`positive_receipt_reattestation_controls.sh:6-20`).  The publish
 negative-control path invokes that control at
 `p4ng/empirics-futon/negative_controls.sh:18-21`.  The exact control result and
-paths are recorded at `runs/U71-re-attestation-gate.edn:9-17`.
+paths are recorded at `runs/U71-re-attestation-gate.edn:9-16`.
