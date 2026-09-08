@@ -1,0 +1,147 @@
+{:schema :historical-cascade-v1
+ :id :p3-transport-boundary-cascade
+ :problem
+ {:id :p3-transport-request-frame-boundary
+  :statement "Nothing accepts an HTTP request and nothing sends a WebSocket frame. The pipeline has no ears or mouth."
+  :source "p4ng/sec-overview-futon.tex:100-104 (survey witness runs/W1-witness-survey.md:183-191)"
+  :solved-behaviour "Thin boundary adapters connect the internal social pipeline to external agents: an HTTP REST adapter (POST /dispatch, POST /presence) and a WebSocket adapter with readiness handshake, typed JSON frames, defensive parameter extraction, one-connection-per-agent registration, and verified server startup."
+  :scope "The four completed parts (I protocol types + parsing, II HTTP adapter, III WebSocket adapter, IV integration; closed at futon3c 06dac238 2026-02-13 with 72 tests / 207 assertions). Deferred items stay out: TLS, backoff (client concern), IRC bridge, auth tokens, rate limiting, persistent registry across restarts (mission 'What This Does NOT Do'). The mission is archived, not evolved."
+  :witness "futon3c/holes/missions/M-transport-adapters.md:267,303,353,411 (four part Status lines) and :480-490 (exit conditions)"}
+ :source-pins
+ {:futon2 "16417bca"
+  :futon3 "ab277bdd6b6aa3f587e09625c750d258d61a7f92"
+  :futon3c "f3534b93d0fd5ee6437b4c38645a793270a36a03"
+  :p4ng "problem quote verified at the committed tree; sec-overview-futon.tex:100-104"}
+ :nodes
+ [{:pattern :realtime/connection-state-machine
+   :library-path "futon3c/library/realtime/connection-state-machine.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-transport-adapters.md:52 (L2 row) and src/futon3c/transport/ws.clj:4-6 (docstring: three-state lifecycle :connecting/:connected/:disconnected)"}
+  {:pattern :realtime/rendezvous-handshake
+   :library-path "library/realtime/rendezvous-handshake.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-transport-adapters.md:40 (R7 row) and src/futon3c/transport/ws.clj:10-11 (readiness handshake before any message processing); exit condition :484"}
+  {:pattern :realtime/request-param-resilience
+   :library-path "futon3c/library/realtime/request-param-resilience.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-transport-adapters.md:54 (L1,L3 row) and src/futon3c/transport/ws.clj:19 + :178 (extract-params on WS upgrade); exit condition :487"}
+  {:pattern :realtime/single-authority-registration
+   :library-path "futon3c/library/realtime/single-authority-registration.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-transport-adapters.md:57 (L6 row) and src/futon3c/transport/ws.clj:21 (one connection per agent-id)"}
+  {:pattern :realtime/structured-events-only
+   :library-path "library/realtime/structured-events-only.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-transport-adapters.md:46 (R9 row) and src/futon3c/transport/ws.clj:22 (typed JSON frames only); exit condition :485 (delivery receipts as JSON frames)"}
+  {:pattern :realtime/verify-after-start
+   :library-path "futon3c/library/realtime/verify-after-start.flexiarg"
+   :origin :selected
+   :witness "futon3c/holes/missions/M-transport-adapters.md:56 (L4,L7 row) and src/futon3c/transport/http.clj:53,:8919,:8955 (start-server! probes the port; throws 'Server started but port is not listening (L7: verify-after-start)')"}]
+ :selected
+ [:realtime/connection-state-machine
+  :realtime/rendezvous-handshake
+  :realtime/request-param-resilience
+  :realtime/single-authority-registration
+  :realtime/structured-events-only
+  :realtime/verify-after-start]
+ :admitted []
+ :admission-note
+ "All six are named in the mission's plan before implementation (cross-reference tables at mission :40-57, committed with the spec and the five futon3c patterns at futon3c 3dc50a81 2026-02-11) and re-attested by the live code's own docstrings -- the strongest node witnesses on this loop. None is recorded as drawn in during execution, so none is admitted. SEVEN OF THE THIRTEEN CROSS-REFERENCED PATTERNS ARE HONESTLY NOT NODES: liveness-heartbeats and transport-pivot are marked '(future, not Part I-IV)' by the mission itself (:43,:44); reconnect-with-backoff is deferred ('the client's concern', :452); listener-leases is '(Part III cleanup)' and no lease/TTL code exists in ws.clj or ws/ (grep lease|ttl over both returns only unrelated 'release' matches); authoritative-transcript (:43) and single-line-transport (:47) name constraints, not implemented mechanisms, and no committed witness attests their involvement in the four completed parts."
+ :edges
+ [{:from :realtime/verify-after-start
+   :to :realtime/rendezvous-handshake
+   :relation :startup-precedes-handshake
+   :source "futon3c/holes/missions/M-transport-adapters.md:56 and src/futon3c/transport/http.clj:8919-8955"
+   :reading "The server refuses to announce readiness until the port probe passes; only then can WS connections begin their readiness handshake."
+   :interpretation-class :documented
+   :documentation "Mission-span documented per the restated edge term: no pattern-to-pattern @why/@how exists (the five futon3c patterns carry @references, not annotations, at pin f3534b93; grep verified). The ordering is authored by http.clj's own start-verify wrapping server startup and by the mission's part order (II before III)."}
+  {:from :realtime/connection-state-machine
+   :to :realtime/rendezvous-handshake
+   :relation :transition-completed-by-handshake
+   :source "src/futon3c/transport/ws.clj:4-11"
+   :reading "The :connecting -> :connected transition IS the successful readiness handshake; a connection still :connecting when TLS fails is ignored without cleanup, which is the state machine's own rule."
+   :interpretation-class :documented
+   :documentation "The code docstring states both patterns in one breath (:4-11) -- the strongest mission/solution-span authoring available; no annotation joins them at the pin."}
+  {:from :realtime/request-param-resilience
+   :to :realtime/connection-state-machine
+   :relation :extraction-enables-transition
+   :source "src/futon3c/transport/ws.clj:178 and futon3c/holes/missions/M-transport-adapters.md:54,:487"
+   :reading "Defensive parameter extraction on the WS upgrade request identifies the agent whose connection then walks the three-state lifecycle; the L3 exit condition names exactly this."
+   :interpretation-class :documented
+   :documentation "Mission exit condition :487 plus the code comment at ws.clj:178 author the ordering; annotation-absence verified at the pin."}
+  {:from :realtime/single-authority-registration
+   :to :realtime/structured-events-only
+   :relation :registration-gates-frames
+   :source "src/futon3c/transport/ws.clj:21,:201 ('Connection not registered') and futon3c/holes/missions/M-transport-adapters.md:57"
+   :reading "One connection per agent-id is enforced at registration time; unregistered connections are refused before any typed frame is processed."
+   :interpretation-class :documented
+   :documentation "The refusal at ws.clj:201 and the mission's L6 row author the gating; annotation-absence verified at the pin."}]
+ :rules
+ [{:id :three-state-connection-lifecycle
+   :member :realtime/connection-state-machine
+   :then-source "futon3c/library/realtime/connection-state-machine.flexiarg:16"
+   :interpretation-class :attested
+   :interpretation
+   "Implement a three-state machine (:connecting after open, :connected after first successful exchange, :disconnected after close), with pre-handshake failures ignored without cleanup."
+   :attestation "futon3c/holes/missions/M-transport-adapters.md:52 (L2) and exit condition :486; src/futon3c/transport/ws.clj:4-6; mission commit 3dc50a81 authored the pattern beside the spec"
+   :span-note "Content line only at pin f3534b93: marker :15, content :16."}
+  {:id :require-readiness-handshake-before-processing
+   :member :realtime/rendezvous-handshake
+   :then-source "library/realtime/rendezvous-handshake.flexiarg:19"
+   :interpretation-class :attested
+   :interpretation
+   "Connections must complete an explicit readiness handshake before any messages are processed; the implemented form is the WS ready event, not the full signed-hello exchange the THEN describes."
+   :attestation "futon3c/holes/missions/M-transport-adapters.md:40 (R7 row 'WS readiness handshake before dispatch') and exit condition :484; src/futon3c/transport/ws.clj:10-11"
+   :span-note "Content line only at futon3 pin ab277bdd: marker :18, content :19. NOTE: the mission's R7 wording ('readiness handshake before dispatch') is narrower than the THEN's signed-hello-with-capabilities form; the attestation covers the readiness reading, and the difference is stated here rather than smoothed."}
+  {:id :three-tier-parameter-extraction
+   :member :realtime/request-param-resilience
+   :then-source "futon3c/library/realtime/request-param-resilience.flexiarg:16"
+   :interpretation-class :attested
+   :interpretation
+   "Three-tier extraction (:query-string, then :request-uri parsing, then payload override) so no single library or proxy quirk loses the session identity."
+   :attestation "futon3c/holes/missions/M-transport-adapters.md:54 (L1,L3 -- both lessons are transport-archaeology sections in the same mission, :59-70) and exit condition :487; src/futon3c/transport/ws.clj:178"
+   :span-note "Content line only at pin f3534b93: marker :15, content :16."}
+  {:id :one-connection-per-agent-at-registration
+   :member :realtime/single-authority-registration
+   :then-source "futon3c/library/realtime/single-authority-registration.flexiarg:16"
+   :interpretation-class :attested
+   :interpretation
+   "Enforce authority at registration time: an agent-id already registered is rejected rather than duplicated."
+   :attestation "futon3c/holes/missions/M-transport-adapters.md:57 (L6) and src/futon3c/transport/ws.clj:21,:201 ('Connection not registered')"
+   :span-note "Content line only at pin f3534b93: marker :15, content :16."}
+  {:id :typed-frames-only
+   :member :realtime/structured-events-only
+   :then-source "library/realtime/structured-events-only.flexiarg:19"
+   :interpretation-class :attested
+   :interpretation
+   "All WS frames are typed JSON; no free text crosses the boundary."
+   :attestation "futon3c/holes/missions/M-transport-adapters.md:46 (R9) and exit condition :485 (delivery receipts as JSON frames); src/futon3c/transport/ws.clj:15,:22"
+   :span-note "Content line only at futon3 pin ab277bdd: marker :18, content :19."}
+  {:id :probe-the-port-after-start
+   :member :realtime/verify-after-start
+   :then-source "futon3c/library/realtime/verify-after-start.flexiarg:16"
+   :interpretation-class :attested
+   :interpretation
+   "After start, probe the port and refuse to report ready when it is not listening."
+   :attestation "futon3c/holes/missions/M-transport-adapters.md:56 (L4,L7) and src/futon3c/transport/http.clj:53,:8919,:8955 (throws on a silent port)"
+   :span-note "Content line only at pin f3534b93: marker :15, content :16."}]
+ :precedence
+ {:realtime/verify-after-start 1
+  :realtime/request-param-resilience 2
+  :realtime/connection-state-machine 3
+  :realtime/rendezvous-handshake 4
+  :realtime/single-authority-registration 5
+  :realtime/structured-events-only 6}
+ :o4
+ {:rule-bearing-members 6
+  :acting-order
+  [:realtime/verify-after-start
+   :realtime/request-param-resilience
+   :realtime/connection-state-machine
+   :realtime/rendezvous-handshake
+   :realtime/single-authority-registration
+   :realtime/structured-events-only]
+  :basis "futon3c/holes/missions/M-transport-adapters.md:40-57,480-490; src/futon3c/transport/http.clj:53,8919-8955; src/futon3c/transport/ws.clj:4-22,178,201"}
+ :transcript
+ {:history "futon3c 3dc50a81 2026-02-11 'Add M-transport-adapters mission spec and 5 realtime patterns' (the plan, the cross-reference tables, and the five futon3c patterns authored together) -> implementation of Parts I-IV -> futon3c 06dac238 2026-02-13 'Complete M-transport-adapters: all 4 parts done (72 tests, 207 assertions)' -> futon3c 5f18bc2f 2026-05-03 archives the mission in a disposition sweep. Later transport work in the same files (e.g. ws.clj 5287650c 2026-08-14, http.clj frame-retention fixes 2026-07-18) postdates the archive and is NOT part of this solution."
+  :basis "git log --follow over holes/missions/M-transport-adapters.md and git log over src/futon3c/transport/{ws,http}.clj, run this invocation at pin f3534b93; all shas and dates read from git output, none from memory."}}
