@@ -32,3 +32,12 @@ raw, growing, question-free queue presented as operator debt.
    re-reading the run — machine work mispriced as operator work. The
    surfacing discipline for needs-joe channels (ruling-shaped text carries
    an answerable question) applies at the write site.
+
+## TRACE review ledger append path
+
+`holes/labs/zaif-harness/trace-review-ledger.edn` is the append-only discharge
+side. Append with `futon2.aif.bulletin/append-trace-review!`, supplying exactly
+one map with `:record/id`, `:disposition`, `:at`, and `:by`. The append function
+refuses incomplete entries and any second disposition for an existing record
+id; existing forms are never rewritten. Bulletin collection subtracts every
+record id present in this ledger from the surfaced-untriaged summary.

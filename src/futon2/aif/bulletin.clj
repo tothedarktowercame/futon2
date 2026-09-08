@@ -44,6 +44,7 @@
    :runs-rel "holes/labs/wm-contract/runs"
    :tripwire-root "/home/joe/code/futon2/data/wm-tripwires/trips"
    :trace-root "/home/joe/code/futon2/data/wm-trace"
+   :trace-review-ledger (str home "/code/futon2/holes/labs/zaif-harness/trace-review-ledger.edn")
    :out-dir (str home "/code/futon2/holes/labs/wm-contract/bulletins")
    :bulletin-rel-dir "holes/labs/wm-contract/bulletins"
    :brief-root brief/default-root})
@@ -233,12 +234,56 @@
                                 (some #(= :TRACE (:node %)) (:wm/route record))
                                 (conj {:board "TRACE"
                                        :id (or (:run/id record) (:timestamp record))
+                                       :at (:timestamp record)
                                        :status :needs-joe
                                        :class :J
                                        :statement "TRACE record surfaced for operator review"
                                        :record (.getPath f)})))))))))
            (sort-by :id)
            vec))))
+
+(defn trace-review-dispositions
+  "Read the append-only TRACE review ledger as record-id -> disposition.
+  Each top-level form is one immutable disposition. Duplicate record ids are
+  rejected: review history must be extended, never replaced or contradicted."
+  [path]
+  (let [f (when path (io/file path))]
+    (if-not (and f (.isFile f))
+      {}
+      (with-open [r (java.io.PushbackReader. (io/reader f))]
+        (loop [by-id {}]
+          (let [entry (edn/read {:eof ::eof} r)]
+            (if (= ::eof entry)
+              by-id
+              (let [id (:record/id entry)]
+                (when-not (and id (:disposition entry) (:at entry) (:by entry))
+                  (throw (ex-info "invalid TRACE review disposition" {:entry entry})))
+                (when (contains? by-id id)
+                  (throw (ex-info "duplicate TRACE review disposition" {:record/id id})))
+                (recur (assoc by-id id entry))))))))))
+
+(defn append-trace-review!
+  "Append one disposition to PATH. Refuses an incomplete or already-reviewed
+  record id; it never rewrites the ledger."
+  [path entry]
+  (let [id (:record/id entry)]
+    (when-not (and id (:disposition entry) (:at entry) (:by entry))
+      (throw (ex-info "invalid TRACE review disposition" {:entry entry})))
+    (when (contains? (trace-review-dispositions path) id)
+      (throw (ex-info "TRACE record already reviewed" {:record/id id})))
+    (io/make-parents (io/file path))
+    (spit path (str (pr-str entry) "\n") :append true)
+    entry))
+
+(defn untriaged-traces
+  "TRACE records with no disposition, summarized without turning them into
+  ruling-shaped decision rows."
+  [trace-root ledger-path]
+  (let [reviewed (trace-review-dispositions ledger-path)
+        records (remove #(contains? reviewed (:id %))
+                        (trace-discharges trace-root))]
+    {:count (count records)
+     :oldest-date (some->> records (keep :at) sort first (#(subs % 0 10)))}))
 
 ;; ------------------------------------------------------- registries and runs
 
@@ -342,8 +387,9 @@
                          [])
         deltas (mapv #(board-delta % date) (:boards cfg))
         joe (vec (concat (mapcat waits-on-joe (:boards cfg))
-                         (tripwire-discharges (:tripwire-root cfg))
-                         (trace-discharges (:trace-root cfg))))
+                         (tripwire-discharges (:tripwire-root cfg))))
+        surfaced-untriaged (untriaged-traces (:trace-root cfg)
+                                             (:trace-review-ledger cfg))
         deposits (ledger-deposits (:run-era-ledger cfg) date)
         adopted (machine-adopted (:registry cfg) date)
         runs (experiments cfg runs-commits)]
@@ -351,6 +397,7 @@
      :repo-commits repo-commits
      :deltas deltas
      :waits-on-joe joe
+     :surfaced-untriaged surfaced-untriaged
      :deposits deposits
      :adopted adopted
      :experiments runs
@@ -449,7 +496,7 @@
   "The bulletin's bytes. A pure function of `facts`: no clock and no HEAD sha,
   so regenerating on an unchanged tree produces the same file."
   [{:keys [date repo-commits deltas deposits adopted experiments waits-on-joe
-           counts]}]
+           surfaced-untriaged counts]}]
   (str/join
    "\n"
    (concat
@@ -500,9 +547,14 @@
              (experiment-lines experiments)
              (str "No run directory under holes/labs/wm-contract/runs was "
                   "written on this date."))
-    (section "What waits on Joe"
+    (section "Decision sheet -- what waits on Joe"
              (joe-lines waits-on-joe)
              "Nothing on the watched boards is waiting on the operator.")
+    (section "Surfaced TRACE records awaiting triage"
+             [(str "- **" (or (:count surfaced-untriaged) 0)
+                   " surfaced-untriaged**; oldest date: **"
+                   (or (:oldest-date surfaced-untriaged) "none") "**.")]
+             "- **0 surfaced-untriaged**; oldest date: **none**.")
     ["## Sources read"
      ""
      (str "- repositories: "

@@ -1,0 +1,3 @@
+;; Append-only TRACE review dispositions. Add exactly one top-level map per
+;; record id via futon2.aif.bulletin/append-trace-review!; never edit or remove
+;; an existing form. Required keys: :record/id, :disposition, :at, :by.

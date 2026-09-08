@@ -71,6 +71,7 @@
    :runs-repo dir
    :runs-rel "holes/labs/demo/runs"
    :trace-root (str dir "/data/wm-trace")
+   :trace-review-ledger (str dir "/trace-review-ledger.edn")
    :out-dir out-dir
    :bulletin-rel-dir "holes/labs/demo/bulletins"
    :brief-root brief-root
@@ -147,10 +148,53 @@
                             :at "2026-09-07T23:12:22.837095336Z"}]}
         _ (spit path (str (pr-str record) "\n"))]
     (is (= [{:board "TRACE" :id (:run/id record)
+             :at (:timestamp record)
              :status :needs-joe :class :J
              :statement "TRACE record surfaced for operator review"
              :record (.getPath path)}]
            (bulletin/trace-discharges (.getPath root))))))
+
+(deftest trace-review-ledger-subtracts-only-the-discharged-record
+  ;; Live record wm-trace-2026-09-07.edn pins these values verbatim from run id
+  ;; 36820e88-3d68-499d-b359-2d8dbe9743de: timestamp and TRACE hop `:at`.
+  (let [root (temp-dir "bulletin-trace-split")
+        trace-path (io/file root "wm-trace-2026-09-07.edn")
+        ledger-path (.getPath (io/file root "trace-review-ledger.edn"))
+        discharged {:timestamp "2026-09-07T23:12:22.838749091Z"
+                    :run/id "36820e88-3d68-499d-b359-2d8dbe9743de"
+                    :wm/route [{:node :TRACE
+                                :via "futon2.aif.trace/write-trace!"
+                                :at "2026-09-07T23:12:22.837095336Z"}]}
+        undischarged (assoc discharged
+                            :timestamp "2026-09-08T00:00:00Z"
+                            :run/id "planted-undischarged")]
+    (spit trace-path (str (pr-str discharged) "\n" (pr-str undischarged) "\n"))
+    (bulletin/append-trace-review!
+     ledger-path
+     {:record/id (:run/id discharged) :disposition :reviewed
+      :at "2026-09-08T12:00:00Z" :by "fixture-reviewer"})
+    (is (= {:count 1 :oldest-date "2026-09-08"}
+           (bulletin/untriaged-traces (.getPath root) ledger-path))
+        "the discharged control leaves the count; the undischarged one stays")
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo #"already reviewed"
+         (bulletin/append-trace-review!
+          ledger-path
+          {:record/id (:run/id discharged) :disposition :ignored
+           :at "2026-09-08T13:00:00Z" :by "second-reviewer"})))
+    (let [text (bulletin/render
+                {:date "2026-09-08" :repo-commits [] :deltas [] :deposits []
+                 :adopted [] :experiments [] :waits-on-joe [{:id :J9
+                                                              :board "demo"
+                                                              :class :J
+                                                              :status :needs-joe
+                                                              :statement "decide"}]
+                 :surfaced-untriaged {:count 1 :oldest-date "2026-09-08"}
+                 :counts {:waits-on-joe 1}})]
+      (is (str/includes? text "Decision sheet -- what waits on Joe"))
+      (is (str/includes? text "**1 surfaced-untriaged**; oldest date: **2026-09-08**"))
+      (is (not (str/includes? text "`planted-undischarged`"))
+          "TRACE records render as one summary line, not decision rows"))))
 
 (deftest a-day-with-no-new-facts-regenerates-to-the-same-bytes
   (testing "generate! twice: identical file, and the second run does not rewrite"
