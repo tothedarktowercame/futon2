@@ -3,12 +3,18 @@
 #   unblock -> work (one row, seat A) -> review (one row, seat B != A) -> publish (when the
 #   registries are clear) -> repeat, until nothing is open, unreviewed, or unblockable.
 # Runs unattended. Log: runs/build-loop.log (tail it; voxterm shows the process tree).
-# Seats: WORK_SEAT=claude|codex (default claude), REVIEW_SEAT the other. Author != reviewer
+# Seats: WORK_SEAT=claude|codex|zai, REVIEW_SEAT a different one. Author != reviewer
 # is enforced by using different tools for the two phases within an iteration.
+# Defaults flipped to work=codex review=zai on 2026-09-08 (Joe: Codex and zai
+# quotas reset to 100%, Claude at 40% -- "use the Codex and Zai resources as
+# much as possible within the WM build loop from here on. So that we stop
+# burning Claude."). The zai seat is a blocking whistle to roster agent zai-1,
+# the same invocation the library loop has run since 2026-09-05. claude stays
+# available as an explicit override (WORK_SEAT=claude ./wm-build-loop.sh).
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG="$HERE/runs/build-loop.log"; mkdir -p "$HERE/runs"
-WORK_SEAT="${WORK_SEAT:-claude}"; REVIEW_SEAT="${REVIEW_SEAT:-codex}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-60}"
+WORK_SEAT="${WORK_SEAT:-codex}"; REVIEW_SEAT="${REVIEW_SEAT:-zai}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-60}"
 log() { echo "[$(date -u '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 # U65: the loop's two identities are REGISTERED Agency seats with
 # delivery-mode inbox, so a bellback addressed to either is written under
@@ -58,6 +64,7 @@ run_seat() { # $1 seat, $2 prompt file, $3 label
   case "$seat" in
     claude) (cd "$HOME/code" && timeout 7200 claude -p --permission-mode bypassPermissions "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
     codex)  (cd "$HOME/code" && timeout 5400 codex exec --skip-git-repo-check --sandbox danger-full-access "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
+    zai)    (cd "$HOME/code" && timeout 5400 python3 futon3c/scripts/agency_send.py --from wm-build-work --to zai-1 --kind whistle < "$prompt" >> "$LOG" 2>&1) ;;
     *) log "unknown seat $seat"; return 2 ;;
   esac
   local rc=$?; log "$label: $seat exit=$rc"; return $rc
