@@ -72,6 +72,11 @@
   mutate a live Agency roster."
   true)
 
+(def ^:dynamic *r16-park-fn*
+  "Hermetic override for the durable R16 park boundary. Production is nil and
+  therefore uses Agency; the runner suite binds an in-memory recorder."
+  nil)
+
 (defonce ^:private wm-status-executor
   (Executors/newSingleThreadExecutor
    (reify ThreadFactory
@@ -140,7 +145,7 @@
   later continuation. A stop-line record alone is not a parked lifecycle
   transition, so failure to register this record refuses closure."
   [{:keys [agency-base] :as opts} attempt-id finding]
-  (if-let [park-fn (:r16-park-fn opts)]
+  (if-let [park-fn (or (:r16-park-fn opts) *r16-park-fn*)]
     (park-fn attempt-id finding)
     (let [repair-id (:repair/id finding)
           _ (when-not (and (string? repair-id) (not (str/blank? repair-id)))

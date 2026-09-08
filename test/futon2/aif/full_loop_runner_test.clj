@@ -23,7 +23,11 @@
 
 (defn- without-live-wm-status
   [f]
-  (binding [runner/*wm-status-reporting?* false]
+  (binding [runner/*wm-status-reporting?* false
+            runner/*r16-park-fn*
+            (fn [_ finding]
+              {:ok true :id (str "test-park/" (:repair/id finding))
+               :status :parked})]
     (f)))
 
 (defn- with-field-desk-stub
@@ -489,25 +493,26 @@
   (let [attempt-id "36820e88-3d68-499d-b359-2d8dbe9743de"
         finding {:repair/id "repair-live-2026-09-07T23:12:22.838749091Z"}
         request (atom nil)]
-    (with-redefs [http/post
-                  (fn [url opts]
-                    (reset! request {:url url
-                                     :body (json/parse-string (:body opts) true)})
-                    {:status 200
-                     :body (json/generate-string
-                            {:ok true :id "park-r16" :status "parked"})})]
-      (is (= "park-r16"
-             (:id (runner/park-r16-stop-line!
-                   {:agency-base "http://agency.test"} attempt-id finding))))
-      (is (= "http://agency.test/api/alpha/park" (:url @request)))
-      (is (= {:agent "war-machine"
-              :surface "morning-brief"
-              :mode "between-turn"
-              :awaiting ["repair-live-2026-09-07T23:12:22.838749091Z"]
-              :payload {:node "R16" :lifecycle/stage "parked"
-                        :attempt-id attempt-id
-                        :repair-id "repair-live-2026-09-07T23:12:22.838749091Z"}}
-             (:body @request))))))
+    (binding [runner/*r16-park-fn* nil]
+      (with-redefs [http/post
+                    (fn [url opts]
+                      (reset! request {:url url
+                                       :body (json/parse-string (:body opts) true)})
+                      {:status 200
+                       :body (json/generate-string
+                              {:ok true :id "park-r16" :status "parked"})})]
+        (is (= "park-r16"
+               (:id (runner/park-r16-stop-line!
+                     {:agency-base "http://agency.test"} attempt-id finding))))
+        (is (= "http://agency.test/api/alpha/park" (:url @request)))
+        (is (= {:agent "war-machine"
+                :surface "morning-brief"
+                :mode "between-turn"
+                :awaiting ["repair-live-2026-09-07T23:12:22.838749091Z"]
+                :payload {:node "R16" :lifecycle/stage "parked"
+                          :attempt-id attempt-id
+                          :repair-id "repair-live-2026-09-07T23:12:22.838749091Z"}}
+               (:body @request)))))))
 
 (deftest r16-completion-queues-a-surfacing-discharge
   ;; Same live record pin as the parked-transition test above: run

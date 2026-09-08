@@ -163,41 +163,41 @@
 
   {:node "R16" :cell :commissioned :verdict :exists :tag "[E-16-C]"
    :reading "The author commission names the selected target, repository/base head, artifact contract, requirements, refusal shape and independent reviewer; that exact prompt is passed to dispatch."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 1393 :to 1449 :expect "author-prompt"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2783 :to 2813 :expect "dispatch!"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 1398 :to 1454 :expect "author-prompt"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2788 :to 2818 :expect "dispatch!"}]}
 
   {:node "R16" :cell :dispatched :verdict :exists :tag "[E-16-D]"
    :reading "dispatch! submits agent, caller, mission id and prompt to Agency; the dispatch checkpoint records agent, job id, prompt reference and response."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 798 :to 810 :expect "dispatch!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2814 :to 2827 :expect "checkpoint"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 803 :to 815 :expect "dispatch!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2819 :to 2832 :expect "checkpoint"}]}
 
   {:node "R16" :cell :returned :verdict :exists :tag "[E-16-R]"
    :reading "poll-job! returns only at an Agency terminal state, and the author boundary refuses to advance unless that returned state is done."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 868 :to 892 :expect "poll-job!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2870 :to 2880 :expect "done"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 873 :to 897 :expect "poll-job!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2875 :to 2885 :expect "done"}]}
 
   {:node "R16" :cell :checked :verdict :exists :tag "[E-16-K]"
    :reading "After a distinct reviewer dispatch and return, approval requires a done review job, an :approve verdict and execution evidence; failure refuses advancement."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2965 :to 3002 :expect "poll-job!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3002 :to 3020 :expect ":approve"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3021 :to 3050 :expect ":build-failed"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2970 :to 3007 :expect "poll-job!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3007 :to 3025 :expect ":approve"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3026 :to 3055 :expect ":build-failed"}]}
 
   {:node "R16" :cell :recorded :verdict :exists :tag "[E-16-X]"
    :reading "Every phase emits start/end/error telemetry, and cohort runs append dispatch and build checkpoint cells. Separately the tick-side R16 implementation records typed attempt/results through TRACE."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 212 :to 250 :expect "emit-phase!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2305 :to 2309 :expect "checkpoint"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3021 :to 3042 :expect "checkpoint"}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 217 :to 255 :expect "emit-phase!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2310 :to 2314 :expect "checkpoint"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3026 :to 3047 :expect "checkpoint"}
               {:file "futon2/src/futon2/aif/enact.clj" :from 5 :to 10 :expect "write-trace!"}]}
 
   {:node "R16" :cell :parked :verdict :exists :tag "[E-16-P]"
    :reading "A failed full-loop closure refuses a missing repair identity, then registers an R16-linked durable Agency park whose awaited dependency is that exact repair obligation. This is distinct from the stop-line record itself."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 136 :to 177 :expect "park-r16-stop-line!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2357 :to 2360 :expect "park-r16-stop-line!"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 141 :to 182 :expect "park-r16-stop-line!"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2362 :to 2365 :expect "park-r16-stop-line!"}]}
 
   {:node "R16" :cell :surfaced :verdict :exists :tag "[E-16-S]"
    :reading "Every completed full-loop outcome queues an R16-linked lifecycle discharge in the existing Morning Brief item, including the attempt identity, outcome, and any parked transition receipt."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2361 :to 2374 :expect ":lifecycle/discharge"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2425 :to 2425 :expect "queue-fn"}]}]
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2366 :to 2379 :expect ":lifecycle/discharge"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2430 :to 2430 :expect "queue-fn"}]}]
 
  ;; --------------------------------------------------------------------------
  ;; KNOWN FALSE-POSITIVE CLASS (PA3z, 2026-09-06). The mirror of PA2z's
