@@ -338,3 +338,41 @@ vertex attachments, the paper's tetrahedron figure). The v != evidence
 exclusion survives unchanged under either model since both carry the
 evidence vertex. Reconciliation is a minted row, not a casual edit: the
 Vertex change is Joe-gated Lean surgery rippling through the contract.
+
+## Item 17 — GO on deriving C; Lean types to Codex now; routing doctrine
+
+> "we really have pretty much everything we would need to start to derive a
+> version of this C [...] that actually does what we need it to do. [...] In
+> the Cascade Live page we have this overall problem statement written down in
+> an induced form [...] because we can follow those inductive arrows back, we
+> can see how that breaks down into work that's been done. And that breakdown
+> is the same kind of concept as your C sub tau [...] the desired end itself
+> was induced as a statement from looking at those things that have been
+> achieved. [...] this is not a refusal. I don't think it's any more something
+> that can even be stated as a refusal [...] What needs to happen is an
+> organized project of working through those things. [...] when we're doing
+> automated work, it may be impossible for an agent to work through all of
+> those things right now without some help from me. And that's okay. We need
+> to send the automated work to the automated loops, and we need the
+> interactive loops for the ones where I really need to have an input. So
+> that's another preference. But we can't sit here kicking the can down the
+> road [...] parts of it that can be built now, which I suspect are the Lean
+> types, need to be built right away, probably by Codex. And then we need to
+> get around to turning those abstract or qualitative preferences into
+> something that can be computed, across these different levels and across
+> different timescales."
+
+Consequences, executed tonight: (1) Lean preference-ladder types dispatched
+to Codex as a standalone draft module (C_tau family, disposition-kernel
+carrier, bridge identity, outcome facets; Vertex-parameterized pending U87),
+including proposed replacement text for the C hole's marker — the
+"deliberate implementation refusal" wording is no longer accurate by Joe's
+own statement and becomes "deferral under an organized discovery project"
+at his sitting. (2) F10 unblocks into the fold implementation (C591 slices
+2-3) in the AUTOMATED lane per the routing doctrine. (3) The organized
+project rows: U88 (Cascade-Live C_tau derivation — INTERACTIVE lane,
+:owner :joe, first step pins the induced problem statement and its
+inductive arrows verbatim), U89 (preference extractor, automated), U90
+(Snatch mini-C, automated). The routing doctrine itself — automated work
+to automated loops, operator-input work to interactive lanes — is recorded
+here as a standing preference (an organization-vertex preference, fittingly).
