@@ -58,8 +58,9 @@ each pattern constrains the fix.
   futon3 86b57cb): the mission is the historical witness of involvement; the
   flexiargs are the library's later formalization the record cites for THEN
   spans. This is stated here, not smoothed.
-- futon5a pin: leaf-5.md read at the committed file; the record carries the
-  survey (futon2 pin) as the citing context.
+- futon5a pin (corrected on reopen): leaf-5.md last touched at futon5a
+  9fc6f96b11ed61749fe09cc8a5e07724c2e0f428 (2026-05-03); pinned exactly in
+  :source-pins.
 - Trail status: the searches above are the complete commands run; no
   truncation anywhere (`grep -rn` over library/ returned the three hits and
   the two misses shown; `grep -n` over irc.clj/irc_test.clj returned every

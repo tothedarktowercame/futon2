@@ -11,7 +11,7 @@
  {:futon2 "2ec9c19fd14ddc6a2fc4ef19eefc2f93142751a2"
   :futon3 "ab277bdd6b6aa3f587e09625c750d258d61a7f92"
   :futon3c "b0c3648965d3e75acf199b09967609353d9023ad"
-  :futon5a "futon5a committed history; witness file leaf-5.md at the survey pin"}
+  :futon5a "9fc6f96b11ed61749fe09cc8a5e07724c2e0f428 (last commit touching holes/stories/leaf-5.md, 2026-05-03)"}
  :nodes
  [{:pattern :realtime/liveness-heartbeats
    :library-path "library/realtime/liveness-heartbeats.flexiarg"
