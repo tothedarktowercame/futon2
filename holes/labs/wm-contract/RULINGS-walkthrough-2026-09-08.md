@@ -238,3 +238,34 @@ Discovery loop reads the evidence landscape into provenance-carrying
 proposed-C whose DIFF against the ruled seed is a decision sheet; the
 extractor never writes preferences. Six unit tests named; four slices;
 Joe reviews the proposal before slices dispatch.
+
+## Item 14 — the section opens with what a preference vector IS and where it sits
+
+> "Maybe the section could start with a little introduction to what is a
+> preference vector, and how does it fit into the wiring topologically?
+> Because in principle there could be lots of different preferences. I could
+> have a preference for winning at Go, or I could have a preference for
+> improving at Go. Playing one stone in front of a wall of three. [...] It
+> would be helpful to know how often do we need to compute C? Do we need to
+> return to computing C lots of times? Our preferences, as we talked about
+> before, are they distributed across four different tetrahedral vertices
+> [...] But other than that, the outline looks good."
+
+Outline approved with a rung 0. The interpretive key for rung 0, stated here
+so the draft can be checked against it: Joe's three Go preferences map to
+three DIFFERENT slots of the formalism — winning at Go is a pragmatic outcome
+preference and lives in C (the risk leg scores divergence from it); improving
+at Go is epistemic value and lives in the ambiguity/information leg (computed,
+never declared — the same logic as the evidence-vertex exclusion and the C
+hole's original marker); the stone-in-front-of-a-wall idiom is a policy
+habit and lives in the prior E. "Preference" in ordinary speech spans all
+three; C carries only the first, and the section says so before anything
+else. Vertices: C is declared per pragmatic vertex only (people, money,
+organisations; evidence excluded by type, Holes.lean Vertex + the C
+signature's v ≠ evidence premise) — Joe's money/society dimensions are
+vertex-indexed, not new machinery. Cadence: C is CONSULTED at tick frequency
+(every G evaluation reads the risk leg) and REVISED at ruling frequency (the
+R13 two-timescale hierarchy: slow strategic loop updates preferences, fast
+tactical loop acts against them; discovery-loop turns propose, rulings fix).
+Topologically: C was literally not a drawn node in the PLOP control map
+(sec-overview-plop.tex:29-30 says so) — this section draws it.
