@@ -1,0 +1,82 @@
+{:comparison :one-of-ten-is-particular-not-characteristic,
+ :findings [],
+ :first-joint
+ {:added-by-organise
+  [:snatch/institutions-vary-by-position-and-force
+   :snatch/mark-without-force
+   :snatch/protect-the-unprotected-move
+   :snatch/revert-then-invert],
+  :added-count 4,
+  :recorded-edge-count 10,
+  :recorded-edges
+  [[:snatch/consult-the-remedy-before-exiting
+    :snatch/mark-without-force]
+   [:snatch/consult-the-remedy-before-exiting
+    :snatch/revert-then-invert]
+   [:snatch/mark-without-force
+    :snatch/institutions-vary-by-position-and-force]
+   [:snatch/mark-without-force :snatch/protect-the-unprotected-move]
+   [:snatch/probe-before-committing
+    :snatch/protect-the-unprotected-move]
+   [:snatch/protect-the-unprotected-move
+    :snatch/institutions-vary-by-position-and-force]
+   [:snatch/re-enter-after-observed-repair
+    :snatch/consult-the-remedy-before-exiting]
+   [:snatch/re-enter-after-observed-repair :snatch/revert-then-invert]
+   [:snatch/revert-then-invert
+    :snatch/institutions-vary-by-position-and-force]
+   [:snatch/revert-then-invert :snatch/protect-the-unprotected-move]],
+  :ruled-recorded-edge-count 1,
+  :ruled-recorded-edges
+  [[:snatch/re-enter-after-observed-repair
+    :snatch/consult-the-remedy-before-exiting]],
+  :scenario [:g4 :snatcher],
+  :selected
+  [:snatch/consult-the-remedy-before-exiting
+   :snatch/probe-before-committing
+   :snatch/re-enter-after-observed-repair]},
+ :futon3-pin "f8dd164bdc7f20a160b5e6b758d71532be65ca1e",
+ :lean-declarations
+ ["organiseSnatchG2Conformant"
+  "snatchG2NoRecordedEdgeSurvives"
+  "snatchG2RecordedEdgeCount"
+  "organiseSnatchG2NotEdge39"],
+ :mutation-plants
+ [{:landed? true, :plant :second-added-emptied, :verdict-after false}
+  {:landed? true,
+   :plant :second-survivor-invented,
+   :verdict-after false}
+  {:landed? true,
+   :plant :lean-declaration-absent,
+   :verdict-after false}],
+ :record :F12-slice-12-second-joint,
+ :second-joint
+ {:added-by-organise
+  [:snatch/institutions-vary-by-position-and-force
+   :snatch/preserve-the-right-to-abstain
+   :snatch/protect-the-unprotected-move],
+  :added-count 3,
+  :recorded-edge-count 5,
+  :recorded-edges
+  [[:snatch/forced-play-needs-a-loss-floor
+    :snatch/preserve-the-right-to-abstain]
+   [:snatch/preserve-the-right-to-abstain
+    :snatch/institutions-vary-by-position-and-force]
+   [:snatch/preserve-the-right-to-abstain
+    :snatch/protect-the-unprotected-move]
+   [:snatch/probe-before-committing
+    :snatch/protect-the-unprotected-move]
+   [:snatch/protect-the-unprotected-move
+    :snatch/institutions-vary-by-position-and-force]],
+  :ruled-recorded-edge-count 0,
+  :ruled-recorded-edges [],
+  :scenario [:g2 :snatcher],
+  :selected
+  [:snatch/exchange-when-both-sides-gain
+   :snatch/forced-play-needs-a-loss-floor
+   :snatch/probe-before-committing]},
+ :source-pointers
+ ["futon3:checks/find_organise.clj:603-633"
+  "futon2:holes/labs/wm-contract/runs/F12-organise/23-snatch-joint.edn:111-157"
+  "mathlib4:DarkTower/WarMachine/F12SecondSnatchExemplar.lean:12-67"],
+ :verdict :pass}
