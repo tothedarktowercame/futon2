@@ -352,6 +352,9 @@
    :mission-fn (fn [target] {:id target})
    :construct-fn runner/construct-for-decision
    :author-artifact-observer-fn synthetic-artifact-binding
+   :r16-park-fn (fn [_ finding]
+                  {:ok true :id (str "test-park/" (:repair/id finding))
+                   :status :parked})
    :delivery-qa-fn
    (fn [_ item]
      {:morning-brief/addendum-id
@@ -478,6 +481,46 @@
      :queued-operator-actions @queued-operator-actions
      :dispatches @dispatches
      :fold-file fold-file :proof-file proof-file}))
+
+(deftest r16-stop-line-registers-a-distinct-durable-park
+  ;; Live pin: wm-trace run 36820e88-3d68-499d-b359-2d8dbe9743de records
+  ;; :timestamp "2026-09-07T23:12:22.838749091Z" verbatim. The campaign file
+  ;; is not present in every worktree, so the values are kept in this fixture.
+  (let [attempt-id "36820e88-3d68-499d-b359-2d8dbe9743de"
+        finding {:repair/id "repair-live-2026-09-07T23:12:22.838749091Z"}
+        request (atom nil)]
+    (with-redefs [http/post
+                  (fn [url opts]
+                    (reset! request {:url url
+                                     :body (json/parse-string (:body opts) true)})
+                    {:status 200
+                     :body (json/generate-string
+                            {:ok true :id "park-r16" :status "parked"})})]
+      (is (= "park-r16"
+             (:id (runner/park-r16-stop-line!
+                   {:agency-base "http://agency.test"} attempt-id finding))))
+      (is (= "http://agency.test/api/alpha/park" (:url @request)))
+      (is (= {:agent "war-machine"
+              :surface "morning-brief"
+              :mode "between-turn"
+              :awaiting ["repair-live-2026-09-07T23:12:22.838749091Z"]
+              :payload {:node "R16" :lifecycle/stage "parked"
+                        :attempt-id attempt-id
+                        :repair-id "repair-live-2026-09-07T23:12:22.838749091Z"}}
+             (:body @request))))))
+
+(deftest r16-completion-queues-a-surfacing-discharge
+  ;; Same live record pin as the parked-transition test above: run
+  ;; 36820e88-3d68-499d-b359-2d8dbe9743de and its verbatim timestamp.
+  (let [{:keys [result item]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim :grounded? true})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= {:node :R16 :stage :surfaced
+            :attempt-id (:attempt-id result)
+            :outcome :grounded-change
+            :parked-transition nil}
+           (:lifecycle/discharge item)))))
 
 (deftest judge-operator-actions-queue-at-the-runner-persistence-boundary
   (let [gate {:type :mission-gate

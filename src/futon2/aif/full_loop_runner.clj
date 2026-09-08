@@ -133,6 +133,49 @@
       :activity (str (name (or phase :agent-wait)) " " attempt
                      " job " (:job-id job) " " elapsed-s "s")})))
 
+(defn park-r16-stop-line!
+  "Register the failed R16 attempt as a durable parked transition.
+
+  The repair obligation is the dependency: resolving it is what permits a
+  later continuation. A stop-line record alone is not a parked lifecycle
+  transition, so failure to register this record refuses closure."
+  [{:keys [agency-base] :as opts} attempt-id finding]
+  (if-let [park-fn (:r16-park-fn opts)]
+    (park-fn attempt-id finding)
+    (let [repair-id (:repair/id finding)
+          _ (when-not (and (string? repair-id) (not (str/blank? repair-id)))
+              (throw (ex-info "R16 stop-line has no durable repair identity"
+                              {:failure-kind :r16-park-repair-id-missing
+                               :failure-stage :parked
+                               :attempt-id attempt-id})))
+          response
+          (http/post
+           (str agency-base "/api/alpha/park")
+           {:headers {"Content-Type" "application/json"}
+            :body (json/generate-string
+                   {:agent wm-agent-id
+                    :surface "morning-brief"
+                    :mode "between-turn"
+                    :awaiting [repair-id]
+                    :payload {:node "R16"
+                              :lifecycle/stage "parked"
+                              :attempt-id attempt-id
+                              :repair-id repair-id}})
+            :timeout 5000
+            :throw false})
+          body (when (string? (:body response))
+                 (json/parse-string (:body response) true))]
+      (when-not (and (= 200 (:status response)) (:ok body)
+                     (= "parked" (some-> (:status body) keyword name)))
+        (throw (ex-info "R16 stop-line park registration failed"
+                        {:failure-kind :r16-park-registration-failed
+                         :failure-stage :parked
+                         :attempt-id attempt-id
+                         :repair-id repair-id
+                         :response/status (:status response)
+                         :response/body body})))
+      body)))
+
 (defn config
   ([] (config {}))
   ([opts]
@@ -2312,6 +2355,9 @@
                                :discharge-contract
                                (discharge-contract repair-class)})))
                        data (assoc data :repair-obligation finding)
+                       parked-transition
+                       (when finding
+                         (park-r16-stop-line! opts attempt-id finding))
                        brief-item
                        (cond->
                         {:attempt-id attempt-id :opportunity-id opportunity-id
@@ -2320,6 +2366,12 @@
                                    :outcome outcome :author author
                                    :reviewer @reviewer-of-record
                                    :commit (:commit data) :witness (:witness data)
+                                   :lifecycle/discharge
+                                   {:node :R16
+                                    :stage :surfaced
+                                    :attempt-id attempt-id
+                                    :outcome outcome
+                                    :parked-transition parked-transition}
                                    :achievement
                                    {:tier (cond
                                             (= :grounded-change outcome)
