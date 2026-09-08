@@ -20,10 +20,9 @@
    [{:run "2026-09-01-s5", :exit 0, :differing []}
     {:run "2026-09-04-re5", :exit 0, :differing []}],
    :manifest-exit 0,
-   :manifest-differing ["00-source.edn" "04-controls.edn"],
-   :verdict :blocked,
-   :blocked-on
-   ["the committed manifest does not regenerate byte-identically: 00-source.edn 04-controls.edn"]},
+   :manifest-differing [],
+   :verdict :green,
+   :blocked-on []},
   :invalidators
   {:declared
    [:r16-base-drawing-stroke
@@ -89,9 +88,9 @@
    :live-holes
    "0410f61ddb95f058bc33610f22c5783d87827d7b996fba4e846b1b463a1ab5fe",
    :build :ok,
-   :verdict :blocked,
+   :verdict :green,
    :taken-at-holes
-   "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
+   "0410f61ddb95f058bc33610f22c5783d87827d7b996fba4e846b1b463a1ab5fe",
    :sorry-in-module 0,
    :theorems
    [{:name "run4CertifiedS5Conformance", :axioms []}
@@ -100,8 +99,7 @@
     {:name "run4CertifiedRe5Census", :axioms []}
     {:name "wmRun4PreregCensus", :axioms []}
     {:name "wmRun4InvalidatorsTouchingDefinitions", :axioms []}],
-   :blocked-on
-   ["the axiom probe was taken at a different Holes.lean than the live one (:stale) -- re-run --probe"]},
+   :blocked-on []},
   :wiring-pin
   {:pinned
    "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec",
@@ -138,7 +136,7 @@
    :blocked-on []}},
  :manifest
  "futon2/holes/labs/wm-contract/runs/F2-run4-preregistration",
- :summary "BLOCKED-ON [regenerates lean-probe closability-audit]",
+ :summary "BLOCKED-ON [closability-audit]",
  :verdict :blocked,
  :accepts-nothing
  "This artifact performs no acceptance and writes no ruling. READY means the evidence an acceptance needs is intact and current; it is not permission, and it does not say which run qualifies.",
@@ -157,7 +155,5 @@
  :subject {:board "wm-contract", :item :RUN4},
  :row :F2,
  :blocked-on
- ["regenerates: the committed manifest does not regenerate byte-identically: 00-source.edn 04-controls.edn"
-  "lean-probe: the axiom probe was taken at a different Holes.lean than the live one (:stale) -- re-run --probe"
-  "closability-audit: the closability audit types wmRunConformsToWiring :readiness :witnessed-and-held-open (:closability :run-gated) -- RUN4's row names this hole"
+ ["closability-audit: the closability audit types wmRunConformsToWiring :readiness :witnessed-and-held-open (:closability :run-gated) -- RUN4's row names this hole"
   "closability-audit: the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"]}

@@ -1,7 +1,7 @@
 {:probe-exit 0,
  :schema :wm/run4-axiom-probe-v1,
  :holes-lean-sha256
- "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b",
+ "0410f61ddb95f058bc33610f22c5783d87827d7b996fba4e846b1b463a1ab5fe",
  :taken-by "futon2/holes/labs/wm-contract/run4_readiness.bb --probe",
  :prereg-sha256
  "880dfab4dc37ddb42953cd80e309deb857f53ef8a2afd8de0dd616b2c91bc6fa",
