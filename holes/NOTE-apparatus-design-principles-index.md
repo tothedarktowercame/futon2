@@ -19,6 +19,33 @@ capability — may belong under monitors-measure-the-work or
 new-failure-class-is-a-design-defect instead; recorded here so the choice
 is visible, not implied.
 
+## The `:assures` schema (authoritative declaration — C583 agreement, claude-1/claude-9)
+
+Declared once, here; owned by claude-9. Instances live on WM worklist tickets
+(the ticket is the authority); the library-side pattern→tickets index is
+GENERATED from tickets and marked derived — never hand-maintained.
+
+```edn
+:assures [{:pattern   "apparatus/<flexiarg-id>"   ; id under futon3/library/apparatus/, never @status
+           :signature "<violation-signature CLAUSE, quoted or stably indexed>"
+                      ; the clause, not the pattern, is the unit of assurance
+           :state     :witnessed | :ticketed | :not-applicable  ; closed enum — no fourth state
+           :witness   {:mechanism-sha "…" :run "<induced-run record>"}}]  ; required iff :witnessed
+```
+
+Closure rule (apparatus/repairs-name-defects-not-neighborhoods): closures are
+signature-denominated — the closing record fills "signature this mechanism
+makes absent"; a sha alone cannot satisfy it; a closure that hedges forward is
+not closed. Witness rule (apparatus/pin-moves-with-the-population +
+done-is-observed-running fence amendment): a witness pins the mechanism sha
+and an induced observation; when the mechanism moves, the standing staleness
+comparator on the render path degrades :witnessed → :ticketed automatically.
+Both frontier fences carry commissioning evidence before the render is
+trusted: the no-fourth-state lint (commissioned by deleting a ticket and
+watching it fail naming the uncovered pair) and the staleness comparator
+(commissioned by editing a witnessed mechanism WITHOUT re-witnessing — degrade
+observed — and WITH re-witnessing — hold observed).
+
 Original charter below, kept as written.
 
 **Status: PROPOSED, pending Joe's ruling.** Extracted 2026-09-08 from the APM
