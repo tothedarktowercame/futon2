@@ -150,3 +150,41 @@ mission parameterizes G and an operator-punched clock edge (witness rule
 with entry 2's decay question answered in the same design; then re-punch
 and fly ONE flight under the clocked mission. Compliance should come from a
 declared channel the machine honors, not from us out-weighing its habits.
+
+---
+
+## An `--amend` from another lane rewrote a committed commit (2026-09-08)
+
+`git reflog` reads `56bf871c HEAD@{0}: commit (amend)` on top of
+`4dd63145`, which was this lane's PA15z evidence-sha backfill. The amend
+kept the message and **added a file this lane never touched**:
+`holes/labs/wm-contract/runs/U73-stall-detector-commissioning.edn`.
+
+Two board laws broken in one operation, and they are the two that guard
+each other:
+
+- **NEVER `--amend`.** Corrections are follow-up commits. The rule exists
+  precisely because this checkout is shared and live: an amend rewrites
+  whatever is on top, and what was on top belonged to a different lane.
+- **Path-scoped commits.** The amend pulled a wm-contract artifact into a
+  commit whose message says "zaif-harness: PA15z evidence sha backfill".
+
+**Nothing was lost and nothing is broken.** PA15z's evidence survives
+intact in HEAD (4092 chars, correct sha), the U73 edit is present and
+functional, `4dd63145` is dangling but recoverable. What is damaged is
+*attribution*: the wm-contract lane's U73 change is now recorded inside a
+zaif-harness backfill, so neither lane's history says what it did.
+
+**Deliberately not repaired.** Un-mixing it would need a second rewrite of
+a shared, live checkout to fix the consequences of the first — trading a
+wrong record for a riskier one, on a repo other seats are committing to
+right now. A follow-up note is what the board's own convention prescribes,
+so this is the follow-up note.
+
+The reason it is worth a SURPRISES entry rather than a shrug: it is the
+same family as two of this lane's own recent mistakes — a directory-wide
+`git add` that swept in a loop log, and a `git commit -- <paths>` that
+re-added the file it claimed to remove. Three incidents, one shape: **a git
+operation whose blast radius exceeded what its author had in view.** The
+guard that works is the same each time — name the paths, never amend, and
+read back what landed instead of asserting it.
