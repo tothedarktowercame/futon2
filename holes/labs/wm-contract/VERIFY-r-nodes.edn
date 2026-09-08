@@ -316,6 +316,19 @@
    :vocabulary-extended "This slice adds one key to :hole-types (:mechanism-built-and-never-entered). No existing key was edited and no earlier row was touched. The key was appended INSIDE the :hole-types map, whose closing brace slice 12 had to move for exactly this reason; verified by parsing the file and checking that every :hole :type in :rows resolves in :hole-types."
    :no-live-tick "No tick was run, no run lock was taken (data/wm-trace/.run-lock does not exist), nothing was written under data/. data/wm-trace was opened for reading by the harness and by this seat's independent count. The files written by this slice are the harness, the receipt, this matrix, the worklist row, and the one appended root in pointer_check.bb."}
 
+  {:slice 14 :node :R11 :at "2026-09-08" :by "codex (wm-edge worklist loop), harness authored in futon2 a15c9f82"
+   :did "Verified the last SELECT-band node. R11 has no equation row and is explicitly plumbing (aif-equations.edn:520-521), so leg (a) is a process and call-graph census rather than a numerical reference. Leg (b) is not applicable: the receipt searched 119 DarkTower/WarMachine Lean modules, symbol-concordance.edn, and sec-lean-state-generated.tex and found no R11 budget carrier (runs/V7-R11-node-sim/00-r11.edn, sha256 b80a827f5260fb5bce9cfe34ba9192ca3a4d3690d005194cf0d3de5501323042). Leg (c) is not applicable because R11 is loop-band and ALIGN has no R11 cell (p4ng/empirics-futon/control-stages.edn:27; ALIGN-rnode-process-census.md:16-23). Leg (d) checks all three R11 dossier residuals (PROBLEMS-r15-r11-r17-batch5.md:83-99)."
+   :handoff "The harness and initial receipt were already committed as futon2 a15c9f82. This seat read them, reproduced the receipt byte-identically twice, inspected every cited implementation and dossier site, ran both focused test namespaces, and wrote the verdict row."
+   :ran ["clojure -M holes/labs/wm-contract/v7_r11_node_sim.clj twice: 10 checks pass, 5 plants caught; diff -q silent; receipt sha256 b80a827f5260fb5bce9cfe34ba9192ca3a4d3690d005194cf0d3de5501323042"
+         "clojure -X:test :nses '[futon2.aif.hierarchical-budget-test]': 8 tests, 26 assertions, 0 failures/errors"
+         "clojure -X:test :nses '[futon2.aif.hierarchical-budget-adapter-test]': 6 tests, 22 assertions, 0 failures/errors"
+         "clj-kondo --lint holes/labs/wm-contract/v7_r11_node_sim.clj: 0 errors, 0 warnings"
+         "futon4/dev/check-parens.el on the harness: exit 0"]
+   :finding "The exact shared-budget arbiter is built and tested, but no production caller enters it. The harness searched 631 code files and found 27 references confined to its own namespaces, tests, the policy wrapper, and the harness; production callers: 0 (runs/V7-R11-node-sim/00-r11.edn :requirer-census). The policy wrapper is only a definition at policy.clj:23-31. Across 58 wm-trace files and 892 records, 0 records carry an R11 route hop or any derived arbiter output marker (the marker keys come from hierarchical_budget.clj:191-212 and hierarchical_budget_adapter.clj:66-96); 101 generic :budget values were deliberately not counted as R11 evidence (the same receipt, :corpus-census)."
+   :campaign-limit "The catalogue claims a two-tick Campaign S exact replay (p4ng/sec-catalog.tex:243). The receipt searched 3683 candidate files for the four identifiers supplied by p4ng/empirics.tex:50, found five narrative files, and found 0 identifiers as structured record values (runs/V7-R11-node-sim/00-r11.edn :campaign-s-artifact). This is repository-scoped :not-found, not a claim that the run did not happen."
+   :reviewer-should-check "Whether the existing :mechanism-built-and-never-entered type is the right shared vocabulary for R11 as well as R15; whether a dynamically resolved caller could evade the text census; and whether the Campaign S record exists outside the searched repositories."
+   :no-ruling "No registry, decision, Lean, src, test, or data file was changed; no live tick ran and no run lock was taken."}
+
 ]
 
  :rows
@@ -1789,4 +1802,29 @@
     "The requirer census is a text search over five trees. A caller reaching the namespace through resolve or requiring-resolve would not appear in it; none was found by reading, but the census cannot rule one out."
     "No live tick was run, no run lock was taken, nothing under data/ was written. data/wm-trace was opened for reading only."
     "No ruling. Nothing here is written to aif-equations.edn :choices or control-map-edges.edn :decisions; whether R15's mechanism should be wired, and whether the catalogue's evidence sentence should stand, is Joe's."]}
+
+  {:node :R11
+   :stage "SELECT"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:27"
+   :slice 14
+   :label "Hierarchical shared budget"
+   :kind :plumbing-node
+   :verdict :hole
+   :hole
+   {:type :mechanism-built-and-never-entered
+    :statement "R11's exact shared-budget arbiter and ranked-field adapter are implemented (src/futon2/aif/hierarchical_budget.clj:157-212; src/futon2/aif/hierarchical_budget_adapter.clj:66-107), exposed through a policy wrapper (src/futon2/aif/policy.clj:23-31), and pass 14 focused tests / 48 assertions. No production caller enters that wrapper, adapter, or arbiter: the slice's census searched 631 code files and found zero production callers, while 0 of 892 records across 58 wm-trace files carry an R11 route hop or derived arbiter output marker (holes/labs/wm-contract/runs/V7-R11-node-sim/00-r11.edn, sha256 b80a827f5260fb5bce9cfe34ba9192ca3a4d3690d005194cf0d3de5501323042). The registry is met because it explicitly classifies R11 as plumbing and gives it no equation (holes/labs/wm-contract/aif-equations.edn:520-521); the hole is between the built boundary and the running machine."
+    :not-a-ruling "Whether to connect the arbiter, broaden R11 to the operational document's multi-agent/shared-state criterion, or accept the narrower Campaign S ranked-field meaning is Joe's. This row records only the code, corpus, and retained-evidence state."}
+   :legs
+   {:a {:status :done :basis "No equation reference exists; process census and production call graph are in runs/V7-R11-node-sim/00-r11.edn :registry-carries-no-r11-equation, :requirer-census, and :corpus-census."}
+    :b {:status :not-applicable :basis "No R11 budget carrier found in 119 DarkTower/WarMachine modules, symbol-concordance.edn, or p4ng/sec-lean-state-generated.tex (the receipt's :lean-carrier-search)."}
+    :c {:status :not-applicable :basis "R11 is loop-band (p4ng/empirics-futon/control-stages.edn:27); ALIGN-rnode-process-census.md:16-23 scopes the census to assurance and contains no R11 cell."}
+    :d {:status :done :basis "PROBLEMS-r15-r11-r17-batch5.md:83-99: the scope disagreement remains, the factoring status is confirmed unmapped at p4ng/empirics-futon/factoring-table.tex:32-36, and general multi-agent composition has no production arbiter caller."}}
+   :harness {:runner "holes/labs/wm-contract/v7_r11_node_sim.clj"
+             :receipt "holes/labs/wm-contract/runs/V7-R11-node-sim/00-r11.edn"
+             :receipt-sha256 "b80a827f5260fb5bce9cfe34ba9192ca3a4d3690d005194cf0d3de5501323042"
+             :checks "10 pass; 5 planted detectors caught; two runs byte-identical."
+             :tests "hierarchical-budget-test 8/26 and hierarchical-budget-adapter-test 6/22, both 0 failures/errors."}
+   :limits ["The call census is textual; a dynamically resolved caller could evade it."
+            "Campaign S is :not-found only in the 3683 searched files; p4ng/sec-catalog.tex:243 is a narrative claim, and no claim is made that the run did not happen."
+            "No live tick ran, no run lock was taken, and data/wm-trace was read only."]}
 ]}

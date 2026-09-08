@@ -17,13 +17,13 @@
    :result :pass,
    :equation-row-count 0,
    :all-r11-occurrences
-   [{:line 521,
+   [{:line 1010,
      :text ":plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]"}],
    :plumbing-hits
-   [{:line 521,
+   [{:line 1010,
      :text ":plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]"}],
    :basis "holes/labs/wm-contract/aif-equations.edn:520-521"}
-  {:files-searched 585,
+  {:files-searched 631,
    :production-callers [],
    :roots ["src" "scripts" "test" "checks" "holes"],
    :hits
@@ -228,8 +228,8 @@
    :records-with-r11-evidence 0,
    :records-with-r11-route 0,
    :first-file "wm-trace-2026-05-18.edn",
-   :generic-budget-value-count 98,
-   :records-total 889,
+   :generic-budget-value-count 101,
+   :records-total 892,
    :basis
    "src/futon2/aif/hierarchical_budget.clj:157-213; src/futon2/aif/hierarchical_budget_adapter.clj:60-100",
    :generic-budget-record-contexts
@@ -330,7 +330,10 @@
     {:file "wm-trace-2026-09-04.edn", :index 0}
     {:file "wm-trace-2026-09-04.edn", :index 1}
     {:file "wm-trace-2026-09-04.edn", :index 2}
-    {:file "wm-trace-2026-09-04.edn", :index 3}],
+    {:file "wm-trace-2026-09-04.edn", :index 3}
+    {:file "wm-trace-2026-09-07.edn", :index 0}
+    {:file "wm-trace-2026-09-07.edn", :index 1}
+    {:file "wm-trace-2026-09-07.edn", :index 2}],
    :parse-errors [],
    :evidence-keys-searched
    [:adapter/schema-version
@@ -383,8 +386,8 @@
     :total-utility
     :utility
     :within-all-budgets?],
-   :last-file "wm-trace-2026-09-04.edn",
-   :files-total 57}
+   :last-file "wm-trace-2026-09-07.edn",
+   :files-total 58}
   {:narrative-hits
    [{:file
      "/home/joe/code/futon2/holes/labs/wm-contract/VERIFY-r-nodes.edn",
@@ -415,7 +418,7 @@
     "canary-0a33ac68-aa60-4018-a896-5643f259a2d4"
     "wm-instrumented-S-20260821/r17-intertick"
     "97266161492420cddfdffa394e49dbc540bbcf1c2e80616483b2732754151990"],
-   :files-searched 3510,
+   :files-searched 3683,
    :structured-record-hits [],
    :basis
    "/home/joe/code/p4ng/sec-catalog.tex:243; /home/joe/code/p4ng/empirics-futon/empirics.tex:50",
@@ -560,15 +563,13 @@
    :stale-equation-citation
    {:claimed "aif-equations.edn:472-473",
     :actual
-    [{:line 472,
-      :text
-      "{:overtake-dominant \"Any overtake refutes. REJECTED HERE ON A MEASUREMENT, not on taste: on the recorded 2026-09-02 pair it refutes every claim after one tick, because the chosen mission's mission-value-factor halves by construction (0.59 to 0.295, non-progress-decay 1.0 to 0.5) while every rival's factor is byte-identical. Such a test measures the decay, not the rationale.\""}
+    [{:line 472, :text ":selection-retrospective"}
      {:line 473,
       :text
-      ":weighted-legs \"Combine the four legs with declared weights. REJECTED HERE: three of the four legs are typed absences on this corpus, so the weights would be unmeasurable and would be fiat standing in for measurement.\""}],
+      "{:observed :rationale-recorded-never-scored :status :observed-not-decided"}],
     :still-lands? false,
     :current-plumbing
-    [{:line 521,
+    [{:line 1010,
       :text ":plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]"}]},
    :fresh-pointers
    {:contract
@@ -635,7 +636,7 @@
    :basis
    "holes/labs/wm-contract/PROBLEMS-r15-r11-r17-batch5.md:83-99"}
   {:carrier-like-definition-hits [],
-   :mathlib-files-searched 91,
+   :mathlib-files-searched 119,
    :basis
    "/home/joe/code/mathlib4/DarkTower/WarMachine; holes/labs/wm-contract/symbol-concordance.edn; /home/joe/code/p4ng/sec-lean-state-generated.tex",
    :result :pass,
@@ -643,16 +644,16 @@
    :generated-state-hits [],
    :finding :not-applicable-no-r11-budget-carrier-found,
    :all-lean-text-hits
-   [{:line 7187,
+   [{:line 7321,
      :text "| R11",
      :file "DarkTower/WarMachine/Holes.lean"}
-    {:line 7231,
+    {:line 7365,
      :text "(.R11, .R16),",
      :file "DarkTower/WarMachine/Holes.lean"}
-    {:line 7236,
+    {:line 7370,
      :text "(.R6, .R11),",
      :file "DarkTower/WarMachine/Holes.lean"}
-    {:line 7263,
+    {:line 7397,
      :text "[{ edge := (.R11, .R16), grounds := [.ruling] },",
      :file "DarkTower/WarMachine/Holes.lean"}],
    :symbol-concordance-hits []}
@@ -680,8 +681,8 @@
  :corpus
  {:root "data/wm-trace",
   :read-only true,
-  :file-count 57,
-  :record-count 889,
+  :file-count 58,
+  :record-count 892,
   :parse-errors []},
  :stage-at "/home/joe/code/p4ng/empirics-futon/control-stages.edn:27",
  :slice 14,
