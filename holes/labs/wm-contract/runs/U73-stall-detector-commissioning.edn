@@ -1,0 +1,33 @@
+{:row :U73
+ :recorded-at "2026-09-08T15:40:00Z"
+ :harness "holes/labs/wm-contract/stall_detector_controls.sh:1-81"
+ :isolation "The harness copies build_step.bb and extracts stall_check from wm-build-loop.sh into a mktemp directory; its fixture ledger, logs, and notify stub never touch the live loop, ledger, log, or Agency route."
+ :mechanisms
+ [{:path "holes/labs/wm-contract/wm-build-loop.sh:64-68"
+   :sha256 "f54de426862a1d8c91e8a047b3dd883f095f690f4fdd7f3bba8aa22b26432672"}
+  {:path "holes/labs/wm-contract/build_step.bb:28-40"
+   :sha256 "5178a26d674e673c4e5a780962a34946a2e5160116e9af0c1cca17ef3d6907ca"}]
+ :runs
+ [{:case :induced-stall
+   :fixture-before-sha256 "373fb0771ac5e54da4b6db737aff46598226ae29a116f2c07f65f02b03cca59f"
+   :iterations 3
+   :exit 3
+   :log "stalled: FIXTURE:open:-577542018 has been next-open for 3 iterations without changing status"
+   :notify "notify:stalled on row FIXTURE:open:-577542018 (3 iterations, no status change)"}
+  {:case :induced-health-refused-edit
+   :fixture-before-sha256 "373fb0771ac5e54da4b6db737aff46598226ae29a116f2c07f65f02b03cca59f"
+   :fixture-after-sha256 "92134a055d011e696230d216392462b5dafcc734f9c90d1c09fdcf358c495859"
+   :edit ":refused false -> :refused true"
+   :iterations-before-edit 2
+   :iterations-after-edit 2
+   :exit 0
+   :log ""
+   :notify ""}
+  {:case :mutation-pre-e84c114e-projection
+   :mutation "Replace whole-row (hash i) with (hash (select-keys i [:progress :evidence :slice-b2a :slice-b2b])) in the harness copy."
+   :mutant-build-step-sha256 "f7e2753554bd8ef8edd4c4103bcc209c0aeaa0bf4db6db1cc4c33ab2e4d91bd3"
+   :edit ":refused false -> :refused true"
+   :exit 3
+   :log "stalled: FIXTURE:open:-15128758 has been next-open for 3 iterations without changing status"
+   :notify "notify:stalled on row FIXTURE:open:-15128758 (3 iterations, no status change)"}]
+ :result :pass}
