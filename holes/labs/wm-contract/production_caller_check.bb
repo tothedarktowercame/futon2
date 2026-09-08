@@ -21,7 +21,7 @@
 (defn production? [path]
   (or (str/starts-with? path "src/") (str/starts-with? path "scripts/")))
 
-(defn inspect-claim [{:keys [id needles declaration-path expected-gap] :as claim}]
+(defn inspect-claim [{:keys [needles declaration-path expected-gap] :as claim}]
   (let [hits (->> needles (mapcat git-grep) distinct sort vec)
         declaration-found? (boolean (some #{declaration-path} hits))
         callers (->> hits (remove #{declaration-path}) (filter production?) vec)
