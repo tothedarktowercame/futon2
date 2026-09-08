@@ -37,67 +37,127 @@
 (println)
 
 ;; ---------------------------------------------------------------------------
-(println "1. negative control over ALIGN's 42 censused cells, under PATTERN v1")
-;; v1 is pinned EXPLICITLY: it is what ALIGN's 42 were measured under, so it stays
-;; the comparability baseline even though the ledger now defaults to v2.
-(let [{:keys [exit data]} (run-census "--pattern" "v1")
-      tally (frequencies (map :verdict (:results data)))]
-  (check "42 cells derived" 42 (count (:results data)))
-  ;; ALIGN's matrix, reproduced: 34 absent, 5 exists, 2 named-only, and the one
-  ;; cell whose pointer has drifted since 2026-09-05.
-  ;; 2026-09-06, SECOND STATE OF THIS CHECK. It first pinned
-  ;; {:absent 34 :exists 5 :named-only 2 :stale-adjudication 1} with exit 3 --
-  ;; the drifted [E-T] pointer. claude-1 (ALIGN's author) then corrected the
-  ;; citation (futon2 4c400a62) and the ledger re-lifted it, so the census is
-  ;; now whole. The expected values move because THE WORLD MOVED, and the git
-  ;; history of this file is the record of that; what must NOT happen is this
-  ;; check being loosened so that both states pass. Controls 5 and 6 below are
-  ;; what keep the refusal proven now that no live cell is stale.
-  (check "tally matches ALIGN" {:absent 34 :exists 6 :named-only 2} tally)
-  (check "no disagreement with the census of record" [] (:disagreements data))
-  (check "no stale adjudications" [] (:stale data))
-  (check "exits 0 (whole census, nothing refused)" 0 exit))
+(println "1. the census as it stands -- and it stands at EXIT 3, deliberately")
+;; FOURTH STATE OF THIS SUITE. It has pinned, in order: ALIGN's 42 with a
+;; drifted [E-T]; the repaired 42; the v2 widening and its exit-4; and now the
+;; census AFTER PA6z-PA10z built real boundaries. :exists went 6 -> 14 because
+;; nine cells were EARNED, not because the check was loosened -- every one is
+;; adjudicated in ALIGN (2a495a7d, e53f1e26) after claude-1 re-read the source
+;; for meaning, not merely for pointer resolution.
+;;
+;; The suite pins exit 3, NOT exit 0, and that is the point of this state: one
+;; adjudication is stale and MUST STAY UNCREDITED until its owner rules. A
+;; suite that went green here would be hiding the only live finding on the board.
+(let [v1 (run-census "--pattern" "v1")
+      v2 (run-census "--pattern" "v2")]
+  (check "v1 and v2 agree cell for cell"
+         (mapv (juxt :node :cell :verdict) (:results (:data v1)))
+         (mapv (juxt :node :cell :verdict) (:results (:data v2))))
+  (check "tally" {:absent 26 :named-only 1 :exists 14 :stale-adjudication 1}
+         (frequencies (map :verdict (:results (:data v2)))))
+  (check "no disagreement with the census of record" [] (:disagreements (:data v2)))
+  (check "exits 3 -- one stale adjudication, refused not papered over" 3 (:exit v2)))
 
-;; ---------------------------------------------------------------------------
-(println "\n2. live pin -- an :exists cell (R16 dispatched, [E-16-D])")
-(let [{:keys [data]} (run-census "--pattern" "v1")
+(println "\n2. the one stale cell is [E-T-S], and it is a GOVERNANCE finding, not just drift")
+;; Two things are wrong with this cell and only one of them is a rotted pointer.
+;;   (i) DRIFT: PA13z (futon2 d17f1088) split TRACE triage out of the decision
+;;       sheet and moved `trace-discharges` from :344 to :212. Routine, and the
+;;       harness reports it with the correction, as it did for [E-T].
+;;   (ii) THE REAL ONE: [E-T-S] has NO ALIGN COUNTERPART. A mechanical sweep of
+;;       every adjudication tag against the census of record finds exactly one
+;;       with no mention -- this one. It was written straight into the
+;;       instrument's data by PA9z's work seat (dfe4dcfd), crediting TRACE
+;;       `surfaced` on a reading the census owner never made. This ledger's own
+;;       header says the adjudicated cells ARE ALIGN's cells transcribed.
+;;       An instrument that can credit a cell its census of record never
+;;       adjudicated is self-certifying -- R9's problem, one layer up, in the
+;;       thing built to detect R9's problem.
+;; So the pointer is NOT quietly re-lifted to :212. That would launder an
+;; unbacked adjudication into a fresh-looking one, which is precisely what this
+;; lane refused to do for [E-T]. Routed to claude-1: adjudicate it in ALIGN and
+;; the ledger re-lifts, or the entry comes out.
+(let [{:keys [data]} (run-census "--pattern" "v2")
+      c (cell data "TRACE" :surfaced)
+      bad (first (:stale c))]
+  (check "not credited" :stale-adjudication (:verdict c))
+  (check "tag" "[E-T-S]" (:tag c))
+  (check "why" :token-not-in-range (:why bad))
+  (check "the rotted pointer" ["futon2/src/futon2/aif/bulletin.clj" 344 347 "trace-discharges"]
+         [(:file bad) (:from bad) (:to bad) (:expect bad)])
+  (check "harness supplies the correction rather than only complaining" [212 284]
+         (:token-found-at bad)))
+
+(println "\n3. live pin -- an :exists cell whose pointers moved and were followed")
+;; R16 :dispatched was pinned at :755-767/:2762-2775 when this suite was
+;; written. PA10z edited full_loop_runner.clj and the pointers moved; the ledger
+;; followed them. Re-pinned at the new lines so the NEXT move is caught too.
+(let [{:keys [data]} (run-census "--pattern" "v2")
       c (cell data "R16" :dispatched)]
   (check "verdict" :exists (:verdict c))
-  (check "basis" :pinned-adjudication (:basis c))
   (check "tag" "[E-16-D]" (:tag c))
-  ;; Pointer quoted verbatim from the harness run, per :PA1z acceptance.
-  (check "pointers all landed"
-         [{:ok? true :file "futon2/src/futon2/aif/full_loop_runner.clj" :from 755 :to 767 :expect "dispatch!"}
-          {:ok? true :file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2762 :to 2775 :expect "checkpoint"}]
+  (check "pointers, at their post-PA10z lines"
+         [{:ok? true :file "futon2/src/futon2/aif/full_loop_runner.clj" :from 803 :to 815 :expect "dispatch!"}
+          {:ok? true :file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2819 :to 2832 :expect "checkpoint"}]
          (:pointers c)))
 
-;; ---------------------------------------------------------------------------
-(println "\n3. live pin -- an :absent cell (R10 checked)")
-(let [{:keys [data]} (run-census "--pattern" "v1")
-      c (cell data "R10" :checked)]
-  (check "verdict" :absent (:verdict c))
-  (check "basis" :node-link-search (:basis c))
-  (check "zero hits" 0 (:hits c))
-  (check "enumeration declared untruncated" true (:untruncated c))
-  (check "command quoted verbatim"
-         "rg -n '(:node|:wm/node|:route/node|:control-node)[[:space:]]+:R10' futon3c/src/futon3c/agency futon3c/src/futon3c/social futon3c/src/futon3c/transport"
-         (:command c)))
+(println "\n4. the route-hop adjudications still dispose of what v2 sees")
+(let [{:keys [data]} (run-census "--pattern" "v2")
+      rh (filterv #(= :route-hop-adjudicated (:basis %)) (:results data))]
+  (check "15 cells disposed of by route-hop reading" 15 (count rh))
+  (check "across the three route-tagged nodes" {"R12" 5 "R20" 5 "TRACE" 5}
+         (frequencies (map :node rh)))
+  (check "every one cites ALIGN's amendment" #{true}
+         (set (map #(boolean (re-find #"d232ea06" (str (:authority %)))) rh))))
 
-;; ---------------------------------------------------------------------------
-(println "\n4. live pin -- the repaired cell (TRACE recorded, [E-T])")
-(let [{:keys [data]} (run-census "--pattern" "v1")
-      c (cell data "TRACE" :recorded)]
-  ;; This cell is the harness's first real catch: its war_machine.clj citation
-  ;; had drifted 6750-6759 -> 6789 under the wm loop's edits, the harness refused
-  ;; to credit it, ALIGN's author corrected the document, and the ledger followed.
-  ;; Pinning the corrected pointer here means a RE-drift is caught again rather
-  ;; than being absorbed as normal.
-  (check "credited again after the ALIGN correction" :exists (:verdict c))
-  (check "basis" :pinned-adjudication (:basis c))
-  (check "the re-lifted pointer, and the untouched second half"
-         [{:ok? true :file "futon2/scripts/futon2/report/war_machine.clj" :from 6789 :to 6789 :expect ":TRACE"}
-          {:ok? true :file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!"}]
-         (:pointers c)))
+(println "\n4b. PA15z MECHANISM (a) -- the PAIRED control, both directions")
+;; PA15z exists because the node-link search establishes NODE linkage while the
+;; census reads CELL verdicts. The obvious fix -- silence every unclaimed cell
+;; of a linked node -- would blind the instrument to the next boundary anyone
+;; builds, which is PA2z's failure with the sign flipped. So the mechanism
+;; matches by SITE, and the control has to prove BOTH directions or it proves
+;; nothing.
+(let [{:keys [data]} (run-census "--pattern" "v2")]
+  ;; (i) SILENCES THE KNOWN: R10's three sites are declared as serving
+  ;; commissioned+dispatched, so the five cells no adjudication claims become
+  ;; decidable-as-absent instead of jamming the census at exit 4.
+  (check "R10's five unclaimed cells resolve as absent"
+         {[:parked :absent] true [:returned :absent] true [:checked :absent] true
+          [:recorded :absent] true [:surfaced :absent] true}
+         (into {} (for [k [:parked :returned :checked :recorded :surfaced]]
+                    [[k (:verdict (cell data "R10" k))] true])))
+  (check "and say WHY, not merely that" #{:serves-cells-accounted}
+         (set (map #(:basis (cell data "R10" %)) [:parked :returned :checked :recorded :surfaced])))
+  ;; (ii) DOES NOT SILENCE THE CREDITED: the same declaration must leave the two
+  ;; earned cells standing.
+  (check "the two earned R10 cells still credited"
+         [[:exists "[E-10-C]"] [:exists "[E-10-D]"]]
+         [((juxt :verdict :tag) (cell data "R10" :commissioned))
+          ((juxt :verdict :tag) (cell data "R10" :dispatched))]))
+
+(println "\n4c. PLANTED CONTROL -- the mechanism must NOT have gone blind")
+;; The failure this guards is the one that would look identical from outside:
+;; a mechanism that silences by NODE rather than by SITE would produce the same
+;; green above while hiding every future boundary. Plant a declaration missing
+;; ONE of R10's three sites; the hit at that site is then unaccounted-for
+;; conduct, and the five cells must go straight back to needing adjudication.
+(let [led (edn/read-string (slurp (io/file here "census-ledger.edn")))
+      planted (update led :serves-cells-declarations
+                      (fn [ds] (mapv (fn [d]
+                                       (if (= "R10" (:node d))
+                                         (update d :sites #(vec (remove (fn [s] (str/includes? s ":121")) %)))
+                                         d))
+                                     ds)))
+      tmp (io/file (System/getProperty "java.io.tmpdir") "pa15z-planted-sites.edn")]
+  (spit tmp (pr-str planted))
+  (let [{:keys [data]} (run-census "--pattern" "v2" "--ledger" (str tmp))]
+    (check "one undeclared site is enough to re-open all five cells"
+           #{:hit-needs-adjudication}
+           (set (map #(:verdict (cell data "R10" %))
+                     [:parked :returned :checked :recorded :surfaced])))
+    (check "the two earned cells are unaffected -- adjudication still wins"
+           #{:exists}
+           (set (map #(:verdict (cell data "R10" %)) [:commissioned :dispatched]))))
+  (.delete tmp))
 
 (println "\n5. PLANTED CONTROL -- a corrupted pointer must refuse")
 (let [led (edn/read-string (slurp (io/file here "census-ledger.edn")))
@@ -136,47 +196,17 @@
   (.delete tmp))
 
 ;; ---------------------------------------------------------------------------
-(println "\n7. PATTERN v2 -- widened, adjudicated, and now agreeing with v1")
-;; THIRD STATE OF THIS CHECK, and the history is the point. claude-1 ruled the
-;; pattern be widened and versioned rather than compensated for by hand. The v2
-;; negative control then came back EXIT 4 with 19 disagreements on R12/R20/TRACE
-;; -- not the clean diff anyone expected. Nothing was absorbed: no verdict had
-;; reversed, but the stated basis for those cells (ALIGN's [A] "returned no
-;; matches") was falsified, so it was routed as an exit-4. claude-1 adjudicated
-;; it in ALIGN (d232ea06) and this ledger now cites that amendment.
-;;
-;; So v2 reaching parity with v1 is EARNED, not assumed: the instrument was
-;; widened until it saw more, the extra sightings were adjudicated by the
-;; document's author, and only then did the two agree. Narrowing v2 back would
-;; have produced the same green with none of the knowledge.
-(let [v1 (run-census "--pattern" "v1")
-      v2 (run-census "--pattern" "v2")
-      tally (fn [r] (frequencies (map :verdict (:results (:data r)))))]
-  (check "v1 still exits 0" 0 (:exit v1))
-  (check "v2 exits 0 after the adjudications" 0 (:exit v2))
-  (check "both versions agree cell for cell"
-         (mapv (juxt :node :cell :verdict) (:results (:data v1)))
-         (mapv (juxt :node :cell :verdict) (:results (:data v2))))
-  (check "and on the tally" {:absent 34 :exists 6 :named-only 2} (tally v2))
-  (check "no disagreements left under v2" [] (:disagreements (:data v2))))
-
-(println "\n8. the 19 are adjudicated, NOT re-hidden")
-;; The distinction this check exists to protect: v2 must still SEE the route-hop
-;; hits and dispose of them by a cited adjudication. If a later edit narrowed the
-;; pattern or the scope instead, the tally above would still be green while the
-;; instrument had gone blind again -- so assert the basis, not just the verdict.
-(let [{:keys [data]} (run-census "--pattern" "v2")
-      adjudicated (filterv #(= :route-hop-adjudicated (:basis %)) (:results data))]
-  (check "19 cells disposed of by the route-hop adjudication" 19 (count adjudicated))
-  (check "confined to the three nodes" {"R12" 7 "R20" 6 "TRACE" 6}
-         (frequencies (map :node adjudicated)))
-  (check "every one cites ALIGN's amendment, not a restated argument" #{true}
-         (set (map #(boolean (re-find #"d232ea06" (str (:authority %)))) adjudicated)))
-  ;; The two cells the node-wide entry must NOT have swallowed.
-  (check "TRACE recorded still credited by [E-T]" [:exists :pinned-adjudication]
-         ((juxt :verdict :basis) (cell data "TRACE" :recorded)))
-  (check "R20 checked still [N20] named-only" [:named-only :pinned-adjudication]
-         ((juxt :verdict :basis) (cell data "R20" :checked))))
+(println "\n7. (removed) the old v1/v2-parity and route-hop-count checks")
+;; Checks 7 and 8 of the previous state pinned {:exists 6} with both versions at
+;; exit 0 and 19 route-hop cells. All three numbers were correct then and are
+;; wrong now, for the same reason: PA6z-PA10z built boundaries, ALIGN absorbed
+;; them, and R20 :checked was PROMOTED out of :named-only -- the first such
+;; promotion on the board, which is the transition this whole track exists to
+;; cause. Their content is not lost: parity, the tally and the route-hop
+;; disposition are all asserted in checks 1 and 4 against current reality.
+;; Recorded as a removal rather than silently deleted, because "the check that
+;; used to pass no longer applies" is exactly the claim that needs a reason
+;; attached to it.
 
 (println)
 (if (seq @failures)

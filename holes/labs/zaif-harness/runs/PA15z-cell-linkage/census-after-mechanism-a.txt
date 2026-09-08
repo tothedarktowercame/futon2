@@ -1,0 +1,51 @@
+Box 12 process census -- NEGATIVE CONTROL over ALIGN's censused nodes
+census of record: futon2/holes/labs/wm-contract/ALIGN-rnode-process-census.md (2026-09-05)
+node-link pattern: v2 (2 form(s), 5 scope paths)
+
+node    cell           verdict                  basis
+R9      commissioned   absent                   node-link-search
+R9      dispatched     absent                   node-link-search
+R9      parked         absent                   node-link-search
+R9      returned       absent                   node-link-search
+R9      checked        named-only               pinned-adjudication [N9]
+R9      recorded       absent                   node-link-search
+R9      surfaced       absent                   node-link-search
+R10     commissioned   exists                   pinned-adjudication [E-10-C]
+R10     dispatched     exists                   pinned-adjudication [E-10-D]
+R10     parked         absent                   serves-cells-accounted
+R10     returned       absent                   serves-cells-accounted
+R10     checked        absent                   serves-cells-accounted
+R10     recorded       absent                   serves-cells-accounted
+R10     surfaced       absent                   serves-cells-accounted
+R12     commissioned   absent                   route-hop-adjudicated
+R12     dispatched     absent                   route-hop-adjudicated
+R12     parked         absent                   route-hop-adjudicated
+R12     returned       exists                   pinned-adjudication [E-12-R]
+R12     checked        exists                   pinned-adjudication [E-12-K]
+R12     recorded       absent                   route-hop-adjudicated
+R12     surfaced       absent                   route-hop-adjudicated
+R20     commissioned   absent                   route-hop-adjudicated
+R20     dispatched     absent                   route-hop-adjudicated
+R20     parked         absent                   route-hop-adjudicated
+R20     returned       absent                   route-hop-adjudicated
+R20     checked        exists                   pinned-adjudication [E20-C]
+R20     recorded       absent                   route-hop-adjudicated
+R20     surfaced       exists                   pinned-adjudication [E20-S]
+TRACE   commissioned   absent                   route-hop-adjudicated
+TRACE   dispatched     absent                   route-hop-adjudicated
+TRACE   parked         absent                   route-hop-adjudicated
+TRACE   returned       absent                   route-hop-adjudicated
+TRACE   checked        absent                   route-hop-adjudicated
+TRACE   recorded       exists                   pinned-adjudication [E-T]
+TRACE   surfaced       stale-adjudication       pinned-adjudication [E-T-S]
+R16     commissioned   exists                   pinned-adjudication [E-16-C]
+R16     dispatched     exists                   pinned-adjudication [E-16-D]
+R16     parked         exists                   pinned-adjudication [E-16-P]
+R16     returned       exists                   pinned-adjudication [E-16-R]
+R16     checked        exists                   pinned-adjudication [E-16-K]
+R16     recorded       exists                   pinned-adjudication [E-16-X]
+R16     surfaced       exists                   pinned-adjudication [E-16-S]
+
+tally: {:absent 26, :exists 14, :named-only 1, :stale-adjudication 1} (42 cells)
+
+STALE ADJUDICATIONS -- these cells are NOT credited:

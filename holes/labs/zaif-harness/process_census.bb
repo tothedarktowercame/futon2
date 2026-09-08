@@ -136,6 +136,45 @@
 (defn- adjudication-for [node cell]
   (first (filter #(and (= node (:node %)) (= cell (:cell %))) (:adjudicated ledger))))
 
+(defn- parse-site
+  "A declared site is [repo:]path:N or [repo:]path:N-M. Returns [path from to]."
+  [site]
+  (let [site (if-let [i (str/index-of site ":")]
+               (if (re-find #"^[a-z0-9-]+:[^0-9]" site) (subs site (inc i)) site)
+               site)
+        [_ path a b] (re-matches #"^(.*):(\d+)(?:-(\d+))?$" site)]
+    (when path [path (parse-long a) (parse-long (or b a))])))
+
+(defn- hit-accounted?
+  "True when HIT falls inside one of DECL's declared site ranges.
+
+   Path match is a SUFFIX match: hits are rooted at the census root
+   (futon2/src/...), declarations are repo-relative (src/...)."
+  [decl hit]
+  (let [[_ hpath hline] (re-matches #"^([^:]+):(\d+):.*$" hit)]
+    (when hpath
+      (let [hline (parse-long hline)]
+        (boolean
+         (some (fn [site]
+                 (when-let [[path from to] (parse-site site)]
+                   (and (str/ends-with? hpath path) (<= from hline to))))
+               (:sites decl)))))))
+
+(defn- serves-cells-verdict
+  "Mechanism (a). A cell no adjudication claims is :absent ONLY IF the node has a
+   :serves-cells declaration that does not name it AND every hit it found is
+   accounted for by that declaration's sites. An UNACCOUNTED hit is conduct the
+   census has never adjudicated, so it still needs adjudication -- silencing by
+   node would blind the instrument to the next boundary anyone builds."
+  [node cell hits]
+  (when-let [decl (first (filter #(= node (:node %)) (:serves-cells-declarations ledger)))]
+    (when-not (some #{cell} (:serves-cells decl))
+      (let [unaccounted (remove #(hit-accounted? decl %) hits)]
+        (when (empty? unaccounted)
+          {:verdict :absent :basis :serves-cells-accounted
+           :authority (:authority decl)
+           :serves-cells (:serves-cells decl)})))))
+
 (defn- route-hop-for
   "An adjudication claude-1 made in ALIGN (d232ea06) covering a whole node's
    route-hop cells. Consulted AFTER the per-cell adjudications above, so an
@@ -168,9 +207,12 @@
         {:node node :cell cell :verdict :absent
          :basis (if tgt :targeted-absence-search :node-link-search)
          :tag (:tag tgt) :command (:command r) :hits 0 :untruncated true}
-        {:node node :cell cell :verdict :hit-needs-adjudication
-         :basis (if tgt :targeted-absence-search :node-link-search)
-         :command (:command r) :hits (:hits r) :untruncated true})))))
+        (if-let [sc (serves-cells-verdict node cell (:hits r))]
+          (merge {:node node :cell cell :command (:command r) :hits (:hits r)
+                  :untruncated true} sc)
+          {:node node :cell cell :verdict :hit-needs-adjudication
+           :basis (if tgt :targeted-absence-search :node-link-search)
+           :command (:command r) :hits (:hits r) :untruncated true}))))))
 
 (defn- declared-verdict [node cell]
   (if-let [adj (adjudication-for node cell)] (:verdict adj) :absent))

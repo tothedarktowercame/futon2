@@ -223,6 +223,60 @@
   :disposition "Reported as a hit; disposed of by reading, never auto-credited. See PA3z's slice artifact for the R5 adjudication."}
 
  ;; --------------------------------------------------------------------------
+ ;; :serves-cells DECLARATIONS (PA15z, mechanism (a)). Lifted from ALIGN --
+ ;; futon2 2a495a7d (R10) and e53f1e26 (R12/R20/R16). NOT restated: the reading
+ ;; is claude-1's, this is the instrument consuming it.
+ ;;
+ ;; THE DEFECT THESE FIX. The node-link search establishes NODE linkage; the
+ ;; census reads CELL verdicts. While every node was fully adjudicated or wholly
+ ;; unlinked the difference never showed. The moment PA6z gave R10 three real
+ ;; :node :R10 sites, the five cells no adjudication claimed found the SAME
+ ;; three hits and reported :hit-needs-adjudication -- correct behaviour, useless
+ ;; answer, census exit 4.
+ ;;
+ ;; MATCHING IS BY SITE, NOT BY NODE, AND THAT IS THE WHOLE DESIGN. A hit is
+ ;; ACCOUNTED FOR when it falls inside a declared site range. A cell not named in
+ ;; any :serves-cells is :absent ONLY IF EVERY HIT IT FOUND IS ACCOUNTED FOR. A
+ ;; hit at an UNDECLARED site is new conduct the census has never adjudicated,
+ ;; and it still reports :hit-needs-adjudication.
+ ;;
+ ;; Node-wide silencing was the obvious implementation and it is the wrong one:
+ ;; it would mark every unclaimed cell absent forever, so the next R10 boundary
+ ;; anyone builds would be invisible to the instrument that exists to find it.
+ ;; That is PA2z's blindness with the sign flipped, and PA15z's acceptance
+ ;; demands a control for BOTH directions precisely so this cannot be shipped by
+ ;; accident.
+ ;;
+ ;; WHY THE TIDIER RULE WAS REFUSED. PA6z's evidence carries
+ ;; :process/stage :dispatched, and a grep across the whole declared scope
+ ;; returns exactly ONE occurrence -- so "read the code's own stage tag" looks
+ ;; like a cleaner mechanical discriminator than a ledger declaration. It is
+ ;; unsafe alone, and ALIGN records the counterexample inside the adjudication:
+ ;; R10 :commissioned is credited on the :r10/invalid-commission refusal, which
+ ;; carries NO stage tag. A tag-only rule would uncredit a genuinely established
+ ;; cell. So the declaration decides and the stage tag corroborates.
+ :serves-cells-declarations
+ [{:node "R10" :authority "futon2 2a495a7d — ALIGN R10 adjudication"
+   :sites ["src/futon3c/social/coordination_ledger.clj:89"
+           "src/futon3c/social/coordination_ledger.clj:104"
+           "src/futon3c/social/coordination_ledger.clj:121"]
+   :serves-cells [:commissioned :dispatched]
+   :corroboration "the only :process/stage in the declared scope is :dispatched, at coordination_ledger.clj:122 — corroborates, never decides"}
+  {:node "R12" :authority "futon2 e53f1e26 — ALIGN R12/R20/R16 absorption"
+   :sites ["src/futon2/aif/calibration_admission.clj:6-44"]
+   :serves-cells [:returned :checked]}
+  {:node "R20" :authority "futon2 e53f1e26"
+   :sites ["src/futon2/aif/tripwire.clj:639-662"
+           "src/futon2/aif/bulletin.clj:190-208"]
+   :serves-cells [:checked :surfaced]}
+  {:node "R16" :authority "futon2 e53f1e26"
+   :sites ["src/futon2/aif/full_loop_runner.clj:141-182"
+           "src/futon2/aif/full_loop_runner.clj:2362-2379"
+           "src/futon2/aif/full_loop_runner.clj:2430"]
+   :serves-cells [:parked :surfaced]
+   :note "R16's other credited cells (E-16-C/D/R/K/X) are pinned adjudications and win on precedence, so R16 has no unclaimed cell for this mechanism to decide. claude-1 declared it anyway so PA15z has no partially-declared node to trip on."}]
+
+ ;; --------------------------------------------------------------------------
  ;; ROUTE-HOP ADJUDICATIONS (claude-1, 2026-09-06). Three adjudications, one
  ;; authority, two consumers.
  ;;
