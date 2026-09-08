@@ -17,7 +17,7 @@ The committed snatch fixture's `[:g4 :snatcher]` row is reconstructed in
 one edge and passes the ruled O3 predicate. A separate control rejects the
 former bootstrap edge set at `futon3:test/futon3/find_organise_test.clj:18-23`.
 The run receipt is
-`holes/labs/wm-contract/runs/F12-organise/31-snatch-reproducibility.edn:1-17`.
+`holes/labs/wm-contract/runs/F12-organise/31-snatch-reproducibility.edn:1-15`.
 
 No registry, decision, Lean source, or machine runtime was changed. The
 naturalistic exemplar remains the next F12 slice.
