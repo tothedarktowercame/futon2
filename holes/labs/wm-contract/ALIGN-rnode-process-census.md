@@ -108,16 +108,46 @@ coarseness visible for the first time):**
   sites spills into no other cell. The census may keep exiting 4 until
   PA15z consumes this; that exit is the instrument telling the truth.
 
+**R12/R20 adjudications (2026-09-08, claude-1, from claude-2's verified pin
+list, bell invoke-1788882067825; every boundary re-read at source for
+meaning, not only for pointer resolution):**
+
+- **[E-12-R] returned exists / [E-12-K] checked exists:** `admit!`
+  (`src/futon2/aif/calibration_admission.clj:6-44`, PA7z futon2 `62a6cb5f`)
+  refuses `:r12/untied-return` unless the return carries `:node :R12` and
+  the commission's id, and separately refuses `:r12/unchecked-return`
+  unless a check names that exact return AND commission with verdict
+  `:approve`; admission emits distinct `:returned` and `:checked` lifecycle
+  records tied to the commission. The two typed refusals are the PA7z
+  lossy-return bar, met as specified.
+- **[E20-S] surfaced exists:** the R20 discharge record carries
+  `:status :needs-joe :class :J` (`tripwire.clj:648-662`) and
+  `bulletin.clj:190-208` (`tripwire-discharges`, PA8z) reads it into the
+  waits-on-Joe section — the board's first `surfaced` cell served by
+  running code rather than an operator turn, answering PA11z finding 3.
+- **:serves-cells declarations, PA15z mechanism (a):**
+  `{:sites ["src/futon2/aif/calibration_admission.clj:6-44"]
+    :serves-cells [:returned :checked]}` (R12);
+  `{:sites ["src/futon2/aif/tripwire.clj:639-662"]
+    :serves-cells [:checked :surfaced]}` and
+  `{:sites ["src/futon2/aif/bulletin.clj:190-208"]
+    :serves-cells [:surfaced]}` (R20);
+  `{:sites ["src/futon2/aif/full_loop_runner.clj:141-182"
+            "src/futon2/aif/full_loop_runner.clj:2362-2379"
+            "src/futon2/aif/full_loop_runner.clj:2430"]
+    :serves-cells [:parked :surfaced]}` (R16, joining the six cells
+  already credited under E-16-C/D/R/K/X).
+
 ## 2. Matrix
 
 | control-stages node | commissioned | dispatched | parked | returned | checked | recorded | surfaced |
 |---|---|---|---|---|---|---|---|
 | R9 — No self-certification | absent [A] | absent [A] | absent [A] | absent [A] | named-only [N9] | absent [A] | absent [A] |
 | R10 — Scheduled entrypoint | exists [E-10-C] | exists [E-10-D] | absent [A-10] | absent [A-10] | absent [A-10] | absent [A-10] | absent [A-10] |
-| R12 — Two-layer calibration | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] |
-| R20 — Interoceptive tripwires | absent [A] | absent [A] | absent [A] | absent [A] | named-only [N20] | absent [A] | absent [A] |
+| R12 — Two-layer calibration | absent [A] | absent [A] | absent [A] | exists [E-12-R] | exists [E-12-K] | absent [A] | absent [A] |
+| R20 — Interoceptive tripwires | absent [A] | absent [A] | absent [A] | absent [A] | exists [E20-C] | absent [A] | exists [E20-S] |
 | TRACE — WM trace store | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | exists [E-T] | absent [A] |
-| R16 — Grounded actuation | exists [E-16-C] | exists [E-16-D] | absent [A16] | exists [E-16-R] | exists [E-16-K] | exists [E-16-X] | absent [A16] |
+| R16 — Grounded actuation | exists [E-16-C] | exists [E-16-D] | exists [E-16-P] | exists [E-16-R] | exists [E-16-K] | exists [E-16-X] | exists [E-16-S] |
 
 ### Cell evidence
 
@@ -150,6 +180,15 @@ coarseness visible for the first time):**
 - **[N20] named-only:** control-stages names R20 “Interoceptive tripwires” at
   `control-stages.edn:41`. That names checking at the node level, but the [A]
   search found no R20-linked handoff checker.
+  **PROMOTED to [E20-C], 2026-09-08 — the board's first :named-only →
+  :exists transition, the transition this track exists to cause.** What
+  promoted it: a node-linked REFUSING boundary now exists — `check!`
+  (`src/futon2/aif/tripwire.clj:639-658`, PA8z futon2 `8a8f65c4`) evaluates
+  the wire and returns `:tripwire/check :refused` with witnesses on
+  violation, an explicit `:passed` on clear, and treats persistence failure
+  as grounds to refuse the call. Named became checking the day the name
+  gained a boundary that can say no. Original [N20] text kept above as
+  history, per the [E-T] convention.
 - **[E-T] exists:** the WM attaches `:TRACE` to `:wm/route` immediately before
   the write at `war_machine.clj:6750-6759`; `trace/write-trace!` constructs and
   appends the exact record at `src/futon2/aif/trace.clj:723-745`. This credits
@@ -172,6 +211,20 @@ coarseness visible for the first time):**
   agent, job id, prompt reference and response at `:2762-2775`.
 - **[A16] absent:** the R16-specific command in §1 found neither a park record
   nor `notify/discharged-at`/bulletin discharge in the full-loop runner.
+  **SUPERSEDED for parked and surfaced, 2026-09-08 (PA10z, futon2
+  `ad51aa0d` + repair `c7fadbba`): the recorded absence was deliberately
+  falsified by construction — the track's intended outcome.** [E-16-P]
+  parked: `park-r16-stop-line!` (`full_loop_runner.clj:141-182`, called at
+  `:2362-2365`) refuses closure without a durable repair identity
+  (`:r16-park-repair-id-missing`, `:failure-stage :parked`) and registers
+  the park with the repair obligation as the awaited dependency. [E-16-S]
+  surfaced: the runner attaches `:lifecycle/discharge {:node :R16 :stage
+  :surfaced ...}` (`:2366-2379`) and queues it through
+  `brief/queue-item!` (`:2430`). Seam note, both cells: the boundaries take
+  injectable fns (`:r16-park-fn`, `:queue-fn`) — the default path is the
+  credited one; the injection point is where a test can silence it, which
+  the census's scope statement should treat as its instrument edge. The
+  original [A16] search text stands above as what was true when it ran.
 - **[E-16-R] exists:** `poll-job!` returns only at an Agency terminal state
   (`full_loop_runner.clj:825-849`), and the author boundary refuses to advance
   unless that returned state is `done` (`:2823-2829`).
