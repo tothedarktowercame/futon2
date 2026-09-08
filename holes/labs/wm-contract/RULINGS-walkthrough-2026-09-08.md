@@ -179,3 +179,31 @@ epistemicTermsAreHorizonBlind: predicted variance is state-blind; four call
 sites declare depths 2/3/3/5). The demonstration inherits these documented
 properties; if an I-track fix later changes the scorer's depth semantics,
 the demonstration is re-run rather than grandfathered.
+
+## Item 11 — Box 2 becomes a Kanban with ownership; Box 6 holes name their closing packets
+
+> "Wouldn't it be great to get it so that the paper was reporting not having
+> holes in our lean formalism. [...] we had at one time talked about trying to
+> get Box 2 set up so that it could work like a Kanban board, where things were
+> being progressed from typed to formalized and witnessed. [...] there are 61
+> things which have been typed but not formalized. [...] I personally don't,
+> from this box two, have great visibility into where that sits in our work
+> queue. It doesn't seem that different each time when I look at it. So maybe
+> we should start to have not just those four columns, but a sort of sign-off
+> on which packet those items are being carried in and moved along to the next
+> stage. [...] it would be good to be organizing this thing as a DAG, so that
+> we get some sense of the priorities for the next steps. And right now this
+> Box 2 reads a little bit more like a slush."
+
+Direction, not a technical ruling: the generated boxes gain an OWNERSHIP
+dimension joined live from the worklist. Box 6: every live hole names its
+closing packet and stage; unowned holes render loudly as UNOWNED (measured at
+this walkthrough: wmRunsOnce and Strategic-mission-selection are the two
+unowned; find->F11, organise->F12, the run-gated six -> U80/RUN4; C is a
+deliberate refusal and should render as REFUSED-BY-DESIGN, distinct from an
+open hole, so the paper's honest end state is nine closed + one explicit
+refusal). Box 2: per family, "N moving, carried by <packet ids> / M unowned",
+with packet order read from the dependency frontier so the box exposes the
+DAG of next steps. Rows :U85 (Box 6) and :U86 (Box 2) mint this; the
+never-changing-box complaint is the acceptance test — a worklist status
+change must change the regenerated box.
