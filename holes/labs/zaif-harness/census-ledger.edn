@@ -124,37 +124,37 @@
  :adjudicated
  [{:node "R12" :cell :returned :verdict :exists :tag "[E-12-R]"
    :reading "Calibration admission refuses a return unless its R12 commission identity matches, then records the tied returned artifact in the admission receipt."
-   :pointers [{:file "futon2/src/futon2/aif/calibration_admission.clj" :from 7 :to 24 :expect ":r12/untied-return"}
-              {:file "futon2/src/futon2/aif/calibration_admission.clj" :from 35 :to 39 :expect ":returned"}]}
+   :pointers [{:file "futon2/src/futon2/aif/calibration_admission.clj" :from 7 :to 24 :expect ":r12/untied-return" :span-sha "c97e1cc67bccf60345714d6d5239811dcabbefb48f63223c13967bcf84ed6c2d"}
+              {:file "futon2/src/futon2/aif/calibration_admission.clj" :from 35 :to 39 :expect ":returned" :span-sha "4d37380335529d9a3040c259546f9e355345944976d1d42381e2e1a527a32f89"}]}
 
   {:node "R12" :cell :checked :verdict :exists :tag "[E-12-K]"
    :reading "Calibration admission refuses a missing, mismatched, or non-approving R12 check and records the approving check before returning admitted."
-   :pointers [{:file "futon2/src/futon2/aif/calibration_admission.clj" :from 25 :to 33 :expect ":r12/unchecked-return"}
-              {:file "futon2/src/futon2/aif/calibration_admission.clj" :from 39 :to 43 :expect ":checked"}]}
+   :pointers [{:file "futon2/src/futon2/aif/calibration_admission.clj" :from 25 :to 33 :expect ":r12/unchecked-return" :span-sha "d0055bfe64dce28d5f129a713cfcd948e89f1ace87c1e12b455c1a9bbf36b675"}
+              {:file "futon2/src/futon2/aif/calibration_admission.clj" :from 39 :to 43 :expect ":checked" :span-sha "2f05a631d66f4ab01c2b2da0b024888eefeff91fce9f7defea1ed3ab1060c16c"}]}
 
   {:node "R10" :cell :commissioned :verdict :exists :tag "[E-10-C]"
    :reading "run-scheduled-dispatch! refuses a scheduled run without a named commission, attaches :node :R10 before dispatch, and records that linked commission with the receipt."
-   :pointers [{:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 92 :to 105 :expect "linked-commission"}
-              {:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 121 :to 125 :expect ":commission"}]}
+   :pointers [{:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 92 :to 105 :expect "linked-commission" :span-sha "c2c75757d01dcd2e8f968d03e6e206d2a5b72def39077009c195d0de04e2e1db"}
+              {:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 121 :to 125 :expect ":commission" :span-sha "d8c64397c3a9391477441d1dbc072ae68b4e368c697e89b23c261a5caf3c8a9e"}]}
 
   {:node "R10" :cell :dispatched :verdict :exists :tag "[E-10-D]"
    :reading "The scheduled boundary refuses an absent or R10-unlinked dispatch receipt and persists the validated receipt joined to its commission identity."
-   :pointers [{:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 104 :to 113 :expect ":r10/unlinked-dispatch-receipt"}
-              {:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 121 :to 128 :expect ":dispatch/receipt"}]}
+   :pointers [{:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 104 :to 113 :expect ":r10/unlinked-dispatch-receipt" :span-sha "a5efc54865b28b53d95dbc7a817078b20fd7b15fc5876161cb300adb4acf6610"}
+              {:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 121 :to 128 :expect ":dispatch/receipt" :span-sha "01f38a8d92b01aed352c9e30f02fd36e59aed65036eedb7cb0ec88892131cdae"}]}
 
   {:node "R9" :cell :checked :verdict :exists :tag "[E-9-K-PA5]"
    :authority "Item-9 ruling, futon2 0b46b86e"
    :reading "The zaif build loop refuses before startup when its resolved work and review seat identities coincide, with a typed R9-linked error."
-   :pointers [{:file "futon2/holes/labs/zaif-harness/zaif-build-loop.sh" :from 23 :to 27 :expect ":r9/self-certification-refused"}]}
+   :pointers [{:file "futon2/holes/labs/zaif-harness/zaif-build-loop.sh" :from 23 :to 27 :expect ":r9/self-certification-refused" :span-sha "e7217048beb1de1695e26484c5340e867a346aa9fb5af5726e17394bba125c44"}]}
 
   {:node "R20" :cell :checked :verdict :exists :tag "[E20-C]"
    :reading "The R20 admission boundary returns :tripwire/check :refused when a wire produces a witness."
-   :pointers [{:file "futon2/src/futon2/aif/tripwire.clj" :from 639 :to 658 :expect ":tripwire/check :refused"}]}
+   :pointers [{:file "futon2/src/futon2/aif/tripwire.clj" :from 639 :to 658 :expect ":tripwire/check :refused" :span-sha "b9b1d938baa4473b4a48f295d8fb2590677ab5ab4fc2f3734d2dcc00592d1f35"}]}
 
   {:node "R20" :cell :surfaced :verdict :exists :tag "[E20-S]"
    :reading "The refusal is an append-only trip record carrying :needs-joe, and the existing bulletin collector re-reads those records into its waits-on-Joe section."
-   :pointers [{:file "futon2/src/futon2/aif/tripwire.clj" :from 648 :to 662 :expect ":status :needs-joe"}
-              {:file "futon2/src/futon2/aif/bulletin.clj" :from 188 :to 208 :expect "tripwire-discharges"}]}
+   :pointers [{:file "futon2/src/futon2/aif/tripwire.clj" :from 648 :to 662 :expect ":status :needs-joe" :span-sha "fa7387973a435453c89ccd87dbeb495b8747f52cad86c43602a9f173a480f94a"}
+              {:file "futon2/src/futon2/aif/bulletin.clj" :from 188 :to 208 :expect "tripwire-discharges" :span-sha "000315c0827ed6ead28b08616613b9bef9fedb69cf2b272705855ff7e08ea4b6"}]}
 
   ;; RE-LIFTED 2026-09-08 from ALIGN's drift-correction block (futon2 0b9535d3).
   ;; Three pointers moved and NOT ONE construct changed: [E-T] one line down
@@ -183,8 +183,8 @@
    ;; it. The verdict never moved -- only the line citation did. Expect this one
    ;; to drift again: war_machine.clj is the most-edited file in the scope, which
    ;; is precisely why the refusal is worth having.
-   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6790 :to 6790 :expect ":TRACE"}
-              {:file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!"}]}
+   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6789 :to 6789 :expect ":TRACE" :span-sha "989aabaa7610218321b275dca39a3f203a9a6b3457b6b5d405a6ea54b1639a55"}
+              {:file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!" :span-sha "0d163f8cbe7b7ab4efcddda0f915c85cf364917b4fcbb215e927bac43a3ca8ef"}]}
 
   ;; RE-LIFTED 2026-09-08 from ALIGN's fresh adjudication (futon2 1b575c71).
    ;; PROVENANCE MATTERS HERE MORE THAN USUAL. This entry existed in this file
@@ -202,46 +202,46 @@
    :reading "trace-discharges reads persisted :TRACE route hops; untriaged-traces subtracts the append-only discharge ledger (append-trace-review! refuses duplicate dispositions) and delivers count + oldest-date as its own bulletin field, split from the decision sheet."
    :revisit-trigger "wm-contract :U75, armed 2026-09-08. The qualification below is CONDITIONAL, not permanent: once 20+ trace records carry PA14z's :trace/reason, per-record surfacing gains an answerable question and this cell must be RE-READ at source rather than inherited. U75 notifies this ledger so the mirrored qualification re-lifts from ALIGN's re-read. Recorded here because a revisit condition with no trigger row IS the nobody-owns-the-aggregate signature -- claude-1 caught that in their own text while co-filing the pattern against it, which is the cleanest self-application on the board."
    :qualification "SURFACING IS AGGREGATE-GRAIN, per ALIGN. What running code surfaces is the queue's existence, size and age -- not per-record surfacing, which carries no answerable question until PA14z's reason field lands at the write site. The cell is credited at the grain the triage note specified, and the qualification travels with it so a later reader does not over-read it."
-   :pointers [{:file "futon2/src/futon2/aif/bulletin.clj" :from 212 :to 236 :expect "trace-discharges"}
-              {:file "futon2/src/futon2/aif/bulletin.clj" :from 278 :to 287 :expect "untriaged-traces"}]}
+   :pointers [{:file "futon2/src/futon2/aif/bulletin.clj" :from 212 :to 236 :expect "trace-discharges" :span-sha "66147ba90f8dd8c60527351d75b45ce659f633e9fabafcf37e3576fd6cf0a7fe"}
+              {:file "futon2/src/futon2/aif/bulletin.clj" :from 278 :to 287 :expect "untriaged-traces" :span-sha "2b8bb863e7c15081f13aea23b87eb9906f064fbfac3a933d1ba57626f3de6c06"}]}
 
   {:node "R16" :cell :commissioned :verdict :exists :tag "[E-16-C]"
    :reading "The author commission names the selected target, repository/base head, artifact contract, requirements, refusal shape and independent reviewer; that exact prompt is passed to dispatch."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 1398 :to 1454 :expect "author-prompt"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2810 :to 2830 :expect "dispatch!"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 1398 :to 1454 :expect "author-prompt" :span-sha "c76e2d31a9acf31b6e72f03d6c6e869fd021e601fe9c9ad9224f46eeaf1e73a0"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2788 :to 2818 :expect "dispatch!" :span-sha "6c2bd0b7b0b6a15ee32c48e2f97d4a37132f80b3b108a141ac5021782c59fd48"}]}
 
   {:node "R16" :cell :dispatched :verdict :exists :tag "[E-16-D]"
    :reading "dispatch! submits agent, caller, mission id and prompt to Agency; the dispatch checkpoint records agent, job id, prompt reference and response."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 803 :to 815 :expect "dispatch!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2819 :to 2832 :expect "checkpoint"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 803 :to 815 :expect "dispatch!" :span-sha "cb0baad8b9deb5ba1117aeb9de54c6f83bc67fbe3c6c57a3a8168150beeb3a5b"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2819 :to 2832 :expect "checkpoint" :span-sha "8f55258706282bfbd1afd125d68bb9abe95399c965451cf216cf3d6dcd91c903"}]}
 
   {:node "R16" :cell :returned :verdict :exists :tag "[E-16-R]"
    :reading "poll-job! returns only at an Agency terminal state, and the author boundary refuses to advance unless that returned state is done."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 873 :to 897 :expect "poll-job!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2875 :to 2885 :expect "done"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 873 :to 897 :expect "poll-job!" :span-sha "6902fe850e0e1c23589441df6fde0d10d96679640cf5b3a3c5afd527f37419ba"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2875 :to 2885 :expect "done" :span-sha "cf07091e33eca6b9b3e5a06a6558c64d3aef498c6a7f0471fe5424b6d85645fc"}]}
 
   {:node "R16" :cell :checked :verdict :exists :tag "[E-16-K]"
    :reading "After a distinct reviewer dispatch and return, approval requires a done review job, an :approve verdict and execution evidence; failure refuses advancement."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2970 :to 3007 :expect "poll-job!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3020 :to 3040 :expect ":approve"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3026 :to 3055 :expect ":build-failed"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2970 :to 3007 :expect "poll-job!" :span-sha "73ffb8f7984d3a8e2541e5cc30cb6f3dc3a01205dd4e79b22ee16023655b565b"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3007 :to 3025 :expect ":approve" :span-sha "c7a1dc4e44f5aa64231f1c9b2a9c9cdda5da89aaf46320a608c2b64f460dbca3"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3026 :to 3055 :expect ":build-failed" :span-sha "fbbad9f67d18b5df7b53ff97839e4650e4aa51bbaae5f2a73ccee0ed3afd9603"}]}
 
   {:node "R16" :cell :recorded :verdict :exists :tag "[E-16-X]"
    :reading "Every phase emits start/end/error telemetry, and cohort runs append dispatch and build checkpoint cells. Separately the tick-side R16 implementation records typed attempt/results through TRACE."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 217 :to 255 :expect "emit-phase!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2310 :to 2314 :expect "checkpoint"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3026 :to 3047 :expect "checkpoint"}
-              {:file "futon2/src/futon2/aif/enact.clj" :from 5 :to 10 :expect "write-trace!"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 217 :to 255 :expect "emit-phase!" :span-sha "bc6f63ed296d28b0803dd277ac465e68bb1391b7d41369daa70f4568adf81379"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2310 :to 2314 :expect "checkpoint" :span-sha "9b1f78f4d1ffbc629c11f2d1b9ea7324705e69d242714fb0b9a8d98c65aec478"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3026 :to 3047 :expect "checkpoint" :span-sha "95ef27bd8410c6f5c8de0ac190f58c0fd14466e2cb25af147ecc000c313c8cd5"}
+              {:file "futon2/src/futon2/aif/enact.clj" :from 5 :to 10 :expect "write-trace!" :span-sha "1bb831cb9ecf182dfcedf52c082c7d738c80897a991379d2688df0b6b71806f3"}]}
 
   {:node "R16" :cell :parked :verdict :exists :tag "[E-16-P]"
    :reading "A failed full-loop closure refuses a missing repair identity, then registers an R16-linked durable Agency park whose awaited dependency is that exact repair obligation. This is distinct from the stop-line record itself."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 141 :to 182 :expect "park-r16-stop-line!"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2362 :to 2365 :expect "park-r16-stop-line!"}]}
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 141 :to 182 :expect "park-r16-stop-line!" :span-sha "b0cab887039133fef09e8a4b04022e8b341eba44e4ca8ed740a6343d3009df63"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2362 :to 2365 :expect "park-r16-stop-line!" :span-sha "d2d03296840b7e853b451a692951c962bdf37a967a6aa65fbad0a35a304db2d2"}]}
 
   {:node "R16" :cell :surfaced :verdict :exists :tag "[E-16-S]"
    :reading "Every completed full-loop outcome queues an R16-linked lifecycle discharge in the existing Morning Brief item, including the attempt identity, outcome, and any parked transition receipt."
-   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2366 :to 2379 :expect ":lifecycle/discharge"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2430 :to 2430 :expect "queue-fn"}]}]
+   :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2366 :to 2379 :expect ":lifecycle/discharge" :span-sha "62d5bef56f52d2bbfe38e67f2856430d6c709f429635492f611767b2caa4e577"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2430 :to 2430 :expect "queue-fn" :span-sha "1e407ca3585b55a879a6929dee3d895835d9ea1fefeda9690559cb0643b86e9b"}]}]
 
  ;; --------------------------------------------------------------------------
  ;; KNOWN FALSE-POSITIVE CLASS (PA3z, 2026-09-06). The mirror of PA2z's

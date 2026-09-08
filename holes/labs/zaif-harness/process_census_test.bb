@@ -79,7 +79,7 @@
   (check "v1 and v2 agree cell for cell"
          (mapv (juxt :node :cell :verdict) (:results (:data v1)))
          (mapv (juxt :node :cell :verdict) (:results (:data v2))))
-  (check "tally" {:absent 26 :named-only 1 :exists 15}
+  (check "tally" {:absent 26 :exists 16}
          (frequencies (map :verdict (:results (:data v2)))))
   (check "no disagreement with the census of record" [] (:disagreements (:data v2)))
   (check "exits 0 -- the stale cell was adjudicated at source, not re-pointed" 0 (:exit v2)))
@@ -103,10 +103,9 @@
   (check "tag" "[E-T-S]" (:tag c))
   (check "cites ALIGN's fresh adjudication, not a restated argument" true
          (boolean (re-find #"1b575c71" (str (:authority c)))))
-  (check "pointers at the post-PA13z channel, both landing"
-         [{:ok? true :file "futon2/src/futon2/aif/bulletin.clj" :from 212 :to 236 :expect "trace-discharges"}
-          {:ok? true :file "futon2/src/futon2/aif/bulletin.clj" :from 278 :to 287 :expect "untriaged-traces"}]
-         (:pointers c))
+  (check "both content anchors land at the captured live spans"
+         [[212 236 true] [278 287 true]]
+         (mapv (juxt :resolved-from :resolved-to :ok?) (:pointers c)))
   ;; ALIGN qualifies the credit as AGGREGATE-grain; the qualification travels
   ;; with the cell so a later reader cannot over-read it as per-record surfacing.
   (check "the aggregate-grain qualification travels with the credit" true
@@ -120,10 +119,23 @@
       c (cell data "R16" :dispatched)]
   (check "verdict" :exists (:verdict c))
   (check "tag" "[E-16-D]" (:tag c))
-  (check "pointers, at their post-PA10z lines"
-         [{:ok? true :file "futon2/src/futon2/aif/full_loop_runner.clj" :from 803 :to 815 :expect "dispatch!"}
-          {:ok? true :file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2819 :to 2832 :expect "checkpoint"}]
-         (:pointers c)))
+  (check "both captured live spans still land"
+         [[803 815 true] [2819 2832 true]]
+         (mapv (juxt :resolved-from :resolved-to :ok?) (:pointers c))))
+
+(println "\n3b. PA17z regression -- the three line drifts are observations, not refusals")
+;; Live records [E-T], [E-16-C], and [E-16-K] are the three drift incidents
+;; named by PA17z. Values below are copied verbatim from this run's pointer
+;; records; their source ranges retain the historical citations.
+(let [{:keys [exit data]} (run-census "--pattern" "v2")
+      moved (->> (:results data) (mapcat #(map (fn [p] [(:tag %) p]) (:pointers %)))
+                 (filter (fn [[_ p]] (= :span-moved (:observation p)))) vec)]
+  (check "all three unchanged spans satisfy" 0 exit)
+  (check "the three live records name their old and new locations"
+         [["[E-T]" 6789 6794 5]
+          ["[E-16-C]" 2788 2802 14]
+          ["[E-16-K]" 3007 3020 13]]
+         (mapv (fn [[tag p]] [tag (:from p) (:resolved-from p) (:line-shift p)]) moved)))
 
 (println "\n4. the route-hop adjudications still dispose of what v2 sees")
 (let [{:keys [data]} (run-census "--pattern" "v2")
@@ -184,12 +196,13 @@
            (set (map #(:verdict (cell data "R10" %)) [:commissioned :dispatched]))))
   (.delete tmp))
 
-(println "\n5. PLANTED CONTROL -- a corrupted pointer must refuse")
+(println "\n5. PLANTED CONTROL -- changed content must refuse")
 (let [led (edn/read-string (slurp (io/file here "census-ledger.edn")))
       planted (update led :adjudicated
                       (fn [as] (mapv (fn [a]
                                        (if (and (= "R16" (:node a)) (= :dispatched (:cell a)))
-                                         (assoc-in a [:pointers 0 :expect] "this-token-is-not-in-that-range")
+                                         (assoc-in a [:pointers 0 :span-sha]
+                                                   (apply str (repeat 64 "0")))
                                          a))
                                      as)))
       tmp (io/file (System/getProperty "java.io.tmpdir") "pa1z-planted-ledger.edn")]
@@ -215,7 +228,9 @@
                   (assoc-in [:scope :v2-node-link] ["futon3c/src/futon3c/no-such-directory"]))
       tmp (io/file (System/getProperty "java.io.tmpdir") "pa1z-planted-scope.edn")]
   (spit tmp (pr-str planted))
-  (let [{:keys [exit out]} (shell/sh "bb" script "--edn" "--ledger" (str tmp))]
+  (let [{:keys [exit out]} (shell/sh "bb" script "--edn" "--pattern" "v2"
+                                      "--node" "PLANTED-NODE"
+                                      "--ledger" (str tmp))]
     (check "exits 2 (error), NOT 0 with a page of :absent" 2 exit)
     (check "produced no verdicts at all" true (str/blank? out)))
   (.delete tmp))

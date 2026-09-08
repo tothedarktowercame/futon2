@@ -30,6 +30,8 @@
          '[clojure.java.io :as io]
          '[clojure.java.shell :as shell])
 
+(import '[java.security MessageDigest])
+
 (def ^:private args (set *command-line-args*))
 (def ^:private edn-out? (contains? args "--edn"))
 (def ^:private one-node (second (drop-while #(not= "--node" %) *command-line-args*)))
@@ -165,26 +167,46 @@
        :command (str/join " ; " (map :command runs))})))
 
 ;; ---------------------------------------------------------------------------
-;; Pinned-pointer check. A pointer must still SHOW its declared token inside its
-;; declared line range, or the adjudication that cited it is stale.
+;; Content-pin v2. Whitespace at line ends is not part of a Clojure reading;
+;; line order, indentation, and every non-trailing byte are. The final newline
+;; makes the normalization independent of slurp/split-lines EOF behaviour.
 ;; ---------------------------------------------------------------------------
-(defn- check-pointer [{:keys [file from to expect]}]
+(defn- normalized-span [lines from to]
+  (str (str/join "\n" (map str/trimr (subvec lines (dec from) to))) "\n"))
+
+(defn- sha256 [s]
+  (format "%064x" (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256")
+                                          (.getBytes s "UTF-8")))))
+
+(defn- check-pointer [{:keys [file from to expect span-sha]}]
   (let [f (io/file (abs-path file))]
     (if-not (.exists f)
       {:ok? false :why :file-missing :file file :expect expect}
       (let [lines (vec (str/split-lines (slurp f)))
             n (count lines)
-            in-range (subvec lines (max 0 (dec from)) (min n to))
-            found? (some #(str/includes? % expect) in-range)]
-        (if found?
-          {:ok? true :file file :from from :to to :expect expect}
-          ;; Locate the token elsewhere so a stale pointer carries its own
-          ;; correction rather than just a complaint.
-          (let [elsewhere (keep-indexed (fn [i l] (when (str/includes? l expect) (inc i))) lines)]
-            {:ok? false :why (if (> to n) :range-past-eof :token-not-in-range)
-             :file file :from from :to to :expect expect
-             :file-lines n
-             :token-found-at (vec (take 5 elsewhere))}))))))
+            width (inc (- to from))
+            base {:file file :from from :to to :expect expect :span-sha span-sha}]
+        (if-not span-sha
+          (assoc base :ok? false :why :content-anchor-missing)
+          (let [matches (->> (range 1 (inc (- (inc n) width)))
+                             (filter (fn [start]
+                                       (let [end (+ start width -1)
+                                             span (subvec lines (dec start) end)]
+                                         (and (some #(str/includes? % expect) span)
+                                              (= span-sha (sha256 (normalized-span lines start end)))))))
+                             vec)]
+            (case (count matches)
+              1 (let [new-from (first matches)
+                      new-to (+ new-from width -1)]
+                  (cond-> (assoc base :ok? true :resolved-from new-from :resolved-to new-to)
+                    (not= [from to] [new-from new-to])
+                    (assoc :observation :span-moved :line-shift (- new-from from))))
+              0 (assoc base :ok? false :why :span-content-changed
+                       :token-found-at (vec (take 5 (keep-indexed
+                                                    (fn [i l] (when (str/includes? l expect) (inc i)))
+                                                    lines))))
+              (assoc base :ok? false :why :content-anchor-ambiguous
+                     :matching-spans matches))))))))
 
 (defn- adjudication-for [node cell]
   (first (filter #(and (= node (:node %)) (= cell (:cell %))) (:adjudicated ledger))))
@@ -338,6 +360,15 @@
         (when (seq (:token-found-at p))
           (printf "      token is at line(s) %s -- pointer looks like drift, not deletion%n"
                   (str/join ", " (:token-found-at p))))))
+    (let [moved (for [r results, p (:pointers r) :when (= :span-moved (:observation p))]
+                  [r p])]
+      (when (seq moved)
+        (println)
+        (println "CONTENT-PIN OBSERVATIONS -- unchanged spans moved:")
+        (doseq [[r p] moved]
+          (printf "  %s %s %s: %s:%d-%d -> %d-%d (shift %+d)%n"
+                  (:node r) (name (:cell r)) (:tag r) (:file p)
+                  (:from p) (:to p) (:resolved-from p) (:resolved-to p) (:line-shift p)))))
     (when (seq disagreements)
       (println)
       (println "DISAGREEMENT WITH THE CENSUS OF RECORD -- route to claude-1, do not reconcile here:")
