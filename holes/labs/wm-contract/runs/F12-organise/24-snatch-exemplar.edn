@@ -1,0 +1,186 @@
+{:all-transcriptions-match? true,
+ :check :F12-snatch-exemplar,
+ :conformance
+ {:all-seven-used? true,
+  :new-conformant-structure-count 0,
+  :reuses-sans-o3? true,
+  :reuses-sans-o4? true,
+  :ruled-clause-names ["o1" "o2" "o3" "o4" "oattr" "oauth" "osel"],
+  :sans-o3-defined-in-ruled? true,
+  :sans-o4-defined-in-ruled? true},
+ :edge-routes
+ {:full-equals-lean? true,
+  :full-node
+  [[0 11]
+   [0 2]
+   [10 18]
+   [11 18]
+   [11 22]
+   [18 22]
+   [2 11]
+   [2 7]
+   [7 18]
+   [7 22]],
+  :lean-filter [[0 2]],
+  :lean-in-added [11 18 22 7],
+  :lean-in-added-matches-added? true,
+  :lean-list
+  [[0 11]
+   [0 2]
+   [10 18]
+   [11 18]
+   [11 22]
+   [18 22]
+   [2 11]
+   [2 7]
+   [7 18]
+   [7 22]],
+  :lean-list-count 10,
+  :lean-list-no-duplicates? true,
+  :no-bootstrap [[0 2]],
+  :row-equals-fast-forward? true,
+  :three-routes-agree? true},
+ :forbidden {:axiom 0, :native-decide 0, :sorry 0},
+ :futon3-head "cdb5e8a56fd907beb6a99f8b88af9de50ff93126",
+ :futon3-pin "cdb5e8a56fd907beb6a99f8b88af9de50ff93126",
+ :holes-lean-head "61c4825dc3e373fd1b761b800814bf85f5770b88",
+ :holes-lean-pin "61c4825dc3e373fd1b761b800814bf85f5770b88",
+ :index-map
+ {:bijection-0-23? true,
+  :count 24,
+  :names-match-repository? true,
+  :values
+  [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23]},
+ :laws {:O1 true, :O2 true, :O3 true, :O4 true},
+ :organise-reproduces-record? true,
+ :plants
+ [{:citation-multiset-unchanged? nil,
+   :landed? true,
+   :plant :fixture-drop-selected,
+   :verdict-after false}
+  {:citation-multiset-unchanged? nil,
+   :landed? true,
+   :plant :fixture-flatten-score,
+   :verdict-after false}
+  {:citation-multiset-unchanged? nil,
+   :landed? true,
+   :plant :fixture-flatten-precedence,
+   :verdict-after false}
+  {:citation-multiset-unchanged? nil,
+   :landed? true,
+   :plant :fixture-drop-recorded-added,
+   :verdict-after false}
+  {:citation-multiset-unchanged? nil,
+   :landed? true,
+   :plant :derived-drop-stands-edge,
+   :verdict-after false}
+  {:citation-multiset-unchanged? true,
+   :landed? true,
+   :plant :exchange-declaration-citations,
+   :verdict-after false}
+  {:citation-multiset-unchanged? nil,
+   :landed? true,
+   :plant :shift-declaration-citation,
+   :verdict-after false}
+  {:citation-multiset-unchanged? nil,
+   :landed? true,
+   :plant :append-sorry,
+   :verdict-after false}],
+ :pointer-bindings
+ {:actual
+  {"module-header" [],
+   "snatchActingOrderAfter" ["204"],
+   "snatchActingOrderBefore" ["71-74"],
+   "snatchAdded" ["66-70"],
+   "snatchPrecedenceAfter" ["212-219"],
+   "snatchPrecedenceBefore" ["85-92"],
+   "snatchScoreAfter" ["211"],
+   "snatchScoreBefore" ["84"],
+   "snatchSelected" ["71-74" "80-83"]},
+  :expected
+  {"module-header" [],
+   "snatchActingOrderAfter" ["204"],
+   "snatchActingOrderBefore" ["71-74"],
+   "snatchAdded" ["66-70"],
+   "snatchPrecedenceAfter" ["212-219"],
+   "snatchPrecedenceBefore" ["85-92"],
+   "snatchScoreAfter" ["211"],
+   "snatchScoreBefore" ["84"],
+   "snatchSelected" ["71-74" "80-83"]},
+  :match? true},
+ :source-pointers
+ ["mathlib4:DarkTower/WarMachine/F12SnatchExemplar.lean:1-337"
+  "futon3:checks/find_organise.clj:284-293"
+  "futon3:checks/find_organise.clj:603-640"],
+ :transcription
+ {:acting-after {:derived [20], :lean [20]},
+  :acting-before {:derived [10 2 0], :lean [10 2 0]},
+  :added {:derived [11 18 22 7], :lean [11 18 22 7]},
+  :admitted {:derived [], :lean-empty? true},
+  :patterns
+  {:derived
+   [0 1 10 11 12 13 14 15 16 17 18 19 2 20 21 22 23 3 4 5 6 7 8 9],
+   :lean-iCC-0-23? true},
+  :precedence-after
+  {:derived [20 5 2 0 3 6 10], :lean [20 5 2 0 3 6 10]},
+  :precedence-before
+  {:derived [5 2 0 3 6 10 20], :lean [5 2 0 3 6 10 20]},
+  :score-after {:derived -5, :lean -5},
+  :score-before {:derived 3, :lean 3},
+  :selected {:derived [0 10 2], :lean [0 10 2]},
+  :stands-on
+  {:derived
+   [[0 11]
+    [0 2]
+    [1 7]
+    [10 18]
+    [11 18]
+    [11 22]
+    [12 20]
+    [13 20]
+    [14 21]
+    [15 21]
+    [16 21]
+    [17 21]
+    [18 22]
+    [19 21]
+    [2 11]
+    [2 7]
+    [3 9]
+    [4 8]
+    [5 18]
+    [6 18]
+    [7 18]
+    [7 22]
+    [8 18]
+    [8 22]
+    [9 18]
+    [9 22]],
+   :lean
+   [[0 11]
+    [0 2]
+    [1 7]
+    [10 18]
+    [11 18]
+    [11 22]
+    [12 20]
+    [13 20]
+    [14 21]
+    [15 21]
+    [16 21]
+    [17 21]
+    [18 22]
+    [19 21]
+    [2 11]
+    [2 7]
+    [3 9]
+    [4 8]
+    [5 18]
+    [6 18]
+    [7 18]
+    [7 22]
+    [8 18]
+    [8 22]
+    [9 18]
+    [9 22]]}},
+ :verdict :pass}

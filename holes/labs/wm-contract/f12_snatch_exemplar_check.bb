@@ -83,6 +83,11 @@
 (defn nums [s] (mapv parse-long (re-seq #"\d+" (or s ""))))
 (defn lean-set [lean nm] (set (nums (second (re-find #"\{([^}]*)\}" (lean-body lean nm))))))
 (defn lean-list [lean nm] (nums (second (re-find #"\[([^]]*)\]" (lean-body lean nm)))))
+(defn lean-in-added
+  "`snatchInAdded`'s own literal, read from the Lean.  Re-spelling its four
+   indices here would leave the declaration the filter route decides through
+   unguarded: dropping `22` from it passed an earlier build of this check."
+  [lean] (set (map parse-long (map second (re-seq #"n == (\d+)" (or (lean-body lean "snatchInAdded") ""))))))
 (defn lean-pairs [s] (set (map (fn [[_ a b]] [(parse-long a) (parse-long b)])
                                (re-seq #"\((\d+),\s*(\d+)\)" (or s "")))))
 (defn idx-get [idx k] (or (idx k) (idx (keyword "snatch" (name k)))))
@@ -102,7 +107,8 @@
   (let [idx (index-map lean) row (:row derived) repo-names (set (:patterns derived))
         full (mapped-edges idx (:full derived)) no-boot (mapped-edges idx (:no-bootstrap derived))
         lean-edges (lean-pairs (lean-body lean "snatchOrganisedEdgeList"))
-        filtered (set (filter (fn [[a b]] (and (not (#{7 11 18 22} a)) (not (#{7 11 18 22} b)))) lean-edges))
+        in-added (lean-in-added lean)
+        filtered (set (filter (fn [[a b]] (and (not (in-added a)) (not (in-added b)))) lean-edges))
         actual-p (pointer-map lean) expected-p (expected-pointers fixture-text)
         stands (set (mapcat (fn [[a bs]] (map #(vector (idx-get idx a) (idx-get idx %)) bs)) (:stands-on row)))
         trans {:selected {:derived (mapped-set idx (:selected row)) :lean (lean-set lean "snatchSelected")}
@@ -121,6 +127,8 @@
                :lean-list-count (count (re-seq #"\(\d+,\s*\d+\)" (lean-body lean "snatchOrganisedEdgeList")))
                :lean-list-no-duplicates? (= 10 (count lean-edges))
                :no-bootstrap no-boot :lean-filter filtered
+               :lean-in-added in-added
+               :lean-in-added-matches-added? (= in-added (lean-set lean "snatchAdded"))
                :three-routes-agree? (= no-boot filtered #{[0 2]})}
         ix {:count (count idx) :values (vec (sort (vals idx))) :bijection-0-23? (= (set (range 24)) (set (vals idx)))
             :names-match-repository? (= (set (keys idx)) repo-names)}]
@@ -131,6 +139,7 @@
      :forbidden {:sorry (count (re-seq #"\bsorry\b" lean)) :axiom (count (re-seq #"(?m)^[ \t]*axiom\b" lean))
                  :native-decide (count (re-seq #"\bnative_decide\b" lean))}
      :all-transcriptions-match? (and (every? (fn [[_ x]] (if (contains? x :lean) (= (:derived x) (:lean x)) true)) trans)
+                                     (empty? (get-in trans [:admitted :derived]))
                                      (get-in trans [:admitted :lean-empty?]) (get-in trans [:patterns :lean-iCC-0-23?]))}))
 (defn verdict [f]
   (let [c (:conformance f)]
@@ -138,6 +147,7 @@
          (:all-transcriptions-match? f) (get-in f [:edge-routes :row-equals-fast-forward?])
          (get-in f [:edge-routes :full-equals-lean?]) (= 10 (get-in f [:edge-routes :lean-list-count]))
          (get-in f [:edge-routes :lean-list-no-duplicates?]) (get-in f [:edge-routes :three-routes-agree?])
+         (get-in f [:edge-routes :lean-in-added-matches-added?])
          (get-in f [:pointer-bindings :match?]) (every? true? (vals (:laws f))) (:organise-reproduces-record? f)
          (:all-seven-used? c) (zero? (:new-conformant-structure-count c))
          (:reuses-sans-o3? c) (:reuses-sans-o4? c) (:sans-o3-defined-in-ruled? c) (:sans-o4-defined-in-ruled? c)
