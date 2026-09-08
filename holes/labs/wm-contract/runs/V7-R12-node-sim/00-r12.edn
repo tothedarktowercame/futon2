@@ -1,0 +1,45 @@
+{:schema :wm/v7-r12-node-sim-v1,
+ :plants
+ [{:id :collapse-layer-labels, :caught? true}
+  {:id :invent-returned-artifact, :caught? true}
+  {:id :invent-independent-checker, :caught? true}
+  {:id :confuse-contract-and-catalogue-r12, :caught? true}],
+ :distinct-contracts
+ {:catalogue "p4ng/sec-catalog.tex:297",
+  :contract "docs/futon-aif-completeness.md:286-294",
+  :concordance "p4ng/R-concordance.md:63-67"},
+ :registry
+ {:equation-row-count 0,
+  :plumbing? true,
+  :pointer "holes/labs/wm-contract/aif-equations.edn:1010"},
+ :checks
+ [{:id :registry-declares-r12-plumbing, :pass? true}
+  {:id :catalogue-keeps-two-labels-and-only-layer-two-clears-value,
+   :pass? true}
+  {:id :contract-r12-is-hyperparameter-inference, :pass? true}
+  {:id :concordance-declares-the-two-r12s-different, :pass? true}
+  {:id :align-census-keeps-r12-seven-cells-absent, :pass? true}
+  {:id :r12-route-is-only-attribution-in-corpus, :pass? true}
+  {:id :r12-route-carries-no-process-identity, :pass? true}],
+ :node :R12,
+ :corpus
+ {:files 58,
+  :records 892,
+  :r12-route-records 69,
+  :r12-records-with-calibration-fields 0,
+  :r12-records-with-process-identity 0},
+ :carriers
+ {:used? false, :reason :registry-declares-plumbing-with-no-equation},
+ :summary
+ {:checks-pass 7, :checks-total 7, :plants-caught 4, :plants-total 4},
+ :align-census
+ {:blocking-cells
+  "holes/labs/wm-contract/ALIGN-rnode-process-census.md:178-180",
+  :returned :absent,
+  :recorded :absent,
+  :checked :absent,
+  :commissioned :absent,
+  :parked :absent,
+  :dispatched :absent,
+  :surfaced :absent,
+  :row "holes/labs/wm-contract/ALIGN-rnode-process-census.md:86"}}

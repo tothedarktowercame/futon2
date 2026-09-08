@@ -49,7 +49,8 @@
   :learned-input-live-in-one-era-and-at-its-prior-since "The node's equations are met and reproduce the corpus exactly, and the OUTCOME-LEARNED input that makes the quantity a dial rather than a constant ran live in one era of the corpus and has stood at its prior in every record since. The break is a carrier replacement, not a regression in the equation: the old carrier's records are off the prior and past burn-in, the new carrier's are at the prior with zero samples, and the feed the new carrier folds stops before its first record. Added by slice 12; the vocabulary is extended rather than a row rewritten."
   :mechanism-built-and-never-entered "The node's mechanism is implemented and has its own passing test suite, and no call path outside that suite enters it: the namespace is required by nothing else, no production record carries the state it would write, and the node's registered runtime validation is the suite itself. The registry can be MET here -- it declares the node runs no equation -- while the tree's green evidence for the node is a test of code the machine never runs. Added by slice 13; the vocabulary is extended rather than a row rewritten."
   :selected-action-not-enacted-and-no-outward-effect "The node computes the action its equation declares, but the enactment boundary does not read that selected action: it chooses the first passing gate from the ranked candidates instead. The executor then returns an in-model construction and explicitly performs no substrate write or outward action, so neither the declared u nor an external consequence closes the action-perception loop. Added by slice 15."
-  :assurance-implemented-on-two-surfaces-without-node-wide-admission "The node's rule is implemented by a retained-corpus independence checker and by the full-loop author/reviewer boundary, but neither mechanism is attached to R9 and neither is a catalogue-wide birth-tag admission rule. The process census therefore remains named-only even though narrower checks run. Added by slice 16."}
+  :assurance-implemented-on-two-surfaces-without-node-wide-admission "The node's rule is implemented by a retained-corpus independence checker and by the full-loop author/reviewer boundary, but neither mechanism is attached to R9 and neither is a catalogue-wide birth-tag admission rule. The process census therefore remains named-only even though narrower checks run. Added by slice 16."
+  :catalogue-calibration-unimplemented-beside-different-contract-apparatus "The node number names two explicitly different second loops. The shipped apparatus implements the contract's hyperparameter-inference loop, while the catalogue's two-layer calibration has no returned artifact, independent checker, or distinct Layer 1/Layer 2 evidence on the node-attributed record. Added by slice 18."}
 
  :slices
  [{:slice 1 :node :R5 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
@@ -339,6 +340,16 @@
          "clj-kondo and futon4/dev/check-parens.el on v7_r16_node_sim.clj: clean"]
    :finding "The registry's non-default posterior-argmax arm is executable and matches the independent reference on both strict and tied carriers (runs/V7-R16-node-sim/00-r16.edn). But close-loop! builds gates from :ranked-actions, takes the first :pass and calls enact! on that gate (src/futon2/aif/enact.clj:305-329); the file contains no read of judgement's selected :action. The executor shells the fold engine and returns :constructed-wiring, :no-construction or :enactment-failed (src/futon2/aif/enact.clj:130-160), while its namespace contract explicitly says artifact-only, no substrate write and no outward action (src/futon2/aif/enact.clj:12-16). Across the receipt's 58 wm-trace files, no :external-effect, :external-witness, :substrate-effect or :substrate-witness field was found."
    :known-candidate-holes "PROBLEMS-r16-r13-r14-batch4.md:31-56 is partly superseded: the action now has a closed Lean carrier at aif-equations.edn:179-186, so its first residual is cleared; the artifact-only residual is confirmed; ALIGN still records parked and surfaced absent at ALIGN-rnode-process-census.md:82-89, but whether parked is required remains explicitly undetermined in the dossier."
+   :no-ruling "No registry, decision, production source, test, or data file changed. No live tick ran and no run lock was taken."}
+
+  {:slice 18 :node :R12 :at "2026-09-08" :by "codex (wm-edge worklist loop)"
+   :did "Verified the next assurance-band node. R12 has no equation reference, so leg (a) is explicitly not numerical: the harness checks the plumbing declaration, the two distinct R12 contracts, the assurance census, and the retained R12-attributed records. Leg (b) is not applicable; legs (c) and (d) re-check ALIGN-rnode-process-census.md:86,178-180 and PROBLEMS-assurance-band-batch6.md:98-138."
+   :ran ["clojure -M holes/labs/wm-contract/v7_r12_node_sim.clj twice: 7 checks pass, 4 plants caught; diff -q silent; receipt sha256 c53ca1b5b70b26fcf9dfe4dd1e05af396261b69576d70dd11d32129f66800c66"
+         "clj-kondo --lint holes/labs/wm-contract/v7_r12_node_sim.clj: 0 errors, 0 warnings"
+         "futon4/dev/check-parens.el on the harness and matrix: OK"
+         "bash p4ng/empirics-futon/negative_controls.sh: PASS 133 negative / 53 positive; bb p4ng/empirics-futon/pointer_check.bb: 3886 pointers / 0 unresolved"]
+   :finding "The catalogue's R12 demands distinct Layer 1 and Layer 2 evidence and permits only independently witnessed Layer 2 to clear value (p4ng/sec-catalog.tex:297). The implementation documented as R12 instead performs hyperparameter inference (docs/futon-aif-completeness.md:286-294), and p4ng/R-concordance.md:63-67 says these are two different second loops. ALIGN records all seven catalogue-R12 process cells absent and names returned and checked as blockers (ALIGN-rnode-process-census.md:86,178-180). The receipt measures that R12 route attribution exists while its records carry none of the declared calibration-layer, returned-artifact, or checker fields."
+   :reviewer-should-check "Whether the explicit field-name census is broad enough to support the absence, and whether the existing concordance is sufficient grounds to keep the hyperparameter apparatus out of the catalogue-R12 verdict."
    :no-ruling "No registry, decision, production source, test, or data file changed. No live tick ran and no run lock was taken."}
 
 ]
@@ -1906,4 +1917,27 @@
             "The corpus state-change search covers three explicit field names from the criterion. A change witnessed under another field name or outside data/wm-trace is outside that count."
             "The last wallclock date is attributed by trace filename and :trigger, not by proving which external scheduler launched the process."
             "No live tick ran, no scheduler was installed, no run lock was taken, and data/wm-trace was read only. No ruling or registry decision was written."]}
+
+  {:node :R12
+   :stage "BELIEVE"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:40"
+   :slice 18
+   :label "Two-layer calibration"
+   :kind :plumbing-node
+   :verdict :hole
+   :hole {:type :catalogue-calibration-unimplemented-beside-different-contract-apparatus
+          :statement "Control-stage R12 correctly runs no equation and is listed as plumbing (holes/labs/wm-contract/aif-equations.edn:1010). Its catalogue contract requires separately labelled Layer 1 self-consistency and independently witnessed Layer 2 value evidence, with only Layer 2 allowed to clear value (p4ng/sec-catalog.tex:297). The codebase's R12 apparatus instead implements the distinct dual-loop hyperparameter-inference contract (docs/futon-aif-completeness.md:286-294), a numbering collision explicitly recorded by p4ng/R-concordance.md:63-67. The assurance census records all seven R12 process cells absent and names returned plus checked as the blockers (holes/labs/wm-contract/ALIGN-rnode-process-census.md:86,178-180). Across the retained corpus, R12 route attribution exists but no R12-attributed record carries either calibration layer, a returned calibration artifact, or an independent checker (holes/labs/wm-contract/runs/V7-R12-node-sim/00-r12.edn)."
+          :not-a-ruling "Whether to build catalogue R12, rename either numbering system, or treat the hyperparameter apparatus as satisfying another node is Joe's. This row records the two contracts and the absence of the catalogue process evidence without choosing a reconciliation."}
+   :legs {:a {:status :done :basis "No equation reference exists; aif-equations.edn:1010 explicitly classifies R12 as plumbing. The structural checks are in runs/V7-R12-node-sim/00-r12.edn."}
+          :b {:status :not-applicable :basis "R12 is declared plumbing and has no equation or F8 Lean readback."}
+          :c {:status :done-with-stated-absence :basis "ALIGN-rnode-process-census.md:86 records all seven cells absent; :178-180 names returned and checked as the merge blockers."}
+          :d {:status :done :basis "PROBLEMS-assurance-band-batch6.md:98-138: the catalogue/contract numbering collision is confirmed, the catalogue process binding remains absent, and the contract apparatus's static/prior limits remain separately recorded at docs/futon-aif-completeness.md:292-294."}}
+   :harness {:runner "holes/labs/wm-contract/v7_r12_node_sim.clj"
+             :receipt "holes/labs/wm-contract/runs/V7-R12-node-sim/00-r12.edn"
+             :receipt-sha256 "c53ca1b5b70b26fcf9dfe4dd1e05af396261b69576d70dd11d32129f66800c66"
+             :checks "7 checks pass; 4 planted detectors caught; two runs byte-identical."
+             :carriers "NONE: the registry declares plumbing and no numerical equation reference exists."}
+   :limits ["The corpus search recognizes the explicit layer, returned-artifact, and checker field names declared in the harness. Equivalent evidence under another spelling or outside data/wm-trace is not ruled out."
+            "The contract apparatus is not re-tested numerically in this slice because it is a different R12. Its repository presence and stated prior/static limits are the only claims made about it."
+            "No live tick ran, no run lock was taken, and data/wm-trace was read only. No ruling or registry decision was written."]}
 ]}
