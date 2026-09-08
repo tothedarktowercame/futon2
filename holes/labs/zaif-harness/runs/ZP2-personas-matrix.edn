@@ -1,0 +1,149 @@
+{:artifact/type :zp2/personas-harness-ops-matrix
+ :as-of "2026-09-08"
+ :source-census "runs/ZP1-stakeholder-census.md:38-57"
+ :legend {:compose "Characteristic program order; not a claim that every edge is implemented."
+          :available "The harness has a cited operation usable by this persona class."
+          :needed "The persona program needs the operation, but no participant-facing edge is identified."
+          :never "Outside this persona's characteristic program."
+          :sparse "Fewer than four :available cells; names a Cluster-C hole."}
+ :operations
+ [{:id :observe :chip :feel-look-sniff
+   :meaning "Take a typed input into the trace."
+   :citation "holes/labs/wm-contract/NOTE-chipwits-iconography.md:18-20,27-30"}
+  {:id :bell :chip :sing
+   :meaning "Tell another registered participant asynchronously."
+   :citation "futon3c/src/futon3c/social/bells.clj:29-43"}
+  {:id :whistle :chip :feel-sing
+   :meaning "Ask a registered participant and retain the exchange."
+   :citation "futon3c/src/futon3c/social/whistles.clj:83-103"}
+  {:id :park :chip :cycles-stop
+   :meaning "Suspend a continuation on named dependencies and resume it once."
+   :citation "futon3c/src/futon3c/agency/parked_on.clj:332-357"}
+  {:id :review :chip :debug
+   :meaning "Require execution evidence from a distinct checking turn."
+   :citation "futon2/src/futon2/aif/full_loop_runner.clj:1275-1319"}
+  {:id :publish :chip :warehouse
+   :meaning "Project current status to participant-facing HUD and federation surfaces."
+   :citation "futon3c/src/futon3c/agency/registry.clj:320-337"}
+  {:id :attest :chip :score
+   :meaning "Turn a capability's independently grounded state into a preferred outcome."
+   :citation "futon2/src/futon2/aif/c_vector.clj:134-154"}
+  {:id :refuse :chip :bouncer
+   :meaning "Stop on a typed adverse condition instead of silently continuing."
+   :citation "holes/labs/wm-contract/NOTE-chipwits-iconography.md:22,27,30-32"}
+  {:id :escalate :chip :turn
+   :meaning "Hand an unresolved trip to an operator as an explicit choice."
+   :citation "futon2/src/futon2/aif/full_loop_cli.clj:635-645"}]
+ :personas
+ [{:id :operator-goal-author
+   :census "runs/ZP1-stakeholder-census.md:40"
+   :program [:observe :bell :whistle :review :attest :refuse :escalate :publish]
+   :never [:park]
+   :stack ["declared goal" "mission state" "candidate action" "independent verdict"]
+   :fuel "operator attention"
+   :pie "work follows declared intent and stops visibly on conflict"
+   :cells {:observe :available :bell :available :whistle :available :park :never
+           :review :available :publish :available :attest :available :refuse :available
+           :escalate :available}}
+  {:id :machine-agent
+   :census "runs/ZP1-stakeholder-census.md:41"
+   :program [:observe :whistle :park :refuse :bell :publish]
+   :never [:attest]
+   :stack ["typed commission" "bounded shelf" "tool result" "witness receipt"]
+   :fuel "token and wall-clock budget"
+   :pie "complete the bounded commission with replayable evidence"
+   :cells {:observe :available :bell :available :whistle :available :park :available
+           :review :available :publish :available :attest :never :refuse :available
+           :escalate :available}}
+  {:id :human-collaborator-reader-reviewer
+   :census "runs/ZP1-stakeholder-census.md:42"
+   :program [:publish :observe :review :whistle :attest]
+   :never [:park :bell]
+   :stack ["machine discovery" "source pointer" "question" "review disposition"]
+   :fuel "reading and checking time"
+   :pie "discoveries arrive intelligibly and change the shared record"
+   :cells {:observe :needed :bell :never :whistle :needed :park :never
+           :review :available :publish :needed :attest :needed :refuse :needed
+           :escalate :needed}
+   :hole :cluster-c/human-discovery-delivery
+   :hole-statement "The harness checks agent work, but lacks a recipient-addressed delivery and acknowledgement edge for a human reader."}
+  {:id :argument-author-downstream-user
+   :census "runs/ZP1-stakeholder-census.md:43"
+   :program [:observe :review :refuse :publish :attest]
+   :never [:park :bell]
+   :stack ["argument revision" "understanding delta" "claim dependency" "reader verdict"]
+   :fuel "argument-maintenance attention"
+   :pie "new understanding updates the canonical argument and its consumers"
+   :cells {:observe :needed :bell :never :whistle :needed :park :never
+           :review :needed :publish :needed :attest :needed :refuse :needed
+           :escalate :needed}
+   :hole :cluster-c/understanding-to-argument
+   :hole-statement "The harness lacks an operation that binds a recorded understanding change to the argument revision and downstream acknowledgement it requires."}
+  {:id :trainer-local-adapter
+   :census "runs/ZP1-stakeholder-census.md:44"
+   :program [:observe :refuse :review :publish :whistle]
+   :never [:bell :park]
+   :stack ["participant feedback" "local adaptation" "evaluation measure" "upstream question"]
+   :fuel "delivery and adaptation time"
+   :pie "local learning improves delivery and travels upstream"
+   :cells {:observe :needed :bell :never :whistle :needed :park :never
+           :review :needed :publish :needed :attest :needed :refuse :needed
+           :escalate :needed}
+   :hole :cluster-c/trainer-feedback-return
+   :hole-statement "The harness has no trainer-facing path that records a local adaptation, tests its effect, and returns it upstream."}
+  {:id :training-recipient-participant
+   :census "runs/ZP1-stakeholder-census.md:45"
+   :program [:observe :refuse :publish]
+   :never [:bell :park :review :attest]
+   :stack ["experienced outcome" "consent boundary" "feedback" "requested change"]
+   :fuel "participation and feedback effort"
+   :pie "the programme changes in response to experienced outcomes"
+   :cells {:observe :needed :bell :never :whistle :needed :park :never
+           :review :never :publish :needed :attest :never :refuse :needed
+           :escalate :needed}
+   :hole :cluster-c/participant-outcome-ingress
+   :hole-statement "The harness lacks a safe participant-facing ingress for outcomes, refusal, and acknowledgement of the resulting change."}
+  {:id :institutional-lead-governor
+   :census "runs/ZP1-stakeholder-census.md:46"
+   :program [:observe :review :attest :refuse :escalate :publish]
+   :never [:park]
+   :stack ["programme evidence" "shared budget" "governance constraint" "change disposition"]
+   :fuel "governance attention and programme budget"
+   :pie "evidence changes programme architecture with accountable authority"
+   :cells {:observe :needed :bell :needed :whistle :needed :park :never
+           :review :needed :publish :needed :attest :needed :refuse :needed
+           :escalate :needed}
+   :hole :cluster-c/governance-disposition
+   :hole-statement "The harness lacks an authority-bound disposition that turns programme evidence into an accepted, refused, or funded architecture change."}
+  {:id :funder-commissioner-external-evaluator
+   :census "runs/ZP1-stakeholder-census.md:47"
+   :program [:observe :review :attest :refuse :publish]
+   :never [:park :bell]
+   :stack ["commission" "claimed outcome" "independent measure" "funding disposition"]
+   :fuel "evaluation time and money"
+   :pie "funding follows independently checked outcomes"
+   :cells {:observe :needed :bell :never :whistle :needed :park :never
+           :review :needed :publish :needed :attest :needed :refuse :needed
+           :escalate :needed}
+   :hole :cluster-c/external-evaluation-return
+   :hole-statement "The harness lacks a commission-linked external verdict whose evidence and funding consequence return to the work loop."}
+  {:id :external-maintainer-client-employer-institution
+   :census "runs/ZP1-stakeholder-census.md:48"
+   :program [:publish :observe :whistle :refuse :attest]
+   :never [:park :bell]
+   :stack ["outward artifact" "external question" "impact evidence" "maintainer or client verdict"]
+   :fuel "external coordination time"
+   :pie "outward work earns a response and the response changes subsequent work"
+   :cells {:observe :needed :bell :never :whistle :needed :park :never
+           :review :needed :publish :needed :attest :needed :refuse :needed
+           :escalate :needed}
+   :hole :cluster-c/outward-response-ingress
+   :hole-statement "The harness lacks a durable edge that attributes an external response to the outward artifact and feeds it into the next decision."}]
+ :proposed-deep-rows
+ [{:persona :human-collaborator-reader-reviewer :from-hole :cluster-c/human-discovery-delivery}
+  {:persona :argument-author-downstream-user :from-hole :cluster-c/understanding-to-argument}
+  {:persona :trainer-local-adapter :from-hole :cluster-c/trainer-feedback-return}
+  {:persona :training-recipient-participant :from-hole :cluster-c/participant-outcome-ingress}
+  {:persona :institutional-lead-governor :from-hole :cluster-c/governance-disposition}
+  {:persona :funder-commissioner-external-evaluator :from-hole :cluster-c/external-evaluation-return}
+  {:persona :external-maintainer-client-employer-institution :from-hole :cluster-c/outward-response-ingress}]}
