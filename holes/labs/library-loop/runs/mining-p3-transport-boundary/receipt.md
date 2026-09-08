@@ -10,15 +10,16 @@ existed without an external request/frame boundary", solved by futon3c
 
 The mission cross-references thirteen patterns. Only SIX are nodes here,
 because a node must be a pattern actually involved in the four COMPLETED
-parts, and the witnesses are the strongest on this loop: each of the six is
-named BOTH in the mission's plan (cross-ref tables, committed 3dc50a81
-2026-02-11, pattern and spec authored together) AND in the live code's own
-docstrings (ws.clj:4-22, http.clj:53):
+parts. Each is named in the mission's plan (cross-ref tables, committed
+3dc50a81 2026-02-11, pattern and spec authored together) and re-attested by
+the closing implementation: five through code docstrings and call sites, and
+loop-failure-signals through typed transport-error call sites in ws.clj
+(:123, :164, :181):
 
 connection-state-machine, rendezvous-handshake, request-param-resilience,
 loop-failure-signals, structured-events-only, verify-after-start.
 
-The eight NOT selected, each with its reason in the cascade's
+The seven NOT selected, each with its reason in the cascade's
 `:admission-note` (CORRECTED on reopen 2026-09-08): liveness-heartbeats and
 transport-pivot are marked "(future, not Part I-IV)" by the mission itself;
 reconnect-with-backoff is deferred as the client's concern; listener-leases is
