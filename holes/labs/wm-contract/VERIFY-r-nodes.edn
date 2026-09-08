@@ -48,7 +48,8 @@
   :depth-runs-as-an-endpoint-and-the-summing-depth-is-never-selected "The registry gives the node ONE symbol and the machine runs TWO mechanisms under it, and the symbol's own definition -- a range for the SUMS -- is met by neither where it matters. The mechanism that scores the tick's candidates builds a K-step trajectory and then reads only its endpoint: no sum over tau, and no discount term anywhere in the file that scores. The mechanism that does add up discounted step costs is called from an advisory lane, and its rows enter the ranking after the decision is already final. Distinct from :posterior-recorded-and-not-selected-by (slice 10), where ONE node's output was computed and not consumed: here two implementations of the SAME registry symbol both run, in different files, and no document in the sweep's reach records that they are two. Added by slice 11; the vocabulary is extended rather than a row rewritten."
   :learned-input-live-in-one-era-and-at-its-prior-since "The node's equations are met and reproduce the corpus exactly, and the OUTCOME-LEARNED input that makes the quantity a dial rather than a constant ran live in one era of the corpus and has stood at its prior in every record since. The break is a carrier replacement, not a regression in the equation: the old carrier's records are off the prior and past burn-in, the new carrier's are at the prior with zero samples, and the feed the new carrier folds stops before its first record. Added by slice 12; the vocabulary is extended rather than a row rewritten."
   :mechanism-built-and-never-entered "The node's mechanism is implemented and has its own passing test suite, and no call path outside that suite enters it: the namespace is required by nothing else, no production record carries the state it would write, and the node's registered runtime validation is the suite itself. The registry can be MET here -- it declares the node runs no equation -- while the tree's green evidence for the node is a test of code the machine never runs. Added by slice 13; the vocabulary is extended rather than a row rewritten."
-  :selected-action-not-enacted-and-no-outward-effect "The node computes the action its equation declares, but the enactment boundary does not read that selected action: it chooses the first passing gate from the ranked candidates instead. The executor then returns an in-model construction and explicitly performs no substrate write or outward action, so neither the declared u nor an external consequence closes the action-perception loop. Added by slice 15."}
+  :selected-action-not-enacted-and-no-outward-effect "The node computes the action its equation declares, but the enactment boundary does not read that selected action: it chooses the first passing gate from the ranked candidates instead. The executor then returns an in-model construction and explicitly performs no substrate write or outward action, so neither the declared u nor an external consequence closes the action-perception loop. Added by slice 15."
+  :assurance-implemented-on-two-surfaces-without-node-wide-admission "The node's rule is implemented by a retained-corpus independence checker and by the full-loop author/reviewer boundary, but neither mechanism is attached to R9 and neither is a catalogue-wide birth-tag admission rule. The process census therefore remains named-only even though narrower checks run. Added by slice 16."}
 
  :slices
  [{:slice 1 :node :R5 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
@@ -1860,4 +1861,26 @@
    :limits ["The corpus absence is a search for four typed external-effect field names over 58 committed wm-trace files; an external witness stored elsewhere or under another name is not ruled out."
             "The harness does not call close-loop! because it is the mutating boundary; source inspection and the existing focused tests establish its selection path."
             "No live tick ran, no run lock was taken, and data/wm-trace was read only."]}
+
+  {:node :R9
+   :stage "ACT"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:43"
+   :slice 16
+   :label "No self-certification"
+   :kind :plumbing-node
+   :verdict :hole
+   :hole {:type :assurance-implemented-on-two-surfaces-without-node-wide-admission
+          :statement "R9 runs no equation and is correctly listed as plumbing (holes/labs/wm-contract/aif-equations.edn:520-521). Two narrower implementations enforce parts of its catalogue rule: checks/r9_independence.clj:15-31 computes whether a producer is inside the declared producing part, and src/futon2/aif/full_loop_runner.clj:2598-2611 refuses an author as reviewer while :1227-1271 corroborates review execution from job events. But the assurance census still has only a named R9 cell (holes/labs/wm-contract/ALIGN-rnode-process-census.md:115-118), and the catalogue itself says there is no universal birth-tag regime (p4ng/sec-catalog.tex:174-178). The receipt finds 0 R9 route records in the committed trace corpus, so neither running subset is attributed to the node."
+          :not-a-ruling "Whether those mechanisms should be unified under R9, whether the catalogue invariant should be narrowed, or whether a universal admission layer should be built is Joe's. This row records only the present scopes."}
+   :legs {:a {:status :done :basis "No equation reference exists; aif-equations.edn:520-521 explicitly classifies R9 as plumbing. The structural checks are in runs/V7-R9-node-sim/00-r9.edn."}
+          :b {:status :done :basis "DarkTower/WarMachine/Holes.lean:1070-1174 carries the R9 independence definitions and source-table certificates; checks/r9_independence.clj:92-112 emits the independently elaborated fixture theorem source used by the retained check."}
+          :c {:status :done-with-named-only :basis "ALIGN-rnode-process-census.md:84 and :115-118: every assurance cell is absent except checked, which is named-only; no R9-linked refusing check was found."}
+          :d {:status :done :basis "PROBLEMS-assurance-band-batch6.md:13-59: the contract/catalogue numbering split remains, the retained corpus checker covers a bounded historical table, and full-loop distinct-reviewer enforcement is a narrower live mechanism."}}
+   :harness {:runner "holes/labs/wm-contract/v7_r9_node_sim.clj"
+             :receipt "holes/labs/wm-contract/runs/V7-R9-node-sim/00-r9.edn"
+             :receipt-sha256 "8e2a86bc25925a863da72af59e2aefd676a2ad0472a6edd2c55680cb4e41e8af"
+             :checks "6 checks; 4 planted detectors; receipt must reproduce byte-identically."}
+   :limits ["The committed trace census detects an explicit R9 route tag and the five catalogue tag spellings; equivalent evidence under another name is outside that count."
+            "The retained checker is evidence about its pinned OBLIGATIONS corpus, not a universal admission gate over present evidence records."
+            "No live tick ran, no run lock was taken, and data/wm-trace was read only. No ruling or registry decision was written."]}
 ]}

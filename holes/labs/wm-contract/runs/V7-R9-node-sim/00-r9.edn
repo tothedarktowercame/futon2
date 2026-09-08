@@ -1,0 +1,28 @@
+{:schema :wm/v7-r9-node-sim-v1,
+ :node :R9,
+ :registry {:equation-row-count 0, :plumbing? true},
+ :implemented-subsets
+ {:retained-corpus-check "checks/r9_independence.clj:15-31,113-143",
+  :full-loop-distinct-reviewer
+  "src/futon2/aif/full_loop_runner.clj:2598-2611",
+  :full-loop-review-corroboration
+  "src/futon2/aif/full_loop_runner.clj:1227-1271"},
+ :corpus
+ {:files 58,
+  :records 892,
+  :r9-route-records 0,
+  :records-with-any-catalogue-birth-tag 0},
+ :checks
+ [{:id :registry-declares-r9-plumbing, :pass? true}
+  {:id :stage-names-no-self-certification, :pass? true}
+  {:id :r9-check-computes-membership, :pass? true}
+  {:id :full-loop-refuses-author-as-reviewer, :pass? true}
+  {:id :full-loop-corroborates-review-execution, :pass? true}
+  {:id :no-r9-route-in-trace, :pass? true}],
+ :plants
+ [{:id :wrong-formula-self-called-independent, :caught? true}
+  {:id :same-actor-reviewer, :caught? true}
+  {:id :invent-r9-route, :caught? true}
+  {:id :untagged-record, :caught? true}],
+ :summary
+ {:checks-pass 6, :checks-total 6, :plants-caught 4, :plants-total 4}}
