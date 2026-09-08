@@ -1,0 +1,89 @@
+{:schema :historical-cascade-v1
+ :id :l2-policy-grain-compliance-cascade
+ :problem
+ {:id :wm-aif-policy-grain-compliance
+  :statement "The War Machine is the reference implementation for the paper, but its live habit prior and its paper-level policy do not currently have the same grain; a second mismatch says truncation could leave the score describing a different policy than the one enacted."
+  :source "holes/missions/M-wm-aif-policy-grain-compliance.md:12-26 (survey witness runs/W1-witness-survey.md:137-143)"
+  :solved-behaviour "Construct and rank a non-degenerate menu of complete same-mission cascade policies in dark mode, with policy identity and policy score referring to the same object."
+  :scope "This record does not claim live selection, persistence, enactment, or full mission closure -- the mission itself remains open beyond the F7 dark-mode decision (mission status line and :B2 adoption at futon2 27a6dd5b)."
+  :witness "holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:145-201"}
+ :source-pins
+ {:futon2 "4b682f0d"
+  :futon3 "ab277bdd6b6aa3f587e09625c750d258d61a7f92"
+  :exemplar {:futon2 "5620ecd3bc33f4bf622f439e8c741708a28f4c59"
+             :futon3 "cdb5e8a56fd907beb6a99f8b88af9de50ff93126"
+             :note "the ratified exemplar record for this same mission, runs/mining-exemplar/cascade.edn at futon2 e059f0a5; this row's record re-derives it under the restated statement"}}
+ :nodes
+ [{:pattern :aif/hierarchical-and-temporal-depth
+   :library-path "library/aif/hierarchical-and-temporal-depth.flexiarg"
+   :origin :selected
+   :witness "holes/missions/M-wm-aif-policy-grain-compliance.md:34-46"}
+  {:pattern :aif/candidate-pattern-action-space
+   :library-path "library/aif/candidate-pattern-action-space.flexiarg"
+   :origin :selected
+   :witness "holes/missions/M-wm-aif-policy-grain-compliance.md:91-125"}
+  {:pattern :aif/expected-free-energy-scorecard
+   :library-path "library/aif/expected-free-energy-scorecard.flexiarg"
+   :origin :selected
+   :witness "holes/missions/M-wm-aif-policy-grain-compliance.md:127-149"}]
+ :selected
+ [:aif/hierarchical-and-temporal-depth
+  :aif/candidate-pattern-action-space
+  :aif/expected-free-energy-scorecard]
+ :admitted []
+ :admission-note
+ "The mission names the hierarchy, candidate-menu contract, and separately named scoring terms in its plan. It does not record any library pattern being drawn in during execution, so no node is classified as admitted. (Carried from the exemplar, unchanged: same evidence base.)"
+ :edges
+ [{:from :aif/hierarchical-and-temporal-depth
+   :to :aif/candidate-pattern-action-space
+   :relation :requires-tactical-menu
+   :source "holes/missions/M-wm-aif-policy-grain-compliance.md:34-44"
+   :reading "The declared hierarchy constructs Pi_cascade(a) before tactical choice."
+   :interpretation-class :documented
+   :documentation "Mission-span documented per the restated edge term (claude-1, 2026-09-08): no @why/@how joins these two patterns toward each other at the futon3 pin ab277bdd (each carries @why to its own problem nodes and @how to its own conclusion -- verified by grep in the M3 reopen review and re-verified this invocation); the reading is authored by the mission's own construction order. Same basis as the ratified exemplar edge (runs/mining-exemplar/cascade.edn, futon2 e059f0a5), now class-marked."}
+  {:from :aif/candidate-pattern-action-space
+   :to :aif/expected-free-energy-scorecard
+   :relation :precedes-ranking
+   :source "holes/missions/M-wm-aif-policy-grain-compliance.md:119-132"
+   :reading "The complete same-mission menu is constructed before ln E_cascade and cascade score rank it."
+   :interpretation-class :documented
+   :documentation "Same documented class and basis as the first edge: the mission's ordering of construction before ranking authors the reading; no pattern-to-pattern annotation exists at the pin."}]
+ :rules
+ [{:id :construct-a-bounded-explicit-candidate-menu
+   :member :aif/candidate-pattern-action-space
+   :then-source "library/aif/candidate-pattern-action-space.flexiarg:27"
+   :interpretation-class :attested
+   :interpretation
+   "Construct a bounded candidate set with explicit inclusion and exclusion reasons."
+   :attestation "holes/missions/M-wm-aif-policy-grain-compliance.md:91-125"
+   :span-note "Content line only at the current pin ab277bdd: the THEN marker is line 26, the content is line 27 -- the exemplar's 26-27 range included the marker line and is superseded here per the exemplar-review convention and the restated statement."}
+  {:id :keep-hierarchical-quantities-distinct
+   :member :aif/hierarchical-and-temporal-depth
+   :then-source "library/aif/hierarchical-and-temporal-depth.flexiarg:33-38"
+   :interpretation-class :attested
+   :interpretation
+   "Strategic selection fixes the tactical target, and the tactical level uses separately named quantities."
+   :attestation "holes/missions/M-wm-aif-policy-grain-compliance.md:34-59"
+   :span-note "Content lines only at the current pin: marker at 32, content 33-38 (exemplar's 32-38 included the marker)."}
+  {:id :record-the-ranking-terms
+   :member :aif/expected-free-energy-scorecard
+   :then-source "library/aif/expected-free-energy-scorecard.flexiarg:28"
+   :interpretation-class :attested
+   :interpretation
+   "Keep scoring terms separately named and record the terms used for each candidate."
+   :attestation "holes/missions/M-wm-aif-policy-grain-compliance.md:56-69,127-149"
+   :span-note "Content line only at the current pin: marker at 27, content 28 (exemplar's 27-28 included the marker)."}]
+ :precedence
+ {:aif/hierarchical-and-temporal-depth 1
+  :aif/candidate-pattern-action-space 2
+  :aif/expected-free-energy-scorecard 3}
+ :o4
+ {:rule-bearing-members 3
+  :acting-order
+  [:aif/hierarchical-and-temporal-depth
+   :aif/candidate-pattern-action-space
+   :aif/expected-free-energy-scorecard]
+  :basis "holes/missions/M-wm-aif-policy-grain-compliance.md:34-46,91-149"}
+ :transcript
+ {:history "futon2 edb50edc 2026-07-23 'Snapshot workspace before live WM run' carries the mission's founding date (M-wm-aif-policy-grain-compliance.md header 'Date: 2026-07-23') -> the dark-mode cascade-policy work decided at F7 (f7-cascade-policy-decision.edn, last touched 9d70a8b4 2026-09-05, witness :145-201) -> futon2 27a6dd5b 2026-09-05 ':B2 adoption -- four machine-proposed holes into M-wm-aif-policy-grain-compliance' (the mission's open tail: the four B2 items remain unchecked, so this cascade records the DARK-MODE PARTIAL solution the mission itself bounds). The exemplar record for the same mission was committed at futon2 e059f0a5 2026-09-07 and reviewed by claude-1 with the format ruled to hold."
+  :basis "git log --follow over holes/missions/M-wm-aif-policy-grain-compliance.md and git log over the F7 decision record, run this invocation at futon2 4b682f0d; all shas and dates read from git, none invented."}}
