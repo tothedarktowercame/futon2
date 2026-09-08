@@ -1,0 +1,27 @@
+{:sources
+ [{:kind :ruling
+   :claim/type :preference
+   :path "holes/labs/wm-contract/RULINGS-walkthrough-2026-09-08.md"
+   :lines [276 278]
+   :verbatim "> preference would strongly be to have all those [APM] problems be solved. But\n> along the way, I have the intermediate preference [...] to have the error\n> codes be diagnosable [...] spreading out the preference for solving all the"
+   :proposal {:object :solved-apm-problems-and-diagnosable-errors
+              :disposition nil
+              :proposed-mass :not-found}}
+  {:kind :choice
+   :claim/type :context
+   :path "holes/labs/wm-contract/aif-equations.edn"
+   :lines [64 65]
+   :verbatim "  {:symbol :C :meaning \"preference distribution over outcomes\" :class :stack-defined :glossary \"Preferences (R19 stack)\" :node nil\n   :note \"C has no node in control-stages.edn; it lives in the R19 preference stack registry\"}"
+   :proposal nil}
+  {:kind :mission
+   :claim/type :context
+   :path "holes/missions/M-formal-war-machine.md"
+   :lines [484 486]
+   :verbatim "This is not a preference. `CommitmentTemperature.lean`'s\n`live_gain_repair_changes_no_action` proves that R8's repairs cannot move a\nselected action while R14's edge is cut — so a Tier-3 repair landed today could"
+   :proposal nil}
+  {:kind :design-pattern-promotion
+   :claim/type :context
+   :path "holes/labs/wm-contract/R5-glossary-formalisation.md"
+   :lines [13 13]
+   :verbatim "| name | *Expected Free Energy Inside an Auditable Controller* — \"compute and persist the canonical core apart from everything wrapped around it\" | WR-25: \"the evaluate stage reports what the criterion set does **not** cover, with the same discipline it applies to a poor score\" (`promotion-tests.edn:124`) |"
+   :proposal nil}]}

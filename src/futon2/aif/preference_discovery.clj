@@ -3,6 +3,7 @@
    data for review; this namespace has no file-writing or registry-writing
   operation."
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]))
 
 (defn- refuse! [reason data]
@@ -62,3 +63,47 @@
        (->> components
             (filter #(not= (:proposed-mass %) (:ruled-mass %)))
             (mapv #(assoc % :question :proposed-c-disagrees-with-ruled-c)))})))
+
+(def landscape-kinds #{:ruling :choice :mission :design-pattern-promotion})
+
+(defn- pinned-text! [root {:keys [path lines verbatim] :as source}]
+  (let [[start end] lines
+        all-lines (str/split-lines (slurp (io/file root path)))
+        actual (str/join "\n" (subvec (vec all-lines) (dec start) end))]
+    (when-not (= verbatim actual)
+      (refuse! :landscape-pin-drift
+               {:path path :lines lines :expected verbatim :actual actual}))
+    (assoc source :citation (str path ":" start (when (not= start end) (str "-" end))))))
+
+(defn extract-landscape
+  "Verify exact excerpts from each declared evidence class and compare explicit
+   preference excerpts with SEEDED-C. Qualitative excerpts remain qualitative:
+   absent disposition or mass becomes a decision question, never a guessed
+   preference. ROOT is the repository root; SPEC is parsed EDN data."
+  [root spec {:keys [support mass]}]
+  (let [sources (mapv #(pinned-text! root %) (:sources spec))
+        kinds (set (map :kind sources))]
+    (when-not (= landscape-kinds kinds)
+      (refuse! :landscape-class-missing
+               {:required landscape-kinds :found kinds}))
+    (let [preferences (filterv #(= :preference (:claim/type %)) sources)
+          components
+          (mapv (fn [{:keys [proposal citation verbatim]}]
+                  (let [{:keys [disposition]} proposal
+                        ruled-mass (get mass disposition ::not-found)]
+                    {:proposal proposal
+                     :ruled-mass (if (= ::not-found ruled-mass) :not-found ruled-mass)
+                     :provenance [{:citation citation :verbatim verbatim}]}))
+                preferences)]
+      {:schema :preference-decision-sheet/v1
+       :seeded-c {:support support :mass mass}
+       :landscape (mapv #(select-keys % [:kind :claim/type :citation]) sources)
+       :proposed-components components
+       :decision-sheet
+       (mapv (fn [{:keys [proposal ruled-mass] :as component}]
+               (assoc component :question
+                      (if (or (nil? (:disposition proposal))
+                              (= :not-found ruled-mass))
+                        :which-ruled-disposition-carries-this-preference
+                        :what-mass-should-this-preference-carry)))
+             components)})))

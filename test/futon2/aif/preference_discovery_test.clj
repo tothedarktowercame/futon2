@@ -26,3 +26,18 @@
       (is (= seed-before ruled/seeded-c))
       (is (= 2 (count components)))
       (is (= (:support seed-before) (:support result))))))
+
+(deftest t6-real-landscape-is-pinned-and-never-quantified-by-the-extractor
+  (let [spec (edn/read-string
+              (slurp "holes/labs/wm-contract/preference-landscape.edn"))
+        result (discovery/extract-landscape "." spec ruled/seeded-c)
+        component (first (:proposed-components result))]
+    (is (= 4 (count (:landscape result))))
+    (is (= :solved-apm-problems-and-diagnosable-errors
+           (get-in component [:proposal :object])))
+    (is (= :not-found (:ruled-mass component)))
+    (is (= :which-ruled-disposition-carries-this-preference
+           (get-in result [:decision-sheet 0 :question])))
+    (is (= ruled/seeded-c (:seeded-c result)))
+    (is (= "holes/labs/wm-contract/RULINGS-walkthrough-2026-09-08.md:276-278"
+           (get-in component [:provenance 0 :citation])))))
