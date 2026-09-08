@@ -1883,4 +1883,27 @@
    :limits ["The committed trace census detects an explicit R9 route tag and the five catalogue tag spellings; equivalent evidence under another name is outside that count."
             "The retained checker is evidence about its pinned OBLIGATIONS corpus, not a universal admission gate over present evidence records."
             "No live tick ran, no run lock was taken, and data/wm-trace was read only. No ruling or registry decision was written."]}
+
+  {:node :R10
+   :stage "PERCEIVE"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:39"
+   :slice 17
+   :label "Scheduled entrypoint"
+   :kind :plumbing-node
+   :verdict :hole
+   :hole {:type :scheduler-apparatus-exists-without-current-node-attributed-liveness
+          :statement "R10 correctly runs no equation and is listed as plumbing (holes/labs/wm-contract/aif-equations.edn:1010). The autonomous entrypoint persists a trace and exits explicitly (scripts/wm_scheduled_run.clj:67-144), and the cron wrapper supplies a non-overlap lock before invoking it (scripts/wm_full_loop_cron.sh:1-17). But the contract says no schedule is currently installed (docs/futon-aif-completeness.md:266-278), the assurance census records all seven R10 process cells absent (holes/labs/wm-contract/ALIGN-rnode-process-census.md:85,176-178), and the retained corpus has zero R10 route records, hence zero R10 records carrying commission or dispatch identity. Its 52 records explicitly stamped :wallclock-cron occur only in four files ending wm-trace-2026-07-14.edn, and none of all 892 records carries an explicit :state-change, :state-changed?, or :grounded-change witness (holes/labs/wm-contract/runs/V7-R10-node-sim/00-r10.edn, sha256 0c6d6fffbc7413dc54176bdfd39c576d8d46463ac6a9ff37943483460a481557)."
+          :not-a-ruling "Whether and when to reinstall a schedule is Joe's operator decision. This row records that the apparatus exists, the historical wallclock era ended, and neither the node attribution nor the state-change evidence required by the catalogue is present in the retained trace."}
+   :legs {:a {:status :done :basis "No equation reference exists; aif-equations.edn:1010 explicitly classifies R10 as plumbing. Structural checks are in runs/V7-R10-node-sim/00-r10.edn."}
+          :b {:status :not-applicable :basis "R10 is scheduler plumbing, and no equation or Lean readback is declared for it."}
+          :c {:status :done-with-stated-absence :basis "ALIGN-rnode-process-census.md:85 has all seven cells absent; :176-178 specifically requires commission identity and a dispatch receipt tied to R10."}
+          :d {:status :done :basis "PROBLEMS-assurance-band-batch6.md:59-99: apparatus readiness is confirmed, current recurring operation and node-bound process identity remain absent, and the state-change criterion is not evidenced by the retained trace."}}
+   :harness {:runner "holes/labs/wm-contract/v7_r10_node_sim.clj"
+             :receipt "holes/labs/wm-contract/runs/V7-R10-node-sim/00-r10.edn"
+             :receipt-sha256 "0c6d6fffbc7413dc54176bdfd39c576d8d46463ac6a9ff37943483460a481557"
+             :checks "7 checks pass; 4 planted detectors caught; two runs byte-identical."}
+   :limits ["The absence of a current schedule is established by the repository contract and a read-only user crontab query; another scheduler outside the inspected repository and user crontab is not ruled out. The receipt intentionally records only the stable repository and corpus evidence."
+            "The corpus state-change search covers three explicit field names from the criterion. A change witnessed under another field name or outside data/wm-trace is outside that count."
+            "The last wallclock date is attributed by trace filename and :trigger, not by proving which external scheduler launched the process."
+            "No live tick ran, no scheduler was installed, no run lock was taken, and data/wm-trace was read only. No ruling or registry decision was written."]}
 ]}

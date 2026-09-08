@@ -1,0 +1,33 @@
+{:schema :wm/v7-r10-node-sim-v1,
+ :node :R10,
+ :registry {:equation-row-count 0, :plumbing? true},
+ :apparatus
+ {:entrypoint "scripts/wm_scheduled_run.clj:67-144",
+  :cron-wrapper "scripts/wm_full_loop_cron.sh:1-17",
+  :current-contract "docs/futon-aif-completeness.md:260-278"},
+ :corpus
+ {:files 58,
+  :records 892,
+  :r10-route-records 0,
+  :r10-records-with-process-identity 0,
+  :wallclock-records-by-file
+  {"wm-trace-2026-07-04.edn" 13,
+   "wm-trace-2026-07-05.edn" 17,
+   "wm-trace-2026-07-06.edn" 21,
+   "wm-trace-2026-07-14.edn" 1},
+  :records-with-explicit-state-change-witness 0},
+ :checks
+ [{:id :registry-declares-r10-plumbing, :pass? true}
+  {:id :entrypoint-persists-one-trace, :pass? true}
+  {:id :cron-wrapper-locks-and-dispatches, :pass? true}
+  {:id :contract-says-install-pending, :pass? true}
+  {:id :trace-has-no-r10-attribution-or-process-identity, :pass? true}
+  {:id :wallclock-era-ended, :pass? true}
+  {:id :no-explicit-state-change-witness, :pass? true}],
+ :plants
+ [{:id :invent-r10-process-identity, :caught? true}
+  {:id :invent-r10-route, :caught? true}
+  {:id :wrong-trigger-called-wallclock, :caught? true}
+  {:id :scheduler-fire-called-state-change, :caught? true}],
+ :summary
+ {:checks-pass 7, :checks-total 7, :plants-caught 4, :plants-total 4}}
