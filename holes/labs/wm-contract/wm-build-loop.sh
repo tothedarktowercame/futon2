@@ -69,7 +69,24 @@ run_seat() { # $1 seat, $2 prompt file, $3 label
   esac
   local rc=$?; log "$label: $seat exit=$rc"; return $rc
 }
-ledger_ok() { bb "$HERE/worklist_check.bb" "$HERE/worklist.edn" > /tmp/wm-build-check.out 2>&1; local rc=$?; grep -vE 'WARNING|^worklist_check:\s+(M|\?\?) ' /tmp/wm-build-check.out | tail -1 | tee -a "$LOG"; return $rc; }
+# Re-render the frontier before each gate check. Ticket-status flips
+# (blocked/open/done) are routine bookkeeping: commit and continue. Any other
+# render change (assurance-state degrade, ticket-count drift) is reverted so
+# the U70 gate stops the loop and a human routes the re-witness -- that stop
+# caught a true witness-staleness on 2026-09-08 and must stay loud.
+refresh_frontier() {
+  (cd "$HERE" && bb gen_dependency_frontier.bb >/dev/null 2>&1) || return 0
+  local diff; diff=$(cd "$HOME/code/futon2" && git diff -- holes/labs/wm-contract/dependency-frontier.md)
+  [ -z "$diff" ] && return 0
+  if echo "$diff" | grep -E '^[+-][^+-]' | grep -qvE '^[+-]\| [0-9]+ \| .:U'; then
+    (cd "$HOME/code/futon2" && git checkout -- holes/labs/wm-contract/dependency-frontier.md)
+    log "frontier: non-status render change; left stale for the U70 gate to refuse"
+    return 0
+  fi
+  (cd "$HOME/code/futon2" && git add holes/labs/wm-contract/dependency-frontier.md && git commit -q -m "frontier: status-flip re-render (wm-build-loop)")
+  log "frontier: status-flip re-render committed"
+}
+ledger_ok() { refresh_frontier; bb "$HERE/worklist_check.bb" "$HERE/worklist.edn" > /tmp/wm-build-check.out 2>&1; local rc=$?; grep -vE 'WARNING|^worklist_check:\s+(M|\?\?) ' /tmp/wm-build-check.out | tail -1 | tee -a "$LOG"; return $rc; }
 publish() {
   if [ "$(bb "$HERE/build_step.bb" registry-held)" = "0" ]; then
     log "publish: registries clear -> build-p4ng.sh futon-2026"
