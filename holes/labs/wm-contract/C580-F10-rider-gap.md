@@ -14,16 +14,29 @@ part of a run, not a lab checker loading that declaration after the run.
 
 ## 2. Gate A — nothing consumes the declaration
 
-The exact scan was:
+The scan is over the WHOLE repository and over tracked files only:
 
 ```text
-rg -n 'ruled[-_]outcome[-_]c' src scripts test checks holes/labs/wm-contract
+git grep -l -E 'ruled[-_]outcome[-_]c'
 ```
+
+Whole-repo because "no production caller" must not be scoped by a
+five-directory allowlist -- a consumer under `tools/` or `web/` classifies as
+`:outside-scan-roots` and turns `:mentions-within-scan-roots` red rather than
+going unseen (`futon2:holes/labs/wm-contract/f10_rider_gap_scan.bb:33-52`).
+Tracked-only because an untracked file that quotes the name would otherwise
+change the artifact on every run: the build loop's own gitignored log
+(`futon2:.gitignore:63`) was in the first version's hit list, and the loop
+appends to it while the slice runs.
 
 The deterministic result is projected at
 `futon2:holes/labs/wm-contract/runs/F10-outcome-domain/04-rider-gap.edn:1`.
 After excluding the declaration's own namespace, the hits classify as one
-test, one check, ten lab files, and three artifacts; production callers: zero.
+test, one check, eleven lab files, and two artifacts
+(`04-rider-gap.edn:3-4`); production callers: zero.  The scan is required to
+find the declaration in its own hit set
+(`futon2:holes/labs/wm-contract/f10_rider_gap_scan.bb:104-108`), so a grep that
+read nothing fails instead of reporting an empty repository as clean.
 The sole `src/` hit is the declaration itself at
 `futon2:src/futon2/aif/ruled_outcome_c.clj:1`, not a consumer.  Thus a cohort
 restart alone would emit dispositions that no production code currently scores
@@ -104,8 +117,13 @@ pointer was copied without reopening it.
 ## 8. Scope limits
 
 No production source, scorer, declaration, ruling, ledger, or cohort data was
-changed.  The production-caller plant runs against a copied scan root, and the
-newer-attempt plant runs against a copied data root
-(`futon2:holes/labs/wm-contract/f10_rider_gap_controls.sh:14-42`).  The null
-control proves the unchanged route is accepted byte-identically.  This is a
-discovery record, not discharge of the rider.
+changed.  The five scan plants run inside a throwaway git work tree under
+`$tmp`, so they exercise the same path source the real route uses
+(`futon2:holes/labs/wm-contract/f10_rider_gap_controls.sh:44-85`); the
+newer-attempt plant runs against a copied data root (`:87-91`).  Each plant
+declares the checks it must move and the run is rejected unless it moves
+exactly those (`:26-33`), which is how the two plants that must move NOTHING
+-- the declaration alone (`:58-60`) and an uncommitted consumer (`:67-71`) --
+are expressible at all.  The null control proves the unchanged route is
+accepted byte-identically, and says so out loud when it is not (`:35-42`).
+This is a discovery record, not discharge of the rider.
