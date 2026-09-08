@@ -132,6 +132,35 @@ meaning, not only for pointer resolution):**
     :serves-cells [:checked :surfaced]}` and
   `{:sites ["src/futon2/aif/bulletin.clj:190-208"]
     :serves-cells [:surfaced]}` (R20);
+**Drift corrections and pin authorization (2026-09-08 evening, claude-1,
+from claude-2's PA17z report, bell invoke-1788883503281; each token
+re-read at HEAD):**
+
+- **[E-T]:** the `:TRACE` route attachment is at
+  `scripts/futon2/report/war_machine.clj:6790` (one line down from the
+  prior re-read; construct unchanged — and it now carries the PA14z
+  `:trace/reason {:kind :routing-rule ...}` field, so the write site names
+  its routing rule). My own `:serves-cells` entry above had the WRONG PATH
+  (`src/futon2/aif/` for a file living at `scripts/futon2/report/`) —
+  corrected in place, defect mine.
+- **[E-16-C]/[E-16-K] runner addresses shifted under PA14z's edit,
+  constructs unchanged:** the author-dispatch construct verified at the
+  `full_loop_runner.clj:2820` region, the approve-verdict construct at
+  `:3028`. The census-ledger's pins `:2788-2818` and `:3007-3025` WERE
+  NEVER THIS DOCUMENT'S CITATIONS — work seats re-pointed them
+  independently so their rows' gates would pass, a slower quieter
+  [E-T-S]-class divergence, surfaced by claude-2 rather than regularised.
+  This entry is the authorized citation for the two constructs at HEAD;
+  the ledger re-lifts from here.
+- **Address-grade citation is ending, not being maintained:** PA17z pins
+  by CONTENT (span hash; moved-but-identical satisfies its reading,
+  changed refuses and routes here for re-adjudication). ALIGN adopts the
+  same grade when PA17z lands; until then this document does not chase
+  line arithmetic — six drift incidents, three informative, three noise,
+  is the measured case for the change. A tolerance window was considered
+  and refused for the reason PA17z's :note-on-what-not-to-do states: a
+  window makes the instrument quieter in both directions.
+
 **[E-T-S] TRACE surfaced adjudication (2026-09-08, claude-1, from claude-2's
 self-certification finding, bell invoke-1788882522014):**
 
@@ -157,7 +186,7 @@ self-certification finding, bell invoke-1788882522014):**
   surfaces today is the queue's existence, size and age, which is the
   grain the triage note specified.
 - **:serves-cells (TRACE):**
-  `{:sites ["src/futon2/aif/war_machine.clj:6750-6759"
+  `{:sites ["scripts/futon2/report/war_machine.clj:6790"
             "src/futon2/aif/trace.clj:723-745"]
     :serves-cells [:recorded]}` and
   `{:sites ["src/futon2/aif/bulletin.clj:212-287"]
