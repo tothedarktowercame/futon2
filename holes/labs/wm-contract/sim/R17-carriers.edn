@@ -1,0 +1,31 @@
+{:schema :wm/v7-r17-carriers-v1
+ :accumulation
+ {:previous {[:channel-a :state-a] 0.1
+             [:channel-b :state-a] 0.1}
+  :tick-mass {[:channel-a :state-a] 0.75
+              [:channel-b :state-a] 0.25}
+  :declared-result {[:channel-a :state-a] 0.85
+                    [:channel-b :state-a] 0.35}
+  :machine-corpus {:capabilities ["cap-a"]
+                   :edges [["cap-a" "mission-a"]]
+                   :discharges []}
+  :machine-result {"cap-a" [1.1]}}
+ :model-reduction
+ [{:id :redundant-parameter
+   :full-prior [1.0 1.0 1.0 1.0]
+   :full-posterior [20.0 20.0 1.0 1.0]
+   :reduced-prior [1.0 1.0 0.01 0.01]
+   :expected-delta-f -5.54574457990935
+   :expected-accept? true}
+  {:id :informative-parameter
+   :full-prior [1.0 1.0 1.0 1.0]
+   :full-posterior [20.0 20.0 20.0 20.0]
+   :reduced-prior [1.0 1.0 0.01 0.01]
+   :expected-delta-f 8.173501392993302
+   :expected-accept? false}
+  {:id :identity
+   :full-prior [1.0 1.0 1.0]
+   :full-posterior [2.0 5.0 11.0]
+   :reduced-prior [1.0 1.0 1.0]
+   :expected-delta-f 0.0
+   :expected-accept? false}]}

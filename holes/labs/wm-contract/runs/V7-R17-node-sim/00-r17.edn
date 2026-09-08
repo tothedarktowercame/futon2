@@ -1,0 +1,38 @@
+{:schema :wm/v7-r17-node-sim-v1,
+ :node :R17,
+ :equations
+ {:dirichlet-accumulation
+  {:declared {[:channel-a :state-a] 0.85, [:channel-b :state-a] 0.35},
+   :machine {"cap-a" [1.1]},
+   :same-grain? false},
+  :model-reduction
+  [{:id :redundant-parameter,
+    :expected {:delta-F -5.54574457990935, :accept? true},
+    :actual {:delta-F -5.54574457990935, :accept? true},
+    :pass? true}
+   {:id :informative-parameter,
+    :expected {:delta-F 8.173501392993302, :accept? false},
+    :actual {:delta-F 8.173501392993302, :accept? false},
+    :pass? true}
+   {:id :identity,
+    :expected {:delta-F 0.0, :accept? false},
+    :actual {:delta-F 0.0, :accept? false},
+    :pass? true}]},
+ :implementation {:mode :offline, :external-r17-offline-callers []},
+ :corpus {:files 58, :r17-attributed-files []},
+ :checks
+ [{:id :two-registry-rows-present, :pass? true}
+  {:id :declared-soft-accumulation-reference, :pass? true}
+  {:id :machine-count-reference, :pass? true}
+  {:id :declared-and-machine-grains-differ, :pass? true}
+  {:id :bmr-reference-cases-match, :pass? true}
+  {:id :bmr-is-offline, :pass? true}
+  {:id :no-production-r17-offline-caller, :pass? true}
+  {:id :no-r17-trace-attribution, :pass? true}],
+ :plants
+ [{:id :drop-second-soft-cell, :caught? true}
+  {:id :replace-bmr-threshold, :caught? true}
+  {:id :invent-live-caller, :caught? true}
+  {:id :invent-trace-attribution, :caught? true}],
+ :summary
+ {:checks-pass 8, :checks-total 8, :plants-caught 4, :plants-total 4}}
