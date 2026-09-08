@@ -72,7 +72,7 @@
   :open-dispatched 1,
   :pending-decisions 14},
  :ledger-frontier 382,
- :as-of "2026-09-08T18:17:44.237770756Z",
+ :as-of "2026-09-08T18:34:44.562322341Z",
  :attribution
  {:systematic-from "C378",
   :systematic-run-length 5,
