@@ -62,3 +62,4 @@ __pycache__/
 holes/labs/wm-contract/refusal-sweep-state.edn
 holes/labs/wm-contract/runs/build-loop.log
 holes/labs/zaif-harness/runs/build-loop.log
+holes/labs/zaif-harness/runs/build-loop.lock
