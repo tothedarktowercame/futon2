@@ -2,6 +2,7 @@
 (ns checks.r9-proof-receipt-check
   (:require [babashka.process :as process]
             [checks.mutable-read-set :as read-set]
+            [checks.positive-proof-receipt :as positive-receipt]
             [clojure.edn :as edn]
             [clojure.string :as str]))
 
@@ -13,22 +14,7 @@
     (.update digest (.getBytes s "UTF-8"))
     (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
 
-(defn declaration-text [source declaration]
-  (let [lines (vec (str/split-lines source))
-        start-pattern (re-pattern
-                       (str "^(?:structure|inductive|def)\\s+"
-                            (java.util.regex.Pattern/quote declaration)
-                            "(?:\\s|$)"))
-        boundary? #(boolean
-                    (re-find #"^(?:/--|structure\s|inductive\s|def\s|theorem\s|lemma\s|namespace\s|end\s)" %))
-        start (first (keep-indexed #(when (re-find start-pattern %2) %1) lines))]
-    (when (nil? start)
-      (throw (ex-info "declaration absent" {:declaration declaration})))
-    (let [end (or (first (keep-indexed
-                          #(when (and (> %1 start) (boundary? %2)) %1)
-                          lines))
-                  (count lines))]
-      (str (str/join "\n" (subvec lines start end)) "\n"))))
+(def declaration-text positive-receipt/declaration-text)
 
 (defn proof-receipt-shape? [x]
   (and (= :LeanProofReceipt (:receipt/type x))

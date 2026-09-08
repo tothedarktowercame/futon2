@@ -6,6 +6,6 @@
  :positive-evidence-scope "Establishes carrier construction or stored normalization only; the source pin prevents silent weakening but does not establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/PolicyPriorKernelNegative.lean" :claim :policy-prior-is-unconditioned}]}
  :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-08T00:00:00Z"}

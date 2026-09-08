@@ -1,20 +1,20 @@
 {:receipt/type :LeanProofReceipt
  :receipt/version 2
- :recorded-at "2026-08-31T23:59:00Z"
+ :recorded-at "2026-09-08T00:00:00Z"
  :theorem "DarkTower.WarMachine.Holes.modelUncertaintyAndEIG"
  :proof-source
  {:repo "mathlib4"
   :path "DarkTower/WarMachine/Holes.lean"
-  :file-git-sha-at-recording "d4056010d5f129ff1da7ce180c6ce8a91a962f6a"
+  :file-git-sha-at-recording "738cae3a540ac03a4d77e1ebe399c7c6dccd8cb6"
   :declarations
   [{:name "modelUncertaintyBonus"
-    :sha256 "2a956226a01cfe5f845273d31c97e759f42e99aced30d57e2dd19acdd6885aec"}
+    :sha256 "9e4315dcae11e7024ca5fad0755d0e785c11d644c3e64690fc5c10c88de67674"}
    {:name "parameterInformationGain"
-    :sha256 "9ff206c94d536551793001be15fcc91b84cbe63101308170ed360f2f76a97fd3"}
+    :sha256 "9c46be7bfb46ac1593d93bc6959787192e18c116ca16128fc24c4b3e2a0aaa92"}
    {:name "expectedInformationGain"
-    :sha256 "f64bf3b57d210b2bb2b5c40d5c670ded7f9f7b9dfe3995864ef4e63aa17d63c9"}
+    :sha256 "dcc3c0a46cd122c986a18656758df15c1d44a39e2106a39d5bd81b0b3c1e8cf4"}
    {:name "modelUncertaintyAndEIG"
-    :sha256 "c81fdb5422808c57a40542f7590c8737f3b98fdcf51641c65fc31cfdb4aeb626"}]}
+    :sha256 "8524cee811e8550f8a01cc9282e05a052f38b6bdf41635a6e79bc8d77b388783"}]}
  :elaborator
  {:command ["lake" "env" "lean"]
   :cwd "/home/joe/code/mathlib4"}

@@ -6,6 +6,6 @@
            :path "holes/labs/wm-contract/expected-information-gain-reference.edn"}
  :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/expected-information-gain-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-08T00:00:00Z"}

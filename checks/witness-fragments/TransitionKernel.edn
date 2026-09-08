@@ -8,6 +8,6 @@
                       [{:fixture "DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean" :claim :transition-is-action-conditioned}
                        {:fixture "DarkTower/WarMachine/TransitionKernelBetaNegative.lean" :claim :transition-B-is-not-beta-normaliser}]}
  :run-sha "1ce10c346dc82dc030355990db5c8257317f958a"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-08T00:00:00Z"}

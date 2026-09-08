@@ -5,6 +5,6 @@
  :positive-evidence-limit :construction-or-projection-only
  :positive-evidence-scope "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :run-sha "ed8d9e07be2dc043c2c7bc12fe08e9bec4c9ea6a"
- :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5"
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
  :result :passed
- :recorded-at "2026-09-03T22:16:17Z"}
+ :recorded-at "2026-09-08T00:00:00Z"}

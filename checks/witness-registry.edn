@@ -8,7 +8,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/ActGateNegative.lean",
      :claim :missing-leg-cannot-pass}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b",
   :check
   {:repo "futon2",
@@ -18,7 +18,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/act-gate-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -29,7 +29,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/AlivenessNegative.lean",
      :claim :aliveness-factor-is-nonnegative}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b",
   :check
   {:repo "futon2",
@@ -39,7 +39,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/aliveness-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -47,7 +47,7 @@
  {:witnesses "BeliefState",
   :positive-evidence-scope
   "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "ed8d9e07be2dc043c2c7bc12fe08e9bec4c9ea6a",
   :check
   {:repo "futon2",
@@ -58,7 +58,7 @@
    :path "holes/labs/wm-contract/belief-state-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -66,7 +66,7 @@
  {:witnesses "Channel",
   :positive-evidence-scope
   "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "38695fceb78b1888c90a44206118e19f44c959bd",
   :check
   {:repo "futon2",
@@ -77,7 +77,7 @@
    :path "holes/labs/wm-contract/channel-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -90,7 +90,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/CohortNegative.lean",
      :claim :cohort-window-is-positive}]},
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b",
   :check
   {:repo "futon2",
@@ -101,7 +101,7 @@
    :path "holes/labs/wm-contract/cohort-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -114,7 +114,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/ControlVocabularyNegative.lean",
      :claim :policy-controls-belong-to-vocabulary}]},
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b",
   :check
   {:repo "futon2",
@@ -126,7 +126,7 @@
    "holes/labs/wm-contract/control-vocabulary-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -146,7 +146,7 @@
     {:fixture
      "DarkTower/WarMachine/DirichletConcentrationsNegative.lean",
      :claim :concentrations-exclude-negative}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "ee5e6a1d50b6980684086c1d157954777ec6176b",
   :check
   {:repo "futon2",
@@ -158,7 +158,7 @@
    "holes/labs/wm-contract/dirichlet-concentrations-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -172,7 +172,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/FoldNegative.lean",
      :claim :fold-requires-policy-holes}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "d46f823aa7433d4990b538993e2674255bdeb0b5",
   :check
   {:repo "futon2",
@@ -183,7 +183,7 @@
    :path "holes/labs/wm-contract/fold-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/fold-reference.edn"}}
@@ -197,10 +197,8 @@
      :claim :ordered-fold-is-not-order-insensitive}
     {:fixture "DarkTower/WarMachine/FoldCFoldedNegative.lean",
      :claim :unfolded-layer-does-not-leave-base-unchanged}]},
-  :contract-sha
-  "db123e92336f23939dc053c54c887ba0bb3122073a0a969bae923bd4fec8d763",
-  :run-sha
-  "cf318f67dd17deacc906dcdd5666f0ee9c2c691ec520ae5be3839aef188026f3",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+  :run-sha "cd65292d54c1ec4e46d5167c4208f1fef58cd60e",
   :check
   {:repo "futon2",
    :path "checks/fold_c_witness.clj",
@@ -210,7 +208,7 @@
    :path "holes/labs/wm-contract/fold-c-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-07T00:00:00Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -234,7 +232,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/GenerativeModelNegative.lean",
      :claim :model-carriers-share-state-type}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
   :check
   {:repo "futon2",
@@ -245,7 +243,7 @@
    :path
    "holes/labs/wm-contract/generative-model-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -258,7 +256,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/HaveWantArrowNegative.lean",
      :claim :composition-requires-matching-endpoint}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "b7444680a0dbf45da3ee129b250dadb5260c964f",
   :check
   {:repo "futon2",
@@ -269,7 +267,7 @@
    :path "holes/labs/wm-contract/have-want-arrow-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -277,7 +275,7 @@
  {:witnesses "observationKernel",
   :positive-evidence-scope
   "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "a33ba573c51b790d19e40a93df3bc84285e34475",
   :check
   {:repo "futon2",
@@ -289,7 +287,7 @@
    "holes/labs/wm-contract/observation-kernel-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -306,7 +304,7 @@
     {:fixture
      "DarkTower/WarMachine/ObservationVectorOutcomeNegative.lean",
      :claim :vector-not-single-outcome}]},
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "2972f9f064683919dd2eb75cc969008d44c0443e",
   :check
   {:repo "futon2",
@@ -318,7 +316,7 @@
    "holes/labs/wm-contract/observation-vector-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -335,7 +333,7 @@
     {:fixture
      "DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean",
      :claim :posterior-is-not-outcome-prediction}]},
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "d2b43fb61ad94126f77996296748feed0d6f4bfd",
   :check
   {:repo "futon2",
@@ -347,7 +345,7 @@
    "holes/labs/wm-contract/parameter-posterior-kernel-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -365,7 +363,7 @@
     {:fixture
      "DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean",
      :claim :parameter-prior-is-not-policy-habit}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "8fb951e4911f94495b62902ea293086fee20eaaa",
   :check
   {:repo "futon2",
@@ -377,7 +375,7 @@
    "holes/labs/wm-contract/parameter-prior-kernel-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -391,7 +389,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/PolicyPriorKernelNegative.lean",
      :claim :policy-prior-is-unconditioned}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a",
   :check
   {:repo "futon2",
@@ -403,7 +401,7 @@
    "holes/labs/wm-contract/policy-prior-kernel-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -414,7 +412,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/PrecisionNegative.lean",
      :claim :precision-is-not-signed-error}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "ec4f5e866d3272479835153ec41c93967faa1268",
   :check
   {:repo "futon2",
@@ -424,7 +422,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/precision-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -441,7 +439,7 @@
     {:fixture
      "DarkTower/WarMachine/PredictiveOutcomeKernelSoftmaxNegative.lean",
      :claim :outcome-prediction-is-not-policy-posterior}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "f0be231606149d5b9e34a62cde01c6b122c2aeba",
   :check
   {:repo "futon2",
@@ -453,7 +451,7 @@
    "holes/labs/wm-contract/predictive-outcome-kernel-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -474,9 +472,9 @@
    "holes/labs/wm-contract/predictive-outcome-risk-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "d260aed610d74e9f29745777e919a6959fc95e54",
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :result :passed,
-  :recorded-at "2026-09-03T22:16:17Z"}
+  :recorded-at "2026-09-08T00:00:00Z"}
  {:witnesses "PreferenceDistribution",
   :positive-evidence-scope
   "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
@@ -489,7 +487,7 @@
     {:fixture
      "DarkTower/WarMachine/PreferenceDistributionPragmaticCostNegative.lean",
      :claim :preference-distribution-is-not-pragmatic-cost}]},
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "146dfcf2679d3a7218d8983782d8a28ef64a8d72",
   :check
   {:repo "futon2",
@@ -501,7 +499,7 @@
    "holes/labs/wm-contract/preference-distribution-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -518,7 +516,7 @@
      :claim :transition-is-action-conditioned}
     {:fixture "DarkTower/WarMachine/TransitionKernelBetaNegative.lean",
      :claim :transition-B-is-not-beta-normaliser}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "1ce10c346dc82dc030355990db5c8257317f958a",
   :check
   {:repo "futon2",
@@ -530,7 +528,7 @@
    "holes/labs/wm-contract/transition-kernel-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -546,7 +544,7 @@
      :claim :positive-statement-source-identity}
     {:mode "--unrelated-positive-edit",
      :claim :declaration-slice-locality}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379",
   :check
   {:repo "futon2",
@@ -557,7 +555,7 @@
    :path
    "holes/labs/wm-contract/variational-free-energy-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -576,16 +574,16 @@
    :path "holes/labs/wm-contract/ambiguity-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413",
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :result :passed,
-  :recorded-at "2026-09-03T15:33:43Z"}
+  :recorded-at "2026-09-08T00:00:00Z"}
  {:witnesses "bayesFactorThreshold",
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
    [{:fixture "DarkTower/WarMachine/BayesFactorThresholdNegative.lean",
      :claim :threshold-requires-model-change-evidence}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "4703c8862a40bd103f80f92cdc9a526fb316e189",
   :check
   {:repo "futon2",
@@ -596,7 +594,7 @@
    :path
    "holes/labs/wm-contract/bayes-factor-threshold-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -609,7 +607,7 @@
    [{:fixture
      "DarkTower/WarMachine/BayesianModelReductionNegative.lean",
      :claim :reduction-preserves-count-arithmetic}]},
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "b048066070e1646c9105067ed6c405621381a2c9",
   :check
   {:repo "futon2",
@@ -620,7 +618,7 @@
    :path
    "holes/labs/wm-contract/bayesian-model-reduction-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -640,9 +638,9 @@
    "holes/labs/wm-contract/expected-free-energy-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :result :passed,
-  :recorded-at "2026-09-03T22:16:17Z"}
+  :recorded-at "2026-09-08T00:00:00Z"}
  {:witnesses "expectedInformationGain",
   :check
   {:repo "futon2",
@@ -658,9 +656,9 @@
    "holes/labs/wm-contract/expected-information-gain-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :result :passed,
-  :recorded-at "2026-09-03T15:33:43Z"}
+  :recorded-at "2026-09-08T00:00:00Z"}
  {:witnesses
   ["findF1Containment"
    "findF2Receipted"
@@ -696,9 +694,9 @@
    "holes/labs/wm-contract/log-multivariate-beta-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :result :passed,
-  :recorded-at "2026-09-03T22:16:17Z"}
+  :recorded-at "2026-09-08T00:00:00Z"}
  {:witnesses "modelReductionFreeEnergyChange",
   :expected-rejection
   {:mode :lean-guard-msgs,
@@ -709,7 +707,7 @@
     {:fixture
      "DarkTower/WarMachine/ModelReductionFreeEnergyChangeTypeNegative.lean",
      :claim :present-free-energy-is-not-model-change}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "ab33ba4cac8e494d122b940d8163692067fc39b8",
   :check
   {:repo "futon2",
@@ -720,7 +718,7 @@
    :path
    "holes/labs/wm-contract/model-reduction-free-energy-change-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -790,7 +788,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/PredictionErrorNegative.lean",
      :claim :prediction-error-has-observation-minus-prediction-sign}]},
-  :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "478cacfa0fa2221b4b83a0c04c925132f62f20ef",
   :check
   {:repo "futon2",
@@ -801,7 +799,7 @@
    :path
    "holes/labs/wm-contract/prediction-error-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T22:16:17Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",
@@ -907,7 +905,7 @@
    :controls
    [{:fixture "DarkTower/WarMachine/SoftmaxNegative.lean",
      :claim :softmax-preserves-score-order}]},
-  :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e",
+  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
   :run-sha "baa9cac380d3c9506120e064faf8f460acbbeff1",
   :check
   {:repo "futon2",
@@ -917,7 +915,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/softmax-positive-receipt.edn",
    :schema :PositiveLeanWitnessReceipt/v1},
-  :recorded-at "2026-09-03T15:33:43Z",
+  :recorded-at "2026-09-08T00:00:00Z",
   :result :passed,
   :fixture
   {:repo "futon2",

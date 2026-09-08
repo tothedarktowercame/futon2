@@ -15,5 +15,5 @@
                 {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean" :declarations [{:name "foldC" :sha256 "ec8a72a5676f78242b9ab4bc7199b9b7689b528a731b54bf5811a3f70f1f1e6d"}]}]
  :elaborator {:command ["lake" "env" "lean"] :cwd "/home/joe/code/mathlib4"}
  :toolchain {:lean-version "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)" :lean-toolchain-sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8" :lake-manifest-sha256 "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"}
- :recorded-at "2026-09-07T00:00:00Z"
+ :recorded-at "2026-09-08T00:00:00Z"
  :result {:exit 0 :axioms ["propext" "Classical.choice" "Quot.sound"]}}

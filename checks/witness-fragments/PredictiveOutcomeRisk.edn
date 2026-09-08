@@ -3,6 +3,6 @@
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/predictive-outcome-risk-reference.edn"}
  :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/predictive-outcome-risk-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :run-sha "d260aed610d74e9f29745777e919a6959fc95e54"
- :contract-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5"
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
  :result :passed
- :recorded-at "2026-09-03T22:16:17Z"}
+ :recorded-at "2026-09-08T00:00:00Z"}

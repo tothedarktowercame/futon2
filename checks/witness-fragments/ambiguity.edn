@@ -6,6 +6,6 @@
            :path "holes/labs/wm-contract/ambiguity-reference.edn"}
  :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/ambiguity-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-08T00:00:00Z"}

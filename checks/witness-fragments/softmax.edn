@@ -4,6 +4,6 @@
  :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/softmax-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/SoftmaxNegative.lean" :claim :softmax-preserves-score-order}]}
  :run-sha "baa9cac380d3c9506120e064faf8f460acbbeff1"
- :contract-sha "6de47bd0503dd4e6090c420ca32d8e7474438d7e"
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
  :result :passed
- :recorded-at "2026-09-03T15:33:43Z"}
+ :recorded-at "2026-09-08T00:00:00Z"}

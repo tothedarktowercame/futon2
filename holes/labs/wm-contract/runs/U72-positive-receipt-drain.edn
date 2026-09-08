@@ -1,0 +1,32 @@
+{:schema :wm/u72-positive-receipt-drain-v1
+ :item :U72
+ :contract-authority {:repo "mathlib4"
+                      :contract "DarkTower/WarMachine/holes-contract.json"
+                      :git-sha "e239086a44147f14defc88e74a662a2cd4487e67"}
+ :receipt-census {:checker "holes/labs/wm-contract/positive_receipt_reattestation_check.bb:43"
+                  :known-stale-before 33
+                  :known-stale-after 0
+                  :after-census "holes/labs/wm-contract/positive-receipt-known-stale.edn:1"}
+ :re-attestation
+ {:positive-receipt-fragments 31
+  :fragment-source "checks/witness-fragments/ActGate.edn:1"
+  :merge-path "scripts/merge_witnesses.bb:1"
+  :checks {:passed 31 :failed 0}
+  :legacy-extractor-correction
+  ["checks/r9_proof_receipt_check.clj:5"
+   "checks/model_uncertainty_eig_witness.clj:4"]}
+ :contract-lint
+ {:before {:strict-stale 38 :positive-receipt-stale 31}
+  :after {:strict-stale 7 :positive-receipt-stale 0
+          :remaining ["organiseO1NodesRecorded" "organiseO2AuthoredReachability"
+                      "organiseO3FastForward" "organiseO4PrecedenceGovernance"
+                      "nonDegenerateAblationLaw" "wmVerdictsLedgerAlone"
+                      "wmVerdictsDeclared"]}
+  :checker "checks/contract_lint.clj:440"}
+ :validation
+ {:clj-kondo {:errors 0 :warnings 0}
+  :check-parens :ok
+  :test {:namespace "positive-proof-receipt-test" :tests 3 :assertions 12
+         :failures 0 :errors 0}
+  :owning-witness-checks {:passed 31 :failed 0}
+  :receipt-gate {:receipts 33 :known-stale 0 :unattested-drift 0}}}

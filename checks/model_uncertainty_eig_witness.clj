@@ -1,8 +1,8 @@
 #!/usr/bin/env bb
 (ns checks.model-uncertainty-eig-witness
   (:require [babashka.process :as process]
-            [clojure.edn :as edn]
-            [clojure.string :as str]))
+            [checks.positive-proof-receipt :as positive-receipt]
+            [clojure.edn :as edn]))
 
 (def mathlib-root "/home/joe/code/mathlib4")
 (def source-path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean")
@@ -17,17 +17,7 @@
     (.update digest (.getBytes s "UTF-8"))
     (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
 
-(defn declaration-text [source declaration]
-  (let [lines (vec (str/split-lines source))
-        start-pattern (re-pattern
-                       (str "^(?:private\\s+)?(?:noncomputable\\s+)?(?:def|theorem|structure|inductive|abbrev)\\s+"
-                            (java.util.regex.Pattern/quote declaration) "(?:\\s|$)"))
-        boundary? #(boolean (re-find #"^(?:/--|private\\s+|structure\\s|inductive\\s|def\\s|theorem\\s|lemma\\s|namespace\\s|end\\s)" %))
-        start (first (keep-indexed #(when (re-find start-pattern %2) %1) lines))]
-    (when (nil? start) (throw (ex-info "declaration absent" {:declaration declaration})))
-    (let [end (or (first (keep-indexed #(when (and (> %1 start) (boundary? %2)) %1) lines))
-                  (count lines))]
-      (str (str/join "\n" (subvec lines start end)) "\n"))))
+(def declaration-text positive-receipt/declaration-text)
 
 (defn basis []
   (let [source (slurp source-path)]
