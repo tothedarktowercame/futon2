@@ -1,0 +1,16 @@
+{:schema :wm/production-caller-manifest-v1
+ :claims
+ [{:id :ruled-outcome-c
+   :needles ["ruled-outcome-c" "ruled_outcome_c"]
+   :declaration-path "src/futon2/aif/ruled_outcome_c.clj"
+   :basis "holes/labs/wm-contract/aif-equations.edn:211"
+   :expected-gap {:reason :awaiting-F10-computation-boundary-decisions
+                  :basis "holes/labs/wm-contract/worklist.edn:1390"}}
+  {:id :prediction-error
+   :needles ["compute-prediction-error" "channel-prediction-error"]
+   :declaration-path "src/futon2/aif/free_energy.clj"
+   :basis "holes/labs/wm-contract/aif-equations.edn:205"}
+  {:id :predictive-outcome
+   :needles ["predict-multi-horizon"]
+   :declaration-path "src/futon2/aif/forward_model.clj"
+   :basis "holes/labs/wm-contract/aif-equations.edn:128"}]}
