@@ -269,3 +269,50 @@ R13 two-timescale hierarchy: slow strategic loop updates preferences, fast
 tactical loop acts against them; discovery-loop turns propose, rulings fix).
 Topologically: C was literally not a drawn node in the PLOP control map
 (sec-overview-plop.tex:29-30 says so) — this section draws it.
+
+## Item 15 — processual preferences, and evidence as a legitimate outcome facet
+
+> "outcomes have to sometimes be thought about in a processual way. [...] my
+> preference would strongly be to have all those [APM] problems be solved. But
+> along the way, I have the intermediate preference [...] to have the error
+> codes be diagnosable [...] spreading out the preference for solving all the
+> problems across the running of the machine, so that the running of the
+> machine tends towards the solution of the problems. And even if that's at a
+> different layer, they need to connect up, otherwise you'll sit around having
+> a preference for solved problems and no way of getting there."
+
+> "I thought it was interesting that you returned to the original crown
+> triangle — money, people, and organizations — whereas the tetrahedral model
+> abstracted that into nouns, verbs, organization, and evidence. I actually
+> feel that evidence could be an important outcome [...] you also need
+> evidence that they work, and that evidence needs to be in a communicable
+> form. [...] if the c-vector only gets to talk about what outcome it is,
+> that's a bit limiting in terms of understanding how you get there."
+
+Two amendments to the section, both answerable inside the formalism:
+
+(1) PROCESSUAL: da Costa's C is C_tau — preferences over observations AT EACH
+STEP of the policy horizon; G sums risk over tau. So trajectory preferences
+are native, and the channel C is RE-RANKED, not deprecated: it IS the
+processual layer ("stay diagnosable, stay healthy along the way" — Joe's
+error-codes preference is literally a channel target at intermediate tau).
+The CONNECT-UP Joe demands is the disposition kernel read in the other
+direction: P(d|o) values each intermediate state by where it tends, so the
+terminal preference back-propagates over the running of the machine — the
+"spreading out" is a Bayesian identity, not a metaphor. (Implementation
+honesty: the F8 findings show our tau-sum is structurally shallow — the
+epistemic legs are horizon-blind — so the formalism's answer is ahead of the
+machine's, and the section must say which claims are formal and which are
+running.)
+
+(2) EVIDENCE FACET: the evidence-vertex exclusion bars preferring evidence
+CONTENT (wanting the data to say X — wishful thinking; epistemic terms own
+information value). It does not bar preferring that communicable evidence
+EXIST — a witness, a receipt, a record in shareable form — which is an
+ARTIFACT outcome, and this system already distinguishes witnessed from
+unwitnessed groundings. Outcome kinds gain facets ("works well" vs
+"works well AND carries a communicable witness"). OPEN QUESTION FOR JOE,
+flagged not decided: the live Vertex type (Holes.lean) is
+people/money/organisations/evidence, while Joe cites the tetrahedral model
+as nouns/verbs/organization/evidence — which is canonical, and is the
+divergence itself a row?
