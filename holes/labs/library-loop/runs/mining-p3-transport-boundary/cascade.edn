@@ -25,10 +25,10 @@
    :library-path "futon3c/library/realtime/request-param-resilience.flexiarg"
    :origin :selected
    :witness "futon3c/holes/missions/M-transport-adapters.md:54 (L1,L3 row) and src/futon3c/transport/ws.clj:19 + :178 (extract-params on WS upgrade); exit condition :487"}
-  {:pattern :realtime/single-authority-registration
-   :library-path "futon3c/library/realtime/single-authority-registration.flexiarg"
+  {:pattern :realtime/loop-failure-signals
+   :library-path "library/realtime/loop-failure-signals.flexiarg"
    :origin :selected
-   :witness "futon3c/holes/missions/M-transport-adapters.md:57 (L6 row) and src/futon3c/transport/ws.clj:21 (one connection per agent-id)"}
+   :witness "futon3c/holes/missions/M-transport-adapters.md:48 (cross-ref: error frames surface failure at the layer that caused it) and the CLOSING ws.clj at futon3c 06dac238:123,164,181 -- typed transport errors :unknown-connection, :not-ready, :invalid-frame"}
   {:pattern :realtime/structured-events-only
    :library-path "library/realtime/structured-events-only.flexiarg"
    :origin :selected
@@ -41,12 +41,12 @@
  [:realtime/connection-state-machine
   :realtime/rendezvous-handshake
   :realtime/request-param-resilience
-  :realtime/single-authority-registration
+  :realtime/loop-failure-signals
   :realtime/structured-events-only
   :realtime/verify-after-start]
  :admitted []
  :admission-note
- "All six are named in the mission's plan before implementation (cross-reference tables at mission :40-57, committed with the spec and the five futon3c patterns at futon3c 3dc50a81 2026-02-11) and re-attested by the live code's own docstrings -- the strongest node witnesses on this loop. None is recorded as drawn in during execution, so none is admitted. SEVEN OF THE THIRTEEN CROSS-REFERENCED PATTERNS ARE HONESTLY NOT NODES: liveness-heartbeats and transport-pivot are marked '(future, not Part I-IV)' by the mission itself (:43,:44); reconnect-with-backoff is deferred ('the client's concern', :452); listener-leases is '(Part III cleanup)' and no lease/TTL code exists in ws.clj or ws/ (grep lease|ttl over both returns only unrelated 'release' matches); authoritative-transcript (:43) and single-line-transport (:47) name constraints, not implemented mechanisms, and no committed witness attests their involvement in the four completed parts."
+ "All six are named in the mission's plan before implementation (cross-reference tables at mission :40-57, committed with the spec and the five futon3c patterns at futon3c 3dc50a81 2026-02-11) and re-attested by the live code's own docstrings -- the strongest node witnesses on this loop. None is recorded as drawn in during execution, so none is admitted. EIGHT OF THE THIRTEEN CROSS-REFERENCED PATTERNS ARE HONESTLY NOT NODES (corrected on reopen 2026-09-08: loop-failure-signals MOVES INTO the node set -- the closing ws.clj at 06dac238 implements typed transport errors at :123,:164,:181 -- and single-authority-registration MOVES OUT; see below): liveness-heartbeats and transport-pivot are marked '(future, not Part I-IV)' by the mission itself (:43,:44); reconnect-with-backoff is deferred ('the client's concern', :452); listener-leases is '(Part III cleanup)' and no lease/TTL code exists in ws.clj or ws/ (grep lease|ttl over both returns only unrelated 'release' matches); authoritative-transcript (:43) and single-line-transport (:47) name constraints, not implemented mechanisms, and no committed witness attests their involvement in the four completed parts; and SINGLE-AUTHORITY-REGISTRATION, though named in ws.clj:21's docstring, IS NOT IMPLEMENTED -- at the closing commit 06dac238 !connections is keyed by CHANNEL (the only guard is the unknown-channel defense at :123), the readiness path merely marks that channel connected, and no code rejects or evicts a second connection with the same agent-id; at the pinned f3534b93 the ws/invoke register! path still replaces the map entry with assoc rather than rejecting. A docstring naming a rule is not involvement; the first pass smoothed this and the reopen review caught it."
  :edges
  [{:from :realtime/verify-after-start
    :to :realtime/rendezvous-handshake
@@ -69,13 +69,13 @@
    :reading "Defensive parameter extraction on the WS upgrade request identifies the agent whose connection then walks the three-state lifecycle; the L3 exit condition names exactly this."
    :interpretation-class :documented
    :documentation "Mission exit condition :487 plus the code comment at ws.clj:178 author the ordering; annotation-absence verified at the pin."}
-  {:from :realtime/single-authority-registration
-   :to :realtime/structured-events-only
-   :relation :registration-gates-frames
-   :source "src/futon3c/transport/ws.clj:21,:201 ('Connection not registered') and futon3c/holes/missions/M-transport-adapters.md:57"
-   :reading "One connection per agent-id is enforced at registration time; unregistered connections are refused before any typed frame is processed."
+  {:from :realtime/structured-events-only
+   :to :realtime/loop-failure-signals
+   :relation :error-frames-are-typed-and-surfaced
+   :source "futon3c at 06dac238: src/futon3c/transport/ws.clj:123,164,181 and futon3c/holes/missions/M-transport-adapters.md:48"
+   :reading "Every transport failure is returned to the sender as a TYPED error frame (:unknown-connection, :not-ready, :invalid-frame) rendered through the same frame protocol -- the typed-frame discipline and the surface-failure-at-source discipline are one mechanism in this code."
    :interpretation-class :documented
-   :documentation "The refusal at ws.clj:201 and the mission's L6 row author the gating; annotation-absence verified at the pin."}]
+   :documentation "The three transport-error call sites at the closing commit, rendered via render-ws-frame, author the pairing; the mission's :48 row states the reading. Annotation-absence verified at the pin."}]
  :rules
  [{:id :three-state-connection-lifecycle
    :member :realtime/connection-state-machine
@@ -101,14 +101,14 @@
    "Three-tier extraction (:query-string, then :request-uri parsing, then payload override) so no single library or proxy quirk loses the session identity."
    :attestation "futon3c/holes/missions/M-transport-adapters.md:54 (L1,L3 -- both lessons are transport-archaeology sections in the same mission, :59-70) and exit condition :487; src/futon3c/transport/ws.clj:178"
    :span-note "Content line only at pin f3534b93: marker :15, content :16."}
-  {:id :one-connection-per-agent-at-registration
-   :member :realtime/single-authority-registration
-   :then-source "futon3c/library/realtime/single-authority-registration.flexiarg:16"
-   :interpretation-class :attested
+  {:id :surface-transport-failure-as-typed-error-frames
+   :member :realtime/loop-failure-signals
+   :then-source "library/realtime/loop-failure-signals.flexiarg:19"
+   :interpretation-class :documented
    :interpretation
-   "Enforce authority at registration time: an agent-id already registered is rejected rather than duplicated."
-   :attestation "futon3c/holes/missions/M-transport-adapters.md:57 (L6) and src/futon3c/transport/ws.clj:21,:201 ('Connection not registered')"
-   :span-note "Content line only at pin f3534b93: marker :15, content :16."}
+   "The implemented rule is narrower than the THEN's own terms: transport failures are surfaced to the sender as typed error frames at the layer that caused them (:unknown-connection, :not-ready, :invalid-frame), while the THEN text names sustained overload, rising drops, and JSONL stalls with tuning/backpressure as the response. The bridge is the mission's reading, not a claim the THEN states."
+   :documentation "Class :documented per the commission's attested-or-documented rule, mirroring the M1 S1 treatment of the same pattern: the mission row (:48) and the closing code (ws.clj at 06dac238:123,164,181) attest the error-frame reading; no committed source attests that this reading of the THEN block is the pattern's own."
+   :span-note "Content line only at futon3 pin ab277bdd: marker :18, content :19."}
   {:id :typed-frames-only
    :member :realtime/structured-events-only
    :then-source "library/realtime/structured-events-only.flexiarg:19"
@@ -130,8 +130,8 @@
   :realtime/request-param-resilience 2
   :realtime/connection-state-machine 3
   :realtime/rendezvous-handshake 4
-  :realtime/single-authority-registration 5
-  :realtime/structured-events-only 6}
+  :realtime/structured-events-only 5
+  :realtime/loop-failure-signals 6}
  :o4
  {:rule-bearing-members 6
   :acting-order
@@ -139,9 +139,9 @@
    :realtime/request-param-resilience
    :realtime/connection-state-machine
    :realtime/rendezvous-handshake
-   :realtime/single-authority-registration
-   :realtime/structured-events-only]
-  :basis "futon3c/holes/missions/M-transport-adapters.md:40-57,480-490; src/futon3c/transport/http.clj:53,8919-8955; src/futon3c/transport/ws.clj:4-22,178,201"}
+   :realtime/structured-events-only
+   :realtime/loop-failure-signals]
+  :basis "futon3c/holes/missions/M-transport-adapters.md:40-57,480-490; src/futon3c/transport/http.clj:53,8919-8955; src/futon3c/transport/ws.clj:4-22,178; closing 06dac238 ws.clj:123,164,181"}
  :transcript
  {:history "futon3c 3dc50a81 2026-02-11 'Add M-transport-adapters mission spec and 5 realtime patterns' (the plan, the cross-reference tables, and the five futon3c patterns authored together) -> implementation of Parts I-IV -> futon3c 06dac238 2026-02-13 'Complete M-transport-adapters: all 4 parts done (72 tests, 207 assertions)' -> futon3c 5f18bc2f 2026-05-03 archives the mission in a disposition sweep. Later transport work in the same files (e.g. ws.clj 5287650c 2026-08-14, http.clj frame-retention fixes 2026-07-18) postdates the archive and is NOT part of this solution."
   :basis "git log --follow over holes/missions/M-transport-adapters.md and git log over src/futon3c/transport/{ws,http}.clj, run this invocation at pin f3534b93; all shas and dates read from git output, none from memory."}}

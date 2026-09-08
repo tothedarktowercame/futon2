@@ -16,15 +16,25 @@ named BOTH in the mission's plan (cross-ref tables, committed 3dc50a81
 docstrings (ws.clj:4-22, http.clj:53):
 
 connection-state-machine, rendezvous-handshake, request-param-resilience,
-single-authority-registration, structured-events-only, verify-after-start.
+loop-failure-signals, structured-events-only, verify-after-start.
 
-The seven NOT selected, each with its reason in the cascade's
-`:admission-note`: liveness-heartbeats and transport-pivot are marked
-"(future, not Part I-IV)" by the mission itself; reconnect-with-backoff is
-deferred as the client's concern; listener-leases is "(Part III cleanup)" and
-grep over ws.clj + ws/ for lease/TTL finds no lease code; authoritative-
-transcript and single-line-transport name constraints, not implemented
-mechanisms, with no committed witness of involvement.
+The eight NOT selected, each with its reason in the cascade's
+`:admission-note` (CORRECTED on reopen 2026-09-08): liveness-heartbeats and
+transport-pivot are marked "(future, not Part I-IV)" by the mission itself;
+reconnect-with-backoff is deferred as the client's concern; listener-leases is
+"(Part III cleanup)" and grep over ws.clj + ws/ for lease/TTL finds no lease
+code; authoritative-transcript and single-line-transport name constraints,
+not implemented mechanisms, with no committed witness of involvement; and
+SINGLE-AUTHORITY-REGISTRATION moved OUT of the node set on reopen -- although
+ws.clj:21's docstring names it, at the closing commit 06dac238 !connections
+is keyed by CHANNEL, the only guard is the unknown-channel defense (:123),
+and no code rejects or evicts a second connection with the same agent-id (the
+pinned register! path still replaces via assoc). Loop-failure-signals moved
+IN: the closing ws.clj implements typed transport errors (:unknown-connection
+:123, :not-ready :164, :invalid-frame :181), which the mission's :48 row maps
+to this pattern. The pattern's rule is classed :documented, mirroring M1's
+treatment: the error-frame reading is the mission's, while the THEN's own
+terms are loop-overload flagging.
 
 ## Format notes (restated statement)
 
