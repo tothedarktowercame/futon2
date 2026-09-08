@@ -61,10 +61,10 @@ the KL is well-defined against them by construction, not by epsilon-fudging.
 - **The diff is the product**: proposed-C vs ruled seeded-C renders as a
   decision sheet. Agreement strengthens a pin (citations accumulate);
   disagreement surfaces for ruling. The extractor NEVER writes preferences.
-- **The AlphaZero duel, made operative**: the habit prior E is revealed
+- **The AlphaZero dual, made operative**: the habit prior E is revealed
   preference (what the system did); C is stated preference (what Joe ruled).
   Discovery adds a third: evidence-derived proposed-C. The E-vs-C gap inside
-  G is the machine's own value-policy duel; the proposed-C-vs-ruled-C gap is
+  G is the machine's own value-policy dual; the proposed-C-vs-ruled-C gap is
   the OPERATOR-FACING one — where behavior-as-logged and preference-as-ruled
   disagree, and precisely the thing worth a decision sheet.
 
