@@ -1,32 +1,67 @@
 {:originals-byte-identical-after-plants? true,
  :plants
- [{:plant :ants-verdict-false,
+ [{:plant :snatch-no-bootstrap-becomes-full,
+   :conclusion-under-test [:reproduction :snatch],
    :landed? true,
-   :conclusions-flipped? true,
-   :verdict-after false,
+   :conclusion-before false,
+   :conclusion-after true,
+   :flipped? true,
    :temporary-copy-removed? true}
-  {:plant :mining-added-nonempty,
+  {:plant :snatch-added-emptied,
+   :conclusion-under-test [:subtraction-stressing-exemplars],
    :landed? true,
-   :conclusions-flipped? true,
-   :verdict-after false,
+   :conclusion-before [:snatch],
+   :conclusion-after [],
+   :flipped? true,
    :temporary-copy-removed? true}
-  {:plant :snatch-no-bootstrap-full,
+  {:plant :snatch-precedence-flattened,
+   :conclusion-under-test
+   [:clause-coverage :o4 :antecedent-satisfied-by],
    :landed? true,
-   :conclusions-flipped? true,
-   :verdict-after false,
+   :conclusion-before [:ants :snatch],
+   :conclusion-after [:ants],
+   :flipped? true,
    :temporary-copy-removed? true}
-  {:plant :snatch-score-flat,
+  {:plant :mining-edges-emptied,
+   :conclusion-under-test
+   [:clause-coverage :o2 :antecedent-satisfied-by],
    :landed? true,
-   :conclusions-flipped? true,
-   :verdict-after false,
+   :conclusion-before [:mining :snatch],
+   :conclusion-after [:snatch],
+   :flipped? true,
    :temporary-copy-removed? true}
-  {:plant :irrelevant-check-label,
+  {:plant :mining-precedence-diverges,
+   :conclusion-under-test
+   [:clause-coverage :o4 :antecedent-satisfied-by],
    :landed? true,
-   :conclusions-flipped? false,
-   :verdict-after true,
+   :conclusion-before [:ants :snatch],
+   :conclusion-after [:ants :mining :snatch],
+   :flipped? true,
+   :temporary-copy-removed? true}
+  {:plant :ants-verdict-false,
+   :conclusion-under-test [:all-exemplars-pass?],
+   :landed? true,
+   :conclusion-before true,
+   :conclusion-after false,
+   :flipped? true,
+   :temporary-copy-removed? true}
+  {:plant :o2-implication-arrow-removed,
+   :conclusion-under-test [:clause-shapes :o2],
+   :landed? true,
+   :conclusion-before :implication,
+   :conclusion-after :unconditional-equation,
+   :flipped? true,
+   :temporary-copy-removed? true}
+  {:plant :control-irrelevant-check-label,
+   :conclusion-under-test [:all-exemplars-pass?],
+   :landed? true,
+   :conclusion-before true,
+   :conclusion-after true,
+   :flipped? false,
    :temporary-copy-removed? true}],
  :check :F12-exemplar-proviso-sheet,
- :subtraction-stressing-exemplar-reproduces? false,
+ :reproduction {:ants :not-measurable, :mining true, :snatch false},
+ :subtraction-stressing-exemplar-reproduces? {:snatch false},
  :all-exemplars-pass? true,
  :registry-evidence
  {:carrier-status :decided,
@@ -44,52 +79,46 @@
   :other-organise-choice-count 5},
  :exemplars
  {:ants
-  {:recorded-edge-count 0,
-   :o3-subtraction-nontrivial? false,
-   :score-type-degenerate? false,
+  {:score-type-degenerate? false,
    :added-by-organise-empty? true,
-   :o4-disjuncts-available [:acting-order :score],
-   :o4-disjuncts-holding [:acting-order],
+   :organised-edges-basis :repository-relation-is-empty,
    :score-moves? false,
    :acting-order-moves? true,
-   :ruled-no-bootstrap-edge-count 0,
-   :ruled-no-bootstrap-edges [],
+   :score-type-basis :rat-score-in-ruled-organise-type,
    :ruled-organise-type? true,
    :verdict true,
-   :reproduces-recorded-edges? true,
+   :reproduces-recorded-edges? :not-measurable,
    :precedence-moves? true,
-   :recorded-edges []},
+   :organised-edge-count 0,
+   :recorded-edges :not-recorded-in-artifact},
   :mining
-  {:recorded-edge-count 2,
-   :o3-subtraction-nontrivial? false,
-   :score-type-degenerate? true,
+  {:score-type-degenerate? true,
    :added-by-organise-empty? true,
-   :o4-disjuncts-available [:acting-order],
-   :o4-disjuncts-holding [],
+   :organised-edges-basis :artifact-transcription-edges-lean,
    :score-moves? false,
    :acting-order-moves? false,
-   :ruled-no-bootstrap-edge-count 2,
-   :ruled-no-bootstrap-edges [[0 1] [1 2]],
+   :score-type-basis :score-typed-unit,
    :ruled-organise-type? true,
    :verdict true,
+   :precedence-basis
+   {:written-before "miningPrecedence",
+    :written-after "miningPrecedence"},
    :reproduces-recorded-edges? true,
    :precedence-moves? false,
+   :organised-edge-count 2,
    :recorded-edges [[0 1] [1 2]]},
   :snatch
-  {:recorded-edge-count 10,
-   :o3-subtraction-nontrivial? true,
-   :score-type-degenerate? false,
+  {:score-type-degenerate? false,
    :added-by-organise-empty? false,
-   :o4-disjuncts-available [:acting-order :score],
-   :o4-disjuncts-holding [:acting-order :score],
+   :organised-edges-basis :artifact-edge-routes-no-bootstrap,
    :score-moves? true,
    :acting-order-moves? true,
-   :ruled-no-bootstrap-edge-count 1,
-   :ruled-no-bootstrap-edges [[0 2]],
+   :score-type-basis :nat-score-moves-on-the-record,
    :ruled-organise-type? true,
    :verdict true,
    :reproduces-recorded-edges? false,
    :precedence-moves? true,
+   :organised-edge-count 1,
    :recorded-edges
    [[0 11]
     [0 2]
@@ -101,10 +130,18 @@
     [2 7]
     [7 18]
     [7 22]]}},
- :only-subtraction-stressing-exemplar :snatch,
+ :clause-shapes
+ {:o1 :unconditional-equation,
+  :o2 :implication,
+  :o3 :unconditional-equation,
+  :o4 :implication,
+  :oattr :unconditional-equation,
+  :oauth :unconditional-equation,
+  :osel :unconditional-equation},
+ :subtraction-stressing-exemplars [:snatch],
  :verdict true,
  :provenance
- {:futon2-head "d841c89ff2f180589bd1e4e7620d44086d685d0a",
+ {:futon2-head "560c99d58b1bad9dcae5c5aa62c66cfef988ee32",
   :holes-lean-head "61c4825dc3e373fd1b761b800814bf85f5770b88",
   :input-sha256
   {:ants
@@ -121,32 +158,83 @@
    "6f2394c1d59550aa4b79718fbb7bb1ea4e576471fd72e0e4b411c4266df89253",
    :ruled
    "6799b35fe28209295af5928506f0b9d9e118ad09175bf5b64b98618170753210",
+   :ruled-lean
+   "de8500eb17db41d26d53c79ce83fc61f0a7efe78d58c410e14d14b84f2a46248",
    :snatch
    "cd91f4f950e73d776bb2534a9d2c0b17f5b3371110fed0025faee27b25f9a462",
    :snatch-lean
    "2b63816c1f0d343f408624b5eb9b9032fbc090147492aa8d1d1ec446bd5648f1"}},
  :clause-coverage
- {:o1 {:true-antecedent-exercised? true, :exemplars [:ants :snatch]},
-  :o2 {:true-antecedent-exercised? true, :exemplars [:mining :snatch]},
-  :o3 {:true-antecedent-exercised? true, :exemplars [:snatch]},
-  :o4 {:true-antecedent-exercised? true, :exemplars [:ants :snatch]},
-  :oattr {:true-antecedent-exercised? true, :exemplars [:ants]},
+ {:o1
+  {:shape :unconditional-equation,
+   :antecedent :none,
+   :vacuity-applies? false},
+  :o2
+  {:shape :implication,
+   :antecedent "(f t sel repo adm).organisedEdges u v",
+   :vacuity-applies? true,
+   :antecedent-satisfied-by [:mining :snatch],
+   :per-exemplar {:ants false, :mining true, :snatch true},
+   :vacuous-on [:ants]},
+  :o3
+  {:shape :unconditional-equation,
+   :antecedent :none,
+   :vacuity-applies? false},
+  :o4
+  {:shape :implication,
+   :antecedent
+   "(f t sel repo adm).precedenceBefore ≠ (f t sel repo adm).precedenceAfter",
+   :vacuity-applies? true,
+   :antecedent-satisfied-by [:ants :snatch],
+   :per-exemplar {:ants true, :mining false, :snatch true},
+   :vacuous-on [:mining]},
+  :oattr
+  {:shape :unconditional-equation,
+   :antecedent :none,
+   :vacuity-applies? false},
   :oauth
-  {:true-antecedent-exercised? true, :exemplars [:mining :snatch]},
+  {:shape :unconditional-equation,
+   :antecedent :none,
+   :vacuity-applies? false},
   :osel
-  {:true-antecedent-exercised? true,
-   :exemplars [:ants :mining :snatch]}},
+  {:shape :unconditional-equation,
+   :antecedent :none,
+   :vacuity-applies? false}},
  :arms
  {:a
   {:label "discharged-as-it-stands",
-   :cost {:nonreproducing-exemplars 1}},
+   :cost
+   {:exemplars-reproducing-their-recorded-edges 1,
+    :exemplars-not-reproducing 1,
+    :exemplars-where-reproduction-is-not-measurable 1,
+    :what-is-paid
+    :the-only-row-that-stresses-the-ruled-subtraction-is-the-one-that-does-not-reproduce}},
   :b
   {:label "discharged-by-snatch-alone",
-   :cost {:snatch-reproduces? false}},
-  :c {:label "not-discharged", :cost {:passing-exemplars 3}},
+   :cost
+   {:snatch-reproduces? false,
+    :snatch-ruled-edge-count 1,
+    :snatch-recorded-edge-count 10,
+    :what-is-paid
+    :the-designated-exemplar-keeps-one-of-its-ten-recorded-edges}},
+  :c
+  {:label "not-discharged",
+   :cost
+   {:exemplars-passing-at-the-ruled-signature 3,
+    :subtraction-stressing-exemplars [:snatch],
+    :what-is-paid
+    :three-passing-exemplars-and-a-producer-that-does-not-exist-yet}},
   :d
   {:label "discharged-with-o3-reopened",
-   :cost {:new-open-field-count 1}},
+   :cost
+   {:reopens :organise-o3-field,
+    :ruled-arm-that-would-reopen :over-the-nodes-organise-did-not-add,
+    :what-is-paid
+    :a-ruling-of-2026-09-07-is-reopened-after-its-exemplar-was-built}},
   :e
   {:label "discharged-conditionally",
-   :cost {:deferred-divergence-count 1}}}}
+   :cost
+   {:divergence-carried-open-on [:snatch],
+    :amendment-released-before-the-divergence-is-settled? true,
+    :what-is-paid
+    :the-holes-lean-edit-lands-while-the-clause-it-encodes-is-unsettled}}}}
