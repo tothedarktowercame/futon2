@@ -1,9 +1,9 @@
 {:row :U73
  :recorded-at "2026-09-08T15:40:00Z"
- :harness "holes/labs/wm-contract/stall_detector_controls.sh:1-81"
+ :harness "holes/labs/wm-contract/stall_detector_controls.sh:1-92"
  :isolation "The harness copies build_step.bb and extracts stall_check from wm-build-loop.sh into a mktemp directory; its fixture ledger, logs, and notify stub never touch the live loop, ledger, log, or Agency route."
  :mechanisms
- [{:path "holes/labs/wm-contract/wm-build-loop.sh:64-68"
+ [{:path "holes/labs/wm-contract/wm-build-loop.sh:57-60"
    :sha256 "f54de426862a1d8c91e8a047b3dd883f095f690f4fdd7f3bba8aa22b26432672"}
   {:path "holes/labs/wm-contract/build_step.bb:28-40"
    :sha256 "5178a26d674e673c4e5a780962a34946a2e5160116e9af0c1cca17ef3d6907ca"}]
