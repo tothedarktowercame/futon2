@@ -1,0 +1,29 @@
+{:schema :wm/v7-r16-node-sim-v1,
+ :node :R16,
+ :equation
+ {:id :action,
+  :defines :u,
+  :cases
+  [{:id :strict-posterior, :reference :beta, :node :beta, :pass? true}
+   {:id :first-maximum,
+    :reference :alpha,
+    :node :alpha,
+    :pass? true}]},
+ :implementation
+ {:selection-read-by-enactor? false,
+  :enacts-first-passing-gate? true,
+  :declares-no-outward-action? true},
+ :corpus {:files 58, :external-witness-field-count 0},
+ :checks
+ [{:id :registry-row-present, :pass? true}
+  {:id :declared-cases-match, :pass? true}
+  {:id :enactor-does-not-read-selected-action, :pass? true}
+  {:id :first-passing-gate-is-enacted, :pass? true}
+  {:id :implementation-declares-no-outward-action, :pass? true}
+  {:id :corpus-has-no-external-witness-field, :pass? true}],
+ :plants
+ [{:id :wrong-formula-last-argmax, :caught? true}
+  {:id :invent-selected-action-read, :caught? true}
+  {:id :invent-external-witness, :caught? true}],
+ :summary
+ {:checks-pass 6, :checks-total 6, :plants-caught 3, :plants-total 3}}

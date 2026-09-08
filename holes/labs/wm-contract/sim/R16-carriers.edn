@@ -1,0 +1,14 @@
+{:schema :wm/v7-r16-carriers-v1
+ :cases
+ [{:id :strict-posterior
+   :ranked-actions
+   [{:rank 1 :action {:type :alpha} :controller-score 0.0 :habit-prior-bias 0.0}
+    {:rank 2 :action {:type :beta} :controller-score 1.0 :habit-prior-bias 3.0}]
+   :tau 1.0
+   :f-pi [0.0 0.0]}
+  {:id :first-maximum
+   :ranked-actions
+   [{:rank 1 :action {:type :alpha} :controller-score 0.0 :habit-prior-bias 0.0}
+    {:rank 2 :action {:type :beta} :controller-score 1.0 :habit-prior-bias 1.0}]
+   :tau 1.0
+   :f-pi [0.0 0.0]}]}

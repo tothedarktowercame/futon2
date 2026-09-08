@@ -47,7 +47,8 @@
   :posterior-recorded-and-not-selected-by "The node's equation is met, its Lean certificate holds, and the posterior it computes is PERSISTED in the corpus -- and the action the machine records is chosen elsewhere. The gap is neither registry-vs-node nor registry-vs-document nor registry-vs-corpus: the node's output and the machine's action are both in the same record, and one is not a function of the other."
   :depth-runs-as-an-endpoint-and-the-summing-depth-is-never-selected "The registry gives the node ONE symbol and the machine runs TWO mechanisms under it, and the symbol's own definition -- a range for the SUMS -- is met by neither where it matters. The mechanism that scores the tick's candidates builds a K-step trajectory and then reads only its endpoint: no sum over tau, and no discount term anywhere in the file that scores. The mechanism that does add up discounted step costs is called from an advisory lane, and its rows enter the ranking after the decision is already final. Distinct from :posterior-recorded-and-not-selected-by (slice 10), where ONE node's output was computed and not consumed: here two implementations of the SAME registry symbol both run, in different files, and no document in the sweep's reach records that they are two. Added by slice 11; the vocabulary is extended rather than a row rewritten."
   :learned-input-live-in-one-era-and-at-its-prior-since "The node's equations are met and reproduce the corpus exactly, and the OUTCOME-LEARNED input that makes the quantity a dial rather than a constant ran live in one era of the corpus and has stood at its prior in every record since. The break is a carrier replacement, not a regression in the equation: the old carrier's records are off the prior and past burn-in, the new carrier's are at the prior with zero samples, and the feed the new carrier folds stops before its first record. Added by slice 12; the vocabulary is extended rather than a row rewritten."
-  :mechanism-built-and-never-entered "The node's mechanism is implemented and has its own passing test suite, and no call path outside that suite enters it: the namespace is required by nothing else, no production record carries the state it would write, and the node's registered runtime validation is the suite itself. The registry can be MET here -- it declares the node runs no equation -- while the tree's green evidence for the node is a test of code the machine never runs. Added by slice 13; the vocabulary is extended rather than a row rewritten."}
+  :mechanism-built-and-never-entered "The node's mechanism is implemented and has its own passing test suite, and no call path outside that suite enters it: the namespace is required by nothing else, no production record carries the state it would write, and the node's registered runtime validation is the suite itself. The registry can be MET here -- it declares the node runs no equation -- while the tree's green evidence for the node is a test of code the machine never runs. Added by slice 13; the vocabulary is extended rather than a row rewritten."
+  :selected-action-not-enacted-and-no-outward-effect "The node computes the action its equation declares, but the enactment boundary does not read that selected action: it chooses the first passing gate from the ranked candidates instead. The executor then returns an in-model construction and explicitly performs no substrate write or outward action, so neither the declared u nor an external consequence closes the action-perception loop. Added by slice 15."}
 
  :slices
  [{:slice 1 :node :R5 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop)"
@@ -328,6 +329,16 @@
    :campaign-limit "The catalogue claims a two-tick Campaign S exact replay (p4ng/sec-catalog.tex:243). The receipt searched 3683 candidate files for the four identifiers supplied by p4ng/empirics.tex:50, found five narrative files, and found 0 identifiers as structured record values (runs/V7-R11-node-sim/00-r11.edn :campaign-s-artifact). This is repository-scoped :not-found, not a claim that the run did not happen."
    :reviewer-should-check "Whether the existing :mechanism-built-and-never-entered type is the right shared vocabulary for R11 as well as R15; whether a dynamically resolved caller could evade the text census; and whether the Campaign S record exists outside the searched repositories."
    :no-ruling "No registry, decision, Lean, src, test, or data file was changed; no live tick ran and no run lock was taken."}
+
+  {:slice 15 :node :R16 :at "2026-09-08" :by "codex (wm-edge worklist loop)"
+   :did "Verified the first ACT-band node. The action equation was run on declared carriers against an independent first-argmax reference; the existing F8 Lean readback was re-run byte-identically. The enactment boundary and the corpus were then checked for the two remaining R16 claims: whether enactment reads the selected action, and whether it produces an independently witnessed outward effect."
+   :ran ["clojure -M holes/labs/wm-contract/v7_r16_node_sim.clj twice: 6 checks pass, 3 plants caught; receipt byte-identical, sha256 3b803ae36883f09d1db74cb2f5c0b6b6e352c90235ee841541176bdcfc4f3967"
+         "clojure -M holes/labs/wm-contract/f8_action_readback.clj: 21 measurements, 0 MISMATCH; committed readback byte-identical"
+         "clojure -M:test -n was attempted as the workspace instruction spells it, but this repo's :test alias has :exec-fn and clojure.main treated -n as a filename; the equivalent one-namespace invocations clojure -X:test :nses '[futon2.aif.enact-scheduled-path-test]' and '[futon2.aif.enact-failure-test]' passed 5 tests / 11 assertions and 3 tests / 16 assertions, 0 failures/errors"
+         "clj-kondo and futon4/dev/check-parens.el on v7_r16_node_sim.clj: clean"]
+   :finding "The registry's non-default posterior-argmax arm is executable and matches the independent reference on both strict and tied carriers (runs/V7-R16-node-sim/00-r16.edn). But close-loop! builds gates from :ranked-actions, takes the first :pass and calls enact! on that gate (src/futon2/aif/enact.clj:305-329); the file contains no read of judgement's selected :action. The executor shells the fold engine and returns :constructed-wiring, :no-construction or :enactment-failed (src/futon2/aif/enact.clj:130-160), while its namespace contract explicitly says artifact-only, no substrate write and no outward action (src/futon2/aif/enact.clj:12-16). Across the receipt's 58 wm-trace files, no :external-effect, :external-witness, :substrate-effect or :substrate-witness field was found."
+   :known-candidate-holes "PROBLEMS-r16-r13-r14-batch4.md:31-56 is partly superseded: the action now has a closed Lean carrier at aif-equations.edn:179-186, so its first residual is cleared; the artifact-only residual is confirmed; ALIGN still records parked and surfaced absent at ALIGN-rnode-process-census.md:82-89, but whether parked is required remains explicitly undetermined in the dossier."
+   :no-ruling "No registry, decision, production source, test, or data file changed. No live tick ran and no run lock was taken."}
 
 ]
 
@@ -1826,5 +1837,27 @@
              :tests "hierarchical-budget-test 8/26 and hierarchical-budget-adapter-test 6/22, both 0 failures/errors."}
    :limits ["The call census is textual; a dynamically resolved caller could evade it."
             "Campaign S is :not-found only in the 3683 searched files; p4ng/sec-catalog.tex:243 is a narrative claim, and no claim is made that the run did not happen."
+            "No live tick ran, no run lock was taken, and data/wm-trace was read only."]}
+
+  {:node :R16
+   :stage "ACT"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:28-41"
+   :slice 15
+   :label "Grounded actuation"
+   :verdict :hole
+   :hole {:type :selected-action-not-enacted-and-no-outward-effect
+          :statement "R16's action equation has a closed Lean carrier and its posterior-argmax arm matches an independent reference on the declared carriers (aif-equations.edn:179-186; runs/V7-R16-node-sim/00-r16.edn, sha256 3b803ae36883f09d1db74cb2f5c0b6b6e352c90235ee841541176bdcfc4f3967). The running enactment boundary does not consume that selected action: it gates :ranked-actions and enacts the first passing gate (src/futon2/aif/enact.clj:305-329). What it enacts is explicitly artifact-only and returns a fold-engine construction, with no substrate write or outward action (src/futon2/aif/enact.clj:12-16,130-160)."
+          :not-a-ruling "Whether R16 should enact the selected u, preserve first-passing-gate as a distinct action law, or grow an operator-armed external actuator is Joe's. This row records the mismatch and does not choose among repairs."}
+   :legs {:a {:status :done :basis "aif-equations.edn:179-186; sim/R16-carriers.edn; runs/V7-R16-node-sim/00-r16.edn."}
+          :b {:status :done :basis "holes/labs/wm-contract/f8_action_readback.clj and runs/F8-action/clojure-readback.txt; the readback re-ran with 0 MISMATCH and was byte-identical."}
+          :c {:status :done-with-stated-absence :basis "ALIGN-rnode-process-census.md:82-89 records commissioned, dispatched, returned, checked and recorded as exists; parked and surfaced as absent."}
+          :d {:status :done :basis "PROBLEMS-r16-r13-r14-batch4.md:31-65; the stale no-Lean finding is cleared by aif-equations.edn:183-186, artifact-only is confirmed by enact.clj:12-16, and the process absences remain as recorded."}}
+   :harness {:runner "holes/labs/wm-contract/v7_r16_node_sim.clj"
+             :carriers "holes/labs/wm-contract/sim/R16-carriers.edn"
+             :receipt "holes/labs/wm-contract/runs/V7-R16-node-sim/00-r16.edn"
+             :receipt-sha256 "3b803ae36883f09d1db74cb2f5c0b6b6e352c90235ee841541176bdcfc4f3967"
+             :checks "6 pass; 3 planted detectors caught; two runs byte-identical."}
+   :limits ["The corpus absence is a search for four typed external-effect field names over 58 committed wm-trace files; an external witness stored elsewhere or under another name is not ruled out."
+            "The harness does not call close-loop! because it is the mutating boundary; source inspection and the existing focused tests establish its selection path."
             "No live tick ran, no run lock was taken, and data/wm-trace was read only."]}
 ]}
