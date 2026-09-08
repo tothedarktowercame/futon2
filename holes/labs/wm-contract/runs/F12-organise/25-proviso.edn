@@ -1,0 +1,152 @@
+{:originals-byte-identical-after-plants? true,
+ :plants
+ [{:plant :ants-verdict-false,
+   :landed? true,
+   :conclusions-flipped? true,
+   :verdict-after false,
+   :temporary-copy-removed? true}
+  {:plant :mining-added-nonempty,
+   :landed? true,
+   :conclusions-flipped? true,
+   :verdict-after false,
+   :temporary-copy-removed? true}
+  {:plant :snatch-no-bootstrap-full,
+   :landed? true,
+   :conclusions-flipped? true,
+   :verdict-after false,
+   :temporary-copy-removed? true}
+  {:plant :snatch-score-flat,
+   :landed? true,
+   :conclusions-flipped? true,
+   :verdict-after false,
+   :temporary-copy-removed? true}
+  {:plant :irrelevant-check-label,
+   :landed? true,
+   :conclusions-flipped? false,
+   :verdict-after true,
+   :temporary-copy-removed? true}],
+ :check :F12-exemplar-proviso-sheet,
+ :subtraction-stressing-exemplar-reproduces? false,
+ :all-exemplars-pass? true,
+ :registry-evidence
+ {:carrier-status :decided,
+  :carrier-record
+  {:by "joe",
+   :at "2026-09-07",
+   :consequence
+   "F12 slice 4 is unblocked and is the designated place for the build-to-spec exemplar. The declared signature at mathlib4/DarkTower/WarMachine/Holes.lean:861 is expected to change (the Score parameter appears) ONLY as part of the staged edit the :organise-sorry ruling describes -- one Holes.lean edit, after the exemplar, paying the C176 contract regeneration once."},
+  :sorry-status :decided,
+  :sorry-record
+  {:by "joe",
+   :at "2026-09-07",
+   :consequence
+   "With :organise-carrier this frees F12 slice 4. No seat discharges the sorry with a concrete implementation: the non-uniqueness proofs make that an arbitrary selection the record cannot justify, which is the docstring's refusal proved rather than stated."},
+  :other-organise-choice-count 5},
+ :exemplars
+ {:ants
+  {:recorded-edge-count 0,
+   :o3-subtraction-nontrivial? false,
+   :score-type-degenerate? false,
+   :added-by-organise-empty? true,
+   :o4-disjuncts-available [:acting-order :score],
+   :o4-disjuncts-holding [:acting-order],
+   :score-moves? false,
+   :acting-order-moves? true,
+   :ruled-no-bootstrap-edge-count 0,
+   :ruled-no-bootstrap-edges [],
+   :ruled-organise-type? true,
+   :verdict true,
+   :reproduces-recorded-edges? true,
+   :precedence-moves? true,
+   :recorded-edges []},
+  :mining
+  {:recorded-edge-count 2,
+   :o3-subtraction-nontrivial? false,
+   :score-type-degenerate? true,
+   :added-by-organise-empty? true,
+   :o4-disjuncts-available [:acting-order],
+   :o4-disjuncts-holding [],
+   :score-moves? false,
+   :acting-order-moves? false,
+   :ruled-no-bootstrap-edge-count 2,
+   :ruled-no-bootstrap-edges [[0 1] [1 2]],
+   :ruled-organise-type? true,
+   :verdict true,
+   :reproduces-recorded-edges? true,
+   :precedence-moves? false,
+   :recorded-edges [[0 1] [1 2]]},
+  :snatch
+  {:recorded-edge-count 10,
+   :o3-subtraction-nontrivial? true,
+   :score-type-degenerate? false,
+   :added-by-organise-empty? false,
+   :o4-disjuncts-available [:acting-order :score],
+   :o4-disjuncts-holding [:acting-order :score],
+   :score-moves? true,
+   :acting-order-moves? true,
+   :ruled-no-bootstrap-edge-count 1,
+   :ruled-no-bootstrap-edges [[0 2]],
+   :ruled-organise-type? true,
+   :verdict true,
+   :reproduces-recorded-edges? false,
+   :precedence-moves? true,
+   :recorded-edges
+   [[0 11]
+    [0 2]
+    [10 18]
+    [11 18]
+    [11 22]
+    [18 22]
+    [2 11]
+    [2 7]
+    [7 18]
+    [7 22]]}},
+ :only-subtraction-stressing-exemplar :snatch,
+ :verdict true,
+ :provenance
+ {:futon2-head "d841c89ff2f180589bd1e4e7620d44086d685d0a",
+  :holes-lean-head "61c4825dc3e373fd1b761b800814bf85f5770b88",
+  :input-sha256
+  {:ants
+   "3a15469dbe02e836395b764de47342aef92dcbe1d1f8bdc0d8fb2cbdee3bbd2e",
+   :ants-lean
+   "4ae999694cab8127808f78c38d72825ac73e41a85730943597715cdd5cc473aa",
+   :holes
+   "db123e92336f23939dc053c54c887ba0bb3122073a0a969bae923bd4fec8d763",
+   :mining
+   "6d300865442c4f5bc8e270ee8d65356e11d9c7f634af725b8a8938ca6d02fbe5",
+   :mining-lean
+   "890a5e36dc4a911244b1feafc0c7b924749c0810da1498a0a27db24430aadd60",
+   :registry
+   "6f2394c1d59550aa4b79718fbb7bb1ea4e576471fd72e0e4b411c4266df89253",
+   :ruled
+   "6799b35fe28209295af5928506f0b9d9e118ad09175bf5b64b98618170753210",
+   :snatch
+   "cd91f4f950e73d776bb2534a9d2c0b17f5b3371110fed0025faee27b25f9a462",
+   :snatch-lean
+   "2b63816c1f0d343f408624b5eb9b9032fbc090147492aa8d1d1ec446bd5648f1"}},
+ :clause-coverage
+ {:o1 {:true-antecedent-exercised? true, :exemplars [:ants :snatch]},
+  :o2 {:true-antecedent-exercised? true, :exemplars [:mining :snatch]},
+  :o3 {:true-antecedent-exercised? true, :exemplars [:snatch]},
+  :o4 {:true-antecedent-exercised? true, :exemplars [:ants :snatch]},
+  :oattr {:true-antecedent-exercised? true, :exemplars [:ants]},
+  :oauth
+  {:true-antecedent-exercised? true, :exemplars [:mining :snatch]},
+  :osel
+  {:true-antecedent-exercised? true,
+   :exemplars [:ants :mining :snatch]}},
+ :arms
+ {:a
+  {:label "discharged-as-it-stands",
+   :cost {:nonreproducing-exemplars 1}},
+  :b
+  {:label "discharged-by-snatch-alone",
+   :cost {:snatch-reproduces? false}},
+  :c {:label "not-discharged", :cost {:passing-exemplars 3}},
+  :d
+  {:label "discharged-with-o3-reopened",
+   :cost {:new-open-field-count 1}},
+  :e
+  {:label "discharged-conditionally",
+   :cost {:deferred-divergence-count 1}}}}
