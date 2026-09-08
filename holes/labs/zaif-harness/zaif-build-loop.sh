@@ -14,17 +14,43 @@
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG="$HERE/runs/build-loop.log"; mkdir -p "$HERE/runs"
+# Review seat flipped claude -> zai 2026-09-08 (Joe: push Codex/zai usage,
+# stop burning Claude; PLAN-4day-leverage-2026-09-08.md). claude stays an
+# explicit override: REVIEW_SEAT=claude ./zaif-build-loop.sh
+WORK_SEAT="${WORK_SEAT:-codex}"; REVIEW_SEAT="${REVIEW_SEAT:-zai}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-40}"
+FUTON3C="$HOME/code/futon3c"
+
+refuse_self_certification() {
+  if [ "$WORK_SEAT" = "$REVIEW_SEAT" ]; then
+    echo "{:error :r9/self-certification-refused :node :R9 :work-seat \"$WORK_SEAT\" :review-seat \"$REVIEW_SEAT\"}" >&2
+    return 9
+  fi
+}
+
+# PA5z's one test lives beside the boundary it exercises. Its live pin is the
+# tracked R9 fixture for run id 0a18c4f7-758e-400a-8223-9c52edf07450:
+# :node :R9 and sha256 2a8d7f45d37261581010b04956a7d3d7aa366d7ba4364c991d3f6edb83814a61,
+# copied verbatim from runs/S7-node-corpus/cross-link.edn. The pin establishes
+# that R9 is a live control node; the planted seat values exercise this ingress.
+if [ "${1:-}" = "--test-seat-separation" ]; then
+  set +e
+  refusal="$(WORK_SEAT=zai REVIEW_SEAT=zai refuse_self_certification 2>&1)"
+  refusal_rc=$?
+  set -e
+  [ "$refusal_rc" -eq 9 ]
+  [ "$refusal" = '{:error :r9/self-certification-refused :node :R9 :work-seat "zai" :review-seat "zai"}' ]
+  WORK_SEAT=codex REVIEW_SEAT=zai refuse_self_certification
+  echo "PA5z seat-separation test: PASS (coincident refused; distinct may start)"
+  exit 0
+fi
+
+refuse_self_certification || exit $?
 # Single-instance guard: two loops mean two review seats editing the same
 # board row (happened 2026-09-03 05:46/05:49 UTC — a timed restart and a manual
 # one raced). Refusing here, before the notify trap is installed, exits quietly:
 # the healthy instance needs no bell about it.
 exec 9>"$HERE/runs/build-loop.lock"
 if ! flock -n 9; then echo "another zaif-build-loop holds runs/build-loop.lock; exiting"; exit 0; fi
-# Review seat flipped claude -> zai 2026-09-08 (Joe: push Codex/zai usage,
-# stop burning Claude; PLAN-4day-leverage-2026-09-08.md). claude stays an
-# explicit override: REVIEW_SEAT=claude ./zaif-build-loop.sh
-WORK_SEAT="${WORK_SEAT:-codex}"; REVIEW_SEAT="${REVIEW_SEAT:-zai}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-40}"
-FUTON3C="$HOME/code/futon3c"
 log() { echo "[$(date -u '+%H:%M:%S')] $*" | tee -a "$LOG"; }
 # Every way out bells claude-2 (lane owner) with the reason and the log tail,
 # so a stopped loop is a message in that session, not a next-day discovery.

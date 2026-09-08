@@ -58,6 +58,14 @@
                         "futon3c/src/futon3c/transport"
                         "futon2/scripts/futon2/report/war_machine.clj"
                         "futon2/src/futon2/aif"]
+         ;; Item-9 ruling (2026-09-08): the census must include the lane
+         ;; harness whose own R9 refusal closes the operator loop.
+         :v3-node-link ["futon3c/src/futon3c/agency"
+                        "futon3c/src/futon3c/social"
+                        "futon3c/src/futon3c/transport"
+                        "futon2/scripts/futon2/report/war_machine.clj"
+                        "futon2/src/futon2/aif"
+                        "futon2/holes/labs/zaif-harness/zaif-build-loop.sh"]
          :not-searched "tests, git history, untracked stores, other Futon repositories, Emacs/voxterm presentation code, APM-specific namespaces outside the requested handoff machinery. Static source census, not a live invocation trace. (ALIGN section 1, verbatim scope statement.)"}
 
  ;; --------------------------------------------------------------------------
@@ -74,7 +82,7 @@
  ;; is never edited; comparability is preserved by MEASUREMENT (re-run the 42
  ;; under v2 and show a zero-verdict diff) rather than by freezing a known blind
  ;; spot.
- :pattern-version :v2
+ :pattern-version :v3
  :node-link-patterns
  {:v1 {:forms ["(:node|:wm/node|:route/node|:control-node)[[:space:]]+:%s"]
        :scope-key :node-link
@@ -87,7 +95,12 @@
        :form-note "No backslash escapes: EDN rejects a \\( escape inside a string, and the right boundary is expressed as [^0-9A-Za-z-] rather than a word boundary so :R1 cannot match :R12. Every route-tag call site has a space and a via-string after the node keyword, so the trailing class always has something to match."
        :constructors-are-data
        "The second form names its constructors EXPLICITLY rather than matching any call with a node keyword in it, which would match comments and unrelated maps and over-report. The constructor set was derived mechanically, not guessed: `rg -n ':node[[:space:]]+[a-z][a-z0-9-]*'` across the whole declared scope returns the {:node <param>} shape in four files, and only war_machine.clj:5868 (route-tag) binds a CONTROL-STAGE node that way -- hierarchical_budget.clj uses :node for a hierarchy node, a different concept, and full_loop_runner.clj:225-226 READS (:node from) rather than constructing a link. CORRECTION (2026-09-06, PA3z): an earlier version of this note said node_sim.clj also used :node for a different concept. That was too strong and is wrong -- node_sim.clj:327 genuinely carries {:node :R5 ...} for the control-stage R5. It does not affect the constructor derivation (node_sim defines no node-linking constructor; :327 is a literal map that v1's own form already catches), but the reason as stated was inaccurate and is corrected rather than quietly dropped. What is true of node_sim is different and is recorded in :known-false-positive-class below: it is a per-node SIMULATION harness that runs one node in isolation -- its own header states that no live tick is taken, no run lock, nothing written under the data directory (node_sim.clj:1-12), so its node linkage is a simulation declaration and not lifecycle conduct. A new constructor is added here with its evidence, the same discipline as the adjudication ledger."
-       :scope-note "v2 searches the union of the v1 node-link paths and the paths ALIGN ALREADY DECLARED IT READ (:also-read). This is NOT a widening into new territory -- futon3 stays outside per claude-1's scope ruling of 2026-09-06 -- it is searching the files ALIGN's own section 1 says it read, with a pattern that can now see what is in them."}}
+       :scope-note "v2 searches the union of the v1 node-link paths and the paths ALIGN ALREADY DECLARED IT READ (:also-read). This is NOT a widening into new territory -- futon3 stays outside per claude-1's scope ruling of 2026-09-06 -- it is searching the files ALIGN's own section 1 says it read, with a pattern that can now see what is in them."}
+  :v3 {:forms ["(:node|:wm/node|:route/node|:control-node)[[:space:]]+:%s"
+               "route-tag[^)]*:%s[^0-9A-Za-z-]"]
+       :scope-key :v3-node-link
+       :provenance "Item-9 ruling, futon2 0b46b86e: grow the census scope to include the lane harness so its R9 seat-coincidence refusal is visible."
+       :scope-note "v3 is v2 plus zaif-build-loop.sh; the widening is specific to the operator-closing harness named by PA5z."}}
 
  ;; Nodes ALIGN censused. Everything not listed here is uncensused and is the
  ;; business of PA2z/PA3z/PA4z, not of this row.
@@ -129,10 +142,10 @@
    :pointers [{:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 104 :to 113 :expect ":r10/unlinked-dispatch-receipt"}
               {:file "futon3c/src/futon3c/social/coordination_ledger.clj" :from 121 :to 128 :expect ":dispatch/receipt"}]}
 
-  {:node "R9" :cell :checked :verdict :named-only :tag "[N9]"
-   :reading "control-stages names R9 'No self-certification'; P-assured-process calls for author-never-closes-own-handoff as architecture. No node-linked refusing check was found."
-   :pointers [{:file "p4ng/empirics-futon/control-stages.edn" :from 43 :to 43 :expect "No self- certification"}
-              {:file "futon2/holes/problems/P-assured-process.md" :from 55 :to 63 :expect "commissioned"}]}
+  {:node "R9" :cell :checked :verdict :exists :tag "[E-9-K-PA5]"
+   :authority "Item-9 ruling, futon2 0b46b86e"
+   :reading "The zaif build loop refuses before startup when its resolved work and review seat identities coincide, with a typed R9-linked error."
+   :pointers [{:file "futon2/holes/labs/zaif-harness/zaif-build-loop.sh" :from 23 :to 27 :expect ":r9/self-certification-refused"}]}
 
   {:node "R20" :cell :checked :verdict :exists :tag "[E20-C]"
    :reading "The R20 admission boundary returns :tripwire/check :refused when a wire produces a witness."
@@ -287,7 +300,13 @@
  ;; carries NO stage tag. A tag-only rule would uncredit a genuinely established
  ;; cell. So the declaration decides and the stage tag corroborates.
  :serves-cells-declarations
- [{:node "R10" :authority "futon2 2a495a7d — ALIGN R10 adjudication"
+ [{:node "R9" :authority "Item-9 ruling, futon2 0b46b86e"
+   :sites ["holes/labs/zaif-harness/zaif-build-loop.sh:25"
+           "holes/labs/zaif-harness/zaif-build-loop.sh:32"
+           "holes/labs/zaif-harness/zaif-build-loop.sh:41"]
+   :serves-cells [:checked]
+   :note "All three node-link hits belong to the same checked-stage refusal and its pinned test; no other lifecycle cell is claimed."}
+  {:node "R10" :authority "futon2 2a495a7d — ALIGN R10 adjudication"
    :sites ["src/futon3c/social/coordination_ledger.clj:89"
            "src/futon3c/social/coordination_ledger.clj:104"
            "src/futon3c/social/coordination_ledger.clj:121"]
