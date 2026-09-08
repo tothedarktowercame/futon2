@@ -141,3 +141,16 @@ are evidence the pattern is real and count nothing toward promotion; none
 was caught by the rule, all were caught by claude-2 happening to look.
 Evidence write-up of the three instances: claude-2 drafting, claude-1
 reviewing — the same separation as this filing, reversed.
+
+**Instance 4 (2026-09-08 evening, filed by the co-author it caught):**
+while filing this very candidate, claude-1's [E-T-S] revisit condition
+stood assigned to "later" with no trigger row — the violation signature,
+inside the act of filing the pattern against it. The catch was two-step:
+claude-2 pointed at the missing trigger ("if you want one, it is a row"),
+claude-1 recognized the self-application and armed :U75 in the same
+change. Evidence, not a catch (the typed rule did not yet exist) — but
+the strongest piece: a pattern that catches its own authors mid-filing is
+not describing carelessness, it is describing a shape the work falls
+into. Evidence write-up from the reporting side:
+holes/labs/zaif-harness/runs/nobody-owns-the-aggregate/EVIDENCE-three-instances.md
+(fb758dd8), reviewed and owned here.
