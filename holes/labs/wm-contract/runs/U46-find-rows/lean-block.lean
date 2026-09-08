@@ -1,14 +1,14 @@
 /-! ### The pinned `find-snatch` record, transcribed (worklist `:U46`)
 
-`futon3:checks/find-snatch.edn`, sha256 `839897ef8fe44952403700bd237389449ae4735d3da7df8239b1b94dc7ef4dfa`, whose
-`:as-of` is the futon3 commit `2734ac570ed78d9bf822a5013cc48e53e68c8ff9` that last touched
-`library/snatch` -- 18 authored patterns, 6 scenarios, 34 recorded rounds.
+`futon3:checks/find-snatch.edn`, sha256 `c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce`, whose
+`:as-of` is the futon3 commit `e58576cec0f14c3da4667ed452d522c561487ee8` that last touched
+`library/snatch` -- 24 authored patterns, 6 scenarios, 34 recorded rounds.
 This block is GENERATED from that file by
 `futon2:holes/labs/wm-contract/u46_find_transcribe.bb`; edit the fixture and
 regenerate rather than editing the literals.
 -/
 
-/-- The 18 authored Snatch patterns of the pinned record, in its
+/-- The 24 authored Snatch patterns of the pinned record, in its
 sorted order. Constructor names are the recorded ids in lowerCamel. -/
 inductive SnatchPattern where
   | aFreeMarkIsAlwaysWorthAssigning
@@ -19,16 +19,22 @@ inductive SnatchPattern where
   | escalateOnlyAsFarAsYouCanLose
   | exchangeWhenBothSidesGain
   | forcedPlayNeedsALossFloor
+  | grimCutsTheCascadeAndNeverWidensIt
+  | haveATemperament
   | institutionsVaryByPositionAndForce
+  | leadWithTheExchangeRule
   | markWithoutForce
   | nonBindingTalkStillMovesPlay
+  | playTheAuthoredOrderFirst
   | preserveTheRightToAbstain
   | priceTheFinalRoundAsFinal
   | probeBeforeCommitting
+  | promoteTheRemedyBeforeTheExit
   | protectTheUnprotectedMove
   | reEnterAfterObservedRepair
   | revertThenInvert
   | useTalkToMakeATestableOffer
+  | widenTheCascadeOnlyOnEvidence
   deriving DecidableEq, Repr
 
 /-- The recorded repository as a list -- what `findF1Containment` contains
@@ -38,10 +44,12 @@ def snatchRepository : List SnatchPattern :=
   .anUnmodelledResponseStopsTheLine, .askForSurplusNotSurrender,
   .consultTheRemedyBeforeExiting, .escalateOnlyAsFarAsYouCanLose,
   .exchangeWhenBothSidesGain, .forcedPlayNeedsALossFloor,
-  .institutionsVaryByPositionAndForce, .markWithoutForce, .nonBindingTalkStillMovesPlay,
-  .preserveTheRightToAbstain, .priceTheFinalRoundAsFinal, .probeBeforeCommitting,
+  .grimCutsTheCascadeAndNeverWidensIt, .haveATemperament,
+  .institutionsVaryByPositionAndForce, .leadWithTheExchangeRule, .markWithoutForce,
+  .nonBindingTalkStillMovesPlay, .playTheAuthoredOrderFirst, .preserveTheRightToAbstain,
+  .priceTheFinalRoundAsFinal, .probeBeforeCommitting, .promoteTheRemedyBeforeTheExit,
   .protectTheUnprotectedMove, .reEnterAfterObservedRepair, .revertThenInvert,
-  .useTalkToMakeATestableOffer]
+  .useTalkToMakeATestableOffer, .widenTheCascadeOnlyOnEvidence]
 
 /-- The six recorded scenarios, `treatment`/`disposition`
 (`find_snatch.clj:22-24`, declaration order). -/

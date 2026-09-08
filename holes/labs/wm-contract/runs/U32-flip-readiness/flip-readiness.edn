@@ -931,7 +931,7 @@
     :blocked-on
     [":requires names no environment flag, so the chain cannot be derived; the declared requirement is carried verbatim: [\"the U14e-1..4 packets landed and their census taken; a separate queued-J decision\"]"]}}},
  :emitted-by "futon2/holes/labs/wm-contract/flip_readiness_check.bb",
- :emitted-at "2026-09-04",
+ :emitted-at "2026-09-08",
  :sources
  {:catalog
   "futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
@@ -945,11 +945,12 @@
  :whole-tree-lines
  {:contract-pin
   {:verdict :green,
-   :contract-authority "581034b67e47240b7a4003dc39bdd7dd545e1daf",
+   :contract-authority "e239086a44147f14defc88e74a662a2cd4487e67",
    :holes-last-content-change
-   "581034b67e47240b7a4003dc39bdd7dd545e1daf",
+   "e239086a44147f14defc88e74a662a2cd4487e67",
    :comparand
    "the last commit that touched DarkTower/WarMachine/Holes.lean, not mathlib HEAD (C175)",
+   :comparand-read-from :live-git,
    :receipt-says
    {:fresh? true,
     :json-sha "4bc55c5968bc4568610405660bdae4a98fcc06c5",

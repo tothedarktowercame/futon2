@@ -57,7 +57,7 @@
                       (str home "/code/futon3/checks/find-snatch.edn")))
 
 (def pinned-fixture-sha256
-  "839897ef8fe44952403700bd237389449ae4735d3da7df8239b1b94dc7ef4dfa")
+  "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce")
 
 (defn slurp-lines [path] (str/split-lines (slurp path)))
 

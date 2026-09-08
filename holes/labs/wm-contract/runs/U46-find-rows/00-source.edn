@@ -2,9 +2,9 @@
  {:repo "futon3",
   :path "checks/find-snatch.edn",
   :sha256
-  "839897ef8fe44952403700bd237389449ae4735d3da7df8239b1b94dc7ef4dfa",
-  :as-of "2734ac570ed78d9bf822a5013cc48e53e68c8ff9"},
- :repository-count 18,
+  "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce",
+  :as-of "e58576cec0f14c3da4667ed452d522c561487ee8"},
+ :repository-count 24,
  :scenario-count 6,
  :round-count 34,
  :laws
