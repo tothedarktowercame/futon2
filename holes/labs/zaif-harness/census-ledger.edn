@@ -173,6 +173,26 @@
   ;; while PA17z is built -- a stopgap, NOT the tolerance window PA17z refuses,
   ;; because it buys days rather than becoming the mechanism.
 
+  ;; PINS RE-LIFTED TO THEIR AUTHORISED ADDRESSES 2026-09-08 (:PA18z, ruled by
+  ;; claude-1). PA17z had left three declared addresses that were stale or, for
+  ;; the E-16 pair, DISOWNED: ALIGN 0b9535d3 states :2788-2818 and :3007-3025
+  ;; "were never this document's citations". Their :line-shift was therefore
+  ;; measured from a baseline that never existed -- 14 and 13 against a fiction,
+  ;; the same defect class PA17z was minted to kill, arriving through the fixture
+  ;; instead of the pointer.
+  ;;
+  ;; ORDER MATTERED AND WAS RULED: the planted moved-span control (suite 4d)
+  ;; landed FIRST. Before it, the only exercise of the moved-span path was a
+  ;; live-record check that asserted these very addresses, so the correct repair
+  ;; would have turned the suite red and read as the repairer's own mistake. A
+  ;; test that depends on a defect staying in place defends that defect.
+  ;;
+  ;; :from/:to are now each cell's AUTHORISED address, and drift from it is
+  ;; reported honestly rather than suppressed: [E-T] declares ALIGN's corrected
+  ;; :6790 and still observes a move to :6794, because the span shifted AGAIN
+  ;; while PA17z was under review. That live 4-line drift is exactly why the
+  ;; regression coverage belongs in a planted control and not in these records.
+
   {:node "TRACE" :cell :recorded :verdict :exists :tag "[E-T]"
    :reading "The WM attaches :TRACE to :wm/route immediately before the write; trace/write-trace! constructs and appends the exact record. Credits ONLY recorded: a tick route record, not evidence that any other process stage occurred."
    ;; POINTER RE-LIFTED 2026-09-06 from ALIGN's dated correction (futon2
@@ -183,7 +203,7 @@
    ;; it. The verdict never moved -- only the line citation did. Expect this one
    ;; to drift again: war_machine.clj is the most-edited file in the scope, which
    ;; is precisely why the refusal is worth having.
-   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6789 :to 6789 :expect ":TRACE" :span-sha "989aabaa7610218321b275dca39a3f203a9a6b3457b6b5d405a6ea54b1639a55"}
+   :pointers [{:file "futon2/scripts/futon2/report/war_machine.clj" :from 6790 :to 6790 :expect ":TRACE" :span-sha "989aabaa7610218321b275dca39a3f203a9a6b3457b6b5d405a6ea54b1639a55"}
               {:file "futon2/src/futon2/aif/trace.clj" :from 723 :to 745 :expect "write-trace!" :span-sha "0d163f8cbe7b7ab4efcddda0f915c85cf364917b4fcbb215e927bac43a3ca8ef"}]}
 
   ;; RE-LIFTED 2026-09-08 from ALIGN's fresh adjudication (futon2 1b575c71).
@@ -208,7 +228,7 @@
   {:node "R16" :cell :commissioned :verdict :exists :tag "[E-16-C]"
    :reading "The author commission names the selected target, repository/base head, artifact contract, requirements, refusal shape and independent reviewer; that exact prompt is passed to dispatch."
    :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 1398 :to 1454 :expect "author-prompt" :span-sha "c76e2d31a9acf31b6e72f03d6c6e869fd021e601fe9c9ad9224f46eeaf1e73a0"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2788 :to 2818 :expect "dispatch!" :span-sha "6c2bd0b7b0b6a15ee32c48e2f97d4a37132f80b3b108a141ac5021782c59fd48"}]}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2802 :to 2832 :expect "dispatch!" :span-sha "6c2bd0b7b0b6a15ee32c48e2f97d4a37132f80b3b108a141ac5021782c59fd48"}]}
 
   {:node "R16" :cell :dispatched :verdict :exists :tag "[E-16-D]"
    :reading "dispatch! submits agent, caller, mission id and prompt to Agency; the dispatch checkpoint records agent, job id, prompt reference and response."
@@ -223,7 +243,7 @@
   {:node "R16" :cell :checked :verdict :exists :tag "[E-16-K]"
    :reading "After a distinct reviewer dispatch and return, approval requires a done review job, an :approve verdict and execution evidence; failure refuses advancement."
    :pointers [{:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 2970 :to 3007 :expect "poll-job!" :span-sha "73ffb8f7984d3a8e2541e5cc30cb6f3dc3a01205dd4e79b22ee16023655b565b"}
-              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3007 :to 3025 :expect ":approve" :span-sha "c7a1dc4e44f5aa64231f1c9b2a9c9cdda5da89aaf46320a608c2b64f460dbca3"}
+              {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3020 :to 3038 :expect ":approve" :span-sha "c7a1dc4e44f5aa64231f1c9b2a9c9cdda5da89aaf46320a608c2b64f460dbca3"}
               {:file "futon2/src/futon2/aif/full_loop_runner.clj" :from 3026 :to 3055 :expect ":build-failed" :span-sha "fbbad9f67d18b5df7b53ff97839e4650e4aa51bbaae5f2a73ccee0ed3afd9603"}]}
 
   {:node "R16" :cell :recorded :verdict :exists :tag "[E-16-X]"

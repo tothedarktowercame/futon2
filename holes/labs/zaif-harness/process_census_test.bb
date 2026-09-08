@@ -123,19 +123,40 @@
          [[803 815 true] [2819 2832 true]]
          (mapv (juxt :resolved-from :resolved-to :ok?) (:pointers c))))
 
-(println "\n3b. PA17z regression -- the three line drifts are observations, not refusals")
-;; Live records [E-T], [E-16-C], and [E-16-K] are the three drift incidents
-;; named by PA17z. Values below are copied verbatim from this run's pointer
-;; records; their source ranges retain the historical citations.
+(println "\n3b. live drift -- ONE span moved from an authorised baseline, and it is real")
+;; AMENDED BY :PA18z. This check used to assert THREE moved spans, against live
+;; records whose declared addresses were stale or -- for [E-16-C]/[E-16-K] --
+;; DISOWNED by ALIGN 0b9535d3 as "never this document's citations". Their
+;; :line-shift of 14 and 13 was measured from a baseline that never existed.
+;; The pins are now re-lifted to their authorised addresses, so those two sit in
+;; place and the fabricated shifts are gone.
+;;
+;; The moved-span REGRESSION now lives in planted control 4d, which is where it
+;; belongs; this check asserts only what is genuinely true of the live tree. The
+;; ordering was ruled and mattered: 4d landed FIRST, so re-lifting the pins could
+;; not turn the suite red and be misread as the repairer's mistake.
+;;
+;; What remains is one HONEST drift. [E-T] declares ALIGN's corrected :6790 and
+;; the span now sits at :6794 -- it moved AGAIN while PA17z was under review.
+;; That is drift from an authorised citation, reported rather than suppressed,
+;; and it is the single best argument for why live records were never the right
+;; home for regression coverage.
 (let [{:keys [exit data]} (run-census "--pattern" "v2")
       moved (->> (:results data) (mapcat #(map (fn [p] [(:tag %) p]) (:pointers %)))
                  (filter (fn [[_ p]] (= :span-moved (:observation p)))) vec)]
-  (check "all three unchanged spans satisfy" 0 exit)
-  (check "the three live records name their old and new locations"
-         [["[E-T]" 6789 6794 5]
-          ["[E-16-C]" 2788 2802 14]
-          ["[E-16-K]" 3007 3020 13]]
-         (mapv (fn [[tag p]] [tag (:from p) (:resolved-from p) (:line-shift p)]) moved)))
+  (check "a moved-but-unchanged span is an observation, not a refusal" 0 exit)
+  (check "exactly one live drift, and it names its authorised origin"
+         [["[E-T]" 6790 6794 4]]
+         (mapv (fn [[tag p]] [tag (:from p) (:resolved-from p) (:line-shift p)]) moved))
+  ;; The two formerly-disowned pins must now be IN PLACE. Asserting the absence
+  ;; of a shift is the point: a reappearing :line-shift here means someone has
+  ;; put a fabricated baseline back.
+  (check "the two re-lifted pins sit in place, no fabricated shift"
+         [nil nil]
+         [(:observation (first (filter #(= "dispatch!" (:expect %))
+                                       (:pointers (cell data "R16" :dispatched)))))
+          (:observation (first (filter #(= ":approve" (:expect %))
+                                       (:pointers (cell data "R16" :checked)))))]))
 
 (println "\n4. the route-hop adjudications still dispose of what v2 sees")
 (let [{:keys [data]} (run-census "--pattern" "v2")
@@ -194,6 +215,58 @@
     (check "the two earned cells are unaffected -- adjudication still wins"
            #{:exists}
            (set (map #(:verdict (cell data "R10" %)) [:commissioned :dispatched]))))
+  (.delete tmp))
+
+(println "\n4d. PLANTED CONTROL -- a span that MOVED but did not CHANGE must satisfy and name the move")
+;; :PA18z. Before this control existed, the ONLY exercise of the moved-span path
+;; was check 3b, asserting against three LIVE records whose declared addresses
+;; were stale or disowned -- [E-16-C]/[E-16-K] carried the two addresses ALIGN
+;; 0b9535d3 states "were never this document's citations". That made the suite
+;; DEFEND the defect: re-lifting those pins to the authorised addresses would
+;; zero the shifts and turn check 3b red, so whoever tried the correct repair
+;; next would read the red as their own mistake.
+;;
+;; The regression value moves here, where it belongs. A planted span is moved by
+;; a known number of lines without altering a byte of it; the pointer must still
+;; satisfy, and must NAME the old and new location. Live records were the wrong
+;; home for this coverage in any case -- [E-T] moved AGAIN (:6790 -> :6794) while
+;; PA17z was being reviewed, which is the argument in one line.
+(let [scratch (io/file here "runs" "pa18z-planted-span.clj")
+      body ["(ns planted.span)" ";; filler" "(defn planted-target []" "  :planted-token-xyz)" ";; tail"]
+      span-from 3 span-to 4
+      norm (fn [lines from to]
+             (str (str/join "\n" (map str/trimr (subvec (vec lines) (dec from) to))) "\n"))
+      sha (fn [t] (format "%064x" (BigInteger. 1 (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                                          (.getBytes t "UTF-8")))))
+      rel "futon2/holes/labs/zaif-harness/runs/pa18z-planted-span.clj"
+      led (edn/read-string (slurp (io/file here "census-ledger.edn")))
+      mk (fn [] (assoc led
+                       :nodes ["PLANTED"] :cells [:recorded]
+                       :adjudicated [{:node "PLANTED" :cell :recorded :verdict :exists :tag "[P]"
+                                      :pointers [{:file rel :from span-from :to span-to
+                                                  :expect "planted-target"
+                                                  :span-sha (sha (norm body span-from span-to))}]}]))
+      tmp (io/file (System/getProperty "java.io.tmpdir") "pa18z-planted-move.edn")
+      run! (fn [] (let [{:keys [data]} (run-census "--ledger" (str tmp) "--node" "PLANTED")]
+                    (first (:pointers (cell data "PLANTED" :recorded)))))]
+  (spit tmp (pr-str (mk)))
+  (spit scratch (str (str/join "\n" body) "\n"))
+  (let [p (run!)]
+    (check "unmoved span satisfies with no observation" [true nil] [(:ok? p) (:observation p)])
+    (check "and resolves where it was declared" [3 4] [(:resolved-from p) (:resolved-to p)]))
+  ;; Move it three lines down. Not one byte of the span changes.
+  (spit scratch (str (str/join "\n" (concat ["" "" ""] body)) "\n"))
+  (let [p (run!)]
+    (check "MOVED span still satisfies -- the reading was about the code, not the line"
+           true (:ok? p))
+    (check "and names the move with old and new location"
+           [:span-moved 3 6 7] [(:observation p) (:line-shift p) (:resolved-from p) (:resolved-to p)]))
+  ;; Now change one byte inside it. This must refuse even though it has not moved.
+  (spit scratch (str (str/join "\n" (concat ["" "" ""] (assoc (vec body) 3 "  :planted-token-CHANGED)"))) "\n"))
+  (let [p (run!)]
+    (check "CHANGED content refuses -- moved-but-identical and changed are distinguished"
+           false (:ok? p)))
+  (.delete scratch)
   (.delete tmp))
 
 (println "\n5. PLANTED CONTROL -- changed content must refuse")
