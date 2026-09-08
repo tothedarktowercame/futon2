@@ -8,10 +8,10 @@
   :scope "This record covers the six fixed failure modes of the IRC server adapter at mission closure (2026-02-23). It does not claim client-side reconnection, TLS, rate limiting, or federation, and it does not claim sustained operator-confirmed use without drop-outs, which the story scene sets as the closure bar (leaf-5.md:44-45)."
   :witness "futon3c/holes/missions/M-IRC-stability.md:302-310 (Completion, 2026-02-23: all 6 failure modes implemented, 16 stability tests)"}
  :source-pins
- {:futon2 "2ec9c19fd14ddc6a2fc4ef19eefc2f93142751a2"
-  :futon3 "ab277bdd6b6aa3f587e09625c750d258d61a7f92"
-  :futon3c "b0c3648965d3e75acf199b09967609353d9023ad"
-  :futon5a "9fc6f96b11ed61749fe09cc8a5e07724c2e0f428 (last commit touching holes/stories/leaf-5.md, 2026-05-03)"}
+ {:futon2 "5c8bed246fcf0219854f1c5bc2155306e985ee12"
+  :futon3 "ab277bdd6b6aa3f587e09625c750d25a7f92"
+  :futon3c "f3534b93d0fd5ee6437b4c38645a793270a36a03"
+  :futon5a "9fc6f96b11ed61749fe09cc8a5e07124c2e0f428 (last commit touching holes/stories/leaf-5.md, 2026-05-03)"}
  :nodes
  [{:pattern :realtime/liveness-heartbeats
    :library-path "library/realtime/liveness-heartbeats.flexiarg"
@@ -37,12 +37,16 @@
    :to :realtime/listener-leases
    :relation :detection-precedes-expiry
    :source "futon3c/holes/missions/M-IRC-stability.md:37-40,97 and src/futon3c/transport/irc.clj:391-410,629-643"
-   :reading "The keepalive loop's PING/PONG stall detection is what fires the reap: liveness detection decides WHICH lease is expired (keepalive-reap at irc.clj:404), and nick-ghost?/kill-ghost! (irc.clj:219-235,274-275) expire the stale instance on reclaim."}
+   :reading "The keepalive loop's PING/PONG stall detection is what fires the reap: liveness detection decides WHICH lease is expired (keepalive-reap at irc.clj:404), and nick-ghost?/kill-ghost! (irc.clj:219-235,274-275) expire the stale instance on reclaim."
+   :interpretation-class :documented
+   :documentation "Mission-span documented per the restated edge term (claude-1, blocker-history 2026-09-08): neither pattern carries @why/@how toward the other at the futon3 pin (grep over library/realtime returns no annotation), so the edge is authored by the mission's own cross-reference table pairing F1's detection with the reaping rule (:37-40 with :97) and by the code's actual composition order -- the ratified exemplar shape (runs/mining-exemplar/receipt.md:63-66)."}
   {:from :realtime/listener-leases
    :to :realtime/loop-failure-signals
    :relation :expiry-surfaces-as-evidence
    :source "futon3c/holes/missions/M-IRC-stability.md:96 and src/futon3c/transport/irc.clj:45,404-409,639-643"
-   :reading "Reaping, ghost-killing, and keepalive errors are emitted as evidence tensions through emit-error-evidence! rather than swallowed -- the mission's F3 invariant that no exception is silently discarded anywhere in irc.clj."}]
+   :reading "Reaping, ghost-killing, and keepalive errors are emitted as evidence tensions through emit-error-evidence! rather than swallowed -- the mission's F3 invariant that no exception is silently discarded anywhere in irc.clj."
+   :interpretation-class :documented
+   :documentation "Same documented class and basis: the mission pairs the reaping/expiry conduct (:97) with the error-surfacing rule (:96) in one cross-reference table, and the implementation routes every one of those events through emit-error-evidence! (irc.clj:45). No @why/@how annotation joins the two patterns at the pin."}]
  :rules
  [{:id :require-server-initiated-liveness-probes
    :member :realtime/liveness-heartbeats
@@ -61,10 +65,10 @@
   {:id :surface-loop-failures-as-evidence
    :member :realtime/loop-failure-signals
    :then-source "library/realtime/loop-failure-signals.flexiarg:19"
-   :interpretation-class :attested
+   :interpretation-class :documented
    :interpretation
-   "Failures in the transport loop are flagged and recorded (evidence tensions), not silently discarded."
-   :attestation "futon3c/holes/missions/M-IRC-stability.md:96 (cross-ref: 'Errors must surface at the layer that caused them, not be swallowed') and :138-161 (F3: replace every silent catch with evidence emission); irc.clj:45,404-409,639-643; irc_test.clj:610+ (relay timeout emits tension evidence)"}]
+   "The implemented rule is narrower than the THEN's own terms: the mission applies the pattern's failure-surfacing discipline to TRANSPORT ERRORS (every exception emitted as an evidence tension, none silently discarded), while the THEN text itself names sustained overload, rising drops, and JSONL stalls with tuning/backpressure as the response. The bridge from loop-overload to exception-surfacing is the mission's reading, not a claim the THEN states."
+   :documentation "Reclassified from :attested to :documented on reopen review (the reviewer's finding 2 stands and is honoured here): the mission attests the exception-surfacing INVARIANT (M-IRC-stability.md:96 cross-ref row, :138-161 F3 design), and no committed source attests that this reading of the THEN block is the pattern's own. Class marked in-band per the commission's attested-or-documented rule (MINING-historical-cascades.md:29-30); irc.clj:45,404-409,639-643; irc_test.clj:610+ (relay timeout emits tension evidence)."}]
  :precedence
  {:realtime/liveness-heartbeats 1
   :realtime/listener-leases 2
@@ -75,4 +79,7 @@
   [:realtime/liveness-heartbeats
    :realtime/listener-leases
    :realtime/loop-failure-signals]
-  :basis "futon3c/holes/missions/M-IRC-stability.md:37-40,91-98,112-161; src/futon3c/transport/irc.clj:45,219-235,274-275,391-410,415-425,509,629-652"}}
+  :basis "futon3c/holes/missions/M-IRC-stability.md:37-40,91-98,112-161; src/futon3c/transport/irc.clj:45,219-235,274-275,391-410,415-425,509,629-652"}
+ :transcript
+ {:history "futon3c b1208d65 2026-02-20 'Add M-IRC-stability mission: 6 failure modes in IRC transport' (the plan with the pattern cross-reference table, M-IRC-stability.md:91-98) -> implementation of F1-F6 in transport/irc.clj -> futon3c 0f55ac8d 2026-02-23 'Close M-operational-readiness and M-IRC-stability' (Completion section M-IRC-stability.md:302-310: all 6 failure modes implemented, 16 stability tests, irc.clj then 652 lines). At the futon3c pin irc.clj is 706 lines and irc_test.clj carries 35 deftests including the stability sections (11 at :409+, relay timeout at :580+ and :610+). The mission's nearby transport history is also part of the record: 29d18a9a 'Ensure IRC relay responses are always deliverable' and 1530126f 'Fix IRC delivery after in-channel nick changes' precede the stability close."
+  :basis "git log over futon3c holes/missions/M-IRC-stability.md and src/futon3c/transport/irc.clj, re-run this invocation at pin f3534b93; all shas and dates read from git, none invented."}}
