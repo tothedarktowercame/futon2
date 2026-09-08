@@ -1,0 +1,39 @@
+{:finding :third-row-also-loses-every-recorded-edge,
+ :findings [],
+ :futon3-pin "f8dd164bdc7f20a160b5e6b758d71532be65ca1e",
+ :lean-declarations
+ ["organiseSnatchG1CautiousConformant"
+  "snatchG1CautiousNoRecordedEdgeSurvives"
+  "snatchG1CautiousRecordedEdgeCount"
+  "organiseSnatchG1CautiousNotEdge518"],
+ :mutation-plants
+ [{:landed? true, :plant :added-emptied, :verdict-after false}
+  {:landed? true, :plant :survivor-invented, :verdict-after false}
+  {:landed? true,
+   :plant :lean-declaration-absent,
+   :verdict-after false}],
+ :record :F12-slice-13-third-joint,
+ :source-pointers
+ ["futon3:checks/find_organise.clj:603-633"
+  "futon2:holes/labs/wm-contract/runs/F12-organise/23-snatch-joint.edn:111-157"
+  "mathlib4:DarkTower/WarMachine/F12ThirdSnatchExemplar.lean:13-57"],
+ :third-joint
+ {:added-by-organise
+  [:snatch/institutions-vary-by-position-and-force
+   :snatch/protect-the-unprotected-move],
+  :added-count 2,
+  :recorded-edge-count 3,
+  :recorded-edges
+  [[:snatch/an-unmodelled-response-stops-the-line
+    :snatch/protect-the-unprotected-move]
+   [:snatch/probe-before-committing
+    :snatch/protect-the-unprotected-move]
+   [:snatch/protect-the-unprotected-move
+    :snatch/institutions-vary-by-position-and-force]],
+  :ruled-recorded-edge-count 0,
+  :ruled-recorded-edges [],
+  :scenario [:g1 :cautious],
+  :selected
+  [:snatch/an-unmodelled-response-stops-the-line
+   :snatch/probe-before-committing]},
+ :verdict :pass}
