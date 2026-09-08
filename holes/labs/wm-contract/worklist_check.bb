@@ -240,6 +240,17 @@
           (binding [*out* *err*] (println l)))
         (die "the positive-receipt re-attestation gate refused this tree (:U71)")))))
 
+;; U70: this rejects cycles, incomplete assurance coverage, stale generated
+;; output, and witnessed mechanisms whose content moved after witnessing.
+(let [checker (str script-dir "/gen_dependency_frontier.bb")]
+  (when (.exists (io/file checker))
+    (let [{:keys [exit out err]} (shell/sh "bb" checker "--check" :dir script-dir)]
+      (doseq [l (remove str/blank? (str/split-lines (str out)))] (println l))
+      (when-not (zero? exit)
+        (doseq [l (remove str/blank? (str/split-lines (str err)))]
+          (binding [*out* *err*] (println l)))
+        (die "the dependency/assurance frontier gate refused this tree (:U70)")))))
+
 (def by-status (frequencies (map :status (:items w))))
 (println (format "worklist_check: %d items OK; %s; %d signed registry entries verified unchanged since signature, %d superseded and skipped, %d declared :covers-key :none, %d signed registry rows carry no :covers-key and are NOT checked"
                  (count (:items w)) (pr-str by-status)

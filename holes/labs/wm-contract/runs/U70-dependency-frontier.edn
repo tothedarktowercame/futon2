@@ -1,0 +1,24 @@
+{:row :U70
+ :recorded-at "2026-09-08T14:20:00Z"
+ :source-register "holes/labs/wm-contract/RED-COMPONENTS-2026-09-07.md:21-141"
+ :ticket-accounting
+ [{:register-items [1 2] :tickets [:U71 :U72]}
+  {:register-item 3 :tickets [:U75 :U76 :U77]}
+  {:register-item 4 :tickets [:U78]}
+  {:register-item 5 :tickets [:U79]}
+  {:register-item 6 :tickets [:U80]}
+  {:register-item 7 :tickets [:U81]}
+  {:register-item 8 :tickets [:U82]}
+  {:register-item 9 :tickets [:U83]}
+  {:register-item 10 :tickets [:U66 :U67 :U68]}]
+ :render {:generator "holes/labs/wm-contract/gen_dependency_frontier.bb:1"
+          :artifact "holes/labs/wm-contract/dependency-frontier.md:1"
+          :result "201 tickets; 14 apparatus pattern/signature pairs"}
+ :commissioning
+ {:command "bash holes/labs/wm-contract/dependency_frontier_controls.sh"
+  :exit 0
+  :missing-pair "deleted default-to-the-cheap-error assurance; generator refused and named the uncovered pair"
+  :stale-without-rewitness "edited positive_receipt_reattestation_check.bb; pin-moves-with-the-population rendered :ticketed"
+  :rewitness "updated the copied mechanism sha; the same pair rendered :witnessed"
+  :output "dependency_frontier_controls: PASS -- missing pair named; stale witness degraded; re-witness held"}
+ :accepted-red-category "not found; only the refused term remains in source/acceptance prose at worklist.edn:1425-1426,1480-1485"}
