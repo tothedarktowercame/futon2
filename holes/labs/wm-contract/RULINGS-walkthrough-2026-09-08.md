@@ -207,3 +207,34 @@ with packet order read from the dependency frontier so the box exposes the
 DAG of next steps. Rows :U85 (Box 6) and :U86 (Box 2) mint this; the
 never-changing-box complaint is the acceptance test — a worklist status
 change must change the regenerated box.
+
+## Item 12 — find: all four C590 choices as recommended; C: a calculation proposal, not more definitions
+
+> "for find, sure, all four are recommended for find."
+
+C590's open choices are ruled: inductive Route pinning structuredAntecedent;
+Warrant as the standsOn descent chain (List P with chain proof); fires? in the
+FindQuery wrapper (Tension's CLOSED-BY-RECORD marker survives); Prop-level laws.
+Implementation dispatched.
+
+> "the machine isn't going to invent my preferences, but [...] you can read my
+> preferences off of all of the work that we've been doing [...] the keyword
+> being discover, not invent. [...] C is to some extent a matter of a process
+> of discovery. And that doesn't mean it should be indefinitely deferred. It
+> means that it needs to include some discovery aspect. [...] What I don't yet
+> have in front of me is a proposal about how this c-vector [...] is going to
+> become something that turns into a calculation. [...] Rather than just keep
+> pushing formal definitions around, we need to understand how that turns into
+> a real evaluation. And that's focusing in on one specific part of the system
+> and maybe developing some unit tests."
+
+C's framing is corrected on the record: DEFERRAL WITH A DISCOVERY OBLIGATION,
+not refusal. The response is C591-C-as-calculation-proposal.md: the missing
+computational object is the disposition kernel P(d|o) bridging predicted
+channel observations to the 12 outcome-kinds seeded-C is declared over —
+discoverable from cohort records, not invented; then disposition-risk(π) =
+KL[Q(d|π) ‖ seeded-C] enters G as the :ruled-outcome-c layer (Items 6/10).
+Discovery loop reads the evidence landscape into provenance-carrying
+proposed-C whose DIFF against the ruled seed is a decision sheet; the
+extractor never writes preferences. Six unit tests named; four slices;
+Joe reviews the proposal before slices dispatch.
