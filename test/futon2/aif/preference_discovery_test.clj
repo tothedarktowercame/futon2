@@ -38,6 +38,10 @@
     (is (= :not-found (:ruled-mass component)))
     (is (= :which-ruled-disposition-carries-this-preference
            (get-in result [:decision-sheet 0 :question])))
+    (is (= {:lane :interactive
+            :reason :genuine-preference-question
+            :writes-preference? false}
+           (:route result)))
     (is (= ruled/seeded-c (:seeded-c result)))
     (is (= "holes/labs/wm-contract/RULINGS-walkthrough-2026-09-08.md:276-278"
            (get-in component [:provenance 0 :citation])))))

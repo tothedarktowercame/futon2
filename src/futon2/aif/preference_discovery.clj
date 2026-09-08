@@ -99,6 +99,9 @@
        :seeded-c {:support support :mass mass}
        :landscape (mapv #(select-keys % [:kind :claim/type :citation]) sources)
        :proposed-components components
+       :route {:lane :interactive
+               :reason :genuine-preference-question
+               :writes-preference? false}
        :decision-sheet
        (mapv (fn [{:keys [proposal ruled-mass] :as component}]
                (assoc component :question
