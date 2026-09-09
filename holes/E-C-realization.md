@@ -36,6 +36,20 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
    Then the rung-3 axes (solvability / monetary benefit / societal benefit)
    as declared coordinates over problems.
 
+1b. THE OBSERVATION MODEL BETWEEN SCORER AND KERNEL (Astra review,
+   TN-astra-wmreview.md:31, verified in code 2026-09-09): the fitted kernel's
+   observation domain is the checkpoint trajectory (the ledger retains no
+   channel-valued observation vector -- checks/disposition_kernel.clj:20-27),
+   while the scorer supplies channel-valued predicted means to
+   disposition-risk (src/futon2/aif/efe.clj:701-703). Constant-kernel
+   coverage (1/12) masks the gap today; a justified model connecting channel
+   observations to kernel observations is a distinct obligation of this
+   excursion, and per the review it must NOT be closed by substituting
+   checkpoint trajectories for channel observations merely to make the
+   connection executable. This also shapes strand 2: what the restarted
+   attempts RECORD (channel observations alongside checkpoints, or a declared
+   mapping) is part of the attempt design.
+
 2. COHORT RESTART AS DESIGNED WORK (Item 18d): the kernel's 1/12 coverage is
    evidence FOR restarting the attempt cohort, not a license to farm (o, d)
    pairs in a loop. Interactively: which attempts, what framing, what counts
