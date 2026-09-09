@@ -36,3 +36,15 @@ positive predicted mass at an explicit preferred zero must refuse, never clamp.
 The find-marker draft remains parked until the FoldC witness/checker/receipt
 reconciliation reflects this separation. No registry or worklist is changed
 by this session record. Further rulings will be appended verbatim.
+
+## Follow-up: reconciliation or a new era
+
+Joe to codex-17, emacs-repl, verbatim:
+
+> Okay, my opinion is if you can reconcile the Old Witness and Receipt with this separation, great. Otherwise, we could mark it as a new era and just point out that they're not directly comparable. But it's worth looking at least at an analogy or discussion of how they relate to each other, even if we can't. Recompute them and get a new certificate with a new system directly. So let's sort that out.
+
+Implementation finding: retain the old ordered-fold certificate under its actual
+claim and distinguish the probability/risk era. The arithmetic is not a
+recomputation of the same quantity. See
+[FOLDC-era-comparison-2026-09-09.md](runs/FOLDC-era-comparison-2026-09-09.md)
+for the checked correspondence, limits, and remaining certification work.
