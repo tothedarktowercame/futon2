@@ -280,3 +280,23 @@ decision (codex-12 busy with topology). The explicit constant adapter
 (disposition_risk.clj:57 contract) is commissioned as a real, tested,
 config-nameable artifact. The find retirement + re-pin chain resumes after
 the representation ruling lands.
+
+## Item 25 — chain the four model-choice builds through codex-17 (claude-1 session)
+
+Joe, verbatim:
+
+> So at this point we have decisions for the four model choices, but we
+> don't necessarily have implementations for those choices. And because I'm
+> quite concerned about the clod usage being very low at this point, I
+> wonder if you could ask... Codex 17. To chain through the build of those
+> four things that they've just helped me make decisions about. They don't
+> need to bell you back with every single build. I think that they need to
+> validate The run readiness using Lean.
+
+Decode: codex-17 chains the implementations of the sitting's four
+dispositions WITHOUT per-build bellbacks (one final report); the chain ends
+by validating run readiness using Lean. Policy-depth wiring is already
+codex-10's in-flight packet and is excluded from the chain to avoid
+two-writer collision; learning's deliverable is the DESIGN per the
+corrected scope (not an implementation, since Joe withheld that ruling).
+Claude reviews the whole chain once at the end.
