@@ -16,7 +16,14 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
 
 - Channel C computes live: 13 ranges, KL risk in the fold
   (src/futon2/aif/preferences.clj, E-C-vector-live.md).
-- Ruled outcome C seeded, :folded? false (checks/ruled_outcome_c.clj:43-62).
+- Ruled outcome C seeded (src/futon2/aif/ruled_outcome_c.clj). CORRECTED
+  2026-09-09 (codex-12 briefing check): the fold is IMPLEMENTED and declared
+  :folded? true at the scorer-side sites (:62, :70; futon2 1480fb20 "F10: fold
+  disposition risk into EFE"), with two sites still :folded? false (:77, :84);
+  what remains is that the PRODUCTION CALLER does not enable or supply the
+  fold's inputs (the F10 rider). The earlier ":folded? false at
+  checks/ruled_outcome_c.clj:43-62" line was stale on both the flag and the
+  path.
 - Disposition kernel P(d|o) fitted from the cohort ledger — 1 of 12 outcome
   kinds with support (3/3 :grounded-change), so disposition-risk computes but
   is constant across policies (checks/disposition_kernel.clj; C591 §1-2).
@@ -71,3 +78,9 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
 - 2026-09-09: excursion opened; C-marker flipped to deferral-under-organized-
   discovery citing this file; U88 slice 1 (the pin) complete; F11 apply and
   U87 census dispatched to Codex in the automated lane.
+- 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
+  instruction; Joe works the excursion interactively in that session.
+  codex-12's briefing check surfaced three stale/omitted claims: the :folded?
+  correction above; the ruled_outcome_c path (src/futon2/aif/, not checks/);
+  and sec-c-vector.tex's bridge account omitting the §1b observation-domain
+  gap — the paper statement is being added.
