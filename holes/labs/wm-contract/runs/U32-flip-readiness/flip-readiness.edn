@@ -944,10 +944,10 @@
   :contract "mathlib4/DarkTower/WarMachine/holes-contract.json"},
  :whole-tree-lines
  {:contract-pin
-  {:verdict :green,
+  {:verdict :blocked,
    :contract-authority "fcd1261c303c2beca08a6812eba4a7ce2e83d722",
    :holes-last-content-change
-   "fcd1261c303c2beca08a6812eba4a7ce2e83d722",
+   "93ade5be78ab7bc79f3ac7a4ac3bb087edf5bc6e",
    :comparand
    "the last commit that touched DarkTower/WarMachine/Holes.lean, not mathlib HEAD (C175)",
    :comparand-read-from :live-git,
@@ -957,7 +957,8 @@
     :module-last-commit-sha
     "4bc55c5968bc4568610405660bdae4a98fcc06c5"},
    :receipt-timestamp "2026-09-03T22:40:16.060969+00:00",
-   :blocked-on nil},
+   :blocked-on
+   ["the contract is pinned at fcd1261c303c2beca08a6812eba4a7ce2e83d722 while Holes.lean last changed at 93ade5be78ab7bc79f3ac7a4ac3bb087edf5bc6e"]},
   :box2-holes
   {:open-hole-count 11,
    :flip-blocking-axis-declared? false,
@@ -1064,25 +1065,32 @@
    ["M-expressions-of-interest measures 0 of 6 criteria (reasons: no-producer)"]}},
  :verdicts
  {:fpi-posterior
-  {:verdict :blocked, :blocked-on [:box2-holes :figure5-partials]},
+  {:verdict :blocked,
+   :blocked-on [:contract-pin :box2-holes :figure5-partials]},
   :guide-gate
   {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+   :blocked-on
+   [:contract-pin :box2-holes :figure5-partials :flag-chain]},
   :mission-c
   {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :mission-gauges]},
+   :blocked-on
+   [:contract-pin :box2-holes :figure5-partials :mission-gauges]},
   :selection-law
   {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+   :blocked-on
+   [:contract-pin :box2-holes :figure5-partials :flag-chain]},
   :task-belief-ladder
   {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+   :blocked-on
+   [:contract-pin :box2-holes :figure5-partials :flag-chain]},
   :tau-variational
   {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+   :blocked-on
+   [:contract-pin :box2-holes :figure5-partials :flag-chain]},
   :zaif-u14e
   {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]}},
+   :blocked-on
+   [:contract-pin :box2-holes :figure5-partials :flag-chain]}},
  :nothing-is-flipped
  "This artifact performs no flip and writes no ruling. A green line is evidence a flip goes to Joe WITH; it is not permission.",
  :line-order
