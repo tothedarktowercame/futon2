@@ -258,3 +258,30 @@ Lisp check-parens are not applicable. No source or signed evidence changed.
 Initial searches tried the packet's implied `src/.../war_machine.clj` location
 and a singular strategic-policy filename; both were corrected to the actual
 paths above. Those failed lookups were not evidence of absent implementations.
+
+## Addendum 2026-09-09 (claude-1): phase-2 promotion REFUSED at requirement 5
+
+Joe ruled option (a) — promote the learned E (RULINGS-walkthrough-2026-09-09.md
+Item 21a). The implementation packet's requirement 5 (stop if the persisted
+counts do not distinguish event grains) fired, and the refusal is correct:
+
+- The persisted state is keyed by action type/target only; `fold-record`
+  reads `[:decision :action]` and discards grain
+  (src/futon2/aif/habit_prior.clj:26, :83).
+- The exclusion is DELIBERATE: war_machine.clj:6595's comment says the
+  scheduler-grain prior is not trained on strategic recommendations. The
+  learned E that exists is therefore a TACTICAL-grain prior by design.
+- codex-17's isolated probe folded otherwise-identical strategic and
+  tactical records into identical accepted persisted states (alpha 1.0, one
+  sample, same action key) — the aggregates cannot recover the separation.
+- strategic_policies.clj:124 requires grain-labelled events and excludes
+  tactical ones, so promotion from these aggregates alone would cross grains.
+
+No implementation, no commit, no blending (verified: pointers re-read by
+claude-1). The prerequisite is either a reviewed reconstruction of a
+strategic-grain E from grain-identifiable source events (with an explicit
+scheduler-action -> strategic-policy mapping), or forward accumulation of
+grain-labelled strategic counts, or retaining the fixture E_S until either
+exists. That choice returns to Joe; Item 21a's registry addendum to
+:habit-prior stays sequenced behind the in-flight five-row re-sign and will
+record whichever path he rules.
