@@ -1,0 +1,37 @@
+{:schema :c-realization/local-satisfaction-v1,
+ :source-pins
+ {"../futon3c/holes/specs/flight.witness.live-957a4836.edn"
+  "3dba6c9a9e98174a1cb081738adbc0c51d1e26c3084884d59e6d2858de56a359",
+  "../futon3c/scripts/flight_spec_verify.clj"
+  "065a81b381a436f0ca58f26c19dbf24ec31df3a8417564e545a9562595d30be5"},
+ :not-established
+ [:trained-prior :policy-grade-capability :cluster-A-complete],
+ :established :grounded-record-supports-admissible-calibration-pair,
+ :counterfactual
+ {:label :measurement-ground-removed,
+  :historical? false,
+  :result
+  {:absolute-error 0.03941189005722734,
+   :settled-window? true,
+   :scan-disagreement 7.553502170054571E-5,
+   :conforms? false,
+   :failed-invariants [:F1-term-or-sorry],
+   :measurement-ground-present? false,
+   :epsilon 0.005,
+   :calibration-admissibility :out,
+   :predicted -4.0790903614457825,
+   :realised -4.039678471388555}},
+ :preference-masses :not-assigned,
+ :probability-of-future-success :not-estimated,
+ :historical-witness
+ {:absolute-error 0.03941189005722734,
+  :settled-window? true,
+  :scan-disagreement 7.553502170054571E-5,
+  :conforms? true,
+  :failed-invariants [],
+  :measurement-ground-present? true,
+  :epsilon 0.005,
+  :calibration-admissibility :in,
+  :predicted -4.0790903614457825,
+  :realised -4.039678471388555},
+ :flight-id "live-957a4836-977a-4083-a243-e61cdd9862e3"}
