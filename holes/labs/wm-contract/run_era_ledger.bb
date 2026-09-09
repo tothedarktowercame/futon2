@@ -476,6 +476,14 @@
    everywhere but the self-test, which points it at a throwaway one."
   ([path opts] (deposit! path opts repo-root))
   ([path {:keys [run-id check-id verdict artifact author notes deposited-by at]} root]
+   ;; Guard evidence is NOT an era-ledger deposit. Capture the computed verdict
+   ;; before committed-artifact admission, including the first untracked pass.
+   ;; With no capture path, existing callers' outputs and writes are unchanged.
+   (when-let [capture (System/getenv "FUTON_WM_VERDICT_CAPTURE")]
+     (spit capture
+           (str (pr-str {:row/run-id run-id :row/check-id check-id
+                         :row/verdict verdict :row/artifact artifact}) "\n")
+           :append true))
    (let [state (artifact-commit-state root artifact)]
      (when-not (= :committed (:state state))
        (throw (ex-info (str "a ledger row may only point at a committed, unmodified file; this artifact is "

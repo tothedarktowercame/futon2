@@ -5,7 +5,7 @@
 #   bash holes/labs/wm-contract/wm_step.sh init  <work-dir> [agent]
 #   bash holes/labs/wm-contract/wm_step.sh reset <work-dir>
 #   bash holes/labs/wm-contract/wm_step.sh step  <work-dir> [label] [--allow-pin-drift]
-#   bash holes/labs/wm-contract/wm_step.sh accept <work-dir> <step-dir> [run-id]
+#   bash holes/labs/wm-contract/wm_step.sh accept <work-dir> <step-dir> [run-id] [--override-red <reason>]
 #   bash holes/labs/wm-contract/wm_step.sh observe <work-dir> <run-id> [--print]
 #   bash holes/labs/wm-contract/wm_step.sh determinism <work-dir>
 #   bash holes/labs/wm-contract/wm_step.sh compare <work-dir> <step-dir-a> <step-dir-b>
@@ -429,6 +429,8 @@ cmd_battery() {
   local date_str; date_str="$(basename "$(ls "$store"/wm-trace-*.edn | head -1)" .edn | sed 's/^wm-trace-//')"
   local battery="$store/battery.log"
   : > "$battery"
+  local -x FUTON_WM_VERDICT_CAPTURE="$store/check-verdicts.edn"
+  : > "$FUTON_WM_VERDICT_CAPTURE"
   # Lean identifier fragments: a slug that starts with a digit or carries a dash
   # is not a Lean name, so the run id cannot be the slug.
   local U49_SLUG RE7_SLUG
@@ -483,7 +485,17 @@ cmd_battery() {
 # accept: advance the pin, deposit the step as a run, run the check battery.
 # --------------------------------------------------------------------------
 cmd_accept() {
-  local work="$1" dir="$2" run_id="${3:-}"
+  local work="$1" dir="$2" run_id=""
+  local override_args=()
+  shift 2
+  if [ "$#" -gt 0 ] && [ "$1" != "--override-red" ]; then
+    run_id="$1"; shift
+  fi
+  if [ "$#" -gt 0 ]; then
+    [ "$#" -eq 2 ] && [ "$1" = "--override-red" ] || die "expected --override-red <reason>"
+    [[ "$2" =~ [^[:space:]] ]] || die "--override-red requires a nonblank reason"
+    override_args=("$2")
+  fi
   [ -f "$dir/step.edn" ] || die "no step.edn in $dir"
   # ACCEPT ADVANCES THE PIN FROM THE SANDBOX THAT STEP LEFT, and every `step`
   # resets the sandbox first, so only the most recent step is acceptable. The
@@ -542,8 +554,19 @@ EOF
   cmd_battery "$work" "$run_id"
 
   # ---- advance the pin ------------------------------------------------------
-  # A red row is a VERDICT, not a tool failure, so it does not block the
-  # advance; a step whose tick did not complete never got this far.
+  # Check captured verdicts before replacing any pin files. Ledger admission
+  # may refuse an untracked artifact; that does not erase its red verdict.
+  local accepted_pin
+  accepted_pin="$(bb -cp "$ROOT/src" -e '
+(require (quote [futon2.aif.step-acceptance :as acceptance]))
+(let [[pin-path capture ledger-path step-id run-id store reason] *command-line-args*
+      rows (concat (map clojure.edn/read-string (clojure.string/split-lines (slurp capture)))
+                   (:rows (clojure.edn/read-string (slurp ledger-path))))]
+  (prn (acceptance/advance-pin (clojure.edn/read-string (slurp pin-path))
+         rows step-id run-id store reason (str (java.time.Instant/now)))))' \
+    "$work/pin/pin.edn" "$store/check-verdicts.edn" "$LAB/run-era-ledger.edn" \
+    "$(basename "$dir")" "$run_id" "holes/labs/wm-contract/runs/$run_id" \
+    "${override_args[@]}")" || die "accept: pin unchanged; inspect battery verdicts"
   local gen
   gen="$(bb -e '(println (:pin/generation (clojure.edn/read-string (slurp (first *command-line-args*)))))' "$work/pin/pin.edn")"
   rm -rf "$work/pin/wm-trace"
@@ -551,15 +574,7 @@ EOF
   cp -p "$work/sandbox/wm-trace"/*.edn "$work/pin/wm-trace/"
   bb "$RECORDS" manifest "$work/pin/wm-trace" "$work/pin/manifest.edn" || die "manifest"
   bb "$RECORDS" world "$work/pin/world.edn" || true
-  bb -e '
-(let [[pin-path gen step-id run-id store] *command-line-args*
-      p (clojure.edn/read-string (slurp pin-path))
-      p (assoc p :pin/generation (inc (Long/parseLong gen))
-                 :pin/advanced-at (str (java.time.Instant/now))
-                 :pin/accepted-steps (conj (vec (:pin/accepted-steps p))
-                                           {:step step-id :run-id run-id :store store}))]
-  (spit pin-path (with-out-str (clojure.pprint/pprint p))))' \
-     "$work/pin/pin.edn" "$gen" "$(basename "$dir")" "$run_id" "holes/labs/wm-contract/runs/$run_id"
+  printf '%s\n' "$accepted_pin" > "$work/pin/pin.edn"
   say "accept: pin advanced to generation $((gen+1)); the accepted step's records are now the state the next step reads"
   cmd_reset "$work"
 }
@@ -611,6 +626,7 @@ cmd_status() {
 }
 
 # --------------------------------------------------------------------------
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
 CMD="${1:-}"; shift || true
 case "$CMD" in
   init) cmd_init "$@" ;;
@@ -626,3 +642,4 @@ case "$CMD" in
   status) cmd_status "$@" ;;
   *) sed -n '1,20p' "${BASH_SOURCE[0]}"; exit 2 ;;
 esac
+fi
