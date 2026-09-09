@@ -310,6 +310,19 @@ explicit. No build was undertaken under that earlier instruction.
   actual seed. Old era-1 receipt stays valid at its stated scope without
   claiming runtime correspondence. Successor certificate + two-axis
   witness healing sequenced by claude-1 in review.
+- 2026-09-09 (thirteenth product — the era-2 CERTIFICATE, commissioned by
+  Joe, REVIEWED): mathlib4 2af52ef97e (PreferenceRiskWitness: the concrete
+  twelve-outcome scalarKL theorem over the actual seed — same_twelve_support,
+  abstained_refuses exercising the named-zero refusal) + futon2 6356087c
+  (checks/preference_risk_receipt.clj generating Lean equality proofs
+  binding all 24 runtime preference/prediction masses to the witness; a
+  changed normalized seed fails the proofs; certificate sha 9899d633...).
+  Explicitly finite execution correspondence, NOT universal Clojure
+  refinement or a live run. claude-1 review by own runs: lake build 2708
+  green; receipt generator byte-identical twice at -cp .:src with
+  regenerated artifacts equal to committed; tests 2/4/0. The two-axis
+  fold_c_witness healing (risk-contribution axis per the separation ruling)
+  authorized next; then find retirement + re-pin.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
