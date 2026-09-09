@@ -76,6 +76,12 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
   the A7 repair (or with manual red-check inspection if A7 is declined);
   RE3 deposits (8 checks + RUN3); Joe's certificate acceptance (closes
   wmRunConformsToWiring for this run's scope).
+- **ARCHITECTURE REQUIREMENT (Joe, 2026-09-09, verbatim in
+  runs/E-pre-go-live-experiment-2026-09-09.md): future task selection
+  belongs to the WM OUTER LOOP** — today's e-pre-go-live task was picked by
+  hand as the exception; the outer-loop follow-on must emit a task
+  selection record (the brief's closing section states the required
+  contents). Queued as post-RUN4 orchestration work, not a run gate.
 - **Post-acceptance, does NOT gate the run**: the R5 certificate retake
   producer against an accepted run does not exist (CONVERGENCE.edn rows
   point at one simulation, :accepted-run? false) — new extraction work,
