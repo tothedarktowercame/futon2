@@ -399,6 +399,22 @@ explicit. No build was undertaken under that earlier instruction.
   loop requested. (codex-17's note that the publish count-pin blocker
   remains open is STALE — claude-1 re-pinned the band with cause and
   published green earlier this hour.)
+- 2026-09-09 (twentieth — :learning WITHHELD, investigation logged): Joe
+  explicitly withholds the learning ruling pending theory/PLoP/
+  implementation clarification (685c107c; investigation
+  runs/LEARNING-theory-history-runtime-2026-09-09.md). The reframe that
+  makes the withholding productive: Da Costa sections 8-9 license both
+  trial-boundary learning and BMR — the missing evidence is SUBSEQUENT
+  CONSUMPTION of the learned object, not an online/offline locus. A
+  genuine records conflict surfaced and recorded without adjudication
+  (PLoP Campaign S inter-tick claim vs VERIFY-r-nodes locating no retained
+  receipts). July GFN diversity-supplier ruling + slush preserved; edge
+  credit has no cascade-construction consumer today. A next-contract shape
+  proposed, not adopted (named learned object, admissible evidence,
+  versioned posterior, observed next-use, disconnected-consumer control).
+  Fresh pure tests 26/92/0. Registry carries the withholding; status
+  honestly stays observed-not-decided (still needs the decision, later,
+  with better evidence).
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
