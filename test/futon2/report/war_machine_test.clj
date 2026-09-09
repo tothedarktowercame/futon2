@@ -12,6 +12,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
+            [futon2.aif.ruled-outcome-c :as ruled]
             [futon2.aif.enumeration-completeness :as ec]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.mission-c :as mc]
@@ -965,6 +966,26 @@
     (is (= 1 (#'wm/consecutive-non-progress-count
               action [failed {:decision {:action {:type :no-op}}} failed]))
         "a targetless record (no-op/abstain) breaks the chain without throwing")))
+
+(deftest configured-fold-options-preserve-absence
+  (let [base {:time-pressure 0.25 :horizon-steps 3}
+        absent (#'wm/configured-fold-efe-opts base {})
+        calls (atom [])
+        config {:ruled-outcome-c-enabled? true
+                :seeded-c ruled/seeded-c
+                :disposition-kernel (fn [observation]
+                                      (swap! calls conj observation)
+                                      (assoc (zipmap (:support ruled/seeded-c)
+                                                    (repeat 0.0))
+                                             :agent-unavailable 1.0))}
+        supplied (#'wm/configured-fold-efe-opts base config)]
+    (is (= base absent))
+    (is (= config (select-keys supplied (keys config))))
+    (is (= (pr-str (efe/compute-efe {} {:type :no-op} base))
+           (pr-str (efe/compute-efe {} {:type :no-op} absent))))
+    (is (pos? (:G-ruled-outcome-c
+               (efe/compute-efe {} {:type :no-op} supplied))))
+    (is (= 1 (count @calls)))))
 
 (deftest live-star-map-efe-opts-adds-conservative-graph-blend
   (testing "live WM opts carry the graph and softened star-map weights when graph loads"

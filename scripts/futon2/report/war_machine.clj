@@ -5906,6 +5906,12 @@
                      (name (or (get-in verdict [:observation :reason])
                                :reason-unavailable)) ")")}))))
 
+(defn- configured-fold-efe-opts
+  "Pass explicitly supplied fold configuration through without adding defaults."
+  [base config]
+  (merge base (select-keys config [:ruled-outcome-c-enabled? :seeded-c
+                                  :disposition-kernel])))
+
 (defn judge
   "The war machine's inference step.
 
@@ -6332,7 +6338,8 @@
                                     :scan-id (or (:scan-id scan-data)
                                                  scan-id
                                                  "war-machine/judge")})
-        wm-efe-opts (live-star-map-efe-opts
+        wm-efe-opts (configured-fold-efe-opts
+                    (live-star-map-efe-opts
                      (live-gap-view-efe-opts
                       {:time-pressure wm-time-pressure
                        :horizon-steps wm-horizon-steps
@@ -6352,6 +6359,7 @@
                        :graph-feasibility-mode (arena-graph-feasibility-mode)
                        ;; M-action-vocabulary P2 dark — default :off
                        :move-class-intensity-mode (arena-move-class-intensity-mode)}))
+                    judge-opts)
         wm-ranked-domain-base (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
         route4 (route-tag route3 :R5 "futon2.aif.efe/rank-actions")
         wm-policy-exclusions (-> wm-ranked-domain-base meta :policy-support/excluded)
