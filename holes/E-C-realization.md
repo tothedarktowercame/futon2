@@ -297,6 +297,19 @@ explicit. No build was undertaken under that earlier instruction.
   pass-through). claude-1 review by own runs: adapter tests 6/46/0; lake
   build 2706 jobs green, axiom prints clean. FoldC witness reconciliation
   under the ruled separation + find retirement/re-pin remain outstanding.
+- 2026-09-09 (twelfth product — FoldC ERA distinction, codex-17 seat,
+  REVIEWED): Joe's follow-up ruling verbatim in the session file ("if you
+  can reconcile... great. Otherwise, we could mark it as a new era and just
+  point out that they're not directly comparable... worth looking at least
+  at an analogy"). The era-comparison report
+  (runs/FOLDC-era-comparison-2026-09-09.md, futon2 a55de165) delivers the
+  analogy table and the claim boundary: the old witness's 3/8/7 are
+  arbitrary fold-ALGEBRA illustration values (order-sensitivity is what
+  they certify), not seed probabilities or KL; the new grounded ln 2 is
+  proved arithmetic, not yet a twelve-outcome scalarKL evaluation over the
+  actual seed. Old era-1 receipt stays valid at its stated scope without
+  claiming runtime correspondence. Successor certificate + two-axis
+  witness healing sequenced by claude-1 in review.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
