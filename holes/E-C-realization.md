@@ -258,6 +258,24 @@ explicit. No build was undertaken under that earlier instruction.
   inputs are labelled synthetic in the artifacts. v1 is a component with a
   callable WM adapter; production Q calibration, PreferenceFamily/time, and
   the observation model remain open.
+- 2026-09-09 (sitting, tenth product — the Item-19 delegations, REVIEWED):
+  the 19a check-off (CHECKOFF-C-family-19a-2026-09-09.md) finds the family
+  ruling AGREES with the session products, with one actionable flag: the
+  :c-grain entry's older :statement/:not-claimed prose still read "proposal
+  awaiting Joe" against the new :status :decided — reconciled by claude-1
+  with a dated :reconciliation-2026-09-09 addendum (prose retained verbatim
+  per the never-silent rule). The 19b draft
+  (DRAFT-realized-outcome-recording-19b-2026-09-09.md) extends
+  :wm/realized-outcome-v1 with a marked :wm/realized-recording-v1 contract:
+  PAIRED channel/checkpoint capture (the §1b answer at the recording level
+  — both domains recorded, no bridge asserted), four-status observation
+  wrappers keeping absence / checked-empty / observed-zero distinct,
+  versioned preference readings, consumer admission, legacy records left
+  unmarked. ADOPTION IS PENDING — its own reviewed step before RUN4; §1b
+  stays open. Source pins C-19-source-pins-2026-09-09.json verified 18/18
+  by claude-1 against the recorded capture revision (3b38f438). Products
+  landed inside claude-1's e4a4ade5 commit (shared-index capture,
+  contents verified matching codex-12's intent).
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
