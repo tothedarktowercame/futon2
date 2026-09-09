@@ -446,6 +446,17 @@ explicit. No build was undertaken under that earlier instruction.
   persistent state and NEXT CONSUMER, distinguishing state inference /
   parameter learning / slower structure-proposal revision. Registry note
   appended (16519d17); :learning stays unruled.
+- 2026-09-09 (twenty-third — :policy-depth RULED): explicit anticipation 3
+  + cascade rollout 3 for RUN4, run-scoped fixed configuration (registry
+  ruling ba4539f8; verbatim in SESSION-model-choices). The sitting's source
+  correction is carried as an implementation obligation: the EFFECTIVE
+  rollout consumer is cascade_lane.clj:381 passing :depth 5 (the default 2
+  is not the effective value) — wiring must trace effective consumers,
+  make both horizons observable in the run record, account the
+  conditional-3/fallback-1 explicitly, and keep early endings truthful.
+  Bounded wiring/test packet routed to codex-10; config sheet carries
+  :policy-depth 3/3. Sitting tally: pi-zero-form ruled, hierarchy ruled
+  (scoped), learning withheld-with-program, policy-depth ruled.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
