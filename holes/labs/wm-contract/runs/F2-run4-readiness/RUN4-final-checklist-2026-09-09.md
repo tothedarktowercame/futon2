@@ -25,13 +25,13 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
    Proposed reading: both RUN4-named holes typed :run-gated with no non-run
    blockers counts as ready-to-run. On Joe's word, claude-1 edits the gate
    with a control.
-2. **The eight-before-any-run ruling resolved against current state**
+2. **PARTIALLY RESOLVED, JOE'S WORD REMAINS** — eight-before-any-run vs the four holes: dirichlet BOUND (9f45821c + existing 56b3c44b), C AMENDED at §2a (c75b7323, definition excursion-owned), find FORKED (applied carrier needs new conformance work, 0f74d9b4), organise FORKED (LA2 evidence a0219c3; :library-correspondence control red, two stale THEN citations). Joe rules: run with find/organise open, or commission the new work first. WAS:
    (EPIC-run-era.md:991, Joe 2026-09-06: Box 6's substantive holes gate the
    first run). The current closability audit types 4 holes pre-run-closable.
    Either those close pre-run (lane work, each its own reviewed slice) or
    Joe rules the current state satisfies his gate. This is the one item
    where "anything outstanding from that first check" has real content.
-3. **F10 fold on/off for RUN4** (the seeded disposition fold; caller opts
+3. **MECHANICALLY DONE (e65b996a, reviewed)** — fold pass-through wired, no default flip; the on/off itself is settled ON by Item 23's reading. WAS: (the seeded disposition fold; caller opts
    :ruled-outcome-c-enabled?/:seeded-c/:disposition-kernel). Item 19a fixed
    C_mis flag-gated; the FOLD flag is a separate decision, still open.
 4. **Adopt the 19b recording contract** (:wm/realized-recording-v1 draft,
