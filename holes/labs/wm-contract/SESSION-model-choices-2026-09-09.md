@@ -51,3 +51,13 @@ src/futon2/aif/rollout.clj:474-479 explicitly describes flat temporal rollout.
 No registry, code, run configuration or live process changes in this record.
 Learning and policy depth remain pending discussion; the earlier pending list
 above records the state before this ruling.
+
+## 3. Learning: no ruling; theory and implementation investigation requested
+
+Joe, verbatim:
+
+> So, here I think I need to ask some more questions going back to the... Work we did on the PLOP paper because we'd actually thought a lot about learning. We tried something with G-Flow Nets. We had a slush. Presumably, we're going to update the cascades with some evidence based on how they're used. So, I'm not 100% confident with keeping structure learning offline. Even if it's in a later phase of the system. In particular, we're trying to make a... A.I.F. compliant model. And if we're saying, well, for run four, we're just not going to do this essential part of the model. Then I'm not totally comfortable with that, if AIF is assuming that we're doing learning in an online fashion. So... I'm not prepared yet to say one way or another about this until I know more about what AIF itself is asking of us here, firstly, until I think about what we had already done in the PLOP 2026 era, secondly, because I wouldn't want to be doing something worse than that. And I guess whether it's online or offline, I'd like a bit more specificity about what exactly learning is going to be looking like in this implementation. And how that's complying with the AIF model.
+
+No adoption of offline-only learning is inferred. The decision remains open
+because Joe requests the theory, PLOP-era evidence and concrete update/consumer
+account before deciding. See runs/LEARNING-theory-history-runtime-2026-09-09.md.
