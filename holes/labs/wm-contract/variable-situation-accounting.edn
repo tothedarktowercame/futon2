@@ -1,9 +1,9 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-09-08",
  :authority
- {:contract-git-sha "fcd1261c303c2beca08a6812eba4a7ce2e83d722",
+ {:contract-git-sha "bf79f988b3131701ff9ed257d371cc45dd5eea5b",
   :contract-sha256
-  "444b9493e3a9b603b8027027b479c807eb1d377fab18e3f9f10859349b3b47ce",
+  "333b31739f984d2a291da1ce0551ae219fcc1aa5fb4af4e5a414910b8f69bde9",
   :glossary-sha256
   "d7ec5b68d1049a86d7a6c3c71eb61f50eb0e351a1d2d212affa6e5636032260f",
   :witness-registry-sha256
@@ -2471,28 +2471,30 @@
    :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §2a′"}
-  {:rung :named,
+  {:rung :type-transcribed,
    :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
    :row-source :contract-declaration,
    :name "find",
    :rung-blocked-by
-   {:rung :type-transcribed,
+   {:rung :formula-transcribed,
     :why
-    "the declaration is a contract HOLE: the proposition is stated, not discharged, so nothing is transcribed by its presence"},
-   :basis
-   "A standing implementation refusal; an owner ruling closes it, no record can.",
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
      :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8158",
      :evidence :contract-manifest-entry,
-     :why "the declaration is named in the contract manifest"}],
-   :readiness :not-ready,
-   :content-status :open-hole,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:307",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
    :carried-by [:F11],
    :area :demo,
-   :closability :pre-run-closable,
-   :owner "P-validated-R5 §3e find"}
+   :owner
+   "P-validated-R5 §3e find; Item 20; Item 23 and RUN4 checklist A2 commission"}
   {:rung :formula-transcribed,
    :pointer-status :resolves,
    :pointer-detail {:resolution :stable-problem-or-record-owner},
@@ -3349,8 +3351,8 @@
    "sec-glossary.tex paragraph:A shared experimental substrate"}],
  :counts
  {:rung
-  {:named 19,
-   :type-transcribed 61,
+  {:named 18,
+   :type-transcribed 62,
    :formula-transcribed 53,
    :witnessed 0,
    :constructed 0,
@@ -3360,13 +3362,13 @@
   :row-source {:contract-declaration 124, :glossary-paragraph 9},
   :content
   {:framing 1,
-   :open-hole 11,
+   :open-hole 10,
    :proven-against-pinned-source 15,
-   :record-negative-space 61,
+   :record-negative-space 62,
    :record-with-witness 45},
   :declaration-rung
-  {:named 10,
-   :type-transcribed 61,
+  {:named 9,
+   :type-transcribed 62,
    :formula-transcribed 53,
    :witnessed 0,
    :constructed 0,
@@ -3376,5 +3378,5 @@
   :rows 133,
   :glossary-content {:framing 1, :open-hole 1, :record-with-witness 7},
   :pointer {:resolves 133},
-  :closability {:pre-run-closable 4, :run-gated 7},
-  :declaration-closability {:pre-run-closable 4, :run-gated 6}}}
+  :closability {:pre-run-closable 3, :run-gated 7},
+  :declaration-closability {:pre-run-closable 3, :run-gated 6}}}

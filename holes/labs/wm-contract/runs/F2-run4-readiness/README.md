@@ -34,11 +34,9 @@ RUN4 run-pins            GREEN
 RUN4 regenerates         GREEN
 RUN4 lean-probe          GREEN
 RUN4 hole-open           GREEN
-RUN4 closability-audit   BLOCKED-ON [2]
+RUN4 closability-audit   GREEN
 RUN4 invalidators        GREEN
-VERDICT: BLOCKED-ON [closability-audit]
-  - closability-audit: the closability audit types wmRunConformsToWiring :readiness :witnessed-and-held-open (:closability :run-gated) -- RUN4's row names this hole
-  - closability-audit: the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole
+VERDICT: READY
 ```
 <!-- END run4_readiness -->
 

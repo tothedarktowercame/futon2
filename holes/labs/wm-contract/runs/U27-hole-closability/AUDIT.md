@@ -1,11 +1,10 @@
 # U27 hole-closability audit — refreshed
 
-As of `2026-09-08`; contract `fcd1261c303c2beca08a6812eba4a7ce2e83d722`.
+As of `2026-09-08`; contract `bf79f988b3131701ff9ed257d371cc45dd5eea5b`.
 
-This report is generated from `variable-situation-accounting.edn`; the EDN artifact is authoritative. Open rows: 11 (10 contract declarations, 1 glossary-side).
+This report is generated from `variable-situation-accounting.edn`; the EDN artifact is authoritative. Open rows: 10 (9 contract declarations, 1 glossary-side).
 
 - `C`: `:pre-run-closable`, `:not-ready`; The DESIGN-c-vector.md §5 split (C_int / C_mis) is an owner amendment (P-validated-R5 §2a); nothing in it needs a tick. The refusal's ground still holds as measured: U12 found one risk_mis value across all 133 mission actions and all three 2026-09-02 records :absent.
-- `find`: `:pre-run-closable`, `:not-ready`; A standing implementation refusal; an owner ruling closes it, no record can.
 - `organise`: `:pre-run-closable`, `:not-ready`; The declaration names its own gate: whether the refusal weakens to definable is LA2's to decide from a running policy-grain rule. That running is checks/playout_snatch.clj, not a tick.
 - `preferenceStackLiveRecorded`: `:run-gated`, `:not-ready`; The claim quantifies over running instances. The C_int half is on all three 2026-09-02 records; mission-c-readback occurs zero times in wm-trace-2026-09-02.edn. Whether the C_mis half would CLOSE it is unsettled: the Lean docstring says PERMANENT (C114) and DESIGN-c-vector.md door 7 says close-by-record.
 - `wmRunsOnce`: `:run-gated`, `:witnessed-and-held-open`; Run-gated here does NOT mean awaiting a run. The witness passes; the hole stays open because the Lean proposition is world-level and C114 declined to narrow it to a pinned receipt.

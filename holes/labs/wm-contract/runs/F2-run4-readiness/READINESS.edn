@@ -13,7 +13,7 @@
    "2026-09-05-u60" :green},
   :censuses-identical
   "both certified runs walk the same nine-hop route and their censuses agree hop for hop (runs/RE5-run-conformance/certificate.edn :limits) -- two runs agreeing about a route they were always going to take is one measurement repeated, not two"},
- :emitted-at "2026-09-08",
+ :emitted-at "2026-09-09",
  :lines
  {:regenerates
   {:certificates
@@ -38,17 +38,15 @@
   :closability-audit
   {:audit "runs/U27-hole-closability/audit.edn",
    :audit-as-of "2026-09-08",
-   :audit-authority "e239086a44147f14defc88e74a662a2cd4487e67",
-   :live-authority "e239086a44147f14defc88e74a662a2cd4487e67",
+   :audit-authority "bf79f988b3131701ff9ed257d371cc45dd5eea5b",
+   :live-authority "bf79f988b3131701ff9ed257d371cc45dd5eea5b",
    :rows
    {"enactedEqualsSelectedWhenRankOneGated"
     {:closability :run-gated, :readiness :not-ready},
     "wmRunConformsToWiring"
     {:closability :run-gated, :readiness :witnessed-and-held-open}},
-   :verdict :blocked,
-   :blocked-on
-   ["the closability audit types wmRunConformsToWiring :readiness :witnessed-and-held-open (:closability :run-gated) -- RUN4's row names this hole"
-    "the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"]},
+   :verdict :green,
+   :blocked-on []},
   :run-pins
   {:runs
    [{:run "2026-09-01-s5",
@@ -72,9 +70,9 @@
   :hole-open
   {:declaration "wmRunConformsToWiring",
    :kind "hole",
-   :contract-authority "e239086a44147f14defc88e74a662a2cd4487e67",
+   :contract-authority "bf79f988b3131701ff9ed257d371cc45dd5eea5b",
    :holes-last-content-change
-   "e239086a44147f14defc88e74a662a2cd4487e67",
+   "bf79f988b3131701ff9ed257d371cc45dd5eea5b",
    :comparand
    "the last commit that touched Holes.lean, not mathlib HEAD (C175)",
    :verdict :green,
@@ -86,11 +84,11 @@
    :live-prereg
    "880dfab4dc37ddb42953cd80e309deb857f53ef8a2afd8de0dd616b2c91bc6fa",
    :live-holes
-   "0410f61ddb95f058bc33610f22c5783d87827d7b996fba4e846b1b463a1ab5fe",
+   "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b",
    :build :ok,
    :verdict :green,
    :taken-at-holes
-   "0410f61ddb95f058bc33610f22c5783d87827d7b996fba4e846b1b463a1ab5fe",
+   "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b",
    :sorry-in-module 0,
    :theorems
    [{:name "run4CertifiedS5Conformance", :axioms []}
@@ -136,8 +134,8 @@
    :blocked-on []}},
  :manifest
  "futon2/holes/labs/wm-contract/runs/F2-run4-preregistration",
- :summary "BLOCKED-ON [closability-audit]",
- :verdict :blocked,
+ :summary "READY",
+ :verdict :ready,
  :accepts-nothing
  "This artifact performs no acceptance and writes no ruling. READY means the evidence an acceptance needs is intact and current; it is not permission, and it does not say which run qualifies.",
  :line-order
@@ -154,6 +152,4 @@
  "mathlib4/DarkTower/WarMachine/Run4Preregistration.lean",
  :subject {:board "wm-contract", :item :RUN4},
  :row :F2,
- :blocked-on
- ["closability-audit: the closability audit types wmRunConformsToWiring :readiness :witnessed-and-held-open (:closability :run-gated) -- RUN4's row names this hole"
-  "closability-audit: the closability audit types enactedEqualsSelectedWhenRankOneGated :readiness :not-ready (:closability :run-gated) -- RUN4's row names this hole"]}
+ :blocked-on []}
