@@ -1,0 +1,11 @@
+{"../futon0/holes/missions/M-capability-star-map.graph.edn" "c8ddf2f06da43f3a186ec6dbedef69c9c7cbaec2776531383d5ab06ce33ff2a4"
+ "../futon0/holes/missions/M-capability-star-map.md" "e10feaa7dbf6e07df4988e9f34c546f71e1aefd2a2b81e7f60032cc439947de0"
+ "../futon4/holes/missions/M-self-representing-stack.md" "7c992576165826be98457560478d4429288d60b42b68fc22b845cbc67209aa04"
+ "../futon4/holes/missions/M-three-column-stack.md" "a98496e185a8b12f992b423e771070c24cdccc8efce037786f745bbcd7cedd20"
+ "../futon2/holes/M-aif-head.md" "b9d7da93cb8c6a57477c8aed5531aa3f8f87de91af9c9f1d960f5b409da1fc87"
+ "../futon2/src/futon2/aif/efe.clj" "dbb8015d77c294d90704d1a96b9c23a6e6398e54d2ac6e516cda00c516fad132"
+ "../futon3c/src/futon3c/peripheral/mission_shapes.clj" "8b5803a7ba0d4e48af80375a56c38f5606f52c44227da5e48afb20381f942c20"
+ "../futon2/src/futon2/aif/epistemic_value.clj" "0df62893adfdce64189c99724a4e1fb80ff0d0a07f84c74a5acf780cc370b690"
+ "../futon2/test/futon2/aif/epistemic_value_test.clj" "92f3dab1b69644742a6d75ac49ec2d62b3247599632dc23284c6c57d4f07bbf4"
+ "../futon2/holes/missions/M-aif-policy-conditioned-eig.md" "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478"
+ "../futon4/holes/mission-lifecycle.md" "5e93504d9f7b6f44ab5fcc7eb53f1cdb1a6fa2894284cbe314b8b316bac58827"}

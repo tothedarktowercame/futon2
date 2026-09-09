@@ -1,0 +1,40 @@
+{:schema :c-realization/family-local-calculations-v1,
+ :B
+ {:evidence-kind :recorded-capability-graph,
+  :mission "M-self-representing-stack",
+  :requires [:agency :evidence-persistence],
+  :recorded-applicable true,
+  :control
+  {:historical? false,
+   :change :evidence-persistence-held,
+   :applicable false},
+  :does-not-certify :live-cross-store-navigation},
+ :C
+ {:evidence-kind :synthetic-semantic-probe-of-existing-code,
+  :mission "M-aif-head",
+  :inputs
+  {:propose
+   {:predicted-artifacts ["report"],
+    :success-criteria ["feedback delivered"]},
+   :delivered
+   {:artifacts ["report"],
+    :validation-artifacts ["feedback delivered"]},
+   :denied
+   {:artifacts ["report"],
+    :validation-artifacts ["feedback delivered: false"]},
+   :absent {:artifacts [], :validation-artifacts []}},
+  :divergence
+  {:delivered 0.0,
+   :explicit-denial 0.0,
+   :absent 1.0,
+   :no-declared-prediction nil},
+  :finding :substring-match-does-not-establish-feedback-satisfaction,
+  :human-learning :not-established},
+ :D
+ {:evidence-kind :existing-reduction-fixtures-recomputed,
+  :mission "M-aif-policy-conditioned-eig",
+  :gains-nats {:inspect 0.6931471805599453, :wait 0.0},
+  :incoherent-posterior-refused? true,
+  :does-not-certify :live-policy-observation-model},
+ :preference-masses :not-assigned,
+ :cluster-completion :not-inferred}

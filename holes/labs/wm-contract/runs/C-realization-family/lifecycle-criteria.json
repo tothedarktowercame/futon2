@@ -1,0 +1,81 @@
+{
+  "source": "futon4/holes/mission-lifecycle.md",
+  "sha256": "5e93504d9f7b6f44ab5fcc7eb53f1cdb1a6fa2894284cbe314b8b316bac58827",
+  "optional_phase": "HEAD",
+  "entries": [
+    {
+      "phase": "HEAD (optional bootstrap before IDENTIFY)",
+      "source_lines": [
+        45,
+        48
+      ],
+      "verbatim": "**Exit criterion:** The operator recognises the `HEAD` as faithful to\nthe mission's live shape, and the carried-forward tensions are named\nwell enough that IDENTIFY can proceed without pretending the unknowns\nhave already been settled.",
+      "assessment": "requirement-extracted-not-mission-satisfaction-asserted"
+    },
+    {
+      "phase": "1. IDENTIFY",
+      "source_lines": [
+        68,
+        69
+      ],
+      "verbatim": "**Exit criterion:** A human has read the proposal and agrees the gap is real\nand the scope is right.",
+      "assessment": "requirement-extracted-not-mission-satisfaction-asserted"
+    },
+    {
+      "phase": "2. MAP",
+      "source_lines": [
+        113,
+        114
+      ],
+      "verbatim": "**Exit criterion:** Every MAP question has a concrete answer. The \"ready vs\nmissing\" table is complete.",
+      "assessment": "requirement-extracted-not-mission-satisfaction-asserted"
+    },
+    {
+      "phase": "3. DERIVE",
+      "source_lines": [
+        153,
+        154
+      ],
+      "verbatim": "**Exit criterion:** Someone could implement the mission from the DERIVE\nsection alone, without needing to ask clarifying questions.",
+      "assessment": "requirement-extracted-not-mission-satisfaction-asserted"
+    },
+    {
+      "phase": "4. ARGUE",
+      "source_lines": [
+        191,
+        193
+      ],
+      "verbatim": "**Exit criterion:** The design feels *inevitable* given the constraints,\nnot merely *possible*. And someone outside the project can understand\nwhat it does and why from the plain-language argument alone.",
+      "assessment": "requirement-extracted-not-mission-satisfaction-asserted"
+    },
+    {
+      "phase": "5. VERIFY",
+      "source_lines": [
+        231,
+        233
+      ],
+      "verbatim": "**Exit criterion:** The design has been checked against available structural\nconstraints. Any risks that can't be verified statically have been spiked.\nDERIVE revisions (if any) are recorded.",
+      "assessment": "requirement-extracted-not-mission-satisfaction-asserted"
+    },
+    {
+      "phase": "6. INSTANTIATE",
+      "source_lines": [
+        266,
+        268
+      ],
+      "verbatim": "**Exit criterion:** Every completion criterion has a concrete demonstration.\nA new person (human or agent) could reproduce the demo from the mission doc\nwithout help.",
+      "assessment": "requirement-extracted-not-mission-satisfaction-asserted"
+    },
+    {
+      "phase": "7. DOCUMENT",
+      "source_lines": [
+        293,
+        295
+      ],
+      "verbatim": "**Exit criterion:** Someone browsing the docbook can discover what this mission\nbuilt without knowing the mission exists. The documentation is findable via\nnavigation, not just via grep.",
+      "assessment": "requirement-extracted-not-mission-satisfaction-asserted"
+    }
+  ],
+  "time_index_mapping": "not-declared",
+  "preference_masses": "not-assigned"
+}
