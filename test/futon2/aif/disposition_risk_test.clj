@@ -76,3 +76,40 @@
                (- (:controller-score with-layer)
                   (:controller-score without-layer))))
            1.0e-12))))
+
+(def constant-artifact
+  {:schema :wm/disposition-kernel-v1
+   :source {:ledger "synthetic-shaped-like-cohort" :sha256 "test-fixture"}
+   :conditioning {:grain :checkpoint-trajectory}
+   :support (vec (sort (:support ruled/seeded-c)))
+   :states [{:observation-summary {:checkpoint-trajectory [:selected :closed]}
+             :sample-size 2
+             :probability (assoc (zipmap (:support ruled/seeded-c) (repeat 0))
+                                 :grounded-change 1)}]})
+
+(deftest constant-checkpoint-adapter-contract
+  (let [adapter (disposition/constant-checkpoint-kernel constant-artifact)]
+    (is (= (adapter {:mission-health 0.0}) (adapter {:mission-health 1.0})))
+    (is (= 12 (count (adapter {}))))
+    (is (= :open (:observation-model-bridge (meta adapter))))
+    (is (= (:source constant-artifact) (:source (meta adapter))))
+    (is (< (Math/abs (- (Math/log 2.0)
+                       (disposition/disposition-risk {} adapter ruled/seeded-c))) 1.0e-12))
+    (is (= (set (keys (adapter {}))) (:support ruled/seeded-c)))))
+
+(deftest constant-checkpoint-adapter-refusals
+  (doseq [artifact [(assoc constant-artifact :support [])
+                    (assoc constant-artifact :states [])
+                    (assoc constant-artifact :support [:grounded-change :grounded-change])
+                    (assoc-in constant-artifact [:states 0 :probability :grounded-change] -1)
+                    (update-in constant-artifact [:states 0 :probability] dissoc :no-selection)
+                    (assoc-in constant-artifact [:states 0 :sample-size] 0)
+                    (update constant-artifact :states conj
+                            {:sample-size 1
+                             :probability (assoc (zipmap (:support ruled/seeded-c) (repeat 0))
+                                                 :agent-unavailable 1)})]]
+    (try (disposition/constant-checkpoint-kernel artifact)
+         (is false "invalid or nonconstant fit accepted")
+         (catch clojure.lang.ExceptionInfo e
+           (is (true? (:refused? (ex-data e))))
+           (is (keyword? (:reason (ex-data e))))))))

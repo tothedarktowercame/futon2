@@ -12,6 +12,8 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
+            [futon2.aif.disposition-risk :as disposition]
+            [checks.disposition-kernel :as checkpoint-kernel]
             [futon2.aif.ruled-outcome-c :as ruled]
             [futon2.aif.enumeration-completeness :as ec]
             [futon2.aif.free-energy :as free-energy]
@@ -2732,3 +2734,22 @@
           "a typed action with no target is a decision the corpus records and is counted; the ladder's SCOPE rule is what excludes it")
       (is (nil? (get idx [:advance-mission "M-c"]))
           "and a file that is not a daily trace is not corpus"))))
+
+(deftest constant-checkpoint-adapter-through-a3-scorer
+  (let [artifact (checkpoint-kernel/fit-kernel
+                  {:attempts [{:closed? true :checkpoints [:selected :closed]
+                               :outcome :grounded-change}]}
+                  "synthetic-cohort" "test-fixture")
+        adapter (disposition/constant-checkpoint-kernel artifact)
+        base {:risk-mode :hinge :ambiguity-mode :variance-sum}
+        absent (#'wm/configured-fold-efe-opts base {})
+        enabled (#'wm/configured-fold-efe-opts
+                 base {:ruled-outcome-c-enabled? true :seeded-c ruled/seeded-c
+                       :disposition-kernel adapter})
+        action {:type :no-op}
+        before (efe/compute-efe {} action base)
+        after (efe/compute-efe {} action enabled)]
+    (is (= (pr-str before) (pr-str (efe/compute-efe {} action absent))))
+    (is (< (Math/abs (- (Math/log 2.0) (:G-ruled-outcome-c after))) 1.0e-12))
+    (is (< (Math/abs (- (Math/log 2.0)
+                       (- (:controller-score after) (:controller-score before)))) 1.0e-12))))

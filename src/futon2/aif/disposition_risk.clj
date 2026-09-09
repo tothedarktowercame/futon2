@@ -56,6 +56,48 @@
       (refuse! :disposition-mass-not-normalised
                {:distribution label :total total}))))
 
+(defn constant-checkpoint-kernel
+  "Explicit constant adapter for checks/disposition_kernel.clj's fitted
+   :wm/disposition-kernel-v1 checkpoint-trajectory artifact (Item 24,
+   RULINGS-walkthrough-2026-09-09.md). Accept only nonempty valid support and
+   sampled rows that all give the SAME distribution. Preserve every named zero;
+   never average, smooth, or select one conditioning row.
+
+   The returned function accepts predicted channel observations but ignores them.
+   For the recorded grounded-change-only cohort and ruled_outcome_c.clj's seed,
+   disposition-risk yields ln 2. This is NOT a fitted channel observation model:
+   holes/E-C-realization.md §1b remains open. Metadata retains the source,
+   checkpoint conditioning, support and explicit constant-adapter limitation."
+  [artifact]
+  (let [{:keys [support states source conditioning]} artifact]
+    (when-not (and (= :wm/disposition-kernel-v1 (:schema artifact))
+                   (= :checkpoint-trajectory (:grain conditioning))
+                   (map? source) (string? (:ledger source))
+                   (string? (:sha256 source))
+                   (vector? support) (seq support)
+                   (every? keyword? support)
+                   (= (count support) (count (set support)))
+                   (vector? states) (seq states))
+      (refuse! :invalid-constant-kernel-artifact
+               {:field :disposition-kernel :schema (:schema artifact)}))
+    (doseq [row states]
+      (when-not (and (map? row) (map? (:probability row))
+                     (integer? (:sample-size row)) (pos? (:sample-size row)))
+        (refuse! :invalid-constant-kernel-row {:row row}))
+      (require-distribution! :checkpoint-kernel support (:probability row)))
+    (let [distributions (distinct (map :probability states))]
+      (when-not (= 1 (count distributions))
+        (refuse! :nonconstant-checkpoint-kernel
+                 {:distinct-distributions (count distributions)
+                  :reason-detail :observation-model-required}))
+      (let [mass (first distributions)]
+        (with-meta (fn [_predicted-channel-observations] mass)
+          {:adapter :constant-checkpoint-kernel/v1
+           :source source :conditioning conditioning :support support
+           :sample-size (reduce + (map :sample-size states))
+           :ignores-channel-observations? true
+           :observation-model-bridge :open})))))
+
 (defn predict-dispositions
   "Apply P(d|o) to the canonical observation prediction for one policy.
 
