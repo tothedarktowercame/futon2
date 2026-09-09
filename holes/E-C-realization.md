@@ -340,6 +340,18 @@ explicit. No build was undertaken under that earlier instruction.
   (author-not-reviewer per the F12 ownership map). This is disposition
   (f)'s naturalistic-exemplar proviso in motion — organise's staged
   closure path.
+- 2026-09-09 (fifteenth product — independent interpretation review,
+  codex-10): futon3 b63a4b6. Four of five apparatus interpretations AGREE
+  (authority, evidence-disposition, replay, observed-running-as-supporting);
+  pin-moves-with-the-population DISAGREES — the proposed multi-commit
+  allowance conflates the THEN's two timing obligations (same-commit
+  population re-pins vs same-slice source re-attestation) and would weaken
+  the same-commit requirement if applied to re-pins. All five fingerprints,
+  15 clause spans, 13 pointers verified. Three prose-derived dangling
+  tokens fenced (S1/S2, the T-apm note path, a1-vs-a2/a3) — lexical shape,
+  not authored relations. Revision routed to codex-17 (author fixes against
+  the reviewer's note; no ruling needed); execution of the first slice
+  proceeds after the dated addendum + recorded fence.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
