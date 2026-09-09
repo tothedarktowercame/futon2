@@ -174,6 +174,17 @@ explicit. No build is undertaken by this sitting's current instruction.
   claude-1 (runs from two cwds byte-identical to committed result; drift
   reporter correctly names the concurrently-edited paper files). Evidence;
   no ruled masses, no paper edit from the sitting.
+- 2026-09-09 (sitting, sixth product — DERIVE written, ARGUE made): Joe ruled
+  the pilots constitute DERIVE and directed the lifecycle-position section
+  above; design + argument at
+  holes/labs/wm-contract/DERIVE-ARGUE-C-realization-2026-09-09.md (futon2
+  b75cd3bf, documentation-only; source digests in the sibling JSON, 11/11
+  verified by claude-1). Reviewed by claude-1: the calculation contract's
+  algebra and licensed/unlicensed block check out; the MAP's endpoint-clamp
+  seam is now an upgrade constraint (hard support must refuse, never clamp);
+  the ARGUE's @why lines are applications of recorded rulings, not library
+  declarations. ARGUE acceptance and VERIFY are not claimed; no build, per
+  Joe's explicit instruction.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
