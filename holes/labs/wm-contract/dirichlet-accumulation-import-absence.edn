@@ -22,7 +22,7 @@
   :production-census-pins
   [{:path "scripts/futon2/report/war_machine.clj",
     :sha256
-    "10af3d218bca645c8ae3296cac8116db9db25bea3959ff9b01f812f009c72de0"}
+    "b072bd7ac1d8191792468df7f266062e29400eda89a810afd827a662a329fcdb"}
    {:path "src/ants/aif/affect.clj",
     :sha256
     "55c9d60f6aa7e9bbc377841499676b02134acaa1d27277ad9763e8fa1ba545b2"}
@@ -179,9 +179,12 @@
    {:path "src/futon2/aif/delivery_qa.clj",
     :sha256
     "27ed0cbb1ca309513a7f685c72954294ff7118fdcf1667f4d66df29f87eb7b50"}
+   {:path "src/futon2/aif/disposition_risk.clj",
+    :sha256
+    "629071fbc47e6ac9ba49095dc2547393481c8af98969f7988464d9190bf2bf92"}
    {:path "src/futon2/aif/efe.clj",
     :sha256
-    "138c47f62715facfb7c156f53acd98c94a643d5d7f8a98410d81ebfc4e75c5dc"}
+    "032551f63d810509a14e45780b87d33cfb54ea0726e9df7c53338141aa220f02"}
    {:path "src/futon2/aif/enact.clj",
     :sha256
     "13801b26cb67ae73c1a070a08e7bb3c2d257e4eeeab3cb6bb847e90c8a6f0c3e"}
@@ -235,7 +238,7 @@
     "b4ca4e4f101f2735ebf5ce93640ed452859a9f9b05af71713c297efc84b600ea"}
    {:path "src/futon2/aif/full_loop_runner.clj",
     :sha256
-    "2878d23f633306c08c0d17ffcdcd071a5ec400bb6b91144938a14499ecb92d0d"}
+    "6553244a68833871a8ce0e0058fea6b10b7c5f7424294fd7aab3ed12586dd2ad"}
    {:path "src/futon2/aif/habit_prior.clj",
     :sha256
     "23f631d82dbbace7f8b854b243ef31ebed11fabfe55e24b41020857b11007f9f"}
@@ -308,6 +311,12 @@
    {:path "src/futon2/aif/precision.clj",
     :sha256
     "f365e6f518c6feaf72cd42074dbaa9eea59c8457dfdd780e256bd5275f207fed"}
+   {:path "src/futon2/aif/preference_discovery.clj",
+    :sha256
+    "901fa0862395508e0295424ad3a014e892b2a419fae622915c9cd872fd76ba13"}
+   {:path "src/futon2/aif/preference_module.clj",
+    :sha256
+    "992105412b34b4a4235cf7554c4667ec8f833af0327a19c7c043403dc47c8291"}
    {:path "src/futon2/aif/preferences.clj",
     :sha256
     "f1a0b5c0a05a3d20bc09a03b03de0af9798cad9f0626bc78b83f140c78417023"}
@@ -325,7 +334,7 @@
     "6ae0ba5076748af45e01c11ad0db76be609557ebdad59ea08f7e439143ea05c3"}
    {:path "src/futon2/aif/ruled_outcome_c.clj",
     :sha256
-    "6516e41a08368c34a19ce3654ef7cd7db5089a323e7cc96da0ed062ccf2439e6"}
+    "c519c4caf5715cc4108ff3aab7be52560423b17aa57b5dff1df97e4d4635d2e0"}
    {:path "src/futon2/aif/selection_authoring_coupling.clj",
     :sha256
     "e3cf1bc7e8180fd479cd3a4389eda777d00446e5ae551b4aaaf9b5f032336859"}
@@ -338,6 +347,9 @@
    {:path "src/futon2/aif/sorry_registry.clj",
     :sha256
     "bc32403b7bee2360debcb2f435e76375cba51e1895e47fb5b57f041bf1e03696"}
+   {:path "src/futon2/aif/strategic_habit.clj",
+    :sha256
+    "b73b9c1f637a24bd5fabe4401c79a7e9a717455938a30d475cee288dfa97bd2f"}
    {:path "src/futon2/aif/substrate.clj",
     :sha256
     "f3c1c2698f5010b318b81ef8e98a737e771822fa4dfc8579c77574efc65ffb2e"}
@@ -352,7 +364,7 @@
     "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"}
    {:path "src/futon2/aif/trace.clj",
     :sha256
-    "9e39ae1cbe550a3789e3215baa5ab1ac4e76988587f21c761280f6f1611b9f63"}
+    "4652c5d53a3e401808b3ed839379deaaead4831a3ed9c5fc508c14b7d67222db"}
    {:path "src/futon2/aif/tripwire.clj",
     :sha256
     "c2fee9a56bebdefd34c50096dd8a59940694eada0f36987a6b97f4318881f15e"}
@@ -386,7 +398,7 @@
   :role-source-pins
   [{:path "scripts/futon2/report/war_machine.clj",
     :sha256
-    "10af3d218bca645c8ae3296cac8116db9db25bea3959ff9b01f812f009c72de0"}
+    "b072bd7ac1d8191792468df7f266062e29400eda89a810afd827a662a329fcdb"}
    {:path "src/futon2/aif/observation.clj",
     :sha256
     "9c93087e6b8a1ecb327749b58159799125edbaff43cf21a17deb4a2680ed6b57"}
@@ -414,13 +426,13 @@
    :belief-producer "src/futon2/aif/belief.clj",
    :required-sites
    [{:path "scripts/futon2/report/war_machine.clj",
-     :line 828,
+     :line 829,
      :text "(belief/update-belief-batch belief-state events"}
     {:path "scripts/futon2/report/war_machine.clj",
-     :line 5940,
+     :line 5951,
      :text "observation (obs/observe scan-data)"}
     {:path "scripts/futon2/report/war_machine.clj",
-     :line 6105,
+     :line 6116,
      :text "(let [predictions (belief/predict-observation"}]},
   :tick-to-concentration-callers []},
  :pass? true,
