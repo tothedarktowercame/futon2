@@ -90,3 +90,37 @@ No offline-only arm, mandatory GFN/BMR combination, or automatic post-RUN4
 deferral is inferred. No final :learning arm or compliance result is recorded;
 Joe has set the design direction, not supplied all its equations. Registry and
 worklist integration belongs to claude-1. No production changes in this note.
+
+
+## 5. Policy depth: explicitly configured three and three for RUN4
+
+Joe, emacs-repl, 2026-09-09, verbatim:
+
+> I'm okay, I guess, with the three steps of anticipation, but the cascade of depth two... Is far too low, I think. To do anything very meaningful. That's basically just selecting two design patterns and linking them together. So let's push them both to three. And see how we get on with that. And that can be consistent with your point about... Keeping it explicitly configured. So we'll configure it as three and three.
+
+Ruling interpretation: RUN4 explicitly configures anticipation/prediction
+horizon 3 and cascade rollout horizon 3. These are separately named settings;
+neither is the run's number of executed steps. No adaptive per-candidate horizon
+or global production-default change is inferred. Three is the chosen trial
+configuration, not an empirically established optimum. Implementation must
+record the effective values at their consumers; an implicit fallback to one
+must not be represented as executing the configured three.
+
+Correction to my preceding explanation, discovered by reading the consumer:
+rollout.clj:474-479 defaults to depth 2, but
+scripts/futon2/report/cascade_lane.clj:381 explicitly calls best-rollout with
+:depth 5. Therefore describing the cascade caller as currently using two was
+incomplete. The ruling supplies an explicit target of three; wiring must account
+for the existing override rather than merely changing the library default.
+The recursive expansion at src/futon2/aif/rollout.clj:554-581 counts moves in
+a policy prefix and allows terminal/truncated/empty-survivor early endings.
+Three is not a guarantee of three distinct design patterns or exactly three
+executed moves; pattern membership and actual depth must be reported separately.
+The main scorer currently conditionally supplies 3 at
+scripts/futon2/report/war_machine.clj:6300-6302 and passes it at :6345.
+
+This note records the ruling and consumer findings only. No code/configuration
+or ledger edits: claude-1 integrates the registry and routes the bounded wiring
+and tests, including proving both effective horizons and truthful early endings.
+The existing learning design work remains outstanding; this ruling does not
+close it or assert that RUN4 is now ready to execute.
