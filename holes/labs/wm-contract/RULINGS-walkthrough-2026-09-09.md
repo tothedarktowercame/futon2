@@ -228,3 +228,33 @@ selector keeps the fixture E_S until forward-accumulated strategic-grain
 data exists to promote; the refusal rule stands (promotion only from
 grain-labelled data). Further redesign, if needed, comes after RUN4 is
 banked.
+
+## Item 23 — the pre-go-live checklist is a TASK LIST (claude-1 session, later on 2026-09-09)
+
+Context: claude-1 presented the RUN4 final checklist
+(runs/F2-run4-readiness/RUN4-final-checklist-2026-09-09.md) with seven
+A-items framed as decisions. Joe, verbatim:
+
+> So above, you listed seven items that were... On a pre-go-live checklist.
+> And I read them, and I don't see anything there that really is
+> contentious. The only question was between having... For items that could
+> be built pre-run, finished, or not. But that's not contentious. All of
+> these items have obvious solutions, and I suggest that you send this
+> checklist to Codex 17. As a task list. So those seven items are not things
+> to rule. Those are seven items to do. Before we go live, I don't have any
+> other comments except that Codex 17 should be able to do all of them
+> following the obvious intent that's already been stated. So I'd like you
+> to dispatch it as such.
+
+RULED: all seven A-items are delegated as tasks under already-stated intent;
+in particular the A2 fork resolves to BUILD — the pre-run-closable holes get
+finished pre-run ("the only question was... finished, or not. But that's
+not contentious"). The settled readings claude-1 dispatches under this
+ruling: A1 the proposed :ready reading; A2 close the four pre-run-closable
+holes; A3 fold ON for RUN4 (the F10 rider itself demands a live computation
+of the seeded C, and the kernel is constant across policies today so it
+cannot move a selection); A4 adopt/implement the 19b recording contract; A5
+the preregistered conformance meaning is the up-front qualification
+statement; A6 concrete run config proposed for review; A7 refuse-on-red at
+accept with explicit override. Any genuine fork not settled by recorded
+intent stops that item and surfaces, without stopping the others.
