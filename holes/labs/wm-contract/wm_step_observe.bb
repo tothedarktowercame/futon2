@@ -54,6 +54,13 @@
 (def repo-root (str (System/getProperty "user.home") "/code/futon2"))
 (classpath/add-classpath (str repo-root "/src"))
 (require '[futon2.aif.realized-recording :as recording])
+
+;; The :wm/realized-recording-v1 envelope is OPT-IN (A4 adoption is a
+;; separate reviewed step; DRAFT-realized-outcome-recording-19b s. legacy
+;; clause). Absent the flag, the legacy record is emitted byte-identically
+;; -- the replay control in negative_controls.sh holds this invariant.
+(def recording-contract-active?
+  (= "1" (System/getenv "FUTON_WM_RECORDING_CONTRACT")))
 (def runs-dir (io/file repo-root "holes/labs/wm-contract/runs"))
 
 (def read-opts {:default (fn [t v] {:unread-tag t :value v})})
@@ -180,7 +187,9 @@
                           (not (and (number? holes-before) (number? holes-after))) nil
                           (< holes-after holes-before) :grounded-change
                           :else :grounded-no-change)]
-            (recording/step-envelope
+            ((if recording-contract-active?
+               #(recording/step-envelope % %2)
+               (fn [r _] r))
              (cond-> (array-map
                      :schema :wm/realized-outcome-v1
                      :observation/schema :wm/step-observation-v1
