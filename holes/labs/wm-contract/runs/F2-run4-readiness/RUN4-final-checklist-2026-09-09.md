@@ -25,7 +25,7 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
    Proposed reading: both RUN4-named holes typed :run-gated with no non-run
    blockers counts as ready-to-run. On Joe's word, claude-1 edits the gate
    with a control.
-2. **COMMISSIONED (Joe: "commission the new work"), two threads live** —
+2. **find: CLOSED (mathlib4 bf79f988b3 + 8b38ceec46, futon2 dc455666, reviewed — witnessed-closed on the existence witness; audit 4->3 pre-run-closable; READY re-verified; published). organise: exemplar EXECUTING (e-pre-go-live, disposition (f))** —
    find: statement slice LANDED (mathlib4 93ade5be78, reviewed — Item-20
    laws at the applied carrier); the existence-witness conformance slice is
    in flight (result-predicate targets, no opaque-find claim). organise:
