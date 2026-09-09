@@ -1,0 +1,81 @@
+# RUN4 final checklist — 2026-09-09
+
+Assembled by claude-1 at Joe's direction ("we should know what other final
+checklist items need to be in place"), from the execution runbook
+(RUN4-execution-runbook-2026-09-09.md), the live readiness meter, and the
+Item 19–22 rulings. Joe's two confirmations map to existing machinery:
+
+- "Running a version of the designed model, well put together as a graph" =
+  the readiness meter's pre-run lines: wiring-pin (wiring hash/commit vs
+  live), definitions-intact, regenerates (byte-identical graph/manifest
+  regeneration), lean-probe, run-pins. ALL GREEN at contract fcd1261c30 as
+  of this writing. Re-run `bb run4_readiness.bb --summary` at start time;
+  green lines are the "well put together as a graph" confirmation.
+- "A certificate that it ran conformantly according to the wiring" = the
+  preregistered conformance certificate (F2-run4-preregistration
+  01-assertions.edn: at least one route, no empty route, no unmapped hop,
+  no refutation) accepted by Joe over the run's deposits; its acceptance is
+  what closes wmRunConformsToWiring (:witnessed-and-held-open, run-gated).
+
+## A. Decisions still needed (Joe), in dependency order
+
+1. **:ready gate semantics** (one sentence). run4_readiness.bb:387 demands
+   `:readiness :ready`, a value the audit producer cannot emit, so the meter
+   that certifies "you are running the designed thing" can never say READY.
+   Proposed reading: both RUN4-named holes typed :run-gated with no non-run
+   blockers counts as ready-to-run. On Joe's word, claude-1 edits the gate
+   with a control.
+2. **The eight-before-any-run ruling resolved against current state**
+   (EPIC-run-era.md:991, Joe 2026-09-06: Box 6's substantive holes gate the
+   first run). The current closability audit types 4 holes pre-run-closable.
+   Either those close pre-run (lane work, each its own reviewed slice) or
+   Joe rules the current state satisfies his gate. This is the one item
+   where "anything outstanding from that first check" has real content.
+3. **F10 fold on/off for RUN4** (the seeded disposition fold; caller opts
+   :ruled-outcome-c-enabled?/:seeded-c/:disposition-kernel). Item 19a fixed
+   C_mis flag-gated; the FOLD flag is a separate decision, still open.
+4. **Adopt the 19b recording contract** (:wm/realized-recording-v1 draft,
+   DRAFT-realized-outcome-recording-19b-2026-09-09.md; pins verified). Its
+   own reviewed ledger step; determines what the run records.
+5. **Qualification criteria stated up front** (prereg C6 reserves this to
+   Joe: the old census includes one ruling-unrealised hop and 19 unfired
+   edges — is that coverage qualifying?). Can be ruled at accept time;
+   better before.
+6. **Run config**: flags (accumulation ON per Item 22; E_S fixture stands;
+   FUTON_WM_MISSION_C off per 19a), step count, work dir, unique run id
+   (runbook step 1).
+7. *(held Block-D, gates the certificate not the run)* **accept-script
+   red-verdict gate**: wm_step.sh:494,545 advances the pin on exit-zero
+   alone; red battery verdicts do not stop it. One word authorizes the
+   refuse-on-red repair.
+
+## B. Mechanical work before start (lane)
+
+8. **E forward accumulation lands + review** (Item 22; codex-17 in flight,
+   job invoke-1788969793592). RUN4's config turns the flag on.
+9. **Readiness snapshot re-emit at start** (`bb run4_readiness.bb` +
+   committed snapshot refresh) so the committed meter matches the live one
+   (runbook risk 1).
+10. **Ledger hygiene, not run-gating**: zai-1 five-row re-sign (in flight),
+    then the sequenced :habit-prior addendum (Items 19c+21a+22) and C3's
+    final re-sign.
+
+## C. At-run and post-run (mechanical; no pre-work required)
+
+- Preflight r6_zero_post_preflight (NOTE: takes/releases the live lock);
+  wm_step.sh init/step with inspection at every step; accept only after
+  the A7 repair (or with manual red-check inspection if A7 is declined);
+  RE3 deposits (8 checks + RUN3); Joe's certificate acceptance (closes
+  wmRunConformsToWiring for this run's scope).
+- **Post-acceptance, does NOT gate the run**: the R5 certificate retake
+  producer against an accepted run does not exist (CONVERGENCE.edn rows
+  point at one simulation, :accepted-run? false) — new extraction work,
+  scoped after the run design is fixed. RUN13's convergence claims wait on
+  it; RUN4's banking does not.
+
+## Explicitly NOT on this checklist
+
+find/F11 (Lean statement slice; not on the tick path), organise/F12 (O4
+adapter; not on the tick path), U84 (fills as a side effect of the run),
+§1b observation-model bridge (19b records both domains; bridging is
+post-RUN4 redesign per Item 22's closing sentence).
