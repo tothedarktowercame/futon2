@@ -1,0 +1,39 @@
+{:selected-policy :patterns-with-remedy,
+ :policies
+ {:grim
+  {:Q-o {[:g1 :snatcher] 1},
+   :Q-d {:abstention 0, :grim-cut 1, :remedy 0},
+   :disposition-risk-nats 1.7917594692280547},
+  :patterns-with-remedy
+  {:Q-o {[:g4 :snatcher] 1},
+   :Q-d {:abstention 0, :grim-cut 0, :remedy 1},
+   :disposition-risk-nats 0.4054651081081642},
+  :preserve-abstention
+  {:Q-o {[:g2 :snatcher] 1},
+   :Q-d {:abstention 1, :grim-cut 0, :remedy 0},
+   :disposition-risk-nats 1.7917594692280547}},
+ :support #{:remedy :grim-cut :abstention},
+ :checks
+ {:C-normalised true,
+  :all-kernel-rows-normalised true,
+  :unobserved-outcomes-explicit-zero true},
+ :source
+ {:record :F12-slice-8-snatch-joint-exemplar,
+  :pointer
+  "futon2:holes/labs/wm-contract/runs/F12-organise/23-snatch-joint.edn:39-170"},
+ :declared-C {:grim-cut 1/6, :remedy 2/3, :abstention 1/6},
+ :record :U90-snatch-mini-c,
+ :measured-at "2026-09-09",
+ :kernel
+ {[:g1 :snatcher]
+  {:count 1,
+   :P-d-given-o {:abstention 0, :grim-cut 1, :remedy 0},
+   :measured {:score-before -5, :score-after -5}},
+  [:g2 :snatcher]
+  {:count 1,
+   :P-d-given-o {:abstention 1, :grim-cut 0, :remedy 0},
+   :measured {:score-before -10, :score-after -10}},
+  [:g4 :snatcher]
+  {:count 1,
+   :P-d-given-o {:abstention 0, :grim-cut 0, :remedy 1},
+   :measured {:score-before 3, :score-after -5}}}}
