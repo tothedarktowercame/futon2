@@ -238,6 +238,26 @@ explicit. No build was undertaken under that earlier instruction.
   institutional interpreter needs declared observation domains and
   cross-domain mappings — the §1b obligation's shape at another site. No
   adoption; not a ruling.
+- 2026-09-09 (sitting, ninth product — INSTANTIATE C module v1, REVIEWED):
+  under Joe's in-session build authorization (verbatim in
+  holes/labs/wm-contract/INSTANTIATE-C-module-v1-2026-09-09.md), futon2
+  eb8da10a + mathlib4 b5870b7384. Clojure preference_module.clj: exact
+  rational tagged distributions, symbolic families with explicit
+  instantiation, KL that REFUSES on positive prediction at zero preference
+  (the DERIVE refuse-don't-clamp constraint, verified in code by claude-1),
+  versioned assessment, partial comparisons, one-entry local-risk ranking,
+  candidate/accepted mode; current-paper profile migrated with provenance.
+  efe.clj integration strictly OPT-IN via :preference-module opts — separate
+  diagnostic key and rank-local-preference-actions, no aggregate G, no
+  production default. Lean LocalPreferenceModule.lean: ExactTable
+  rational->canonical PreferenceDistribution constructor + parameterized
+  binary family with zero/positivity proofs — a representation proof, NOT
+  end-to-end refinement and NOT closing §1b. claude-1 review by own runs:
+  43 tests/164 assertions/0 failures; replay byte-identical twice and equal
+  to committed result.edn; lake env lean exit 0, zero sorry. Synthetic Q
+  inputs are labelled synthetic in the artifacts. v1 is a component with a
+  callable WM adapter; production Q calibration, PreferenceFamily/time, and
+  the observation model remain open.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
