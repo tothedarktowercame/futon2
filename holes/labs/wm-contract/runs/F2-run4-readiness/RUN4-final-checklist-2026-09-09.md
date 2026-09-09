@@ -19,7 +19,7 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
 
 ## A. Decisions still needed (Joe), in dependency order
 
-1. **:ready gate semantics** (one sentence). run4_readiness.bb:387 demands
+1. **DONE (b9208880, reviewed: READY verified, 11/11 plants)** — :ready gate semantics. run4_readiness.bb:387 demands
    `:readiness :ready`, a value the audit producer cannot emit, so the meter
    that certifies "you are running the designed thing" can never say READY.
    Proposed reading: both RUN4-named holes typed :run-gated with no non-run
@@ -37,7 +37,7 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
 4. **Adopt the 19b recording contract** (:wm/realized-recording-v1 draft,
    DRAFT-realized-outcome-recording-19b-2026-09-09.md; pins verified). Its
    own reviewed ledger step; determines what the run records.
-5. **Qualification criteria stated up front** (prereg C6 reserves this to
+5. **DONE (00112270, reviewed)** — qualification criteria stated up front (prereg C6 reserves this to
    Joe: the old census includes one ruling-unrealised hop and 19 unfired
    edges — is that coverage qualifying?). Can be ruled at accept time;
    better before.
@@ -57,9 +57,8 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
 9. **Readiness snapshot re-emit at start** (`bb run4_readiness.bb` +
    committed snapshot refresh) so the committed meter matches the live one
    (runbook risk 1).
-10. **Ledger hygiene, not run-gating**: zai-1 five-row re-sign (in flight),
-    then the sequenced :habit-prior addendum (Items 19c+21a+22) and C3's
-    final re-sign.
+10. **DONE** — all re-signs landed (42239777, 2a082e63); 31 signed entries
+    verified; ledger quiet.
 
 ## C. At-run and post-run (mechanical; no pre-work required)
 
