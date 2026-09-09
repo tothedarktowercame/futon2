@@ -323,6 +323,23 @@ explicit. No build was undertaken under that earlier instruction.
   regenerated artifacts equal to committed; tests 2/4/0. The two-axis
   fold_c_witness healing (risk-contribution axis per the separation ruling)
   authorized next; then find retirement + re-pin.
+- 2026-09-09 (fourteenth product — the naturalistic organise task SELECTED,
+  codex-17 seat): Joe picks dogfooding — build an e-pre-go-live cascade
+  from today's own pre-go-live work ("I always love to dog feed these
+  systems... for future, the outer loop should pick the task for us" —
+  verbatim in runs/E-pre-go-live-experiment-2026-09-09.md, futon2
+  f9433625). The brief supersedes the budget-vs-floor basis question (the
+  exemplar builds a NEW task-local cascade; no claim over the old
+  outputs) and sets the constraints: real command execution via the shared
+  firing loop, frozen task/membership/basis between arms, reviewed
+  precedence intervention only, unexercised guards reported honestly, no
+  fabricated authored edges, no prose-@why-as-ids. Architecture
+  requirement recorded: FUTURE task selection belongs to the WM outer loop
+  (carried into the RUN4 checklist's orchestration section, fcddb659).
+  Independent library-lane interpretation review routed to codex-10
+  (author-not-reviewer per the F12 ownership map). This is disposition
+  (f)'s naturalistic-exemplar proviso in motion — organise's staged
+  closure path.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
