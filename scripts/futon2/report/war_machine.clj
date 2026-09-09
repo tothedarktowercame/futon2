@@ -41,6 +41,7 @@
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.anticipation :as anticipation]
             [futon2.aif.policy-depth :as policy-depth]
+            [futon2.aif.beta-habit :as beta-habit]
             [futon2.aif.adapters.interest-network :as interest-net]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
@@ -577,8 +578,12 @@
 
    Returns `{:policy-precision-state <state>}` for merging onto the judgement,
    or `nil` when there is nothing to say. Reads no state and writes none; the
-   returned map is data for `trace/trace-record` to persist."
-  [previous-trace f-pi-fields current-ranked]
+   returned map is data for `trace/trace-record` to persist.
+   RUN4 opt-in fourth argument applies the ruled habit-in-both arm with
+   identity-aligned ln E provenance; the three-argument path stays unchanged."
+  ([previous-trace f-pi-fields current-ranked]
+   (beta-dark-carry previous-trace f-pi-fields current-ranked false))
+  ([previous-trace f-pi-fields current-ranked habit-in-both?]
   (let [carried (:policy-precision-state previous-trace)
         readback (:f-pi-by-candidate-id f-pi-fields)
         ;; the whole-tick absence envelope and the per-candidate map are
@@ -587,10 +592,11 @@
         ;; which is exactly the confusion the envelope was introduced to stop
         by-candidate (when (= :present (:status readback))
                        (:by-candidate-id readback))]
-    {:policy-precision-state
+    (cond-> {:policy-precision-state
      (if (map? by-candidate)
        (try
-         (policy-precision/carry-beta carried by-candidate current-ranked
+         ((if habit-in-both? beta-habit/carry policy-precision/carry-beta)
+          carried by-candidate current-ranked
                                       {:identity-fn #(candidate-identity %)
                                        :score-fn :controller-score})
          ;; A solver rejection is recorded as an explicit absence with the
@@ -609,7 +615,16 @@
                    carried (or (:error (ex-data error)) :beta-solver-error))
                   :error-data (ex-data error))))
        (policy-precision/held-state
-        carried (or (:reason readback) :no-f-pi-readback)))}))
+        carried (or (:reason readback) :no-f-pi-readback)))}
+      habit-in-both?
+      (update :policy-precision-state
+              (fn [state]
+                (if (:habit-provenance state) state
+                    (assoc state :habit-provenance
+                           {:arm :habit-prior-in-both :placement :both
+                            :boundary :policy-precision-beta-carry
+                            :source :unavailable
+                            :reason (:reason state)}))))))))
 
 (defn f-pi-posterior-opts
   "RUN9 / stage S4: the `:f-pi-opts` this tick hands `policy/select-action`.
@@ -5945,7 +5960,10 @@
                :as judge-opts
                :or {trace? false include-advisory-lanes? true
                     step-portfolio? true eval-invariant-fallback? true}}]
-  (let [depth-config (policy-depth/configured judge-opts)
+  (let [beta-habit? (beta-habit/enabled? judge-opts)
+        _ (beta-habit/preconditions! beta-habit? *f-pi-dark?* *beta-dark?*
+                                    trace/*persist-policy-trace-details?*)
+        depth-config (policy-depth/configured judge-opts)
         accumulate-strategic-habit?
         (strategic-habit/enabled? judge-opts
           (System/getenv "FUTON_WM_ACCUMULATE_STRATEGIC_HABIT"))
@@ -6443,7 +6461,7 @@
         beta-dark-fields (when (or *beta-dark?* (= :variational-beta-gamma wm-tau-mode))
                            (beta-dark-carry prev-trace-record
                                             f-pi-dark-fields
-                                            wm-ranked))
+                                            wm-ranked beta-habit?))
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
         ;; (composes with can-propose? at proposer-side); then run
         ;; deliberative select-action with default-mode-select as a
