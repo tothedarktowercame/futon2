@@ -89,6 +89,17 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
   readback; the Bernoulli utility clamps endpoints where disposition KL
   preserves zeros. Logged as sitting EVIDENCE — the map's acceptance and any
   design that follows remain Joe's.
+- 2026-09-09 (sitting, second product): Joe's process framing, verbatim at
+  holes/labs/wm-contract/SESSION-C-tau-process-framing-2026-09-09.md (futon2
+  b0a55be8, codex-12 with Joe). Core moves: C may not be a vector; C_tau and
+  effective progress toward high-level problem resolution join the outcome
+  preferences (the final-outcome and process views are hard to fully
+  separate); the empirical start is Cascade Live; the problem breakdown
+  connects to the library's authored how/why links, patterns-as-production-
+  rules, and satisfaction reasoning (SAT/prover as an initial framing) — a
+  different calculational flow over the same objects G runs on. No weights,
+  no solver design, no fold enabling, no MAP acceptance. Evidence, not
+  design approval.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
