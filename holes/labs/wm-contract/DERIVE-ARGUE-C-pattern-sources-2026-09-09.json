@@ -1,0 +1,66 @@
+{
+  "schema": "c-derive-argue-pattern-sources-v1",
+  "futon3-head": "704762abe9991f76bbe703eba7c3cce1066a5968",
+  "patterns": [
+    {
+      "pattern": "measurement/warrant-travels-with-the-number",
+      "path": "futon3/library/measurement/warrant-travels-with-the-number.flexiarg",
+      "sha256": "415a41bc2fc385ebc02e7cae2dc20d0b484790afa9b14a7958fc66853652e7e3"
+    },
+    {
+      "pattern": "pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy",
+      "path": "futon3/library/pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy.flexiarg",
+      "sha256": "eaa5f4b9e104fea25100f23a959b84682df8ee8e5b153b2c17436f97d3c35c99"
+    },
+    {
+      "pattern": "war-room/wr-8-typed-files-are-sources-of-truth",
+      "path": "futon3/library/war-room/wr-8-typed-files-are-sources-of-truth.flexiarg",
+      "sha256": "a82d4a19e82ef1a4dac3ec5b00afa9923513266149aaa923220bd1ac91190f19"
+    },
+    {
+      "pattern": "war-room/wr-10-next-move-surface-is-recursive-closure",
+      "path": "futon3/library/war-room/wr-10-next-move-surface-is-recursive-closure.flexiarg",
+      "sha256": "990d1350cca2821994c285abb1fc33deb73057f9e3630049165eb0ebf828f743"
+    },
+    {
+      "pattern": "cascades/edges-earn-permanence",
+      "path": "futon3/library/cascades/edges-earn-permanence.flexiarg",
+      "sha256": "3226ac2100b997247e1d40fb2df071907ed78a6a28ddeb150ac59613df13d37b"
+    },
+    {
+      "pattern": "agent/student-dispatch",
+      "path": "futon3/library/agent/student-dispatch.flexiarg",
+      "sha256": "41ead0ce673e834419065c2b0e7758421b713c0706c443d8a8d51b5bd9376848"
+    },
+    {
+      "pattern": "mission-coherence/logic-model-before-code",
+      "path": "futon3/library/mission-coherence/logic-model-before-code.flexiarg",
+      "sha256": "49d1775bffd48740cd643bd6c71fd21952bd1a4f83c9066c5911af4c18f9adf2"
+    },
+    {
+      "pattern": "enrichment/extend-not-rewrite",
+      "path": "futon3/library/enrichment/extend-not-rewrite.flexiarg",
+      "sha256": "69ab2d3d04c4c015f3071e13d6ff5c5ed920ba80d8b76ed073d6d8c277483291"
+    },
+    {
+      "pattern": "snatch/widen-the-cascade-only-on-evidence",
+      "path": "futon3/library/snatch/widen-the-cascade-only-on-evidence.flexiarg",
+      "sha256": "2e879dd5b43db450d97fed2c0dfff0f8710196cb60b76e238e4516b6c15f8fd6"
+    },
+    {
+      "pattern": "aif/structure-learning-by-model-reduction",
+      "path": "futon3/library/aif/structure-learning-by-model-reduction.flexiarg",
+      "sha256": "6242b468d8a822223afa3c475095afc2aa2d46c855c522c154c3b93972218939"
+    },
+    {
+      "pattern": "ukrns/separate-evidence-gaps-from-implementation-decisions",
+      "path": "futon3/library/ukrns/separate-evidence-gaps-from-implementation-decisions.flexiarg",
+      "sha256": "6b0aaf97c8cb9e1c7239c4f39ce7a421da9bce9b1805ad146a7c43b5f4e9ca91"
+    }
+  ],
+  "lifecycle": {
+    "path": "futon4/holes/mission-lifecycle.md",
+    "sha256": "5e93504d9f7b6f44ab5fcc7eb53f1cdb1a6fa2894284cbe314b8b316bac58827"
+  },
+  "scope": "Source identity for design argument; not proof of pattern effectiveness or implementation."
+}

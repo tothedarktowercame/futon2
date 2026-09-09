@@ -12,6 +12,24 @@ This excursion is the named owner of the C-hole's DEFERRAL UNDER ORGANIZED
 DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
 453054fbef): the deferral is honest exactly as long as this lane is moving.
 
+## Current lifecycle position — 2026-09-09 sitting
+
+Joe recognises the historical and current-paper pilots as the **DERIVE** step:
+"we've derived the shape a solution should take". His direction is to write
+that shape and an upgrade path, then ARGUE it using the Futon3 pattern library;
+"at this point, we don't need to go off and build it".
+
+The full ruling is preserved verbatim in
+[DERIVE and ARGUE](labs/wm-contract/DERIVE-ARGUE-C-realization-2026-09-09.md).
+That document specifies the preference registry, assessment and comparison
+contracts, lifecycle/process criteria, recursive proposals, invariants, and
+upgrade interfaces for serendipity, other outcome types, multiple levels and
+predictive integration. ARGUE is now written with library cross-references and
+pattern selection records; its acceptance and VERIFY are not asserted. The
+first implementation target is a reproducible diagnostic; the production
+observation-model obligation in §1b and numerical preference decisions remain
+explicit. No build is undertaken by this sitting's current instruction.
+
 ## Entry state (what the automated lane finished, 2026-09-08/09)
 
 - Channel C computes live: 13 ranges, KL risk in the fold
