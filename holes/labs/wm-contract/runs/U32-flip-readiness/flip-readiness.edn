@@ -945,9 +945,9 @@
  :whole-tree-lines
  {:contract-pin
   {:verdict :green,
-   :contract-authority "ae9dc5b58e7d9d4253ea51eeed511d2c0ab2e31d",
+   :contract-authority "fcd1261c303c2beca08a6812eba4a7ce2e83d722",
    :holes-last-content-change
-   "ae9dc5b58e7d9d4253ea51eeed511d2c0ab2e31d",
+   "fcd1261c303c2beca08a6812eba4a7ce2e83d722",
    :comparand
    "the last commit that touched DarkTower/WarMachine/Holes.lean, not mathlib HEAD (C175)",
    :comparand-read-from :live-git,
