@@ -1,0 +1,40 @@
+      grounds: /home/joe/code/futon2/holes/labs/wm-contract/C255-workflow-report-v3-review.md:10-14, /home/joe/code/futon2/holes/labs/wm-contract/C250-workflow-report-v2-review.md:11-14
+tex-reachability: PASS negative control reported sec-conclusion.tex dormant from the live graph (conditionally-live because the commented edge is retained)
+tex-reachability: PASS negative control reported sec-discussion.tex as undeclared dormant when its exclusion was withdrawn
+tex-reachability: PASS negative control rejected a declared exclusion for the live sec-conclusion.tex
+wrote /home/joe/code/p4ng/defect-repair-tally.svg
+wrote /home/joe/code/p4ng/defect-repair-tally.pdf
+{"repaired": 60, "partial": 1, "open": 0}
+PASS 9 classes, 61 instances; as of 2026-09-03 · source SHA-256 608752834e4a
+wrote /home/joe/code/p4ng/wm-status.svg
+wrote /home/joe/code/p4ng/wm-status.pdf
+{"closed": 110, "components": 12, "fresh": true, "hole": 14, "source-sha256": "afe7b70d4e45"}
+PASS 12 components; receipt SHA-256 afe7b70d4e45
+==> building futon-2026 (preload p4ng-html-shim.sty)
+==> futon-2026.tex
+Conversion complete: 7 warnings
+==> nav, xref resolution, bibliography dedup, index
+  label index: 62 labels
+  TOTAL: 0 resolved, 0 unresolved
+  index.html written with 1 entries
+
+==> built 3 pages in /tmp/p4ng-build-futon-2026
+==> gate: 0 ltx_ERROR spans
+==> tuftify
+/home/joe/code/futon5/holes/tech-notes/paper/html-build/wysiwyg/tuftify.py:382: SyntaxWarning: invalid escape sequence '\s'
+  HEAD_CSS = """
+==> pdf
+==> svg2pdf: aif-control-map-live.pdf
+==> gate: PDF clean, 36 pages
+==> publish
+==> published /var/www/zone.hyperreal.enterprises/wip/futon-2026.pdf
+published -> /var/www/zone.hyperreal.enterprises/wip/futon-2026.html (522145 bytes)
+  assets copied: aif-cascade-map.svg, aif-control-map-futon.svg, aif-control-map-live.svg, aif-equation-dag.svg, business-model-grid.svg, plotting-table.jpg, register-key.svg, snatch-cascade.svg, turn-pattern-mission-chain.svg, war-machine-caravans.jpg
+  futon-2026-cuts.html: already current
+  futon-2026.html: nav updated
+  index.html: already current
+  mission-efe-field.html: already current
+  pipeline-pattern-cascade.html: already current
+  plop-2026.html: already current
+  rule-rewriting-ca.html: already current
+==> published /var/www/zone.hyperreal.enterprises/wip/futon-2026.html

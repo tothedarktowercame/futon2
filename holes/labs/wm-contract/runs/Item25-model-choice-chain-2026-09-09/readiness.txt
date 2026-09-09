@@ -1,0 +1,12 @@
+```
+RUN4 certificates        GREEN
+RUN4 definitions-intact  GREEN
+RUN4 wiring-pin          GREEN
+RUN4 run-pins            GREEN
+RUN4 regenerates         GREEN
+RUN4 lean-probe          GREEN
+RUN4 hole-open           GREEN
+RUN4 closability-audit   GREEN
+RUN4 invalidators        GREEN
+VERDICT: READY
+```

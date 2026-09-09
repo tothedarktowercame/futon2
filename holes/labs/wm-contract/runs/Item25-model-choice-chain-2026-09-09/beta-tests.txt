@@ -1,0 +1,25 @@
+
+Testing futon2.report.beta-habit-wiring-test
+
+Testing futon2.aif.beta-habit-test
+
+Testing futon2.report.war-machine-test
+
+FAIL in (mission-c-readback-hashes-the-criteria-source-test) (war_machine_test.clj:1772)
+U15. U12 clause (a) passed determinism only as stated: the readback
+            reproduces from its arguments, but :criteria-source is a PATH into
+            a mutable file. The digest is what a replay compares. the mission-path fallback, the other source U12 read, and a parse
+              that produces NO criteria still records what it read
+expected: (= (get u12-recorded-source-sha256 doc) (:criteria-source-sha256 r))
+  actual: (not (= "51f6de53d7e95d42a42bb3a599e8430d35c29c34c692e27e239884541fa0c846" "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e"))
+War Machine selection clock write failed: substrate down
+War Machine mission clock unreadable: offline
+
+Testing futon2.aif.policy-precision-test
+
+Testing futon2.aif.policy-test
+
+Testing futon2.aif.trace-test
+
+Ran 233 tests containing 1168 assertions.
+1 failures, 0 errors.

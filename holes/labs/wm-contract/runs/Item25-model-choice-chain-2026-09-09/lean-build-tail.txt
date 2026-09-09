@@ -1,0 +1,12 @@
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:65:0: 'DarkTower.WarMachine.MachineTemperatureWitness.productionFloorGainOne' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:66:0: 'DarkTower.WarMachine.MachineTemperatureWitness.belowFloorBetaReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:67:0: 'DarkTower.WarMachine.MachineTemperatureWitness.nonfiniteBetaReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+Build completed successfully (8623 jobs).
