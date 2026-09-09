@@ -206,6 +206,28 @@ explicit. No build is undertaken by this sitting's current instruction.
   Lineage verified: M-G-over-cascades.md:66 (Joe's 2026-06-23 IAD flag) and
   M-aif4iad.md; bounded Ostrom primary-source check with access date.
   InstitutionSpec/RuleSpec proposed, NOT adopted; no build; not a ruling.
+- 2026-09-09 (sitting, eighth product — pattern/institution duality,
+  discussion evidence): Joe asks how institutions and design patterns differ
+  and relate — dual? co-production? interpreter? — referencing
+  M-formal-patterns (verbatim at
+  holes/labs/wm-contract/SESSION-C-pattern-institution-duality-2026-09-09.md,
+  futon2 78fa6e00, note-only). The note separates three easily-fused pairs:
+  living pattern vs its written production representation; institution vs
+  its executing actors/program; cascade data vs its interpretation.
+  Proposes step(I,K,temperament,state,observations) with evidence-return
+  pairing — no duality or coinduction asserted. Two checked corrections:
+  LA1c's 'nothing executes a policy-grain rule' is historical — the shared
+  firing loop at play/policy grain exists (futon3
+  checks/playout_snatch.clj:200-274, pattern-policy), verified by claude-1
+  against sites known from the F11 chain; and M-formal-patterns' freeze
+  (futon5 holes/M-formal-patterns.md:95, FROZEN 2026-08-04) is respected —
+  no slice, and its unverified modelling/G-bridge claims are NOT imported
+  (satisfying every signed bond is distinct from a frustrated system merely
+  having a minimum). LA1c's institutional consequence carried forward:
+  Snatch treatments can change the observation space itself, so an
+  institutional interpreter needs declared observation domains and
+  cross-domain mappings — the §1b obligation's shape at another site. No
+  adoption; not a ruling.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
