@@ -217,6 +217,11 @@
     :evidence "C538-F10-outcome-domain-decision-sheet.md (the survey); runs/D1-evidence/kl-worked-example.edn (Q discriminates; C placement flips the policy ranking -- address-sorry last under uniform C, second under grounded-change-weighted C; 68 pairs + 14 no-pi = the NOTE's 82); runs/D1-evidence/spectral.edn + receipt.md (normalized lambda_2 = 0.0410 vs null 0.2235 +/- 0.0518, z = -3.53, 200 rewirings seed 54112026); C537-serendipity-shapes-C.md (the occasion/update distinction D3 declares)"}
    :correction-2026-09-07 "DATED CORRECTION, owed by the ruling itself (the never-silent rule) and triggered by the C574 census + Joe's trace-or-clear instruction ('Either we can trace it properly. Or we can't. So, I'm not going to guess.'). The :decision text's 'FOURTEEN terminal flight dispositions, the nine never-yet-observed' inherits a miscount: TRACED in C574-F10-disposition-enumeration.md section 10 to a literal-grep artifact -- at the origin note's authorship revision (futon2 453cedfa, 2026-08-27) full_loop_runner.clj held exactly fourteen literal :outcome keywords, missing :grounded-change and :no-selection because they are assigned via variables. The fourteen counts syntax, not a vocabulary. CORRECTED READING: Obs organisations ranges over outcome-kinds (full_loop_cohort.clj:31-33), TWELVE members, the set the machine gates on at :317 and tripwire.clj:189; the five observed dispositions (kl-worked-example.edn) are members; SEVEN carry named zero mass, not nine. Every other clause of the ruling stands unchanged. Support widens later only by a reviewed change to the gate itself. The runner/gate vocabulary seam (emittable-but-ungated names) is recorded in C574 section 10 as a code-consistency finding, outside this correction."}
   
+  ;; 2026-09-09 reconciliation, RULINGS-walkthrough-2026-09-09.md Item 18b:
+  ;; :people -> :nouns, :money -> :verbs, :organisations -> :organization;
+  ;; :evidence is unchanged. The outcome-domain ruling above records the
+  ;; specialization; nouns/verbs remain named-empty and the twelve kinds and
+  ;; masses are unchanged. See runs/U87-vertex-ripple-census.md.
   :policy-grain
   {:observed :selection-counts-inhabited-cascade-grain-uninhabited
    :status :decided
