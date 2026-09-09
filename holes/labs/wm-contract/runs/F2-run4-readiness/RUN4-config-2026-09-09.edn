@@ -10,6 +10,11 @@
   :steps-proposed 3
   :steps-reason "The prior accepted pin (data/wm-step/w1) banked 2 accepted steps; 3 gives one more than precedent while keeping every step individually inspectable at the accept gate. Joe may set any count at go."
   :observation-window "next-accepted-step rule, version-pinned in :window per the adopted recording contract (A4)"}
+ :hierarchy {:model :single-level :scope :RUN4
+             :warrant "SESSION-model-choices-2026-09-09.md section 2 (4f81e3d1)"
+             :follow-ons [:outer-loop-own-aif :inner-loop-own-aif
+                          :zaif-aif-backed-agents :hierarchical-model]
+             :claim "Run-scoped flat model; no coupled generative hierarchy claimed"}
  :flags
  {:accumulate-strategic-habit? {:value true :warrant "Item 22 + futon2 8dd17915 (reviewed); RUN4 banks the first grain-labelled strategic counts"}
   :strategic-prior "fixture E_S stands (Items 21a+22; promotion refused until nonempty grain-labelled data)"
