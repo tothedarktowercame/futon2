@@ -124,3 +124,25 @@ or ledger edits: claude-1 integrates the registry and routes the bounded wiring
 and tests, including proving both effective horizons and truthful early endings.
 The existing learning design work remains outstanding; this ruling does not
 close it or assert that RUN4 is now ready to execute.
+
+
+## 6. Policy-depth revision: anticipation 3, cascade rollout 5
+
+Joe, emacs-repl, 2026-09-09, verbatim:
+
+> Okay, well maybe we should make it 3 and 5 then if we were already working with that level. I mean, a depth 5 cascade gives us considerable room for complexity, whereas a depth 3 cascade isn't going to have any interesting structure in it whatsoever. So let's revise my statement to anticipation horizon. Horizon 3 and Cascade Rollout Horizon 5. And that will be... Set for Run 4 and possibly adaptive in the future.
+
+This explicitly supersedes section 5's numerical 3/3 ruling (a7b1d9b3):
+RUN4 configures anticipation horizon 3 and cascade rollout horizon 5.
+Keep section 5 as history. The settings remain explicit and RUN4-scoped;
+adaptive depth is a future possibility, not commissioned or enabled here.
+The consumer-tracing, effective-value recording, absent-config preservation
+and truthful early-ending obligations still apply. The cascade target now
+matches the existing caller's :depth 5 override; matching that literal alone
+does not establish that the run-config value reaches the consumer.
+Depth counts rollout moves, not guaranteed distinct patterns. Joe's preference
+for more compositional room is the rationale, not an empirical claim that all
+depth-three cascades are uninteresting or that five is optimal. Run length
+remains separate. No live run, source/configuration or registry edits here.
+claude-1 must update the config/registry and redirect the in-flight codex-10
+wiring packet to 3/5 before accepting it.
