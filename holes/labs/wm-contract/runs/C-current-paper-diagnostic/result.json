@@ -1,0 +1,79 @@
+{
+  "acceptance-grid": {
+    "cells": 160,
+    "interpretation": "unrun is not failure; no external usefulness estimate",
+    "observations": {
+      "paid": {
+        "n": 0,
+        "unknown": 160,
+        "y": 0
+      },
+      "solved": {
+        "n": 0,
+        "unknown": 160,
+        "y": 0
+      }
+    }
+  },
+  "calculation": {
+    "family": "C_i=(p_i,1-p_i), 1/2<p_i<1",
+    "future-success-probability": "not-estimated",
+    "joint-distribution": "not-specified",
+    "local-KL-improvement-nats": "log(p_claim-warrant/(1-p_claim-warrant)) > 0",
+    "numeric-masses": "not-assigned"
+  },
+  "claim-assessment": "conditional on explicit analyst scope annotation; independent review pending",
+  "controls": {
+    "opposing-improvements-unranked": true,
+    "reverse-change-worsens": true,
+    "unchanged-does-not-improve": true,
+    "unknown-does-not-become-failure": true,
+    "unknown-does-not-pass": true
+  },
+  "counterfactual": {
+    "action": "revise producer thesis to claim an outline",
+    "comparison": "improves-known-coordinates",
+    "historical": false,
+    "satisfaction": {
+      "claim-warrant": true,
+      "external-usefulness": null,
+      "inspectable-reasons": null,
+      "reusable-patterns": null,
+      "semantic-satisfaction": false
+    }
+  },
+  "current-satisfaction": {
+    "claim-warrant": false,
+    "external-usefulness": null,
+    "inspectable-reasons": null,
+    "reusable-patterns": null,
+    "semantic-satisfaction": false
+  },
+  "next-tasks": {
+    "claim-warrant": {
+      "lifecycle-phase": "DOCUMENT",
+      "task": "Reconcile the Part IV thesis in empirics-futon/argument_outline.py with the Part III outline and regenerate its views."
+    },
+    "external-usefulness": {
+      "lifecycle-phase": "INSTANTIATE",
+      "task": "Design one current-work trial with a problem, prior prediction, independent outcome review and recording of observations; do not fill the grid to manufacture coverage."
+    },
+    "inspectable-reasons": {
+      "lifecycle-phase": "ARGUE",
+      "task": "Use this registry and diagnostic as a small review subject; record whether a reader can reconstruct the finding."
+    },
+    "reusable-patterns": {
+      "lifecycle-phase": "DOCUMENT",
+      "task": "Choose a specific pattern and an independent enactment to examine; preserve unresolved promotion status."
+    },
+    "semantic-satisfaction": {
+      "lifecycle-phase": "VERIFY",
+      "task": "Design a feedback outcome carrier which separates delivered feedback from explicit denial; retain the existing negative probe."
+    }
+  },
+  "paper-revision": "f036a91ccddf9c30ddb56acf547cb9dcd7fb9ef2",
+  "production-C": "unchanged; this is a retrospective diagnostic and conditional comparison",
+  "schema": "c-current-paper-diagnostic-v1",
+  "semantic-probe-origin": "reuses pinned prior executable result; does not rerun the underlying Clojure code",
+  "source-validation": "passed"
+}
