@@ -80,3 +80,59 @@ as-of 2026-09-06, status in-force, provenance
 "futon2 holes/labs/library-loop/runs/W2-pushout-sketch.md (pushout sketch +
 Joe ruling); restatable by operator ruling"). U88 slice 1 pins it at
 holes/labs/wm-contract/runs/U88-cascade-live-pin.md.
+
+## Item 19 — the Block-A ruling-needed walkthrough (claude-1 session, later on 2026-09-09)
+
+Context: claude-1 presented the issue board's 14 ruling-needed items grouped
+A-D, with recommendations. Joe's turn, verbatim:
+
+> So yes, I can accept C as a family of preference distributions. The family
+> view is my answer. Yes. The one thing I would add to that is that with...
+> Codex 12, we were developing an Ostrom interpretation of that family, but
+> that doesn't change the ruling. I would say that... The work with Codex 12
+> is definitive here, but So my ruling should be checked off against the work
+> we were just doing there. But basically I agree with your suggestion. Okay,
+> and as for realized outcome schema, we can also pass that to Codex 12. And
+> draft. The schema, that's fine. I don't agree that E should be off. Or... I
+> think you should be on, and we should pass that task to Codex 17. I can
+> agree with your suggestion for Item 5 that the acceptance inspection is the
+> retrospective for Run 4. That's okay. Go. Let's deal with that Block A set
+> of issues now and come back to the Block B and Block C. And D later.
+
+### 19a — :c-grain RULED
+C is a FAMILY of preference distributions indexed by grain; the family view
+is the answer. The concrete instance for the run, per the suggestion Joe
+accepted: C_int live; C_mis stays flag-gated; the v1 preference-module
+diagnostic optional per opts. ADDENDUM: the Ostrom/institutional
+interpretation developed in the codex-12 sitting does not change the ruling,
+but the sitting's work is definitive context — the ruling is to be checked
+off against those session products (MAP, DERIVE-ARGUE, INSTANTIATE v1,
+institutional-constraints notes).
+
+### 19b — :realized-outcome-schema: drafting DELEGATED
+The one schema (three writers, four readers today) is to be DRAFTED in the
+codex-12 sitting, with adoption before the RUN4 start as its own reviewed
+step.
+
+### 19c — :habit-prior RULED E-ON; implementation to codex-17
+Joe rejects E-off for the run: "I think [E] should be on, and we should pass
+that task to Codex 17." Decode: the learned, persisted habit prior E gets
+APPLIED on the live strategic path for RUN4; the implementation task routes
+to codex-17. :pi-zero-form's two arms (habit-prior-in-both vs in-pi-only) are
+NOT selected by this ruling; the implementation discovery surfaces that arm
+concretely and it returns to Joe unless a recorded principle settles it.
+
+### 19d — :focus-clock-reconciliation DEFERRED WITH REASON
+Follows from 19a: C_mis stays flag-gated for the run, so the
+which-mission's-C-at-the-tick question cannot bite; deferred until a run
+enables C_mis. (Joe addressed items 1, 2, 3, 5 explicitly; this deferral was
+the presented recommendation inside the accepted item-1 package.)
+
+### 19e — :selection-retrospective RULED for RUN4
+The acceptance inspection IS the retrospective for RUN4 (the runbook's
+pin-advance inspection of route reasons); a mechanical retrospective checker
+is later work, not a RUN4 gate.
+
+Blocks B (find triple), C (hierarchy/learning/policy-depth deferrals) and D
+(four one-sentence items) explicitly held for a later pass, per Joe's closing
+sentence.
