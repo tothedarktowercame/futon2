@@ -371,6 +371,21 @@ explicit. No build was undertaken under that earlier instruction.
   re-emitted (recurring class — note: --emit belongs IN the re-pin chain),
   full publish green and served. The organise hole is now the last
   pre-run-closable member of the commission.
+- 2026-09-09 (eighteenth — e-pre-go-live FIRST SLICE executed): the revision
+  addendum + token fence landed (futon2 2b77d212, original preserved as
+  history; re-reviewed AGREE by codex-10 at futon3 a376e40), then the first
+  bounded slice ran REAL commands (427c695d,
+  runs/E-pre-go-live-authority-probe-2026-09-09.edn): an actual
+  find-organise/fire execution of the readiness reader with command output,
+  source fingerprints, member accounting and driver source recorded. Its
+  captured verdict (BLOCKED-ON [regenerates lean-probe hole-open]) is the
+  honest reading AT ITS 18:46 MOMENT — mid-window in the find re-pin chain;
+  claude-1's own run after the chain completed reads READY on all nine
+  lines. Honest boundaries in the record itself: O4 UNEXERCISED — one
+  diagnostic action, not a paired precedence experiment; baseline/
+  intervention/primary-score manifest still unspecified; no organise
+  closure or readiness claim. Disposition (f)'s exemplar remains in
+  progress, not satisfied.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
