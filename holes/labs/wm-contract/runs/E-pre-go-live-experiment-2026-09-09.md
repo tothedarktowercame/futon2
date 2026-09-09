@@ -42,7 +42,7 @@ an apparent improvement.
 | Authored pattern | Candidate role in this task | Interpretation boundary |
 |---|---|---|
 | apparatus/one-authority-per-question, IF/HOWEVER/THEN lines 17–24 | Resolve the owning source and gate for each pre-go-live question; make disagreements explicit before publishing a disposition | A checklist is a view, not permission to alter its authority |
-| apparatus/pin-moves-with-the-population, lines 17–24 | Keep contract emission and dependent regeneration in the source-change packet once its review prerequisites are met | Population mutation and re-pin must share a commit. Source edit and re-attestation share a slice; only this latter class may span commits when source-Git-SHA emission requires it. No early self-repinning of unreviewed changes |
+| apparatus/pin-moves-with-the-population, lines 17–24 | Keep contract emission and dependent regeneration in the source-change packet once its review prerequisites are met | No early self-repinning of unreviewed changes; same slice may span repos/commits when source-Git-SHA emission requires it |
 | apparatus/evidence-to-disposition-once, lines 17–24 | Construct one versioned preparation disposition from captured evidence; render each consumer's answer from it | Do not reuse a count of green lines as a second authoritative readiness verdict |
 | apparatus/replayable-not-precious, lines 17–24 | Freeze inputs and replay preparation checks in an isolated workspace | Preparation attempts are distinct from the sacred live-run evidence; no live run is replayed here |
 | apparatus/done-is-observed-running, lines 17–24 | Supporting obligation: report runtime activation separately from source/build/review status | A local probe is not a standing live comparator; this member cannot be declared fully executed by the experiment |
@@ -164,3 +164,21 @@ Carry the remaining review requirements into the manifest:
 
 No task choice is reopened for Joe. No pattern, registry, generator or ledger
 is changed by this revision.
+
+## Dispatch clarification — 2026-09-09
+
+Claude's packet invoke-1788979374709-16810-a419642b removes an extra
+interpretation-approval loop after the correction. The original candidate row
+is preserved above as history; the dated correction supersedes it. The three
+prose tokens remain explicitly excluded. Execution still may not invent a
+reviewed baseline or precedence intervention that the brief never specified.
+
+First slice: execute the authority-reader preparation check through the shared
+firing loop. This is a diagnostic transcript round, not a graded primary pair.
+Only one carried action is executable in this slice: obtain the actual readiness
+verdict. All five candidate members remain accounted for; the remaining four
+are supporting/unexecuted. No source maintenance is attempted before the
+find-marker and successor integration reviews settle. No publication follows a
+blocked verdict. This bounded probe cannot exercise O4: it has no reviewed
+precedence change and no paired primary executions. Record that as unexercised,
+not as a conformant naturalistic exemplar.
