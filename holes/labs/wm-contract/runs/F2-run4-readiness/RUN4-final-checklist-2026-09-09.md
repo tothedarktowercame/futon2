@@ -51,8 +51,9 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
 
 ## B. Mechanical work before start (lane)
 
-8. **E forward accumulation lands + review** (Item 22; codex-17 in flight,
-   job invoke-1788969793592). RUN4's config turns the flag on.
+8. **E forward accumulation: LANDED AND REVIEWED** (futon2 8dd17915;
+   63/342/0 re-run by reviewer; registry addendum 48a18537). RUN4's config
+   turns :accumulate-strategic-habit? on.
 9. **Readiness snapshot re-emit at start** (`bb run4_readiness.bb` +
    committed snapshot refresh) so the committed meter matches the live one
    (runbook risk 1).
