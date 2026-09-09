@@ -117,6 +117,27 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
   artifact itself. Reviewed by claude-1 (own runs from the documented cwd:
   exit 0, two runs byte-identical, output equals committed result.edn, pins
   hold). Evidence toward slice 2; no masses assigned.
+- 2026-09-09 (sitting, fourth product — family of local calculations +
+  lifecycle criteria): Joe asked to repeat the achievement analysis across
+  clusters and derive intermediate criteria from futon4 mission-lifecycle
+  (verbatim at holes/labs/wm-contract/SESSION-C-family-and-lifecycle-2026-09-09.md,
+  futon2 740f2c28; artifacts runs/C-realization-family/). Four probes: (A)
+  links the first-flights replay; (B) nonempty prerequisite satisfaction on
+  the historical capability graph for the completed self-representing-stack,
+  with the evidence-persistence counterfactual flipping applicability
+  true->false; (C) the cluster-C carrier probe — mission_shapes/
+  compute-prediction-divergence matches criterion text by SUBSTRING
+  CONTAINMENT (futon3c src/futon3c/peripheral/mission_shapes.clj:270-292,
+  verified by claude-1), so 'feedback delivered' and 'feedback delivered:
+  false' both score divergence 0 — the explicit zero for 'feedback reaches
+  every participant' now has a demonstrated mechanism; (D) EIG reduction
+  fixtures recomputed (ln 2 / 0, incoherent posterior refused), explicitly
+  partial arithmetic. Eight lifecycle exits pinned verbatim; two axes
+  proposed for discussion (sought capability/outcome; intermediate lifecycle
+  requirements). :cluster-completion :not-inferred in the artifact. Reviewed
+  by claude-1 (own runs from futon3c: exit 0, byte-identical, matches
+  committed result.edn). Evidence, not cluster completion or preference
+  approval.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
