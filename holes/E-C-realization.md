@@ -185,6 +185,27 @@ explicit. No build is undertaken by this sitting's current instruction.
   the ARGUE's @why lines are applications of recorded rulings, not library
   declarations. ARGUE acceptance and VERIFY are not claimed; no build, per
   Joe's explicit instruction.
+- 2026-09-09 (sitting, seventh product — preferences as institutional
+  constraints, discussion evidence): Joe proposes preferences-as-constraints
+  (from conversation with Rob and Charlie), the peripheral execution
+  envelope generalized to the hybrid LLM+code case, patterns as
+  Ostrom-style institutions with action arenas, and an IAD+EFE reading —
+  asking whether it is compatible with the DERIVE design (verbatim at
+  holes/labs/wm-contract/SESSION-C-institutional-constraints-2026-09-09.md,
+  futon2 21b1c7d7, note-only). codex-12's refinement, endorsed by claude-1's
+  review: compatible, because the constraints view lands in computational
+  locations the design already separates — only preferred-outcome/manner
+  rows go in C_i or C_i,tau; prohibitions go to the admissibility relation
+  (where the peripheral envelope already lives), obligations to trace
+  monitors, information/participation to observation access and roles,
+  sanctions to the transition model, amendment to a separate authority
+  process — with one preference registry justifying entries across
+  locations. Declared rule, enforcement mechanism, observed compliance and
+  underlying preference are recorded separately (the DERIVE model-vs-subject
+  invariant applied to norms); hard-zero C is not actuator enforcement.
+  Lineage verified: M-G-over-cascades.md:66 (Joe's 2026-06-23 IAD flag) and
+  M-aif4iad.md; bounded Ostrom primary-source check with access date.
+  InstitutionSpec/RuleSpec proposed, NOT adopted; no build; not a ruling.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
