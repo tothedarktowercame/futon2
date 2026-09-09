@@ -1,0 +1,135 @@
+{:schema :c-module-v1-replay,
+ :production-observation-model :not-supplied,
+ :numeric-preference-authority :existing-illustrative-seed-only,
+ :seed-zero-refusal
+ {:status :refused,
+  :reason :positive-prediction-at-zero-preference,
+  :outcomes [[:organization :cancelled]]},
+ :paper-assessment
+ {:module
+  {:schema :preference-module/v1,
+   :id :current-work,
+   :version 1,
+   :context :futon-paper-and-system-work},
+  :aggregation :not-declared,
+  :entries
+  [{:risk-expression "-log(1-p)",
+    :source
+    {:ref
+     "holes/labs/wm-contract/runs/C-current-paper-diagnostic/preference-registry.json",
+     :basis
+     "Claims distinguish demonstrated results from outlines and unrun comparisons.",
+     :status :candidate,
+     :paper-revision "f036a91ccddf9c30ddb56acf547cb9dcd7fb9ef2",
+     :sources
+     [{:path "p4ng/sec-what-this-is.tex",
+       :sha256
+       "7cd05be36c30636b97925e98d5c5014ca4942c837ed57677ecc0ebe66c34d0fe",
+       :lines [54 63],
+       :verbatim
+       "\\paragraph{What this paper does not claim.}  It does not claim that governing\ncoding agents this way makes them better.  That comparison has not been run: it\nwould need an arm in which the same agents work the same codebase without\nactive-inference-governed selection, adjudicated by someone with no stake in the\noutcome, over enough attempts to mean something.  What can be shown, and is\nshown here, is narrower and still worth having: that the loop closes, that its\ndecisions carry reasons a person can inspect and disagree with, and that its\nclaims about the world are backed by evidence it did not manufacture.  A reader\nwho finishes this paper believing we have demonstrated benefit has been misled,\nand we would rather say so at the start than be read that way."}
+      {:path "p4ng/sec-transfer.tex",
+       :sha256
+       "65e2a444ebd8dab775507d884568cc5d46b391f85bb1c9e86ead14076025cfa0",
+       :lines [82 95],
+       :verbatim
+       "\nTwo bounds, stated here because they are easier to hold in a paper than in a\nmeeting. First, the honest claim is \\emph{diagnostic, not evolutionary}: that\nan organisation instrumented this way will be shown where its decisions are\ncoupled and where they are not, and \\emph{not} that instrumenting it causes\nimprovement. The selective half of the argument is a plan with criteria fixed\nin advance and nothing yet measured; a pitch implying otherwise is claiming an\nunrun experiment.\n\nSecond, the first engagement is not a validated diagnostic being applied. It is\n\\textbf{the instrument being built on a real subject}, and it should be scoped\nand priced as construction. This is not a hedge --- it is the same claim this\npaper makes about itself, applied to the first client rather than to the first\noperator."}]},
+    :status :symbolic,
+    :id :claim-warrant,
+    :criterion "claim-warrant/v1",
+    :domain "1/2 < p < 1",
+    :version 1,
+    :reading
+    {:version 1,
+     :criterion "claim-warrant/v1",
+     :status :observed,
+     :value false,
+     :evidence "C-current-paper-diagnostic/result.json@befdd98f"},
+    :parameter "p_claim-warrant"}
+   {:id :inspectable-reasons,
+    :version 1,
+    :status :unknown,
+    :reason :no-reading}
+   {:risk-expression "-log(1-p)",
+    :source
+    {:ref
+     "holes/labs/wm-contract/runs/C-current-paper-diagnostic/preference-registry.json",
+     :basis
+     "A witness establishes the claimed change, rather than merely repeating the claim.",
+     :status :candidate,
+     :paper-revision "f036a91ccddf9c30ddb56acf547cb9dcd7fb9ef2",
+     :sources
+     [{:path "p4ng/sec-conclusion.tex",
+       :sha256
+       "d65feaee42edef3ba2d6ec211013783574a745e27c21a81c088624a9eafb9f50",
+       :lines [11 15],
+       :verbatim
+       "keep the principled quantities separate from the engineering ones so a reader can\ntell which moved a choice; never let a component certify its own output; require\na witness the system could not have manufactured before believing the world has\nchanged; and treat a failure as terrain to be crossed later rather than as\nsomething to roll back."}]},
+    :status :symbolic,
+    :id :semantic-satisfaction,
+    :criterion "semantic-satisfaction/v1",
+    :domain "1/2 < p < 1",
+    :version 1,
+    :reading
+    {:version 1,
+     :criterion "semantic-satisfaction/v1",
+     :status :observed,
+     :value false,
+     :evidence "C-current-paper-diagnostic/result.json@befdd98f"},
+    :parameter "p_semantic-satisfaction"}
+   {:id :external-usefulness,
+    :version 1,
+    :status :unknown,
+    :reason :no-reading}
+   {:id :reusable-patterns,
+    :version 1,
+    :status :unknown,
+    :reason :no-reading}]},
+ :wm-local-ranking
+ {:status :ranked,
+  :criterion :disposition,
+  :quantity :local-kl-risk,
+  :module
+  {:id :recorded-seed, :version 1, :context :wm-flight-dispositions},
+  :candidates
+  [{:id :grounded,
+    :diagnostic
+    {:id :disposition,
+     :version 1,
+     :criterion "flight-disposition/v1",
+     :reading
+     {:version 1,
+      :criterion "flight-disposition/v1",
+      :status :predicted,
+      :distribution
+      {:support [[:organization :grounded-change]],
+       :mass {[:organization :grounded-change] 1}},
+      :evidence "synthetic-adapter-control-not-live-forecast"},
+     :source
+     {:ref "src/futon2/aif/ruled_outcome_c.clj",
+      :basis "D1 illustrative seed, not a new ruling",
+      :status :illustrative-seed},
+     :status :computed,
+     :risk-nats 0.6931471805599453}}
+   {:id :build-failure,
+    :diagnostic
+    {:id :disposition,
+     :version 1,
+     :criterion "flight-disposition/v1",
+     :reading
+     {:version 1,
+      :criterion "flight-disposition/v1",
+      :status :predicted,
+      :distribution
+      {:support [[:organization :build-failed]],
+       :mass {[:organization :build-failed] 1}},
+      :evidence "synthetic-adapter-control-not-live-forecast"},
+     :source
+     {:ref "src/futon2/aif/ruled_outcome_c.clj",
+      :basis "D1 illustrative seed, not a new ruling",
+      :status :illustrative-seed},
+     :status :computed,
+     :risk-nats 2.0794415416798357}}]},
+ :hypothetical-correction :improves,
+ :wm-adapter-controls :synthetic-predictions,
+ :seed-risk {:status :computed, :risk-nats 0.6931471805599453}}

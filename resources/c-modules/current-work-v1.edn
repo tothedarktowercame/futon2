@@ -1,0 +1,148 @@
+{:schema :preference-module/v1,
+ :id :current-work,
+ :version 1,
+ :context :futon-paper-and-system-work,
+ :entries
+ [{:next-work
+   "Reconcile the Part IV thesis in empirics-futon/argument_outline.py with the Part III outline and regenerate its views.",
+   :phase "DOCUMENT",
+   :source
+   {:ref
+    "holes/labs/wm-contract/runs/C-current-paper-diagnostic/preference-registry.json",
+    :basis
+    "Claims distinguish demonstrated results from outlines and unrun comparisons.",
+    :status :candidate,
+    :paper-revision "f036a91ccddf9c30ddb56acf547cb9dcd7fb9ef2",
+    :sources
+    [{:path "p4ng/sec-what-this-is.tex",
+      :sha256
+      "7cd05be36c30636b97925e98d5c5014ca4942c837ed57677ecc0ebe66c34d0fe",
+      :lines [54 63],
+      :verbatim
+      "\\paragraph{What this paper does not claim.}  It does not claim that governing\ncoding agents this way makes them better.  That comparison has not been run: it\nwould need an arm in which the same agents work the same codebase without\nactive-inference-governed selection, adjudicated by someone with no stake in the\noutcome, over enough attempts to mean something.  What can be shown, and is\nshown here, is narrower and still worth having: that the loop closes, that its\ndecisions carry reasons a person can inspect and disagree with, and that its\nclaims about the world are backed by evidence it did not manufacture.  A reader\nwho finishes this paper believing we have demonstrated benefit has been misled,\nand we would rather say so at the start than be read that way."}
+     {:path "p4ng/sec-transfer.tex",
+      :sha256
+      "65e2a444ebd8dab775507d884568cc5d46b391f85bb1c9e86ead14076025cfa0",
+      :lines [82 95],
+      :verbatim
+      "\nTwo bounds, stated here because they are easier to hold in a paper than in a\nmeeting. First, the honest claim is \\emph{diagnostic, not evolutionary}: that\nan organisation instrumented this way will be shown where its decisions are\ncoupled and where they are not, and \\emph{not} that instrumenting it causes\nimprovement. The selective half of the argument is a plan with criteria fixed\nin advance and nothing yet measured; a pitch implying otherwise is claiming an\nunrun experiment.\n\nSecond, the first engagement is not a validated diagnostic being applied. It is\n\\textbf{the instrument being built on a real subject}, and it should be scoped\nand priced as construction. This is not a hedge --- it is the same claim this\npaper makes about itself, applied to the first client rather than to the first\noperator."}]},
+   :vertex :organization,
+   :measurement
+   "Compare explicitly annotated claim scope with the evidence scope; annotation requires review.",
+   :id :claim-warrant,
+   :kind :soft-binary,
+   :criterion "claim-warrant/v1",
+   :version 1,
+   :parameter "p_claim-warrant"}
+  {:next-work
+   "Use this registry and diagnostic as a small review subject; record whether a reader can reconstruct the finding.",
+   :phase "ARGUE",
+   :source
+   {:ref
+    "holes/labs/wm-contract/runs/C-current-paper-diagnostic/preference-registry.json",
+    :basis
+    "A person can inspect and disagree with reasons for a decision.",
+    :status :candidate,
+    :paper-revision "f036a91ccddf9c30ddb56acf547cb9dcd7fb9ef2",
+    :sources
+    [{:path "p4ng/sec-conclusion.tex",
+      :sha256
+      "d65feaee42edef3ba2d6ec211013783574a745e27c21a81c088624a9eafb9f50",
+      :lines [10 15],
+      :verbatim
+      "the invariants: record the decision together with the reasons that produced it;\nkeep the principled quantities separate from the engineering ones so a reader can\ntell which moved a choice; never let a component certify its own output; require\na witness the system could not have manufactured before believing the world has\nchanged; and treat a failure as terrain to be crossed later rather than as\nsomething to roll back."}]},
+   :vertex :organization,
+   :measurement
+   "An independent reader can recover a decision and its reasons from the maintained record.",
+   :id :inspectable-reasons,
+   :kind :soft-binary,
+   :criterion "inspectable-reasons/v1",
+   :version 1,
+   :parameter "p_inspectable-reasons"}
+  {:next-work
+   "Design a feedback outcome carrier which separates delivered feedback from explicit denial; retain the existing negative probe.",
+   :phase "VERIFY",
+   :source
+   {:ref
+    "holes/labs/wm-contract/runs/C-current-paper-diagnostic/preference-registry.json",
+    :basis
+    "A witness establishes the claimed change, rather than merely repeating the claim.",
+    :status :candidate,
+    :paper-revision "f036a91ccddf9c30ddb56acf547cb9dcd7fb9ef2",
+    :sources
+    [{:path "p4ng/sec-conclusion.tex",
+      :sha256
+      "d65feaee42edef3ba2d6ec211013783574a745e27c21a81c088624a9eafb9f50",
+      :lines [11 15],
+      :verbatim
+      "keep the principled quantities separate from the engineering ones so a reader can\ntell which moved a choice; never let a component certify its own output; require\na witness the system could not have manufactured before believing the world has\nchanged; and treat a failure as terrain to be crossed later rather than as\nsomething to roll back."}]},
+   :vertex :organization,
+   :measurement
+   "The existing carrier distinguishes explicit satisfaction from explicit denial in the recorded probe.",
+   :id :semantic-satisfaction,
+   :kind :soft-binary,
+   :criterion "semantic-satisfaction/v1",
+   :version 1,
+   :parameter "p_semantic-satisfaction"}
+  {:next-work
+   "Design one current-work trial with a problem, prior prediction, independent outcome review and recording of observations; do not fill the grid to manufacture coverage.",
+   :phase "INSTANTIATE",
+   :source
+   {:ref
+    "holes/labs/wm-contract/runs/C-current-paper-diagnostic/preference-registry.json",
+    :basis
+    "The instrument helps solve a real problem; payment is a separate outcome coordinate.",
+    :status :candidate,
+    :paper-revision "f036a91ccddf9c30ddb56acf547cb9dcd7fb9ef2",
+    :sources
+    [{:path "p4ng/sec-evaluation-outline.tex",
+      :sha256
+      "f293bc38e0f71f06d7dab67a83d9abae54bf0eae007407bc1c827964221e47a5",
+      :lines [49 55],
+      :verbatim
+      "  result about whether the model sorts outcomes: the cells report coverage, not\n  findings. Only the fifteen cases whose problem a source actually locates are\n  drawn; the other seventeen are named beneath the grid, and the\n  \\textsc{believe} column is empty across the whole corpus.\n  The corresponding acceptance grid --- could this apparatus have reached that\n  case's known outcome sooner, and would anyone have paid --- is a different\n  artefact whose one hundred and sixty cells are all unrun."}
+     {:path "p4ng/sec-transfer.tex",
+      :sha256
+      "65e2a444ebd8dab775507d884568cc5d46b391f85bb1c9e86ead14076025cfa0",
+      :lines [84 95],
+      :verbatim
+      "meeting. First, the honest claim is \\emph{diagnostic, not evolutionary}: that\nan organisation instrumented this way will be shown where its decisions are\ncoupled and where they are not, and \\emph{not} that instrumenting it causes\nimprovement. The selective half of the argument is a plan with criteria fixed\nin advance and nothing yet measured; a pitch implying otherwise is claiming an\nunrun experiment.\n\nSecond, the first engagement is not a validated diagnostic being applied. It is\n\\textbf{the instrument being built on a real subject}, and it should be scoped\nand priced as construction. This is not a hedge --- it is the same claim this\npaper makes about itself, applied to the first client rather than to the first\noperator."}]},
+   :vertex :organization,
+   :measurement
+   "Read solved and paid observations separately; unknown is neither success nor failure.",
+   :id :external-usefulness,
+   :kind :soft-binary,
+   :criterion "external-usefulness/v1",
+   :version 1,
+   :parameter "p_external-usefulness"}
+  {:next-work
+   "Choose a specific pattern and an independent enactment to examine; preserve unresolved promotion status.",
+   :phase "DOCUMENT",
+   :source
+   {:ref
+    "holes/labs/wm-contract/runs/C-current-paper-diagnostic/preference-registry.json",
+    :basis
+    "The stated invariants are recognisable beyond this one implementation.",
+    :status :candidate,
+    :paper-revision "f036a91ccddf9c30ddb56acf547cb9dcd7fb9ef2",
+    :sources
+    [{:path "p4ng/sec-conclusion.tex",
+      :sha256
+      "d65feaee42edef3ba2d6ec211013783574a745e27c21a81c088624a9eafb9f50",
+      :lines [17 20],
+      :verbatim
+      "A pattern earns its name through repeated enactment and review, and one\nimplementation in one stack is one enactment; no entrywise promotion census\nexists, so this paper makes no numerical or majority claim about which entries\nhave earned it."}
+     {:path "p4ng/sec-conclusion.tex",
+      :sha256
+      "d65feaee42edef3ba2d6ec211013783574a745e27c21a81c088624a9eafb9f50",
+      :lines [28 32],
+      :verbatim
+      "For the pattern reader, the test we cannot run is the one worth running.  If\nthese invariants are real, they should be recognisable in harnesses built for\nentirely different reasons by people who have never read this paper.  Where they\nare, the entry has earned its promotion; where they are not, it was a description\nof our system all along, and we would rather find that out than not."}]},
+   :vertex :organization,
+   :measurement
+   "An independent enactment and review supplies evidence for a specific entry.",
+   :id :reusable-patterns,
+   :kind :soft-binary,
+   :criterion "reusable-patterns/v1",
+   :version 1,
+   :parameter "p_reusable-patterns"}]}

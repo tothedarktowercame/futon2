@@ -31,6 +31,7 @@
   (:require [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.preferences :as pref]
+            [futon2.aif.preference-module :as c-module]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.disposition-risk :as disposition]
             [futon2.aif.move-class-intensity :as move-intensity]))
@@ -971,6 +972,8 @@
    `:time-pressure-scale`."
   ([state candidate-actions] (rank-actions state candidate-actions {}))
   ([state candidate-actions opts]
+   (when (:preference-module opts)
+     (c-module/validate-module (:preference-module opts)))
    (let [{:keys [included excluded]}
          (partition-policy-support (:capability-graph opts) candidate-actions opts)
          seed-required? (and (:ruled-outcome-c-enabled? opts) (seq included))
@@ -980,7 +983,13 @@
          ranked (if refusal?
                   []
                   (->> included
-                       (map #(compute-efe state % opts))
+                       (map (fn [action]
+                              (cond-> (compute-efe state action opts)
+                                (:preference-module opts)
+                                (assoc :preference-module-diagnostic
+                                       (c-module/assess
+                                        (:preference-module opts)
+                                        (get action :preference-readings {}))))))
                        (sort-by :controller-score)
                        (map-indexed (fn [i e] (assoc e :rank (inc i))))
                        vec))]
@@ -1005,3 +1014,16 @@
    candidate remains."
   [state candidate-actions opts]
   (first (rank-star-map-actions state candidate-actions opts)))
+
+(defn rank-local-preference-actions
+  "WM support gate and existing scores, plus a separate one-entry local C-risk
+   ordering. Caller supplies a finite :preference-module, entry id and predicted
+   :preference-readings on each action. This does not invent an aggregate G."
+  [state actions opts entry-id]
+  (let [ranked (rank-actions state actions opts)
+        candidates (mapv (fn [r] {:id (get-in r [:action :id])
+                                 :readings (get-in r [:action :preference-readings] {})}) ranked)]
+    {:wm-rankings ranked
+     :policy-support (meta ranked)
+     :local-preference-ranking
+     (c-module/rank-local-risk (:preference-module opts) entry-id candidates)}))

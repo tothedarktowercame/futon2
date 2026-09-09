@@ -14,6 +14,16 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
 
 ## Current lifecycle position — 2026-09-09 sitting
 
+**Later in the sitting:** Joe explicitly authorised beginning a modular,
+versioned C implementation, with Lean type correctness and WM interoperability
+as the present criteria; speculative duality is deferred to evidence from use.
+This supersedes the earlier stop before building, preserved below as history.
+The first implementation and his verbatim direction are recorded in
+[INSTANTIATE C module v1](labs/wm-contract/INSTANTIATE-C-module-v1-2026-09-09.md).
+This is an initial component with a callable WM adapter, not closure of the
+production observation model or of the full excursion.
+
+
 Joe recognises the historical and current-paper pilots as the **DERIVE** step:
 "we've derived the shape a solution should take". His direction is to write
 that shape and an upgrade path, then ARGUE it using the Futon3 pattern library;
@@ -28,7 +38,7 @@ predictive integration. ARGUE is now written with library cross-references and
 pattern selection records; its acceptance and VERIFY are not asserted. The
 first implementation target is a reproducible diagnostic; the production
 observation-model obligation in §1b and numerical preference decisions remain
-explicit. No build is undertaken by this sitting's current instruction.
+explicit. No build was undertaken under that earlier instruction.
 
 ## Entry state (what the automated lane finished, 2026-09-08/09)
 

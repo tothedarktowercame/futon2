@@ -1,0 +1,6 @@
+{"src/futon2/aif/preference_module.clj" "992105412b34b4a4235cf7554c4667ec8f833af0327a19c7c043403dc47c8291"
+ "src/futon2/aif/efe.clj" "032551f63d810509a14e45780b87d33cfb54ea0726e9df7c53338141aa220f02"
+ "src/futon2/aif/ruled_outcome_c.clj" "c519c4caf5715cc4108ff3aab7be52560423b17aa57b5dff1df97e4d4635d2e0"
+ "resources/c-modules/current-work-v1.edn" "c52ca83ad03c6ff207e8efd333e7fdcc01904df4ccfc0e6a05bf71da9ab6319e"
+ "holes/labs/wm-contract/runs/C-current-paper-diagnostic/result.json" "f678ad693ab9cdfde2b5a791186c4c5a3b5fc2dc172f4eff547f66ffec3d89be"
+ "../mathlib4/DarkTower/WarMachine/LocalPreferenceModule.lean" "187ed6bf353ef696700823db2e0ec6eee5b80d883499e2283f5ff4a55f51c9ba"}

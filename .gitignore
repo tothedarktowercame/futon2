@@ -38,6 +38,7 @@ web/war-machine/resources/public/data/affect-events.json
 resources/*
 !resources/sorrys.edn
 !resources/capability_zones/
+!resources/c-modules/
 
 # local file that shouldn't be tracked here
 LICENSE
