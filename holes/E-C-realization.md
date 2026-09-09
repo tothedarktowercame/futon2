@@ -276,6 +276,27 @@ explicit. No build was undertaken under that earlier instruction.
   by claude-1 against the recorded capture revision (3b38f438). Products
   landed inside claude-1's e4a4ade5 commit (shared-index capture,
   contents verified matching codex-12's intent).
+- 2026-09-09 (eleventh product — the SEPARATION ruling, codex-17 seat,
+  REVIEWED): Joe ruled the FoldC representation question in the codex-17
+  session (verbatim at
+  holes/labs/wm-contract/SESSION-FoldC-separation-2026-09-09.md, futon2
+  78e1482a): preference distributions and scalar KL risk STAY SEPARATE —
+  "There are different things... that's basically part of the definition" —
+  implementation delegated to codex-17; Markov categories recorded as a
+  direction to investigate for probability/prediction, not an asserted
+  representation. First implementation slice mathlib4 b76719cd23
+  (PreferenceRiskSeparation.lean): constant probability conditional with
+  finite predictive marginalisation (constant_absorbs_prediction), a
+  separately-typed RiskContribution, scalarKL with preferred-zero admission
+  (preferred_zero_refuses — the refuse-don't-clamp constraint carried into
+  the separated type), and grounded_seed_risk = log 2 anchoring the
+  measured value; docstring disclaims a Stoch instance and the §1b bridge.
+  The runtime adapter also landed (futon2 02b317f5:
+  futon2.aif.disposition-risk/constant-checkpoint-kernel — typed refusals
+  on every failure mode, ln 2 reproduced end-to-end through the A3
+  pass-through). claude-1 review by own runs: adapter tests 6/46/0; lake
+  build 2706 jobs green, axiom prints clean. FoldC witness reconciliation
+  under the ruled separation + find retirement/re-pin remain outstanding.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
