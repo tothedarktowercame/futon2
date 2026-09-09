@@ -457,6 +457,21 @@ explicit. No build was undertaken under that earlier instruction.
   Bounded wiring/test packet routed to codex-10; config sheet carries
   :policy-depth 3/3. Sitting tally: pi-zero-form ruled, hierarchy ruled
   (scoped), learning withheld-with-program, policy-depth ruled.
+- 2026-09-09 (twenty-fourth — policy-depth wiring LANDED, U12 finding
+  deepened): the 3/5 wiring committed (futon2 4e76f94f + the concurrent
+  inbox-zero capture ff015b85 carrying the war_machine/trace half — both
+  reviewed together by claude-1, own test runs green). Delivered as
+  specced: config-driven policy_depth.clj, effective horizons recorded per
+  invocation (config-supplied-5 distinct from legacy-5 via a retained
+  depth-3 control), fallback-1 recorded, truthful endings, absent-config
+  byte-identity. Files released to codex-17's build chain. THE U12 GATE
+  STAYS RED WITH A DEEPER CAUSE: the honest re-measure attempt found the
+  replay deterministic (43 files byte-identical twice) but the producer
+  EMITS A FIXED VERDICT THAT CONTRADICTS ITS OWN MEASURED NUMBERS
+  (obsolete since the U18 c-grain evolution). Artifact and pin correctly
+  untouched — updating either would record a lie. Defect ticket candidate:
+  U12 replay verdict must DERIVE from measurements; until then the suite
+  carries one known, fully-diagnosed failure.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
