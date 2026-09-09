@@ -415,6 +415,26 @@ explicit. No build was undertaken under that earlier instruction.
   Fresh pure tests 26/92/0. Registry carries the withholding; status
   honestly stays observed-not-decided (still needs the decision, later,
   with better evidence).
+- 2026-09-09 (twenty-first — learning HISTORICAL RECOVERY, first unit):
+  Joe redirects the learning question: the specification is the CLAIMED
+  PLoP system, recovered from the July/August drafts and Science history
+  and validated now — not reduction to the current offline-only registry
+  state (verbatim + spec at
+  runs/LEARNING-historical-recovery-spec-2026-09-09.md, futon2 b6f4040e).
+  Seven recovery tickets proposed (LR1-LR7: persistence, trainer
+  correctness, diverse proposals, outcome->reward->next-proposal
+  consumption, BMR->next-field, pattern admission, historical receipts),
+  each a claimed behavior + validation contract with anti-overclaim guards
+  inline; proposals only, no ledger writes. FIRST REAL REPRODUCTION
+  executed: the historical GFN trainer in the documented futon3a/.venv —
+  9/9 tests, full 700-iter run, G0a/G0b true, conditional TV
+  0.0125095739..., matching July to ~1e-16 (numeric, not bytes). Campaign
+  S receipt hunt: the pickaxe finds later audit text and narrative, NOT an
+  original receipt; external stores unsearched, absence stays scoped.
+  Superior-success claim remains withdrawn. :learning stays unruled; no
+  RUN4 gate changes. Reviewed by claude-1 (note-only verified; ticket
+  structure and guards read; reproduction taken on its recorded evidence —
+  LR2 re-execution belongs to whoever mints it).
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
