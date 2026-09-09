@@ -1,0 +1,26 @@
+{:schema :wm/run4-config-proposal-v1
+ :status :PROPOSED-FOR-REVIEW
+ :assembled-by "claude-1"
+ :at "2026-09-09"
+ :authority "RULINGS-walkthrough-2026-09-09.md Item 23 (checklist as task list); per-flag warrants below"
+ :run
+ {:run-id "run4-2026-09-09"
+  :work-dir "/home/joe/code/futon2/data/wm-step/run4-2026-09-09"
+  :runner "wm_step.sh init/step/accept (supervised stepped path; RUN4-execution-runbook-2026-09-09.md; scheduled runner stays dormant)"
+  :steps-proposed 3
+  :steps-reason "The prior accepted pin (data/wm-step/w1) banked 2 accepted steps; 3 gives one more than precedent while keeping every step individually inspectable at the accept gate. Joe may set any count at go."
+  :observation-window "next-accepted-step rule, version-pinned in :window per the adopted recording contract (A4)"}
+ :flags
+ {:accumulate-strategic-habit? {:value true :warrant "Item 22 + futon2 8dd17915 (reviewed); RUN4 banks the first grain-labelled strategic counts"}
+  :strategic-prior "fixture E_S stands (Items 21a+22; promotion refused until nonempty grain-labelled data)"
+  :FUTON_WM_MISSION_C {:value :unset :warrant "Item 19a: C_mis stays flag-gated"}
+  :ruled-outcome-c-enabled? {:value true :warrant "Item 23 reading of A3: the F10 rider demands a live computation of the seeded C; kernel constant across policies today so it cannot move a selection; pass-through wired at e65b996a (reviewed)"}
+  :seeded-c "src/futon2/aif/ruled_outcome_c.clj seed (canonical vertex keys, ba64ecdd)"
+  :disposition-kernel "checks/disposition_kernel.clj fitted kernel (1/12 support; constant risk ln 2)"
+  :recording-contract {:value :wm/realized-recording-v1 :warrant "A4 implemented f71eeade (reviewed); producer/window/attempt/reviewer per the five supplied choices; strategic-habit revision handling and cross-store retrospective discovery NOT YET CLAIMED (named gaps, A4-recording-adoption-2026-09-09.md)"}
+  :accept-red-guard {:value :refuse-on-red :warrant "A7 implemented 00b9afd4 (reviewed); FUTON_WM_VERDICT_CAPTURE set by wm_step.sh so first-pass reds block; --override-red <reason> recorded in the pin"}}
+ :qualification "runs/F2-run4-readiness/RUN4-qualification-2026-09-09.md (A5): the preregistered conformance meaning; coverage reported alongside"
+ :readiness "VERDICT: READY at fcd1261c30 (nine lines green; A1 b9208880 reviewed)"
+ :open-before-go
+ {:find-organise-fork "Joe's eight-before-any-run resolution: run with the find and organise holes open (neither is RUN4-named; meter READY), or commission the new work first (find: conformance proofs at the applied carrier; organise: stale THEN citations repair + LA2 weakening decision)"
+  :adoption "Joe adopts the A4 recording contract (this sheet's :recording-contract line) and this config at go/no-go"}}

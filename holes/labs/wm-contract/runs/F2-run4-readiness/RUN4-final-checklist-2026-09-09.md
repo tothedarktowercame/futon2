@@ -34,18 +34,17 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
 3. **MECHANICALLY DONE (e65b996a, reviewed)** — fold pass-through wired, no default flip; the on/off itself is settled ON by Item 23's reading. WAS: (the seeded disposition fold; caller opts
    :ruled-outcome-c-enabled?/:seeded-c/:disposition-kernel). Item 19a fixed
    C_mis flag-gated; the FOLD flag is a separate decision, still open.
-4. **Adopt the 19b recording contract** (:wm/realized-recording-v1 draft,
+4. **IMPLEMENTED (f71eeade, reviewed); adoption at go/no-go** — 19b recording contract. WAS: (:wm/realized-recording-v1 draft,
    DRAFT-realized-outcome-recording-19b-2026-09-09.md; pins verified). Its
    own reviewed ledger step; determines what the run records.
 5. **DONE (00112270, reviewed)** — qualification criteria stated up front (prereg C6 reserves this to
    Joe: the old census includes one ruling-unrealised hop and 19 unfired
    edges — is that coverage qualifying?). Can be ruled at accept time;
    better before.
-6. **Run config**: flags (accumulation ON per Item 22; E_S fixture stands;
+6. **ASSEMBLED (RUN4-config-2026-09-09.edn, PROPOSED-FOR-REVIEW)** — run config. WAS: flags (accumulation ON per Item 22; E_S fixture stands;
    FUTON_WM_MISSION_C off per 19a), step count, work dir, unique run id
    (runbook step 1).
-7. *(held Block-D, gates the certificate not the run)* **accept-script
-   red-verdict gate**: wm_step.sh:494,545 advances the pin on exit-zero
+7. **DONE (00b9afd4, reviewed)** — accept-script red-verdict gate. WAS: wm_step.sh:494,545 advances the pin on exit-zero
    alone; red battery verdicts do not stop it. One word authorizes the
    refuse-on-red repair.
 
