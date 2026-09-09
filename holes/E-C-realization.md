@@ -78,6 +78,17 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
 - 2026-09-09: excursion opened; C-marker flipped to deferral-under-organized-
   discovery citing this file; U88 slice 1 (the pin) complete; F11 apply and
   U87 census dispatched to Codex in the automated lane.
+- 2026-09-09 (sitting, first product): Joe directed a MAP before design —
+  assemble the partial C calculations with their input suppliers and
+  consumers. Recorded with his verbatim words at
+  holes/labs/wm-contract/MAP-C-realization-2026-09-09.md (futon2 810574cb,
+  codex-12 with Joe; source inspection only). Beyond the §1b checkpoint/
+  channel-means gap it surveys three more seams: the mean-only
+  disposition-risk call does not implement uncertainty marginalization; goal
+  KL enters the controller augmentation while mission C stays post-selection
+  readback; the Bernoulli utility clamps endpoints where disposition KL
+  preserves zeros. Logged as sitting EVIDENCE — the map's acceptance and any
+  design that follows remain Joe's.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
