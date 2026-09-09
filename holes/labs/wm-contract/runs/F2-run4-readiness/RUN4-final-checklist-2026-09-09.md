@@ -25,7 +25,17 @@ Item 19–22 rulings. Joe's two confirmations map to existing machinery:
    Proposed reading: both RUN4-named holes typed :run-gated with no non-run
    blockers counts as ready-to-run. On Joe's word, claude-1 edits the gate
    with a control.
-2. **PARTIALLY RESOLVED, JOE'S WORD REMAINS** — eight-before-any-run vs the four holes: dirichlet BOUND (9f45821c + existing 56b3c44b), C AMENDED at §2a (c75b7323, definition excursion-owned), find FORKED (applied carrier needs new conformance work, 0f74d9b4), organise FORKED (LA2 evidence a0219c3; :library-correspondence control red, two stale THEN citations). Joe rules: run with find/organise open, or commission the new work first. WAS:
+2. **COMMISSIONED (Joe: "commission the new work"), two threads live** —
+   find: statement slice LANDED (mathlib4 93ade5be78, reviewed — Item-20
+   laws at the applied carrier); the existence-witness conformance slice is
+   in flight (result-predicate targets, no opaque-find claim). organise:
+   reconciliation LANDED (futon3 8199b9b, reviewed) — Joe's 2026-09-07
+   ruling already selected the existential destination (arm 6, staged
+   disposition (f)); the citation drift is repaired (634c6cc, control
+   green); release waits on the NATURALISTIC EXEMPLAR proviso, whose
+   remaining choices are Joe's (freeze WHICH cascade basis — budget 20/3 or
+   floor 41/14 — and for WHAT task), plus library-lane interpretation
+   authoring (F12-O4-witness-discovery.md ownership map). WAS: — eight-before-any-run vs the four holes: dirichlet BOUND (9f45821c + existing 56b3c44b), C AMENDED at §2a (c75b7323, definition excursion-owned), find FORKED (applied carrier needs new conformance work, 0f74d9b4), organise FORKED (LA2 evidence a0219c3; :library-correspondence control red, two stale THEN citations). Joe rules: run with find/organise open, or commission the new work first. WAS:
    (EPIC-run-era.md:991, Joe 2026-09-06: Box 6's substantive holes gate the
    first run). The current closability audit types 4 holes pre-run-closable.
    Either those close pre-run (lane work, each its own reviewed slice) or
