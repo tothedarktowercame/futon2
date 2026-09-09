@@ -40,6 +40,7 @@
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.anticipation :as anticipation]
+            [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.adapters.interest-network :as interest-net]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
@@ -5944,7 +5945,8 @@
                :as judge-opts
                :or {trace? false include-advisory-lanes? true
                     step-portfolio? true eval-invariant-fallback? true}}]
-  (let [accumulate-strategic-habit?
+  (let [depth-config (policy-depth/configured judge-opts)
+        accumulate-strategic-habit?
         (strategic-habit/enabled? judge-opts
           (System/getenv "FUTON_WM_ACCUMULATE_STRATEGIC_HABIT"))
         route0 (:wm/route scan-data)
@@ -6297,9 +6299,8 @@
         ;; v0.15: multi-horizon scoring activates when anticipation
         ;; loaded events in horizon. Falls back to single-step if no
         ;; anticipation data.
-        wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)
-                                    (seq (:events anticipation-snapshot)))
-                           3)
+        depth-anticipation (policy-depth/anticipation anticipation-snapshot depth-config)
+        wm-horizon-steps (:horizon-steps depth-anticipation)
         wm-enriched-candidates-pre-ladder
         (->> wm-candidates
              enrich-candidates-with-structural-pressure
@@ -6585,7 +6586,8 @@
         ;; `judge` docstring already promised.
         cascade-policies (if include-advisory-lanes?
                            (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
-                                 wm-ranked {:n 3 :budget 6 :decision wm-decision})
+                                 wm-ranked (cond-> {:n 3 :budget 6 :decision wm-decision}
+                                             depth-config (assoc :policy-depth depth-config)))
                                 (catch Throwable _ []))
                            [])
         cascade-actions (mapv (fn [cp]
@@ -6770,7 +6772,8 @@
                   :pattern-gaps (if include-advisory-lanes?
                                   (try
                                     ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
-                                     wm-ranked {:n 10 :budget 6})
+                                     wm-ranked (cond-> {:n 10 :budget 6}
+                                                 depth-config (assoc :policy-depth depth-config)))
                                     (catch Throwable _ []))
                                   [])
                   :wm/route route6
@@ -6807,7 +6810,18 @@
         result0-unasserted (carry-mission-focus result0-unfocused mission-focus)
         ;; U37: last of the terminal projections, after the focus read, so the
         ;; three reviewed shapes above are untouched when the flag is off.
-        result0 (carry-enumeration-completeness result0-unasserted)
+        result0 (cond-> (carry-enumeration-completeness result0-unasserted)
+                  depth-config
+                  (assoc :policy-depth
+                         {:configured depth-config
+                          :anticipation (mapv #(assoc (:record depth-anticipation)
+                                                 :action (:action %)) wm-ranked-domain-base)
+                          :cascade-rollout
+                          (vec (for [lane (concat cascade-policies
+                                                  (:pattern-gaps result0-unasserted))
+                                     event (:policy-rollout-events lane)
+                                     :when (= :policy-depth/v1 (:producer-contract event))]
+                                 event))}))
         result
         (if trace?
           (let [result (-> result0

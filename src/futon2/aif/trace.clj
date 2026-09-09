@@ -640,6 +640,8 @@
     ;; run, NOT that the record belongs to an unnamed one.
     (:run/id judge-output)
     (assoc :run/id (:run/id judge-output))
+    (:policy-depth judge-output)
+    (assoc :policy-depth (:policy-depth judge-output))
     ;; U52 ladder judgement. The judge attaches the ladder's own record and
     ;; its typed refusals to the judgement; the per-action rung annotations
     ;; survive via `strip-ranked-action` but these two top-level fields are
