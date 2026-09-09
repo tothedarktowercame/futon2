@@ -47,6 +47,7 @@
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
+            [futon2.aif.strategic-habit :as strategic-habit]
             [futon2.aif.mission-c :as mission-c] [futon2.aif.mission-epistemic-value :as mission-epistemic]
             [futon2.aif.mission-gauges :as mission-gauges]
             [futon2.aif.mission-registry :as mission-registry]
@@ -5934,9 +5935,13 @@
   ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
                       step-portfolio? eval-invariant-fallback?
                       strategic-selection-fn wm-version run-id]
+               :as judge-opts
                :or {trace? false include-advisory-lanes? true
                     step-portfolio? true eval-invariant-fallback? true}}]
-  (let [route0 (:wm/route scan-data)
+  (let [accumulate-strategic-habit?
+        (strategic-habit/enabled? judge-opts
+          (System/getenv "FUTON_WM_ACCUMULATE_STRATEGIC_HABIT"))
+        route0 (:wm/route scan-data)
         observation (obs/observe scan-data)
         route1 (route-tag route0 :R2 "futon2.aif.observation/observe")
         free-energy (fe/compute-controller-diagnostics observation)
@@ -6598,6 +6603,11 @@
           ;; recommendations while it is counterfactual-only. A distinct E_S
           ;; will learn from reviewed strategic selection events.
           habit-prior-pre)
+        strategic-habit-state
+        (strategic-habit/carry
+         (:strategic-habit-state prev-trace-record) wm-decision
+         (str "wm-live-selection-" wm-as-of) wm-as-of
+         accumulate-strategic-habit?)
         aif-heads (scan-aif-heads)
         inventory (load-invariant-inventory eval-invariant-fallback?)
         ;; Get portfolio step data for structural info
@@ -6762,6 +6772,8 @@
 
                    beta-dark-fields
                    (merge beta-dark-fields))
+           strategic-habit-state
+           (assoc :strategic-habit-state strategic-habit-state)
            habit-prior-state
            (assoc :habit-prior-state habit-prior-state)
            wm-version

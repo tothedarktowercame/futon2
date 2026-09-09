@@ -2555,7 +2555,9 @@
                                 (fn [days]
                                   (wm/generate-war-machine
                                    days
-                                   {:include-advisory-lanes? false
+                                   (merge
+                                    (select-keys opts [:accumulate-strategic-habit?])
+                                    {:include-advisory-lanes? false
                                     :strategic-selection-fn
                                     (fn [request]
                                       (let [selection
@@ -2565,7 +2567,7 @@
                                         (when
                                          (:readiness/selection-transient selection)
                                           (reset! selection-transient? true))
-                                        selection))})))
+                                        selection))}))))
             judgement0-base
             (run-phase!
              opts @phase-context :selection

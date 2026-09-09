@@ -690,6 +690,8 @@
     (assoc :enactment (:enactment judge-output))
     ;; B1 learned E(π), dark and present-only: the flag-off trace shape remains
     ;; unchanged, while enabled ticks carry the sufficient-statistic state.
+    (:strategic-habit-state judge-output)
+    (assoc :strategic-habit-state (:strategic-habit-state judge-output))
     (:habit-prior-state judge-output)
     (assoc :habit-prior-state (:habit-prior-state judge-output))
     ;; I3: one keyword per tick, not per candidate, and inside the flag so the
