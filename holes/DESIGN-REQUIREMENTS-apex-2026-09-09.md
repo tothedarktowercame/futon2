@@ -75,7 +75,7 @@ Not weights — "what are they weights of" is the open question, and Joe
 rejected the weights framing as minimalistic. Whether each requirement is
 best merged into the system as a preference (a C-family carrier), an
 institution (rules-in-use over observation access, participation, and
-roles — cf. Joe's IAD/Ostrom strand, corneli2016), a design pattern (an
+roles — cf. Joe's IAD/Ostrom strand: corneli2016, https://metameso.org/~joe/papers/corneli2016institutional.pdf, also cited at holes/M-G-over-cascades.md:66), a design pattern (an
 if/however/then in the library with correspondence controls), or several
 of these at different grains, is the subject of the excursion this
 document seeds (E-requirements-integration). The one adjacent settled
