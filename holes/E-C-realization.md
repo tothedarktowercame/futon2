@@ -386,6 +386,19 @@ explicit. No build was undertaken under that earlier instruction.
   intervention/primary-score manifest still unspecified; no organise
   closure or readiness claim. Disposition (f)'s exemplar remains in
   progress, not satisfied.
+- 2026-09-09 (nineteenth — the paired BEFORE/AFTER probes): a second real
+  authority-reader execution through find-organise/fire, post-re-pin
+  (futon2 a9abb714, runs/E-pre-go-live-post-repin-probe-2026-09-09.md +
+  edn): VERDICT READY, all nine lines green, with raw command/stdout/exit,
+  member accounting and before/after driver+pattern fingerprints recorded.
+  Together with the 18:46 BLOCKED-ON probe this is a recorded
+  state-change-under-real-work pair — readiness changed because actual
+  preparation work happened between the two executions — NOT a
+  precedence-only comparison, and the record says so. O4 remains
+  unexercised; organise closure not claimed; no further interpretation
+  loop requested. (codex-17's note that the publish count-pin blocker
+  remains open is STALE — claude-1 re-pinned the band with cause and
+  published green earlier this hour.)
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
