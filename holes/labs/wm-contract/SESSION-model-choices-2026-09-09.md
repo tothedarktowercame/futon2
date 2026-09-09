@@ -25,3 +25,29 @@ accumulation remain in force; this does not promote tactical habit into the
 strategic selector or replace its standing fixture E_S automatically.
 
 Hierarchy, learning and policy depth remain pending discussion.
+
+## 2. Hierarchy: single-level for RUN4, with follow-on provisos
+
+Joe, verbatim:
+
+> So, that's fine for run 4, I suppose, to some extent, however. We had previously thought of the outer loop. As having its own AIF, and the inner loop is having its own AIF, and now we have also started to define the ZIF harness so we could get agents working. With an AIF backing as well. However, I don't think any of that's strictly needed for Run 4. As long as we're mainly just getting run 4 to exercise the inner loop, or else if we're conceiving of the outer loop, we're going to use the inner loop. And the inner loop is all part of one AIF system rather than a hierarchical model. So, in any case, we'll get the hierarchical model in due course with the Zaif agents. But... For now. We can do whatever makes sense for Run 4 to get it moving again with these provisos in place. For follow-on actions.
+
+Interpretation: accept the currently single-level prediction model for RUN4's
+inner-loop exercise. If outer-loop work is involved in this run, it uses the
+inner loop; that does not establish a coupled generative hierarchy. This is an
+era/run-scoped disposition of :hierarchy, not a permanent single-level design
+or a claim that all of the stack is one AIF system.
+
+Preserve follow-on actions: the outer loop's own AIF, the inner loop's own AIF,
+and AIF-backed agents through the Zaif harness must be accounted for in the
+future hierarchical model. The ruling does not specify their probabilistic
+coupling, timescales or implementation, and does not claim they are already
+wired. These follow-ons do not gate RUN4. Preserve both "ZIF" and "Zaif" in
+the verbatim text; the existing project reference is P-validated-R5.md:722-727
+(M-zaif-harness), rather than creating a new system name from transcription.
+
+Observed implementation basis: aif-equations.edn :choices :hierarchy;
+src/futon2/aif/rollout.clj:474-479 explicitly describes flat temporal rollout.
+No registry, code, run configuration or live process changes in this record.
+Learning and policy depth remain pending discussion; the earlier pending list
+above records the state before this ruling.
