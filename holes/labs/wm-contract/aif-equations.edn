@@ -393,7 +393,8 @@
   :policy-depth {:observed :fixed-per-configuration :status :observed-not-decided
                  :evidence "war_machine.clj:4485-4487, 4516-4520 (3 with anticipation snapshot, else single-step); rollout.clj:166-171, 212-230 (default 2) (C448 5c.4)"
                  :statement "T varies by invocation/configuration, never per candidate policy."}
-  :hierarchy {:observed :single-level :status :observed-not-decided
+  :hierarchy {:observed :single-level :status :decided
+              :ruling {:by "joe" :at "2026-09-09" :grounds :ruling :channel "model-choices sitting with codex-17; verbatim in SESSION-model-choices-2026-09-09.md (4f81e3d1)" :decision "RUN4-SCOPED: the single-level prediction model is accepted for RUN4's inner-loop exercise. If outer-loop work is involved in this run it USES the inner loop; that does not establish a coupled generative hierarchy. NOT a permanent single-level design and not a claim the stack is one AIF system. FOLLOW-ONS PRESERVED (Joe verbatim: the hierarchical model comes in due course with the Zaif agents): the outer loop with its own AIF, the inner loop with its own AIF, and AIF-backed Zaif agents / hierarchical model (M-zaif-harness reference); no coupling claimed now."}
               :evidence "rollout.clj:166-176 ('flat temporal rollout, not nested fast/slow hierarchy'); hierarchical_budget.clj exists but is not wired as a generative hierarchy (C448 5c.5)"
               :theory-alternative "dacosta2020 A.4 deep temporal models"
               :statement "One level is realised; R15 runs no equation and is listed under :plumbing."}
