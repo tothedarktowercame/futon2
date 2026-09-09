@@ -67,7 +67,8 @@
    template: `futon2.aif.precision` (R7). Sibling outcome-learner: R12
    `futon2.aif.intrinsic-values` (Beta-credit, per-action-class follow-through —
    a DIFFERENT quantity than decision decisiveness)."
-  (:require [futon2.aif.realized-outcome :as ro]))
+  (:require [futon2.aif.realized-outcome :as ro]
+            [futon2.aif.realized-recording :as recording]))
 
 ;; Window / burn-in.
 (def default-window-size 20)        ; match R7's rolling window
@@ -208,6 +209,28 @@
   ([gain-state realized-outcome]
    (fold-realized-outcome gain-state realized-outcome {}))
   ([gain-state realized-outcome opts]
+   (if (or (recording/marked? realized-outcome) (:recording/journal gain-state))
+     (let [journal (vec (:recording/journal gain-state))
+           journal (if (some #{realized-outcome} journal) journal
+                       (conj journal realized-outcome))
+           latest (into {} (map (juxt recording/sample-key identity))
+                        (recording/latest-revisions (filter recording/marked? journal)))
+           base (or (:recording/base gain-state) gain-state)
+           ;; Re-derive at each sample's original position; interleaved legacy
+           ;; events must not vanish when a marked sample is retracted.
+           replay (reduce (fn [{:keys [state seen]} r]
+                            (if (recording/marked? r)
+                              (let [k (recording/sample-key r) current (get latest k)]
+                                {:seen (conj seen k)
+                                 :state (if (and (not (contains? seen k))
+                                                 (recording/calibration-admitted? current))
+                                          (observe-outcome state (:expected-score current)
+                                                           (:realized-score current) opts)
+                                          state)})
+                              {:seen seen :state (fold-realized-outcome state r opts)}))
+                          {:state base :seen #{}} journal)]
+       (assoc (:state replay)
+              :recording/base base :recording/journal journal))
    (let [vocab (ro/vocabulary realized-outcome)]
      (if (and vocab
               (not= (:tick realized-outcome) (:last-outcome-tick gain-state)))
@@ -220,7 +243,7 @@
          ;; so a replay over the July corpus is distinguishable from a live fold.
          (contains? ro/historical-vocabularies vocab)
          (assoc :last-outcome-vocabulary vocab))
-       gain-state))))
+       gain-state)))))
 
 (defn coerce-state
   "Schema guard for a selection gain-state read back from a persisted trace record.

@@ -45,12 +45,15 @@
 ;; READ-ONLY except for that one file. No tick, no run lock, no substrate call,
 ;; no network, nothing under data/.
 
-(require '[clojure.edn :as edn]
+(require '[babashka.classpath :as classpath]
+         '[clojure.edn :as edn]
          '[clojure.java.io :as io]
          '[clojure.pprint :as pp]
          '[clojure.string :as str])
 
 (def repo-root (str (System/getProperty "user.home") "/code/futon2"))
+(classpath/add-classpath (str repo-root "/src"))
+(require '[futon2.aif.realized-recording :as recording])
 (def runs-dir (io/file repo-root "holes/labs/wm-contract/runs"))
 
 (def read-opts {:default (fn [t v] {:unread-tag t :value v})})
@@ -177,7 +180,8 @@
                           (not (and (number? holes-before) (number? holes-after))) nil
                           (< holes-after holes-before) :grounded-change
                           :else :grounded-no-change)]
-            (cond-> (array-map
+            (recording/step-envelope
+             (cond-> (array-map
                      :schema :wm/realized-outcome-v1
                      :observation/schema :wm/step-observation-v1
                      :observation/status (if (and (number? expected) (number? realized) outcome)
@@ -215,7 +219,17 @@
               (not (number? realized))
               (assoc :observation/realized-leg-absent :chosen-action-not-ranked-at-the-next-step)
               (nil? outcome)
-              (assoc :observation/outcome-leg-absent :open-hole-count-not-recorded-on-both-records))))))))
+              (assoc :observation/outcome-leg-absent :open-hole-count-not-recorded-on-both-records))
+             {:run-id prev-run-id
+              :step-index (inc (.indexOf (vec (:pin/accepted-steps
+                                                (read-edn (io/file work "pin/pin.edn")))) prev))
+              :before claim-rec :after later-rec
+              :evidence {:digest (format "%064x" (BigInteger. 1
+                                        (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                                 (.getBytes (pr-str [claim-rec later-rec]) "UTF-8"))))
+                         :locator {:before-run prev-run-id :after-run run-id
+                                   :before-tick (:run/id claim-rec) :after-tick (:run/id later-rec)}
+                         :adapter :wm-step-observe-recording-v1 :actor :supervised-stepper}})))))))
 
 (let [args (vec *command-line-args*)
       [work run-id] (filterv #(not (str/starts-with? % "--")) args)
@@ -230,7 +244,7 @@
     (if print-only?
       (pp/pprint r)
       (do (io/make-parents out)
-          (spit out (with-out-str (pp/pprint r)))
+          (recording/persist! out r)
           (println "wm_step_observe: wrote" rel)
           (println "  status" (:observation/status r)
                    "for-run" (:observation/observed-for-run r)

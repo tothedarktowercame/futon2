@@ -347,8 +347,8 @@
    measurement rather than a silence (C511 section 3)."
   [observations claim-rec]
   (if-let [o (get observations (:run/id claim-rec))]
-    {:status :measured
-     :outcome (:outcome o)
+    {:status (if (ro/categorical-outcome o) :measured :unknown)
+     :outcome (ro/categorical-outcome o)
      :scale (:scale o)
      :expected-score (ro/expected-score o)
      :realized-score (ro/realized-score o)

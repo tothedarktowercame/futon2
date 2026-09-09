@@ -45,7 +45,8 @@
 
    PURE: no I/O, no state, no loop. Loadable from babashka (u39 adds `src` to
    the classpath) so the lab's readers and the JVM's readers cannot drift."
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [futon2.aif.realized-recording :as recording]))
 
 (def schema
   "The one schema key. Written by every producer of a realized outcome."
@@ -110,7 +111,12 @@
    in the live corpus do."
   [trace-record]
   (when (map? trace-record)
-    (some #(get-in trace-record %) categorical-places)))
+    (some (fn [path]
+            (let [container (if (= path [:outcome]) trace-record
+                                (get-in trace-record (butlast path)))]
+              (if (recording/marked? container)
+                (recording/category container :step)
+                (get-in trace-record path)))) categorical-places)))
 
 (defn realized-outcome
   "The realized-outcome record riding a trace record, if any."

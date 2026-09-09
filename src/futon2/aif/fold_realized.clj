@@ -26,7 +26,8 @@
    untouched (this ns is the OBSERVE-side producer, not a fold-contract term)."
   (:require [clojure.edn :as edn]
             [futon2.aif.actuator-a3 :as a3]
-            [futon2.aif.fold-eval :as fe]))
+            [futon2.aif.fold-eval :as fe]
+            [futon2.aif.realized-recording :as recording]))
 
 (def ^:dynamic *live-wire?*
   "Default ON as of 2026-07-08 (Joe-directed): enactment is live-wired. When ON,
@@ -93,12 +94,14 @@
    it at 0.5 (the retired v0 feed). The gate still verdicts on its own
    reconciled leg; only γ's calibration pair is constrained here, at the
    contract, so no future caller can reintroduce the mismatch."
-  [{:keys [policy expected-score fold]} enacted-wiring tick]
-  {:policy     policy
+  [{:keys [policy expected-score fold] :as decision} enacted-wiring tick]
+  (recording/envelope
+   {:policy     policy
    :expected-score (or (:coverage-score-delta fold)
                        (when (number? expected-score) expected-score))
    :realized-score (fe/coverage->score-delta (realized-coverage enacted-wiring))
-   :tick       tick})
+   :tick       tick}
+   (:recording/context decision)))
 
 (defn- deposit-for-mission
   [mission-id]
@@ -164,7 +167,8 @@
          expected (expected-remaining bound deposit)
          expected-g (:expected-score expected)
          exact? (and (number? remaining) (= expected-g remaining))]
-     (cond-> {:policy (or policy mission-id)
+     (recording/envelope
+      (cond-> {:policy (or policy mission-id)
               :mission (:mission deposit mission-id)
               :expected-score expected-g
               :expected-source (:expected-source expected)
@@ -178,7 +182,8 @@
                      :discharged? (and (pos? bound) (zero? remaining))}
               :box-snapshot snapshot
               :anti-tautology-flag (when exact? :exact-grounded-forecast)}
-       (or tick (:tick opts)) (assoc :tick (or tick (:tick opts)))))))
+       (or tick (:tick opts)) (assoc :tick (or tick (:tick opts))))
+      (:recording/context opts)))))
 
 (defn with-realized-outcome
   "STAGED seam: thread the `:realized-outcome` onto a `judge`-style output so it
@@ -194,6 +199,9 @@
   (if *live-wire?*
     (assoc judge-output :realized-outcome
            (if *selection-gain-grounded-feed?*
-             (realized-outcome-grounded (:policy decision) decision {:tick tick})
+             (realized-outcome-grounded (:policy decision) decision
+                                       (cond-> {:tick tick}
+                                         (:recording/context decision)
+                                         (assoc :recording/context (:recording/context decision))))
              (realized-outcome-of decision enacted-wiring tick)))
     judge-output))
