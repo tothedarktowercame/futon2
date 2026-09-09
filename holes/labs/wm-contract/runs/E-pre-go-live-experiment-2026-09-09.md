@@ -42,7 +42,7 @@ an apparent improvement.
 | Authored pattern | Candidate role in this task | Interpretation boundary |
 |---|---|---|
 | apparatus/one-authority-per-question, IF/HOWEVER/THEN lines 17–24 | Resolve the owning source and gate for each pre-go-live question; make disagreements explicit before publishing a disposition | A checklist is a view, not permission to alter its authority |
-| apparatus/pin-moves-with-the-population, lines 17–24 | Keep contract emission and dependent regeneration in the source-change packet once its review prerequisites are met | No early self-repinning of unreviewed changes; same slice may span repos/commits when source-Git-SHA emission requires it |
+| apparatus/pin-moves-with-the-population, lines 17–24 | Keep contract emission and dependent regeneration in the source-change packet once its review prerequisites are met | Population mutation and re-pin must share a commit. Source edit and re-attestation share a slice; only this latter class may span commits when source-Git-SHA emission requires it. No early self-repinning of unreviewed changes |
 | apparatus/evidence-to-disposition-once, lines 17–24 | Construct one versioned preparation disposition from captured evidence; render each consumer's answer from it | Do not reuse a count of green lines as a second authoritative readiness verdict |
 | apparatus/replayable-not-precious, lines 17–24 | Freeze inputs and replay preparation checks in an isolated workspace | Preparation attempts are distinct from the sacred live-run evidence; no live run is replayed here |
 | apparatus/done-is-observed-running, lines 17–24 | Supporting obligation: report runtime activation separately from source/build/review status | A local probe is not a standing live comparator; this member cannot be declared fully executed by the experiment |
@@ -115,3 +115,52 @@ must account for source drift, especially the parked Holes edit.
 - `futon3/checks/find_organise.clj` — `64c3abb4a5a8655736ffc6391cbf7cbae17a76cdc3e026cfc3e6adcf0da1d9ce`
 - `futon3/checks/F12-O4-witness-discovery.md` — `397e67ff4f577be0f79223af4a2e635553f1e85715bab88679817a575238dacf`
 - `futon2/holes/labs/wm-contract/runs/F2-run4-readiness/RUN4-final-checklist-2026-09-09.md` — `8c12fd21718528fbb15b4a80de14147828af2d50ace64cbcccb18fe82c66dbd2`
+
+## Response to independent interpretation review — 2026-09-09
+
+Basis: futon3 b63a4b6,
+`holes/labs/library-contract/E-pre-go-live-interpretation-review-2026-09-09.md`.
+Four roles agreed; the pin-maintenance interpretation required correction.
+The candidate table above now preserves both authored timing obligations.
+This revision is submitted for re-review; it does not adopt an execution
+manifest or authorize either primary arm.
+
+Classify maintenance actions before execution:
+
+| Proposed action | Class | Required timing and owner |
+|---|---|---|
+| Edit Holes declarations and emit the contract's source-Git-SHA attestation | Source re-attestation | Same mutating owner's slice; source commit precedes generated attestation commit when its source SHA requires it; dependent publish blocked until complete |
+| Refresh probe, source transcription, and closability evidence following that source edit | Source re-attestation when attesting the source | Same source-change slice through owning generators; interpretation must identify the actual attested object per output |
+| Change a selected pattern population and its membership pin | Population re-pin | Same commit, same mutating owner; no source-SHA exception |
+| Change any report that both attests source and pins a population | Both, pending per-field classification | Satisfy both obligations; if impossible, stop and report the conflict rather than calling the whole report source re-attestation |
+
+This table is classification guidance for the proposed work, not evidence that
+all fields of the eventual generator outputs have been classified. The manifest
+must enumerate those fields. Existing unreviewed changes are not retrospectively
+licensed by the distinction. Authority conflicts and stale pins stop dependent
+publication; reporting a warning in a published verdict is insufficient.
+
+Carry the remaining review requirements into the manifest:
+
+- Name each fact's authoritative reader, mutation gate and comparator. Define a
+  small closed preparation-disposition enumeration, a single evidence join,
+  total consumer dispatch and an exhaustiveness check. No consumer may re-join
+  raw evidence. Blame is not part of this proposed task's consumers; mark its
+  pattern branch not applicable rather than claiming to implement it.
+- Pin attempt identity, primary rounds, restart/partial-state handling, and
+  apparatus-caused rerun attribution before execution. Source drift refuses the
+  comparison; it never justifies silently updating one arm.
+- Keep done-is-observed-running supporting/unexecuted: local checks neither
+  establish a standing live comparator nor close unknown activation evidence.
+- The reviewed reader census found no outgoing authored stands-on edges from
+  these five members. Prose tokens S1/S2, the futon3c document path and
+  a1-vs-a2/a3 are not authored dependencies or unresolved executable members.
+  @references and @see-also do not become why edges. Any precedence intervention
+  stays explicitly task-local interpretation, independently reviewed; O2/O3
+  and exact fast-forward equality remain mandatory.
+- The baseline, command allowlist, guards/effects, primary score, and execution
+  manifest remain to be specified and reviewed. Agreement with these candidate
+  roles alone does not make the experiment ready to execute.
+
+No task choice is reopened for Joe. No pattern, registry, generator or ledger
+is changed by this revision.
