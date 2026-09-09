@@ -435,6 +435,17 @@ explicit. No build was undertaken under that earlier instruction.
   RUN4 gate changes. Reviewed by claude-1 (note-only verified; ticket
   structure and guards read; reproduction taken on its recorded evidence —
   LR2 re-execution belongs to whoever mints it).
+- 2026-09-09 (twenty-second — learning scope CORRECTED): Joe narrows the
+  recovery program — no full PLoP-variant restoration; the historical work
+  INSPIRES a concrete AIF-compatible implementation and claim, and
+  learning is not a single final phase. LR1-LR7 downgrade to reference
+  material (not mandatory, not RUN4 gates); nothing else inferred
+  (no offline-only adoption, no automatic deferral, no mandatory GFN/BMR
+  pairing). The next design's required shape is now stated: each actual
+  learned variable with its evidence, update equation/objective, schedule,
+  persistent state and NEXT CONSUMER, distinguishing state inference /
+  parameter learning / slower structure-proposal revision. Registry note
+  appended (16519d17); :learning stays unruled.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
