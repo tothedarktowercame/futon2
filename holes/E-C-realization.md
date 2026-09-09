@@ -360,6 +360,17 @@ explicit. No build was undertaken under that earlier instruction.
   manifest-review prerequisites from the addendum remain ahead of any
   O4/experiment claim. codex-17 cleared to execute the first
   e-pre-go-live slice under the brief's constraints.
+- 2026-09-09 (seventeenth — find CLOSED and published): the retirement +
+  re-pin chain landed (mathlib4 bf79f988b3 marker: mkWitnessedClosed citing
+  Item 20/23 + both slices, existence-not-correspondence boundary +
+  falsifier in the receipt; 8b38ceec46 contract json; futon2 dc455666
+  regens + run note). claude-1 review: audit delta verified (find leaves
+  pre-run-closable, 4->3), READY re-verified by own run, coverage band
+  re-pinned WITH CAUSE (Total 10&61 -> 9&62: named -> type-transcribed on
+  the existence witness; witnessed stays 0 honestly), flip sidecar
+  re-emitted (recurring class — note: --emit belongs IN the re-pin chain),
+  full publish green and served. The organise hole is now the last
+  pre-run-closable member of the commission.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
