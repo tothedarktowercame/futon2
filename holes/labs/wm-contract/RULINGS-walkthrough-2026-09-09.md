@@ -258,3 +258,25 @@ the preregistered conformance meaning is the up-front qualification
 statement; A6 concrete run config proposed for review; A7 refuse-on-red at
 accept with explicit override. Any genuine fork not settled by recorded
 intent stops that item and surfaces, without stopping the others.
+
+## Item 24 — the FoldC representation gets ruled NOW, with codex-17; adapter readied (claude-1 session)
+
+Context: the FoldC reconciliation stopped at the value-derivation boundary
+(the runtime folds a KL scalar; Lean foldC composes outcome-indexed
+preference functions; no code-reading yields the layer's prefers function).
+claude-1 presented three options (illustrative extension / hold / rule the
+representation now). Joe, verbatim:
+
+> Codex 12 has gotten busy with topology work, so how about we bell this to
+> Codex 17? I would like to go with the Option 3, rule the representation
+> now, although I'd like to talk with Codex 17 about it. And I'd like to
+> also make sure that we get the, Explicit. Adapter. Ready. For Running. So
+> basically, please pass whatever. We need to get this thing up and running
+> to Codex 17 and we'll work on that.
+
+RULED: Option 3 — the disposition-risk-as-preference-layer representation
+is ruled now, interactively, with codex-17 as the sitting seat for this
+decision (codex-12 busy with topology). The explicit constant adapter
+(disposition_risk.clj:57 contract) is commissioned as a real, tested,
+config-nameable artifact. The find retirement + re-pin chain resumes after
+the representation ruling lands.
