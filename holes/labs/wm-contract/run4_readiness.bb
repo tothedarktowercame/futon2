@@ -374,7 +374,7 @@
                :live-authority authority
                :rows (into (sorted-map)
                            (for [n run4-holes]
-                             [n (select-keys (get audit-rows n) [:closability :readiness :hole-class])]))}
+                             [n (select-keys (get audit-rows n) [:closability :readiness :hole-class :non-run-blockers :blocker :blockers])]))}
               (cond-> []
                 (nil? audit) (conj (str "the closability audit is not at " (:audit w) " (:not-derivable)"))
                 (and audit authority (not= audit-authority authority))
@@ -384,10 +384,14 @@
                 :always
                 (into (for [n run4-holes
                             :let [r (get audit-rows n)]
-                            :when (not= :ready (:readiness r))]
+                            :when (or (not= :run-gated (:closability r))
+                                      (seq (:non-run-blockers r))
+                                      (some? (:blocker r))
+                                      (seq (:blockers r)))]
                         (if r
-                          (format "the closability audit types %s :readiness %s (:closability %s) -- RUN4's row names this hole"
-                                  n (pr-str (:readiness r)) (pr-str (:closability r)))
+                          (format "the closability audit types %s :readiness %s (:closability %s) -- requires run-gated with no non-run blockers; blockers %s"
+                                  n (pr-str (:readiness r)) (pr-str (:closability r))
+                                  (pr-str (select-keys r [:non-run-blockers :blocker :blockers])))
                           (format "the closability audit carries no row for %s, which RUN4's row names (:not-derivable)" n))))))
 
         ;; ---- LINE 9 -------------------------------------------------------
@@ -637,9 +641,22 @@
                                   #(update % :rows
                                            (fn [rs] (vec (remove (fn [r] (= "wmRunConformsToWiring" (:name r))) rs))))))}])
 
+(def plants-with-blocker
+  (conj plants
+        {:id :N11 :line :closability-audit
+         :what "a run-gated hole carries a non-run implementation blocker"
+         :plant (fn [tmp _]
+                  (edit-edn! (str tmp "/audit.edn")
+                             #(update % :rows
+                                      (fn [rs]
+                                        (mapv (fn [r]
+                                                (if (= "wmRunConformsToWiring" (:name r))
+                                                  (assoc r :non-run-blockers [:implementation-missing])
+                                                  r)) rs)))))}))
+
 (defn run-negative! [w]
   (let [base (derive-lines (assoc w :regenerate? false))
-        rows (vec (for [p plants]
+        rows (vec (for [p plants-with-blocker]
                     (let [[tmp w'] (copy-world! w)
                           _ ((:plant p) tmp w')
                           lines (derive-lines w')
