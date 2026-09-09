@@ -61,3 +61,32 @@ Joe, verbatim:
 No adoption of offline-only learning is inferred. The decision remains open
 because Joe requests the theory, PLOP-era evidence and concrete update/consumer
 account before deciding. See runs/LEARNING-theory-history-runtime-2026-09-09.md.
+
+
+## 4. Learning scope corrected: AIF-compatible implementation, history as inspiration
+
+Joe, emacs-repl, 2026-09-09, verbatim:
+
+> So I don't think we need to recover all of the claims from the PLOP paper, especially given that the submitted version didn't go through all of the different rotations and permutations of learning. What I think we need to do is create basically an AIF-compliant claim. Version. And I don't think, again, that AIF is just saying that there's one learning phase that happens. All at the end. I think we can get inspired by the earlier work. And build an implementation that is AIF-compatible and... Go from there.
+
+This corrects the recovery-spec interpretation in b6f4040e: LR1–LR7 are a
+source of mechanisms, evidence and possible tests, not a required restoration
+checklist or an adopted RUN4 gate set. The implementation target is a stated,
+validated AIF-compatible learning model. Historical variants need not all be
+implemented; their negative findings remain evidence, not requirements to
+reproduce the failed behavior.
+
+The earlier observation that trial-boundary updates are permitted was not a
+prescription for one terminal learning phase. It must not be read that way.
+Proposed next design separates current-state inference, evidence-driven model
+parameter updates, and slower structural/proposal revisions. For each actually
+implemented update, name the model variable, admissible evidence, objective or
+update equation, timing, persisted state and subsequent consumer. AIF mapping
+must be justified for that specific computation; attaching AIF vocabulary to a
+reward fit or habit counter is insufficient. The choice of exact update schedule
+and which structural/proposal mechanisms to include remains design work.
+
+No offline-only arm, mandatory GFN/BMR combination, or automatic post-RUN4
+deferral is inferred. No final :learning arm or compliance result is recorded;
+Joe has set the design direction, not supplied all its equations. Registry and
+worklist integration belongs to claude-1. No production changes in this note.
