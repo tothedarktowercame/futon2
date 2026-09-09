@@ -5,6 +5,17 @@
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.ruled-outcome-c :as ruled]))
 
+(deftest canonical-vertices-preserve-specialization-carriers
+  (is (= #{:nouns :verbs :organization :evidence}
+         (set (keys ruled/ruled-vertices))))
+  (doseq [v [:nouns :verbs]]
+    (is (= :named-empty (get-in ruled/ruled-vertices [v :status])))
+    (is (= #{} (get-in ruled/ruled-vertices [v :carrier]))))
+  (is (= {:status :ruled :carrier cohort/outcome-kinds}
+         (:organization ruled/ruled-vertices)))
+  (is (= :unruled (get-in ruled/ruled-vertices [:evidence :status])))
+  (is (= :owed (get-in ruled/ruled-vertices [:evidence :carrier]))))
+
 (deftest ruled-seed-is-wide-and-exact
   (testing "support and exact mass"
     (is (= cohort/outcome-kinds (:support ruled/seeded-c)))

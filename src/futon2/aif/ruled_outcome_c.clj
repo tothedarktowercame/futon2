@@ -24,17 +24,20 @@
    `futon2:src/futon2/aif/full_loop_cohort.clj:31-33` rather than retyped."
   (set/difference cohort/outcome-kinds observed-dispositions))
 
+;; 2026-09-09, walkthrough Item 18b: canonical tetrahedron names; the earlier
+;; people/money/organisations reading is a specialization, not new carriers.
 (def ruled-vertices
-  "The tagged-sum carrier declaration: four vertices are attested at
-   `futon2:holes/problems/P-validated-R5.md:116-120`; people and money are
-   named-empty, with money belonging to VSAT at
+  "The tagged-sum carrier declaration uses nouns, verbs, organization, evidence.
+   The specialization at `futon2:holes/problems/P-validated-R5.md:116-120`
+   placed people at nouns and money at verbs; both remain named-empty,
+   with money belonging to VSAT at
    `futon2:holes/problems/P-validated-R5.md:129-132`.  Evidence remains
    deliberately unruled because certification/update records and the named
    epistemic-validity region have no attested source enumeration
    (`futon2:holes/labs/wm-contract/aif-equations.edn:211`)."
-  {:organisations {:status :ruled :carrier cohort/outcome-kinds}
-   :people {:status :named-empty :carrier #{}}
-   :money {:status :named-empty :carrier #{} :reason :vsat-vertex}
+  {:organization {:status :ruled :carrier cohort/outcome-kinds}
+   :nouns {:status :named-empty :carrier #{}}
+   :verbs {:status :named-empty :carrier #{} :reason :vsat-vertex}
    :evidence {:status :unruled
               :carrier :owed
               :reason :no-attested-certification-update-vocabulary}})
@@ -73,7 +76,7 @@
     :basis "futon2:holes/labs/wm-contract/C537-serendipity-shapes-C.md:49-59"
     :folded? false
     :in-ruled-sum :yes
-    :site "named-empty organisations-support region"}
+    :site "named-empty organization-support region"}
    {:layer/id :c-mis
     :source :runtime-dark
     :author "futon2.aif.mission-c"
