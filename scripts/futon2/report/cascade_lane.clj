@@ -369,32 +369,52 @@
    `:policy` — so it declares `:authority :diagnose`. When the rollout refuses
    there is no `:policy-rollout-score` key, `:score` is nil, and the act gate
    abstains on the ΔG leg exactly as it does when the mission has no moves."
-  [mission-target]
-  (let [stem (-> (str mission-target) (str/replace #"^M-" ""))]
-    (if (contains? @!rollout-g-cache stem)
-      (get @!rollout-g-cache stem)
+  [mission-target & [config]]
+  (let [stem (-> (str mission-target) (str/replace #"^M-" ""))
+        cache-key (if config [stem config] stem)]
+    (if (contains? @!rollout-g-cache cache-key)
+      (get @!rollout-g-cache cache-key)
       (let [result (try
                      (let [pat (re-pattern (java.util.regex.Pattern/quote stem))
                            mv  (filter #(re-find pat (str (:have %) (:want %))) @!rollout-moves)]
                        (when (seq mv)
                          (let [seed (rollout/seed-roots {:arrows {} :cap-overlay @!rollout-cap-overlay :reachable #{}} mv)
-                               best (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9
-                                                          :authority :diagnose)]
+                               best (if config
+                                      (rollout/best-rollout seed mv
+                                        :depth (:cascade-rollout config) :top-k 3 :gamma 0.9
+                                        :authority :diagnose :record-depth? true)
+                                      (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9
+                                                            :authority :diagnose))]
                            {:score (some-> (:policy-rollout-score best) double)
                             :events (vec (concat (:move-score-events best)
                                                  (:move-cost-events best)
-                                                 (when-let [r (:rollout/refusal best)] [r])))})))
-                     (catch Throwable _ nil))
-            result (or result {:score nil :events []})]
-        (swap! !rollout-g-cache assoc stem result)
+                                                 (when-let [r (:rollout/refusal best)] [r])
+                                                 (when config
+                                                   [(assoc (:policy-depth best)
+                                                      :producer-contract :policy-depth/v1
+                                                      :mission mission-target)])))})))
+                     (catch Throwable e
+                       (when config
+                         {:score nil :events [{:producer-contract :policy-depth/v1
+                                              :kind :cascade-rollout :mission mission-target
+                                              :requested (:cascade-rollout config)
+                                              :status :error :error (.getMessage e)}]})))
+            result (or result
+                       {:score nil :events (if config
+                                             [{:producer-contract :policy-depth/v1
+                                               :kind :cascade-rollout :mission mission-target
+                                               :requested (:cascade-rollout config)
+                                               :status :not-invoked :reason :no-moves}]
+                                             [])})]
+        (swap! !rollout-g-cache assoc cache-key result)
         result))))
 
 (defn policy-rollout
   "grain-3 ΔG: best-rollout G(π) over the v2 move-set restricted to this mission's moves.
    Returns the (negative-better) G as a double, or nil if the mission has no moves in the
    set (no rollout path — ΔG genuinely unavailable, not zero). Memoized per stem."
-  [mission-target]
-  (:score (policy-rollout-result mission-target)))
+  [mission-target & [config]]
+  (:score (policy-rollout-result mission-target config)))
 
 (defn policy-rollout-events
   "AC5/AC6 self-repair condition: the typed records the rollout's validation
@@ -405,8 +425,8 @@
    scored and costed. Each record carries its own `:producer-contract`, which
    is how a consumer tells the three apart. Same memoized rollout as
    `policy-rollout`, so reading both costs one search."
-  [mission-target]
-  (vec (:events (policy-rollout-result mission-target))))
+  [mission-target & [config]]
+  (vec (:events (policy-rollout-result mission-target config))))
 
 (def ^:dynamic *gate-decision-target?*
   "When true (DEFAULT, operator ruling 2026-07-06: \"Yes, we should accept
@@ -457,7 +477,7 @@
    :open-mission entries the dedup keeps a single entry for it, so the target
    is present in the returned list without being at index 0."
   ([ranked-actions] (cascade-lane ranked-actions {}))
-  ([ranked-actions {:keys [n budget decision] :or {n 3 budget default-budget}}]
+  ([ranked-actions {:keys [n budget decision policy-depth] :or {n 3 budget default-budget}}]
    (let [build-entry (fn [e]
                        (let [m (get-in e [:action :target])
                              psi (str/trim (str (mission->psi m) " "
@@ -470,13 +490,15 @@
                                  shown (if seated?
                                          (vec (cons "agent/sense-deliberate-act" base-shown))
                                          base-shown)
-                                 rollout-events (policy-rollout-events m)]
+                                 rollout-events (if policy-depth (policy-rollout-events m policy-depth)
+                                                    (policy-rollout-events m))]
                              (cond-> {:mission m :psi psi
                                       :size (if seated? (inc (:size c)) (:size c))
                                       :wholeness (:wholeness c) :budget (:budget c)
                                       :truncated (:truncated c)
                                       :cascade-score (:cascade-score c)
-                                      :policy-rollout-score (policy-rollout m)
+                                      :policy-rollout-score (if policy-depth (policy-rollout m policy-depth)
+                                                               (policy-rollout m))
                                       :shown shown
                                       :semilattice (:semilattice c)
                                       :seat-injection (when seated?
@@ -524,7 +546,7 @@
    Returns entries with :cascade-score, :coverage-reward, and :prior-cost;
    gaps sort first by lowest score."
   ([ranked-actions] (gap-lane ranked-actions {}))
-  ([ranked-actions {:keys [n budget] :or {n 10 budget default-budget}}]
+  ([ranked-actions {:keys [n budget policy-depth] :or {n 10 budget default-budget}}]
    (->> ranked-actions
         (filter #(#{:open-mission "open-mission"} (get-in % [:action :type])))
         (take n)
@@ -536,9 +558,11 @@
                      cascade-score (:cascade-score c)
                      gap? (or (nil? c) (nil? cascade-score)
                               (<= cascade-score gap-cascade-score-threshold))
-                     rollout-events (policy-rollout-events m)]
+                     rollout-events (if policy-depth (policy-rollout-events m policy-depth)
+                                        (policy-rollout-events m))]
                  (cond-> {:mission m :psi psi :cascade-score cascade-score
-                          :policy-rollout-score (policy-rollout m)
+                          :policy-rollout-score (if policy-depth (policy-rollout m policy-depth)
+                                                   (policy-rollout m))
                           :coverage-reward (:coverage-reward c) :prior-cost (:prior-cost c)
                           :wholeness (:wholeness c) :size (:size c) :gap? gap?
                           :note (cond

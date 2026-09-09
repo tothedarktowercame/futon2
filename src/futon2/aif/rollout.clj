@@ -555,9 +555,15 @@
         !events (volatile! [])
         !cost-events (volatile! [])
         !emptied (volatile! [])]
-    (letfn [(expand [state prefix remaining-depth]
-              (if (zero? remaining-depth)
-                [{:state state :policy prefix}]
+    (letfn [(finish [state prefix ending]
+              (cond-> {:state state :policy prefix}
+                (:record-depth? opts)
+                (assoc :rollout/ending {:kind ending :moves (count prefix)
+                                        :effective horizon})))
+            (expand [state prefix remaining-depth]
+              (if (or (zero? remaining-depth)
+                      (and (:record-depth? opts) (:truncated? state)))
+                [(finish state prefix (if (:truncated? state) :truncated :horizon))]
                 (let [{:keys [survivors move-score-events move-cost-events
                               candidate-set-emptied? reachable-count]}
                       (ranked-survivors-with-records state moves :top-k top-k)]
@@ -569,13 +575,14 @@
                     (vswap! !emptied conj {:prefix (mapv :move/id prefix)
                                            :reachable-count reachable-count}))
                   (if (empty? survivors)
-                    [{:state state :policy prefix}]
+                    [(finish state prefix :empty)]
                     (mapcat
                      (fn [move]
                        (let [state' (apply-move state move)
                              prefix' (conj prefix move)]
                          (if (or (:truncated? state') (:move/terminal? move))
-                           [{:state state' :policy prefix'}]
+                           [(finish state' prefix' (if (:move/terminal? move)
+                                                    :terminal :truncated))]
                            (expand state' prefix' (dec remaining-depth)))))
                      survivors)))))]
       {:nodes (vec (expand (normalize-state state) [] horizon))
@@ -661,10 +668,15 @@
         gamma (rollout-discount opts)
         auth (rollout-authority opts)
         {:keys [nodes move-score-events move-cost-events] :as expansion}
-        (expand-policies-with-records state moves {:horizon horizon :top-k top-k})
+        (expand-policies-with-records state moves
+                                     {:horizon horizon :top-k top-k
+                                      :record-depth? (:record-depth? opts)})
         projected (mapv (fn [{:keys [policy]}] (project-policy state policy :gamma gamma))
                         nodes)
         events (cond-> {}
+                 (:record-depth? opts)
+                 (assoc :policy-depth {:kind :cascade-rollout :effective horizon
+                                       :endings (mapv :rollout/ending nodes)})
                  (seq move-score-events) (assoc :move-score-events move-score-events)
                  (seq move-cost-events) (assoc :move-cost-events move-cost-events))
         refusal (or (rollout-refusal expansion auth)
@@ -694,7 +706,8 @@
   (let [horizon (rollout-horizon opts)
         gamma (rollout-discount opts)]
     (first (score-policies state moves :horizon horizon :top-k top-k :gamma gamma
-                           :authority (:authority opts)))))
+                           :authority (:authority opts)
+                           :record-depth? (:record-depth? opts)))))
 
 (defn softmax
   [scores tau]
