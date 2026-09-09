@@ -1,3 +1,4 @@
+; Era-1 algebra evidence; see runs/FOLDC-era-comparison-2026-09-09.md
 {:schema :fold-c-reference/v1
  :ruled-domain :F10/SeedObs
  :runtime-folded-layer-ids []

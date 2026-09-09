@@ -25,6 +25,8 @@
   "d5940a2d22c5f76cd28f62475c178bfd68dd870fee372a0a6dbec4c17fa57e4c",
   "../mathlib4/DarkTower/WarMachine/Holes.lean#Vertex"
   "6cd2aebee2b49c5a0569ef56375d137ab6e9bf52c53104c62639028ebed2aefb",
+  "../mathlib4/DarkTower/WarMachine/PreferenceRiskBoundary.lean"
+  "29c10485d3365030000658a96359d1c994b20b1789c47156f10f9486bc12cfaa",
   "../mathlib4/DarkTower/WarMachine/PreferenceRiskSeparation.lean"
   "b7317a54292bca223d912f771a9821865068a99060b0e338f81b6e0e261b05c0",
   "../mathlib4/DarkTower/WarMachine/PreferenceRiskWitness.lean"
@@ -36,7 +38,7 @@
   "checks/disposition_kernel.clj"
   "66bdef7b458c3777a60804f3db97bf413dc1428de5c4e4533ffa26bf503d5aee",
   "checks/preference_risk_receipt.clj"
-  "a2e36b697ad58f225359be160b23a19d54f9824172d25babc686bdba2bb23c10",
+  "2a4c3c25537a0f181b3bc44c194d233d2da280a89ebe3521d127a35631932a5d",
   "src/futon2/aif/disposition_risk.clj"
   "b2b70f228939a511baa610d921b3c3431ee4618dcd8dc39fdd66bebc9807afe0",
   "src/futon2/aif/efe.clj"
@@ -44,7 +46,7 @@
   "src/futon2/aif/full_loop_cohort.clj"
   "b4ca4e4f101f2735ebf5ce93640ed452859a9f9b05af71713c297efc84b600ea",
   "src/futon2/aif/ruled_outcome_c.clj"
-  "c519c4caf5715cc4108ff3aab7be52560423b17aa57b5dff1df97e4d4635d2e0"},
+  "f68cea57d83d242ffdcb99309d2d451c813a938c371d06909bec6dc174fab257"},
  :source-cohort
  {:ledger "holes/labs/M-aif-full-loop-46/ledger.edn",
   :sha256

@@ -1,19 +1,88 @@
-{:receipt/type :PositiveLeanWitnessReceipt
- :receipt/version 1
- :module "DarkTower.WarMachine.FoldCWitness"
- :theorem "DarkTower.WarMachine.FoldCWitness.foldC_order_is_observable"
- :fixture {:repo "futon2" :path "holes/labs/wm-contract/fold-c-reference.edn" :schema :fold-c-reference/v1 :sha256 "9035b78364b7ca86e3a9a384d7b834a448f693fecfa5291b5e512df91584560d"}
- :adapter {:kind :edn-fields-to-lean-declaration/v1
-           :lean-declaration "runtimeFoldedLayers"
-           :mappings [{:fixture-path [:runtime-folded-layer-ids] :lean-field "runtimeFoldedLayers" :expected [] :expected-shape :collection}
-                      {:fixture-path [:base-at-grounded-change] :lean-field "organisationOutcome .groundedChange" :expected 3 :expected-shape :scalar}
-                      {:fixture-path [:ordered-example :add-then-double] :lean-field "= 8" :expected 8 :expected-shape :scalar}
-                      {:fixture-path [:ordered-example :double-then-add] :lean-field "= 7" :expected 7 :expected-shape :scalar}] 
-           :correspondence {:boundary/type :declared-not-derived :subject :fixture-to-lean-correspondence :pinned :fixture-identity-shape-and-retained-slice-occurrence :not-pinned :semantic-value-correspondence :derivation-status :derivable-not-adopted :reason :identity-preserving-adapter-and-proof-not-provided}}
- :dependency-closure {:boundary/type :declared-not-derived :subject :lean-semantic-dependency-closure :pinned :author-declared-source-slices :not-pinned :complete-transitive-constant-closure :derivation-status :derivable-not-adopted :reason :closure-derivable-but-impractical-to-content-pin}
- :source-basis [{:repo "mathlib4" :path "DarkTower/WarMachine/FoldCWitness.lean" :declarations [{:name "ruledBase" :sha256 "02d1b616f6a79bf7bc0da02308b23a9e4260ca2edc0c7ed338368ca87051197f"} {:name "runtimeFoldedLayers" :sha256 "96485183343cb1f70fe1ae03ad9d443e10c69dbd6d16d0d2d6a302afa77834c0"} {:name "foldC_runtimeFoldedLayers_eq_base" :sha256 "45d1ac0f05c328c3067b8ace14edcaaa07da554881adde3f82ba846cc03e62e7"} {:name "addLayer" :sha256 "af4e9b0e490f6aca5449ff48732d70622c516765c6e2ed22cbe598d95a4abc7f"} {:name "doubleLayer" :sha256 "dc64d5bfffb2947687f266c89639aefb707a59b136c75c29be34eda59889c002"} {:name "foldC_order_is_observable" :sha256 "4de6b02e6a0b5a1b3e9dfd622423390577c972e22f3847a86a8ca8e9ad0df3ac"}]}
-                {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean" :declarations [{:name "foldC" :sha256 "ec8a72a5676f78242b9ab4bc7199b9b7689b528a731b54bf5811a3f70f1f1e6d"}]}]
- :elaborator {:command ["lake" "env" "lean"] :cwd "/home/joe/code/mathlib4"}
- :toolchain {:lean-version "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)" :lean-toolchain-sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8" :lake-manifest-sha256 "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"}
- :recorded-at "2026-09-08T00:00:00Z" :reattested "2026-09-09 claude-1: ruledBase moved .organisations -> .organization under the Vertex canon edit (Item 18b, mathlib4 fcd1261c30); mass and disposition unchanged; lake env lean DarkTower/WarMachine/FoldCWitness.lean re-run exit 0"
- :result {:exit 0 :axioms ["propext" "Classical.choice" "Quot.sound"]}}
+; Era-1 algebra evidence; see runs/FOLDC-era-comparison-2026-09-09.md
+{:adapter
+ {:kind :edn-fields-to-lean-declaration/v1,
+  :lean-declaration "runtimeFoldedLayers",
+  :mappings
+  [{:fixture-path [:runtime-folded-layer-ids],
+    :lean-field "runtimeFoldedLayers",
+    :expected [],
+    :expected-shape :collection}
+   {:fixture-path [:base-at-grounded-change],
+    :lean-field "organisationOutcome .groundedChange",
+    :expected 3,
+    :expected-shape :scalar}
+   {:fixture-path [:ordered-example :add-then-double],
+    :lean-field "= 8",
+    :expected 8,
+    :expected-shape :scalar}
+   {:fixture-path [:ordered-example :double-then-add],
+    :lean-field "= 7",
+    :expected 7,
+    :expected-shape :scalar}],
+  :correspondence
+  {:boundary/type :declared-not-derived,
+   :subject :fixture-to-lean-correspondence,
+   :pinned :fixture-identity-shape-and-retained-slice-occurrence,
+   :not-pinned :semantic-value-correspondence,
+   :derivation-status :derivable-not-adopted,
+   :reason :identity-preserving-adapter-and-proof-not-provided}},
+ :theorem
+ "DarkTower.WarMachine.FoldCWitness.foldC_order_is_observable",
+ :dependency-closure
+ {:boundary/type :declared-not-derived,
+  :subject :lean-semantic-dependency-closure,
+  :pinned :author-declared-source-slices,
+  :not-pinned :complete-transitive-constant-closure,
+  :derivation-status :derivable-not-adopted,
+  :reason :closure-derivable-but-impractical-to-content-pin},
+ :receipt/version 1,
+ :source-basis
+ [{:repo "mathlib4",
+   :path "DarkTower/WarMachine/FoldCWitness.lean",
+   :declarations
+   [{:name "ruledBase",
+     :sha256
+     "02d1b616f6a79bf7bc0da02308b23a9e4260ca2edc0c7ed338368ca87051197f"}
+    {:name "runtimeFoldedLayers",
+     :sha256
+     "96485183343cb1f70fe1ae03ad9d443e10c69dbd6d16d0d2d6a302afa77834c0"}
+    {:name "foldC_runtimeFoldedLayers_eq_base",
+     :sha256
+     "45d1ac0f05c328c3067b8ace14edcaaa07da554881adde3f82ba846cc03e62e7"}
+    {:name "addLayer",
+     :sha256
+     "af4e9b0e490f6aca5449ff48732d70622c516765c6e2ed22cbe598d95a4abc7f"}
+    {:name "doubleLayer",
+     :sha256
+     "dc64d5bfffb2947687f266c89639aefb707a59b136c75c29be34eda59889c002"}
+    {:name "foldC_order_is_observable",
+     :sha256
+     "4de6b02e6a0b5a1b3e9dfd622423390577c972e22f3847a86a8ca8e9ad0df3ac"}]}
+  {:repo "mathlib4",
+   :path "DarkTower/WarMachine/Holes.lean",
+   :declarations
+   [{:name "foldC",
+     :sha256
+     "ec8a72a5676f78242b9ab4bc7199b9b7689b528a731b54bf5811a3f70f1f1e6d"}]}],
+ :elaborator
+ {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
+ :reattested
+ "2026-09-09 claude-1: ruledBase moved .organisations -> .organization under the Vertex canon edit (Item 18b, mathlib4 fcd1261c30); mass and disposition unchanged; lake env lean DarkTower/WarMachine/FoldCWitness.lean re-run exit 0",
+ :toolchain
+ {:lean-version
+  "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+  :lean-toolchain-sha256
+  "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+  :lake-manifest-sha256
+  "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
+ :module "DarkTower.WarMachine.FoldCWitness",
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result
+ {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
+ :receipt/type :PositiveLeanWitnessReceipt,
+ :fixture
+ {:repo "futon2",
+  :path "holes/labs/wm-contract/fold-c-reference.edn",
+  :schema :fold-c-reference/v1,
+  :sha256
+  "bfd4bb1b7158013b0d2764e093b174cc2ac3b93b163e68ec2662216203cd4421"}}

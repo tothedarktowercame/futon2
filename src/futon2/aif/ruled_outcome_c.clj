@@ -56,6 +56,7 @@
    `futon2:src/futon2/aif/efe.clj:117-150` and Lean fold boundary at
    `mathlib4:DarkTower/WarMachine/Holes.lean:7186-7189`.  Declaration only."
   [{:layer/id :ruled-outcome-c
+    :composition-axis :risk-contribution
     :source :owner-ruling
     :author "Joseph Corneli"
     :basis "futon2:holes/labs/wm-contract/aif-equations.edn:211-214"

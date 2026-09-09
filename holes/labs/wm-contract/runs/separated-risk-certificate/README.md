@@ -64,10 +64,20 @@ all certificate runs passed. Two final derivations are byte-identical:
 
 | Artifact | SHA256 |
 |---|---|
-| certificate.edn | 9899d63330af6993daa07afad94793ebf5b75f75ea69a7d9053043d9e832046b |
+| certificate.edn | 196c7408938610c9ad340b709945c15acec5f5bd9f44cfaacdfb92d754173ff5 |
 | runtime-mass-binding.lean | 305222dea73f92c92bf89166be7423e12d1eae04eb3b40e5067b338911fc6659 |
 
 Clojure/EDN lint: 0 errors, 0 warnings; check-parens and git diff --check pass.
 No production scorer, worklist, registry, old witness or old receipt was changed.
 Independent review must decide integration of this successor check; this commit
 does not turn the known old layer-ID comparison failure green.
+
+## Two-axis integration refresh
+
+The follow-up integration pins PreferenceRiskBoundary.lean as well as the
+concrete witness, and refreshes the certificate after the runtime declaration
+acquires an explicit risk-contribution axis. Computed masses and observed risk
+values are unchanged. The fold wrapper now compares BOTH declaration axes and
+regenerates this certificate in a temporary directory, demanding byte equality
+with the reviewed artifacts; generation alone is not acceptance. The old
+ordered-fold receipt is preserved separately.

@@ -1,0 +1,6 @@
+{:schema :fold-c-axes/v1,
+ :era-report "runs/FOLDC-era-comparison-2026-09-09.md",
+ :preference-layer-ids [],
+ :risk-contribution-ids [:ruled-outcome-c],
+ :risk-declaration-sha256
+ "af6fb6fd713e048f011bd6dd1c3ee1e8f9a5f41a60ba73f61c1dff2c952e74bc"}

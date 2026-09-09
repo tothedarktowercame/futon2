@@ -1,6 +1,6 @@
 (ns checks.preference-risk-receipt
   "Finite execution certificate for the separated risk boundary. Run in its own
-   process from futon2. Generated proofs bind actual runtime masses to Lean;
+   process from futon2 with bb -cp .:src -m checks.preference-risk-receipt. Generated proofs bind actual runtime masses to Lean;
    this is not a proof of Clojure semantics or a live-run certificate."
   (:require [babashka.process :as process]
             [checks.disposition-kernel :as kernel]
@@ -89,6 +89,7 @@
   ["checks/preference_risk_receipt.clj" "checks/disposition_kernel.clj"
    "src/futon2/aif/disposition_risk.clj" "src/futon2/aif/ruled_outcome_c.clj"
    "src/futon2/aif/efe.clj" "src/futon2/aif/full_loop_cohort.clj"
+   "../mathlib4/DarkTower/WarMachine/PreferenceRiskBoundary.lean"
    "../mathlib4/DarkTower/WarMachine/PreferenceRiskWitness.lean"
    "../mathlib4/DarkTower/WarMachine/PreferenceRiskSeparation.lean"
    "../mathlib4/DarkTower/WarMachine/F10RuledCarrier.lean"
