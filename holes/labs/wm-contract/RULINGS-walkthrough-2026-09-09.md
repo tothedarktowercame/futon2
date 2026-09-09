@@ -176,3 +176,33 @@ pattern text with file/lines/exact bytes, or an authored descent), distinct
 from F2's acknowledged clause; the two-fault matrix showed the checks
 separate. The identity-expectation collapse is avoided by 20a's parameter
 clause.
+
+## Item 21 — E-source and the fifth bucket (claude-1 session, later on 2026-09-09)
+
+Joe, verbatim:
+
+> Yes, let's promote the learned E. Which could be another Codex dispatch. As
+> for the fifth tetrahedron bucket, that's defined to be workflow. That's
+> like, in a sense, orchestration of work towards building all the other
+> ones. So that's straightforward. Fff. Fff. The other ones look slightly
+> more technical, so let's come back to those.
+
+### 21a — E source/boundary: PROMOTE THE LEARNED E (option a)
+The learned, persisted scheduler E is promoted into the final strategic
+selector's deciding expression, replacing the frozen July-23 Phase-7 fixture
+E_S there (per the E-live-strategic-discovery-2026-09-09.md sheet's option
+(a)). Implementation dispatched to codex-17 (phase 2 of the Item 19c task):
+opt-in, existing selection/tie rules preserved, provenance naming the
+boundary where E applied. The registry addendum to :habit-prior is
+SEQUENCED AFTER the in-flight five-row re-sign (zai-1) to avoid re-signing
+a moving entry; it lands with the implementation slice's ledger work.
+
+### 21b — fifth tetrahedron bucket RULED: workflow
+The board's cross-cutting facet is DEFINED as "workflow" — orchestration of
+work toward building the other four vertices. (Matches the discovery note's
+observation that the tetrahedron figure's interior already represents
+workflow.) The PENDING marker comes off the issue-board generator.
+
+Remaining Block-D items (RUN4 :ready gate semantics, accept-script
+red-verdict gate, U83 supersession, organise marker) explicitly held —
+"slightly more technical, let's come back to those."
