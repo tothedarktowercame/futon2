@@ -764,3 +764,25 @@ Joe's gloss extends it in one direction the restatement stated only as a type
 Consequence: §5 packets are ungated (this file's header gate), and
 library-contract rows L6 and LA2–LA9 unblock (worklist rows updated with this
 date; LJ1 closes against this section).
+
+## §2a addendum — 2026-09-09: ruled preference family (Item 19a)
+
+This dated amendment preserves the earlier §2a text as history. Joe's
+[RULINGS-walkthrough-2026-09-09.md Item 19a](../labs/wm-contract/RULINGS-walkthrough-2026-09-09.md)
+settles the grain question: C is a family of preference distributions indexed
+by grain. For RUN4, C_int is live and C_mis remains flag-gated; the v1
+preference-module diagnostic is optional via opts. This is the family split
+proposed in [DESIGN-c-vector.md §5](../labs/wm-contract/DESIGN-c-vector.md):
+C_int assigns densities to declared channels, while C_mis assigns them to a
+mission's declared criteria, with the proposed factored composition and typed
+unmeasurable refusal. The ruling does not silently enable C_mis.
+
+The amendment settles the owner-level family interpretation, not the value of
+the global Lean C declaration. At this amendment's source read,
+`mathlib4/DarkTower/WarMachine/Holes.lean:156-157` explicitly defers C under
+organized discovery to `C591-C-as-calculation-proposal.md` and `E-C-realization.md`.
+The observation-to-disposition bridge still belongs to that excursion. A
+concrete C definition or a change from that deferral to a closed marker would
+claim more than this amendment supplies; neither is made here. The audit may
+therefore continue to expose C as open until its producer's closure evidence
+reflects the excursion's actual result.
