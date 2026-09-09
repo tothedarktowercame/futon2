@@ -206,3 +206,25 @@ workflow.) The PENDING marker comes off the issue-board generator.
 Remaining Block-D items (RUN4 :ready gate semantics, accept-script
 red-verdict gate, U83 supersession, organise marker) explicitly held —
 "slightly more technical, let's come back to those."
+
+## Item 22 — E accumulates forward (claude-1 session, later on 2026-09-09)
+
+Context: phase-2 promotion refused at the grain finding (the persisted E is
+tactical-by-design; E-live-strategic-discovery addendum, futon2 b60d2f4b);
+claude-1 presented three paths (reconstruct historically / accumulate
+forward / fixture stands). Joe, verbatim:
+
+> I would say we can just accumulate forward. We don't have to go back to
+> the historical stuff because the models changed so much from the previous
+> runs. I think it's only two that's relevant to this one. Then if we need
+> to do further redesign or rethinking, we can do it after we have banked
+> run 4.
+
+### 22 — RULED: forward accumulation only (path 2)
+Grain-labelled strategic selections are accumulated into the persisted prior
+from now on (RUN4 included); no historical reconstruction (the models
+changed too much for the earlier runs to be relevant). The strategic
+selector keeps the fixture E_S until forward-accumulated strategic-grain
+data exists to promote; the refusal rule stands (promotion only from
+grain-labelled data). Further redesign, if needed, comes after RUN4 is
+banked.
