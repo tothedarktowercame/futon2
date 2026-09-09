@@ -100,6 +100,23 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
   different calculational flow over the same objects G runs on. No weights,
   no solver design, no fold enabling, no MAP acceptance. Evidence, not
   design approval.
+- 2026-09-09 (sitting, third product — the first LOCAL CALCULATION): Joe
+  accepts the family-of-preference-distributions terminology, names growing
+  personal/organizational capability as a preference, and asks for one local
+  calculation mined qualitatively from historical missions/capabilities
+  (verbatim at holes/labs/wm-contract/SESSION-C-local-achievement-2026-09-09.md,
+  futon2 bbfb5921). The calculation
+  (runs/C-realization-first-flights/local_calculation.bb + result.edn):
+  M-first-flights Phase A — cluster A's own first member, records carry
+  derivations — replays a SHA-pinned historical flight witness through the
+  existing verifier; the ground-removed counterfactual has IDENTICAL
+  absolute error (0.03941189005722734) but flips the calibration-
+  admissibility mask out via F1, so the satisfaction condition
+  distinguishes what the numeric error cannot. :preference-masses
+  :not-assigned and :probability-of-future-success :not-estimated are in the
+  artifact itself. Reviewed by claude-1 (own runs from the documented cwd:
+  exit 0, two runs byte-identical, output equals committed result.edn, pins
+  hold). Evidence toward slice 2; no masses assigned.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
