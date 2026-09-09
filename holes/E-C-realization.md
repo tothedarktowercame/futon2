@@ -138,6 +138,24 @@ DISCOVERY marker (mathlib4 DarkTower/WarMachine/Holes.lean:152, commit
   by claude-1 (own runs from futon3c: exit 0, byte-identical, matches
   committed result.edn). Evidence, not cluster completion or preference
   approval.
+- 2026-09-09 (sitting, fifth product — current-paper preferences + working
+  diagnostic): Joe asked for current preferences mined from the PLoP/Futon
+  papers with a small registry and a working diagnostic, toward recursive
+  current work (verbatim at
+  holes/labs/wm-contract/SESSION-C-current-paper-diagnostic-2026-09-09.md,
+  futon2 befdd98f; artifacts runs/C-current-paper-diagnostic/). Five
+  source-grounded entries (claim-warrant, inspectable-reasons,
+  semantic-satisfaction, external-usefulness, reusable-patterns), each a
+  SYMBOLIC soft-binary family (p_i, 1-p_i) with 1/2 < p_i < 1 — masses
+  symbolic, no numbers ruled. The diagnostic's one analyst annotation
+  verified by claude-1 against the f036a91 pin: sec-recapitulation.tex:16
+  says 'the boundary Part III measured' while :10 and
+  sec-evaluation-outline.tex:3 say outline-only, 160 acceptance cells unrun
+  — a one-sentence producer correction would flip the claim-warrant
+  coordinate. Unknowns carry measurement status, not mass. Reviewed by
+  claude-1 (runs from two cwds byte-identical to committed result; drift
+  reporter correctly names the concurrently-edited paper files). Evidence;
+  no ruled masses, no paper edit from the sitting.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
