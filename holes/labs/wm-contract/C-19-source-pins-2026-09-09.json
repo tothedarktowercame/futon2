@@ -1,0 +1,79 @@
+{
+  "schema": "c-19-source-pins/v1",
+  "repository": "futon2",
+  "head-at-capture": "3b38f438348a17926835832aca7cbe299355047c",
+  "sources": [
+    {
+      "path": "holes/E-C-realization.md",
+      "sha256": "f2de8705bf7f35bff57286ee3994223a3b0109674a552cb4a441b9673a321521"
+    },
+    {
+      "path": "holes/labs/wm-contract/RULINGS-walkthrough-2026-09-09.md",
+      "sha256": "a326989d1f680c9a8b2dca3038cb046039b5efaeede5edbb509cb8c522d3a7c4"
+    },
+    {
+      "path": "holes/labs/wm-contract/aif-equations.edn",
+      "sha256": "beba863688e850d3ad808a0d657495fe2df5927b9cb970c6c5dd4bcfd0d5effb"
+    },
+    {
+      "path": "holes/labs/wm-contract/MAP-C-realization-2026-09-09.md",
+      "sha256": "d7aa47308cd9dee8d4dd65b1500179f29158d3fe28772665df04cdddef3db769"
+    },
+    {
+      "path": "holes/labs/wm-contract/SESSION-C-local-achievement-2026-09-09.md",
+      "sha256": "80e29a20023a983d3b5c1dffe8edfaa35fd4648e83db24febff0add3202d1203"
+    },
+    {
+      "path": "holes/labs/wm-contract/DERIVE-ARGUE-C-realization-2026-09-09.md",
+      "sha256": "c177555dbd11642b3510c327004d63753252abcaa310560410d4cf41dced6d3f"
+    },
+    {
+      "path": "holes/labs/wm-contract/INSTANTIATE-C-module-v1-2026-09-09.md",
+      "sha256": "e8f191030335039b0667758e3e510e87572931b3a1e072954a6d87cb8fee1ad7"
+    },
+    {
+      "path": "holes/labs/wm-contract/SESSION-C-institutional-constraints-2026-09-09.md",
+      "sha256": "e051112dabcc00471c319cc23d2a07ac3480533edf75e84effaf84e2bde05ceb"
+    },
+    {
+      "path": "holes/labs/wm-contract/SESSION-C-pattern-institution-duality-2026-09-09.md",
+      "sha256": "9d7e70be269bf7688ee8a31311e6999b15c382b325030904fb24ac9a4dff8cec"
+    },
+    {
+      "path": "src/futon2/aif/realized_outcome.clj",
+      "sha256": "35c546c35c54a6339fa1bb3d8f3bd018ef37ab039480e87aa5b652345721c5dd"
+    },
+    {
+      "path": "src/futon2/aif/fold_realized.clj",
+      "sha256": "3c7cf2f57a9bae549a65146c2d2922c104fa1f40c19a7e151671bef846db7925"
+    },
+    {
+      "path": "src/futon2/aif/preference_module.clj",
+      "sha256": "992105412b34b4a4235cf7554c4667ec8f833af0327a19c7c043403dc47c8291"
+    },
+    {
+      "path": "src/futon2/aif/selection_gain.clj",
+      "sha256": "2f58d9ceff766521e9756457ee121de277189e447e1d082272c5c2bc7416d058"
+    },
+    {
+      "path": "src/futon2/aif/trace.clj",
+      "sha256": "9e39ae1cbe550a3789e3215baa5ab1ac4e76988587f21c761280f6f1611b9f63"
+    },
+    {
+      "path": "src/futon2/aif/full_loop_cohort.clj",
+      "sha256": "b4ca4e4f101f2735ebf5ce93640ed452859a9f9b05af71713c297efc84b600ea"
+    },
+    {
+      "path": "checks/disposition_kernel.clj",
+      "sha256": "66bdef7b458c3777a60804f3db97bf413dc1428de5c4e4533ffa26bf503d5aee"
+    },
+    {
+      "path": "holes/labs/wm-contract/wm_step_observe.bb",
+      "sha256": "36476c05de17cf6894c0b6d39b886064f9b82885ea80820b447e50175d1619b2"
+    },
+    {
+      "path": "scripts/futon2/report/war_machine.clj",
+      "sha256": "10af3d218bca645c8ae3296cac8116db9db25bea3959ff9b01f812f009c72de0"
+    }
+  ]
+}

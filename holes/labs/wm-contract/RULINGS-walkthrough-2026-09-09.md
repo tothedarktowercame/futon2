@@ -136,3 +136,43 @@ is later work, not a RUN4 gate.
 Blocks B (find triple), C (hierarchy/learning/policy-depth deferrals) and D
 (four one-sentence items) explicitly held for a later pass, per Joe's closing
 sentence.
+
+## Item 20 — the find triple ruled (Block B; claude-1 session, later on 2026-09-09)
+
+Context: claude-1 presented the three registered find choices with the
+F11 slice evidence and the choice-evidence experiment
+(futon3:checks/find-snatch-choice-evidence.edn), noting the Item 18a carrier
+application reshaped the arms, and recommended: F2 content against the
+applied data carrier (expectation stays a parameter); F4 reading C with the
+vacuity clause; F3 the applied citation field, ratified. Joe, verbatim:
+
+> So I agree with your readings. I agree with your readings on the find
+> questions. I particularly liked the deontic must not because I thought that
+> would be a nice way to connect this back to the Ostrom IAD. Considerations
+> that I was talking about with Codex 12. But anyway, I'm happy to follow
+> your recommendations on these.
+
+### 20a — :find-f2-receipt-carrier RULED
+Content-F2 against the applied (Item 18a / C590) data carrier: F2 states the
+acknowledged clause, route and as-of content, not receipt presence. The
+expectation remains an independently supplied PARAMETER (C567 review's
+DualContentF2 separation), never fixed to the identity. Presence-only is
+refuted by the experiment (presence preserved a planted clause-attribution
+fault; content checks rejected it; as-of substitution failed only
+query-binding).
+
+### 20b — :find-f4-reading RULED: reading C
+The zero-mass designation is an EXTERNALLY SUPPLIED parameter — the paper's
+deontic "must not" — with the vacuity clause: an empty applicable designation
+is reported vacuous and earns no discrimination. Reading B is what C reduces
+to when the only designation on record is the scenario's own. Joe's addendum:
+the deontic must-not connects this to the Ostrom/IAD considerations from the
+codex-12 sitting — the designation supplier is an institutional role
+(authority-supplied rule, not finder self-certification).
+
+### 20c — :find-f3-citation-field RULED
+The citation is the applied carrier's citation field (FindCitation data:
+pattern text with file/lines/exact bytes, or an authored descent), distinct
+from F2's acknowledged clause; the two-fault matrix showed the checks
+separate. The identity-expectation collapse is avoided by 20a's parameter
+clause.
