@@ -1,0 +1,75 @@
+{:schema :e-pre-go-live/preparation-probe-v1,
+ :source-basis
+ {"futon2/holes/labs/wm-contract/run4_readiness.bb"
+  "79bd666a394390931fb6384acb9701b1e420941e1b7013ca80fbd9bdd6ccdd5e",
+  "futon2/holes/labs/wm-contract/runs/E-pre-go-live-experiment-2026-09-09.md"
+  "bd92e5efa1946217ed411c31e681a334ef004712830bbd7a3d6cadf500cd1cd5",
+  "futon3/checks/find_organise.clj"
+  "64c3abb4a5a8655736ffc6391cbf7cbae17a76cdc3e026cfc3e6adcf0da1d9ce",
+  "futon3/library/apparatus/done-is-observed-running.flexiarg"
+  "301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653",
+  "futon3/library/apparatus/evidence-to-disposition-once.flexiarg"
+  "9b07bae8e672031979881d6bacbff4926453b949691ffa99751e226b43e6033e",
+  "futon3/library/apparatus/one-authority-per-question.flexiarg"
+  "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1",
+  "futon3/library/apparatus/pin-moves-with-the-population.flexiarg"
+  "259e32df9a71a6360bc7129cb48680329d9275bfd7c25b5c67c211c25ceb9b79",
+  "futon3/library/apparatus/replayable-not-precious.flexiarg"
+  "44a87d59413bd24b5a86cab526b751b953b846bca9519a0500b926fe4a543546"},
+ :source-basis-after
+ {"futon2/holes/labs/wm-contract/run4_readiness.bb"
+  "79bd666a394390931fb6384acb9701b1e420941e1b7013ca80fbd9bdd6ccdd5e",
+  "futon2/holes/labs/wm-contract/runs/E-pre-go-live-experiment-2026-09-09.md"
+  "bd92e5efa1946217ed411c31e681a334ef004712830bbd7a3d6cadf500cd1cd5",
+  "futon3/checks/find_organise.clj"
+  "64c3abb4a5a8655736ffc6391cbf7cbae17a76cdc3e026cfc3e6adcf0da1d9ce",
+  "futon3/library/apparatus/done-is-observed-running.flexiarg"
+  "301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653",
+  "futon3/library/apparatus/evidence-to-disposition-once.flexiarg"
+  "9b07bae8e672031979881d6bacbff4926453b949691ffa99751e226b43e6033e",
+  "futon3/library/apparatus/one-authority-per-question.flexiarg"
+  "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1",
+  "futon3/library/apparatus/pin-moves-with-the-population.flexiarg"
+  "259e32df9a71a6360bc7129cb48680329d9275bfd7c25b5c67c211c25ceb9b79",
+  "futon3/library/apparatus/replayable-not-precious.flexiarg"
+  "44a87d59413bd24b5a86cab526b751b953b846bca9519a0500b926fe4a543546"},
+ :driver-source
+ "(require '[find-organise :as fo] '[babashka.process :as p]\n         '[clojure.pprint :as pp] '[clojure.string :as str])\n(def root \"/home/joe/code/\")\n(def members (mapv #(str \"apparatus/\" %) [\"one-authority-per-question\" \"pin-moves-with-the-population\"\n                                          \"evidence-to-disposition-once\" \"replayable-not-precious\"\n                                          \"done-is-observed-running\"]))\n(def sources (into [\"futon3/checks/find_organise.clj\"\n                    \"futon2/holes/labs/wm-contract/run4_readiness.bb\"\n                    \"futon2/holes/labs/wm-contract/runs/E-pre-go-live-experiment-2026-09-09.md\"]\n                   (map #(str \"futon3/library/\" % \".flexiarg\") members)))\n(defn pins [] (into (sorted-map) (map (fn [path]\n  [path (let [d (java.security.MessageDigest/getInstance \"SHA-256\")]\n          (.update d (.getBytes (slurp (str root path)) \"UTF-8\"))\n          (format \"%064x\" (java.math.BigInteger. 1 (.digest d))))]) sources)))\n(def before (pins))\n(def command [\"bb\" \"run4_readiness.bb\" \"--summary\"])\n(def rule {:id (first members) :then-source {:file (first (drop 3 sources)) :lines [23 24]}\n           :if #(= :requested (:authority-read %))\n           :however #(not (:already-read? %))\n           :then (fn [_] (let [r (apply p/shell {:dir (str root \"futon2/holes/labs/wm-contract\")\n                                                :continue true :out :string :err :string} command)]\n                          {:command command :exit (:exit r) :stdout (:out r) :stderr (:err r)}))})\n(def fired (fo/fire [rule] (constantly 0) {:authority-read :requested :already-read? false}))\n(def after (pins))\n(def output (second fired))\n(def record\n  {:schema :e-pre-go-live/preparation-probe-v1 :at (str (java.time.Instant/now))\n   :task-selection {:by :Joe :mode :operator-selected :future-owner :wm-outer-loop}\n   :round {:id :authority-probe-1 :kind :diagnostic-transcript :primary? false}\n   :source-basis before :source-basis-after after :basis-stable? (= before after)\n   :basis-limit :driver-pattern-and-authority-reader-pins-not-transitive-input-freeze\n   :excluded-lexical-tokens [\"S1/S2\" \"futon3c/holes/T-apm-recurring-failure-end-to-end.md\" \"a1-vs-a2/a3\"]\n   :members (mapv (fn [id] {:id id :status (if (= id (first members)) :partially-executed :supporting-unexecuted)}) members)\n   :acting-order (if fired [(:id (first fired))] [])\n   :action output\n   :dependent-publication :not-attempted\n   :o4 {:status :unexercised :reason :no-reviewed-precedence-intervention-or-primary-pair\n        :score :not-graded :closure-claimed? false}\n   :driver-source (slurp *file*)})\n(spit (str root \"futon2/holes/labs/wm-contract/runs/E-pre-go-live-authority-probe-2026-09-09.edn\")\n      (with-out-str (pp/pprint record)))\n(println (:stdout output))\n(println \"shared-fire acting-order:\" (:acting-order record) \"basis-stable:\" (= before after) \"O4: unexercised\")\n(when-not (and fired (= before after) (zero? (:exit output))) (System/exit 1))\n",
+ :round
+ {:id :authority-probe-1,
+  :kind :diagnostic-transcript,
+  :primary? false},
+ :dependent-publication :not-attempted,
+ :task-selection
+ {:by :Joe, :mode :operator-selected, :future-owner :wm-outer-loop},
+ :basis-limit
+ :driver-pattern-and-authority-reader-pins-not-transitive-input-freeze,
+ :basis-stable? true,
+ :at "2026-09-09T18:46:13.427308527Z",
+ :action
+ {:command ["bb" "run4_readiness.bb" "--summary"],
+  :exit 0,
+  :stdout
+  "```\nRUN4 certificates        GREEN\nRUN4 definitions-intact  GREEN\nRUN4 wiring-pin          GREEN\nRUN4 run-pins            GREEN\nRUN4 regenerates         BLOCKED-ON [1]\nRUN4 lean-probe          BLOCKED-ON [1]\nRUN4 hole-open           BLOCKED-ON [1]\nRUN4 closability-audit   GREEN\nRUN4 invalidators        GREEN\nVERDICT: BLOCKED-ON [regenerates lean-probe hole-open]\n  - regenerates: the committed manifest does not regenerate byte-identically: 00-source.edn 04-controls.edn\n  - lean-probe: the axiom probe was taken at a different Holes.lean than the live one (:stale) -- re-run --probe\n  - hole-open: the emitted contract is pinned at fcd1261 while Holes.lean last changed at 93ade5b -- re-emit\n```\n",
+  :stderr ""},
+ :members
+ [{:id "apparatus/one-authority-per-question",
+   :status :partially-executed}
+  {:id "apparatus/pin-moves-with-the-population",
+   :status :supporting-unexecuted}
+  {:id "apparatus/evidence-to-disposition-once",
+   :status :supporting-unexecuted}
+  {:id "apparatus/replayable-not-precious",
+   :status :supporting-unexecuted}
+  {:id "apparatus/done-is-observed-running",
+   :status :supporting-unexecuted}],
+ :acting-order ["apparatus/one-authority-per-question"],
+ :excluded-lexical-tokens
+ ["S1/S2"
+  "futon3c/holes/T-apm-recurring-failure-end-to-end.md"
+  "a1-vs-a2/a3"],
+ :o4
+ {:status :unexercised,
+  :reason :no-reviewed-precedence-intervention-or-primary-pair,
+  :score :not-graded,
+  :closure-claimed? false}}
