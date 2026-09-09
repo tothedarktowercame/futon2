@@ -300,3 +300,36 @@ codex-10's in-flight packet and is excluded from the chain to avoid
 two-writer collision; learning's deliverable is the DESIGN per the
 corrected scope (not an implementation, since Joe withheld that ruling).
 Claude reviews the whole chain once at the end.
+
+## Item 26 — the four cluster requirements: not weights; a new excursion (claude-1 session)
+
+Context: the U88 Cascade Live walkthrough (pinned snapshot a93ec6fb). Joe
+endorsed all four cluster requirements and rejected the weights framing.
+Verbatim:
+
+> So here are my comments on the walkthrough notes you've reported back. So
+> these are all really good requirements. I like them all. Records carry
+> warrant. That's good. One queryable self-account. That's good.
+> Accountable Next Action Choice, including Goal Formation. That's good.
+> Feedback reaches every participant. That's good. So this is all good
+> stuff. I guess the question is... How does it become computational? And
+> here it says Wait, Deferral. I don't know if these are best represented
+> as weights. Or something else? What are they weights of? And how would
+> they work? Because when I was thinking about these... Types of design
+> requirements. I was thinking about them as more of an institutional...
+> Arrangement. So... I think we should take these. Design requirements. I
+> write them down some place. And make a further excursion that thinks
+> about how... These. Design requirements get... Merged into the system.
+> So are they preferences? Are they institutions? Are they design patterns?
+> What difference do they make? But just thinking of them as weights seems
+> a little bit minimalistic to me. And I'm not even sure what they would be
+> waiting. So, my suggestion, under the circumstances, is that we. Bell
+> this to. Codex 17 and see if we can't make another excursion out of it.
+
+RULED: (a) all four cluster requirements ENDORSED as design requirements;
+(b) the weights framing REJECTED for now — "what are they weights of" is
+itself the open question; (c) the requirements get written down as a
+first-class document; (d) a NEW EXCURSION (codex-17 seat) works out how
+they merge into the system — preferences vs institutions vs design
+patterns, and what difference each makes. U88's walkthrough requirement is
+satisfied by this sitting; the excursion continues the thread.
