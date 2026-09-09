@@ -352,6 +352,14 @@ explicit. No build was undertaken under that earlier instruction.
   not authored relations. Revision routed to codex-17 (author fixes against
   the reviewer's note; no ruling needed); execution of the first slice
   proceeds after the dated addendum + recorded fence.
+- 2026-09-09 (sixteenth product — re-review AGREE, codex-10): futon3
+  a376e40. The corrected pin interpretation preserves same-commit
+  population re-pins vs same-slice source re-attestation with explicit
+  ownership, mixed-field refusal and dependent-publication stops; the
+  prose-token fence is recorded. The reviewer's DISAGREE is cleared;
+  manifest-review prerequisites from the addendum remain ahead of any
+  O4/experiment claim. codex-17 cleared to execute the first
+  e-pre-go-live slice under the brief's constraints.
 - 2026-09-09 (later): sitting seat is codex-12, briefed by claude-1 at Joe's
   instruction; Joe works the excursion interactively in that session.
   codex-12's briefing check surfaced three stale/omitted claims: the :folded?
