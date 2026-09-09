@@ -1,9 +1,9 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-09-08",
  :authority
- {:contract-git-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ {:contract-git-sha "fcd1261c303c2beca08a6812eba4a7ce2e83d722",
   :contract-sha256
-  "7b41d69121ba82ef7c4bb8b9c305a756d9825418f73f3a534fb8bbc54d8cb170",
+  "444b9493e3a9b603b8027027b479c807eb1d377fab18e3f9f10859349b3b47ce",
   :glossary-sha256
   "d7ec5b68d1049a86d7a6c3c71eb61f50eb0e351a1d2d212affa6e5636032260f",
   :witness-registry-sha256
@@ -45,7 +45,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7910",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7986",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -68,7 +68,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7910",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7986",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -92,7 +92,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7911",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7987",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -116,7 +116,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7912",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7988",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -140,7 +140,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7913",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7989",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -163,7 +163,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7914",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7990",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -186,7 +186,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7915",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7991",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -211,7 +211,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7916",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7992",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -236,7 +236,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7917",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7993",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -259,7 +259,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7918",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7994",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -282,7 +282,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7918",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7994",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -305,7 +305,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7919",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7995",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -328,16 +328,16 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7919",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7995",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:150",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:154",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
    :content-status :record-negative-space,
-   :carried-by [:U87],
+   :carried-by :unowned,
    :area :demo,
    :owner "P-validated-R5 §2a"}
   {:rung :type-transcribed,
@@ -351,11 +351,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7920",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7996",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:164",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:168",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -374,11 +374,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7920",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7996",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:172",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:176",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -397,11 +397,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7921",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7997",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:837",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:913",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -420,11 +420,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7921",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7997",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1071",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1147",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -443,11 +443,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7922",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7998",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1075",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1151",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -466,11 +466,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7922",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7998",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1082",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1158",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -489,11 +489,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7923",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7999",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1090",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1166",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -512,11 +512,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7923",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7999",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1131",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1207",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -535,11 +535,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7923",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7999",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7843",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7919",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -558,11 +558,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7923",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7999",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7860",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7936",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -581,11 +581,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7923",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7999",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7864",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7940",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -604,11 +604,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7923",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7999",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1111",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1187",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -627,11 +627,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7923",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7999",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1136",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1212",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -651,11 +651,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7924",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8000",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7256",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7332",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -676,11 +676,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7924",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8000",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7274",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7350",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -700,11 +700,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7925",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8001",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7159",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7235",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -723,11 +723,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7925",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8001",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7164",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7240",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -746,11 +746,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7926",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8002",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7174",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7250",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -769,11 +769,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7926",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8002",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7182",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7258",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -792,11 +792,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7927",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8003",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7185",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7261",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -815,11 +815,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7927",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8003",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7189",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7265",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -838,11 +838,11 @@
     "the witness's evidence is holes/labs/wm-contract/fold-c-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7928",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8004",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7195",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7271",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -864,11 +864,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7928",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8004",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7200",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7276",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -887,11 +887,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7929",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8005",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7207",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7283",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -910,11 +910,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7930",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8006",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7219",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7295",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -933,11 +933,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7931",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8007",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7227",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7303",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -956,11 +956,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7932",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8008",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7240",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7316",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -979,11 +979,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7933",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8009",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7244",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7320",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1002,11 +1002,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7934",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8010",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7251",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7327",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1025,11 +1025,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7935",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8011",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1197",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1273",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1048,11 +1048,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7935",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8011",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1209",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1285",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1071,11 +1071,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7936",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8012",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1220",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1296",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1094,11 +1094,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7936",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8012",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1229",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1305",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1117,11 +1117,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7937",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8013",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1234",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1310",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1140,11 +1140,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7937",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8013",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1300",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1376",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1163,11 +1163,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7938",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8014",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1308",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1384",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1186,11 +1186,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7939",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8015",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7156",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7232",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1209,11 +1209,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7940",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8016",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6968",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7044",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1232,11 +1232,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7941",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8017",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6973",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7049",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1256,11 +1256,11 @@
     "the witness's evidence is holes/labs/wm-contract/model-reduction-free-energy-change-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7942",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8018",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7084",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7160",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1283,11 +1283,11 @@
     "the witness's evidence is holes/labs/wm-contract/observation-vector-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7944",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8020",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6945",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7021",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1313,11 +1313,11 @@
     "the witness's evidence is holes/labs/wm-contract/predictive-outcome-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7946",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8022",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6892",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6968",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1340,11 +1340,11 @@
     "the witness's evidence is holes/labs/wm-contract/parameter-prior-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7948",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8024",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6896",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6972",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1367,11 +1367,11 @@
     "the witness's evidence is holes/labs/wm-contract/parameter-posterior-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7950",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8026",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6900",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6976",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1394,11 +1394,11 @@
     "the witness's evidence is holes/labs/wm-contract/transition-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7952",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8028",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6905",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6981",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1421,11 +1421,11 @@
     "the witness's evidence is holes/labs/wm-contract/preference-distribution-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7954",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8030",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6913",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6989",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1448,11 +1448,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7956",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8032",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7009",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7085",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1471,11 +1471,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7957",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8033",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7029",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7105",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1494,11 +1494,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7958",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8034",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7046",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7122",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1517,11 +1517,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7959",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8035",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7051",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7127",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1540,11 +1540,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7960",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8036",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7107",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7183",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1563,11 +1563,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7961",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8037",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6928",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7004",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1586,11 +1586,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7962",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8038",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:880",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:956",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -1610,11 +1610,11 @@
     "the witness's evidence is holes/labs/wm-contract/log-multivariate-beta-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7963",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8039",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7073",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7149",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1637,11 +1637,11 @@
     "the witness's evidence is holes/labs/wm-contract/expected-free-energy-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7965",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8041",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7021",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7097",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1664,11 +1664,11 @@
     "the witness's evidence is holes/labs/wm-contract/ambiguity-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7967",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8043",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7014",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7090",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1691,7 +1691,7 @@
     "the witness's evidence is holes/labs/wm-contract/have-want-arrow-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7969",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8045",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -1717,7 +1717,7 @@
     "the witness's evidence is holes/labs/wm-contract/fold-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7971",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8047",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -1743,7 +1743,7 @@
     "the witness's evidence is holes/labs/wm-contract/fold-turn-quarantine.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7973",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8049",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -1770,7 +1770,7 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7975",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8051",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -1793,11 +1793,11 @@
     "the witness's evidence is holes/labs/wm-contract/belief-state-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7976",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8052",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6940",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7016",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1819,11 +1819,11 @@
     "the witness's evidence is holes/labs/wm-contract/variational-free-energy-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7978",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8054",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6962",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7038",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1846,11 +1846,11 @@
     "the witness's evidence is holes/labs/wm-contract/precision-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7980",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8056",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6954",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7030",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1873,11 +1873,11 @@
     "the witness's evidence is holes/labs/wm-contract/prediction-error-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7982",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8058",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6949",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7025",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1900,11 +1900,11 @@
     "the witness's evidence is holes/labs/wm-contract/softmax-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7984",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8060",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7094",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7170",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1926,11 +1926,11 @@
     "the witness's evidence is holes/labs/wm-contract/bayes-factor-threshold-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7986",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8062",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7091",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7167",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1953,11 +1953,11 @@
     "the witness's evidence is holes/labs/wm-contract/bayesian-model-reduction-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7988",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8064",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7102",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7178",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -1981,11 +1981,11 @@
     "the witness's evidence is holes/labs/wm-contract/dirichlet-concentrations-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7990",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8066",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7070",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7146",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2008,11 +2008,11 @@
     "the witness's evidence is holes/labs/wm-contract/channel-vocabulary-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7992",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8068",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1239",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1315",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2034,11 +2034,11 @@
     "the witness's evidence is holes/labs/wm-contract/observation-kernel-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7994",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8070",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6937",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7013",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2061,11 +2061,11 @@
     "the witness's evidence is holes/labs/wm-contract/predictive-outcome-risk-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7996",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8072",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7001",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7077",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2088,11 +2088,11 @@
     "the witness's evidence is holes/labs/wm-contract/policy-prior-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7998",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8074",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6909",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6985",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2116,7 +2116,7 @@
     "the witness's evidence is holes/labs/wm-contract/control-vocabulary-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8000",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8076",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -2143,7 +2143,7 @@
     "the witness's evidence is holes/labs/wm-contract/aliveness-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8002",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8078",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -2170,7 +2170,7 @@
     "the witness's evidence is holes/labs/wm-contract/act-gate-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8004",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8080",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -2199,7 +2199,7 @@
     "the witness's evidence is holes/labs/wm-contract/cohort-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8006",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8082",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
@@ -2226,11 +2226,11 @@
     "the witness's evidence is holes/labs/wm-contract/expected-information-gain-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8008",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8084",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7060",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7136",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2253,11 +2253,11 @@
     "the witness's evidence is holes/labs/wm-contract/generative-model-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8010",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8086",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6921",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6997",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2279,11 +2279,11 @@
     "the witness's evidence is holes/labs/wm-contract/model-uncertainty-eig-proof-receipt.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8012",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8088",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7147",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7223",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2306,11 +2306,11 @@
     "the witness's evidence is holes/labs/wm-contract/cascade-diff-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8014",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8090",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:902",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:978",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2332,11 +2332,11 @@
     "the witness's evidence is holes/labs/wm-contract/cascade-diff-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8016",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8092",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:910",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:986",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2358,11 +2358,11 @@
     "the witness's evidence is holes/labs/wm-contract/cascade-diff-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8018",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8094",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:917",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:993",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2384,11 +2384,11 @@
     "the witness's evidence is holes/labs/wm-contract/cascade-diff-reference.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8020",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8096",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:924",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1000",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2410,11 +2410,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8022",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8098",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1183",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1259",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -2435,12 +2435,12 @@
    "The DESIGN-c-vector.md §5 split (C_int / C_mis) is an owner amendment (P-validated-R5 §2a); nothing in it needs a tick. The refusal's ground still holds as measured: U12 found one risk_mis value across all 133 mission actions and all three 2026-09-02 records :absent.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8026",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8102",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
    :content-status :open-hole,
-   :carried-by [:F10 :U87 :RUN4],
+   :carried-by [:F10 :RUN4],
    :area :preferences,
    :closability :pre-run-closable,
    :owner "P-validated-R5 §2a"}
@@ -2455,11 +2455,11 @@
     "the witness's evidence is holes/labs/wm-contract/ablation-exact-dyadic.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8027",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8103",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:188",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:192",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2484,7 +2484,7 @@
    "A standing implementation refusal; an owner ruling closes it, no record can.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8028",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8104",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
@@ -2504,11 +2504,11 @@
     "the witness's evidence is checks/find-snatch.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8029",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8105",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:267",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:343",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2531,11 +2531,11 @@
     "the witness's evidence is checks/find-snatch.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8030",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8106",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:272",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:348",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2558,11 +2558,11 @@
     "the witness's evidence is checks/find-snatch.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8031",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8107",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:276",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:352",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2585,11 +2585,11 @@
     "the witness's evidence is checks/find-snatch.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8032",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8108",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:280",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:356",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2614,7 +2614,7 @@
    "The declaration names its own gate: whether the refusal weakens to definable is LA2's to decide from a running policy-grain rule. That running is checks/playout_snatch.clj, not a tick.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8033",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8109",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
@@ -2634,11 +2634,11 @@
     "the witness's evidence is holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8034",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8110",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1097",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1173",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2661,11 +2661,11 @@
     "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8035",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8111",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1143",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1219",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2687,11 +2687,11 @@
     "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8036",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8112",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1157",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1233",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2713,11 +2713,11 @@
     "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8037",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8113",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1160",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1236",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2740,11 +2740,11 @@
     "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8038",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8114",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1170",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1246",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2767,11 +2767,11 @@
     "the witness's evidence is holes/labs/wm-contract/R9-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8039",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8115",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1165",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1241",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2794,11 +2794,11 @@
     "the witness's evidence is holes/labs/wm-contract/R2-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8040",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8116",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1263",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1339",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2821,11 +2821,11 @@
     "the witness's evidence is holes/labs/wm-contract/R2-D2-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8041",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8117",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1267",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1343",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2848,11 +2848,11 @@
     "the witness's evidence is holes/labs/wm-contract/R8-D3-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8042",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8118",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1318",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:1394",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2875,11 +2875,11 @@
     "the witness's evidence is holes/labs/wm-contract/R8-D3-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8043",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8119",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6867",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6943",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2902,11 +2902,11 @@
     "the witness's evidence is holes/labs/wm-contract/R8-D3-report.edn, which carries no run identity -- a fixture, not a record exhibiting the quantity"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8044",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8120",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6871",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6947",
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
@@ -2931,7 +2931,7 @@
    "The claim quantifies over running instances. The C_int half is on all three 2026-09-02 records; mission-c-readback occurs zero times in wm-trace-2026-09-02.edn. Whether the C_mis half would CLOSE it is unsettled: the Lean docstring says PERMANENT (C114) and DESIGN-c-vector.md door 7 says close-by-record.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8045",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8121",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
@@ -2956,7 +2956,7 @@
    "Run-gated here does NOT mean awaiting a run. The witness passes; the hole stays open because the Lean proposition is world-level and C114 declined to narrow it to a pinned receipt.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8046",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8122",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-and-held-open,
@@ -2982,7 +2982,7 @@
    "RUN-GATED, NOT PERMANENT -- the owner refused the permanent-attestation reading on 2026-09-03 and C114's decline of the pinned transcription is superseded by that ruling. The s5 certificate does not close it and is not claimed to: the ruling reserves mkClosed for Joe's acceptance. Two limits the certificate states about itself rather than leaving to a reader: 5 of the 9 distinct hops are drawn only because a previous route MEASUREMENT put them on the :route-measured-drawn layer, and 19 of the 22 drawn edges never fired, so what is proved is that the run stayed inside the union of the two layers.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8047",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8123",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-and-held-open,
@@ -3005,11 +3005,11 @@
     "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8048",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8124",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}
     {:rung :type-transcribed,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7804",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7880",
      :evidence :lean-definition-site,
      :why
      "the closed declaration has a definition site in the module"}],
@@ -3031,7 +3031,7 @@
    "The antecedent has never occurred on record, and no record since the pin carries the enactment half at all: :realized-outcome occurs 0 times in the 09-01, 09-02 and S4 traces. The S-stage runs are shadow runs, so they cannot produce it by construction.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8049",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8125",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
@@ -3055,7 +3055,7 @@
    "An absence over code paths, settled by reading the tree; a run could only falsify it. The provenance walk is done and written down (TN §9a) but not bound: the name does not occur in checks/witness-registry.edn, so there is no check, no fixture and no rejecting control.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8050",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8126",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
@@ -3077,7 +3077,7 @@
    "The wiring exists and the record does not: S3 is a replay, its one live tau = beta tick ran under a write-suppressing preflight, and all 18 :tau-source values in wm-trace-2026-09-01.edn are :selection-gain-only. :J10 (Joe 2026-09-03) gave it H4's disposition shape and :U47 corrected its falsifier field to the absence form (mathlib4 a3ae5084be); with no persisted record at all there is nothing for it to be witnessed under, so it stays :not-ready rather than moving with H4.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8051",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8127",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :not-ready,
@@ -3102,7 +3102,7 @@
    "RULED :J10 (Joe 2026-09-03), executed by :U47. The contest is settled and it was a wording defect, not an evidential one: the falsifier field named the CONFIRMING observation, word for word what the evidence field asks for, and is corrected to the absence form at mathlib4 a3ae5084be -- so the S4 record is a WITNESS and not a refutation. What it witnesses is the FLAGGED path (FUTON_WM_FPI_POSTERIOR is read from the environment and default-off, war_machine.clj:199-219), so the hole stays open :run-gated and closes on a default-path persisted record carrying the term -- or if the flag is ruled default-on, which is its own ruling.",
    :rung-ladder
    [{:rung :named,
-     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8052",
+     :licence "mathlib4/DarkTower/WarMachine/Holes.lean:8128",
      :evidence :contract-manifest-entry,
      :why "the declaration is named in the contract manifest"}],
    :readiness :witnessed-under-flag,

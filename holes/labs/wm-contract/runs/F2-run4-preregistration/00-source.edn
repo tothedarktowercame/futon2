@@ -25,5 +25,5 @@
  :holes-lean
  {:path "mathlib4/DarkTower/WarMachine/Holes.lean",
   :sha256
-  "0410f61ddb95f058bc33610f22c5783d87827d7b996fba4e846b1b463a1ab5fe"},
+  "fc8a6a9906a6d334e838a7c598c220a4ac686d835505a09b0239764ac08d042d"},
  :emitted-lean "mathlib4/DarkTower/WarMachine/Run4Preregistration.lean"}

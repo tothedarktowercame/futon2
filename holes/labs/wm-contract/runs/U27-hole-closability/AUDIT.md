@@ -1,6 +1,6 @@
 # U27 hole-closability audit — refreshed
 
-As of `2026-09-08`; contract `e239086a44147f14defc88e74a662a2cd4487e67`.
+As of `2026-09-08`; contract `fcd1261c303c2beca08a6812eba4a7ce2e83d722`.
 
 This report is generated from `variable-situation-accounting.edn`; the EDN artifact is authoritative. Open rows: 11 (10 contract declarations, 1 glossary-side).
 

@@ -46,7 +46,7 @@
   :holes-lean
   "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean",
   :holes-lean-sha256
-  "0410f61ddb95f058bc33610f22c5783d87827d7b996fba4e846b1b463a1ab5fe",
+  "fc8a6a9906a6d334e838a7c598c220a4ac686d835505a09b0239764ac08d042d",
   :rows
   [{:run "2026-09-01-s5",
     :block "runs/U49-run-conformance/lean-block.lean",

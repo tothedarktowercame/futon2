@@ -2,9 +2,9 @@
  :as-of "2026-09-08",
  :authority
  {:contract-file "mathlib4/DarkTower/WarMachine/holes-contract.json",
-  :contract-git-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+  :contract-git-sha "fcd1261c303c2beca08a6812eba4a7ce2e83d722",
   :contract-sha256
-  "7b41d69121ba82ef7c4bb8b9c305a756d9825418f73f3a534fb8bbc54d8cb170",
+  "444b9493e3a9b603b8027027b479c807eb1d377fab18e3f9f10859349b3b47ce",
   :accounting
   "futon2/holes/labs/wm-contract/variable-situation-accounting.edn",
   :accounting-open-hole-rows 11},
@@ -24,7 +24,7 @@
    :owner "P-validated-R5 §2a",
    :basis
    "The DESIGN-c-vector.md §5 split (C_int / C_mis) is an owner amendment (P-validated-R5 §2a); nothing in it needs a tick. The refusal's ground still holds as measured: U12 found one risk_mis value across all 133 mission actions and all three 2026-09-02 records :absent.",
-   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8026"]}
+   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8102"]}
   {:name "find",
    :row-source :contract-declaration,
    :area :demo,
@@ -33,7 +33,7 @@
    :owner "P-validated-R5 §3e find",
    :basis
    "A standing implementation refusal; an owner ruling closes it, no record can.",
-   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8028"]}
+   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8104"]}
   {:name "organise",
    :row-source :contract-declaration,
    :area :demo,
@@ -42,8 +42,8 @@
    :owner "P-validated-R5 §3e organise",
    :basis
    "The declaration names its own gate: whether the refusal weakens to definable is LA2's to decide from a running policy-grain rule. That running is checks/playout_snatch.clj, not a tick.",
-   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8033"]}
-  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8045"],
+   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8109"]}
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8121"],
    :row-source :contract-declaration,
    :name "preferenceStackLiveRecorded",
    :basis
@@ -54,7 +54,7 @@
    :owner "P-R19-preferences-open §gate",
    :runtime-evidence
    "A trace record carrying mission-c criteria records beside its :preference-stack -- a tick whose mission-c-readback is neither :no-active-clock nor :no-measurable-criteria."}
-  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8046"],
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8122"],
    :row-source :contract-declaration,
    :name "wmRunsOnce",
    :basis
@@ -66,7 +66,7 @@
    "record: futon2:holes/problems/BUILD-packets/WM-RUN1.md · Joe 2026-08-31 · run-at-least-once",
    :runtime-evidence
    "A completed tick leaving a TickRunRecord. IT EXISTS -- the pinned 2026-08-30 receipt, three 2026-09-02 receipts, four more from the S4 stage run."}
-  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8047"],
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8123"],
    :row-source :contract-declaration,
    :name "wmRunConformsToWiring",
    :basis
@@ -78,7 +78,7 @@
    "record: futon2:holes/problems/BUILD-packets/WM-RUN2.md · Joe 2026-08-31 · organisation evidence",
    :runtime-evidence
    "A CERTIFICATE OVER A QUALIFYING RUN, and the certificate is what ends it (Joe's RUN4 ruling, 2026-09-03; executed by :U49): a run's reassembled route and the Figure 4 edge layers transcribed into Lean and conformance proved by decide. The machinery exists and is exercised -- mathlib4 wmS5RunConformsToDrawnWiring over runs/2026-09-01-s5 (futon2 5a66411; 4 routes, 36 hops, 9 distinct, 0 refutations, 0 unmapped), with wmS5RouteCensus deciding its numbers, both at 0 axioms. WHICH run qualifies is Joe's call at certificate time, so what is outstanding is an acceptance, not a build."}
-  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8049"],
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8125"],
    :row-source :contract-declaration,
    :name "enactedEqualsSelectedWhenRankOneGated",
    :basis
@@ -97,8 +97,8 @@
    :owner "wm-organization · TN-edge-review worklist H2",
    :basis
    "An absence over code paths, settled by reading the tree; a run could only falsify it. The provenance walk is done and written down (TN §9a) but not bound: the name does not occur in checks/witness-registry.edn, so there is no check, no fixture and no rejecting control.",
-   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8050"]}
-  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8051"],
+   :pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8126"]}
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8127"],
    :row-source :contract-declaration,
    :name "policyPrecisionIsGammaFromBeta",
    :basis
@@ -110,7 +110,7 @@
    "wm-organization · TN-edge-review worklist H3 (Joe's J1 ruling)",
    :runtime-evidence
    "A PERSISTED record carrying :tau with :tau-source naming carry-beta's :beta-source, from a tick under FUTON_WM_TAU_MODE=variational-beta-gamma with writes enabled."}
-  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8052"],
+  {:pointers ["mathlib4/DarkTower/WarMachine/Holes.lean:8128"],
    :row-source :contract-declaration,
    :name "policyPosteriorImportsPolicyF",
    :basis
