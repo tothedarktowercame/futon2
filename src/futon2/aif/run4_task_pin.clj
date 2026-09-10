@@ -1,8 +1,9 @@
 (ns futon2.aif.run4-task-pin
   "Pure validation for immutable RUN4 operator-selected task pins.
 
-  Validation establishes identity and freshness only.  It does not select,
-  dispatch, accept, or declare a trial ready."
+  Validation establishes identity and freshness only.  The pin digest names
+  the exact UTF-8 EDN bytes (including whitespace), not a canonicalized EDN
+  value.  Validation does not select, dispatch, accept, or declare readiness."
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
             [futon2.aif.c-fold-config :as digest]
@@ -15,6 +16,7 @@
                   (merge {:refused? true :reason reason} data))))
 
 (defn- parse-one [text]
+  (when-not (string? text) (refuse! :invalid-pin-text))
   (try
     (with-open [reader (java.io.PushbackReader.
                         (java.io.StringReader. text))]
@@ -28,18 +30,34 @@
         (refuse! :invalid-pin-edn)))))
 
 (defn- required-string! [value reason]
-  (when (str/blank? (str value)) (refuse! reason))
+  (when-not (and (string? value) (not (str/blank? value))) (refuse! reason))
   value)
 
-(defn- verify-source! [read-text {:keys [path sha256]}]
-  (required-string! path :missing-source-path)
-  (required-string! sha256 :missing-source-digest)
-  (let [text (try
-               (read-text path)
-               (catch Exception _ (refuse! :unreadable-source {:path path})))]
-    (when-not (= sha256 (digest/sha256 text))
-      (refuse! :stale-source {:path path}))
-    {:path path :sha256 sha256}))
+(defn- identifier? [value]
+  (let [token (cond
+                (keyword? value) (subs (str value) 1)
+                (string? value) value
+                :else nil)]
+    (boolean (and token
+                  (re-matches #"[A-Za-z0-9][A-Za-z0-9._:/-]*" token)))))
+
+(defn- required-id! [value reason]
+  (when-not (identifier? value) (refuse! reason))
+  value)
+
+(defn- verify-source! [read-text source]
+  (when-not (map? source) (refuse! :invalid-source-pin))
+  (let [{:keys [path sha256]} source]
+    (required-string! path :invalid-source-path)
+    (when-not (and (string? sha256) (re-matches #"[0-9a-f]{64}" sha256))
+      (refuse! :invalid-source-digest {:path path}))
+    (let [text (try
+                 (read-text path)
+                 (catch Exception _ (refuse! :unreadable-source {:path path})))]
+      (when-not (string? text) (refuse! :invalid-source-content {:path path}))
+      (when-not (= sha256 (digest/sha256 text))
+        (refuse! :stale-source {:path path}))
+      {:path path :sha256 sha256})))
 
 (defn validate
   "Validate PIN-TEXT using injected read-only ports.
@@ -55,11 +73,14 @@
         {:keys [series-id trial-id series-order candidate-task-ids selected-task-id
                 sources casting operator-selection config mapping]} pin]
     (when-not (= schema (:schema pin)) (refuse! :unknown-schema))
-    (required-string! series-id :missing-series-id)
-    (when (nil? trial-id) (refuse! :missing-trial-id))
+    (required-id! series-id :invalid-series-id)
+    (required-id! trial-id :invalid-trial-id)
     (when-not (= :as-declared series-order) (refuse! :unknown-series-order))
     (when-not (and (vector? candidate-task-ids) (seq candidate-task-ids))
       (refuse! :missing-candidate-set))
+    (when-not (every? identifier? candidate-task-ids)
+      (refuse! :invalid-candidate-id))
+    (required-id! selected-task-id :invalid-selected-task-id)
     (when-not (= (count candidate-task-ids)
                  (count (distinct candidate-task-ids)))
       (refuse! :duplicate-candidate-id))
@@ -71,18 +92,22 @@
       (refuse! :missing-source-pins))
     (let [verified-sources (mapv #(verify-source! read-text %) sources)
           verified-config (verify-source! read-text config)
-          author (required-string! (:author casting) :missing-author)
-          reviewer (required-string! (:reviewer casting) :missing-reviewer)
+          _ (when-not (map? casting) (refuse! :invalid-casting))
+          author (required-string! (:author casting) :invalid-author)
+          reviewer (required-string! (:reviewer casting) :invalid-reviewer)
+          _ (required-string! (:repair-reviewer casting)
+                              :invalid-repair-reviewer)
           _ (when (= author reviewer) (refuse! :author-is-reviewer))
           _ (when-not (= :operator-selected (:mode operator-selection))
               (refuse! :unknown-selection-mode))
           operator (required-string! (:operator operator-selection)
-                                     :missing-operator)
+                                     :invalid-operator)
           authority-ref (required-string! (:authority-ref operator-selection)
-                                          :missing-selection-authority)
+                                          :invalid-selection-authority)
           mission-id (required-string! (:mission-id mapping)
-                                       :missing-mission-mapping)
+                                       :invalid-mission-mapping)
           action (:action mapping)
+          _ (when-not (map? action) (refuse! :invalid-action-mapping))
           mission (resolve-mission mission-id)
           _ (when-not mission (refuse! :unknown-mission-mapping))
           _ (when-not (= mission-id (:id mission))
@@ -95,6 +120,7 @@
       {:schema :wm/run4-task-identity-envelope-v1
        :valid? true
        :task-pin {:sha256 (digest/sha256 pin-text)
+                  :digest-semantics :exact-utf8-pin-bytes
                   :series-id series-id
                   :trial-id trial-id
                   :series-order series-order
@@ -107,6 +133,8 @@
        {:mode :operator-selected
         :operator operator
         :authority-ref authority-ref
+        :authority-status :declared-not-authenticated
+        :authority-authentication-required-at-serving-boundary? true
         :outer-loop-ranking-match-required? false
         :inner-policy-selection-required-before-execution? true
         :silent-selector-override-permitted? false}

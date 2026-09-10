@@ -52,6 +52,8 @@
         envelope (pin/validate text (ports))]
     (is (true? (:valid? envelope)))
     (is (= (digest/sha256 text) (get-in envelope [:task-pin :sha256])))
+    (is (= :exact-utf8-pin-bytes
+           (get-in envelope [:task-pin :digest-semantics])))
     (is (= (:candidate-task-ids base-pin)
            (get-in envelope [:task-pin :ordered-task-ids])))
     (is (= mission (get-in envelope [:mission-action :mission])))
@@ -60,10 +62,18 @@
     (is (true? (get-in envelope
                        [:operator-selection
                         :inner-policy-selection-required-before-execution?])))
+    (is (= :declared-not-authenticated
+           (get-in envelope [:operator-selection :authority-status])))
     (is (= {:status :not-evaluated} (:executability envelope)))
     (is (= {:status :not-evaluated} (:acceptance envelope)))
     (is (= {:permitted? false :reason :validation-only} (:launch envelope)))
     (is (nil? (:ready envelope)))))
+
+(deftest pin-identity-is-exact-byte-identity
+  (let [plain (pin-text base-pin)
+        with-newline (str plain "\n")]
+    (is (not= (get-in (pin/validate plain (ports)) [:task-pin :sha256])
+              (get-in (pin/validate with-newline (ports)) [:task-pin :sha256])))))
 
 (deftest refuses-candidate-and-casting-identity-defects
   (testing "duplicate and absent selected IDs"
@@ -78,7 +88,30 @@
   (testing "author and reviewer must be distinct"
     (is (= :author-is-reviewer
            (reason (assoc-in base-pin [:casting :reviewer] "zai-5")
+                   (ports))))
+    (is (= :invalid-author
+           (reason (assoc-in base-pin [:casting :author] 42) (ports))))
+    (is (= :invalid-reviewer
+           (reason (assoc-in base-pin [:casting :reviewer] {:seat "codex-17"})
+                   (ports))))
+    (is (= :invalid-repair-reviewer
+           (reason (assoc-in base-pin [:casting :repair-reviewer] :codex-1)
                    (ports))))))
+
+(deftest refuses-malformed-identifiers-and-paths-with-typed-reasons
+  (is (= :invalid-series-id (reason (assoc base-pin :series-id " ") (ports))))
+  (is (= :invalid-trial-id (reason (assoc base-pin :trial-id 42) (ports))))
+  (is (= :invalid-candidate-id
+         (reason (assoc base-pin :candidate-task-ids
+                        [:existing-mission-smoke {:task :bad}])
+                 (ports))))
+  (is (= :invalid-selected-task-id
+         (reason (assoc base-pin :selected-task-id nil) (ports))))
+  (is (= :invalid-source-path
+         (reason (assoc-in base-pin [:sources 0 :path] {:path "packet.md"})
+                 (ports))))
+  (is (= :invalid-source-path
+         (reason (assoc-in base-pin [:config :path] 42) (ports)))))
 
 (deftest refuses-stale-and-unknown-inputs
   (is (= :stale-source
