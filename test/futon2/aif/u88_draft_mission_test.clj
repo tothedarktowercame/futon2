@@ -4,7 +4,7 @@
    outside production mission discovery; a disposable canonical-shaped path
    shows the SAME doc parses as :draft (excluded) and, after the simulated
    lifecycle marker flip, as an ordinary open mission (accepted). Production
-   is never activated." 
+   is never activated."
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
