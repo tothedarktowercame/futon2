@@ -1,0 +1,13 @@
+{:witnesses "policyPosteriorImportsPolicyF"
+ :positive-evidence-scope "Finite digest-pinned S4 flagged-path witness, held open; three eligible records of four. This does not establish default-path behavior or close the Lean declaration."
+ :report {:repo "futon2" :path "holes/labs/wm-contract/policy-posterior-fpi-flagged-witness.edn" :schema :policy-posterior-fpi-flagged-witness/v1}
+ :expected-rejection {:mode :candidate-f-removed-or-identity-misjoined
+                      :command ["bb" "checks/policy_posterior_fpi_flagged_witness.clj" "--negative-remove-f"]
+                      :exact-cause :eligible-record-lacks-identity-joined-candidate-f}
+ :check {:repo "futon2" :path "checks/policy_posterior_fpi_flagged_witness.clj" :entrypoint "-main"}
+ :positive-evidence-limit :flagged-path-witness-held-open
+ :recorded-at "2026-09-10T00:00:00Z"
+ :result :passed
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn"}
+ :control {:kind :in-memory-record-mutation :writes-live-state? false
+           :expected-cause :eligible-record-lacks-identity-joined-candidate-f}}
