@@ -218,3 +218,51 @@ rules with no institutional adoption implied.
    independently belled workers and then reported as machine actuation.
    Run ID (suggested `run4-2026-09-10`) and isolated work directory are
    allocated at execution freeze, not here.
+
+## Coordinator review — 2026-09-10 (supersedes conflicting proposals above)
+
+Trial 2's three captions are already determined: the three source-read
+entries in futon3c's memory-caption-history-candidate-2026-09-10 artifact,
+not a newly sampled population. Memory IDs:
+
+- e-apm-promotion-5fdb99169bd788313841375c797c302c
+- e-apm-promotion-faa280c92bd833ed990672c3b7007a78
+- e-apm-promotion-442f1ab7683c3685e2232135f161830e
+
+Freeze the source-read-enrichments.edn bytes and each basis-evidence artifact
+at execution preparation. Original source-byte verification has already passed
+in the independent bootstrap review; admission still requires current original
+memory authority. No live publication follows merely from this packet.
+
+The assertion that worker != coordinator is sufficient review separation is
+rejected. Caption review must obey Job A's actual rule: reviewer distinct from
+the caption proposer AND contributing observation authors. Editing an entry
+creates a new proposal requiring independent review; 'admit-with-edit' is not
+permission to approve one's own revised text. An all-rejected set may count as
+completed review, but supplies zero positive admission/retrieval evidence.
+Report those outcomes separately, and mark the positive path unexercised.
+
+Trial 3's proposed generic-feedback trigger and any-reference acknowledgement
+are rejected as interpretations of the frozen IAD design. For this isolated
+experiment, use these explicit local rules:
+
+1. A declared feedback-created event under the experimental instance creates
+   one obligation for each member of its frozen recipient set. Neither an
+   arbitrary memory nor its author's tag establishes institutional authority.
+2. Recipients are stable identities bound by the instance's membership record;
+   include two recipients and an unavailable-route case. A subject ref or the
+   current online roster cannot silently define or shrink that set.
+3. A typed recipient inbox receipt must bind the instance, feedback revision,
+   authorized recipient and payload digest. Generic references do not count.
+   Delivery, acknowledgement, agreement and subsequent use remain separate.
+4. Report pending/unavailable/overdue states; no external notifications,
+   escalation, punishment or live mutation. Unknown evidence remains unknown.
+
+Use clearly labelled synthetic fixtures for these rule controls, with captured
+real transport shapes only where appropriate and sanitized. This avoids
+relabeling unrelated historical evidence as an institution that did not yet
+exist. Exercise false delivery, wrong recipient/revision, duplicate receipt,
+recipient disappearance, disagreement, and unobserved use. A source-read-only
+prototype can remain entirely isolated. This freezes experiment semantics,
+not live institutional adoption; fixture bytes and worker inputs still require
+pinning before the run.
