@@ -83,12 +83,15 @@
 ;;      certificate says this run stayed inside the union of the drawn and
 ;;      measured layers, not that the drawn figure predicted the run.
 
+(load-file "../../../src/futon2/aif/run4_route_conformance.clj")
+
 (require '[clojure.edn :as edn]
          '[clojure.string :as str]
          '[clojure.java.io :as io]
          '[clojure.pprint :as pprint]
          '[babashka.fs :as fs]
-         '[babashka.process :as process])
+         '[babashka.process :as process]
+         '[futon2.aif.run4-route-conformance :as route-core])
 
 (def control-map-path
   (or (System/getenv "U49_CONTROL_MAP")
@@ -189,16 +192,10 @@
 
 (def drawn-set (set drawn-edges))
 (def measured-set (set measured-edges))
+(def route-index (route-core/index control-map))
 
 (defn classify [hop]
-  (let [g (retired hop)]
-    (cond
-      (and g (:code g) (measured-set hop)) :excluded-dependency-grain
-      (and g (:code g))                    :refutation
-      (and g (:ruling g))                  :ruling-unrealised
-      (drawn-set hop)                      :drawn
-      (measured-set hop)                   :route-measured
-      :else                                :unmapped)))
+  (route-core/classify route-index hop))
 
 ;; ------------------------------------------------------------- the run -----
 
@@ -238,11 +235,7 @@
 ;; mutate the tables and watch it fail.
 
 (defn conforms? [rts]
-  (let [hs (mapcat hops rts)]
-    (and (seq rts)
-         (every? seq rts)
-         (not-any? #(= :unmapped (classify %)) hs)
-         (not-any? #(= :refutation (classify %)) hs))))
+  (route-core/conforms-routes? control-map rts))
 
 ;; ----------------------------------------------------------------- Lean ----
 
