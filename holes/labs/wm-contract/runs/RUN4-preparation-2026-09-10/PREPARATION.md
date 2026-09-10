@@ -77,3 +77,42 @@ final certificate acceptance distinct. Mathematical success is not sufficient
 for wiring conformance; wiring conformance alone is not mathematical success.
 The machine's future outer-loop task selection remains a follow-on, with today's
 manual selection explicitly recorded.
+
+## Task assessment received; corrected packet boundary
+
+Zai-2 completed preparation job invoke-1789046112134-18644-8e97aeae and
+recommended the m96J04 endpoint-uniqueness implication. This is an assessment,
+not an execution result, and Joe has not yet selected this candidate.
+
+Corrections by Codex-17 before any worker dispatch:
+
+- Supply the selected memory verbatim, including any occurrence of its name
+  or Gronwall in its body. Do not strip method vocabulary to manufacture a
+  harder task. Do not add analyst-derived proof hints separately. The assessment's
+  simultaneous 'verbatim body' and 'exclude Gronwall' requirements were ambiguous;
+  original memory integrity takes precedence.
+- Withhold the analyst reference proof and retained f196 proof from the worker
+  packet. Describe the condition as memory-assisted with target prerequisites
+  and ordinary Mathlib access, not 'memory-only'. Shared-workspace exclusion
+  instructions alone are not an enforced access boundary; report accidental
+  reference exposure rather than claiming blindness without evidence.
+- Independent substantive review of three captions does NOT need sealed
+  retrieval queries. It needs their original memories, source problems/proofs,
+  and claimed applicability evidence. The sealed holdout tests retrieval quality
+  later. Historical admissibility reconstruction is relevant only to historical
+  exposure claims, not a prerequisite for every caption review.
+- A monitor prototype can be developed without live campaign mutation. Its
+  unsettled local rule contract, not inevitable live writes, makes it the less
+  immediately specified task here.
+
+If selected, freeze the target prerequisite prefix and exact theorem statement,
+its source hashes, and the memory/review inputs; let the worker construct the
+proof without the analyst solution. Require Lean compilation and axiom audit,
+recording failures as failures. Keep whole-problem construction/compactness
+outside the claim. A supplied-memory success demonstrates bounded application,
+not autonomous retrieval or causal benefit over a no-memory control.
+
+Staffing update: Codex-8 review failed at remote compaction with a full context,
+without a verdict. Replacement Codex-11 job
+invoke-1789046209668-18649-ec123bc3 was accepted/queued. C wiring review is still
+pending; the failure is not a source or test failure.
