@@ -116,3 +116,41 @@ Staffing update: Codex-8 review failed at remote compaction with a full context,
 without a verdict. Replacement Codex-11 job
 invoke-1789046209668-18649-ec123bc3 was accepted/queued. C wiring review is still
 pending; the failure is not a source or test failure.
+
+## Three-trial instruction — 2026-09-10
+
+Joe, verbatim excerpts:
+
+> Why don't we try all three of them? They might not all work.
+
+> I don't think the war machine was set up for solving mathematics problems.
+
+> So I would say maybe Run 4 should run a short series of trials so we can look at a few different circumstances. Let's get all the wiring and stuff in place first.
+
+This selects all three candidates and supersedes the pending-choice text above.
+`SERIES.edn` records the preparation scope, not live run state. The mathematical
+trial deliberately probes imperfect task fit. Do not quietly replace a failed
+trial with an easier task or exclude it from the reported series. Distinguish
+failure of the task from failure of execution infrastructure and from failure
+to satisfy wiring conformance. Preserve each attempted trial and retry.
+
+New preparation dispatches, all Agency accepted/queued:
+
+- Zai-2: three bounded trial packets, note-only,
+  invoke-1789046427129-18653-5f152e86.
+- Codex-10: steering of its execution-path review to the three-trial scope,
+  invoke-1789046428538-18654-e9bc9c59.
+- Codex-12: read-only Voxterm WM evidence view, implementation/tests,
+  invoke-1789046429888-18655-7649d6a6. Missing trial evidence must display as
+  missing; neither READY nor agent presence establishes a running trial.
+
+The existing full_loop_runner has author and reviewer dispatch boundaries
+(`src/futon2/aif/full_loop_runner.clj:2814`, `:2981`). This is a concrete path
+for the execution review to assess; its existence alone does not show that a
+hand-selected RUN4 packet reaches it or that its receipts satisfy RUN4's
+contract. No alternate manual dispatch loop has been introduced.
+
+Trial worker assignments wait for the verified supported runner path. This
+avoids waking a solver to do off-machine work and later relabeling that work
+as machine execution. Preparation may proceed concurrently; trial execution
+waits until wiring and recording prerequisites are satisfied, per Joe.

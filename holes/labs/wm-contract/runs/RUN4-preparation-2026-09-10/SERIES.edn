@@ -1,0 +1,44 @@
+{:schema :wm/run4-series-preparation-v1
+ :status :preparing-not-started
+ :date "2026-09-10"
+ :selection {:mode :operator-selected
+             :operator "Joe"
+             :authority "PREPARATION.md section Three-trial instruction"
+             :outer-loop-selection-exercised? false}
+ :launch-condition :wiring-and-recording-verified-before-execution
+ :trials [{:id :memory-assisted-mathematics
+           :task "Prove the bounded m96J04 endpoint-uniqueness implication using the supplied reviewed memory"
+           :task-fit :deliberately-exploratory
+           :claim-limit "One implication, not whole-problem closure, autonomous retrieval or causal memory benefit"
+           :packet-status :pending}
+          {:id :caption-review-and-admission
+           :task "Independently review three source-read captions and admit only those whose evidence and apparatus gates pass"
+           :task-fit :workflow-evidence
+           :claim-limit "No sealed-query use; rejection is a valid result; no inferred historical use"
+           :packet-status :pending}
+          {:id :feedback-obligation-prototype
+           :task "Build and test an isolated feedback-obligation monitor against explicit experimental local rules"
+           :task-fit :software-apparatus
+           :claim-limit "Prototype rules are not adopted live institutions; no campaign integration implied"
+           :packet-status :pending}]
+ :staffing {:coordinator "codex-17"
+            :task-preparation "zai-2"
+            :execution-path-review "codex-10"
+            :c-wiring-review "codex-11"
+            :voxterm-implementation "codex-12"
+            :trial-worker-assignments :pending-execution-path
+            :claude-invocations :prohibited}
+ :recording {:trial-id-required? true
+             :input-and-config-pins-required? true
+             :worker-and-reviewer-distinct? true
+             :preparation-distinct-from-enactment? true
+             :separate-results [:task-result :wiring-conformance :recording-completeness]
+             :task-result-values [:succeeded :failed :blocked :not-attempted]
+             :unobserved-result :unknown
+             :errors-retained? true
+             :retry-retains-original-attempt? true
+             :run-acceptance :operator-reserved}
+ :display {:source :actual-run-evidence
+           :missing-source :no-run-evidence
+           :stale-source :show-last-observation-and-age
+           :readiness-is-not-running? true}}
