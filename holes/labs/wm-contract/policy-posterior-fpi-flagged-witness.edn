@@ -18,6 +18,7 @@
    :identity-join? true,
    :reason nil,
    :status :present,
+   :candidate-map-cardinality? true,
    :applied? true,
    :declared-candidate-count 145}
   {:all-values-present? false,
@@ -29,6 +30,7 @@
    :identity-join? false,
    :reason :incomplete-coverage,
    :status :absent,
+   :candidate-map-cardinality? true,
    :applied? false,
    :declared-candidate-count 145}
   {:all-values-present? true,
@@ -40,6 +42,7 @@
    :identity-join? true,
    :reason nil,
    :status :present,
+   :candidate-map-cardinality? true,
    :applied? true,
    :declared-candidate-count 145}
   {:all-values-present? true,
@@ -51,8 +54,10 @@
    :identity-join? true,
    :reason nil,
    :status :present,
+   :candidate-map-cardinality? true,
    :applied? true,
    :declared-candidate-count 145}],
+ :reason nil,
  :evidence-scope :flagged-path-witness-held-open,
  :pass? true,
  :denominator 4,
