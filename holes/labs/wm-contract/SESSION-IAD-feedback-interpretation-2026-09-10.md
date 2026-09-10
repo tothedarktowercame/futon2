@@ -185,3 +185,79 @@ implemented. Independently review the bindings and the execution trace.
 This would establish a bounded local protocol, not a general theory of
 institutional compliance. Learning can then compare repeated episodes and
 propose amendments; it must not silently change the adopted obligations.
+
+
+## Primer cross-check — 2026-09-10
+
+Joe supplied `/home/joe/iad.txt`, a ChatGPT-assisted operational primer.
+Read in full; source SHA256: `b688cd04d5f92362a129655851dd8df652cf35aa59c1faa26a37cff132a17e54`.
+This is a design input, not independent scholarly verification. The following
+additions make omissions in the worked proposal explicit; they do not adopt
+new operational rules.
+
+### Reconstruct before prescribing
+
+The endpoint design above is prescriptive. A separate descriptive record must
+state what actors actually did, which information was available at decision
+time, and which enforcement or monitoring mechanisms actually operated.
+Do not infer a rule-in-use from a desired outcome, an API name, or a declared
+rule. Keep declared rule, implemented mechanism, observed conduct, and outcome
+evaluation as separately sourced fields. Observation of regular conduct alone
+does not establish an obligation.
+
+For the caption-review episode, reconstruct at least two linked action
+situations: the author's proposal of a caption and the reviewer's judgment
+about its admission. Publication consumes the review result at a further
+boundary. Authority to propose is not authority to approve. A delivery receipt
+supports neither authority unless the corresponding binding establishes it.
+
+### External conditions and evaluation
+
+The local instance needs three explicit context records:
+
+- Rules-in-use: applicable standing instructions, adoption/amendment authority,
+  and evidence of enforcement or accepted practice, with unknowns retained.
+- Community attributes: working conventions, shared vocabulary, trust and
+  competence assumptions relevant to interpreting feedback. Record assumptions
+  as assumptions; an agent roster cannot establish these attributes.
+- Material conditions: available transports, durable inboxes, authentication,
+  access restrictions, time and token budgets, and outages. An obligation can
+  persist when its delivery mechanism is unavailable.
+
+Evaluate separately: delivery coverage, delay and resource cost, distribution
+of missed feedback across participants, opportunity to dispute, and later use
+of the correction. A fast 2/2 delivery is not evidence of useful feedback or
+fair participation. Do not invent numerical preference weights from this list.
+Repeated episodes can reveal an inaccessible channel or exclusionary rule;
+that evidence can support a proposed amendment. Only authorized adoption
+changes the next instance's rules. Learning about a rule is distinct from
+changing it.
+
+### Deontic status is not technical capability
+
+For each bound actor/action/context, retain independently evidenced answers
+to `can`, `may`, `must`, and `must-not`. These are not four mutually exclusive
+labels. An action can be possible and prohibited, or required and currently
+impossible. Unknown evidence remains unknown. Conflicting obligations and
+prohibitions are reported for resolution, not silently assigned a priority.
+
+In the current setting, an available agent-wake endpoint could make a Claude
+invocation technically possible while Joe's instruction prohibits invoking it.
+A feedback obligation cannot override that instruction. Record the blocked
+route and seek an authorized alternative; do not drop the recipient or spend
+the quota. Conversely, a recipient's disconnected state establishes neither a
+prohibition nor the absence of an obligation.
+
+Express each proposed regulatory rule with actor/position, deontic status,
+action, conditions, and an explicit response to noncompliance where one is
+adopted. Distinguish rejection of an invalid certificate from a sanction on its
+author: the former need not imply the latter. A response rule itself needs an
+actor, authority, and feasible action. Merely writing 'escalate' leaves those
+bindings unresolved.
+
+Additional acceptance cases: technically possible but prohibited action is
+refused; required but unavailable action remains outstanding; successful
+self-authored work cannot serve as independent review; a repeated behavior
+without authority evidence is not promoted to a rule; a proposed amendment
+cannot change current obligations before adoption. These are specifications,
+not newly executed tests.
