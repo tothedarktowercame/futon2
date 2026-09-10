@@ -287,13 +287,20 @@
                                              :run4/task-pin])
                              (get-in result [:checkpoints :construction :judgment
                                              :run4/task-pin]))
+            environment-attestation
+            (get-in result [:checkpoints :selection :ground
+                            :run4/operator-selection :authority-attestation
+                            :effective-environment])
             record (cond-> {:run/id run-id
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
                     :traceWritten (boolean (:trace-path result))
                     :route route}
-                     pin-identity (assoc :run4/task-pin pin-identity))]
+                     pin-identity (assoc :run4/task-pin pin-identity)
+                     environment-attestation
+                     (assoc :run4/effective-environment-attestation
+                            environment-attestation))]
         (io/make-parents target)
         (spit tmp (str (pr-str record) "\n"))
         (java.nio.file.Files/move
@@ -1008,7 +1015,8 @@
           :operator (get-in envelope [:operator-selection :operator])
           :authority-ref (get-in envelope [:operator-selection :authority-ref])
           :authority-attestation
-          (select-keys attestation [:status :boundary :principal :pin-sha256])
+          (select-keys attestation [:status :boundary :principal :pin-sha256
+                                    :effective-environment])
           :outer-loop-ranking-match-required? false
           :ordinary-selector-decision counterfactual}
          :counterfactual counterfactual}))))
