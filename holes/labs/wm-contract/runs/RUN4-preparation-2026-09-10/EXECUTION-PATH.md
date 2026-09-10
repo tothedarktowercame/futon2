@@ -5,6 +5,113 @@ Status: **NOT EXECUTED**. This is a read-only path audit at futon2
 regeneration, registry/worklist edit, data write, or sealed-holdout read was
 performed. The commands below are proposals, not evidence of a run.
 
+## 2026-09-10 scope and carrier update (supersedes three-trial wording below)
+
+RUN4 now contains **four** ordered trials.  `SERIES.edn:7-31` preserves the
+original three and adds `:outer-loop-aif-replacement`; Joe prioritizes that
+fourth, progressive-development workload.  Its bounded packet is
+`TRIAL-PACKETS.md:210-329`.  References below to a three-trial series describe
+the earlier audit state and must not be used as the current series cardinality.
+
+### Carrier decision: blocked, no honest existing action
+
+The existing carrier cannot represent any of these packet-defined tasks
+without inventing semantics:
+
+- The forward model admits only its enumerated action types and requires a
+  target for ordinary actions (`src/futon2/aif/forward_model.clj:26-45`).
+- Ordinary mission actions are executable only when their target resolves to
+  a live file-backed mission (`src/futon2/aif/mission_registry.clj:282-320`).
+- The runner takes its entry from the ordinary judgment and derives target,
+  mission and construction from that same entry
+  (`src/futon2/aif/full_loop_runner.clj:2584-2609,2678-2692`).
+- The default constructor is a cascade over an already meaningful action;
+  special semantics exist only through explicit action-type methods
+  (`src/futon2/aif/full_loop_runner.clj:1006-1089`).  Its own contract says a
+  meta-action must not masquerade as an ordinary mission by renaming fields.
+- Default mission construction resolves the action target through the mission
+  registry (`src/futon2/aif/full_loop_runner.clj:1091-1107`), and the eventual
+  author dispatch consumes that derived mission and construction
+  (`src/futon2/aif/full_loop_runner.clj:2803-2824`).
+
+In particular, Trial 4 is one fixture-scoped decision → execution → outcome →
+next-use experiment with three still-explicit semantic prerequisites
+(`TRIAL-PACKETS.md:271-320`).  It is not “advance” of any existing mission.
+Likewise the math, caption and feedback packets have no explicit current
+mission/action bindings.  Similar mission titles do not establish mappings.
+Therefore no guarded entry injection is implemented in this slice: injecting
+one of these tasks as `:advance-mission` would bypass the carrier contract, and
+injecting a novel type would fail the current forward-model/admissibility
+boundary.
+
+### Smallest explicit extension contract (PROPOSED, NOT IMPLEMENTED)
+
+The task-pin mapping must become a tagged union.  Existing behavior remains:
+
+```clojure
+{:carrier :mission-action
+ :mission-id "M-existing"
+ :action {:type :advance-mission :target "M-existing"}}
+```
+
+The new arm is an explicit action and immutable task definition, not a mission
+alias:
+
+```clojure
+{:carrier :pinned-task-action
+ :action {:type :execute-pinned-task
+          :target :outer-loop-aif-replacement
+          :series-id "run4-2026-09-10"
+          :trial-id :outer-loop-aif-replacement
+          :pin-sha256 "<exact-byte task-pin digest>"}
+ :task-definition
+ {:schema :wm/pinned-task-definition-v1
+  :id :outer-loop-aif-replacement
+  :kind :bounded-development
+  :packet {:path "holes/labs/wm-contract/runs/RUN4-preparation-2026-09-10/TRIAL-PACKETS.md"
+           :sha256 "<frozen whole-file or extracted-packet digest>"}
+  :source-pins [{:path "<isolated ledger fixture>" :sha256 "<digest>"}
+                {:path "<outcome fixture>" :sha256 "<digest>"}]
+  :target-repository "/home/joe/code/futon2"
+  :scope {:objective :one-decision-execution-outcome-next-use-cycle
+          :live-ledger? false :scheduler? false}
+  :semantic-contracts
+  {:selection-equation "<frozen definition>"
+   :outcome-mapping "<frozen definition>"
+   :learned-state-consumption "<frozen definition>"}
+  :outcomes #{:succeeded :failed :blocked}}}
+```
+
+That arm is not addressable until all of the following land together and are
+independently reviewed:
+
+1. `:execute-pinned-task` is registered in the forward model with an explicit
+   prediction arm and task-definition-backed `can-propose?`/`can-execute?`.
+   Unknown, stale or incomplete definitions refuse before selection.
+2. A proposer emits the exact digest-bound action into the ordinary candidate
+   field.  Operator selection may choose it without matching unconstrained
+   rank, but the exact action must occur in the recorded admissible set.  The
+   unconstrained ranking remains a labelled counterfactual; there is no silent
+   selector override.
+3. `construct-selected-action :execute-pinned-task` and
+   `mission-for-decision` consume the verified task definition directly.  They
+   do not look up or fabricate a mission.  The constructor yields the same
+   author prompt/build/review/grounding route used after ordinary construction.
+4. Series ID, trial ID, exact-byte pin digest, task-definition digest and
+   operator-selection provenance propagate through selection, construction,
+   dispatch, review, build, grounding, delivery QA and the append-only result.
+5. The option is absent by default.  With no validated pinned-task envelope,
+   candidate generation, selected entry, checkpoints, prompts and run records
+   remain byte/value identical to the existing path.  Validation alone remains
+   non-executable and grants no launch permission.
+
+The concrete Trial 4 example above is presently **blocked**, not executable:
+its selection equation, outcome mapping and learned-state consumption contract
+are still intentionally unset, and its isolated fixture paths/digests have not
+been frozen (`TRIAL-PACKETS.md:309-320,341-344`).  This is the exact next
+implementation boundary; an HTTP route, dispatch activation and RUN4 accept
+bridge remain later reviewed slices.
+
 ## Finding
 
 There is currently **no supported single path** that simultaneously:
