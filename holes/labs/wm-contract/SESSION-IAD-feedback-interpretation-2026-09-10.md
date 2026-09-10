@@ -261,3 +261,114 @@ self-authored work cannot serve as independent review; a repeated behavior
 without authority evidence is not promoted to a rule; a proposed amendment
 cannot change current obligations before adoption. These are specifications,
 not newly executed tests.
+
+## Optative preference selects the institutional proposal — 2026-09-10
+
+Joe's verbatim direction:
+
+> the key, I think, will be to relate this back to preferences... because we need to select suitable institutions to match "optative" moods -- not to create busy work.
+
+Status: proposed computational interpretation of this direction. No preference
+masses, selection equation, or institution is adopted by this addendum.
+
+### Selection contract before activation
+
+An optative expresses a desired situation, not yet an obligation. Record who
+expresses it, whose outcomes matter, its task scope and horizon, and how its
+satisfaction could be observed. Example: a correction is available and used
+before an affected participant repeats the corrected mistake. Delivery is an
+intermediate observation; receipt counts alone cannot establish that outcome.
+
+The proposed interpretation endpoint should return candidate arrangements
+before activating any one of them. Each candidate must declare:
+
+- the desired outcome and its observation contract;
+- the local participants and applicability evidence;
+- the change to permissions, obligations, information access and responses;
+- the hypothesized route from that change to the desired outcome;
+- the evidence supporting that hypothesis and what remains unknown;
+- expected effort, delay, resource use and distribution of burdens;
+- existing obligations it preserves, and authority required to adopt it;
+- a comparison baseline and a review/expiry condition.
+
+The baseline is the current authorized arrangement, not suspension of its
+obligations. Choosing no additional institution is valid. A retrieval match
+only nominates a candidate; it does not supply evidence of suitability or
+license activation. Lack of evidence of benefit is not evidence of zero
+benefit, and administrative cost is not a license to bypass standing rules.
+
+### Concrete comparison for correction feedback
+
+All alternatives below are proposals, not live assignments. Assume an existing
+review process already stores corrections and retains its independent-review
+requirement. Compare additions against that baseline on the same task and
+participant population.
+
+| Candidate | Additional institutional commitment | Expected mechanism to examine | Cost or failure to observe |
+|---|---|---|---|
+| Retain current arrangement | None | Existing retrieval may already bring the correction into the next task | Missed correction at next use |
+| Searchable correction with applicability caption | Assign responsibility for maintaining and reviewing the correction's description | Relevant retrieval exposes the correction when needed | Caption maintenance; wrong or missed retrieval |
+| Targeted notification | Bind affected recipients and assign delivery responsibility | Correction arrives before their next relevant decision | Interruptions, access gaps, mistargeting |
+| Acknowledgment before a specified dependent action | Add a local prerequisite and a route for resolving unavailable recipients | The dependent action cannot proceed through the controlled endpoint without recorded receipt | Waiting, bottlenecks, perfunctory acknowledgment |
+
+These may be combined if evidence supports the combination; they are not
+necessarily a ladder of increasingly good governance. In particular, more
+acknowledgments can increase recorded activity without improving subsequent
+work. The last candidate does not establish understanding merely by blocking
+an action until acknowledgment.
+
+### Where preferences enter the War Machine
+
+Proposed separation of objects:
+
+1. A task-scoped preference concerns outcomes for the named participants.
+2. An institutional candidate changes the available actions, information or
+   transition conditions under which policies operate.
+3. A predictive model estimates consequences of policies under that candidate.
+4. Selection compares those consequences and the institution's burdens under
+   the adopted evaluation rule, subject to existing authority and constraints.
+
+If represented through AIF, the optative needs a declared outcome domain and
+an explicit interpretation into the preference carrier. The institution is
+then a candidate intervention in the modeled action situation, not itself a
+scalar preference weight. Learning about delivery, use and cost can improve
+the predictions used in later selections. It cannot automatically amend the
+institution. This design does not supply the outstanding observation bridge,
+assert that the runtime already evaluates institutional candidates, or invent
+probabilities to make such an evaluation executable.
+
+Until comparable predictions and a warranted preference interpretation exist,
+the endpoint returns a comparison with unknowns and reasons, not a fabricated
+numeric ranking. It may recommend a bounded evidence-gathering experiment
+under existing authority. Selection and authorized adoption remain separately
+recorded even if a standing delegation permits both without operator input.
+
+### Consumer and non-busywork acceptance conditions
+
+The selection record names the chosen arrangement, baseline, preference basis,
+expected improvement, predicted burden, uncertainty, and adoption authority.
+Its next consumer is the task's policy-generation/admission boundary: that
+boundary must demonstrably use the selected instance's information and rules.
+The later evaluation records downstream correction use and observed burdens,
+not only procedural compliance. Increased activity alone cannot satisfy the
+improvement claim.
+
+Required future controls (specified, not run):
+
+- Additional receipts with unchanged downstream correction use must not by
+  themselves demonstrate preference satisfaction.
+- If a candidate offers no additional benefit on the adopted criteria and
+  adds burden, the evaluator must not prefer it merely for having more rules.
+- A favorable benefit estimate cannot admit a prohibited agent invocation.
+- Disconnecting the selected institution from policy generation must fail the
+  claim that institutional selection affected execution.
+- Unobserved downstream use remains unknown even with complete delivery.
+- Burdens and benefits affecting different participants remain visible; a
+  population average must not silently settle whose interests take priority.
+
+The next bounded experiment should compare the current arrangement with one
+applicable addition on frozen task inputs. Record both its execution cost and
+whether a subsequent task actually consumes the correction. A single episode
+can demonstrate that path; it cannot establish general superiority. Retain or
+revise the arrangement through its declared review process according to what
+that evidence supports.
