@@ -20,6 +20,7 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.run4-task-pin :as run4-pin]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
             [futon2.aif.tripwire :as tripwire]
@@ -282,12 +283,17 @@
       (let [dir (io/file (or (:run-record-dir raw-opts) default-run-record-dir))
             target (io/file dir (str "tick-run-record-" run-id ".edn"))
             tmp (io/file dir (str "." (.getName target) "." (UUID/randomUUID) ".tmp"))
-            record {:run/id run-id
+            pin-identity (or (get-in result [:checkpoints :selection :ground
+                                             :run4/task-pin])
+                             (get-in result [:checkpoints :construction :judgment
+                                             :run4/task-pin]))
+            record (cond-> {:run/id run-id
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
                     :traceWritten (boolean (:trace-path result))
-                    :route route}]
+                    :route route}
+                     pin-identity (assoc :run4/task-pin pin-identity))]
         (io/make-parents target)
         (spit tmp (str (pr-str record) "\n"))
         (java.nio.file.Files/move
@@ -919,6 +925,83 @@
   (let [action (get-in judgement [:decision :action])]
     (when (map? action)
       (first (filter #(= action (:action %)) (:ranked-actions judgement))))))
+
+(defn- pinned-refusal! [detail & [data]]
+  (throw (ex-info "RUN4 pinned selection refused"
+                  (merge {:outcome :pinned-selection-refused
+                          :failure-kind :pinned-selection-refused
+                          :failure-stage :selection
+                          :failure-detail detail}
+                         data))))
+
+(defn resolve-pinned-selection
+  "Resolve an authenticated, fresh RUN4 pin against current policy evidence.
+
+  This is an opt-in selection boundary, not an authentication mechanism. A
+  trusted caller must inject `:run4-trusted-boundary-fn`; its structured
+  attestation must bind the exact-byte pin digest. With no RUN4 options this
+  returns nil, preserving the ordinary selector path."
+  [opts judgement effective-casting]
+  (let [option-keys [:run4-task-pin-text :run4-task-pin-ports
+                     :run4-trusted-boundary-fn]
+        present (filter #(contains? opts %) option-keys)]
+    (when (seq present)
+      (when-not (= (set option-keys) (set present))
+        (pinned-refusal! :incomplete-pinned-selection-options))
+      (let [envelope (try
+                       (run4-pin/validate (:run4-task-pin-text opts)
+                                          (:run4-task-pin-ports opts))
+                       (catch clojure.lang.ExceptionInfo e
+                         (pinned-refusal! :invalid-or-stale-task-pin
+                                          {:pin-refusal (:reason (ex-data e))})))
+            pin-digest (get-in envelope [:task-pin :sha256])
+            casting-keys [:author :reviewer :repair-reviewer]
+            pinned-casting (select-keys (:casting envelope) casting-keys)
+            actual-casting (select-keys effective-casting casting-keys)
+            _ (when-not (= pinned-casting actual-casting)
+                (pinned-refusal! :pinned-casting-mismatch
+                                 {:pinned pinned-casting :effective actual-casting}))
+            trust-fn (:run4-trusted-boundary-fn opts)
+            _ (when-not (fn? trust-fn)
+                (pinned-refusal! :missing-trusted-boundary))
+            attestation (trust-fn {:pin-digest pin-digest
+                                   :operator-selection
+                                   (:operator-selection envelope)})
+            _ (when-not (and (map? attestation)
+                             (= :authenticated (:status attestation))
+                             (= :trusted-serving-context (:boundary attestation))
+                             (string? (:principal attestation))
+                             (not (str/blank? (:principal attestation)))
+                             (= pin-digest (:pin-sha256 attestation)))
+                (pinned-refusal! :pinned-authority-unauthenticated))
+            action (get-in envelope [:mission-action :action])
+            mission (get-in envelope [:mission-action :mission])
+            ranked-entry (first (filter #(= action (:action %))
+                                        (:ranked-actions judgement)))
+            _ (when-not ranked-entry
+                (pinned-refusal! :pinned-action-not-candidate))
+            admissible-entry (when (contains? judgement :admissible-actions)
+                               (first (filter #(= action (:action %))
+                                              (:admissible-actions judgement))))
+            _ (when (and (contains? judgement :admissible-actions)
+                         (nil? admissible-entry))
+                (pinned-refusal! :pinned-action-not-admissible))
+            entry (or admissible-entry ranked-entry)
+            identity (assoc (:task-pin envelope)
+                            :mission-id (:id mission)
+                            :action action)
+            counterfactual (:decision judgement)]
+        {:entry entry
+         :identity identity
+         :provenance
+         {:source :authenticated-operator-task-pin
+          :operator (get-in envelope [:operator-selection :operator])
+          :authority-ref (get-in envelope [:operator-selection :authority-ref])
+          :authority-attestation
+          (select-keys attestation [:status :boundary :principal :pin-sha256])
+          :outer-loop-ranking-match-required? false
+          :ordinary-selector-decision counterfactual}
+         :counterfactual counterfactual}))))
 
 (defn- selected-target [entry]
   (or (get-in entry [:action :target])
@@ -2583,7 +2666,14 @@
                          (assoc :readiness/selection-transient true))
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)
-            entry (if stop-line (repair-entry stop-line) ordinary-entry)
+            pinned-selection
+            (when-not stop-line
+              (resolve-pinned-selection
+               opts judgement0 {:author author :reviewer reviewer
+                                :repair-reviewer repair-reviewer}))
+            entry (if stop-line
+                    (repair-entry stop-line)
+                    (or (:entry pinned-selection) ordinary-entry))
             repair-action? (= :repair-machine-failure
                               (get-in entry [:action :type]))
             reviewer (if repair-action? repair-reviewer reviewer)
@@ -2592,7 +2682,7 @@
             (mapv #((or (:operator-gate-queue-fn opts)
                         brief/queue-operator-gate!) %)
                   (:operator-actions judgement0))
-            judgement (assoc judgement0
+            judgement (cond-> (assoc judgement0
                              :operator-action-refs operator-action-refs
                              :wm-version
                              ((or (:version-stamp-fn opts) trace/wm-version-stamp)
@@ -2602,6 +2692,12 @@
                                      :author author
                                      :reviewer reviewer
                                      :repair-reviewer repair-reviewer)))
+                        pinned-selection
+                        (assoc :run4/task-pin (:identity pinned-selection)
+                               :run4/operator-selection (:provenance pinned-selection)
+                               :run4/counterfactual-decision
+                               (:counterfactual pinned-selection)
+                               :run4/enacted-action (:action entry)))
             target (some-> entry selected-target)
             ranked-for-review (if stop-line
                                 [entry]
@@ -2628,15 +2724,23 @@
                                        {:source :stop-the-line
                                         :repair-id (:repair/id stop-line)
                                         :repair-class (:repair/class stop-line)}
-                                       (assoc
-                                        (select-keys (:decision judgement)
-                                                     [:source :rank :controller-score :tau
-                                                      :selection-gain
-                                                      :habit-prior-applied?])
-                                        :discrimination discrimination))
+                                       (if pinned-selection
+                                         (assoc (:provenance pinned-selection)
+                                                :controller-score (:controller-score entry)
+                                                :discrimination discrimination)
+                                         (assoc
+                                          (select-keys (:decision judgement)
+                                                       [:source :rank :controller-score :tau
+                                                        :selection-gain
+                                                        :habit-prior-applied?])
+                                          :discrimination discrimination)))
                                      :trace-persistence :after-construction}
-                                    {:kind :wm-judgement
-                                     :decision (:decision judgement)})
+                                    (cond-> {:kind :wm-judgement
+                                             :decision (:decision judgement)}
+                                      pinned-selection
+                                      (assoc :run4/task-pin (:identity pinned-selection)
+                                             :run4/operator-selection
+                                             (:provenance pinned-selection))))
                                (:readiness/selection-transient judgement0)
                                (assoc-in [:judgment
                                           :readiness/selection-transient]
@@ -2701,7 +2805,7 @@
                                       :rule :constructed-selection-persisted
                                       :question "Does the constructed selection require operator review?"})))]
           (checkpoint! :construction
-                       (term {:mission (str target)
+                       (term (cond-> {:mission (str target)
                               :cascade (select-keys construction
                                                     [:psi :cascade-score :semilattice
                                                      :construction-kind
@@ -2714,8 +2818,14 @@
                               :patterns (vec (:shown construction))
                               :deposit nil
                               :trace-path trace-path}
-                             {:kind :decision-pinned-construction
-                              :selected-action (:action entry)}))
+                               pinned-selection
+                               (assoc :run4/task-pin (:identity pinned-selection)
+                                      :run4/operator-selection
+                                      (:provenance pinned-selection)))
+                             (cond-> {:kind :decision-pinned-construction
+                                      :selected-action (:action entry)}
+                               pinned-selection
+                               (assoc :run4/task-pin (:identity pinned-selection)))))
           (let [snapshot (when stop-line
                            (recovery-snapshot opts stop-line))
                 recovery-stage (:failure-stage stop-line)

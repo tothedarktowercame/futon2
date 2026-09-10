@@ -12,6 +12,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.run4-task-pin :as run4-pin]
             [futon2.aif.tripwire :as tripwire]
             [futon2.report.cascade-lane :as cascade]
             [futon2.report.war-machine :as wm])
@@ -1085,6 +1086,69 @@
            (mapv :phase @phases)))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))
+
+(deftest authenticated-run4-pin-enters-normal-gated-runner-path
+  (let [pinned-action (get-in judgement [:ranked-actions 0 :action])
+        digest (apply str (repeat 64 "a"))
+        constructed (atom nil)
+        dispatches (atom [])
+        envelope {:task-pin {:sha256 digest :digest-semantics :exact-utf8-pin-bytes
+                             :series-id "RUN4" :trial-id :outer-loop
+                             :selected-task-id :outer-loop
+                             :ordered-task-ids [:outer-loop :math :caption :monitor]}
+                  :casting {:author "zai-5" :reviewer "codex-7"
+                            :repair-reviewer "codex-1"}
+                  :operator-selection {:operator "Joe" :authority-ref "SERIES.edn"}
+                  :mission-action {:mission {:id "M-rank-head"}
+                                   :action pinned-action}}
+        opts (merge
+              (isolated-runner-opts)
+              {:repair-open-fn (constantly [])
+               :trace-fn (constantly "/tmp/test-run4-trace.edn")
+               :construct-fn (fn [entry]
+                               (reset! constructed entry)
+                               {:shown [] :psi :psi :cascade-score 1.0
+                                :semilattice [] :policy-holes []})
+               :dispatch-fn (fn [_ agent _ _ _]
+                              (swap! dispatches conj agent)
+                              {:job-id (if (= agent "zai-5") "author" "reviewer")})
+               :poll-fn (fn [_ job-id]
+                          (if (= job-id "author")
+                            {:job-id job-id :state "done" :artifact-ref "abc123"
+                             :feature-card feature-card-claim
+                             :execution successful-execution
+                             :events [{:text "FULL_LOOP_AUTHOR: DONE abc123"}]}
+                            {:job-id job-id :state "done"
+                             :execution successful-execution
+                             :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
+               :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
+               :ground-fn (fn [& _] {:resolved? true :dial-moved? true
+                                     :implementation-id "run4-impl"
+                                     :discharge-id "run4-discharge"})
+               :run4-task-pin-text "{:exact :pin-bytes}"
+               :run4-task-pin-ports {:read-text identity
+                                     :resolve-mission identity
+                                     :action-admissible? (constantly true)}
+               :run4-trusted-boundary-fn
+               (fn [{:keys [pin-digest]}]
+                 {:status :authenticated :boundary :trusted-serving-context
+                  :principal "Joe/session-authenticated"
+                  :pin-sha256 pin-digest})})]
+    (with-redefs [run4-pin/validate (fn [_ _] envelope)]
+      (let [result (runner/run-opportunity! opts)]
+        (is (= :grounded-change (:outcome result)))
+        (is (= pinned-action (:action @constructed)))
+        (is (= ["zai-5" "codex-7"] @dispatches)
+            "the existing author/reviewer arm and its gates were reached")
+        (is (= "RUN4" (get-in result [:checkpoints :selection :ground
+                                      :run4/task-pin :series-id])))
+        (is (= :habit-prior
+               (get-in result [:checkpoints :selection :ground
+                               :decision :source]))
+            "ordinary selection remains recorded as the counterfactual")
+        (is (= :outer-loop
+               (get-in result [:checkpoints :construction :judgment
+                               :run4/task-pin :trial-id])))))))
 
 (deftest reviewer-prompt-cannot-supply-its-own-approval
   (let [job {:result-summary "FULL_LOOP_REVIEW: REQUEST_CHANGES live seam remains optional"

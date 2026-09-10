@@ -344,17 +344,18 @@ before/after acting-order and score fields missing
 
 - **READY is true as a meter result.**
 - **O4 commissioning is incomplete as an organise witness.**
-- Neither fact silently decides Joe's documented fork.
-- If Joe requires organise/O4 before RUN4, the missing reviewed
-  baseline/intervention/primary-score execution manifest must be completed
-  first. If Joe authorizes RUN4 with organise open, the run must record that
-  explicit disposition; READY alone is insufficient.
+- Joe has commissioned the organise work; this note does not reopen the stale
+  run-open-versus-close fork. O4 remains incomplete and must be recorded as
+  such rather than inferred from READY.
 
 ## Pre-launch checklist after implementation (still NOT EXECUTED)
 
-1. Adopt a unique RUN4 ID/config and the three-trial series pin; record all
-   three selected packets, their order, hashes, and per-trial stop conditions.
-2. Record Joe's organise fork disposition and re-emit/inspect the readiness
+1. Adopt a unique RUN4 ID/config and the four-trial ordered series pin; record
+   all four selected packets, their order, hashes, and per-trial stop conditions.
+   The fourth is the AIF-instrumented successor to the existing WM build loop;
+   the first three remain in the series.
+2. Record the commissioned organise work and incomplete O4 state, and
+   re-emit/inspect the readiness
    snapshot without treating process exit zero as the verdict.
 3. Verify serving-code identity, roster availability, author != effective
    reviewer, source/task digests, lock availability, and no preempting stop line.
