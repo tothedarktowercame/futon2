@@ -18,6 +18,7 @@ def routedEvent : Prop := sorry")
            (:lifecycle-counts report)))
     (is (= {:name "routedEvent"
             :declaration-category "OPEN, RUN-GATED"
+            :docstring-checker-citations []
             :closability :run-gated
             :readiness :not-ready}
            (first (:sorry-declarations report))))))
@@ -52,8 +53,14 @@ def routedEvent : Prop := sorry")
                                    :readiness :not-ready}}}
         registry {"x" {:witnesses "x" :recorded-at "2026-09-08T00:00:00Z"
                         :result :passed
-                        :check {:path "checks/lean_sorry_category_check.clj"}
-                        :expected-rejection {:mode :negative}}}
+                        :check {:repo "futon2"
+                                :path "checks/lean_sorry_category_check.clj"}
+                        :report {:repo "futon2"
+                                 :path "holes/labs/wm-contract/U80-current-sorry-census-2026-09-10.md"}
+                        :expected-rejection {:mode :negative}
+                        :control {:kind :in-memory-synthetic-edge
+                                  :writes-live-state? false
+                                  :expected-cause :negative}}}
         report (check/validate-source
                 "/-- PERMANENT EXTERNAL ATTESTATION · historical audit omitted a docstring citation -/\ndef x : Prop := sorry"
                 lifecycle registry)
@@ -62,7 +69,27 @@ def routedEvent : Prop := sorry")
     (is (= {:as-of "2026-09-08" :authority {:contract-git-sha "bf79f"}}
            (:lifecycle-provenance report)))
     (is (= :witness-registry (get-in row [:witness-evidence :source])))
-    (is (true? (get-in row [:witness-evidence :check-present?])))))
+    (is (true? (get-in row [:witness-evidence :check :present?])))
+    (is (true? (get-in row [:witness-evidence :admitted?])))
+    (is (empty? (:docstring-checker-citations row)))))
+
+(deftest registry-admission-refuses-foreign-and-malformed-evidence
+  (let [source "/-- PERMANENT EXTERNAL ATTESTATION · owner x -/\ndef x : Prop := sorry"
+        base {:witnesses "x" :result :passed
+              :check {:repo "futon2" :path "checks/lean_sorry_category_check.clj"}
+              :control {:kind :in-memory-synthetic-edge
+                        :writes-live-state? false :expected-cause :negative}}
+        cases [(assoc base :check {:repo "nonexistent-repo"
+                                   :path "checks/lean_sorry_category_check.clj"})
+               (assoc base :check {:repo "futon2" :path "../foreign.clj"})
+               (assoc base :control true)]]
+    (doseq [row cases]
+      (let [report (check/validate-source source {} {"x" row})]
+        (is (false? (:pass? report)))
+        (is (some #(= :registry-witness-not-admitted (:reason %))
+                  (:findings report)))
+        (is (false? (get-in report [:sorry-declarations 0
+                                    :witness-evidence :admitted?])))))))
 
 (deftest lifecycle-and-declaration-category-remain-distinct
   (let [report (check/validate-source

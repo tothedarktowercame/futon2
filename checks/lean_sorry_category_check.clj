@@ -105,21 +105,44 @@
 
           :else [])))))
 
+(defn safe-reference [reference]
+  (let [{:keys [repo path]} reference
+        root (when (string? repo) (get repository-roots repo))
+        relative? (and (string? path) (not (fs/absolute? path))
+                       (not-any? #{".."} (fs/components path)))
+        target (when (and root relative?) (fs/path root path))]
+    {:reference reference
+     :valid? (boolean (and root relative?))
+     :reason (cond
+               (not (map? reference)) :malformed-reference
+               (not (string? repo)) :malformed-repository
+               (nil? root) :unknown-repository
+               (not (string? path)) :malformed-path
+               (not relative?) :unsafe-path)
+     :present? (boolean (and target (fs/regular-file? target)))}))
+
+(defn structured-control? [control]
+  (and (map? control)
+       (keyword? (:kind control))
+       (boolean? (:writes-live-state? control))
+       (keyword? (:expected-cause control))))
+
 (defn registry-evidence [registry-by-name name]
   (when-let [row (get registry-by-name name)]
-    (let [check-path (get-in row [:check :path])
-          report-path (get-in row [:report :path])
-          check-target (when check-path (fs/path workspace check-path))
-          report-target (when report-path (fs/path workspace report-path))]
+    (let [check (safe-reference (:check row))
+          report (when (:report row) (safe-reference (:report row)))
+          control-valid? (structured-control? (:control row))]
       {:source :witness-registry
        :recorded-at (:recorded-at row)
        :result (:result row)
-       :check check-path
-       :check-present? (boolean (and check-target (fs/regular-file? check-target)))
-       :report report-path
-       :report-present? (boolean (and report-target (fs/regular-file? report-target)))
+       :check check
+       :report report
        :expected-rejection (:expected-rejection row)
-       :control (:control row)})))
+       :control (:control row)
+       :control-valid? control-valid?
+       :admitted? (boolean (and (= :passed (:result row))
+                                (:valid? check) (:present? check)
+                                control-valid?))})))
 
 (defn validate-source
   ([source] (validate-source source {} {}))
@@ -133,19 +156,20 @@
          (fn [{:keys [name doc sorry?]}]
            (let [{:keys [clause present category]} (current-category doc)
                  witness (registry-evidence registry-by-name name)
-                 executable-witness? (and witness (:check-present? witness)
-                                          (= :passed (:result witness))
-                                          (or (:expected-rejection witness)
-                                              (:control witness)))
+                 executable-witness? (:admitted? witness)
+                 doc-paths (vec (checker-paths doc))
                  checker-errors
                  (if (= category "PERMANENT EXTERNAL ATTESTATION")
-                   (let [paths (vec (checker-paths doc))]
-                     (if (and (empty? paths) (not executable-witness?))
-                       [{:declaration name :reason :attestation-checker-absent}]
-                       (for [path paths
-                             :when (not (fs/regular-file? (fs/path workspace path)))]
+                   (concat
+                    (when (and (empty? doc-paths) (not executable-witness?))
+                      [{:declaration name :reason :recognized-evidence-absent}])
+                    (for [path doc-paths
+                          :when (not (fs/regular-file? (fs/path workspace path)))]
                          {:declaration name :reason :attestation-checker-missing
-                          :path path})))
+                          :path path})
+                    (when (and witness (not (:admitted? witness)))
+                      [{:declaration name :reason :registry-witness-not-admitted
+                        :evidence witness}]))
                    [])
                  fixture-errors
                  (when (= category "WITNESSED-INSTANCE OBLIGATION")
@@ -188,7 +212,8 @@
      (mapv (fn [{:keys [name doc sorry?]}]
              (when sorry?
                (merge {:name name
-                       :declaration-category (:category (current-category doc))}
+                       :declaration-category (:category (current-category doc))
+                       :docstring-checker-citations (vec (checker-paths doc))}
                       (when-let [evidence (registry-evidence registry-by-name name)]
                         {:witness-evidence evidence})
                       (select-keys (get lifecycle-by-name name)

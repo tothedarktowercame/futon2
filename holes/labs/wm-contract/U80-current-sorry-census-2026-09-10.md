@@ -37,6 +37,15 @@ at `2026-09-08T00:00:00Z`. The checker reports this current registry evidence
 and its file-presence checks alongside the old lifecycle provenance. It does
 not turn U27's stale not-bound prose into a new owner decision.
 
+Registry admission follows each reference's declared repository through the
+checker's fixed repository map. Unknown repositories, malformed or escaping
+paths, missing checker files, non-passing registry results, and malformed
+controls are reported and cannot borrow a same-named file from `futon2`.
+Admission means that the registry binds the declaration to an existing checker
+and a structured rejecting control; it does not mean the checker was freshly
+run by this census. The report preserves the full check and report references,
+and separately reports whether the Lean docstring itself cites a checker.
+
 The dependency-first account is also narrower than U80's old wording. The one
 current implementation refusal is `organise`; worklist row F12 carries its
 construction and remains blocked. `C` is currently a deferral, carried by F10,
@@ -50,7 +59,9 @@ The checker remains red for three concrete current-label obligations:
 `policyPosteriorImportsPolicyF` are currently labelled permanent external
 attestations but have neither a docstring checker citation nor a passing
 registry witness with an executable check and rejecting control. The other
-three current permanent attestations have executable witness evidence. This note therefore does not
+three current permanent attestations have recognized evidence in this checked
+source and registry corpus. This is not a claim that the remaining three have
+no evidence in any wider corpus. This note therefore does not
 claim six established not-retiring bases, and it does not recreate the stale
 claim of seven. Establishing or changing a not-retiring disposition requires
 an owner ruling or the missing independently checked evidence.
