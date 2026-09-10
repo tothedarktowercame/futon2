@@ -20,6 +20,11 @@
            :task "Build and test an isolated feedback-obligation monitor against explicit experimental local rules"
            :task-fit :software-apparatus
            :claim-limit "Prototype rules are not adopted live institutions; no campaign integration implied"
+           :packet-status :pending}
+          {:id :outer-loop-aif-replacement
+           :task "Implement a bounded AIF-instrumented successor slice for the existing WM build loop"
+           :task-fit :machine-development
+           :claim-limit "Replacement objective; first trial proves one decision/outcome/next-use cycle without taking over the live ledger or claiming full outer-loop completion"
            :packet-status :pending}]
  :staffing {:coordinator "codex-17"
             :task-preparation "zai-2"

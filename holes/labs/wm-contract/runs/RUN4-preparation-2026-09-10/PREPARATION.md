@@ -154,3 +154,49 @@ Trial worker assignments wait for the verified supported runner path. This
 avoids waking a solver to do off-machine work and later relabeling that work
 as machine execution. Preparation may proceed concurrently; trial execution
 waits until wiring and recording prerequisites are satisfied, per Joe.
+
+## Fourth task: AIF-instrumented build-loop successor
+
+Joe's 2026-09-10 direction, verbatim excerpts:
+
+> Another fairly obvious task that we could put into this machine is finishing the outer loop.
+
+> this war machine. Version would Replace that old Loop with an AIF instrumentation.
+
+Added :outer-loop-aif-replacement to SERIES.edn, preserving all three previously
+selected trials. Developing the outer loop is work for the inner loop; it does
+not mean RUN4 has begun selecting its own tasks. Final objective: replace the
+old build loop. Proposed first trial: one bounded successor slice, not a claim
+that the complete replacement can fit into one short trial.
+
+Source inspected: wm-build-loop.sh:106-151. The existing loop checks ledger
+validity, unblocks eligible rows, chooses the next row through build_step.bb,
+dispatches work, independently reviews, checks again, publishes, and detects
+stalls. build_step.bb:14-40 supplies eligibility and a deterministic priority
+ordering. These behaviors and their gates are the compatibility baseline.
+Do not replace them with an unconstrained agent choosing attractive tasks.
+
+Also inspected scripts/wm_outer_loop.clj:1-35: despite its name, this is a
+narrow trace-to-Beta-update process, not the build-work-review-publish loop.
+A replacement must identify which code supplies each actual responsibility.
+
+Proposed bounded product: a candidate/eligibility snapshot, explicit preference
+and prediction inputs, an AIF selection record over eligible tasks, existing
+inner-loop handoff, result/reviewer evidence, and a persisted update consumed
+at the next selection. An after-the-fact AIF annotation that does not influence
+selection or the next update is insufficient. Undefined equations or mappings
+remain implementation prerequisites, not invented defaults.
+
+Validate on frozen ledger-shaped inputs with controlled outcome feedback:
+blocked rows stay excluded; author/reviewer separation holds; invalid ledger
+refuses; missing outcomes remain unknown; stale input pins refuse; disconnecting
+learned-state consumption fails the next-use claim. Compare with the old
+priority policy honestly: selecting differently is not automatically better.
+Keep all mutations within an isolated fixture store until replacement review
+and explicit cutover. Do not run wm-build-loop.sh merely to inspect it: its
+EXIT notifier calls Claude-1, which Joe currently prohibits.
+
+Full replacement acceptance later requires preserved stop/repair/publish
+behavior, bounded retries, no duplicate dispatch, and a demonstrated decision /
+execution / learning cycle on real work. No live ledger takeover or scheduler
+activation is authorized by preparing this fourth task.
