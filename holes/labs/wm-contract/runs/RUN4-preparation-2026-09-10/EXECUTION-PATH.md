@@ -7,6 +7,33 @@ performed. The commands below are proposals, not evidence of a run.
 
 ## 2026-09-10 scope and carrier update (supersedes three-trial wording below)
 
+### Smaller structural solution found for Trial 4 (draft only)
+
+The follow-up lifecycle check narrows the carrier finding below.  Trial 4
+genuinely fits an ordinary **new development mission** whose first milestone is
+to build the isolated fixture-scoped experiment and specify/freeze its three
+open model contracts.  It does not fit any *existing* mission, and those model
+contracts are not treated as chosen.  The non-live draft is
+`draft-missions/M-run4-outer-loop-successor.md`; it remains outside the mission
+registry discovery roots and has leading status `DRAFT`.
+
+The isolated regression test
+`test/futon2/aif/run4_draft_mission_test.clj` copies the exact draft into a
+disposable code root.  It proves the unchanged parser classifies it `:draft`
+and excludes it.  A disposable-only simulated post-review `OPEN` transition
+then proves the unchanged mission enumerator emits `:advance-mission`, the
+existing forward-model admissibility check accepts that exact ID, and
+`construct-for-decision` takes the ordinary default construction arm.  This is
+parser/carrier evidence, not activation or dispatch.
+
+Accordingly, a new `:execute-pinned-task` action is **not yet justified for
+Trial 4**.  After independent review, the smaller route would be an explicit
+operator activation of this newly authored mission followed by a task pin that
+binds its exact `:advance-mission` action.  Until activation and frozen packet
+inputs exist, no valid mapping exists and no launch is permitted.  The original
+three probes still lack individual explicit mission/action bindings; this
+finding does not map them by similarity.
+
 RUN4 now contains **four** ordered trials.  `SERIES.edn:7-31` preserves the
 original three and adds `:outer-loop-aif-replacement`; Joe prioritizes that
 fourth, progressive-development workload.  Its bounded packet is
