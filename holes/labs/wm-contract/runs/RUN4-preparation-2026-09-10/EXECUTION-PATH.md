@@ -65,20 +65,57 @@ The older direct `wm-scheduled-run` path is now honestly named
 right, but its direct-process launch discussion predates the one-serving-JVM
 rule and is not a current launch recipe.
 
+## Joe's selected three-trial series
+
+Joe has now selected all three prepared tasks, so the input is no longer a
+shortlist from which the runner chooses one. The authoritative preparation
+record is `SERIES.edn:1-40`; the bounded task contracts are
+`TRIAL-PACKETS.md:28-220`:
+
+1. memory-assisted m96J04 endpoint uniqueness, deliberately imperfect WM fit;
+2. substantive review/admission of the three fixed captions;
+3. an isolated feedback-obligation monitor under frozen experimental rules.
+
+Success is not a series invariant. Each trial must terminate independently as
+`:succeeded`, `:failed`, `:blocked`, or `:not-attempted`; infrastructure and
+wiring outcomes remain separate fields. In particular, failure on the math
+trial is evidence about this task/runner encounter, not grounds to erase it or
+claim that mathematical proving was the WM's original remit. Trial 2 may have
+mixed admit/reject verdicts and still succeed under its packet. Trial 3 must
+block if the experimental rules/corpus have not been frozen.
+
+Three ordinary `/wm/click` requests—or three direct Agency bells—would not
+meet this instruction. The existing click record has no series identity,
+ordinal, frozen task-packet digest, predecessor link, or series stopping rule.
+Nothing prevents the ordinary selector from choosing a different mission on
+each click. Such jobs would be three unrelated opportunities later grouped by
+prose, not one preregistered RUN4 inner-loop series.
+
 ## Smallest missing seam
 
-Add one reviewed, fail-closed **RUN4 task-pin adapter** to the serving click,
-plus one acceptance bridge; do not add a second runner.
+Add one reviewed, fail-closed **RUN4 series adapter** around the loaded
+full-loop runner, plus one acceptance bridge; do not add a second JVM or a
+manual Agency dispatch loop. This is implementation work required before
+launch.
 
-The click request should accept `task-pin` only as a path or digest-bound
-record with this minimum shape:
+The series-start request should accept only a path or digest-bound manifest
+with this minimum shape (the actual three task packets and their source hashes
+replace the ellipses):
 
 ```clojure
-{:schema :wm/run4-task-pin-v1
+{:schema :wm/run4-series-pin-v1
  :run4-id "RUN4-..."
- :shortlist [{:task-id "..." :mission-id "..." :source-ref "..."}]
- :selected-task-id "..."
- :selection {:mode :operator-selected :selector "joe" :reason "..."}
+ :selection {:mode :operator-selected :selector "Joe"
+             :selected-all? true
+             :source-ref "PREPARATION.md:120-135"}
+ :trials [{:ordinal 1 :trial-id :memory-assisted-mathematics
+           :packet-ref "TRIAL-PACKETS.md:28-88" :packet-sha256 "..."}
+          {:ordinal 2 :trial-id :caption-review-and-admission
+           :packet-ref "TRIAL-PACKETS.md:92-146" :packet-sha256 "..."}
+          {:ordinal 3 :trial-id :feedback-obligation-prototype
+           :packet-ref "TRIAL-PACKETS.md:150-204" :packet-sha256 "..."}]
+ :order :ordinal
+ :stop-rule :attempt-each-once-even-after-fail-or-block
  :casting {:author "zai-5" :reviewer "codex-17"
            :repair-reviewer "codex-1"}
  :source-pins {:futon2 "<sha>" :readiness "<sha256>"}
@@ -87,39 +124,70 @@ record with this minimum shape:
 
 Required behavior is deliberately narrow:
 
-- resolve the selected task to an already-addressable mission/action and
-  refuse absent, ambiguous, stale, inadmissible, or selector-disagreeing
-  mappings; record both the ranked machine choice and the operator exception;
+- validate all three packet/source hashes before attempt 1 and refuse the
+  series before dispatch on missing, ambiguous, stale, or unordered inputs;
+- create a typed `:execute-pinned-trial` action and construction for each
+  packet. The current runner cannot do this through public opts: its entry comes
+  from `selected-entry` and its target/construction/mission are derived from
+  that entry (`full_loop_runner.clj:2584-2605,2678-2692`). The adapter must
+  inject the pinned entry *inside* that state machine, not dispatch around it;
+- preserve the ordinary ranked WM selection as a counterfactual checkpoint,
+  but label the enacted selection `:operator-selected-series`; never claim the
+  strategic selector chose these tasks;
 - retain the normal construction, real Agency author dispatch, independent
   review, build, grounding, and delivery-QA gates—task pinning must not bypass
   them;
+- run the three ordinals sequentially under one series controller. A terminal
+  task failure/block advances to the next ordinal; an infrastructure state that
+  makes further execution unsafe stops the controller and records remaining
+  trials `:not-attempted` rather than silently retrying or skipping;
 - execute under the existing run lock and redirect/freeze every mutable input
   needed by the RUN4 pin contract;
-- emit one identity bundle joining task-pin digest, click ID, attempt ID,
-  full-loop run ID, selected mission/action, author/reviewer jobs, commit,
-  trace, and terminal outcome;
+- emit one append-only series record and one attempt record per ordinal,
+  joining series-pin digest, series ID, ordinal/trial ID, predecessor attempt,
+  click ID, attempt ID, full-loop run ID, selected action, author/reviewer jobs,
+  commit or store admission receipt, trace, task outcome, infrastructure
+  outcome, wiring outcome, and recording-completeness outcome;
+- preserve every initial attempt and retry as separate records; a retry needs a
+  new attempt ID and `:retry-of`, while the series ordinal remains fixed;
 - teach `wm_step.sh accept` (or a new subcommand sharing its acceptance code)
-  to validate that bundle and feed that exact trace/run identity into the
-  existing battery before advancing `:pin/accepted-steps`.
+  to validate the series/attempt bundle and feed those exact trace/run
+  identities into the existing battery before advancing
+  `:pin/accepted-steps`. Acceptance must report all three task outcomes and
+  cannot reduce them to a single green series bit.
+
+Concretely, the required code surfaces are:
+
+- futon3c HTTP: a new `POST /api/alpha/wm/series` handler accepting
+  `series-pin` only; ordinary `/wm/click` remains selector-owned;
+- futon3c serving service: single-flight series lifecycle/status and sequential
+  calls into the already loaded `full-loop-runner`;
+- futon2 full-loop runner: validated pinned-entry injection, typed
+  `:execute-pinned-trial` construction, selection-source provenance, and
+  series/ordinal fields on checkpoints and run records;
+- futon2 RUN4 tooling: `wm_step.sh accept-series` (shared acceptance/battery
+  implementation, not copy/paste) and an identity/schema checker.
 
 Proposed operator surface **after that seam exists and is independently
 reviewed**:
 
 ```bash
 # NOT EXECUTED — PROPOSED; unsupported at current HEAD
-curl --fail-with-body -X POST http://127.0.0.1:7070/api/alpha/wm/click \
+curl --fail-with-body -X POST http://127.0.0.1:7070/api/alpha/wm/series \
   -H 'Content-Type: application/json' \
-  --data '{"task-pin":"/home/joe/code/futon2/data/wm-step/RUN4/pin/task.edn"}'
+  --data '{"series-pin":"/home/joe/code/futon2/data/wm-step/RUN4/pin/series.edn"}'
 
 # NOT EXECUTED — PROPOSED; unsupported at current HEAD
-bash holes/labs/wm-contract/wm_step.sh accept-click \
+bash holes/labs/wm-contract/wm_step.sh accept-series \
   /home/joe/code/futon2/data/wm-step/RUN4 \
-  /home/joe/code/futon2/data/wm-step/RUN4/click-result.edn RUN4-ID
+  /home/joe/code/futon2/data/wm-step/RUN4/series-result.edn RUN4-ID
 ```
 
-Until both halves exist, the correct disposition is **NO LAUNCH PATH**, not
-“run a click, then import its output.” Importing after the fact would not prove
-that the pinned input governed the worker execution.
+Until all four surfaces exist and are independently reviewed, the correct
+disposition is **NO LAUNCH PATH**, not “run three clicks, then import their
+outputs.” Importing after the fact would prove neither that the pinned packets
+governed worker execution nor that one series controller preserved order,
+failures, and stopping behavior.
 
 ## READY versus organise/O4 commissioning
 
@@ -150,15 +218,17 @@ before/after acting-order and score fields missing
 
 ## Pre-launch checklist after implementation (still NOT EXECUTED)
 
-1. Adopt a unique RUN4 ID/config and the hand-selected task-pin; record the
-   complete shortlist, not only the winner.
+1. Adopt a unique RUN4 ID/config and the three-trial series pin; record all
+   three selected packets, their order, hashes, and per-trial stop conditions.
 2. Record Joe's organise fork disposition and re-emit/inspect the readiness
    snapshot without treating process exit zero as the verdict.
 3. Verify serving-code identity, roster availability, author != effective
    reviewer, source/task digests, lock availability, and no preempting stop line.
-4. Execute exactly one serving-JVM click through the reviewed task-pin seam.
-5. Inspect worker/reviewer jobs, commit/build/grounding, route identity, and
-   terminal outcome before acceptance.
+4. Start exactly one serving-JVM series controller through the reviewed seam;
+   it owns the three sequential inner-loop opportunities.
+5. Inspect each trial's worker/reviewer jobs, product-specific receipts,
+   build/grounding where applicable, route identity, and terminal outcomes
+   before series acceptance.
 6. Run the acceptance bridge and existing battery; commit exact generated
    artifacts explicitly, then perform the existing deposit pass. A worker
    success is not itself RUN4 certificate acceptance.
