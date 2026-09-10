@@ -34,6 +34,36 @@ def routedEvent : Prop := sorry")
       (is (false? (:pass? report)))
       (is (some #(= :double-category (:reason %)) (:findings report))))))
 
+(deftest category-must-be-the-entire-current-clause
+  (doseq [clause ["NOT PERMANENT EXTERNAL ATTESTATION"
+                  "PREFIX OPEN, RUN-GATED"
+                  "OPEN, RUN-GATED SUFFIX"]]
+    (let [report (check/validate-source
+                  (str "/-- " clause " · evidence: `checks/lean_sorry_category_check.clj` -/\n"
+                       "def x : Prop := sorry"))]
+      (is (false? (:pass? report)) clause)
+      (is (some #(= :unknown-current-category (:reason %)) (:findings report)) clause)
+      (is (empty? (:sorry-category-counts report)) clause))))
+
+(deftest registry-witness-and-lifecycle-provenance-are-explicit
+  (let [lifecycle {:as-of "2026-09-08"
+                   :authority {:contract-git-sha "bf79f"}
+                   :by-name {"x" {:closability :pre-run-closable
+                                   :readiness :not-ready}}}
+        registry {"x" {:witnesses "x" :recorded-at "2026-09-08T00:00:00Z"
+                        :result :passed
+                        :check {:path "checks/lean_sorry_category_check.clj"}
+                        :expected-rejection {:mode :negative}}}
+        report (check/validate-source
+                "/-- PERMANENT EXTERNAL ATTESTATION · historical audit omitted a docstring citation -/\ndef x : Prop := sorry"
+                lifecycle registry)
+        row (first (:sorry-declarations report))]
+    (is (:pass? report))
+    (is (= {:as-of "2026-09-08" :authority {:contract-git-sha "bf79f"}}
+           (:lifecycle-provenance report)))
+    (is (= :witness-registry (get-in row [:witness-evidence :source])))
+    (is (true? (get-in row [:witness-evidence :check-present?])))))
+
 (deftest lifecycle-and-declaration-category-remain-distinct
   (let [report (check/validate-source
                 "/-- PERMANENT EXTERNAL ATTESTATION · evidence: `checks/lean_sorry_category_check.clj` -/\ndef x : Prop := sorry"

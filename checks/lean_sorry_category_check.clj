@@ -8,6 +8,8 @@
 (def workspace "/home/joe/code/futon2")
 (def lifecycle-path
   "/home/joe/code/futon2/holes/labs/wm-contract/runs/U27-hole-closability/audit.edn")
+(def witness-registry-path
+  "/home/joe/code/futon2/checks/witness-registry.edn")
 
 (def repository-roots
   {"futon2" "/home/joe/code/futon2"
@@ -30,10 +32,11 @@
 
 (defn current-category [doc]
   (let [clause (first-clause doc)
-        present (filterv #(str/includes? clause %) current-categories)]
+        present (filterv #(str/includes? clause %) current-categories)
+        category (when (some #{clause} current-categories) clause)]
     {:clause clause
      :present present
-     :category (when (= 1 (count present)) (first present))}))
+     :category category}))
 
 (defn historical-category-mentions [doc]
   (let [history (second (str/split doc #"·" 2))]
@@ -102,18 +105,42 @@
 
           :else [])))))
 
+(defn registry-evidence [registry-by-name name]
+  (when-let [row (get registry-by-name name)]
+    (let [check-path (get-in row [:check :path])
+          report-path (get-in row [:report :path])
+          check-target (when check-path (fs/path workspace check-path))
+          report-target (when report-path (fs/path workspace report-path))]
+      {:source :witness-registry
+       :recorded-at (:recorded-at row)
+       :result (:result row)
+       :check check-path
+       :check-present? (boolean (and check-target (fs/regular-file? check-target)))
+       :report report-path
+       :report-present? (boolean (and report-target (fs/regular-file? report-target)))
+       :expected-rejection (:expected-rejection row)
+       :control (:control row)})))
+
 (defn validate-source
-  ([source] (validate-source source {}))
-  ([source lifecycle-by-name]
-  (let [decls (declarations source)
+  ([source] (validate-source source {} {}))
+  ([source lifecycle] (validate-source source lifecycle {}))
+  ([source lifecycle registry-by-name]
+  (let [lifecycle-by-name (or (:by-name lifecycle) lifecycle)
+        lifecycle-provenance (select-keys lifecycle [:as-of :authority])
+        decls (declarations source)
         findings
         (mapcat
          (fn [{:keys [name doc sorry?]}]
            (let [{:keys [clause present category]} (current-category doc)
+                 witness (registry-evidence registry-by-name name)
+                 executable-witness? (and witness (:check-present? witness)
+                                          (= :passed (:result witness))
+                                          (or (:expected-rejection witness)
+                                              (:control witness)))
                  checker-errors
                  (if (= category "PERMANENT EXTERNAL ATTESTATION")
                    (let [paths (vec (checker-paths doc))]
-                     (if (empty? paths)
+                     (if (and (empty? paths) (not executable-witness?))
                        [{:declaration name :reason :attestation-checker-absent}]
                        (for [path paths
                              :when (not (fs/regular-file? (fs/path workspace path)))]
@@ -124,13 +151,13 @@
                  (when (= category "WITNESSED-INSTANCE OBLIGATION")
                    (obligation-fixture-errors name doc))]
              (concat
-              (when (and sorry? (not= 1 (count present)))
+              (when (and sorry? (nil? category))
                 [{:declaration name :reason :sorry-category-count
-                  :count (count present) :categories present
+                  :count 0 :categories []
                   :current-clause clause}])
               (when (> (count present) 1)
                 [{:declaration name :reason :double-category :categories present}])
-              (when (and sorry? (empty? present))
+              (when (and sorry? (nil? category) (<= (count present) 1))
                 [{:declaration name :reason :unknown-current-category
                   :current-clause clause}])
               (when (and (= category "DELIBERATE IMPLEMENTATION REFUSAL") (not sorry?))
@@ -156,11 +183,14 @@
      (frequencies (keep (comp :category current-category :doc) decls))
      :historical-category-mentions
      (apply merge-with + (map (comp historical-category-mentions :doc) decls))
+     :lifecycle-provenance lifecycle-provenance
      :sorry-declarations
      (mapv (fn [{:keys [name doc sorry?]}]
              (when sorry?
                (merge {:name name
                        :declaration-category (:category (current-category doc))}
+                      (when-let [evidence (registry-evidence registry-by-name name)]
+                        {:witness-evidence evidence})
                       (select-keys (get lifecycle-by-name name)
                                    [:closability :readiness]))))
            (filter :sorry? decls))
@@ -171,10 +201,15 @@
 
 (defn read-lifecycle [path]
   (let [doc (edn/read-string (slurp path))]
-    (into {} (keep (fn [row]
-                     (when (= :contract-declaration (:row-source row))
-                       [(:name row) row])))
-          (:rows doc))))
+    {:as-of (:as-of doc)
+     :authority (:authority doc)
+     :by-name (into {} (keep (fn [row]
+                               (when (= :contract-declaration (:row-source row))
+                                 [(:name row) row])))
+                    (:rows doc))}))
+
+(defn read-registry [path]
+  (into {} (map (juxt :witnesses identity)) (edn/read-string (slurp path))))
 
 (defn mutate [source mode]
   (case mode
@@ -222,7 +257,8 @@
   (let [mode (first args)
         negative? (some? mode)
         report (validate-source (mutate (slurp source-path) mode)
-                                (read-lifecycle lifecycle-path))
+                                (read-lifecycle lifecycle-path)
+                                (read-registry witness-registry-path))
         detected? (and negative? (negative-detected? mode report))]
     (println "lean-sorry-category-check:"
              (cond
