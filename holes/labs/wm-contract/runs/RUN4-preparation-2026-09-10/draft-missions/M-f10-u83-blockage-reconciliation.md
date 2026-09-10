@@ -13,7 +13,7 @@ Produce one reconciliation record per row that dispositions every claim the
 row's recorded blocker makes, using current evidence, and proposes (does not
 apply) the row correction for owner acceptance.
 
-## Frozen row excerpts and digests (input pins)
+## Row excerpts and digests required before execution (not yet frozen)
 
 - `:F10` recorded blocker (worklist.edn, live read 2026-09-10): fold opts and
   the kernel adapter are absent. SHA-256 of the row's blocker text is pinned
@@ -24,7 +24,7 @@ apply) the row correction for owner acceptance.
   text and `MORNING-BRIEF-reduction-2026-09-07.md:73` say the queue no longer
   exists and Joe ruled those attempts.
 
-## Cited evidence (pre-pinned)
+## Cited evidence (paths only; hashes required before execution)
 
 - F10: `runs/RUN4-preparation-2026-09-10/C-WIRING-REVIEW.md` — accepted C
   wiring refutes the "absent fold opts / kernel adapter" wording; remaining
@@ -40,7 +40,8 @@ Two records; per record every blocker claim maps to exactly one of
 evidence`; nothing else. Objective checks: (a) each row's claim count equals
 its disposition count; (b) no new implementation is proposed; (c) proposed
 worklist corrections are clearly marked as pending owner acceptance. Row
-digests verified against the frozen pins above.
+digests must be frozen by the coordinator before worker dispatch, then verified
+by the worker. This draft currently supplies no digest pins.
 
 ## Done means
 

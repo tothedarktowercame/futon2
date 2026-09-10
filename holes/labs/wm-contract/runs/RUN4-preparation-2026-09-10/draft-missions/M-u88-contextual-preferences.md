@@ -48,11 +48,14 @@ D. Event sequence and expected derived state:
 2. `delivery-attempted` → transport acceptance for A ⇒ coverage still 0/2
    (transport ≠ inbox receipt).
 3. `inbox-receipt` A, digest D, revision 2 ⇒ coverage 1/2.
-4. duplicate `inbox-receipt` A (same event id) ⇒ idempotent refuse, coverage 1/2.
+4. duplicate `inbox-receipt` A (same event id) ⇒ idempotent no-op returning the existing result, coverage 1/2.
+   Reusing that ID with conflicting content is a typed refusal.
 5. `inbox-receipt` A for digest D′ ≠ D ⇒ refused, coverage 1/2.
 6. `inbox-receipt` A naming revision 1 ⇒ refused (revision mismatch), 1/2.
 7. O leaves the registry / seat disconnects ⇒ denominator stays 2; O's
-   obligation `:unavailable`, coverage 1/2.
+   obligation remains outstanding, coverage 1/2. Registry absence alone
+   does not establish inbox unavailability; only separate route evidence can
+   support `:unavailable`.
 8. `deadline-reached` ⇒ O `:overdue`; never auto-satisfied.
 9. A `disputed` ⇒ A still receipted (disagreement counts as receipt, not
    endorsement); separate dispute state opens.
@@ -66,7 +69,7 @@ D. Event sequence and expected derived state:
 
 - Each rule above is a unit test with expected coverage/obligation state.
 - Typed refusals (not nil, not exceptions-as-data-silence) for: wrong
-  recipient, wrong digest, wrong revision, duplicate id, unauthorized actor,
+  recipient, wrong digest, wrong revision, conflicting reuse of an event id, unauthorized actor,
   missing prerequisite field.
 - One-recipient receipt cannot discharge another's obligation (test 7 vs 3).
 - Missing applicability or authority blocks activation (test).
@@ -81,3 +84,9 @@ Fixture episode derives exactly the states above under fixture-supplied
 authority; rejecting cases refuse typed; scope exclusions restated in the
 closing record. Closure/adoption of worklist `:U88` remains with Joe; this
 mission's worker stops at the demonstrated interpreter.
+
+## Coordinator review correction, 2026-09-10
+
+Exact event replay is idempotent; conflicting reuse refuses. Registry absence
+does not prove absence of an inbox route. These clarify the source contract,
+not a new sanction or institutional adoption.
