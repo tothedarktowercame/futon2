@@ -1,0 +1,191 @@
+{
+  "schema": "f12-pre-execution-manifest-v1",
+  "status": "proposed-independent-review-required",
+  "primary_execution_authorized": false,
+  "task": {
+    "selector": "Joe",
+    "mode": "operator-selected",
+    "product": "Preparation disposition for find closure and separated-risk certificate prerequisites, using the owning readiness reader. No readiness adoption or activation claim."
+  },
+  "members": [
+    "apparatus/one-authority-per-question",
+    "apparatus/pin-moves-with-the-population",
+    "apparatus/evidence-to-disposition-once",
+    "apparatus/replayable-not-precious",
+    "apparatus/done-is-observed-running"
+  ],
+  "selected": [
+    "apparatus/one-authority-per-question",
+    "apparatus/pin-moves-with-the-population",
+    "apparatus/evidence-to-disposition-once",
+    "apparatus/replayable-not-precious",
+    "apparatus/done-is-observed-running"
+  ],
+  "added_by_organise": [],
+  "admitted_by": [],
+  "authored_stands_on": [],
+  "edges": [],
+  "relation_basis": "reviewed authored why relations; exclude prose tokens and references; exact fast-forward required",
+  "excluded_tokens": [
+    "S1/S2",
+    "futon3c/holes/T-apm-recurring-failure-end-to-end.md",
+    "a1-vs-a2/a3"
+  ],
+  "then_spans": {
+    "apparatus/one-authority-per-question": [
+      23,
+      24
+    ],
+    "apparatus/pin-moves-with-the-population": [
+      23,
+      24
+    ],
+    "apparatus/evidence-to-disposition-once": [
+      23,
+      24
+    ],
+    "apparatus/replayable-not-precious": [
+      23,
+      24
+    ],
+    "apparatus/done-is-observed-running": [
+      23,
+      24
+    ]
+  },
+  "precedence_before": [
+    2,
+    4,
+    3,
+    1,
+    5
+  ],
+  "precedence_after": [
+    1,
+    4,
+    3,
+    2,
+    5
+  ],
+  "precedence_index": [
+    "apparatus/one-authority-per-question",
+    "apparatus/pin-moves-with-the-population",
+    "apparatus/evidence-to-disposition-once",
+    "apparatus/replayable-not-precious",
+    "apparatus/done-is-observed-running"
+  ],
+  "baseline_kind": "labelled diagnostic control: replay-priority, NOT observed practice",
+  "intervention": "exchange authority-reader and replay priorities; preserve replay prerequisite",
+  "expected_constraint": "replay requires the first authority receipt; both arms may execute authority, replay, disposition. If order and score flat, O4 false and unexercised; do not weaken guard.",
+  "commands": {
+    "authority": {
+      "argv": [
+        "/usr/bin/timeout",
+        "--signal=TERM",
+        "--kill-after=5s",
+        "60s",
+        "/usr/local/bin/bb",
+        "run4_readiness.bb",
+        "--summary"
+      ],
+      "cwd": "/home/joe/code/futon2/holes/labs/wm-contract"
+    },
+    "replay": {
+      "argv": [
+        "/usr/bin/timeout",
+        "--signal=TERM",
+        "--kill-after=5s",
+        "60s",
+        "/usr/local/bin/bb",
+        "run4_readiness.bb",
+        "--summary"
+      ],
+      "cwd": "/home/joe/code/futon2/holes/labs/wm-contract"
+    }
+  },
+  "budget": {
+    "top_level_commands_per_arm": 2,
+    "firings_per_arm": 3,
+    "automatic_retries": 0,
+    "command_timeout_seconds": 60,
+    "kill_grace_seconds": 5,
+    "primary_pairs": 1
+  },
+  "rounds": [
+    {
+      "id": "authority",
+      "transcript": true,
+      "primary": false
+    },
+    {
+      "id": "replay",
+      "transcript": true,
+      "primary": true
+    },
+    {
+      "id": "disposition",
+      "transcript": true,
+      "primary": false
+    }
+  ],
+  "score": {
+    "name": "stable-preparation-replay-completed",
+    "denominator_per_arm": 1,
+    "success": "primary replay exits 0, parses the exact nine unique readiness lines and one consistent verdict, equals authority receipt and is on the same frozen input basis",
+    "range": [
+      0,
+      1
+    ],
+    "not": "green-line count, activation evidence, canonical G or benefit estimate"
+  },
+  "supporting_unexecuted": [
+    "apparatus/pin-moves-with-the-population",
+    "apparatus/done-is-observed-running"
+  ],
+  "partial_executable_members": [
+    "apparatus/one-authority-per-question",
+    "apparatus/evidence-to-disposition-once",
+    "apparatus/replayable-not-precious"
+  ],
+  "closed_dispositions": [
+    "REFUSED_BASIS",
+    "CHECK_FAILED",
+    "EVIDENCE_CONFLICT",
+    "PREPARATION_BLOCKED",
+    "PREPARATION_CLEAR"
+  ],
+  "source_pins": {
+    "futon3/checks/find_organise.clj": "64c3abb4a5a8655736ffc6391cbf7cbae17a76cdc3e026cfc3e6adcf0da1d9ce",
+    "futon3/checks/F12-O4-witness-discovery.md": "397e67ff4f577be0f79223af4a2e635553f1e85715bab88679817a575238dacf",
+    "futon3/holes/labs/library-contract/E-pre-go-live-interpretation-review-2026-09-09.md": "cc8a61b6165d7b7b546eea2b0a648a3c6f4d2afe70a876c9e2e7942efaa4580c",
+    "futon2/holes/labs/wm-contract/run4_readiness.bb": "79bd666a394390931fb6384acb9701b1e420941e1b7013ca80fbd9bdd6ccdd5e",
+    "futon2/holes/labs/wm-contract/u49_route_transcribe.bb": "b9e33f3a3f2c9a24ba4642d7d50849885538e6fb1afc1ba6eac0911718bb6cbc",
+    "futon2/holes/labs/wm-contract/run4_prereg_transcribe.bb": "b6bc60daa10bc5f7a16a7b97e61d00da6972bf178b198b75c17cd0d14d7f54ed",
+    "futon2/holes/labs/wm-contract/runs/E-pre-go-live-experiment-2026-09-09.md": "bd92e5efa1946217ed411c31e681a334ef004712830bbd7a3d6cadf500cd1cd5",
+    "futon3/library/apparatus/one-authority-per-question.flexiarg": "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1",
+    "futon3/library/apparatus/pin-moves-with-the-population.flexiarg": "259e32df9a71a6360bc7129cb48680329d9275bfd7c25b5c67c211c25ceb9b79",
+    "futon3/library/apparatus/evidence-to-disposition-once.flexiarg": "9b07bae8e672031979881d6bacbff4926453b949691ffa99751e226b43e6033e",
+    "futon3/library/apparatus/replayable-not-precious.flexiarg": "44a87d59413bd24b5a86cab526b751b953b846bca9519a0500b926fe4a543546",
+    "futon3/library/apparatus/done-is-observed-running.flexiarg": "301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653"
+  },
+  "availability": {
+    "bb": "/usr/local/bin/bb",
+    "bb_version": "babashka v1.13.219",
+    "git": "/usr/bin/git",
+    "timeout": "/usr/bin/timeout",
+    "checked": "executable paths, bb version, source command branches; no primary commands run"
+  },
+  "execution_prerequisites": [
+    "Independent codex-17 review pin naming manifest SHA256 and commit",
+    "Complete immutable input/environment/Git-query freeze annex, reviewed before primary execution",
+    "Reviewed driver realizing the shared-fire/state/receipt protocol in companion note; this data manifest alone is not a generic whole-library interpreter"
+  ],
+  "prohibitions": [
+    "no emit/probe/deposit flags",
+    "no source or population mutations",
+    "no live service or Student calls",
+    "no Lean or Lake",
+    "no primary execution before independent review",
+    "no closure claim"
+  ]
+}
