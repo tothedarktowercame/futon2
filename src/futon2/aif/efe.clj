@@ -591,7 +591,7 @@
                          graph-feasibility-mode
                          move-class-intensity-weight survey-eig-weight
                          ruled-outcome-c-enabled? disposition-kernel
-                         ruled-outcome-c-weight seeded-c]
+                         ruled-outcome-c-weight seeded-c c-fold-provenance]
                   :or {info-weight default-info-weight
                        survey-eig-weight default-survey-eig-weight
                        survival-weight default-survival-weight
@@ -937,6 +937,9 @@
 
        (gap-contribution? gap-terms)
        (assoc :gap? true)
+
+       (and ruled-outcome-c-enabled? c-fold-provenance)
+       (assoc :c-fold-provenance c-fold-provenance)
 
        learn-action?
        (assoc :c-zone-load (assoc zone-evidence :risk zone-risk)

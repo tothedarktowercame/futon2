@@ -135,6 +135,10 @@
                    :move-class-intensity-mode :move-class-intensity-contribution
                    :move-class-intensity
                    :controller-score :rank :time-pressure :horizon-steps])
+    (:c-fold-provenance r)
+    (assoc :c-fold-provenance (:c-fold-provenance r)
+           :G-ruled-outcome-c (:G-ruled-outcome-c r)
+           :predicted-disposition-risk (:predicted-disposition-risk r))
     *persist-policy-trace-details?*
     (assoc :prediction-mean (get-in r [:prediction :next-observation :mean])
            ;; F_π scores an observation under each candidate's predictive

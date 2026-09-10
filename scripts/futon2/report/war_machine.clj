@@ -31,7 +31,8 @@
    after a successful trace append. Its separate default-off read is carried
    only as report/trace evidence; selection never consumes it.
    Pattern:   war-machine/operational-not-decorative"
-  (:require [babashka.http-client :as http]
+  (:require [futon2.aif.c-fold-config :as c-fold-config]
+            [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn]
             [clojure.java.io :as io]
@@ -5923,10 +5924,11 @@
                                :reason-unavailable)) ")")}))))
 
 (defn- configured-fold-efe-opts
-  "Pass explicitly supplied fold configuration through without adding defaults."
+  "Materialize opt-in pinned run-sheet C, with explicit caller opts taking precedence."
   [base config]
-  (merge base (select-keys config [:ruled-outcome-c-enabled? :seeded-c
-                                  :disposition-kernel])))
+  (merge base (select-keys (c-fold-config/resolve-opts config)
+                          [:ruled-outcome-c-enabled? :seeded-c
+                           :disposition-kernel :c-fold-provenance])))
 
 (defn judge
   "The war machine's inference step.

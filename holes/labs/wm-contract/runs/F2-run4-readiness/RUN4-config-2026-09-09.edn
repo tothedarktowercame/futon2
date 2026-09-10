@@ -10,6 +10,12 @@
   :steps-proposed 3
   :steps-reason "The prior accepted pin (data/wm-step/w1) banked 2 accepted steps; 3 gives one more than precedent while keeping every step individually inspectable at the accept gate. Joe may set any count at go."
   :observation-window "next-accepted-step rule, version-pinned in :window per the adopted recording contract (A4)"}
+ :c-fold {:enabled? true
+  :seed {:id :ruled-outcome-c-v1 :path "../../../../../resources/run4/seeded-c.edn"
+         :sha256 "1459952e2d3e4534760ba8512482fc3cb3aa4020d2c3464b2056efaff6112e1f"}
+  :kernel {:adapter :constant-checkpoint-kernel/v1 :path "../../../../../resources/run4/checkpoint-kernel.edn"
+         :sha256 "39996c267ba36fc7cfbfb53a5821f304a4ff21089ff53bff031090e8f23e90d0"}
+  :warrant "Item 23 A3; 2026-09-10 executable pinned configuration; descriptive flags below are historical rationale"}
  :beta-habit-in-both? true
  :beta-habit-warrant "SESSION-model-choices-2026-09-09.md section 1; Item 25"
  :beta-habit-required-environment {"FUTON_WM_FPI_DARK" "1"
