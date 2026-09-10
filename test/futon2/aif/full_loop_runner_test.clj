@@ -1092,6 +1092,8 @@
         digest (apply str (repeat 64 "a"))
         constructed (atom nil)
         dispatches (atom [])
+        pinned-judgement (assoc judgement :admissible-actions
+                                (:ranked-actions judgement))
         envelope {:task-pin {:sha256 digest :digest-semantics :exact-utf8-pin-bytes
                              :series-id "RUN4" :trial-id :outer-loop
                              :selected-task-id :outer-loop
@@ -1104,6 +1106,9 @@
         opts (merge
               (isolated-runner-opts)
               {:repair-open-fn (constantly [])
+               :judge-fn (fn [_] {:judgement pinned-judgement})
+               :repair-system-record-fn
+               (fn [finding] (assoc finding :repair/id "test/run4-refusal"))
                :trace-fn (constantly "/tmp/test-run4-trace.edn")
                :construct-fn (fn [entry]
                                (reset! constructed entry)
@@ -1148,7 +1153,18 @@
             "ordinary selection remains recorded as the counterfactual")
         (is (= :outer-loop
                (get-in result [:checkpoints :construction :judgment
-                               :run4/task-pin :trial-id])))))))
+                               :run4/task-pin :trial-id]))))
+      (reset! dispatches [])
+      (let [refused (runner/run-opportunity!
+                     (assoc opts :judge-fn
+                            (fn [_]
+                              {:judgement
+                               (dissoc pinned-judgement :admissible-actions)})))]
+        (is (= :pinned-selection-refused (:outcome refused)))
+        (is (= :missing-or-malformed-admissible-evidence
+               (get-in refused [:data :failure-detail])))
+        (is (empty? @dispatches)
+            "missing admissible evidence refuses before author dispatch")))))
 
 (deftest reviewer-prompt-cannot-supply-its-own-approval
   (let [job {:result-summary "FULL_LOOP_REVIEW: REQUEST_CHANGES live seam remains optional"

@@ -196,6 +196,18 @@
              (pinned-opts {:run4-trusted-boundary-fn (constantly true)})
              policy-judgement)))))
   (testing "current candidate and admissible evidence must contain the exact action"
+    (doseq [ranked [nil [] {} [{:rank 1 :action :malformed}]]]
+      (is (= :missing-or-malformed-ranked-evidence
+             (:failure-detail
+              (selection-failure
+               (pinned-opts)
+               (assoc policy-judgement :ranked-actions ranked))))))
+    (doseq [admissible [nil [] {} [{:rank 1 :action :malformed}]]]
+      (is (= :missing-or-malformed-admissible-evidence
+             (:failure-detail
+              (selection-failure
+               (pinned-opts)
+               (assoc policy-judgement :admissible-actions admissible))))))
     (is (= :pinned-action-not-candidate
            (:failure-detail
             (selection-failure
