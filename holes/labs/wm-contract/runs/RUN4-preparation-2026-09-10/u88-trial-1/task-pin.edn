@@ -15,7 +15,7 @@
            {:path "holes/labs/wm-contract/runs/RUN4-preparation-2026-09-10/U88-PREPARATION-BASIS.json"
             :sha256 "64db034c9ae02282a169337d1683fc707abe2e4f05ddbd1e198b48b36778545c"}]
  :config {:path "holes/labs/wm-contract/runs/RUN4-preparation-2026-09-10/u88-trial-1/run-config.edn"
-          :sha256 "5787dce80c14cd327402c94685b42312aa2187b600a4147f24bf87e4ab36bdc6"}
+          :sha256 "fcc70191f2fe0ecbdc345632a32f87b4e1287f7dff947545ad3ced9814358c56"}
  :casting {:author "zai-2"
            :reviewer "codex-12"
            :repair-reviewer "codex-17"}

@@ -78,7 +78,7 @@
               envelope (task-pin/validate (read-text task-pin-path)
                                          (stub-ports (fn [id] (get open id))))]
           (is (:valid? envelope))
-          (is (= "fd203522990a819fe95e04fb7f81fcae98f5f7c4a18d1b1365188ac8a68d13d4"
+          (is (= "ec0555250f116814370eb77810eeb946302b1d50c277a2f30f9cbc3a7e64c9d6"
                  (get-in envelope [:task-pin :sha256])))
           (is (= mission-id (get-in envelope [:task-pin :selected-task-id])))
           (is (= :advance-mission
@@ -104,3 +104,15 @@
     (is (= pin-sha (:sha256 (:packet trial))))
     (is (not= (:author (:casting series)) (:reviewer (:casting series))))
     (is (pos? (count (:source-pins series))))))
+
+(deftest serving-and-recording-requirements-are-declared-not-attested
+  (let [sheet (edn/read-string (read-text run-config-path))
+        declaration (:serving-declaration sheet)]
+    (is (= {"FUTON_WM_FPI_DARK" "1"
+            "FUTON_WM_BETA_DARK" "1"
+            "FUTON_WM_TRACE_POLICY_DETAILS" "1"}
+           (:required-environment declaration)))
+    (is (= {:model :single-level :scope :RUN4} (:hierarchy declaration)))
+    (is (= :wm/realized-recording-v1
+           (get-in declaration [:recording-requirement :contract])))
+    (is (nil? (:effective-environment-attestation sheet)))))

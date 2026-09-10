@@ -1,5 +1,11 @@
 # U88 trial-1 packet — pinned config / task pin / series pin (frozen proposal)
 
+This revision supersedes the original proposal at `50192c5e`; those bytes and
+their pins remain in git history. It declares the three serving-JVM
+requirements and the RUN4-scoped single-level model. The recording flag is a
+requirement on the separate `wm_step_observe.bb` process; this packet does not
+claim that the series invokes or attests that process.
+
 2026-09-10, Zai-2, under Codex-17's dispatch. PROPOSAL outside discovery
 roots; nothing activated, dispatched, or served. Coordinator corrections at
 futon2 `db99f729` (identical replay no-op; conflicting event-ID refusal;
@@ -12,9 +18,9 @@ remain in git history; the revision record is `db99f729` itself.
 ## Files (this directory)
 
 - `run-config.edn` — `:wm/run4-pinned-run-config-v1`, sha256
-  `5787dce80c14cd327402c94685b42312aa2187b600a4147f24bf87e4ab36bdc6`.
+  `fcc70191f2fe0ecbdc345632a32f87b4e1287f7dff947545ad3ced9814358c56`.
 - `task-pin.edn` — `:wm/run4-task-pin-v1`, sha256
-  `fd203522990a819fe95e04fb7f81fcae98f5f7c4a18d1b1365188ac8a68d13d4`.
+  `ec0555250f116814370eb77810eeb946302b1d50c277a2f30f9cbc3a7e64c9d6`.
 - `series-pin.edn` — `:wm/run4-series-pin-v1` (frozen, one trial, stop-rule
   `:attempt-each-once-even-after-fail-or-block`), pins the task pin.
 
@@ -34,7 +40,12 @@ remain in git history; the revision record is `db99f729` itself.
 
 ## Concrete gaps (NOT dropped to fit the loader)
 
-- **G1 — runner-environment flags have no sheet field.** The strict loader
+- **G1 — caller integration remains.** The strict loader now carries
+  `:run4/serving-declaration` as pinned data. The trusted caller must compare
+  its three requirements with both current environment and already-loaded
+  consumer values before click. Codex10 separately owns that integration and
+  the post-accept observer adapter; this proposal claims neither is complete.
+  Historically, the
   (`futon3c.wm.run4-pinned-run-config`) admits only
   `#{:cohort? :window-days :accumulate-strategic-habit? :beta-habit-in-both?
   :policy-depth}` plus `:c-fold`. The ruled recording contract

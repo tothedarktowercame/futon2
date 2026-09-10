@@ -2,6 +2,14 @@
  :runner-options {:beta-habit-in-both? true
                   :accumulate-strategic-habit? true
                   :policy-depth {:anticipation 3 :cascade-rollout 5}}
+ :serving-declaration
+ {:required-environment {"FUTON_WM_FPI_DARK" "1"
+                         "FUTON_WM_BETA_DARK" "1"
+                         "FUTON_WM_TRACE_POLICY_DETAILS" "1"}
+  :hierarchy {:model :single-level :scope :RUN4}
+  :recording-requirement
+  {:contract :wm/realized-recording-v1
+   :environment {"FUTON_WM_RECORDING_CONTRACT" "1"}}}
  :c-fold {:enabled? true
           :seed {:id :ruled-outcome-c-v1
                  :path "../../../../../../resources/run4/seeded-c.edn"
