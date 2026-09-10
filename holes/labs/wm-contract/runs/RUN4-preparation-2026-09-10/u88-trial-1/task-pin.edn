@@ -1,0 +1,27 @@
+{:schema :wm/run4-task-pin-v1
+ :series-id "run4-inner-loop-u88-2026-09-10"
+ :trial-id "M-u88-contextual-preferences"
+ :series-order :as-declared
+ :candidate-task-ids ["M-u88-contextual-preferences"
+                      "wm-choice/learning"
+                      "wm-ticket/F10-u83-reconciliation"]
+ :selected-task-id "M-u88-contextual-preferences"
+ :sources [{:path "holes/labs/wm-contract/runs/RUN4-preparation-2026-09-10/draft-missions/M-u88-contextual-preferences.md"
+            :sha256 "8fecf3daf99b58b6fe5f15182df017e3205530cc568af930452b59ca3ee89508"}
+           {:path "holes/labs/wm-contract/SESSION-IAD-feedback-interpretation-2026-09-10.md"
+            :sha256 "47981b01c1ebbb5efa822ba9c7479e312323cd113c1bdd1f40cc61715678356d"}
+           {:path "src/futon2/aif/mission_registry.clj"
+            :sha256 "07822ed0667f268350fc3b9d921adce4d0d8c78276463b3bf03e93f5a01b89da"}
+           {:path "holes/labs/wm-contract/runs/RUN4-preparation-2026-09-10/U88-PREPARATION-BASIS.json"
+            :sha256 "64db034c9ae02282a169337d1683fc707abe2e4f05ddbd1e198b48b36778545c"}]
+ :config {:path "holes/labs/wm-contract/runs/RUN4-preparation-2026-09-10/u88-trial-1/run-config.edn"
+          :sha256 "5787dce80c14cd327402c94685b42312aa2187b600a4147f24bf87e4ab36bdc6"}
+ :casting {:author "zai-2"
+           :reviewer "codex-12"
+           :repair-reviewer "codex-17"}
+ :operator-selection {:mode :operator-selected
+                      :operator "Joe"
+                      :authority-ref "futon2 db99f729 (U88-PREPARATION-BASIS.json, reviewed-draft-not-activated) + Joe 2026-09-10 inner-loop direction reviewed at bf054892/cf2aee0c"}
+ :mapping {:mission-id "M-u88-contextual-preferences"
+           :action {:type :advance-mission
+                    :target "M-u88-contextual-preferences"}}}
