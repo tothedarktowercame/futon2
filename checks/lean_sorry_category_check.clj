@@ -167,7 +167,7 @@
                           :when (not (fs/regular-file? (fs/path workspace path)))]
                          {:declaration name :reason :attestation-checker-missing
                           :path path})
-                    (when (and witness (not (:admitted? witness)))
+                    (when (and (empty? doc-paths) witness (not (:admitted? witness)))
                       [{:declaration name :reason :registry-witness-not-admitted
                         :evidence witness}]))
                    [])

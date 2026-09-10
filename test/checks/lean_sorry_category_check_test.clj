@@ -106,3 +106,12 @@ def routedEvent : Prop := sorry")
                              {:reason :double-category}]}]
     (is (not (check/negative-detected? "--negative-double" baseline)))
     (is (check/negative-detected? "--negative-double" detected))))
+
+(deftest registered-legacy-metadata-does-not-invalidate-docstring-evidence
+  ;; Real existing rows have checker citations but predate structured controls.
+  ;; The registry is an alternative binding route, not a new requirement on them.
+  (let [registry (check/read-registry check/witness-registry-path)
+        source (slurp check/source-path)
+        report (check/validate-source source {} registry)]
+    (doseq [name ["preferenceStackLiveRecorded" "wmRunsOnce"]]
+      (is (not-any? #(= name (:declaration %)) (:findings report)) name))))

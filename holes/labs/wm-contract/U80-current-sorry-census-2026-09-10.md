@@ -70,3 +70,26 @@ Unknown first-clause categories and first clauses containing two recognized
 categories are rejected. The negative-control runner now requires the finding
 specific to its mutation; a pre-existing red finding can no longer make an
 unrelated mutation appear detected.
+
+## Independent review and small compatibility correction — 2026-09-10
+
+Codex-17 reviewed through 565d1aa8. Exact current-clause matching, declared-repo
+resolution and the Dirichlet registry binding now withstand the reported plants.
+My normal invocation initially produced FIVE findings, not the three reported:
+preferenceStackLiveRecorded and wmRunsOnce were additionally rejected because
+old registry rows lack structured controls, despite their valid docstring
+checker citations. I corrected the interaction: registry admission is an
+alternative route when the docstring has no checker citation. Its missing
+metadata cannot invalidate an already-valid docstring route. Missing cited
+files still fail, and fallback registry bindings retain their strict checks.
+The two real legacy rows are now regression fixtures.
+
+After that correction: 8 tests / 40 assertions / zero failures or errors;
+all six mutation controls exited 0 with their own required finding detected;
+clj-kondo zero errors/warnings; check-parens OK; diff check clean. The normal
+census has exactly three recognized-evidence-absent findings:
+enactedEqualsSelectedWhenRankOneGated, policyPrecisionIsGammaFromBeta, and
+policyPosteriorImportsPolicyF. This accepts the repaired census mechanism at
+its stated reference-binding scope, not those three obligations or U80 closure.
+The existing checker/registry pathways do not themselves execute the witnesses,
+and the historical lifecycle audit remains explicitly dated.
