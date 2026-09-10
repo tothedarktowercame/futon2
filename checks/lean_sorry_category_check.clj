@@ -1,10 +1,13 @@
 #!/usr/bin/env bb
 (ns checks.lean-sorry-category-check
   (:require [babashka.fs :as fs]
+            [clojure.edn :as edn]
             [clojure.string :as str]))
 
 (def source-path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean")
 (def workspace "/home/joe/code/futon2")
+(def lifecycle-path
+  "/home/joe/code/futon2/holes/labs/wm-contract/runs/U27-hole-closability/audit.edn")
 
 (def repository-roots
   {"futon2" "/home/joe/code/futon2"
@@ -12,10 +15,34 @@
    "mathlib4" "/home/joe/code/mathlib4"
    "p4ng" "/home/joe/code/p4ng"})
 
-(def labels
+(def attestation-labels
   ["DELIBERATE IMPLEMENTATION REFUSAL"
    "PERMANENT EXTERNAL ATTESTATION"
    "WITNESSED-INSTANCE OBLIGATION"])
+
+(def current-categories
+  (conj attestation-labels
+        "OPEN, RUN-GATED"
+        "DEFERRAL UNDER ORGANIZED DISCOVERY"))
+
+(defn first-clause [doc]
+  (str/trim (first (str/split doc #"·" 2))))
+
+(defn current-category [doc]
+  (let [clause (first-clause doc)
+        present (filterv #(str/includes? clause %) current-categories)]
+    {:clause clause
+     :present present
+     :category (when (= 1 (count present)) (first present))}))
+
+(defn historical-category-mentions [doc]
+  (let [history (second (str/split doc #"·" 2))]
+    (frequencies
+     (mapcat (fn [label]
+               (repeat (count (re-seq (re-pattern (java.util.regex.Pattern/quote label))
+                                      (or history "")))
+                       label))
+             current-categories))))
 
 (defn declarations [source]
   (->> (str/split source #"(?=/--)")
@@ -75,16 +102,14 @@
 
           :else [])))))
 
-(defn validate-source [source]
+(defn validate-source
+  ([source] (validate-source source {}))
+  ([source lifecycle-by-name]
   (let [decls (declarations source)
         findings
         (mapcat
          (fn [{:keys [name doc sorry?]}]
-           (let [present (filterv #(str/includes? doc %) labels)
-                 category (first present)
-                 unknown (keep second
-                               (re-seq #"([A-Z][A-Z -]+) · contract kind HOLE intentionally" doc))
-                 unknown (remove (set labels) unknown)
+           (let [{:keys [clause present category]} (current-category doc)
                  checker-errors
                  (if (= category "PERMANENT EXTERNAL ATTESTATION")
                    (let [paths (vec (checker-paths doc))]
@@ -101,17 +126,19 @@
              (concat
               (when (and sorry? (not= 1 (count present)))
                 [{:declaration name :reason :sorry-category-count
-                  :count (count present) :categories present}])
+                  :count (count present) :categories present
+                  :current-clause clause}])
               (when (> (count present) 1)
                 [{:declaration name :reason :double-category :categories present}])
+              (when (and sorry? (empty? present))
+                [{:declaration name :reason :unknown-current-category
+                  :current-clause clause}])
               (when (and (= category "DELIBERATE IMPLEMENTATION REFUSAL") (not sorry?))
                 [{:declaration name :reason :refusal-label-on-proved}])
               (when (and (= category "PERMANENT EXTERNAL ATTESTATION") (not sorry?))
                 [{:declaration name :reason :attestation-label-on-proved}])
               (when (and (= category "WITNESSED-INSTANCE OBLIGATION") sorry?)
                 [{:declaration name :reason :witnessed-obligation-has-sorry}])
-              (for [label unknown]
-                {:declaration name :reason :unknown-category :category label})
               checker-errors
               fixture-errors)))
          decls)]
@@ -121,13 +148,33 @@
      :sorry-category-counts
      (frequencies
       (keep (fn [{:keys [doc sorry?]}]
-              (when sorry? (first (filter #(str/includes? doc %) labels))))
+              (when sorry? (:category (current-category doc))))
             decls))
-     :category-counts (frequencies
-                       (mapcat (fn [{:keys [doc]}]
-                                 (filter #(str/includes? doc %) labels))
-                               decls))
-     :findings (vec findings)}))
+     :current-declaration-category-counts
+     (frequencies (keep (comp :category current-category :doc) decls))
+     :category-counts
+     (frequencies (keep (comp :category current-category :doc) decls))
+     :historical-category-mentions
+     (apply merge-with + (map (comp historical-category-mentions :doc) decls))
+     :sorry-declarations
+     (mapv (fn [{:keys [name doc sorry?]}]
+             (when sorry?
+               (merge {:name name
+                       :declaration-category (:category (current-category doc))}
+                      (select-keys (get lifecycle-by-name name)
+                                   [:closability :readiness]))))
+           (filter :sorry? decls))
+     :lifecycle-counts
+     {:closability (frequencies (keep :closability (vals lifecycle-by-name)))
+      :readiness (frequencies (keep :readiness (vals lifecycle-by-name)))}
+     :findings (vec findings)})))
+
+(defn read-lifecycle [path]
+  (let [doc (edn/read-string (slurp path))]
+    (into {} (keep (fn [row]
+                     (when (= :contract-declaration (:row-source row))
+                       [(:name row) row])))
+          (:rows doc))))
 
 (defn mutate [source mode]
   (case mode
@@ -137,7 +184,7 @@
     "--negative-double"
     (str/replace-first source
                        "DELIBERATE IMPLEMENTATION REFUSAL · contract kind HOLE intentionally"
-                       "DELIBERATE IMPLEMENTATION REFUSAL · PERMANENT EXTERNAL ATTESTATION · contract kind HOLE intentionally")
+                       "DELIBERATE IMPLEMENTATION REFUSAL + PERMANENT EXTERNAL ATTESTATION · contract kind HOLE intentionally")
 
     "--negative-proved-label"
     (str/replace-first source
@@ -149,24 +196,37 @@
                        "checks/does_not_exist.clj")
 
     "--negative-missing-fixture"
-    (str/replace-first source
-                       "futon2:holes/labs/wm-contract/ablation-exact-dyadic.edn"
-                       "futon2:holes/labs/wm-contract/does-not-exist.edn")
+    (str source
+         "\n/-- WITNESSED-INSTANCE OBLIGATION · fixture: `futon2:holes/labs/wm-contract/does-not-exist.edn` · fixture-sha256: `"
+         (apply str (repeat 64 "0")) "` -/\ndef negativeMissingFixture : Prop := True\n")
 
     "--negative-fixture-drift"
-    (str/replace-first source
-                       "f315b748420540688ef81086101b5789a4ecb2bd2a84c7a2b491f94fe8c56261"
-                       (apply str (repeat 64 "0")))
+    (str source
+         "\n/-- WITNESSED-INSTANCE OBLIGATION · fixture: `futon2:holes/labs/wm-contract/ablation-exact-dyadic.edn` · fixture-sha256: `"
+         (apply str (repeat 64 "0")) "` -/\ndef negativeFixtureDrift : Prop := True\n")
 
     source))
+
+(def negative-reasons
+  {"--negative-unlabelled" :unknown-current-category
+   "--negative-double" :double-category
+   "--negative-proved-label" :attestation-label-on-proved
+   "--negative-missing-checker" :attestation-checker-missing
+   "--negative-missing-fixture" :obligation-fixture-missing
+   "--negative-fixture-drift" :obligation-fixture-pin-mismatch})
+
+(defn negative-detected? [mode report]
+  (some #(= (negative-reasons mode) (:reason %)) (:findings report)))
 
 (defn -main [& args]
   (let [mode (first args)
         negative? (some? mode)
-        report (validate-source (mutate (slurp source-path) mode))]
+        report (validate-source (mutate (slurp source-path) mode)
+                                (read-lifecycle lifecycle-path))
+        detected? (and negative? (negative-detected? mode report))]
     (println "lean-sorry-category-check:"
              (cond
-               (and negative? (not (:pass? report))) "negative-control PASS"
+               detected? "negative-control PASS"
                negative? "mutation slipped"
                (:pass? report) "PASS"
                :else "FAIL")
@@ -174,9 +234,10 @@
              "exit-convention=0-pass/1-fail/2-mutation-slipped")
     (System/exit
      (cond
-       (and negative? (not (:pass? report))) 0
+       detected? 0
        negative? 2
        (:pass? report) 0
        :else 1))))
 
-(apply -main *command-line-args*)
+(when (= *file* (System/getProperty "babashka.file"))
+  (apply -main *command-line-args*))

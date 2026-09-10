@@ -21,7 +21,9 @@ CONTRACT_DISPLAY = {"conformant": "shape-conformant",
                     "witnessed": "binding-passed-shape-unchecked"}
 LEAN_DISPLAY = {"DELIBERATE IMPLEMENTATION REFUSAL": "deliberate-implementation-refusal",
                 "PERMANENT EXTERNAL ATTESTATION": "permanent-external-attestation",
-                "WITNESSED-INSTANCE OBLIGATION": "witnessed-instance-obligation"}
+                "WITNESSED-INSTANCE OBLIGATION": "witnessed-instance-obligation",
+                "OPEN, RUN-GATED": "open-run-gated",
+                "DEFERRAL UNDER ORGANIZED DISCOVERY": "organized-discovery-deferral"}
 
 
 def run(argv, cwd=ROOT):
