@@ -205,6 +205,131 @@ rules with no institutional adoption implied.
 
 ---
 
+---
+
+## Trial 4 — AIF-instrumented outer-loop successor slice (build-loop replacement, first slice)
+
+2026-09-10, added after Joe's fourth-task direction. Basis: PREPARATION.md
+"Fourth task" section and `SERIES.edn :outer-loop-aif-replacement`. **Do not
+run `wm-build-loop.sh` for any purpose** — its EXIT notifier calls Claude-1,
+currently prohibited. This packet is note-only; no code, no live loop, no
+ledger or data changes.
+
+**Deliberate fit limit:** the stated objective is full replacement of the old
+build loop, but this first trial proves only **one decision → execution →
+outcome → next-use cycle on frozen fixture inputs**. It does not claim the
+complete outer loop, does not take over the live ledger, and does not activate
+any scheduler. Selecting differently from the old priority policy is not by
+itself an improvement; the comparison must be reported honestly.
+
+### Responsibility trace (what the successor must cover, from source)
+
+Actual responsibilities of the old loop (`holes/labs/wm-contract/wm-build-loop.sh:106-151`
+with `build_step.bb`):
+1. **Ledger validity gate** before work, after work, and after review; invalid
+   ledger stops the loop.
+2. **Unblocking**: `:blocked` rows whose `:depends-on` are all `:done` become
+   `:open`; the unblock commit is made exactly once (the double-unblock bug is
+   history, not to be reintroduced).
+3. **Selection**: `next-open` = deterministic priority over loopable rows —
+   `:F` (FUNDAMENTALS) rows exclusively first, then run-lock rows (:RUN12/:RUN11),
+   then :RUN rows, then ledger order; `:J`-class, `:joe`-owned and `:loop-skip`
+   rows are never taken.
+4. **Dispatch** of exactly the chosen row to a work seat, with inbox drain
+   (bells waiting for the seat are folded into the prompt).
+5. **Independent review** of `:done-unreviewed` rows by a separate review seat.
+6. **Publish gate**: held while any registry-touching row awaits review.
+7. **Stall detection** via whole-row hash (any edit is life).
+8. Bulletin at natural stop.
+
+**Distinct and not the same thing:** `scripts/wm_outer_loop.clj` is a *narrow
+trace-to-Beta-update process* — read trace window, extract learn-action
+emissions, derive follow-through, Beta update via
+`futon2.aif.intrinsic-values/next-record`, persist hyperedge, apply. It
+performs none of responsibilities 1–8. A successor must name which code owns
+each responsibility; nothing may silently inherit from the old script by
+running it. `futon2.aif.full-loop-runner` (author/reviewer dispatch
+boundaries at `src/futon2/aif/full_loop_runner.clj:2814, :2981`) is a
+candidate execution path for the execution review to assess — its existence is
+not evidence a RUN4 packet reaches it.
+
+### Inputs
+
+- Frozen ledger-shaped fixture store (isolated copy, never the live
+  `worklist.edn`): rows spanning statuses (`:open`, `:blocked` with mixed
+  `:depends-on`, `:done-unreviewed` incl. one registry-touching), classes
+  (`:F`, `:RUN`, `:J`, `:joe`-owned, `:loop-skip`), and pin fields for the
+  stale-pin refusal test.
+- Controlled outcome feedback fixture: scripted work/review outcomes for the
+  dispatched row, including one missing-outcome case.
+- Existing reusable components (consumed, not reinvented):
+  `futon2.aif.intrinsic-values` Beta update (`next-record`), trace reading
+  (`futon2.aif.trace`), the `full-loop-runner` dispatch boundaries, the
+  priority/eligibility semantics of `build_step.bb` as the compatibility
+  baseline.
+
+### Product (first successor slice)
+
+One cycle on the fixture store:
+1. Eligibility snapshot + candidate set (same eligibility rules as
+   `build_step.bb`, stated explicitly).
+2. Explicit preference and prediction inputs to selection.
+3. An **AIF selection record actually consumed**: the selection decision is
+   made by the AIF-instrumented selector, and the record shows the inputs it
+   used — not an after-the-fact annotation of an unchanged priority choice.
+4. Existing inner-loop handoff: the selected row is dispatched with
+   author/reviewer separation preserved.
+5. Result/reviewer evidence recorded.
+6. A persisted learned-state update (Beta posterior over the fixture store)
+   **and a second selection in which that update is demonstrably consumed** —
+   a negative control must show that disconnecting the learned-state
+   consumption fails the next-use claim.
+
+### Pass / fail / blocked
+
+- **Pass:** one full cycle plus second-selection consumption demonstrated on
+  fixtures; all validation checks below hold.
+- **Fail:** selection is annotation-only, next use does not consume the
+  update (or negative control doesn't detect disconnection), or any preserved
+  behavior below is violated on fixtures.
+- **Blocked:** fixture store cannot be built without touching live data, or
+  the execution path is not yet verified (shared wiring prerequisite), or a
+   required semantic contract below is still undefined at freeze.
+
+### Preserved behaviors to validate on fixtures (compatibility baseline)
+
+Blocked rows with unfinished dependencies stay excluded; author/reviewer
+separation holds; invalid ledger refuses (before/after work and review);
+missing outcomes remain `:unknown`, never coerced; stale input pins refuse;
+publish held while a registry row is unreviewed; no duplicate dispatch of one
+row; `:J`/`:joe`/`:loop-skip` rows never selected; FUNDAMENTALS exclusivity
+preserved or its relaxation explicitly recorded as a proposed change with the
+old policy's output shown alongside.
+
+### Semantic contracts that are MISSING (prerequisites, not invented defaults)
+
+No defaults for these are invented here; each must be defined and frozen
+before the trial, or the trial reports blocked on it:
+- The selection equation itself: how preference/prediction inputs map to a
+  choice among eligible rows (the AIF side), and its relation to the
+  deterministic priority order (override, re-rank, tie-break?).
+- The outcome mapping: which work/review evidence counts as success/failure
+  signal for the Beta update of which class.
+- The learned-state consumption contract: where the posterior lives, how the
+  next selection reads it, and what makes consumption verifiable rather than
+  claimed.
+
+### Evidence fields
+
+Fixture store hash and provenance (must derive from copies, never live data);
+eligibility snapshot; selection record with inputs and consumed-component
+proofs; dispatch/receipt IDs; author and reviewer identities; outcome records;
+Beta update record; second-selection consumption proof and negative-control
+result; validation check results per preserved behavior; explicit statement
+that no live ledger, scheduler or cutover occurred.
+
+---
+
 ## Unresolved prerequisites before any trial can be frozen
 
 1. **Trial 1:** freeze exact three hashes (prefix copy, memory, review) and the
@@ -213,7 +338,11 @@ rules with no institutional adoption implied.
    source memory + proof for each; freeze the rubric text.
 3. **Trial 3:** coordinator picks one option per rule item (1–4) above; freeze
    corpus; confirm read-only access path to the evidence store.
-4. **Series level:** execution path for WM-enacted dispatch is still under
+4. **Trial 4:** define and freeze the three missing semantic contracts above
+   (selection equation, outcome mapping, learned-state consumption); build the
+   isolated fixture store from copies; and the shared wiring prerequisite
+   applies — plus the hard rule that wm-build-loop.sh is never invoked.
+5. **Series level:** execution path for WM-enacted dispatch is still under
    review (Codex-10/Codex-11); these packets must not be executed by
    independently belled workers and then reported as machine actuation.
    Run ID (suggested `run4-2026-09-10`) and isolated work directory are
