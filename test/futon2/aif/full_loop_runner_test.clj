@@ -3837,4 +3837,8 @@
       (is (= 1 (:attempt-count state)))
       (is (= 1 (:closed-count state)))
       (is (= cohort/checkpoint-order (get-in state [:attempts 0 :checkpoints])))
-      (is (= :run4-explicit-test (:cohort/id state))))))
+      (is (= :run4-explicit-test (:cohort/id state)))
+      (is (= "run4-explicit-test--attempt-001"
+             (get-in result [:data :repair-obligation :attempt-id])))
+      (is (= "run4-explicit-test--attempt-001"
+             (get-in result [:morning-brief-ref :attempt-id]))))))

@@ -2416,6 +2416,9 @@
                         (cohort/start-attempt! time-cell)))
         attempt-id (or (:attempt/id start-event)
                        (str "canary-" (UUID/randomUUID)))
+        external-attempt-id (if execution-cohort
+                              (str (name (:cohort-id execution-cohort)) "--" attempt-id)
+                              attempt-id)
         _ (swap! phase-context assoc :attempt-id attempt-id)
         checkpoint! (fn [checkpoint cell]
                       (swap! checkpoints assoc checkpoint cell)
@@ -2448,7 +2451,7 @@
                          (or existing-finding
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
-                              {:attempt-id attempt-id
+                              {:attempt-id external-attempt-id
                                :repair-class repair-class
                                :machine-repo (:repo code-state)
                                :target (or (:target data)
@@ -2475,10 +2478,10 @@
                        data (assoc data :repair-obligation finding)
                        parked-transition
                        (when finding
-                         (park-r16-stop-line! opts attempt-id finding))
+                         (park-r16-stop-line! opts external-attempt-id finding))
                        brief-item
                        (cond->
-                        {:attempt-id attempt-id :opportunity-id opportunity-id
+                        {:attempt-id external-attempt-id :opportunity-id opportunity-id
                                    :batch-id (:batch-id opts)
                                    :trigger trigger :selected-target (:target data)
                                    :outcome outcome :author author
@@ -2487,7 +2490,7 @@
                                    :lifecycle/discharge
                                    {:node :R16
                                     :stage :surfaced
-                                    :attempt-id attempt-id
+                                    :attempt-id external-attempt-id
                                     :outcome outcome
                                     :parked-transition parked-transition}
                                    :achievement
