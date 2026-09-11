@@ -2646,9 +2646,10 @@
                        trace-path (get-in @checkpoints
                                           [:construction :judgment :trace-path])
                        historical-route?
-                       (= :revalidate-historical-repair
-                          (get-in @checkpoints [:selection :ground
-                                                :run4/enacted-action :type]))
+                       (and (= :historical-verification-awaiting-validation outcome)
+                            (= :revalidate-historical-repair
+                               (get-in @checkpoints [:selection :ground
+                                                     :run4/enacted-action :type])))
                        run-route (cond-> (vec (:wm/route selection-judgment))
                                    (and historical-route?
                                         (empty? (:wm/route selection-judgment)))
