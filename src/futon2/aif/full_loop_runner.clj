@@ -2728,6 +2728,15 @@
                               (= :environmental-hold (:repair/class %))))
                  (take 1)
                  vec)
+            historical-validation-lines
+            (filterv #(and (= :awaiting-validation (:repair/status %))
+                           (map? (:repair/verification %)))
+                     validation-lines)
+            ordinary-validation-lines
+            (filterv #(not (some (fn [historical]
+                                   (= (:repair/id historical) (:repair/id %)))
+                                 historical-validation-lines))
+                     validation-lines)
             stop-lines (if stop-line
                          [stop-line]
                          [])
@@ -3425,11 +3434,11 @@
                     ;; production-shaped successor.  It may therefore validate
                     ;; an older implemented machine repair while discharging
                     ;; its own recoverable obligation.
-                    (when (and (seq validation-lines)
+                    (when (and (seq ordinary-validation-lines)
                                (:resolved? witness) (:dial-moved? witness))
                       (run-phase!
                        opts @phase-context :stop-line-validation
-                       #(doseq [obligation validation-lines]
+                       #(doseq [obligation ordinary-validation-lines]
                           ((or (:repair-resolve-fn opts) repair/resolve!)
                            obligation
                            {:attempt-id attempt-id :commit commit
@@ -3462,6 +3471,12 @@
                                 :author-job author-job :review-job review-job
                                 :artifact-binding artifact-binding
                                 :build-retries (vec build-retries)}
+                                (seq historical-validation-lines)
+                                (assoc :historical-validation-deferred
+                                       (mapv #(select-keys
+                                              % [:repair/id :repair/status
+                                                 :repair/verification])
+                                             historical-validation-lines))
                                 (seq reviews)
                                 (assoc :reviews reviews :revision revision)
 
