@@ -1,4 +1,4 @@
-# U88 trial-1 packet — pinned config / task pin / series pin (frozen proposal)
+# U88 trial-1 packet — activated mission / exact task and series pins
 
 This revision supersedes the original proposal at `50192c5e`; those bytes and
 their pins remain in git history. It declares the three serving-JVM
@@ -6,12 +6,12 @@ requirements and the RUN4-scoped single-level model. The recording flag is a
 requirement on the separate `wm_step_observe.bb` process; this packet does not
 claim that the series invokes or attests that process.
 
-2026-09-10, Zai-2, under Codex-17's dispatch. PROPOSAL outside discovery
-roots; nothing activated, dispatched, or served. Coordinator corrections at
+2026-09-11 activation update: Joe explicitly directed OPEN activation and exact pin freeze. The canonical mission is now in ordinary discovery; dispatch and serving remain unperformed, and validation still grants no launch permission. Coordinator corrections at
 futon2 `db99f729` (identical replay no-op; conflicting event-ID refusal;
 registry departure is not inbox-unavailable proof) are already folded into
 the mission draft by that commit — its post-correction bytes
-(sha256 `8fecf3da…`) are what this packet pins, so the packet cannot silently
+(sha256 `8fecf3da…`) are preserved as the historical basis. This packet pins the
+activated canonical bytes (sha256 `8212ec99…`), so it cannot silently
 drift from the reviewed fixture semantics. The original round-1 mission bytes
 remain in git history; the revision record is `db99f729` itself.
 
@@ -20,7 +20,7 @@ remain in git history; the revision record is `db99f729` itself.
 - `run-config.edn` — `:wm/run4-pinned-run-config-v1`, sha256
   `fcc70191f2fe0ecbdc345632a32f87b4e1287f7dff947545ad3ced9814358c56`.
 - `task-pin.edn` — `:wm/run4-task-pin-v1`, sha256
-  `ec0555250f116814370eb77810eeb946302b1d50c277a2f30f9cbc3a7e64c9d6`.
+  `9cf34ffcff3a78bbe2b60e5c8cbfa674887ff3c34de5a41c49ea57315b63b717`.
 - `series-pin.edn` — `:wm/run4-series-pin-v1` (frozen, one trial, stop-rule
   `:attempt-each-once-even-after-fail-or-block`), pins the task pin.
 
@@ -77,15 +77,14 @@ remain in git history; the revision record is `db99f729` itself.
 
 ## Mission eligibility
 
-The mission is DRAFT. Real eligibility validation REFUSES this task pin today
-— proven by
-`futon2.aif.u88-trial-packet-test/production-draft-mission-refuses-the-task-pin`
-(`:unknown-mission-mapping` against production open-missions). The complete
-packet validates only against a **disposable OPEN copy** in a temp root
-(futon2 test: exact pin sha, `:advance-mission` target
-`M-u88-contextual-preferences`, `:launch {:permitted? false}`; futon3c test:
-full `series/preflight` green with stubbed prepare-trial). No fixture
-exercise here is a live-valid pin.
+The canonical mission at `holes/missions/M-u88-contextual-preferences.md` is
+OPEN and discovered by the production mission registry. Its activation metadata
+records Joe's 2026-09-11 instruction and the reviewed `db99f729` draft basis.
+The task-pin validator and serving guardrail accept only the exact action
+`{:type :advance-mission :target "M-u88-contextual-preferences"}`; alias-shaped
+targets refuse. Validation remains non-dispatching and returns
+`:launch {:permitted? false}`. The historical draft stays in the preparation
+root and still parses as `:draft` in isolated parser tests.
 
 ## Staffing (proposed) + read-only availability check 2026-09-10 (~18:1xZ)
 

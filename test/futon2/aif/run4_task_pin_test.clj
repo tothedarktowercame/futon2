@@ -157,6 +157,11 @@
   (is (= :action-mission-mismatch
          (reason (assoc-in base-pin [:mapping :action :target] "M-other")
                  (ports))))
+  (is (= :action-mission-mismatch
+         (reason (assoc-in base-pin [:mapping :action :target]
+                           "futon4-d/mission/kangaroo")
+                 (ports)))
+      "RUN4 pins require the exact mission id; aliases and title mappings refuse")
   (is (= :inadmissible-action-mapping
          (reason base-pin (assoc (ports) :action-admissible? (constantly false))))))
 

@@ -1,12 +1,9 @@
 (ns futon2.aif.u88-draft-mission-test
-  "Parser validation for the U88 and F10/U83 draft missions, in the same
-   convention as futon2.aif.run4-draft-mission-test: the lab drafts live
-   outside production mission discovery; a disposable canonical-shaped path
-   shows the SAME doc parses as :draft (excluded) and, after the simulated
-   lifecycle marker flip, as an ordinary open mission (accepted). Production
-   is never activated."
+  "Parser validation distinguishes retained preparation drafts from the
+   activated canonical U88 mission. Historical draft bytes remain :draft and
+   excluded; production discovery now carries the separately activated OPEN
+   mission. The F10/U83 preparation document remains draft-only."
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.mission-registry :as missions])
   (:import (java.io File)
@@ -35,33 +32,19 @@
     (spit target body)
     (.getAbsolutePath target)))
 
-(deftest drafts-are-excluded-from-production-but-parse-as-ordinary-missions
+(deftest retained-preparation-documents-remain-drafts
   (doseq [[path id] (map vector drafts draft-ids)]
     (let [body (slurp path)]
-      (is (not (contains? (set (map :id (missions/open-missions))) id))
-          "the lab draft is outside production mission discovery")
       (with-temp-code-root
         (fn [root]
           (install-isolated! root id body)
           (let [parsed (first (filter #(= id (:id %))
                                       (:missions (missions/load-missions root))))]
-            (is (some? parsed) "parses at the canonical mission path")
+            (is (some? parsed) "historical draft parses at a canonical-shaped fixture path")
             (is (= :draft (:status-class parsed)))
-            (is (empty? (missions/open-missions {:missions [parsed]}))
-                "a DRAFT mission is not open work"))
-          ;; simulate, only inside the disposable root, the separate lifecycle
-          ;; action that could follow independent review
-          (install-isolated!
-           root id
-           (str/replace body
-                        "DRAFT — NON-LIVE; independent review and explicit activation required"
-                        "OPEN — fixture episode milestone pending"))
-          (let [parsed (first (filter #(= id (:id %))
-                                      (:missions (missions/load-missions root))))]
-            (is (= :open (:status-class parsed)))
-            (is (= [id] (map :id (missions/open-missions {:missions [parsed]})))
-                "the simulated OPEN mission is ordinary open work")))))))
+            (is (empty? (missions/open-missions {:missions [parsed]})))))))))
 
-(deftest production-still-carries-no-these-missions
-  (is (empty? (filter #(contains? (set draft-ids) (:id %))
-                      (missions/open-missions)))))
+(deftest production-distinguishes-activated-u88-from-retained-f10-draft
+  (let [open-by-id (into {} (map (juxt :id identity) (missions/open-missions)))]
+    (is (= :open (:status-class (get open-by-id "M-u88-contextual-preferences"))))
+    (is (nil? (get open-by-id "M-f10-u83-blockage-reconciliation")))))

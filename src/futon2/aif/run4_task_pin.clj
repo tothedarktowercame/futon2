@@ -6,8 +6,7 @@
   value.  Validation does not select, dispatch, accept, or declare readiness."
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
-            [futon2.aif.c-fold-config :as digest]
-            [futon2.aif.mission-registry :as missions]))
+            [futon2.aif.c-fold-config :as digest]))
 
 (def schema :wm/run4-task-pin-v1)
 
@@ -112,8 +111,7 @@
           _ (when-not mission (refuse! :unknown-mission-mapping))
           _ (when-not (= mission-id (:id mission))
               (refuse! :mission-identity-mismatch))
-          _ (when-not (= mission-id
-                         (missions/mission-target-id (:target action)))
+          _ (when-not (= mission-id (:target action))
               (refuse! :action-mission-mismatch))
           _ (when-not (action-admissible? mission action)
               (refuse! :inadmissible-action-mapping))]
