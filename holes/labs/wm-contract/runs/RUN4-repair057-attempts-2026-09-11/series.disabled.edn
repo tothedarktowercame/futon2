@@ -1,11 +1,23 @@
-{:schema :wm/run4-series-v1
- :status :disabled-unreviewed
+{:schema :wm/run4-series-pin-v1
  :series-id "run4-repair057-then-u88-2026-09-11"
- :cohort-id :run4-repair057-20260911-v1
- :ordered-trials [{:ordinal 1 :trial-id "repair057-historical-revalidation"
-                   :attempt-id "repair057-revalidation-attempt-002"}
-                  {:ordinal 2 :trial-id "M-u88-contextual-preferences-validation"
-                   :attempt-id "u88-validation-successor-attempt-003"}]
- :legacy-preservation {:consumed-cohort :run4-u88-20260911-v1
-                       :old-series "run4-inner-loop-u88-successor-2026-09-11"
-                       :mutated? false}}
+ :status :frozen :order :ordinal
+ :stop-rule :attempt-each-once-even-after-fail-or-block
+ :casting {:author "zai-2" :reviewer "codex-12" :repair-reviewer "codex-10"}
+ :source-pins [{:path "holes/labs/wm-contract/runs/RUN4-repair057-revalidation-2026-09-11/contract.edn"
+                :sha256 "6519a7cbbc085469449182e9f7f93d5d9576f857a004ba186ff9d4444f76ea7b"}
+               {:path "holes/labs/wm-contract/runs/RUN4-repair057-revalidation-2026-09-11/PROPOSAL.md"
+                :sha256 "ad271ba80086ea1ae4343ecb350694e09eeb8f3d240e08b1dc77dad864ef0820"}]
+ :trials [{:ordinal 1 :trial-id "repair057-historical-revalidation"
+           :attempt-id "repair057-revalidation-attempt-002"
+           :pin-sha256 "6519a7cbbc085469449182e9f7f93d5d9576f857a004ba186ff9d4444f76ea7b"
+           :packet {:path "holes/labs/wm-contract/runs/RUN4-repair057-revalidation-2026-09-11/contract.edn"
+                    :sha256 "6519a7cbbc085469449182e9f7f93d5d9576f857a004ba186ff9d4444f76ea7b"}}
+          {:ordinal 2 :trial-id "M-u88-contextual-preferences-validation"
+           :attempt-id "u88-validation-successor-attempt-003"
+           :pin-sha256 "845fb14054665a3a4bcd4e571994c0b2fd230bbb3b5b8cf8781d1a3a2c8206e9"
+           :packet {:path "holes/labs/wm-contract/runs/RUN4-U88-successor-2026-09-11/task-pin.edn"
+                    :sha256 "845fb14054665a3a4bcd4e571994c0b2fd230bbb3b5b8cf8781d1a3a2c8206e9"}}]
+ :deployment {:enabled? false
+              :preparation-refusal :unsupported-historical-revalidation-action
+              :legacy-preservation {:consumed-cohort :run4-u88-20260911-v1
+                                    :old-series "run4-inner-loop-u88-successor-2026-09-11"}}}
