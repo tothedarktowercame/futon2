@@ -3966,15 +3966,16 @@
   (let [root (.getPath (.toFile (Files/createTempDirectory
                                  "runner-authority-alias"
                                  (make-array FileAttribute 0))))
+        cohort-id :run4-successor-v2-selection-admission-20260911-v1
         raw (pr-str (-> (edn/read-string (slurp cohort/default-preregistration))
-                        (assoc :cohort/id :shared-declared-id)
+                        (assoc :cohort/id cohort-id)
                         (assoc-in [:stopping-rule :target] 1)))
         run-one
         (fn [suffix]
           (let [data-root (str root "/" suffix)
                 path (str data-root "/cohort.edn")
                 binding {:preregistration path :data-root data-root
-                         :cohort-id :shared-declared-id
+                         :cohort-id cohort-id
                          :sha256 (digest/sha256 raw)}]
             (.mkdirs (io/file data-root))
             (spit path raw)
@@ -3993,6 +3994,8 @@
         aid (get-in a [:execution-identity :id])
         bid (get-in b [:execution-identity :id])]
     (is (= "attempt-001" (:attempt-id a) (:attempt-id b)))
+    (is (<= (count aid) 128))
+    (is (re-matches #"[A-Za-z0-9][A-Za-z0-9._-]{0,127}" aid))
     (is (not= aid bid))
     (is (= aid (get-in a [:data :repair-obligation :attempt-id])))
     (is (= bid (get-in b [:data :repair-obligation :attempt-id])))

@@ -150,8 +150,10 @@
     (throw (ex-info "Invalid cohort execution authority"
                     {:reason :invalid-execution-authority})))
   {:kind :runner-execution
-   :id (str (name (:cohort-id authority)) "--ea1-"
-            (:authority-id authority) "--" attempt-id)})
+   ;; The authority digest already commits to cohort id, preregistration bytes,
+   ;; and canonical data root. Repeating an unbounded cohort name made the
+   ;; otherwise valid identity exceed durable repair-store ID limits.
+   :id (str "ea1-" (:authority-id authority) "--" attempt-id)})
 
 (defn execution-provenance
   "Return the versioned authority association behind an execution identity."
