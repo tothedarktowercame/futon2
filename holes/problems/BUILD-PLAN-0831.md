@@ -1,5 +1,13 @@
 # Build plan — takeover, 2026-08-31
 
+**Learning build addition, 2026-09-11 (Joe):** develop run-to-run reviewed pattern
+and cascade revision in the existing learning component. The next run consumes
+the preceding run's reviewed changes; no standing TA role is required.
+[Build packet](BUILD-packets/LEARNING-pattern-cascade.md) gives the producer,
+review/publication, next-consumer and empirical checks. This selects a development
+direction, not a completed learning or AIF-compliance claim. The historical
+status narrative below retains its original date.
+
 *claude-20, taking the owner seat after claude-15's session was poisoned. Everything below was
 re-verified from artefacts this morning; where I found the status page stale I say so rather than
 silently correcting it.*

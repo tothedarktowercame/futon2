@@ -4,6 +4,12 @@
 SESSION-model-choices-2026-09-09.md sections 3–4; Item 25 commissions this
 note, not the learner. LR1–LR7 are evidence references, not a restoration list.
 
+**2026-09-11 direction update:** Joe has selected run-to-run pattern/library/
+cascade revision for development within this learning component, without a
+standing TA role. Section 5 and the linked build packet record that direction.
+The September 9 proposal status still applies to the unresolved numerical
+model choices; this update neither settles them nor claims implemented learning.
+
 ## Intended claim
 
 A named, single-level categorical model updates state beliefs as observations
@@ -132,7 +138,38 @@ No available admissible reduction is an honest outcome, not grounds to invent
 one. Initial implementation can validate the proposal/hold path without claiming
 an accepted change; an accepted-change claim needs a separate executed case.
 
-### 5. Optional cascade proposal model: not required as a second AIF learner
+### 5. Run-to-run pattern and cascade revision — selected development direction
+
+Joe's 2026-09-11 instruction selects this responsibility for the learning build:
+each generation of execution supplies evidence for reviewed revisions that the
+next generation can consume. No standing TA role is required. The worker can
+propose a revision; independent review and authorized publication remain distinct
+responsibilities, assigned through ordinary staffing.
+
+Build packet: [LEARNING-pattern-cascade.md](../../../problems/BUILD-packets/LEARNING-pattern-cascade.md).
+
+The learned objects are versioned pattern conditions/constructions, example and
+retrieval links, and explicitly authorized cascade organisation policies. An
+episode supplies a diagnosed obligation, original problem and exact artifact
+receipts; a proposal names the intended change and parent revision. Independent
+review binds candidate bytes. Publication preserves history and refuses a stale
+base. A later episode records the exact source/index/policy revisions consumed,
+actual applicability and execution evidence, and separately reviewed usefulness.
+Missing observations remain unknown; publication and citations earn no learning
+success claim. Failed use can generate the next localized revision proposal.
+
+Reuse Cascade/CascadeDiff and organise where their required relations and node
+origins are present. Teaching/task dependencies cannot silently become authored
+library edges, and a library text patch is not itself a CascadeDiff. Keep pattern
+occurrences, canonical pattern identities, and example links distinct.
+
+This is the explicit library/cascade revision responsibility formerly left to
+the optional proposal-model discussion. GFlowNet fitting is not its substitute
+or prerequisite. If useful later, a sampler may propose candidates inside this
+reviewed version lifecycle. The previous optional statistical proposal is
+retained below as a possible mechanism, not the selected implementation plan.
+
+#### Retained optional sampler proposal (not commissioned by this update)
 
 If commissioned, maintain a separate success/failure posterior per executed
 cascade identity, update from independently adjudicated outcomes (unknown holds),
