@@ -21,6 +21,10 @@
 
 (def artifact-shapes #{:code-commit :data-deposit :spec-document})
 
+(defprotocol HistoricalSuccessorAuthority
+  (historical-successor-record [authority]
+    "Return a record only from an authoritative durable-evidence reader."))
+
 (def ^:dynamic *store-count-reader*
   "Read the current number of RECORD-TYPE records at STORE-URL. Bind in tests
   to exercise validation without writing to, or depending on, a live store."
@@ -329,14 +333,18 @@
 (defn commit-historical-verification!
   "Execute a selected historical verification action. Canonical finding and
   verification bytes are the only identity sources."
-  ([evidence] (commit-historical-verification! default-root evidence))
-  ([root evidence]
+  ([execution-attempt evidence]
+   (commit-historical-verification! default-root execution-attempt evidence))
+  ([root execution-attempt evidence]
+   (when-not (safe-id? execution-attempt)
+     (throw (ex-info "Historical verification execution identity invalid" {})))
    (let [candidate (admission-from! root evidence)
          source (:verification-artifact candidate)
          cap (capture-under! (:verification-root evidence) (:path evidence))
          copy (write-new-durable! root "verification-evidence"
                                   (:verification-id candidate) (:value cap))
-         record (assoc candidate :verification-source source
+         record (assoc candidate :verification-attempt execution-attempt
+                                 :verification-source source
                                  :verification-artifact copy)]
      (write-new-durable! root "verifications" (:repair/id record) record)
      record)))
@@ -345,7 +353,37 @@
   "Compatibility wrapper. The supplied obligation is deliberately not an
   authority; canonical store bytes determine the transition."
   ([obligation evidence] (record-historical-verification! default-root obligation evidence))
-  ([root _obligation evidence] (commit-historical-verification! root evidence)))
+  ([root _obligation evidence]
+   (commit-historical-verification! root (:verification-id (historical-verification-candidate root evidence)) evidence)))
+
+(declare verified-admissions)
+
+(defn commit-historical-resolution!
+  "Persist a terminal-reader-authorized, distinct production successor. Maps
+  and caller witness flags are deliberately not accepted."
+  ([repair-id authority] (commit-historical-resolution! default-root repair-id authority))
+  ([root repair-id authority]
+   (when-not (satisfies? HistoricalSuccessorAuthority authority)
+     (throw (ex-info "Historical successor lacks reader authority" {})))
+   (let [record (historical-successor-record authority)
+         admissions (verified-admissions root)
+         admission (get admissions repair-id)
+         finding (:value (finding-capture! root repair-id))]
+     (when-not (and (= :wm/historical-repair-resolution-v1 (:schema record))
+                    (= repair-id (:repair/id record) (:repair/id admission))
+                    (= (:verification-id admission) (:verification-id record))
+                    (= (:verification-attempt admission) (:verification-attempt record))
+                    (= :resolved (:repair/status record))
+                    (= :succeeded (:task-result record))
+                    (= :safe (:infrastructure record))
+                    (safe-id? (:validation-attempt record))
+                    (not= (:validation-attempt record) (:attempt-id finding))
+                    (safe-id? (:click-id record)) (safe-id? (:run-id record))
+                    (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
+                            ((juxt :projection-digest :run-record-digest) record)))
+       (throw (ex-info "Historical successor evidence refused" {:repair/id repair-id})))
+     (write-new-durable! root "resolutions" repair-id record)
+     record)))
 
 (defn- verified-admissions [root]
   (let [directory (historical-directory! root "verifications" false)]
@@ -356,6 +394,7 @@
                      artifact (:verification-artifact stored)
                      _ (when-not (and (= #{:schema :repair/id :repair/schema-version
                                            :repair/status :failed-attempt :verification-id
+                                           :verification-attempt
                                            :verification-artifact :verification-source
                                            :finding-artifact :actors
                                            :review :implementation}
@@ -372,7 +411,9 @@
                                root {:verification-root (.getParent (io/file (:path artifact)))
                                      :path (:path artifact)
                                      :sha256 (:sha256 artifact)})
-                     expected (assoc candidate :verification-artifact artifact
+                     expected (assoc candidate
+                                     :verification-attempt (:verification-attempt stored)
+                                     :verification-artifact artifact
                                                :verification-source (:verification-source stored))]
                  (when-not (= stored expected)
                    (throw (ex-info "Historical admission record corrupt"

@@ -48,6 +48,7 @@
              (:construction-kind (runner/construct-for-decision entry)))))
     (let [record (repair/commit-historical-verification!
                   (.getPath store)
+                  "verification-attempt-001"
                   {:verification-root (.getPath evidence-root) :path (.getPath file)
                    :sha256 (digest/sha256 (slurp file))})]
       (let [entry (runner/historical-revalidation-entry
