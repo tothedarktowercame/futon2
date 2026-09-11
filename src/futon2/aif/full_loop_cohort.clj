@@ -116,8 +116,9 @@
     (assoc material :authority-id
            (sha256 (pr-str (into (sorted-map) material))))))
 
-(defn execution-authority
-  "Return the deterministic authority namespace for newly recorded executions.
+(defn execution-context
+  "Capture one validated preregistration snapshot and its deterministic
+  authority namespace for a newly recorded execution.
 
   The declared cohort id and local attempt ordinal are not globally unique.
   This namespace additionally binds the captured preregistration bytes and the
@@ -125,11 +126,16 @@
   value, so every consumer can independently recompute it from server-owned
   cohort authority."
   [binding]
-  (let [_validated-snapshot (:snapshot (execution-preflight binding false))]
+  (let [snapshot (:snapshot (execution-preflight binding false))]
     ;; Authority is meaningful only for the exact activated binding. The
     ;; preflight above captures the preregistration once; capacity is
     ;; deliberately irrelevant.
-    (execution-authority-value binding)))
+    {:snapshot snapshot :authority (execution-authority-value binding)}))
+
+(defn execution-authority
+  "Return the authority portion of a freshly validated execution context."
+  [binding]
+  (:authority (execution-context binding)))
 
 (defn execution-identity
   "Qualify one cohort-local attempt using a validated execution authority."

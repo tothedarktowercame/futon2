@@ -2456,8 +2456,9 @@
         _ (when (and (contains? opts :execution-cohort) (not (true? cohort?)))
             (throw (ex-info "Explicit execution cohort requires cohort recording"
                             {:reason :execution-cohort-recording-required})))
-        execution-authority (when execution-cohort
-                              (cohort/execution-authority execution-cohort))
+        execution-context (when execution-cohort
+                            (cohort/execution-context execution-cohort))
+        execution-authority (:authority execution-context)
         time-cell (term (cond-> {:opportunity-id opportunity-id
                          :trigger trigger
                          :machine-state {:started-at (str (Instant/now))}
@@ -2478,8 +2479,7 @@
                           execution-authority
                           (assoc :execution-authority execution-authority))
                         {:kind :trigger-opportunity :id opportunity-id})
-        cohort-source (when (contains? opts :execution-cohort)
-                        (:snapshot (cohort/execution-preflight execution-cohort)))
+        cohort-source (:snapshot execution-context)
         start-event (when cohort?
                       (if cohort-source
                         (cohort/start-attempt! cohort-source (:data-root execution-cohort) time-cell)
