@@ -3842,3 +3842,36 @@
              (get-in result [:data :repair-obligation :attempt-id])))
       (is (= "run4-explicit-test--attempt-001"
              (get-in result [:morning-brief-ref :attempt-id]))))))
+
+(deftest explicit-cohorts-qualify-shared-ordinal-without-touching-default
+  (let [root (.getPath (.toFile (Files/createTempDirectory
+                                 "runner-two-explicit-cohorts"
+                                 (make-array FileAttribute 0))))
+        default-before (cohort/ledger)
+        run-one
+        (fn [cohort-id suffix]
+          (let [data-root (str root "/" suffix)
+                path (str data-root "/cohort.edn")
+                raw (pr-str (-> (edn/read-string (slurp cohort/default-preregistration))
+                                (assoc :cohort/id cohort-id)
+                                (assoc-in [:stopping-rule :target] 1)))
+                sha (apply str (map #(format "%02x" (bit-and 255 %))
+                                    (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                             (.getBytes raw "UTF-8"))))
+                binding {:preregistration path :data-root data-root
+                         :cohort-id cohort-id :sha256 sha}]
+            (.mkdirs (io/file data-root))
+            (spit path raw)
+            (cohort/activate! path data-root)
+            (runner/run-opportunity!
+             (assoc (readiness-run-opts (atom []) (constantly {}))
+                    :cohort? true :execution-cohort binding))))
+        a (run-one :run4-a "a")
+        b (run-one :run4-b "b")]
+    (is (= "run4-a--attempt-001"
+           (get-in a [:data :repair-obligation :attempt-id])))
+    (is (= "run4-b--attempt-001"
+           (get-in b [:data :repair-obligation :attempt-id])))
+    (is (not= (get-in a [:morning-brief-ref :attempt-id])
+              (get-in b [:morning-brief-ref :attempt-id])))
+    (is (= default-before (cohort/ledger)))))
