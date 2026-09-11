@@ -1156,12 +1156,27 @@
                (get-in result [:checkpoints :construction :judgment
                                :run4/task-pin :trial-id]))))
       (reset! dispatches [])
-      (let [refused (runner/run-opportunity!
-                     (assoc opts :judge-fn
+      (let [root (.getPath (.toFile (Files/createTempDirectory
+                                    "pinned-refusal-cohort" (make-array FileAttribute 0))))
+            path (str root "/cohort.edn")
+            raw (pr-str (-> (edn/read-string (slurp cohort/default-preregistration))
+                            (assoc :cohort/id :pinned-refusal-test)
+                            (assoc-in [:stopping-rule :target] 1)))
+            _ (spit path raw)
+            _ (cohort/activate! path root)
+            authority {:preregistration path :data-root root
+                       :cohort-id :pinned-refusal-test :sha256 (digest/sha256 raw)}
+            refused (runner/run-opportunity!
+                     (assoc opts :cohort? true :execution-cohort authority :judge-fn
                             (fn [_]
                               {:judgement
                                (dissoc pinned-judgement :admissible-actions)})))]
-        (is (= :pinned-selection-refused (:outcome refused)))
+        (is (= :guardrail-refusal (:outcome refused)))
+        (is (= :guardrail-refusal
+               (:outcome (cohort/closed-execution authority "attempt-001"))))
+        (is (= :pinned-selection-refused (get-in refused [:data :failure-kind])))
+        (is (= :missing-or-malformed-admissible-evidence
+               (get-in refused [:data :repair-obligation :failure-data :failure-detail])))
         (is (= :missing-or-malformed-admissible-evidence
                (get-in refused [:data :failure-detail])))
         (is (empty? @dispatches)

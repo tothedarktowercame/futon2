@@ -2199,10 +2199,13 @@
 
 (defn- outcome-from [e]
   (let [raw (or (:outcome (ex-data e)) :incomplete)]
-    (if (#{:agent-job-stalled :construction-failed :grounding-failed
-           :policy-nondiscrimination :incomplete} raw)
-      :incomplete
-      raw)))
+    (cond
+      ;; A pin refusal is a guardrail outcome, not a new disposition carrier.
+      ;; Its exact subtype stays in failure-kind/detail and durable finding data.
+      (= :pinned-selection-refused raw) :guardrail-refusal
+      (#{:agent-job-stalled :construction-failed :grounding-failed
+         :policy-nondiscrimination :incomplete} raw) :incomplete
+      :else raw)))
 
 (def ^:private transport-failure-classes
   "Recognised transport conditions, matched by CLASS (most specific first), not
