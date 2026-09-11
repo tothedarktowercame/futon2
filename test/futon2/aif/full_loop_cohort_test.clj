@@ -222,3 +222,43 @@
               "the eligible set travels with the refusal"))))
     (testing "an eligible trigger still opens normally"
       (is (some? (open! root "eligible-1"))))))
+
+(deftest explicit-cohort-pin-and-capacity
+  (let [root (tmp-root)
+        path (str root "/cohort.edn")
+        p (-> (edn/read-string (slurp prereg-path))
+              (assoc :cohort/id :run4-test)
+              (assoc-in [:stopping-rule :target] 1))
+        raw (pr-str p)
+        digest (apply str (map #(format "%02x" (bit-and 255 %))
+                              (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                       (.getBytes raw "UTF-8"))))
+        binding {:preregistration path :data-root root :cohort-id :run4-test :sha256 digest}]
+    (spit path raw)
+    (is (thrown? clojure.lang.ExceptionInfo (cohort/execution-preflight binding)))
+    (cohort/activate! path root)
+    (let [{:keys [snapshot remaining]} (cohort/execution-preflight binding)
+          cell (term {:opportunity-id "run4/one" :trigger :wallclock-cron
+                      :machine-state {} :agent-roster []
+                      :code-state {:git-sha "test" :git-dirty? false
+                                   :resolved-mode-flags {} :configuration-digest "test"}
+                      :semantic-epoch :test})
+          event (cohort/start-attempt! snapshot root cell)
+          attempt (:attempt/id event)]
+      (is (= 1 remaining))
+      (is (= :run4-test (:cohort/id event)))
+      (is (thrown? clojure.lang.ExceptionInfo (cohort/execution-preflight binding)))
+      (is (= 0 (:remaining (cohort/execution-preflight binding false))))
+      (doseq [checkpoint [:selection :construction :dispatch :build :adjudication]]
+        (cohort/append-checkpoint! snapshot root attempt checkpoint {:sorry {:kind :test}}))
+      (cohort/close-attempt! snapshot root attempt
+                             (term {:outcome :agent-unavailable :grounded? false
+                                    :artifact-only? false :duration-ms 1 :resource-use {}}))
+      (is (= 1 (:closed-count (cohort/ledger snapshot root))))
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (cohort/start-attempt! snapshot root (assoc-in cell [:judgment :opportunity-id] "run4/two")))))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (cohort/execution-preflight (assoc binding :cohort-id :foreign) false)))
+    (spit path (str raw "\n"))
+    (is (thrown? clojure.lang.ExceptionInfo (cohort/execution-preflight binding false))))
+)

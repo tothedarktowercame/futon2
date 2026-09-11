@@ -2404,14 +2404,26 @@
                                                            :semantic-epoch])))
                          :semantic-epoch semantic-epoch}
                         {:kind :trigger-opportunity :id opportunity-id})
-        start-event (when cohort? (cohort/start-attempt! time-cell))
+        execution-cohort (:execution-cohort opts)
+        _ (when (and (contains? opts :execution-cohort) (not (true? cohort?)))
+            (throw (ex-info "Explicit execution cohort requires cohort recording"
+                            {:reason :execution-cohort-recording-required})))
+        cohort-source (when (contains? opts :execution-cohort)
+                        (:snapshot (cohort/execution-preflight execution-cohort)))
+        start-event (when cohort?
+                      (if cohort-source
+                        (cohort/start-attempt! cohort-source (:data-root execution-cohort) time-cell)
+                        (cohort/start-attempt! time-cell)))
         attempt-id (or (:attempt/id start-event)
                        (str "canary-" (UUID/randomUUID)))
         _ (swap! phase-context assoc :attempt-id attempt-id)
         checkpoint! (fn [checkpoint cell]
                       (swap! checkpoints assoc checkpoint cell)
                       (when cohort?
-                        (cohort/append-checkpoint! attempt-id checkpoint cell))
+                        (if cohort-source
+                          (cohort/append-checkpoint! cohort-source (:data-root execution-cohort)
+                                                     attempt-id checkpoint cell)
+                          (cohort/append-checkpoint! attempt-id checkpoint cell)))
                       cell)
         close! (fn [outcome data]
                  (reset! closing? true)
@@ -2574,7 +2586,10 @@
                                :wm/route run-route
                                :trace-path trace-path
                                :data data}]
-                   (when cohort? (cohort/close-attempt! attempt-id closed))
+                   (when cohort?
+                     (if cohort-source
+                       (cohort/close-attempt! cohort-source (:data-root execution-cohort) attempt-id closed)
+                       (cohort/close-attempt! attempt-id closed)))
                    (if-let [path (:canary-out opts)]
                      (do (io/make-parents path)
                          (spit path (with-out-str (pp/pprint result))))

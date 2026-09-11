@@ -103,6 +103,32 @@
                         (.getBytes ^String s StandardCharsets/UTF_8))]
     (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
 
+(defrecord PinnedPreregistration [value])
+
+(defn pin-preregistration
+  "Capture and validate exact preregistration bytes for one operation."
+  [{:keys [preregistration cohort-id sha256] :as binding}]
+  (when-not (and (= #{:preregistration :data-root :cohort-id :sha256} (set (keys binding)))
+                (string? preregistration) (.isAbsolute (io/file preregistration))
+                (string? (:data-root binding)) (.isAbsolute (io/file (:data-root binding)))
+                (keyword? cohort-id) (nil? (namespace cohort-id))
+                (string? sha256) (re-matches #"[0-9a-f]{64}" sha256))
+    (throw (ex-info "Invalid execution cohort binding" {:reason :invalid-execution-cohort})))
+  (let [raw (slurp preregistration)
+        p (with-open [r (java.io.PushbackReader. (java.io.StringReader. raw))]
+            (let [p (edn/read {:eof ::eof} r)]
+              (when-not (= ::eof (edn/read {:eof ::eof} r))
+                (throw (ex-info "Trailing preregistration data" {:reason :invalid-preregistration})))
+              p))]
+    (when-not (and (map? p) (valid-preregistration? p)
+                   (= cohort-id (:cohort/id p))
+                   (= sha256 (futon2.aif.full-loop-cohort/sha256 raw)))
+      (throw (ex-info "Execution cohort pin mismatch" {:reason :execution-cohort-pin-mismatch})))
+    (->PinnedPreregistration p)))
+
+(defn- read-preregistration [source]
+  (if (instance? PinnedPreregistration source) (:value source) (read-edn source)))
+
 (defn- write-new! [path value]
   ;; pr-str, not pp/pprint: cohort cells are machine-read EDN, and cells that
   ;; embed machine-state can run to megabytes — the pretty-writer's per-char
@@ -214,7 +240,7 @@
   opportunity and include :opportunity-id and :trigger in its judgment."
   ([cell] (start-attempt! default-preregistration default-data-root cell))
   ([prereg-path data-root cell]
-   (let [p (read-edn prereg-path)
+   (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
          judgment (:judgment cell)
          opportunity-id (:opportunity-id judgment)
@@ -281,7 +307,7 @@
   ([attempt-id checkpoint cell]
    (append-checkpoint! default-preregistration default-data-root attempt-id checkpoint cell))
   ([prereg-path data-root attempt-id checkpoint cell]
-   (let [p (read-edn prereg-path)
+   (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
          attempt-dir (io/file dir attempt-id)]
      (when-not (contains? (set checkpoint-order) checkpoint)
@@ -328,7 +354,7 @@
   ([attempt-id cell]
    (close-attempt! default-preregistration default-data-root attempt-id cell))
   ([prereg-path data-root attempt-id cell]
-   (let [p (read-edn prereg-path)
+   (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
          events (attempt-events (io/file dir attempt-id))
          present (set (map :checkpoint/type events))
@@ -371,7 +397,7 @@
 (defn ledger
   ([] (ledger default-preregistration default-data-root))
   ([prereg-path data-root]
-   (let [p (read-edn prereg-path)
+   (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
          recorded-attempts (mapv attempt-summary (attempt-dirs dir))
          cancelled-attempts (filterv #(= :cancelled (:outcome %))
@@ -464,3 +490,22 @@
      (spit out-edn (with-out-str (pp/pprint value)))
      (spit out-html (render-html value))
      {:edn out-edn :html out-html})))
+
+(defn execution-preflight
+  "Read-only pinned cohort identity, activation and capacity validation.
+  The locked start-attempt! remains authoritative for concurrent admission."
+  ([binding] (execution-preflight binding true))
+  ([binding require-capacity?]
+   (let [snapshot (pin-preregistration binding)
+         state (ledger snapshot (:data-root binding))
+         activation (:activation state)]
+     (when-not (and (= (:cohort-id binding) (:cohort/id activation))
+                    (= (:sha256 binding) (:preregistration-sha256 activation))
+                    (= (:target state) (:stopping-target activation)))
+       (throw (ex-info "Execution cohort activation mismatch"
+                       {:reason :execution-cohort-activation-mismatch})))
+     (when (and require-capacity? (not (pos? (:remaining state))))
+       (throw (ex-info "Execution cohort is exhausted"
+                       {:reason :execution-cohort-exhausted})))
+     {:cohort-id (:cohort-id binding) :target (:target state)
+      :remaining (:remaining state) :snapshot snapshot})))

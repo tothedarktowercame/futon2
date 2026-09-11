@@ -3816,3 +3816,25 @@
     (is (= 1 (count @supersessions)))
     (is (empty? @dispatches)
         "no replacement turn is dispatched on a typed recovery refusal")))
+
+(deftest explicit-cohort-routes-all-events-to-its-own-store
+  (let [root (.getPath (.toFile (Files/createTempDirectory "runner-explicit-cohort" (make-array FileAttribute 0))))
+        path (str root "/cohort.edn")
+        raw (pr-str (-> (edn/read-string (slurp cohort/default-preregistration))
+                        (assoc :cohort/id :run4-explicit-test)
+                        (assoc-in [:stopping-rule :target] 1)))
+        sha (apply str (map #(format "%02x" (bit-and 255 %))
+                           (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                    (.getBytes raw "UTF-8"))))
+        binding {:preregistration path :data-root root :cohort-id :run4-explicit-test :sha256 sha}
+        opts (assoc (readiness-run-opts (atom []) (constantly {}))
+                    :cohort? true :execution-cohort binding)]
+    (spit path raw)
+    (cohort/activate! path root)
+    (let [result (runner/run-opportunity! opts)
+          state (cohort/ledger path root)]
+      (is (= :agent-unavailable (:outcome result)))
+      (is (= 1 (:attempt-count state)))
+      (is (= 1 (:closed-count state)))
+      (is (= cohort/checkpoint-order (get-in state [:attempts 0 :checkpoints])))
+      (is (= :run4-explicit-test (:cohort/id state))))))
