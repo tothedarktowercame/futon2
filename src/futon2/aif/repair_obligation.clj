@@ -456,6 +456,18 @@
 
 (declare verified-admissions)
 
+(defn- qualified-execution? [execution identity]
+  (and (= #{:kind :id :identity-version :cohort-id :cohort-sha256
+            :data-root-sha256 :authority-id :attempt-id}
+          (set (keys execution)))
+       (= :runner-execution (:kind execution) (:kind identity))
+       (= 1 (:identity-version execution))
+       (= identity (select-keys execution [:kind :id]))
+       (keyword? (:cohort-id execution))
+       (safe-id? (:attempt-id execution))
+       (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
+               ((juxt :cohort-sha256 :data-root-sha256 :authority-id) execution))))
+
 (defn commit-historical-resolution!
   "Persist a terminal-reader-authorized, distinct production successor. Maps
   and caller witness flags are deliberately not accepted."
@@ -467,7 +479,9 @@
          admissions (verified-admissions root)
          admission (get admissions repair-id)
          finding (:value (finding-capture! root repair-id))]
-     (when-not (and (= :wm/historical-repair-resolution-v1 (:schema record))
+     (when-not (and (contains? #{:wm/historical-repair-resolution-v1
+                                 :wm/historical-repair-resolution-v2}
+                               (:schema record))
                     (= repair-id (:repair/id record) (:repair/id admission))
                     (= (:verification-id admission) (:verification-id record))
                     (= (:verification-attempt admission) (:verification-attempt record))
@@ -476,28 +490,35 @@
                     (= :safe (:infrastructure record))
                     (execution-identity? (:validation-attempt record))
                     (execution-identity? (:verification-attempt record))
-                    (= #{:cohort-id :cohort-sha256 :attempt-id}
-                       (set (keys (:verification-execution record))))
-                    (keyword? (get-in record [:verification-execution :cohort-id]))
-                    (= (get-in record [:verification-attempt :id])
-                       (get-in record [:verification-execution :attempt-id]))
-                    (string? (get-in record [:verification-execution :cohort-sha256]))
-                    (re-matches #"[0-9a-f]{64}"
-                                (get-in record [:verification-execution :cohort-sha256]))
-                    (= #{:cohort-id :cohort-sha256 :attempt-id}
-                       (set (keys (:validation-execution record))))
-                    (keyword? (get-in record [:validation-execution :cohort-id]))
-                    (safe-id? (get-in record [:validation-execution :attempt-id]))
-                    (string? (get-in record [:validation-execution :cohort-sha256]))
-                    (re-matches #"[0-9a-f]{64}"
-                                (get-in record [:validation-execution :cohort-sha256]))
-                    (= (get-in record [:validation-attempt :id])
-                       (str (name (get-in record [:validation-execution :cohort-id]))
-                            "--" (get-in record [:validation-execution :attempt-id])))
-                    (not= (select-keys (:validation-execution record)
-                                       [:cohort-id :attempt-id])
-                          (select-keys (:verification-execution record)
-                                       [:cohort-id :attempt-id]))
+                    (if (= :wm/historical-repair-resolution-v2 (:schema record))
+                      (and (qualified-execution? (:verification-execution record)
+                                                 (:verification-attempt record))
+                           (qualified-execution? (:validation-execution record)
+                                                 (:validation-attempt record))
+                           (not= (:verification-execution record)
+                                 (:validation-execution record)))
+                      (and (= #{:cohort-id :cohort-sha256 :attempt-id}
+                              (set (keys (:verification-execution record))))
+                           (keyword? (get-in record [:verification-execution :cohort-id]))
+                           (= (get-in record [:verification-attempt :id])
+                              (get-in record [:verification-execution :attempt-id]))
+                           (string? (get-in record [:verification-execution :cohort-sha256]))
+                           (re-matches #"[0-9a-f]{64}"
+                                       (get-in record [:verification-execution :cohort-sha256]))
+                           (= #{:cohort-id :cohort-sha256 :attempt-id}
+                              (set (keys (:validation-execution record))))
+                           (keyword? (get-in record [:validation-execution :cohort-id]))
+                           (safe-id? (get-in record [:validation-execution :attempt-id]))
+                           (string? (get-in record [:validation-execution :cohort-sha256]))
+                           (re-matches #"[0-9a-f]{64}"
+                                       (get-in record [:validation-execution :cohort-sha256]))
+                           (= (get-in record [:validation-attempt :id])
+                              (str (name (get-in record [:validation-execution :cohort-id]))
+                                   "--" (get-in record [:validation-execution :attempt-id])))
+                           (not= (select-keys (:validation-execution record)
+                                              [:cohort-id :attempt-id])
+                                 (select-keys (:verification-execution record)
+                                              [:cohort-id :attempt-id]))))
                     (not= (:validation-attempt record) (:verification-attempt record))
                     (not= (get-in record [:validation-attempt :id]) (:attempt-id finding))
                     (safe-id? (:click-id record)) (safe-id? (:run-id record))
