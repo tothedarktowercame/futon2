@@ -1015,14 +1015,30 @@
                              (every? #(and (map? %) (map? (:action %)))
                                      admissible-actions))
                 (pinned-refusal! :missing-or-malformed-admissible-evidence))
-            ranked-entry (first (filter #(= action (:action %))
-                                        ranked-actions))
-            _ (when-not ranked-entry
+            ;; A canonical mission pin names the operation and mission. The
+            ;; real proposer/ranker also carries prediction/scoring inputs.
+            ;; Keep those inputs intact, and require the SAME full candidate
+            ;; to have passed admissibility; never synthesize a ranked entry.
+            mission-identity? (and (= :advance-mission (:type action))
+                                   (= #{:type :target} (set (keys action))))
+            matches? (fn [entry]
+                       (= action (if mission-identity?
+                                   (select-keys (:action entry) [:type :target])
+                                   (:action entry))))
+            ranked-matches (filterv matches? ranked-actions)
+            _ (when (empty? ranked-matches)
                 (pinned-refusal! :pinned-action-not-candidate))
-            admissible-entry (first (filter #(= action (:action %))
-                                            admissible-actions))
-            _ (when-not admissible-entry
+            _ (when-not (= 1 (count ranked-matches))
+                (pinned-refusal! :ambiguous-pinned-candidate))
+            ranked-entry (first ranked-matches)
+            admissible-matches (filterv matches? admissible-actions)
+            _ (when (empty? admissible-matches)
                 (pinned-refusal! :pinned-action-not-admissible))
+            _ (when-not (= 1 (count admissible-matches))
+                (pinned-refusal! :ambiguous-pinned-admissibility))
+            admissible-entry (first admissible-matches)
+            _ (when-not (= (:action ranked-entry) (:action admissible-entry))
+                (pinned-refusal! :pinned-candidate-admissibility-mismatch))
             entry admissible-entry
             identity (assoc (:task-pin envelope)
                             :mission-id (:id mission)
@@ -1038,7 +1054,8 @@
           (select-keys attestation [:status :boundary :principal :pin-sha256
                                     :effective-environment])
           :outer-loop-ranking-match-required? false
-          :ordinary-selector-decision counterfactual}
+          :ordinary-selector-decision counterfactual
+          :enacted-candidate-action (:action entry)}
          :counterfactual counterfactual}))))
 
 (defn- selected-target [entry]

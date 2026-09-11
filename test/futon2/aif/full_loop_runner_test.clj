@@ -12,6 +12,8 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.pattern-registry :as patterns]
+            [futon2.aif.mission-registry :as mission-registry]
+            [futon2.aif.action-proposer :as proposer]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.run4-task-pin :as run4-pin]
             [futon2.aif.tripwire :as tripwire]
@@ -4024,3 +4026,40 @@
                  :T3 {:phase :opportunity :transition :end
                       :outcome :agent-unavailable :cohort? true
                       :external-attempt-id bid :repair-root repair/default-root})))))
+
+
+(deftest pinned-mission-identity-retains-real-proposer-action
+  (let [action {:type :advance-mission :target "M-u88-contextual-preferences"}
+        mission {:id (:target action) :path "/disposable/M-u88.md"
+                 :title "U88" :status-class :open :open-hole-count 1}
+        candidate (first (proposer/propose mission-registry/mission-enumerator-proposer
+                                          {:missions [mission]}))
+        entry {:rank 1 :action candidate}
+        casting {:author "codex-20" :reviewer "zai-1" :repair-reviewer "zai-1"}
+        envelope {:task-pin {:sha256 "digest"} :casting casting
+                  :mission-action {:action action :mission mission}}
+        opts {:run4-task-pin-text "pin" :run4-task-pin-ports {}
+              :run4-trusted-boundary-fn
+              (constantly {:status :authenticated :boundary :trusted-serving-context
+                           :principal "Joe" :pin-sha256 "digest"})}
+        judge {:ranked-actions [entry] :admissible-actions [entry]
+               :decision {:action {:type :no-op}}}
+        refusal (fn [j] (try (runner/resolve-pinned-selection opts j casting)
+                             (catch clojure.lang.ExceptionInfo e
+                               (:failure-detail (ex-data e)))))]
+    (with-redefs [run4-pin/validate (fn [& _] envelope)]
+      (let [selected (runner/resolve-pinned-selection opts judge casting)]
+        (is (not= action candidate))
+        (is (= entry (:entry selected)))
+        (is (= candidate (get-in selected [:provenance :enacted-candidate-action])))
+        (is (= action (get-in selected [:identity :action]))))
+      (is (= :ambiguous-pinned-candidate
+             (refusal (assoc judge :ranked-actions [entry entry]))))
+      (is (= :ambiguous-pinned-admissibility
+             (refusal (assoc judge :admissible-actions [entry entry]))))
+      (is (= :pinned-candidate-admissibility-mismatch
+             (refusal (assoc-in judge [:admissible-actions 0 :action :open-hole-count] 2))))
+      (is (= :pinned-action-not-candidate
+             (refusal (assoc-in judge [:ranked-actions 0 :action :target] "M-other"))))
+      (is (= :pinned-action-not-candidate
+             (refusal (assoc-in judge [:ranked-actions 0 :action :type] :open-mission)))))))
