@@ -1,0 +1,15 @@
+{:schema :wm/historical-repair-revalidation-proposal-v1
+ :status :disabled-unreviewed
+ :action :revalidate-historical-repair
+ :repair-id "repair-attempt-057-untyped-failure"
+ :finding {:path "data/wm-repair-obligations/findings/repair-attempt-057-untyped-failure.edn"
+           :sha256 "2ed74a8a61725b0db936063a19d3d4cc2e8080ab34ebab3a808e2822fd28b1c5"}
+ :implementation {:first "9ab503bd61be1d63e7a24731e8e8aa285a9e44da"
+                  :last "3bdc381e76518e69f90077397fa46495da98e61c"
+                  :relationship :ancestor-chain}
+ :requires [:exact-finding-bytes :implementation-ancestry
+            :fresh-independent-review-execution :nonempty-qualification
+            :new-verification-identity :immutable-publication]
+ :effect :awaiting-validation
+ :does-not [:claim-fresh-authorship :create-code-implementation
+            :resolve-repair :dispatch-successor]}

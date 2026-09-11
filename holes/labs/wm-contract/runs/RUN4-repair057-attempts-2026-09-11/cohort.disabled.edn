@@ -1,0 +1,16 @@
+{:protocol/version 4
+ :status :disabled-unreviewed
+ :cohort/id :run4-repair057-20260911-v1
+ :purpose "Attempt 1 verifies and admits the historical repair implementation; attempt 2 is the distinct production-shaped successor. Not two U88 successes."
+ :casting {:author "zai-2" :reviewer "codex-12" :repair-reviewer "codex-10"}
+ :stopping-rule {:kind :fixed-attempt-count :target 2}
+ :attempt-plan [{:ordinal 1 :attempt-id "repair057-revalidation-attempt-002"
+                 :action :revalidate-historical-repair}
+                {:ordinal 2 :attempt-id "u88-validation-successor-attempt-003"
+                 :action :ordinary-production-shaped-successor
+                 :requires :repair057-awaiting-validation}]
+ :data-root "/home/joe/run4/RUN4-repair057-20260911-v1"
+ :activation {:enabled? false :requires [:independent-contract-review
+                                         :fresh-repair-reviewer-availability
+                                         :canonical-preregistration-sha256
+                                         :server-owned-root-provisioning]}}

@@ -1,0 +1,11 @@
+{:schema :wm/run4-series-v1
+ :status :disabled-unreviewed
+ :series-id "run4-repair057-then-u88-2026-09-11"
+ :cohort-id :run4-repair057-20260911-v1
+ :ordered-trials [{:ordinal 1 :trial-id "repair057-historical-revalidation"
+                   :attempt-id "repair057-revalidation-attempt-002"}
+                  {:ordinal 2 :trial-id "M-u88-contextual-preferences-validation"
+                   :attempt-id "u88-validation-successor-attempt-003"}]
+ :legacy-preservation {:consumed-cohort :run4-u88-20260911-v1
+                       :old-series "run4-inner-loop-u88-successor-2026-09-11"
+                       :mutated? false}}
