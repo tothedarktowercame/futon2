@@ -1,0 +1,30 @@
+{:cohort/id :run4-u88-production-successor-20260911-v2
+ :protocol/version 4
+ :status :preregistered
+ :purpose "One distinct production-shaped U88 successor after historical repair verification; no historical admission counts as task success."
+ :authority "Joe authorized continued RUN4 trials after independently reviewed durable gates, 2026-09-11."
+ :registered-on "2026-09-11"
+ :allowed-triggers #{:duree-click-on-demand :duree-click-continuous}
+ :stopping-rule {:kind :fixed-attempt-count :target 1}
+ :checkpoint-order [:time-step :selection :construction :dispatch :build :adjudication :closed]
+ :required-before-close #{:selection :construction :dispatch :build :adjudication}
+ :checkpoint-contract
+ {:time-step [:opportunity-id :trigger :machine-state :agent-roster :code-state :semantic-epoch]
+  :selection [:selected-mission :selected-action :ranked-candidates :selection-reasons]
+  :construction [:mission :cascade :sorries :wiring :patterns :deposit]
+  :dispatch [:agent :availability :job-id :prompt-ref]
+  :build [:artifacts :generated-code :commits :patterns-used :inline-improvements :validation]
+  :adjudication [:before :after :witness :build-match :dial]
+  :closed [:outcome :grounded? :artifact-only? :duration-ms :resource-use]}
+ :machine-evolution
+ {:allowed? true
+  :per-attempt-provenance [:semantic-epoch :git-sha :git-dirty? :resolved-mode-flags :configuration-digest]
+  :epoch-boundary "Futon2 81a32ab0 strict cohort execution authority; distinct from immutable historical qualification at 72d9beba."
+  :rule "Preserve every admitted opportunity and its exact source provenance."}
+ :grounded-success
+ {:outcome :grounded-change
+  :requires [:independent-before-witness :independent-after-witness :resolved-adjudication :dial-moved]
+  :artifact-only-counts? false}
+ :casting {:author "zai-2" :reviewer "codex-12" :repair-reviewer "codex-12"}
+ :analysis {:claim "Outcome unknown until this separately admitted ordinary task executes."
+            :denominator "The single admitted opportunity, regardless of outcome."}}

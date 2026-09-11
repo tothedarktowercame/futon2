@@ -1,0 +1,18 @@
+{:schema :wm/run4-series-pin-v1
+ :series-id "run4-u88-production-successor-20260911-v2"
+ :status :frozen :order :ordinal
+ :stop-rule :attempt-each-once-even-after-fail-or-block
+ :casting {:author "zai-2" :reviewer "codex-12" :repair-reviewer "codex-12"}
+ :source-pins [{:path "holes/missions/M-u88-contextual-preferences.md"
+                :sha256 "8212ec999123468aa10a8bfc657028a0d06ec3c51be7b97a0bcb517f4040c146"}
+               {:path "holes/labs/wm-contract/runs/RUN4-U88-production-successor-2026-09-11-v2/run-config.edn"
+                :sha256 "7005dafb0467024ccf0d624ab2b370ed0d3a74c3629776ad97df597f3f5b5ee8"}
+               {:path "holes/labs/wm-contract/SESSION-IAD-feedback-interpretation-2026-09-10.md"
+                :sha256 "47981b01c1ebbb5efa822ba9c7479e312323cd113c1bdd1f40cc61715678356d"}
+               {:path "holes/labs/wm-contract/runs/RUN4-U88-production-successor-2026-09-11-v2/cohort.edn"
+                :sha256 "0fd6cea04489a3974a69605895871fd1b7f14536bd5b75141b1ae95a927cae83"}]
+ :trials [{:ordinal 1 :trial-id "M-u88-contextual-preferences"
+           :attempt-id "u88-production-successor-20260911-v2-attempt-001"
+           :pin-sha256 "2dce0b7bc9eb437aaef405254bea34597cc4e3c96248d4861bdcfbf9a8ae9286"
+           :packet {:path "holes/labs/wm-contract/runs/RUN4-U88-production-successor-2026-09-11-v2/task-pin.edn"
+                    :sha256 "2dce0b7bc9eb437aaef405254bea34597cc4e3c96248d4861bdcfbf9a8ae9286"}}]}
