@@ -7,7 +7,10 @@
 ;;   registry-held  print 1 if any :done-unreviewed row touches a registry (publish gate), else 0
 ;;   counts         print the status frequencies
 (require '[clojure.edn :as edn] '[clojure.string :as str])
-(def path (str (.getParent (.getAbsoluteFile (java.io.File. *file*))) "/worklist.edn"))
+(def args (vec *command-line-args*))
+(def path (if (= "--worklist" (get args 1))
+            (or (get args 2) (throw (ex-info "--worklist requires a path" {})))
+            (str (.getParent (.getAbsoluteFile (java.io.File. *file*))) "/worklist.edn")))
 (def w (edn/read-string (slurp path)))
 (def items (:items w))
 (def by-id (into {} (map (juxt :id identity) items)))
@@ -15,7 +18,8 @@
   (and (= :open (:status i))
        (not= :J (:class i))
        (not= :joe (:owner i))
-       (not (:loop-skip i))))
+       (not (:loop-skip i))
+       (every? #(= :done (:status (by-id %))) (:depends-on i))))
 ;; Priority: FUNDAMENTALS first and exclusively -- while any :F row is open
 ;; the loop may not take other work (Joe, 2026-09-05: the missing Q(o|pi)
 ;; constructor "should be a major finding and a priority focus, the Lean model
@@ -24,7 +28,7 @@
 (defn prio [i] [(if (= :F (:class i)) 0 1)
                 (case (:id i) :RUN12 0 :RUN11 1 2)
                 (if (= :RUN (:class i)) 0 1)])
-(def cmd (first *command-line-args*))
+(def cmd (first args))
 (case cmd
   ;; stall-key: id + status + a hash of the WHOLE next-open row, so a
   ;; one-slice-per-invocation row that is COMMITTING slices does not read as
@@ -37,6 +41,7 @@
   "stall-key" (println (or (some->> (first (sort-by prio (filter loopable? items)))
                                     ((fn [i] (str (name (:id i)) ":" (name (:status i)) ":" (hash i)))))
                            "NONE"))
+  "next-task" (prn (first (sort-by prio (filter loopable? items))))
   "next-open" (println (or (some-> (first (sort-by prio (filter loopable? items))) :id name) "NONE"))
   "unreviewed" (println (str/join " " (map (comp name :id) (filter #(= :done-unreviewed (:status %)) items))))
   "registry-held" (println (if (some #(and (= :done-unreviewed (:status %))
