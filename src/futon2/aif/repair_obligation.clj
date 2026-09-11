@@ -456,17 +456,28 @@
 
 (declare verified-admissions)
 
-(defn- qualified-execution? [execution identity]
-  (and (= #{:kind :id :identity-version :cohort-id :cohort-sha256
-            :data-root-sha256 :authority-id :attempt-id}
-          (set (keys execution)))
-       (= :runner-execution (:kind execution) (:kind identity))
-       (= 1 (:identity-version execution))
-       (= identity (select-keys execution [:kind :id]))
+(defn- validated-execution? [execution identity]
+  (and (= :runner-execution (:kind execution) (:kind identity))
        (keyword? (:cohort-id execution))
        (safe-id? (:attempt-id execution))
-       (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
-               ((juxt :cohort-sha256 :data-root-sha256 :authority-id) execution))))
+       (string? (:cohort-sha256 execution))
+       (re-matches #"[0-9a-f]{64}" (:cohort-sha256 execution))
+       (case (:identity-version execution)
+         1 (and (= #{:kind :id :identity-version :cohort-id :cohort-sha256
+                     :data-root-sha256 :authority-id :attempt-id}
+                   (set (keys execution)))
+                (= identity (select-keys execution [:kind :id]))
+                (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
+                        ((juxt :data-root-sha256 :authority-id) execution)))
+         0 (and (= #{:kind :id :legacy-id :identity-version :cohort-id
+                     :cohort-sha256 :attempt-id}
+                   (set (keys execution)))
+                (= (:id execution) (:legacy-id execution)
+                   (str (name (:cohort-id execution)) "--" (:attempt-id execution)))
+                (contains? #{{:kind :runner-execution :id (:attempt-id execution)}
+                             {:kind :runner-execution :id (:legacy-id execution)}}
+                           identity))
+         false)))
 
 (defn commit-historical-resolution!
   "Persist a terminal-reader-authorized, distinct production successor. Maps
@@ -491,9 +502,9 @@
                     (execution-identity? (:validation-attempt record))
                     (execution-identity? (:verification-attempt record))
                     (if (= :wm/historical-repair-resolution-v2 (:schema record))
-                      (and (qualified-execution? (:verification-execution record)
+                      (and (validated-execution? (:verification-execution record)
                                                  (:verification-attempt record))
-                           (qualified-execution? (:validation-execution record)
+                           (validated-execution? (:validation-execution record)
                                                  (:validation-attempt record))
                            (not= (:verification-execution record)
                                  (:validation-execution record)))
