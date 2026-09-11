@@ -3861,14 +3861,23 @@
                         :historical-verification-execute-fn
                         (fn [request]
                           (swap! executions conj request)
-                          (assoc admission :verification-attempt
-                                 (:execution-identity request)))
+                          (assoc admission
+                                 :verification-attempt (:execution-identity request)
+                                 :verification-source (:verification-artifact admission)
+                                 :verification-artifact
+                                 {:path "/server/store/verification-evidence/verification-057.edn"
+                                  :sha256 (apply str (repeat 64 "b"))}))
                         :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
     (is (= :historical-verification-awaiting-validation (:outcome result)))
     (is (= {:kind :runner-execution :id (:attempt-id result)}
            (get-in @executions [0 :execution-identity])))
     (is (= admission (get-in @executions [0 :candidate])))
     (is (empty? @dispatches))
+    (is (nil? (get-in result [:data :failure-kind])))
+    (is (nil? (get-in result [:data :failure-stage])))
+    (is (nil? (get-in result [:data :error])))
+    (is (= :historical-verification-admission
+           (get-in result [:checkpoints :adjudication :ground :kind])))
     (is (= 1 (:closed-count (cohort/ledger path root))))))
 
 (deftest explicit-cohort-routes-all-events-to-its-own-store

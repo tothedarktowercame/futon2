@@ -2798,6 +2798,9 @@
                                :run4/operator-selection (:provenance pinned-selection)
                                :run4/counterfactual-decision
                                (:counterfactual pinned-selection)
+                               :run4/enacted-action (:action entry))
+                        (and historical-action? (:run4/requested-pin opts))
+                        (assoc :run4/requested-pin (:run4/requested-pin opts)
                                :run4/enacted-action (:action entry)))
             target (some-> entry selected-target)
             ranked-for-review (if stop-line
@@ -2838,10 +2841,12 @@
                                      :trace-persistence :after-construction}
                                     (cond-> {:kind :wm-judgement
                                              :decision (:decision judgement)}
-                                      pinned-selection
-                                      (assoc :run4/task-pin (:identity pinned-selection)
+                                     pinned-selection
+                                     (assoc :run4/task-pin (:identity pinned-selection)
                                              :run4/operator-selection
-                                             (:provenance pinned-selection))))
+                                             (:provenance pinned-selection))
+                                     (and historical-action? (:run4/requested-pin opts))
+                                     (assoc :run4/requested-pin (:run4/requested-pin opts))))
                                (:readiness/selection-transient judgement0)
                                (assoc-in [:judgment
                                           :readiness/selection-transient]
@@ -2942,7 +2947,17 @@
               (when-not (and (= :wm/historical-repair-admission-v1 (:schema transition))
                              (= (:repair/id stop-line) (:repair/id transition))
                              (= :awaiting-validation (:repair/status transition))
-                             (= execution-identity (:verification-attempt transition)))
+                             (= execution-identity (:verification-attempt transition))
+                             (= (:verification-id historical-admission)
+                                (:verification-id transition))
+                             (= (:verification-artifact historical-admission)
+                                (:verification-source transition))
+                             (let [artifact (:verification-artifact transition)]
+                               (and (= #{:path :sha256} (set (keys artifact)))
+                                    (string? (:path artifact))
+                                    (not (str/blank? (:path artifact)))
+                                    (string? (:sha256 artifact))
+                                    (re-matches #"[0-9a-f]{64}" (:sha256 artifact)))))
                 (throw (ex-info "Historical verification transition malformed"
                                 {:outcome :historical-verification-refused
                                  :failure-kind :historical-verification-transition-invalid
@@ -2968,8 +2983,8 @@
                                  {:kind :historical-verification-admission
                                   :evidence (:verification-artifact transition)}))
               (throw (ex-info "Historical repair verification admitted for validation"
-                              {:outcome :historical-verification-awaiting-validation
-                               :failure-kind nil :failure-stage nil
+                              {:historical-verification-complete? true
+                               :outcome :historical-verification-awaiting-validation
                                :repair-obligation transition
                                :verification-attempt execution-identity}))))
           (let [snapshot (when stop-line
@@ -3426,7 +3441,14 @@
       (catch Throwable e
         (if @closing?
           (throw e)
-          (let [failure (ex-data e)
+          (if (true? (:historical-verification-complete? (ex-data e)))
+            (let [completion (ex-data e)]
+              (close! :historical-verification-awaiting-validation
+                      {:target (get-in @checkpoints [:selection :judgment
+                                                     :selected-mission])
+                       :repair-obligation (:repair-obligation completion)
+                       :verification-attempt (:verification-attempt completion)}))
+            (let [failure (ex-data e)
                 review-job (:review-job failure)
                 verdict (some-> review-job review-verdict)
                 review-finding (when (and (nil? (:repair-obligation failure))
@@ -3467,7 +3489,7 @@
                                          (:build-retries failure))}
                         (seq (:reviews failure))
                         (assoc :reviews (:reviews failure)
-                               :revision (:revision failure))))))))))
+                               :revision (:revision failure)))))))))))
 
 (defn run-opportunity!
   "Run one opportunity and ensure initialization failures also become durable
