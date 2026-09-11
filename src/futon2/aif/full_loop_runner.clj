@@ -2539,7 +2539,8 @@
                                                     [:judgment :code-state])}
                                :discharge-contract
                                (discharge-contract repair-class)})))
-                       data (assoc data :repair-obligation finding)
+                       data (assoc data :repair-obligation
+                                   (if admitted-verification? existing-finding finding))
                        parked-transition
                        (when (and finding (not admitted-verification?))
                          (park-r16-stop-line! opts external-attempt-id finding))
