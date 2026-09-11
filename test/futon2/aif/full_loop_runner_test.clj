@@ -6,6 +6,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.full-loop-cli :as cli]
+            [futon2.aif.c-fold-config :as digest]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
@@ -3833,6 +3834,15 @@
 
 (deftest historical-verification-action-commits-without-author-dispatch
   (let [dispatches (atom []) executions (atom [])
+        root (.getPath (.toFile (Files/createTempDirectory
+                                "historical-action-cohort"
+                                (make-array FileAttribute 0))))
+        path (str root "/cohort.edn")
+        raw (pr-str (-> (edn/read-string (slurp cohort/default-preregistration))
+                        (assoc :cohort/id :historical-action-test)
+                        (assoc-in [:stopping-rule :target] 1)))
+        _ (spit path raw)
+        _ (cohort/activate! path root)
         stop-line {:repair/id "repair-057" :repair/status :open
                    :repair/class :machine-failure :attempt-id "failed-057"}
         admission {:schema :wm/historical-repair-admission-v1
@@ -3842,7 +3852,11 @@
                    :actors {:author "zai-5" :reviewer "codex-1"}}
         result (runner/run-opportunity!
                 (merge (isolated-runner-opts)
-                       {:repair-open-fn (constantly [stop-line])
+                       {:cohort? true
+                        :execution-cohort {:preregistration path :data-root root
+                                           :cohort-id :historical-action-test
+                                           :sha256 (digest/sha256 raw)}
+                        :repair-open-fn (constantly [stop-line])
                         :historical-verification-candidate-fn (fn [_] admission)
                         :historical-verification-execute-fn
                         (fn [request]
@@ -3854,7 +3868,8 @@
     (is (= {:kind :runner-execution :id (:attempt-id result)}
            (get-in @executions [0 :execution-identity])))
     (is (= admission (get-in @executions [0 :candidate])))
-    (is (empty? @dispatches))))
+    (is (empty? @dispatches))
+    (is (= 1 (:closed-count (cohort/ledger path root))))))
 
 (deftest explicit-cohort-routes-all-events-to-its-own-store
   (let [root (.getPath (.toFile (Files/createTempDirectory "runner-explicit-cohort" (make-array FileAttribute 0))))

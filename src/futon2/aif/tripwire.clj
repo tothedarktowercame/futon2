@@ -188,8 +188,10 @@
           cohort-complete? (= :cohort-complete outcome)
           enumerated? (or cohort-complete?
                           (contains? cohort/outcome-kinds outcome))
+          admitted-verification? (= :historical-verification-awaiting-validation outcome)
           zero-achievement? (and (not= :grounded-change outcome)
-                                 (not cohort-complete?))
+                                 (not cohort-complete?)
+                                 (not admitted-verification?))
           statuses (when (and zero-achievement? durable-attempt-id)
                      (attempt-finding-statuses
                       (or (:repair-root observation) repair/default-root)

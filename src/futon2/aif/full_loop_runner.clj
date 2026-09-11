@@ -2481,7 +2481,9 @@
                          :when (not (contains? @checkpoints cp))]
                    (checkpoint! cp (sorry (keyword (str "not-reached-" (name cp)))
                                           {:outcome outcome})))
-                 (let [selection-judgment (get-in @checkpoints [:selection :judgment])
+                 (let [admitted-verification?
+                       (= :historical-verification-awaiting-validation outcome)
+                       selection-judgment (get-in @checkpoints [:selection :judgment])
                        selected-action (:selected-action selection-judgment)
                        selected-entry (when selected-action
                                         {:action selected-action
@@ -2494,7 +2496,8 @@
                                         (repair-class-for
                                          (or (:failure-kind data) outcome)))
                        finding
-                       (when-not (= :grounded-change outcome)
+                       (when-not (or (= :grounded-change outcome)
+                                     admitted-verification?)
                          (or existing-finding
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
@@ -2524,7 +2527,7 @@
                                (discharge-contract repair-class)})))
                        data (assoc data :repair-obligation finding)
                        parked-transition
-                       (when finding
+                       (when (and finding (not admitted-verification?))
                          (park-r16-stop-line! opts external-attempt-id finding))
                        brief-item
                        (cond->
@@ -2536,7 +2539,8 @@
                                    :commit (:commit data) :witness (:witness data)
                                    :lifecycle/discharge
                                    {:node :R16
-                                    :stage :surfaced
+                                   :stage (if admitted-verification?
+                                            :verification-admitted :surfaced)
                                     :attempt-id external-attempt-id
                                     :outcome outcome
                                     :parked-transition parked-transition}
@@ -2551,12 +2555,15 @@
                                                "Independently reviewed and grounded change"
                                                (:commit data)
                                                "Authored commit exists but the loop is incomplete"
+                                               admitted-verification?
+                                               "Historical verification admitted; production successor required"
                                                :else "No grounded achievement")
                                     :build (get-in @checkpoints [:build :judgment])
                                     :adjudication
                                     (get-in @checkpoints [:adjudication :judgment])}
                                    :failure
-                                   (when-not (= :grounded-change outcome)
+                                   (when-not (or (= :grounded-change outcome)
+                                                 admitted-verification?)
                                      (cond-> {:kind (or (:failure-kind data) outcome)
                                               :stage (or (:failure-stage data)
                                                          (last-error-phase @phase-events))
@@ -2932,12 +2939,34 @@
                               {:execution-identity execution-identity
                                :obligation stop-line
                                :candidate historical-admission})]
+              (when-not (and (= :wm/historical-repair-admission-v1 (:schema transition))
+                             (= (:repair/id stop-line) (:repair/id transition))
+                             (= :awaiting-validation (:repair/status transition))
+                             (= execution-identity (:verification-attempt transition)))
+                (throw (ex-info "Historical verification transition malformed"
+                                {:outcome :historical-verification-refused
+                                 :failure-kind :historical-verification-transition-invalid
+                                 :failure-stage :construction
+                                 :repair-obligation stop-line})))
               (checkpoint! :dispatch
                            (sorry :historical-verification-no-author-dispatch
                                   {:verification-attempt execution-identity}))
               (checkpoint! :build
                            (sorry :historical-code-identity-unchanged
                                   {:verification-id (:verification-id transition)}))
+              (checkpoint! :adjudication
+                           (term {:before nil :after nil
+                                  :witness {:resolved? false :dial-moved? false}
+                                  :build-match {:commit nil :review-approved? false}
+                                  :dial {:moved? false :implementation-id nil}
+                                  :verification-id (:verification-id transition)
+                                  :verification-attempt execution-identity
+                                  :repair-id (:repair/id transition)
+                                  :repair-status :awaiting-validation
+                                  :repair-resolved? false
+                                  :production-successor-required? true}
+                                 {:kind :historical-verification-admission
+                                  :evidence (:verification-artifact transition)}))
               (throw (ex-info "Historical repair verification admitted for validation"
                               {:outcome :historical-verification-awaiting-validation
                                :failure-kind nil :failure-stage nil
