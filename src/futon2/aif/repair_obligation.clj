@@ -12,7 +12,9 @@
             [clojure.string :as str]
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.substrate :as substrate])
-  (:import [java.nio.file Files StandardOpenOption]
+  (:import [java.nio ByteBuffer]
+           [java.nio.channels FileChannel]
+           [java.nio.file Files StandardOpenOption]
            [java.time Instant]))
 
 (def default-root "/home/joe/code/futon2/data/wm-repair-obligations")
@@ -213,58 +215,139 @@
         (throw (ex-info "Historical verification artifact corrupt" {:path (str path)})))
       v)))
 
+(defn- safe-id? [x]
+  (and (string? x) (re-matches #"[A-Za-z0-9][A-Za-z0-9._-]{0,127}" x)))
+
+(defn- write-new-durable! [root repair-id value]
+  (when-not (safe-id? repair-id) (throw (ex-info "Unsafe repair identity" {})))
+  (let [base (.getCanonicalFile (io/file root "verifications"))
+        _ (.mkdirs base)
+        target (io/file base (str repair-id ".edn"))
+        bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")]
+    (when-not (and (= base (.getCanonicalFile (.getParentFile target)))
+                   (not (Files/isSymbolicLink (.toPath target))))
+      (throw (ex-info "Historical admission output outside authority" {})))
+    (with-open [ch (FileChannel/open (.toPath target)
+                                     (into-array StandardOpenOption
+                                                 [StandardOpenOption/CREATE_NEW
+                                                  StandardOpenOption/WRITE]))]
+      (let [buf (ByteBuffer/wrap bytes)]
+        (while (.hasRemaining buf) (.write ch buf)))
+      (.force ch true))
+    (with-open [parent (FileChannel/open (.toPath base)
+                                         (make-array StandardOpenOption 0))]
+      (.force parent true))
+    (.getPath target)))
+
+(defn- capture-under! [root path]
+  (let [base (.getCanonicalFile (io/file root))
+        file (.getCanonicalFile (io/file path))]
+    (when-not (and (.isDirectory base) (.isFile file)
+                   (not (Files/isSymbolicLink (.toPath (io/file path))))
+                   (.startsWith (.toPath file) (.toPath base)))
+      (throw (ex-info "Historical verification path outside authority" {:path path})))
+    (let [text (slurp file)]
+      {:file file :text text :sha256 (digest/sha256 text)
+       :value (strict-read text file)})))
+
+(defn- verification-value? [value]
+  (and (= #{:schema :verification-id :repair-id :state :repair-resolved?
+            :actors :review :qualification :finding :implementation}
+          (set (keys value)))
+       (= :wm/historical-repair-verification-v1 (:schema value))
+       (safe-id? (:verification-id value)) (safe-id? (:repair-id value))
+       (= :awaiting-validation (:state value)) (false? (:repair-resolved? value))
+       (every? nonblank? ((juxt :author :reviewer) (:actors value)))
+       (not= (get-in value [:actors :author]) (get-in value [:actors :reviewer]))
+       (= :approve (get-in value [:review :verdict]))
+       (true? (get-in value [:review :execution :executed]))
+       (nonblank? (get-in value [:review :job-id]))
+       (= #{:path :sha256 :check-ids} (set (keys (:qualification value))))
+       (= #{:path :sha256} (set (keys (:finding value))))
+       (seq (get-in value [:qualification :check-ids]))
+       (= (count (get-in value [:qualification :check-ids]))
+          (count (distinct (get-in value [:qualification :check-ids]))))
+       (every? keyword? (get-in value [:qualification :check-ids]))
+       (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
+               [(get-in value [:qualification :sha256])
+                (get-in value [:finding :sha256])])))
+
+(defn- finding-capture! [root repair-id]
+  (when-not (safe-id? repair-id)
+    (throw (ex-info "Unsafe repair identity" {:repair/id repair-id})))
+  (capture-under! (io/file root "findings")
+                  (io/file root "findings" (str repair-id ".edn"))))
+
+(defn- admission-from! [root {:keys [verification-root path sha256]}]
+  (let [cap (capture-under! verification-root path)
+        value (:value cap)
+        _ (when-not (and (= sha256 (:sha256 cap)) (verification-value? value))
+            (throw (ex-info "Historical verification lacks admitted evidence" {})))
+        finding (finding-capture! root (:repair-id value))]
+    (when-not (and (= (:repair-id value) (get-in finding [:value :repair/id]))
+                   (= :open (get-in finding [:value :repair/status]))
+                   (= :machine-failure (get-in finding [:value :repair/class]))
+                   (= (:sha256 finding) (get-in value [:finding :sha256]))
+                   (= (.getCanonicalPath ^java.io.File (:file finding))
+                      (.getCanonicalPath (io/file (get-in value [:finding :path])))))
+      (throw (ex-info "Historical verification finding join refused"
+                      {:repair/id (:repair-id value)})))
+    {:schema :wm/historical-repair-admission-v1
+     :repair/id (:repair-id value) :repair/schema-version 1
+     :repair/status :awaiting-validation
+     :failed-attempt (get-in finding [:value :attempt-id])
+     :verification-id (:verification-id value)
+     :verification-artifact {:path (.getPath ^java.io.File (:file cap)) :sha256 sha256}
+     :finding-artifact {:path (.getPath ^java.io.File (:file finding))
+                        :sha256 (:sha256 finding)}
+     :actors (:actors value) :review (:review value) :implementation (:implementation value)}))
+
+(defn historical-verification-candidate
+  "Read and validate a candidate without changing stop-line state."
+  ([evidence] (historical-verification-candidate default-root evidence))
+  ([root evidence] (admission-from! root evidence)))
+
+(defn commit-historical-verification!
+  "Execute a selected historical verification action. Canonical finding and
+  verification bytes are the only identity sources."
+  ([evidence] (commit-historical-verification! default-root evidence))
+  ([root evidence]
+   (let [record (admission-from! root evidence)]
+     (write-new-durable! root (:repair/id record) record)
+     record)))
+
 (defn record-historical-verification!
-  "Admit a separately verified historical implementation to awaiting-validation.
-  This creates no implementation entity and never resolves the obligation."
+  "Compatibility wrapper. The supplied obligation is deliberately not an
+  authority; canonical store bytes determine the transition."
   ([obligation evidence] (record-historical-verification! default-root obligation evidence))
-  ([root obligation {:keys [verification-root path sha256]}]
-   (let [base (.getCanonicalFile (io/file verification-root))
-         file (.getCanonicalFile (io/file path))
-         text (when (and (.isDirectory base) (.isFile file)
-                         (.startsWith (.toPath file) (.toPath base))) (slurp file))
-         value (when text (strict-read text file))]
-     (when-not (and (= :open (:repair/status obligation))
-                    (= :machine-failure (:repair/class obligation))
-                    (= sha256 (when text (digest/sha256 text)))
-                    (= #{:schema :verification-id :repair-id :state :repair-resolved?
-                         :actors :review :qualification :finding :implementation}
-                       (set (keys value)))
-                    (= :wm/historical-repair-verification-v1 (:schema value))
-                    (= (:repair/id obligation) (:repair-id value))
-                    (= :awaiting-validation (:state value))
-                    (false? (:repair-resolved? value))
-                    (string? (:verification-id value))
-                    (not (str/blank? (:verification-id value)))
-                    (every? #(and (string? %) (not (str/blank? %)))
-                            ((juxt :author :reviewer) (:actors value)))
-                    (not= (get-in value [:actors :author])
-                          (get-in value [:actors :reviewer]))
-                    (= :approve (get-in value [:review :verdict]))
-                    (true? (get-in value [:review :execution :executed]))
-                    (string? (get-in value [:review :job-id]))
-                    (not (str/blank? (get-in value [:review :job-id])))
-                    (= #{:path :sha256 :check-ids}
-                       (set (keys (:qualification value))))
-                    (= #{:path :sha256} (set (keys (:finding value))))
-                    (seq (get-in value [:qualification :check-ids]))
-                    (= (count (get-in value [:qualification :check-ids]))
-                       (count (distinct (get-in value [:qualification :check-ids]))))
-                    (every? keyword? (get-in value [:qualification :check-ids]))
-                    (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
-                            [(get-in value [:qualification :sha256])
-                             (get-in value [:finding :sha256])]))
-       (throw (ex-info "Historical verification lacks admitted evidence"
-                       {:repair/id (:repair/id obligation)})))
-     (let [record {:schema :wm/historical-repair-admission-v1
-                   :repair/id (:repair/id obligation)
-                   :repair/schema-version 1 :repair/status :awaiting-validation
-                   :failed-attempt (:attempt-id obligation)
-                   :verification-id (:verification-id value)
-                   :verification-artifact {:path (.getPath file) :sha256 sha256}
-                   :actors (:actors value)
-                   :review (:review value) :implementation (:implementation value)}]
-       (write-new! (io/file root "verifications" (str (:repair/id obligation) ".edn")) record)
-       record))))
+  ([root _obligation evidence] (commit-historical-verification! root evidence)))
+
+(defn- verified-admissions [root]
+  (into {}
+        (map (fn [file]
+               (let [cap (capture-under! (io/file root "verifications") file)
+                     stored (:value cap)
+                     artifact (:verification-artifact stored)
+                     _ (when-not (and (= #{:schema :repair/id :repair/schema-version
+                                           :repair/status :failed-attempt :verification-id
+                                           :verification-artifact :finding-artifact :actors
+                                           :review :implementation}
+                                         (set (keys stored)))
+                                      (= #{:path :sha256} (set (keys artifact)))
+                                      (nonblank? (:path artifact)))
+                         (throw (ex-info "Historical admission record corrupt"
+                                         {:path (.getPath ^java.io.File file)})))
+                     expected (admission-from!
+                               root {:verification-root (.getParent (io/file (:path artifact)))
+                                     :path (:path artifact)
+                                     :sha256 (:sha256 artifact)})]
+                 (when-not (= stored expected)
+                   (throw (ex-info "Historical admission record corrupt"
+                                   {:path (.getPath ^java.io.File file)})))
+                 [(:repair/id stored) stored])))
+        (->> (or (.listFiles (io/file root "verifications")) [])
+             (filter #(.isFile %))
+             (filter #(str/ends-with? (.getName %) ".edn")))))
 
 (defn obligation-history
   "All immutable findings for an attempt, enriched with any implementation and
@@ -272,7 +355,7 @@
   ([attempt-id] (obligation-history default-root attempt-id))
   ([root attempt-id]
    (let [implementations (indexed-records root "implementations")
-         verifications (indexed-records root "verifications")
+         verifications (verified-admissions root)
          resolutions (indexed-records root "resolutions")]
      (->> (records (io/file root "findings"))
           (filter #(= attempt-id (:attempt-id %)))
@@ -292,7 +375,7 @@
   ([root]
    (let [resolved (set (map :repair/id (records (io/file root "resolutions"))))
          implementations (indexed-records root "implementations")
-         verifications (indexed-records root "verifications")]
+         verifications (verified-admissions root)]
      (->> (records (io/file root "findings"))
           (remove #(contains? resolved (:repair/id %)))
           (mapv (fn [finding]

@@ -9,7 +9,7 @@
         store (doto (io/file root "store") .mkdir)
         obligation {:repair/id "repair-057" :repair/status :open :repair/class :machine-failure
                     :attempt-id "attempt-057"}
-        verification {:schema :wm/historical-repair-verification-v1
+        verification0 {:schema :wm/historical-repair-verification-v1
                       :verification-id "verify-1" :repair-id "repair-057"
                       :state :awaiting-validation :repair-resolved? false
                       :actors {:author "zai-2" :reviewer "codex-10"}
@@ -17,12 +17,15 @@
                                :execution {:executed true :tool-events 1}}
                       :qualification {:path "/authority/q.edn" :sha256 (apply str (repeat 64 "a"))
                                       :check-ids [:recovery :exhaustion]}
-                      :finding {:path "/authority/f.edn" :sha256 (apply str (repeat 64 "b"))}
                       :implementation {:first "a" :last "b" :source-head "c"}}
-        file (io/file evidence-root "verify.edn")
-        _ (spit file (str (pr-str verification) "\n"))
         _ (doto (io/file store "findings") .mkdir)
-        _ (spit (io/file store "findings/repair-057.edn") (str (pr-str obligation) "\n"))]
+        finding-file (io/file store "findings/repair-057.edn")
+        _ (spit finding-file (str (pr-str obligation) "\n"))
+        verification (assoc verification0 :finding
+                            {:path (.getCanonicalPath finding-file)
+                             :sha256 (digest/sha256 (slurp finding-file))})
+        file (io/file evidence-root "verify.edn")
+        _ (spit file (str (pr-str verification) "\n"))]
     (doseq [bad [(assoc-in verification [:review :job-id] "")
                  (assoc-in verification [:review :execution :executed] false)
                  (assoc-in verification [:actors :reviewer] "zai-2")
@@ -34,8 +37,16 @@
                     {:verification-root (.getPath evidence-root) :path (.getPath file)
                      :sha256 (digest/sha256 (slurp file))}))))
     (spit file (str (pr-str verification) "\n"))
-    (let [record (repair/record-historical-verification!
-                  (.getPath store) obligation
+    (let [evidence {:verification-root (.getPath evidence-root) :path (.getPath file)
+                    :sha256 (digest/sha256 (slurp file))}
+          candidate (repair/historical-verification-candidate (.getPath store) evidence)
+          entry (runner/historical-revalidation-entry
+                 obligation candidate {:author "zai-2" :repair-reviewer "codex-10"})]
+      (is (= :open (:repair/status (first (repair/open-obligations (.getPath store))))))
+      (is (= :historical-repair-revalidation
+             (:construction-kind (runner/construct-for-decision entry)))))
+    (let [record (repair/commit-historical-verification!
+                  (.getPath store)
                   {:verification-root (.getPath evidence-root) :path (.getPath file)
                    :sha256 (digest/sha256 (slurp file))})]
       (let [entry (runner/historical-revalidation-entry
@@ -46,6 +57,10 @@
                  obligation record {:author "zai-2" :repair-reviewer "zai-2"})))
       (is (= :awaiting-validation (:repair/status record)))
       (is (= :awaiting-validation (:repair/status (first (repair/open-obligations (.getPath store)))))))
+    (spit file (str (pr-str (assoc verification :verification-id "drifted")) "\n"))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (repair/open-obligations (.getPath store))))
+    (spit file (str (pr-str verification) "\n"))
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (repair/record-historical-verification!
                   (.getPath store) obligation
