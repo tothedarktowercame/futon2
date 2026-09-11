@@ -388,6 +388,14 @@
                     (execution-identity? (:validation-attempt record))
                     (execution-identity? (:verification-attempt record))
                     (= #{:cohort-id :cohort-sha256 :attempt-id}
+                       (set (keys (:verification-execution record))))
+                    (keyword? (get-in record [:verification-execution :cohort-id]))
+                    (= (get-in record [:verification-attempt :id])
+                       (get-in record [:verification-execution :attempt-id]))
+                    (string? (get-in record [:verification-execution :cohort-sha256]))
+                    (re-matches #"[0-9a-f]{64}"
+                                (get-in record [:verification-execution :cohort-sha256]))
+                    (= #{:cohort-id :cohort-sha256 :attempt-id}
                        (set (keys (:validation-execution record))))
                     (keyword? (get-in record [:validation-execution :cohort-id]))
                     (safe-id? (get-in record [:validation-execution :attempt-id]))
@@ -397,6 +405,10 @@
                     (= (get-in record [:validation-attempt :id])
                        (str (name (get-in record [:validation-execution :cohort-id]))
                             "--" (get-in record [:validation-execution :attempt-id])))
+                    (not= (select-keys (:validation-execution record)
+                                       [:cohort-id :attempt-id])
+                          (select-keys (:verification-execution record)
+                                       [:cohort-id :attempt-id]))
                     (not= (:validation-attempt record) (:verification-attempt record))
                     (not= (get-in record [:validation-attempt :id]) (:attempt-id finding))
                     (safe-id? (:click-id record)) (safe-id? (:run-id record))

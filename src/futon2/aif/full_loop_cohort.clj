@@ -511,3 +511,22 @@
                        {:reason :execution-cohort-exhausted})))
      {:cohort-id (:cohort-id binding) :target (:target state)
       :remaining (:remaining state) :snapshot snapshot})))
+
+(defn closed-execution
+  "Validate BINDING against its immutable preregistration, activation, and
+  ledger, then return the qualified identity of one exact closed attempt.
+  This is read-only and deliberately does not require remaining capacity."
+  [binding attempt-id]
+  (let [_ (execution-preflight binding false)
+        state (ledger (:preregistration binding) (:data-root binding))
+        matches (filterv #(= attempt-id (:attempt/id %)) (:attempts state))]
+    (when-not (and (string? attempt-id) (not (str/blank? attempt-id))
+                   (= 1 (count matches)) (:closed? (first matches)))
+      (throw (ex-info "Closed cohort execution unavailable"
+                      {:reason :closed-execution-unavailable})))
+    {:kind :runner-execution
+     :id (str (name (:cohort-id binding)) "--" attempt-id)
+     :cohort-id (:cohort-id binding)
+     :cohort-sha256 (:sha256 binding)
+     :attempt-id attempt-id
+     :outcome (:outcome (first matches))}))
