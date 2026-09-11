@@ -294,18 +294,17 @@
                             :effective-environment])
             record (cond-> {:run/id run-id
                     :click/id (:click-id raw-opts)
-                    :runner-attempt/id (:attempt-id result)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
                     :traceWritten (boolean (:trace-path result))
                     :route route}
                      pin-identity (assoc :run4/task-pin pin-identity)
-                     (:run4/requested-pin raw-opts)
-                     (assoc :run4/requested-pin (:run4/requested-pin raw-opts)
-                            :run4/controller-attempt-id
-                            (:run4/controller-attempt-id raw-opts))
                      (= :historical-verification-awaiting-validation (:outcome result))
-                     (assoc :run4/enacted-action
+                     (assoc :runner-attempt/id (:attempt-id result)
+                            :run4/requested-pin (:run4/requested-pin raw-opts)
+                            :run4/controller-attempt-id
+                            (:run4/controller-attempt-id raw-opts)
+                            :run4/enacted-action
                             (get-in result [:checkpoints :selection :judgment
                                             :selected-action])
                             :historical-verification
