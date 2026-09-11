@@ -19,10 +19,17 @@
    `futon2:holes/labs/wm-contract/runs/D1-evidence/kl-worked-example.edn:11`."
   (set (keys seeded-positive-masses)))
 
+(def non-disposition-outcomes
+  #{:historical-verification-awaiting-validation
+    :historical-verification-refused})
+
+(def disposition-outcomes
+  (set/difference cohort/outcome-kinds non-disposition-outcomes))
+
 (def named-zero-dispositions
   "The seven named-zero obligations, derived from the gated authority at
    `futon2:src/futon2/aif/full_loop_cohort.clj:31-33` rather than retyped."
-  (set/difference cohort/outcome-kinds observed-dispositions))
+  (set/difference disposition-outcomes observed-dispositions))
 
 ;; 2026-09-09, walkthrough Item 18b: canonical tetrahedron names; the earlier
 ;; people/money/organisations reading is a specialization, not new carriers.
@@ -35,7 +42,7 @@
    deliberately unruled because certification/update records and the named
    epistemic-validity region have no attested source enumeration
    (`futon2:holes/labs/wm-contract/aif-equations.edn:211`)."
-  {:organization {:status :ruled :carrier cohort/outcome-kinds}
+  {:organization {:status :ruled :carrier disposition-outcomes}
    :nouns {:status :named-empty :carrier #{}}
    :verbs {:status :named-empty :carrier #{} :reason :vsat-vertex}
    :evidence {:status :unruled
@@ -47,7 +54,7 @@
    `futon2:holes/labs/wm-contract/aif-equations.edn:214`; named zeros remain in
    support so the positivity premise at
    `mathlib4:DarkTower/WarMachine/Holes.lean:6993-6997` can reach them."
-  {:support cohort/outcome-kinds
+  {:support disposition-outcomes
    :mass (merge (zipmap named-zero-dispositions (repeat 0))
                 seeded-positive-masses)})
 
