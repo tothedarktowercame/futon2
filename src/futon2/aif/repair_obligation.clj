@@ -218,10 +218,27 @@
 (defn- safe-id? [x]
   (and (string? x) (re-matches #"[A-Za-z0-9][A-Za-z0-9._-]{0,127}" x)))
 
+(defn- historical-directory! [root child create?]
+  (let [base (.getCanonicalFile (io/file root))
+        directory (io/file base child)
+        path (.toPath directory)]
+    (when-not (and (.isDirectory base)
+                   (not (Files/isSymbolicLink path))
+                   (= base (.getCanonicalFile (.getParentFile directory)))
+                   (= directory (.getCanonicalFile directory)))
+      (throw (ex-info "Historical store directory outside authority" {:child child})))
+    (when (and create? (not (.exists directory)))
+      (Files/createDirectory path (make-array java.nio.file.attribute.FileAttribute 0))
+      (with-open [parent (FileChannel/open (.toPath base)
+                                           (make-array StandardOpenOption 0))]
+        (.force parent true)))
+    (when (and (.exists directory) (not (.isDirectory directory)))
+      (throw (ex-info "Historical store directory malformed" {:child child})))
+    (when (.isDirectory directory) directory)))
+
 (defn- write-new-durable! [root repair-id value]
   (when-not (safe-id? repair-id) (throw (ex-info "Unsafe repair identity" {})))
-  (let [base (.getCanonicalFile (io/file root "verifications"))
-        _ (.mkdirs base)
+  (let [base (historical-directory! root "verifications" true)
         target (io/file base (str repair-id ".edn"))
         bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")]
     (when-not (and (= base (.getCanonicalFile (.getParentFile target)))
@@ -275,8 +292,9 @@
 (defn- finding-capture! [root repair-id]
   (when-not (safe-id? repair-id)
     (throw (ex-info "Unsafe repair identity" {:repair/id repair-id})))
-  (capture-under! (io/file root "findings")
-                  (io/file root "findings" (str repair-id ".edn"))))
+  (let [directory (historical-directory! root "findings" false)]
+    (when-not directory (throw (ex-info "Historical finding directory missing" {})))
+    (capture-under! directory (io/file directory (str repair-id ".edn")))))
 
 (defn- admission-from! [root {:keys [verification-root path sha256]}]
   (let [cap (capture-under! verification-root path)
@@ -323,9 +341,10 @@
   ([root _obligation evidence] (commit-historical-verification! root evidence)))
 
 (defn- verified-admissions [root]
-  (into {}
+  (let [directory (historical-directory! root "verifications" false)]
+    (into {}
         (map (fn [file]
-               (let [cap (capture-under! (io/file root "verifications") file)
+               (let [cap (capture-under! directory file)
                      stored (:value cap)
                      artifact (:verification-artifact stored)
                      _ (when-not (and (= #{:schema :repair/id :repair/schema-version
@@ -345,9 +364,8 @@
                    (throw (ex-info "Historical admission record corrupt"
                                    {:path (.getPath ^java.io.File file)})))
                  [(:repair/id stored) stored])))
-        (->> (or (.listFiles (io/file root "verifications")) [])
-             (filter #(.isFile %))
-             (filter #(str/ends-with? (.getName %) ".edn")))))
+        (->> (or (when directory (.listFiles ^java.io.File directory)) [])
+             (filter #(str/ends-with? (.getName %) ".edn"))))))
 
 (defn obligation-history
   "All immutable findings for an attempt, enriched with any implementation and

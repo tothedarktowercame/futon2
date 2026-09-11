@@ -66,3 +66,14 @@
                   (.getPath store) obligation
                   {:verification-root (.getPath evidence-root) :path (.getPath file)
                    :sha256 (digest/sha256 (slurp file))})))))
+
+(deftest historical-store-directory-escape-refuses
+  (let [store (tmp) external (tmp)
+        link (.toPath (io/file store "verifications"))]
+    (java.nio.file.Files/createSymbolicLink
+     link (.toPath external) (make-array java.nio.file.attribute.FileAttribute 0))
+    (is (thrown? clojure.lang.ExceptionInfo (repair/open-obligations (.getPath store))))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 ((ns-resolve 'futon2.aif.repair-obligation 'write-new-durable!)
+                  (.getPath store) "repair-057" {:test :must-not-write})))
+    (is (empty? (.listFiles external)))))
