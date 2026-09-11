@@ -1176,6 +1176,34 @@
                    {:from :independent-review :to :successor-validation}]
      :policy-holes []}))
 
+(defn historical-revalidation-entry
+  "Admit a verified historical repair as a distinct selectable action. This
+  does not execute it or relax ordinary author invariants."
+  [obligation admission casting]
+  (when (and (= :open (:repair/status obligation))
+             (= :machine-failure (:repair/class obligation))
+             (= :wm/historical-repair-admission-v1 (:schema admission))
+             (= (:repair/id obligation) (:repair/id admission))
+             (= :awaiting-validation (:repair/status admission))
+             (= (get-in admission [:actors :author]) (:author casting))
+             (= (get-in admission [:actors :reviewer]) (:repair-reviewer casting))
+             (not= (:author casting) (:repair-reviewer casting)))
+    {:rank 0 :action {:type :revalidate-historical-repair
+                      :target (:repair/id obligation)
+                      :repair-obligation obligation
+                      :admission admission}}))
+
+(defmethod construct-selected-action :revalidate-historical-repair
+  [entry]
+  (let [action (:action entry) admission (:admission action)]
+    {:mission (:target action)
+     :construction-kind :historical-repair-revalidation
+     :selected-action (dissoc action :admission)
+     :verification-id (:verification-id admission)
+     :verification-artifact (:verification-artifact admission)
+     :effect :awaiting-validation
+     :production-successor-required? true}))
+
 (defmethod construct-selected-action :default
   [entry]
   (some-> (first (cascade/cascade-lane [entry] {:n 1 :budget 6}))

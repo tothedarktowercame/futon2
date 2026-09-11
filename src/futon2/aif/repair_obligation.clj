@@ -10,6 +10,7 @@
             [clojure.java.shell :as shell]
             [clojure.pprint :as pp]
             [clojure.string :as str]
+            [futon2.aif.c-fold-config :as digest]
             [futon2.aif.substrate :as substrate])
   (:import [java.nio.file Files StandardOpenOption]
            [java.time Instant]))
@@ -205,12 +206,73 @@
   (into {} (map (juxt :repair/id identity)
                 (records (io/file root child)))))
 
+(defn- strict-read [text path]
+  (with-open [r (java.io.PushbackReader. (java.io.StringReader. text))]
+    (let [v (edn/read {:eof ::empty} r)]
+      (when (or (= ::empty v) (not= ::end (edn/read {:eof ::end} r)))
+        (throw (ex-info "Historical verification artifact corrupt" {:path (str path)})))
+      v)))
+
+(defn record-historical-verification!
+  "Admit a separately verified historical implementation to awaiting-validation.
+  This creates no implementation entity and never resolves the obligation."
+  ([obligation evidence] (record-historical-verification! default-root obligation evidence))
+  ([root obligation {:keys [verification-root path sha256]}]
+   (let [base (.getCanonicalFile (io/file verification-root))
+         file (.getCanonicalFile (io/file path))
+         text (when (and (.isDirectory base) (.isFile file)
+                         (.startsWith (.toPath file) (.toPath base))) (slurp file))
+         value (when text (strict-read text file))]
+     (when-not (and (= :open (:repair/status obligation))
+                    (= :machine-failure (:repair/class obligation))
+                    (= sha256 (when text (digest/sha256 text)))
+                    (= #{:schema :verification-id :repair-id :state :repair-resolved?
+                         :actors :review :qualification :finding :implementation}
+                       (set (keys value)))
+                    (= :wm/historical-repair-verification-v1 (:schema value))
+                    (= (:repair/id obligation) (:repair-id value))
+                    (= :awaiting-validation (:state value))
+                    (false? (:repair-resolved? value))
+                    (string? (:verification-id value))
+                    (not (str/blank? (:verification-id value)))
+                    (every? #(and (string? %) (not (str/blank? %)))
+                            ((juxt :author :reviewer) (:actors value)))
+                    (not= (get-in value [:actors :author])
+                          (get-in value [:actors :reviewer]))
+                    (= :approve (get-in value [:review :verdict]))
+                    (true? (get-in value [:review :execution :executed]))
+                    (string? (get-in value [:review :job-id]))
+                    (not (str/blank? (get-in value [:review :job-id])))
+                    (= #{:path :sha256 :check-ids}
+                       (set (keys (:qualification value))))
+                    (= #{:path :sha256} (set (keys (:finding value))))
+                    (seq (get-in value [:qualification :check-ids]))
+                    (= (count (get-in value [:qualification :check-ids]))
+                       (count (distinct (get-in value [:qualification :check-ids]))))
+                    (every? keyword? (get-in value [:qualification :check-ids]))
+                    (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
+                            [(get-in value [:qualification :sha256])
+                             (get-in value [:finding :sha256])]))
+       (throw (ex-info "Historical verification lacks admitted evidence"
+                       {:repair/id (:repair/id obligation)})))
+     (let [record {:schema :wm/historical-repair-admission-v1
+                   :repair/id (:repair/id obligation)
+                   :repair/schema-version 1 :repair/status :awaiting-validation
+                   :failed-attempt (:attempt-id obligation)
+                   :verification-id (:verification-id value)
+                   :verification-artifact {:path (.getPath file) :sha256 sha256}
+                   :actors (:actors value)
+                   :review (:review value) :implementation (:implementation value)}]
+       (write-new! (io/file root "verifications" (str (:repair/id obligation) ".edn")) record)
+       record))))
+
 (defn obligation-history
   "All immutable findings for an attempt, enriched with any implementation and
   resolution records. Unlike `open-obligations`, this is an audit view."
   ([attempt-id] (obligation-history default-root attempt-id))
   ([root attempt-id]
    (let [implementations (indexed-records root "implementations")
+         verifications (indexed-records root "verifications")
          resolutions (indexed-records root "resolutions")]
      (->> (records (io/file root "findings"))
           (filter #(= attempt-id (:attempt-id %)))
@@ -219,6 +281,8 @@
                     (get implementations (:repair/id finding))
                     (assoc :repair/implementation
                            (get implementations (:repair/id finding)))
+                    (get verifications (:repair/id finding))
+                    (assoc :repair/verification (get verifications (:repair/id finding)))
                     (get resolutions (:repair/id finding))
                     (assoc :repair/resolution
                            (get resolutions (:repair/id finding))))))))))
@@ -227,19 +291,23 @@
   ([] (open-obligations default-root))
   ([root]
    (let [resolved (set (map :repair/id (records (io/file root "resolutions"))))
-         implementations (indexed-records root "implementations")]
+         implementations (indexed-records root "implementations")
+         verifications (indexed-records root "verifications")]
      (->> (records (io/file root "findings"))
           (remove #(contains? resolved (:repair/id %)))
           (mapv (fn [finding]
                   (let [finding (update finding :repair/class
                                         #(if (= :system-actuation-failure %)
                                            :machine-failure %))]
-                    (if-let [implementation (get implementations
+                    (if-let [verification (get verifications (:repair/id finding))]
+                      (assoc finding :repair/status :awaiting-validation
+                             :repair/verification verification)
+                      (if-let [implementation (get implementations
                                                     (:repair/id finding))]
                       (assoc finding
                              :repair/status :awaiting-validation
                              :repair/implementation implementation)
-                      finding))))
+                      finding)))))
           (sort-by :opened-at)
           vec))))
 
