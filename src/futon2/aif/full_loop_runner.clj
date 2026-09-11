@@ -2645,7 +2645,18 @@
                                     {:kind :full-loop-outcome :attempt-id attempt-id})
                        trace-path (get-in @checkpoints
                                           [:construction :judgment :trace-path])
+                       historical-route?
+                       (= :revalidate-historical-repair
+                          (get-in @checkpoints [:selection :ground
+                                                :run4/enacted-action :type]))
                        run-route (cond-> (vec (:wm/route selection-judgment))
+                                   (and historical-route?
+                                        (empty? (:wm/route selection-judgment)))
+                                   (into [{:node :STOP_LINE :via :repair-obligation
+                                           :at (str (Instant/now))}
+                                          {:node :HISTORICAL_VERIFICATION
+                                           :via :verified-admission
+                                           :at (str (Instant/now))}])
                                    trace-path
                                    (conj {:node :TRACE
                                           :via "futon2.aif.trace/write-trace!"
