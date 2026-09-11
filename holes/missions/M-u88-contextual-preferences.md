@@ -98,3 +98,31 @@ mission's worker stops at the demonstrated interpreter.
 Exact event replay is idempotent; conflicting reuse refuses. Registry absence
 does not prove absence of an inbox route. These clarify the source contract,
 not a new sanction or institutional adoption.
+
+## Activation-boundary parcel, 2026-09-11 (independent review pending)
+
+Implemented `futon2.aif.contextual-preferences/derive-binding`, a pure
+fixture-only activation derivation. The input carries a versioned roster with
+per-recipient role/reason/evidence, applicability scoped to the task, a supplied
+instance-scoped warrant, payload/view, receipt standard, adapter evidence, and
+an explicit timeliness flag. Deadlines use fixture integer ticks. The view
+digest is checked against SHA-256 of the exact UTF-8 view bytes.
+
+Valid bindings derive separate pending obligations for A and O and coverage
+0/2. Invalid or missing prerequisites return typed refusals with field paths;
+unknown membership/applicability cannot activate. Transport-only standards
+cannot substitute for authorized inboxes, and missing adapters return an
+adapter gap. Solo rosters stay solo; empty rosters are vacuous and earn no
+delivery evidence. The supplied immutable binding is retained in the result.
+
+Replay validation:
+`clojure -M:test -m cognitect.test-runner -n futon2.aif.contextual-preferences-test`
+passes 5 tests / 82 assertions. Both source and test pass clj-kondo (zero
+warnings/errors) and `futon4/dev/check-parens.el`.
+
+This is an activation boundary, not the completed fixture episode. Event
+validation/replay, receipts, deadlines, disputes, and amendments remain open,
+along with independent review. Warrant and adapter evidence are supplied
+fixture assertions, not production authentication. No selector, ranking,
+preference masses, endpoints, transport, live agent interactions, binding
+adoption, or registry/worklist writes were added. U88 closure remains Joe's.
