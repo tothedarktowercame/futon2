@@ -14,9 +14,9 @@
           root (get-in deps [:historical-action :repair-root])
           obligation (first (repair/open-obligations root))
           candidate ((:historical-verification-candidate-fn ports) obligation)
-          _ ((:historical-verification-execute-fn ports)
-             {:execution-identity {:kind :runner-execution :id "verification-prior"}
-              :obligation obligation :candidate candidate})
+          admitted ((:historical-verification-execute-fn ports)
+                    {:execution-identity {:kind :runner-execution :id "verification-prior"}
+                     :obligation obligation :candidate candidate})
           original deployment/materialize]
       (with-redefs [deployment/materialize
                     (fn [text dependencies]
@@ -25,9 +25,13 @@
                                       (slurp (io/file (:authority-root template)
                                                       (get-in template [:manifest :ref]))))]
                         (original text (merge dependencies deps
-                          {:historical-successor {:repair-id "repair-057"
-                                                   :series-id (:series-id manifest)
-                                                   :trial-id (get-in manifest [:trials 0 :trial-id])}}))))]
+                          {:historical-successor
+                           {:repair-id "repair-057"
+                            :verification-id (:verification-id admitted)
+                            :verification-attempt (:verification-attempt admitted)
+                            :successor {:series-id (:series-id manifest)
+                                        :trial-id (get-in manifest [:trials 0 :trial-id])
+                                        :attempt-id (get-in manifest [:trials 0 :attempt-id])}}}))))]
         (t/test-vars [#'u/async-wrapper-persists-to-reader-roots-and-terminal-roundtrips])
         (assert (empty? (repair/open-obligations root)) "Historical repair not resolved")
         (prn {:historical-resolution :verified})))))))
