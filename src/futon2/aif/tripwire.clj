@@ -184,22 +184,23 @@
             :as observation}]
   (when (and (= :opportunity phase) (= :end transition)
              (or cohort? (:tripwire/force? observation)))
-    (let [cohort-complete? (= :cohort-complete outcome)
+    (let [durable-attempt-id (or (:external-attempt-id observation) attempt-id)
+          cohort-complete? (= :cohort-complete outcome)
           enumerated? (or cohort-complete?
                           (contains? cohort/outcome-kinds outcome))
           zero-achievement? (and (not= :grounded-change outcome)
                                  (not cohort-complete?))
-          statuses (when (and zero-achievement? attempt-id)
+          statuses (when (and zero-achievement? durable-attempt-id)
                      (attempt-finding-statuses
                       (or (:repair-root observation) repair/default-root)
-                      attempt-id))]
+                      durable-attempt-id))]
       (cond-> []
         (not enumerated?)
         (conj {:kind :unknown-outcome :outcome outcome})
         (and zero-achievement?
              (empty? (set/intersection #{:open :superseded} statuses)))
         (conj {:kind :missing-durable-stop-line
-               :attempt-id attempt-id :statuses statuses})))))
+               :attempt-id durable-attempt-id :statuses statuses})))))
 
 (defn- t4 [{:keys [a-matrix-events grounding-witnesses]}]
   (when (some? a-matrix-events)

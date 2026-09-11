@@ -2419,7 +2419,8 @@
         external-attempt-id (if execution-cohort
                               (str (name (:cohort-id execution-cohort)) "--" attempt-id)
                               attempt-id)
-        _ (swap! phase-context assoc :attempt-id attempt-id)
+        _ (swap! phase-context assoc :attempt-id attempt-id
+                 :external-attempt-id external-attempt-id)
         checkpoint! (fn [checkpoint cell]
                       (swap! checkpoints assoc checkpoint cell)
                       (when cohort?

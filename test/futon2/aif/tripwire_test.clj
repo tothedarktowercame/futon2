@@ -68,6 +68,18 @@
              (:kind (first (tripwire/evaluate-wire
                             :T3 (assoc observation :outcome :surprise)))))))))
 
+(deftest t3-prefers-qualified-external-attempt-identity
+  (let [root (temp-dir)
+        _ (write-edn! root "findings" "repair-qualified.edn"
+                      {:repair/id "repair-qualified" :repair/status :open
+                       :attempt-id "run4-a--attempt-001"})
+        observation {:phase :opportunity :transition :end
+                     :outcome :agent-unavailable :cohort? true
+                     :attempt-id "attempt-001"
+                     :external-attempt-id "run4-a--attempt-001"
+                     :repair-root (.getPath root)}]
+    (is (empty? (tripwire/evaluate-wire :T3 observation)))))
+
 (deftest t4-a-matrix-provenance-trips-without-grounding-witness
   (let [event {:event-id "qa-1" :entity-id "impl-1"}
         violations (tripwire/evaluate-wire
