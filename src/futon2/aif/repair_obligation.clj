@@ -236,10 +236,10 @@
       (throw (ex-info "Historical store directory malformed" {:child child})))
     (when (.isDirectory directory) directory)))
 
-(defn- write-new-durable! [root repair-id value]
-  (when-not (safe-id? repair-id) (throw (ex-info "Unsafe repair identity" {})))
-  (let [base (historical-directory! root "verifications" true)
-        target (io/file base (str repair-id ".edn"))
+(defn- write-new-durable! [root child record-id value]
+  (when-not (safe-id? record-id) (throw (ex-info "Unsafe repair identity" {})))
+  (let [base (historical-directory! root child true)
+        target (io/file base (str record-id ".edn"))
         bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")]
     (when-not (and (= base (.getCanonicalFile (.getParentFile target)))
                    (not (Files/isSymbolicLink (.toPath target))))
@@ -254,7 +254,8 @@
     (with-open [parent (FileChannel/open (.toPath base)
                                          (make-array StandardOpenOption 0))]
       (.force parent true))
-    (.getPath target)))
+    {:path (.getPath target)
+     :sha256 (digest/sha256 (String. bytes "UTF-8"))}))
 
 (defn- capture-under! [root path]
   (let [base (.getCanonicalFile (io/file root))
@@ -330,8 +331,14 @@
   verification bytes are the only identity sources."
   ([evidence] (commit-historical-verification! default-root evidence))
   ([root evidence]
-   (let [record (admission-from! root evidence)]
-     (write-new-durable! root (:repair/id record) record)
+   (let [candidate (admission-from! root evidence)
+         source (:verification-artifact candidate)
+         cap (capture-under! (:verification-root evidence) (:path evidence))
+         copy (write-new-durable! root "verification-evidence"
+                                  (:verification-id candidate) (:value cap))
+         record (assoc candidate :verification-source source
+                                 :verification-artifact copy)]
+     (write-new-durable! root "verifications" (:repair/id record) record)
      record)))
 
 (defn record-historical-verification!
@@ -349,17 +356,24 @@
                      artifact (:verification-artifact stored)
                      _ (when-not (and (= #{:schema :repair/id :repair/schema-version
                                            :repair/status :failed-attempt :verification-id
-                                           :verification-artifact :finding-artifact :actors
+                                           :verification-artifact :verification-source
+                                           :finding-artifact :actors
                                            :review :implementation}
                                          (set (keys stored)))
                                       (= #{:path :sha256} (set (keys artifact)))
-                                      (nonblank? (:path artifact)))
+                                      (nonblank? (:path artifact))
+                                      (= (.getCanonicalPath
+                                          (io/file root "verification-evidence"
+                                                   (str (:verification-id stored) ".edn")))
+                                         (.getCanonicalPath (io/file (:path artifact)))))
                          (throw (ex-info "Historical admission record corrupt"
                                          {:path (.getPath ^java.io.File file)})))
-                     expected (admission-from!
+                     candidate (admission-from!
                                root {:verification-root (.getParent (io/file (:path artifact)))
                                      :path (:path artifact)
-                                     :sha256 (:sha256 artifact)})]
+                                     :sha256 (:sha256 artifact)})
+                     expected (assoc candidate :verification-artifact artifact
+                                               :verification-source (:verification-source stored))]
                  (when-not (= stored expected)
                    (throw (ex-info "Historical admission record corrupt"
                                    {:path (.getPath ^java.io.File file)})))

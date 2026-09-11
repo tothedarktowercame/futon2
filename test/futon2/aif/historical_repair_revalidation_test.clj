@@ -1,5 +1,6 @@
 (ns futon2.aif.historical-repair-revalidation-test
   (:require [clojure.test :refer [deftest is]] [clojure.java.io :as io]
+            [clojure.pprint :as pprint]
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.repair-obligation :as repair]))
@@ -57,10 +58,12 @@
                  obligation record {:author "zai-2" :repair-reviewer "zai-2"})))
       (is (= :awaiting-validation (:repair/status record)))
       (is (= :awaiting-validation (:repair/status (first (repair/open-obligations (.getPath store)))))))
-    (spit file (str (pr-str (assoc verification :verification-id "drifted")) "\n"))
+    (let [copy (io/file store "verification-evidence/verify-1.edn")]
+      (spit copy (str (pr-str (assoc verification :verification-id "drifted")) "\n")))
     (is (thrown? clojure.lang.ExceptionInfo
                  (repair/open-obligations (.getPath store))))
-    (spit file (str (pr-str verification) "\n"))
+    (spit (io/file store "verification-evidence/verify-1.edn")
+          (with-out-str (pprint/pprint verification)))
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (repair/record-historical-verification!
                   (.getPath store) obligation
@@ -75,5 +78,5 @@
     (is (thrown? clojure.lang.ExceptionInfo (repair/open-obligations (.getPath store))))
     (is (thrown? clojure.lang.ExceptionInfo
                  ((ns-resolve 'futon2.aif.repair-obligation 'write-new-durable!)
-                  (.getPath store) "repair-057" {:test :must-not-write})))
+                  (.getPath store) "verifications" "repair-057" {:test :must-not-write})))
     (is (empty? (.listFiles external)))))
