@@ -415,7 +415,14 @@
                     (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
                             ((juxt :projection-digest :run-record-digest) record)))
        (throw (ex-info "Historical successor evidence refused" {:repair/id repair-id})))
-     (write-new-durable! root "resolutions" repair-id record)
+     (try
+       (write-new-durable! root "resolutions" repair-id record)
+       (catch java.nio.file.FileAlreadyExistsException _
+         (let [directory (historical-directory! root "resolutions" false)
+               existing (capture-under! directory (io/file directory (str repair-id ".edn")))]
+           (when-not (= record (:value existing))
+             (throw (ex-info "Historical resolution conflicts with retained evidence"
+                             {:repair/id repair-id}))))))
      record)))
 
 (defn- verified-admissions [root]
