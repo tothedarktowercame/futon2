@@ -1,0 +1,19 @@
+{:schema :wm/historical-qualification-plan-v1
+ :verification-id "repair-057-revalidation-20260911-v1"
+ :repair-id "repair-attempt-057-untyped-failure"
+ :sources
+ [{:path "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj"
+   :sha256 "f42e30dbfd94f9e1633866dc31fcbbca8e830ae6060d5443fa3b76081529c4b3"}
+  {:path "/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj"
+   :sha256 "0a6ac35f08ee94473c7547f2ff54ae028af0bbbcc871a6d37532d9e14656ddb0"}
+  {:path "/home/joe/code/futon2/test/futon2/aif/full_loop_runner_test.clj"
+   :sha256 "ce12668770bc5560de66851e367060311d13ada33c2c750c4bb745402a81a6a1"}
+  {:path "/home/joe/code/futon2/test/futon2/aif/repair_obligation_test.clj"
+   :sha256 "8d53ba851aa2a1f49115179eaf4ba79b48fea78462ff930e6242742abe9ecbd2"}]
+ :checks
+ [{:id :full-runner-regression
+   :argv ["clojure" "-M:test:test-all" "-n" "futon2.aif.full-loop-runner-test"]
+   :timeout-ms 600000}
+  {:id :repair-store-regression
+   :argv ["clojure" "-M:test:test-all" "-n" "futon2.aif.repair-obligation-test"]
+   :timeout-ms 600000}]}
