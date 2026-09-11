@@ -1,5 +1,6 @@
 (ns futon2.aif.repair-obligation-test
   (:require [clojure.java.shell :as shell]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.repair-obligation :as repair]))
@@ -150,6 +151,60 @@
     (is (= first-record replay))
     (is (= :repair-finding-conflict (:reason (ex-data conflict))))
     (is (= [first-record] (repair/open-obligations root)))))
+
+(deftest system-finding-replay-rejects-symlink-authority-and-is-race-safe
+  (let [root (temp-root)
+        outside-root (temp-root)
+        finding {:attempt-id "cohort--ea1-authority--attempt-002"
+                 :repair-class :environmental-hold
+                 :failure-stage :agent-readiness
+                 :outcome :agent-unavailable
+                 :failure-kind :agent-readiness-failed
+                 :error "Agency unavailable"
+                 :opened-at "2026-09-11T14:45:12Z"}
+        results (mapv deref
+                      [(future (repair/record-system-failure! root finding))
+                       (future (repair/record-system-failure! root finding))])
+        record (first results)
+        target (java.io.File. root
+                              (str "findings/" (:repair/id record) ".edn"))
+        outside (java.io.File. outside-root "outside.edn")]
+    (is (= (first results) (second results)))
+    (io/copy target outside)
+    (io/delete-file target)
+    (java.nio.file.Files/createSymbolicLink
+     (.toPath target) (.toPath outside)
+     (make-array java.nio.file.attribute.FileAttribute 0))
+    (is (= :repair-finding-conflict
+           (:reason
+            (ex-data
+             (try (repair/record-system-failure! root finding) nil
+                  (catch clojure.lang.ExceptionInfo e e))))))
+    (let [symlink-root (str (temp-root) "-link")]
+      (java.nio.file.Files/createSymbolicLink
+       (.toPath (java.io.File. symlink-root)) (.toPath (java.io.File. root))
+       (make-array java.nio.file.attribute.FileAttribute 0))
+      (is (= :repair-finding-root-refused
+             (:reason
+              (ex-data
+               (try (repair/record-system-failure! symlink-root
+                                                   (assoc finding :attempt-id "other"))
+                    nil
+                    (catch clojure.lang.ExceptionInfo e e)))))))
+    (let [parent-root (temp-root)
+          external-findings (java.io.File. (temp-root) "external-findings")]
+      (.mkdir external-findings)
+      (java.nio.file.Files/createSymbolicLink
+       (.toPath (java.io.File. parent-root "findings"))
+       (.toPath external-findings)
+       (make-array java.nio.file.attribute.FileAttribute 0))
+      (is (= :repair-finding-root-refused
+             (:reason
+              (ex-data
+               (try (repair/record-system-failure! parent-root
+                                                   (assoc finding :attempt-id "parent"))
+                    nil
+                    (catch clojure.lang.ExceptionInfo e e)))))))))
 
 (deftest failed-commit-cannot-be-its-own-repair-implementation
   (let [root (temp-root)

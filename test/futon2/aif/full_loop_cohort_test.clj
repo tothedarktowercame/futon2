@@ -118,6 +118,45 @@
       (is (not= (:id ai) (:id bi)))
       (is (= "attempt-001" (:attempt-id ai) (:attempt-id bi))))))
 
+(deftest present-malformed-execution-authority-cannot-downgrade-to-legacy
+  (let [root (tmp-root)
+        raw (slurp prereg-path)
+        binding {:preregistration prereg-path :data-root root
+                 :cohort-id (:cohort/id (edn/read-string raw))
+                 :sha256 (#'cohort/sha256 raw)}
+        _ (cohort/activate! prereg-path root)
+        authority (cohort/execution-authority binding)
+        attempt (:attempt/id
+                 (cohort/start-attempt!
+                  prereg-path root
+                  (term {:opportunity-id "clock/authority"
+                         :trigger :wallclock-cron
+                         :machine-state {:tick 1}
+                         :agent-roster []
+                         :code-state {:git-sha "abc" :git-dirty? false
+                                      :resolved-mode-flags {}
+                                      :configuration-digest "test"}
+                         :semantic-epoch :epoch-1
+                         :execution-authority authority})))
+        _ (append-required! root attempt)
+        _ (cohort/close-attempt!
+           prereg-path root attempt
+           (term {:outcome :agent-unavailable :grounded? false
+                  :artifact-only? false :duration-ms 1
+                  :resource-use {:agent-turns 0}}))
+        time-step (io/file root (name (:cohort-id binding)) attempt
+                           "001-time-step.edn")
+        original (edn/read-string (slurp time-step))]
+    (is (= 1 (:identity-version (cohort/closed-execution binding attempt))))
+    (doseq [malformed [nil false {} (assoc authority :authority-id (apply str (repeat 64 "0")))]]
+      (spit time-step
+            (pr-str (assoc-in original
+                              [:payload :judgment :execution-authority]
+                              malformed)))
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"Closed cohort execution unavailable"
+                            (cohort/closed-execution binding attempt))))))
+
 (deftest grounded-checkpoints-cannot-omit-preregistered-fields
   (let [root (tmp-root)
         _ (cohort/activate! prereg-path root)

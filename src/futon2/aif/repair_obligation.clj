@@ -14,12 +14,13 @@
             [futon2.aif.substrate :as substrate])
   (:import [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
-           [java.nio.file Files StandardOpenOption]
+           [java.nio.file Files StandardOpenOption LinkOption OpenOption]
            [java.time Instant]))
 
 (def default-root "/home/joe/code/futon2/data/wm-repair-obligations")
 
 (def artifact-shapes #{:code-commit :data-deposit :spec-document})
+(defonce ^:private finding-publication-monitors (atom {}))
 
 (defprotocol HistoricalSuccessorAuthority
   (historical-successor-record [authority]
@@ -117,27 +118,93 @@
                               StandardOpenOption/WRITE]))
     (.getPath file)))
 
+(defn- finding-directory! [root]
+  (let [supplied (io/file root)
+        normalized (.toFile (.normalize (.toPath (.getAbsoluteFile supplied))))
+        canonical (.getCanonicalFile supplied)]
+    (when-not (and (.isDirectory supplied)
+                   (= normalized canonical)
+                   (not (Files/isSymbolicLink (.toPath supplied))))
+      (throw (ex-info "Repair finding root outside authority"
+                      {:reason :repair-finding-root-refused})))
+    (let [directory (io/file canonical "findings")
+          path (.toPath directory)]
+      (when (and (.exists directory)
+                 (or (Files/isSymbolicLink path) (not (.isDirectory directory))))
+        (throw (ex-info "Repair finding directory outside authority"
+                        {:reason :repair-finding-root-refused})))
+      (when-not (.exists directory)
+        (try
+          (Files/createDirectory path
+                                 (make-array java.nio.file.attribute.FileAttribute 0))
+          (with-open [parent (FileChannel/open (.toPath canonical)
+                                               (make-array OpenOption 0))]
+            (.force parent true))
+          (catch java.nio.file.FileAlreadyExistsException _ nil)))
+      (when-not (and (.isDirectory directory)
+                     (not (Files/isSymbolicLink path))
+                     (= canonical (.getCanonicalFile (.getParentFile directory)))
+                     (= directory (.getCanonicalFile directory)))
+        (throw (ex-info "Repair finding directory outside authority"
+                        {:reason :repair-finding-root-refused})))
+      directory)))
+
 (defn- write-new-or-identical!
   "Publish immutable EDN, acknowledging replay only when the exact bytes are
   already present. Callers that want replay semantics must supply every
   unstable field (notably :opened-at); semantic-map equality is deliberately
   insufficient."
-  [path value]
-  (let [file (io/file path)
-        bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")]
-    (io/make-parents file)
-    (try
-      (Files/write (.toPath file) bytes
-                   (into-array StandardOpenOption
-                               [StandardOpenOption/CREATE_NEW
-                                StandardOpenOption/WRITE]))
-      (.getPath file)
-      (catch java.nio.file.FileAlreadyExistsException e
-        (if (java.util.Arrays/equals bytes (Files/readAllBytes (.toPath file)))
-          (.getPath file)
-          (throw (ex-info "Immutable repair finding conflicts with existing bytes"
-                          {:reason :repair-finding-conflict
-                           :path (.getPath file)} e)))))))
+  [root record-id value]
+  (let [directory (finding-directory! root)
+        file (io/file directory (str record-id ".edn"))
+        file-path (.toPath file)
+        lock-path (.toPath (io/file directory ".publication.lock"))
+        bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")
+        monitor-key (.getPath directory)
+        monitor (get (swap! finding-publication-monitors
+                            #(if (contains? % monitor-key)
+                               % (assoc % monitor-key (Object.))))
+                     monitor-key)]
+    (when-not (= directory (.getCanonicalFile (.getParentFile file)))
+      (throw (ex-info "Repair finding output outside authority"
+                      {:reason :repair-finding-root-refused})))
+    (locking monitor
+      (with-open [lock-channel
+                  (FileChannel/open lock-path
+                                    (into-array OpenOption
+                                                [StandardOpenOption/CREATE
+                                                 StandardOpenOption/WRITE
+                                                 LinkOption/NOFOLLOW_LINKS]))]
+        (when-not (Files/isRegularFile lock-path
+                                       (into-array LinkOption
+                                                   [LinkOption/NOFOLLOW_LINKS]))
+          (throw (ex-info "Repair finding publication lock malformed"
+                          {:reason :repair-finding-root-refused})))
+        (with-open [_lock (.lock lock-channel)]
+          (try
+        (with-open [ch (FileChannel/open file-path
+                                        (into-array OpenOption
+                                                    [StandardOpenOption/CREATE_NEW
+                                                     StandardOpenOption/WRITE
+                                                     LinkOption/NOFOLLOW_LINKS]))]
+          (let [buffer (ByteBuffer/wrap bytes)]
+            (while (.hasRemaining buffer) (.write ch buffer)))
+          (.force ch true))
+        (with-open [parent (FileChannel/open (.toPath directory)
+                                             (make-array OpenOption 0))]
+          (.force parent true))
+        (.getPath file)
+        (catch java.nio.file.FileAlreadyExistsException e
+          (if (and (Files/isRegularFile file-path
+                                        (into-array LinkOption
+                                                    [LinkOption/NOFOLLOW_LINKS]))
+                   (not (Files/isSymbolicLink file-path))
+                   (= directory (.getCanonicalFile (.getParentFile file)))
+                   (java.util.Arrays/equals bytes (Files/readAllBytes file-path)))
+            (.getPath file)
+              (throw (ex-info "Immutable repair finding conflicts with existing bytes"
+                              {:reason :repair-finding-conflict
+                               :path (.getPath file)} e))))))))))
 
 (defn- records [dir]
   (->> (or (.listFiles (io/file dir)) [])
@@ -227,7 +294,7 @@
                  :backtrace (:backtrace finding)
                  :discharge-contract (:discharge-contract finding)
                  :opened-at (or (:opened-at finding) (str (Instant/now)))}]
-     (write-new-or-identical! (io/file root "findings" (str id ".edn")) record)
+     (write-new-or-identical! root id record)
      record)))
 
 (defn- indexed-records [root child]

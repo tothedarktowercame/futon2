@@ -594,9 +594,10 @@
         files (->> (or (.listFiles attempt-dir) []) (filter #(.isFile %))
                    (sort-by #(.getName %)) vec)
         events (mapv #(read-one-file % :invalid-cohort-event) files)
-        stored-authority (get-in (first events)
-                                 [:payload :judgment :execution-authority])
-        expected-authority (when stored-authority
+        authority-judgment (get-in (first events) [:payload :judgment])
+        authority-present? (contains? authority-judgment :execution-authority)
+        stored-authority (:execution-authority authority-judgment)
+        expected-authority (when authority-present?
                              (execution-authority-value binding))
         ordinal (:attempt/ordinal (first events))
         types (mapv :checkpoint/type events)
@@ -628,13 +629,13 @@
                    (= expected-files (mapv #(.getName %) files))
                    (every? true? (map valid-event? (range 1 (inc (count events)))
                                       checkpoint-order events))
-                   (or (nil? stored-authority)
+                   (or (not authority-present?)
                        (= expected-authority stored-authority))
                    (grounded-term? close) (empty? (grounded-close-errors close)))
       (throw (ex-info "Closed cohort execution unavailable"
                       {:reason :closed-execution-unavailable})))
     (merge
-     (if stored-authority
+     (if authority-present?
        (execution-provenance stored-authority attempt-id)
        {:kind :runner-execution
         :identity-version 0
