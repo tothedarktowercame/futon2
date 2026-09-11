@@ -1551,7 +1551,7 @@
         proof-ref (assoc :proof-ref proof-ref)
         note (assoc :reviewer-note note)))))
 
-(declare recovery-job-id resolve-build)
+(declare recovery-job-id resolve-build resolve-target-build)
 
 (defn- prompt-findings [stop-lines]
   (mapv (fn [finding]
@@ -1839,8 +1839,7 @@
                              opts repo pre-revision-head revision-author-job)
                     revision-commit (:commit binding)
                     build (when revision-commit
-                            ((or (:resolve-build-fn opts) resolve-build)
-                             revision-commit))]
+                            (resolve-target-build opts repo revision-commit))]
                 (when-not revision-commit
                   (let [{:keys [verdict reason]}
                         (author-verdict revision-author-job)]
@@ -1947,10 +1946,27 @@
   "Resolve an Agency artifact-ref to one Futon repository and its changed files.
   Returns nil for anything that is not commit-shaped, rather than probing every
   repository with it."
-  [commit]
-  (when (commit-ish? commit)
-    (when-let [repo (find-commit-repo commit)]
-      {:repo repo :files (commit-files repo commit)})))
+  ([commit]
+   (when (commit-ish? commit)
+     (when-let [repo (find-commit-repo commit)]
+       {:repo repo :files (commit-files repo commit)})))
+  ([commit target-repo]
+   ;; Shared Git objects do not identify the commissioned working tree.
+   ;; With an explicit target, never fall back to scanning sibling repos.
+   (when (and (commit-ish? commit) (string? target-repo)
+              (not (str/blank? target-repo)))
+     (let [top (git target-repo "rev-parse" "--show-toplevel")]
+       (when (and (zero? (:exit top))
+                  (= (.getCanonicalPath (io/file target-repo))
+                     (.getCanonicalPath (io/file (str/trim (:out top)))))
+                  (zero? (:exit (git target-repo "cat-file" "-e"
+                                     (str commit "^{commit}")))))
+         {:repo target-repo :files (commit-files target-repo commit)})))))
+
+(defn- resolve-target-build [opts target-repo commit]
+  (if-let [resolve-fn (:resolve-build-fn opts)]
+    (resolve-fn commit)
+    (resolve-build commit target-repo)))
 
 (defn- artifact-only-files? [files]
   (and (seq files)
@@ -2061,8 +2077,7 @@
                                                   cure-artifact-ref cure-job)
                 commit-changed? (and new-commit (not= new-commit commit))
                 new-build (when commit-changed?
-                            ((or (:resolve-build-fn opts) resolve-build)
-                             new-commit))]
+                            (resolve-target-build opts repo new-commit))]
             (if (and commit-changed? (nil? new-build))
               ;; Fail closed: the cure turn claims a NEW commit that resolves
               ;; to no repository. The old binding of new-repo/new-files fell
@@ -3264,8 +3279,7 @@
                                         :artifact-binding artifact-binding))
                     build (run-phase! opts @phase-context :build-resolution
                                       #(when commit
-                                         ((or (:resolve-build-fn opts) resolve-build)
-                                          commit)))
+                                         (resolve-target-build opts author-repo commit)))
                     repo (:repo build)
                     files (:files build)]
                 (when (and fresh-author? repo

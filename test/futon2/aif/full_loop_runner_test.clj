@@ -3,6 +3,7 @@
             [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.full-loop-cli :as cli]
@@ -4063,3 +4064,37 @@
              (refusal (assoc-in judge [:ranked-actions 0 :action :target] "M-other"))))
       (is (= :pinned-action-not-candidate
              (refusal (assoc-in judge [:ranked-actions 0 :action :type] :open-mission)))))))
+
+(deftest ^:slow commissioned-repository-wins-over-shared-worktree-objects
+  (let [root (.toFile (Files/createTempDirectory "wm-commissioned-repo-"
+                                                 (make-array FileAttribute 0)))
+        repo (str (io/file root "commissioned"))
+        sibling (str (io/file root "sibling"))
+        unrelated (str (io/file root "unrelated"))
+        command (fn [& args]
+                  (let [r (apply shell/sh args)]
+                    (assert (zero? (:exit r)) (:err r))
+                    (str/trim (:out r))))]
+    (try
+      (command "git" "init" "-q" repo)
+      (command "git" "-C" repo "-c" "user.name=Fixture" "-c" "user.email=fixture@example.invalid"
+               "commit" "--allow-empty" "-qm" "commissioned base")
+      (spit (io/file repo "implementation.clj") "(ns implementation)\n")
+      (command "git" "-C" repo "add" "implementation.clj")
+      (command "git" "-C" repo "-c" "user.name=Fixture" "-c" "user.email=fixture@example.invalid"
+               "commit" "-qm" "implementation")
+      (let [commit (command "git" "-C" repo "rev-parse" "HEAD")]
+        (command "git" "-C" repo "worktree" "add" "--detach" sibling commit)
+        (command "git" "init" "-q" unrelated)
+        (with-redefs [futon2.aif.full-loop-runner/primary-repos (constantly [sibling repo])]
+          (is (= sibling (:repo (runner/resolve-build commit)))
+              "retained legacy scan reproduces the wrong first checkout")
+          (is (= {:repo repo :files ["implementation.clj"]}
+                 (#'runner/resolve-target-build {} repo commit)))
+          (is (nil? (#'runner/resolve-target-build {} unrelated commit))
+              "missing object in commissioned repo cannot fall back")
+          (is (nil? (#'runner/resolve-target-build {} nil commit)))
+          (is (nil? (#'runner/resolve-target-build {} repo "not-a-commit"))))
+        (command "git" "-C" repo "worktree" "remove" sibling))
+      (finally
+        (doseq [f (reverse (file-seq root))] (.delete f))))))
