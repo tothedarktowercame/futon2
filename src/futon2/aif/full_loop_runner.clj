@@ -298,6 +298,10 @@
                     :selectorSeam "live:validated-selection"
                     :traceWritten (boolean (:trace-path result))
                     :route route}
+                     (:execution-cohort raw-opts)
+                     (assoc :execution-cohort
+                            (select-keys (:execution-cohort raw-opts)
+                                         [:cohort-id :sha256]))
                      pin-identity (assoc :run4/task-pin pin-identity)
                      (= :historical-verification-awaiting-validation (:outcome result))
                      (assoc :runner-attempt/id (:attempt-id result)
@@ -308,10 +312,7 @@
                             (get-in result [:checkpoints :selection :judgment
                                             :selected-action])
                             :historical-verification
-                            (get-in result [:data :repair-obligation])
-                            :execution-cohort
-                            (select-keys (:execution-cohort raw-opts)
-                                         [:cohort-id :sha256]))
+                            (get-in result [:data :repair-obligation]))
                      environment-attestation
                      (assoc :run4/effective-environment-attestation
                             environment-attestation))]
