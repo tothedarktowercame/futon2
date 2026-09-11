@@ -1421,7 +1421,8 @@
 
 (defn independent-review-evidence
   "Public read-only validator for an already fetched Agency review job. Uses
-  the same verdict and execution gates as the full-loop adjudication path."
+  the same verdict and execution evidence as full-loop adjudication, but always
+  requires execution, including when the reviewed artifacts are data files."
   [files review-job]
   (let [gate (review-execution-gate files review-job)
         verdict (review-verdict review-job)]
@@ -1433,6 +1434,7 @@
      :valid? (and (string? (:job-id review-job))
                   (= "done" (:state review-job))
                   (= :approve verdict)
+                  (:executed? gate)
                   (:passed? gate))}))
 
 (defn- reviewer-note [job]
