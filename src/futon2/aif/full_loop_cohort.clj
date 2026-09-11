@@ -512,16 +512,60 @@
      {:cohort-id (:cohort-id binding) :target (:target state)
       :remaining (:remaining state) :snapshot snapshot})))
 
+(defn- read-one-file [file reason]
+  (try
+    (with-open [r (java.io.PushbackReader. (io/reader file))]
+      (let [value (edn/read {:eof ::empty} r)]
+        (when (or (= ::empty value) (not= ::end (edn/read {:eof ::end} r)))
+          (throw (ex-info "Invalid cohort evidence" {:reason reason})))
+        value))
+    (catch clojure.lang.ExceptionInfo e (throw e))
+    (catch Throwable _ (throw (ex-info "Invalid cohort evidence" {:reason reason})))))
+
 (defn closed-execution
   "Validate BINDING against its immutable preregistration, activation, and
   ledger, then return the qualified identity of one exact closed attempt.
   This is read-only and deliberately does not require remaining capacity."
   [binding attempt-id]
-  (let [_ (execution-preflight binding false)
-        state (ledger (:preregistration binding) (:data-root binding))
-        matches (filterv #(= attempt-id (:attempt/id %)) (:attempts state))]
-    (when-not (and (string? attempt-id) (not (str/blank? attempt-id))
-                   (= 1 (count matches)) (:closed? (first matches)))
+  (let [snapshot (pin-preregistration binding)
+        p (:value snapshot)
+        dir (cohort-dir p (:data-root binding))
+        activation (read-one-file (activation-path dir) :invalid-cohort-activation)
+        attempt-dir (io/file dir attempt-id)
+        files (->> (or (.listFiles attempt-dir) []) (filter #(.isFile %))
+                   (sort-by #(.getName %)) vec)
+        events (mapv #(read-one-file % :invalid-cohort-event) files)
+        ordinal (:attempt/ordinal (first events))
+        types (mapv :checkpoint/type events)
+        expected-files (mapv (fn [sequence checkpoint]
+                               (format "%03d-%s.edn" sequence (name checkpoint)))
+                             (range 1 (inc (count checkpoint-order))) checkpoint-order)
+        valid-event? (fn [sequence checkpoint event]
+                       (and (= #{:event/schema-version :cohort/id :attempt/id
+                                 :attempt/ordinal :event/sequence :checkpoint/type
+                                 :recorded-at :payload}
+                               (set (keys event)))
+                            (= 1 (:event/schema-version event))
+                            (= (:cohort-id binding) (:cohort/id event))
+                            (= attempt-id (:attempt/id event))
+                            (= ordinal (:attempt/ordinal event))
+                            (= sequence (:event/sequence event))
+                            (= checkpoint (:checkpoint/type event))
+                            (empty? (checkpoint-cell-errors p checkpoint (:payload event)))))
+        close (:payload (last events))]
+    (when-not (and (string? attempt-id) (re-matches #"attempt-\d{3}" attempt-id)
+                   (= #{:cohort/id :activated-at :preregistration-path
+                        :preregistration-sha256 :stopping-target}
+                      (set (keys activation)))
+                   (= (:cohort-id binding) (:cohort/id activation))
+                   (= (:sha256 binding) (:preregistration-sha256 activation))
+                   (= (get-in p [:stopping-rule :target]) (:stopping-target activation))
+                   (.isDirectory attempt-dir) (pos-int? ordinal)
+                   (= checkpoint-order types)
+                   (= expected-files (mapv #(.getName %) files))
+                   (every? true? (map valid-event? (range 1 (inc (count events)))
+                                      checkpoint-order events))
+                   (grounded-term? close) (empty? (grounded-close-errors close)))
       (throw (ex-info "Closed cohort execution unavailable"
                       {:reason :closed-execution-unavailable})))
     {:kind :runner-execution
@@ -529,4 +573,4 @@
      :cohort-id (:cohort-id binding)
      :cohort-sha256 (:sha256 binding)
      :attempt-id attempt-id
-     :outcome (:outcome (first matches))}))
+     :outcome (get-in close [:judgment :outcome])}))

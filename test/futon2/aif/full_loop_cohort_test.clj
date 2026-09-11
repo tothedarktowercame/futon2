@@ -73,6 +73,27 @@
       (is (= {:agent-unavailable 1} (:outcomes ledger)))
       (is (= 5 (get-in ledger [:attempts 0 :typed-sorries]))))))
 
+(deftest closed-execution-rejects-a-foreign-or-truncated-lifecycle
+  (let [root (tmp-root)
+        raw (slurp prereg-path)
+        binding {:preregistration prereg-path :data-root root
+                 :cohort-id (:cohort/id (edn/read-string raw))
+                 :sha256 (#'cohort/sha256 raw)}
+        _ (cohort/activate! prereg-path root)
+        attempt (:attempt/id (open! root "clock/strict-close"))]
+    (append-required! root attempt)
+    (cohort/close-attempt! prereg-path root attempt
+                           (term {:outcome :agent-unavailable :grounded? false
+                                  :artifact-only? false :duration-ms 1
+                                  :resource-use {:agent-turns 0}}))
+    (is (= attempt (:attempt-id (cohort/closed-execution binding attempt))))
+    (let [close (io/file root (name (:cohort-id binding)) attempt "007-closed.edn")
+          value (edn/read-string (slurp close))]
+      (spit close (str (pr-str (assoc value :cohort/id :foreign-cohort
+                                      :attempt/id "attempt-999")) "\n"))
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (cohort/closed-execution binding attempt))))))
+
 (deftest grounded-checkpoints-cannot-omit-preregistered-fields
   (let [root (tmp-root)
         _ (cohort/activate! prereg-path root)
