@@ -70,9 +70,14 @@
 
 (deftest t3-prefers-qualified-external-attempt-identity
   (let [root (temp-dir)
-        _ (write-edn! root "findings" "repair-qualified.edn"
-                      {:repair/id "repair-qualified" :repair/status :open
-                       :attempt-id "run4-a--attempt-001"})
+        _ (repair/record-system-failure!
+           (.getPath root)
+           {:attempt-id "run4-a--attempt-001"
+            :repair-class :environmental-hold
+            :failure-stage :author-readiness
+            :failure-kind :agent-unavailable
+            :outcome :agent-unavailable
+            :error "fixture"})
         observation {:phase :opportunity :transition :end
                      :outcome :agent-unavailable :cohort? true
                      :attempt-id "attempt-001"
