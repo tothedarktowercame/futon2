@@ -46,6 +46,21 @@
       (is (= :open (:repair/status (first (repair/open-obligations (.getPath store))))))
       (is (= :historical-repair-revalidation
              (:construction-kind (runner/construct-for-decision entry)))))
+    (let [capture-var (ns-resolve 'futon2.aif.repair-obligation 'capture-under!)
+          capture @capture-var
+          reads (atom 0)]
+      (with-redefs-fn
+        {capture-var (fn [root path]
+                       (let [result (capture root path)]
+                         (if (and (= (str file) (str path))
+                                  (= 2 (swap! reads inc)))
+                           (assoc result :sha256 (apply str (repeat 64 "0")))
+                           result)))}
+        #(is (thrown? clojure.lang.ExceptionInfo
+                      (repair/commit-historical-verification!
+                       (.getPath store) "verification-execution-001"
+                       {:verification-root (.getPath evidence-root) :path (.getPath file)
+                        :sha256 (digest/sha256 (slurp file))})))))
     (let [record (repair/commit-historical-verification!
                   (.getPath store)
                   "verification-attempt-001"
@@ -72,12 +87,13 @@
                    :sha256 (digest/sha256 (slurp file))})))))
 
 (deftest historical-store-directory-escape-refuses
-  (let [store (tmp) external (tmp)
-        link (.toPath (io/file store "verifications"))]
+  (doseq [child ["verifications" "verification-evidence"]]
+   (let [store (tmp) external (tmp)
+        link (.toPath (io/file store child))]
     (java.nio.file.Files/createSymbolicLink
      link (.toPath external) (make-array java.nio.file.attribute.FileAttribute 0))
     (is (thrown? clojure.lang.ExceptionInfo (repair/open-obligations (.getPath store))))
     (is (thrown? clojure.lang.ExceptionInfo
                  ((ns-resolve 'futon2.aif.repair-obligation 'write-new-durable!)
-                  (.getPath store) "verifications" "repair-057" {:test :must-not-write})))
-    (is (empty? (.listFiles external)))))
+                  (.getPath store) child "repair-057" {:test :must-not-write})))
+    (is (empty? (.listFiles external))))))

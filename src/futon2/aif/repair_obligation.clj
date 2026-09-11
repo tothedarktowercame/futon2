@@ -341,6 +341,8 @@
    (let [candidate (admission-from! root evidence)
          source (:verification-artifact candidate)
          cap (capture-under! (:verification-root evidence) (:path evidence))
+         _ (when-not (= (:sha256 source) (:sha256 cap))
+             (throw (ex-info "Historical verification changed before copying" {})))
          copy (write-new-durable! root "verification-evidence"
                                   (:verification-id candidate) (:value cap))
          record (assoc candidate :verification-attempt execution-attempt
@@ -377,6 +379,8 @@
                     (= :succeeded (:task-result record))
                     (= :safe (:infrastructure record))
                     (safe-id? (:validation-attempt record))
+                    (safe-id? (:verification-attempt record))
+                    (not= (:validation-attempt record) (:verification-attempt record))
                     (not= (:validation-attempt record) (:attempt-id finding))
                     (safe-id? (:click-id record)) (safe-id? (:run-id record))
                     (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
@@ -386,13 +390,16 @@
      record)))
 
 (defn- verified-admissions [root]
-  (let [directory (historical-directory! root "verifications" false)]
+  (let [directory (historical-directory! root "verifications" false)
+        evidence-directory (historical-directory! root "verification-evidence" false)]
     (into {}
         (map (fn [file]
                (let [cap (capture-under! directory file)
                      stored (:value cap)
                      artifact (:verification-artifact stored)
-                     _ (when-not (and (= #{:schema :repair/id :repair/schema-version
+                     _ (when-not (and evidence-directory
+                                      (safe-id? (:verification-attempt stored))
+                                      (= #{:schema :repair/id :repair/schema-version
                                            :repair/status :failed-attempt :verification-id
                                            :verification-attempt
                                            :verification-artifact :verification-source
@@ -402,8 +409,7 @@
                                       (= #{:path :sha256} (set (keys artifact)))
                                       (nonblank? (:path artifact))
                                       (= (.getCanonicalPath
-                                          (io/file root "verification-evidence"
-                                                   (str (:verification-id stored) ".edn")))
+                                          (io/file evidence-directory (str (:verification-id stored) ".edn")))
                                          (.getCanonicalPath (io/file (:path artifact)))))
                          (throw (ex-info "Historical admission record corrupt"
                                          {:path (.getPath ^java.io.File file)})))
