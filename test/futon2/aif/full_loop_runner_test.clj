@@ -3159,6 +3159,17 @@
         "T3 must not fire on :cohort-complete (no unknown-outcome, no missing-stop-line)")))
 
 ;; --- transport failure typing (repair-attempt-057-untyped-failure) ----------
+
+(deftest public-independent-review-evidence-uses-production-gates
+  (let [job {:job-id "review-1" :state "done"
+                         :result-summary "FULL_LOOP_REVIEW: APPROVE"
+             :execution {:executed true :tool-events 1 :command-events 1}}]
+    (is (true? (:valid? (runner/independent-review-evidence ["repair.clj"] job))))
+    (is (false? (:valid? (runner/independent-review-evidence
+                          ["repair.clj"] (assoc job :state "running")))))
+    (is (false? (:valid? (runner/independent-review-evidence
+                          ["repair.clj"] (assoc job :execution {})))))))
+
 ;; attempt-057 died at :selection with java.net.http.HttpTimeoutException after
 ;; 100s. Raw transport exceptions carry no ex-data, so failure-kind-from fell to
 ;; :untyped-failure and repair-class-for sent that down :else to :machine-failure

@@ -1419,6 +1419,22 @@
      :passed? passed?
      :failure-kind (when-not passed? :review-execution-evidence-missing)}))
 
+(defn independent-review-evidence
+  "Public read-only validator for an already fetched Agency review job. Uses
+  the same verdict and execution gates as the full-loop adjudication path."
+  [files review-job]
+  (let [gate (review-execution-gate files review-job)
+        verdict (review-verdict review-job)]
+    {:job-id (:job-id review-job)
+     :state (:state review-job)
+     :verdict verdict
+     :execution (:execution gate)
+     :execution-source (:execution-source gate)
+     :valid? (and (string? (:job-id review-job))
+                  (= "done" (:state review-job))
+                  (= :approve verdict)
+                  (:passed? gate))}))
+
 (defn- reviewer-note [job]
   (or (:reviewer-note job)
       (some-> (re-find #"(?m)^FULL_LOOP_REVIEWER_NOTE:\s*(.+)$"
