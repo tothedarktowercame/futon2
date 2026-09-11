@@ -105,6 +105,59 @@
                         (.getBytes ^String s StandardCharsets/UTF_8))]
     (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
 
+(declare pin-preregistration execution-preflight)
+
+(defn- execution-authority-value [binding]
+  (let [material {:schema :wm/cohort-execution-authority-v1
+                  :cohort-id (:cohort-id binding)
+                  :preregistration-sha256 (:sha256 binding)
+                  :data-root-sha256
+                  (sha256 (.getCanonicalPath (io/file (:data-root binding))))}]
+    (assoc material :authority-id
+           (sha256 (pr-str (into (sorted-map) material))))))
+
+(defn execution-authority
+  "Return the deterministic authority namespace for newly recorded executions.
+
+  The declared cohort id and local attempt ordinal are not globally unique.
+  This namespace additionally binds the captured preregistration bytes and the
+  canonical cohort data root.  It deliberately contains no timestamp or random
+  value, so every consumer can independently recompute it from server-owned
+  cohort authority."
+  [binding]
+  (let [_validated-snapshot (:snapshot (execution-preflight binding false))]
+    ;; Authority is meaningful only for the exact activated binding. The
+    ;; preflight above captures the preregistration once; capacity is
+    ;; deliberately irrelevant.
+    (execution-authority-value binding)))
+
+(defn execution-identity
+  "Qualify one cohort-local attempt using a validated execution authority."
+  [authority attempt-id]
+  (when-not (and (= :wm/cohort-execution-authority-v1 (:schema authority))
+                 (keyword? (:cohort-id authority))
+                 (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
+                         [(:preregistration-sha256 authority)
+                          (:data-root-sha256 authority)
+                          (:authority-id authority)])
+                 (string? attempt-id) (re-matches #"attempt-\d{3}" attempt-id))
+    (throw (ex-info "Invalid cohort execution authority"
+                    {:reason :invalid-execution-authority})))
+  {:kind :runner-execution
+   :id (str (name (:cohort-id authority)) "--ea1-"
+            (:authority-id authority) "--" attempt-id)})
+
+(defn execution-provenance
+  "Return the versioned authority association behind an execution identity."
+  [authority attempt-id]
+  (merge (execution-identity authority attempt-id)
+         {:identity-version 1
+          :cohort-id (:cohort-id authority)
+          :cohort-sha256 (:preregistration-sha256 authority)
+          :data-root-sha256 (:data-root-sha256 authority)
+          :authority-id (:authority-id authority)
+          :attempt-id attempt-id}))
+
 (defrecord PinnedPreregistration [value])
 
 (defn pin-preregistration
@@ -535,6 +588,10 @@
         files (->> (or (.listFiles attempt-dir) []) (filter #(.isFile %))
                    (sort-by #(.getName %)) vec)
         events (mapv #(read-one-file % :invalid-cohort-event) files)
+        stored-authority (get-in (first events)
+                                 [:payload :judgment :execution-authority])
+        expected-authority (when stored-authority
+                             (execution-authority-value binding))
         ordinal (:attempt/ordinal (first events))
         types (mapv :checkpoint/type events)
         expected-files (mapv (fn [sequence checkpoint]
@@ -565,12 +622,19 @@
                    (= expected-files (mapv #(.getName %) files))
                    (every? true? (map valid-event? (range 1 (inc (count events)))
                                       checkpoint-order events))
+                   (or (nil? stored-authority)
+                       (= expected-authority stored-authority))
                    (grounded-term? close) (empty? (grounded-close-errors close)))
       (throw (ex-info "Closed cohort execution unavailable"
                       {:reason :closed-execution-unavailable})))
-    {:kind :runner-execution
-     :id (str (name (:cohort-id binding)) "--" attempt-id)
-     :cohort-id (:cohort-id binding)
-     :cohort-sha256 (:sha256 binding)
-     :attempt-id attempt-id
-     :outcome (get-in close [:judgment :outcome])}))
+    (merge
+     (if stored-authority
+       (execution-provenance stored-authority attempt-id)
+       {:kind :runner-execution
+        :identity-version 0
+        :id (str (name (:cohort-id binding)) "--" attempt-id)
+        :legacy-id (str (name (:cohort-id binding)) "--" attempt-id)
+        :cohort-id (:cohort-id binding)
+        :cohort-sha256 (:sha256 binding)
+        :attempt-id attempt-id})
+     {:outcome (get-in close [:judgment :outcome])})))

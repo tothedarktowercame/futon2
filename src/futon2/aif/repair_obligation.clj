@@ -117,6 +117,28 @@
                               StandardOpenOption/WRITE]))
     (.getPath file)))
 
+(defn- write-new-or-identical!
+  "Publish immutable EDN, acknowledging replay only when the exact bytes are
+  already present. Callers that want replay semantics must supply every
+  unstable field (notably :opened-at); semantic-map equality is deliberately
+  insufficient."
+  [path value]
+  (let [file (io/file path)
+        bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")]
+    (io/make-parents file)
+    (try
+      (Files/write (.toPath file) bytes
+                   (into-array StandardOpenOption
+                               [StandardOpenOption/CREATE_NEW
+                                StandardOpenOption/WRITE]))
+      (.getPath file)
+      (catch java.nio.file.FileAlreadyExistsException e
+        (if (java.util.Arrays/equals bytes (Files/readAllBytes (.toPath file)))
+          (.getPath file)
+          (throw (ex-info "Immutable repair finding conflicts with existing bytes"
+                          {:reason :repair-finding-conflict
+                           :path (.getPath file)} e)))))))
+
 (defn- records [dir]
   (->> (or (.listFiles (io/file dir)) [])
        (filter #(.isFile %))
@@ -204,8 +226,8 @@
                  :failure-data (:failure-data finding)
                  :backtrace (:backtrace finding)
                  :discharge-contract (:discharge-contract finding)
-                 :opened-at (str (Instant/now))}]
-     (write-new! (io/file root "findings" (str id ".edn")) record)
+                 :opened-at (or (:opened-at finding) (str (Instant/now)))}]
+     (write-new-or-identical! (io/file root "findings" (str id ".edn")) record)
      record)))
 
 (defn- indexed-records [root child]

@@ -302,6 +302,11 @@
                      (assoc :execution-cohort
                             (select-keys (:execution-cohort raw-opts)
                                          [:cohort-id :sha256]))
+                     (:execution-identity result)
+                     (assoc :runner-execution/identity
+                            (:execution-identity result)
+                            :runner-execution/provenance
+                            (:execution-provenance result))
                      pin-identity (assoc :run4/task-pin pin-identity)
                      (= :historical-verification-awaiting-validation (:outcome result))
                      (assoc :runner-attempt/id (:attempt-id result)
@@ -2447,7 +2452,13 @@
                                                stack-code-state)))}
                             (catch Throwable e {:error e}))
         code-state (:value code-state-result)
-        time-cell (term {:opportunity-id opportunity-id
+        execution-cohort (:execution-cohort opts)
+        _ (when (and (contains? opts :execution-cohort) (not (true? cohort?)))
+            (throw (ex-info "Explicit execution cohort requires cohort recording"
+                            {:reason :execution-cohort-recording-required})))
+        execution-authority (when execution-cohort
+                              (cohort/execution-authority execution-cohort))
+        time-cell (term (cond-> {:opportunity-id opportunity-id
                          :trigger trigger
                          :machine-state {:started-at (str (Instant/now))}
                          :agent-roster
@@ -2464,11 +2475,9 @@
                                                            :repair-reviewer :trigger
                                                            :semantic-epoch])))
                          :semantic-epoch semantic-epoch}
+                          execution-authority
+                          (assoc :execution-authority execution-authority))
                         {:kind :trigger-opportunity :id opportunity-id})
-        execution-cohort (:execution-cohort opts)
-        _ (when (and (contains? opts :execution-cohort) (not (true? cohort?)))
-            (throw (ex-info "Explicit execution cohort requires cohort recording"
-                            {:reason :execution-cohort-recording-required})))
         cohort-source (when (contains? opts :execution-cohort)
                         (:snapshot (cohort/execution-preflight execution-cohort)))
         start-event (when cohort?
@@ -2477,11 +2486,14 @@
                         (cohort/start-attempt! time-cell)))
         attempt-id (or (:attempt/id start-event)
                        (str "canary-" (UUID/randomUUID)))
-        external-attempt-id (if execution-cohort
-                              (str (name (:cohort-id execution-cohort)) "--" attempt-id)
-                              attempt-id)
+        execution-identity (when execution-authority
+                             (cohort/execution-identity execution-authority attempt-id))
+        execution-provenance (when execution-authority
+                               (cohort/execution-provenance execution-authority attempt-id))
+        external-attempt-id (or (:id execution-identity) attempt-id)
         _ (swap! phase-context assoc :attempt-id attempt-id
-                 :external-attempt-id external-attempt-id)
+                 :external-attempt-id external-attempt-id
+                 :execution-identity execution-identity)
         checkpoint! (fn [checkpoint cell]
                       (swap! checkpoints assoc checkpoint cell)
                       (when cohort?
@@ -2530,6 +2542,8 @@
                                         (str "zero-achievement outcome " outcome)
                                         (:error data))
                                :failure-data (:error-data data)
+                               :opened-at (get-in time-cell
+                                                  [:judgment :machine-state :started-at])
                                :backtrace
                                {:phase-events @phase-events
                                 :last-completed-checkpoint
@@ -2664,13 +2678,16 @@
                                    (conj {:node :TRACE
                                           :via "futon2.aif.trace/write-trace!"
                                           :at (str (Instant/now))}))
-                       result {:attempt-id attempt-id :opportunity-id opportunity-id
+                       result (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
                                :wm/route run-route
                                :trace-path trace-path
-                               :data data}]
+                               :data data}
+                                execution-identity
+                                (assoc :execution-identity execution-identity
+                                       :execution-provenance execution-provenance))]
                    (when cohort?
                      (if cohort-source
                        (cohort/close-attempt! cohort-source (:data-root execution-cohort) attempt-id closed)
@@ -2977,7 +2994,8 @@
                                :failure-kind :historical-verification-port-missing
                                :failure-stage :construction
                                :repair-obligation stop-line})))
-            (let [execution-identity {:kind :runner-execution :id attempt-id}
+            (let [execution-identity (or execution-identity
+                                         {:kind :runner-execution :id attempt-id})
                   transition ((:historical-verification-execute-fn opts)
                               {:execution-identity execution-identity
                                :obligation stop-line

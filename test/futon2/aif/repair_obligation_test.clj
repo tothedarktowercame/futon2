@@ -130,6 +130,27 @@
            (set (map :repair/id (repair/open-obligations root)))))
     (is (not= (:repair/id machine) (:repair/id artifact)))))
 
+(deftest system-finding-replay-is-byte-exact-or-a-typed-conflict
+  (let [root (temp-root)
+        finding {:attempt-id "cohort--ea1-authority--attempt-001"
+                 :repair-class :environmental-hold
+                 :failure-stage :agent-readiness
+                 :outcome :agent-unavailable
+                 :failure-kind :agent-readiness-failed
+                 :error "Agency unavailable"
+                 :opened-at "2026-09-11T14:45:12Z"
+                 :backtrace {:source :disposable}}
+        first-record (repair/record-system-failure! root finding)
+        replay (repair/record-system-failure! root finding)
+        conflict (try
+                   (repair/record-system-failure!
+                    root (assoc finding :error "different evidence"))
+                   nil
+                   (catch clojure.lang.ExceptionInfo e e))]
+    (is (= first-record replay))
+    (is (= :repair-finding-conflict (:reason (ex-data conflict))))
+    (is (= [first-record] (repair/open-obligations root)))))
+
 (deftest failed-commit-cannot-be-its-own-repair-implementation
   (let [root (temp-root)
         finding (repair/record-review-failure!

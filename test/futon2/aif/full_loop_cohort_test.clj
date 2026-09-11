@@ -94,6 +94,30 @@
       (is (thrown? clojure.lang.ExceptionInfo
                    (cohort/closed-execution binding attempt))))))
 
+(deftest execution-authority-binds-canonical-data-root
+  (let [base (tmp-root)
+        raw (slurp prereg-path)
+        cohort-id (:cohort/id (edn/read-string raw))
+        sha (#'cohort/sha256 raw)
+        binding (fn [suffix]
+                  {:preregistration prereg-path
+                   :data-root (str base "/" suffix)
+                   :cohort-id cohort-id :sha256 sha})
+        a (binding "a") b (binding "b")]
+    (.mkdir (io/file (:data-root a)))
+    (.mkdir (io/file (:data-root b)))
+    (cohort/activate! prereg-path (:data-root a))
+    (cohort/activate! prereg-path (:data-root b))
+    (let [aa (cohort/execution-authority a)
+          aa-replay (cohort/execution-authority a)
+          ba (cohort/execution-authority b)
+          ai (cohort/execution-provenance aa "attempt-001")
+          bi (cohort/execution-provenance ba "attempt-001")]
+      (is (= aa aa-replay))
+      (is (not= (:authority-id aa) (:authority-id ba)))
+      (is (not= (:id ai) (:id bi)))
+      (is (= "attempt-001" (:attempt-id ai) (:attempt-id bi))))))
+
 (deftest grounded-checkpoints-cannot-omit-preregistered-fields
   (let [root (tmp-root)
         _ (cohort/activate! prereg-path root)

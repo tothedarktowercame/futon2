@@ -3869,7 +3869,7 @@
                                   :sha256 (apply str (repeat 64 "b"))}))
                         :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
     (is (= :historical-verification-awaiting-validation (:outcome result)))
-    (is (= {:kind :runner-execution :id (:attempt-id result)}
+    (is (= (:execution-identity result)
            (get-in @executions [0 :execution-identity])))
     (is (= admission (get-in @executions [0 :candidate])))
     (is (empty? @dispatches))
@@ -3924,9 +3924,9 @@
       (is (= 1 (:closed-count state)))
       (is (= cohort/checkpoint-order (get-in state [:attempts 0 :checkpoints])))
       (is (= :run4-explicit-test (:cohort/id state)))
-      (is (= "run4-explicit-test--attempt-001"
+      (is (= (get-in result [:execution-identity :id])
              (get-in result [:data :repair-obligation :attempt-id])))
-      (is (= "run4-explicit-test--attempt-001"
+      (is (= (get-in result [:execution-identity :id])
              (get-in result [:morning-brief-ref :attempt-id]))))))
 
 (deftest explicit-cohorts-qualify-shared-ordinal-without-touching-default
@@ -3954,10 +3954,55 @@
                     :cohort? true :execution-cohort binding))))
         a (run-one :run4-a "a")
         b (run-one :run4-b "b")]
-    (is (= "run4-a--attempt-001"
+    (is (= (get-in a [:execution-identity :id])
            (get-in a [:data :repair-obligation :attempt-id])))
-    (is (= "run4-b--attempt-001"
+    (is (= (get-in b [:execution-identity :id])
            (get-in b [:data :repair-obligation :attempt-id])))
     (is (not= (get-in a [:morning-brief-ref :attempt-id])
               (get-in b [:morning-brief-ref :attempt-id])))
     (is (= default-before (cohort/ledger)))))
+
+(deftest same-declared-cohort-in-distinct-authority-roots-cannot-alias-findings
+  (let [root (.getPath (.toFile (Files/createTempDirectory
+                                 "runner-authority-alias"
+                                 (make-array FileAttribute 0))))
+        raw (pr-str (-> (edn/read-string (slurp cohort/default-preregistration))
+                        (assoc :cohort/id :shared-declared-id)
+                        (assoc-in [:stopping-rule :target] 1)))
+        run-one
+        (fn [suffix]
+          (let [data-root (str root "/" suffix)
+                path (str data-root "/cohort.edn")
+                binding {:preregistration path :data-root data-root
+                         :cohort-id :shared-declared-id
+                         :sha256 (digest/sha256 raw)}]
+            (.mkdirs (io/file data-root))
+            (spit path raw)
+            (cohort/activate! path data-root)
+            {:binding binding
+             :result
+             (runner/run-opportunity!
+              (-> (readiness-run-opts (atom []) (constantly {}))
+                  (dissoc :repair-system-record-fn)
+                  (assoc :cohort? true :execution-cohort binding
+                         :repair-root repair/default-root)))}))
+        ar (run-one "authority-a")
+        br (run-one "authority-b")
+        a (:result ar)
+        b (:result br)
+        aid (get-in a [:execution-identity :id])
+        bid (get-in b [:execution-identity :id])]
+    (is (= "attempt-001" (:attempt-id a) (:attempt-id b)))
+    (is (not= aid bid))
+    (is (= aid (get-in a [:data :repair-obligation :attempt-id])))
+    (is (= bid (get-in b [:data :repair-obligation :attempt-id])))
+    (is (= aid (:id (cohort/closed-execution (:binding ar) "attempt-001"))))
+    (is (= bid (:id (cohort/closed-execution (:binding br) "attempt-001"))))
+    (is (empty? (tripwire/evaluate-wire
+                 :T3 {:phase :opportunity :transition :end
+                      :outcome :agent-unavailable :cohort? true
+                      :external-attempt-id aid :repair-root repair/default-root})))
+    (is (empty? (tripwire/evaluate-wire
+                 :T3 {:phase :opportunity :transition :end
+                      :outcome :agent-unavailable :cohort? true
+                      :external-attempt-id bid :repair-root repair/default-root})))))
