@@ -37,10 +37,13 @@
                             :successor {:series-id (:series-id manifest)
                                         :trial-id (get-in manifest [:trials 0 :trial-id])
                                         :attempt-id (get-in manifest [:trials 0 :attempt-id])}}}))))]
-        (t/test-vars [#'u/async-wrapper-persists-to-reader-roots-and-terminal-roundtrips])
+        (binding [u/*expected-terminal-response* {:status "series-terminal" :task-result nil}]
+          (t/test-vars [#'u/async-wrapper-persists-to-reader-roots-and-terminal-roundtrips]))
+        (assert (empty? (repair/open-obligations root)) "Series advanced with unresolved historical repair")
         (prn {:open-repairs-after-controller-completion (mapv :repair/id (repair/open-obligations root))})
         (prn {:simulation :terminal-written-between-service-precheck-and-controller-lock})))))))
 
 (prn @t/*report-counters*)
+(assert (zero? (+ (:fail @t/*report-counters*) (:error @t/*report-counters*))))
 
 )

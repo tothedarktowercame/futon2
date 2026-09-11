@@ -12,8 +12,8 @@
    :sha256 "8d53ba851aa2a1f49115179eaf4ba79b48fea78462ff930e6242742abe9ecbd2"}]
  :checks
  [{:id :full-runner-regression
-   :argv ["clojure" "-M:test:test-all" "-n" "futon2.aif.full-loop-runner-test"]
+   :argv ["clojure" "-M:test" "-m" "cognitect.test-runner" "-n" "futon2.aif.full-loop-runner-test"]
    :timeout-ms 600000}
   {:id :repair-store-regression
-   :argv ["clojure" "-M:test:test-all" "-n" "futon2.aif.repair-obligation-test"]
+   :argv ["clojure" "-M:test" "-m" "cognitect.test-runner" "-n" "futon2.aif.repair-obligation-test"]
    :timeout-ms 600000}]}
