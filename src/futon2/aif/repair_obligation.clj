@@ -222,6 +222,10 @@
 (defn- safe-id? [x]
   (and (string? x) (re-matches #"[A-Za-z0-9][A-Za-z0-9._-]{0,127}" x)))
 
+(defn- execution-identity? [x]
+  (and (map? x) (= #{:kind :id} (set (keys x)))
+       (= :runner-execution (:kind x)) (safe-id? (:id x))))
+
 (defn- historical-directory! [root child create?]
   (let [base (.getCanonicalFile (io/file root))
         directory (io/file base child)
@@ -336,7 +340,7 @@
   ([execution-attempt evidence]
    (commit-historical-verification! default-root execution-attempt evidence))
   ([root execution-attempt evidence]
-   (when-not (safe-id? execution-attempt)
+   (when-not (execution-identity? execution-attempt)
      (throw (ex-info "Historical verification execution identity invalid" {})))
    (let [candidate (admission-from! root evidence)
          source (:verification-artifact candidate)
@@ -356,7 +360,10 @@
   authority; canonical store bytes determine the transition."
   ([obligation evidence] (record-historical-verification! default-root obligation evidence))
   ([root _obligation evidence]
-   (commit-historical-verification! root (:verification-id (historical-verification-candidate root evidence)) evidence)))
+   (commit-historical-verification!
+    root {:kind :runner-execution
+          :id (:verification-id (historical-verification-candidate root evidence))}
+    evidence)))
 
 (declare verified-admissions)
 
@@ -378,10 +385,10 @@
                     (= :resolved (:repair/status record))
                     (= :succeeded (:task-result record))
                     (= :safe (:infrastructure record))
-                    (safe-id? (:validation-attempt record))
-                    (safe-id? (:verification-attempt record))
+                    (execution-identity? (:validation-attempt record))
+                    (execution-identity? (:verification-attempt record))
                     (not= (:validation-attempt record) (:verification-attempt record))
-                    (not= (:validation-attempt record) (:attempt-id finding))
+                    (not= (get-in record [:validation-attempt :id]) (:attempt-id finding))
                     (safe-id? (:click-id record)) (safe-id? (:run-id record))
                     (every? #(and (string? %) (re-matches #"[0-9a-f]{64}" %))
                             ((juxt :projection-digest :run-record-digest) record)))
@@ -398,7 +405,7 @@
                      stored (:value cap)
                      artifact (:verification-artifact stored)
                      _ (when-not (and evidence-directory
-                                      (safe-id? (:verification-attempt stored))
+                                      (execution-identity? (:verification-attempt stored))
                                       (= #{:schema :repair/id :repair/schema-version
                                            :repair/status :failed-attempt :verification-id
                                            :verification-attempt

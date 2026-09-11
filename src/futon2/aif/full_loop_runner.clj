@@ -2754,11 +2754,22 @@
               (resolve-pinned-selection
                opts judgement0 {:author author :reviewer reviewer
                                 :repair-reviewer repair-reviewer}))
+            historical-admission
+            (when (and stop-line (:historical-verification-candidate-fn opts))
+              ((:historical-verification-candidate-fn opts) stop-line))
+            historical-entry
+            (when historical-admission
+              (historical-revalidation-entry
+               stop-line historical-admission
+               {:author author :repair-reviewer repair-reviewer}))
             entry (if stop-line
-                    (repair-entry stop-line)
+                    (or historical-entry (repair-entry stop-line))
                     (or (:entry pinned-selection) ordinary-entry))
-            repair-action? (= :repair-machine-failure
-                              (get-in entry [:action :type]))
+            historical-action? (= :revalidate-historical-repair
+                                  (get-in entry [:action :type]))
+            repair-action? (contains? #{:repair-machine-failure
+                                        :revalidate-historical-repair}
+                                      (get-in entry [:action :type]))
             reviewer (if repair-action? repair-reviewer reviewer)
             _ (reset! reviewer-of-record reviewer)
             operator-action-refs
@@ -2909,6 +2920,29 @@
                                       :selected-action (:action entry)}
                                pinned-selection
                                (assoc :run4/task-pin (:identity pinned-selection)))))
+          (when historical-action?
+            (when-not (:historical-verification-execute-fn opts)
+              (throw (ex-info "Historical verification execution port missing"
+                              {:outcome :historical-verification-refused
+                               :failure-kind :historical-verification-port-missing
+                               :failure-stage :construction
+                               :repair-obligation stop-line})))
+            (let [execution-identity {:kind :runner-execution :id attempt-id}
+                  transition ((:historical-verification-execute-fn opts)
+                              {:execution-identity execution-identity
+                               :obligation stop-line
+                               :candidate historical-admission})]
+              (checkpoint! :dispatch
+                           (sorry :historical-verification-no-author-dispatch
+                                  {:verification-attempt execution-identity}))
+              (checkpoint! :build
+                           (sorry :historical-code-identity-unchanged
+                                  {:verification-id (:verification-id transition)}))
+              (throw (ex-info "Historical repair verification admitted for validation"
+                              {:outcome :historical-verification-awaiting-validation
+                               :failure-kind nil :failure-stage nil
+                               :repair-obligation transition
+                               :verification-attempt execution-identity}))))
           (let [snapshot (when stop-line
                            (recovery-snapshot opts stop-line))
                 recovery-stage (:failure-stage stop-line)

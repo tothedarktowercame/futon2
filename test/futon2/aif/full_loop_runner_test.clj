@@ -3831,6 +3831,31 @@
     (is (empty? @dispatches)
         "no replacement turn is dispatched on a typed recovery refusal")))
 
+(deftest historical-verification-action-commits-without-author-dispatch
+  (let [dispatches (atom []) executions (atom [])
+        stop-line {:repair/id "repair-057" :repair/status :open
+                   :repair/class :machine-failure :attempt-id "failed-057"}
+        admission {:schema :wm/historical-repair-admission-v1
+                   :repair/id "repair-057" :repair/status :awaiting-validation
+                   :verification-id "verification-057"
+                   :verification-artifact {:path "/server/evidence" :sha256 (apply str (repeat 64 "a"))}
+                   :actors {:author "zai-5" :reviewer "codex-1"}}
+        result (runner/run-opportunity!
+                (merge (isolated-runner-opts)
+                       {:repair-open-fn (constantly [stop-line])
+                        :historical-verification-candidate-fn (fn [_] admission)
+                        :historical-verification-execute-fn
+                        (fn [request]
+                          (swap! executions conj request)
+                          (assoc admission :verification-attempt
+                                 (:execution-identity request)))
+                        :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+    (is (= :historical-verification-awaiting-validation (:outcome result)))
+    (is (= {:kind :runner-execution :id (:attempt-id result)}
+           (get-in @executions [0 :execution-identity])))
+    (is (= admission (get-in @executions [0 :candidate])))
+    (is (empty? @dispatches))))
+
 (deftest explicit-cohort-routes-all-events-to-its-own-store
   (let [root (.getPath (.toFile (Files/createTempDirectory "runner-explicit-cohort" (make-array FileAttribute 0))))
         path (str root "/cohort.edn")

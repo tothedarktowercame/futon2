@@ -58,12 +58,12 @@
                            result)))}
         #(is (thrown? clojure.lang.ExceptionInfo
                       (repair/commit-historical-verification!
-                       (.getPath store) "verification-execution-001"
+                       (.getPath store) {:kind :runner-execution :id "verification-execution-001"}
                        {:verification-root (.getPath evidence-root) :path (.getPath file)
                         :sha256 (digest/sha256 (slurp file))})))))
     (let [record (repair/commit-historical-verification!
                   (.getPath store)
-                  "verification-attempt-001"
+                  {:kind :runner-execution :id "verification-attempt-001"}
                   {:verification-root (.getPath evidence-root) :path (.getPath file)
                    :sha256 (digest/sha256 (slurp file))})]
       (let [entry (runner/historical-revalidation-entry
