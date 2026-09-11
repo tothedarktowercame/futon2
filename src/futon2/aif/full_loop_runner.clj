@@ -47,6 +47,7 @@
 (def default-build-cure-retries 1)
 (def default-author-infrastructure-retries 1)
 (def default-revision-rounds 1)
+(def ^:private historical-verification-completion-token (Object.))
 (def readiness-wake-timeout-ms 30000)
 (def substrate-retry-delay-ms 5000)
 (def strategic-selection-retry-delay-ms 5000)
@@ -2983,7 +2984,8 @@
                                  {:kind :historical-verification-admission
                                   :evidence (:verification-artifact transition)}))
               (throw (ex-info "Historical repair verification admitted for validation"
-                              {:historical-verification-complete? true
+                              {:historical-verification-completion-token
+                               historical-verification-completion-token
                                :outcome :historical-verification-awaiting-validation
                                :repair-obligation transition
                                :verification-attempt execution-identity}))))
@@ -3441,7 +3443,8 @@
       (catch Throwable e
         (if @closing?
           (throw e)
-          (if (true? (:historical-verification-complete? (ex-data e)))
+          (if (identical? historical-verification-completion-token
+                          (:historical-verification-completion-token (ex-data e)))
             (let [completion (ex-data e)]
               (close! :historical-verification-awaiting-validation
                       {:target (get-in @checkpoints [:selection :judgment

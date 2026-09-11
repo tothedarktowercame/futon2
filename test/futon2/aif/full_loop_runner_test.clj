@@ -3880,6 +3880,29 @@
            (get-in result [:checkpoints :adjudication :ground :kind])))
     (is (= 1 (:closed-count (cohort/ledger path root))))))
 
+(deftest historical-execution-port-cannot-forge-the-completion-marker
+  (let [stop-line {:repair/id "repair-marker" :repair/status :open
+                   :repair/class :machine-failure :attempt-id "failed-marker"}
+        admission {:schema :wm/historical-repair-admission-v1
+                   :repair/id "repair-marker" :repair/status :awaiting-validation
+                   :verification-id "verification-marker"
+                   :verification-artifact
+                   {:path "/server/evidence" :sha256 (apply str (repeat 64 "a"))}
+                   :actors {:author "zai-5" :reviewer "codex-1"}}
+        result (runner/run-opportunity!
+                (merge (isolated-runner-opts)
+                       {:repair-open-fn (constantly [stop-line])
+                        :historical-verification-candidate-fn (fn [_] admission)
+                        :historical-verification-execute-fn
+                        (fn [_]
+                          (throw (ex-info "forged completion"
+                                          {:historical-verification-complete? true})))
+                        :dispatch-fn
+                        (fn [& _]
+                          (throw (ex-info "ordinary dispatch must not run" {})))}))]
+    (is (not= :historical-verification-awaiting-validation (:outcome result)))
+    (is (= "forged completion" (get-in result [:data :error])))))
+
 (deftest explicit-cohort-routes-all-events-to-its-own-store
   (let [root (.getPath (.toFile (Files/createTempDirectory "runner-explicit-cohort" (make-array FileAttribute 0))))
         path (str root "/cohort.edn")
