@@ -306,9 +306,26 @@ operator workflow conversation (standdown 2026-09-12).
     packet 1's independent identity copy refuses
     :entity-identity-mismatch BEFORE the append-only close
     write; 147 tests/770 assertions; redirected readback
-    verified. Retention packet 3 (cross-ledger identity)
-    dispatched (codex-24); 1b waits on retained data + the
-    categorical-authority ruling at its review.
+    verified. RETENTION PACKET 3 DONE (2026-09-12, futon2
+    4c776dc2..c02f18bf, reviewed): selection persistence staged
+    until the trace writer returns its literal path so
+    selection and close name the same :run/id + :trace-path;
+    cohort-produced traces carry present-only :cohort-attempt
+    (schema honestly 28->29, ordinary/scheduled ticks
+    byte-identical); pure join helper
+    (cross_ledger_identity.clj) joins by run identity ONLY —
+    cohort/attempt is diagnostic, historical reused-attempt-id
+    collisions surface :historical-attempt-id-collision, and
+    missing/multiple matches refuse typed; 221 tests/1015
+    assertions; redirected evidence retained both directions.
+    RETENTION STACK 1-3 COMPLETE — future closes carry entity,
+    belief row, and literal ledger joins. Packet 4
+    (disposition-coverage report) dispatched (codex-24);
+    packet 5 (status coverage) accrues naturally; 1b waits on
+    retained data + the categorical-authority ruling at its
+    review. RELOAD NOTE: schema-29 + close-capture code needs
+    a trace+runner reload before live cohort runs carry the
+    new fields (fold into the next natural reload point).
 15. Write measurement proofs for the five machine declarations that
     lack one: belief state, belief update, depth, temperature,
     action. SPLIT 2026-09-12 (codex-24 discovery, correct refusal):
