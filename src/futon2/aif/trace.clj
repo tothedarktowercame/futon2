@@ -368,8 +368,11 @@
          (PA14z, 2026-09-08).
     28 - adds the complete present-only :machine-q Q/C pair to each ranked
          action that the opt-in scorer evaluated. Partial pairs and ordered
-         support disagreement refuse before append (row 14, 2026-09-12)."
-  28)
+         support disagreement refuse before append (row 14, 2026-09-12).
+    29 - adds present-only :cohort-attempt to traces produced by a full-loop
+         cohort attempt. The literal cohort/attempt identity is threaded by
+         the runner; ordinary and scheduled ticks remain byte-identical."
+  29)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the
@@ -708,6 +711,8 @@
     ;; run, NOT that the record belongs to an unnamed one.
     (:run/id judge-output)
     (assoc :run/id (:run/id judge-output))
+    (:cohort-attempt judge-output)
+    (assoc :cohort-attempt (:cohort-attempt judge-output))
     (:policy-depth judge-output)
     (assoc :policy-depth (:policy-depth judge-output))
     ;; U52 ladder judgement. The judge attaches the ladder's own record and

@@ -2715,6 +2715,8 @@
         _ (emit-phase! opts @phase-context {:phase :opportunity :transition :start})
         checkpoints (atom {})
         selected-entity-belief (atom nil)
+        pending-selection (atom nil)
+        selection-persisted? (atom false)
         dispatched-turns (atom 0)
         reviewer-of-record (atom reviewer)
         closing? (atom false)
@@ -2782,8 +2784,25 @@
                                                      attempt-id checkpoint cell)
                           (cohort/append-checkpoint! attempt-id checkpoint cell)))
                       cell)
+        persist-selection!
+        (fn [trace-path]
+          (when (and @pending-selection (not @selection-persisted?))
+            (let [cell (update @pending-selection :judgment assoc
+                               :belief-source
+                               (cond-> {:run/id (:run-id opts)}
+                                 trace-path (assoc :trace-path trace-path)))]
+              (swap! checkpoints assoc :selection cell)
+              (when cohort?
+                (if cohort-source
+                  (cohort/append-checkpoint! cohort-source
+                                             (:data-root execution-cohort)
+                                             attempt-id :selection cell)
+                  (cohort/append-checkpoint! attempt-id :selection cell)))
+              (reset! selection-persisted? true)))
+          (get @checkpoints :selection))
         close! (fn [outcome data]
                  (reset! closing? true)
+                 (persist-selection! nil)
                  (doseq [cp required-checkpoints
                          :when (not (contains? @checkpoints cp))]
                    (checkpoint! cp (sorry (keyword (str "not-reached-" (name cp)))
@@ -3120,6 +3139,7 @@
                         brief/queue-operator-gate!) %)
                   (:operator-actions judgement0))
             judgement (cond-> (assoc judgement0
+                             :run/id (:run-id opts)
                              :operator-action-refs operator-action-refs
                              :wm-version
                              ((or (:version-stamp-fn opts) trace/wm-version-stamp)
@@ -3137,7 +3157,12 @@
                                :run4/enacted-action (:action entry))
                         (and historical-action? (:run4/requested-pin opts))
                         (assoc :run4/requested-pin (:run4/requested-pin opts)
-                               :run4/enacted-action (:action entry)))
+                               :run4/enacted-action (:action entry))
+                        cohort?
+                        (assoc :cohort-attempt
+                               {:cohort/id (or (:cohort/id start-event)
+                                               (:cohort-id execution-cohort))
+                                :attempt/id attempt-id}))
             target (some-> entry selected-target)
             _ (reset! selected-entity-belief
                       {:selection-reached? true
@@ -3195,7 +3220,8 @@
                                           :readiness/selection-transient]
                                          true))
                              (sorry :no-selection {:decision (:decision judgement)}))]
-        (checkpoint! :selection selection-cell)
+        (reset! pending-selection selection-cell)
+        (swap! checkpoints assoc :selection selection-cell)
         (when-not entry
           (throw (ex-info "War Machine abstained or selected no addressable action"
                           {:outcome (if (= :abstain (get-in judgement [:decision :action]))
@@ -3259,6 +3285,7 @@
                                      {:kind :routing-rule
                                       :rule :constructed-selection-persisted
                                       :question "Does the constructed selection require operator review?"})))]
+          (persist-selection! trace-path)
           (checkpoint! :construction
                        (term (cond-> {:mission (str target)
                               :cascade (select-keys construction
@@ -3877,7 +3904,7 @@
         started-at (str (Instant/now))
         result
         (try
-      (run-opportunity-core! raw-opts)
+      (run-opportunity-core! (assoc raw-opts :run-id run-id))
     (catch Throwable e
       (when (= :delivery-qa-gate-failed
                (:failure-kind (ex-data e)))
