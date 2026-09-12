@@ -448,7 +448,21 @@ operator workflow conversation (standdown 2026-09-12).
     disclaims the catalogue-wide R20 node, VERIFY zeros
     unchanged; source ledger sha + extraction time pinned; 24h
     compaction of the worker-loss record noted honestly.
-    Packet 3 (R20 continuation credit) dispatched (codex-22).
+    PACKET 3 DONE (2026-09-12, futon2 1a0ab2bf..0fc1a592,
+    reviewed): a real completed buffer/poller park cycle
+    retained (park-ca4df3cc joined to its terminal invoke job —
+    reviewer spot-checked the join in the live store's
+    dependency index and the job in the live ledger; payload
+    redacted; the projection-not-source-record limitation
+    stated); deadline-woken class typed absent (no real
+    instance); the invented-dependency negative control ran in
+    an ISOLATED store (path verified in the control record and
+    receipts — accepted, no early wake, exactly one deadline
+    wake; the referential gap named as a limitation, not
+    smoothed); credit wording narrow with catalogue-wide R20
+    disclaimed; 2 tests/11 assertions; receipts commit-first
+    with two failure receipts retained. Packet 4 (R9/TRACE
+    non-credit record) dispatched (codex-22).
 18. Implement R20's chartered interoceptive commitment link — the
     genuinely missing piece, distinct from row 17's crediting.
 19. Implement R9, "No self-certification": the checks that prevent
