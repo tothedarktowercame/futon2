@@ -205,8 +205,17 @@ operator workflow conversation (standdown 2026-09-12).
     :infinite-risk refusal carrying the offending outcomes on the
     seven-zero-C shape; reviewer recomputed the 1/2*ln(4/3)
     reference bit-identical; 3 tests/11 assertions at tree
-    804b37fe. Packet 4 dispatched (compute-efe injection,
-    codex-22); 5 follows 4; 2 and 6 follow packet 1.
+    804b37fe. Packet 4 DONE (2026-09-12, futon2
+    0536763d/42a0d8a5/836f0831, reviewed): opt-in :machine-q on
+    compute-efe — per-candidate provider, adapter risk folded
+    weighted into g-risk, full Q/C pair + adapter result retained
+    under :machine-q, refusals propagate uncaught; option-absent
+    path proven byte-identical (reviewer recomputed the baseline
+    digest e00e160d at the pre-change tree in a worktree —
+    matches the committed pin); enabled test drives the REAL
+    predictive-outcome-kernel and the C-flip reverses ranking;
+    38 tests/147 assertions. Packet 5 dispatched (trace
+    retention, codex-23); 2 and 6 follow packet 1.
     :blocker DECISION NEEDED (packet 1 only — model content, not
     principle-settleable): no inspected authority declares a
     semantic status-to-disposition correspondence, and sorting two
