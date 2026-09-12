@@ -84,7 +84,18 @@ hypotheses; continuous Dirichlet a named exclusion). Rows 6-11
 implementation packets are ready to dispatch and HELD pending
 operator workflow conversation (standdown 2026-09-12).
 
-6. The predictive-outcome-kernel constructor.
+6. DONE (futon2 c1a66818..3503686d, mathlib4 b3f9dcae..ed6993c5;
+   reviewed 2026-09-12). Q(o|pi)=sum_s A(o|s)Q(s|pi) over row 9's
+   terminal; MachineQ bridge theorem proven (non-vacuous, pins the
+   QReading to the actual carriers); constant disposition adapter
+   fails the sensitivity control; twelve-outcome support from the
+   contract authority. NOTE forward to row 14: the witness's A
+   instance (wm-state-outcome-prior-v1) is an honest declared
+   prior whose CONTENT is positional placeholder (state i ->
+   outcome i mod 12); the constructor reads A from the model
+   instance, so row 14's integration must carry a reviewed
+   declared correspondence as the machine's A content, not this
+   placeholder.
 7. DONE (futon2 72950ab5..e6d52a2a, mathlib4 4750f9fa; reviewed
    2026-09-12). Leg (c) surfaced a real contract conflict —
    production float rows sum one ulp off 1 — settled as contract
