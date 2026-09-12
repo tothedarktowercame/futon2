@@ -260,12 +260,16 @@ operator workflow conversation (standdown 2026-09-12).
     R6 softmax -> needs-capture (trace/strip-decision dissocs
     :softmax-weights and :ranked-actions at trace.clj:171-178;
     the lossy rankings cannot reconstruct the action-keyed
-    posterior) — capture-family candidate; PLUS a discovered
-    production DEFECT: policy/softmax-weights at zero temperature
-    returns [##NaN ##NaN] (reviewer-reproduced) instead of a typed
-    refusal — repair item queued (typed zero/nonpositive-
-    temperature refusal + tests; violates the no-silent-default
-    contract discipline). R17 binding -> DONE (2026-09-12):
+    posterior) — capture-family candidate. Softmax NaN DEFECT
+    REPAIRED (2026-09-12, futon2 5750251c/39f2fd0f, reviewed):
+    guard at the single selection-scores seam (all softmax-weights
+    arities and both direct callers route through it) refuses
+    :nonpositive-temperature / :nonfinite-temperature via ex-info
+    :refusal with the offending value; positive baseline at
+    production tau 1.0 pinned from a pre-repair run and byte-
+    identical; 56 tests/301 assertions, receipts at tree 5750251c;
+    reviewer reproduced all three refusals + baseline locally;
+    serving JVM reloaded from master post-review. R17 binding -> DONE (2026-09-12):
     R17-dirichlet-accumulation-ieee-residuals-v1 admitted at
     :verified-binding (futon2 5360a4a4 admission, 65dce508
     registry; mathlib4 MachineAccumulationWitness.lean at
