@@ -1,0 +1,17 @@
+{:receipts
+ [{:gate :clojure-tests
+   :command "clojure -X:test :nses '[futon2.aif.machine-q-risk-test]'"
+   :exit 0 :tests 3 :assertions 11
+   :tree-sha "804b37fe9541740f3a79378014d7d5dce158933e" :at "2026-09-12"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_q_risk.clj test/futon2/aif/machine_q_risk_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "804b37fe9541740f3a79378014d7d5dce158933e" :at "2026-09-12"}
+  {:gate :check-parens
+   :command "bash /home/joe/code/futon4/dev/check-parens.sh src/futon2/aif/machine_q_risk.clj test/futon2/aif/machine_q_risk_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "804b37fe9541740f3a79378014d7d5dce158933e" :at "2026-09-12"}]
+ :preflight
+ [{:command "clojure -M:test -n futon2.aif.machine-q-risk-test"
+   :exit 1 :outcome :alias-invocation-mismatch
+   :finding "This repository's :test alias exposes :exec-fn rather than main opts; the commissioned namespace-only test used -X:test :nses."}]}
