@@ -1,0 +1,10 @@
+{:schema :wm/machine-action-branches-capture-failed-attempt-v1
+ :command "clojure -M holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/capture_branches.clj"
+ :exit 1
+ :tree-sha "d6d79205"
+ :scope :redirected-machinery-tick
+ :external-write? false
+ :failure {:class :unknown-f-pi-scaling :f-pi-scaling 1.0
+           :accepted [:unscaled :by-tau]}
+ :stage :post-generation-direct-full-score-invocation
+ :report "/tmp/clojure-10066426588466728928.edn"}

@@ -26,3 +26,10 @@ retained in `failed-attempt.edn`. The follow-up removes that unnecessary second
 projection: this packet requires the complete in-memory decision and ranked
 actions, which the machinery result already supplies, and is not a trace-writer
 test. The mismatch remains a typed finding rather than being hidden.
+
+The second execution attempt again completed the isolated machinery generation
+and then refused before writing artifacts: the authored commissioned F option
+used numeric `1.0`, while production accepts the closed scaling vocabulary
+`:unscaled` or `:by-tau`. `failed-attempt-f-scaling.edn` retains that refusal.
+The follow-up uses the production vocabulary `:unscaled`; it does not weaken
+the boundary.

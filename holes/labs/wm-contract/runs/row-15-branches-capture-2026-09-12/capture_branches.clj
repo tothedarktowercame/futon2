@@ -80,7 +80,7 @@
          :selection-law :full-score-posterior
          :f-pi-opts {:f-pi-policy-posterior? true
                      :f-pi-values f-zeroes
-                     :f-pi-scaling 1.0
+                     :f-pi-scaling :unscaled
                      :f-pi-posterior
                      {:status :commissioned-zero-control
                       :basis :real-candidate-domain-f-pi-option-only}}))
