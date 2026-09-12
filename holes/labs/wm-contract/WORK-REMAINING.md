@@ -165,6 +165,13 @@ operator workflow conversation (standdown 2026-09-12).
     follows on the row-2 pattern. The existing
     F8-belief-update readback is synthetic-reference only and must
     not be relabelled as a trace proof.
+    BELIEF STATE DONE (2026-09-12): two production-trace-scoped
+    claims admitted (codex-24 1e96deb4..5c615a6a + mathlib4
+    67cab68a/fd002c83; review + admission c6835840; registry 50
+    entries e4fe14d6) — the registry's first real-trace-scope
+    witnesses. Depth/temperature/action in flight (part 2,
+    codex-22); update-capture packet waits on the row-13 TN's
+    shared-seam answer.
 16. Write measurement proofs for the remaining equation-bearing
     nodes not covered by rows 2 and 15 (inventory first; roughly
     five).
