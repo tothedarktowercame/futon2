@@ -1,0 +1,27 @@
+{:schema :wm/row15-machine-action-divergence-fixture-v1
+ :scope :production-trace-record-20260912T172809-live-selector-divergence
+ :source {:repo "futon2"
+          :path "data/wm-trace/wm-trace-2026-09-12.edn.pre-migration-backup"
+          :sha256 "25a0a1e2257396c2d1db889375773c9cbed99b2ad26c57b4674e02ca1660d686"
+          :form-index 3
+          :timestamp "2026-09-12T17:28:09.498448087Z"
+          :trace-schema 27}
+ :selection-law {:requested :controller-head
+                 :applied :controller-head
+                 :controller-head-rank 1
+                 :chosen-rank 139
+                 :moved-from-controller-head? true
+                 :consulted-ranking :live-selector-id}
+ :controller-head {:rank 1
+                   :controller-score 2.0198396241717806
+                   :action {:type :advance-mission
+                            :target "M-expressions-of-interest"}}
+ :live-selected {:rank 139
+                 :controller-score 2.480133636820313
+                 :action {:type :advance-mission
+                          :target "M-shared-memory-control-build-test"}}
+ :comparison {:same-rank? false
+              :same-action? false
+              :result :diverged-from-machineAction-controller-head}
+ :limits {:internal-controller-head-correctness :not-refuted
+          :positive-live-selector-carrier :open-row15-packet4}}
