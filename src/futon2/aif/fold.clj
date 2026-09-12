@@ -46,6 +46,37 @@
 (defn- obligation-id? [value]
   (or (keyword? value) (and (string? value) (seq value))))
 
+(defn- nonempty-string? [value]
+  (and (string? value) (seq value)))
+
+(defn- hole-findings [box-index box-id hole]
+  (let [at {:box/index box-index :box/id box-id}]
+    (cond-> []
+      (not (keyword? (:kind hole)))
+      (conj (assoc at :finding :hole-kind-missing))
+      (not (nonempty-string? (:wanted hole)))
+      (conj (assoc at :finding :hole-wanted-missing))
+      (and (contains? hole :discharge) (not (keyword? (:discharge hole))))
+      (conj (assoc at :finding :hole-discharge-invalid
+                      :observed (:discharge hole)))
+      (and (contains? hole :satiety) (not (keyword? (:satiety hole))))
+      (conj (assoc at :finding :hole-satiety-invalid
+                      :observed (:satiety hole)))
+      (not (obligation-id? (:obligation/id hole)))
+      (conj (assoc at :finding :box-hole-obligation-id-missing)))))
+
+(defn- policy-hole-findings [index hole]
+  (let [at {:policy-hole/index index}]
+    (cond-> []
+      (not (nonempty-string? (:free hole)))
+      (conj (assoc at :finding :policy-hole-free-missing))
+      (not (nonempty-string? (:why hole)))
+      (conj (assoc at :finding :policy-hole-why-missing))
+      (not (contains? hole :unfolded-pattern))
+      (conj (assoc at :finding :policy-hole-unfolded-pattern-missing))
+      (not (obligation-id? (:obligation/id hole)))
+      (conj (assoc at :finding :policy-hole-obligation-id-missing)))))
+
 (defn- condition-findings [box-index condition-index condition]
   (let [at {:box/index box-index :condition/index condition-index}]
     (cond-> []
@@ -71,7 +102,8 @@
         conditions (:conditions box)
         at {:box/index index :box/id (:id box)}]
     (into
-     (cond-> []
+     (into
+      (cond-> []
        (not (map? pattern))
        (conj (assoc at :finding :box-pattern-reference-invalid))
        (and (map? pattern) (nil? (:pattern/id pattern)))
@@ -87,9 +119,10 @@
        (and (vector? conditions) (empty? conditions)
             (not= :deduction warrant))
        (conj (assoc at :finding :box-conditions-empty))
-       (and (contains? box :hole)
-            (not (obligation-id? (get-in box [:hole :obligation/id]))))
-       (conj (assoc at :finding :box-hole-obligation-id-missing)))
+       (and (contains? box :hole) (not (map? (:hole box))))
+       (conj (assoc at :finding :box-hole-invalid)))
+      (when (map? (:hole box))
+        (hole-findings index (:id box) (:hole box))))
      (when (vector? conditions)
        (mapcat (fn [[condition-index condition]]
                  (condition-findings index condition-index condition))
@@ -123,16 +156,48 @@
              (not (vector? boxes)) (conj {:finding :boxes-not-vector})
              (not (vector? holes)) (conj {:finding :policy-holes-not-vector})
              (vector? holes)
-             (into (keep-indexed
-                    (fn [index hole]
-                      (when-not (obligation-id? (:obligation/id hole))
-                        {:finding :policy-hole-obligation-id-missing
-                         :policy-hole/index index}))
-                    holes)))
+             (into (mapcat (fn [[index hole]]
+                             (policy-hole-findings index hole))
+                           (map-indexed vector holes))))
            (when (vector? boxes)
              (mapcat (fn [[index box]] (box-findings index box))
                      (map-indexed vector boxes))))]
       {:ok (empty? findings) :fold/schema :enriched :findings findings})))
+
+(defn- box-pattern-id [box]
+  (let [reference (:fits-pattern box)]
+    (if (map? reference) (:pattern/id reference) reference)))
+
+(defn validate-fold-correspondence
+  "Check that a fold output accounts for its cascade outline. Every cascade
+  pattern must be filled by a box or named by a policy hole, and non-deduction
+  box warrants must come from the cascade. An outside-outline warrant is a
+  finding, not a permission system: how such warrants become licensed is a
+  later policy decision that requires evidence."
+  [fold-output cascade]
+  (let [cascade-set (set cascade)
+        boxes (get-in fold-output [:wiring :boxes])
+        policy-holes (:policy-holes fold-output)
+        box-patterns (keep box-pattern-id boxes)
+        unfolded-patterns (keep :unfolded-pattern policy-holes)
+        accounted (into (set box-patterns) unfolded-patterns)
+        unaccounted (remove accounted cascade)
+        outside (keep-indexed
+                 (fn [index box]
+                   (let [pattern-id (box-pattern-id box)]
+                     (when (and (not= :deduction (:warrant-kind box))
+                                (some? pattern-id)
+                                (not (cascade-set pattern-id)))
+                       {:finding :box-warrant-outside-cascade
+                        :box/index index :box/id (:id box)
+                        :pattern/id pattern-id})))
+                 boxes)
+        findings (into (mapv (fn [pattern-id]
+                               {:finding :cascade-pattern-unaccounted
+                                :pattern/id pattern-id})
+                             unaccounted)
+                       outside)]
+    {:ok (empty? findings) :findings findings}))
 
 (defn valid-fold-output-v1?
   "Boolean projection of `validate-fold-output-v1`."

@@ -36,10 +36,12 @@
      {:id :ordinary-step
       :fits-pattern {:pattern/id :p/a :pattern/revision "rev-1"}
       :warrant-kind :deduction :conditions []
-      :hole {:obligation/id :obligation/inside :why "open"}}]
+      :hole {:obligation/id :obligation/inside :kind :sorry
+             :wanted "the remaining proof"}}]
     :wires [[:pattern-step :ordinary-step]] :terminals [:ordinary-step]}
    :coverage-score-delta -0.5
-   :policy-holes [{:obligation/id :obligation/outside :why "open"}]})
+   :policy-holes [{:obligation/id :obligation/outside
+                   :unfolded-pattern nil :free "unknown move" :why "open"}]})
 
 (deftest structured-proof-fold-output-v1
   (is (fold/valid-fold-output-v1? enriched-output))
@@ -76,3 +78,57 @@
     (is (contains? findings :condition-status-missing))
     (is (contains? findings :policy-hole-obligation-id-missing))
     (is (contains? findings :box-hole-obligation-id-missing))))
+
+(deftest hole-interface-validation
+  (testing "a bare gap marker is not a hole interface"
+    (let [result (fold/validate-fold-output-v1
+                  (assoc-in enriched-output [:wiring :boxes 1 :hole]
+                            {:obligation/id :obligation/bare}))
+          findings (set (map :finding (:findings result)))]
+      (is (not (:ok result)))
+      (is (contains? findings :hole-kind-missing))
+      (is (contains? findings :hole-wanted-missing))))
+  (testing "policy holes state the free work, grounds, and pattern position"
+    (let [result (fold/validate-fold-output-v1
+                  (assoc enriched-output :policy-holes
+                         [{:obligation/id :obligation/statusless}]))
+          findings (set (map :finding (:findings result)))]
+      (is (contains? findings :policy-hole-free-missing))
+      (is (contains? findings :policy-hole-why-missing))
+      (is (contains? findings :policy-hole-unfolded-pattern-missing)))))
+
+(deftest recorded-fold-turn-holes-retain-real-interface-shape
+  (let [construction (edn/read-string
+                      (slurp "holes/labs/M-evaluate-policies/exhibit/fold-turn.edn"))
+        output {:wiring construction :coverage-score-delta -0.75
+                :policy-holes (:policy-holes construction)}
+        findings (:findings (fold/validate-fold-output-v1 output))
+        hole-findings (set (map :finding findings))]
+    (is (not (contains? hole-findings :hole-kind-missing)))
+    (is (not (contains? hole-findings :hole-wanted-missing)))
+    (is (not (contains? hole-findings :hole-discharge-invalid)))
+    (is (not (contains? hole-findings :hole-satiety-invalid)))
+    (is (not (contains? hole-findings :policy-hole-free-missing)))
+    (is (not (contains? hole-findings :policy-hole-why-missing)))
+    (is (not (contains? hole-findings :policy-hole-unfolded-pattern-missing)))
+    (is (= 2 (count (filter #(= :box-hole-obligation-id-missing (:finding %))
+                            findings))))
+    (is (= 2 (count (filter #(= :policy-hole-obligation-id-missing (:finding %))
+                            findings))))))
+
+(deftest fold-output-corresponds-to-cascade-outline
+  (let [construction (edn/read-string
+                      (slurp "holes/labs/M-evaluate-policies/exhibit/fold-turn.edn"))
+        output {:wiring construction :policy-holes (:policy-holes construction)}]
+    (is (:ok (fold/validate-fold-correspondence output (:cascade construction)))))
+  (testing "cascade debts and outside non-deduction warrants are findings"
+    (let [result (fold/validate-fold-correspondence enriched-output [:p/missing])
+          findings (set (map :finding (:findings result)))]
+      (is (contains? findings :cascade-pattern-unaccounted))
+      (is (contains? findings :box-warrant-outside-cascade))))
+  (testing "ordinary deductions need not name a cascade pattern"
+    (let [deduction-output
+          (-> enriched-output
+              (assoc-in [:wiring :boxes 0 :fits-pattern :pattern/id] :p/a)
+              (assoc-in [:wiring :boxes 1 :fits-pattern :pattern/id] :proof/local))]
+      (is (:ok (fold/validate-fold-correspondence deduction-output [:p/a]))))))
