@@ -45,15 +45,14 @@ violation-signature-before-work) and the signature audit
    fragments + merge_witnesses.bb admission with the TN's maximum
    claims and named refusals; deterministic merge (byte-identical
    twice), 23 controls green including no-output-on-refusal.
-2. IN PROGRESS (1ca908d3). The three proofs' 24 claims are carried
-   as :proposed with pins audited (precision matches; observation's
-   one historical divergence and prediction-error's two census
-   divergences recorded, not re-pinned). The carrier correctly
-   refuses to admit them: retained F8 transcripts carry no checker
-   exit codes and no review receipts. REMAINING: re-run the three
-   Lean witness checkers to produce executed verification receipts,
-   independent review receipts, then admission + canonical registry
-   integration as a reviewed step.
+2. DONE (2026-09-12). Executed verification receipts produced by
+   real checker runs (codex-23 f9be1c4b + mathlib4 1f09599c3f:
+   exit 0, axiom census propext/choice/Quot.sound only, no
+   sorryAx); independent review receipts by claude-15 (198ca443);
+   all 24 claims :verified-binding through the carrier's full
+   gate, deterministic; canonical registry integrated (1dd22548,
+   --check green). Historical pin divergences remain recorded,
+   never re-pinned.
 3. DONE (14dc45cc, reviewed; live 2026-09-12). The click path
    records both output-validator verdicts (pass/fail + findings +
    input digests) inside the construction record it saves, on
