@@ -1,0 +1,8 @@
+[{:command "clojure -M:test -e '(require ...machine-model-test ...machine-belief-test) (run-tests ...)'"
+  :exit 0 :tests 6 :assertions 57 :ran-by "claude-15" :at "2026-09-12"}
+ {:command "lake env lean DarkTower/WarMachine/MachineModelSpec.lean"
+  :exit 0 :errors 0 :warnings 0 :ran-by "claude-15" :at "2026-09-12"}
+ {:command "clj-kondo --lint machine_model.clj machine_belief.clj machine_model_test.clj"
+  :exit 0 :errors 0 :warnings 0 :ran-by "claude-15" :at "2026-09-12"}
+ {:command "emacs --batch -l check-parens.el machine_model.clj machine_belief.clj machine_model_test.clj"
+  :exit 0 :ran-by "claude-15" :at "2026-09-12"}]

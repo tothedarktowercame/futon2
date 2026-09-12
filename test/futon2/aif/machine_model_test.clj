@@ -104,3 +104,19 @@
               (is (= :measurement-kernel-mismatch
                      (get-in (m/validate (assoc-in model [key :name] "foreign")) [:refusal :kind])))))
           (finally (Files/deleteIfExists path)))))))
+
+(deftest float-carried-row-admission-v1-1
+  ;; Contract v1.1: declared order-independent numeric criterion.
+  (let [one-ulp-off {:a 0.10532904980883244 :b 0.14086253396643547
+                     :c 0.31240050666821867 :d 0.09555013225308848
+                     :e 0.07447381184188043 :f 0.1660549156527121
+                     :g 0.10532904980883244}]
+    (is (= :float-carried (m/row-sum-admission one-ulp-off))
+        "real production row summing one ulp off 1 admits as float-carried")
+    (is (= :float-carried (m/row-sum-admission (into {} (reverse one-ulp-off))))
+        "admission is order-independent")
+    (is (nil? (m/row-sum-admission (assoc one-ulp-off :a 0.104)))
+        "a genuinely unnormalized float row refuses")
+    (is (= :exact (m/row-sum-admission {:a 1/2 :b 1/2})))
+    (is (nil? (m/row-sum-admission {:a 1/2 :b 1/3}))
+        "exact rows keep the exact ==1 requirement")))

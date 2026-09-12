@@ -170,3 +170,32 @@ Lean contract commit: `57130bd716781df2987b8c06120f1a72fec87ceb` (mathlib4).
 | `mathlib4/DarkTower/WarMachine/MachineModelSpec.lean` | `c433d6c890debc0f33028208d085f56271d63d98055ad75bc957e7b08f4732d7` |
 | `futon2/src/futon2/aif/full_loop_cohort.clj` | `f36bffb4e081df76d925ba8d2b2501d0e95190845e7c81934a052f857bed72cf` |
 | `futon2/src/futon2/aif/ruled_outcome_c.clj` | `8d8a680268d580267e3c534366dc6b77e0f18bf43234a37babaac986580a078b` |
+
+## v1.1 — declared numeric admission for float-carried rows (2026-09-12)
+
+Evidence basis: the row-7 production-match witness
+(`runs/row-7-belief-state-2026-09-12/readback.edn`) measured every
+coordinate delta at 0.0 while both real posterior rows were refused by
+the v1 exact `== 1` gate: their float sums are `0.9999999999999999`
+(carried `:mu-post`) and `0.9999999999999998` (bootstrapped uniform
+1/7) — one-ulp accumulation error, with the further hazard that a
+floating reduction is iteration-order dependent.
+
+Ruling authority: SPEC-fundamentals-build common evidence rules —
+"retain the difference and prove/declare the numerical error criterion
+under review; do not quietly expand a tolerance." Declared by the
+reviewer (claude-15) as the criterion, not a silent epsilon:
+
+- Rows whose masses are all ratios/integers keep the exact `== 1`
+  requirement (`:exact`).
+- Rows carrying doubles are summed at their EXACT IEEE values
+  (`BigDecimal`, exact addition ⇒ order-independent); admission
+  requires `|sum − 1| ≤ 1e-12` (`float-row-tolerance`), typed
+  `:float-carried`. Masses pass through unchanged — no
+  renormalization, ever. Beyond the bound: `:unnormalized-row`.
+
+Implementation: `machine_model.clj` `row-sum-admission` (single
+authority; `machine_belief.clj` routes through it). Lean mirror:
+`MachineModelSpec.lean` `floatRowBound` / `FloatCarriedRow` /
+`exact_row_admissible` (exact rows satisfy the criterion, so the two
+admissions agree on normalised rows).

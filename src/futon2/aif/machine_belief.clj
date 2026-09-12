@@ -2,7 +2,8 @@
   "Single-entity bridge from the stored categorical belief to MachineModel v1.
    This namespace reads the post-filter, post-carry belief; it never repairs,
    normalises, averages, or otherwise rewrites it."
-  (:require [futon2.aif.belief :as belief]))
+  (:require [futon2.aif.belief :as belief]
+            [futon2.aif.machine-model :as machine-model]))
 
 (def state-support
   "The declared order of MachineBeliefState.Status.all."
@@ -62,7 +63,9 @@
                    (vals posterior)))
       (refusal :invalid-mass [:stored-belief entity])
 
-      (not (== 1 (reduce + (vals posterior))))
+      ;; Contract v1.1 numeric admission: exact rows == 1; float-carried
+      ;; rows within the declared order-independent criterion.
+      (nil? (machine-model/row-sum-admission posterior))
       (refusal :invalid-mass [:stored-belief entity])
 
       :else

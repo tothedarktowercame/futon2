@@ -32,14 +32,41 @@
   (demand! (and (vector? xs) (seq xs)) :missing-support path)
   (demand! (= (count xs) (count (set xs))) :duplicate-support path))
 
+(def float-row-tolerance
+  "Contract v1.1 declared numerical error criterion (reviewer-declared per
+   SPEC-fundamentals-build common evidence rules: 'prove/declare the
+   numerical error criterion under review; do not quietly expand a
+   tolerance'). Float-carried rows are summed EXACTLY at their IEEE values
+   (BigDecimal), so the sum is order-independent; admission requires
+   |sum - 1| <= this bound. Masses are never renormalized. Evidence basis:
+   row-7 production rows sum to 0.9999999999999999 / ...98 (one-ulp float
+   error; runs/row-7-belief-state-2026-09-12/readback.edn)."
+  1e-12M)
+
+(defn row-sum-admission
+  "Typed numeric admission for a mass row. Exact rows (all ratios/integers)
+   must sum to exactly 1 -> :exact. Rows carrying doubles are summed at
+   their exact IEEE values -> :float-carried when within
+   float-row-tolerance of 1. nil = inadmissible."
+  [row]
+  (let [vs (vals row)]
+    (if (every? #(or (integer? %) (ratio? %)) vs)
+      (when (== 1 (reduce + vs)) :exact)
+      (let [sum (reduce (fn [^BigDecimal acc v] (.add acc (BigDecimal. (double v))))
+                        BigDecimal/ZERO vs)
+            gap (.abs (.subtract sum BigDecimal/ONE))]
+        (when (<= (.compareTo gap ^BigDecimal float-row-tolerance) 0)
+          :float-carried)))))
+
 (defn- distribution! [row support path]
   (demand! (map? row) :missing-distribution path)
   (demand! (= (set (keys row)) (set support)) :distribution-support-mismatch path)
   (doseq [v (vals row)]
     (demand! (and (number? v) (Double/isFinite (double v)) (not (neg? v)))
              :invalid-mass path))
-  ;; Exact arithmetic when inputs are ratios; no silent epsilon or renormalization.
-  (demand! (== 1 (reduce + (vals row))) :unnormalized-row path))
+  ;; Exact arithmetic when inputs are ratios; declared v1.1 criterion for
+  ;; float-carried rows; no silent epsilon or renormalization.
+  (demand! (some? (row-sum-admission row)) :unnormalized-row path))
 
 (defn- measurement! [{:keys [path sha256]} at]
   (demand! (and (named? path) (string? sha256)
