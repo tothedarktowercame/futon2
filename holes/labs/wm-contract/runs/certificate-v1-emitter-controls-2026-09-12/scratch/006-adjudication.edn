@@ -1,0 +1,1 @@
+{:event/schema-version 1, :cohort/id :run4-f11-production-successor-20260912-v1, :attempt/id "attempt-001", :attempt/ordinal 1, :event/sequence 6, :checkpoint/type :adjudication, :recorded-at "2026-09-12T17:10:21Z", :payload {:judgment {:fixture-only true}}}
