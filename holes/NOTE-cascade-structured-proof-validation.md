@@ -352,3 +352,15 @@ because it re-orders the work:
   this slice: codex-10's cohort-validator tightening to the enriched
   contract (their sequencing; contract now ready), then V1 commissioning
   of the correspondence check and the end-to-end rehearsal turn.
+- **Tightening landed (codex-10, futon2 `9dd4fd8d`):** runner and cohort
+  store enforce `validate-fold-output-v1` AND `validate-fold-correspondence`
+  against the persisted cascade, with exact agreement among persisted
+  fold-output/wiring/holes/cascade; enriched refusal shape for
+  exceptional termination. Commissioned: induced missing-warrant-revision
+  fails `:fold-output-invalid`/`:box-pattern-revision-missing`; refusal
+  control persists and closes exceptionally. Witness at
+  `labs/wm-contract/runs/RUN4-enriched-fold-gate-2026-09-12/commissioning.edn`
+  citing the contract commits. **The mechanism chain of Rulings 1–4 is
+  complete and commissioned end to end; next is the rehearsal turn
+  (positive direction through the full stack), then the Ruling-5
+  attestation repair per codex-17's audit.**
