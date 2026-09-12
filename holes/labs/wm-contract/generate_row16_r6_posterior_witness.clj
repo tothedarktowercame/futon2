@@ -149,7 +149,7 @@
         (str/join
          "\n"
          (concat
-          ["import DarkTower.WarMachine.Holes" ""
+          ["import DarkTower.WarMachine.PolicyPosterior" ""
            "namespace DarkTower.WarMachine.MachinePolicyPosteriorWitness" ""
            "/- Generated from the bounded schema-27 production fixture. The reference"
            "uses the declared raw-exponential normalization and never reads retained Q. -/" ""
@@ -158,9 +158,9 @@
            "    (habit : PolicyIndex → ℝ)"
            "    (grade : PolicyIndex → DarkTower.WarMachine.Holes.ExpectedFreeEnergyValue)"
            "    (tau : ℝ) (policies : List PolicyIndex) :"
-           "    DarkTower.WarMachine.Holes.softmaxWithFPi exp log habit grade (fun _ => 0) tau policies ="
+           "    DarkTower.WarMachine.PolicyPosterior.softmaxWithFPi exp log habit grade (fun _ => 0) tau policies ="
            "      DarkTower.WarMachine.Holes.softmax exp log habit grade tau policies := by"
-           "  exact DarkTower.WarMachine.Holes.softmaxWithFPi_zero exp log habit grade tau policies" ""]
+           "  exact DarkTower.WarMachine.PolicyPosterior.softmaxWithFPi_zero exp log habit grade tau policies" ""]
           theorem-lines
           [(str "/-- Maximum observed raw-exp versus retained binary64 residual; all 148"
                 " coordinates are bounded above by 2^-45. -/")
