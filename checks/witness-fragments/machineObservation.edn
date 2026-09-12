@@ -1,0 +1,77 @@
+{:witnesses "machineObservation",
+ :node-witnesses
+ [{:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-observe/clojure-readback.txt",
+     :sha256
+     "7d6e5528e8d6e1d824403519b485dee876b68021f0666a0fb537473f4cef19f8"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-observe/lean-state-join-check.edn",
+     :sha256
+     "838937ca19d5df68e4a635b386e3d377ce934756ac06cfc14c52899d2bea5121"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineObservation.lean",
+    :sha256
+    "f864610a2d794b57fa18d8b3b457faf7c426015f4c01ec5c989df292adbb10a0",
+    :declaration
+    "DarkTower.WarMachine.MachineObservation.machineObservation"},
+   :scope :reference-model-empty-input,
+   :node :R2,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt
+   {:source-commit "169662b19653d20c76274bdce4845ab414da10cf",
+    :reported-witness-sha256
+    "81a8d33df84db80cc0716d6a8fb673aa453f9774072a12336b39328af1a88710",
+    :current-witness-sha256
+    "2498ed198408a6ef991de1da6d2cd43dfccac612629bcacaabc8d90b9ef5a86e",
+    :match? false,
+    :handoff
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-observe/codex-handoff-summary.md",
+     :sha256
+     "9035b64c5408dc2e117176616276bf5d02b89ba1a9da82b01225d60b389e5e19"}},
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R2-observe-emptyObservationHasFourteenZeros-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservation.lean",
+     :retained-census-sha256
+     "f864610a2d794b57fa18d8b3b457faf7c426015f4c01ec5c989df292adbb10a0",
+     :current-sha256
+     "f864610a2d794b57fa18d8b3b457faf7c426015f4c01ec5c989df292adbb10a0",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservationWitness.lean",
+     :retained-census-sha256
+     "2498ed198408a6ef991de1da6d2cd43dfccac612629bcacaabc8d90b9ef5a86e",
+     :current-sha256
+     "2498ed198408a6ef991de1da6d2cd43dfccac612629bcacaabc8d90b9ef5a86e",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machineObservation",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineObservationWitness.lean",
+    :sha256
+    "2498ed198408a6ef991de1da6d2cd43dfccac612629bcacaabc8d90b9ef5a86e",
+    :module "DarkTower.WarMachine.MachineObservationWitness",
+    :declaration
+    "DarkTower.WarMachine.MachineObservationWitness.emptyObservationHasFourteenZeros"},
+   :quantity :o,
+   :claim
+   "For zero-valued inputs and absent variants, machineObservation's numeric projection has fourteen zero coordinates in Channel.all order.",
+   :equation :observe}]}

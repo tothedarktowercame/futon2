@@ -1,0 +1,821 @@
+{:witnesses "machineChannelPredictionError",
+ :node-witnesses
+ [{:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-basicTriple,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-basicTriple-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.basicTriple"},
+   :quantity :eps,
+   :claim
+   "At reference observation 3/4, mean 1/4 and variance 1/4, error is 1/2, per-call precision 4 and weighted error 2.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-unitVariance,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-unitVariance-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.unitVariance"},
+   :quantity :eps,
+   :claim
+   "At reference observation 3/4, mean 1/4 and variance 1, per-call precision is 1 and weighted error 1/2.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-emptyBeliefReadsTheObservation,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-emptyBeliefReadsTheObservation-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.emptyBeliefReadsTheObservation"},
+   :quantity :eps,
+   :claim
+   "At reference observation 3/4, mean 0 and variance 1, error is 3/4, per-call precision 1 and weighted error 3/4.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-negativeError,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-negativeError-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeError"},
+   :quantity :eps,
+   :claim
+   "At reference observation 1/4, mean 3/4 and variance 1/4, error is -1/2 and weighted error -2.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-exactZeroError,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-exactZeroError-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.exactZeroError"},
+   :quantity :eps,
+   :claim
+   "At reference observation and mean 1/2 and variance 1/4, error and weighted error are zero.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-eighthVariance,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-eighthVariance-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.eighthVariance"},
+   :quantity :eps,
+   :claim
+   "At reference observation 3/4, mean 1/4 and variance 1/8, per-call precision is 8 and weighted error 4.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-zeroVarianceFloored,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-zeroVarianceFloored-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.zeroVarianceFloored"},
+   :quantity :eps,
+   :claim
+   "At reference observation 3/4, mean 1/4 and variance 0, the floor gives per-call precision 100 and weighted error 50.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-negativeVarianceFloored,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-negativeVarianceFloored-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeVarianceFloored"},
+   :quantity :eps,
+   :claim
+   "At reference observation 3/4, mean 1/4 and variance -4, the floor gives per-call precision 100 and weighted error 50.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-unobservedIsOmitted,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-unobservedIsOmitted-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedIsOmitted"},
+   :quantity :eps,
+   :claim
+   "A missing reference observation with mean and variance 1/4 yields an absent observed member.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-brokenModelRefuses,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-brokenModelRefuses-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.brokenModelRefuses"},
+   :quantity :eps,
+   :claim
+   "Reference observation 3/4 with missing mean and variance 1/4 refuses the missing mean.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-unobservedWithBrokenModelRefuses,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-unobservedWithBrokenModelRefuses-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedWithBrokenModelRefuses"},
+   :quantity :eps,
+   :claim
+   "Missing reference observation and mean with variance 1/4 refuses the missing mean.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-malformedObservationRefuses,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-malformedObservationRefuses-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.malformedObservationRefuses"},
+   :quantity :eps,
+   :claim
+   "A nonfinite reference observation with mean and variance 1/4 refuses the nonfinite observed member.",
+   :equation :prediction-error}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/clojure-readback.txt",
+     :sha256
+     "8f22cae82d1e9a1c53ccab8ec7c3430e84e9a9017dde972da354b8531ea1647a"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
+     :sha256
+     "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionError.lean",
+    :sha256
+    "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+   :scope :reference-model-bothModelMembersNamed,
+   :node :R3a,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R3a-prediction-error-bothModelMembersNamed-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :retained-census-sha256
+     "acc0ec35b23ec2dfabce3f79c2356ba9af8b63627acf7e2ccc1c5633d187463c",
+     :current-sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :match? false,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :retained-census-sha256
+     "59cb0ef59faecaf274b992e1f823d164d352f9b1898099e38f004b37155d754e",
+     :current-sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :match? false,
+     :retained-typecheck-exit nil}],
+   :declaration "machineChannelPredictionError",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+    :sha256
+    "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePredictionErrorWitness.bothModelMembersNamed"},
+   :quantity :eps,
+   :claim
+   "Reference observation 3/4 with missing mean and nonfinite variance refuses both in mean-variance order.",
+   :equation :prediction-error}]}

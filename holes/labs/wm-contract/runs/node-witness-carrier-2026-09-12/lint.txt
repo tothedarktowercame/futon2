@@ -1,0 +1,4 @@
+$ clj-kondo --lint scripts/merge_witnesses.bb scripts/witnesses/node_witness.clj test/witnesses/node_witness_test.clj test/witnesses/merge_witnesses_control.bb
+linting took 40ms, errors: 0, warnings: 0
+
+EXIT 0

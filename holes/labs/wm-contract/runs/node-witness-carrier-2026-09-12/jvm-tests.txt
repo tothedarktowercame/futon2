@@ -1,0 +1,8 @@
+$ clojure -M:test -m witnesses.node-witness-test
+
+Testing witnesses.node-witness-test
+
+Ran 8 tests containing 38 assertions.
+0 failures, 0 errors.
+
+EXIT 0

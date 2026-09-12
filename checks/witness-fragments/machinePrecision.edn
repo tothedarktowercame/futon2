@@ -1,0 +1,628 @@
+{:witnesses "machinePrecision",
+ :node-witnesses
+ [{:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-oneStillError,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-oneStillError-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.oneStillError"},
+   :quantity :Pi,
+   :claim "Under defaults, the reference precision of [0] is 2.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-threeStillErrors,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-threeStillErrors-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.threeStillErrors"},
+   :quantity :Pi,
+   :claim
+   "Under defaults, the reference precision of three zeros is 4.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-sevenStillErrors,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-sevenStillErrors-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.sevenStillErrors"},
+   :quantity :Pi,
+   :claim
+   "Under defaults, the reference precision of seven zeros is 8.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-fifteenStillErrors,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-fifteenStillErrors-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.fifteenStillErrors"},
+   :quantity :Pi,
+   :claim
+   "Under defaults, the reference precision of fifteen zeros is 16.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-fullWindowOfStillErrors,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-fullWindowOfStillErrors-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.fullWindowOfStillErrors"},
+   :quantity :Pi,
+   :claim
+   "Under defaults, the reference precision of twenty zeros is 21.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-windowBinds,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-windowBinds-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.windowBinds"},
+   :quantity :Pi,
+   :claim
+   "Under defaults, twenty-five zeros and twenty zeros have the same reference precision.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-unitError,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-unitError-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.unitError"},
+   :quantity :Pi,
+   :claim "Under defaults, the reference precision of [1] is 1.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-halfError,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-halfError-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.halfError"},
+   :quantity :Pi,
+   :claim "Under defaults, the reference precision of [1/2] is 8/5.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-tripleError,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-tripleError-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.tripleError"},
+   :quantity :Pi,
+   :claim "Under defaults, the reference precision of [3] is 1/5.",
+   :equation :precision}
+  {:schema :wm/node-witness-v1,
+   :retained-evidence
+   {:readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/clojure-readback.txt",
+     :sha256
+     "10f0c4557b9161cfe07edbace76a7539ee533dc15c47d2666cdf222771553896"},
+    :census
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
+     :sha256
+     "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
+   :verification {:status :unresolved-at-pin, :receipt nil},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecision.lean",
+    :sha256
+    "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+   :scope :reference-model-floorIsReached,
+   :node :R7,
+   :evidence-limit
+   "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
+   :as-of "2026-09-12",
+   :historical-receipt nil,
+   :review {:status :proposed, :receipt nil},
+   :status :proposed,
+   :id "R7-precision-floorIsReached-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :pin-comparisons
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :retained-census-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :current-sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :match? true,
+     :retained-typecheck-exit nil}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :retained-census-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :current-sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :match? true,
+     :retained-typecheck-exit nil}],
+   :declaration "machinePrecision",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+    :sha256
+    "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePrecisionWitness.floorIsReached"},
+   :quantity :Pi,
+   :claim
+   "Under defaults, twenty errors of size ten give variance component 7/667 and reference precision 1/10.",
+   :equation :precision}]}

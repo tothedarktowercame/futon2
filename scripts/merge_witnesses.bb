@@ -1,73 +1,122 @@
 #!/usr/bin/env bb
-;; merge_witnesses.bb — assemble checks/witness-registry.edn from per-unit fragments.
-;;
-;; Why: 14 bind-hole units all append to one EDN vector. Fourteen agents editing one
-;; file on a shared checkout is fourteen-way conflict, so the plan was sequential no
-;; matter how many agents existed. Each unit now writes its OWN fragment
-;; (checks/witness-fragments/<id>.edn) and this merges them. Parallel-safe by construction.
-;;
-;;   --split   one-time: explode the current registry into fragments
-;;   --check   merge in memory and diff against the committed registry (round-trip test)
-;;   (default) merge fragments -> registry
-(require '[clojure.edn :as edn] '[clojure.java.io :as io]
+;; Editable authority remains checks/witness-fragments; output remains a vector.
+(require '[babashka.classpath :as cp] '[clojure.java.io :as io])
+(cp/add-classpath (str (.getParentFile (io/file *file*))))
+(require '[witnesses.node-witness :as nw]
          '[clojure.pprint :as pp] '[clojure.string :as str])
 
 (def frag-dir "checks/witness-fragments")
 (def registry "checks/witness-registry.edn")
-
+(def default-authorities
+  {:roots {"futon2" "/home/joe/code/futon2" "mathlib4" "/home/joe/code/mathlib4"
+           "p4ng" "/home/joe/code/p4ng"}
+   :equations ["futon2" "holes/labs/wm-contract/aif-equations.edn"]
+   :nodes ["p4ng" "empirics-futon/control-stages.edn"]
+   :fundamentals ["futon2" "holes/labs/wm-contract/FUNDAMENTALS.edn"]})
+(defn names [e] (let [w (:witnesses e)] (if (string? w) [w] w)))
 (defn frag-name [e]
-  (let [w (:witnesses e), w (if (string? w) [w] w)]
-    (str (str/replace (or (first w) "unnamed") #"[^A-Za-z0-9_.-]" "_") ".edn")))
-
-(defn read-frags []
-  (->> (.listFiles (io/file frag-dir))
-       (filter #(str/ends-with? (.getName %) ".edn"))
-       (sort-by #(.getName %))
-       (map #(edn/read-string (slurp %)))))
-
+  (str (str/replace (or (first (names e)) "unnamed") #"[^A-Za-z0-9_.-]" "_") ".edn"))
+(defn read-frags
+  ([] (read-frags frag-dir))
+  ([directory]
+   (->> (.listFiles (io/file directory))
+        (filter #(str/ends-with? (.getName %) ".edn"))
+        (sort-by #(.getName %))
+        (mapv #(nw/read-edn (slurp %))))))
 (defn merged
   ([] (merged (read-frags)))
   ([es]
-  (let [es (vec es)
-        wits (mapcat #(let [w (:witnesses %)] (if (string? w) [w] w)) es)
-        dupes (->> wits frequencies (filter (fn [[_ n]] (< 1 n))) (map first))]
-    (when (empty? es)
-      (throw (ex-info "witness registry unavailable: zero fragments" {:error :zero-fragments})))
-    (when (seq dupes)
-      (println "DUPLICATE witness names across fragments:" (pr-str dupes))
-      (System/exit 1))
-    es)))
-
-(defn -main [& args]
-  (cond
-    (some #{"--negative-empty"} args)
+   (let [es (vec es)
+         dupes (->> es (mapcat names) frequencies
+                    (filter (fn [[_ n]] (< 1 n))) (map first))]
+     (nw/need! (seq es) nil :zero-fragments nil)
+     (doseq [e es]
+       (nw/need! (and (map? e) (seq (names e))
+                     (every? #(and (string? %) (not (str/blank? %))) (names e)))
+                 nil :invalid-fragment e))
+     (nw/need! (empty? dupes) nil :duplicate-witness-ownership (vec dupes))
+     es)))
+(defn validate-merge [es authorities]
+  (let [es (merged es) ctx (nw/context (:roots authorities))
+        claims (mapcat :node-witnesses es)
+        duplicate-ids (->> claims (keep :id) frequencies (filter #(> (val %) 1)) (map key))]
+    (nw/need! (empty? duplicate-ids) nil :duplicate-node-witness-id (vec duplicate-ids))
+    ;; Include cap authority in the digest; admission is NOT a readiness promotion.
+    (when (seq claims)
+      (apply nw/read-path! ctx (conj (:fundamentals authorities) :fundamentals)))
+    (doseq [e es]
+      (nw/need! (or (nil? (:node-witnesses e)) (vector? (:node-witnesses e)))
+                nil :node-witness-schema-invalid :node-witnesses))
+    (let [admissions (vec (for [e es w (:node-witnesses e)]
+                            (nw/validate! ctx authorities (names e) w)))
+          inputs (mapv #(select-keys % [:repo :path :sha256]) (vals @(:reads ctx)))
+          digest (nw/sha256 (.getBytes (pr-str [es inputs]) "UTF-8"))]
+      {:entries es :admissions admissions :dependencies inputs :input-sha256 digest})))
+(defn preserve-ids! [prior entries]
+  (let [old (into {} (map (juxt :id identity) (mapcat :node-witnesses prior)))]
+    (doseq [w (mapcat :node-witnesses entries) :let [p (get old (:id w))] :when (and (:id w) p)]
+      (nw/need! (and (= (nw/subject p) (nw/subject w))
+                     (or (not= :admitted (:status p))
+                         (= (select-keys p [:verification :review])
+                            (select-keys w [:verification :review]))))
+                (:id w) :node-witness-id-revision-required nil))))
+(defn atomic-write! [output text]
+  (let [dest (.toPath (.getAbsoluteFile (io/file output)))
+        tmp (java.nio.file.Files/createTempFile (.getParent dest) ".witness-" ".tmp"
+                                               (make-array java.nio.file.attribute.FileAttribute 0))]
     (try
-      (merged [])
-      (println "merge-witnesses: FAIL empty fragment set accepted")
-      (catch Exception _
-        (println "merge-witnesses: PASS empty fragment set rejected")))
-
-    (some #{"--split"} args)
-    (let [es (edn/read-string (slurp registry))]
-      (doseq [e es] (spit (str frag-dir "/" (frag-name e)) (with-out-str (pp/pprint e))))
-      (println "split" (count es) "entries into" frag-dir))
-
-    (some #{"--check"} args)
-    (let [a (edn/read-string (slurp registry)) b (merged)]
-      (if (= (set a) (set b))
-        (println (pr-str {:pass? true :entries (count b) :note "merge(fragments) == committed registry"}))
-        (do (println (pr-str {:pass? false :registry (count a) :merged (count b)
-                              :only-in-registry (vec (remove (set b) a))
-                              :only-in-merged (vec (remove (set a) b))}))
-            (System/exit 1))))
-
-    :else
-    (let [b (merged)
-          hdr (str ";; GENERATED by scripts/merge_witnesses.bb — DO NOT HAND-EDIT.\n"
-                   ";; Edit or add a fragment in checks/witness-fragments/ and re-run the merge.\n"
-                   ";; Fragments exist so that N units can be written in parallel without N-way\n"
-                   ";; conflict on one EDN vector (build plan 2026-08-31, wave 1).\n")]
-      (spit registry (str hdr (with-out-str (pp/pprint b))))
-      (println "merged" (count b) "fragments ->" registry))))
-
-(when (= *file* (System/getProperty "babashka.file")) (apply -main *command-line-args*))
+      (spit (.toFile tmp) text)
+      (java.nio.file.Files/move tmp dest
+                               (into-array java.nio.file.CopyOption
+                                           [java.nio.file.StandardCopyOption/ATOMIC_MOVE
+                                            java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+      (finally (java.nio.file.Files/deleteIfExists tmp)))))
+(defn render [result]
+  (str ";; GENERATED by scripts/merge_witnesses.bb; edit owning fragments.\n"
+       ";; input-sha256 " (:input-sha256 result) "\n"
+       ";; admissions " (pr-str (:admissions result)) "\n"
+       ";; dependencies " (pr-str (:dependencies result)) "\n"
+       (with-out-str (pp/pprint (:entries result)))))
+(defn parse-args [args]
+  (loop [args args opts {:fragments frag-dir :output registry :authorities default-authorities}]
+    (if-let [a (first args)]
+      (case a
+        ("--check" "--split" "--negative-empty") (recur (next args) (assoc opts :mode a))
+        ("--fragments" "--output" "--authorities")
+        (do (nw/need! (second args) nil :missing-argument a)
+            (recur (nnext args) (assoc opts (keyword (subs a 2))
+                                     (if (= a "--authorities")
+                                       (nw/read-edn (slurp (second args))) (second args)))))
+        (nw/refuse! nil :unknown-argument a)) opts)))
+(defn -main [& args]
+  (try
+    (let [{:keys [mode fragments output authorities]} (parse-args args)]
+      (case mode
+        "--negative-empty"
+        (let [refused (try (merged []) false
+                          (catch clojure.lang.ExceptionInfo e (= :zero-fragments (:error (ex-data e)))))]
+          (nw/need! refused nil :negative-control-failed nil)
+          (println "merge-witnesses: PASS empty fragment set rejected"))
+        "--split"
+        (let [entries (nw/read-edn (slurp output))]
+          (doseq [e entries] (spit (io/file fragments (frag-name e)) (with-out-str (pp/pprint e))))
+          (println "split" (count entries) "entries"))
+        (let [result (validate-merge (read-frags fragments) authorities)
+              prior (when (.isFile (io/file output)) (nw/read-edn (slurp output)))
+              entries (:entries result)]
+          (when prior (preserve-ids! prior entries))
+          (if (= mode "--check")
+            (do (nw/need! (and (= (set prior) (set entries))
+                               (or (empty? (:admissions result))
+                                   (= (slurp output) (render result))))
+                          nil :registry-out-of-date nil)
+                (prn {:pass? true :entries (count entries) :input-sha256 (:input-sha256 result)}))
+            (do
+              (atomic-write! output (render result))
+              (prn (dissoc result :entries :dependencies)))))))
+    0
+    (catch Exception e
+      (binding [*out* *err*] (prn (merge {:message (.getMessage e)} (ex-data e))))
+      1)))
+(when (= *file* (System/getProperty "babashka.file"))
+  (System/exit (apply -main *command-line-args*)))
