@@ -1,0 +1,14 @@
+{:at "2026-09-12"
+ :witness-tree-sha "57c471fe5be18f7a365278e306491b268432d8ab"
+ :artifact-tree-sha "c0d3f5157e42736753cd9d06696f7e9f56f8fb66"
+ :gates
+ [{:command "clojure -M -i holes/labs/wm-contract/row12_witness.clj"
+   :exit 0 :ticks 3 :coordinates 294 :maximum-absolute-delta 0.0 :controls-passed 3}
+  {:command "clojure -M -e <witness EDN assertions>"
+   :exit 0 :assertions 3 :coordinates 294}
+  {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el holes/labs/wm-contract/row12_witness.clj holes/labs/wm-contract/runs/row-12-accumulation-2026-09-12/witness.edn"
+   :exit 0 :files 2}
+  {:command "clj-kondo --lint holes/labs/wm-contract/row12_witness.clj"
+   :first-exit 2 :first-errors 0 :first-warnings 1
+   :finding "row12-witness/run! shadowed clojure.core/run!"
+   :fixed-by "d52bba21" :exit 0 :errors 0 :warnings 0}]}
