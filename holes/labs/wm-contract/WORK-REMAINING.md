@@ -885,8 +885,21 @@ operator workflow conversation (standdown 2026-09-12).
     PRE-EXISTING declaration-rung-band assertion before
     reaching the new control — attributed, retained, not
     reported green; needs its own hygiene attribution (p4ng
-    lane). Packet 2 (always-on base batch) dispatched
-    (codex-23).
+    lane). PACKET 2 DONE (2026-09-12, p4ng e53c5f0/5c84b6a,
+    futon2 receipts a53c86e5, reviewed): the eight edges in the
+    base ledger with the TN's exact labels (reviewer
+    spot-checked the R2->R8 two-bases and R6->R4
+    candidate-grain entries); the hand-maintained paper SVG
+    correctly UNTOUCHED — its owner edit specification is
+    committed (row-21-base-figure-edit-spec.edn,
+    :figure-sync :awaits-figure-owner per entry); conformance
+    6->14 conformant, 11->3 realised-undrawn (exactly the
+    three conditionals); 8 duplicate + 8 reversal plants
+    refused, disposable-only. SECOND STANDING p4ng RED noted:
+    the organization checker exposes a stale control-stages.edn
+    pin (retained in receipts; p4ng-lane hygiene alongside the
+    declaration-rung red). Packet 3 (conditional batch)
+    dispatched (codex-23).
 22. For the drawn connections that have never fired in any recorded
     run: decide which the qualifying run must exercise (default:
     all that the full loop traverses) and mark the remainder
