@@ -369,6 +369,17 @@
    :disagreement? false
    :commit (:artifact-ref author-job)})
 
+(defn enriched-test-fold [{:keys [shown]}]
+  {:wiring {:boxes [] :wires [] :terminals []}
+   :coverage-score-delta nil
+   :policy-holes
+   (mapv (fn [pattern-id]
+           {:free (str "test construction for " pattern-id)
+            :why "Production fold is isolated by this runner test"
+            :unfolded-pattern pattern-id
+            :obligation/id (str "test/" pattern-id)})
+         shown)})
+
 (defn isolated-runner-opts []
   {:cohort? false
    :phase-log-fn (fn [_])
@@ -384,6 +395,7 @@
    :version-stamp-fn identity
    :mission-fn (fn [target] {:id target})
    :construct-fn runner/construct-for-decision
+   :construction-wiring-fn enriched-test-fold
    :author-artifact-observer-fn synthetic-artifact-binding
    :r16-park-fn (fn [_ finding]
                   {:ok true :id (str "test-park/" (:repair/id finding))
@@ -1062,6 +1074,7 @@
           :version-stamp-fn identity
           :mission-fn (fn [target] {:id target :path "/mission.md"})
           :trace-fn (fn [_] "/tmp/test-trace.edn")
+          :construction-wiring-fn enriched-test-fold
           :construct-fn (fn [entry]
                           (reset! constructed entry)
                           {:shown [:P1] :psi :psi :cascade-score 1.0
@@ -1138,6 +1151,7 @@
                :repair-system-record-fn
                (fn [finding] (assoc finding :repair/id "test/run4-refusal"))
                :trace-fn (constantly "/tmp/test-run4-trace.edn")
+               :construction-wiring-fn enriched-test-fold
                :construct-fn (fn [entry]
                                (reset! constructed entry)
                                {:shown [] :psi :psi :cascade-score 1.0
@@ -1384,6 +1398,7 @@
           :version-stamp-fn identity
           :mission-fn (fn [_] nil)
           :trace-fn (fn [_] "/tmp/fire-pattern-trace.edn")
+          :construction-wiring-fn enriched-test-fold
           :author-artifact-observer-fn synthetic-artifact-binding
           :dispatch-fn (fn [_ agent _ _ prompt]
                          (swap! dispatches conj {:agent agent :prompt prompt})
@@ -1517,29 +1532,41 @@
         missing
         (runner/run-opportunity!
          (assoc base
-                :construction-wiring-fn (constantly {})
+                :construction-wiring-fn
+                (constantly
+                 {:wiring
+                  {:boxes [{:id :box/induced-invalid
+                            :fits-pattern {:pattern/id :P1}
+                            :warrant-kind :pattern
+                            :conditions [{:condition "Induced condition"
+                                          :status :established
+                                          :witness :commissioning}]}]}
+                  :coverage-score-delta nil
+                  :policy-holes []})
                 :repair-system-record-fn
                 (fn [finding]
                   (swap! missing-findings conj finding)
-                  (assoc finding :repair/id "fold-wiring-missing"))))
-        refusal {:schema :wm/fold-wiring-refusal-v1
-                 :kind :construction-evidence-unavailable
-                 :grounds {:source :induced-commissioning-fixture}}
+                  (assoc finding :repair/id "fold-output-invalid"))))
+        refusal {:fold/refused true
+                 :why "Induced commissioning fixture has no grounded wiring"
+                 :refusal/class :construction-evidence-unavailable}
         refused-findings (atom [])
         refused
         (runner/run-opportunity!
          (assoc base
                 :construction-wiring-fn
-                (constantly {:refusal refusal})
+                (constantly refusal)
                 :repair-system-record-fn
                 (fn [finding]
                   (swap! refused-findings conj finding)
                   (assoc finding :repair/id "fold-wiring-refused"))))]
-    (testing "induced silent nil fails loudly with a named finding"
+    (testing "induced enriched-invalid output fails loudly with a named finding"
       (is (= :incomplete (:outcome missing)))
-      (is (= :fold-wiring-missing
+      (is (= :fold-output-invalid
              (get-in missing [:data :failure-kind])))
-      (is (= "fold-wiring-missing"
+      (is (= :box-pattern-revision-missing
+             (get-in missing [:data :error-data :fold-findings 0 :finding])))
+      (is (= "fold-output-invalid"
              (get-in missing [:data :repair-obligation :repair/id])))
       (is (= :not-reached-construction
              (get-in missing [:checkpoints :construction :sorry :kind]))))
@@ -1575,6 +1602,7 @@
           :version-stamp-fn identity
           :mission-fn (fn [target] {:id target})
           :trace-fn (fn [_] "/tmp/test-trace.edn")
+          :construction-wiring-fn enriched-test-fold
           :construct-fn (fn [_] {:shown [:P1] :psi :psi :cascade-score 1.0
                                  :semilattice [] :policy-holes []})
           :author-artifact-observer-fn synthetic-artifact-binding
@@ -2108,6 +2136,7 @@
           :version-stamp-fn identity
           :mission-fn (fn [target] {:id target})
           :trace-fn (fn [_] "/tmp/test-trace.edn")
+          :construction-wiring-fn enriched-test-fold
           :construct-fn (fn [entry]
                           {:mission (get-in entry [:action :target])
                            :shown [:P1] :psi :psi :cascade-score 1.0
@@ -2643,6 +2672,7 @@
           :version-stamp-fn identity
           :mission-fn (fn [target] {:id target})
           :construct-fn runner/construct-for-decision
+          :construction-wiring-fn enriched-test-fold
           :dispatch-fn
           (fn [_ agent _ _ _]
             (swap! dispatches conj agent)
@@ -2706,6 +2736,7 @@
           :version-stamp-fn identity
           :mission-fn (fn [target] {:id target})
           :construct-fn runner/construct-for-decision
+          :construction-wiring-fn enriched-test-fold
           :dispatch-fn (fn [& args] (swap! dispatches conj args))
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
           :ground-fn (fn [& _]
@@ -2751,6 +2782,7 @@
           :version-stamp-fn identity
           :mission-fn (fn [target] {:id target})
           :construct-fn runner/construct-for-decision
+          :construction-wiring-fn enriched-test-fold
           :dispatch-fn (fn [& args] (swap! dispatches conj args))
           :queue-fn identity})]
     (is (= :incomplete (:outcome result)))

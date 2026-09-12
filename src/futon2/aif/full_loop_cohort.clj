@@ -7,7 +7,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.aif.fold :as fold])
   (:import [java.nio.channels FileChannel]
            [java.nio.charset StandardCharsets]
            [java.nio.file Files Path StandardOpenOption]
@@ -44,16 +45,6 @@
   (and (map? x) (contains? x :judgment) (contains? x :ground)
        (some? (:ground x))))
 
-(defn valid-fold-wiring-refusal?
-  "True only for the exact exceptional refusal carried by a construction."
-  [x]
-  (and (map? x)
-       (= #{:schema :kind :grounds} (set (keys x)))
-       (= :wm/fold-wiring-refusal-v1 (:schema x))
-       (keyword? (:kind x))
-       (map? (:grounds x))
-       (seq (:grounds x))))
-
 (defn cell? [x]
   (or (grounded-term? x) (typed-sorry? x)))
 
@@ -77,13 +68,28 @@
           wiring-errors
           (when (= :construction checkpoint)
             (let [wiring (:wiring judgment)
-                  refusal (:wiring-refusal judgment)
-                  valid-refusal? (valid-fold-wiring-refusal? refusal)]
-              (cond
-                (and (some? wiring) (nil? refusal)) []
-                (and (nil? wiring) valid-refusal?) []
-                (some? refusal) [:invalid-fold-wiring-refusal]
-                :else [:missing-fold-wiring])))]
+                  fold-output (:fold-output judgment)
+                  validation (fold/validate-fold-output-v1 fold-output)
+                  refusal? (= :refusal (:fold/schema validation))
+                  correspondence (when (and (:ok validation) (not refusal?))
+                                   (fold/validate-fold-correspondence
+                                    fold-output (:patterns judgment)))]
+              (cond-> []
+                (not (:ok validation))
+                (into (mapv (fn [finding]
+                              [:invalid-fold-output (:finding finding)])
+                            (:findings validation)))
+                (and (:ok validation) refusal? (some? wiring))
+                (conj :refusal-cannot-carry-wiring)
+                (and (:ok validation) (not refusal?) (not= wiring (:wiring fold-output)))
+                (conj :checkpoint-wiring-mismatch)
+                (and (:ok validation) (not refusal?)
+                     (not= (:sorries judgment) (:policy-holes fold-output)))
+                (conj :checkpoint-policy-holes-mismatch)
+                (and correspondence (not (:ok correspondence)))
+                (into (mapv (fn [finding]
+                              [:fold-correspondence (:finding finding)])
+                            (:findings correspondence))))))]
       (into (into missing-top missing-code) wiring-errors))))
 
 (defn preregistration-errors [p]

@@ -176,22 +176,24 @@
 (deftest construction-checkpoint-refuses-silent-nil-wiring
   (let [p (cohort/read-edn prereg-path)
         base {:mission "M-x" :cascade {} :sorries [] :patterns [] :deposit nil}]
-    (is (= [:missing-fold-wiring]
-           (cohort/checkpoint-cell-errors p :construction
-                                          (term (assoc base :wiring nil)))))
+    (is (= [[:invalid-fold-output :nil-fold-output]]
+           (cohort/checkpoint-cell-errors
+            p :construction (term (assoc base :wiring nil :fold-output nil)))))
     (is (empty?
          (cohort/checkpoint-cell-errors
           p :construction
           (term (assoc base
                        :wiring nil
-                       :wiring-refusal
-                       {:schema :wm/fold-wiring-refusal-v1
-                        :kind :construction-evidence-unavailable
-                        :grounds {:source :commissioning}})))))
-    (is (= [:invalid-fold-wiring-refusal]
+                       :fold-output
+                       {:fold/refused true
+                        :why "No grounded construction evidence"
+                        :refusal/class :construction-evidence-unavailable})))))
+    (is (= [[:invalid-fold-output :refusal-why-missing]]
            (cohort/checkpoint-cell-errors
             p :construction
-            (term (assoc base :wiring nil :wiring-refusal false)))))))
+            (term (assoc base :wiring nil
+                         :fold-output {:fold/refused true
+                                       :refusal/class :invalid})))))))
 
 (deftest artifact-only-cannot-be-laundered-as-grounded
   (let [root (tmp-root)

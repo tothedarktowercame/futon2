@@ -16,6 +16,7 @@
             [futon2.aif.c-vector :as cv]
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.fold-classical :as fold-classical]
+            [futon2.aif.fold :as fold]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.mission-registry :as missions]
@@ -1309,16 +1310,23 @@
                       ;; cascade, but the record still needs a wiring object.
                       (fold-classical/classical-fold
                        (vec (:shown construction)) construction)))
-         wiring (:wiring result)
-         refusal (:refusal result)]
+         validation (fold/validate-fold-output-v1 result)
+         refusal? (= :refusal (:fold/schema validation))
+         correspondence (when (and (:ok validation) (not refusal?))
+                          (fold/validate-fold-correspondence
+                           result (vec (:shown construction))))]
      (cond
-       (and (some? wiring) (nil? refusal)) {:status :wired :wiring wiring}
-       (and (nil? wiring) (cohort/valid-fold-wiring-refusal? refusal))
-       {:status :refused :refusal refusal}
-       :else {:status :invalid
-              :failure-kind (if (some? refusal)
-                              :fold-wiring-refusal-invalid
-                              :fold-wiring-missing)}))))
+       (and (:ok validation) refusal?)
+       {:status :refused :fold-output result}
+       (and (:ok validation) (:ok correspondence))
+       {:status :wired :fold-output result :wiring (:wiring result)}
+       :else
+       {:status :invalid
+        :failure-kind (if (and (:ok validation) (not (:ok correspondence)))
+                        :fold-correspondence-invalid
+                        :fold-output-invalid)
+        :findings (vec (concat (:findings validation)
+                               (:findings correspondence)))}))))
 
 (defn- mission-for-decision [entry target]
   (let [action (:action entry)]
@@ -3051,6 +3059,7 @@
             (throw (ex-info "Construction fold wiring is missing or malformed"
                             {:outcome :construction-failed
                              :failure-kind (:failure-kind wiring-result)
+                             :fold-findings (:findings wiring-result)
                              :failure-stage :construction
                              :target target})))
           ;; A selected action enters the canonical trace—and therefore the
@@ -3072,8 +3081,10 @@
                                                      :capability-contract
                                                      :actuation-contract
                                                      :repair-contract])
-                              :sorries (vec (:policy-holes construction))
+                              :sorries (vec (get-in wiring-result
+                                                   [:fold-output :policy-holes]))
                               :wiring (:wiring wiring-result)
+                              :fold-output (:fold-output wiring-result)
                               :patterns (vec (:shown construction))
                               :deposit nil
                               :trace-path trace-path}
@@ -3083,7 +3094,7 @@
                                       (:provenance pinned-selection))
 
                                (= :refused (:status wiring-result))
-                               (assoc :wiring-refusal (:refusal wiring-result)))
+                               (assoc :wiring-refusal (:fold-output wiring-result)))
                              (cond-> {:kind :decision-pinned-construction
                                       :selected-action (:action entry)}
                                pinned-selection
@@ -3094,7 +3105,7 @@
                              :failure-kind :fold-wiring-refused
                              :failure-stage :construction
                              :target target
-                             :wiring-refusal (:refusal wiring-result)})))
+                             :wiring-refusal (:fold-output wiring-result)})))
           (when historical-action?
             (when-not (:historical-verification-execute-fn opts)
               (throw (ex-info "Historical verification execution port missing"

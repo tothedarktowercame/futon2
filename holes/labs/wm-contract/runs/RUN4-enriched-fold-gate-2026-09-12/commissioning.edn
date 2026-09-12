@@ -1,0 +1,35 @@
+{:schema :wm/assurance-frontier-witness-v1
+ :pattern "apparatus/monitors-measure-the-work"
+ :violation-signature "A RUN4 construction carries wiring that violates the enriched fold-output or cascade-correspondence contract and the attempt proceeds."
+ :state :witnessed
+ :contract
+ {:output-validator :futon2.aif.fold/validate-fold-output-v1
+  :correspondence-validator :futon2.aif.fold/validate-fold-correspondence
+  :source-commits ["86aef779" "553a8bc9"]}
+ :mechanisms
+ [{:path "src/futon2/aif/full_loop_runner.clj"
+   :sha256 "581ceed026a955abbaf05458a7c6625a4a36a0b761da3a2817b1d79bd094bb18"}
+  {:path "src/futon2/aif/full_loop_cohort.clj"
+   :sha256 "f36bffb4e081df76d925ba8d2b2501d0e95190845e7c81934a052f857bed72cf"}]
+ :induced-run
+ {:production-path :futon2.aif.full-loop-runner/run-opportunity!
+  :mutation :remove-pattern-revision-from-box-warrant
+  :observed {:outcome :incomplete
+             :failure-kind :fold-output-invalid
+             :fold-finding :box-pattern-revision-missing
+             :named-repair-id "fold-output-invalid"
+             :construction :not-reached}}
+ :exceptional-control
+ {:input {:fold/refused true
+          :why "Induced commissioning fixture has no grounded wiring"
+          :refusal/class :construction-evidence-unavailable}
+  :observed {:outcome :incomplete
+             :failure-kind :fold-wiring-refused
+             :construction :persisted-exceptional}}
+ :commands
+ ["clojure -M:test -m cognitect.test-runner -n futon2.aif.fold-test"
+  "clojure -M:test -m cognitect.test-runner -n futon2.aif.full-loop-cohort-test"
+  "clojure -M:test -m cognitect.test-runner -n futon2.aif.full-loop-runner-test"]
+ :results [{:tests 7 :assertions 47 :failures 0 :errors 0}
+           {:tests 15 :assertions 62 :failures 0 :errors 0}
+           {:tests 135 :assertions 658 :failures 0 :errors 0}]}
