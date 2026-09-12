@@ -39,3 +39,28 @@
                  [:revision :model-revision-mismatch
                   (assoc (policy "foreign" [:advance-mission]) :model/revision "v2")]]]
           (testing (name label) (is (= expected (kind p)))))))))
+
+(deftest predictive-outcome-composition-and-refusals
+  (model-test/with-example
+    (fn [example]
+      (let [base (transition-test/model example)
+            a (predictive/declared-outcome-a base)
+            model (assoc base :A (dissoc a :ok))
+            kernel (transition/controlled-transition-kernel
+                    model transition-test/actions transition-test/params)
+            policies [(policy "p" [:advance-mission :advance-mission])]
+            result (predictive/predictive-outcome-kernel model belief-input kernel policies)]
+        (is (:ok result))
+        (is (= 1 (reduce + (vals (get-in result [:rows "p"])))))
+        (is (= :missing-a-support
+               (get-in (predictive/predictive-outcome-kernel
+                        (update-in model [:A :rows] dissoc :spawned)
+                        belief-input kernel policies) [:refusal :kind])))
+        (is (= :model-revision-mismatch
+               (get-in (predictive/predictive-outcome-kernel
+                        (assoc-in model [:model :revision] "foreign")
+                        belief-input kernel policies) [:refusal :kind])))
+        (is (= :evidence-vocabulary-owed
+               (get-in (predictive/predictive-outcome-kernel
+                        (assoc model :outcome-vertex :evidence)
+                        belief-input kernel policies) [:refusal :kind])))))))

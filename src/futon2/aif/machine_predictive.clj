@@ -74,3 +74,55 @@
          :policies (mapv :policy rows)
          :rows (into {} (map (juxt #(get-in % [:policy :id]) :terminal) rows))
          :trajectories (into {} (map (juxt #(get-in % [:policy :id]) :steps) rows))}))))
+
+(defn declared-outcome-a
+  "Construct the named declared state→tagged-outcome prior. This is not the
+   legacy seven-event lifecycle likelihood and makes no measured claim."
+  [model]
+  (let [states (:state-support model)
+        outcomes (get-in model [:outcome :support])]
+    (cond
+      (not= (:outcome model) (machine-model/outcome-authority))
+      (refusal :outcome-authority-mismatch [:outcome])
+      (empty? outcomes) (refusal :missing-a-support [:outcome :support])
+      :else
+      {:ok true :authority :declared-prior :name "wm-state-outcome-prior-v1"
+       :rows (into {} (map-indexed
+                       (fn [i state]
+                         [state (assoc (zipmap outcomes (repeat 0))
+                                       (nth outcomes (mod i (count outcomes))) 1)])
+                       states))})))
+
+(defn predictive-outcome-kernel
+  "Compose row 9 terminal states with the admitted machine A over a full plan."
+  [model belief-input kernel policies]
+  (cond
+    (= :evidence (:outcome-vertex model))
+    {:ok false :refusal {:kind :evidence-vocabulary-owed
+                         :path [:outcome :vertices :evidence]}}
+    (not= (:model model) (:model kernel))
+    (refusal :model-revision-mismatch [:model])
+    (not= :declared-prior (get-in model [:A :authority]))
+    (refusal :undeclared-authority [:A :authority])
+    (not= (set (:state-support kernel)) (set (keys (get-in model [:A :rows]))))
+    (refusal :missing-a-support [:A :rows])
+    :else
+    (let [predicted (predicted-state-kernel belief-input kernel policies)
+          outcomes (get-in model [:outcome :support])]
+      (if-not (:ok predicted)
+        predicted
+        (let [rows (into {}
+                         (for [[id q] (:rows predicted)]
+                           [id (into (array-map)
+                                     (for [o outcomes]
+                                       [o (reduce + (for [[s mass] q]
+                                                        (* mass (get-in model [:A :rows s o]))))]))]))]
+          (if (some nil? (for [s (:state-support kernel) o outcomes]
+                           (get-in model [:A :rows s o])))
+            (refusal :missing-a-support [:A :rows])
+            {:ok true :schema :wm/predictive-outcome-kernel-v1
+             :model (:model model) :authority (select-keys (:A model) [:authority :name])
+             :support outcomes :policy-horizons (into {} (map (juxt :id #(count (:actions %))) policies))
+             :state-predictions (:rows predicted) :rows rows
+             :pins {:model (:model model) :state-support (:state-support model)
+                    :outcome-support outcomes}}))))))
