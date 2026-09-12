@@ -32,6 +32,7 @@
       commission {:agent-id (:agent-id reviewer) :prompt reviewer-prompt
                   :caller (:caller reviewer) :surface (:surface reviewer)
                   :model (:invocation/model reviewer)}
+      digest-match? (= (:request-digest reviewer) (r9/request-digest commission))
       input {:role-binding {:author (:agent-id producer) :reviewer (:agent-id reviewer)}
              :producer-job producer :reviewer-job reviewer
              :subject {:boundary :witness-admission-candidate
@@ -64,10 +65,12 @@
                  :declared-reviewer-to-reviewer-agent :passed
                  :distinct-seat-identities :passed
                  :artifact-binding :passed
-                 :review-request-digest :passed}
+                 :review-request-digest (if digest-match? :passed :failed)}
                 :outcome outcome
-                :finding "The real jobs retain enough input to recompute the reviewer request digest, but no structured review receipt names the same verification receipt and reviewer. The real pair therefore refuses before the anchor check; this is a retention/admission gap, not permission to weaken the join."
+                :finding (if digest-match?
+                           "The digest join passes, but no structured review receipt names the same verification receipt and reviewer. The pair refuses before the anchor check."
+                           "The retained review prompt event is trimmed and is not the original request-digest preimage. Recalculation therefore refuses at :review-request-digest before the review-receipt or anchor checks. This is a retention gap, not permission to weaken the join.")
                 :expected-current-checker-state :awaiting-anchor}]
   (spit output-path (str (pr-str readback) "\n"))
-  (println (pr-str {:outcome outcome :passed-joins 5
+  (println (pr-str {:outcome outcome :passed-joins (if digest-match? 5 4)
                     :failed-join (:failed-join outcome)})))
