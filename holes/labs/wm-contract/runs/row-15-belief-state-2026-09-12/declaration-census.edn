@@ -1,0 +1,22 @@
+{:record
+ {:declarations
+  {"DarkTower.WarMachine.MachineBeliefState.machineBeliefState"
+   {:kind :abbrev
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+             :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"}}
+   "DarkTower.WarMachine.MachineBeliefStateWitness.carriedTraceCoordinates"
+   {:kind :theorem
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+             :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"}
+    :module "DarkTower.WarMachine.MachineBeliefStateWitness"
+    :proposition "The retained 2026-09-04 production mu-post row has the seven stated decimal coordinates."
+    :axioms ["propext" "Classical.choice" "Quot.sound"]}
+   "DarkTower.WarMachine.MachineBeliefStateWitness.bootstrappedTraceCoordinates"
+   {:kind :theorem
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+             :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"}
+    :module "DarkTower.WarMachine.MachineBeliefStateWitness"
+    :proposition "Every coordinate of the retained 2026-05-23 production mu-pre row is 0.14285714285714285."
+    :axioms ["propext" "Classical.choice" "Quot.sound"]}}
+  :generated-at "2026-09-12"
+  :method "Focused declarations identified from committed sources; propositions stated at the exact retained trace reference points; axiom lists obtained by executed Row15BeliefStateAxiomCheck.lean."}}
