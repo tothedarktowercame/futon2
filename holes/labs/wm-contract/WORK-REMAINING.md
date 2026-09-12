@@ -180,6 +180,32 @@ operator workflow conversation (standdown 2026-09-12).
 14. Build the machine-Q link: the forward model actually receiving
     a policy-conditioned outcome distribution. RULED: build, not
     descope — narrowing the claim instead is the facade option.
+    DISCOVERY DONE (2026-09-12, TN-row14-discovery-2026-09-12.md,
+    9f671e03/2a529c57; every file:line pin re-verified at HEAD by
+    the reviewer). Findings: the live scorer consumes continuous
+    means/variances and its disposition lane is a different object
+    from the machine Q; machine-predictive's twelve-wide Q reaches
+    nothing but its own tests. SEAM RULED: efe/compute-efe's
+    option boundary, per-candidate, with the full Q/C pair + pins
+    retained per ranked action (NOT the once-per-tick row-13
+    accumulation envelope). Build split adopted (TN §4, six
+    packets): (1) reviewed A declaration artifact, (2) model
+    assembly, (3) scoring adapter, (4) compute-efe injection,
+    (5) trace retention, (6) row-11 registration refresh.
+    Packet 3 dispatched (no A dependency); 4 and 5 follow it;
+    2 and 6 follow packet 1.
+    :blocker DECISION NEEDED (packet 1 only — model content, not
+    principle-settleable): no inspected authority declares a
+    semantic status-to-disposition correspondence, and sorting two
+    enumerations is not one. Options: (a) Joe declares the 7x12
+    correspondences (rationale per nonzero cell, named zeros);
+    (b) measured A from pinned production observation/state
+    records under the contract's :observed-estimate authority
+    (machine_model.clj:71-99) — honest but sparse at current
+    retention; (c) explicit noninformative declared A (uniform
+    rows) with the content caveat retained, discharging the
+    placeholder only structurally. The reviewer builds packets
+    3/4/5 meanwhile; nothing in them commits to an A choice.
 15. Write measurement proofs for the five machine declarations that
     lack one: belief state, belief update, depth, temperature,
     action. SPLIT 2026-09-12 (codex-24 discovery, correct refusal):
