@@ -13,7 +13,7 @@
                  :authorized? true :executed? false}
      :provenance {:selector-seam :explicit-machinery-test}}))
 (def result
-  (futon2.report.war-machine/generate-war-machine
+  ((requiring-resolve 'futon2.report.war-machine/generate-war-machine)
    1 {:trace? false
       :step-portfolio? false
       :step-mission-detail-portfolio? false
