@@ -218,6 +218,7 @@ self-certification finding, bell invoke-1788882522014):**
 | R12 — Two-layer calibration | absent [A] | absent [A] | absent [A] | exists [E-12-R] | exists [E-12-K] | absent [A] | absent [A] |
 | R20 — Interoceptive tripwires | absent [A] | absent [A] | absent [A] | absent [A] | exists [E20-C] | absent [A] | exists [E20-S] |
 | TRACE — WM trace store | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | exists [E-T] | exists [E-T-S] |
+| R15 — Hierarchy and timescale | absent [A15] | absent [A15] | absent [A15] | absent [A15] | absent [A15] | absent [A15] | absent [A15] |
 | R11 — Hierarchical shared budget | absent [A11] | absent [A11] | absent [A11] | absent [A11] | absent [A11] | absent [A11] | absent [A11] |
 | R16 — Grounded actuation | exists [E-16-C] | exists [E-16-D] | exists [E-16-P] | exists [E-16-R] | exists [E-16-K] | exists [E-16-X] | exists [E-16-S] |
 
@@ -246,6 +247,29 @@ self-certification finding, bell invoke-1788882522014):**
   formal ladder is complete at `named` because the equation registry declares
   it plumbing; its obligated lifecycle ladder is 0/7, so no completeness is
   claimed.
+- **[A15] R15 absent (row 20, 2026-09-12):** the temporal-hierarchy module
+  distinguishes its two-timescale parameterisation from both flat rollout
+  depth and a general nested generative model
+  (`src/futon2/aif/temporal_hierarchy.clj:1-43`). Its `apply-slow-prior`
+  (`:111-163`) shapes fast-loop priors and costs, `hierarchical-rollout`
+  (`:165-180`) passes the shaped moves to rollout, and `advance-slow-state`
+  (`:190-237`) refuses unwitnessed outcomes before constructing the next slow
+  Beta state. Those definitions are not lifecycle transitions merely because
+  they exist. The pinned V7 receipt
+  `runs/V7-R15-node-sim/00-r15.edn` (SHA-256
+  `508054e635f153e8f6f892e0de1a94d18234d668d7f34166810cf87f3a17dc17`)
+  found references confined to the namespace, its test, and its own harness:
+  zero production callers; zero `:slow/mode`, `:slow/intrinsics`, or
+  `:slow/previous-mode` values across 889 retained trace records; and zero R15
+  route hops. Its nine planted controls include a slow-state trace and a
+  temporal-hierarchy caller, demonstrating that both would be detected. The
+  reviewed account at `VERIFY-r-nodes.edn:1771-1839` classifies this as
+  `:mechanism-built-and-never-entered` and records that Campaign S occurs only
+  in narrative prose: no structured record carries its identifiers or slow
+  state. Therefore all seven cells are typed `absent`. R15's formal plumbing
+  ladder terminates at `named`; its obligated lifecycle ladder is 0/7. No
+  completeness, live coupling, Campaign S execution, or general nested-model
+  claim is made.
   **Basis amendment for R12, R20 and TRACE cells (2026-09-06, claude-1, from
   the PA-track pattern-v2 exit-4 — futon2 `2d3106c9`):** under the widened
   search (constructor-call form + the futon2 paths §1 already declares), the
