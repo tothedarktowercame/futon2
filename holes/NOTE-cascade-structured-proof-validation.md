@@ -154,3 +154,32 @@ first implementation slice is (a) gate demands `:wiring` non-nil, then
 empirically by reviewed scoring after structure exists. Ownership note:
 the construction checkpoints live in the RUN4 runner chain; that chain has
 a named owner and this note does not commission changes to it.
+
+## Ruling (Joe, 2026-09-12): slice approved, with the no-op caveat
+
+Joe approved parts (a) and (b), and strengthened the bar. Never-silent-nil
+is only the floor: **validated work must produce and persist ALL the
+records asked of it — cascade selected, scored, and a construction — a
+turn that reaches done shows its work along the way.** "If it's not
+actually able to write down a structured proof, it's not able to do a
+proof — it's not doing anything." A refusal is therefore an exceptional
+outcome, not an alternative steady state, and a refusal is itself work: it
+produces a typed record with its grounds, and a recurring refusal class is
+a candidate design pattern ("we thought this was a good idea; HOWEVER it
+turned out not to be; THEREFORE refuse this class") — the flexiarg shape,
+authored and reviewed like any other. A machine that mostly refuses is a
+finding about the machine, not a compliant machine.
+
+Joe also ratified I11 (handoffs compose) with a framing recorded here
+because it bears on this note's rubric: handoffs-compose is the dynamic
+version of a structured proof — handoffs are like Petri-net markers
+flowing through a structured proof that is not yet written down. Petri
+nets and structured proofs are well-understood mathematical objects; this
+is a candidate formalization route for the handoff algebra
+(`labs/wm-contract/SPEC-handoff-algebra-v0.md`), suggested not mandated.
+
+Routing (claude-15's recommended split, proceeding under the ruling): the
+fold contract (futon2 `src/futon2/aif/fold.clj`) defines the enriched
+output; the RUN4 runner chain (codex-10's lane) demands it at the
+construction checkpoint — requested of that lane's owner, not commissioned
+past them.
