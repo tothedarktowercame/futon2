@@ -197,8 +197,16 @@ operator workflow conversation (standdown 2026-09-12).
     packets): (1) reviewed A declaration artifact, (2) model
     assembly, (3) scoring adapter, (4) compute-efe injection,
     (5) trace retention, (6) row-11 registration refresh.
-    Packet 3 dispatched (no A dependency); 4 and 5 follow it;
-    2 and 6 follow packet 1.
+    Packet 3 DONE (2026-09-12, futon2 804b37fe/e14caa8d,
+    reviewed): machine_q_risk.clj standalone adapter — ordered
+    twelve-support equality, model/revision identity, pins,
+    row-sum-admission routing (:exact/:float-carried, no local
+    tolerance, no renormalization), D_KL[Q||C] with
+    :infinite-risk refusal carrying the offending outcomes on the
+    seven-zero-C shape; reviewer recomputed the 1/2*ln(4/3)
+    reference bit-identical; 3 tests/11 assertions at tree
+    804b37fe. Packet 4 dispatched (compute-efe injection,
+    codex-22); 5 follows 4; 2 and 6 follow packet 1.
     :blocker DECISION NEEDED (packet 1 only — model content, not
     principle-settleable): no inspected authority declares a
     semantic status-to-disposition correspondence, and sorting two
