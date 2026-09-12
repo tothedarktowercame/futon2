@@ -1,0 +1,3 @@
+Script started on 2026-09-12 19:14:51+00:00 [COMMAND="lake env lean DarkTower/WarMachine/MachineParameters.lean" <not executed on terminal>]
+
+Script done on 2026-09-12 19:14:53+00:00 [COMMAND_EXIT_CODE="0"]

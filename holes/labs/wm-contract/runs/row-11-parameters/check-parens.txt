@@ -1,0 +1,4 @@
+Script started on 2026-09-12 19:14:15+00:00 [COMMAND="emacs -Q --batch -l ../futon4/dev/check-parens.el --eval "(arxana-check-parens-cli)" -- --no-defaults src/futon2/aif/machine_parameters.clj test/futon2/aif/machine_parameters_test.clj holes/labs/wm-contract/runs/row-11-parameters/generate_registrations.clj holes/labs/wm-contract/runs/row-11-parameters/readback.clj" <not executed on terminal>]
+OK
+
+Script done on 2026-09-12 19:14:15+00:00 [COMMAND_EXIT_CODE="0"]

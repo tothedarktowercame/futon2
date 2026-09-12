@@ -1,0 +1,2 @@
+{:command "emacs check-parens on row-11 source, test, generator, witness" :exit 0
+ :tests 4 :assertions 4 :tree-sha "683e91dfdaf7e09ec34c58a9b2e3704ed8fa5cee" :at "2026-09-12T19:14:57Z"}

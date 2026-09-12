@@ -1,0 +1,4 @@
+Script started on 2026-09-12 19:14:37+00:00 [COMMAND="lake env lean DarkTower/WarMachine/MachineParameters.lean" <not executed on terminal>]
+DarkTower/WarMachine/MachineParameters.lean:48:4: error: No goals to be solved
+
+Script done on 2026-09-12 19:14:39+00:00 [COMMAND_EXIT_CODE="1"]
