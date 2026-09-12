@@ -509,7 +509,20 @@ operator workflow conversation (standdown 2026-09-12).
     composite formal subject in a NEW module first, then one
     real offline envelope retention, then the proof).
     Seven-step split adopted; step 1 (R6 policy-set proof)
-    dispatched (codex-22).
+    dispatched (codex-22). STEP 4 STOPPED HONESTLY then RULED
+    (2026-09-12): r17-offline/run requires a caller-supplied
+    :parent-model with :id (r17_offline.clj:14-19, reviewer
+    verified); no production caller or parent-model record
+    exists — only the synthetic test fixture — and inventing an
+    id would fabricate the "real envelope" (codex-23, correct
+    stop; same mechanism-built-never-commissioned shape as the
+    R10 credit stop). RULED in-lane on the row-13
+    accumulation-config precedent: the prerequisite is a
+    DECLARED, versioned, reviewed parent-model
+    identity/provenance record for the real substrate corpus
+    (nomenclature + provenance pins, not model content) —
+    packet re-dispatched to create the record and then run the
+    real envelope with it.
     A/B/C ALL DONE — R6 CLAIM ADMITTED (2026-09-12):
     R6-policy-posterior-production-20260912T172809-f-absent-v1
     at :verified-binding (futon2 f269e9b7/bc3a5698; witness
