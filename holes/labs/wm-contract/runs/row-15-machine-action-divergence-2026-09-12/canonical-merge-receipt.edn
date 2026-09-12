@@ -1,0 +1,6 @@
+{:command "bb scripts/merge_witnesses.bb --output /tmp/row15-machine-action-divergence-review.edn"
+ :exit 0 :tests 32 :assertions 33
+ :tree-sha "034e6a7342ca9d51f5beccd914da0f58db6abf33"
+ :at "2026-09-12"
+ :result {:claim-status :pending :refusals 0}
+ :transcript "canonical-merge.txt"}
