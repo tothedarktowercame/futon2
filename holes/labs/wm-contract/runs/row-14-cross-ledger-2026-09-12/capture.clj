@@ -43,6 +43,7 @@
            preregistration root attempt :selection
            (term {:selected-mission "entity-1" :selected-action
                   {:type :address-sorry :target "entity-1"}
+                  :ranked-candidates [] :selection-reasons {:source :capture}
                   :belief-source source}))
         _ (doseq [checkpoint [:construction :dispatch :build :adjudication]]
             (cohort/append-checkpoint! preregistration root attempt checkpoint
