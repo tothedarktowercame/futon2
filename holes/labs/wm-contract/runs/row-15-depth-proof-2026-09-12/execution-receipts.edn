@@ -1,0 +1,26 @@
+{:receipts
+ [{:gate :lean-elaboration-and-axioms
+   :command "lake env lean DarkTower/WarMachine/MachineDepthCaptureWitness.lean"
+   :exit 0 :tests 2 :assertions 4
+   :tree-sha "c25e730644f7040cb3a2af5562a53abeb6b64a80"
+   :at "2026-09-12"}
+  {:gate :node-witness-verify-kind
+   :command "bb holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/verification-check.bb"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "105074c3dc18c29342e3b4f13bf1f264946873a5"
+   :at "2026-09-12"}
+  {:gate :disposable-merge
+   :command "bb scripts/merge_witnesses.bb --output /tmp/row15-depth-witness-registry.edn"
+   :exit 0 :tests 1 :assertions 2
+   :tree-sha "105074c3dc18c29342e3b4f13bf1f264946873a5"
+   :at "2026-09-12"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/verification-check.bb"
+   :exit 0 :tests 1 :assertions 2
+   :tree-sha "105074c3dc18c29342e3b4f13bf1f264946873a5"
+   :at "2026-09-12"}
+  {:gate :check-parens
+   :command "bash /home/joe/code/futon4/dev/check-parens.sh checks/witness-fragments/machineDepth.edn holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/declaration-census.edn holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/verification-receipts.edn holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/verification-check.bb"
+   :exit 0 :tests 4 :assertions 4
+   :tree-sha "105074c3dc18c29342e3b4f13bf1f264946873a5"
+   :at "2026-09-12"}]}

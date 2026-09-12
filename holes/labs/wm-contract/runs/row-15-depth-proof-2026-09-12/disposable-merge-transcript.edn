@@ -1,0 +1,8 @@
+{:command "bb scripts/merge_witnesses.bb --output /tmp/row15-depth-witness-registry.edn"
+ :exit 0
+ :new-admissions
+ [{:id "R13-depth-machinery-capture-20260912-v1"
+   :status :pending
+   :node :R13}]
+ :refusals []
+ :assertions {:new-claim-pending true :zero-refusals true}}
