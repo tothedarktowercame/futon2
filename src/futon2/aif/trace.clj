@@ -196,7 +196,14 @@
 
 (defn- stringable-softmax-weights
   [softmax-weights ranked-actions]
-  (let [rank-keys (mapv ranked-candidate-id ranked-actions)
+  ;; A decision with NO softmax-weights has no posterior to persist; the
+  ;; historical details-on shape for it is an empty rank-keyed map, not a
+  ;; refusal. The rank-join completeness check guards decisions that DO carry
+  ;; a posterior (row 16 R6 boundary; nil-case repair 2026-09-12, reviewer,
+  ;; from the packet-4b ambient findings).
+  (if (nil? softmax-weights)
+    {}
+    (let [rank-keys (mapv ranked-candidate-id ranked-actions)
         duplicate-rank-keys (->> rank-keys frequencies
                                  (keep (fn [[k n]] (when (> n 1) k)))
                                  sort vec)
@@ -215,11 +222,11 @@
                              (filter #(contains? missing-actions (:action %)) ranked-actions))
                        :extra-weight-actions (vec extra-actions)
                        :duplicate-rank-keys duplicate-rank-keys})))
-    (into {}
-          (map (fn [ranked-action]
-                 [(ranked-candidate-id ranked-action)
-                  (get softmax-weights (:action ranked-action))]))
-          ranked-actions)))
+      (into {}
+            (map (fn [ranked-action]
+                   [(ranked-candidate-id ranked-action)
+                    (get softmax-weights (:action ranked-action))]))
+            ranked-actions))))
 
 (def ^:private selection-proof-input-fields
   #{:schema :algorithm/revision :decision-id :temperature :candidate-domain
