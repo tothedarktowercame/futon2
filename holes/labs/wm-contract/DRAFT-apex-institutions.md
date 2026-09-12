@@ -162,8 +162,12 @@ signature-discipline at entry: the entry record the cue demands
 carries task, pattern/version, intended transition, and witness
 conditions — the signature-before-work fields, filled per task instead
 of per row. The card→use-citation check (carriage alone is not
-evidence of use) is ⊘'s commissioning discipline at the pattern level:
-the card is "commissioned" for the task only by its cited use.
+evidence of use) is an OBSERVATION check at pattern grain — related to
+but weaker than ⊘'s commissioning, which requires an induced violation
+and its typed refusal (codex-25 correction, 2026-09-12: card use is not
+commissioning). Also per Joe's ruling: clocking in is entry into an
+institution and role, not necessarily mission clocking — 🕒's mission
+anchor is the special case with existing machinery.
 
 **Emitter asymmetry (restated for this document).** Operator cues
 obligate the receiver at full authority; agent cues are self-

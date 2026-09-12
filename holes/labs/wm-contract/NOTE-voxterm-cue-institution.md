@@ -110,3 +110,37 @@ the harness is the thing that reads cues and emits records.
 Row links: EX-1 (this is its protocol layer); zaif four arms
 (retrieve/act/ask/yield ↔ 🎒/🕒-act/ask-cue/🏁); M-zaif-harness
 boundary 1 (the asymmetry above is it, restated at cue grain).
+
+## STATUS CLARIFICATIONS (2026-09-12, late; per codex-25 reconciliation)
+
+**Joe's ruling — clocking generalized:** clocking in can be entry into
+an INSTITUTION and a ROLE, not necessarily mission clocking. The 🕒
+anchor above (mission clock / clock-dispatch!) is the SPECIAL case
+with existing machinery; the general reading — a cue enters the
+emitter or receiver into an institution's position — is the ruling.
+Recorded as DECISION; no new machinery claimed.
+
+**Adoption state changed:** the seven workshop patterns were ADMITTED
+by Joe to futon3/library/workshop (futon3 4a7f07c; staging removal
+3682c693; sigil registry repinned futon2 7ae9f82f — the maintenance/
+re-pin gap in the Layer-4 review was closed by exactly that step).
+References above to data/pattern-staging/workshop/ are historical;
+the library is authoritative. ADOPTED (patterns), PROPOSAL (everything
+in this note: record convention, lint, EX-1), IMPLEMENTED (existing
+machinery only: cues v1, mission clock, PSR/PUR, PAR, row query).
+
+**Commissioning correction (codex-25):** card→use-citation is NOT
+induced-violation commissioning. ⊘'s commissioning requires feeding a
+known breach and observing the typed refusal; a use-citation is an
+OBSERVATION check — weaker, and correctly so at pattern grain. The
+addendum in DRAFT-apex-institutions.md is corrected in place on this
+point (see its amendment note).
+
+**Gates preserved:** the observation-only experiment (EX-1 and any
+cue round-trip run) preserves existing gates and operator rulings;
+the proposed lint is a WATCHER, not a gate, until separately adopted.
+
+**Cross-reference:** futon3/library/workshop/IAD-ADAPTER.md is the
+adapter design (proposal, candidate-with-gaps); adoption ≠ enforcement
+≠ participation — three distinct states this note's vocabulary should
+not blur.
