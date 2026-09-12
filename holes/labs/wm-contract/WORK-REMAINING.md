@@ -143,12 +143,14 @@ operator workflow conversation (standdown 2026-09-12).
 
 ## Phase 2 — learning arrows and the remaining equations (5)
 
-12. IN PROGRESS: recurrence + proofs landed and reviewed (futon2
-    01a5e8a4, mathlib4 cbf0959b: machineRealisesDeclaredAccumulation
-    discharged; anti-recount theorem non-vacuous). The three-real-
-    tick F8 witness was honestly recorded :not-executed (author
-    self-caught an unsupported claim, corrected f35ae290);
-    execution packet out to codex-23.
+12. DONE (futon2 01a5e8a4 + witness 57c471fe..271d6095, mathlib4
+    cbf0959b; reviewed 2026-09-12). Eq.21 recurrence proven
+    (RealisesDeclaredAccumulation discharged; anti-recount theorem
+    non-vacuous); three-real-tick replay in recorded order, 294
+    coordinates, max IEEE delta 0.0; recount imposter fails,
+    dropped tick and support mutation refuse. The author
+    self-caught an initially unsupported witness claim before
+    execution — retained in f35ae290's history.
 13. U92: feed that accumulation from the live tick's observation
     and belief, making the two learning arrows into R17 real.
 14. Build the machine-Q link: the forward model actually receiving
