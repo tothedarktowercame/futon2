@@ -10,4 +10,34 @@
  :run-sha "f0be231606149d5b9e34a62cde01c6b122c2aeba"
  :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
  :result :passed
- :recorded-at "2026-09-08T00:00:00Z"}
+ :recorded-at "2026-09-08T00:00:00Z"
+ :node-witnesses
+ [{:schema :wm/node-witness-v1
+   :status :proposed
+   :id "R4-forward-model-float-carried-production-pins-v1"
+   :node :R4 :equation :forward-model :quantity :Q-o-pi
+   :declaration "PredictiveOutcomeKernel" :kind :lean-witness
+   :polarity :supports :scope :production-pins-float-carried-v1.1 :as-of "2026-09-12"
+   :artifact
+   {:repo "mathlib4" :path "DarkTower/WarMachine/MachineForwardModelWitness.lean"
+    :sha256 "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c"
+    :module "DarkTower.WarMachine.MachineForwardModelWitness"
+    :declaration "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"}
+   :subject-artifact
+   {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+    :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"
+    :declaration "DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"}
+   :claim "At the unchanged row-9 production pins, three policy-conditioned outcome rows match independent exact positional-A composition within measured IEEE deltas and satisfy FloatCarriedRow.nearNormalised; exact ProbabilityKernel normalization is deferred to row 14's reviewed model instance."
+   :evidence-limit "Contract-v1.1 FloatCarriedRow measurement at these production pins only. It does not claim the production bytes are an exactly normalized PredictiveOutcomeKernel and does not perform renormalization."
+   :retained-evidence
+   {:readback {:repo "futon2" :path "holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.edn"
+               :sha256 "88559ad404088f2087212febe8ab24385dfefefe130288a12e6ddbd14da504f7"}
+    :generator {:repo "futon2" :path "holes/labs/wm-contract/runs/row-6-predictive-outcome/generate_forward_witness.clj"
+                :sha256 "eaa27949d53c45ee6b8400affba7fbadae4f58309bac57cf595d8cb605f023cf"}
+    :negative-controls {:repo "futon2" :path "holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.edn"
+                        :sha256 "88559ad404088f2087212febe8ab24385dfefefe130288a12e6ddbd14da504f7"}}
+   :verification
+   {:status :verified
+    :receipt {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-forward-model-2026-09-12/verification-receipts.edn"
+              :sha256 "cf383515274dba2b24612380724fb9b6f57bfb28d11890f253db493e127af289"
+              :selector [:records "R4-forward-model-float-carried-production-pins-v1"]}}}]}
