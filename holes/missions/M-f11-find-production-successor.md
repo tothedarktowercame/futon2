@@ -49,3 +49,8 @@ Repair-024 is resolved only after this mission's ordinary gates produce strict
 durable terminal evidence. A failure—especially
 `:feature-card-missing-or-invalid`—leaves repair-024 awaiting validation and
 stops the continuous loop.
+
+## Open holes
+
+- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence.
+- [ ] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.

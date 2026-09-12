@@ -5,7 +5,7 @@
  :candidate-task-ids ["M-f11-find-production-successor"]
  :selected-task-id "M-f11-find-production-successor"
  :sources [{:path "holes/missions/M-f11-find-production-successor.md"
-            :sha256 "916825b655247710bb890554c06b2ed83c40914c501d2c2b5e6483a0882a240f"}
+            :sha256 "467847467ea4e7fd105b65c19be9a6d0f4329d0ba43487e70d299de3514d2b8b"}
            {:path "holes/labs/wm-contract/worklist.edn"
             :sha256 "579410576f1789e46101ffde766b735783126bc22d7eb877c4bcdfb95680a1ef"}
            {:path "src/futon2/aif/mission_registry.clj"
