@@ -64,3 +64,52 @@ Row links: NOTE-operator-landscape-reader (System 4 machinery),
 NOTE-task-manager-outer-loop (System 3/5 seam), NOTE-inbox-zero-aif
 (System 2), the witness loop (System 3*), M-zaif-harness (C-belief),
 SPEC-chip-boards-v0 recursion ruling (fractality).
+
+## Part III as sedimentary layers: the demand-side simulation (Joe, 2026-09-12)
+
+The layered reading: the PRESENT stratum is current capabilities, current
+clients, current delivery pipelines. The companies named in Part III's
+business landscape (business-model-grid.svg: Andela, Braintrust,
+Gitcoin, HackerOne, AppJet, Galois, Docker, ...) are stand-ins for OTHER
+POSSIBLE delivery vectors and benefit surfaces — a possible stratum not
+yet deposited.
+
+The mechanism: one zaif stand-in agent per company, a demand board:
+
+- each carries a SYNTHETIC C-vector derived from that company's public
+  shape — its requirements, demand surfaces, needs, satisfaction
+  criteria (Andela: talent-pipeline quality signals; Braintrust:
+  verifiable contractor track records; Gitcoin: public-goods funding
+  matching; HackerOne: vulnerability-response discipline; ...) —
+  sourced from public material, provenance-stamped, precision declared
+  LOW until any real engagement calibrates it;
+- the demand board walks the capability landscape (the cartographer's
+  map + capability z-axis) and expresses demand: "I'd want this
+  capability, this pattern, this kind of warrant" — typed demand
+  records against map regions and capability stars;
+- aggregation across demand agents = a simulated demand signal per
+  capability/region — an input to priority that is received (per
+  zai-5's ruling) by the task manager / ranked-actions seam, never an
+  autonomous scheduling force.
+
+Three honesty rules, all inherited:
+
+1. **Synthetic ≠ real, forever typed.** An Andela-agent's C is a model
+   with declared provenance and low precision; a Rebecca slice is real
+   engagement with measured channels. The two never share a precision
+   row, and a simulated demand record carries :simulated true into any
+   aggregation it feeds.
+2. **Demand is expressed, never enacted.** The demand board's acts are
+   demand records on the map — proposals in the playout vocabulary
+   (watchable futures, not enacted ones). The god-view, minus god-mode,
+   applied to the market side.
+3. **It's a playout, so it's scored.** Where real outcomes later land
+   (a real engagement, a declined proposal — the grid already records
+   Declined/Engaged), they calibrate the corresponding synthetic
+   C-vector. The simulation learns like any other forward model: by
+   prediction error (R14 for demand).
+
+What this buys Part III: the "marching around the landscape" IS the
+business thesis in simulation — which capabilities the ecosystem would
+pay for, priced before building, with the sediment recording which
+possible strata got deposited and which stayed possible.
