@@ -1,0 +1,23 @@
+{:receipts
+ [{:gate :canonical-dossier-render
+   :command "python3 empirics-futon/gen_rnode_dossiers.py"
+   :cwd "/home/joe/code/p4ng"
+   :exit 0 :tests 1 :assertions 5
+   :tree-sha {:futon2 "99ee3880c51ebd1ff8714fbd80eda61162ebec3d"
+              :p4ng "a7d274162826b57bf7a3ecc6d4605be7c77268d1"}
+   :observed {:nodes 20 :assurance-censused 8
+              :r15-strip "-------" :r15-at-obligated-state false
+              :output "sec-rnode-dossiers-generated.tex"}
+   :at "2026-09-12"}
+  {:gate :dossier-matrix-schema-controls
+   :command "python3 empirics-futon/test_rnode_contract_union.py"
+   :cwd "/home/joe/code/p4ng"
+   :exit 0 :tests 14 :assertions 22
+   :tree-sha {:futon2 "99ee3880c51ebd1ff8714fbd80eda61162ebec3d"
+              :p4ng "a7d274162826b57bf7a3ecc6d4605be7c77268d1"}
+   :observed {:canonical-output-unchanged true
+              :r15-ceiling "named"
+              :r15-at-state false
+              :r15-cells ["absent" "absent" "absent" "absent"
+                          "absent" "absent" "absent"]}
+   :at "2026-09-12"}]}
