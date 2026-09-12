@@ -853,8 +853,22 @@ operator workflow conversation (standdown 2026-09-12).
     need post-schema evidence decisions there). Today's new
     paths (machine-Q scorer, selector boundary, R20->R14
     charter) are census candidates, not silent additions. Four
-    packets; packet 1 (generator classification repair)
-    dispatched (codex-23).
+    packets. PACKET 1 DONE (2026-09-12, p4ng
+    a2ef9d8/795ff2c/6fa4bd1, futon2 receipts fce023a7,
+    reviewed): active theory edges derive from LIVE importers
+    only, difference taken afterward so dual-derivation pairs
+    stay active (reviewer verified the design in source);
+    conformance regenerated — 20 current theory edges, 11
+    :realised-undrawn, :retired-source [[:R3a :R8]] retained
+    and named with a legend count in the live topology; planted
+    retired-only control cannot render amber (dedicated
+    committed control); dual-importer control stays live.
+    STANDING RED NOTED: p4ng negative_controls.sh fails on a
+    PRE-EXISTING declaration-rung-band assertion before
+    reaching the new control — attributed, retained, not
+    reported green; needs its own hygiene attribution (p4ng
+    lane). Packet 2 (always-on base batch) dispatched
+    (codex-23).
 22. For the drawn connections that have never fired in any recorded
     run: decide which the qualifying run must exercise (default:
     all that the full loop traverses) and mark the remainder
