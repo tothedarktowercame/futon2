@@ -14,10 +14,11 @@
    {:action {:type :no-op} :controller-score 0.5}])
 
 (def decision (policy/select-action ranked {:abstain-epsilon epsilon}))
-(trace/write-trace! {:ranked-actions ranked
-                     :decision decision
-                     :mode :machinery-capture}
-                    :dir redirected-dir :date-str date-str)
+(binding [trace/*persist-policy-trace-details?* false]
+  (trace/write-trace! {:ranked-actions ranked
+                       :decision decision
+                       :mode :machinery-capture}
+                      :dir redirected-dir :date-str date-str))
 (def persisted (first (trace/read-trace :dir redirected-dir :date-str date-str)))
 (def readback
   {:schema :wm/abstain-epsilon-capture-v1
