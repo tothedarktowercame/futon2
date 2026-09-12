@@ -49,8 +49,17 @@
      "holes/labs/wm-contract/runs/F8-observe/codex-handoff-summary.md",
      :sha256
      "9035b64c5408dc2e117176616276bf5d02b89ba1a9da82b01225d60b389e5e19"}},
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector
+     [:records "R2-observe-emptyObservationHasFourteenZeros-v1"]}},
+   :status :admitted,
    :id "R2-observe-emptyObservationHasFourteenZeros-v1",
    :kind :lean-witness,
    :polarity :supports,

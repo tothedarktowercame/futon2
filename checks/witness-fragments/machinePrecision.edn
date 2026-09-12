@@ -36,8 +36,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-oneStillError-v1"]}},
+   :status :admitted,
    :id "R7-precision-oneStillError-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -106,8 +114,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-threeStillErrors-v1"]}},
+   :status :admitted,
    :id "R7-precision-threeStillErrors-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -177,8 +193,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-sevenStillErrors-v1"]}},
+   :status :admitted,
    :id "R7-precision-sevenStillErrors-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -248,8 +272,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-fifteenStillErrors-v1"]}},
+   :status :admitted,
    :id "R7-precision-fifteenStillErrors-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -319,8 +351,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-fullWindowOfStillErrors-v1"]}},
+   :status :admitted,
    :id "R7-precision-fullWindowOfStillErrors-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -390,8 +430,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-windowBinds-v1"]}},
+   :status :admitted,
    :id "R7-precision-windowBinds-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -461,8 +509,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-unitError-v1"]}},
+   :status :admitted,
    :id "R7-precision-unitError-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -531,8 +587,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-halfError-v1"]}},
+   :status :admitted,
    :id "R7-precision-halfError-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -601,8 +665,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-tripleError-v1"]}},
+   :status :admitted,
    :id "R7-precision-tripleError-v1",
    :kind :lean-witness,
    :polarity :supports,
@@ -671,8 +743,16 @@
    "Reference proof candidate, not admitted. Census typecheck exit is nil; readback is a retained historical measurement, not current execution. No node rung promotion.",
    :as-of "2026-09-12",
    :historical-receipt nil,
-   :review {:status :proposed, :receipt nil},
-   :status :proposed,
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/review-receipts.edn",
+     :sha256
+     "2db4590f2cb1ec119ccec2e59b31cb88a84046997f33b559aa6fe2ff135ecabf",
+     :selector [:records "R7-precision-floorIsReached-v1"]}},
+   :status :admitted,
    :id "R7-precision-floorIsReached-v1",
    :kind :lean-witness,
    :polarity :supports,

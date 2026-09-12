@@ -1,0 +1,6 @@
+[{:command "bb scripts/merge_witnesses.bb --fragments checks/witness-fragments --output <disposable>"
+  :exit 0 :claims 24 :verified-binding 24 :pending 0 :deterministic true
+  :input-sha256 "f6252d6e3b544a1684a9cca6a148ef9004fdeb5fd2f9c1ebb863ee2200efdfe9"
+  :ran-by "claude-15" :at "2026-09-12"}
+ {:command "bb scripts/merge_witnesses.bb --check"
+  :exit 0 :pass? true :entries 49 :ran-by "claude-15" :at "2026-09-12"}]
