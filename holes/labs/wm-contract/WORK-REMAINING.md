@@ -940,6 +940,35 @@ operator workflow conversation (standdown 2026-09-12).
     run: decide which the qualifying run must exercise (default:
     all that the full loop traverses) and mark the remainder
     aspirational on the figure.
+    AUDIT DONE (2026-09-12, TN-row22-firing-audit-2026-09-12.md
+    56eb4608; reviewer spot-verified fired claims against own
+    admission evidence and the never-fired R13->R4 against the
+    depth capture). Population corrected to 32 base edges (21
+    original + 8 + 3; the packet's 25 was wrong arithmetic).
+    20 FIRED at an explicitly declared grain (witness-at-pins /
+    field-presence / route-hop / coarse-route — never promoted);
+    12 NEVER FIRED. Verdict classes: (a) FOUR full-loop
+    continuation edges mandatory by the row's default and
+    currently unevidenced — R6->R13, R13->R14, R14->R16,
+    R16->R2: the qualifying run must retain joined evidence for
+    each; (b) the conditional family needs Joe's run
+    configuration (see the row-24 sheet); (c) SEVEN
+    aspirational-marking candidates need Joe's ruling —
+    R11->R16, R6->R11, R7->R14, R9->R16, R10->R8, R15->R13,
+    R15->R16. The marking packet (evidence-grain :firing
+    annotations on all 32 + :aspirational per Joe's (c) ruling
+    + generator refusal of unclassified base edges) waits on
+    that ruling.
+    :blocker ADDENDUM TO THE ROW-24 DECISION SHEET (Joe): the
+    qualifying-run CONFIGURATION must state — (i) effective
+    horizon policy (enable real anticipation giving horizon>=2,
+    or rule the depth arm out); (ii) the three F_pi/detail
+    flags (previous-tick policy details, FUTON_WM_FPI_DARK,
+    FUTON_WM_FPI_POSTERIOR with complete coverage) — prior
+    RUN9 firing does not silently set the future
+    configuration; (iii) which of the seven class-(c) edges
+    receive the aspirational mark. This is row-24 inventory
+    item 17's concrete content.
 23. R6→R16: keep the per-run correspondence capture running; settle
     the verdict from the build-phase test runs.
     VERDICT SETTLED AS :insufficient-retention (2026-09-12,
