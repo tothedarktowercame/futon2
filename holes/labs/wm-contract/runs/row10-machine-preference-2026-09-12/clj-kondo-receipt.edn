@@ -1,0 +1,5 @@
+{:command "clj-kondo --lint src/futon2/aif/ruled_outcome_c.clj test/futon2/aif/machine_preference_test.clj"
+ :exit 0 :tests 2 :assertions 2
+ :tree-sha "d5022a52c2179178876bc1730dd221aa41cdafa4"
+ :at "2026-09-12T18:50:59Z"
+ :transcript "linting took 14ms, errors: 0, warnings: 0"}

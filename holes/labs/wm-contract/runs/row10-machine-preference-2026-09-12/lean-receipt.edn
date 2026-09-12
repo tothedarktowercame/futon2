@@ -1,0 +1,4 @@
+{:command "lake env lean DarkTower/WarMachine/MachinePreferenceDistribution.lean"
+ :repo "mathlib4" :exit 0 :tests 1 :assertions 10
+ :tree-sha "03bba0e70f1b1901072c5d40ac7ec8713941d29d"
+ :at "2026-09-12T18:50:59Z" :transcript ""}

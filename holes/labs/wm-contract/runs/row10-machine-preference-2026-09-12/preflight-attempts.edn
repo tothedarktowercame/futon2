@@ -1,0 +1,13 @@
+[{:command "clojure -M:test -n futon2.aif.machine-preference-test"
+  :exit 1 :tests 0 :assertions 0 :outcome :runner-not-entered
+  :finding "The :test alias is :exec-fn; -M treated -n as a filename."}
+ {:command "clj-kondo --lint src/futon2/aif/ruled_outcome_c.clj test/futon2/aif/machine_preference_test.clj"
+  :exit 3 :outcome :syntax-finding :finding "Missing close parenthesis in the new refusal-control test; repaired by follow-up ebbbafde."}
+ {:command "/home/joe/code/futon4/dev/check-parens.sh ..."
+  :exit 126 :outcome :wrapper-not-entered :finding "Wrapper lacks executable permission; invoked explicitly with bash for the recorded gate."}
+ {:command "lake env lean DarkTower/WarMachine/MachinePreferenceDistribution.lean"
+  :exit 1 :outcome :elaboration-finding :commit "b9712a17ed"
+  :finding "Corrected ProbabilityKernel normalisation projection and list-field parentheses in follow-up 9f486f2750."}
+ {:command "lake env lean DarkTower/WarMachine/MachinePreferenceDistribution.lean"
+  :exit 1 :outcome :elaboration-finding :commit "9f486f2750"
+  :finding "Restated empty-region theorems over declared support in follow-up 03bba0e70f."}]

@@ -1,0 +1,65 @@
+{:schema :wm/machine-preference-witness-v1
+ :row 10
+ :at "2026-09-12T18:50:59Z"
+ :production-entry "futon2.aif.c-fold-config/resolve-opts"
+ :constructor "futon2.aif.ruled-outcome-c/construct-machine-preference"
+ :input-pins
+ {:run-config {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12-v2/run-config.edn"
+               :sha256 "3ed73d48cc9085a1c1884bc869e6e5c1f977ef6014a0bbbf58d7f29cc2f306b5"}
+  :seed {:path "resources/run4/seeded-c.edn"
+         :sha256 "1459952e2d3e4534760ba8512482fc3cb3aa4020d2c3464b2056efaff6112e1f"}
+  :clojure-source {:path "src/futon2/aif/ruled_outcome_c.clj"
+                   :sha256 "bf8784090906d19b0f7a5700e9c148dc2cdd40762e5a624e49e6a70cf995519c"}
+  :lean-source {:repo "mathlib4" :commit "03bba0e70f1b1901072c5d40ac7ec8713941d29d"
+                :path "DarkTower/WarMachine/MachinePreferenceDistribution.lean"
+                :sha256 "d2c2920db63763fed62813527c4a7813a8e7fe2081dc7c055573214390dfb841"}}
+ :support-order [[:organization :abstained]
+                 [:organization :agent-unavailable]
+                 [:organization :artifact-only]
+                 [:organization :build-failed]
+                 [:organization :cancelled]
+                 [:organization :dispatch-failed]
+                 [:organization :grounded-change]
+                 [:organization :grounded-no-change]
+                 [:organization :guardrail-refusal]
+                 [:organization :incomplete]
+                 [:organization :no-selection]
+                 [:organization :substrate-unavailable]]
+ :production-masses
+ {[:organization :abstained] 0
+  [:organization :agent-unavailable] 1/8
+  [:organization :artifact-only] 0
+  [:organization :build-failed] 1/8
+  [:organization :cancelled] 0
+  [:organization :dispatch-failed] 0
+  [:organization :grounded-change] 1/2
+  [:organization :grounded-no-change] 0
+  [:organization :guardrail-refusal] 0
+  [:organization :incomplete] 1/8
+  [:organization :no-selection] 1/8
+  [:organization :substrate-unavailable] 0}
+ :lean-reference-masses
+ {[:organization :abstained] 0
+  [:organization :agent-unavailable] 1/8
+  [:organization :artifact-only] 0
+  [:organization :build-failed] 1/8
+  [:organization :cancelled] 0
+  [:organization :dispatch-failed] 0
+  [:organization :grounded-change] 1/2
+  [:organization :grounded-no-change] 0
+  [:organization :guardrail-refusal] 0
+  [:organization :incomplete] 1/8
+  [:organization :no-selection] 1/8
+  [:organization :substrate-unavailable] 0}
+ :comparison {:coordinates 12 :exact 12 :divergent 0 :sum 1
+              :first-supported [:organization :abstained]
+              :first-positive [:organization :agent-unavailable]}
+ :negative-controls
+ [{:mutation :layer-revision-change :outcome :refused
+   :kind :preference-layer-revision-mismatch}
+  {:mutation :unknown-outcome :outcome :refused
+   :kind :unknown-preference-outcome}
+  {:mutation :q-positive-c-zero :outcome :refused
+   :kind :positive-prediction-at-zero-preference :risk :infinite}]
+ :consumption {:outcome :refused :kind :evidence-vocabulary-owed}
+ :scope "Pinned RUN4 production C loader and exact machine-C constructor; no tick integration or qualifying run."}
