@@ -1,0 +1,23 @@
+{:receipts
+ [{:gate :lean-elaboration-and-axiom-check
+   :command "lake env lean DarkTower/WarMachine/MachineActionBranchesWitness.lean"
+   :exit 0 :tests 8 :assertions 8
+   :tree-sha "0a4309b1f9fb62a9cff149cd01ad92a7cb4cab32" :at "2026-09-12T23:57:00Z"
+   :sorryAx false}
+  {:gate :scoped-darktower-build
+   :command "lake build DarkTower.WarMachine.MachineActionBranchesWitness"
+   :exit 0 :tests 8498 :assertions 8
+   :tree-sha "0a4309b1f9fb62a9cff149cd01ad92a7cb4cab32" :at "2026-09-12T23:58:00Z"}
+  {:gate :clj-kondo
+   :command "clj-kondo --config '{:linters {:namespace-name-mismatch {:level :off}}}' --lint holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/generate.clj"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "99527d30ab410d9dcea5c2fe1520ddc4d98812ad" :at "2026-09-12T23:59:00Z"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l ../futon4/dev/check-parens.el holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/generate.clj"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "99527d30ab410d9dcea5c2fe1520ddc4d98812ad" :at "2026-09-12T23:59:00Z"}]
+ :retained-failed-gates
+ [{:tree-sha "16f94fb0534a03fa445e3aca20fe46a9b2186e02" :exit 1
+   :finding :signed-raw-negative-score-bits-are-not-order-preserving}
+  {:tree-sha "773e6d5c8ced89c892450e4c88b5a090eca94665" :exit 0
+   :finding :clj-kondo-unused-capture-bindings}]}

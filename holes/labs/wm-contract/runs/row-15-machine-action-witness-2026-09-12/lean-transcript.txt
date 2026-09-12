@@ -1,0 +1,3 @@
+Command: lake env lean DarkTower/WarMachine/MachineActionBranchesWitness.lean
+Exit: 0
+Eight printed declarations elaborate. The six finite branch equalities use native_decide's generated proof axiom; the rational abstain theorem uses only propext, Classical.choice, and Quot.sound. The aggregate theorem contains their union. No printed declaration contains sorryAx.
