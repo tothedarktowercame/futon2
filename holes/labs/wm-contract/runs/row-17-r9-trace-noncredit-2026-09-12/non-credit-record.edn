@@ -1,0 +1,109 @@
+{:schema :wm/assurance-non-credit-v1
+ :work-remaining/row 17
+ :as-of "2026-09-12"
+ :facts-artifact true
+ :canonical-census-edited false
+ :pins
+ {:futon3c/head "3682c693a7e379dc8d86cf90716d34da5c478544"
+  :futon2/head-before-artifact "297a6559d84ba47ec2eace229408b57404c85e3f"
+  :agency-job-construction
+  {:path "futon3c/src/futon3c/transport/http.clj"
+   :lines "1334-1359"
+   :fields [:job-id :agent-id :caller :surface :request-digest :bellback-of
+            :mode :state :created-at :started-at :finished-at :terminal-code
+            :terminal-message :session-id :trace-id :result-summary
+            :artifact-ref :execution :invocation/model :delivery :events]}
+  :agency-job-finalization
+  {:path "futon3c/src/futon3c/transport/http.clj"
+   :lines "1571-1618"
+   :fields [:state :finished-at :terminal-code :terminal-message :session-id
+            :trace-id :result :result-summary :result-text :artifact-ref
+            :execution]}
+  :agency-delivery
+  {:path "futon3c/src/futon3c/transport/http.clj"
+   :lines "1682-1737"
+   :fields [:delivery/status :delivery/surface :delivery/destination
+            :delivery/recorded-at :delivery/note]}
+  :trace-index
+  {:path "futon3c/src/futon3c/transport/http.clj"
+   :ledger-declaration-lines "360-366"
+   :population-lines "1573-1575,1606-1618"
+   :delivery-lookup-lines "1682-1688"
+   :join-inputs [:trace-id :trace->job]}
+  :r9-source-census
+  {:command "rg -n '\\((?:not=|=)[^\\n]*reviewer|reviewer[^\\n]*\\((?:not=|=)|self[- ]?cert' futon3c/src/futon3c/transport/http.clj futon3c/src/futon3c/agency/parked_on.clj futon3c/src/futon3c/agency/turn_queue.clj futon3c/src/futon3c/social/coordination_ledger.clj"
+   :exit 1
+   :matches 0
+   :scope "The invoke lifecycle, parking, durable turn queue, and coordination-ledger boundaries credited in Row 17."
+   :claim "No reviewer equality/inequality comparison and no self-certification refusal occurs in the bounded Agency lifecycle sources."}
+  :existing-r9-account
+  {:path "futon2/holes/labs/wm-contract/VERIFY-r-nodes.edn"
+   :lines "1888-1908"
+   :verdict :hole
+   :scope :assurance-implemented-on-two-surfaces-without-node-wide-admission}
+  :existing-narrower-enforcement
+  {:path "futon2/src/futon2/aif/full_loop_runner.clj"
+   :distinct-reviewer-current-lines "3123-3135"
+   :review-execution-current-lines "1631-1675"
+   :finding "The VERIFY-r-nodes.edn prose still cites 2598-2611 and 1227-1271. Those pointers are stale at this HEAD; the same mechanisms now occur at the current lines pinned here. This artifact does not edit that census prose."}}
+ :R9
+ {:node :R9
+  :label "No self-certification"
+  :available-provenance
+  {:records [:caller :agent-id :request-digest :execution :result
+             :result-summary :artifact-ref :delivery :trace-id]
+   :potential-use "A distinct-reviewer admission checker could join producer and reviewer jobs to declared role identities and their retained execution, artifact, result, and delivery evidence."}
+  :not-established
+  ["Agency does not compare a producing agent/author identity with a reviewer identity at the surveyed lifecycle boundary."
+   "Agency does not refuse author=reviewer as a general evidence-admission rule."
+   "A conventionally different caller and target in stored jobs is evidence of that occurrence, not evidence that equality was mechanically impossible."]
+  :existing-narrow-scope
+  {:distinct-reviewer-refusal "full_loop_runner.clj:3123-3135 refuses author=reviewer inside the full-loop runner."
+   :review-execution-corroboration "full_loop_runner.clj:1631-1675 derives and gates review execution from job summary/events."
+   :node-wide-status :not-admitted}
+  :owner-of-missing-refusal {:work-remaining/row 19}
+  :credit :none}
+ :TRACE
+ {:node :TRACE
+  :label "WM trace store (route ledger)"
+  :agency-join-inputs
+  {:job-field :trace-id
+   :ledger-index :trace->job
+   :meaning "These associate an Agency invoke trace identity with its Agency job and delivery update."}
+  :not-established
+  ["An Agency invoke/job trace identity is not a War Machine route record."
+   "Neither :trace-id nor :trace->job proves that a WM run contains the corresponding route hops, inputs, or outcome."
+   "No identity-preserving cross-ledger witness from the Agency job authority to the WM trace authority is retained here."]
+  :future-evidence
+  {:kind :cross-ledger-identity-preserving-join-witness
+   :must-bind [:agency/job-id :agency/trace-id :wm/run-id :wm/trace-record
+               :source-revisions :timestamps]
+   :must-check [:identity-preservation :referent-existence
+                :route-record-membership :revision-agreement]}
+  :credit :none}
+ :row-19-input-spec
+ {:purpose "Mechanically refuse self-certification rather than infer independence from provenance."
+  :declared-role-binding [:author :reviewer]
+  :producer-job-fields [:job-id :agent-id :caller :request-digest :created-at
+                        :started-at :finished-at :state :terminal-code
+                        :execution :artifact-ref :result-summary :delivery
+                        :trace-id]
+  :reviewer-job-fields [:job-id :agent-id :caller :request-digest :created-at
+                        :started-at :finished-at :state :terminal-code
+                        :execution :artifact-ref :result-summary :delivery
+                        :trace-id]
+  :required-joins
+  [[:author :producer-job/agent-id]
+   [:reviewer :reviewer-job/agent-id]
+   [:producer-job/artifact-ref :reviewed-artifact]
+   [:reviewer-job/request-digest :review-commission]
+   [:reviewer-job/trace-id :reviewer-job-ledger-entry]]
+  :required-refusals
+  [:author-equals-reviewer
+   :producer-job-missing
+   :reviewer-job-missing
+   :review-execution-missing
+   :artifact-binding-mismatch
+   :trace-referent-missing]}
+ :maximum-claim
+ "This record preserves available Agency provenance and future join inputs while attaching no R9 or TRACE credit. It does not change any census cell, node verdict, or canonical accounting artifact."}
