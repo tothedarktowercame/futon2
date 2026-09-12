@@ -419,9 +419,20 @@ operator workflow conversation (standdown 2026-09-12).
     0.125); packet tests clean, ambient broad-run failures
     attributed to concurrent lanes (reviewer re-ran
     trace/policy/selection/machine-q suites ambient — all
-    green). machineAction INTERNAL-BRANCHES PROOF now unblocked
-    (epsilon captured + schema-28 retention) — queued behind
-    mathlib4 contention; (3) DIVERGENCE WITNESS ADMITTED
+    green). machineAction INTERNAL-BRANCHES CAPTURE DONE
+    (2026-09-12, futon2 0e9ad207..664a5077, reviewed): one
+    redirected epsilon-bearing machinery tick (no live writes,
+    resolved epsilon 0.01, tau 1.0, full ranking/posterior
+    retained, reviewer-verified flags) + five direct
+    invocations of the production select-action with REAL
+    retained inputs varying only the branch-selecting option,
+    each labelled :direct-invocation-of-production-fn
+    (controller-head, full-score first-max, habit last-max,
+    no-op abstain, requested-posterior-F_pi-absent) + the
+    commissioned first-max tie control; capture refusals and
+    lint findings retained; receipts commit-first. The
+    INTERNAL-BRANCHES WITNESS is queued for the next free
+    mathlib4 slot; (3) DIVERGENCE WITNESS ADMITTED
     (2026-09-12, futon2 f2afa6e8/623b9318; mathlib4 df87676b,
     NEW module, frozen files untouched):
     R16-machineAction-live-selector-divergence-20260912-v1 at
