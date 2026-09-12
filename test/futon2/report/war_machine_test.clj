@@ -2736,10 +2736,30 @@
           "and a file that is not a daily trace is not corpus"))))
 
 (deftest constant-checkpoint-adapter-through-a3-scorer
-  (let [artifact (checkpoint-kernel/fit-kernel
-                  {:attempts [{:closed? true :checkpoints [:selected :closed]
-                               :outcome :grounded-change}]}
-                  "synthetic-cohort" "test-fixture")
+  (let [legacy-artifact
+        (checkpoint-kernel/fit-kernel
+         {:attempts [{:closed? true :checkpoints [:selected :closed]
+                      :outcome :grounded-change}]}
+         "synthetic-cohort" "test-fixture")
+        ;; The checkpoint fitter still records its historical 14-label carrier.
+        ;; The A3 scorer contract narrowed to ruled-outcome C's current twelve
+        ;; on 2026-09-12; this fixture must exercise that boundary, not disable
+        ;; the refusal by feeding the two named historical labels through it.
+        support (vec (sort (:support ruled/seeded-c)))
+        project (fn [mass] (select-keys mass support))
+        artifact (-> legacy-artifact
+                     (assoc :support support)
+                     (update :outcome-counts project)
+                     (update :supported-outcomes
+                             #(vec (filter (set support) %)))
+                     (update :unsupported-outcomes
+                             #(vec (filter (set support) %)))
+                     (update :states
+                             (fn [states]
+                               (mapv #(-> %
+                                          (update :counts project)
+                                          (update :probability project))
+                                     states))))
         adapter (disposition/constant-checkpoint-kernel artifact)
         base {:risk-mode :hinge :ambiguity-mode :variance-sum}
         absent (#'wm/configured-fold-efe-opts base {})
