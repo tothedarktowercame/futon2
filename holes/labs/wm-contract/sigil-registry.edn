@@ -22,25 +22,25 @@
  :sigils
  [{:sigil "◈" :ascii "[warrant]" :pattern "workshop/records-carry-warrant"
    :semantics "this claim travels with its derivation — ask for it"
-   :source "futon3c data/pattern-staging/workshop/records-carry-warrant.flexiarg"}
+   :source "futon3c data/pattern-staging/workshop/records-carry-warrant.flexiarg :source-sha256-prefix "31fe8840389b""}
   {:sigil "▣" :ascii "[account]" :pattern "workshop/one-queryable-self-account"
    :semantics "this state lives in the one queryable account, with provenance"
-   :source "futon3c data/pattern-staging/workshop/one-queryable-self-account.flexiarg"}
+   :source "futon3c data/pattern-staging/workshop/one-queryable-self-account.flexiarg :source-sha256-prefix "cca75604ab3f""}
   {:sigil "⇄" :ascii "[feedback]" :pattern "workshop/feedback-reaches-every-participant"
    :semantics "this edge carries feedback to a participant who can act on it"
-   :source "futon3c data/pattern-staging/workshop/feedback-reaches-every-participant.flexiarg"}
+   :source "futon3c data/pattern-staging/workshop/feedback-reaches-every-participant.flexiarg :source-sha256-prefix "a01e36ef28a9""}
   {:sigil "⌖" :ascii "[choice]" :pattern "workshop/accountable-next-action-choice"
    :semantics "this selection emits its account; preference received, not computed"
-   :source "futon3c data/pattern-staging/workshop/accountable-next-action-choice.flexiarg"}
+   :source "futon3c data/pattern-staging/workshop/accountable-next-action-choice.flexiarg :source-sha256-prefix "b66d0944e798""}
   {:sigil "⬡" :ascii "[holes]" :pattern "workshop/honest-holes-gate-composed-claims"
    :semantics "this composition carries its holes or a typed none"
-   :source "futon3c data/pattern-staging/workshop/honest-holes-gate-composed-claims.flexiarg"}
+   :source "futon3c data/pattern-staging/workshop/honest-holes-gate-composed-claims.flexiarg :source-sha256-prefix "d002d8468ad1""}
   {:sigil "⚖" :ascii "[work]" :pattern "workshop/progress-is-a-witnessed-state-change"
    :semantics "work = witnessed state change; this claims work — where is the witness"
-   :source "futon3c data/pattern-staging/workshop/progress-is-a-witnessed-state-change.flexiarg"}
+   :source "futon3c data/pattern-staging/workshop/progress-is-a-witnessed-state-change.flexiarg :source-sha256-prefix "3c9a4c9fe359""}
   {:sigil "⊘" :ascii "[sig]" :pattern "workshop/violation-signature-before-work"
    :semantics "no work without its breach detector; this is guarded / :signature-pending blocks"
-   :source "futon3c data/pattern-staging/workshop/violation-signature-before-work.flexiarg"}
+   :source "futon3c data/pattern-staging/workshop/violation-signature-before-work.flexiarg :source-sha256-prefix "488b8f66ac27""}
   ;; operational pair (runtime-native, not flexiarg-bound):
   {:sigil "⌁" :ascii "[refuse]" :pattern "runtime/typed-refusal"
    :semantics "a first-class cheap outcome — the refusal record, never a silent skip"
