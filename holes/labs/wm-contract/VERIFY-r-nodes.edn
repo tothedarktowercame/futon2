@@ -196,7 +196,7 @@
    :packet-was-wrong-and-codex-9-said-so "The dispatched packet asserted that multi-horizon rollout is opt-in and default-off, and asked whether ANY caller supplies :horizon-steps. codex-9 reported the premise false and named the caller. VERIFIED INDEPENDENTLY BY THIS SEAT AT HEAD: war_machine.clj:6285-6287 binds wm-horizon-steps to 3 whenever the anticipation snapshot has loaded events, and :6329 passes it into the efe opts. The corpus agrees -- 213 of 889 records carry multi-horizon evidence and the only depth ever recorded is 3. This is the second consecutive slice whose packet was contradicted by the tree, and the correction changed the verdict: R4's declared depth T is REACHED in production, so the hole is not that the roll-forward never runs."
    :no-live-tick "No tick was run, no run lock was taken, nothing was written under data/. data/wm-trace was opened for reading only. No file under src/ or scripts/ changed; no registry, ledger, document or p4ng file changed."}
   {:slice 9 :node :R20 :at "2026-09-06" :by "claude-cli (wm-edge worklist loop), harness authored by codex-9"
-   :did "Leg (c), which no earlier slice has run. R20 is the first node in the sweep that the equations registry itself puts outside the equations: it is in :plumbing (aif-equations.edn:521) and grep -n ':node :R20' over that file returns nothing, so there is no equation to meet and legs (a) and (b) are :not-applicable rather than :not-found. What R20 declares about itself lives in the catalogue paragraph (p4ng/sec-catalog.tex:369), the control-stage row (control-stages.edn:41) and the ALIGN process census (ALIGN-rnode-process-census.md:87 and its :98-115 basis amendment), and this slice measures those three against today's code and today's trace corpus. The harness is a census rather than a simulator: six checks, three plants, no reference and no numerical comparison, because there is no equation to build a reference from."
+   :did "Leg (c), which no earlier slice has run. R20 is the first node in the sweep that the equations registry itself puts outside the equations: it is in :plumbing (aif-equations.edn:521) and grep -n ':node :R20' over that file returns nothing, so there is no equation to meet and legs (a) and (b) are :not-applicable rather than :not-found. What R20 declares about itself lives in the catalogue paragraph (p4ng/sec-catalog.tex:369), the control-stage row (control-stages.edn:32) and the ALIGN process census (ALIGN-rnode-process-census.md:87 and its :98-115 basis amendment), and this slice measures those three against today's code and today's trace corpus. The harness is a census rather than a simulator: six checks, three plants, no reference and no numerical comparison, because there is no equation to build a reference from."
    :handoff "AUTHOR IS NOT REVIEWER. The harness and first receipt were written by codex-9 from a written packet under bell invoke-1788720225940-13363-bb97591d (futon2 abb6b0fb). This seat reviewed the diff, re-ran every gate itself, made the review fixes directly rather than re-dispatching, and had measured four of the six numbers independently before the bellback arrived."
    :ran ["clojure -M holes/labs/wm-contract/v7_r20_node_sim.clj (exit 0) -- 6 checks, 3 plants, and a read of the whole wm-trace corpus (889 records in 57 files, 2026-05-18 to 2026-09-04)"
          "the same command a second time, and diff -q against the first receipt -- byte-identical, no output, sha256 2f865c1b50819c08db42d4334b24b301d1586865d447d8bf8aef8c4c7cb65602 at the REVIEWED state (codex-9's delivered state was 910f6acde24e84ab8915a7502ba38c6a89047d9abbb79007466a977613e840f4, and this seat reproduced THAT byte-identically before touching it)"
@@ -1429,7 +1429,7 @@
     "No live tick was run and no run lock was taken. data/wm-trace was opened for reading; nothing under data/ was written."]}
   {:node :R20
    :stage "EVALUATE"
-   :stage-at "p4ng/empirics-futon/control-stages.edn:41"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:32"
    :slice 9
    :label "Interoceptive tripwires"
    :kind :assurance-node
@@ -1437,7 +1437,7 @@
    :registry-rows-and-what-they-say
    {:count "ZERO equation rows, and unlike R3a at slice 6 that is the registry saying so rather than the registry being silent. grep -n ':node :R20' over aif-equations.edn returns nothing; R20 occurs on exactly one line of that file, :521, inside :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE], under the header comment 'Nodes that run no equation. Legitimate plumbing, not AIF.' (aif-equations.edn:520)."
     :verdict-on-the-registry "MET, AND THE ONLY THING IN R20'S ACCOUNT THAT IS. The registry declares R20 runs no equation and R20 runs no equation. Every finding below is against R20's OTHER account of itself -- the catalogue paragraph and the process census -- because that is where R20's content is."
-    :stage-row-carries-no-basis "As at R4 and R7. control-stages.edn:41 is the bare row {:node \"R20\" :stage \"EVALUATE\" :band :assurance :label \"Interoceptive tripwires\"}, with no :basis field. R20 is also the sweep's first :band :assurance node."
+    :stage-row-carries-no-basis "As at R4 and R7. control-stages.edn:32 is the bare row {:node \"R20\" :stage \"EVALUATE\" :band :assurance :label \"Interoceptive tripwires\"}, with no :basis field. R20 is also the sweep's first :band :assurance node."
     :and-no-contract-criterion-at-all "p4ng/R-concordance.md:41 -- R20 is | *-- no requirement --* | Interoceptive Tripwires | **native** |. R20 is native to the catalogue: the completeness contract has no R20 row to grade it against, so unlike slices 3, 4, 5 and 8 there is no grading document here to be accurate or stale about it."}
 
    :what-the-catalogue-declares-and-what-the-tree-has
@@ -1478,7 +1478,7 @@
    :hole {:type :declared-conduct-runs-unattributed
           :one-line "R20 meets the equations registry exactly (it is declared plumbing and it runs no equation), and its catalogue paragraph asks for a weave of eight tripwire kinds with a freeze/record/park/summon ladder and a retro-trip calibration bar; the tree has ONE wire of one kind -- the metabolic Andon cord at war_machine.clj:5969-5978, with a staleness gate -- nothing links it to R20 but a route tag ten lines from its input scan, and 0 of 889 trace records carry anything it produced."
           :pointers ["holes/labs/wm-contract/aif-equations.edn:520-521 -- the plumbing declaration, the whole of R20's presence in the equations registry"
-                     "p4ng/empirics-futon/control-stages.edn:41 -- the stage row, no :basis"
+                     "p4ng/empirics-futon/control-stages.edn:32 -- the stage row, no :basis"
                      "p4ng/sec-catalog.tex:369 -- the catalogue paragraph: the eight wire kinds, the freeze/record/park/summon ladder, the retro-trip bar"
                      "p4ng/R-concordance.md:41 -- no contract requirement exists for R20"
                      "scripts/futon2/report/war_machine.clj:5954-5978 -- the Andon-cord override and its staleness gate, the one wire"
@@ -1865,7 +1865,7 @@
 
   {:node :R16
    :stage "ACT"
-   :stage-at "p4ng/empirics-futon/control-stages.edn:28-41"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:29"
    :slice 15
    :label "Grounded actuation"
    :verdict :hole
@@ -1887,7 +1887,7 @@
 
   {:node :R9
    :stage "ACT"
-   :stage-at "p4ng/empirics-futon/control-stages.edn:43"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:35"
    :slice 16
    :label "No self-certification"
    :kind :plumbing-node
@@ -1909,7 +1909,7 @@
 
   {:node :R10
    :stage "PERCEIVE"
-   :stage-at "p4ng/empirics-futon/control-stages.edn:39"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:30"
    :slice 17
    :label "Scheduled entrypoint"
    :kind :plumbing-node
@@ -1932,7 +1932,7 @@
 
   {:node :R12
    :stage "BELIEVE"
-   :stage-at "p4ng/empirics-futon/control-stages.edn:40"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:31"
    :slice 18
    :label "Two-layer calibration"
    :kind :plumbing-node
@@ -1955,7 +1955,7 @@
 
   {:node :R17
    :stage "SELECT"
-   :stage-at "p4ng/empirics-futon/control-stages.edn:42"
+   :stage-at "p4ng/empirics-futon/control-stages.edn:33"
    :slice 19
    :label "Structure learning"
    :verdict :hole
