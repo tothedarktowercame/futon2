@@ -1,0 +1,6 @@
+'DarkTower.WarMachine.MachinePolicyPosteriorWitness.fAbsentBranchCompatibility' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

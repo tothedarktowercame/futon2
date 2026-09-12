@@ -1,0 +1,45 @@
+{:records
+ {"R6-policy-posterior-production-20260912T172809-f-absent-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R6-policy-posterior-production-20260912T172809-f-absent-v1"
+    :node :R6 :equation :policy-posterior :quantity :Q-pi
+    :declaration "softmaxWithFPi" :kind :lean-witness
+    :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
+               :sha256 "ff2baad9b581105c53005324c527edad692c08090413677d3ac584a954eadd48"
+               :module "DarkTower.WarMachine.MachinePolicyPosteriorWitness"
+               :declaration "DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual"}
+    :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+                       :sha256 "1a4116f594baa0aa2534bb21ed820651a763148491579b7dbe5b134077144f23"
+                       :declaration "DarkTower.WarMachine.Holes.softmaxWithFPi"}
+    :claim "At the pinned schema-27 details record, all 148 retained F-absent Q(pi) coordinates equal the independent production log-sum-exp replay; against the carrier's raw-exp normalization, all exact rational residuals are exhibited and bounded by 2^-45. softmaxWithFPi_zero identifies this absent branch with the existing softmax evidence."
+    :polarity :supports
+    :scope :production-trace-details-record-20260912T172809-f-absent
+    :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
+     :sha256 "ff2baad9b581105c53005324c527edad692c08090413677d3ac584a954eadd48"
+     :module "DarkTower.WarMachine.MachinePolicyPosteriorWitness"
+     :declaration "DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+     :sha256 "1a4116f594baa0aa2534bb21ed820651a763148491579b7dbe5b134077144f23"
+     :declaration "DarkTower.WarMachine.Holes.softmaxWithFPi"}
+    {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/fixture.edn"
+     :sha256 "7d3cd7923b9fdc76eb5a12cc797277a4a88ab50baf8cf2cf9b20fc3be04f9efe"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+     :sha256 "1a4116f594baa0aa2534bb21ed820651a763148491579b7dbe5b134077144f23"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
+     :sha256 "ff2baad9b581105c53005324c527edad692c08090413677d3ac584a954eadd48"}]
+   :declaration-census
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/declaration-census.edn"
+    :sha256 "a58e5a9781633be05fb7f296711fd709ce11c4856c70358c5db7100f075e1919" :selector [:record]}
+   :transcript
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/lean-transcript.txt"
+    :sha256 "d10bc3331b88825709d340f9ab8cfa23a605acddd94c8483ac758154385e8687"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain"
+               :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
+             :sha256 "ff2baad9b581105c53005324c527edad692c08090413677d3ac584a954eadd48"}}}}

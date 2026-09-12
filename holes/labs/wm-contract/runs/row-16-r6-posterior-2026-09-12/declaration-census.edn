@@ -1,0 +1,13 @@
+{:record
+ {:declarations
+  {"DarkTower.WarMachine.Holes.softmaxWithFPi"
+   {:kind :def
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+             :sha256 "1a4116f594baa0aa2534bb21ed820651a763148491579b7dbe5b134077144f23"}}
+   "DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual"
+   {:kind :theorem
+    :module "DarkTower.WarMachine.MachinePolicyPosteriorWitness"
+    :proposition "The maximum exact binary64 residual across the 148 pinned F-absent posterior coordinates is at most 2^-45."
+    :axioms ["propext" "Classical.choice" "Quot.sound"]
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
+             :sha256 "ff2baad9b581105c53005324c527edad692c08090413677d3ac584a954eadd48"}}}}}

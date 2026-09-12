@@ -1,0 +1,37 @@
+{:witnesses "softmaxWithFPi"
+ :node-witnesses
+ [{:schema :wm/node-witness-v1
+   :status :proposed
+   :id "R6-policy-posterior-production-20260912T172809-f-absent-v1"
+   :node :R6
+   :equation :policy-posterior
+   :quantity :Q-pi
+   :declaration "softmaxWithFPi"
+   :kind :lean-witness
+   :polarity :supports
+   :scope :production-trace-details-record-20260912T172809-f-absent
+   :as-of "2026-09-12"
+   :claim "At the pinned schema-27 details record, all 148 retained F-absent Q(pi) coordinates equal the independent production log-sum-exp replay; against the carrier's raw-exp normalization, all exact rational residuals are exhibited and bounded by 2^-45. softmaxWithFPi_zero identifies this absent branch with the existing softmax evidence."
+   :evidence-limit "The record explicitly marks F_pi absent. Nonzero-F correspondence remains open, and this upstream posterior claim does not claim correspondence of the downstream live selector."
+   :artifact
+   {:repo "mathlib4"
+    :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
+    :sha256 "ff2baad9b581105c53005324c527edad692c08090413677d3ac584a954eadd48"
+    :module "DarkTower.WarMachine.MachinePolicyPosteriorWitness"
+    :declaration "DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual"}
+   :subject-artifact
+   {:repo "mathlib4"
+    :path "DarkTower/WarMachine/Holes.lean"
+    :sha256 "1a4116f594baa0aa2534bb21ed820651a763148491579b7dbe5b134077144f23"
+    :declaration "DarkTower.WarMachine.Holes.softmaxWithFPi"}
+   :retained-evidence
+   {:fixture {:repo "futon2"
+              :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/fixture.edn"
+              :sha256 "7d3cd7923b9fdc76eb5a12cc797277a4a88ab50baf8cf2cf9b20fc3be04f9efe"}}
+   :verification
+   {:status :verified
+    :receipt {:repo "futon2"
+              :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/verification-receipts.edn"
+              :sha256 "7888d53fcce5d58b39dd65d2cf555d91c24616bb4a79aad0b9b84fef7921b701"
+              :selector [:records "R6-policy-posterior-production-20260912T172809-f-absent-v1"]}}
+   :review {:status :pending :reviewer "claude-15"}}]}
