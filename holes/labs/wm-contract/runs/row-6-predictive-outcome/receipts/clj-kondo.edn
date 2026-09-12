@@ -1,0 +1,2 @@
+{:command "clj-kondo --lint src/futon2/aif/machine_predictive.clj test/futon2/aif/machine_predictive_test.clj holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj" :exit 0
+ :tests 1 :assertions 1 :tree-sha "521ce3c3bcc2b1837d70525840b51c72c40ad0c7" :at "2026-09-12T19:07:55Z" :findings {:errors 0 :warnings 0}}

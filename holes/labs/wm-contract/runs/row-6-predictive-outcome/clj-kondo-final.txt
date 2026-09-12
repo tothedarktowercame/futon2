@@ -1,0 +1,5 @@
+Script started on 2026-09-12 19:07:32+00:00 [COMMAND="clj-kondo --lint src/futon2/aif/machine_predictive.clj test/futon2/aif/machine_predictive_test.clj holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj" <not executed on terminal>]
+holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj:23:47: warning: Unresolved var: user/states
+linting took 19ms, errors: 0, warnings: 1
+
+Script done on 2026-09-12 19:07:32+00:00 [COMMAND_EXIT_CODE="2"]

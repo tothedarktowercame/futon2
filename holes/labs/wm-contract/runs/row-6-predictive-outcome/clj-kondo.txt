@@ -1,0 +1,11 @@
+Script started on 2026-09-12 19:06:27+00:00 [COMMAND="clj-kondo --lint src/futon2/aif/machine_predictive.clj test/futon2/aif/machine_predictive_test.clj holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj" <not executed on terminal>]
+holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj:1:12: warning: namespace clojure.edn is required but never used
+holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj:8:34: warning: Unresolved var: user/sha256
+holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj:11:33: warning: Unresolved var: user/input
+holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj:11:60: warning: Unresolved var: user/states
+holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj:14:29: warning: Unresolved var: user/policies
+holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj:17:35: warning: Unresolved var: user/belief-result
+holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj:17:55: warning: Unresolved var: user/kernel
+linting took 24ms, errors: 0, warnings: 7
+
+Script done on 2026-09-12 19:06:27+00:00 [COMMAND_EXIT_CODE="2"]

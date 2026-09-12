@@ -1,0 +1,5 @@
+Script started on 2026-09-12 19:06:55+00:00 [COMMAND="lake env lean DarkTower/WarMachine/MachinePredictiveOutcome.lean" <not executed on terminal>]
+DarkTower/WarMachine/MachinePredictiveOutcome.lean:16:14: error(lean.unknownIdentifier): Unknown identifier `DarkTower.WarMachine.MachineModelSpec.Authority`
+DarkTower/WarMachine/MachinePredictiveOutcome.lean:33:4: error(lean.dependsOnNoncomputable): failed to compile definition, consider marking it as 'noncomputable' because it depends on 'predictedStateTerminal', which is 'noncomputable'
+
+Script done on 2026-09-12 19:06:57+00:00 [COMMAND_EXIT_CODE="1"]

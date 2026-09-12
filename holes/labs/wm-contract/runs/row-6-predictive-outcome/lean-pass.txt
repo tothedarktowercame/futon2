@@ -1,0 +1,7 @@
+Script started on 2026-09-12 19:07:08+00:00 [COMMAND="lake env lean DarkTower/WarMachine/MachinePredictiveOutcome.lean" <not executed on terminal>]
+DarkTower/WarMachine/MachinePredictiveOutcome.lean:87:0: error: Unexpected name `DarkTower.WarMachine.MachinePredictiveOutcome` after `end`: The current section is unnamed
+
+Hint: Delete the name `DarkTower.WarMachine.MachinePredictiveOutcome` to end the current unnamed scope; outer named scopes can then be closed using additional `end` command(s):
+  end ̵D̵a̵r̵k̵T̵o̵w̵e̵r̵.̵W̵a̵r̵M̵a̵c̵h̵i̵n̵e̵.̵M̵a̵c̵h̵i̵n̵e̵P̵r̵e̵d̵i̵c̵t̵i̵v̵e̵O̵u̵t̵c̵o̵m̵e̵
+
+Script done on 2026-09-12 19:07:10+00:00 [COMMAND_EXIT_CODE="1"]
