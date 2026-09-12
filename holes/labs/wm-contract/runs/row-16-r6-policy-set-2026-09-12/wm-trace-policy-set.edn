@@ -1,0 +1,476 @@
+{:timestamp "2026-09-12T17:28:09.498448087Z",
+ :wm-version
+ {:git-dirty? true,
+  :goal-outcome-mode :kl,
+  :belief-model-manifest
+  {:observation-model-hash "0x9f0e738a",
+   :transition-model-hash "0x5351a7ad",
+   :initial-prior-hash "0xfc317074"},
+  :strategic-selection-boundary :reviewed-reason-bearing-policy,
+  :structural-pressure-mode :habit-prior,
+  :c-temperature 0.1,
+  :trace-schema-version 27,
+  :ambiguity-mode :gaussian-entropy,
+  :homeostatic-control-mode :telemetry-only,
+  :salience-mode :separate,
+  :author "codex-20",
+  :move-class-intensity-mode :off,
+  :predictability-control-mode :telemetry-only,
+  :habit-prior-source :learned-frequency,
+  :real-actuation? true,
+  :tau-mode :selection-gain-only,
+  :scheduler-habit-authority :counterfactual-only,
+  :git-sha "801610f90624735e5603d233e1270d6cdd59b896",
+  :risk-mode :kl,
+  :kl-channel-weights {},
+  :strategic-memory-authority :reviewed-live-chain-integrity,
+  :reviewer "codex-18",
+  :graph-feasibility-mode :policy-support,
+  :trigger :duree-click-on-demand,
+  :likelihood-mode :aif,
+  :repair-reviewer "codex-19"},
+ :ranked-actions
+ [{:rank 1,
+   :controller-score 2.0198396241717806,
+   :action {:type :advance-mission}}
+  {:rank 2,
+   :controller-score 2.0394672683857213,
+   :action {:type :advance-mission}}
+  {:rank 3,
+   :controller-score 2.0600075256330688,
+   :action {:type :no-op}}
+  {:rank 4,
+   :controller-score 2.1318162149208466,
+   :action {:type :advance-mission}}
+  {:rank 5,
+   :controller-score 2.1393867009371808,
+   :action {:type :address-sorry}}
+  {:rank 6,
+   :controller-score 2.1393867009371808,
+   :action {:type :address-sorry}}
+  {:rank 7,
+   :controller-score 2.159970402448465,
+   :action {:type :advance-mission}}
+  {:rank 8,
+   :controller-score 2.1646875480396233,
+   :action {:type :advance-mission}}
+  {:rank 9,
+   :controller-score 2.167695932972734,
+   :action {:type :advance-mission}}
+  {:rank 10,
+   :controller-score 2.181791191955867,
+   :action {:type :advance-mission}}
+  {:rank 11,
+   :controller-score 2.1820346943777764,
+   :action {:type :advance-mission}}
+  {:rank 12,
+   :controller-score 2.190191822273917,
+   :action {:type :advance-mission}}
+  {:rank 13,
+   :controller-score 2.193005682857134,
+   :action {:type :advance-mission}}
+  {:rank 14,
+   :controller-score 2.2045495268608732,
+   :action {:type :advance-mission}}
+  {:rank 15,
+   :controller-score 2.2053548592262615,
+   :action {:type :advance-mission}}
+  {:rank 16,
+   :controller-score 2.210879389296778,
+   :action {:type :advance-mission}}
+  {:rank 17,
+   :controller-score 2.2142478103604195,
+   :action {:type :advance-mission}}
+  {:rank 18,
+   :controller-score 2.215948767641422,
+   :action {:type :advance-mission}}
+  {:rank 19,
+   :controller-score 2.216551812156254,
+   :action {:type :advance-mission}}
+  {:rank 20,
+   :controller-score 2.2205972401218474,
+   :action {:type :advance-mission}}
+  {:rank 21,
+   :controller-score 2.2206592888078522,
+   :action {:type :advance-mission}}
+  {:rank 22,
+   :controller-score 2.2254421559748896,
+   :action {:type :advance-mission}}
+  {:rank 23,
+   :controller-score 2.2269834682157215,
+   :action {:type :advance-mission}}
+  {:rank 24,
+   :controller-score 2.2391129838419777,
+   :action {:type :advance-mission}}
+  {:rank 25,
+   :controller-score 2.2403328883911087,
+   :action {:type :advance-mission}}
+  {:rank 26,
+   :controller-score 2.2457869862118405,
+   :action {:type :address-sorry}}
+  {:rank 27,
+   :controller-score 2.253741241706905,
+   :action {:type :advance-mission}}
+  {:rank 28,
+   :controller-score 2.2596443973349096,
+   :action {:type :advance-mission}}
+  {:rank 29,
+   :controller-score 2.2605251315451937,
+   :action {:type :advance-mission}}
+  {:rank 30,
+   :controller-score 2.266997865681532,
+   :action {:type :advance-mission}}
+  {:rank 31,
+   :controller-score 2.275474036361374,
+   :action {:type :advance-mission}}
+  {:rank 32,
+   :controller-score 2.276521816140132,
+   :action {:type :advance-mission}}
+  {:rank 33,
+   :controller-score 2.277426771544681,
+   :action {:type :advance-mission}}
+  {:rank 34,
+   :controller-score 2.277588999201783,
+   :action {:type :advance-mission}}
+  {:rank 35,
+   :controller-score 2.2844876005903068,
+   :action {:type :advance-mission}}
+  {:rank 36,
+   :controller-score 2.2924416651240307,
+   :action {:type :advance-mission}}
+  {:rank 37,
+   :controller-score 2.2933885616486127,
+   :action {:type :advance-mission}}
+  {:rank 38,
+   :controller-score 2.296195388518868,
+   :action {:type :advance-mission}}
+  {:rank 39,
+   :controller-score 2.296195388518868,
+   :action {:type :advance-mission}}
+  {:rank 40,
+   :controller-score 2.296195388518868,
+   :action {:type :advance-mission}}
+  {:rank 41,
+   :controller-score 2.296195388518868,
+   :action {:type :advance-mission}}
+  {:rank 42,
+   :controller-score 2.296195388518868,
+   :action {:type :advance-mission}}
+  {:rank 43,
+   :controller-score 2.296195388518868,
+   :action {:type :advance-mission}}
+  {:rank 44,
+   :controller-score 2.297802965211019,
+   :action {:type :advance-mission}}
+  {:rank 45,
+   :controller-score 2.2991037496333315,
+   :action {:type :advance-mission}}
+  {:rank 46,
+   :controller-score 2.3017576207946027,
+   :action {:type :advance-mission}}
+  {:rank 47,
+   :controller-score 2.310385433466408,
+   :action {:type :advance-mission}}
+  {:rank 48,
+   :controller-score 2.311175421622522,
+   :action {:type :advance-mission}}
+  {:rank 49,
+   :controller-score 2.3126016461741727,
+   :action {:type :advance-mission}}
+  {:rank 50,
+   :controller-score 2.3146352216096635,
+   :action {:type :advance-mission}}
+  {:rank 51,
+   :controller-score 2.3172940217748423,
+   :action {:type :advance-mission}}
+  {:rank 52,
+   :controller-score 2.3210994189608987,
+   :action {:type :advance-mission}}
+  {:rank 53,
+   :controller-score 2.322742772820106,
+   :action {:type :advance-mission}}
+  {:rank 54,
+   :controller-score 2.3247943138162985,
+   :action {:type :advance-mission}}
+  {:rank 55,
+   :controller-score 2.3249176893760652,
+   :action {:type :advance-mission}}
+  {:rank 56,
+   :controller-score 2.328491291436464,
+   :action {:type :advance-mission}}
+  {:rank 57,
+   :controller-score 2.3288744787078888,
+   :action {:type :advance-mission}}
+  {:rank 58,
+   :controller-score 2.328945665727318,
+   :action {:type :advance-mission}}
+  {:rank 59,
+   :controller-score 2.3306734775079296,
+   :action {:type :advance-mission}}
+  {:rank 60,
+   :controller-score 2.3321842345764456,
+   :action {:type :advance-mission}}
+  {:rank 61,
+   :controller-score 2.332678893141534,
+   :action {:type :advance-mission}}
+  {:rank 62,
+   :controller-score 2.3354150917134717,
+   :action {:type :advance-mission}}
+  {:rank 63,
+   :controller-score 2.3355477197677037,
+   :action {:type :advance-mission}}
+  {:rank 64,
+   :controller-score 2.3374950385904754,
+   :action {:type :advance-mission}}
+  {:rank 65,
+   :controller-score 2.3375161175799946,
+   :action {:type :advance-mission}}
+  {:rank 66,
+   :controller-score 2.3408117022678714,
+   :action {:type :advance-mission}}
+  {:rank 67,
+   :controller-score 2.3415136473503257,
+   :action {:type :advance-mission}}
+  {:rank 68,
+   :controller-score 2.3430904198988007,
+   :action {:type :advance-mission}}
+  {:rank 69,
+   :controller-score 2.344775012510354,
+   :action {:type :advance-mission}}
+  {:rank 70,
+   :controller-score 2.3455649894975608,
+   :action {:type :advance-mission}}
+  {:rank 71,
+   :controller-score 2.3463214382474007,
+   :action {:type :advance-mission}}
+  {:rank 72,
+   :controller-score 2.3483050424798364,
+   :action {:type :advance-mission}}
+  {:rank 73,
+   :controller-score 2.3525059476654064,
+   :action {:type :advance-mission}}
+  {:rank 74,
+   :controller-score 2.3543073066022377,
+   :action {:type :advance-mission}}
+  {:rank 75,
+   :controller-score 2.361058414381702,
+   :action {:type :advance-mission}}
+  {:rank 76,
+   :controller-score 2.36156111734843,
+   :action {:type :advance-mission}}
+  {:rank 77,
+   :controller-score 2.3676992635600844,
+   :action {:type :advance-mission}}
+  {:rank 78,
+   :controller-score 2.368576456661103,
+   :action {:type :advance-mission}}
+  {:rank 79,
+   :controller-score 2.3701297773342986,
+   :action {:type :advance-mission}}
+  {:rank 80,
+   :controller-score 2.3716548037871523,
+   :action {:type :advance-mission}}
+  {:rank 81,
+   :controller-score 2.380062508475192,
+   :action {:type :advance-mission}}
+  {:rank 82,
+   :controller-score 2.380487803195948,
+   :action {:type :advance-mission}}
+  {:rank 83,
+   :controller-score 2.386922635329839,
+   :action {:type :advance-mission}}
+  {:rank 84,
+   :controller-score 2.386922635329839,
+   :action {:type :advance-mission}}
+  {:rank 85,
+   :controller-score 2.386922635329839,
+   :action {:type :advance-mission}}
+  {:rank 86,
+   :controller-score 2.386922635329839,
+   :action {:type :advance-mission}}
+  {:rank 87,
+   :controller-score 2.386922635329839,
+   :action {:type :advance-mission}}
+  {:rank 88,
+   :controller-score 2.386922635329839,
+   :action {:type :advance-mission}}
+  {:rank 89,
+   :controller-score 2.386922635329839,
+   :action {:type :advance-mission}}
+  {:rank 90,
+   :controller-score 2.389020831285521,
+   :action {:type :advance-mission}}
+  {:rank 91,
+   :controller-score 2.405368192012887,
+   :action {:type :advance-mission}}
+  {:rank 92,
+   :controller-score 2.405368192012887,
+   :action {:type :advance-mission}}
+  {:rank 93,
+   :controller-score 2.405368192012887,
+   :action {:type :advance-mission}}
+  {:rank 94,
+   :controller-score 2.4164051622112055,
+   :action {:type :advance-mission}}
+  {:rank 95,
+   :controller-score 2.4201588856060425,
+   :action {:type :advance-mission}}
+  {:rank 96,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 97,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 98,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 99,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 100,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 101,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 102,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 103,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 104,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 105,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 106,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 107,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 108,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 109,
+   :controller-score 2.42391260900088,
+   :action {:type :advance-mission}}
+  {:rank 110,
+   :controller-score 2.4248847708853134,
+   :action {:type :advance-mission}}
+  {:rank 111,
+   :controller-score 2.4388016313109233,
+   :action {:type :advance-mission}}
+  {:rank 112,
+   :controller-score 2.4388016313109233,
+   :action {:type :advance-mission}}
+  {:rank 113,
+   :controller-score 2.4388016313109233,
+   :action {:type :advance-mission}}
+  {:rank 114,
+   :controller-score 2.4388016313109233,
+   :action {:type :advance-mission}}
+  {:rank 115,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 116,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 117,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 118,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 119,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 120,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 121,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 122,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 123,
+   :controller-score 2.442555354705761,
+   :action {:type :advance-mission}}
+  {:rank 124,
+   :controller-score 2.4612958837093832,
+   :action {:type :advance-mission}}
+  {:rank 125,
+   :controller-score 2.4612958837093832,
+   :action {:type :advance-mission}}
+  {:rank 126,
+   :controller-score 2.4612958837093832,
+   :action {:type :advance-mission}}
+  {:rank 127,
+   :controller-score 2.4612958837093832,
+   :action {:type :advance-mission}}
+  {:rank 128,
+   :controller-score 2.468872466635801,
+   :action {:type :advance-mission}}
+  {:rank 129,
+   :controller-score 2.4763799134254754,
+   :action {:type :advance-mission}}
+  {:rank 130,
+   :controller-score 2.4763799134254754,
+   :action {:type :advance-mission}}
+  {:rank 131,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 132,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 133,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 134,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 135,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 136,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 137,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 138,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 139,
+   :controller-score 2.480133636820313,
+   :action {:type :advance-mission}}
+  {:rank 140,
+   :controller-score 3.2270137183678718,
+   :action {:type :fire-pattern}}
+  {:rank 141,
+   :controller-score 3.2377626806970032,
+   :action {:type :fire-pattern}}
+  {:rank 142,
+   :controller-score 3.250104042296542,
+   :action {:type :fire-pattern}}
+  {:rank 143,
+   :controller-score 127.00772891939256,
+   :action {:type :learn-action-class}}
+  {:rank 144,
+   :controller-score 127.00772891939256,
+   :action {:type :learn-action-class}}
+  {:rank 145,
+   :controller-score 127.00772891939256,
+   :action {:type :learn-action-class}}
+  {:rank 146,
+   :controller-score 127.00772891939256,
+   :action {:type :learn-action-class}}
+  {:rank 147,
+   :controller-score 127.00772891939256,
+   :action {:type :learn-action-class}}
+  {:rank 148,
+   :controller-score 127.00772891939256,
+   :action {:type :learn-action-class}}]}
