@@ -12,6 +12,33 @@ per Item 5. Update this file in place; git holds history.
 and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 + 4 papers + 7 standing tracker rows.**
 
+## Signature discipline (adopted by Joe 2026-09-12)
+
+Per the apex patterns (progress-is-a-witnessed-state-change,
+violation-signature-before-work) and the signature audit
+(runs/signature-audit.edn, guarded by runs/check_signature_audit.bb):
+
+- A row may start only when its breach detector (signature) exists;
+  where the row's own work builds the detector, the packet must
+  build and commission it (induced violation) before any positive
+  claim.
+- BLOCKED until their named detector exists: rows 13, 14, 15, 16,
+  17, 18, 20, 26, 32, 33, 36, 37 (gaps per the audit). Rows 6-11
+  are UNBLOCKED: their signature-builder (the scoping spec's
+  acceptance leg (c) reference points + the MachineModelSpec
+  contract refusals) is done and reviewed; each implementation
+  packet carries its own witness detector with negative controls.
+- Every ticket/dispatch cites its row number.
+- Typed statuses only: :not-proven is legal; an unbacked
+  :validated is a finding.
+- One test run per packet: the author commits an execution receipt
+  (command, exit code, counts, tree sha); review validates the
+  receipt against the reviewed commit instead of re-running
+  (Joe, 2026-09-12). Re-run only on receipt mismatch, diff
+  contradiction, or harness changes.
+- "Is work happening?" = which rows changed state with witnesses
+  this week (inline DONE annotations + git history of this file).
+
 ## Phase 0 — the machinery that makes "provably so" possible (5)
 
 1. DONE (1ca908d3, reviewed 2026-09-12). The witness carrier:
