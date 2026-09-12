@@ -199,3 +199,25 @@ authority; `machine_belief.clj` routes through it). Lean mirror:
 `MachineModelSpec.lean` `floatRowBound` / `FloatCarriedRow` /
 `exact_row_admissible` (exact rows satisfy the criterion, so the two
 admissions agree on normalised rows).
+
+## v1.2 — declared residual criterion for float-computed recurrences (2026-09-12)
+
+Evidence basis: the R17 witness generation (codex-22 stop, this date)
+proved the exact rational recurrence `a[t+1] = a[t] + o×μ` is FALSE for
+the retained IEEE values — at tick 0, `[:active-repo-ratio :addressed]`,
+the exact residual is `−43/576460752303423488` (≈ −7.5e-17), because
+production computes with rounded binary64 operations. A Lean witness
+must not state false exact equalities, and a full formal IEEE-754 model
+is not demanded by the honesty ruling.
+
+Declared criterion (reviewer, same authority as v1.1): for each
+float-computed coordinate the Lean witness states the TRUE exact
+identity `exact(a[t+1]) = exact(a[t]) + exact(o)·exact(μ) + e` with the
+computed residual `e` exhibited as an exact rational, plus the bound
+`|e| ≤ 2^-48` (measured maxima cited; derivation: two roundings per
+step at magnitudes ≤ 4 give ≤ 2^-49; one binade of headroom). A
+residual exceeding the bound is a refusal, not a wider bound.
+Correspondingly, witnesses whose reference replicates the declared rule
+in double arithmetic (row 12) attest correspondence AT IEEE SEMANTICS;
+the exact-vs-float gap is carried by the residual statements, never
+hidden.
