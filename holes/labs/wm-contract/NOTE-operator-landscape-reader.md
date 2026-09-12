@@ -155,3 +155,41 @@ cartographer's association graph is the interpretation layer it lacks:
   Futon City is then just one rendering of the result, regenerable.
 - keep the page: it becomes the cartographer's SING — a typed meter
   (map extent, frontier growth, cold-family coverage), rendered.
+
+## The askable questions = the chip set (Joe, 2026-09-12)
+
+"Nothing answers questions, and nothing even asks questions." The
+rendering answers nothing; the fix is to enumerate what CAN be asked —
+and the askable questions ARE the chips (Z1's named query library, read
+as a table of contents). Each chip below is a named XTQL form over the
+association graph, two-wire by construction:
+
+FEEL (adjacent, free — about one node):
+- does this turn associate with anything? (unmatched-turn = R8 residual)
+- does this pattern have an author other than joe? (stakeholder bridge)
+- is this association fresh vs the corpus version it was minted under?
+
+LOOK (line of sight — about one relation, writes the range finder):
+- what does X neighbor, and with what justification passage?
+- how far is pattern P from author A's region? (hops × precision decay)
+- since when has this cluster existed? (bitemporal: map frontier growth)
+
+SMELL (whole room, untargeted):
+- which patterns fired this window? (hub traffic — cheap, low-value)
+- which patterns NEVER fire? (the cold 196 — the frontier)
+- which clusters cross authors? (rebecca/eric bridge candidates)
+
+KEYPRESS:
+- has the corpus been rebuilt since the last stamp? (τ decay, typed)
+- is an operator turn pending?
+
+And the pickup/zap asymmetry, restated as questions:
+- PICKUP: may I acquire this into working memory? (always askable)
+- ZAP: may I change the record? (never askable for the cartographer —
+  the question whose answer is constitutionally "no" is still worth
+  NAMING, because a crew member who can't say why it may not zap is
+  safer by accident, not by design)
+
+A question with no named form is unaskable, and unaskability is a
+finding: the set of questions we cannot yet pose over the map is the
+map's own gap list — publish it beside the R-node gap list.
