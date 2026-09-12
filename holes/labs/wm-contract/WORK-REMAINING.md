@@ -284,9 +284,21 @@ operator workflow conversation (standdown 2026-09-12).
     Joe's proviso engaged: five additive retention packets
     named (status-at-close; entity identity on every close;
     cross-ledger identity; disposition coverage reporting;
-    status coverage). Retention packet 1 (categorical status
-    at close) dispatched (codex-24); 1b waits on retained
-    data + the categorical-authority ruling at its review.
+    status coverage). RETENTION PACKET 1 DONE (2026-09-12,
+    futon2 d30ed68f..d9fddee2, reviewed): the close judgment
+    carries :entity-state-at-close — full seven-coordinate row
+    snapshotted from the in-force judgement :belief AT SELECTION
+    TIME (explicit :run/id + :trace-path source, no judge rerun,
+    no temporal lookup), method-labelled derivation with the
+    categorical ruling explicitly withheld, :ambiguous-tie
+    refusal, typed absences for no-entity and unavailable-row;
+    close semantics untouched, 145 tests/763 assertions green;
+    redirected capture readback verified by the reviewer; two
+    failed capture attempts honestly retained (the first
+    refused by the existing trigger-preregistration guard).
+    Retention packet 2 (entity identity on every close)
+    dispatched (codex-24); 1b waits on retained data + the
+    categorical-authority ruling at its review.
 15. Write measurement proofs for the five machine declarations that
     lack one: belief state, belief update, depth, temperature,
     action. SPLIT 2026-09-12 (codex-24 discovery, correct refusal):
