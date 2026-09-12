@@ -1,0 +1,26 @@
+{:receipts
+ [{:gate :war-machine-tests
+   :command "clojure -X:test :nses '[futon2.report.war-machine-test]'"
+   :exit 0 :tests 99 :assertions 555
+   :tree-sha "6848a03e97e55fa4f227e788792d12618636ef89" :at "2026-09-12"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint test/futon2/report/war_machine_test.clj"
+   :exit 0 :tests 1 :assertions 1 :errors 0 :warnings 0
+   :tree-sha "6848a03e97e55fa4f227e788792d12618636ef89" :at "2026-09-12"}
+  {:gate :check-parens
+   :command "bash /home/joe/code/futon4/dev/check-parens.sh test/futon2/report/war_machine_test.clj holes/labs/wm-contract/runs/U12-c-mis-falsifier/measurements.edn"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "6848a03e97e55fa4f227e788792d12618636ef89" :at "2026-09-12"}]
+ :attributions
+ {:u12-anchor-rot
+  {:tracked-source "holes/missions/M-wm-aif-policy-grain-compliance.md"
+   :source-change "27a6dd5bf1e0e4fc327bc2f3692e33e903ce1f7a"
+   :source-change-at "2026-09-05T09:47:19Z"
+   :pin-authored-at "2026-09-02T18:27:11Z"
+   :finding :legitimate-source-advance-with-stale-measurement-pin}
+  :checkpoint-support
+  {:fixture-commit "02b317f5c"
+   :fixture-at "2026-09-09T18:11:35Z"
+   :narrowing-commit "b071b528"
+   :narrowing-at "2026-09-12T18:48:51Z"
+   :finding :fixture-predates-twelve-disposition-contract}}}
