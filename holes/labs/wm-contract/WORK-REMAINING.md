@@ -461,10 +461,16 @@ operator workflow conversation (standdown 2026-09-12).
     boundary refused decisions with NO softmax-weights (nil ->
     non-map -> all-missing) — nil now returns the historical
     empty map, present maps keep the full check; both
-    war-machine ambient softmax errors clear. Remaining
-    standing ambient reds (U12 mutable criteria-source hash;
-    disposition-support fixture) dispatched as a hygiene packet
-    (codex-24); (4c)
+    war-machine ambient softmax errors clear. AMBIENT BOARD
+    GREEN (2026-09-12, futon2 a89718a2/b566c3f0/367cffdd,
+    reviewed; reviewer re-ran war-machine ambient 99/555
+    green): U12 digest repinned with a dated
+    previous/current-sha record (mutation attributed to a
+    legitimate tracked mission append 27a6dd5b on 2026-09-05
+    that skipped the digest refresh); the pre-row-10 checkpoint
+    fixture now PROJECTS its historical 14-label artifact onto
+    the contractual twelve (exercising the boundary, not
+    disabling the refusal); no production changes; (4c)
     ReasonBearingSelector.lean extension + compat theorem
     (frozen files untouched); (4d) positive post-capture
     witness at the first complete-envelope record.
