@@ -479,7 +479,15 @@ operator workflow conversation (standdown 2026-09-12).
     scope 6->7 nodes, formal rung stays named,
     at-obligated-state false; 14 matrix/schema controls green;
     receipts bound to both repos' trees; reviewer spot-verified
-    the source pins at HEAD). R15 row dispatched (codex-24).
+    the source pins at HEAD). R15 ROW DONE (2026-09-12, futon2
+    99ee3880/0d3bc6ad, p4ng fec6e538, reviewed): seven [A15]
+    typed absences, byte-pinned V7 receipt with nine planted
+    controls, Campaign-S-in-prose-only recorded; render 7->8
+    nodes, strip -------, at-obligated-state false, canonical
+    output otherwise unchanged; 14 controls green; no
+    completeness/live/nested-model claim. ROW 20 CENSUS
+    EXTENSION COMPLETE — both nodes now inside census scope
+    with honest-absence rows.
 
 ## Phase 4 — the wiring diagram agrees with the code (3)
 
