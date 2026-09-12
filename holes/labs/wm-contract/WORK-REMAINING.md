@@ -171,12 +171,16 @@ operator workflow conversation (standdown 2026-09-12).
     F8-belief-update readback is synthetic-reference only and must
     not be relabelled as a trace proof.
     BELIEF STATE DONE (2026-09-12): two production-trace-scoped
-    claims admitted (codex-24 1e96deb4..5c615a6a + mathlib4
-    67cab68a/fd002c83; review + admission c6835840; registry 50
-    entries e4fe14d6) — the registry's first real-trace-scope
-    witnesses. Depth/temperature/action in flight (part 2,
-    codex-22); update-capture packet waits on the row-13 TN's
-    shared-seam answer.
+    claims admitted (c6835840/e4fe14d6). TEMPERATURE DONE
+    (2026-09-12): R14 trace claim admitted (codex-22 da91d1f5..
+    8867439b + mathlib4 0c738057/1023b2f4; admission 1a93c20f;
+    registry 51 entries b15b15f2) — tau-spread and tau reproduced
+    from trace record 0, deltas 0.0. DEPTH and ACTION join the
+    needs-capture family (codex-22 split finding, no synthetic
+    substitutes): trace omits :policy-depth/:horizon-steps and the
+    ranked-action input maps + selector option packet — capture
+    candidates for the row-13 trace envelope seam, alongside
+    belief update and the row-16 five.
 16. IN PROGRESS. Inventory done and reviewed (TN 6e6b2f5c): 18
     equation-bearing declarations — 4 admitted (26 claims), 4
     under row 15, 5 provable now from retained pins, 5 needing
