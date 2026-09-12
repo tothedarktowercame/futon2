@@ -272,3 +272,41 @@ And the causal discipline falls out of the existing ruling: causal links
 are editable (Ostrom), but their warrant is measured, their minting is
 gated, and unidentifiable questions are named as such — the same
 honesty vocabulary as the witness status, applied to causation.
+
+## Cadence and the wiring-diagram role (Joe, 2026-09-12)
+
+CADENCE — pressure, not per-turn. The embedding runs in the background
+off every turn, but the cartographer works in BATCHES like inbox-zero:
+operator turns accumulate (say 10, across sessions), and the batch is
+the unit of reading. (A really cheap model could scan each turn forward
+immediately — possible, deliberately not chosen: the constellation only
+reveals itself across turns, and per-turn reading would hub-collapse it
+before the shape appears.)
+
+THE CONSTELLATION STEP — a batch of ~10 turns is read as a
+CONSTELLATION of associated patterns: unordered, lit up together, no
+wiring yet. The reading questions: what effective work is going on /
+trying to go on / blocked? Which existing cascade level would these
+belong to — spanned already (automatable-now), waiting on a capability
+(not-yet, keyed to its star), or genuinely new (a region no cascade
+covers)?
+
+THE WIRING STEP — the cartographer's paired synthesis role: turn the
+constellation into a WIRING DIAGRAM — the little diagram becomes chips
+and wires. The identities hold at data level: chip ⊂ wiring diagram ≡
+cascade ≡ board (chip_board.clj's EDN: chips vector + authored wires).
+So the 10-15 turn module IS a board proposal — a candidate policy for
+making that shape of work automatable — and it enters the library the
+way patterns do, as a named, stored, re-deployable Warehouse artifact.
+
+Discipline for the wiring step (nothing new, all existing rulings):
+constellation → wiring is the AUTHORED act — the cartographer proposes
+at proposal precision (R9/R7 asymmetry: self-authored boards never
+self-ratify; L4 mints); edges are JUNCTIONs with provenance;
+Workshop-before-run holds; and the module carries its provenance batch
+(the turn ids it was read from) so the map can later ask which modules
+a given turn fed.
+
+This is the "make this automatable in the future" loop closed: turns →
+constellation → wiring → module → (ratified) → lane. Each batch of
+operator pressure becomes one candidate for the next layer.
