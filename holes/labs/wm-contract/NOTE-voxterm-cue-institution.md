@@ -69,3 +69,44 @@ Row links: EX-1 (codex-25 thread); DRAFT-apex-institutions (the
 pending rulings this records-not-settles); LAYER4-PROCESS (the
 small record); sigil-registry (⌁, ⚖, ⌖); NOTE-inbox-zero-aif (the
 shape being transposed).
+
+## Agent-issued cues: the zaif controller's own vocabulary (Joe, 2026-09-12)
+
+Cues are not operator-only. An agent's self-talk can issue 🎒 PATTERN
+CARD (and by the same rule, 🕒/🏁 against itself) — and this is where
+the zaif harness cashes out: the controller between turns reads BOTH
+streams (operator turns and its own self-talk), and arm selection
+BECOMES cue issuance — ask = cue the operator; act = cue itself;
+retrieve = 🎒; yield = 🏁 without an entry. One vocabulary, two
+emitters.
+
+The constitutional asymmetry (emitter-typed semantics, same glyph):
+
+- OPERATOR cue: creates an obligation on the receiver. Boundary-in
+  with full authority; the receipt is mandatory; silence is the
+  violation.
+- AGENT cue: a SELF-COMMITMENT at proposal precision. It binds the
+  emitter (the agent must discharge it or refuse typedly — the same
+  lint applies), but it confers no authority the agent lacked: an
+  agent cannot clock itself onto a mission (attribution is received),
+  cannot mint its own credit, cannot ratify its own pattern adoption.
+  The record carries :emitter :agent and the precision row says
+  proposal.
+
+The 🎒 spec's own clause is the keystone: CARRIAGE ALONE IS NOT
+EVIDENCE OF USE. The PSR record shows the card entered the backpack;
+USE must cite the clause invoked at the moment of application —
+exactly EX-1's observed-use requirement. So the lint has two checks
+now: cue→receipt (no silent gap) and card→use-citation (no decorative
+backpacks). Both are regex-plus-lookup cheap.
+
+What the zaif loop looks like in cues, end to end: operator 🕒 (or the
+agent's own, at proposal precision) → 🎒 fetch, card in backpack →
+work under the card, clause citations in the trace → 🏁 departure
+record with the clause-used field → Layer 4 revision fed. The four
+arms, the pattern language, and the cue protocol become ONE system:
+the harness is the thing that reads cues and emits records.
+
+Row links: EX-1 (this is its protocol layer); zaif four arms
+(retrieve/act/ask/yield ↔ 🎒/🕒-act/ask-cue/🏁); M-zaif-harness
+boundary 1 (the asymmetry above is it, restated at cue grain).
