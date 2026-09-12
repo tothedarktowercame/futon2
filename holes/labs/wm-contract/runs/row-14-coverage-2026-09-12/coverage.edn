@@ -1,0 +1,257 @@
+{:constraints
+ {:induces-failures? false,
+  :schedules-attempts? false,
+  :probability-claim? false},
+ :schema :wm/measured-a-coverage-v1,
+ :capture-capabilities
+ {:status-at-close {:since "d30ed68f", :deployed? false},
+  :outcome-entity {:since "6deb8019", :deployed? false},
+  :cross-ledger {:since "4c776dc2", :deployed? false},
+  :reload-status :pending},
+ :zero-cells
+ [{:status :addressed, :disposition :abstained}
+  {:status :addressed, :disposition :agent-unavailable}
+  {:status :addressed, :disposition :artifact-only}
+  {:status :addressed, :disposition :build-failed}
+  {:status :addressed, :disposition :cancelled}
+  {:status :addressed, :disposition :dispatch-failed}
+  {:status :addressed, :disposition :grounded-change}
+  {:status :addressed, :disposition :grounded-no-change}
+  {:status :addressed, :disposition :guardrail-refusal}
+  {:status :addressed, :disposition :incomplete}
+  {:status :addressed, :disposition :no-selection}
+  {:status :addressed, :disposition :substrate-unavailable}
+  {:status :falsified, :disposition :abstained}
+  {:status :falsified, :disposition :agent-unavailable}
+  {:status :falsified, :disposition :artifact-only}
+  {:status :falsified, :disposition :build-failed}
+  {:status :falsified, :disposition :cancelled}
+  {:status :falsified, :disposition :dispatch-failed}
+  {:status :falsified, :disposition :grounded-change}
+  {:status :falsified, :disposition :grounded-no-change}
+  {:status :falsified, :disposition :guardrail-refusal}
+  {:status :falsified, :disposition :incomplete}
+  {:status :falsified, :disposition :no-selection}
+  {:status :falsified, :disposition :substrate-unavailable}
+  {:status :foreclosed, :disposition :abstained}
+  {:status :foreclosed, :disposition :agent-unavailable}
+  {:status :foreclosed, :disposition :artifact-only}
+  {:status :foreclosed, :disposition :build-failed}
+  {:status :foreclosed, :disposition :cancelled}
+  {:status :foreclosed, :disposition :dispatch-failed}
+  {:status :foreclosed, :disposition :grounded-change}
+  {:status :foreclosed, :disposition :grounded-no-change}
+  {:status :foreclosed, :disposition :guardrail-refusal}
+  {:status :foreclosed, :disposition :incomplete}
+  {:status :foreclosed, :disposition :no-selection}
+  {:status :foreclosed, :disposition :substrate-unavailable}
+  {:status :refined, :disposition :abstained}
+  {:status :refined, :disposition :agent-unavailable}
+  {:status :refined, :disposition :artifact-only}
+  {:status :refined, :disposition :build-failed}
+  {:status :refined, :disposition :cancelled}
+  {:status :refined, :disposition :dispatch-failed}
+  {:status :refined, :disposition :grounded-change}
+  {:status :refined, :disposition :grounded-no-change}
+  {:status :refined, :disposition :guardrail-refusal}
+  {:status :refined, :disposition :incomplete}
+  {:status :refined, :disposition :no-selection}
+  {:status :refined, :disposition :substrate-unavailable}
+  {:status :reopened, :disposition :abstained}
+  {:status :reopened, :disposition :agent-unavailable}
+  {:status :reopened, :disposition :artifact-only}
+  {:status :reopened, :disposition :build-failed}
+  {:status :reopened, :disposition :cancelled}
+  {:status :reopened, :disposition :dispatch-failed}
+  {:status :reopened, :disposition :grounded-change}
+  {:status :reopened, :disposition :grounded-no-change}
+  {:status :reopened, :disposition :guardrail-refusal}
+  {:status :reopened, :disposition :incomplete}
+  {:status :reopened, :disposition :no-selection}
+  {:status :reopened, :disposition :substrate-unavailable}
+  {:status :spawned, :disposition :abstained}
+  {:status :spawned, :disposition :agent-unavailable}
+  {:status :spawned, :disposition :artifact-only}
+  {:status :spawned, :disposition :build-failed}
+  {:status :spawned, :disposition :cancelled}
+  {:status :spawned, :disposition :dispatch-failed}
+  {:status :spawned, :disposition :grounded-change}
+  {:status :spawned, :disposition :grounded-no-change}
+  {:status :spawned, :disposition :guardrail-refusal}
+  {:status :spawned, :disposition :incomplete}
+  {:status :spawned, :disposition :no-selection}
+  {:status :spawned, :disposition :substrate-unavailable}
+  {:status :strengthened, :disposition :abstained}
+  {:status :strengthened, :disposition :agent-unavailable}
+  {:status :strengthened, :disposition :artifact-only}
+  {:status :strengthened, :disposition :build-failed}
+  {:status :strengthened, :disposition :cancelled}
+  {:status :strengthened, :disposition :dispatch-failed}
+  {:status :strengthened, :disposition :grounded-no-change}
+  {:status :strengthened, :disposition :guardrail-refusal}
+  {:status :strengthened, :disposition :incomplete}
+  {:status :strengthened, :disposition :no-selection}
+  {:status :strengthened, :disposition :substrate-unavailable}],
+ :dispositions
+ {:observed
+  [:agent-unavailable
+   :build-failed
+   :grounded-change
+   :incomplete
+   :no-selection
+   :substrate-unavailable],
+  :never-observed
+  [:abstained
+   :artifact-only
+   :cancelled
+   :dispatch-failed
+   :grounded-no-change
+   :guardrail-refusal]},
+ :source
+ {:close-root "data/wm-full-loop",
+  :pinned-census
+  "holes/labs/wm-contract/runs/row-14-measured-a-sources-2026-09-12/counts.edn",
+  :pinned-census-schema :wm/measured-a-source-census-v1},
+ :retention-opportunities
+ [{:dimension :disposition,
+   :value :abstained,
+   :observation "fills only when policy selection naturally abstains"}
+  {:dimension :disposition,
+   :value :artifact-only,
+   :observation
+   "fills only when a real attempt closes with an authored artifact but no grounding"}
+  {:dimension :disposition,
+   :value :cancelled,
+   :observation "fills only when a real attempt is cancelled"}
+  {:dimension :disposition,
+   :value :dispatch-failed,
+   :observation "fills only when an actual dispatch fails"}
+  {:dimension :disposition,
+   :value :grounded-no-change,
+   :observation
+   "fills only when grounding honestly observes no state change"}
+  {:dimension :disposition,
+   :value :guardrail-refusal,
+   :observation "fills only when a guardrail actually refuses"}
+  {:dimension :status,
+   :value :addressed,
+   :observation
+   "fills only when a naturally closing single entity carries this retained status"}
+  {:dimension :status,
+   :value :falsified,
+   :observation
+   "fills only when a naturally closing single entity carries this retained status"}
+  {:dimension :status,
+   :value :foreclosed,
+   :observation
+   "fills only when a naturally closing single entity carries this retained status"}
+  {:dimension :status,
+   :value :refined,
+   :observation
+   "fills only when a naturally closing single entity carries this retained status"}
+  {:dimension :status,
+   :value :reopened,
+   :observation
+   "fills only when a naturally closing single entity carries this retained status"}
+  {:dimension :status,
+   :value :spawned,
+   :observation
+   "fills only when a naturally closing single entity carries this retained status"}],
+ :as-of "2026-09-12",
+ :cells
+ {:addressed
+  {:grounded-change 0,
+   :artifact-only 0,
+   :build-failed 0,
+   :grounded-no-change 0,
+   :abstained 0,
+   :incomplete 0,
+   :guardrail-refusal 0,
+   :dispatch-failed 0,
+   :no-selection 0,
+   :agent-unavailable 0,
+   :cancelled 0,
+   :substrate-unavailable 0},
+  :falsified
+  {:grounded-change 0,
+   :artifact-only 0,
+   :build-failed 0,
+   :grounded-no-change 0,
+   :abstained 0,
+   :incomplete 0,
+   :guardrail-refusal 0,
+   :dispatch-failed 0,
+   :no-selection 0,
+   :agent-unavailable 0,
+   :cancelled 0,
+   :substrate-unavailable 0},
+  :foreclosed
+  {:grounded-change 0,
+   :artifact-only 0,
+   :build-failed 0,
+   :grounded-no-change 0,
+   :abstained 0,
+   :incomplete 0,
+   :guardrail-refusal 0,
+   :dispatch-failed 0,
+   :no-selection 0,
+   :agent-unavailable 0,
+   :cancelled 0,
+   :substrate-unavailable 0},
+  :refined
+  {:grounded-change 0,
+   :artifact-only 0,
+   :build-failed 0,
+   :grounded-no-change 0,
+   :abstained 0,
+   :incomplete 0,
+   :guardrail-refusal 0,
+   :dispatch-failed 0,
+   :no-selection 0,
+   :agent-unavailable 0,
+   :cancelled 0,
+   :substrate-unavailable 0},
+  :reopened
+  {:grounded-change 0,
+   :artifact-only 0,
+   :build-failed 0,
+   :grounded-no-change 0,
+   :abstained 0,
+   :incomplete 0,
+   :guardrail-refusal 0,
+   :dispatch-failed 0,
+   :no-selection 0,
+   :agent-unavailable 0,
+   :cancelled 0,
+   :substrate-unavailable 0},
+  :spawned
+  {:grounded-change 0,
+   :artifact-only 0,
+   :build-failed 0,
+   :grounded-no-change 0,
+   :abstained 0,
+   :incomplete 0,
+   :guardrail-refusal 0,
+   :dispatch-failed 0,
+   :no-selection 0,
+   :agent-unavailable 0,
+   :cancelled 0,
+   :substrate-unavailable 0},
+  :strengthened
+  {:grounded-change 1,
+   :artifact-only 0,
+   :build-failed 0,
+   :grounded-no-change 0,
+   :abstained 0,
+   :incomplete 0,
+   :guardrail-refusal 0,
+   :dispatch-failed 0,
+   :no-selection 0,
+   :agent-unavailable 0,
+   :cancelled 0,
+   :substrate-unavailable 0}},
+ :statuses
+ {:observed [:strengthened],
+  :never-observed
+  [:addressed :falsified :foreclosed :refined :reopened :spawned]},
+ :claim :coverage-observation-not-probability}
