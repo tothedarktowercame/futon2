@@ -1,0 +1,43 @@
+;; handoff-lint/enumeration.edn — the canonical channel enumeration, PINNED
+;; before any classification (SPEC-handoff-algebra-v0.md §1 + R2 + R8;
+;; Joe's go relayed by claude-15, 2026-09-12). Classification only: this
+;; lint fixes nothing. If the count disagrees with "thirteen" as spoken,
+;; that is a finding, not a problem.
+{:schema :handoff-lint/enumeration-v1
+ :pinned-at "2026-09-12"
+ :pinned-by "zai-7"
+ :source-corpus ["SPEC-chip-boards-v0.md"
+                 "NOTE-agent-needs-from-issue-board.md"
+                 "NOTE-operator-landscape-reader.md"
+                 "NOTE-task-manager-outer-loop.md"
+                 "NOTE-pattern-interpretations.md"
+                 "NOTE-vsm-aif.md"
+                 "zai-7 bell to claude-15, invoke-1789225259523"]
+ :channels
+ [;; --- the thirteen as spoken (zai-7's requirements bell), in that order ---
+  {:id :channel/bell  :spoken "bells (request/brief) as push"}
+  {:id :channel/clocking  :spoken "clocking as attribution"}
+  {:id :channel/packet-minting  :spoken "packet minting as the gate for pinned RUN4 lanes"}
+  {:id :channel/certificate  :spoken "certificates (any board -> witnesses)"}
+  {:id :channel/verify-request  :spoken "verify-request proposals (verifier -> lanes)"}
+  {:id :channel/constellation-artifact  :spoken "constellation artifacts (cartographer -> Workshop)"}
+  {:id :channel/ranked-actions  :spoken "ranked-actions (WM -> task manager)"}
+  {:id :channel/demand-record  :spoken "demand records (simulated agents -> priority seam)"}
+  {:id :channel/board-transition  :spoken "board-transition events (structure learning)"}
+  {:id :channel/applicability-predicate  :spoken "applicability predicates (institutions -> artifacts)"}
+  {:id :channel/refusal-record  :spoken "typed refusal records (:inbox-zero/refusal et al.)"}
+  {:id :constraint/actor-idle  :spoken "the actor-idle constraint on selection windows"}
+  {:id :constraint/mid-turn-rules  :spoken "mid-turn rules (in-flight acts complete under the old mission's G)"}
+  {:id :constraint/precision-asymmetry  :spoken "precision asymmetries at every boundary (self-authored = proposal)"}]
+ :enumeration-findings
+ [;; FINDING E1: the spoken count was thirteen; the pinned enumeration is
+  ;; FOURTEEN, because the requirements bell listed typed refusals as a
+  ;; phenomenon but never as a numbered item. Refusal records are a
+  ;; channel by the four-field test (they have payload, authority, and
+  ;; consumers), so they are pinned. The three constraints (actor-idle,
+  ;; mid-turn, precision-asymmetry) are pinned as CONSTRAINTS, not
+  ;; channels: per claude-15's expected reclassifications they dissolve
+  ;; into the algebra's judgments (§2(a), reconciliation clause, I11
+  ;; upward-edge typing) and will classify not-applicable-as-channels.
+  {:finding/id :E1
+   :claim "spoken 13, pinned 14 channels + 3 constraints; refusal-record was spoken-of but unnumbered"}]}
