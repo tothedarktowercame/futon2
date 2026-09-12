@@ -1,0 +1,24 @@
+{:receipts
+ [{:gate :clojure-tests
+   :command "clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'"
+   :exit 0 :tests 145 :assertions 763
+   :tree-sha "d30ed68f" :at "2026-09-12"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/full_loop_runner.clj test/futon2/aif/full_loop_runner_test.clj"
+   :exit 0 :tests 2 :assertions 2 :errors 0 :warnings 0
+   :tree-sha "d30ed68f" :at "2026-09-12"}
+  {:gate :check-parens
+   :command "bash /home/joe/code/futon4/dev/check-parens.sh src/futon2/aif/full_loop_runner.clj test/futon2/aif/full_loop_runner_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "d30ed68f" :at "2026-09-12"}
+  {:gate :redirected-close-capture
+   :command "clojure -M holes/labs/wm-contract/runs/row-14-status-at-close-2026-09-12/capture.clj"
+   :exit 0 :tests 1 :assertions 4
+   :tree-sha "798d036a" :at "2026-09-12"
+   :retained-readback "holes/labs/wm-contract/runs/row-14-status-at-close-2026-09-12/readback.edn"}]
+ :capture-attempts
+ [{:tree-sha "034e6a73" :exit 1 :stage :pre-attempt
+   :typed-refusal :trigger-ineligible
+   :finding "The capture initially named an unpreregistered synthetic trigger; no cohort attempt was admitted."}
+  {:tree-sha "798d036a" :exit 1 :stage :post-close-readback
+   :finding "The redirected close was written successfully, then the capture reader used the wrong cohort directory/payload path. readback.edn was recovered from that exact immutable 007-closed.edn; the writer was not rerun."}]}

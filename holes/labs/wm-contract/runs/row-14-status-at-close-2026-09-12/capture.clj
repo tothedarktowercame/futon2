@@ -50,14 +50,15 @@
                   :artifact-only? false :duration-ms 1
                   :resource-use {:agent-turns 0}
                   :entity-state-at-close state}))
-        close-file (io/file root "run4-successor-v2-selection-admission-20260911-v1"
+        cohort-id (name (:cohort/id (edn/read-string (slurp preregistration))))
+        close-file (io/file root cohort-id
                             attempt "007-closed.edn")
         persisted (edn/read-string (slurp close-file))
         readback {:source :redirected-machinery-close
                   :live-write? false
                   :attempt-id attempt
                   :entity-state-at-close
-                  (get-in persisted [:cell :judgment :entity-state-at-close])}]
+                  (get-in persisted [:payload :judgment :entity-state-at-close])}]
     (spit output-path (str (pr-str readback) "\n"))
     (prn readback)))
 
