@@ -916,6 +916,33 @@ operator workflow conversation (standdown 2026-09-12).
     bytes; connections attested. The mandatory negative scope may
     contain only items Joe has ruled out in writing — at
     completion, nothing load-bearing remains in it.
+    SCOPING DONE (2026-09-12, TN-row24-scoping-2026-09-12.md
+    46829fa1; reviewer verified the C502 September-1 pattern,
+    the F11 emitter pins byte-exact, and the signature-audit
+    row-24 entry). The F11 lane's derive_certificate.bb is the
+    implementation authority — row 24 extends, never forks. The
+    registry's 34 admissions are maximum HONEST claims (33
+    supports + 1 refutes, machinery/partial scopes), so
+    registry membership can never mean positively-complete.
+    Seven packets specced; row 24's own breach detector is the
+    full predicate's rejections, commissioned across transport
+    by row 25's tamper battery.
+    :blocker DECISION SHEET FOR JOE (the row's own text requires
+    his written rulings):
+    (I) THE §2C READING — how a FULL-scope certificate treats
+    typed partials: (1) attest typed state as-is (census-
+    complete honesty, "full" != all-positive); (2) require
+    positive closure (today un-certifiable, correctly); (3)
+    two-level — always attest the complete typed census, plus a
+    separate QualifyingRun predicate requiring positive closure
+    except items Joe ruled non-load-bearing in writing (TN
+    argues fewest semantic traps; not chosen for him).
+    (II) THE 17-ITEM NEGATIVE-SCOPE INVENTORY (TN §3): each
+    item must close before row 28 or receive Joe's written
+    rule-out by exact bytes — includes confirming the J2
+    R8-free-energy retirement as permitted negative scope
+    (item 11) and the R11/R15 0/7 absences (item 16). Existing
+    negative-scope prose does NOT count as rulings.
 25. Write the run→certificate→Lean-file generator with tamper tests
     (every mutated certificate fails), on the September-1 proof
     pattern.
