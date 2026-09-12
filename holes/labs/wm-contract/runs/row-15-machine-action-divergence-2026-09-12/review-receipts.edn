@@ -1,0 +1,57 @@
+{:records
+ {"R16-machineAction-live-selector-divergence-20260912-v1"
+  {:subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineAction.lean",
+     :sha256
+     "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692",
+     :declaration "DarkTower.WarMachine.MachineAction.machineAction"},
+    :scope
+    :production-trace-record-20260912T172809-live-selector-divergence,
+    :node :R16,
+    :as-of "2026-09-12",
+    :id "R16-machineAction-live-selector-divergence-20260912-v1",
+    :kind :lean-witness,
+    :polarity :refutes,
+    :declaration "machineAction",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean",
+     :sha256
+     "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253",
+     :module "DarkTower.WarMachine.MachineActionDivergenceWitness",
+     :declaration
+     "DarkTower.WarMachine.MachineActionDivergenceWitness.liveSelectorDivergesFromMachineActionControllerHead"},
+    :quantity :u,
+    :claim
+    "The pinned reason-bearing live selector moved from machineAction's controller-head output at rank 1 to rank 139. This refutes correspondence at this record only, not the internal branch.",
+    :equation :action},
+   :verdict :approved,
+   :reviewer "claude-15",
+   :reviewed-at "2026-09-12",
+   :basis
+   "Reviewed on bellback: NEW module only (Holes.lean sha 4dc0a76b and MachineAction.lean untouched — subject-file freeze verified by reviewer); theorem semantics checked against MachineAction.lean's real controller-head branch (candidates.head? over the non-no-op filter), stated generally over tail/scored; pinned :selection-law values (controller-head rank 1, chosen rank 139, :consulted-ranking :live-selector-id) match the reviewer's own earlier extraction from the pinned record; polarity :refutes with record-local claim and evidence-limit naming the reviewed selector-boundary extension as the open positive path; axiom checks no sorryAx; receipts commit-first; disposable merge 31 verified-binding + this claim pending, zero refusals",
+   :verification
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/verification-receipts.edn",
+    :sha256
+    "472a60fb40e67c29e50cc663051624079997cdc3db8d75ec85f84965ed967ef9",
+    :selector
+    [:records
+     "R16-machineAction-live-selector-divergence-20260912-v1"]},
+   :dependencies
+   [{:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/verification-receipts.edn",
+     :sha256
+     "472a60fb40e67c29e50cc663051624079997cdc3db8d75ec85f84965ed967ef9"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean",
+     :sha256
+     "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineAction.lean",
+     :sha256
+     "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"}]}}}

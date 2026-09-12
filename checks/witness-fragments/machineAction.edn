@@ -1,31 +1,61 @@
-{:witnesses "machineAction"
+{:witnesses "machineAction",
  :node-witnesses
- [{:schema :wm/node-witness-v1
-   :status :proposed
-   :id "R16-machineAction-live-selector-divergence-20260912-v1"
-   :node :R16 :equation :action :quantity :u :declaration "machineAction"
-   :kind :lean-witness :polarity :refutes
-   :scope :production-trace-record-20260912T172809-live-selector-divergence
-   :as-of "2026-09-12"
-   :claim "The pinned reason-bearing live selector moved from machineAction's controller-head output at rank 1 to rank 139. This refutes correspondence at this record only, not the internal branch."
-   :evidence-limit "The positive live-action path requires a reviewed carrier extension for the reason-bearing selector boundary (Row 15 packet 4)."
-   :artifact
-   {:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean"
-    :sha256 "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253"
-    :module "DarkTower.WarMachine.MachineActionDivergenceWitness"
-    :declaration "DarkTower.WarMachine.MachineActionDivergenceWitness.liveSelectorDivergesFromMachineActionControllerHead"}
-   :subject-artifact
-   {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
-    :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"
-    :declaration "DarkTower.WarMachine.MachineAction.machineAction"}
+ [{:schema :wm/node-witness-v1,
    :retained-evidence
-   {:fixture {:repo "futon2"
-              :path "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/fixture.edn"
-              :sha256 "1a78c6fe3c211a1f713256001472d8c3f9136664beb132b0ddd68424ee3082a9"}}
+   {:fixture
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/fixture.edn",
+     :sha256
+     "1a78c6fe3c211a1f713256001472d8c3f9136664beb132b0ddd68424ee3082a9"}},
    :verification
-   {:status :verified
-    :receipt {:repo "futon2"
-              :path "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/verification-receipts.edn"
-              :sha256 "472a60fb40e67c29e50cc663051624079997cdc3db8d75ec85f84965ed967ef9"
-              :selector [:records "R16-machineAction-live-selector-divergence-20260912-v1"]}}
-   :review {:status :pending :reviewer "claude-15"}}]}
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/verification-receipts.edn",
+     :sha256
+     "472a60fb40e67c29e50cc663051624079997cdc3db8d75ec85f84965ed967ef9",
+     :selector
+     [:records
+      "R16-machineAction-live-selector-divergence-20260912-v1"]}},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineAction.lean",
+    :sha256
+    "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692",
+    :declaration "DarkTower.WarMachine.MachineAction.machineAction"},
+   :scope
+   :production-trace-record-20260912T172809-live-selector-divergence,
+   :node :R16,
+   :evidence-limit
+   "The positive live-action path requires a reviewed carrier extension for the reason-bearing selector boundary (Row 15 packet 4).",
+   :as-of "2026-09-12",
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/review-receipts.edn",
+     :sha256
+     "a2c7a35d444a842bb5c18ae86154138849b6e8dcb91a1f37eda115e1b3f0dfc9",
+     :selector
+     [:records
+      "R16-machineAction-live-selector-divergence-20260912-v1"]}},
+   :status :admitted,
+   :id "R16-machineAction-live-selector-divergence-20260912-v1",
+   :kind :lean-witness,
+   :polarity :refutes,
+   :declaration "machineAction",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean",
+    :sha256
+    "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253",
+    :module "DarkTower.WarMachine.MachineActionDivergenceWitness",
+    :declaration
+    "DarkTower.WarMachine.MachineActionDivergenceWitness.liveSelectorDivergesFromMachineActionControllerHead"},
+   :quantity :u,
+   :claim
+   "The pinned reason-bearing live selector moved from machineAction's controller-head output at rank 1 to rank 139. This refutes correspondence at this record only, not the internal branch.",
+   :equation :action}]}
