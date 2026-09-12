@@ -380,6 +380,24 @@ operator workflow conversation (standdown 2026-09-12).
 17. Credit the Agency's existing work-lifecycle machinery (dispatch
     receipts, parking, coordination ledger) to the loop-assurance
     nodes it already serves — today no node gets credit for it.
+    DISCOVERY DONE (2026-09-12, TN-row17-discovery-2026-09-12.md
+    2a0acf1d; reviewer spot-verified the R10 boundary,
+    execution-evidence refusal, and worker-lost recovery in
+    futon3c source). Credits ruled: R10 — full credit
+    constructible now (run-scheduled-dispatch! mechanically
+    enforces the commission/receipt join with typed :node :R10
+    refusals); R20 — two NARROW rows only (work-execution
+    tripwires; continuation/deadline handling), never the
+    catalogue-wide node (VERIFY zeros stand); R9 — WITHHELD
+    (Agency records identities but does not refuse
+    author=reviewer; input evidence only; row 19 owns the
+    refusal); TRACE — WITHHELD (Agency ledgers are not WM route
+    records; a cross-ledger join witness is future work).
+    Admission constraint: /tmp ledger hashes are discovery-time
+    pins — evidence packets must retain bounded extracted
+    fixtures with source hash + extraction time before
+    compaction/mutation. Four packets proposed (TN §5); packet 1
+    (R10 credit) dispatched (codex-22).
 18. Implement R20's chartered interoceptive commitment link — the
     genuinely missing piece, distinct from row 17's crediting.
 19. Implement R9, "No self-certification": the checks that prevent
