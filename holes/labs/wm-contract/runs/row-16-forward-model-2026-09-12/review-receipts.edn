@@ -1,0 +1,56 @@
+{:records
+ {"R4-forward-model-float-carried-production-pins-v1"
+  {:subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/Holes.lean",
+     :sha256
+     "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b",
+     :declaration
+     "DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"},
+    :scope :production-pins-float-carried-v1.1,
+    :node :R4,
+    :as-of "2026-09-12",
+    :id "R4-forward-model-float-carried-production-pins-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "PredictiveOutcomeKernel",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineForwardModelWitness.lean",
+     :sha256
+     "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c",
+     :module "DarkTower.WarMachine.MachineForwardModelWitness",
+     :declaration
+     "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"},
+    :quantity :Q-o-pi,
+    :claim
+    "At the unchanged row-9 production pins, three policy-conditioned outcome rows match independent exact positional-A composition within measured IEEE deltas and satisfy FloatCarriedRow.nearNormalised; exact ProbabilityKernel normalization is deferred to row 14's reviewed model instance.",
+    :equation :forward-model},
+   :verdict :approved,
+   :reviewer "claude-15",
+   :reviewed-at "2026-09-12",
+   :basis
+   "Reviewed on bellback: generator read in full (runs/row-6-predictive-outcome/generate_forward_witness.clj) — mass values sourced from the repaired readback's :independent-exact-reference only, production values untouched; one coordinate cross-checked readback-to-Lean (advance-twice groundedChange 40250802085974281/72057594037927936); nearNormalised + composition + inheritedExcess (both unique rows exactly 2^-55) verified via receipts commit-first (exit 0, 0 errors 0 warnings, axiom census propext/Classical.choice/Quot.sound only, no sorryAx, witness sha at mathlib4 9de3305be6 equals tested pin); scope :production-pins-float-carried-v1.1 defers exact kernel normalization to row 14 with no overstatement; refusal records retained in pinned readback; disposable merge R4 pending 0 refusals",
+   :verification
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-16-forward-model-2026-09-12/verification-receipts.edn",
+    :sha256
+    "cf383515274dba2b24612380724fb9b6f57bfb28d11890f253db493e127af289",
+    :selector
+    [:records "R4-forward-model-float-carried-production-pins-v1"]},
+   :dependencies
+   [{:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-forward-model-2026-09-12/verification-receipts.edn",
+     :sha256
+     "cf383515274dba2b24612380724fb9b6f57bfb28d11890f253db493e127af289"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineForwardModelWitness.lean",
+     :sha256
+     "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/Holes.lean",
+     :sha256
+     "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}]}}}
