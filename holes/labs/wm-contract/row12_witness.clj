@@ -21,7 +21,7 @@
   (reduce max 0.0 (for [o observation-support s state-support]
                     (Math/abs (- (double (get-in actual [o s]))
                                  (double (get-in reference [o s])))))))
-(defn run! []
+(defn execute! []
   (let [rows (forms 3)
         observation-support (vec (sort (keys (:observation (first rows)))))
         state-support (vec (sort (keys (get-in (first rows) [:mu-post entity]))))
@@ -75,4 +75,4 @@
     (prn {:status :executed :compared-coordinates (:compared-coordinates witness)
           :maximum-absolute-delta (:maximum-absolute-delta witness)
           :controls (mapv #(select-keys % [:mutation :passed? :refusal :result]) (:controls witness))})))
-(run!)
+(execute!)
