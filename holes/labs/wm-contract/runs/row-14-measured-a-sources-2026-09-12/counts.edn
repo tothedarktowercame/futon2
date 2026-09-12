@@ -1,0 +1,382 @@
+{:schema :wm/measured-a-source-census-v1,
+ :counts
+ {:total-pairs 1,
+  :nonzero-cells 1,
+  :zero-cells 83,
+  :matrix
+  {:addressed
+   {:abstained 0,
+    :agent-unavailable 0,
+    :artifact-only 0,
+    :build-failed 0,
+    :cancelled 0,
+    :dispatch-failed 0,
+    :grounded-change 0,
+    :grounded-no-change 0,
+    :guardrail-refusal 0,
+    :incomplete 0,
+    :no-selection 0,
+    :substrate-unavailable 0},
+   :falsified
+   {:abstained 0,
+    :agent-unavailable 0,
+    :artifact-only 0,
+    :build-failed 0,
+    :cancelled 0,
+    :dispatch-failed 0,
+    :grounded-change 0,
+    :grounded-no-change 0,
+    :guardrail-refusal 0,
+    :incomplete 0,
+    :no-selection 0,
+    :substrate-unavailable 0},
+   :foreclosed
+   {:abstained 0,
+    :agent-unavailable 0,
+    :artifact-only 0,
+    :build-failed 0,
+    :cancelled 0,
+    :dispatch-failed 0,
+    :grounded-change 0,
+    :grounded-no-change 0,
+    :guardrail-refusal 0,
+    :incomplete 0,
+    :no-selection 0,
+    :substrate-unavailable 0},
+   :refined
+   {:abstained 0,
+    :agent-unavailable 0,
+    :artifact-only 0,
+    :build-failed 0,
+    :cancelled 0,
+    :dispatch-failed 0,
+    :grounded-change 0,
+    :grounded-no-change 0,
+    :guardrail-refusal 0,
+    :incomplete 0,
+    :no-selection 0,
+    :substrate-unavailable 0},
+   :reopened
+   {:abstained 0,
+    :agent-unavailable 0,
+    :artifact-only 0,
+    :build-failed 0,
+    :cancelled 0,
+    :dispatch-failed 0,
+    :grounded-change 0,
+    :grounded-no-change 0,
+    :guardrail-refusal 0,
+    :incomplete 0,
+    :no-selection 0,
+    :substrate-unavailable 0},
+   :spawned
+   {:abstained 0,
+    :agent-unavailable 0,
+    :artifact-only 0,
+    :build-failed 0,
+    :cancelled 0,
+    :dispatch-failed 0,
+    :grounded-change 0,
+    :grounded-no-change 0,
+    :guardrail-refusal 0,
+    :incomplete 0,
+    :no-selection 0,
+    :substrate-unavailable 0},
+   :strengthened
+   {:abstained 0,
+    :agent-unavailable 0,
+    :artifact-only 0,
+    :build-failed 0,
+    :cancelled 0,
+    :dispatch-failed 0,
+    :grounded-change 1,
+    :grounded-no-change 0,
+    :guardrail-refusal 0,
+    :incomplete 0,
+    :no-selection 0,
+    :substrate-unavailable 0}}},
+ :populations
+ {:trace-records-with-mu-post 897,
+  :close-outcomes
+  {:no-selection 22,
+   :build-failed 22,
+   :agent-unavailable 9,
+   :substrate-unavailable 2,
+   :grounded-change 19,
+   :incomplete 7},
+  :close-entity-id-present 41,
+  :trace-files 60,
+  :close-date-range
+  {:first "2026-07-14T20:27:28.840534153Z",
+   :last "2026-07-27T10:59:53.609069187Z"},
+  :cohort-close-files 82,
+  :trace-records 897,
+  :unique-close-records 81,
+  :trace-date-range
+  {:first "2026-05-18T19:42:49.284838608Z",
+   :last "2026-09-12T17:28:09.498448087Z"},
+  :duplicate-identity-conflicts
+  [{:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-012"},
+    :signatures
+    #{{:closed-at "2026-07-15T07:00:13.390827759Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-16T11:54:34.409184891Z",
+       :outcome :agent-unavailable,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-010"},
+    :signatures
+    #{{:closed-at "2026-07-16T11:11:50.463780687Z",
+       :outcome :build-failed,
+       :entity/id "M-learning-loop"}
+      {:closed-at "2026-07-15T05:00:13.169383373Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-007"},
+    :signatures
+    #{{:closed-at "2026-07-15T02:00:13.413663181Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-16T09:08:33.352634623Z",
+       :outcome :grounded-change,
+       :entity/id "repair-attempt-006-late-author-artifact"}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-011"},
+    :signatures
+    #{{:closed-at "2026-07-16T11:48:45.506244527Z",
+       :outcome :build-failed,
+       :entity/id "repair-attempt-010"}
+      {:closed-at "2026-07-15T06:00:12.679928680Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-006"},
+    :signatures
+    #{{:closed-at "2026-07-15T01:00:19.287619706Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-16T09:03:02.660635643Z",
+       :outcome :incomplete,
+       :entity/id "M-learning-loop"}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-016"},
+    :signatures
+    #{{:closed-at "2026-07-16T13:01:12.356234154Z",
+       :outcome :grounded-change,
+       :entity/id "repair-attempt-010"}
+      {:closed-at "2026-07-15T11:00:30.412441239Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-024"},
+    :signatures
+    #{{:closed-at "2026-07-15T19:00:19.086830269Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-18T14:42:13.791893172Z",
+       :outcome :build-failed,
+       :entity/id "M-learning-loop"}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-003"},
+    :signatures
+    #{{:closed-at "2026-07-14T22:00:34.252872546Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-15T21:50:31.281498511Z",
+       :outcome :grounded-change,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-008"},
+    :signatures
+    #{{:closed-at "2026-07-16T10:30:20.252053526Z",
+       :outcome :build-failed,
+       :entity/id "M-learning-loop"}
+      {:closed-at "2026-07-15T03:00:13.643685331Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-023"},
+    :signatures
+    #{{:closed-at "2026-07-15T18:00:07.140844474Z",
+       :outcome :agent-unavailable,
+       :entity/id nil}
+      {:closed-at "2026-07-17T23:52:26.424018409Z",
+       :outcome :grounded-change,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-005"},
+    :signatures
+    #{{:closed-at "2026-07-15T22:36:22.189211132Z",
+       :outcome :grounded-change,
+       :entity/id "M-learning-loop"}
+      {:closed-at "2026-07-15T00:00:28.135846554Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-009"},
+    :signatures
+    #{{:closed-at "2026-07-16T10:56:36.081409832Z",
+       :outcome :build-failed,
+       :entity/id "repair-attempt-008"}
+      {:closed-at "2026-07-15T04:00:12.756119309Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-021"},
+    :signatures
+    #{{:closed-at "2026-07-16T15:47:46.291924732Z",
+       :outcome :build-failed,
+       :entity/id "repair-attempt-020-build-failed"}
+      {:closed-at "2026-07-15T16:00:27.958012819Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-022"},
+    :signatures
+    #{{:closed-at "2026-07-16T16:34:01.065836902Z",
+       :outcome :grounded-change,
+       :entity/id "M-learning-loop"}
+      {:closed-at "2026-07-15T17:00:34.146522728Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-013"},
+    :signatures
+    #{{:closed-at "2026-07-16T12:12:33.889635826Z",
+       :outcome :build-failed,
+       :entity/id "repair-attempt-010"}
+      {:closed-at "2026-07-15T08:00:13.546595964Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-004"},
+    :signatures
+    #{{:closed-at "2026-07-15T21:50:32.027820498Z",
+       :outcome :agent-unavailable,
+       :entity/id nil}
+      {:closed-at "2026-07-14T23:00:27.924800398Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-017"},
+    :signatures
+    #{{:closed-at "2026-07-15T12:00:30.487679960Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-16T14:15:52.793510726Z",
+       :outcome :grounded-change,
+       :entity/id "M-learning-loop"}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-015"},
+    :signatures
+    #{{:closed-at "2026-07-15T10:00:31.369921051Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-16T12:49:38.442307806Z",
+       :outcome :build-failed,
+       :entity/id "repair-attempt-010"}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-002"},
+    :signatures
+    #{{:closed-at "2026-07-15T21:41:59.442192587Z",
+       :outcome :grounded-change,
+       :entity/id nil}
+      {:closed-at "2026-07-14T21:00:35.185956222Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-020"},
+    :signatures
+    #{{:closed-at "2026-07-15T15:00:59.240733898Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-16T15:21:19.043825898Z",
+       :outcome :build-failed,
+       :entity/id "M-learning-loop"}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-018"},
+    :signatures
+    #{{:closed-at "2026-07-15T13:00:31.776062587Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-16T14:35:11.611835161Z",
+       :outcome :build-failed,
+       :entity/id "M-learning-loop"}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-019"},
+    :signatures
+    #{{:closed-at "2026-07-16T15:12:37.487009994Z",
+       :outcome :build-failed,
+       :entity/id "repair-attempt-018"}
+      {:closed-at "2026-07-15T14:00:37.517544161Z",
+       :outcome :no-selection,
+       :entity/id nil}}}
+   {:identity
+    {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-014"},
+    :signatures
+    #{{:closed-at "2026-07-15T09:00:13.850393352Z",
+       :outcome :no-selection,
+       :entity/id nil}
+      {:closed-at "2026-07-16T12:35:19.916733870Z",
+       :outcome :build-failed,
+       :entity/id "repair-attempt-010"}}}],
+  :byte-identical-copies 1},
+ :support
+ {:states
+  [:addressed
+   :falsified
+   :foreclosed
+   :refined
+   :reopened
+   :spawned
+   :strengthened],
+  :outcomes
+  [:abstained
+   :agent-unavailable
+   :artifact-only
+   :build-failed
+   :cancelled
+   :dispatch-failed
+   :grounded-change
+   :grounded-no-change
+   :guardrail-refusal
+   :incomplete
+   :no-selection
+   :substrate-unavailable]},
+ :authority :read-only-production-record-census,
+ :inputs
+ {:cohort-root "data/wm-full-loop",
+  :trace-root "data/wm-trace",
+  :manifest-entry-count 142,
+  :manifest-sha256
+  "d536239b50303e300f7b2378ce9586257f4fac7a61c9484cb6a759ad52baea8f"},
+ :as-of "2026-09-12",
+ :join
+ {:rule :latest-prior-trace-containing-exact-entity-id,
+  :status-source :derived-unique-argmax-of-mu-post,
+  :assessed 81,
+  :status-counts
+  {:missing-entity-id 40,
+   :no-prior-entity-belief 40,
+   :joined-derived-argmax 1},
+  :joined-count 1,
+  :joined-date-range
+  {:first "2026-07-14T20:27:28.840534153Z",
+   :last "2026-07-14T20:27:28.840534153Z"},
+  :age-ms {:min 232539, :max 232539}},
+ :joined-pairs
+ [{:attempt/id "attempt-001",
+   :source-sha256
+   "48eb15025df4820bb5155ad6a329e203fc7dfdb9abe6b5eadf70a0614a9f89a4",
+   :outcome :grounded-change,
+   :source
+   "data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/007-closed.edn",
+   :entity/id :sorry/pudding-g1-arrow-witness-binding,
+   :trace-at "2026-07-14T20:23:36.301882001Z",
+   :status :strengthened,
+   :closed-at "2026-07-14T20:27:28.840534153Z",
+   :age-ms 232539,
+   :cohort/id :wm-outer-loop-40-v1}]}
