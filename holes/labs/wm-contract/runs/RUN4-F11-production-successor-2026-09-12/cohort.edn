@@ -1,0 +1,32 @@
+{:protocol/version 4
+ :cohort/id :run4-f11-production-successor-20260912-v1
+ :status :draft
+ :registered-on "2026-09-12"
+ :authority "Joe-authorized continuous WM backlog; F11 commissioned as repair-024 distinct production-shaped successor"
+ :purpose "One ordinary F11 work item through the tightened runtime stack"
+ :casting {:author "codex-20" :reviewer "codex-18" :repair-reviewer "codex-19"}
+ :allowed-triggers #{:duree-click-continuous :duree-click-on-demand}
+ :stopping-rule {:kind :fixed-attempt-count :target 1}
+ :required-before-close #{:selection :construction :dispatch :build :adjudication}
+ :checkpoint-order [:time-step :selection :construction :dispatch :build :adjudication :closed]
+ :checkpoint-contract
+ {:time-step [:opportunity-id :trigger :machine-state :agent-roster :code-state :semantic-epoch]
+  :selection [:selected-mission :selected-action :ranked-candidates :selection-reasons]
+  :construction [:mission :cascade :sorries :wiring :patterns :deposit]
+  :dispatch [:agent :availability :job-id :prompt-ref]
+  :build [:artifacts :generated-code :commits :patterns-used :inline-improvements :validation]
+  :adjudication [:before :after :witness :build-match :dial]
+  :closed [:outcome :grounded? :artifact-only? :duration-ms :resource-use]
+  :selection-enaction [:selected-action :selected-rank :enacted-action :comparison :divergence]
+  :cell-shape "Every checkpoint payload is judgment+ground or a typed sorry/refusal."}
+ :grounded-success {:outcome :grounded-change
+                    :requires [:independent-before-witness :independent-after-witness
+                               :resolved-adjudication :dial-moved]
+                    :artifact-only-counts? false}
+ :repair-successor
+ {:repair-id "repair-attempt-024-feature-card-missing-or-invalid"
+  :replacement-commit "a0bd18be8ba400a9930ae7b773652076df4981ad"
+  :discharge-only-after-ordinary-gates true}
+ :metrics {:i8/item 1 :i8/operator-interventions-before-terminal 0
+           :i6/watched-finding :feature-card-missing-or-invalid}
+ :claims {:runtime-validation-only true :lean-attestation :suspended-vocabulary}}
