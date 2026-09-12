@@ -1,0 +1,30 @@
+{:subject
+ {:repo "mathlib4"
+  :path "DarkTower/WarMachine/CertificateStates.lean"
+  :sha256 "83bb3bbbea3bad9a9d56568704300427f94e1bf1539ad322041e3cae8beab778"
+  :tree-sha "6a0da69092276ca305016fe0dd8638a92f61db3f"}
+ :receipts
+ [{:gate :lean-elaboration-and-axiom-check
+   :command "lake env lean DarkTower/WarMachine/CertificateStates.lean"
+   :exit 0 :tests 4 :assertions 4
+   :tree-sha "6a0da69092276ca305016fe0dd8638a92f61db3f"
+   :at "2026-09-12T23:45:00Z"
+   :sorryAx false
+   :axioms {:census [] :other-theorems ["propext"]}}
+  {:gate :scoped-darktower-build
+   :command "lake build DarkTower.WarMachine.CertificateStates"
+   :exit 0 :tests 8496 :assertions 4
+   :tree-sha "6a0da69092276ca305016fe0dd8638a92f61db3f"
+   :at "2026-09-12T23:46:00Z"
+   :result "Build completed successfully (8496 jobs)."}]
+ :toolchain
+ {:path "lean-toolchain"
+  :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+ :retained-failed-elaborations
+ [{:tree-sha "e25f9e5ba43222551ba6152dfac464fb9c79d5f3"
+   :exit 1
+   :findings [:unfold-census-for-decidable-instance
+              :decidable-is-data-not-theorem-proposition]}
+  {:tree-sha "176e3a21ed66844940cdba1f2496ce2626391396"
+   :exit 1
+   :findings [:unknown-decidable-em-name]}]}
