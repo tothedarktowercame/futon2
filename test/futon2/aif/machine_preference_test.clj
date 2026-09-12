@@ -95,9 +95,9 @@
                          [:refusal :kind]))))
         (testing "Q positive where C is named zero exposes infinite risk"
           (is (= {:kind :positive-prediction-at-zero-preference
-                  :path [:distribution :mass [:organization :cancelled]]
+                 :path [:distribution :mass [:organization :cancelled]]
                   :risk :infinite}
-                 (:refusal (c/unsupported-risk result [:organization :cancelled] 1/8))))))))
+                 (:refusal (c/unsupported-risk result [:organization :cancelled] 1/8)))))))))
 
 (deftest pinned-production-loader-witness
   (with-model
