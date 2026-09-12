@@ -4,6 +4,13 @@
  :registered-on "2026-09-12"
  :authority "Joe-authorized continuous WM backlog; F11 commissioned as repair-024 distinct production-shaped successor"
  :purpose "One ordinary F11 work item through the tightened runtime stack"
+ :machine-evolution
+ {:allowed? true
+  :rule "Development may continue, but no admitted opportunity may be dropped or relabelled."
+  :per-attempt-provenance [:semantic-epoch :git-sha :git-dirty?
+                           :resolved-mode-flags :configuration-digest]
+  :epoch-boundary "F11 item one, after authenticated Codex fold-port commissioning."
+  :analysis "Report this attempt in its own semantic epoch."}
  :casting {:author "codex-20" :reviewer "codex-18" :repair-reviewer "codex-19"}
  :allowed-triggers #{:duree-click-continuous :duree-click-on-demand}
  :stopping-rule {:kind :fixed-attempt-count :target 1}

@@ -10,9 +10,9 @@
                {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12/run-config.edn"
                 :sha256 "3ed73d48cc9085a1c1884bc869e6e5c1f977ef6014a0bbbf58d7f29cc2f306b5"}
                {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12/cohort.edn"
-                :sha256 "6f746869ec44b57d4ef684c316f1a313f2ed52f98dcf209095a48ead8c2f9897"}]
+                :sha256 "681d6e42a3949bbf6225b6bda1c5708fd2d7c0fc2c5f6f652af71e8c6601de71"}]
  :trials [{:ordinal 1 :trial-id "M-f11-find-production-successor"
            :attempt-id "f11-production-successor-20260912-attempt-001"
-           :pin-sha256 "5ad320f7821de1647381a3dc09f2b523fd7aefd7f636330c0a5bb2b1f23ebcbf"
+           :pin-sha256 "c8b87cb34ad3405664deba442aacdfadfa0d4ceddf17792d51383dc80a987c42"
            :packet {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12/task-pin.edn"
-                    :sha256 "5ad320f7821de1647381a3dc09f2b523fd7aefd7f636330c0a5bb2b1f23ebcbf"}}]}
+                    :sha256 "c8b87cb34ad3405664deba442aacdfadfa0d4ceddf17792d51383dc80a987c42"}}]}

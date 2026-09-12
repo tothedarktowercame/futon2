@@ -11,7 +11,7 @@
            {:path "src/futon2/aif/mission_registry.clj"
             :sha256 "07822ed0667f268350fc3b9d921adce4d0d8c78276463b3bf03e93f5a01b89da"}
            {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12/cohort.edn"
-            :sha256 "6f746869ec44b57d4ef684c316f1a313f2ed52f98dcf209095a48ead8c2f9897"}]
+            :sha256 "681d6e42a3949bbf6225b6bda1c5708fd2d7c0fc2c5f6f652af71e8c6601de71"}]
  :config {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12/run-config.edn"
           :sha256 "3ed73d48cc9085a1c1884bc869e6e5c1f977ef6014a0bbbf58d7f29cc2f306b5"}
  :casting {:author "codex-20" :reviewer "codex-18" :repair-reviewer "codex-19"}
