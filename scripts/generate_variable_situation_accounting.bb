@@ -10,6 +10,7 @@
 ;; :counts :declaration-closability for the declaration-side total the table
 ;; prints. Reconciled by name at runs/RE1-hole-count-reconciliation/README.md.
 (require '[cheshire.core :as json]
+         '[babashka.process :as process]
          '[clojure.edn :as edn]
          '[clojure.java.io :as io]
          '[clojure.string :as str]
@@ -18,12 +19,22 @@
 
 (def root (.getCanonicalFile
            (io/file (or (System/getenv "FUTON2_ROOT") "/home/joe/code/futon2"))))
-(def contract-file (io/file "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"))
+(def mathlib-root (io/file "/home/joe/code/mathlib4"))
+(def machine-contract-dir (io/file mathlib-root "DarkTower/WarMachine/machine-contracts"))
+(def machine-contract-manifest
+  (io/file (or (System/getenv "WM_MACHINE_CONTRACT_MANIFEST")
+               (str (io/file machine-contract-dir "manifest.json")))))
+(def machine-contract-verifier
+  (io/file (or (System/getenv "WM_MACHINE_CONTRACT_VERIFIER")
+               (str (io/file mathlib-root "scripts/emit-machine-contracts.py")))))
+(def contract-file (io/file mathlib-root "DarkTower/WarMachine/holes-contract.json"))
 (def glossary-file (io/file "/home/joe/code/p4ng/sec-glossary.tex"))
 (def witness-file (io/file root "checks/witness-registry.edn"))
 (def worklist-file (io/file (or (System/getenv "WM_WORKLIST")
                                 (str (io/file root "holes/labs/wm-contract/worklist.edn")))))
-(def output-file (io/file root "holes/labs/wm-contract/variable-situation-accounting.edn"))
+(def output-file
+  (io/file (or (System/getenv "WM_ACCOUNTING_OUTPUT")
+               (str (io/file root "holes/labs/wm-contract/variable-situation-accounting.edn")))))
 (def lean-file (io/file "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"))
 ;; Licences are written relative to ~/code so one resolver checks every one of
 ;; them, whichever repository the evidence lives in.
@@ -31,6 +42,55 @@
 (def lean-rel "mathlib4/DarkTower/WarMachine/Holes.lean")
 (def witness-rel "futon2/checks/witness-registry.edn")
 (def glossary-rel "p4ng/sec-glossary.tex")
+
+(defn verify-machine-contracts! []
+  (let [result (process/shell {:out :string :err :string :continue true}
+                              "python3" (str machine-contract-verifier)
+                              "verify" (str machine-contract-manifest))]
+    (when-not (zero? (:exit result))
+      (throw (ex-info (str "machine-contract union refused: " (str/trim (:err result)))
+                      {:error :machine-contract-union-refused
+                       :exit (:exit result)})))))
+
+(defn line-containing [file needle]
+  (some (fn [[i line]] (when (str/includes? line needle) (inc (long i))))
+        (map-indexed vector (str/split-lines (slurp file)))))
+
+(defn contract-union []
+  ;; Verification precedes parsing.  This reuses packet A's actual verifier,
+  ;; including all fourteen source pins and the bundle/Holes byte pins.
+  (verify-machine-contracts!)
+  (let [manifest (json/parse-string (slurp machine-contract-manifest) true)
+        bundle-file (io/file (.getParentFile machine-contract-manifest)
+                             (get-in manifest [:bundle :file]))
+        bundle (json/parse-string (slurp bundle-file) true)
+        holes (json/parse-string (slurp contract-file) true)
+        holes-declarations
+        (mapv #(assoc % :_lean-file lean-file :_lean-rel lean-rel)
+              (:declarations holes))
+        machine-declarations
+        (mapv (fn [contract]
+                (let [d (first (:declarations contract))
+                      module (get-in contract [:source :module])
+                      source-rel (str "mathlib4/" (str/replace module "." "/") ".lean")
+                      source-file (io/file code-root source-rel)
+                      contract-rel (str "mathlib4/DarkTower/WarMachine/machine-contracts/"
+                                        (.getName bundle-file))
+                      contract-line (line-containing bundle-file
+                                                     (str "\"name\": \"" (:name d) "\""))]
+                  (when-not contract-line
+                    (throw (ex-info (str "machine declaration absent from verified bundle: " (:name d))
+                                    {:error :machine-contract-pointer-absent :name (:name d)})))
+                  (assoc d
+                         :_local-name (last (str/split (:name d) #"\."))
+                         :_lean-file source-file
+                         :_lean-rel source-rel
+                         :_contract-licence (str contract-rel ":" contract-line))))
+              (:contracts bundle))]
+    {:source (:source holes)
+     :declarations (vec (concat holes-declarations machine-declarations))
+     :machine-manifest manifest
+     :machine-bundle-file bundle-file}))
 
 (defn regex-quote [s] (java.util.regex.Pattern/quote (str s)))
 
@@ -76,19 +136,22 @@
 (def area-names
   {:belief #{"GenerativeModel" "generativeFactorMass" "TransitionKernel" "BeliefState" "ObservationVector"
              "beliefUpdate" "predictionError" "PrecisionMap" "observationKernel"
-             "observationKernelRowMass"}
+             "observationKernelRowMass" "machineObservation" "machineBeliefState"
+             "machineBeliefUpdate" "machinePrecision" "machineChannelPredictionError"}
    :scores #{"variationalFreeEnergy" "expectedFreeEnergy" "G_eq_expectedFreeEnergy"
              "ambiguity" "observationEntropy" "softmax" "predictiveOutcomeRisk"
              "PredictiveOutcomeKernel" "ExpectedInformationGainValue"
              "expectedInformationGain" "parameterInformationGain" "modelUncertaintyBonus"
-             "modelUncertaintyAndEIG" "ParameterPriorKernel" "ParameterPosteriorKernel"}
+             "modelUncertaintyAndEIG" "ParameterPriorKernel" "ParameterPosteriorKernel"
+             "machineDepth"}
    :preferences #{"PreferenceDistribution"}
    ;; policyPosteriorImportsPolicyF / policyPrecisionIsGammaFromBeta (Holes.lean:6648,6651,
    ;; minted 2026-08-30, TN-edge-review H3/H4) are about the policy posterior itself --
    ;; pi = sigma(ln E - F - G) and the gamma that scales G in it (aif-equations.edn:181,218) --
    ;; so they sit with E (PolicyPriorKernel) and pi, not with the free energies they read.
    :policy #{"ControlPolicy" "ControlVocabulary" "cascadeGrainPi" "PolicyPriorKernel"
-             "policyPosteriorImportsPolicyF" "policyPrecisionIsGammaFromBeta"}
+             "policyPosteriorImportsPolicyF" "policyPrecisionIsGammaFromBeta"
+             "machineTemperature" "machineAction"}
    ;; dirichletAccumulationImportAbsent (Holes.lean:6645, H2) names the missing path into
    ;; R17's concentrations; its contract evidence is DirichletConcentrations, already here.
    :learning #{"bayesianModelReduction" "modelReductionFreeEnergyChange"
@@ -508,6 +571,22 @@
 ;; --- one-pass indexes over the evidence sources -----------------------------
 (def lean-lines (delay (str/split-lines (slurp lean-file))))
 
+(defn source-lines [d]
+  (if-let [file (:_lean-file d)]
+    (str/split-lines (slurp file))
+    @lean-lines))
+
+(defn declaration-local-name [d]
+  (or (:_local-name d) (:name d)))
+
+(defn source-definition-line [d]
+  (let [nm (declaration-local-name d)
+        pattern (re-pattern
+                 (str "^\\s*(?:noncomputable\\s+)?(?:abbrev|def|structure|inductive|"
+                      "theorem|lemma|class|opaque|axiom)\\s+" (regex-quote nm) "\\b"))]
+    (some (fn [[i line]] (when (re-find pattern line) (inc (long i))))
+          (map-indexed vector (source-lines d)))))
+
 ;; Every quoted string literal in the module, earliest line wins. The contract
 ;; manifest emits declarations as `mkClosed "name" "owner"` and as
 ;; `("name", "owner")` tuples, so the quoted literal is the one shape both
@@ -559,10 +638,16 @@
   "[ladder blocked] for a contract declaration."
   [d binding binding-line]
   (let [nm (:name d)
-        literal (get @lean-literal-lines nm)
-        _ (when-not literal
+        named-licence (or (:_contract-licence d)
+                          (when-let [literal (get @lean-literal-lines nm)]
+                            (str lean-rel ":" literal)))
+        definition-line (if (:_lean-file d)
+                          (source-definition-line d)
+                          (get @lean-definition-lines nm))
+        source-rel (or (:_lean-rel d) lean-rel)
+        _ (when-not named-licence
             (unlicensed! nm :named "no line of the Lean module names it as a string literal"))
-        l0 [{:rung :named :licence (str lean-rel ":" literal)
+        l0 [{:rung :named :licence named-licence
              :evidence :contract-manifest-entry
              :why "the declaration is named in the contract manifest"}]]
     (cond
@@ -571,13 +656,13 @@
            :why (str "the declaration is a contract HOLE: the proposition is stated, "
                      "not discharged, so nothing is transcribed by its presence")}]
 
-      (nil? (get @lean-definition-lines nm))
+      (nil? definition-line)
       [l0 {:rung :type-transcribed
            :why "the module carries no definition site for the declared name"}]
 
       :else
       (let [l1 (conj l0 {:rung :type-transcribed
-                         :licence (str lean-rel ":" (get @lean-definition-lines nm))
+                         :licence (str source-rel ":" definition-line)
                          :evidence :lean-definition-site
                          :why "the closed declaration has a definition site in the module"})]
         (cond
@@ -732,7 +817,9 @@
     (format "%064x" (BigInteger. 1 (.digest d)))))
 
 (defn area-for [{:keys [name owner]}]
-  (or (some (fn [[area names]] (when (contains? names name) area)) area-names)
+  (let [local-name (last (str/split name #"\."))]
+  (or (some (fn [[area names]] (when (or (contains? names name)
+                                         (contains? names local-name)) area)) area-names)
       (cond
         (or (str/includes? owner "R19") (#{"C" "machineHasNoC"} name)) :preferences
         (str/includes? owner "validated-R5") :demo
@@ -740,7 +827,7 @@
         (or (str/starts-with? owner "P-R2") (str/starts-with? owner "P-R8")
             (str/starts-with? owner "P-R9") (str/starts-with? owner "record:")
             (str/includes? owner "delivery-lifecycle")) :records
-        :else :unclassified)))
+        :else :unclassified))))
 
 (defn glossary-title-at [owner]
   (when-let [[_ n] (re-find #"sec-glossary\.tex:(\d+)" owner)]
@@ -820,7 +907,7 @@
     (if (sequential? w) w [w])))
 
 (defn build-registry
-  ([] (build-registry (json/parse-string (slurp contract-file) true)))
+  ([] (build-registry (contract-union)))
   ([contract]
   (let [_ (when (empty? (:declarations contract))
             (throw (ex-info "model coverage unavailable: zero contract declarations"
@@ -889,11 +976,19 @@
                               :unowned)))
                    uncarried-rows)]
     {:schema :wm/variable-situation-accounting-v1
-     :as-of "2026-09-08"
-     :authority {:contract-git-sha (get-in contract [:source :git-sha])
-                 :contract-sha256 (sha256 contract-file)
-                 :glossary-sha256 (sha256 glossary-file)
-                 :witness-registry-sha256 (sha256 witness-file)}
+     :as-of (let [dates (keep :decided (:declarations contract))]
+              (when-not (and (seq dates)
+                             (every? #(re-matches #"\d{4}-\d{2}-\d{2}" %) dates))
+                (throw (ex-info "contract declarations have no total ISO decision-date population"
+                                {:error :invalid-contract-dates})))
+              (last (sort dates)))
+     :authority (cond-> {:contract-git-sha (get-in contract [:source :git-sha])
+                         :contract-sha256 (sha256 contract-file)
+                         :glossary-sha256 (sha256 glossary-file)
+                         :witness-registry-sha256 (sha256 witness-file)}
+                  (:machine-manifest contract)
+                  (assoc :machine-contract-manifest-sha256 (sha256 machine-contract-manifest)
+                         :machine-contract-bundle-sha256 (sha256 (:machine-bundle-file contract))))
      ;; :framing is U14's addition: a glossary paragraph that names the frame
      ;; the paper is written in has nothing to build and nothing to hold open,
      ;; so neither :named-only (reads as uncovered) nor a closed status (reads

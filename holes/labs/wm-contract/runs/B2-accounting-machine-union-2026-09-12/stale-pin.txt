@@ -1,0 +1,29 @@
+----- Error --------------------------------------------------------------------
+Type:     clojure.lang.ExceptionInfo
+Message:  machine-contract union refused: REFUSED: stale source pin: DarkTower/WarMachine/MachineContracts.lean
+Data:     {:error :machine-contract-union-refused, :exit 1}
+Location: /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:51:7
+
+----- Context ------------------------------------------------------------------
+47:   (let [result (process/shell {:out :string :err :string :continue true}
+48:                               "python3" (str machine-contract-verifier)
+49:                               "verify" (str machine-contract-manifest))]
+50:     (when-not (zero? (:exit result))
+51:       (throw (ex-info (str "machine-contract union refused: " (str/trim (:err result)))
+          ^--- machine-contract union refused: REFUSED: stale source pin: DarkTower/WarMachine/MachineContracts.lean
+52:                       {:error :machine-contract-union-refused
+53:                        :exit (:exit result)})))))
+54:
+55: (defn line-containing [file needle]
+56:   (some (fn [[i line]] (when (str/includes? line needle) (inc (long i))))
+
+----- Stack trace --------------------------------------------------------------
+user/verify-machine-contracts! - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:51:7
+user/verify-machine-contracts! - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:46:1
+user/contract-union            - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:62:3
+user/contract-union            - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:59:1
+user/build-registry            - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:917:23
+user/build-registry            - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:917:7
+user/build-registry            - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:916:1
+user                           - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:1192:15
+user                           - /home/joe/code/futon2/scripts/generate_variable_situation_accounting.bb:1175:1

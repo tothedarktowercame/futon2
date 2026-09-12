@@ -1,0 +1,5 @@
+60ef363cb8e2b8e8bc795f366064b07be7cfa3f46f8906b2451a199a51b4af82  scripts/generate_variable_situation_accounting.bb
+1ced38773c04da65e461081bdcfafb494f23b45927ac08c68ef08b273e481516  /home/joe/code/mathlib4/DarkTower/WarMachine/machine-contracts/manifest.json
+a2f894f90888ed43fdea89d7ee08f5684c71c699977e2fc499e7a747eb35c488  /home/joe/code/mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json
+313e3f897577b30d66cfcd4e9e99b7f37053b5028cddb18cfe16a255d3f3ab4b  /home/joe/code/mathlib4/scripts/emit-machine-contracts.py
+7217db85e6e3b08a1c89c944fff629b0a153e980edc2095ce08f2ca37ac67ce1  /tmp/variable-situation-accounting-b2-control.edn

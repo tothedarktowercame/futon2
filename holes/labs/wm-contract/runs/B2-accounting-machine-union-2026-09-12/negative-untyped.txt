@@ -1,0 +1,1 @@
+variable-situation-accounting: PASS untyped open hole rejected {:error :untyped-open-hole, :name "plantedUntypedHole"}

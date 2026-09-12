@@ -1,0 +1,15 @@
+{:schema :wm/accounting-machine-union-controls-v1
+ :date "2026-09-12"
+ :canonical-output-written? false
+ :commands
+ [{:control :generate-first :exit 0 :transcript "generate-first.txt"}
+  {:control :generate-second :exit 0 :transcript "generate-second.txt"}
+  {:control :byte-identical :exit 0 :sha256 "7217db85e6e3b08a1c89c944fff629b0a153e980edc2095ce08f2ca37ac67ce1"}
+  {:control :check-disposable :exit 0 :transcript "check.txt"}
+  {:control :negative-untyped :exit 0 :transcript "negative-untyped.txt"}
+  {:control :stale-machine-pin :exit 1 :expected-exit 1 :output-created? false :transcript "stale-pin.txt"}
+  {:control :existing-row-classification :exit 0 :transcript "row-diff-classification.edn"}]
+ :diagnostic-history
+ [{:control :derive-as-of :exit 1
+   :finding "clojure.core/max is numeric and rejected ISO date strings"
+   :correction "Validate YYYY-MM-DD and select the last lexicographically sorted date."}]}

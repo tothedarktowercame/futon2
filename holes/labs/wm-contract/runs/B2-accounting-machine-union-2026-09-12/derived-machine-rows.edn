@@ -1,0 +1,212 @@
+{:schema :wm/machine-accounting-derived-rows-v1,
+ :source-output-sha256
+ "7217db85e6e3b08a1c89c944fff629b0a153e980edc2095ce08f2ca37ac67ce1",
+ :rows
+ [{:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineObservation.machineObservation",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:14",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachineObservation.lean:58",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R2: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineBeliefState.machineBeliefState",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:42",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachineBeliefState.lean:25",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R1: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name
+   "DarkTower.WarMachine.MachineBeliefUpdate.machineBeliefUpdate",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:70",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachineBeliefUpdate.lean:181",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R3: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachinePrecision.machinePrecision",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:98",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachinePrecision.lean:101",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R7: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineDepth.machineDepth",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:126",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/MachineDepth.lean:133",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :scores,
+   :owner
+   "R13: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineTemperature.machineTemperature",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:154",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachineTemperature.lean:42",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :policy,
+   :owner
+   "R14: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineAction.machineAction",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:182",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/MachineAction.lean:49",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :policy,
+   :owner
+   "R16: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name
+   "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:210",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachinePredictionError.lean:160",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R3a-host-proposed: machine-model transcription; no runtime correspondence claim"}]}
