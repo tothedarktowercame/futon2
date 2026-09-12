@@ -87,7 +87,12 @@ operator workflow conversation (standdown 2026-09-12).
 
 6. The predictive-outcome-kernel constructor.
 7. The belief-to-state distribution.
-8. The controlled transition kernel.
+8. DONE as source module + proofs + witness (futon2 5f6b40da +
+   41d61a40; mathlib4 e1b75181..c1c71011 + 34180899 rejection
+   cases; reviewed via receipts 2026-09-12). Declared-prior
+   authority only, honestly recorded (:empirical-claim false; no
+   measured action law exists). Live-filter wiring belongs to the
+   integration owner after rows 7/9/10.
 9. The policy-conditioned state predictive.
 10. The machine preference distribution.
 11. The parameter kernels.

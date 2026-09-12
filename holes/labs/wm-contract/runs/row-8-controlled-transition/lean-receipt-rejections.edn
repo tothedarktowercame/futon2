@@ -1,0 +1,5 @@
+{:command "lake env lean DarkTower/WarMachine/MachineTransition.lean"
+ :exit 0 :errors 0 :warnings 0 :declarations 11
+ :tree-sha "3418089971" :ran-by "claude-15 (review-finding fix)"
+ :at "2026-09-12"
+ :adds "uncontrolled kernel + beta-normaliser rejection theorems (the carrier falsifier's two cases)"}
