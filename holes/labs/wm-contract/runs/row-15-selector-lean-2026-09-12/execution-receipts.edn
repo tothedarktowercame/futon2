@@ -1,0 +1,35 @@
+{:subject
+ {:repo "mathlib4"
+  :path "DarkTower/WarMachine/ReasonBearingSelector.lean"
+  :sha256 "95d473dfc6226bb9da62153d5222999faf8969d656a4f49253b094d3de8653fb"
+  :tree-sha "817fb157fd1656223369fb85f6d7be2de948037b"}
+ :frozen-import
+ {:path "DarkTower/WarMachine/MachineAction.lean"
+  :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"}
+ :receipts
+ [{:gate :lean-elaboration-and-axiom-check
+   :command "lake env lean DarkTower/WarMachine/ReasonBearingSelector.lean"
+   :exit 0 :tests 7 :assertions 7
+   :tree-sha "817fb157fd1656223369fb85f6d7be2de948037b"
+   :at "2026-09-12T23:14:00Z"
+   :sorryAx false
+   :axioms ["propext" "Classical.choice" "Quot.sound"]}
+  {:gate :scoped-darktower-build
+   :command "lake build DarkTower.WarMachine.ReasonBearingSelector"
+   :exit 0 :tests 8498 :assertions 7
+   :tree-sha "817fb157fd1656223369fb85f6d7be2de948037b"
+   :at "2026-09-12T23:15:00Z"
+   :result "Build completed successfully (8498 jobs)."}]
+ :toolchain
+ {:path "lean-toolchain"
+  :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+ :retained-failed-elaborations
+ [{:tree-sha "50dab6430fe2e72986c137fb3d9ecda7ffd6d42e"
+   :exit 1
+   :findings [:list-nonempty-name :well-formed-decidability :fold-membership-proof]}
+  {:tree-sha "533993114eea5632437df20596e98691c4a4f3be"
+   :exit 1
+   :findings [:well-formed-decidability :tie-proof-branch :fold-membership-proof]}
+  {:tree-sha "6ea7138996e1d47a51a9a8a36c96806d9909a74c"
+   :exit 1
+   :findings [:final-reflexive-membership-goal]}]}
