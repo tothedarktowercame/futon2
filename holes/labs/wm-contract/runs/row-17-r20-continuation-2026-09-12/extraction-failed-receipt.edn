@@ -1,0 +1,5 @@
+{:command "FUTON3C_PARKED_ON_PATH=.../isolated-park-store.edn FUTON3C_LIVE_PARKED_ON_OBSERVED=1 clojure -M -e '(load-file \"../futon2/holes/labs/wm-contract/runs/row-17-r20-continuation-2026-09-12/extract_and_verify.clj\")'"
+ :exit 1
+ :failure "Could not locate futon3c/dev/config on the default classpath; execution stopped during namespace loading before either park store was touched."
+ :tree-sha "1a0ab2bfe914ae53857cb081da83546958b893c6"
+ :at "2026-09-12T20:28:00Z"}
