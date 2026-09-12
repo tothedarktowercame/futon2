@@ -21,7 +21,8 @@
   {:channel :channel/verify-request :outcome :ticketed
    :gap "payload mechanical (id, pointer, basis-sha256, freshness — emitted by the live verifier), but NO consumer exists: no acceptance authority receives it, no reconciliation. The N3 lane that would consume it is not built"
    :source "futon3c agents/cascade_verifier_board.clj (look-debt verb)"
-   :ticket-owner "N3 lane build"}
+   :ticket-owner "N3 lane build"
+   :ticket-note "claude-15 (2026-09-12 review): this is not a nice-to-have consumer ticket — there is an OPEN PRODUCER with no acceptance side, structurally the same debt as the twelve wiring-nil checkpoints, on a channel instead of an artifact. Work is flowing into the void; the acceptance side is the debt."}
 
   {:channel :channel/constellation-artifact :outcome :ticketed
    :gap "designed only (NOTE-operator-landscape-reader role-split section); no mechanics exist — all four fields are prose"
