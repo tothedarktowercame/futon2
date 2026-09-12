@@ -86,7 +86,13 @@ implementation packets are ready to dispatch and HELD pending
 operator workflow conversation (standdown 2026-09-12).
 
 6. The predictive-outcome-kernel constructor.
-7. The belief-to-state distribution.
+7. IN PROGRESS: legs (a)+(b) done and reviewed (futon2
+   72950ab5/5a7f517f/a73fe29e, mathlib4 4750f9fa; receipts
+   validated). Leg (c) surfaced a real contract conflict —
+   production float rows sum one ulp off 1 — settled by reviewer
+   as contract v1.1 (futon2 60d298df, mathlib4 2f46171d): exact
+   IEEE summation, |sum-1| <= 1e-12, typed :float-carried, no
+   renormalization. Leg (c) completion re-belled to codex-22.
 8. DONE as source module + proofs + witness (futon2 5f6b40da +
    41d61a40; mathlib4 e1b75181..c1c71011 + 34180899 rejection
    cases; reviewed via receipts 2026-09-12). Declared-prior
