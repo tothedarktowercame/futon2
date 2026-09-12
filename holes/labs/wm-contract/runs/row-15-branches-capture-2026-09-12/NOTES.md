@@ -33,3 +33,11 @@ used numeric `1.0`, while production accepts the closed scaling vocabulary
 `:unscaled` or `:by-tau`. `failed-attempt-f-scaling.edn` retains that refusal.
 The follow-up uses the production vocabulary `:unscaled`; it does not weaken
 the boundary.
+
+Post-capture validation found that the first finite epsilon derived from the
+controller head did not dominate the habit-selected candidate, and that a tie
+among two non-winning rows did not exercise first-max. The committed
+`repair_direct_controls.clj` reuses the retained machinery bytes without taking
+another tick: it uses a large finite epsilon against the complete real list and
+a two-real-candidate tie domain with the first real score duplicated. It
+rewrites only those two direct-invocation controls and the hash manifest.
