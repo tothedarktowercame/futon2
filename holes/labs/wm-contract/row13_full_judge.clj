@@ -1,5 +1,6 @@
 (ns row13-full-judge
   (:require [clojure.java.io :as io] [clojure.pprint :as pp]
+            [futon2.aif.machine-accumulation :as accumulation]
             [futon2.aif.trace :as trace] [futon2.report.war-machine :as wm]
             [futon2.run-tick-once :as tick]))
 
@@ -57,9 +58,10 @@
                 (assoc (refusal gap "row13-control-gap") :expected :carry-chain-gap)
                 (assoc (refusal support "row13-control-support") :expected :support-mismatch)]
       entity (:accumulation-entity-id (wm/accumulation-config))
-      initial (#'wm/declared-accumulation-initialization
-               (:observation (first records)) (get-in (first records) [:mu-post entity])
-               (:accumulation-initialization (wm/accumulation-config)))
+      initial (accumulation/initialize
+               (vec (sort (keys (:observation (first records)))))
+               (vec (sort (keys (get-in (first records) [:mu-post entity]))))
+               (get-in (wm/accumulation-config) [:accumulation-initialization :prior]))
       befores (cons initial (map :accumulation-state records))
       checks (mapv (fn [before r]
                      (let [coordinates (coordinate-comparison before r)]
