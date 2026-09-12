@@ -444,8 +444,15 @@ operator workflow conversation (standdown 2026-09-12).
     'named' but the obligated lifecycle ladder is 0/7. TN also
     corrects the premise: R14/R17 have formal rungs but NO
     lifecycle rows (R17 explicitly omitted originally). Two
-    independent facts-row packets; R11 dispatched (codex-24),
-    R15 follows.
+    independent facts-row packets. R11 ROW DONE (2026-09-12,
+    futon2 59941798/aba95c09, p4ng a7d27416, reviewed): seven
+    [A11] typed absences with the byte-pinned V7 receipt, five
+    planted controls, and the :mechanism-built-and-never-entered
+    classification; render control verified (....... -> -------,
+    scope 6->7 nodes, formal rung stays named,
+    at-obligated-state false; 14 matrix/schema controls green;
+    receipts bound to both repos' trees; reviewer spot-verified
+    the source pins at HEAD). R15 row dispatched (codex-24).
 
 ## Phase 4 — the wiring diagram agrees with the code (3)
 
