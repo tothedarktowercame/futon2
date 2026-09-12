@@ -296,7 +296,17 @@ operator workflow conversation (standdown 2026-09-12).
     redirected capture readback verified by the reviewer; two
     failed capture attempts honestly retained (the first
     refused by the existing trigger-preregistration guard).
-    Retention packet 2 (entity identity on every close)
+    RETENTION PACKET 2 DONE (2026-09-12, futon2
+    6deb8019/3adc78bf, reviewed): every close carries typed
+    :outcome-entity from the central close seam — :present with
+    the exact selection target, or :absent distinguishing
+    :failed-before-selection / :no-selection-made /
+    :selection-had-no-target from actual state flags; no
+    target-class or mission-text promotion; disagreement with
+    packet 1's independent identity copy refuses
+    :entity-identity-mismatch BEFORE the append-only close
+    write; 147 tests/770 assertions; redirected readback
+    verified. Retention packet 3 (cross-ledger identity)
     dispatched (codex-24); 1b waits on retained data + the
     categorical-authority ruling at its review.
 15. Write measurement proofs for the five machine declarations that
