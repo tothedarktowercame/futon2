@@ -585,11 +585,13 @@
     :policy-support-exclusions (vec (:policy-support-exclusions judge-output))
     :decision (strip-decision (:decision judge-output)
                               (:ranked-actions judge-output))
-    :mode (:mode judge-output)
-    ;; Row 15 depth capture. Nil is an observed scorer input, not a missing
-    ;; field: it selects EFE's single-step path, recorded beside depth 1.
-    :horizon-steps (:horizon-steps judge-output)
-    :policy-depth-used (:policy-depth-used judge-output)}
+    :mode (:mode judge-output)}
+    (contains? judge-output :horizon-steps)
+    ;; Row 15 depth capture. A present nil is the observed scorer input, not a
+    ;; missing value: it selects EFE's single-step path.
+    (assoc :horizon-steps (:horizon-steps judge-output))
+    (contains? judge-output :policy-depth-used)
+    (assoc :policy-depth-used (:policy-depth-used judge-output))
     ;; RUN10 topology evidence. A measured nine-hop route adds 1,093 bytes to
     ;; a 1,042,451-byte policy-detail trace record (0.105%), so it is retained
     ;; unconditionally rather than coupled to the much larger detail flag.

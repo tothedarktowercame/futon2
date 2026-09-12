@@ -114,13 +114,13 @@
    :decision {:action {:type :no-op}
               :rank 1 :controller-score 0.05 :tau 0.2
               :softmax-weights {:will-be-stripped :for-trace}}
-   :mode :multiplied
-   :horizon-steps nil
-   :policy-depth-used 1})
+   :mode :multiplied})
 
 (deftest trace-record-retains-depth-input-and-effective-depth-test
   (testing "nil is retained as the actual single-step scorer input"
-    (let [r (trace/trace-record sample-judge-output)]
+    (let [r (trace/trace-record (assoc sample-judge-output
+                                       :horizon-steps nil
+                                       :policy-depth-used 1))]
       (is (contains? r :horizon-steps))
       (is (nil? (:horizon-steps r)))
       (is (= 1 (:policy-depth-used r)))))
