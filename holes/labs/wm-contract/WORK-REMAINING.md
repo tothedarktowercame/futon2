@@ -466,6 +466,32 @@ operator workflow conversation (standdown 2026-09-12).
     carrier's F-absent branch (the pinned record has F_pi
     :status :absent), general nonzero-F correspondence retained
     as open until a record with F_pi present exists.
+    CAPTURE-FAMILY GAP ANALYSIS DONE (2026-09-12,
+    TN-row16-capture-family-2026-09-12.md 603b3c0d; reviewer
+    spot-verified every binding + one retained-field claim per
+    proof). VERDICTS: R8 free-energy BLOCKED PERMANENTLY for
+    row 16 (:retired-no-production-object — the producer was
+    deleted under Joe's J2 ruling; capture cannot retain what
+    the machine no longer computes; reopening is an operator
+    decision, not capture work). R8 policy-F PROVABLE NOW from
+    the pinned S4 consecutive details-on records (sha aaeccaf4
+    verified; 4 f-pi record sets + 1 real incomplete-coverage
+    refusal control). R5 ambiguity BLOCKED
+    (:production-carrier-disagrees-with-declared-law — the
+    machine computes Gaussian differential entropy, the Lean
+    law is categorical kernel entropy; must NOT be bridged by
+    relabelling; packet A = explicit bridge-or-divergence
+    module, then estimator decision/build/capture/proof). R6
+    policy-set PROVABLE NOW (complete real ranked lists
+    retained; explicit Clojure-to-Candidate projection
+    declared, not pretended byte-identity). R17
+    model-reduction NEEDS CAPTURE after a binding-completeness
+    packet (registry binds only bayesFactorThreshold while its
+    formal line asserts three laws — carrier-lags-registry;
+    composite formal subject in a NEW module first, then one
+    real offline envelope retention, then the proof).
+    Seven-step split adopted; step 1 (R6 policy-set proof)
+    dispatched (codex-22).
     A/B/C ALL DONE — R6 CLAIM ADMITTED (2026-09-12):
     R6-policy-posterior-production-20260912T172809-f-absent-v1
     at :verified-binding (futon2 f269e9b7/bc3a5698; witness
