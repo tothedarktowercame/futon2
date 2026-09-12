@@ -232,11 +232,21 @@ operator workflow conversation (standdown 2026-09-12).
     returns [##NaN ##NaN] (reviewer-reproduced) instead of a typed
     refusal — repair item queued (typed zero/nonpositive-
     temperature refusal + tests; violates the no-silent-default
-    contract discipline). R17 binding -> provable now WITH new
-    formal evidence: the row-12 witness references are independent
-    but exist only as Clojure values; a generated Lean witness
-    file must state the 294 exact reference equations and
-    elaborate (packet out, codex-22).
+    contract discipline). R17 binding -> DONE (2026-09-12):
+    R17-dirichlet-accumulation-ieee-residuals-v1 admitted at
+    :verified-binding (futon2 5360a4a4 admission, 65dce508
+    registry; mathlib4 MachineAccumulationWitness.lean at
+    7f41356e14/sha256 3ddc2a2d) — 294 exact residual identities
+    under contract v1.2, maximum residual 5/36028797018963968
+    independently recomputed by the reviewer; scope
+    :row12-three-tick-ieee-correspondence (measured recurrence
+    correspondence, NOT live R17 wiring, :realised stays false).
+    Admission had one refusal round: aif-equations :lean carried
+    the annotation "(carrier only, Holes.lean:6935-6936)" and
+    validate! requires exact equality with the claim's
+    :declaration — refusal retained at 3383caf3, authority
+    normalized to the bare declaration name at 77f73a55
+    (annotation content preserved in :lean-status/:lean-note).
 
 ## Phase 3 — the assurance nodes (4)
 
