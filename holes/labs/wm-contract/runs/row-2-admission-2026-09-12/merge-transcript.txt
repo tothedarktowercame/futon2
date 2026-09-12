@@ -1,0 +1,4 @@
+exit 0
+admissions: 24 pending; 0 refused
+input-sha256: 73c7c328806e502069515d24617395afcd29db7245e4ea121ee67c434ac9e0c3
+No canonical output was written; three genuine fragments were merged in a disposable directory.

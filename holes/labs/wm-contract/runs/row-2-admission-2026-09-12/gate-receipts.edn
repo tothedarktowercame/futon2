@@ -1,0 +1,18 @@
+{:tree-sha "f9be1c4b117bc21693efe2866423a062c76878de"
+ :at "2026-09-12"
+ :gates
+ [{:command "lake env lean DarkTower/WarMachine/MachineObservationWitness.lean"
+   :repo "mathlib4" :tree-sha "1f09599c3f" :exit 0 :declarations 1}
+  {:command "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean"
+   :repo "mathlib4" :tree-sha "1f09599c3f" :exit 0 :declarations 10}
+  {:command "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean"
+   :repo "mathlib4" :tree-sha "1f09599c3f" :exit 0 :declarations 13}
+  {:command "lake env lean DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean"
+   :repo "mathlib4" :tree-sha "1f09599c3f" :exit 0 :declarations 24
+   :axioms ["propext" "Classical.choice" "Quot.sound"] :sorryAx false}
+  {:command "bb scripts/merge_witnesses.bb --fragments <disposable-three-fragment-dir> --output <disposable-output>"
+   :exit 0 :claims 24 :pending 24 :refused 0}
+  {:command "clj-kondo --lint holes/labs/wm-contract/row2_receipts.clj"
+   :exit 0 :errors 0 :warnings 0}
+  {:command "emacs --batch -Q -l futon4/dev/check-parens.el <nine-touched-clj-edn-files>"
+   :exit 0 :files 9}]}
