@@ -277,6 +277,45 @@
                 :via (:via to)
                 :at_ (:at to)}))))
 
+(defn- packet-run-route
+  "Route hops for a click result, from the selection seam's own :wm/route
+   when present, else the observed packet boundary.
+
+   RUN4 operator-selected production packets carry no selection-judgment
+   :wm/route (only the trace-selection seam emits one), so without the
+   fallback every production click ended grounded with an EMPTY route:
+   persist-run-record! wrote nothing and the terminal projection then
+   refused :missing-run-record AFTER the work was banked (2026-09-11
+   codex20 click; 2026-09-12 u88-zai-successor click wm-click-c398aea7,
+   grounded commit 5d595dc9). Historical admissions keep their explicit
+   STOP_LINE->HISTORICAL_VERIFICATION hops." 
+  [selection-judgment selection-ground outcome trace-path]
+  (let [historical-route?
+        (and (= :historical-verification-awaiting-validation outcome)
+             (= :revalidate-historical-repair
+                (get-in selection-ground [:run4/enacted-action :type])))
+        run4-production-pin?
+        (some-> (get-in selection-ground [:run4/task-pin]) not-empty)]
+    (cond-> (vec (:wm/route selection-judgment))
+      (and historical-route? (empty? (:wm/route selection-judgment)))
+      (into [{:node :STOP_LINE :via :repair-obligation
+              :at (str (Instant/now))}
+             {:node :HISTORICAL_VERIFICATION
+              :via :verified-admission
+              :at (str (Instant/now))}])
+      (and run4-production-pin? (not historical-route?)
+           (empty? (:wm/route selection-judgment)))
+      (into [{:node :RUN4_PACKET
+              :via :operator-selected-packet
+              :at (str (Instant/now))}
+             {:node :FULL_LOOP_CLOSE
+              :via outcome
+              :at (str (Instant/now))}])
+      trace-path
+      (conj {:node :TRACE
+             :via "futon2.aif.trace/write-trace!"
+             :at (str (Instant/now))}))))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [route (observed-route (:wm/route result))]
@@ -2696,23 +2735,11 @@
                                     {:kind :full-loop-outcome :attempt-id attempt-id})
                        trace-path (get-in @checkpoints
                                           [:construction :judgment :trace-path])
-                       historical-route?
-                       (and (= :historical-verification-awaiting-validation outcome)
-                            (= :revalidate-historical-repair
-                               (get-in @checkpoints [:selection :ground
-                                                     :run4/enacted-action :type])))
-                       run-route (cond-> (vec (:wm/route selection-judgment))
-                                   (and historical-route?
-                                        (empty? (:wm/route selection-judgment)))
-                                   (into [{:node :STOP_LINE :via :repair-obligation
-                                           :at (str (Instant/now))}
-                                          {:node :HISTORICAL_VERIFICATION
-                                           :via :verified-admission
-                                           :at (str (Instant/now))}])
-                                   trace-path
-                                   (conj {:node :TRACE
-                                          :via "futon2.aif.trace/write-trace!"
-                                          :at (str (Instant/now))}))
+                       run-route (packet-run-route selection-judgment
+                                                   (get-in @checkpoints
+                                                           [:selection :ground])
+                                                   outcome
+                                                   trace-path)
                        result (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
                                :morning-brief-ref brief-ref

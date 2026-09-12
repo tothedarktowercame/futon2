@@ -75,6 +75,30 @@
                  :via "observe" :at_ "2026-08-31T00:00:01Z"}]
                (:route record))))))))
 
+(deftest run4-operator-selected-packet-gets-run-record-route
+  ;; 2026-09-12: operator-selected RUN4 production packets emit no
+  ;; selection-judgment :wm/route, so persist-run-record! wrote nothing and
+  ;; the terminal projection refused :missing-run-record AFTER a grounded
+  ;; close (u88-zai-successor click wm-click-c398aea7, commit 5d595dc9).
+  ;; The packet boundary is the honest route for such clicks.
+  (let [pin {:path "holes/labs/wm-contract/runs/x/task-pin.edn"
+             :sha256 (apply str (repeat 64 "a"))
+             :series-id "run4-x-v1" :trial-id "M-u88-contextual-preferences"}
+        hops (#'runner/packet-run-route
+              ;; selection judgment with no :wm/route, ground carrying the pin
+              {} {:run4/task-pin pin} :grounded-change nil)
+        routed (#'runner/packet-run-route
+                {} {:run4/task-pin pin} :grounded-change
+                "/tmp/observed-trace")]
+    (is (= [:RUN4_PACKET :FULL_LOOP_CLOSE] (mapv :node hops)))
+    (is (= [:operator-selected-packet :grounded-change] (mapv :via hops)))
+    (is (= :TRACE (:node (last routed)))
+        "the trace hop still appends when a trace was written")
+    (is (empty? (#'runner/packet-run-route
+                 {} {} :grounded-change nil))
+        "no pin and no seam route stays empty: nothing is invented for
+         non-packet clicks")))
+
 (deftest production-repair-root-is-unreachable-during-runner-suite
   (is (not= hermetic/production-repair-root repair/default-root))
   (is (not= hermetic/production-trip-root tripwire/default-trip-root)))
