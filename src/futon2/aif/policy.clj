@@ -866,9 +866,9 @@
                 :habit-prior-applied? true
                 :decision-explanation explanation
                 :softmax-weights (zipmap (mapv :action ranked-actions)
-                                         weights)}))))))))
+                                         weights)})))))))
     ;; Record the resolved selector option, including when it came from the
     ;; default.  This is the exact epsilon used by the actuation comparison;
     ;; strategic decisions retain the same resolved option so their boundary
     ;; and option envelope can be reconstructed without inventing a default.
-    :abstain-epsilon abstain-epsilon))
+    :abstain-epsilon abstain-epsilon)))
