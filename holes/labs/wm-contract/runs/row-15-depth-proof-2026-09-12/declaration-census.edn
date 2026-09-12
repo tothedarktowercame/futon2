@@ -1,0 +1,15 @@
+{:record
+ {:schema :wm/declaration-census-v1
+  :declarations
+ {"DarkTower.WarMachine.MachineDepth.machineDepth"
+  {:kind :abbrev
+   :module "DarkTower.WarMachine.MachineDepth"
+   :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepth.lean"
+            :sha256 "ba3b7ca7fb5eb8ba405db3c78d41a91a3f916b5c1e391b49387700a2e262871d"}}
+  "DarkTower.WarMachine.MachineDepthCaptureWitness.machineryCapture20260912MachineDepth"
+  {:kind :theorem
+   :module "DarkTower.WarMachine.MachineDepthCaptureWitness"
+   :proposition "(efeDepths : machineDepth) recordedEfeInput = { risk := 1, homeostatic := 1, ambiguity := 1, information := 1 }"
+   :axioms []
+   :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepthCaptureWitness.lean"
+            :sha256 "f6eb70b75a5fefecd8a81912564b4b8cd2e681ef5b3d374ce75ee27735e594b1"}}}}}

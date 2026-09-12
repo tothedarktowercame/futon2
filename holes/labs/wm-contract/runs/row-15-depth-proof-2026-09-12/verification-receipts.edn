@@ -1,0 +1,43 @@
+{:records
+ {"R13-depth-machinery-capture-20260912-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachineDepthCaptureWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R13-depth-machinery-capture-20260912-v1"
+    :node :R13 :equation :depth :quantity :T :declaration "machineDepth"
+    :kind :lean-witness
+    :artifact
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepthCaptureWitness.lean"
+     :sha256 "f6eb70b75a5fefecd8a81912564b4b8cd2e681ef5b3d374ce75ee27735e594b1"
+     :module "DarkTower.WarMachine.MachineDepthCaptureWitness"
+     :declaration "DarkTower.WarMachine.MachineDepthCaptureWitness.machineryCapture20260912MachineDepth"}
+    :subject-artifact
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepth.lean"
+     :sha256 "ba3b7ca7fb5eb8ba405db3c78d41a91a3f916b5c1e391b49387700a2e262871d"
+     :declaration "DarkTower.WarMachine.MachineDepth.machineDepth"}
+    :claim "At the pinned redirected machinery capture, configured depth 3 was gated off because anticipation was unavailable; EFE received nil and the recorded effective depth 1 equals the declared machineDepth law at that input. This is not a live production-trace claim."
+    :polarity :supports :scope :machinery-capture-2026-09-12 :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepthCaptureWitness.lean"
+     :sha256 "f6eb70b75a5fefecd8a81912564b4b8cd2e681ef5b3d374ce75ee27735e594b1"
+     :module "DarkTower.WarMachine.MachineDepthCaptureWitness"
+     :declaration "DarkTower.WarMachine.MachineDepthCaptureWitness.machineryCapture20260912MachineDepth"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepth.lean"
+     :sha256 "ba3b7ca7fb5eb8ba405db3c78d41a91a3f916b5c1e391b49387700a2e262871d"
+     :declaration "DarkTower.WarMachine.MachineDepth.machineDepth"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepthCaptureWitness.lean"
+     :sha256 "f6eb70b75a5fefecd8a81912564b4b8cd2e681ef5b3d374ce75ee27735e594b1"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepth.lean"
+     :sha256 "ba3b7ca7fb5eb8ba405db3c78d41a91a3f916b5c1e391b49387700a2e262871d"}]
+   :declaration-census
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/declaration-census.edn"
+    :sha256 "85cfbea9ddf9983a495db3528af22c513a9515a009080c7826e6ff2cdffee9ff" :selector [:record]}
+   :transcript
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/lean-transcript.txt"
+    :sha256 "51f3c2d44be46df984ebeed7112b2c8de2f11c34e0efb9fb80ab0942ad01c728"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain"
+               :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDepthCaptureWitness.lean"
+             :sha256 "f6eb70b75a5fefecd8a81912564b4b8cd2e681ef5b3d374ce75ee27735e594b1"}}}}
