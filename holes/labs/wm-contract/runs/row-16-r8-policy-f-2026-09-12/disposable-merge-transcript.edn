@@ -4,5 +4,5 @@
  :claim {:id "R8-policy-F-s4-consecutive-records-v1" :status :pending :node :R8}
  :refusals []
  :admission-count 35
- :input-sha256 "49446023c4d6650e7308e60119842059a4b724bdb7cdf5e4dbb0a97e6ed60225"
+ :input-sha256 "5e4c9d52359870827530761e712abbe8f62d2e8169478391a71a6ba924f3c48e"
  :canonical-registry-written? false}
