@@ -144,8 +144,13 @@ operator workflow conversation (standdown 2026-09-12).
     dropped tick and support mutation refuse. The author
     self-caught an initially unsupported witness claim before
     execution — retained in f35ae290's history.
-13. U92: feed that accumulation from the live tick's observation
-    and belief, making the two learning arrows into R17 real.
+13. IN PROGRESS: discovery TN reviewed (817957a8: anchor at
+    war_machine.clj:6280, carry in the daily WM trace as
+    :accumulation-state, migration-required refusal not silent
+    reinit, TN-9a boundary on the R1->R17/R2->R17 flip);
+    implementation packet out (codex-23). The TN's shared
+    :accumulation-update-input envelope also serves row 15's
+    belief-update capture — one retention seam, two proofs.
 14. Build the machine-Q link: the forward model actually receiving
     a policy-conditioned outcome distribution. RULED: build, not
     descope — narrowing the claim instead is the facade option.
