@@ -134,17 +134,17 @@
   [m]
   (cond
     (nil? m)
-    {:ok false :fold/schema :invalid :findings [{:finding :nil-fold-output}]}
+    {:validator/version 1 :ok false :fold/schema :invalid :findings [{:finding :nil-fold-output}]}
     (and (map? m) (:fold/refused m))
     (let [findings (cond-> []
                      (not (and (string? (:why m)) (seq (:why m))))
                      (conj {:finding :refusal-why-missing})
                      (not (keyword? (:refusal/class m)))
                      (conj {:finding :refusal-class-invalid}))]
-      {:ok (empty? findings) :fold/schema :refusal
+      {:validator/version 1 :ok (empty? findings) :fold/schema :refusal
        :fold/exceptional? true :findings findings})
     (not (map? m))
-    {:ok false :fold/schema :invalid :findings [{:finding :fold-output-not-map}]}
+    {:validator/version 1 :ok false :fold/schema :invalid :findings [{:finding :fold-output-not-map}]}
     :else
     (let [wiring (:wiring m)
           boxes (:boxes wiring)
@@ -162,13 +162,13 @@
            (when (vector? boxes)
              (mapcat (fn [[index box]] (box-findings index box))
                      (map-indexed vector boxes))))]
-      {:ok (empty? findings) :fold/schema :enriched :findings findings})))
+      {:validator/version 1 :ok (empty? findings) :fold/schema :enriched :findings findings})))
 
 (defn- box-pattern-id [box]
   (let [reference (:fits-pattern box)]
     (if (map? reference) (:pattern/id reference) reference)))
 
-(defn validate-fold-correspondence
+(defn- validate-fold-correspondence-input
   "Check that a fold output accounts for its cascade outline. Every cascade
   pattern must be filled by a box or named by a policy hole, and non-deduction
   box warrants must come from the cascade. An outside-outline warrant is a
@@ -197,7 +197,19 @@
                                 :pattern/id pattern-id})
                              unaccounted)
                        outside)]
-    {:ok (empty? findings) :findings findings}))
+    {:validator/version 1 :ok (empty? findings) :findings findings}))
+
+(defn validate-fold-correspondence
+  "Versioned correspondence verdict. Malformed collection carriers return a
+  negative verdict instead of throwing; shape validation remains independent."
+  [fold-output cascade]
+  (let [boxes (get-in fold-output [:wiring :boxes])
+        holes (:policy-holes fold-output)
+        cells? (fn [x] (or (nil? x) (and (sequential? x) (every? map? x))))]
+    (if (and (cells? boxes) (cells? holes))
+      (validate-fold-correspondence-input fold-output cascade)
+      {:validator/version 1 :ok false
+       :findings [{:finding :correspondence-input-invalid}]})))
 
 (defn valid-fold-output-v1?
   "Boolean projection of `validate-fold-output-v1`."

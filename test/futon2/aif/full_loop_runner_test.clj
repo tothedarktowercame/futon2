@@ -18,13 +18,23 @@
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.run4-task-pin :as run4-pin]
             [futon2.aif.tripwire :as tripwire]
+            [futon2.aif.trace :as trace]
             [futon2.report.cascade-lane :as cascade]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]
            [java.time Instant]))
 
-(use-fixtures :once hermetic/with-hermetic-stores)
+(defn with-hermetic-traces [f]
+  ;; Cross-run tripwire reads must not scan the production daily trace.
+  (let [root (.toFile (Files/createTempDirectory "wm-runner-trace-suite-"
+                                                (make-array FileAttribute 0)))]
+    (try
+      (with-redefs-fn {#'trace/default-trace-dir (.getPath root)} f)
+      (finally
+        (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
+
+(use-fixtures :once hermetic/with-hermetic-stores with-hermetic-traces)
 
 (defn- without-live-wm-status
   [f]
@@ -379,6 +389,19 @@
             :unfolded-pattern pattern-id
             :obligation/id (str "test/" pattern-id)})
          shown)})
+
+(defn assert-construction-validator-record! [result]
+  ;; Re-read the saved judgment representation; derive every digest from it.
+  (let [j (edn/read-string (pr-str (get-in result [:checkpoints :construction :judgment])))
+        output-digest (digest/sha256 (pr-str (:fold-output j)))
+        shape (:shape-validation j) correspondence (:correspondence-validation j)]
+    (is (= "futon2.aif.fold/validate-fold-output-v1" (:validator shape)))
+    (is (= "futon2.aif.fold/validate-fold-correspondence" (:validator correspondence)))
+    (is (= [1 1] [(:version shape) (:version correspondence)]))
+    (is (every? boolean? [(:ok shape) (:ok correspondence)]))
+    (is (every? vector? [(:findings shape) (:findings correspondence)]))
+    (is (= output-digest (:input-sha256 shape) (:fold-output-sha256 correspondence)))
+    (is (= (digest/sha256 (pr-str (:patterns j))) (:cascade-sha256 correspondence)))))
 
 (defn isolated-runner-opts []
   {:cohort? false
@@ -1560,6 +1583,9 @@
                 (fn [finding]
                   (swap! refused-findings conj finding)
                   (assoc finding :repair/id "fold-wiring-refused"))))]
+    (assert-construction-validator-record! missing)
+    (assert-construction-validator-record! refused)
+    (is (false? (get-in refused [:checkpoints :construction :judgment :correspondence-validation :ok])))
     (testing "induced enriched-invalid output fails loudly with a named finding"
       (is (= :incomplete (:outcome missing)))
       (is (= :fold-output-invalid
@@ -1568,8 +1594,10 @@
              (get-in missing [:data :error-data :fold-findings 0 :finding])))
       (is (= "fold-output-invalid"
              (get-in missing [:data :repair-obligation :repair/id])))
-      (is (= :not-reached-construction
-             (get-in missing [:checkpoints :construction :sorry :kind]))))
+      (is (false? (get-in missing [:checkpoints :construction :judgment
+                                  :shape-validation :ok])))
+      (is (seq (get-in missing [:checkpoints :construction :judgment
+                               :shape-validation :findings]))))
     (testing "typed grounded refusal is persisted, then closes exceptionally"
       (is (= :incomplete (:outcome refused)))
       (is (= :fold-wiring-refused
@@ -2238,6 +2266,9 @@
                         :implementation-id "impl"})
           :queue-fn identity})]
     (is (= :grounded-change (:outcome result)))
+    (assert-construction-validator-record! result)
+    (is (true? (get-in result [:checkpoints :construction :judgment :shape-validation :ok])))
+    (is (true? (get-in result [:checkpoints :construction :judgment :correspondence-validation :ok])))
     (is (false? @transform-called?)
         "stop-line precedence must bypass optional ordinary-selection transforms")
     (is (= ["repair-failed-1" "repair-failed-1"]
@@ -4278,3 +4309,39 @@
         (command "git" "-C" repo "worktree" "remove" sibling))
       (finally
         (doseq [f (reverse (file-seq root))] (.delete f))))))
+
+
+(deftest wired-construction-verdicts-and-emitter-deliverable-stage
+  (let [{:keys [result]} (run-feature-card-attempt {:author-card feature-card-claim})
+        judgment (edn/read-string (pr-str (get-in result [:checkpoints :construction :judgment])))
+        emitter-ns (or (find-ns 'runner-certificate-emitter-control)
+                       (create-ns 'runner-certificate-emitter-control))]
+    (assert-construction-validator-record! result)
+    (is (true? (get-in judgment [:shape-validation :ok])))
+    (is (true? (get-in judgment [:correspondence-validation :ok])))
+    ;; The emitter is loaded into this isolated test JVM, never the service.
+    (binding [*ns* emitter-ns]
+      (clojure.core/refer 'clojure.core)
+      (load-file "holes/labs/wm-contract/derive_certificate.bb"))
+    (let [validate (ns-resolve emitter-ns 'validate-deliverable!)
+          ;; This synthetic authority/execution fixture tests record completeness,
+          ;; not real-run certification or authority acceptance.
+          output (assoc (:fold-output judgment) :fold/execution {:fixture true}
+                        :fold/authority {:fixture true})
+          captured (runner/construction-wiring-result {:shown (:patterns judgment)}
+                                                       (constantly output))
+          j (merge judgment (select-keys captured [:fold-output :wiring
+                                                   :shape-validation :correspondence-validation]))]
+      (is (= (:shape-validation j) (:shape (validate j))))
+      (is (= :validator-result-invalid
+             (:refusal/class (try (validate (dissoc j :shape-validation)) nil
+                                  (catch clojure.lang.ExceptionInfo e (ex-data e)))))))))
+
+(deftest missing-port-and-malformed-fold-have-two-negative-verdicts
+  (doseq [result [(runner/construction-wiring-result {:shown [:P1]} nil true)
+                  (runner/construction-wiring-result {:shown [:P1]}
+                                                      (constantly {:wiring {:boxes 7}}))]]
+    (is (= :invalid (:status result)))
+    (doseq [k [:shape-validation :correspondence-validation]]
+      (is (false? (get-in result [k :ok])))
+      (is (seq (get-in result [k :findings]))))))

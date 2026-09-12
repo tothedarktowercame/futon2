@@ -1315,36 +1315,42 @@
   ([construction wiring-fn]
    (construction-wiring-result construction wiring-fn false))
   ([construction wiring-fn required?]
-   (if (and required? (not (fn? wiring-fn)))
-     {:status :invalid
-      :failure-kind :construction-wiring-port-missing
-      :findings [{:finding :construction-wiring-port-missing
-                  :message "Authenticated production construction requires the server-owned fold port"}]}
-     (let [result (if wiring-fn
-                  (wiring-fn construction)
-                  (or (:fold (close-loop/act-gate-from-lane-entry construction
-                                                                    construction))
-                      ;; The act gate omits a score-bearing fold for an empty
-                      ;; cascade, but the record still needs a wiring object.
-                      (fold-classical/classical-fold
-                       (vec (:shown construction)) construction)))
+   (let [port-missing? (and required? (not (fn? wiring-fn)))
+         result (when-not port-missing?
+                  (if wiring-fn
+                    (wiring-fn construction)
+                    (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
+                        (fold-classical/classical-fold (vec (:shown construction)) construction))))
+         patterns (vec (:shown construction))
          validation (fold/validate-fold-output-v1 result)
+         correspondence (fold/validate-fold-correspondence result patterns)
          refusal? (= :refusal (:fold/schema validation))
-         correspondence (when (and (:ok validation) (not refusal?))
-                          (fold/validate-fold-correspondence
-                           result (vec (:shown construction))))]
-     (cond
-       (and (:ok validation) refusal?)
-       {:status :refused :fold-output result}
-       (and (:ok validation) (:ok correspondence))
-       {:status :wired :fold-output result :wiring (:wiring result)}
-       :else
-       {:status :invalid
-        :failure-kind (if (and (:ok validation) (not (:ok correspondence)))
-                        :fold-correspondence-invalid
-                        :fold-output-invalid)
-        :findings (vec (concat (:findings validation)
-                               (:findings correspondence)))})))))
+         output-digest (sha256 result)
+         evidence {:fold-output result
+                   :shape-validation
+                   {:validator "futon2.aif.fold/validate-fold-output-v1"
+                    :version (:validator/version validation)
+                    :ok (:ok validation) :findings (vec (:findings validation))
+                    :input-sha256 output-digest}
+                   :correspondence-validation
+                   {:validator "futon2.aif.fold/validate-fold-correspondence"
+                    :version (:validator/version correspondence)
+                    :ok (:ok correspondence) :findings (vec (:findings correspondence))
+                    :cascade-sha256 (sha256 patterns)
+                    :fold-output-sha256 output-digest}}]
+     (merge evidence
+            (cond
+              port-missing?
+              {:status :invalid :failure-kind :construction-wiring-port-missing
+               :findings [{:finding :construction-wiring-port-missing
+                           :message "Authenticated production construction requires the server-owned fold port"}]}
+              (and (:ok validation) refusal?) {:status :refused}
+              (and (:ok validation) (:ok correspondence))
+              {:status :wired :wiring (:wiring result)}
+              :else
+              {:status :invalid
+               :failure-kind (if (:ok validation) :fold-correspondence-invalid :fold-output-invalid)
+               :findings (vec (concat (:findings validation) (:findings correspondence)))})))))
 
 (defn selection-enaction-record
   "Persist the comparison between the selected decision and the action that
@@ -3088,18 +3094,12 @@
                              :target target
                              :selected-entry
                              (select-keys entry [:action :controller-score :G-efe])})))
-          (when (= :invalid (:status wiring-result))
-            (throw (ex-info "Construction fold wiring is missing or malformed"
-                            {:outcome :construction-failed
-                             :failure-kind (:failure-kind wiring-result)
-                             :fold-findings (:findings wiring-result)
-                             :failure-stage :construction
-                             :target target})))
           ;; A selected action enters the canonical trace—and therefore the
           ;; learned habit prior—only after its production construction path
           ;; has been demonstrated. Failed selections remain fully auditable
           ;; in the cohort and stop-line finding, but cannot reinforce E(pi).
-          (let [trace-path (when-not repair-action?
+          (let [trace-path (when (and (not repair-action?)
+                                           (not= :invalid (:status wiring-result)))
                              ((or (:trace-fn opts) trace/write-trace!)
                               (assoc judgement :trace/reason
                                      {:kind :routing-rule
@@ -3114,10 +3114,12 @@
                                                      :capability-contract
                                                      :actuation-contract
                                                      :repair-contract])
-                              :sorries (vec (get-in wiring-result
-                                                   [:fold-output :policy-holes]))
+                              :sorries (let [holes (get-in wiring-result [:fold-output :policy-holes])]
+                                         (when (sequential? holes) (vec holes)))
                               :wiring (:wiring wiring-result)
                               :fold-output (:fold-output wiring-result)
+                              :shape-validation (:shape-validation wiring-result)
+                              :correspondence-validation (:correspondence-validation wiring-result)
                               :selection-enaction
                               (selection-enaction-record
                                (:action entry)
@@ -3144,6 +3146,13 @@
                                       :selected-action (:action entry)}
                                pinned-selection
                                (assoc :run4/task-pin (:identity pinned-selection)))))
+          (when (= :invalid (:status wiring-result))
+            (throw (ex-info "Construction fold wiring is missing or malformed"
+                            {:outcome :construction-failed
+                             :failure-kind (:failure-kind wiring-result)
+                             :fold-findings (:findings wiring-result)
+                             :failure-stage :construction
+                             :target target})))
           (when (= :refused (:status wiring-result))
             (throw (ex-info "Construction fold wiring explicitly refused"
                             {:outcome :construction-failed
