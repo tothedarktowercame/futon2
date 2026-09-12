@@ -193,3 +193,37 @@ And the pickup/zap asymmetry, restated as questions:
 A question with no named form is unaskable, and unaskability is a
 finding: the set of questions we cannot yet pose over the map is the
 map's own gap list — publish it beside the R-node gap list.
+
+## Futon City as a playout board (Joe, 2026-09-12 — the SimCity step)
+
+The interactive step beyond the projection: focus a topic, simulate a
+work sequence ("10 simulated clicks"), ask what the likely buildout is.
+In AIF terms the city stops being R2's rendering and becomes R4's
+forward model; the cascade you would run is the policy; the playout is
+Q(o|π) evaluated on the map. Three rules keep it honest:
+
+1. **Playouts are walks on the association graph under a candidate
+   cascade** — the same graph the question-chips query. A simulated
+   click is a chip firing: FEEL a cluster, PICKUP a pattern, wire an
+   edge. No free-floating speculation: every step of the playout is a
+   move the question vocabulary can name, and every probability it uses
+   is a measured quantity on the graph (association density, precision
+   rows, hub/cold structure).
+2. **Q is calibrated from history, not invented.** The map is
+   bitemporal: "the last N times work focused near pattern P, what grew
+   in the following window?" is a query. Historical focus-then-growth
+   pairs are the map's own retro-bootstrap for the forward model — the
+   zaif retro-bootstrap idea (γ starts calibrated) transplanted from
+   corrections to buildouts. Cold-family focus has few historical
+   exemplars: those playouts carry WIDE intervals, stated.
+3. **A playout is a proposal, priced in fuel.** Ten simulated clicks
+   cost embedding queries and reads; the playout board has a fuel
+   budget like any other, and its output is a typed buildout-forecast
+   record (topic, walk, predicted growth with intervals, calibration
+   basis) — never an action. The operator reads forecasts and picks;
+   the city does not build itself. SimCity's god-view, minus the
+   god-mode: you can WATCH the future, not enact it.
+
+Instrumentation note: this is exactly what a-sorry-enterprise /
+slush-demo style simulated-flow runs already do for cascades; the city
+playout is the same machinery with the association graph as the board.
