@@ -1,0 +1,31 @@
+{:subject
+ {:repo "mathlib4"
+  :path "DarkTower/WarMachine/AmbiguityBridge.lean"
+  :sha256 "ff4ce3c15f6d7385c648fe80c8cd17146ff76d21ab6a6ac8094eee5e80c4c6ec"
+  :tree-sha "e17012884b3c902d3833b800530bc8aa69f8d95e"}
+ :frozen-import
+ {:path "DarkTower/WarMachine/Holes.lean"
+  :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}
+ :receipts
+ [{:gate :lean-elaboration-and-axiom-check
+   :command "lake env lean DarkTower/WarMachine/AmbiguityBridge.lean"
+   :exit 0 :tests 4 :assertions 4
+   :tree-sha "e17012884b3c902d3833b800530bc8aa69f8d95e"
+   :at "2026-09-12T23:34:00Z"
+   :sorryAx false
+   :axioms ["propext" "Classical.choice" "Quot.sound"]}
+  {:gate :scoped-darktower-build
+   :command "lake build DarkTower.WarMachine.AmbiguityBridge"
+   :exit 0 :tests 2707 :assertions 4
+   :tree-sha "e17012884b3c902d3833b800530bc8aa69f8d95e"
+   :at "2026-09-12T23:35:00Z"
+   :result "Build completed successfully (2707 jobs)."
+   :import-note "Lake replay reports frozen Holes.lean's pre-existing sorry declarations; all four new printed axiom sets exclude sorryAx."}]
+ :toolchain
+ {:path "lean-toolchain"
+  :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+ :retained-failed-elaboration
+ {:tree-sha "4446b30b8fcf7c1d0bd56e57f2117a033e60a8df"
+  :exit 1
+  :findings [:normalize-unit-product-before-positivity
+             :use-le-div-iff-for-floor-bound]}}
