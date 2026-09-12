@@ -1,7 +1,6 @@
-(ns row-16-r6-policy-set.readback
-  (:require [clojure.edn :as edn]
-            [clojure.pprint :as pp]
-            [futon2.aif.machine-policy-set :as policy-set]))
+(require '[clojure.edn :as edn]
+         '[clojure.pprint :as pp]
+         '[futon2.aif.machine-policy-set :as policy-set])
 
 (def run-dir "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12")
 

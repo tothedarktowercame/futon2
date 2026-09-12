@@ -1,11 +1,10 @@
-(ns row-16-r6-policy-set.generate
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [clojure.pprint :as pp]
-            [clojure.string :as str]
-            [futon2.aif.machine-policy-set :as policy-set])
-  (:import [java.io PushbackReader]
-           [java.security MessageDigest]))
+(require '[clojure.edn :as edn]
+         '[clojure.java.io :as io]
+         '[clojure.pprint :as pp]
+         '[clojure.string :as str]
+         '[futon2.aif.machine-policy-set :as policy-set])
+(import '[java.io PushbackReader]
+        '[java.security MessageDigest])
 
 (def source-path "data/wm-trace/wm-trace-2026-09-12.edn.pre-migration-backup")
 (def source-sha "25a0a1e2257396c2d1db889375773c9cbed99b2ad26c57b4674e02ca1660d686")
@@ -45,7 +44,7 @@
        "def pinnedRanked : List Candidate := [\n  "
        (str/join ",\n  " (map lean-candidate projected))
        "\n]\n\n"
-       "theorem pinnedCandidateCount : pinnedRanked.length = 148 := by native_decide\n\n"
+       "theorem pinnedCandidateCount : pinnedRanked.length = 148 := by rfl\n\n"
        "theorem everyProjectedCandidateIsMember :\n"
        "    ∀ c, c ∈ pinnedRanked → c ∈ machinePolicySet pinnedRanked := by\n"
        "  intro c hc\n  exact hc\n\n"
