@@ -819,6 +819,26 @@ operator workflow conversation (standdown 2026-09-12).
 21. Add to the drawn control diagram the twelve connections that
     exist in code but are not drawn, or annotate edge by edge why
     each stays off the drawing.
+    DISCOVERY DONE (2026-09-12, TN-row21-discovery-2026-09-12.md
+    76d2a95b; reviewer re-verified the generator rule and the
+    twelve at HEAD — the :realised-undrawn population matches
+    edge-for-edge). The twelve are the conformance generator's
+    twelve (theory-minus-drawn minus holes), reproducible at
+    HEAD. DISPOSITION: 8 draw as ordinary wiring (R1->R3,
+    R1->R3a, R2->R3a, R3a->R7, R3a->R3, R2->R8 one-pair-two-
+    bases, R6->R4 candidate-grain, R14->R6 tau), 3 draw as
+    CONDITIONAL with exact activation conditions (R13->R4
+    horizon>=2, R4->R8 F_pi flag, R8->R6 F_pi), 1 stays OFF
+    with a typed retired-source annotation: R3a->R8's only
+    producer was deleted under Joe's J2 ruling and the
+    generator subtracts only :holes, not retired equations — a
+    conformance false positive. Firing questions explicitly
+    separated to row 22 (R1->R3a, R3a->R3, R6->R4, R13->R4
+    need post-schema evidence decisions there). Today's new
+    paths (machine-Q scorer, selector boundary, R20->R14
+    charter) are census candidates, not silent additions. Four
+    packets; packet 1 (generator classification repair)
+    dispatched (codex-23).
 22. For the drawn connections that have never fired in any recorded
     run: decide which the qualifying run must exercise (default:
     all that the full loop traverses) and mark the remainder
