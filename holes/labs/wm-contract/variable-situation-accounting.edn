@@ -1,5 +1,5 @@
 {:schema :wm/variable-situation-accounting-v1,
- :as-of "2026-09-08",
+ :as-of "2026-09-12",
  :authority
  {:contract-git-sha "bf79f988b3131701ff9ed257d371cc45dd5eea5b",
   :contract-sha256
@@ -7,7 +7,11 @@
   :glossary-sha256
   "d7ec5b68d1049a86d7a6c3c71eb61f50eb0e351a1d2d212affa6e5636032260f",
   :witness-registry-sha256
-  "edfd45881b6a33c7a4af9bebc1d90728d021c47fa578349f769bfd875fe200cb"},
+  "b399c6afd964569fa5ee785eea68e8b7d633ed6d88f256c4f5e119f5c94d6a69",
+  :machine-contract-manifest-sha256
+  "1ced38773c04da65e461081bdcfafb494f23b45927ac08c68ef08b273e481516",
+  :machine-contract-bundle-sha256
+  "a2f894f90888ed43fdea89d7ee08f5684c71c699977e2fc499e7a747eb35c488"},
  :axes
  {:content-status
   [:named-only
@@ -1881,7 +1885,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:812",
+     :licence "futon2/checks/witness-registry.edn:841",
      :evidence :passing-witness-check,
      :why "witness check checks/prediction_error_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -1908,7 +1912,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:929",
+     :licence "futon2/checks/witness-registry.edn:958",
      :evidence :passing-witness-check,
      :why "witness check checks/softmax_witness.clj passed"}],
    :content-status :record-with-witness,
@@ -1989,7 +1993,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:134",
+     :licence "futon2/checks/witness-registry.edn:161",
      :evidence :passing-witness-check,
      :why
      "witness check checks/dirichlet_concentrations_witness.clj passed"}],
@@ -2644,7 +2648,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:891",
+     :licence "futon2/checks/witness-registry.edn:920",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_proof_receipt_check.clj passed against a pinned source"}],
@@ -2671,7 +2675,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:990",
+     :licence "futon2/checks/witness-registry.edn:1019",
      :evidence :passing-witness-check,
      :why "witness check checks/r9_independence.clj passed"}],
    :content-status :record-with-witness,
@@ -2697,7 +2701,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:990",
+     :licence "futon2/checks/witness-registry.edn:1019",
      :evidence :passing-witness-check,
      :why "witness check checks/r9_independence.clj passed"}],
    :content-status :record-with-witness,
@@ -2723,7 +2727,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:912",
+     :licence "futon2/checks/witness-registry.edn:941",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
@@ -2750,7 +2754,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:912",
+     :licence "futon2/checks/witness-registry.edn:941",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
@@ -2777,7 +2781,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:912",
+     :licence "futon2/checks/witness-registry.edn:941",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r9_independence.clj passed against a pinned source"}],
@@ -2804,7 +2808,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:854",
+     :licence "futon2/checks/witness-registry.edn:883",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r2_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -2831,7 +2835,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:854",
+     :licence "futon2/checks/witness-registry.edn:883",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r2_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -2858,7 +2862,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:873",
+     :licence "futon2/checks/witness-registry.edn:902",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -2885,7 +2889,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:873",
+     :licence "futon2/checks/witness-registry.edn:902",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -2912,7 +2916,7 @@
      :evidence :lean-definition-site,
      :why "the closed declaration has a definition site in the module"}
     {:rung :formula-transcribed,
-     :licence "futon2/checks/witness-registry.edn:873",
+     :licence "futon2/checks/witness-registry.edn:902",
      :evidence :passing-witness-check,
      :why
      "witness check checks/r8_pinned_snapshot_witness.clj passed against a pinned source"}],
@@ -3116,6 +3120,214 @@
    "wm-organization · TN-edge-review worklist H4 (Joe's J2 ruling)",
    :runtime-evidence
    "A DEFAULT-PATH record whose Q(pi) carries the per-policy F term. The FLAGGED-path record exists: runs/2026-09-01-s4/wm-trace-s4.edn, 3 of 4 ticks with :f-pi-posterior :applied? true."}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineObservation.machineObservation",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:14",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachineObservation.lean:58",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R2: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineBeliefState.machineBeliefState",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:42",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachineBeliefState.lean:25",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R1: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name
+   "DarkTower.WarMachine.MachineBeliefUpdate.machineBeliefUpdate",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:70",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachineBeliefUpdate.lean:181",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R3: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachinePrecision.machinePrecision",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:98",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachinePrecision.lean:101",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R7: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineDepth.machineDepth",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:126",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/MachineDepth.lean:133",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :scores,
+   :owner
+   "R13: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineTemperature.machineTemperature",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:154",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachineTemperature.lean:42",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :policy,
+   :owner
+   "R14: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name "DarkTower.WarMachine.MachineAction.machineAction",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:182",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence "mathlib4/DarkTower/WarMachine/MachineAction.lean:49",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :policy,
+   :owner
+   "R16: machine-model transcription; no runtime correspondence claim"}
+  {:rung :type-transcribed,
+   :pointer-status :resolves,
+   :pointer-detail {:resolution :stable-problem-or-record-owner},
+   :row-source :contract-declaration,
+   :name
+   "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError",
+   :rung-blocked-by
+   {:rung :formula-transcribed,
+    :why
+    "no passing entry of checks/witness-registry.edn exercises the declaration, so nothing elaborates its defining expression"},
+   :rung-ladder
+   [{:rung :named,
+     :licence
+     "mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json:210",
+     :evidence :contract-manifest-entry,
+     :why "the declaration is named in the contract manifest"}
+    {:rung :type-transcribed,
+     :licence
+     "mathlib4/DarkTower/WarMachine/MachinePredictionError.lean:160",
+     :evidence :lean-definition-site,
+     :why
+     "the closed declaration has a definition site in the module"}],
+   :content-status :record-negative-space,
+   :carried-by :unowned,
+   :area :belief,
+   :owner
+   "R3a-host-proposed: machine-model transcription; no runtime correspondence claim"}
   {:rung :named,
    :pointer-status :resolves,
    :witness
@@ -3352,31 +3564,31 @@
  :counts
  {:rung
   {:named 18,
-   :type-transcribed 62,
+   :type-transcribed 70,
    :formula-transcribed 53,
    :witnessed 0,
    :constructed 0,
    :wired 0,
    :validated 0,
    :run-correlated 0},
-  :row-source {:contract-declaration 124, :glossary-paragraph 9},
+  :row-source {:contract-declaration 132, :glossary-paragraph 9},
   :content
   {:framing 1,
    :open-hole 10,
    :proven-against-pinned-source 15,
-   :record-negative-space 62,
+   :record-negative-space 70,
    :record-with-witness 45},
   :declaration-rung
   {:named 9,
-   :type-transcribed 62,
+   :type-transcribed 70,
    :formula-transcribed 53,
    :witnessed 0,
    :constructed 0,
    :wired 0,
    :validated 0,
    :run-correlated 0},
-  :rows 133,
+  :rows 141,
   :glossary-content {:framing 1, :open-hole 1, :record-with-witness 7},
-  :pointer {:resolves 133},
+  :pointer {:resolves 141},
   :closability {:pre-run-closable 3, :run-gated 7},
   :declaration-closability {:pre-run-closable 3, :run-gated 6}}}
