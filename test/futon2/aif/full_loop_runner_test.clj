@@ -61,6 +61,29 @@
 
 (use-fixtures :each with-field-desk-stub without-live-wm-status)
 
+(deftest entity-state-at-close-retains-the-in-force-row
+  (let [row {:strengthened 0.4 :addressed 0.1 :falsified 0.1
+             :reopened 0.1 :spawned 0.1 :refined 0.1 :foreclosed 0.1}
+        record (runner/entity-state-at-close
+                "entity-1" {"entity-1" row} {:run/id "run-1"} "at-1")]
+    (is (= :wm/entity-state-at-close-v1 (:schema record)))
+    (is (= row (:belief-row record)))
+    (is (= :strengthened (:derived-status record)))
+    (is (= {:run/id "run-1"} (:belief-source record)))))
+
+(deftest entity-state-at-close-refuses-ties-and-missing-entities
+  (let [tie-row {:strengthened 0.2 :addressed 0.2 :falsified 0.12
+                 :reopened 0.12 :spawned 0.12 :refined 0.12
+                 :foreclosed 0.12}
+        tied (runner/entity-state-at-close
+              :entity/tied {:entity/tied tie-row} {:run/id "run-tie"} "at-2")
+        absent (runner/entity-state-at-close nil {} {} "at-3")]
+    (is (= tie-row (:belief-row tied)))
+    (is (= :ambiguous-tie (:derived-status tied)))
+    (is (= :refused (:status tied)))
+    (is (= {:status :absent :reason :no-selected-entity}
+           (select-keys absent [:status :reason])))))
+
 (deftest run-opportunity-surfaces-stable-run-identity
   (let [record-dir (.getPath
                     (.toFile

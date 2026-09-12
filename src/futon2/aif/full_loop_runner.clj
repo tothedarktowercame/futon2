@@ -2401,6 +2401,46 @@
 (defn- term [judgment ground]
   {:judgment judgment :ground ground})
 
+(defn entity-state-at-close
+  "Retain the selected entity's belief row without declaring argmax to be the
+  admissible categorical state estimator.  The row is the observation; the
+  derived status is labelled as such.  Ties and unavailable rows stay typed.
+
+  `belief` must be the judgment already in force for this selection.  Callers
+  must not substitute a later or temporally-nearest trace row."
+  [entity-id belief belief-source recorded-at]
+  (if (nil? entity-id)
+    {:schema :wm/entity-state-at-close-v1
+     :status :absent
+     :reason :no-selected-entity
+     :recorded-at recorded-at}
+    (let [row (get belief entity-id)]
+      (if-not (and (map? row) (= 7 (count row)) (every? number? (vals row)))
+        {:schema :wm/entity-state-at-close-v1
+         :entity/id entity-id
+         :status :absent
+         :reason :in-force-belief-row-unavailable
+         :belief-source belief-source
+         :recorded-at recorded-at}
+        (let [maximum (apply max (vals row))
+              leaders (->> row
+                           (keep (fn [[status mass]]
+                                   (when (= maximum mass) status)))
+                           vec)]
+          (cond-> {:schema :wm/entity-state-at-close-v1
+                   :entity/id entity-id
+                   :belief-row row
+                   :status-method :derived-unique-argmax-of-mu-post
+                   :belief-source belief-source
+                   :recorded-at recorded-at}
+            (= 1 (count leaders))
+            (assoc :derived-status (first leaders))
+
+            (not= 1 (count leaders))
+            (assoc :derived-status :ambiguous-tie
+                   :status :refused
+                   :reason :ambiguous-tie)))))))
+
 (defn- sorry [kind data]
   {:sorry (assoc data :kind kind)})
 
@@ -2645,6 +2685,7 @@
         phase-context (atom {:opportunity-id opportunity-id :trigger trigger})
         _ (emit-phase! opts @phase-context {:phase :opportunity :transition :start})
         checkpoints (atom {})
+        selected-entity-belief (atom nil)
         dispatched-turns (atom 0)
         reviewer-of-record (atom reviewer)
         closing? (atom false)
@@ -2859,9 +2900,19 @@
                             {:delivery-qa-ref ref
                              :field-desk-endpoint
                              (delivery-qa/endpoint opts)})))
+                       trace-path (get-in @checkpoints
+                                          [:construction :judgment :trace-path])
+                       close-state (let [{:keys [entity-id belief run-id]}
+                                         @selected-entity-belief]
+                                     (entity-state-at-close
+                                      entity-id belief
+                                      (cond-> {:run/id run-id}
+                                        trace-path (assoc :trace-path trace-path))
+                                      (str (Instant/now))))
                        closed (term (merge {:outcome outcome
                                             :grounded? (= :grounded-change outcome)
                                             :artifact-only? (= :artifact-only outcome)
+                                            :entity-state-at-close close-state
                                             :morning-brief-ref brief-ref
                                             :delivery-qa-ref delivery-qa-ref
                                             :duration-ms (- (System/currentTimeMillis) started)
@@ -2869,8 +2920,6 @@
                                             {:agent-turns @dispatched-turns}}
                                            (select-keys data [:witness]))
                                     {:kind :full-loop-outcome :attempt-id attempt-id})
-                       trace-path (get-in @checkpoints
-                                          [:construction :judgment :trace-path])
                        run-route (packet-run-route selection-judgment
                                                    (get-in @checkpoints
                                                            [:selection :ground])
@@ -3058,6 +3107,10 @@
                         (assoc :run4/requested-pin (:run4/requested-pin opts)
                                :run4/enacted-action (:action entry)))
             target (some-> entry selected-target)
+            _ (reset! selected-entity-belief
+                      {:entity-id target
+                       :belief (:belief judgement)
+                       :run-id (:run/id judgement)})
             ranked-for-review (if stop-line
                                 [entry]
                                 (or (:admissible-actions judgement)
