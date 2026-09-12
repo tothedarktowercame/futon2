@@ -221,15 +221,69 @@
                   (get softmax-weights (:action ranked-action))]))
           ranked-actions)))
 
+(def ^:private selection-proof-input-fields
+  #{:schema :algorithm/revision :decision-id :temperature :candidate-domain
+    :policy-table :tie-break :selected-policy-id})
+
+(def ^:private selection-proof-policy-fields
+  #{:policy-id :mission-ids :E_S :G_S :log-shadow-potential
+    :shadow-probability :hard-support :provenance})
+
+(defn- validate-selection-proof-input [envelope]
+  (let [missing (set/difference selection-proof-input-fields
+                                (set (keys envelope)))
+        rows (:policy-table envelope)
+        partial-rows (when (vector? rows)
+                       (keep-indexed
+                        (fn [idx row]
+                          (when (or (not (map? row))
+                                    (seq (set/difference
+                                          selection-proof-policy-fields
+                                          (set (keys row)))))
+                            idx))
+                        rows))
+        policy-ids (when (vector? rows) (mapv :policy-id rows))
+        table-support (when (vector? rows)
+                        (set (mapcat :mission-ids rows)))
+        domain-support (when (vector? (:candidate-domain envelope))
+                         (set (:candidate-domain envelope)))]
+    (cond
+      (or (not (map? envelope))
+          (seq missing)
+          (not= :wm/selection-proof-input-v1 (:schema envelope))
+          (not (vector? rows))
+          (seq partial-rows))
+      (throw (ex-info "Selection proof input is incomplete"
+                      {:refusal :selection-proof-input-incomplete
+                       :missing-fields (vec (sort missing))
+                       :partial-policy-rows (vec partial-rows)}))
+
+      (not= domain-support table-support)
+      (throw (ex-info "Selection proof input support disagrees"
+                      {:refusal :selection-proof-support-mismatch
+                       :candidate-domain domain-support
+                       :policy-table-support table-support}))
+
+      (not (some #{(:selected-policy-id envelope)} policy-ids))
+      (throw (ex-info "Selected policy is absent from proof table"
+                      {:refusal :selected-policy-not-in-proof-table
+                       :selected-policy-id (:selected-policy-id envelope)}))
+
+      :else envelope)))
+
 (defn- strip-decision
   "Compact the decision for trace. The full softmax-weights map is
    keyed by action maps (non-stringable), so the default-off form drops it.
    When policy trace details are enabled, Q(π) is re-keyed by `rank/N`, the
    stable rank already retained by `strip-ranked-action`. Chosen-action /
    abstain identity is preserved. The details-on path refuses an incomplete
-   rank join before append; this changes admission, not the record shape, so
-   trace schema 28 does not advance."
+   rank join before append; this changes admission, not the record shape.
+   Decision fields follow that precedent: present-only
+   :selection-proof-input is validated here but does not advance schema 29,
+   just as :softmax-weights-by-candidate-id did not advance its schema."
   [d ranked-actions]
+  (when (contains? d :selection-proof-input)
+    (validate-selection-proof-input (:selection-proof-input d)))
   (cond-> (dissoc d :softmax-weights :ranked-actions)
     *persist-policy-trace-details?*
     (assoc :softmax-weights-by-candidate-id

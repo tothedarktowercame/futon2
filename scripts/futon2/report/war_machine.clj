@@ -6599,7 +6599,7 @@
                :scheduler-habit-ranking scheduler-habit-ranking})))
         selected-policy (:selected-policy strategic-selection)
         wm-decision
-        (assoc controller-decision
+        (cond-> (assoc controller-decision
                :action (:action strategic-action)
                :selection-law
                (strategic-selection-law controller-decision strategic-action
@@ -6639,6 +6639,9 @@
                 :counterfactuals
                 (:counterfactuals strategic-selection)
                 :actuation (:actuation strategic-selection)})
+          (:selection-proof-input strategic-selection)
+          (assoc :selection-proof-input
+                 (:selection-proof-input strategic-selection)))
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
         ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
         ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction

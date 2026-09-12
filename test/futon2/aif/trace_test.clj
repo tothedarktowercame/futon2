@@ -954,3 +954,61 @@
            (:cohort-attempt (trace/trace-record
                              (assoc base :cohort-attempt identity)))))
     (is (not (contains? (trace/trace-record base) :cohort-attempt)))))
+
+(def selection-proof-envelope
+  {:schema :wm/selection-proof-input-v1
+   :algorithm/revision {:name :shadow-policy :revision 1}
+   :decision-id "decision-1" :temperature 1.0
+   :candidate-domain ["M-a" "M-b"]
+   :policy-table
+   [{:policy-id "pi-a" :mission-ids ["M-a"] :E_S -0.2 :G_S 0.3
+     :log-shadow-potential -0.5 :shadow-probability 0.6
+     :hard-support {:status :supported} :provenance [:memory/a]}
+    {:policy-id "pi-b" :mission-ids ["M-b"] :E_S -0.4 :G_S 0.5
+     :log-shadow-potential -0.9 :shadow-probability 0.4
+     :hard-support {:status :supported} :provenance [:memory/b]}]
+   :tie-break :ascending-policy-id :selected-policy-id "pi-a"})
+
+(deftest redirected-trace-retains-selection-proof-input-exactly
+  (let [date "2026-09-12"
+        output (assoc-in sample-judge-output [:decision :selection-proof-input]
+                         selection-proof-envelope)]
+    (binding [trace/*persist-policy-trace-details?* false]
+      (trace/write-trace! output :dir *tmpdir* :date-str date))
+    (is (= selection-proof-envelope
+           (get-in (first (trace/read-trace :dir *tmpdir* :date-str date))
+                   [:decision :selection-proof-input])))))
+
+(deftest selection-proof-input-refuses-before-trace-append
+  (doseq [[date envelope expected]
+          [["2026-09-09" (dissoc selection-proof-envelope :temperature)
+            :selection-proof-input-incomplete]
+           ["2026-09-10" (assoc selection-proof-envelope
+                                  :candidate-domain ["M-a"])
+            :selection-proof-support-mismatch]
+           ["2026-09-11" (assoc selection-proof-envelope
+                                  :selected-policy-id "pi-missing")
+            :selected-policy-not-in-proof-table]]]
+    (let [path (io/file *tmpdir* (str "wm-trace-" date ".edn"))
+          refusal (try
+                    (binding [trace/*persist-policy-trace-details?* false]
+                      (trace/write-trace!
+                       (assoc-in sample-judge-output
+                                 [:decision :selection-proof-input] envelope)
+                       :dir *tmpdir* :date-str date))
+                    nil
+                    (catch clojure.lang.ExceptionInfo e
+                      (:refusal (ex-data e))))]
+      (is (= expected refusal))
+      (is (false? (.exists path))))))
+
+(deftest absent-selection-proof-input-is-byte-identical-in-both-detail-modes
+  (doseq [details? [false true]]
+    (binding [trace/*persist-policy-trace-details?* details?]
+      (let [off (trace/trace-record sample-judge-output)
+            on (trace/trace-record
+                (assoc-in sample-judge-output [:decision :selection-proof-input]
+                          selection-proof-envelope))]
+        (is (= (dissoc off :timestamp)
+               (update (dissoc on :timestamp) :decision
+                       dissoc :selection-proof-input)))))))
