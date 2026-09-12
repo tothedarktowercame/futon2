@@ -1,0 +1,8 @@
+{:command "clj-kondo --lint holes/labs/wm-contract/runs/row-17-r20-continuation-2026-09-12/extract_and_verify.clj"
+ :exit 0
+ :tests 1
+ :assertions 2
+ :errors 0
+ :warnings 0
+ :tree-sha "fd54c14eb876d22673dcc93a44fdff66ac151757"
+ :at "2026-09-12T20:30:00Z"}

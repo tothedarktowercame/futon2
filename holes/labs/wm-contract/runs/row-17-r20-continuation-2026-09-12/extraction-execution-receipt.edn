@@ -1,0 +1,8 @@
+{:command "FUTON3C_PARKED_ON_PATH=.../isolated-park-store.edn FUTON3C_LIVE_PARKED_ON_OBSERVED=1 clojure -Sdeps '{:paths [\"src\" \"dev\"]}' -M -e '(load-file \"../futon2/holes/labs/wm-contract/runs/row-17-r20-continuation-2026-09-12/extract_and_verify.clj\")'"
+ :exit 0
+ :tests 2
+ :assertions 11
+ :tree-sha "526fd7ee91cd5d7ff6f0e64532ec222581f8dac8"
+ :park-store-sha256 "57e50c2d9f386f406f1aa7aa26d4b5e8b5035d3e09da06edf92ce882ffe26245"
+ :invoke-ledger-sha256 "7117c2f769c3a1d82dee9024e04361fed67b4ddefc7b696ec09adadfcbb68897"
+ :at "2026-09-12T20:28:47.308667414Z"}
