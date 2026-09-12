@@ -2060,6 +2060,52 @@
     (is (= :build-failed (:outcome result)))
     (is (= :machine-failure (:repair-class (first @findings))))))
 
+(deftest author-refusal-does-not-attribute-concurrent-head-movement
+  ;; repair-attempt-001: another actor's documentation commit moved HEAD
+  ;; while the author reported REFUSE. It must never become a review parcel.
+  (doseq [[marker artifact expected]
+          [["FULL_LOOP_AUTHOR: REFUSE :required-negative-controls-failed" nil
+            :guardrail-refusal]
+           ["FULL_LOOP_AUTHOR: REFUSE" nil :build-failed]
+           ["FULL_LOOP_AUTHOR: REFUSE :blocked" "98d0dcb" :build-failed]]]
+    (let [dispatches (atom []) findings (atom []) observed (atom false)
+          built (atom false)
+          opts (assoc (no-commit-author-opts
+                       dispatches findings
+                       {:job-id "author-job" :state "done" :artifact-ref artifact
+                        :events [{:type "text" :text marker}]})
+                      :author-artifact-observer-fn
+                      (fn [repo before _]
+                        (reset! observed true)
+                        {:fresh-author? true :repo repo
+                         :pre-dispatch-head (:head before)
+                         :observed-head "98d0dcb" :commit "98d0dcb"})
+                      :resolve-build-fn
+                      (fn [& _]
+                        (reset! built true)
+                        {:repo "/repo" :files ["unrelated-document.md"]}))
+          result (runner/run-opportunity! opts)]
+      (is (= expected (:outcome result)))
+      (is (false? @observed) "refusal is resolved before artifact observation")
+      (is (false? @built) "no build is resolved for unrelated HEAD movement")
+      (is (= ["zai-5"] @dispatches) "no reviewer dispatch")
+      (when (= expected :build-failed)
+        (is (= :invalid-author-refusal (get-in result [:data :failure-kind])))))))
+
+(deftest refusal-contract-applies-to-every-author-phase
+  (doseq [stage [:author-wait :revision-wait :build-cure-wait]]
+    (let [job {:state "done" :events [{:type "text"
+                                      :text "FULL_LOOP_AUTHOR: REFUSE :blocked"}]}
+          failure (try (#'runner/throw-if-author-refused! job "repair-attempt-001" stage)
+                       nil
+                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :guardrail-refusal (:outcome failure)))
+      (is (= stage (:failure-stage failure)))
+      (is (= ":blocked" (:refusal-reason failure)))))
+  (is (nil? (#'runner/throw-if-author-refused!
+             {:events [{:type "text" :text "FULL_LOOP_AUTHOR: DONE abc123"}]}
+             "repair-attempt-001" :author-wait))))
+
 (deftest done-claim-without-verifiable-commit-stays-build-failed
   ;; Fail-closed: a DONE claim that repository observation cannot validate is
   ;; exactly the failure the machine-failure line exists for.

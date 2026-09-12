@@ -1395,6 +1395,25 @@
       "REFUSE" {:verdict :refuse :reason (str/trim (str detail))}
       {:verdict :unverifiable})))
 
+(defn- throw-if-author-refused! [author-job target stage]
+  ;; Shared HEAD movement cannot establish an artifact for a refusing author.
+  ;; A contradictory artifact claim is a failure, never an environmental hold.
+  (let [{:keys [verdict reason]} (author-verdict author-job)]
+    (when (= :refuse verdict)
+      (if (and (not (str/blank? reason))
+               (nil? (:artifact-ref author-job)))
+        (throw (ex-info "Author refused with a typed reason"
+                        {:outcome :guardrail-refusal
+                         :failure-kind :guardrail-refusal
+                         :failure-stage stage
+                         :refusal-reason reason
+                         :target target :author-job author-job}))
+        (throw (ex-info "Author refusal lacks a reason or claims an artifact"
+                        {:outcome :build-failed
+                         :failure-kind :invalid-author-refusal
+                         :failure-stage stage
+                         :target target :author-job author-job}))))))
+
 (def ^:private feature-card-keys
   [:built :want-coverage :matches-intent? :things-to-try
    :fold-ref :proof-ref :reviewer-note])
@@ -1922,6 +1941,7 @@
                            :review-job review-job
                            :commit commit
                            :reviews [(review-record 1 commit review-job review-gate)]})))
+            _ (throw-if-author-refused! revision-author-job target :revision-wait)
             revision-build
             (run-phase!
              opts phase-context :revision-build
@@ -1930,23 +1950,6 @@
                     revision-commit (:commit binding)
                     build (when revision-commit
                             (resolve-target-build opts repo revision-commit))]
-                (when-not revision-commit
-                  (let [{:keys [verdict reason]}
-                        (author-verdict revision-author-job)]
-                    (when (and (= :refuse verdict)
-                               (not (str/blank? reason)))
-                      (throw
-                       (ex-info "Revision author refused with a typed reason"
-                                {:outcome :guardrail-refusal
-                                 :failure-kind :guardrail-refusal
-                                 :failure-stage :revision-build
-                                 :refusal-reason reason
-                                 :author-job revision-author-job
-                                 :review-job review-job
-                                 :commit commit
-                                 :reviews
-                                 [(review-record
-                                   1 commit review-job review-gate)]})))))
                 (when-not (and revision-commit
                                (not= commit revision-commit)
                                (:repo build)
@@ -2155,6 +2158,7 @@
                 (run-phase! opts phase-context :build-cure-wait
                             #((or (:poll-fn opts) poll-job!) opts cure-job-id))
                 _ (throw-if-cancelled! cure-job :build-cure-wait)
+                _ (throw-if-author-refused! cure-job target :build-cure-wait)
                 ;; Re-resolve the build: the commit may have changed.
                 cure-artifact-ref (:artifact-ref cure-job)
                 cure-binding (when fresh-author?
@@ -3367,6 +3371,7 @@
                                          :author-job author-job}
                                   (seq author-retries)
                                   (assoc :author-retries author-retries)))))
+              (throw-if-author-refused! author-job target :author-wait)
               (let [artifact-binding
                     (when fresh-author?
                       (fresh-artifact-binding opts author-repo
@@ -3408,30 +3413,10 @@
                              :artifact-binding artifact-binding
                              :resolved-repository repo})))
                 (when-not (and commit repo (vector? files))
-                  ;; The author contract offers exactly one legal no-commit
-                  ;; ending: a line-anchored REFUSE with a typed reason. That
-                  ;; is an agent declining, not a broken machine — class it
-                  ;; like :abstained (environmental hold), so the line does
-                  ;; not demand a repair commit for a refusal. Fail-closed
-                  ;; boundaries: an observed commit outranks any marker (a
-                  ;; refusal cannot suppress review of real work), a bare
-                  ;; REFUSE without a reason is unverifiable, and a DONE
-                  ;; claim without a verifiable commit stays a build failure.
-                  (let [{:keys [verdict reason]} (author-verdict author-job)]
-                    (when (and (nil? commit)
-                               (= :refuse verdict)
-                               (not (str/blank? reason)))
-                      (throw (ex-info "Author refused with a typed reason"
-                                      {:outcome :guardrail-refusal
-                                       :failure-kind :guardrail-refusal
-                                       :failure-stage :build-resolution
-                                       :refusal-reason reason
-                                       :target target
-                                       :author-job author-job})))
-                    (throw (ex-info "Author completed without a verifiable commit"
-                                    {:outcome :build-failed
-                                     :author-verdict verdict
-                                     :author-job author-job}))))
+                  (throw (ex-info "Author completed without a verifiable commit"
+                                  {:outcome :build-failed
+                                   :author-verdict (:verdict (author-verdict author-job))
+                                   :author-job author-job})))
                 (let [{:keys [commit repo files author-job build-retries]}
                       (build-cure-loop opts @phase-context author dispatched-turns
                                        target commit repo files author-job
