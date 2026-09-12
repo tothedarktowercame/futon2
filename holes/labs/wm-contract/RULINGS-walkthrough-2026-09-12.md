@@ -164,3 +164,57 @@ contradicted by record). Each non-validated row names what would
 close it. This list is the completion frame for the week; the
 backlog and instrument lanes feed it. The outer-loop row inherits
 Item 2 (amended): on-demand capability at the Empirics standard.
+
+## Item 4 — The definition of done, and how we talk about it
+
+Joe (same day, later): "There also has to be a difference in how we
+talk about it. Not just that it is backed up by Lean, for example,
+which we wouldn't have mentioned in the old draft because that one
+wasn't. And not just backed up by the fact that we ran it 77 times,
+which was the case last time... if you look at the empirics.tex
+file, it claims that it got better and better and more and more
+complete as it went on because we were feeding defects back in and
+getting them repaired. Which was a nice feature, but it just didn't
+actually validate that we'd done AIF well. And if you look at the
+commits we've made, it's not quite obvious how we'll account for all
+the changes... we couldn't say freeze this git hash and then
+everything since then is an improvement, because we had to rewrite
+the system almost completely. So the Lean work, like I've said, is
+not some kind of optional extra. What we want to get out is
+basically a run comparable to the one in the earlier paper, with
+time stamps and stuff like that. And also the Lean-computed
+validation of the runtime certificate that that run does conform to
+AIF. I think that would probably do it."
+
+Operationalized — the definition of done is TWO artifacts:
+
+1. **A qualifying run** of the re-architected system, comparable to
+   the earlier paper's empirics run: timestamped, real work, full
+   record chain (G-record, cascade, enriched wiring with fold
+   provenance, correspondence, selection-enaction verdict, typed
+   terminals) — the machinery F11's re-admitted cycle already
+   exercises; an on-demand outer-loop run at the Empirics standard
+   (Item 2 amended) is the natural shape.
+2. **The Lean-computed validation of that run's runtime
+   certificate** — closing wmRunConformsToWiring (Holes.lean:7412,
+   RUN-GATED since Joe's 2026-08-31 ruling; close path = certificate
+   over a pinned run proved by decide, machinery precedented by
+   wmS5RunConformsToDrawnWiring) — extended to "conforms to AIF":
+   the certificate binds route conformance to the drawn wiring AND
+   the registry-bound equation obligations at pinned revisions
+   (machine-contracts + aif-equations :realised state), per the
+   agreed certificate-interface answer (contrast note Q3: checked
+   certificate interface, not a second acceptance authority).
+
+Discourse discipline (for both papers):
+- Run counts are not validation ("we ran it 77 times" claims
+  nothing); the defect-feedback loop is a FEATURE, not AIF
+  validation.
+- No commit-continuity story: the system was rewritten almost
+  completely; the account is run + certificate + Lean validation,
+  not "freeze this hash, everything after is improvement."
+- "Backed by Lean" is said only of what the certificate actually
+  computes, in the suspended-vocabulary discipline until Joe accepts
+  the certificate.
+
+Which run qualifies remains Joe's call at certificate time.
