@@ -406,6 +406,22 @@ operator workflow conversation (standdown 2026-09-12).
     budget") and R15 ("Hierarchy and timescale"), currently outside
     census scope entirely; each needs its own working-evidence row
     or an explicit recorded basis for why its ladder is complete.
+    DISCOVERY DONE (2026-09-12, TN-row20-census-2026-09-12.md
+    8ee0dcb7; reviewer verified the census vocabulary/matrix, the
+    plumbing vector (aif-equations.edn:1049 at HEAD — TN's
+    520-521 pin drifted with concurrent edits), and both V7
+    receipt hashes byte-exact). Verdicts, both honest-absence
+    (a): R11 and R15 each get a census row of seven typed
+    'absent' cells pinned to their retained V7 caller/corpus
+    censuses (b80a827f / 508054e6) — built standalone mechanisms
+    (hierarchical_budget + adapter; temporal_hierarchy) with
+    ZERO production callers and zero node-linked runtime
+    records; formal plumbing ladders correctly terminate at
+    'named' but the obligated lifecycle ladder is 0/7. TN also
+    corrects the premise: R14/R17 have formal rungs but NO
+    lifecycle rows (R17 explicitly omitted originally). Two
+    independent facts-row packets; R11 dispatched (codex-24),
+    R15 follows.
 
 ## Phase 4 — the wiring diagram agrees with the code (3)
 
