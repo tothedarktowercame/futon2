@@ -157,13 +157,26 @@ operator workflow conversation (standdown 2026-09-12).
     the exact-rational recurrence differs by rounding residuals
     (~2^-59 scale), carried honestly under contract v1.2's
     declared residual criterion by the R17 claim packet.
-13. IN PROGRESS: discovery TN reviewed (817957a8: anchor at
-    war_machine.clj:6280, carry in the daily WM trace as
-    :accumulation-state, migration-required refusal not silent
-    reinit, TN-9a boundary on the R1->R17/R2->R17 flip);
-    implementation packet out (codex-23). The TN's shared
-    :accumulation-update-input envelope also serves row 15's
-    belief-update capture — one retention seam, two proofs.
+13. DONE (2026-09-12; TN 817957a8; seam 6e096a2a; completion
+    480ebd17..404a152d; reviewed + reloaded live). Live tick
+    accumulation at the war_machine.clj:6280 anchor; carry in the
+    daily trace; one committed configuration record threaded
+    through BOTH production callers (on-demand run_tick_once +
+    scheduled wm_scheduled_run) with typed refusal on
+    malformation; full-judge three-tick machinery evidence
+    (row13-full-1..3, 294 coordinates delta 0.0,
+    :full-judge-redirected-run true); three refusals before
+    append. LIVE STATE NOTE: the next live traced tick will
+    refuse :accumulation-migration-required BY DESIGN until the
+    runbook's explicit predecessor-state migration
+    (runs/row-13-live-accumulation-2026-09-12/NOTES.md) is
+    performed — a documented discharge, not an incident. The
+    shared :accumulation-update-input envelope is now retained
+    per tick: row 15's belief-update capture prerequisite is
+    SATISFIED at the seam (proof packet can follow after the
+    first migrated live tick supplies a real captured update).
+    Registry flip R1->R17/R2->R17 remains TN-9a-gated, not
+    performed.
 14. Build the machine-Q link: the forward model actually receiving
     a policy-conditioned outcome distribution. RULED: build, not
     descope — narrowing the claim instead is the facade option.
