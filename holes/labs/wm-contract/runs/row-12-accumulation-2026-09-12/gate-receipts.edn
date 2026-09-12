@@ -1,0 +1,9 @@
+{:at "2026-09-12" :futon2-tree-sha "01a5e8a4" :mathlib4-tree-sha "cbf0959b0d"
+ :gates [{:command "clojure -M:test -e <scoped machine-accumulation runner>"
+          :exit 0 :tests 1 :assertions 11}
+         {:command "clj-kondo --lint src/futon2/aif/machine_accumulation.clj test/futon2/aif/machine_accumulation_test.clj"
+          :exit 0 :errors 0 :warnings 0}
+         {:command "emacs --batch -Q -l futon4/dev/check-parens.el <two row-12 files>"
+          :exit 0 :files 2}
+         {:command "lake env lean DarkTower/WarMachine/MachineAccumulation.lean"
+          :exit 0 :errors 0 :warnings 0}]}

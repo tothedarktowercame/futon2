@@ -1,0 +1,23 @@
+{:schema :wm/accumulation-witness-v1 :row 12 :at "2026-09-12"
+ :trace {:path "data/wm-trace/wm-trace-2026-09-04.edn"
+         :sha256 "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120"
+         :form-selectors [0 1 2]
+         :timestamps ["2026-09-04T07:46:52.742121237Z"
+                      "2026-09-04T07:48:10.260151161Z"
+                      "2026-09-04T07:49:29.060729571Z"]}
+ :coordinate-contract
+ {:observation [:active-repo-ratio :annotation-health :attack-coverage :consulting-pct
+                :coupling-density :depositing-signal :loop-health :mathematics-pct
+                :mission-health :portfolio-pct :sorry-count-norm :stack-pct
+                :support-coverage :ticks-firing-ratio]
+  :state [:addressed :falsified :foreclosed :refined :reopened :spawned :strengthened]}
+ :declared-update "a[t+1,o,s] = a[t,o,s] + observation[t,o] * belief[t,s]"
+ :initialization {:authority :declared :prior 1.0}
+ :steps 3 :coordinates-per-step 98 :compared-coordinates 294
+ :comparison {:lean-reference :declaredAccumulation
+              :clojure-production :futon2.aif.machine-accumulation/step
+              :maximum-absolute-delta 0.0 :zero-values-measured true}
+ :controls [{:mutation :recount-current-tick-only :result :failed-recurrence}
+            {:mutation :dropped-middle-tick :refusal :carry-chain-gap}
+            {:mutation :support-mismatch :refusal :support-mismatch}]
+ :boundary {:live-wiring false :a4a-changed false :registry-changed false}}
