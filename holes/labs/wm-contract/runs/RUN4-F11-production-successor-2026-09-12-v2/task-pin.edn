@@ -1,0 +1,21 @@
+{:schema :wm/run4-task-pin-v1
+ :series-id "run4-f11-production-successor-20260912-v2"
+ :trial-id "M-f11-find-production-successor"
+ :series-order :as-declared
+ :candidate-task-ids ["M-f11-find-production-successor"]
+ :selected-task-id "M-f11-find-production-successor"
+ :sources [{:path "holes/missions/M-f11-find-production-successor.md"
+            :sha256 "5f8dcfca1ec3c51067fcbd8ed20fceb8c73f059274a3c63c28e75fd7d4d317be"}
+           {:path "holes/labs/wm-contract/worklist.edn"
+            :sha256 "579410576f1789e46101ffde766b735783126bc22d7eb877c4bcdfb95680a1ef"}
+           {:path "src/futon2/aif/mission_registry.clj"
+            :sha256 "07822ed0667f268350fc3b9d921adce4d0d8c78276463b3bf03e93f5a01b89da"}
+           {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12-v2/cohort.edn"
+            :sha256 "821149cf56c048a44ee29f4f82ef00cdc9f8a142256055f930d8ce029b65c1d4"}]
+ :config {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12-v2/run-config.edn"
+          :sha256 "3ed73d48cc9085a1c1884bc869e6e5c1f977ef6014a0bbbf58d7f29cc2f306b5"}
+ :casting {:author "codex-20" :reviewer "codex-18" :repair-reviewer "codex-19"}
+ :operator-selection {:mode :operator-selected :operator "Joe"
+                      :authority-ref "Joe continuous WM direction; claude-15 seam and TN-9a review; 2026-09-12"}
+ :mapping {:mission-id "M-f11-find-production-successor"
+           :action {:type :advance-mission :target "M-f11-find-production-successor"}}}
