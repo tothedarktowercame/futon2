@@ -285,7 +285,11 @@
         output (assoc sample-judge-output
                       :observation (observation/observe {})
                       :ranked-actions ranked)
-        record (trace/trace-record output)
+        ;; The final assertion pins the default-off decision shape; bind the
+        ;; details flag so the ambient FUTON_WM_TRACE_POLICY_DETAILS cannot
+        ;; add :softmax-weights-by-candidate-id to the stripped decision.
+        record (binding [trace/*persist-policy-trace-details?* false]
+                 (trace/trace-record output))
         shadow (:support-typed-scoring-shadow record)]
     (is (= :shadow-only (:authority shadow)))
     (is (= [2.0 -1.0]
