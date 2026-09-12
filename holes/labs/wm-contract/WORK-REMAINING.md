@@ -359,7 +359,22 @@ operator workflow conversation (standdown 2026-09-12).
     unchanged — ruling recorded in the docstring); test fixtures
     bind details off suite-wide so the ambient env cannot leak
     into default-shape claims; 54 tests/173 assertions at
-    1f87a6b6. R6 posterior proof packet dispatched (codex-23). Softmax NaN DEFECT
+    1f87a6b6. R6 posterior proof STOPPED correctly (2026-09-12,
+    codex-23): authority mismatch — the registry equation
+    (aif-equations.edn:177-180) declares the B.9 form WITH F_pi,
+    but the bound Lean carrier softmax (Holes.lean:7224-7229,
+    CLOSED-BY-RECORD) omits F_pi, and its docstring declares the
+    F-less form; production selection-scores HAS the F_pi seam,
+    so the carrier lags both the declared equation and the code.
+    RULED in-lane per no-facade: extend, don't narrow — (A) new
+    general carrier softmaxWithFPi + zero-F compatibility
+    theorem, the closed softmax and SoftmaxWitness untouched
+    (dispatched, codex-23); then (B) reviewer authority edit
+    rebinding :lean to the general carrier with a dated note;
+    then (C) the 148-coordinate witness against the general
+    carrier's F-absent branch (the pinned record has F_pi
+    :status :absent), general nonzero-F correspondence retained
+    as open until a record with F_pi present exists. Softmax NaN DEFECT
     REPAIRED (2026-09-12, futon2 5750251c/39f2fd0f, reviewed):
     guard at the single selection-scores seam (all softmax-weights
     arities and both direct callers route through it) refuses
