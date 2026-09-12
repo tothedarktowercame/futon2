@@ -518,7 +518,7 @@
       (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
           "the enabled record differs from the disabled one in exactly this key
            (:timestamp aside, which trace-record stamps per call)")
-      (is (= 27 trace/trace-schema-version)
+      (is (= 28 trace/trace-schema-version)
           ":mission-c entered the ledger at 23, and that bump is what separates
            'producer predates C_mis' from 'flag was off'. Pinning the ledger
            HEAD here is what makes every later key-set change bump too -- this
@@ -552,7 +552,7 @@
            producer that read one and measured zero")
       (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
           "and it is still exactly one key that separates the two records")
-      (is (= 27 trace/trace-schema-version)
+    (is (= 28 trace/trace-schema-version)
           "absence of :gauge-observables at 25 or later would mean every
            producer was absent; before 25 it means the producer predates them.
            The pin is on the ledger HEAD, so a later key added without a bump
@@ -583,7 +583,7 @@
       (is (= (dissoc off :timestamp)
              (update (dissoc on :timestamp) :decision dissoc :enumeration-completeness))
           "the flag-on record differs from the flag-off one in exactly this key")
-      (is (= 27 trace/trace-schema-version)
+      (is (= 28 trace/trace-schema-version)
           "absence of the key at 26 or later means the flag was off on that
            tick; before 26 it means the producer predates the check, and only
            the version tells a reader which -- a false clean bill otherwise"))))
