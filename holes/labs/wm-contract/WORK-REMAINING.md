@@ -14,15 +14,19 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Phase 0 — the machinery that makes "provably so" possible (5)
 
-1. Build the witness carrier: the mechanism that attaches a
-   measured-against-production proof to the node that owns it, with
-   refusals when the proof or link is missing. The witness-evidence
-   definition (TN-node-witness-carrier-proposal, 2df0662d) is
-   ADOPTED as the working standard; its honesty constraints
-   (maximum claims, named refusals) are unchanged.
-2. Credit the three measurement proofs that already exist —
-   observation, precision, prediction-error, each proven equal to
-   production output — to their nodes through row 1.
+1. DONE (1ca908d3, reviewed 2026-09-12). The witness carrier:
+   fragments + merge_witnesses.bb admission with the TN's maximum
+   claims and named refusals; deterministic merge (byte-identical
+   twice), 23 controls green including no-output-on-refusal.
+2. IN PROGRESS (1ca908d3). The three proofs' 24 claims are carried
+   as :proposed with pins audited (precision matches; observation's
+   one historical divergence and prediction-error's two census
+   divergences recorded, not re-pinned). The carrier correctly
+   refuses to admit them: retained F8 transcripts carry no checker
+   exit codes and no review receipts. REMAINING: re-run the three
+   Lean witness checkers to produce executed verification receipts,
+   independent review receipts, then admission + canonical registry
+   integration as a reviewed step.
 3. DONE (14dc45cc, reviewed; live 2026-09-12). The click path
    records both output-validator verdicts (pass/fail + findings +
    input digests) inside the construction record it saves, on
