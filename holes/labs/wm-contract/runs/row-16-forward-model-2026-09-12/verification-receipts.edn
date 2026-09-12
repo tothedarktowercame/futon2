@@ -28,7 +28,7 @@
    [{:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
      :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}
     {:repo "mathlib4" :path "DarkTower/WarMachine/MachineModelSpec.lean"
-     :sha256 "0ec54a8804beaf5ef58b0c043214c09c06cc59fb76d4cb65f9a6a0e322726feb"}
+     :sha256 "854ee13082542b52d8f6fe88a72fcfaacaf0878bc3253e31a64c60896d6e8960"}
     {:repo "mathlib4" :path "DarkTower/WarMachine/MachineForwardModelWitness.lean"
      :sha256 "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c"}]
    :declaration-census
