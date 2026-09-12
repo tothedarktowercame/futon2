@@ -931,7 +931,7 @@
     :blocked-on
     [":requires names no environment flag, so the chain cannot be derived; the declared requirement is carried verbatim: [\"the U14e-1..4 packets landed and their census taken; a separate queued-J decision\"]"]}}},
  :emitted-by "futon2/holes/labs/wm-contract/flip_readiness_check.bb",
- :emitted-at "2026-09-09",
+ :emitted-at "2026-09-12",
  :sources
  {:catalog
   "futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
@@ -1035,11 +1035,11 @@
    :blocked-on
    ["10 of 10 open holes are neither closed nor typed :flip-blocking false; :flip-blocking is not in variable-situation-accounting.edn's :axes at all, which declares :closability and :readiness (U27's pre-run/run-gated fence) and nothing about flips"]},
   :figure5-partials
-  {:verdict :blocked,
+  {:verdict :green,
    :instances 61,
-   :by-status {:repaired 60, :partial 1},
-   :unrepaired [{:id :r16-engine-wiring, :status :partial}],
-   :blocked-on [":r16-engine-wiring is :partial"]},
+   :by-status {:repaired 61},
+   :unrepaired [],
+   :blocked-on nil},
   :mission-gauges
   {:verdict :blocked,
    :criteria 9,
@@ -1057,26 +1057,19 @@
    :blocked-on
    ["M-expressions-of-interest measures 0 of 6 criteria (reasons: no-producer)"]}},
  :verdicts
- {:fpi-posterior
-  {:verdict :blocked, :blocked-on [:box2-holes :figure5-partials]},
+ {:fpi-posterior {:verdict :blocked, :blocked-on [:box2-holes]},
   :guide-gate
-  {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+  {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]},
   :mission-c
-  {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :mission-gauges]},
+  {:verdict :blocked, :blocked-on [:box2-holes :mission-gauges]},
   :selection-law
-  {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+  {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]},
   :task-belief-ladder
-  {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+  {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]},
   :tau-variational
-  {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]},
+  {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]},
   :zaif-u14e
-  {:verdict :blocked,
-   :blocked-on [:box2-holes :figure5-partials :flag-chain]}},
+  {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]}},
  :nothing-is-flipped
  "This artifact performs no flip and writes no ruling. A green line is evidence a flip goes to Joe WITH; it is not permission.",
  :line-order
