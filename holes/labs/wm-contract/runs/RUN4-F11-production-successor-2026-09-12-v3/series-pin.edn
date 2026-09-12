@@ -1,0 +1,18 @@
+{:schema :wm/run4-series-pin-v1
+ :series-id "run4-f11-production-successor-20260912-v3"
+ :status :frozen :order :ordinal
+ :stop-rule :attempt-each-once-even-after-fail-or-block
+ :casting {:author "codex-20" :reviewer "codex-18" :repair-reviewer "codex-19"}
+ :source-pins [{:path "holes/missions/M-f11-find-production-successor.md"
+                :sha256 "8853b2564874cf526d3ed150f0f59ba3b1fcd7ae0cac17598a022c438bf45f36"}
+               {:path "holes/labs/wm-contract/worklist.edn"
+                :sha256 "579410576f1789e46101ffde766b735783126bc22d7eb877c4bcdfb95680a1ef"}
+               {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12-v3/run-config.edn"
+                :sha256 "a47d79436424c29ed50fe2a6a942b3f4715d4092ed1f142b8a9525b72f7e0fd5"}
+               {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12-v3/cohort.edn"
+                :sha256 "f7330d3fa8170ac3a722bd9c74b4b7dd0fe7f64602ebed204567308e159a02e4"}]
+ :trials [{:ordinal 1 :trial-id "M-f11-find-production-successor"
+           :attempt-id "f11-production-successor-20260912-attempt-003"
+           :pin-sha256 "e8687277cfcc1e137d8639a1f22a37a642fa90e7534fffa0802c0ee8df2982f4"
+           :packet {:path "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12-v3/task-pin.edn"
+                    :sha256 "e8687277cfcc1e137d8639a1f22a37a642fa90e7534fffa0802c0ee8df2982f4"}}]}
