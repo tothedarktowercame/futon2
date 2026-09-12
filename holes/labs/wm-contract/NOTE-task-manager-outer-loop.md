@@ -135,3 +135,31 @@ Two consequences:
    (the R14 idiom): a "not-yet" from an old library version is stale the
    moment relevant patterns or cascades land. The task manager re-tests
    the not-yet bucket on map growth, not on a timer.
+
+## The capability dimension: staging into future layers (Joe, 2026-09-12)
+
+Map growth re-read: some tasks must be staged into a FUTURE LAYER of the
+buildout, indexed by capability — if the capability doesn't exist yet,
+the task cannot go, no matter how fresh or unblocked it is. The
+capability stars (capability-star-map, a live mission) are the third
+dimension of the embedding bedding:
+
+- the 2D map (patterns × turns) is the bedding; **capability stars are
+  the z-axis** — each star indexes a layer that would be built ON TOP of
+  the region of pattern space it unlocks;
+- a not-yet task is keyed to the capability whose landing would re-test
+  it: {task → required-capability → map-region-unlocked}. The not-yet
+  bucket stops being a pile and becomes a dependency-ordered backlog
+  (the same ancestor/downstream structure the issue board already
+  carries — this dimension composes with it, not against it);
+- the re-test trigger sharpens: not "map grew" generically, but
+  "capability K went live" → re-test exactly the region K unlocks, and
+  only that region. Event-driven triage with a named cause;
+- playouts extend one step upward: a simulated buildout can now ask
+  "what does layer K+1 look like if star K lands?" — the t7 walk with
+  the z-axis as an intervention (a do-operator on capability arrival,
+  and identifiability per t10 applies).
+
+Constitutional line unchanged: capabilities are received (their stars'
+landing is mission work, L3/L4), never projected by the task manager —
+it stages TOWARD layers, it does not decide the layers.
