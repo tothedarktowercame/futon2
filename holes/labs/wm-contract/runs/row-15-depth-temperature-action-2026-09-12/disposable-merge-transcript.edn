@@ -1,0 +1,5 @@
+{:exit 0
+ :new-admissions [{:id "R14-temperature-trace-20260904-row0-v1"
+                   :status :pending :node :R14}]
+ :refusals 0
+ :input-sha256 "1f0000ffc00ffb26220a0e20d0c88ddcd6dfeabee0b918e754d3ff3aec9ac97a"}

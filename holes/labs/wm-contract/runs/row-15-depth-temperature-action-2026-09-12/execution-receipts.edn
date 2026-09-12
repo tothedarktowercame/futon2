@@ -1,0 +1,25 @@
+{:receipts
+ [{:gate :clj-readback
+   :command "clojure -M holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/readback.clj"
+   :exit 0 :tests 1 :assertions 4
+   :tree-sha "da91d1f5c9833f7784d1a122ee85a37dd757eada" :at "2026-09-12"}
+  {:gate :clj-kondo
+   :command "clj-kondo --config '{:linters {:namespace-name-mismatch {:level :off}}}' --lint holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/readback.clj"
+   :exit 0 :tests 1 :assertions 2
+   :tree-sha "da91d1f5c9833f7784d1a122ee85a37dd757eada" :at "2026-09-12"}
+  {:gate :check-parens
+   :command "bash /home/joe/code/futon4/dev/check-parens.sh holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/readback.clj holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/input-and-findings.edn"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "da91d1f5c9833f7784d1a122ee85a37dd757eada" :at "2026-09-12"}
+  {:gate :lean-elaboration-and-axioms
+   :command "lake env lean DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
+   :exit 0 :tests 1 :assertions 2
+   :tree-sha "1023b2f4dec6bc5e49d5c042b81ca86c211c1c9b" :at "2026-09-12"}
+  {:gate :node-witness-verify-kind
+   :command "bb -cp scripts -e '(verify-kind! R14-temperature-trace-20260904-row0-v1)'"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "b1e8e3dd707008b54ee9592fbd596f875b0723db" :at "2026-09-12"}
+  {:gate :disposable-merge
+   :command "bb scripts/merge_witnesses.bb --output /tmp/row15-witness-registry.edn"
+   :exit 0 :tests 1 :assertions 2
+   :tree-sha "5729d3ac4296f3e5d28f49eee2da9519f08fc5ed" :at "2026-09-12"}]}
