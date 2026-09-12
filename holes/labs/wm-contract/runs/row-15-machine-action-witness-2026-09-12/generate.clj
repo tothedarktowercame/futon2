@@ -42,12 +42,10 @@
             (let [actual (sha256 (str capture-dir "/" file))]
               (when-not (= expected-sha actual)
                 (throw (ex-info "capture pin mismatch" {:file file :expected expected-sha :actual actual})))))
-        natural (read-edn "machinery-capture.edn")
         controller (read-edn "controller-head.edn")
         full (read-edn "full-score-first-max.edn")
         habit (read-edn "habit-last-max.edn")
         abstain (read-edn "no-op-abstain.edn")
-        absent (read-edn "requested-posterior-f-pi-absent.edn")
         tie (read-edn "first-max-tie-control.edn")
         base-rows (get-in controller [:input :ranked-actions])
         base-ranked (projection/project-ranked-actions base-rows)
