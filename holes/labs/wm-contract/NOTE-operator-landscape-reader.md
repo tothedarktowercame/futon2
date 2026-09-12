@@ -77,3 +77,81 @@ Row links: NOTE-agent-needs-from-issue-board (this is the N2/C-belief
 complement the hierarchy was missing); FINDINGS-embedding-pipeline (the
 measurements); SPEC-chip-boards-v0 §3½ (the reader sits at L1-L2 and
 feeds L4); M-zaif-harness (the C-belief arm this operationalizes).
+
+## The R-node specification (Joe asked, 2026-09-12)
+
+The cartographer differs from the coherence keepers node by node — where
+inbox-zero's R3 revises a predicate, this agent's R3 accumulates a MAP.
+
+- **R1 (belief μ)** — the association graph itself: turns × patterns ×
+  passages, per-author. Belief state is the map's current extent, not a
+  scalar. Counterpart slices are first-class from day one: the operator
+  slice now; **Rebecca's slice and Eric's slice later are the same slot
+  with a different author key** — same sphere of endeavor, distinct
+  individuals, distinct precision rows (their channels are email/prose,
+  measured separately per U9; no precision transfers between people).
+- **R2 (observation o)** — four channels with measured precisions: the
+  embedding tags (floorless seeder), FTS elaboration passages, the
+  operator-turn full text, and declared marks. Every association record
+  carries input text + corpus version + justification excerpt (the two
+  provenance holes, closed by construction).
+- **R3 (update)** — association accrual with hub correction: an
+  association into a cold family (the 196 never-fired patterns) carries
+  an EIG bonus recorded on the edge; hub hits are recorded but do not
+  grow the map's information. The map grows at its frontier, not its
+  hubs.
+- **R4 (forward model Q)** — predicted value of an association: covers
+  the null lesson — random vectors reach 58% of the library, so
+  breadth is worth ~nothing; the model prices DISTINCTION (new
+  turn-pattern pair, cold family, cross-author bridge), not coverage.
+- **R5 (G)** — per candidate association: risk (a wrong association
+  poisons cascade construction downstream — the map is load-bearing for
+  L4) + ambiguity (score does not separate sense from salad ⇒ every
+  embedding-only association is high-ambiguity until FTS-elaborated).
+  The elaboration arm exists to drain exactly that ambiguity.
+- **R6 (policy)** — retrieve (FTS elaboration) / act (write the
+  association record) / ask (surface a cluster to the operator as a
+  candidate cascade family) / yield (window exhausted). No zap: the
+  reader never constructs a cascade.
+- **R7 (channel precision Π)** — the earned table from the findings,
+  plus: per-author rows (joe ≠ rebecca ≠ eric), per-corpus-version rows
+  (an unstamped corpus is an unknown channel, not a stale one).
+- **R8 (mismatch F_π)** — a turn that associates with NOTHING (below
+  even the floorless seeder's habits) is the interesting residual: the
+  operator is doing work the pattern language cannot yet name. Mismatch
+  = new-pattern candidate, surfaced, not force-tagged.
+- **R9 (witness)** — associations are proposals; a cascade built from
+  them is authored and ratified one level up. The map never certifies
+  itself (same clause as the issue board's accepts-nothing).
+- **R13 (horizon T)** — per-window (a day's turns); the map's horizon
+  is the whole history, but each cycle only extends the frontier.
+- **R14 (τ)** — trust in the map: re-derive a sample of associations
+  after each corpus rebuild (the corpus is rebuilt regularly and
+  unstamped today — stamping it is the precondition). Corpus change
+  without re-derivation is τ decay, typed.
+- **R16 (action u)** — the association record is the act, witnessed by
+  its justification excerpt.
+- **R17 (learning)** — the embedding itself is tunable LATER (input
+  lengths, what text is embedded — the findings measured prefix-vs-full
+  disagreement 0.33, so tuning changes most answers); for NOW the
+  dataset we have is the declared instrument, versioned and measured.
+  Tuning is a sanctioned change vector with re-measurement, never
+  silent.
+
+## Embedding Live and the interpretation layer
+
+`mission-efe-field.html` ("Futon City") is the same material rendered:
+all historical missions, pattern/scoped, 2D, with per-mission status
+and generativity. It is a PROJECTION — lovely, and not queryable. The
+cartographer's association graph is the interpretation layer it lacks:
+
+- a 2D layout answers "where is X"; the graph answers "what does X
+  neighbor, why (passage), since when (bitemporal), how trusted
+  (precision row), and what cascade spans it";
+- **cascades as a spanning set**: the claim worth making explicit — a
+  good pattern cascade is a minimal spanning structure over the turns
+  that produced meaningful work. The map's job is to hold the points;
+  cascade construction (L4, authored) is choosing the spanning edges;
+  Futon City is then just one rendering of the result, regenerable.
+- keep the page: it becomes the cartographer's SING — a typed meter
+  (map extent, frontier growth, cold-family coverage), rendered.
