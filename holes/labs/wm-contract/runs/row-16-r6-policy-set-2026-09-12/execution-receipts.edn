@@ -16,9 +16,13 @@
     :errors 2 :warnings 0 :cause :run-directory-not-source-root
     :resolution "Disable only namespace-name-mismatch, following the row-15 run-directory precedent; all semantic linters remain enabled."}]}
  :check-parens
- {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- policy-set packet Clojure and EDN files"
+ {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- src/futon2/aif/machine_policy_set.clj test/futon2/aif/machine_policy_set_test.clj holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/generate.clj holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/readback.clj holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/fixture.edn holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/wm-trace-policy-set.edn"
   :exit 0 :tests 6 :assertions 6
-  :tree-sha "c02f18bff184aebca26f2c6d64265ee620f2ac5c" :at "2026-09-12"}
+  :tree-sha "e9c66d641f250ccda1d1418253b170899e80c6eb" :at "2026-09-12"
+  :follow-up
+  {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/generate.clj holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/readback.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "c02f18bff184aebca26f2c6d64265ee620f2ac5c" :cause :namespace-follow-up}}
  :lean
  {:command "lake env lean DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
   :exit 0 :tests 3 :assertions 3 :errors 0 :warnings 0 :sorryAx 0

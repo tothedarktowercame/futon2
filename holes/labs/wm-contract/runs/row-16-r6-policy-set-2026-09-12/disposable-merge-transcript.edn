@@ -1,0 +1,10 @@
+{:command "bb scripts/merge_witnesses.bb --output /tmp/row16-policy-set-witness-registry.edn"
+ :exit 0
+ :scope :all-real-witness-fragments
+ :claim {:id "R6-policy-set-production-20260912T172809-v1"
+         :status :pending
+         :node :R6}
+ :refusals []
+ :admission-count 33
+ :input-sha256 "1b7ffc0c7ade76a8060f0ea77286cb6a4acbfa7ab7ea1773ac3741ce12c9dde6"
+ :canonical-registry-written? false}
