@@ -7,6 +7,7 @@
            [java.time Instant]))
 
 (def admission-schema :wm/r9-independence-admission-v1)
+(def checker-admission-status :awaiting-anchor)
 
 (defn- refuse! [cause & [data]]
   (throw (ex-info (name cause) (merge {:refusal cause} data))))

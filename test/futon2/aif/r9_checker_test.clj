@@ -32,6 +32,7 @@
        (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
 
 (deftest complete-joins-stop-at-anchor
+  (is (= :awaiting-anchor r9/checker-admission-status))
   (is (= :r9/anchor-missing (refusal base)))
   (let [anchor {:schema :wm/r9-bootstrap-anchor-v1 :status :anchored
                 :authority "operator:joe" :checker-source-sha256 checker-sha}
