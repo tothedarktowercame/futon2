@@ -373,10 +373,18 @@ operator workflow conversation (standdown 2026-09-12).
     trace/policy/selection/machine-q suites ambient — all
     green). machineAction INTERNAL-BRANCHES PROOF now unblocked
     (epsilon captured + schema-28 retention) — queued behind
-    mathlib4 contention with the R6 packet-C build; (3)
-    divergence witness from existing pins — queued, same
-    contention; (4) machineAction live-selector Lean extension
-    (spec first).
+    mathlib4 contention; (3) DIVERGENCE WITNESS ADMITTED
+    (2026-09-12, futon2 f2afa6e8/623b9318; mathlib4 df87676b,
+    NEW module, frozen files untouched):
+    R16-machineAction-live-selector-divergence-20260912-v1 at
+    :verified-binding, polarity :refutes — the registry's FIRST
+    refuting claim: at the pinned record the live selector
+    chose rank 139 against the controller-head branch's rank 1,
+    proved generally over the remaining candidates;
+    record-local, internal branch not refuted. Registry: 32
+    claims across R1, R2, R3a, R4, R6, R7, R13, R14, R16, R17.
+    (4) machineAction live-selector Lean extension (spec
+    first).
 16. IN PROGRESS. Inventory done and reviewed (TN 6e6b2f5c): 18
     equation-bearing declarations — 4 admitted (26 claims), 4
     under row 15, 5 provable now from retained pins, 5 needing
