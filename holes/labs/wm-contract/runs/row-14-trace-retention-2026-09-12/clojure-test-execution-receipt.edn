@@ -1,0 +1,13 @@
+{:command "env -u FUTON_WM_TRACE_POLICY_DETAILS clojure -X:test :nses '[futon2.aif.trace-test]'"
+ :exit 0
+ :tests 51
+ :assertions 161
+ :tree-sha "e23bd7cb5847d1b8801ce1d52e5eb5c603571dca"
+ :at "2026-09-12"
+ :prior-attempts
+ [{:command "clojure -X:test :nses '[futon2.aif.trace-test]'"
+   :tree-sha "65851e31e960fa9440c6bb8aad17eddfb9422eb3"
+   :exit 1 :cause :ambient-policy-details-enabled :failures 1}
+  {:command "env -u FUTON_WM_TRACE_POLICY_DETAILS clojure -X:test :nses '[futon2.aif.trace-test]'"
+   :tree-sha "ff8873745aa93403d05e9a13e316d0668df2a89b"
+   :exit 1 :cause :trace-ledger-test-pins-required-version-28 :failures 3}]}

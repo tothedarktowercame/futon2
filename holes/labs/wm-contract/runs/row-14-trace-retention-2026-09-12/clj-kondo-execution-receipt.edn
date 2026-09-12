@@ -1,0 +1,7 @@
+{:command "clj-kondo --lint src/futon2/aif/trace.clj test/futon2/aif/trace_test.clj"
+ :exit 0
+ :tests 2
+ :assertions 0
+ :tree-sha "e23bd7cb5847d1b8801ce1d52e5eb5c603571dca"
+ :at "2026-09-12"
+ :findings {:errors 0 :warnings 0}}
