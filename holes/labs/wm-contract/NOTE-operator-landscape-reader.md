@@ -310,3 +310,31 @@ a given turn fed.
 This is the "make this automatable in the future" loop closed: turns →
 constellation → wiring → module → (ratified) → lane. Each batch of
 operator pressure becomes one candidate for the next layer.
+
+## Role split: the cartographer does not author wiring (Joe, 2026-09-12)
+
+Reading a batch into a constellation and AUTHORING a wiring diagram are
+different tasks — too many for one agent without overwhelm. Split:
+
+- **Cartographer (reading role)** — R2/R3/R8-weighted: associations,
+  constellations, freshness, mismatch residuals. Constitution unchanged:
+  read-only + association records, ZAP forbidden. It hands over a typed
+  constellation artifact (batch id, lit patterns, precision rows, triage
+  verdict per shape: spanned / waiting-on-capability / new).
+- **Workshop agent (authoring role)** — R6/R4-weighted: turns a
+  constellation into a wiring diagram (board proposal) using the
+  recursion ruling's laws (opacity, finiteness, return-with-value). It
+  may PROPOSE wiring at proposal precision; L4 mints. It consumes the
+  cartographer's constellation artifact and the issue board's
+  spanned/not-yet verdicts — never the raw turns, which keeps its
+  inputs precision-tagged end to end.
+- **Ratification stays L4** — unchanged; the split adds no new
+  decision-rights anywhere.
+
+The seam between them is a typed artifact, not a shared brain: the
+constellation record. That keeps each role's R-node weight legible
+(cartographer ≈ R2-dominant, workshop ≈ R6-dominant), lets their
+precision ledgers stay separate (measured independently, per U9), and
+matches the iconography note's original triptych — Workshop/constructor
+was never the robot's job. Crew roster now: keepers, verifier,
+cartographer, workshop, task manager, witnesses, lanes.
