@@ -1,0 +1,35 @@
+{:records
+ {"R14-temperature-trace-20260904-row0-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R14-temperature-trace-20260904-row0-v1" :node :R14
+    :equation :temperature :quantity :tau :declaration "machineTemperature"
+    :kind :lean-witness
+    :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
+               :sha256 "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594"
+               :module "DarkTower.WarMachine.MachineDeclarationMeasurements"
+               :declaration "DarkTower.WarMachine.MachineDeclarationMeasurements.temperatureTrace20260904Row0"}
+    :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineTemperature.lean"
+                       :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"
+                       :declaration "DarkTower.WarMachine.MachineTemperature.machineTemperature"}
+    :claim "The retained row's selection-gain-only temperature is exactly 1; production and Lean deltas are 0.0."
+    :polarity :supports :scope :production-trace-row-0 :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
+     :sha256 "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineTemperature.lean"
+     :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
+     :sha256 "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineTemperature.lean"
+     :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"}]
+   :declaration-census {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/declaration-census.edn"
+                        :sha256 "ea4986fa2dcc6c17d37173ec8e8a48327f2191d8f2eb7bc39f7730e01547a23f" :selector [:record]}
+   :transcript {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/lean-transcript.txt"
+                :sha256 "433202878a7eb668b04d0d8ba6f8d43264fafb2f776dcecdbbebde1a92fde72d"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
+             :sha256 "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594"}}}}

@@ -1,0 +1,13 @@
+{:record
+ {:declarations
+  {"DarkTower.WarMachine.MachineTemperature.machineTemperature"
+   {:kind :def
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineTemperature.lean"
+             :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"}}
+   "DarkTower.WarMachine.MachineDeclarationMeasurements.temperatureTrace20260904Row0"
+   {:kind :theorem
+    :module "DarkTower.WarMachine.MachineDeclarationMeasurements"
+    :proposition "machineTemperature ⟨selectionGainOnly, 1/100, 25006118387130687/1000000000000000, 1, none⟩ = .ok 1"
+    :axioms ["propext" "Classical.choice" "Quot.sound"]
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
+             :sha256 "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594"}}}}}

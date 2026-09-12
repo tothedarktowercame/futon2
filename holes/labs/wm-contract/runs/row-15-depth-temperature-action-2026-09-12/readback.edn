@@ -1,0 +1,14 @@
+{:schema :wm/row-15-measurement-v1
+ :trace {:path "data/wm-trace/wm-trace-2026-09-04.edn" :sha256 "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120" :record-index 0}
+ :temperature
+ {:declaration "DarkTower.WarMachine.MachineTemperature.machineTemperature"
+  :production-entrypoints ["futon2.aif.policy/adaptive-temperature" "futon2.aif.policy/effective-temperature"]
+  :inputs {:controller-score-count 146 :selection-gain 1.0 :tau-mode :selection-gain-only}
+  :coordinates
+  {:tau-spread {:retained 25.006118387130687 :readback 25.006118387130687 :delta 0.0}
+   :tau {:retained 1.0 :lean-reference 1.0 :readback 1.0 :production-delta 0.0 :lean-delta 0.0}}}
+ :not-reconstructible
+ {:depth {:declaration "DarkTower.WarMachine.MachineDepth.machineDepth"
+          :missing-retention [:requested-policy-depth-config :effective-efe-horizon-steps]}
+  :action {:declaration "DarkTower.WarMachine.MachineAction.machineAction"
+           :missing-retention [:ranked-action-input-maps :selector-option-packet]}}}

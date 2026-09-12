@@ -1,0 +1,25 @@
+{:witnesses "machineTemperature"
+ :node-witnesses
+ [{:schema :wm/node-witness-v1
+   :status :proposed
+   :id "R14-temperature-trace-20260904-row0-v1"
+   :node :R14 :equation :temperature :quantity :tau
+   :declaration "machineTemperature" :kind :lean-witness :polarity :supports
+   :scope :production-trace-row-0 :as-of "2026-09-12"
+   :claim "The retained row's selection-gain-only temperature is exactly 1; production and Lean deltas are 0.0."
+   :evidence-limit "One retained trace row; no claim for depth or action, whose complete inputs were not retained."
+   :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
+              :sha256 "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594"
+              :module "DarkTower.WarMachine.MachineDeclarationMeasurements"
+              :declaration "DarkTower.WarMachine.MachineDeclarationMeasurements.temperatureTrace20260904Row0"}
+   :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineTemperature.lean"
+                      :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"
+                      :declaration "DarkTower.WarMachine.MachineTemperature.machineTemperature"}
+   :retained-evidence
+   {:input {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/input-and-findings.edn"
+            :sha256 "ee28e89469e114d4460be5c7ceae9a3d061206848aa697d711d605e348fe74dd"}
+    :readback {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/readback.edn"
+               :sha256 "c54e916179560f745717f775aa27856a568f110a5a8e9bbebb8a6ac6c5523224"}}
+   :verification {:status :verified
+                  :receipt {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/verification-receipts.edn"
+                            :sha256 "2146c59e2ad35aef5e2ccd84bcfb648adc7168928bb10a7beded5bdf45ed0328" :selector [:records "R14-temperature-trace-20260904-row0-v1"]}}}]}

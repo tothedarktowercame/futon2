@@ -1,0 +1,4 @@
+'DarkTower.WarMachine.MachineDeclarationMeasurements.temperatureTrace20260904Row0' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+exit 0; no sorryAx

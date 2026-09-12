@@ -1,0 +1,6 @@
+[{:command "clj-kondo --lint .../readback.clj" :exit 3
+  :outcome :namespace-path-policy
+  :finding "The retained run directory is not a source root; commissioned lint disables only namespace-name-mismatch and retains every semantic linter."}
+ {:command "emacs --batch -Q -l futon4/dev/check-parens.el --eval (check-parens-file ...)" :exit 255
+  :outcome :wrong-cli-entrypoint
+  :finding "The checker exposes arxana-check-parens-cli; commissioned gate used its documented shell wrapper."}]
