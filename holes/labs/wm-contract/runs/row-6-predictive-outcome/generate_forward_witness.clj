@@ -62,6 +62,13 @@
        "    (allO.map advanceTwiceMass).sum - 1 = (1 : ℚ) / 36028797018963968 ∧\n"
        "    (allO.map cascadeMass).sum - 1 = (1 : ℚ) / 36028797018963968 := by\n"
        "  norm_num [allO, advanceTwiceMass, cascadeMass]\n\n"
+       "theorem productionPinnedFloatCarried :\n"
+       "    (∀ o, advanceTwiceMass o = compose advanceTwiceTerminal o) ∧\n"
+       "    (∀ o, cascadeMass o = compose cascadeTerminal o) ∧\n"
+       "    |((allO.map advanceTwiceMass).sum) - 1| ≤ floatRowBound ∧\n"
+       "    |((allO.map cascadeMass).sum) - 1| ≤ floatRowBound := by\n"
+       "  exact ⟨advanceTwiceComposition, cascadeComposition,\n"
+       "    advanceTwiceRow.nearNormalised, cascadeRow.nearNormalised⟩\n\n"
        "end DarkTower.WarMachine.MachineForwardModelWitness\n"))
 
 (spit output-path lean)
