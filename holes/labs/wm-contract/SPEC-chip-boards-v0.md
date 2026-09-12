@@ -203,3 +203,28 @@ beyond declared values.
 
 Row links: U7 (per-tool pairs), U8 (reporting gate), U9 (R7 channel table),
 U5 (the sub-panel seam), R13/R17 pins, M-zaif-harness-v1 (edition).
+
+## The recursion ruling (Joe, 2026-09-12): every chip can be an expansion board
+
+Like the ChipWits SUB-PANELs (A–G, entered by the SUB-PANEL chip,
+returned from by BOOMERANG), any chip may itself be a board — its own
+wiring diagram — so chip ⊂ board is recursive: board = chips + wires,
+chip = (verb | board). Fully recursive, with three laws that keep it
+from being a soup:
+
+1. **Opacity at the parent**: a chip-that-is-a-board exposes only its
+   interface — two wires, args, effects, fuel price. The parent cannot
+   see its internals, so the parent's tests survive the child's
+   rewiring. (This IS the U5 opaque-candidate seam, now with a
+   referent.)
+2. **Finiteness at every level**: each board, however nested, is a
+   finite panel readable at a glance. Recursion composes; it never
+   licenses an infinite board.
+3. **BOOMERANG = return-with-value**: sub-board completion is a typed
+   return to the parent's next wire — sub-boards never escape upward
+   except through their interface.
+
+The recursion is what makes modules compose: the cartographer's 10-turn
+module (a board proposal) can be wired into a larger board as ONE chip,
+whose provenance batch names the turns it was read from. Nesting depth
+is itself a meter (a stack-like fuel cost is the natural pricing).
