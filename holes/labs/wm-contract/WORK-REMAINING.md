@@ -275,10 +275,15 @@ operator workflow conversation (standdown 2026-09-12).
     historical records unchanged; redirected machinery capture
     retained (requested 3, :anticipation-events-unavailable,
     effective 1), no live trace or JVM touched; self-caught
-    golden-failure repair to present-only in e2052a93. Depth
-    proof packet dispatched at machinery-capture scope
-    (codex-24); a production-scoped claim follows the first live
-    record carrying the fields. RELOAD PLAN: reload trace +
+    golden-failure repair to present-only in e2052a93. DEPTH
+    PROOF DONE at machinery-capture scope (2026-09-12):
+    R13-depth-machinery-capture-20260912-v1 admitted at
+    :verified-binding (futon2 0a9bdc9d/65f60618; mathlib4
+    MachineDepthCaptureWitness.lean at c25e7306, both theorems
+    axiom-free) — the pinned capture's effective depth 1 equals
+    the declared machineDepth law at EFE input nil; scope denies
+    production; the production-scoped claim follows the first
+    post-reload live record carrying the fields. RELOAD PLAN: reload trace +
     war_machine namespaces on the serving JVM from master ONCE
     after row-14 packet 5 lands (single reload covers depth
     capture + machine-Q retention; next live tick then also
