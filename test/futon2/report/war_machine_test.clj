@@ -1748,7 +1748,7 @@
   {"holes/labs/zaif-harness/runs/S4-identify-ingest.edn"
    "b85cb1dade5acecccfcb5188106a82908aa61a70f60b1f4b9f6af46873a5f2a9"
    "holes/missions/M-wm-aif-policy-grain-compliance.md"
-   "51f6de53d7e95d42a42bb3a599e8430d35c29c34c692e27e239884541fa0c846"})
+   "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e"})
 
 (deftest mission-c-readback-hashes-the-criteria-source-test
   (testing "U15. U12 clause (a) passed determinism only as stated: the readback

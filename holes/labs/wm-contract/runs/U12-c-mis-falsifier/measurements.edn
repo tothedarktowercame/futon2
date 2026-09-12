@@ -67,7 +67,16 @@
   :qualification :criteria-source-is-an-unhashed-path},
  :criteria-source-sha256
  {"/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md"
-  "51f6de53d7e95d42a42bb3a599e8430d35c29c34c692e27e239884541fa0c846",
+  "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e",
   "/home/joe/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn"
   "b85cb1dade5acecccfcb5188106a82908aa61a70f60b1f4b9f6af46873a5f2a9"},
+ :digest-repin
+ {:at "2026-09-12"
+  :reason :tracked-mission-source-advanced
+  :source-commit "27a6dd5bf1e0e4fc327bc2f3692e33e903ce1f7a"
+  :previous-sha256
+  "51f6de53d7e95d42a42bb3a599e8430d35c29c34c692e27e239884541fa0c846"
+  :current-sha256
+  "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e"
+  :measurement-result-changed? false},
  :row :U12}
