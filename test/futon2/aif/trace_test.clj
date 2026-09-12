@@ -114,7 +114,21 @@
    :decision {:action {:type :no-op}
               :rank 1 :controller-score 0.05 :tau 0.2
               :softmax-weights {:will-be-stripped :for-trace}}
-   :mode :multiplied})
+   :mode :multiplied
+   :horizon-steps nil
+   :policy-depth-used 1})
+
+(deftest trace-record-retains-depth-input-and-effective-depth-test
+  (testing "nil is retained as the actual single-step scorer input"
+    (let [r (trace/trace-record sample-judge-output)]
+      (is (contains? r :horizon-steps))
+      (is (nil? (:horizon-steps r)))
+      (is (= 1 (:policy-depth-used r)))))
+  (testing "configured multi-horizon values pass through unchanged"
+    (let [r (trace/trace-record (assoc sample-judge-output
+                                       :horizon-steps 3 :policy-depth-used 3))]
+      (is (= 3 (:horizon-steps r)))
+      (is (= 3 (:policy-depth-used r))))))
 
 (deftest trace-record-shape-test
   (testing "trace-record extracts all documented fields"

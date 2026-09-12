@@ -6375,6 +6375,9 @@
         ;; anticipation data.
         depth-anticipation (policy-depth/anticipation anticipation-snapshot depth-config)
         wm-horizon-steps (:horizon-steps depth-anticipation)
+        wm-policy-depth-used (if (and wm-horizon-steps (>= wm-horizon-steps 2))
+                               wm-horizon-steps
+                               1)
         wm-enriched-candidates-pre-ladder
         (->> wm-candidates
              enrich-candidates-with-structural-pressure
@@ -6887,10 +6890,18 @@
         result0-unasserted (carry-mission-focus result0-unfocused mission-focus)
         ;; U37: last of the terminal projections, after the focus read, so the
         ;; three reviewed shapes above are untouched when the flag is off.
-        result0 (cond-> (carry-enumeration-completeness result0-unasserted)
+        result0 (cond-> (assoc (carry-enumeration-completeness result0-unasserted)
+                               ;; Row 15 measurement capture: the exact EFE
+                               ;; input (nil selects its single-step path) and
+                               ;; the policy depth actually used. Persistence
+                               ;; reads these fields; selection does not.
+                               :horizon-steps wm-horizon-steps
+                               :policy-depth-used wm-policy-depth-used)
                   depth-config
                   (assoc :policy-depth
                          {:configured depth-config
+                          :horizon-steps wm-horizon-steps
+                          :effective wm-policy-depth-used
                           :anticipation (mapv #(assoc (:record depth-anticipation)
                                                  :action (:action %)) wm-ranked-domain-base)
                           :cascade-rollout
