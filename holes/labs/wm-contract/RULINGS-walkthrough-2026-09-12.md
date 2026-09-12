@@ -218,3 +218,42 @@ Discourse discipline (for both papers):
   the certificate.
 
 Which run qualifies remains Joe's call at certificate time.
+
+## Item 5 — Fundamentals first; a qualifying run requires ALL nodes validated
+
+Joe (same day, evening, superseding any contrary ordering): "The
+separation into Track 1 and Track 2 is not correct. I ask for all
+the fundamentals to be built first as a matter of priority. ...
+None of them qualifies. The only question is, does it run at all?
+But if it runs with only one of twenty fundamentals in place, this
+is exactly the kind of facade that I've told you is not acceptable.
+... We need to have all of these nodes be defined, validated,
+working. Provably so. And that's what a qualifying run is. And
+anything else is fake. And I won't be sold that. And I'm not going
+to put that in a paper. I will withdraw my paper from the
+conference if we cannot do this. Within one week."
+
+Operationalized:
+1. A QUALIFYING RUN is a run of the system with every node defined,
+   validated, and working, provably so, whose certificate attests
+   exactly that. No run before the node work completes may be
+   called qualifying, presented as a candidate, or offered for
+   acceptance. Runs during the build are machinery tests only and
+   are recorded as such.
+2. Build order: node fundamentals and per-node proof machinery
+   FIRST; record-chain completeness alongside (it is small); the
+   certificate and the run LAST. WORK-REMAINING.md is reordered
+   accordingly and is the single execution authority.
+3. No further operator decisions during execution. The previously
+   open decision rows are resolved under this ruling: the
+   witnessed-evidence definition is ADOPTED as the working standard
+   (its honesty constraints unchanged); the on-demand outer-loop
+   entry point is MANDATED (the loop must work; Empirics standard);
+   the machine-Q link is BUILT, not descoped (descoping is the
+   facade option); certificate scope must check every node's
+   validation state and the connections — the mandatory negative
+   scope may carry only items Joe has ruled out in writing, and the
+   target at completion is that nothing load-bearing remains in it.
+4. Efficiency constraint acknowledged: ~10% of the week's usage
+   already spent; packets stay small, parallel across seats,
+   reviews real.

@@ -1,164 +1,161 @@
-# The work remaining — one definitive list
+# The work remaining — the single execution authority
 
-2026-09-12, claude-15, at Joe's direction. This consolidates every
-open item from: the paper's generated trackers (Box 2, Box 3), the
-private trackers (worklist.edn, FUNDAMENTALS.edn, aif-equations.edn
-holes, the process census), the PLoP completion list
-(COMPLETION-LIST-plop2026-2026-09-12.md), and the certificate lane.
-One task per row, plain language, priority order. Rows marked
-**[JOE]** are decisions only you can make; everything else is build
-or writing work. Update this file in place as rows close; git holds
-the history.
+2026-09-12 (v2, reordered under RULINGS Item 5). One task per row,
+plain language, build order. **A QUALIFYING RUN is a run with every
+node defined, validated, and working, provably so, whose
+certificate attests exactly that. Anything else is fake.** Runs
+before Phase 5 completes are machinery tests only. No row waits on
+an operator decision: former decision points are resolved inline
+per Item 5. Update this file in place; git holds history.
 
-**38 rows total: 7 to certify a run + 17 for per-node evidence + 3
-for the wiring diagram + 4 for the papers + 7 standing tracker rows.**
+**39 rows: 5 proof-machinery + 6 probability objects + 5 learning
+and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
++ 4 papers + 7 standing tracker rows.**
 
-## A. Certify one real run (the ruled definition of done) — 7 rows
+## Phase 0 — the machinery that makes "provably so" possible (5)
 
-1. Make the click path record its two output-validator verdicts
-   (pass/fail + findings) inside the construction record it saves.
-   It checks them today but does not write them down, so no run can
-   be certified yet.
-2. Load the repaired end-of-run projection code into the running
-   service (waiting only for the current F11 cycle to finish; the
-   live service still loses the terminal summary of any run that
-   stops early).
-3. Finish the standing F11 job: get the F2 reconciliation change
-   committed through the author → independent review → gates path.
-   This also discharges the last stop-line repair (repair-024). A
-   grounded cycle here is a qualifying-run candidate. (Item 3 is
-   running now.)
-4. **[JOE go needed]** Build the on-demand whole-loop entry point:
-   run the full loop once, by hand, over the same gated click path —
-   what the old cron used to trigger, at the repaired-Empirics
-   standard. Its run is the other qualifying-run candidate.
-5. Write the Lean certificate checker: the certificate structure
-   plus four computable checks — all seven records present and
-   mutually consistent; chosen action equals enacted action or
-   carries an explicitly typed divergence; every equation claim tied
-   to its checked Lean declaration at the pinned version; the
-   statement of what is NOT checked present and exact.
-6. Write the generator that turns one run's records into that
-   certificate and into a Lean file whose checks are proved by
-   computation (the same pattern as the September-1 route proof),
-   plus tamper tests: every mutated certificate must fail.
-7. **[JOE]** Review the check-strength section of the certificate
-   spec, choose which run qualifies, and accept or reject the
-   certificate. Acceptance closes the last Lean hole
-   (wmRunConformsToWiring) and is the finish line you defined.
+1. Build the witness carrier: the mechanism that attaches a
+   measured-against-production proof to the node that owns it, with
+   refusals when the proof or link is missing. The witness-evidence
+   definition (TN-node-witness-carrier-proposal, 2df0662d) is
+   ADOPTED as the working standard; its honesty constraints
+   (maximum claims, named refusals) are unchanged.
+2. Credit the three measurement proofs that already exist —
+   observation, precision, prediction-error, each proven equal to
+   production output — to their nodes through row 1.
+3. Make the click path record its two output-validator verdicts
+   (pass/fail + findings + input digests) inside the construction
+   record it saves. Without this no run of any kind can be
+   certified.
+4. Load the repaired end-of-run projection into the running service
+   (claude-15, at the current pause point).
+5. Make every terminal path produce a run record — the stop-line
+   repair path currently produces none
+   (`runner-did-not-observe-topology-route`, v3 cycle). Discovery
+   then fix.
 
-## B. Per-node evidence: every box in the diagram backed by proof it
-## does what the paper says — 17 rows
+## Phase 1 — the six probability objects the mathematics assumes
+## and the machine does not have (6)
 
-8. **[JOE]** Approve the proposed definition of node-level witness
-   evidence (codex-16's paragraph), so measured-against-production
-   proofs can be credited to the node that owns them.
-9. Build the witness carrier: the mechanism that attaches an
-   existing measurement proof to its owning node, with refusals when
-   the proof or the link is missing.
-10. Credit the three measurement proofs that already exist — the
-    observation, precision, and prediction-error declarations are
-    each proven equal to production output at every reference point
-    — to their nodes.
-11. Write the same kind of measurement proof for the five machine
-    declarations that lack one: belief state, belief update, depth,
-    temperature, action.
-12. Inventory which remaining equation-bearing nodes still lack
-    measurement evidence after rows 10–11, and write those proofs
-    (roughly five more).
-13. Build the predictive-outcome-kernel constructor — the first of
-    six probability objects the paper's mathematics assumes and the
-    machine does not have. Each means: implement it in the running
-    system and state it in Lean.
-14. Build the belief-to-state distribution (second missing
-    probability object).
-15. Build the controlled transition kernel (third).
-16. Build the policy-conditioned state predictive (fourth).
-17. Build the machine preference distribution (fifth).
-18. Build the parameter kernels (sixth).
-19. U91: replace R17's per-tick recount with genuine learning — 
-    counts that accumulate across ticks by the declared update rule,
-    proven against the repair predicate
-    (RealisesDeclaredAccumulation).
-20. U92: feed that accumulation from the live tick's observation and
-    belief, making the two learning arrows into R17 real.
-21. **[JOE]** Decide the machine-Q question: build the missing link
-    (the forward model actually receiving a policy-conditioned
-    outcome distribution) or formally narrow the paper's claim. Six
-    tracker rows collapse into this one decision plus at most one
-    build.
-22. Credit the Agency's existing work-lifecycle machinery (dispatch
+Each row means: implement it in the running system, state it in
+Lean, and prove the implementation matches at reference points.
+(FUNDAMENTALS.edn names each; a scoping pass pins current state and
+acceptance per object before implementation packets go out.)
+
+6. The predictive-outcome-kernel constructor.
+7. The belief-to-state distribution.
+8. The controlled transition kernel.
+9. The policy-conditioned state predictive.
+10. The machine preference distribution.
+11. The parameter kernels.
+
+## Phase 2 — learning arrows and the remaining equations (5)
+
+12. U91: replace R17's per-tick recount with genuine accumulation —
+    counts that carry forward tick to tick by the declared update
+    rule, proven against RealisesDeclaredAccumulation.
+13. U92: feed that accumulation from the live tick's observation
+    and belief, making the two learning arrows into R17 real.
+14. Build the machine-Q link: the forward model actually receiving
+    a policy-conditioned outcome distribution. RULED: build, not
+    descope — narrowing the claim instead is the facade option.
+15. Write measurement proofs for the five machine declarations that
+    lack one: belief state, belief update, depth, temperature,
+    action.
+16. Write measurement proofs for the remaining equation-bearing
+    nodes not covered by rows 2 and 15 (inventory first; roughly
+    five).
+
+## Phase 3 — the assurance nodes (4)
+
+17. Credit the Agency's existing work-lifecycle machinery (dispatch
     receipts, parking, coordination ledger) to the loop-assurance
-    nodes it already serves — it runs, but no node gets credit, so
-    "Scheduled entrypoint", "Two-layer calibration", "Interoceptive
-    tripwires" and the trace store all show nearly empty assurance.
-23. Implement the chartered interoceptive commitment link for R20
-    (the tripwires node) — the piece that is genuinely missing, not
-    just uncredited.
-24. Implement R9, "No self-certification" — the one node with
-    essentially nothing behind it: the checks that prevent the
-    system from certifying its own work need to exist and refuse.
+    nodes it already serves — today no node gets credit for it.
+18. Implement R20's chartered interoceptive commitment link — the
+    genuinely missing piece, distinct from row 17's crediting.
+19. Implement R9, "No self-certification": the checks that prevent
+    the system from certifying its own work must exist and refuse.
+20. Extend the evidence census to R11 ("Hierarchical shared
+    budget") and R15 ("Hierarchy and timescale"), currently outside
+    census scope entirely; each needs its own working-evidence row
+    or an explicit recorded basis for why its ladder is complete.
 
-## C. The wiring diagram versus the code — 3 rows
+## Phase 4 — the wiring diagram agrees with the code (3)
 
-25. Add to the drawn control diagram the twelve connections that
-    exist in code but are not drawn (or annotate, edge by edge, why
-    each stays off the drawing). Until then the diagram under-draws
-    the system.
-26. Decide, for the drawn connections that have never fired in any
-    recorded run (19 of 22 in the September run), which the
-    qualifying run should exercise and which are aspirational — and
-    mark the aspirational ones as such on the figure.
-27. R6→R16 (structure learning feeding the drawing): keep the
-    per-run correspondence capture running and settle its verdict
-    once enough runs exist. Rides on rows 3–4.
+21. Add to the drawn control diagram the twelve connections that
+    exist in code but are not drawn, or annotate edge by edge why
+    each stays off the drawing.
+22. For the drawn connections that have never fired in any recorded
+    run: decide which the qualifying run must exercise (default:
+    all that the full loop traverses) and mark the remainder
+    aspirational on the figure.
+23. R6→R16: keep the per-run correspondence capture running; settle
+    the verdict from the build-phase test runs.
 
-## D. The papers say only what is true — 4 rows
+## Phase 5 — the certificate and THE run (5)
 
-28. Rewrite the seven claims the record contradicts to their
-    evidenced scope: "acts on what it recommends" (universal),
-    "evidence it did not manufacture" (universal), "drawing
-    agreement is a checked property of the build", the deleted
-    per-tick fit scalar, "the thing scored is the cascade",
-    "the witness feeds the next belief", "BMR over accumulated
-    counts".
-29. **[JOE]** Decide which paper — PLoP, futon-2026, or the
-    mathematical companion — owes each of the four promised
-    deliverables (preregistration, empirics, faithfulness table,
-    retraction), and point the four macros at real sections. This
-    single decision collapses most of the sixty unresolved
-    completion-list rows.
-30. Locate and pin, or honestly retire, the historical records the
-    paper cites but cannot currently produce (the attempt-061
-    original phase log and similar).
-31. Rewrite the empirics narrative to the ruled discourse: one
-    certified run rather than 77 uncertified ones; the
-    defect-feedback loop described as a feature, not as validation;
-    no commit-continuity story.
+24. Write the Lean certificate checker at FULL scope: all records
+    present and consistent; chosen action equals enacted or carries
+    a typed divergence; every node's validation state attested;
+    every equation claim tied to its checked declaration at pinned
+    bytes; connections attested. The mandatory negative scope may
+    contain only items Joe has ruled out in writing — at
+    completion, nothing load-bearing remains in it.
+25. Write the run→certificate→Lean-file generator with tamper tests
+    (every mutated certificate fails), on the September-1 proof
+    pattern.
+26. Build the on-demand whole-loop entry point over the gated click
+    path (MANDATED; repaired-Empirics standard: real work, findings
+    routed, breakdowns fixed in-lane).
+27. Complete the F11 mission: the F2 reconciliation committed
+    through author → independent review → gates; discharges
+    repair-024.
+28. THE qualifying run: the full loop, on demand, every prior row
+    closed, certificate computed and Lean-validated, presented to
+    Joe with nothing to decide but acceptance of a stated,
+    fully-attested fact.
 
-## E. Standing tracker rows not absorbed above — 7 rows
+## Phase 6 — the papers say only what is now true (4)
 
-32. RUN13: convergence certificates over accepted runs (unblocks
-    after block A lands).
-33. F10, first slice: the outcome-domain decision sheet for Joe.
-34. F12: the four O-laws stated in Lean against the existing Cascade
-    carrier, each witnessed on a real constructed cascade.
-35. U80: dependency-first tickets for each retiring implementation
-    refusal (depends on F12).
-36. U83: the generated blocked-attempts view with counts and
-    evidence links.
-37. U84: the census count re-run and the ALIGN qualification
+29. Rewrite the seven record-contradicted claims to their evidenced
+    scope (acts-on-recommendation, evidence-not-manufactured,
+    drawing-agreement-at-build, deleted per-tick scalar,
+    cascade-vs-first-move, witness-feeds-next-belief,
+    BMR-over-counts) — several become TRUE again as phases 1–5
+    land; rewrite to the certificate, not around it.
+30. Point the four companion macros (preregistration, empirics,
+    faithfulness table, retraction) at the real sections where the
+    material now lives; criterion: only certificate-attested
+    material discharges a promise.
+31. Locate and pin, or honestly retire, the historical records the
+    paper cites but cannot produce (attempt-061 original phase log
+    and similar).
+32. Rewrite the empirics narrative to the ruled discourse: one
+    certified run; defect-feedback described as a feature; no
+    commit-continuity story.
+
+## Phase 7 — standing tracker rows (7)
+
+33. RUN13: convergence certificates over accepted runs (after
+    Phase 5).
+34. F10 slice 1: the outcome-domain decision sheet (produced as an
+    artifact for Joe's asynchronous read; does not block).
+35. F12: the four O-laws stated in Lean against the Cascade
+    carrier, witnessed on a real constructed cascade.
+36. U80: dependency-first tickets per retiring implementation
+    refusal (after F12).
+37. U83: the generated blocked-attempts view.
+38. U84: the census count re-run and ALIGN qualification
     re-affirmed or amended with dated evidence.
-38. U88: the C_tau horizon-structure interactive pass with Joe.
+39. U88: the C_tau horizon-structure artifact (async; does not
+    block).
 
-## Not on this list
+## Done this week (not on the list)
 
-Already done (this week): the fold seam and its typed refusals; the
-selection-vs-enaction live verdict; the eight machine-declaration
-contracts and their checked union; the readiness accounting
-extension; the honest Box 3 (obligated-state headline, lifecycle
-strips); the R3a hosting correction and Box 2 regeneration; the
-certificate spec and its mechanical emitter with tamper controls;
-the end-of-run projection repair (committed, not yet loaded — row 2);
-the PLoP completion list itself. The old worklist RUN4 master row's
-"Joe edits the Lean hole" is row 7 here, not a separate task.
+Fold seam + typed refusals; live selection-vs-enaction verdicts;
+eight machine-declaration contracts + checked union; readiness
+accounting extension; honest Box 3 (obligated-state headline,
+lifecycle strips); R3a hosting correction + Box 2 regeneration;
+certificate spec + mechanical emitter with tamper controls;
+projection repair (row 4 loads it); runner hardening against
+misattributed author claims; the PLoP completion list.
