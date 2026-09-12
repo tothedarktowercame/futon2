@@ -15,8 +15,10 @@
 (def state-names ["addressed" "falsified" "foreclosed" "refined" "reopened" "spawned" "strengthened"])
 (def mapped-outcomes (mapv (comp outcome-names second) (take 7 support)))
 (defn qlit [x]
-  (let [n (numerator x) d (denominator x)]
-    (if (= d 1) (str n) (str "(" n " : ℚ) / " d))))
+  (if (ratio? x)
+    (let [n (numerator x) d (denominator x)]
+      (str "(" n " : ℚ) / " d))
+    (str x)))
 (defn row [id] (get-in report [:comparisons id :independent-exact-reference]))
 (defn mass-cases [id]
   (str/join "\n" (for [o support]
