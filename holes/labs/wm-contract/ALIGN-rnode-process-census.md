@@ -207,6 +207,7 @@ self-certification finding, bell invoke-1788882522014):**
 | R12 — Two-layer calibration | absent [A] | absent [A] | absent [A] | exists [E-12-R] | exists [E-12-K] | absent [A] | absent [A] |
 | R20 — Interoceptive tripwires | absent [A] | absent [A] | absent [A] | absent [A] | exists [E20-C] | absent [A] | exists [E20-S] |
 | TRACE — WM trace store | absent [A] | absent [A] | absent [A] | absent [A] | absent [A] | exists [E-T] | exists [E-T-S] |
+| R11 — Hierarchical shared budget | absent [A11] | absent [A11] | absent [A11] | absent [A11] | absent [A11] | absent [A11] | absent [A11] |
 | R16 — Grounded actuation | exists [E-16-C] | exists [E-16-D] | exists [E-16-P] | exists [E-16-R] | exists [E-16-K] | exists [E-16-X] | exists [E-16-S] |
 
 ### Cell evidence
@@ -216,6 +217,24 @@ self-certification finding, bell invoke-1788882522014):**
   named as `commissioned → dispatched → parked → returned → checked → recorded
   → surfaced` in `P-assured-process.md:55-63`, but that general statement does
   not establish any individual node cell.
+- **[A11] R11 absent (row 20, 2026-09-12):** the exact finite arbiter is
+  implemented at `src/futon2/aif/hierarchical_budget.clj:157-212`, its ranked
+  field adapter at `src/futon2/aif/hierarchical_budget_adapter.clj:66-107`, and
+  its explicit policy boundary at `src/futon2/aif/policy.clj:23-31`. None of
+  those definitions is a lifecycle transition merely because it exists. The
+  pinned V7 receipt
+  `runs/V7-R11-node-sim/00-r11.edn` (SHA-256
+  `b80a827f5260fb5bce9cfe34ba9192ca3a4d3690d005194cf0d3de5501323042`)
+  searched 631 code files and found zero production callers; across 892
+  records in 58 WM trace files it found no R11 route hop or derived arbiter
+  output marker. Its five planted controls demonstrate that the census detects
+  a production caller, trace witness, equation, campaign artifact, and stale
+  citation. The reviewed account at `VERIFY-r-nodes.edn:1841-1864` classifies
+  this as `:mechanism-built-and-never-entered`. Therefore all seven cells are
+  typed `absent`, not inferred from the previous lack of a matrix row. R11's
+  formal ladder is complete at `named` because the equation registry declares
+  it plumbing; its obligated lifecycle ladder is 0/7, so no completeness is
+  claimed.
   **Basis amendment for R12, R20 and TRACE cells (2026-09-06, claude-1, from
   the PA-track pattern-v2 exit-4 — futon2 `2d3106c9`):** under the widened
   search (constructor-call form + the futon2 paths §1 already declares), the
