@@ -604,9 +604,17 @@ operator workflow conversation (standdown 2026-09-12).
     R17 ENVELOPE BLOCKED ON SUBSTRATE DATA: the production
     prerequisite is capability-typed edge/discharge retention
     in the substrate (integration-owned, beyond row 16 — the
-    R10-caller shape one level deeper). Step 3 (composite
-    formal subject, mathlib4) remains dispatchable when
-    mathlib4 frees; step 5 (proof) behind both.
+    R10-caller shape one level deeper). STEP 3 DONE
+    (2026-09-12, mathlib4 9fd88669, receipts 47446438,
+    reviewed; rebinding authority edit 412d3fb0):
+    ModelReduction.lean composes the three frozen laws BY
+    REFERENCE (the reducedEquation field pins the posterior to
+    the frozen componentwise map — no drift hole), projection
+    theorems recover each declaration, identity-fixture
+    end-to-end + above-threshold rejection, no sorryAx, Holes
+    untouched at 4dc0a76b; aif-equations :model-reduction
+    rebound to modelReductionDecision with a dated note. Step 5
+    (proof) remains behind the substrate-data prerequisite.
     A/B/C ALL DONE — R6 CLAIM ADMITTED (2026-09-12):
     R6-policy-posterior-production-20260912T172809-f-absent-v1
     at :verified-binding (futon2 f269e9b7/bc3a5698; witness
