@@ -267,6 +267,26 @@ operator workflow conversation (standdown 2026-09-12).
     (recorded counts, no smoothing, measured zeros named as
     such, never invented mass). Packets 2 (model assembly) and
     6 (row-11 refresh) follow 1b.
+    PACKET 1a DONE (2026-09-12,
+    TN-row14-measured-a-sources-2026-09-12.md 23a268d0/56b98a29,
+    reviewed): the 7x12 census over 81 distinct close records
+    (2026-07-14..27) and 897 trace records yields ONE candidate
+    pair (strengthened x grounded-change; reviewer verified it
+    from the raw close file sha 48eb1502 and the trace record —
+    argmax 0.183 over a near-uniform row, underlining why
+    :derived-unique-argmax-of-mu-post needs estimator review,
+    surfaced not decided). 40/81 closes lack entity identity;
+    40 have no prior trace with the exact entity; six of twelve
+    dispositions never occur in the corpus. VERDICT: no
+    positive A construction licensed — six state rows typed
+    absent per the 1b sketch (exact ratios, measured zeros stay
+    zero, absent rows typed, new revision per pin change).
+    Joe's proviso engaged: five additive retention packets
+    named (status-at-close; entity identity on every close;
+    cross-ledger identity; disposition coverage reporting;
+    status coverage). Retention packet 1 (categorical status
+    at close) dispatched (codex-24); 1b waits on retained
+    data + the categorical-authority ruling at its review.
 15. Write measurement proofs for the five machine declarations that
     lack one: belief state, belief update, depth, temperature,
     action. SPLIT 2026-09-12 (codex-24 discovery, correct refusal):
