@@ -17,7 +17,11 @@
 
 (defn- with-tmpdir [f]
   (let [dir (Files/createTempDirectory "wm-trace-test" (into-array FileAttribute []))]
-    (binding [*tmpdir* (str dir)]
+    ;; Tests exercise the default-off contract unless a case explicitly binds
+    ;; policy details on. Ambient production configuration must not turn every
+    ;; unrelated fixture mutation into a details-on posterior claim.
+    (binding [*tmpdir* (str dir)
+              trace/*persist-policy-trace-details?* false]
       (try (f)
            (finally
              (doseq [^File child (reverse (file-seq (io/file (str dir))))]
