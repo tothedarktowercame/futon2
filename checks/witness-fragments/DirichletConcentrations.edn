@@ -1,38 +1,96 @@
-{:witnesses "DirichletConcentrations"
- :check {:repo "futon2" :path "checks/dirichlet_concentrations_witness.clj" :entrypoint "-main"}
- :fixture {:repo "futon2" :path "holes/labs/wm-contract/dirichlet-concentrations-reference.edn"}
- :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/dirichlet-concentrations-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
- :positive-evidence-limit :construction-or-projection-only
- :positive-evidence-scope "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
- :expected-rejection {:mode :lean-guard-msgs :controls
-                      [{:fixture "DarkTower/WarMachine/DirichletConcentrationsEmptyNegative.lean" :claim :concentrations-are-nonempty}
-                       {:fixture "DarkTower/WarMachine/DirichletConcentrationsZeroNegative.lean" :claim :concentrations-exclude-zero}
-                       {:fixture "DarkTower/WarMachine/DirichletConcentrationsNegative.lean" :claim :concentrations-exclude-negative}]}
- :run-sha "ee5e6a1d50b6980684086c1d157954777ec6176b"
- :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67"
- :result :passed
- :recorded-at "2026-09-08T00:00:00Z"
+{:witnesses "DirichletConcentrations",
+ :positive-evidence-scope
+ "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour.",
+ :expected-rejection
+ {:mode :lean-guard-msgs,
+  :controls
+  [{:fixture
+    "DarkTower/WarMachine/DirichletConcentrationsEmptyNegative.lean",
+    :claim :concentrations-are-nonempty}
+   {:fixture
+    "DarkTower/WarMachine/DirichletConcentrationsZeroNegative.lean",
+    :claim :concentrations-exclude-zero}
+   {:fixture
+    "DarkTower/WarMachine/DirichletConcentrationsNegative.lean",
+    :claim :concentrations-exclude-negative}]},
+ :contract-sha "e239086a44147f14defc88e74a662a2cd4487e67",
+ :run-sha "ee5e6a1d50b6980684086c1d157954777ec6176b",
+ :check
+ {:repo "futon2",
+  :path "checks/dirichlet_concentrations_witness.clj",
+  :entrypoint "-main"},
+ :positive-proof-receipt
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/dirichlet-concentrations-positive-receipt.edn",
+  :schema :PositiveLeanWitnessReceipt/v1},
+ :positive-evidence-limit :construction-or-projection-only,
  :node-witnesses
- [{:schema :wm/node-witness-v1 :status :proposed
-   :id "R17-dirichlet-accumulation-ieee-residuals-v1"
-   :node :R17 :equation :dirichlet-accumulation :quantity :a-conc
-   :declaration "DirichletConcentrations" :kind :lean-witness
-   :polarity :supports :scope :row12-three-tick-ieee-correspondence
-   :as-of "2026-09-12"
-   :claim "At Row 12's 294 pinned coordinates production corresponds at IEEE semantics; exact-vs-float residuals are exhibited and bounded by 2^-48, with maximum 5/36028797018963968."
-   :evidence-limit "Three retained ticks for one entity; establishes measured recurrence correspondence, not live R17 wiring."
-   :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAccumulationWitness.lean"
-              :sha256 "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d"
-              :module "DarkTower.WarMachine.MachineAccumulationWitness"
-              :declaration "DarkTower.WarMachine.MachineAccumulationWitness.measuredMaximumResidual"}
-   :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
-                      :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"
-                      :declaration "DarkTower.WarMachine.Holes.DirichletConcentrations"}
+ [{:schema :wm/node-witness-v1,
    :retained-evidence
-   {:row12-witness {:repo "futon2" :path "holes/labs/wm-contract/runs/row-12-accumulation-2026-09-12/witness.edn"
-                    :sha256 "919a7916d0e6e4fc51226e7b5331e830e8c94ff27bbd433c4251fa931f83b0d2"}
-    :residual-notes {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/notes.edn"
-                     :sha256 "224532239871d4147dec1a3b817ed4486f0b8452d4c7182df902bece808e610b"}}
-   :verification {:status :verified
-                  :receipt {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/verification-receipts.edn"
-                            :sha256 "2d7a9eb38e5a8200deec65b6295e791503c8301a0ca436b27f01d83e54e3bd5e" :selector [:records "R17-dirichlet-accumulation-ieee-residuals-v1"]}}}]}
+   {:row12-witness
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-12-accumulation-2026-09-12/witness.edn",
+     :sha256
+     "919a7916d0e6e4fc51226e7b5331e830e8c94ff27bbd433c4251fa931f83b0d2"},
+    :residual-notes
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/notes.edn",
+     :sha256
+     "224532239871d4147dec1a3b817ed4486f0b8452d4c7182df902bece808e610b"}},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/verification-receipts.edn",
+     :sha256
+     "2d7a9eb38e5a8200deec65b6295e791503c8301a0ca436b27f01d83e54e3bd5e",
+     :selector
+     [:records "R17-dirichlet-accumulation-ieee-residuals-v1"]}},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Holes.lean",
+    :sha256
+    "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b",
+    :declaration "DarkTower.WarMachine.Holes.DirichletConcentrations"},
+   :scope :row12-three-tick-ieee-correspondence,
+   :node :R17,
+   :evidence-limit
+   "Three retained ticks for one entity; establishes measured recurrence correspondence, not live R17 wiring.",
+   :as-of "2026-09-12",
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/review-receipts.edn",
+     :sha256
+     "b6cade34e4c47e5fbe17a2d6325f17548be2c952331a8b8f3d0407fa0a12d6c5",
+     :selector
+     [:records "R17-dirichlet-accumulation-ieee-residuals-v1"]}},
+   :status :admitted,
+   :id "R17-dirichlet-accumulation-ieee-residuals-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :declaration "DirichletConcentrations",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineAccumulationWitness.lean",
+    :sha256
+    "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d",
+    :module "DarkTower.WarMachine.MachineAccumulationWitness",
+    :declaration
+    "DarkTower.WarMachine.MachineAccumulationWitness.measuredMaximumResidual"},
+   :quantity :a-conc,
+   :claim
+   "At Row 12's 294 pinned coordinates production corresponds at IEEE semantics; exact-vs-float residuals are exhibited and bounded by 2^-48, with maximum 5/36028797018963968.",
+   :equation :dirichlet-accumulation}],
+ :recorded-at "2026-09-08T00:00:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2",
+  :path
+  "holes/labs/wm-contract/dirichlet-concentrations-reference.edn"}}

@@ -1,0 +1,56 @@
+{:records
+ {"R17-dirichlet-accumulation-ieee-residuals-v1"
+  {:subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/Holes.lean",
+     :sha256
+     "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b",
+     :declaration
+     "DarkTower.WarMachine.Holes.DirichletConcentrations"},
+    :scope :row12-three-tick-ieee-correspondence,
+    :node :R17,
+    :as-of "2026-09-12",
+    :id "R17-dirichlet-accumulation-ieee-residuals-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "DirichletConcentrations",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineAccumulationWitness.lean",
+     :sha256
+     "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d",
+     :module "DarkTower.WarMachine.MachineAccumulationWitness",
+     :declaration
+     "DarkTower.WarMachine.MachineAccumulationWitness.measuredMaximumResidual"},
+    :quantity :a-conc,
+    :claim
+    "At Row 12's 294 pinned coordinates production corresponds at IEEE semantics; exact-vs-float residuals are exhibited and bounded by 2^-48, with maximum 5/36028797018963968.",
+    :equation :dirichlet-accumulation},
+   :verdict :approved,
+   :reviewer "claude-15",
+   :reviewed-at "2026-09-12",
+   :basis
+   "Formal half reviewed on bellback: generator independence verified in source (inputs from pinned trace forms, exact-ieee-ratio arithmetic); maximum residual independently recomputed by claude-15 from the pinned trace (tick 2 [:active-repo-ratio :strengthened] = -5/36028797018963968, matching); verification receipt validated commit-first (executed exit 0, typecheck+axiom-check passed, no sorryAx, 294 residual identities + measuredMaximumResidual); :lean authority normalized at 77f73a55 settling the retained refusal 3383caf3; disposable merge over real fragments R17+R4 pending 0 refusals",
+   :verification
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/verification-receipts.edn",
+    :sha256
+    "2d7a9eb38e5a8200deec65b6295e791503c8301a0ca436b27f01d83e54e3bd5e",
+    :selector
+    [:records "R17-dirichlet-accumulation-ieee-residuals-v1"]},
+   :dependencies
+   [{:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/verification-receipts.edn",
+     :sha256
+     "2d7a9eb38e5a8200deec65b6295e791503c8301a0ca436b27f01d83e54e3bd5e"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineAccumulationWitness.lean",
+     :sha256
+     "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/Holes.lean",
+     :sha256
+     "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}]}}}
