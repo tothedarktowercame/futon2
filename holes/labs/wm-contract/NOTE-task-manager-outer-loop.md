@@ -69,3 +69,39 @@ inner loop's?
 Build order: the verifier's freshness work first (it is the task
 manager's eyes), then S2 manual selection, then the staging board.
 Cartographer parked until this lands (Joe's sequencing).
+
+## ANSWERED: the WM build's rulings (zai-5, 2026-09-12, from RUN4 live work)
+
+(a) **Receive `ranked-actions`; never derive a ranking.** The strategic
+loop's judgment already emits `ranked-candidates` + `selection-reasons`
+(fed by `futon3c.aif.intrinsic-values` posteriors, rehydrated at JVM
+start). That shape IS the machine's canonical "preferences over missions
+right now." If priority must ever be injected rather than received, the
+sanctioned channel is the RUN4 operator-selection pin structure
+(`:operator-selected` mode with authority-ref) — not a new one.
+
+(b) **Bells are push, clocking is context, packets are the gate.** Three
+distinct channels: the bell (`agency_send --kind request`) is the
+sanctioned push primitive (the WM loop dispatches author/reviewer turns
+this way); clocking (M-autoclock-in) sets mission targeting and
+dispatches nothing; RUN4 lanes take operator-provisioned packets only —
+frozen pins, sha-chained, attempt-each-once. A task manager pushing into
+a pinned lane goes through packet minting, never direct dispatch. The
+admission apparatus exists precisely to refuse unsanctioned intake.
+
+(c) **The outer loop gets its own small G — register-liveness facts,
+inbox-zero-shaped.** Mission work keeps the per-cohort grounded-success
+contract. The outer loop's success predicate: "no fact in the register
+is older than its own criterion, and every stageable item has been
+surfed with its urgency facts" — all observable, nothing adjudicated.
+Division of labor confirmed: freshness is the VERIFIER's job to measure,
+the task manager's to surface and act on.
+
+**Wiring caution (learned by a burned cohort attempt):** RUN4 selection
+windows require cast actors IDLE. Surface-to-lane handoffs schedule for
+idle, never fire-and-hope.
+
+Revised constitutional line, in one sentence: the task manager receives
+`ranked-actions`, pushes via bells, attributes via the clock, gates
+pinned lanes through packet minting, and its own success is a freshness
+predicate — five verbs, none of them pilot.
