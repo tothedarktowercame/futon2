@@ -428,7 +428,21 @@ operator workflow conversation (standdown 2026-09-12).
     then (C) the 148-coordinate witness against the general
     carrier's F-absent branch (the pinned record has F_pi
     :status :absent), general nonzero-F correspondence retained
-    as open until a record with F_pi present exists. Softmax NaN DEFECT
+    as open until a record with F_pi present exists.
+    A/B/C ALL DONE — R6 CLAIM ADMITTED (2026-09-12):
+    R6-policy-posterior-production-20260912T172809-f-absent-v1
+    at :verified-binding (futon2 f269e9b7/bc3a5698; witness
+    MachinePolicyPosteriorWitness.lean; carrier relocated to
+    PolicyPosterior.lean under the subject-file freeze policy,
+    Holes.lean reviewer-verified restored byte-identical to
+    4dc0a76b). All 148 retained coordinates equal the
+    independent production log-sum-exp replay bit-for-bit
+    (reviewer replayed all 148); 145 exact rational raw-carrier
+    residuals exhibited, max exactly 2^-55 within the derived
+    2^-45 bound. Registry: 31 claims :verified-binding across
+    R1, R2, R3a, R4, R6, R7, R13, R14, R17. Open: nonzero-F
+    correspondence; live-selector correspondence (row 15
+    divergence lane). Softmax NaN DEFECT
     REPAIRED (2026-09-12, futon2 5750251c/39f2fd0f, reviewed):
     guard at the single selection-scores seam (all softmax-weights
     arities and both direct callers route through it) refuses
