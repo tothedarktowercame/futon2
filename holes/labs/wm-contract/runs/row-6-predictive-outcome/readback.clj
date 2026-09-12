@@ -15,7 +15,7 @@
 (def all-policies (conj user/policies repeated))
 (def result (predictive/predictive-outcome-kernel
              model (:belief-input user/belief-result) user/kernel all-policies))
-(def constant-row (zipmap (:support outcome) (repeat (/ 1.0 (count (:support outcome)))))
+(def constant-row (zipmap (:support outcome) (repeat (/ 1.0 (count (:support outcome))))))
 (def controls
   {:missing-a-support
    (predictive/predictive-outcome-kernel
