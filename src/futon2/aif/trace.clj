@@ -346,8 +346,11 @@
          routing rule and answerable operator question, or the explicit
          :trace-route-reason-missing machine-triage rule. The writer supplies
          this invariant, including for callers that predate reasoned routes
-         (PA14z, 2026-09-08)."
-  27)
+         (PA14z, 2026-09-08).
+    28 - adds the complete present-only :machine-q Q/C pair to each ranked
+         action that the opt-in scorer evaluated. Partial pairs and ordered
+         support disagreement refuse before append (row 14, 2026-09-12)."
+  28)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the
