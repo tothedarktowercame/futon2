@@ -9,9 +9,9 @@
  :audited-at "2026-09-12"
  :audited-by "zai-7"
  :authority "workshop/progress-is-a-witnessed-state-change + violation-signature-before-work (futon3c data/pattern-staging/workshop/, pending Joe's read)"
- :summary {:rows 39
-           :has-signature 12
-           :signature-pending 27
+ :summary {:rows 39 ;; derived from the :rows vector below (self-check: 20+19=39)
+           :has-signature 20
+           :signature-pending 19
            :rule "signature-pending rows BLOCK execution under the pattern; has-signature rows may start"}
  :rows
  [;; Phase 0 — machinery that makes provably-so possible. These rows are
