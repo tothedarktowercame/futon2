@@ -555,9 +555,22 @@ operator workflow conversation (standdown 2026-09-12).
     accumulation-config precedent: the prerequisite is a
     DECLARED, versioned, reviewed parent-model
     identity/provenance record for the real substrate corpus
-    (nomenclature + provenance pins, not model content) —
-    packet re-dispatched to create the record and then run the
-    real envelope with it.
+    (nomenclature + provenance pins, not model content).
+    RECORD CREATED + SECOND HONEST STOP (2026-09-12, futon2
+    2c4f4a59/93e81f03): the commissioned real corpus read
+    succeeded (36 capabilities, 710 mission docs) but the
+    substrate holds ZERO capability-typed hyperedges (reviewer
+    verified against the live store: {:hyperedges [] :count 0})
+    and all 24 discharges are :implementation/commit — so
+    corpus->concentration yields zero-dimensional rows, any
+    envelope is vacuous, and the perturb-one-real-concentration
+    control cannot exist. No vacuous envelope was retained.
+    R17 ENVELOPE BLOCKED ON SUBSTRATE DATA: the production
+    prerequisite is capability-typed edge/discharge retention
+    in the substrate (integration-owned, beyond row 16 — the
+    R10-caller shape one level deeper). Step 3 (composite
+    formal subject, mathlib4) remains dispatchable when
+    mathlib4 frees; step 5 (proof) behind both.
     A/B/C ALL DONE — R6 CLAIM ADMITTED (2026-09-12):
     R6-policy-posterior-production-20260912T172809-f-absent-v1
     at :verified-binding (futon2 f269e9b7/bc3a5698; witness
