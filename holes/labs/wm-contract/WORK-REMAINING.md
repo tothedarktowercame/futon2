@@ -143,9 +143,12 @@ operator workflow conversation (standdown 2026-09-12).
 
 ## Phase 2 — learning arrows and the remaining equations (5)
 
-12. U91: replace R17's per-tick recount with genuine accumulation —
-    counts that carry forward tick to tick by the declared update
-    rule, proven against RealisesDeclaredAccumulation.
+12. IN PROGRESS: recurrence + proofs landed and reviewed (futon2
+    01a5e8a4, mathlib4 cbf0959b: machineRealisesDeclaredAccumulation
+    discharged; anti-recount theorem non-vacuous). The three-real-
+    tick F8 witness was honestly recorded :not-executed (author
+    self-caught an unsupported claim, corrected f35ae290);
+    execution packet out to codex-23.
 13. U92: feed that accumulation from the live tick's observation
     and belief, making the two learning arrows into R17 real.
 14. Build the machine-Q link: the forward model actually receiving
