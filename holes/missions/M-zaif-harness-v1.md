@@ -173,3 +173,57 @@ On completion: update `app-zaif.tex` (the route map gains its test column and
 loses nothing silently), registry rows for what U-tests pinned, a docbook entry
 for the harness edition, and the honest gap list published where the crew's
 future briefings will read it.
+
+## CHECKPOINT 2026-09-12 — the chip-board edition: first crew members live
+
+Joe with zai-7 (zai session zai-30eb95a4). One day's arc, from analogy to
+witnessed certificates. Provenance: operator sessions in the emacs-repl
+surface; artifacts and commits listed per item.
+
+**The board vocabulary (MAP/DERIVE-grade, landed as notes):**
+`NOTE-ibol-to-aif.md` (ChipWits IBOL transplanted: the board is the XTDB
+hyperedge graph, panels are cascades, MOVE is edge traversal, per-role
+harness boards — with Joe's ruling that mid-run rewiring is ALLOWED as
+witnessed board-transition events, superseding "no mid-run rewiring");
+`SPEC-chip-boards-v0.md` (implementation spec: board schema, chip library,
+§3½ hierarchy criterion L0–L4 with the collapse test);
+`NOTE-inbox-zero-aif.md` (inbox-zero theorized: R-node reading, four
+testable predictions); `NOTE-agent-needs-from-issue-board.md` (crew needs
+N0–N4 read off the Cascade Live register: 324 issues, live backlog 23 —
+the system is verification-starved, not execution-starved).
+
+**Built (futon3c, all kondo 0/0, tests green):**
+- `agents/chip_board.clj` — the pure two-wire board runtime; verb registry
+  (load-time); hazard-gated zap; verify-trace replay certificate.
+- `agents/inbox_zero_board.clj` + `_live.clj` — inbox-zero as task 0, the
+  base-case board (commits 980c0243, 2f6b1f20). First live run: 11 repos
+  flagged, felt-idle commit proposal for futon5a, certificate replay-true.
+  In-flight channel = watcher activity ≤1h (prediction 3, made explicit).
+- `agents/cascade_verifier_board.clj` — the N1 verifier (commit b3d0721f),
+  NO zap chip by construction. First live run: all 324 register rows are
+  verification debt under the standing-query reading — the register is
+  stale by its own freshness criterion ("fresh" was being read off the
+  wrong axis; the inbox-zero multi-clause lesson, transposed).
+
+**The witness loop went around once, as designed:** codex-17's
+`ChipBoardWitness.lean` (mathlib4 9fe1552eaf) validated the named-repo
+hazard model and 17-line readback at zero deltas, and BLOCKED the blanket
+certificate on three real runtime defects (nil-repo zap committed;
+replay accepted altered effect payloads; compare-move validated but
+unimplemented). All three fixed with regression tests in futon3c
+80d874b8; re-run requested. `:lean/status` stays `:pending` until then —
+the honest-gap discipline held under pressure.
+
+**New claim worth naming (Joe's unification):** inbox-zero and the
+cascade-verifier are ONE board schema — a coherence keeper standing over
+"state vs record": disagreement predicate (dirty>24h / not-fresh),
+witnessed transition (commit / revalidate), hazard table, act-allowed?.
+Dirt, behind, and stale are the same mismatch in three signatures.
+Refactor deferred until the third binding (the N0 packet-writer, 124
+no-carrying-packet rows) forces the abstraction; the schema is recorded
+here as the claim it is built against.
+
+**Carried forward:** certificate flip gated on the codex-17 re-run; the
+queued no-act-arm witness for the verifier board; shelf fuel discipline
+(the verifier's first run carried all 324 rows on the shelf — sing
+counts, not corpora).
