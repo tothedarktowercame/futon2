@@ -1,0 +1,57 @@
+{:witnesses "machineBeliefState"
+ :node-witnesses
+ [{:schema :wm/node-witness-v1
+   :status :proposed
+   :id "R1-belief-state-carried-trace-coordinates-v1"
+   :node :R1 :equation :belief-state :quantity :mu
+   :declaration "machineBeliefState" :kind :lean-witness
+   :polarity :supports :scope :production-trace-carried-row :as-of "2026-09-12"
+   :artifact
+   {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+    :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"
+    :module "DarkTower.WarMachine.MachineBeliefStateWitness"
+    :declaration "DarkTower.WarMachine.MachineBeliefStateWitness.carriedTraceCoordinates"}
+   :subject-artifact
+   {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+    :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"
+    :declaration "DarkTower.WarMachine.MachineBeliefState.machineBeliefState"}
+   :claim "The production-facing belief reader carries all seven coordinates of the pinned 2026-09-04 mu-post row unchanged; every measured coordinate delta is 0.0."
+   :evidence-limit "Exact retained trace row only; this is a carrier measurement and makes no belief-update or downstream-consumer claim."
+   :retained-evidence
+   {:input {:repo "futon2" :path "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/input.edn"
+            :sha256 "5b69620145426a15d4f862238796afd9fbe26a1c536f6c280494cd8390e7fa6d"}
+    :readback {:repo "futon2" :path "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.edn"
+               :sha256 "e520e35e86484d6fcc9fd643e6a6c3221ec49b5b8221a7591b91776fb1aabf7b"}}
+   :verification
+   {:status :verified
+    :receipt {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/verification-receipts.edn"
+              :sha256 "4771564c4d0ed4bc550998a59ed9a351869c34fa8de8db26ab173e7c734e90c9"
+              :selector [:records "R1-belief-state-carried-trace-coordinates-v1"]}}}
+
+  {:schema :wm/node-witness-v1
+   :status :proposed
+   :id "R1-belief-state-bootstrapped-trace-coordinates-v1"
+   :node :R1 :equation :belief-state :quantity :mu
+   :declaration "machineBeliefState" :kind :lean-witness
+   :polarity :supports :scope :production-trace-bootstrapped-row :as-of "2026-09-12"
+   :artifact
+   {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+    :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"
+    :module "DarkTower.WarMachine.MachineBeliefStateWitness"
+    :declaration "DarkTower.WarMachine.MachineBeliefStateWitness.bootstrappedTraceCoordinates"}
+   :subject-artifact
+   {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+    :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"
+    :declaration "DarkTower.WarMachine.MachineBeliefState.machineBeliefState"}
+   :claim "The production-facing belief reader carries all seven coordinates of the pinned 2026-05-23 bootstrapped mu-pre row unchanged; every measured coordinate delta is 0.0."
+   :evidence-limit "Exact retained trace row only; this is a carrier measurement and makes no belief-update or downstream-consumer claim."
+   :retained-evidence
+   {:input {:repo "futon2" :path "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/input.edn"
+            :sha256 "5b69620145426a15d4f862238796afd9fbe26a1c536f6c280494cd8390e7fa6d"}
+    :readback {:repo "futon2" :path "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.edn"
+               :sha256 "e520e35e86484d6fcc9fd643e6a6c3221ec49b5b8221a7591b91776fb1aabf7b"}}
+   :verification
+   {:status :verified
+    :receipt {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/verification-receipts.edn"
+              :sha256 "4771564c4d0ed4bc550998a59ed9a351869c34fa8de8db26ab173e7c734e90c9"
+              :selector [:records "R1-belief-state-bootstrapped-trace-coordinates-v1"]}}}]}
