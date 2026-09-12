@@ -1,0 +1,2 @@
+row21_retired_source_control: PASS retired-only R1->R15 omitted from amber and retained; mixed live+retired R1->R15 remains realised-undrawn
+exit 0

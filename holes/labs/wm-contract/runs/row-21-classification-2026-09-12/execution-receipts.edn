@@ -1,0 +1,42 @@
+{:schema :wm/execution-receipts-v1
+ :subject :row-21-retired-equation-classification
+ :p4ng-tree-sha "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+ :at "2026-09-12T21:19:16Z"
+ :receipts
+ [{:gate :retired-source-control
+   :command "empirics-futon/row21_retired_source_control.sh"
+   :exit 0 :tests 2 :assertions 5
+   :tree-sha "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+   :transcript "retired-source-control.txt"}
+  {:gate :disposable-conformance-generation
+   :command "env AIF_OUT=/tmp/row21-classification-gate/ bb empirics-futon/gen_aif_dag.bb"
+   :exit 0 :tests 1 :assertions 8
+   :tree-sha "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+   :transcript "disposable-conformance.txt"}
+  {:gate :live-topology-check
+   :command "bb empirics-futon/gen_live_topology.bb --check"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+   :transcript "live-topology-check.txt"}
+  {:gate :clj-kondo-dag
+   :command "clj-kondo --lint empirics-futon/gen_aif_dag.bb"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+   :transcript "clj-kondo-dag.txt"}
+  {:gate :clj-kondo-live-topology
+   :command "clj-kondo --lint empirics-futon/gen_live_topology.bb"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+   :transcript "clj-kondo-live-topology.txt"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- empirics-futon/gen_aif_dag.bb empirics-futon/gen_live_topology.bb"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+   :transcript "check-parens.txt"}]
+ :blocked-gate
+ {:gate :negative-controls
+  :command "bash empirics-futon/negative_controls.sh"
+  :exit 1
+  :tree-sha "a2ef9d8c65ccb3bd8cc8118a37a2b00663b10349"
+  :transcript "negative-controls-blocked.txt"
+  :finding "The existing declaration-rung-band assertion failed before control 4d2 was reached. The dedicated committed Row-21 control subsequently passed at 6fa4bd1; the unrelated full-suite failure is retained, not reported green."}}

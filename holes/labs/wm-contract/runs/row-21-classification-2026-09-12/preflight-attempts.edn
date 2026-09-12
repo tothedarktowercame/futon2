@@ -1,0 +1,19 @@
+{:schema :wm/execution-attempts-v1
+ :at "2026-09-12T21:19:16Z"
+ :attempts
+ [{:command "clj-kondo --lint empirics-futon/gen_aif_dag.bb empirics-futon/gen_live_topology.bb"
+   :exit 3
+   :tree-sha "a2ef9d8c65ccb3bd8cc8118a37a2b00663b10349"
+   :finding "Both Babashka scripts use namespace user; linting them in one invocation conflated same-named vars and reported two false cross-file arity errors. Each file subsequently linted independently at 6fa4bd1 with zero errors and warnings."}
+  {:command "/home/joe/code/futon4/dev/check-parens.el empirics-futon/gen_aif_dag.bb empirics-futon/gen_live_topology.bb"
+   :exit 126
+   :tree-sha "a2ef9d8c65ccb3bd8cc8118a37a2b00663b10349"
+   :finding "The Emacs Lisp checker is a library, not an executable. The documented emacs --batch invocation subsequently passed at 6fa4bd1."}
+  {:command "empirics-futon/row21_retired_source_control.sh"
+   :exit 1
+   :tree-sha "795ff2c902f0b766d3bbf685e8aa2b18b709313e"
+   :finding "The first control incorrectly asserted that the complete :retired-source population equalled only the planted pair, overlooking the real R3a->R8 member. Follow-up 6fa4bd1 changed equality to membership; the production derivation was unchanged."}
+  {:command "env AIF_OUT=/tmp/row21-classification-gate/ bb empirics-futon/gen_aif_dag.bb"
+   :exit 1
+   :tree-sha "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+   :finding "The disposable output directory did not exist. It was created, then the identical generator command passed at the same tree."}]}
