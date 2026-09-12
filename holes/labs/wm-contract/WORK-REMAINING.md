@@ -233,18 +233,25 @@ operator workflow conversation (standdown 2026-09-12).
     schema 28, war-machine; bottom-up after a stale
     ruled-outcome-c dep surfaced) — next live tick performs the
     migrated accumulation step and persists depth fields.
-    :blocker DECISION NEEDED (packet 1 only — model content, not
-    principle-settleable): no inspected authority declares a
-    semantic status-to-disposition correspondence, and sorting two
-    enumerations is not one. Options: (a) Joe declares the 7x12
-    correspondences (rationale per nonzero cell, named zeros);
-    (b) measured A from pinned production observation/state
-    records under the contract's :observed-estimate authority
-    (machine_model.clj:71-99) — honest but sparse at current
-    retention; (c) explicit noninformative declared A (uniform
-    rows) with the content caveat retained, discharging the
-    placeholder only structurally. The reviewer builds packets
-    3/4/5 meanwhile; nothing in them commits to an A choice.
+    A-CONTENT RULED BY JOE (2026-09-12, operator): option (b) —
+    MEASURE A from production under the contract's
+    :observed-estimate authority (machine_model.clj:71-99,
+    pinned measurement record required), with the PROVISO that
+    sparse data creates FOLLOW-ON RETENTION ACTIONS to capture
+    and feed in the needed data, rather than excusing a thin
+    estimate; the positional placeholder may inspire structure
+    but REAL DATA WITH CERTIFICATES is required. Packet 1 is
+    therefore now two steps: (1a) measurement-source discovery —
+    census what production records pair entity status with
+    full-loop disposition (attempt/cohort close records joined
+    to belief/status at close time), counts and coverage per
+    7x12 cell, sparsity verdict, and the named retention gaps
+    as follow-on capture packets; (1b) the pinned measurement
+    record + reviewed estimator producing the A artifact with
+    :authority :observed-estimate — sparse cells stay honest
+    (recorded counts, no smoothing, measured zeros named as
+    such, never invented mass). Packets 2 (model assembly) and
+    6 (row-11 refresh) follow 1b.
 15. Write measurement proofs for the five machine declarations that
     lack one: belief state, belief update, depth, temperature,
     action. SPLIT 2026-09-12 (codex-24 discovery, correct refusal):
