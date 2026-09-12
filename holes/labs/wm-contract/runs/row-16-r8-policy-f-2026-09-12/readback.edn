@@ -1,0 +1,1903 @@
+{:schema :wm/row16-r8-policy-f-readback-v1,
+ :coordinate-count 2030,
+ :controls
+ {:negative-variance
+  {:status :refused,
+   :error :invalid-variance,
+   :data {:error :invalid-variance, :channel :x, :variance -1.0}},
+  :deterministic-mismatch
+  {:status :refused,
+   :error :deterministic-mismatch,
+   :data
+   {:error :deterministic-mismatch,
+    :channel :x,
+    :prediction 0.0,
+    :observation 1.0,
+    :residual 1.0,
+    :variance-status nil,
+    :hint
+    "this zero variance carries no :absent status, so it is a real deterministic claim"}},
+  :zero-variance-match 0.0,
+  :absent-variance-floor 1.741353440210627},
+ :candidate-count 145,
+ :real-incomplete-coverage-control
+ {:form-index 1,
+  :timestamp "2026-09-01T20:37:20.458200407Z",
+  :result
+  {:status :absent,
+   :reason :incomplete-coverage,
+   :candidate-count 145,
+   :uncovered-count 1,
+   :applied? false}},
+ :declared-measured-bound
+ {:criterion :absolute-delta, :bound 1.0E-12, :all-within? true},
+ :rows
+ [{:candidate-id "rank/1",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-expressions-of-interest"]],
+    :status :present,
+    :value -19.15060554680762},
+   :production -19.15060554680762,
+   :symbolic-reference
+   {:decimal90
+    "-19.1506055468076170383770223660794794697360231049189350096488671222635889667517509370651665",
+    :binary64 -19.15060554680762},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/2",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-distributed-frontiermath"]],
+    :status :present,
+    :value -19.158299697215455},
+   :production -19.158299697215455,
+   :symbolic-reference
+   {:decimal90
+    "-19.1582996972154540412222264680769059761918706167993784684439721211469713197995689506080449",
+    :binary64 -19.158299697215455},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/3",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-symbol-grounding"]],
+    :status :present,
+    :value -19.160669355899554},
+   :production -19.160669355899554,
+   :symbolic-reference
+   {:decimal90
+    "-19.1606693558995549024407365135588242574900460540283216420009798519978701103531711251658347",
+    :binary64 -19.160669355899554},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/4",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-superpod-mark2"]],
+    :status :present,
+    :value -19.16119663296875},
+   :production -19.16119663296875,
+   :symbolic-reference
+   {:decimal90
+    "-19.1611966329687496399140626128932704966636079487838592262723862394371644737059303916822933",
+    :binary64 -19.16119663296875},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/5",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-futon-enrichment"]],
+    :status :present,
+    :value -19.163172593520333},
+   :production -19.163172593520333,
+   :symbolic-reference
+   {:decimal90
+    "-19.1631725935203320776266552719740364732676782469686705960295602317525283114308253979420457",
+    :binary64 -19.163172593520333},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/6",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-a-sorry-enterprise"]],
+    :status :present,
+    :value -19.16323854425279},
+   :production -19.16323854425279,
+   :symbolic-reference
+   {:decimal90
+    "-19.1632385442527903203930556477804880875207915392845940419883768055892315392954662261351865",
+    :binary64 -19.163238544252792},
+   :production-minus-reference 3.552713678800501E-15,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/7",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-categorical-code"]],
+    :status :present,
+    :value -19.16330974690797},
+   :production -19.16330974690797,
+   :symbolic-reference
+   {:decimal90
+    "-19.1633097469079685551329115044194813969299821332534049069715632552573551881748711845292343",
+    :binary64 -19.16330974690797},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/8",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-war-machine-pilot"]],
+    :status :present,
+    :value -19.163400152262753},
+   :production -19.163400152262753,
+   :symbolic-reference
+   {:decimal90
+    "-19.1634001522627540035268063800757762465853364633539071980972791451014210721637295796133505",
+    :binary64 -19.163400152262753},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/9",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-single-locus"]],
+    :status :present,
+    :value -19.163442246055205},
+   :production -19.163442246055205,
+   :symbolic-reference
+   {:decimal90
+    "-19.1634422460552060022909120443287111514320159324760171244231606120520940914006195009067424",
+    :binary64 -19.163442246055205},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/10",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-futonzero-mvp"]],
+    :status :present,
+    :value -19.163539760640706},
+   :production -19.163539760640706,
+   :symbolic-reference
+   {:decimal90
+    "-19.1635397606407054476084863757826406534324555872200480187234864039965470713995110866865013",
+    :binary64 -19.163539760640706},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/11",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-patterns-done-right"]],
+    :status :present,
+    :value -19.16363079989708},
+   :production -19.16363079989708,
+   :symbolic-reference
+   {:decimal90
+    "-19.1636307998970804006260879341053895340811841592351579274892466142753282288982438389503626",
+    :binary64 -19.16363079989708},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/12",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-the-futon-stack"]],
+    :status :present,
+    :value -19.163652738020726},
+   :production -19.163652738020726,
+   :symbolic-reference
+   {:decimal90
+    "-19.1636527380207259019775025086074297468020643334931676021745507662681754744893944750054865",
+    :binary64 -19.163652738020726},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/13",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-landing-practice"]],
+    :status :present,
+    :value -19.163680088236745},
+   :production -19.163680088236745,
+   :symbolic-reference
+   {:decimal90
+    "-19.1636800882367456687218290309377066613022545580114367468528462478466630883147542330439339",
+    :binary64 -19.163680088236745},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/14",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-recommendation-bindings"]],
+    :status :present,
+    :value -19.163710080511578},
+   :production -19.163710080511578,
+   :symbolic-reference
+   {:decimal90
+    "-19.1637100805115781222600195728319405846699780820249121182652667001333797793230546460610072",
+    :binary64 -19.163710080511578},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/15",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-mission-coherence-patterns"]],
+    :status :present,
+    :value -19.163853223680874},
+   :production -19.163853223680874,
+   :symbolic-reference
+   {:decimal90
+    "-19.1638532236808735837026697574963213004436746336737905296469055729189873532993981846485363",
+    :binary64 -19.163853223680874},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/16",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-self-improvement-loop"]],
+    :status :present,
+    :value -19.163861258515116},
+   :production -19.163861258515116,
+   :symbolic-reference
+   {:decimal90
+    "-19.1638612585151173069745674010279241319638047263869989625301865581305393413053896646819656",
+    :binary64 -19.163861258515116},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/17",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-diagramprover"]],
+    :status :present,
+    :value -19.1639412084456},
+   :production -19.1639412084456,
+   :symbolic-reference
+   {:decimal90
+    "-19.1639412084456004585880813967072110203474711282132591849487758088039734772884483688907630",
+    :binary64 -19.1639412084456},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/18",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-single-entry-point"]],
+    :status :present,
+    :value -19.16407023550107},
+   :production -19.16407023550107,
+   :symbolic-reference
+   {:decimal90
+    "-19.1640702355010721217958614399358116404551571595518845386715052993013997083073883629876477",
+    :binary64 -19.16407023550107},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/19",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-state-snapshot-witness"]],
+    :status :present,
+    :value -19.164163799433634},
+   :production -19.164163799433634,
+   :symbolic-reference
+   {:decimal90
+    "-19.1641637994336347393941444474944863255001907689669066272407303584196914989376079923639732",
+    :binary64 -19.164163799433634},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/20",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-trip-journal"]],
+    :status :present,
+    :value -19.164269087865378},
+   :production -19.164269087865378,
+   :symbolic-reference
+   {:decimal90
+    "-19.1642690878653774359996131295710509094582518355405024050733253667715748425987492733302765",
+    :binary64 -19.164269087865378},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/21",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-pattern-ingest"]],
+    :status :present,
+    :value -19.16435284946339},
+   :production -19.16435284946339,
+   :symbolic-reference
+   {:decimal90
+    "-19.1643528494633908811307188335486506726758401905934373575743922728500872076389686509887307",
+    :binary64 -19.16435284946339},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/22",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-vsatarcs-invariants-integration"]],
+    :status :present,
+    :value -19.16436798467475},
+   :production -19.16436798467475,
+   :symbolic-reference
+   {:decimal90
+    "-19.1643679846747496272663344113955631655270979032880624064178517398362684360432816062778444",
+    :binary64 -19.16436798467475},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/23",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-paper-reverse-morphogenesis"]],
+    :status :present,
+    :value -19.164388119883693},
+   :production -19.164388119883693,
+   :symbolic-reference
+   {:decimal90
+    "-19.1643881198836937595943701739267491192302663203798749736303264593869745825533744539829959",
+    :binary64 -19.164388119883693},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/24",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-war-machine-vsatarcs-interop"]],
+    :status :present,
+    :value -19.164413216456335},
+   :production -19.164413216456335,
+   :symbolic-reference
+   {:decimal90
+    "-19.1644132164563368151719870968073580261635043347279699850449421174422284402613841797648631",
+    :binary64 -19.164413216456335},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/25",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-eoi-outbox-management"]],
+    :status :present,
+    :value -19.164425334292265},
+   :production -19.164425334292265,
+   :symbolic-reference
+   {:decimal90
+    "-19.1644253342922661009564506850826898668025276924500347420974498436678732412830339686338096",
+    :binary64 -19.164425334292265},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/26",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-typed-holes-lean-handoffs"]],
+    :status :present,
+    :value -19.164425334292265},
+   :production -19.164425334292265,
+   :symbolic-reference
+   {:decimal90
+    "-19.1644253342922661009564506850826898668025276924500347420974498436678732412830339686338096",
+    :binary64 -19.164425334292265},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/27",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-typed-holes-mathlib-handoff"]],
+    :status :present,
+    :value -19.164425334292265},
+   :production -19.164425334292265,
+   :symbolic-reference
+   {:decimal90
+    "-19.1644253342922661009564506850826898668025276924500347420974498436678732412830339686338096",
+    :binary64 -19.164425334292265},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/28",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-stack-geometry"]],
+    :status :present,
+    :value -19.164428235766035},
+   :production -19.164428235766035,
+   :symbolic-reference
+   {:decimal90
+    "-19.1644282357660361876158076835657046121201728362334592340343746315412482405536335104299362",
+    :binary64 -19.164428235766035},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/29",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-pattern-mining"]],
+    :status :present,
+    :value -19.164463168139832},
+   :production -19.164463168139832,
+   :symbolic-reference
+   {:decimal90
+    "-19.1644631681398325644130577533771144283678025916513094366827492329733118480135882095441753",
+    :binary64 -19.164463168139832},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/30",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-superpod-mark3"]],
+    :status :present,
+    :value -19.164584189127208},
+   :production -19.164584189127208,
+   :symbolic-reference
+   {:decimal90
+    "-19.1645841891272084562637823773963148783406496198930100965678921956573557805774540989415722",
+    :binary64 -19.164584189127208},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/31",
+   :retained
+   {:candidate-identity
+    [:advance-mission
+     [:target "M-the-futon-stack-Q6-r12-design-choices"]],
+    :status :present,
+    :value -19.16458663882146},
+   :production -19.16458663882146,
+   :symbolic-reference
+   {:decimal90
+    "-19.1645866388214614881251798956317148740731157079111153462850231782229555190123895039078968",
+    :binary64 -19.16458663882146},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/32",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-daily-scan"]],
+    :status :present,
+    :value -19.16475132979947},
+   :production -19.16475132979947,
+   :symbolic-reference
+   {:decimal90
+    "-19.1647513297994670587594096751442056090465101017269989579729621965798484005273388361891426",
+    :binary64 -19.16475132979947},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/33",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-differentiable-code"]],
+    :status :present,
+    :value -19.164794301498695},
+   :production -19.164794301498695,
+   :symbolic-reference
+   {:decimal90
+    "-19.1647943014986964543626672930906820748701138260587323345784797210284606284610293781336809",
+    :binary64 -19.164794301498695},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/34",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-hyperreal-dictionary-planning"]],
+    :status :present,
+    :value -19.164846468320462},
+   :production -19.164846468320462,
+   :symbolic-reference
+   {:decimal90
+    "-19.1648464683204620774691559903804145059324261635362981475847651445623443744069240774397272",
+    :binary64 -19.164846468320462},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/35",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-archaeology-control"]],
+    :status :present,
+    :value -19.16490058983981},
+   :production -19.16490058983981,
+   :symbolic-reference
+   {:decimal90
+    "-19.1649005898398104952306839987278718397393298649620249805147356030053981689896632478499805",
+    :binary64 -19.16490058983981},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/36",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-tpg-coupling-evolution"]],
+    :status :present,
+    :value -19.1649193149119},
+   :production -19.1649193149119,
+   :symbolic-reference
+   {:decimal90
+    "-19.1649193149118989092533292924749909729971911105576943618069200340473521238368026975909939",
+    :binary64 -19.1649193149119},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/37",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-pattern-application-diagnostic"]],
+    :status :present,
+    :value -19.16501216759461},
+   :production -19.16501216759461,
+   :symbolic-reference
+   {:decimal90
+    "-19.1650121675946118399640634466389235284010165955342418048134759260189563274551906110903265",
+    :binary64 -19.16501216759461},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/38",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-structure-seed-promotion"]],
+    :status :present,
+    :value -19.165099184821944},
+   :production -19.165099184821944,
+   :symbolic-reference
+   {:decimal90
+    "-19.1650991848219447371917899566474751675706601114108411083492656007209444334862446303746958",
+    :binary64 -19.165099184821944},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/39",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-pattern-retrieval-calibration"]],
+    :status :present,
+    :value -19.165119623934697},
+   :production -19.165119623934697,
+   :symbolic-reference
+   {:decimal90
+    "-19.1651196239346982184625569482241511424224672185681336692712325217823438294903814666436785",
+    :binary64 -19.165119623934697},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/40",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-futonzero-prelim-practice"]],
+    :status :present,
+    :value -19.165164810772197},
+   :production -19.165164810772197,
+   :symbolic-reference
+   {:decimal90
+    "-19.1651648107721974881530457546180067280297707591369028995154960312643423006938569455884699",
+    :binary64 -19.165164810772197},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/41",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-artificial-stack-exchange"]],
+    :status :present,
+    :value -19.165198489621254},
+   :production -19.165198489621254,
+   :symbolic-reference
+   {:decimal90
+    "-19.1651984896212553793779036099191310568855354117933092566898987971724017705232758170947975",
+    :binary64 -19.165198489621254},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/42",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-editorial-assistant"]],
+    :status :present,
+    :value -19.165240889522867},
+   :production -19.165240889522867,
+   :symbolic-reference
+   {:decimal90
+    "-19.1652408895228677450906689669297837685532879641224209331766088288586508196594347598191462",
+    :binary64 -19.165240889522867},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/43",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-webarxana"]],
+    :status :present,
+    :value -19.165254218600033},
+   :production -19.165254218600033,
+   :symbolic-reference
+   {:decimal90
+    "-19.1652542186000345889333906425226503788452498237477858705231911296081100765513763077872836",
+    :binary64 -19.165254218600033},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/44",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-prior-mathematics"]],
+    :status :present,
+    :value -19.16528962114823},
+   :production -19.16528962114823,
+   :symbolic-reference
+   {:decimal90
+    "-19.1652896211482291528102003381761462687222508235914485013777638541505301499314292270051097",
+    :binary64 -19.16528962114823},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/45",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-bounded-disposition"]],
+    :status :present,
+    :value -19.16528962114823},
+   :production -19.16528962114823,
+   :symbolic-reference
+   {:decimal90
+    "-19.1652896211482291528102003381761462687222508235914485013777638541505301499314292270051097",
+    :binary64 -19.16528962114823},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/46",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-reflective-discipline"]],
+    :status :present,
+    :value -19.165313840876525},
+   :production -19.165313840876525,
+   :symbolic-reference
+   {:decimal90
+    "-19.1653138408765266921053728141582624987889573128947434675996468777473322217559302061336262",
+    :binary64 -19.165313840876525},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/47",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-action-cost-modelling"]],
+    :status :present,
+    :value -19.165510468669456},
+   :production -19.165510468669456,
+   :symbolic-reference
+   {:decimal90
+    "-19.1655104686694548536291213346005041178662964003526961011528795378812215191414704771754411",
+    :binary64 -19.165510468669456},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/48",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-stack-hud-refactor"]],
+    :status :present,
+    :value -19.16560941348143},
+   :production -19.16560941348143,
+   :symbolic-reference
+   {:decimal90
+    "-19.1656094134814309746581844421373141904354449077770132580690337531130011009248526164786028",
+    :binary64 -19.16560941348143},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/49",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-weird-modernism"]],
+    :status :present,
+    :value -19.16562399782186},
+   :production -19.16562399782186,
+   :symbolic-reference
+   {:decimal90
+    "-19.1656239978218611892393346723358200442915932006012512709568176070991990407968816994423822",
+    :binary64 -19.16562399782186},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/50",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-coupling-as-constraint"]],
+    :status :present,
+    :value -19.165686055433678},
+   :production -19.165686055433678,
+   :symbolic-reference
+   {:decimal90
+    "-19.1656860554336785232592796214082008633001952108389828316914108662554493117899110180704015",
+    :binary64 -19.165686055433678},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/51",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-or-training-as-learning-system"]],
+    :status :present,
+    :value -19.165696327942626},
+   :production -19.165696327942626,
+   :symbolic-reference
+   {:decimal90
+    "-19.1656963279426258920870644137419396174169697527667736934053459581619385028737839877005505",
+    :binary64 -19.165696327942626},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/52",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-reachable-from-boot"]],
+    :status :present,
+    :value -19.16575956837917},
+   :production -19.16575956837917,
+   :symbolic-reference
+   {:decimal90
+    "-19.1657595683791694925227362127697560728124476363824495255253091800688066337154978995561725",
+    :binary64 -19.16575956837917},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/53",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-stack-stereolithography"]],
+    :status :present,
+    :value -19.165773741429682},
+   :production -19.165773741429682,
+   :symbolic-reference
+   {:decimal90
+    "-19.1657737414296834573956057198360370614667798572489988697184962029965755429882264523167773",
+    :binary64 -19.165773741429682},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/54",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-essay-corpus-substrate"]],
+    :status :present,
+    :value -19.16587581181966},
+   :production -19.16587581181966,
+   :symbolic-reference
+   {:decimal90
+    "-19.1658758118196587374869783510872584699892822824650345777029814426265173845610227143681638",
+    :binary64 -19.16587581181966},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/55",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-canon-fingerprint-store"]],
+    :status :present,
+    :value -19.165919195871236},
+   :production -19.165919195871236,
+   :symbolic-reference
+   {:decimal90
+    "-19.1659191958712362634870262142772925650632786846506731627328963390735845246121980836607007",
+    :binary64 -19.165919195871236},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/56",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-hypergraph-operator"]],
+    :status :present,
+    :value -19.165929001554055},
+   :production -19.165929001554055,
+   :symbolic-reference
+   {:decimal90
+    "-19.1659290015540555952799602194979485280678980609889700683321439203188999700834937087296476",
+    :binary64 -19.165929001554055},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/57",
+   :retained
+   {:candidate-identity
+    [:advance-mission
+     [:target "M-simulating-or-training-as-learning-system"]],
+    :status :present,
+    :value -19.165979666741045},
+   :production -19.165979666741045,
+   :symbolic-reference
+   {:decimal90
+    "-19.1659796667410444128398980758680226218326455259825679899967654587558422977480312432351886",
+    :binary64 -19.165979666741045},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/58",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-vsatarcs-writer"]],
+    :status :present,
+    :value -19.1660201914182},
+   :production -19.1660201914182,
+   :symbolic-reference
+   {:decimal90
+    "-19.1660201914181979261802816423541116994435802356049070001300420647333523969185002913598836",
+    :binary64 -19.1660201914182},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/59",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-symbol-grounding-scaling-plan"]],
+    :status :present,
+    :value -19.166105834776236},
+   :production -19.166105834776236,
+   :symbolic-reference
+   {:decimal90
+    "-19.1661058347762360193817216924945008066558865775375688272157279061467158198298552414948130",
+    :binary64 -19.166105834776236},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/60",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-essays-retraction-visibility"]],
+    :status :present,
+    :value -19.166175031656614},
+   :production -19.166175031656614,
+   :symbolic-reference
+   {:decimal90
+    "-19.1661750316566140797347310336344925023522499894100552573788525342630556057948432715869501",
+    :binary64 -19.166175031656614},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/61",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-essays-edit-cycle"]],
+    :status :present,
+    :value -19.166206455381328},
+   :production -19.166206455381328,
+   :symbolic-reference
+   {:decimal90
+    "-19.1662064553813296073992770875861109013793806966859720675553990543569167564874597065358303",
+    :binary64 -19.166206455381328},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/62",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-xor-coupling-probe"]],
+    :status :present,
+    :value -19.166213815394258},
+   :production -19.166213815394258,
+   :symbolic-reference
+   {:decimal90
+    "-19.1662138153942590800293829610578910650184082489327175388154106360895795400308895374469720",
+    :binary64 -19.166213815394258},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/63",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-bounded-in-flight-state"]],
+    :status :present,
+    :value -19.16627041885106},
+   :production -19.16627041885106,
+   :symbolic-reference
+   {:decimal90
+    "-19.1662704188510582661567295914110263841508666939940780150918819661305799906652381897445189",
+    :binary64 -19.16627041885106},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/64",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-differentiable-math"]],
+    :status :present,
+    :value -19.1663636296699},
+   :production -19.1663636296699,
+   :symbolic-reference
+   {:decimal90
+    "-19.1663636296698986609308877346390390237524293079185656058637559875328174354956983677742390",
+    :binary64 -19.1663636296699},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/65",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-fulab-wiring-survey"]],
+    :status :present,
+    :value -19.16637777662644},
+   :production -19.16637777662644,
+   :symbolic-reference
+   {:decimal90
+    "-19.1663777766264418175658632574945801612611995075181574017276728846702281424990263241886351",
+    :binary64 -19.16637777662644},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/66",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-peeragogy-rewrite"]],
+    :status :present,
+    :value -19.16645639344638},
+   :production -19.16645639344638,
+   :symbolic-reference
+   {:decimal90
+    "-19.1664563934463803793223291661952146190928535167637388053390136602395492016635213551506686",
+    :binary64 -19.16645639344638},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/67",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-war-machine-wiring"]],
+    :status :present,
+    :value -19.16649081108803},
+   :production -19.16649081108803,
+   :symbolic-reference
+   {:decimal90
+    "-19.1664908110880295122945223993067704626839772444138276297276798540783907332189602953859950",
+    :binary64 -19.16649081108803},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/68",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-web-arxana-ui-improvements"]],
+    :status :present,
+    :value -19.166680844028246},
+   :production -19.166680844028246,
+   :symbolic-reference
+   {:decimal90
+    "-19.1666808440282469529878458274792893060359358173994141642745930885275915979308693952549743",
+    :binary64 -19.166680844028246},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/69",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-emacs-cursor-peripheral"]],
+    :status :present,
+    :value -19.166764051889984},
+   :production -19.166764051889984,
+   :symbolic-reference
+   {:decimal90
+    "-19.1667640518899852883917823228163097957970163933537275283681108797335359029312143248432966",
+    :binary64 -19.166764051889984},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/70",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-arxana-roundtrip"]],
+    :status :present,
+    :value -19.166872625666944},
+   :production -19.166872625666944,
+   :symbolic-reference
+   {:decimal90
+    "-19.1668726256669451008236467698252415595837723240366027422597578555477953925733722403687332",
+    :binary64 -19.166872625666944},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/71",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-substrate-metric"]],
+    :status :present,
+    :value -19.167161104897126},
+   :production -19.167161104897126,
+   :symbolic-reference
+   {:decimal90
+    "-19.1671611048971262787799934663052578433150525007711242226043092136215459393499224100181499",
+    :binary64 -19.167161104897126},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/72",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-the-perfect-crime"]],
+    :status :present,
+    :value -19.167232155624546},
+   :production -19.167232155624546,
+   :symbolic-reference
+   {:decimal90
+    "-19.1672321556245460198452510838190263436789433201302904864644750937789003815264199749256406",
+    :binary64 -19.167232155624546},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/73",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-kangaroo"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/74",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-librarian"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/75",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-aif-tokamak"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/76",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-propagators"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/77",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-wm-tripwires"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/78",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-lab-standard"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/79",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-live-efe-map"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/80",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-usage-hacking"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/81",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-agents-queue"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/82",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-autoclock-in"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/83",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-case-studies"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/84",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-xenotype-its"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/85",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-metaca-search"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/86",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-latex-wysiwyg"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/87",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-metric-harness"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/88",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-becoming-nomad"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/89",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-chipwitz-corps"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/90",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-omni-wm-runner"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/91",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-typed-memories"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/92",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-pheromone-field"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/93",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-capability-zones"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/94",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-arxana-hardening"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/95",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-sci-reproduction"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/96",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-codex-sorry-loop"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/97",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-intent-curvature"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/98",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-memory-retrieval"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/99",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-formal-war-machine"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/100",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-zai-learning-loop"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/101",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-pattern-posteriors"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/102",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-smart-emacs-cursor"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/103",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-web-arxana-missions"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/104",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-futonzero-grounding"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/105",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-value-creation-loop"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/106",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-futonzero-generative"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/107",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-sigils-reconsidered"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/108",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-exotype-xenotype-eoc"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/109",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-populate-substrate-2"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/110",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-apm-capability-ratchet"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/111",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-differentiable-substrate"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/112",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-distributed-proofreaders"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/113",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-efe-bge-followon-actions"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/114",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-aif-a-matrix-faithfulness"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/115",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-aif-policy-conditioned-eig"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/116",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-run-produces-its-own-brief"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/117",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-capability-zones-S1-handoff"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/118",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-capability-zones-S3-handoff"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/119",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-federated-agency-hardening"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/120",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-capability-zones-S1-coverage"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/121",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-capability-zones-S2a-handoff"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/122",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-capability-zones-S2b-handoff"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/123",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-aif-gap-epistemic-affordance"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/124",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-wm-strategic-mission-selection"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/125",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-sci-reproduction-replay-ledger"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/126",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-mission-scopes-into-substrate-2"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/127",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-shared-memory-control-build-test"]],
+    :status :present,
+    :value -19.167881334292264},
+   :production -19.167881334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1678813342922661042258354479988514813149665801735801442631506779874578093252181758334085",
+    :binary64 -19.167881334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/128",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-wm-aif-policy-grain-compliance"]],
+    :status :present,
+    :value -19.168205334292267},
+   :production -19.168205334292267,
+   :symbolic-reference
+   {:decimal90
+    "-19.1682053342922661040639649310085036750545705824510618616679825833787824888162495256253004",
+    :binary64 -19.168205334292267},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/129",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-futon-problems"]],
+    :status :present,
+    :value -19.168313334292264},
+   :production -19.168313334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1683133342922661040100080920117210729677719165435557674695932185092240486465933088892643",
+    :binary64 -19.168313334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/130",
+   :retained
+   {:candidate-identity [:advance-mission [:target "M-learning-loop"]],
+    :status :present,
+    :value -19.168313334292264},
+   :production -19.168313334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1683133342922661040100080920117210729677719165435557674695932185092240486465933088892643",
+    :binary64 -19.168313334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/131",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-apm-demonstration"]],
+    :status :present,
+    :value -19.168313334292264},
+   :production -19.168313334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1683133342922661040100080920117210729677719165435557674695932185092240486465933088892643",
+    :binary64 -19.168313334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/132",
+   :retained
+   {:candidate-identity
+    [:advance-mission [:target "M-dionysus-winddown"]],
+    :status :present,
+    :value -19.168313334292264},
+   :production -19.168313334292264,
+   :symbolic-reference
+   {:decimal90
+    "-19.1683133342922661040100080920117210729677719165435557674695932185092240486465933088892643",
+    :binary64 -19.168313334292264},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/133",
+   :retained
+   {:candidate-identity
+    [:address-sorry [:target :sorry/pattern-measure-never-target]],
+    :status :present,
+    :value -19.71401947862632},
+   :production -19.71401947862632,
+   :symbolic-reference
+   {:decimal90
+    "-19.7140194786263209228023008945361689302612833047651241459939784868912469756018159444852080",
+    :binary64 -19.71401947862632},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/134",
+   :retained
+   {:candidate-identity
+    [:address-sorry
+     [:target :sorry/pattern-typed-theme-liberates-the-solo]],
+    :status :present,
+    :value -19.71401947862632},
+   :production -19.71401947862632,
+   :symbolic-reference
+   {:decimal90
+    "-19.7140194786263209228023008945361689302612833047651241459939784868912469756018159444852080",
+    :binary64 -19.71401947862632},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/135",
+   :retained
+   {:candidate-identity
+    [:address-sorry [:target :sorry/wm-realised-on-merge-binding]],
+    :status :present,
+    :value -19.716019478626322},
+   :production -19.716019478626322,
+   :symbolic-reference
+   {:decimal90
+    "-19.7160194786263209207622660867874440881594139251538375974794927372027252570765886965093376",
+    :binary64 -19.716019478626322},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/136",
+   :retained
+   {:candidate-identity [:no-op [:unscoped nil]],
+    :status :present,
+    :value -19.371045888346348},
+   :production -19.371045888346348,
+   :symbolic-reference
+   {:decimal90
+    "-19.3710458883463482660869567167971105003343728080164345797941527324560284460917413387064059",
+    :binary64 -19.371045888346348},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/137",
+   :retained
+   {:candidate-identity
+    [:fire-pattern
+     [:target "features/operator-turns-enter-the-observation-vector"]],
+    :status :present,
+    :value -19.006552167093385},
+   :production -19.006552167093385,
+   :symbolic-reference
+   {:decimal90
+    "-19.0065521670933845725994265731019145717467670463508357040753936591459402079837586294228529",
+    :binary64 -19.006552167093385},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/138",
+   :retained
+   {:candidate-identity
+    [:fire-pattern [:target "musn/plan-before-tool"]],
+    :status :present,
+    :value -18.997132963356414},
+   :production -18.997132963356414,
+   :symbolic-reference
+   {:decimal90
+    "-18.9971329633564148355305955264890819389609801368058586321819699794374670583321478337642362",
+    :binary64 -18.997132963356414},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/139",
+   :retained
+   {:candidate-identity
+    [:fire-pattern [:target "orchestration/recorded-handoff"]],
+    :status :present,
+    :value -18.961972298066378},
+   :production -18.961972298066378,
+   :symbolic-reference
+   {:decimal90
+    "-18.9619722980663756057404893591433990842262297236862111093936841651314620647382007928974419",
+    :binary64 -18.961972298066375},
+   :production-minus-reference -3.552713678800501E-15,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/140",
+   :retained
+   {:candidate-identity
+    [:learn-action-class [:target-class :apply-cascade]],
+    :status :present,
+    :value -19.371045888346348},
+   :production -19.371045888346348,
+   :symbolic-reference
+   {:decimal90
+    "-19.3710458883463482660869567167971105003343728080164345797941527324560284460917413387064059",
+    :binary64 -19.371045888346348},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/141",
+   :retained
+   {:candidate-identity
+    [:learn-action-class [:target-class :close-hole]],
+    :status :present,
+    :value -19.371045888346348},
+   :production -19.371045888346348,
+   :symbolic-reference
+   {:decimal90
+    "-19.3710458883463482660869567167971105003343728080164345797941527324560284460917413387064059",
+    :binary64 -19.371045888346348},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/142",
+   :retained
+   {:candidate-identity
+    [:learn-action-class [:target-class :close-mission]],
+    :status :present,
+    :value -19.371045888346348},
+   :production -19.371045888346348,
+   :symbolic-reference
+   {:decimal90
+    "-19.3710458883463482660869567167971105003343728080164345797941527324560284460917413387064059",
+    :binary64 -19.371045888346348},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/143",
+   :retained
+   {:candidate-identity [:learn-action-class [:target-class :close]],
+    :status :present,
+    :value -19.371045888346348},
+   :production -19.371045888346348,
+   :symbolic-reference
+   {:decimal90
+    "-19.3710458883463482660869567167971105003343728080164345797941527324560284460917413387064059",
+    :binary64 -19.371045888346348},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/144",
+   :retained
+   {:candidate-identity [:learn-action-class [:target-class :survey]],
+    :status :present,
+    :value -19.371045888346348},
+   :production -19.371045888346348,
+   :symbolic-reference
+   {:decimal90
+    "-19.3710458883463482660869567167971105003343728080164345797941527324560284460917413387064059",
+    :binary64 -19.371045888346348},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}
+  {:candidate-id "rank/145",
+   :retained
+   {:candidate-identity
+    [:learn-action-class [:target-class :survey-mission]],
+    :status :present,
+    :value -19.371045888346348},
+   :production -19.371045888346348,
+   :symbolic-reference
+   {:decimal90
+    "-19.3710458883463482660869567167971105003343728080164345797941527324560284460917413387064059",
+    :binary64 -19.371045888346348},
+   :production-minus-reference 0.0,
+   :retained-minus-production 0.0}],
+ :all-retained-replayed? true,
+ :maximum-symbolic-reference-delta 3.552713678800501E-15,
+ :actual-production-function
+ futon2.aif.policy-free-energy/f-pi-for-candidate}
