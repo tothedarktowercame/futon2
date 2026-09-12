@@ -117,6 +117,47 @@ never restated.
   lint-style verifier over the frozen artifacts directory, not only an
   install-time preflight. This is V1 applied to the minting tooling itself.
 
+- **I11 — Handoffs compose** (added by amendment 2026-09-12: ratified by
+  Joe, concurred zai-5 with both instances below; claude-15 committed).
+  Every delegated job carries its own acceptance authority and its own
+  reconciliation. An enclosing layer consumes only the delegated job's
+  terminal disposition — a closed enum satisfying I5 — **and carries only
+  its identity reference; findings and internals flow nowhere upward**
+  (zai-5 wording). It never answers the delegated job's acceptance
+  question. Copying a child's findings into a parent's findings vector is
+  itself a breach (the flatten), not a permitted visibility repair.
+  APM instance: f227 — depth-two nesting (Guide enclosing an independent
+  promotion review) blinded the rescue selector
+  (`futon3c/holes/technotes/TN-apm-f227-submit-step-trace-2026-09-12.md`);
+  the repair (futon3c `d10a59c4`) gives the nested review its own
+  reconciliation through the shared driver path, flatten prohibition
+  test-enforced
+  (`f227-empty-nested-repair-exhausts-with-recheck-outside-guide-findings`).
+  WM instances (zai-5, both witnessed live 2026-09-12): the review-marker
+  protocol is the terminal-disposition contract in production — the
+  verifier consumes an independent review only through line-anchored
+  markers (`futon3c/src/futon3c/wm/run4_historical_verification.clj`,
+  marker regex + `(= [sha] markers)` join); a substantively approving
+  review expressed in prose read `:unverifiable` and the parent REFUSED
+  rather than salvaging the approval it could see in the child's events —
+  the induced-violation obligation, already witnessed (chain at futon3c
+  `f0b13183`). And the linked-successor join: a link config carrying
+  neither child identity reference was refused with typed
+  `invalid-consumer-input` rather than probed into the child's records
+  (`:wm/historical-repair-resolution-v2`). The chip-boards recursion
+  ruling (opacity at the parent, finiteness at every level,
+  return-with-value; `SPEC-chip-boards-v0.md`) is this law in board
+  vocabulary; `SPEC-handoff-algebra-v0.md` §3 binds the two so no
+  second version grows. Patterns: `evidence-to-disposition-once`,
+  `one-authority-per-question`.
+  Formalization pointer (Joe, at ratification; suggested not mandated):
+  handoffs-compose is the dynamic version of a structured proof —
+  handoffs as Petri-net markers flowing through a structured proof not
+  yet written down; if I11 gets a formal model, marker/flow vocabulary
+  over the disposition enum is the right abstraction level (it composes
+  with the replay layer without re-modeling internals), subject to V4's
+  coupling requirement.
+
 ## Validation obligations
 
 - **V1 — A check must be able to fail.** Every guard/monitor/lint is
