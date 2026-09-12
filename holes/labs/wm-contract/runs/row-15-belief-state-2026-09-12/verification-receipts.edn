@@ -1,0 +1,82 @@
+{:records
+ {"R1-belief-state-carried-trace-coordinates-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R1-belief-state-carried-trace-coordinates-v1" :node :R1
+    :equation :belief-state :quantity :mu :declaration "machineBeliefState"
+    :kind :lean-witness
+    :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+               :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"
+               :module "DarkTower.WarMachine.MachineBeliefStateWitness"
+               :declaration "DarkTower.WarMachine.MachineBeliefStateWitness.carriedTraceCoordinates"}
+    :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+                       :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"
+                       :declaration "DarkTower.WarMachine.MachineBeliefState.machineBeliefState"}
+    :claim "The production-facing belief reader carries all seven coordinates of the pinned 2026-09-04 mu-post row unchanged; every measured coordinate delta is 0.0."
+    :polarity :supports :scope :production-trace-carried-row :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+     :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"
+     :module "DarkTower.WarMachine.MachineBeliefStateWitness"
+     :declaration "DarkTower.WarMachine.MachineBeliefStateWitness.carriedTraceCoordinates"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+     :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"
+     :declaration "DarkTower.WarMachine.MachineBeliefState.machineBeliefState"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+     :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+     :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"}]
+   :declaration-census {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/declaration-census.edn"
+                        :sha256 "ff18b7c1bc94a2f3dd6afdbdd0fc6551bd2a9c29f4b439699a309cf772112570"
+                        :selector [:record]}
+   :transcript {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/lean-transcript.txt"
+                :sha256 "c197e93c1a753eafa5e77fa94c16baa899d39d444abce1acd2dbc0201db445f7"}
+   :axiom-transcript {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/axiom-transcript.txt"
+                      :sha256 "58d77d1c7854d14e023491a751f7012e3b4feca6145469475b7ce5d7b5195ed0"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean"
+             :sha256 "35d2d10e6490ba71b8bc546396a820ef69ec70eba90fe242943d1a1ced2128bd"}}
+
+  "R1-belief-state-bootstrapped-trace-coordinates-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R1-belief-state-bootstrapped-trace-coordinates-v1" :node :R1
+    :equation :belief-state :quantity :mu :declaration "machineBeliefState"
+    :kind :lean-witness
+    :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+               :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"
+               :module "DarkTower.WarMachine.MachineBeliefStateWitness"
+               :declaration "DarkTower.WarMachine.MachineBeliefStateWitness.bootstrappedTraceCoordinates"}
+    :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+                       :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"
+                       :declaration "DarkTower.WarMachine.MachineBeliefState.machineBeliefState"}
+    :claim "The production-facing belief reader carries all seven coordinates of the pinned 2026-05-23 bootstrapped mu-pre row unchanged; every measured coordinate delta is 0.0."
+    :polarity :supports :scope :production-trace-bootstrapped-row :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+     :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"
+     :module "DarkTower.WarMachine.MachineBeliefStateWitness"
+     :declaration "DarkTower.WarMachine.MachineBeliefStateWitness.bootstrappedTraceCoordinates"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+     :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"
+     :declaration "DarkTower.WarMachine.MachineBeliefState.machineBeliefState"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefState.lean"
+     :sha256 "da2c648860c1a4ee48f58106c5f7fc60a5150d914bc2089a2440eea801a7521e"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+     :sha256 "91b73c17ce9d068ef7e9361e7c708efe84b821109bcf202a87cf20ea312bef1b"}]
+   :declaration-census {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/declaration-census.edn"
+                        :sha256 "ff18b7c1bc94a2f3dd6afdbdd0fc6551bd2a9c29f4b439699a309cf772112570"
+                        :selector [:record]}
+   :transcript {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/lean-transcript.txt"
+                :sha256 "c197e93c1a753eafa5e77fa94c16baa899d39d444abce1acd2dbc0201db445f7"}
+   :axiom-transcript {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/axiom-transcript.txt"
+                      :sha256 "58d77d1c7854d14e023491a751f7012e3b4feca6145469475b7ce5d7b5195ed0"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean"
+             :sha256 "35d2d10e6490ba71b8bc546396a820ef69ec70eba90fe242943d1a1ced2128bd"}}}}
