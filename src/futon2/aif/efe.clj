@@ -37,7 +37,7 @@
             [futon2.aif.machine-q-risk :as machine-q-risk]
             [futon2.aif.move-class-intensity :as move-intensity]))
 
-(defn- ambiguity
+(defn- ^:clj-kondo/ignore ambiguity
   "R5b epistemic term over per-channel predicted variances.
 
    Modes (M-evaluate-policies D5c — compute-efe's default flipped to
