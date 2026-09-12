@@ -14,7 +14,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-oneStillError-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -76,7 +84,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-threeStillErrors-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -139,7 +155,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-sevenStillErrors-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -202,7 +226,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-fifteenStillErrors-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -265,7 +297,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-fullWindowOfStillErrors-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -328,7 +368,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-windowBinds-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -391,7 +439,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-unitError-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -453,7 +509,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-halfError-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -515,7 +579,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-tripleError-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",
@@ -577,7 +649,15 @@
      "holes/labs/wm-contract/runs/F8-precision/lean-state-join-check.edn",
      :sha256
      "a383cfddf1b3431916c64a501fece431870f08cce8c85389f622ad5940d673bc"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn",
+     :sha256
+     "33f026e7eb29d1bedbebda5cf9a3c53e79e26bddc0e239bbe0c0cb102feaf442",
+     :selector [:records "R7-precision-floorIsReached-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePrecision.lean",

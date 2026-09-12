@@ -14,7 +14,16 @@
      "holes/labs/wm-contract/runs/F8-observe/lean-state-join-check.edn",
      :sha256
      "838937ca19d5df68e4a635b386e3d377ce934756ac06cfc14c52899d2bea5121"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/observation-receipts.edn",
+     :sha256
+     "a7ed85a8b385275e86123a579d96c4ce6f6f3fbefc3ee7c8c2eb913a42ccfaa6",
+     :selector
+     [:records "R2-observe-emptyObservationHasFourteenZeros-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachineObservation.lean",

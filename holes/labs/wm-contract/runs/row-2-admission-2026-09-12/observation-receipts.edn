@@ -1,0 +1,93 @@
+{:records
+ {"R2-observe-emptyObservationHasFourteenZeros-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachineObservationWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservation.lean",
+     :sha256
+     "f864610a2d794b57fa18d8b3b457faf7c426015f4c01ec5c989df292adbb10a0",
+     :declaration
+     "DarkTower.WarMachine.MachineObservation.machineObservation"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservationWitness.lean",
+     :sha256
+     "2498ed198408a6ef991de1da6d2cd43dfccac612629bcacaabc8d90b9ef5a86e",
+     :module "DarkTower.WarMachine.MachineObservationWitness",
+     :declaration
+     "DarkTower.WarMachine.MachineObservationWitness.emptyObservationHasFourteenZeros"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/observation-transcript.txt",
+    :sha256
+    "1ad274d8dc9dda176914501bfc7ee84d50ff5a43dfa0efb16ed1e405ab3816c5"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservationWitness.lean",
+     :sha256
+     "2498ed198408a6ef991de1da6d2cd43dfccac612629bcacaabc8d90b9ef5a86e",
+     :module "DarkTower.WarMachine.MachineObservationWitness",
+     :declaration
+     "DarkTower.WarMachine.MachineObservationWitness.emptyObservationHasFourteenZeros"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservation.lean",
+     :sha256
+     "f864610a2d794b57fa18d8b3b457faf7c426015f4c01ec5c989df292adbb10a0",
+     :declaration
+     "DarkTower.WarMachine.MachineObservation.machineObservation"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservation.lean",
+     :sha256
+     "f864610a2d794b57fa18d8b3b457faf7c426015f4c01ec5c989df292adbb10a0",
+     :declaration
+     "DarkTower.WarMachine.MachineObservation.machineObservation"},
+    :scope :reference-model-empty-input,
+    :node :R2,
+    :as-of "2026-09-12",
+    :id "R2-observe-emptyObservationHasFourteenZeros-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineObservation",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservationWitness.lean",
+     :sha256
+     "2498ed198408a6ef991de1da6d2cd43dfccac612629bcacaabc8d90b9ef5a86e",
+     :module "DarkTower.WarMachine.MachineObservationWitness",
+     :declaration
+     "DarkTower.WarMachine.MachineObservationWitness.emptyObservationHasFourteenZeros"},
+    :quantity :o,
+    :claim
+    "For zero-valued inputs and absent variants, machineObservation's numeric projection has fourteen zero coordinates in Channel.all order.",
+    :equation :observe}}}}

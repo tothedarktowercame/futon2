@@ -1,0 +1,287 @@
+{:record
+ {:declarations
+  {"DarkTower.WarMachine.MachinePredictionErrorWitness.eighthVariance"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "At reference observation 3/4, mean 1/4 and variance 1/8, per-call precision is 8 and weighted error 4.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedIsOmitted"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "A missing reference observation with mean and variance 1/4 yields an absent observed member.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedWithBrokenModelRefuses"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "Missing reference observation and mean with variance 1/4 refuses the missing mean.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.fullWindowOfStillErrors"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, the reference precision of twenty zeros is 21.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.unitError"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, the reference precision of [1] is 1.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.floorIsReached"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, twenty errors of size ten give variance component 7/667 and reference precision 1/10.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.threeStillErrors"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, the reference precision of three zeros is 4.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachineObservation.machineObservation"
+   {:kind :def,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservation.lean",
+     :sha256
+     "f864610a2d794b57fa18d8b3b457faf7c426015f4c01ec5c989df292adbb10a0"}},
+   "DarkTower.WarMachine.MachinePrecisionWitness.windowBinds"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, twenty-five zeros and twenty zeros have the same reference precision.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.tripleError"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, the reference precision of [3] is 1/5.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecision.machinePrecision"
+   {:kind :def,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de"}},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.malformedObservationRefuses"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "A nonfinite reference observation with mean and variance 1/4 refuses the nonfinite observed member.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeError"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "At reference observation 1/4, mean 3/4 and variance 1/4, error is -1/2 and weighted error -2.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.emptyBeliefReadsTheObservation"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "At reference observation 3/4, mean 0 and variance 1, error is 3/4, per-call precision 1 and weighted error 3/4.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.unitVariance"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "At reference observation 3/4, mean 1/4 and variance 1, per-call precision is 1 and weighted error 1/2.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.exactZeroError"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "At reference observation and mean 1/2 and variance 1/4, error and weighted error are zero.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.brokenModelRefuses"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "Reference observation 3/4 with missing mean and variance 1/4 refuses the missing mean.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.fifteenStillErrors"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, the reference precision of fifteen zeros is 16.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeVarianceFloored"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "At reference observation 3/4, mean 1/4 and variance -4, the floor gives per-call precision 100 and weighted error 50.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.halfError"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, the reference precision of [1/2] is 8/5.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.zeroVarianceFloored"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "At reference observation 3/4, mean 1/4 and variance 0, the floor gives per-call precision 100 and weighted error 50.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachineObservationWitness.emptyObservationHasFourteenZeros"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineObservationWitness.lean",
+     :sha256
+     "2498ed198408a6ef991de1da6d2cd43dfccac612629bcacaabc8d90b9ef5a86e"},
+    :module "DarkTower.WarMachine.MachineObservationWitness",
+    :proposition
+    "For zero-valued inputs and absent variants, machineObservation's numeric projection has fourteen zero coordinates in Channel.all order.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"
+   {:kind :def,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f"}},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.bothModelMembersNamed"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "Reference observation 3/4 with missing mean and nonfinite variance refuses both in mean-variance order.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.oneStillError"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, the reference precision of [0] is 2.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePrecisionWitness.sevenStillErrors"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f"},
+    :module "DarkTower.WarMachine.MachinePrecisionWitness",
+    :proposition
+    "Under defaults, the reference precision of seven zeros is 8.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]},
+   "DarkTower.WarMachine.MachinePredictionErrorWitness.basicTriple"
+   {:kind :theorem,
+    :source
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494"},
+    :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+    :proposition
+    "At reference observation 3/4, mean 1/4 and variance 1/4, error is 1/2, per-call precision 4 and weighted error 2.",
+    :axioms ["propext" "Classical.choice" "Quot.sound"]}}}}

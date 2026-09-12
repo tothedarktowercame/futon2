@@ -14,7 +14,15 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector [:records "R3a-prediction-error-basicTriple-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -77,7 +85,15 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector [:records "R3a-prediction-error-unitVariance-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -140,7 +156,17 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector
+     [:records
+      "R3a-prediction-error-emptyBeliefReadsTheObservation-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -203,7 +229,15 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector [:records "R3a-prediction-error-negativeError-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -266,7 +300,15 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector [:records "R3a-prediction-error-exactZeroError-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -329,7 +371,15 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector [:records "R3a-prediction-error-eighthVariance-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -392,7 +442,16 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector
+     [:records "R3a-prediction-error-zeroVarianceFloored-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -455,7 +514,16 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector
+     [:records "R3a-prediction-error-negativeVarianceFloored-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -518,7 +586,16 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector
+     [:records "R3a-prediction-error-unobservedIsOmitted-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -581,7 +658,16 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector
+     [:records "R3a-prediction-error-brokenModelRefuses-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -644,7 +730,17 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector
+     [:records
+      "R3a-prediction-error-unobservedWithBrokenModelRefuses-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -707,7 +803,17 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector
+     [:records
+      "R3a-prediction-error-malformedObservationRefuses-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",
@@ -770,7 +876,16 @@
      "holes/labs/wm-contract/runs/F8-prediction-error/lean-state-join-check.edn",
      :sha256
      "98fa69d9332b2e45e76e373f5360dc8df8bc4b216ff1251ccdfb6910238a7add"}},
-   :verification {:status :unresolved-at-pin, :receipt nil},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-receipts.edn",
+     :sha256
+     "2571eb0aa17b04a8613cb9395bfe7162b5a4dc4594b7cff3d0135776eedadcb8",
+     :selector
+     [:records "R3a-prediction-error-bothModelMembersNamed-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachinePredictionError.lean",

@@ -1,0 +1,917 @@
+{:records
+ {"R7-precision-oneStillError-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.oneStillError"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.oneStillError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-oneStillError,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-oneStillError-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.oneStillError"},
+    :quantity :Pi,
+    :claim "Under defaults, the reference precision of [0] is 2.",
+    :equation :precision}},
+  "R7-precision-sevenStillErrors-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.sevenStillErrors"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.sevenStillErrors"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-sevenStillErrors,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-sevenStillErrors-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.sevenStillErrors"},
+    :quantity :Pi,
+    :claim
+    "Under defaults, the reference precision of seven zeros is 8.",
+    :equation :precision}},
+  "R7-precision-threeStillErrors-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.threeStillErrors"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.threeStillErrors"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-threeStillErrors,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-threeStillErrors-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.threeStillErrors"},
+    :quantity :Pi,
+    :claim
+    "Under defaults, the reference precision of three zeros is 4.",
+    :equation :precision}},
+  "R7-precision-fullWindowOfStillErrors-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.fullWindowOfStillErrors"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.fullWindowOfStillErrors"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-fullWindowOfStillErrors,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-fullWindowOfStillErrors-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.fullWindowOfStillErrors"},
+    :quantity :Pi,
+    :claim
+    "Under defaults, the reference precision of twenty zeros is 21.",
+    :equation :precision}},
+  "R7-precision-unitError-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.unitError"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.unitError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-unitError,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-unitError-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.unitError"},
+    :quantity :Pi,
+    :claim "Under defaults, the reference precision of [1] is 1.",
+    :equation :precision}},
+  "R7-precision-halfError-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.halfError"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.halfError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-halfError,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-halfError-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.halfError"},
+    :quantity :Pi,
+    :claim "Under defaults, the reference precision of [1/2] is 8/5.",
+    :equation :precision}},
+  "R7-precision-fifteenStillErrors-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.fifteenStillErrors"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.fifteenStillErrors"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-fifteenStillErrors,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-fifteenStillErrors-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.fifteenStillErrors"},
+    :quantity :Pi,
+    :claim
+    "Under defaults, the reference precision of fifteen zeros is 16.",
+    :equation :precision}},
+  "R7-precision-windowBinds-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.windowBinds"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.windowBinds"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-windowBinds,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-windowBinds-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.windowBinds"},
+    :quantity :Pi,
+    :claim
+    "Under defaults, twenty-five zeros and twenty zeros have the same reference precision.",
+    :equation :precision}},
+  "R7-precision-tripleError-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.tripleError"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.tripleError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-tripleError,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-tripleError-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.tripleError"},
+    :quantity :Pi,
+    :claim "Under defaults, the reference precision of [3] is 1/5.",
+    :equation :precision}},
+  "R7-precision-floorIsReached-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePrecisionWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.floorIsReached"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-transcript.txt",
+    :sha256
+    "622a3b4c195a0cc8045e46277ce43293c26c2f2b08d300a23dbb8e1987267a1f"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.floorIsReached"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecision.lean",
+     :sha256
+     "d8eb677df9e402b93ee7e7c67eef19840dcb20f6000527a2a3defa6c7b21d1de",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecision.machinePrecision"},
+    :scope :reference-model-floorIsReached,
+    :node :R7,
+    :as-of "2026-09-12",
+    :id "R7-precision-floorIsReached-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePrecision",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePrecisionWitness.lean",
+     :sha256
+     "4bbde5dfa69660f1b478fe445b834fdf89f150fabebd7665868f76fda07cbb5f",
+     :module "DarkTower.WarMachine.MachinePrecisionWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePrecisionWitness.floorIsReached"},
+    :quantity :Pi,
+    :claim
+    "Under defaults, twenty errors of size ten give variance component 7/667 and reference precision 1/10.",
+    :equation :precision}}}}

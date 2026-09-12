@@ -1,0 +1,1197 @@
+{:records
+ {"R3a-prediction-error-eighthVariance-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.eighthVariance"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.eighthVariance"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-eighthVariance,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-eighthVariance-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.eighthVariance"},
+    :quantity :eps,
+    :claim
+    "At reference observation 3/4, mean 1/4 and variance 1/8, per-call precision is 8 and weighted error 4.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-unobservedWithBrokenModelRefuses-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedWithBrokenModelRefuses"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedWithBrokenModelRefuses"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-unobservedWithBrokenModelRefuses,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-unobservedWithBrokenModelRefuses-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedWithBrokenModelRefuses"},
+    :quantity :eps,
+    :claim
+    "Missing reference observation and mean with variance 1/4 refuses the missing mean.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-brokenModelRefuses-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.brokenModelRefuses"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.brokenModelRefuses"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-brokenModelRefuses,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-brokenModelRefuses-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.brokenModelRefuses"},
+    :quantity :eps,
+    :claim
+    "Reference observation 3/4 with missing mean and variance 1/4 refuses the missing mean.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-malformedObservationRefuses-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.malformedObservationRefuses"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.malformedObservationRefuses"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-malformedObservationRefuses,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-malformedObservationRefuses-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.malformedObservationRefuses"},
+    :quantity :eps,
+    :claim
+    "A nonfinite reference observation with mean and variance 1/4 refuses the nonfinite observed member.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-negativeVarianceFloored-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeVarianceFloored"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeVarianceFloored"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-negativeVarianceFloored,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-negativeVarianceFloored-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeVarianceFloored"},
+    :quantity :eps,
+    :claim
+    "At reference observation 3/4, mean 1/4 and variance -4, the floor gives per-call precision 100 and weighted error 50.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-bothModelMembersNamed-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.bothModelMembersNamed"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.bothModelMembersNamed"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-bothModelMembersNamed,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-bothModelMembersNamed-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.bothModelMembersNamed"},
+    :quantity :eps,
+    :claim
+    "Reference observation 3/4 with missing mean and nonfinite variance refuses both in mean-variance order.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-unobservedIsOmitted-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedIsOmitted"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedIsOmitted"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-unobservedIsOmitted,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-unobservedIsOmitted-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedIsOmitted"},
+    :quantity :eps,
+    :claim
+    "A missing reference observation with mean and variance 1/4 yields an absent observed member.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-exactZeroError-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.exactZeroError"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.exactZeroError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-exactZeroError,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-exactZeroError-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.exactZeroError"},
+    :quantity :eps,
+    :claim
+    "At reference observation and mean 1/2 and variance 1/4, error and weighted error are zero.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-basicTriple-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.basicTriple"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.basicTriple"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-basicTriple,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-basicTriple-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.basicTriple"},
+    :quantity :eps,
+    :claim
+    "At reference observation 3/4, mean 1/4 and variance 1/4, error is 1/2, per-call precision 4 and weighted error 2.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-zeroVarianceFloored-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.zeroVarianceFloored"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.zeroVarianceFloored"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-zeroVarianceFloored,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-zeroVarianceFloored-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.zeroVarianceFloored"},
+    :quantity :eps,
+    :claim
+    "At reference observation 3/4, mean 1/4 and variance 0, the floor gives per-call precision 100 and weighted error 50.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-negativeError-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeError"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-negativeError,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-negativeError-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.negativeError"},
+    :quantity :eps,
+    :claim
+    "At reference observation 1/4, mean 3/4 and variance 1/4, error is -1/2 and weighted error -2.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-unitVariance-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unitVariance"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unitVariance"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-unitVariance,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-unitVariance-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.unitVariance"},
+    :quantity :eps,
+    :claim
+    "At reference observation 3/4, mean 1/4 and variance 1, per-call precision is 1 and weighted error 1/2.",
+    :equation :prediction-error}},
+  "R3a-prediction-error-emptyBeliefReadsTheObservation-v1"
+  {:executed? true,
+   :declaration-census
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/declaration-census.edn",
+    :sha256
+    "a504cc8d44d3be7e2f3a4414c83149ef0702f9ce6e16e5dfc146a53c43d896a0",
+    :selector [:record]},
+   :typecheck :passed,
+   :exit 0,
+   :command
+   "lake env lean DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+   :import-closure
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.emptyBeliefReadsTheObservation"}],
+   :toolchain
+   {:repo "mathlib4",
+    :path "lean-toolchain",
+    :sha256
+    "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"},
+   :axiom-transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/axiom-transcript.txt",
+    :sha256
+    "db4ad62660bf2291fc0cc7ffcea83e07e99838289fc8759eba8c5bbb4b470a43"},
+   :checker
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean",
+    :sha256
+    "dc3e8bc7f5f831a2229c2d1f059600577375a94e24f59fb8c212aabda7baab4a"},
+   :result :passed,
+   :axiom-check :passed,
+   :transcript
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-2-admission-2026-09-12/prediction-error-transcript.txt",
+    :sha256
+    "8b27b31c65017175f86fe22e22c580a3cabe97e05f8422f8655e69870a6732fe"},
+   :dependencies
+   [{:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.emptyBeliefReadsTheObservation"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"}],
+   :subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionError.lean",
+     :sha256
+     "86c68198ec18fb072c5035c989fdf8e3ef61965b6f12f8ef7994be59bd19014f",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionError.machineChannelPredictionError"},
+    :scope :reference-model-emptyBeliefReadsTheObservation,
+    :node :R3a,
+    :as-of "2026-09-12",
+    :id "R3a-prediction-error-emptyBeliefReadsTheObservation-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineChannelPredictionError",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePredictionErrorWitness.lean",
+     :sha256
+     "96783ef9bde9e12c8d302f6b7244de1c4c43f156814abfbaa43d6dc05dd81494",
+     :module "DarkTower.WarMachine.MachinePredictionErrorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePredictionErrorWitness.emptyBeliefReadsTheObservation"},
+    :quantity :eps,
+    :claim
+    "At reference observation 3/4, mean 0 and variance 1, error is 3/4, per-call precision 1 and weighted error 3/4.",
+    :equation :prediction-error}}}}
