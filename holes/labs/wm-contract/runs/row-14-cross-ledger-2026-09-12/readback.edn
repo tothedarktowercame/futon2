@@ -1,0 +1,1 @@
+{:live-write? false, :selection-belief-source {:run/id "row14/cross-ledger/redirected", :trace-path "/tmp/row14-cross-ledger-10945253131663763041/trace/wm-trace-2026-09-12.edn"}, :trace-run/id "row14/cross-ledger/redirected", :trace-cohort-attempt {:cohort/id :wm-outer-loop-40-v1, :attempt/id "attempt-001"}, :join-status :joined}
