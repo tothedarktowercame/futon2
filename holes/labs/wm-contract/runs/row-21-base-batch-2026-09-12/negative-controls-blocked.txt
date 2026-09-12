@@ -1,0 +1,7 @@
+production_caller_controls: PASS positive expected-gap and negative missing-caller
+positive_receipt_reattestation_controls: PASS -- fresh receipt accepted; planted unre-attested drift rejected
+dependency_frontier_controls: PASS -- missing pair named; stale witness degraded; re-witness held
+negative_controls: FAIL -- the declaration rung bands moved: Total & 9 & 70 & 53 & 0
+
+The suite exited 1 at the pre-existing declaration-rung-band assertion, before
+the Row 21 section. The dedicated Row 21 control exited 0.

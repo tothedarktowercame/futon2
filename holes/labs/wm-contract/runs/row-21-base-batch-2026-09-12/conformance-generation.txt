@@ -1,0 +1,2 @@
+{"plumbing":8,"retired-source":1,"theory":20,"missing-edges":["R1→R17","R13→R4","R2→R17","R4→R8","R6→R16","R8→R6"],"conformant":14,"path-dependent":1,"drawn":29,"not-realised":2,"realised-undrawn":3,"unexplained":7,"missing":6,"unexplained-edges":["R13→R14","R14→R16","R2→R3","R6→R13","R7→R14","R7→R8","R8→R5"]}
+exit 0

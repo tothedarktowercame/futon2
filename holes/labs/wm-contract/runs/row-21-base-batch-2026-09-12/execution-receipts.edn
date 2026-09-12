@@ -1,0 +1,57 @@
+{:schema :wm/execution-receipts-v1
+ :subject :row-21-always-on-base-batch
+ :at "2026-09-12T21:28:24Z"
+ :receipts
+ [{:gate :base-batch-controls
+   :command "empirics-futon/row21_base_batch_control.sh"
+   :exit 0 :tests 17 :assertions 24
+   :tree-sha "e53c5f054d201b107d3687fa184ac0f12531c1af"
+   :transcript "base-batch-controls.txt"}
+  {:gate :disposable-conformance-generation
+   :command "env AIF_OUT=/tmp/row21-base-batch-gate/ bb empirics-futon/gen_aif_dag.bb"
+   :exit 0 :tests 1 :assertions 8
+   :tree-sha "e53c5f054d201b107d3687fa184ac0f12531c1af"
+   :transcript "conformance-generation.txt"}
+  {:gate :live-topology-check
+   :command "bb empirics-futon/gen_live_topology.bb --check"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "5c84b6a420df270a037291901053cb4f57ab4201"
+   :transcript "live-topology-check.txt"}
+  {:gate :clj-kondo-gen-aif-dag
+   :command "clj-kondo --lint empirics-futon/gen_aif_dag.bb"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "5c84b6a420df270a037291901053cb4f57ab4201"
+   :transcript "clj-kondo-gen-aif-dag.txt"}
+  {:gate :clj-kondo-live-topology
+   :command "clj-kondo --lint empirics-futon/gen_live_topology.bb"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "5c84b6a420df270a037291901053cb4f57ab4201"
+   :transcript "clj-kondo-live-topology.txt"}
+  {:gate :clj-kondo-base-check
+   :command "clj-kondo --lint empirics-futon/row21_base_batch_check.bb"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "5c84b6a420df270a037291901053cb4f57ab4201"
+   :transcript "clj-kondo-base-check.txt"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- empirics-futon/gen_aif_dag.bb empirics-futon/gen_live_topology.bb empirics-futon/row21_base_batch_check.bb"
+   :exit 0 :tests 3 :assertions 3
+   :tree-sha "5c84b6a420df270a037291901053cb4f57ab4201"
+   :transcript "check-parens.txt"}]
+ :blocked-gates
+ [{:gate :negative-controls
+   :command "bash empirics-futon/negative_controls.sh"
+   :exit 1
+   :tree-sha "5c84b6a420df270a037291901053cb4f57ab4201"
+   :transcript "negative-controls-blocked.txt"
+   :finding "Pre-existing declaration-rung-band assertion failed before Row 21 controls; dedicated controls passed."}
+  {:gate :control-organization-check
+   :command "bb checks/control_organization_check.clj"
+   :exit 1
+   :tree-sha "5c84b6a420df270a037291901053cb4f57ab4201"
+   :transcript "control-organization-blocked.txt"
+   :finding "The Row 21 edge population and classifications agree (30/19/11); the check refuses an older, unrelated stale sha256 pin for control-stages.edn."}]
+ :attempts [{:gate :live-topology-check
+             :command "bb empirics-futon/gen_live_topology.bb --check"
+             :exit 1
+             :tree-sha "e53c5f054d201b107d3687fa184ac0f12531c1af"
+             :finding "The pre-commit generated footer named the prior input commit. Follow-up 5c84b6a regenerated the snapshot after the ledger commit; the check then passed."}]}

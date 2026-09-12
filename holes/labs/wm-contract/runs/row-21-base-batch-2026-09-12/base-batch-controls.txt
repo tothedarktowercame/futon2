@@ -1,0 +1,2 @@
+row21_base_batch_control: PASS 8 required edges; 8 duplicate plants and 8 reversal plants refused
+exit 0

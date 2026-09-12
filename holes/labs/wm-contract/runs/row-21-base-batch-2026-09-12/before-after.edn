@@ -1,0 +1,11 @@
+{:schema :wm/row-21-base-batch-delta-v1
+ :before {:p4ng-tree "6fa4bd1661018eb0fb15666f2b8a57591f79ea94"
+          :drawn 21 :theory 20 :conformant 6 :realised-undrawn 11
+          :retired-source [[:R3a :R8]]}
+ :after {:p4ng-tree "5c84b6a420df270a037291901053cb4f57ab4201"
+         :drawn 29 :theory 20 :conformant 14 :realised-undrawn 3
+         :retired-source [[:R3a :R8]]
+         :remaining-realised-undrawn [[:R13 :R4] [:R4 :R8] [:R8 :R6]]}
+ :paper-svg {:status :awaits-figure-owner
+             :byte-edited? false
+             :spec "p4ng/empirics-futon/row-21-base-figure-edit-spec.edn"}}
