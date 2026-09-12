@@ -381,6 +381,26 @@ because it re-orders the work:
   outcomes and attestation bytes preserved; a separate design-validity
   assessment may say a historical run is incomplete without rewriting
   it; new gates are not retroactive proof.
+- **REHEARSAL GREEN (codex-10 + zai-5 fold seat, futon2 `8af42df3`,
+  independently re-verified by claude-15):** one real WM turn through
+  the full tightened stack — the GENUINE U88 v4 production G/selection
+  and cascade (source checkpoint pinned; rationale explicitly refuses a
+  synthesized favorable cascade), a real zai-5 fold (Agency job
+  `invoke-1789228389623-20416-1cb6bc77`; persisted wiring matches the
+  seat's actual output), 2 enriched boxes with condition triples and
+  in-box holes + 2 policy holes, `validate-fold-output-v1` and
+  `validate-fold-correspondence` green with zero findings on claude-15's
+  own re-run, runner gate `:wired`, cohort gate clean, all artifacts
+  digest-pinned. Claims held to Ruling-5 discipline:
+  `:runtime-validation :green, :task-success :not-claimed,
+  :mission-closure :not-performed, :lean-attestation
+  :suspended-vocabulary`. **The runtime side of "working to this
+  specification" is demonstrated.** Two honest bounds: the rehearsal
+  proves the STACK, not cascade richness (the outline is still the thin
+  two-pattern production halo — the C1 TA-move remains the quality
+  lever); and the G→outline join inherits the audit's caveat (the
+  genuine selection record is carried, not newly evidenced — the
+  minimal-new-evidence capture remains the bar for successors).
 - **Tightening landed (codex-10, futon2 `9dd4fd8d`):** runner and cohort
   store enforce `validate-fold-output-v1` AND `validate-fold-correspondence`
   against the persisted cascade, with exact agreement among persisted
