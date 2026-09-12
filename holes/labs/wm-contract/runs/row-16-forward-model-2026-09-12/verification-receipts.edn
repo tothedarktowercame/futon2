@@ -1,0 +1,45 @@
+{:records
+ {"R4-forward-model-float-carried-production-pins-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachineForwardModelWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R4-forward-model-float-carried-production-pins-v1"
+    :node :R4 :equation :forward-model :quantity :Q-o-pi
+    :declaration "PredictiveOutcomeKernel" :kind :lean-witness
+    :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineForwardModelWitness.lean"
+               :sha256 "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c"
+               :module "DarkTower.WarMachine.MachineForwardModelWitness"
+               :declaration "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"}
+    :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+                       :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"
+                       :declaration "DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"}
+    :claim "At the unchanged row-9 production pins, three policy-conditioned outcome rows match independent exact positional-A composition within measured IEEE deltas and satisfy FloatCarriedRow.nearNormalised; exact ProbabilityKernel normalization is deferred to row 14's reviewed model instance."
+    :polarity :supports :scope :production-pins-float-carried-v1.1 :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineForwardModelWitness.lean"
+     :sha256 "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c"
+     :module "DarkTower.WarMachine.MachineForwardModelWitness"
+     :declaration "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+     :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"
+     :declaration "DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+     :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineModelSpec.lean"
+     :sha256 "0ec54a8804beaf5ef58b0c043214c09c06cc59fb76d4cb65f9a6a0e322726feb"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineForwardModelWitness.lean"
+     :sha256 "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c"}]
+   :declaration-census
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-forward-model-2026-09-12/declaration-census.edn"
+    :sha256 "ecd86647b4efe8d225adc465b904aa28ee784e1daa0749fd338e66c7929988d5"
+    :selector [:record]}
+   :transcript {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-forward-model-2026-09-12/lean-transcript.txt"
+                :sha256 "78873a5a5165a9dc614c1cfac2ea4121869d2473696f83cf97e0cc684b33bf2e"}
+   :axiom-transcript {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-forward-model-2026-09-12/axiom-transcript.txt"
+                      :sha256 "328bfdd7e44b398a13bee2fc648990b7b5ee578ff23e7190371aa67b23bf5e9e"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain"
+               :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean"
+             :sha256 "af21e8139281b9fd5296054b34f28e6ab59bdc218bb131bd2cb579d36d169b89"}}}}
