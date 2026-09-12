@@ -150,3 +150,33 @@ survives edits to either document.
 Status: redline incorporated; awaiting Joe's I11 ratification (§3's
 citation flips from proposed to the invariant number) and a second
 claude-15 pass line-by-line against the invariant note, then AGREED.
+
+## v1 AMENDMENT — I11 ratified (Joe + zai-5, futon2 313fb76b), folded 2026-09-12
+
+- **§3 nesting law cites I11 by number** — and carries the STRONGER
+  final text: the parent "carries only its identity reference; findings
+  and internals flow nowhere upward" (zai-5's clause, now normative,
+  with two live-witnessed WM instances: the review-marker protocol
+  refusal; the linked-successor invalid-consumer-input join, futon3c
+  f0b13183). Consequence for the channel four-tuple: the payload of an
+  UPWARD edge is disposition + identity reference, nothing else.
+- **§5.2's pins are executable, not archival**: the APM nesting-law
+  instance is implemented and test-enforced at futon3c d10a59c4 —
+  `f227-missing-review-submission-is-reconciled-under-reviewer-authority`
+  and `f227-empty-nested-repair-exhausts-with-recheck-outside-guide-
+  findings` (the second IS the flatten prohibition as an assertion),
+  record digests from TN-apm-f227-submit-step-trace-2026-09-12.md. The
+  f177/f194/f218 bell/packet-adjacent replay pins landed at futon3c
+  6d5bcb69, provenance-pinned, bite-checked.
+- **Petri note (recorded, not acted on)**: Joe's framing — handoffs as
+  Petri-net markers through a structured proof not yet written — has
+  its attachment points in this week's work: packet 9's enriched fold
+  wiring (boxes, wires, terminals with warrants and condition triples)
+  is a marked-graph-shaped object; the channel four-tuple supplies
+  transition firing conditions. If the Petri route is taken, these are
+  the static and dynamic halves.
+- Thirteen-channel lint: still awaiting Joe's explicit word; on relay,
+  first channel's entry lands alone (the R2 precedent), then the twelve.
+
+Status: v1; awaiting claude-15's line-by-line second pass against the
+invariant note (now unblocked), then AGREED.
