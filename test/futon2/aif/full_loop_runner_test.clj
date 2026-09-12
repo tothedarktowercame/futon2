@@ -1828,7 +1828,7 @@
                           (:phase %))
                         phases)))))
 
-(deftest fresh-author-prefers-repo-observed-head-over-narrated-artifact
+(deftest fresh-author-rejects-repo-head-disagreeing-with-claimed-artifact
   (let [events (atom [])
         resolved (atom nil)
         dispatches (atom [])
@@ -1877,22 +1877,18 @@
            :ground-fn
            (fn [& _] {:resolved? true :dial-moved? true
                       :implementation-id "observed-impl"})}))]
-    (is (= :grounded-change (:outcome result)))
-    (is (= "observed456" @resolved))
-    (is (= [:pre-dispatch-head :author-dispatch :post-author-head
-            :reviewer-dispatch]
-           @events))
-    (is (re-find #"authored commit observed456"
-                 (:prompt (second @dispatches))))
-    (is (true? (get-in result [:checkpoints :build :judgment :validation
-                               :artifact-binding :disagreement?])))))
+    (is (= :build-failed (:outcome result)))
+    (is (= :artifact-binding-mismatch (get-in result [:data :failure-kind])))
+    (is (nil? @resolved))
+    (is (= [:pre-dispatch-head :author-dispatch :post-author-head] @events))
+    (is (= ["zai-5"] (mapv :agent @dispatches)))))
 
 (deftest fresh-artifact-observation-validates-delta-ancestry-and-time-window
   (let [base-opts {:repo-head-observation-fn
                    (fn [repo] {:repo repo :head "observed456"
                                :observed-at-ms 2000})
                    :resolve-commit-sha-fn
-                   (fn [_ commit] (when (= commit "facade01234567890abcdef1234567890abcdef1") "old123"))
+                   (fn [_ commit] (when (= commit "facade01234567890abcdef1234567890abcdef1") "observed456"))
                    :ancestor-fn (fn [_ ancestor descendant]
                                   (and (= ancestor "base000")
                                        (= descendant "observed456")))
@@ -1904,12 +1900,29 @@
     (is (= "observed456" (:commit binding)))
     (is (:descendant? binding))
     (is (:in-author-window? binding))
-    (is (:disagreement? binding))
+    (is (:corroborates? binding))
+    (is (false? (:disagreement? binding)))
     (is (nil? (:commit
                (runner/fresh-artifact-binding
                 (assoc base-opts :commit-time-ms-fn (fn [& _] 500000))
                 "/repo" before {:artifact-ref "facade01234567890abcdef1234567890abcdef1"})))
         "a changed descendant outside the tolerated author window is rejected")))
+
+(deftest artifact-binding-requires-a-resolvable-matching-claim
+  (let [opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head "concurrent-head" :observed-at-ms 2000})
+              :ancestor-fn (constantly true)
+              :commit-time-ms-fn (constantly 1500)
+              :resolve-commit-sha-fn (fn [_ ref] (when (= ref "author-sha") "author-head"))}
+        before {:head "base" :observed-at-ms 1000}]
+    (doseq [claim [nil "unresolvable" "author-sha"]]
+      (let [failure (try
+                      (runner/fresh-artifact-binding opts "/repo" before {:artifact-ref claim})
+                      nil
+                      (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        (is (= :artifact-binding-mismatch (:failure-kind failure)))
+        (is (= "concurrent-head" (get-in failure [:artifact-binding :observed-head])))
+        (is (nil? (get-in failure [:artifact-binding :commit])))))))
 
 (deftest narrated-artifact-without-new-repo-head-stops-before-review
   (let [dispatches (atom [])

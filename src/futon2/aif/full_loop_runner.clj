@@ -456,41 +456,52 @@
 
 (defn fresh-artifact-binding
   "Observe and validate the commit produced by one fresh author dispatch.
-  Agency narration is retained only as corroboration of the repository HEAD."
+  The claimed commit must resolve to the validated repository HEAD.
+  Divergent or missing claims fail closed. Injected observations cannot
+  override an explicit disagreement."
   [opts repo before author-job]
-  (if-let [f (:author-artifact-observer-fn opts)]
-    (f repo before author-job)
-    (let [after (observe-repo-head opts repo)
-          before-head (:head before)
-          observed-head (:head after)
-          text-ref (:artifact-ref author-job)
-          start-ms (:observed-at-ms before)
-          end-ms (:observed-at-ms after)
-          changed? (and before-head observed-head (not= before-head observed-head))
-          descendant? (and changed?
-                           (ancestor? opts repo before-head observed-head))
-          timestamp-ms (when changed? (commit-time-ms opts repo observed-head))
-          in-window? (and timestamp-ms start-ms end-ms
-                          (<= (- start-ms artifact-window-tolerance-ms)
-                              timestamp-ms
-                              (+ end-ms artifact-window-tolerance-ms)))
-          observed-valid? (and changed? descendant? in-window?)
-          text-sha (resolve-commit-sha opts repo text-ref)
-          corroborates? (and observed-valid? text-sha (= observed-head text-sha))]
-      {:fresh-author? true
-       :repo repo
-       :pre-dispatch-head before-head
-       :observed-head observed-head
-       :observed-commit-time-ms timestamp-ms
-       :author-window-start-ms start-ms
-       :author-window-end-ms end-ms
-       :text-artifact-ref text-ref
-       :text-artifact-sha text-sha
-       :descendant? (boolean descendant?)
-       :in-author-window? (boolean in-window?)
-       :corroborates? (boolean corroborates?)
-       :disagreement? (and observed-valid? (not corroborates?))
-       :commit (when observed-valid? observed-head)})))
+  (let [binding
+        (if-let [f (:author-artifact-observer-fn opts)]
+          (f repo before author-job)
+          (let [after (observe-repo-head opts repo)
+                before-head (:head before)
+                observed-head (:head after)
+                text-ref (:artifact-ref author-job)
+                start-ms (:observed-at-ms before)
+                end-ms (:observed-at-ms after)
+                changed? (and before-head observed-head (not= before-head observed-head))
+                descendant? (and changed?
+                                 (ancestor? opts repo before-head observed-head))
+                timestamp-ms (when changed? (commit-time-ms opts repo observed-head))
+                in-window? (and timestamp-ms start-ms end-ms
+                                (<= (- start-ms artifact-window-tolerance-ms)
+                                    timestamp-ms
+                                    (+ end-ms artifact-window-tolerance-ms)))
+                observed-valid? (and changed? descendant? in-window?)
+                text-sha (resolve-commit-sha opts repo text-ref)
+                corroborates? (and observed-valid? text-sha (= observed-head text-sha))]
+            {:fresh-author? true
+             :repo repo
+             :pre-dispatch-head before-head
+             :observed-head observed-head
+             :observed-commit-time-ms timestamp-ms
+             :author-window-start-ms start-ms
+             :author-window-end-ms end-ms
+             :text-artifact-ref text-ref
+             :text-artifact-sha text-sha
+             :descendant? (boolean descendant?)
+             :in-author-window? (boolean in-window?)
+             :corroborates? (boolean corroborates?)
+             :disagreement? (and observed-valid? (not corroborates?))
+             :commit (when corroborates? observed-head)}))]
+    (when (:disagreement? binding)
+      (throw (ex-info "Author commit claim disagrees with observed repository HEAD"
+                      {:outcome :build-failed
+                       :failure-kind :artifact-binding-mismatch
+                       :failure-stage :artifact-binding
+                       :author-job author-job
+                       :artifact-binding (assoc binding :commit nil)})))
+    binding))
 
 (defn- primary-repos []
   (->> (or (.listFiles (io/file "/home/joe/code")) [])
