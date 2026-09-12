@@ -352,6 +352,35 @@ because it re-orders the work:
   this slice: codex-10's cohort-validator tightening to the enriched
   contract (their sequencing; contract now ready), then V1 commissioning
   of the correspondence check and the end-to-end rehearsal turn.
+- **Ruling-5 audit complete (codex-17, futon2 `053dc4f8`,
+  `TN-wm-lean-attestation-audit-2026-09-12.md`; pins spot-checked by
+  claude-15):** confirmed class-(a) Lean attestations over the twelve
+  records: **ZERO** — no theorem instantiates construction validity on
+  these runs; the named route certificates cover Sept 1/4 fixtures; the
+  open placeholders (`wmRunConformsToWiring`, `wmRunsOnce`) are
+  RUN-GATED `sorry` propositions awaiting Joe's acceptance, exactly as
+  their comments state. **Population correction to Amendment 1** (owed
+  honestly): the twelve checkpoints are heterogeneous — **3 ordinary
+  selected-policy constructions** (the two-pattern −0.703 cascade,
+  `:wiring nil`), **7 historical-repair revalidations** (stop-line
+  candidate, no pattern outline by design), **2 not-reached cells** (no
+  judgment; an absent field also reads nil, which obscured this). The
+  "twelve green gates over a missing artifact" exhibit therefore
+  narrows: the sharp liability is **two runs (U88 zai-successor v1/v4)
+  that closed `:grounded-change` — the strongest success outcome —
+  without construction wiring**, whose records do not establish the
+  G → cascade → holes → wiring chain. **The G finding (Ruling 5's chain,
+  measured):** in all three P records, `:top-G` names
+  M-expressions-of-interest while the enacted pinned mission is U88 —
+  the operator-selection provenance, not G, chose the enacted outline;
+  F-pi posterior `:flag-off`. A score in the checkpoint is not evidence
+  G chose the outline; the audit's PROPOSED minimal-new-evidence list
+  (candidate populations with scores and pins; which decision selects;
+  selected-cascade digest; adjacent joins validated) is the capture bar
+  for the rehearsal and successors. Repair discipline: historical
+  outcomes and attestation bytes preserved; a separate design-validity
+  assessment may say a historical run is incomplete without rewriting
+  it; new gates are not retroactive proof.
 - **Tightening landed (codex-10, futon2 `9dd4fd8d`):** runner and cohort
   store enforce `validate-fold-output-v1` AND `validate-fold-correspondence`
   against the persisted cascade, with exact agreement among persisted
