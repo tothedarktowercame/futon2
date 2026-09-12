@@ -1,0 +1,29 @@
+{:schema :wm/r17-parent-model-v1
+ :id "substrate-capability-model-v1"
+ :model/revision "v1"
+ :authority :declared
+ :corpus
+ {:reader "futon2.aif.a4a-substrate/read-corpus"
+  :reader-options {:limit 1000}
+  :base-url "http://127.0.0.1:7073"
+  :source
+  [{:path "/api/alpha/entities?type=capability&limit=1000"
+    :count 36
+    :sha256 "c46b645658e31b6dfb632c92e2e8f324c0116af44bbf19cab231fdb31bb37eb8"}
+   {:path "/api/alpha/entities?type=mission%2Fdoc&limit=1000"
+    :count 710
+    :sha256 "f2a9acf762d510523cc197e0c4f76585c2cebf0f18ef5281d77dac22531d6074"}
+   {:path "/api/alpha/hyperedges?type=capability%2F*&limit=1000&include-total=false"
+    :count 0
+    :sha256 "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"}
+   {:path "/api/alpha/entities?type=discharge&limit=1000"
+    :count 24
+    :sha256 "28146409fd49c5c209cbdd47cdd38ae906f940b4953bcd153c27524c3325da4c"}]
+  :canonical-corpus-counts {:capabilities 36 :edges 0 :discharges 24}
+  :canonical-corpus-sha256 "f619336e51ce4113073f3ac4a9af4ff01d8703817f4abe99b4670d1ebc973bc0"
+  :read-at "2026-09-12T21:04:14.796183266Z"}
+ :commissioned-by
+ "WORK-REMAINING row 16 step 4 (claude-15 ruling 64633afc)"
+ :caveats
+ ["No production caller runs R17 (census pinned in aif-equations :lean-note); :realised stays false; this record commissions OFFLINE analysis only."
+  "This record declares model identity and corpus provenance only; it declares no model content."]}
