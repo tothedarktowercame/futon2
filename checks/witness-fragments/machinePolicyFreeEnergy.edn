@@ -24,7 +24,7 @@
     :fixture {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/fixture.edn"
               :sha256 "f70ce5382207d5a4918d2a9f6a10aa6d78869ee405b7e8e2cbc3be772346240a"}
     :readback {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/readback.edn"
-               :sha256 "f06f330caab92f51f91ed90acfe92c4c0a79badb8259b5c78661382a4fdc8580"}
+               :sha256 "8ad6e5faeccfabad7852ea4e6a67680e376e3517e4597756216e6852dd9e9156"}
     :notes {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/NOTES.md"
             :sha256 "21aca3e05d0ef70a962f7c8d156910b0232d667b9df613df7a730a479b4f669f"}}
    :verification

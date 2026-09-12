@@ -2,15 +2,15 @@
  [{:gate :clojure-test
    :command "clojure -X:test :nses '[futon2.aif.policy-free-energy-measurement-test]'"
    :exit 0 :tests 1 :assertions 4
-   :tree-sha "367cffddd3a73b1749cee345408d11c721cd3186" :at "2026-09-12T22:51:00Z"}
+   :tree-sha "81801a89f486f6206b30d9b3d725ef8e6f0fca25" :at "2026-09-12T22:58:00Z"}
   {:gate :clj-kondo
    :command "clj-kondo --config '{:linters {:namespace-name-mismatch {:level :off}}}' --lint holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/generate.clj holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/readback.clj test/futon2/aif/policy_free_energy_measurement_test.clj"
    :exit 0 :tests 0 :assertions 0
-   :tree-sha "6848a03e97e55fa4f227e788792d12618636ef89" :at "2026-09-12T22:49:00Z"}
+   :tree-sha "81801a89f486f6206b30d9b3d725ef8e6f0fca25" :at "2026-09-12T22:58:00Z"}
   {:gate :check-parens
    :command "emacs --batch -Q -l ../futon4/dev/check-parens.el generate.clj readback.clj policy_free_energy_measurement_test.clj fixture.edn readback.edn"
    :exit 0 :tests 5 :assertions 5
-   :tree-sha "6848a03e97e55fa4f227e788792d12618636ef89" :at "2026-09-12T22:49:30Z"}
+   :tree-sha "81801a89f486f6206b30d9b3d725ef8e6f0fca25" :at "2026-09-12T22:58:00Z"}
   {:gate :lean-elaboration
    :command "lake env lean DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean"
    :exit 0 :tests 2 :assertions 2

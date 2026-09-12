@@ -31,7 +31,7 @@
     {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/fixture.edn"
      :sha256 "f70ce5382207d5a4918d2a9f6a10aa6d78869ee405b7e8e2cbc3be772346240a"}
     {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/readback.edn"
-     :sha256 "f06f330caab92f51f91ed90acfe92c4c0a79badb8259b5c78661382a4fdc8580"}]
+     :sha256 "8ad6e5faeccfabad7852ea4e6a67680e376e3517e4597756216e6852dd9e9156"}]
    :import-closure
    [{:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean"
      :sha256 "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57"}
