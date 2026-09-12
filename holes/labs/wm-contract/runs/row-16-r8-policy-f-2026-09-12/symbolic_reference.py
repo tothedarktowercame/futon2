@@ -26,12 +26,18 @@ def pi():
         a, p = an, two * p
     return (a + b) ** 2 / (Decimal(4) * t)
 
-totals = {}
+totals, terms = {}, []
 with open("holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/symbolic-input.tsv") as f:
     for row in csv.DictReader(f, delimiter="\t"):
         r, v = dec_ratio(row["residual"]), dec_ratio(row["variance"])
         term = ((Decimal(2) * pi() * v).ln() + r*r/v) / Decimal(2)
         totals[row["candidate"]] = totals.get(row["candidate"], Decimal(0)) + term
+        terms.append((row["candidate"], row["channel"], term))
+
+with open("holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/symbolic-channel-reference.tsv", "w") as f:
+    f.write("candidate\tchannel\tdecimal90\tbinary64\n")
+    for candidate, channel, value in terms:
+        f.write(f"{candidate}\t{channel}\t{value}\t{float(value)!r}\n")
 
 with open("holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/symbolic-reference.tsv", "w") as f:
     f.write("candidate\tdecimal90\tbinary64\n")
