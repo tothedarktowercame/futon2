@@ -1581,6 +1581,24 @@
       (is (= "fold-wiring-refused"
              (get-in refused [:data :repair-obligation :repair/id]))))))
 
+(deftest production-construction-requires-server-fold-port
+  (let [construction {:shown ["iching/hexagram-43-guai"]}
+        result (runner/construction-wiring-result construction nil true)]
+    (is (= :invalid (:status result)))
+    (is (= :construction-wiring-port-missing (:failure-kind result)))
+    (is (= :construction-wiring-port-missing
+           (get-in result [:findings 0 :finding])))))
+
+(deftest selection-enaction-comparison-is-explicit
+  (let [selected {:type :advance-mission :target "M-f11"}
+        other {:type :repair-machine-failure :target "repair-1"}]
+    (is (= :match
+           (:verdict (runner/selection-enaction-record selected selected
+                                                       {:source :test}))))
+    (is (= :typed-divergence
+           (:verdict (runner/selection-enaction-record selected other
+                                                       {:source :test}))))))
+
 (deftest rejected-review-preserves-authored-commit-in-morning-brief
   (let [queued (atom [])
         findings (atom [])

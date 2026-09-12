@@ -1300,9 +1300,16 @@
   "Produce and classify fold wiring for a construction.  The optional port is
   for server-owned fold implementations and induced commissioning tests; its
   result is subject to the same gate."
-  ([construction] (construction-wiring-result construction nil))
+  ([construction] (construction-wiring-result construction nil false))
   ([construction wiring-fn]
-   (let [result (if wiring-fn
+   (construction-wiring-result construction wiring-fn false))
+  ([construction wiring-fn required?]
+   (if (and required? (not (fn? wiring-fn)))
+     {:status :invalid
+      :failure-kind :construction-wiring-port-missing
+      :findings [{:finding :construction-wiring-port-missing
+                  :message "Authenticated production construction requires the server-owned fold port"}]}
+     (let [result (if wiring-fn
                   (wiring-fn construction)
                   (or (:fold (close-loop/act-gate-from-lane-entry construction
                                                                     construction))
@@ -1326,7 +1333,16 @@
                         :fold-correspondence-invalid
                         :fold-output-invalid)
         :findings (vec (concat (:findings validation)
-                               (:findings correspondence)))}))))
+                               (:findings correspondence)))})))))
+
+(defn selection-enaction-record
+  "Persist the comparison between the selected decision and the action that
+  actually entered construction. A non-match is explicit rather than absent."
+  [selected enacted evidence]
+  {:verdict (if (= selected enacted) :match :typed-divergence)
+   :selected selected
+   :enacted enacted
+   :evidence evidence})
 
 (defn- mission-for-decision [entry target]
   (let [action (:action entry)]
@@ -3047,7 +3063,9 @@
                                                construct-for-decision) entry)))
               wiring-result (when construction
                               (construction-wiring-result
-                               construction (:construction-wiring-fn opts)))]
+                               construction
+                               (:construction-wiring-fn opts)
+                               (boolean pinned-selection)))]
           (when-not construction
             (throw (ex-info "No construction for selected decision"
                             {:outcome :construction-failed
@@ -3085,6 +3103,18 @@
                                                    [:fold-output :policy-holes]))
                               :wiring (:wiring wiring-result)
                               :fold-output (:fold-output wiring-result)
+                              :selection-enaction
+                              (selection-enaction-record
+                               (:action entry)
+                               (or (get-in pinned-selection
+                                           [:provenance :enacted-candidate-action])
+                                   (:action entry))
+                               {:source (if pinned-selection
+                                          :authenticated-operator-task-pin
+                                          :runner-selection)
+                                :operator-authority-ref
+                                (get-in pinned-selection
+                                        [:provenance :authority-ref])})
                               :patterns (vec (:shown construction))
                               :deposit nil
                               :trace-path trace-path}
