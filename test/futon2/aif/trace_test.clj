@@ -113,7 +113,8 @@
                                   :next-belief {:also :stripped}}}]
    :decision {:action {:type :no-op}
               :rank 1 :controller-score 0.05 :tau 0.2
-              :softmax-weights {:will-be-stripped :for-trace}}
+              :softmax-weights {{:type :no-op} 0.75
+                                {:type :address-sorry :target :sorry/x} 0.25}}
    :mode :multiplied})
 
 (deftest trace-record-retains-depth-input-and-effective-depth-test
