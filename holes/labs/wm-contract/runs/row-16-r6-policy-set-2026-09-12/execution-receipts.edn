@@ -22,7 +22,11 @@
   :follow-up
   {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/generate.clj holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/readback.clj"
    :exit 0 :tests 2 :assertions 2
-   :tree-sha "c02f18bff184aebca26f2c6d64265ee620f2ac5c" :cause :namespace-follow-up}}
+   :tree-sha "c02f18bff184aebca26f2c6d64265ee620f2ac5c" :cause :namespace-follow-up}
+  :artifact-follow-up
+  {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- checks/witness-fragments/machinePolicySet.edn declaration-census.edn execution-receipts.edn verification-receipts.edn disposable-merge-transcript.edn"
+   :exit 0 :tests 5 :assertions 5
+   :tree-sha "9c39d884f1a8de0dfe75b95197cd847f537f8b36"}}
  :lean
  {:command "lake env lean DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
   :exit 0 :tests 3 :assertions 3 :errors 0 :warnings 0 :sorryAx 0
