@@ -650,7 +650,11 @@
                   (artifact-evidence? obligation implementation true)
                   (:resolved? witness) (:dial-moved? witness))
        (throw (ex-info "Machine repair implementation lacks grounded review evidence"
-                       {:obligation obligation :implementation implementation})))
+                       {:outcome :incomplete
+                        :failure-kind :machine-repair-lacks-grounded-review-evidence
+                        :failure-stage :stop-line-resolution
+                        :obligation obligation
+                        :implementation implementation})))
      (let [record (cond->
                    {:repair/id (:repair/id obligation)
                     :repair/schema-version 1

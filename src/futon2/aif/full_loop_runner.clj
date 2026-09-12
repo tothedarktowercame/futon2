@@ -292,8 +292,13 @@
    codex20 click; 2026-09-12 u88-zai-successor click wm-click-c398aea7,
    grounded commit 5d595dc9). Historical admissions keep their explicit
    STOP_LINE->HISTORICAL_VERIFICATION hops." 
-  [selection-judgment selection-ground outcome trace-path]
-  (let [historical-route?
+  ([selection-judgment selection-ground outcome trace-path]
+   (packet-run-route selection-judgment selection-ground outcome trace-path nil))
+  ([selection-judgment selection-ground outcome trace-path
+    {:keys [selected-action]}]
+  (let [selected-action (or selected-action (:selected-action selection-judgment))
+        repair-route? (= :repair-machine-failure (:type selected-action))
+        historical-route?
         (and (= :historical-verification-awaiting-validation outcome)
              (= :revalidate-historical-repair
                 (get-in selection-ground [:run4/enacted-action :type])))
@@ -306,6 +311,12 @@
              {:node :HISTORICAL_VERIFICATION
               :via :verified-admission
               :at (str (Instant/now))}])
+      (and repair-route? (not historical-route?)
+           (empty? (:wm/route selection-judgment)))
+      (into [{:node :STOP_LINE :via :repair-obligation
+              :at (str (Instant/now))}
+             {:node :FULL_LOOP_CLOSE :via outcome
+              :at (str (Instant/now))}])
       (and run4-production-pin? (not historical-route?)
            (empty? (:wm/route selection-judgment)))
       (into [{:node :RUN4_PACKET
@@ -317,11 +328,58 @@
       trace-path
       (conj {:node :TRACE
              :via "futon2.aif.trace/write-trace!"
-             :at (str (Instant/now))}))))
+             :at (str (Instant/now))})))))
+
+(defn- terminal-record-context [raw-opts result]
+  (let [selected-action (get-in result [:checkpoints :selection :judgment
+                                        :selected-action])
+        requested-pin (:run4/requested-pin raw-opts)
+        failure-kind (get-in result [:data :failure-kind])
+        failure-stage (get-in result [:data :failure-stage])]
+    (cond
+      (= :cohort-complete (:outcome result))
+      {:kind :cohort-stopping-rule
+       :outcome :cohort-complete
+       :target (get-in result [:data :target])
+       :attempted (get-in result [:data :attempted])}
+
+      (= :initialization failure-stage)
+      {:kind (or failure-kind :initialization-failed)
+       :outcome :incomplete
+       :failure-stage :initialization}
+
+      (= :repair-machine-failure (:type selected-action))
+      (cond-> {:kind (or failure-kind (:outcome result))
+               :outcome (:outcome result)
+               :repair-id (get-in selected-action [:repair-obligation :repair/id])
+               :enacted-action selected-action}
+        requested-pin (assoc :requested-not-enacted requested-pin))
+
+      :else nil)))
+
+(defn- terminal-fallback-route [result]
+  (cond
+    (= :cohort-complete (:outcome result))
+    [{:node :COHORT :via :stopping-rule-reached :at (str (Instant/now))}
+     {:node :STOPPING_RULE :via :cohort-complete :at (str (Instant/now))}]
+
+    (= :initialization (get-in result [:data :failure-stage]))
+    [{:node :INITIALIZATION
+      :via (or (get-in result [:data :failure-kind]) :initialization-failed)
+      :at (str (Instant/now))}
+     {:node :FULL_LOOP_CLOSE :via :incomplete :at (str (Instant/now))}]
+
+    :else
+    [{:node :RUNNER :via :terminal-result :at (str (Instant/now))}
+     {:node :FULL_LOOP_CLOSE :via (or (:outcome result) :unknown)
+      :at (str (Instant/now))}]))
 
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
-  (let [route (observed-route (:wm/route result))]
+  (let [observed (observed-route (:wm/route result))
+        route (if (seq observed)
+                observed
+                (observed-route (terminal-fallback-route result)))]
     (if (seq route)
       (let [dir (io/file (or (:run-record-dir raw-opts) default-run-record-dir))
             target (io/file dir (str "tick-run-record-" run-id ".edn"))
@@ -334,6 +392,7 @@
             (get-in result [:checkpoints :selection :ground
                             :run4/operator-selection :authority-attestation
                             :effective-environment])
+            terminal-context (terminal-record-context raw-opts result)
             record (cond-> {:run/id run-id
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
@@ -362,7 +421,9 @@
                             (get-in result [:data :repair-obligation]))
                      environment-attestation
                      (assoc :run4/effective-environment-attestation
-                            environment-attestation))]
+                            environment-attestation)
+                     terminal-context
+                     (assoc :terminal terminal-context))]
         (io/make-parents target)
         (spit tmp (str (pr-str record) "\n"))
         (java.nio.file.Files/move
@@ -372,8 +433,11 @@
                       java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
         {:run-record-status :present
          :run-record (.getAbsolutePath target)})
-      {:run-record-status :absent
-       :run-record-absence :runner-did-not-observe-topology-route})))
+      ;; terminal-fallback-route is total for wrapper results. Retain the guard
+      ;; as a fail-closed invariant rather than silently publishing no record.
+      (throw (ex-info "Terminal result has no recordable route"
+                      {:failure-kind :terminal-route-missing
+                       :outcome (:outcome result)})))))
 
 (defn- git [repo & args]
   (apply shell/sh "git" "-C" repo args))
@@ -2811,7 +2875,10 @@
                                                    (get-in @checkpoints
                                                            [:selection :ground])
                                                    outcome
-                                                   trace-path)
+                                                   trace-path
+                                                   {:selected-action selected-action
+                                                    :requested-pin
+                                                    (:run4/requested-pin opts)})
                        result (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
                                :morning-brief-ref brief-ref

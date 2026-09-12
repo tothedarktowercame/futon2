@@ -28,11 +28,17 @@
 (defn with-hermetic-traces [f]
   ;; Cross-run tripwire reads must not scan the production daily trace.
   (let [root (.toFile (Files/createTempDirectory "wm-runner-trace-suite-"
-                                                (make-array FileAttribute 0)))]
+                                                (make-array FileAttribute 0)))
+        run-record-root (.toFile (Files/createTempDirectory
+                                  "wm-runner-record-suite-"
+                                  (make-array FileAttribute 0)))]
     (try
-      (with-redefs-fn {#'trace/default-trace-dir (.getPath root)} f)
+      (with-redefs-fn {#'trace/default-trace-dir (.getPath root)
+                       #'runner/default-run-record-dir (.getPath run-record-root)} f)
       (finally
-        (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))
+        (doseq [file (reverse (file-seq root))] (io/delete-file file true))
+        (doseq [file (reverse (file-seq run-record-root))]
+          (io/delete-file file true))))))
 
 (use-fixtures :once hermetic/with-hermetic-stores with-hermetic-traces)
 
@@ -79,6 +85,8 @@
         (is (not= (:run/id generated) (:run/id generated-again))
             "identical production-shaped invocations receive distinct occurrence ids")
         (is (= :present (:run-record-status assigned)))
+        (is (not (contains? record :terminal))
+            "existing routed record shape stays unchanged")
         (is (= "run-assigned" (:run/id record)))
         (is (= "click-assigned" (:click/id record)))
         (is (= [{:fromNode "R20" :toNode "R12"
@@ -108,6 +116,80 @@
                  {} {} :grounded-change nil))
         "no pin and no seam route stays empty: nothing is invented for
          non-packet clicks")))
+
+(deftest every-terminal-wrapper-category-persists-a-run-record
+  (let [record-dir (.getPath
+                    (.toFile
+                     (Files/createTempDirectory
+                      "wm-total-run-record-test-" (make-array FileAttribute 0))))
+        requested {:status :authenticated-not-enacted
+                   :identity {:series-id "run4-f11-v3"
+                              :trial-id "M-f11-find-production-successor"
+                              :path "runs/f11/task-pin.edn"
+                              :sha256 (apply str (repeat 64 "a"))}}
+        stop-action {:type :repair-machine-failure
+                     :target "repair-attempt-001"
+                     :repair-obligation {:repair/id "repair-attempt-001"}}
+        stop-result
+        {:attempt-id "attempt-stop" :outcome :incomplete
+         :checkpoints {:selection {:judgment {:selected-action stop-action}}}
+         :wm/route (#'runner/packet-run-route
+                    {:selected-action stop-action} {} :incomplete nil
+                    {:selected-action stop-action
+                     :requested-pin requested})
+         :data {:failure-kind :machine-repair-lacks-grounded-review-evidence
+                :failure-stage :stop-line-resolution}}
+        run-with (fn [run-id core opts]
+                   (with-redefs-fn {#'runner/run-opportunity-core! core}
+                     #(runner/run-opportunity!
+                       (merge {:run-id run-id :click-id (str "click-" run-id)
+                               :run-record-dir record-dir}
+                              opts))))]
+    (testing "stop-line close carries enacted repair and requested-not-enacted pin"
+      (let [result (run-with "stop" (fn [_] stop-result)
+                             {:run4/requested-pin requested})
+            record (edn/read-string (slurp (:run-record result)))]
+        (is (= :present (:run-record-status result)))
+        (is (= [{:fromNode "STOP_LINE" :toNode "FULL_LOOP_CLOSE"
+                 :via :incomplete :at_ (get-in record [:route 0 :at_])}]
+               (:route record)))
+        (is (= {:kind :machine-repair-lacks-grounded-review-evidence
+                :outcome :incomplete :repair-id "repair-attempt-001"
+                :enacted-action stop-action :requested-not-enacted requested}
+               (:terminal record)))))
+    (testing "pre-core initialization failure is typed without invented selection"
+      (let [result
+            (run-with "initialization"
+                      (fn [_] (throw (ex-info "pre-core failed"
+                                             {:failure-kind :initialization-failed})))
+                      {:repair-system-record-fn
+                       (fn [m] (assoc m :repair/id "repair-initialization-test"))
+                       :queue-fn (fn [_] {:morning-brief/addendum-id "brief-init"})})
+            record (edn/read-string (slurp (:run-record result)))]
+        (is (= :present (:run-record-status result)))
+        (is (= ["INITIALIZATION"]
+               (mapv :fromNode (:route record))))
+        (is (= {:kind :initialization-failed :outcome :incomplete
+                :failure-stage :initialization}
+               (:terminal record)))
+        (is (not (contains? record :run4/task-pin)))))
+    (testing "cohort stopping rule records its observed counts"
+      (let [result
+            (run-with "cohort-complete"
+                      (fn [_] (throw (ex-info "stopped"
+                                             {:cohort/error :stopping-rule-reached
+                                              :target 1 :attempted 1}))) {})
+            record (edn/read-string (slurp (:run-record result)))]
+        (is (= :present (:run-record-status result)))
+        (is (= ["COHORT"] (mapv :fromNode (:route record))))
+        (is (= {:kind :cohort-stopping-rule :outcome :cohort-complete
+                :target 1 :attempted 1}
+               (:terminal record)))))
+    (testing "historical admission keeps its established shape"
+      (let [route (#'runner/packet-run-route
+                   {} {:run4/enacted-action {:type :revalidate-historical-repair}}
+                   :historical-verification-awaiting-validation nil)]
+        (is (= [:STOP_LINE :HISTORICAL_VERIFICATION] (mapv :node route)))))))
 
 (deftest production-repair-root-is-unreachable-during-runner-suite
   (is (not= hermetic/production-repair-root repair/default-root))
