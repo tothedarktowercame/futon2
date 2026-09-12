@@ -22,4 +22,4 @@
                :sha256 "c54e916179560f745717f775aa27856a568f110a5a8e9bbebb8a6ac6c5523224"}}
    :verification {:status :verified
                   :receipt {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/verification-receipts.edn"
-                            :sha256 "2146c59e2ad35aef5e2ccd84bcfb648adc7168928bb10a7beded5bdf45ed0328" :selector [:records "R14-temperature-trace-20260904-row0-v1"]}}}]}
+                            :sha256 "561c699fe7ca4b0ee029630bb5ac580290c25724ddd585c22ea07f83572930f9" :selector [:records "R14-temperature-trace-20260904-row0-v1"]}}}]}

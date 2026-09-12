@@ -3,4 +3,7 @@
   :finding "The retained run directory is not a source root; commissioned lint disables only namespace-name-mismatch and retains every semantic linter."}
  {:command "emacs --batch -Q -l futon4/dev/check-parens.el --eval (check-parens-file ...)" :exit 255
   :outcome :wrong-cli-entrypoint
-  :finding "The checker exposes arxana-check-parens-cli; commissioned gate used its documented shell wrapper."}]
+  :finding "The checker exposes arxana-check-parens-cli; commissioned gate used its documented shell wrapper."}
+ {:command "verify-kind! R14-temperature-trace-20260904-row0-v1" :exit 1
+  :outcome :dependency-identity-too-narrow
+  :finding "Receipt dependencies now retain the exact artifact identities, including declaration and module fields."}]
