@@ -150,7 +150,13 @@ operator workflow conversation (standdown 2026-09-12).
     coordinates, max IEEE delta 0.0; recount imposter fails,
     dropped tick and support mutation refuse. The author
     self-caught an initially unsupported witness claim before
-    execution — retained in f35ae290's history.
+    execution — retained in f35ae290's history. SCOPE
+    CLARIFICATION (2026-09-12, from the R17 witness-generation
+    stop): the row-12 correspondence is AT IEEE SEMANTICS (its
+    reference replicates the declared rule in double arithmetic);
+    the exact-rational recurrence differs by rounding residuals
+    (~2^-59 scale), carried honestly under contract v1.2's
+    declared residual criterion by the R17 claim packet.
 13. IN PROGRESS: discovery TN reviewed (817957a8: anchor at
     war_machine.clj:6280, carry in the daily WM trace as
     :accumulation-state, migration-required refusal not silent
