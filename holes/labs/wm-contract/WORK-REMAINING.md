@@ -98,7 +98,13 @@ operator workflow conversation (standdown 2026-09-12).
    authority only, honestly recorded (:empirical-claim false; no
    measured action law exists). Live-filter wiring belongs to the
    integration owner after rows 7/9/10.
-9. The policy-conditioned state predictive.
+9. DONE (futon2 71543de9/7bb1745f, mathlib4 4a65380f..6ce906a4;
+   reviewed 2026-09-12). Full-plan iteration composing rows 7+8;
+   induction proofs for terminal + every retained step; horizon
+   control verified by independent arithmetic (same-first-action
+   plans diverge at depth 2). Open obligation assigned to row 6:
+   bridge theorem tying predictedStateStep to the generic
+   machinePredictedStateKernel (MachineQ.lean).
 10. DONE as source module + proofs + witness (futon2
     b071b528/ebbbafde/a18e3f66; mathlib4 b9712a17..03bba0e7;
     reviewed 2026-09-12). Twelve tagged masses exact vs Lean, sum
