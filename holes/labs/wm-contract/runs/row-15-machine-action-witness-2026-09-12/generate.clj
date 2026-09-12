@@ -34,7 +34,7 @@
         [n d] (if (neg? power)
                 [n (bigint (.shiftLeft java.math.BigInteger/ONE (- power)))]
                 [(bigint (.shiftLeft (biginteger n) power)) 1N])]
-    (str "(" n " : ℚ) / " d)))
+    (str "((" n " : ℚ) / " d ")")))
 
 (defn -main []
   (let [manifest (read-edn "manifest.edn")
@@ -51,14 +51,14 @@
         tie (read-edn "first-max-tie-control.edn")
         base-rows (get-in controller [:input :ranked-actions])
         base-ranked (projection/project-ranked-actions base-rows)
-        full-scored (mapv #(project-score % (:selection-score %))
-                          (get-in full [:output :habit-adjusted-ranking]))
+        full-weights (get-in full [:output :softmax-weights])
+        full-scored (mapv #(project-score % (get full-weights (:action %))) base-rows)
         weights (get-in habit [:output :softmax-weights])
         habit-scored (mapv #(project-score % (get weights (:action %))) base-rows)
         tie-rows (get-in tie [:input :ranked-actions])
         tie-ranked (projection/project-ranked-actions tie-rows)
-        tie-scored (mapv #(project-score % (:selection-score %))
-                         (get-in tie [:output :habit-adjusted-ranking]))
+        tie-weights (get-in tie [:output :softmax-weights])
+        tie-scored (mapv #(project-score % (get tie-weights (:action %))) tie-rows)
         chosen-id (get-in habit [:output :rank])
         chosen-habit (first (filter #(= chosen-id (:id %)) habit-scored))
         selected-full (first (filter #(= (get-in full [:output :rank]) (:id %)) full-scored))
@@ -71,7 +71,9 @@
               "import DarkTower.WarMachine.MachineAction\n\n"
               "namespace DarkTower.WarMachine.MachineActionBranchesWitness\n\n"
               "open DarkTower.WarMachine.MachineAction\n\n"
-              "/- Generated only through futon2.aif.machine-policy-set/project-candidate. -/\n"
+              "/- Generated only through futon2.aif.machine-policy-set/project-candidate.\n"
+              "The scored carriers use retained positive posterior weights; MachineAction.\n"
+              "fullScoreIsPosteriorArgmax licenses their order as the selection-score order. -/\n"
               (candidate-list "baseRanked" base-ranked)
               (candidate-list "fullScoreRanked" full-scored)
               (candidate-list "habitScoreRanked" habit-scored)
