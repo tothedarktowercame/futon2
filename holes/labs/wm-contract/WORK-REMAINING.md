@@ -84,22 +84,24 @@ hypotheses; continuous Dirichlet a named exclusion). Rows 6-11
 implementation packets are ready to dispatch and HELD pending
 operator workflow conversation (standdown 2026-09-12).
 
-6. LEGS (a)+(b) DONE; LEG (c) REOPENED 2026-09-12 (codex-24
-   batch-A audit, TN 7e19ef83): the witness readback set
-   :lean-reference to the production row itself — circular, so
-   its 0.0 deltas were tautological. Caught by the batch-A
-   exact-reference audit, missed in the original review (a
-   mechanical delta check cannot detect reference circularity;
-   reviews now check reference independence). The Lean module,
-   bridge theorem, refusals, and sensitivity control all stand
-   (proven in Lean, independent). REPAIR (packet out, codex-24):
-   derive independent exact/rational references from the pinned
-   row-9 inputs; record production-vs-reference deltas plus the
-   :float-carried admission (production sums are 1.00000000000000005
-   /...06 exactly — within v1.1's bound, but the exact Lean
-   normalization must use the exact-rational reference, never the
-   production bytes as their own reference). Failed Lean attempt
-   retained unamended (mathlib4 c86eed2bba, removed f893753dfc).
+6. DONE (2026-09-12, second review after circularity repair). The
+   original leg (c) was circular (:lean-reference := production
+   row; caught by the batch-A audit TN 7e19ef83, missed in the
+   first review — reviews now check reference independence).
+   Repair (codex-24 b3ca7b0b..fe59d5ab, reviewed): fully
+   independent exact-IEEE-rational reference pipeline; 36
+   coordinates over three policies, max delta exactly 2^-55
+   (~2.78e-17), production rows admitted :float-carried, exact
+   sums recorded as-is. DEEP FINDING: the pinned belief row itself
+   sums to 1 + 2^-55 exactly, so the derived kernel inherits it —
+   an exactly-normalized PredictiveOutcomeKernel is
+   unconstructible at production pins without unauthorized
+   renormalization. RULED (reviewer, per contract v1.1's purpose):
+   FloatCarriedRow.nearNormalised is the Lean target for
+   production-derived rows; exact normalization belongs to a
+   reviewed mathematical model instance (row 14's A/model
+   content). Lean module, bridge theorem, refusals, sensitivity
+   control stand. Failed attempt history retained (c86eed2bba).
    Row-14 placeholder-A note unchanged.
 7. DONE (futon2 72950ab5..e6d52a2a, mathlib4 4750f9fa; reviewed
    2026-09-12). Leg (c) surfaced a real contract conflict —
