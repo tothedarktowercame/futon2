@@ -550,7 +550,17 @@ operator workflow conversation (standdown 2026-09-12).
     formal line asserts three laws — carrier-lags-registry;
     composite formal subject in a NEW module first, then one
     real offline envelope retention, then the proof).
-    Seven-step split adopted. STEP 1 DONE — R6 POLICY-SET
+    Seven-step split adopted. STEP 2 DONE — R8 POLICY-F CLAIM
+    ADMITTED (2026-09-12, futon2 f94c3712/bcf60667; mathlib4
+    c58245bf): 145 candidates / 2030 channel coordinates from
+    consecutive S4 records, production replay bit-identical,
+    symbolic-Real.log law interpreted independently at 90
+    digits (reviewer recomputed one channel term
+    digit-for-digit), max delta 3.55e-15 under 1e-12; real
+    :incomplete-coverage control + four typed-branch controls;
+    scope honestly :s4-run-2026-09-01-consecutive-records
+    (redirected RUN9 machinery, not a scheduled tick).
+    Registry: 34 claims, eleven node families. STEP 1 DONE — R6 POLICY-SET
     CLAIM ADMITTED (2026-09-12, futon2 64dae43d/a38ee070;
     mathlib4 MachinePolicySetMeasurementWitness.lean,
     axiom-free): all 148 ranked candidates projected losslessly
