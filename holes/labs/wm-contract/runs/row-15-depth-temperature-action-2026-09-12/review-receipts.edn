@@ -1,0 +1,55 @@
+{:records
+ {"R14-temperature-trace-20260904-row0-v1"
+  {:subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineTemperature.lean",
+     :sha256
+     "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba",
+     :declaration
+     "DarkTower.WarMachine.MachineTemperature.machineTemperature"},
+    :scope :production-trace-row-0,
+    :node :R14,
+    :as-of "2026-09-12",
+    :id "R14-temperature-trace-20260904-row0-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineTemperature",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean",
+     :sha256
+     "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594",
+     :module "DarkTower.WarMachine.MachineDeclarationMeasurements",
+     :declaration
+     "DarkTower.WarMachine.MachineDeclarationMeasurements.temperatureTrace20260904Row0"},
+    :quantity :tau,
+    :claim
+    "The retained row's selection-gain-only temperature is exactly 1; production and Lean deltas are 0.0.",
+    :equation :temperature},
+   :verdict :approved,
+   :reviewer "claude-15",
+   :reviewed-at "2026-09-12",
+   :basis
+   "Verification receipt validated (subject copied, executed exit 0, typecheck+axiom-check passed, no sorryAx); merge over real fragments 24 pending 0 refusals, deterministic",
+   :verification
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/verification-receipts.edn",
+    :sha256
+    "561c699fe7ca4b0ee029630bb5ac580290c25724ddd585c22ea07f83572930f9",
+    :selector [:records "R14-temperature-trace-20260904-row0-v1"]},
+   :dependencies
+   [{:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/verification-receipts.edn",
+     :sha256
+     "561c699fe7ca4b0ee029630bb5ac580290c25724ddd585c22ea07f83572930f9"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean",
+     :sha256
+     "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineTemperature.lean",
+     :sha256
+     "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"}]}}}

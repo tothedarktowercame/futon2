@@ -1,25 +1,63 @@
-{:witnesses "machineTemperature"
+{:witnesses "machineTemperature",
  :node-witnesses
- [{:schema :wm/node-witness-v1
-   :status :proposed
-   :id "R14-temperature-trace-20260904-row0-v1"
-   :node :R14 :equation :temperature :quantity :tau
-   :declaration "machineTemperature" :kind :lean-witness :polarity :supports
-   :scope :production-trace-row-0 :as-of "2026-09-12"
-   :claim "The retained row's selection-gain-only temperature is exactly 1; production and Lean deltas are 0.0."
-   :evidence-limit "One retained trace row; no claim for depth or action, whose complete inputs were not retained."
-   :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean"
-              :sha256 "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594"
-              :module "DarkTower.WarMachine.MachineDeclarationMeasurements"
-              :declaration "DarkTower.WarMachine.MachineDeclarationMeasurements.temperatureTrace20260904Row0"}
-   :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineTemperature.lean"
-                      :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"
-                      :declaration "DarkTower.WarMachine.MachineTemperature.machineTemperature"}
+ [{:schema :wm/node-witness-v1,
    :retained-evidence
-   {:input {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/input-and-findings.edn"
-            :sha256 "ee28e89469e114d4460be5c7ceae9a3d061206848aa697d711d605e348fe74dd"}
-    :readback {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/readback.edn"
-               :sha256 "c54e916179560f745717f775aa27856a568f110a5a8e9bbebb8a6ac6c5523224"}}
-   :verification {:status :verified
-                  :receipt {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/verification-receipts.edn"
-                            :sha256 "561c699fe7ca4b0ee029630bb5ac580290c25724ddd585c22ea07f83572930f9" :selector [:records "R14-temperature-trace-20260904-row0-v1"]}}}]}
+   {:input
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/input-and-findings.edn",
+     :sha256
+     "ee28e89469e114d4460be5c7ceae9a3d061206848aa697d711d605e348fe74dd"},
+    :readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/readback.edn",
+     :sha256
+     "c54e916179560f745717f775aa27856a568f110a5a8e9bbebb8a6ac6c5523224"}},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/verification-receipts.edn",
+     :sha256
+     "561c699fe7ca4b0ee029630bb5ac580290c25724ddd585c22ea07f83572930f9",
+     :selector [:records "R14-temperature-trace-20260904-row0-v1"]}},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineTemperature.lean",
+    :sha256
+    "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba",
+    :declaration
+    "DarkTower.WarMachine.MachineTemperature.machineTemperature"},
+   :scope :production-trace-row-0,
+   :node :R14,
+   :evidence-limit
+   "One retained trace row; no claim for depth or action, whose complete inputs were not retained.",
+   :as-of "2026-09-12",
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-depth-temperature-action-2026-09-12/review-receipts.edn",
+     :sha256
+     "ae2b7a6bf70f9e966013e0e427ffcb0c403269351fd9bf77a77ae97f5a616d81",
+     :selector [:records "R14-temperature-trace-20260904-row0-v1"]}},
+   :status :admitted,
+   :id "R14-temperature-trace-20260904-row0-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :declaration "machineTemperature",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineDeclarationMeasurements.lean",
+    :sha256
+    "e354a33b0937ce3c1eb18e22df9bc8aa152fad4667efd6dabdcc526d00beb594",
+    :module "DarkTower.WarMachine.MachineDeclarationMeasurements",
+    :declaration
+    "DarkTower.WarMachine.MachineDeclarationMeasurements.temperatureTrace20260904Row0"},
+   :quantity :tau,
+   :claim
+   "The retained row's selection-gain-only temperature is exactly 1; production and Lean deltas are 0.0.",
+   :equation :temperature}]}
