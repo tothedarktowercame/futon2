@@ -513,6 +513,35 @@ operator workflow conversation (standdown 2026-09-12).
     silently upgrade into enforced assurance.
 18. Implement R20's chartered interoceptive commitment link — the
     genuinely missing piece, distinct from row 17's crediting.
+    DISCOVERY DONE (2026-09-12, TN-row18-discovery-2026-09-12.md
+    7b5cde4a; reviewer verified the charter pins, the
+    :chartered R20->R14 edge in control-map-edges.edn, and the
+    built-surface claims at HEAD). REFERENT SETTLED from the
+    sources (three readings enumerated, not silently picked):
+    the commitment link is R20->R14 — an unresolved GENUINE trip
+    lowers R14's applied selection gain until discharge restores
+    it; the catalogue, figure, and machine-readable edge all
+    name R14. The old VERIFY R20 zeros are dated findings — the
+    weave (T1-T13, T12 stub), fail-safe action ladder, 5/5
+    retro-trip calibration, blind-spot map, refusing check, and
+    attended surface exist at HEAD (pins in the TN). MISSING
+    (narrow): the trip->discharge confidence snapshot, the
+    composition at the R14 selection seam, the joint
+    decision/trace record, and the production witness. Five
+    packets adopted, STRICT order 1->2->3->4->5 (TN §4); packet
+    3 must not pick a decay law packet 1 has not supplied.
+    :blocker DECISION NEEDED (packet 1 — the v1 factor law is
+    model content, charter fixes only monotone direction,
+    factor 1 at zero trips, and restoration on discharge):
+    Joe rules (i) the law shape for k distinct open genuine
+    trips — e.g. the TN-War-Machine-Restart design sketch
+    m = base^k (base and floor to be fixed), or a linear step,
+    or a fixed single-factor m0 while any trip is open; (ii)
+    the floor; (iii) distinct-trip vs distinct-wire counting;
+    (iv) whether restoration requires an operator/grounding
+    gate (the grounding-confirmation gate is a SEPARATE
+    proposed behavior the TN excludes from this edge — ruling
+    optional here). Packets 2-5 wait on (i)-(iii).
 19. Implement R9, "No self-certification": the checks that prevent
     the system from certifying its own work must exist and refuse.
 20. Extend the evidence census to R11 ("Hierarchical shared
