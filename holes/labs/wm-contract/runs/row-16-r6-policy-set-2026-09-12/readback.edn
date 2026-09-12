@@ -1,0 +1,171 @@
+{:schema :wm/row16-r6-policy-set-readback-v1,
+ :subject
+ {:node :R6,
+  :equation :policy-set,
+  :quantity :pi,
+  :declaration "machinePolicySet"},
+ :production-reader futon2.aif.trace/read-trace,
+ :projection futon2.aif.machine-policy-set/project-ranked-actions,
+ :positive
+ {:status :matched,
+  :candidate-count 148,
+  :projection
+  [{:id 1, :score 4611730693289401505, :no-op false}
+   {:id 2, :score 4611774890814985537, :no-op false}
+   {:id 3, :score 4611821143362428161, :no-op true}
+   {:id 4, :score 4611982842155587361, :no-op false}
+   {:id 5, :score 4611999889374588449, :no-op false}
+   {:id 6, :score 4611999889374588449, :no-op false}
+   {:id 7, :score 4612046239749816512, :no-op false}
+   {:id 8, :score 4612056861817379808, :no-op false}
+   {:id 9, :score 4612063636098011680, :no-op false}
+   {:id 10, :score 4612095375799563744, :no-op false}
+   {:id 11, :score 4612095924118272032, :no-op false}
+   {:id 12, :score 4612114292337348768, :no-op false}
+   {:id 13, :score 4612120628588085792, :no-op false}
+   {:id 14, :score 4612146623013862624, :no-op false}
+   {:id 15, :score 4612148436461132960, :no-op false}
+   {:id 16, :score 4612160876596916448, :no-op false}
+   {:id 17, :score 4612168461606839969, :no-op false}
+   {:id 18, :score 4612172291822128417, :no-op false}
+   {:id 19, :score 4612173649757654560, :no-op false}
+   {:id 20, :score 4612182759251593760, :no-op false}
+   {:id 21, :score 4612182898972813345, :no-op false}
+   {:id 22, :score 4612193669032208961, :no-op false}
+   {:id 23, :score 4612197139758825697, :no-op false}
+   {:id 24, :score 4612224452999852993, :no-op false}
+   {:id 25, :score 4612227199980689440, :no-op false}
+   {:id 26, :score 4612239481517145985, :no-op false}
+   {:id 27, :score 4612257392908187776, :no-op false}
+   {:id 28, :score 4612270685632931072, :no-op false}
+   {:id 29, :score 4612272668870061696, :no-op false}
+   {:id 30, :score 4612287244171583937, :no-op false}
+   {:id 31, :score 4612306330811141569, :no-op false}
+   {:id 32, :score 4612308690201452160, :no-op false}
+   {:id 33, :score 4612310727979863517, :no-op false}
+   {:id 34, :score 4612311093284071553, :no-op false}
+   {:id 35, :score 4612326627553392920, :no-op false}
+   {:id 36, :score 4612344538514428000, :no-op false}
+   {:id 37, :score 4612346670735845633, :no-op false}
+   {:id 38, :score 4612352991148069121, :no-op false}
+   {:id 39, :score 4612352991148069121, :no-op false}
+   {:id 40, :score 4612352991148069121, :no-op false}
+   {:id 41, :score 4612352991148069121, :no-op false}
+   {:id 42, :score 4612352991148069121, :no-op false}
+   {:id 43, :score 4612352991148069121, :no-op false}
+   {:id 44, :score 4612356611088964991, :no-op false}
+   {:id 45, :score 4612359540195084799, :no-op false}
+   {:id 46, :score 4612365516181671294, :no-op false}
+   {:id 47, :score 4612384944288638176, :no-op false}
+   {:id 48, :score 4612386723183820928, :no-op false}
+   {:id 49, :score 4612389934756000608, :no-op false}
+   {:id 50, :score 4612394513960787361, :no-op false}
+   {:id 51, :score 4612400501046503937, :no-op false}
+   {:id 52, :score 4612409070039178497, :no-op false}
+   {:id 53, :score 4612412770543092479, :no-op false}
+   {:id 54, :score 4612417390202725473, :no-op false}
+   {:id 55, :score 4612417668019787969, :no-op false}
+   {:id 56, :score 4612425715056241760, :no-op false}
+   {:id 57, :score 4612426577917268161, :no-op false}
+   {:id 58, :score 4612426738216185249, :no-op false}
+   {:id 59, :score 4612430628902430913, :no-op false}
+   {:id 60, :score 4612434030824916321, :no-op false}
+   {:id 61, :score 4612435144696981025, :no-op false}
+   {:id 62, :score 4612441306068415520, :no-op false}
+   {:id 63, :score 4612441604720243329, :no-op false}
+   {:id 64, :score 4612445989692405632, :no-op false}
+   {:id 65, :score 4612446037158070304, :no-op false}
+   {:id 66, :score 4612453458155056449, :no-op false}
+   {:id 67, :score 4612455038794862337, :no-op false}
+   {:id 68, :score 4612458589370993217, :no-op false}
+   {:id 69, :score 4612462382736322048, :no-op false}
+   {:id 70, :score 4612464161606354656, :no-op false}
+   {:id 71, :score 4612465864977508608, :no-op false}
+   {:id 72, :score 4612470331657149632, :no-op false}
+   {:id 73, :score 4612479791254663808, :no-op false}
+   {:id 74, :score 4612483847554382145, :no-op false}
+   {:id 75, :score 4612499049697622112, :no-op false}
+   {:id 76, :score 4612500181684068929, :no-op false}
+   {:id 77, :score 4612514003560564705, :no-op false}
+   {:id 78, :score 4612515978823826145, :no-op false}
+   {:id 79, :score 4612519476591028640, :no-op false}
+   {:id 80, :score 4612522910645311041, :no-op false}
+   {:id 81, :score 4612541843113161089, :no-op false}
+   {:id 82, :score 4612542800791734049, :no-op false}
+   {:id 83, :score 4612557290745534241, :no-op false}
+   {:id 84, :score 4612557290745534241, :no-op false}
+   {:id 85, :score 4612557290745534241, :no-op false}
+   {:id 86, :score 4612557290745534241, :no-op false}
+   {:id 87, :score 4612557290745534241, :no-op false}
+   {:id 88, :score 4612557290745534241, :no-op false}
+   {:id 89, :score 4612557290745534241, :no-op false}
+   {:id 90, :score 4612562015462796320, :no-op false}
+   {:id 91, :score 4612598826446636449, :no-op false}
+   {:id 92, :score 4612598826446636449, :no-op false}
+   {:id 93, :score 4612598826446636449, :no-op false}
+   {:id 94, :score 4612623679494072672, :no-op false}
+   {:id 95, :score 4612632132127713792, :no-op false}
+   {:id 96, :score 4612640584761354913, :no-op false}
+   {:id 97, :score 4612640584761354913, :no-op false}
+   {:id 98, :score 4612640584761354913, :no-op false}
+   {:id 99, :score 4612640584761354913, :no-op false}
+   {:id 100, :score 4612640584761354913, :no-op false}
+   {:id 101, :score 4612640584761354913, :no-op false}
+   {:id 102, :score 4612640584761354913, :no-op false}
+   {:id 103, :score 4612640584761354913, :no-op false}
+   {:id 104, :score 4612640584761354913, :no-op false}
+   {:id 105, :score 4612640584761354913, :no-op false}
+   {:id 106, :score 4612640584761354913, :no-op false}
+   {:id 107, :score 4612640584761354913, :no-op false}
+   {:id 108, :score 4612640584761354913, :no-op false}
+   {:id 109, :score 4612640584761354913, :no-op false}
+   {:id 110, :score 4612642773875305152, :no-op false}
+   {:id 111, :score 4612674111859018624, :no-op false}
+   {:id 112, :score 4612674111859018624, :no-op false}
+   {:id 113, :score 4612674111859018624, :no-op false}
+   {:id 114, :score 4612674111859018624, :no-op false}
+   {:id 115, :score 4612682564492659745, :no-op false}
+   {:id 116, :score 4612682564492659745, :no-op false}
+   {:id 117, :score 4612682564492659745, :no-op false}
+   {:id 118, :score 4612682564492659745, :no-op false}
+   {:id 119, :score 4612682564492659745, :no-op false}
+   {:id 120, :score 4612682564492659745, :no-op false}
+   {:id 121, :score 4612682564492659745, :no-op false}
+   {:id 122, :score 4612682564492659745, :no-op false}
+   {:id 123, :score 4612682564492659745, :no-op false}
+   {:id 124, :score 4612724764412378465, :no-op false}
+   {:id 125, :score 4612724764412378465, :no-op false}
+   {:id 126, :score 4612724764412378465, :no-op false}
+   {:id 127, :score 4612724764412378465, :no-op false}
+   {:id 128, :score 4612741825360400543, :no-op false}
+   {:id 129, :score 4612758730627682784, :no-op false}
+   {:id 130, :score 4612758730627682784, :no-op false}
+   {:id 131, :score 4612767183261323905, :no-op false}
+   {:id 132, :score 4612767183261323905, :no-op false}
+   {:id 133, :score 4612767183261323905, :no-op false}
+   {:id 134, :score 4612767183261323905, :no-op false}
+   {:id 135, :score 4612767183261323905, :no-op false}
+   {:id 136, :score 4612767183261323905, :no-op false}
+   {:id 137, :score 4612767183261323905, :no-op false}
+   {:id 138, :score 4612767183261323905, :no-op false}
+   {:id 139, :score 4612767183261323905, :no-op false}
+   {:id 140, :score 4614449007689797921, :no-op false}
+   {:id 141, :score 4614473212201167969, :no-op false}
+   {:id 142, :score 4614501002476918433, :no-op false}
+   {:id 143, :score 4638637791321784721, :no-op false}
+   {:id 144, :score 4638637791321784721, :no-op false}
+   {:id 145, :score 4638637791321784721, :no-op false}
+   {:id 146, :score 4638637791321784721, :no-op false}
+   {:id 147, :score 4638637791321784721, :no-op false}
+   {:id 148, :score 4638637791321784721, :no-op false}]},
+ :controls
+ {:order-mutation
+  {:expected-count 148,
+   :observed-count 148,
+   :first-mismatch 0,
+   :refusal :policy-set-projection-mismatch},
+  :dropped-candidate
+  {:expected-count 148,
+   :observed-count 147,
+   :first-mismatch nil,
+   :refusal :policy-set-projection-mismatch}}}

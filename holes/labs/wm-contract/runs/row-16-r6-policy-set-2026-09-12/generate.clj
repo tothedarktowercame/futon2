@@ -1,10 +1,11 @@
-(require '[clojure.edn :as edn]
-         '[clojure.java.io :as io]
-         '[clojure.pprint :as pp]
-         '[clojure.string :as str]
-         '[futon2.aif.machine-policy-set :as policy-set])
-(import '[java.io PushbackReader]
-        '[java.security MessageDigest])
+(ns holes.labs.wm-contract.runs.row-16-r6-policy-set-2026-09-12.generate
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.pprint :as pp]
+            [clojure.string :as str]
+            [futon2.aif.machine-policy-set :as policy-set])
+  (:import [java.io PushbackReader]
+           [java.security MessageDigest]))
 
 (def source-path "data/wm-trace/wm-trace-2026-09-12.edn.pre-migration-backup")
 (def source-sha "25a0a1e2257396c2d1db889375773c9cbed99b2ad26c57b4674e02ca1660d686")
