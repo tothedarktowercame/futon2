@@ -1,0 +1,11 @@
+{:schema :wm/predicted-state-input-v1
+ :row-7 {:path "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/input.edn"
+         :sha256 "5b69620145426a15d4f862238796afd9fbe26a1c536f6c280494cd8390e7fa6d"
+         :capture-index 0}
+ :row-8 {:path "holes/labs/wm-contract/runs/row-8-controlled-transition/production-match.edn"
+         :sha256 "dcb2e2221e71516f37ec642ea8ed953e8f944641f17d98521f46ad02585644b5"}
+ :model {:id "wm-status-transition" :revision "row-8-declared-v1"}
+ :policies [{:id "advance-twice" :revision "v1"
+             :actions [:advance-mission :advance-mission]}
+            {:id "advance-then-cascade" :revision "v1"
+             :actions [:advance-mission :apply-cascade]}]}
