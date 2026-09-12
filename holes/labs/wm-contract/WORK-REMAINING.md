@@ -534,8 +534,17 @@ operator workflow conversation (standdown 2026-09-12).
     formal line asserts three laws — carrier-lags-registry;
     composite formal subject in a NEW module first, then one
     real offline envelope retention, then the proof).
-    Seven-step split adopted; step 1 (R6 policy-set proof)
-    dispatched (codex-22). STEP 4 STOPPED HONESTLY then RULED
+    Seven-step split adopted. STEP 1 DONE — R6 POLICY-SET
+    CLAIM ADMITTED (2026-09-12, futon2 64dae43d/a38ee070;
+    mathlib4 MachinePolicySetMeasurementWitness.lean,
+    axiom-free): all 148 ranked candidates projected losslessly
+    (raw binary64 bits into Lean Int — reviewer recomputed the
+    rank-1 bits independently) and proved member-complete +
+    extensionally equal to machinePolicySet; production reader
+    matched 148/148 with reorder/drop refusals
+    (:policy-set-projection-mismatch); claim held to
+    machinePolicySet, not widened. Registry: 33 claims. Step 2
+    (R8 policy-F proof) dispatched (codex-22). STEP 4 STOPPED HONESTLY then RULED
     (2026-09-12): r17-offline/run requires a caller-supplied
     :parent-model with :id (r17_offline.clj:14-19, reviewer
     verified); no production caller or parent-model record
