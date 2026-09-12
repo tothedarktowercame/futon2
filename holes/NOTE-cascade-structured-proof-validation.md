@@ -252,3 +252,28 @@ packet-9 review. (3) A turn's output is positioned against holes: it fills
 named holes and/or creates named ones, and the gate reads that position —
 which is also what makes the cascade→hole→wiring triple the natural
 Petri/structured-proof object recorded under Ruling 2.
+
+## Landed mechanisms (2026-09-12, end of day)
+
+- **Demand side (codex-10, futon2 `61ad7453`):** RUN4 persists actual
+  fold wiring; silent nil fails `:fold-wiring-missing`; typed
+  `:wm/fold-wiring-refusal-v1` (keyword kind, nonempty grounds) persists
+  then terminates exceptionally; cohort store enforces independently.
+  Commissioned per V1 in both directions, witness at
+  `labs/wm-contract/runs/RUN4-fold-wiring-gate-2026-09-12/commissioning.edn`
+  (frontier schema, sha-pinned mechanisms, induced nil + induced refusal).
+- **Contract side (codex-21, futon2 `86aef779`):** `validate-fold-output-v1`
+  — pattern revisions, warrant-kind enum with deduction triage, condition
+  triples with status enum and witness/obstruction, obligation ids on
+  holes, refusal valid-but-exceptional, named machine-readable findings;
+  legacy `valid-fold-output?` semantics untouched (callers enumerated);
+  LLM prompt/parse updated, outputs tagged legacy/enriched/refusal; the
+  July exemplar pinned read-only as the legacy case with findings matching
+  the scoring report's marks.
+- **Named-check results at packet-9 review (both rulings postdate the
+  packet):** Ruling 3 gap — holes validated for obligation id only, bare
+  gap-markers pass, interface fields not yet demanded. Ruling 2 gap — the
+  validator is unary; no output×cascade correspondence check. Follow-up
+  packet dispatched for both (hole interface shape; correspondence:
+  every cascade pattern folded-or-holed, out-of-cascade warrants a named
+  finding).
