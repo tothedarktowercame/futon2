@@ -1,0 +1,1 @@
+{:admissions [{:id "R6-policy-posterior-production-20260912T172809-f-absent-v1", :status :pending, :node :R6}], :input-sha256 "ff7455b9f6c1a821d658ab9c6e6fce113af02ca961cae80e264443d7a4c0ee30"}

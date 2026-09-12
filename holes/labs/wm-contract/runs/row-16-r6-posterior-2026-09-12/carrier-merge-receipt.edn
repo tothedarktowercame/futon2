@@ -1,0 +1,6 @@
+{:command "bb scripts/merge_witnesses.bb --fragments /tmp/row16-r6-fragments --output /tmp/row16-r6-posterior-review.edn"
+ :exit 0 :tests 1 :assertions 2
+ :tree-sha "8bb7d7640d1e27cd9e42a4dc92efe1340ca73600"
+ :at "2026-09-12"
+ :result {:pending 1 :refusals 0}
+ :transcript "carrier-merge-scoped-transcript.txt"}

@@ -16,3 +16,8 @@ sequential normalization plus exponential and division roundings.
 This witnesses only `F_pi = 0`/absent, via `softmaxWithFPi_zero`. Nonzero-F
 correspondence remains open. The separately recorded live-selector divergence
 is downstream and outside this posterior claim.
+
+The scoped disposable carrier merge reports this proposal pending and zero
+refusals. The retained `carrier-merge-transcript.txt` is an earlier global
+attempt that stopped on the pre-existing R17 fragment's stale `Holes.lean` pin
+after packet A changed that shared file; it never evaluated this proposal.
