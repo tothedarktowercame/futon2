@@ -1,0 +1,4 @@
+All 24 declarations: [propext, Classical.choice, Quot.sound].
+No declaration depends on sorryAx.
+Command: lake env lean DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean
+Exit: 0.

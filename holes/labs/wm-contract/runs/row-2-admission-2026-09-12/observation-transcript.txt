@@ -1,0 +1,3 @@
+command: lake env lean DarkTower/WarMachine/MachineObservationWitness.lean
+exit: 0
+stdout/stderr: empty
