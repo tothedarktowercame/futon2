@@ -2,7 +2,10 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is]]
             [futon2.aif.machine-model :as machine-model]
-            [futon2.aif.machine-parameters :as parameters]))
+            [futon2.aif.machine-model-test :as model-test]
+            [futon2.aif.machine-parameters :as parameters]
+            [futon2.aif.machine-predictive :as predictive]
+            [futon2.aif.machine-transition-test :as transition-test]))
 
 (def dir "holes/labs/wm-contract/runs/row-11-parameters")
 (def states [:addressed :falsified :foreclosed :refined :reopened :spawned :strengthened])
@@ -39,3 +42,15 @@
                     model (assoc-in parameter-state [:hypotheses 0 :registration :path]
                                     (str dir "/identity-transition-mutated.edn"))
                     policies outcomes) [:refusal :kind])))))
+
+(deftest registrations-satisfy-machine-model-contract
+  (model-test/with-example
+    (fn [example]
+      (let [base (transition-test/model example)
+            a (dissoc (predictive/declared-outcome-a base) :ok)
+            registered (assoc base :A a
+                              :parameters {:kind :finite-registered-hypotheses
+                                           :hypotheses [h1 h2]
+                                           :prior {"identity-transition" 1/2
+                                                   "controlled-transition" 1/2}})]
+        (is (:ok (machine-model/validate registered)))))))
