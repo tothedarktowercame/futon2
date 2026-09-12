@@ -1,7 +1,7 @@
 (require '[clojure.edn :as edn] '[clojure.pprint :as pp])
 (let [path "futon2/holes/labs/wm-contract/worklist.edn"
       w (edn/read-string (slurp path))
-      ids #{:RUN4 :RUN13 :F10 :F12 :F11 :U80 :U83 :U84 :U88}
+      ids #{:RUN4 :RUN13 :F10 :F12 :F11 :U80 :U83 :U84 :U88 :U91 :U92}
       rows (filterv #(ids (:id %)) (:items w))
       prerequisite-ids (set (mapcat :depends-on rows))
       prerequisites (filterv #(and (prerequisite-ids (:id %)) (not (ids (:id %)))) (:items w))

@@ -207,7 +207,14 @@
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
  ;; control-map-edges.edn :decisions so a decision can replace an observation.
  :choices
- {:outcome-domain
+ {:r17-target-semantics
+  {:question "Is R17's target semantics Da Costa eq. 21 over the live tick model's o and mu (the declared theory edges R1->R17, R2->R17), or is the capability x mission recount (a4a.clj corpus->concentration) an adopted stack specialisation? Raised by the paper's Box 2 showing both edges unrealised; sharpened by the F8 leg-1 slice (mathlib4 4d89779d08): the machine's rule is the one-hot special case of eq. 21, a recount without the recurrence, on unstable coordinates, with no production caller."
+   :status :decided
+   :ruling {:by "joe" :at "2026-09-12" :grounds :ruling
+    :channel "session, claude-15 reporting Box 2's two unrealised theory edges (R1->R17, R2->R17, Da Costa eq. 21) and the path-dependent R6->R16. Joe: 'I'm a little concerned that... we are indeed not yet running a complete model of AIF... I wonder if those should be investigated too.' On claude-15's recommendation (commission the repair with RealisesDeclaredAccumulation as the acceptance predicate; eq. 21 over the live tick model as target semantics): 'I'm happy to go with your recommendations here. Please dispatch accordingly.'"
+    :decision "EQ. 21 OVER THE LIVE TICK MODEL is the target semantics; the capability x mission recount is NOT adopted as a specialisation -- it stands as the class-(b) defect the F8 slice characterised, until repaired. Repair commissioned as worklist rows U91 (realise the declared accumulation; acceptance = discharge RealisesDeclaredAccumulation) and U92 (feed R17 from live tick o/mu; realise edges R1->R17, R2->R17; depends-on U91). Ruled the same turn, other Box 2 edge: selection->enaction correspondence (R6->R16, H1b) enters the continuous-run per-item review bar from F11 onward -- each run record carries enacted-equals-selected evidence or a typed record of why not."}}
+
+  :outcome-domain
   {:question "Which Obs v declarations does the machine's C range over, family-or-one-C, and where does serendipity value live? Raised by :F10 (worklist.edn), surveyed in C538-F10-outcome-domain-decision-sheet.md sections 1-6: today the machine computes no KL[Q(o|pi) || C] anywhere -- the only real Q ranges over the 7 M-INC state/* events while the risk term's C reads 13 channel ranges, disjoint alphabets -- so declaring Obs is the entire decision."
    :status :decided
    :ruling {:by "joe" :at "2026-09-07" :grounds :ruling

@@ -194,7 +194,37 @@
    :depends-on [],
    :progress
    "slice 1 (discovery) DONE 2026-09-09 (claude-1): the page is /var/www/zone.hyperreal.enterprises/wip/pipeline-pattern-cascade.html, located by Joe's Item 18e ('a Caddy served page adjacent to the futon-2026 paper', RULINGS-walkthrough-2026-09-09.md:70). Pin at holes/labs/wm-contract/runs/U88-cascade-live/U88-cascade-live-pin.md: apex thesis verbatim (apex-thesis-v1, as-of 2026-09-06, in-force; extracted to apex-thesis-pinned.json sha256 d8c783996d2473ec72cb7b2b073dc3793067ec49e92aa7e8be269d512db5246d), four induced clusters A-D with grounds and 19 members, 176 live graph arrows (graph-arrows-2026-09-09.json sha256 bc94b7b284d3fa4297be6ac9533047a7c0107fdefce1c076e8af95a5eee66ce0, all :move-class :close-hole -- single-flavour, itself a finding), and the candidate C_tau bands laid beside with an EXPLICIT ZERO for cluster C ('feedback reaches every participant' has no carrier in channel C or seeded-c). Slice 2 stays :owner :joe, routed through the interactive excursion futon2/holes/E-C-realization.md (Item 18c/18d).",
-   :owner :joe}],
+   :owner :joe}
+  {:statement
+   "REALISE THE DECLARED ACCUMULATION (automated lane, implementation half 1 of 2): a production accumulation function on the machine's own fixed carriers (Holes.Channel x MachineBeliefState.Status) with Da Costa eq. 21 semantics -- the previous concentration on the right-hand side (an accumulation, not a recount); soft updates (a tick whose o carries mass on two channels moves two cells; a one-hot o recovers the unit increment); stable coordinates (no sorted-ids positional indexing). The existing corpus->concentration recount (a4a.clj:85-113) is refuted as a carrier by the F8 slice's four propositions; this row builds what RealisesDeclaredAccumulation demands. No feeder rewiring in this row -- that is U92.",
+   :basis
+   "Joe's ruling 2026-09-12 (claude-15 session; aif-equations.edn :choices :r17-target-semantics): Box 2's unrealised theory edges R1->R17, R2->R17 (Da Costa eq. 21) are to be repaired; target semantics is eq. 21 over the live tick model. Findings basis: the F8 leg-1 slice (mathlib4 4d89779d08) and registry row :dirichlet-accumulation (:realised false).",
+   :acceptance
+   "RealisesDeclaredAccumulation (mathlib4 DarkTower/WarMachine/MachineDirichletAccumulation.lean, landed 4d89779d08) discharged for the new implementation's Lean statement -- the predicate is already non-vacuous (declaredAccumulationRealisesItself) and non-trivial (recountShapedDoesNotRealise), so discharge is the bar; runtime witnesses from live-pinned records (one pin per test, captured verbatim) for the recurrence (successive updates differ from a recount) and the soft update (a two-channel o moves exactly two cells); clj-kondo 0/0, check-parens OK; any aif-equations.edn field change second-read before p4ng regeneration (TN 9a gate).",
+   :reviewer-should-check
+   "lake env lean on the discharge module and #print axioms on the discharging declaration (no sorryAx); re-run the runtime witnesses from the pinned records; confirm the old recount path is unchanged or explicitly retired, not silently aliased; confirm the coordinates are the fixed carriers and not list positions.",
+   :status :open,
+   :id :U91,
+   :class :I,
+   :covers-key :dirichlet-accumulation,
+   :depends-on [],
+   :owner :any}
+  {:statement
+   "FEED R17 FROM THE LIVE TICK MODEL (automated lane, implementation half 2 of 2): the U91 accumulation consumes the tick model's o (R2) and posterior mu (R1) from production records, with a production caller. Realises theory edges R2->R17 and R1->R17; BMR then runs over concentrations accumulated from what the machine actually observed.",
+   :basis
+   "Same ruling as U91 (aif-equations.edn :choices :r17-target-semantics). Provenance basis: TN-edge-review-aif-wiring.md section 9a and C456 -- R17's feeder reads capability entities over Drawbridge and no production :capability/* writes flow; the F8 census found no production caller of R17's accumulation (only external reference into the a4a family is actuator_a6.clj:127, a different function).",
+   :blocker
+   "Depends on U91: there is no declared-semantics accumulation to feed until RealisesDeclaredAccumulation is discharged.",
+   :acceptance
+   "A production caller runs the U91 accumulation over live tick records; the provenance standard step recorded (name the feeder, grep the store, find the writer); registry edges [[:R2 :R17] [:R1 :R17]] flip from :not-realised with evidence pointers, second-read before p4ng/Box 2 regeneration (TN 9a gate); the corresponding :holes entries close; the pre-repair no-caller census retained as the V1 negative control.",
+   :reviewer-should-check
+   "Independently re-run the caller census; verify the feeder consumes tick-model o and mu rather than capability hyperedges; verify Box 2 regeneration happened only after the second read.",
+   :status :blocked,
+   :id :U92,
+   :class :I,
+   :covers-key :dirichlet-accumulation,
+   :depends-on [:U91],
+   :owner :any}],
  :queue-note
  "Build-worklist input. Canonical statuses preserved. No live RUN4 manifest, capacity or activation. Refresh from canonical worklist before each dispatch; do not infer repair-store eligibility from this snapshot.",
  :classes
