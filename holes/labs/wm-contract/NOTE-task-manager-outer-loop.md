@@ -105,3 +105,33 @@ Revised constitutional line, in one sentence: the task manager receives
 `ranked-actions`, pushes via bells, attributes via the clock, gates
 pinned lanes through packet minting, and its own success is a freshness
 predicate — five verbs, none of them pilot.
+
+## Automatability as a triage dimension (Joe, 2026-09-12)
+
+Fourth question after fresh/owned/unblocked: HOW AUTOMATABLE is this?
+Don't feed the WM non-automatable tasks. Three-valued, and the middle
+value is the load-bearing one:
+
+- **automatable-now**: a cascade exists that spans turns of this shape —
+  go ahead once a working lane takes it (the "just go" bucket in the
+  current tracker).
+- **needs-operator**: the task's shape includes a judgment only the
+  operator can make (rulings, preferences, acceptance) — route to ASK,
+  never to a lane. Some tracker items are permanently this bucket.
+- **not-yet**: no spanning cascade today. Operator turns were, by
+  definition, non-automatable AT THE TIME THEY WERE DONE — but that
+  verdict decays as the library grows.
+
+Two consequences:
+
+1. **The predicate is a query, not a judgment**: "is there a cascade
+   spanning turns of this shape?" is askable on the association map
+   (cartographer t3/t6). This is the crossover between task manager and
+   cartographer: the task manager consumes the map's spanning-structure
+   read as its triage input, and the map's growth rate IS the
+   automatability frontier moving — yesterday's not-yet becoming
+   today's automatable-now, measured rather than felt.
+2. **Automatability verdicts are fresh-stamped like everything else**
+   (the R14 idiom): a "not-yet" from an old library version is stale the
+   moment relevant patterns or cascades land. The task manager re-tests
+   the not-yet bucket on map growth, not on a timer.
