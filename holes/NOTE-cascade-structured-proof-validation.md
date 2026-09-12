@@ -183,3 +183,39 @@ fold contract (futon2 `src/futon2/aif/fold.clj`) defines the enriched
 output; the RUN4 runner chain (codex-10's lane) demands it at the
 construction checkpoint — requested of that lane's owner, not commissioned
 past them.
+
+## Ruling 2 (Joe, 2026-09-12, later the same day): the cascade IS the outline of the work
+
+Joe's sharpening, recorded because it changes the gate's semantics, not
+just its strictness: **the cascade is not an optional annotation that
+accompanies work** ("here's a two-pattern cascade, tickbox") — **it is the
+outline of the work that is going to be done.** The pattern-first
+methodology, stated as a discipline:
+
+1. Write the structured proof first, from known patterns. Where no known
+   pattern fits, fill the gap with a NEW pattern of the right shape — but
+   prefer known ones, so the library grows coherently. The preference is
+   the library-building mechanism, not a style choice.
+2. The structured proof is the statement layer — "the types, or the lemma
+   statements, which are basically like types." The construction that
+   fills it (Lean code in the APM; the fold wiring in the WM) is the proof
+   layer — "the proofs are the wiring."
+3. **There is nothing else that can be delivered besides these objects** —
+   outline, filling, and their correspondence. "Otherwise it all falls
+   apart." A deliverable that is neither an outline obligation nor a
+   filling of one is not work product.
+4. The point of proof-first is the library: "building a coherent library
+   of moves that can be thought about and worked with."
+
+Consequences for the mechanisms in flight: the rubric's M1 tightens from
+"obligations are named" to "the obligations ARE the cascade's outline, and
+every box fills one"; the fold correspondence (each cascade pattern either
+folded into a box or surfaced as a hole with `:unfolded-pattern`) is
+promoted from a prompt convention to a gate demand — cascade adequacy and
+wiring correspondence are checked, not assumed. The typed-submission
+discipline already enforces clause 3 at the report layer (f227's outer
+failure was literally a prose-instead-of-EDN deliverable); this ruling
+extends the same rule to the work's content layer. Whether the landed
+packet-9 contract can already express box→outline-obligation
+correspondence is a named check at that packet's review; if not, it is one
+small follow-up, not a rework.
