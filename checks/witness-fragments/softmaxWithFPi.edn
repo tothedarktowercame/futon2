@@ -1,37 +1,61 @@
-{:witnesses "softmaxWithFPi"
+{:witnesses "softmaxWithFPi",
  :node-witnesses
- [{:schema :wm/node-witness-v1
-   :status :proposed
-   :id "R6-policy-posterior-production-20260912T172809-f-absent-v1"
-   :node :R6
-   :equation :policy-posterior
-   :quantity :Q-pi
-   :declaration "softmaxWithFPi"
-   :kind :lean-witness
-   :polarity :supports
-   :scope :production-trace-details-record-20260912T172809-f-absent
-   :as-of "2026-09-12"
-   :claim "At the pinned schema-27 details record, all 148 retained F-absent Q(pi) coordinates equal the independent production log-sum-exp replay; against the carrier's raw-exp normalization, all exact rational residuals are exhibited and bounded by 2^-45. softmaxWithFPi_zero identifies this absent branch with the existing softmax evidence."
-   :evidence-limit "The record explicitly marks F_pi absent. Nonzero-F correspondence remains open, and this upstream posterior claim does not claim correspondence of the downstream live selector."
-   :artifact
-   {:repo "mathlib4"
-    :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
-    :sha256 "8cfa95399fc001739b06f7962b8a05af5114d090cc8f530eafd987e252331215"
-    :module "DarkTower.WarMachine.MachinePolicyPosteriorWitness"
-    :declaration "DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual"}
-   :subject-artifact
-   {:repo "mathlib4"
-    :path "DarkTower/WarMachine/PolicyPosterior.lean"
-    :sha256 "59817e0a9ff296a95d7cfcc59d4f1709fb2d38d8cfbbc156ba7c489f12da114b"
-    :declaration "DarkTower.WarMachine.PolicyPosterior.softmaxWithFPi"}
+ [{:schema :wm/node-witness-v1,
    :retained-evidence
-   {:fixture {:repo "futon2"
-              :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/fixture.edn"
-              :sha256 "7d3cd7923b9fdc76eb5a12cc797277a4a88ab50baf8cf2cf9b20fc3be04f9efe"}}
+   {:fixture
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/fixture.edn",
+     :sha256
+     "7d3cd7923b9fdc76eb5a12cc797277a4a88ab50baf8cf2cf9b20fc3be04f9efe"}},
    :verification
-   {:status :verified
-    :receipt {:repo "futon2"
-              :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/verification-receipts.edn"
-              :sha256 "3936b656c7f4a82bf968c0a9d62b3a783e192ccd025abbcebbf4fe5cdc58c51c"
-              :selector [:records "R6-policy-posterior-production-20260912T172809-f-absent-v1"]}}
-   :review {:status :pending :reviewer "claude-15"}}]}
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/verification-receipts.edn",
+     :sha256
+     "3936b656c7f4a82bf968c0a9d62b3a783e192ccd025abbcebbf4fe5cdc58c51c",
+     :selector
+     [:records
+      "R6-policy-posterior-production-20260912T172809-f-absent-v1"]}},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/PolicyPosterior.lean",
+    :sha256
+    "59817e0a9ff296a95d7cfcc59d4f1709fb2d38d8cfbbc156ba7c489f12da114b",
+    :declaration
+    "DarkTower.WarMachine.PolicyPosterior.softmaxWithFPi"},
+   :scope :production-trace-details-record-20260912T172809-f-absent,
+   :node :R6,
+   :evidence-limit
+   "The record explicitly marks F_pi absent. Nonzero-F correspondence remains open, and this upstream posterior claim does not claim correspondence of the downstream live selector.",
+   :as-of "2026-09-12",
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/review-receipts.edn",
+     :sha256
+     "9d568d2610abef89f0174bec55f59df61b8b8428d610baa3c14777d40cd924f6",
+     :selector
+     [:records
+      "R6-policy-posterior-production-20260912T172809-f-absent-v1"]}},
+   :status :admitted,
+   :id "R6-policy-posterior-production-20260912T172809-f-absent-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :declaration "softmaxWithFPi",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean",
+    :sha256
+    "8cfa95399fc001739b06f7962b8a05af5114d090cc8f530eafd987e252331215",
+    :module "DarkTower.WarMachine.MachinePolicyPosteriorWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual"},
+   :quantity :Q-pi,
+   :claim
+   "At the pinned schema-27 details record, all 148 retained F-absent Q(pi) coordinates equal the independent production log-sum-exp replay; against the carrier's raw-exp normalization, all exact rational residuals are exhibited and bounded by 2^-45. softmaxWithFPi_zero identifies this absent branch with the existing softmax evidence.",
+   :equation :policy-posterior}]}

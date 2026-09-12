@@ -1,0 +1,57 @@
+{:records
+ {"R6-policy-posterior-production-20260912T172809-f-absent-v1"
+  {:subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/PolicyPosterior.lean",
+     :sha256
+     "59817e0a9ff296a95d7cfcc59d4f1709fb2d38d8cfbbc156ba7c489f12da114b",
+     :declaration
+     "DarkTower.WarMachine.PolicyPosterior.softmaxWithFPi"},
+    :scope :production-trace-details-record-20260912T172809-f-absent,
+    :node :R6,
+    :as-of "2026-09-12",
+    :id "R6-policy-posterior-production-20260912T172809-f-absent-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "softmaxWithFPi",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean",
+     :sha256
+     "8cfa95399fc001739b06f7962b8a05af5114d090cc8f530eafd987e252331215",
+     :module "DarkTower.WarMachine.MachinePolicyPosteriorWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual"},
+    :quantity :Q-pi,
+    :claim
+    "At the pinned schema-27 details record, all 148 retained F-absent Q(pi) coordinates equal the independent production log-sum-exp replay; against the carrier's raw-exp normalization, all exact rational residuals are exhibited and bounded by 2^-45. softmaxWithFPi_zero identifies this absent branch with the existing softmax evidence.",
+    :equation :policy-posterior},
+   :verdict :approved,
+   :reviewer "claude-15",
+   :reviewed-at "2026-09-12",
+   :basis
+   "Reviewed on bellback across three rounds: generator read in full (reference from retained inputs only, throw-on-mismatch input validation); reviewer independently replayed ALL 148 coordinates from the fixture inputs — scores, references, residuals bit-identical, max residual exactly 2^-55 within the derived 2^-45 gamma-152 bound; log-sum-exp finding precise (retained weights ARE production LSE output bit-for-bit; carrier raw-exp form differs by bounded rounding only, exhibited per-coordinate as exact rationals); carrier relocated to PolicyPosterior.lean per the subject-file freeze policy with Holes.lean verified restored byte-identical to 4dc0a76b by the reviewer; fragment subject-artifact points at the new module, ends-with rule holds; verification receipts regenerated referencing the new pins; scope F-absent branch with nonzero-F correspondence and live-selector correspondence explicitly open; disposable merge 30 verified-binding + R6 pending, ZERO refusals (R4/R17 resolve again)",
+   :verification
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/verification-receipts.edn",
+    :sha256
+    "3936b656c7f4a82bf968c0a9d62b3a783e192ccd025abbcebbf4fe5cdc58c51c",
+    :selector
+    [:records
+     "R6-policy-posterior-production-20260912T172809-f-absent-v1"]},
+   :dependencies
+   [{:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/verification-receipts.edn",
+     :sha256
+     "3936b656c7f4a82bf968c0a9d62b3a783e192ccd025abbcebbf4fe5cdc58c51c"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean",
+     :sha256
+     "8cfa95399fc001739b06f7962b8a05af5114d090cc8f530eafd987e252331215"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/PolicyPosterior.lean",
+     :sha256
+     "59817e0a9ff296a95d7cfcc59d4f1709fb2d38d8cfbbc156ba7c489f12da114b"}]}}}
