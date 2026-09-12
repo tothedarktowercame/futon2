@@ -1,0 +1,18 @@
+{:receipts
+ [{:gate :clj-reference-readback
+   :command "clojure -M holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj"
+   :exit 0 :tests 3 :assertions 36
+   :tree-sha "b3ca7b0bb89632cfc2ee5f4d50d2f72a3478f669"
+   :at "2026-09-12"
+   :result :typed-split
+   :finding :independent-reference-is-float-carried-not-exactly-normalised}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj"
+   :exit 0 :tests 1 :assertions 2
+   :tree-sha "afaa786545eee9e3683e8dfd0073570f07a48d92"
+   :at "2026-09-12"}
+  {:gate :check-parens
+   :command "bash /home/joe/code/futon4/dev/check-parens.sh holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.clj holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.edn"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "afaa786545eee9e3683e8dfd0073570f07a48d92"
+   :at "2026-09-12"}]}
