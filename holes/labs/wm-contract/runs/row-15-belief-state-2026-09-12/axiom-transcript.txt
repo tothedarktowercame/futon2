@@ -1,0 +1,7 @@
+Command: lake env lean DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean
+Exit: 0
+'DarkTower.WarMachine.MachineBeliefState.machineBeliefState' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineBeliefStateWitness.carriedTraceCoordinates' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineBeliefStateWitness.bootstrappedTraceCoordinates' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineBeliefStateWitness.retainedTraceBeliefReferences' depends on axioms: [propext, Classical.choice, Quot.sound]
+No listed declaration depends on sorryAx.

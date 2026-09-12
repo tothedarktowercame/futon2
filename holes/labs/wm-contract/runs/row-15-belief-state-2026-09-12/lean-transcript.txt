@@ -1,0 +1,3 @@
+Command: lake env lean DarkTower/WarMachine/MachineBeliefStateWitness.lean
+Exit: 0
+Output: <empty>

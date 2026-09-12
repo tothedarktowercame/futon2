@@ -1,0 +1,6 @@
+[{:command "lake env lean DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean"
+  :exit 1 :outcome :stale-object
+  :finding "The imported witness .olean predated the new declarations."}
+ {:command "lake build DarkTower.WarMachine.MachineBeliefStateWitness"
+  :exit 0 :outcome :dependency-object-built
+  :finding "Target built; inherited Holes.lean sorry warnings were emitted, so the focused axiom check separately establishes no sorryAx in the subject or witness theorems."}]
