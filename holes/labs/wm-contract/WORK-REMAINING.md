@@ -142,7 +142,20 @@ operator workflow conversation (standdown 2026-09-12).
     descope — narrowing the claim instead is the facade option.
 15. Write measurement proofs for the five machine declarations that
     lack one: belief state, belief update, depth, temperature,
-    action.
+    action. SPLIT 2026-09-12 (codex-24 discovery, correct refusal):
+    belief STATE is provable now (row-7 pinned trace rows suffice;
+    packet out). Belief UPDATE is not reconstructible at identical
+    pins — the trace retains mu-pre/mu-post + aggregates but NOT
+    per-entity events, resolved A/B bytes, or a model revision pin
+    (inputs to machineBeliefUpdate, MachineBeliefUpdate.lean:181).
+    PREREQUISITE (rows-3/5 class, record retention): extend the
+    update path to retain {pre-row, per-entity attributed events,
+    A/B bytes or hashes + revision, mode, post-row} per tick —
+    additive record fields, no behavior change — then one
+    machinery-test tick produces the real capture and the proof
+    follows on the row-2 pattern. The existing
+    F8-belief-update readback is synthetic-reference only and must
+    not be relabelled as a trace proof.
 16. Write measurement proofs for the remaining equation-bearing
     nodes not covered by rows 2 and 15 (inventory first; roughly
     five).
