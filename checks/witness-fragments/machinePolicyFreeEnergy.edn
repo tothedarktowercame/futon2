@@ -31,5 +31,5 @@
    {:status :verified
     :receipt {:repo "futon2"
               :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/verification-receipts.edn"
-              :sha256 "e42c6c637709b19008d5c348cedebb8a597b8ea0779b7b313b194c3b815438b7"
+              :sha256 "cd43e9bc05d1ecf8c58b4f514d5d8f74e37782c84af23940bc79127244a1a2e5"
               :selector [:records "R8-policy-F-s4-consecutive-records-v1"]}}}]}
