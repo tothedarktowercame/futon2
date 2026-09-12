@@ -63,8 +63,11 @@ admitted to be informal (a typed gap, not a surprise later).
   before it is trusted (a check that cannot fail is not a check — the
   witness loop's five-round record is V1 working).
 - Conformance = REPLAY of recorded production orderings through the
-  actual channel code; the incident archive is the suite (APM packets
-  5–8 are building that half).
+  actual channel code; the incident archive is the suite (APM half
+  landed: decision-point map
+  futon3c TN-apm-acceptance-ordering-decision-points-2026-09-12.md /
+  e49f47ea; replay pins 6d5bcb69; nested-reconciliation d10a59c4;
+  exhaustion recheck 96072db6).
 - A Lean model of the algebra is evidence only when statement-hash /
   enumeration-pinned to the running registry (else a second, silently
   stale truth — the witness-status precedent applies to the algebra
