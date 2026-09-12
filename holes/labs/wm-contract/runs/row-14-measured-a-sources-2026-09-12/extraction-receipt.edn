@@ -1,0 +1,12 @@
+{:command "tmp_out=$(mktemp) && clojure -M -e '(load-file row14_measured_a_census.clj) (-main tmp_out)' && cmp committed counts && sha256sum tmp_out"
+ :exit 0
+ :tests 1
+ :assertions 1
+ :observed {:byte-identical-to-committed true
+            :sha256 "2075b7b5defb96d45e8c23cef5f6d1220fe3edf28f3177e13cf4a8cb31a05fd4"
+            :state-count 7
+            :outcome-count 12
+            :total-pairs 1
+            :nonzero-cells 1}
+ :tree-sha "23a268d0e605408eb1ed8365576f8c56e899f43f"
+ :at "2026-09-12"}

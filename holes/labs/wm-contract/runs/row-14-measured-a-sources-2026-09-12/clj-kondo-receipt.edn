@@ -1,0 +1,8 @@
+{:command "clj-kondo --lint holes/labs/wm-contract/row14_measured_a_census.clj"
+ :exit 0
+ :tests 1
+ :assertions 2
+ :errors 0
+ :warnings 0
+ :tree-sha "23a268d0e605408eb1ed8365576f8c56e899f43f"
+ :at "2026-09-12"}
