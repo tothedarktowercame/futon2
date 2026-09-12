@@ -94,6 +94,17 @@ coarseness visible for the first time):**
   `:r10/unlinked-dispatch-receipt` refuses (`:111`). Live pin: dispatch
   record `invoke-1788708049924-13300-38749afe`, commission
   `PA11z-library-annotator-exemplar`.
+  CORRECTION (2026-09-12, claude-15, from the row-17 packet-1 stop):
+  that live pin is a 2026-09-06 invoke, which PREDATES the R10 boundary
+  (futon3c f3534b93, 2026-09-08); Futon1b holds only generic
+  invoke-start/complete records for it and zero records tagged
+  `[:coordination :scheduled-dispatch :R10]` in 20,000 scanned
+  (2026-09-01..12). The cell's `exists` stands on the refusing mechanism
+  per the §1 vocabulary; the pin is NOT an R10-joined record, and no
+  R10-joined record exists yet — `run-scheduled-dispatch!` has no
+  production caller (test-only, verified). A real joined record requires
+  the integration owner to wire a production scheduled entrypoint
+  through the boundary.
 - **[A-10] parked, returned, checked, recorded, surfaced remain absent:**
   commissioning and dispatching a job parks, returns, checks, records and
   surfaces nothing; the only `:process/stage` in the declared scope is

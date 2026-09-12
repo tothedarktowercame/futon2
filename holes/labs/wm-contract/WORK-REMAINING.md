@@ -405,8 +405,23 @@ operator workflow conversation (standdown 2026-09-12).
     Admission constraint: /tmp ledger hashes are discovery-time
     pins — evidence packets must retain bounded extracted
     fixtures with source hash + extraction time before
-    compaction/mutation. Four packets proposed (TN §5); packet 1
-    (R10 credit) dispatched (codex-22).
+    compaction/mutation. Four packets proposed (TN §5). PACKET 1
+    STOPPED HONESTLY (2026-09-12, codex-22; verified by the
+    reviewer): NO real R10-joined record exists to extract —
+    run-scheduled-dispatch! (futon3c f3534b93, 2026-09-08) has
+    zero production callers (test-only, caller census verified)
+    and the authoritative Futon1b query found 0 records tagged
+    [:coordination :scheduled-dispatch :R10] in 20,000 scanned;
+    the census E-10-D "live pin" is a 2026-09-06 generic invoke
+    predating the boundary (census corrected with a dated note).
+    A synthetic fixture record was correctly refused as the
+    positive leg. R10 full credit therefore BLOCKED on a build
+    prerequisite owned by the integration lane: wire a
+    production scheduled entrypoint through
+    run-scheduled-dispatch!. The mechanism-level census cells
+    (E-10-C/E-10-D exists-by-refusing-code) stand per the census
+    vocabulary. Packet 2 (R20 execution tripwires — real ledger
+    records DO exist for these) dispatched (codex-22).
 18. Implement R20's chartered interoceptive commitment link — the
     genuinely missing piece, distinct from row 17's crediting.
 19. Implement R9, "No self-certification": the checks that prevent
