@@ -227,3 +227,48 @@ Q(o|π) evaluated on the map. Three rules keep it honest:
 Instrumentation note: this is exactly what a-sorry-enterprise /
 slush-demo style simulated-flow runs already do for cascades; the city
 playout is the same machinery with the association graph as the board.
+
+## The cartographer's tool manifest (Joe asked, 2026-09-12)
+
+The cartographer is multi-tool by design. Tools are named R2 channels
+(same discipline as the question chips); each is a query or a playout,
+never an action on the record.
+
+READ (SMELL/LOOK family — measured, cheap):
+- t1 embeddings-lookup: turn → top-k patterns + scores, corpus-stamped
+  (the floorless seeder; scores are data).
+- t2 pattern-card: a pattern's text, family, fire-history (hub vs cold).
+- t3 adjacency: pattern↔pattern and pattern↔mission links, as found
+  (the seed graph of M-G-over-cascades; fixed-as-found by T1's default).
+- t4 fts-passage: full-text over turns/passages — the elaboration arm.
+- t5 bitemporal-history: focus-then-growth window queries — the
+  calibration basis for everything predictive.
+- t6 association-read: the cartographer's own prior association
+  records, precision-tagged.
+
+PREDICT (R4 — priced in fuel, output is a typed forecast record):
+- t7 playout-walk: candidate cascade × graph → simulated buildout,
+  steps are chip moves (FEEL/PICKUP/wire); probabilities only from
+  t5/t6 measurements; cold-family focus yields wide stated intervals.
+- t8 calibration-report: how past playouts scored against what grew
+  (preregistered forecasts observed later — R14 for the forward model).
+
+CAUSE (gated — M-G-over-cascades T1's second horn, warrant required):
+- t9 link-proposer: proposes a typed causal link as a PROPOSAL record;
+  warrant must be measured discharge lift on held-out holes, and the
+  minting is a collective-choice act (Ostrom 3/8 per M-G-over-cascades),
+  not a cartographer side-effect.
+- t10 identifiability-check: before any causal question is answered,
+  ask whether it is answerable — do-calculus identifiability over the
+  graph (diagramprover-refs: dagitty/dosearch for identification,
+  chyp for rewrite-based proofs). "What caused X" that the graph cannot
+  identify is surfaced as unidentifiable, not guessed.
+
+The predictive-processing loop that makes this AIF rather than analytics:
+every t7 forecast is a preregistered prediction; t5 observes what
+actually grew; t8 scores it; calibration updates. Prediction error is
+the cartographer's own R3 — the map learns where its futures are wrong.
+And the causal discipline falls out of the existing ruling: causal links
+are editable (Ostrom), but their warrant is measured, their minting is
+gated, and unidentifiable questions are named as such — the same
+honesty vocabulary as the witness status, applied to causation.
