@@ -2,6 +2,6 @@
  :exit 0
  :tests 1
  :assertions 1
- :tree-sha "5a7f517f59bb045352ea909b7458e372ea5d9209"
- :at "2026-09-12T18:49:55Z"
- :findings {:errors 0 :warnings 1 :warning :unused-binding}}
+ :tree-sha "502e824a25c5bc67cd52bf558574f2b61de255cf"
+ :at "2026-09-12T18:54:38Z"
+ :findings {:errors 0 :warnings 0}}

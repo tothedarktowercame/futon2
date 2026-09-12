@@ -1,6 +1,6 @@
 {:command "clojure -X:test :nses '[futon2.aif.machine-belief-test]'"
  :exit 0
  :tests 2
- :assertions 12
- :tree-sha "5a7f517f59bb045352ea909b7458e372ea5d9209"
- :at "2026-09-12T18:49:55Z"}
+ :assertions 13
+ :tree-sha "502e824a25c5bc67cd52bf558574f2b61de255cf"
+ :at "2026-09-12T18:54:38Z"}
