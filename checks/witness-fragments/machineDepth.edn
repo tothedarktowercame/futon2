@@ -1,41 +1,56 @@
-{:witnesses "machineDepth"
+{:witnesses "machineDepth",
  :node-witnesses
- [{:schema :wm/node-witness-v1
-   :id "R13-depth-machinery-capture-20260912-v1"
-   :node :R13
-   :equation :depth
-   :quantity :T
-   :declaration "machineDepth"
-   :kind :lean-witness
-   :polarity :supports
-   :scope :machinery-capture-2026-09-12
-   :as-of "2026-09-12"
-   :status :proposed
-   :claim
-   "At the pinned redirected machinery capture, configured depth 3 was gated off because anticipation was unavailable; EFE received nil and the recorded effective depth 1 equals the declared machineDepth law at that input. This is not a live production-trace claim."
-   :evidence-limit
-   "One redirected machinery tick only. No live production-trace depth claim is made; that requires a post-reload live record carrying the new fields."
-   :artifact
-   {:repo "mathlib4"
-    :path "DarkTower/WarMachine/MachineDepthCaptureWitness.lean"
-    :sha256 "f6eb70b75a5fefecd8a81912564b4b8cd2e681ef5b3d374ce75ee27735e594b1"
-    :module "DarkTower.WarMachine.MachineDepthCaptureWitness"
-    :declaration
-    "DarkTower.WarMachine.MachineDepthCaptureWitness.machineryCapture20260912MachineDepth"}
-   :subject-artifact
-   {:repo "mathlib4"
-    :path "DarkTower/WarMachine/MachineDepth.lean"
-    :sha256 "ba3b7ca7fb5eb8ba405db3c78d41a91a3f916b5c1e391b49387700a2e262871d"
-    :declaration "DarkTower.WarMachine.MachineDepth.machineDepth"}
+ [{:schema :wm/node-witness-v1,
    :retained-evidence
    {:capture
-    {:repo "futon2"
-     :path "holes/labs/wm-contract/runs/row-15-depth-capture-2026-09-12/capture.edn"
-     :sha256 "a906fdb015633beee344d597b58883143ba62ddcc1cbc63b779c27613c12ca1c"}}
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-depth-capture-2026-09-12/capture.edn",
+     :sha256
+     "a906fdb015633beee344d597b58883143ba62ddcc1cbc63b779c27613c12ca1c"}},
    :verification
-   {:status :verified
+   {:status :verified,
     :receipt
-    {:repo "futon2"
-     :path "holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/verification-receipts.edn"
-     :sha256 "e33b9619a496ad478e909003206929b391d6faf370486d185184b168fe855996"
-     :selector [:records "R13-depth-machinery-capture-20260912-v1"]}}}]}
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/verification-receipts.edn",
+     :sha256
+     "e33b9619a496ad478e909003206929b391d6faf370486d185184b168fe855996",
+     :selector [:records "R13-depth-machinery-capture-20260912-v1"]}},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineDepth.lean",
+    :sha256
+    "ba3b7ca7fb5eb8ba405db3c78d41a91a3f916b5c1e391b49387700a2e262871d",
+    :declaration "DarkTower.WarMachine.MachineDepth.machineDepth"},
+   :scope :machinery-capture-2026-09-12,
+   :node :R13,
+   :evidence-limit
+   "One redirected machinery tick only. No live production-trace depth claim is made; that requires a post-reload live record carrying the new fields.",
+   :as-of "2026-09-12",
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-depth-proof-2026-09-12/review-receipts.edn",
+     :sha256
+     "42e75c4274204a41f71842e0908e77c931b60f0ac0ac692ceefb8f7de851aa3e",
+     :selector [:records "R13-depth-machinery-capture-20260912-v1"]}},
+   :status :admitted,
+   :id "R13-depth-machinery-capture-20260912-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :declaration "machineDepth",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineDepthCaptureWitness.lean",
+    :sha256
+    "f6eb70b75a5fefecd8a81912564b4b8cd2e681ef5b3d374ce75ee27735e594b1",
+    :module "DarkTower.WarMachine.MachineDepthCaptureWitness",
+    :declaration
+    "DarkTower.WarMachine.MachineDepthCaptureWitness.machineryCapture20260912MachineDepth"},
+   :quantity :T,
+   :claim
+   "At the pinned redirected machinery capture, configured depth 3 was gated off because anticipation was unavailable; EFE received nil and the recorded effective depth 1 equals the declared machineDepth law at that input. This is not a live production-trace claim.",
+   :equation :depth}]}
