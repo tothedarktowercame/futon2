@@ -1,0 +1,7 @@
+{:command "bb holes/labs/wm-contract/runs/row-17-r20-tripwires-2026-09-12/extract_and_verify.bb"
+ :exit 0
+ :tests 4
+ :assertions 32
+ :tree-sha "2cc81a678027df8b7cef473c66aa98f835fe23f3"
+ :source-ledger-sha256 "519065fb0c1c3b740cda9bf152acfb259ac614b59b37fc0f203992044dcc9681"
+ :at "2026-09-12T20:22:15.229504746Z"}

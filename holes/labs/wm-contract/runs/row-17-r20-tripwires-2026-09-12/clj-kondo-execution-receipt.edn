@@ -1,0 +1,8 @@
+{:command "clj-kondo --lint holes/labs/wm-contract/runs/row-17-r20-tripwires-2026-09-12/extract_and_verify.bb"
+ :exit 0
+ :tests 1
+ :assertions 2
+ :errors 0
+ :warnings 0
+ :tree-sha "ba9b989054fb1e1a1aaba80d5a53b09e727a49d9"
+ :at "2026-09-12T20:23:00Z"}
