@@ -861,6 +861,27 @@ operator workflow conversation (standdown 2026-09-12).
     aspirational on the figure.
 23. R6→R16: keep the per-run correspondence capture running; settle
     the verdict from the build-phase test runs.
+    VERDICT SETTLED AS :insufficient-retention (2026-09-12,
+    TN-row23-verdict-2026-09-12.md cb91f408; reviewer verified
+    the F11 pin sha + record and the capture code): the
+    selection-enaction capture (introduced 679746a3 today,
+    construction checkpoint) had ZERO deployed production
+    instances; retained evidence gives scoped sub-verdicts only
+    — 2 historical closes :diverges-with-named-cause
+    (first-passing-gate substitution per C460), 1 F11 scratch
+    pin :corresponds-at-pins, nothing pooled. The admitted
+    selector divergence is a named PRE-enaction substitution, a
+    candidate cause for future per-run records, not a
+    selected/enacted verdict. NEXT: the capture now RUNS —
+    reviewer performed the pending reload (2026-09-12, serving
+    JVM from master: trace schema 29, full-loop-runner with
+    selection-enaction + status-at-close + outcome-entity,
+    cross-ledger-identity, war-machine, and the futon3c
+    selector-envelope producer; all probes green). Real
+    build-phase attempts will now retain construction
+    checkpoints in the durable corpus; the witness packet
+    follows the first naturally retained instances — no
+    synthetic substitute counts.
 
 ## Phase 5 — the certificate and THE run (5)
 
