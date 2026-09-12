@@ -319,10 +319,22 @@ operator workflow conversation (standdown 2026-09-12).
     extension of machineAction to the reason-bearing selector
     boundary — narrowing to the internal decision is the facade
     option and is not taken. Packet sequence: (1) R6 rank-join
-    boundary check (dispatched, codex-23); (2) abstain-epsilon
-    capture on the decision producer; (3) divergence witness
-    from existing pins; (4) machineAction live-selector Lean
-    extension (spec first).
+    boundary DONE (see row 16 batch B); (2) ABSTAIN-EPSILON
+    CAPTURE DONE (2026-09-12, futon2 46774fde..297a6559,
+    reviewed): select-action assocs the RESOLVED
+    :abstain-epsilon onto every decision path (default and
+    explicit, abstain and chosen) — the exact value the
+    actuation comparison used; trace needed no change
+    (strip-decision passes it; redirected readback confirmed at
+    0.125); packet tests clean, ambient broad-run failures
+    attributed to concurrent lanes (reviewer re-ran
+    trace/policy/selection/machine-q suites ambient — all
+    green). machineAction INTERNAL-BRANCHES PROOF now unblocked
+    (epsilon captured + schema-28 retention) — queued behind
+    mathlib4 contention with the R6 packet-C build; (3)
+    divergence witness from existing pins — queued, same
+    contention; (4) machineAction live-selector Lean extension
+    (spec first).
 16. IN PROGRESS. Inventory done and reviewed (TN 6e6b2f5c): 18
     equation-bearing declarations — 4 admitted (26 claims), 4
     under row 15, 5 provable now from retained pins, 5 needing
