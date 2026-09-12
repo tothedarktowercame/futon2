@@ -1,0 +1,90 @@
+;; signature-audit.edn — the two apex patterns applied to WORK-REMAINING
+;; itself, as their first functional act (Joe, 2026-09-12: "encode these
+;; and use them in a way that is functional for us right now").
+;; Pattern: workshop/violation-signature-before-work — no row starts
+;; until its breach detector exists; :signature-pending BLOCKS.
+;; This audit is classification only (lint discipline). It does not
+;; modify WORK-REMAINING.md; claude-15 owns that file.
+{:schema :work-remaining/signature-audit-v1
+ :audited-at "2026-09-12"
+ :audited-by "zai-7"
+ :authority "workshop/progress-is-a-witnessed-state-change + violation-signature-before-work (futon3c data/pattern-staging/workshop/, pending Joe's read)"
+ :summary {:rows 39
+           :has-signature 12
+           :signature-pending 27
+           :rule "signature-pending rows BLOCK execution under the pattern; has-signature rows may start"}
+ :rows
+ [;; Phase 0 — machinery that makes provably-so possible. These rows are
+  ;; THEMSELVES signature-builders; they carry their detectors inline.
+  {:row 1 :status :has-signature
+   :signature "refusal when proof or link missing (the witness carrier's own named-refusals constraint); negative control = detach a proof, require the refusal"}
+  {:row 2 :status :has-signature
+   :signature "the three measurement proofs re-derive at delta 0 vs production readback; negative = perturb production output, require mismatch"}
+  {:row 3 :status :has-signature
+   :signature "construction record contains both verdicts; negative = omit one, run certification, require typed failure"}
+  {:row 4 :status :has-signature
+   :signature "the repaired projection loads and serves; negative = stale/malformed projection rejected at load"}
+  {:row 5 :status :signature-pending
+   :gap "run-record-existence on every terminal path has no detector yet — discovery is part of the row; the signature is 'every terminal emits a run record', commissionable only after the v3 cycle is found"}
+  ;; Phase 1 — the six probability objects.
+  {:row 6 :status :signature-pending :gap "reference-point match vs Lean statement needs the scoping pass to name the reference points before a detector exists"}
+  {:row 7 :status :signature-pending :gap "same shape as row 6"}
+  {:row 8 :status :signature-pending :gap "same shape as row 6"}
+  {:row 9 :status :signature-pending :gap "same shape as row 6"}
+  {:row 10 :status :signature-pending :gap "same shape as row 6"}
+  {:row 11 :status :signature-pending :gap "same shape as row 6"}
+  ;; Phase 2
+  {:row 12 :status :has-signature
+   :signature "RealisesDeclaredAccumulation proof (named in the row); negative = fabricated counts fail the declared update rule"}
+  {:row 13 :status :signature-pending :gap "arrow-liveness (accumulation actually fed by live tick) — detector depends on row 12"}
+  {:row 14 :status :signature-pending
+   :gap "machine-Q link: 'forward model actually receives' has no existence detector; candidate = the R6→R16 correspondence capture (row 23) extended to Q"}
+  {:row 15 :status :signature-pending :gap "five measurement proofs unnamed; signature = per-declaration readback match, commissionable per proof as written"}
+  {:row 16 :status :signature-pending :gap "inventory first (the row says so); same per-proof shape"}
+  ;; Phase 3
+  {:row 17 :status :signature-pending :gap "crediting without a credit-detector is exactly the mystification failure mode; needs a census row that can refuse"}
+  {:row 18 :status :signature-pending :gap "R20 commitment link existence check undefined"}
+  {:row 19 :status :has-signature
+   :signature "the row IS a signature-builder: plant self-certification, require refusal; negative control is the commissioning act"}
+  {:row 20 :status :signature-pending :gap "census extension: each new scope row can refuse (basis exists) — detector trivial once rows exist"}
+  ;; Phase 4
+  {:row 21 :status :has-signature
+   :signature "diagram-vs-code edge census; negative = a code connection absent from both drawing and annotation fails the census"}
+  {:row 22 :status :has-signature
+   :signature "never-fired connection census over recorded runs; negative = an unexercised mandatory connection at run time fails"}
+  {:row 23 :status :has-signature
+   :signature "the per-run correspondence capture itself; negative = divergence between drawn and enacted fires the verdict"}
+  ;; Phase 5
+  {:row 24 :status :has-signature
+   :signature "the certificate checker IS a detector; the mandatory-negative-scope emptiness is its final assertion; tamper tests per row 25"}
+  {:row 25 :status :has-signature
+   :signature "every mutated certificate fails (tamper tests named in the row)"}
+  {:row 26 :status :signature-pending :gap "whole-loop entry point liveness: on-demand invocation with routed findings; detector = the click path's own two-verdict record (row 3) at full scope"}
+  {:row 27 :status :has-signature
+   :signature "author → independent review → gates chain with receipts; negative = reconciliation committed without the chain is a type error (the F11 lane discipline)"}
+  {:row 28 :status :has-signature
+   :signature "THE qualifying run's certificate: every prior row closed, Lean-validated, nothing for Joe to decide but acceptance — the certificate checker (row 24) attests it; this is the apex pattern's terminal"}
+  ;; Phase 6
+  {:row 29 :status :has-signature
+   :signature "record-contradicted claims census; negative = a claim beyond its evidenced scope fails the seven-item check"}
+  {:row 30 :status :has-signature
+   :signature "companion-macro targets resolve to certificate-attested sections; negative = a promise discharged by unattested material fails"}
+  {:row 31 :status :has-signature
+   :signature "cited-record existence; negative = a citation that cannot produce its record fails (pinned or retired, no third state)"}
+  {:row 32 :status :signature-pending :gap "narrative rewrite conformance to the ruled discourse — needs a claim-inventory check, derivable from rows 29-31"}
+  ;; Phase 7 — standing trackers
+  {:row 33 :status :signature-pending :gap "convergence certificates (after Phase 5; inherits its signature)"}
+  {:row 34 :status :has-signature
+   :signature "decision-sheet artifact exists for async read (does not block; existence + provenance is the check)"}
+  {:row 35 :status :has-signature
+   :signature "four O-laws witnessed on a REAL constructed cascade (named in the row)"}
+  {:row 36 :status :signature-pending :gap "dependency-first ticket view (after F12)"}
+  {:row 37 :status :signature-pending :gap "blocked-attempts view generation — detector = view regenerates from record"}
+  {:row 38 :status :has-signature
+   :signature "census re-run with dated evidence; negative = stale qualification fails re-affirmation"}
+  {:row 39 :status :has-signature
+   :signature "artifact existence + provenance (async; does not block)"}]
+ :notes
+ ["Phase 1's six rows share one gap-shape: the scoping pass the file already names must pin reference points BEFORE detectors exist — the scoping pass IS the signature-builder for Phase 1, and should be treated as Phase 0.5."
+  "Rows that are themselves signature-builders (1, 19, 24, 25) are the highest-leverage starts under the pattern: they unblock the blocking discipline itself."
+  "This audit is itself unguarded until claude-15 reviews it — one reviewer, one induced-violation check (does a wrong row-count fail anything?), per the pattern's own commissioning rule."]}
