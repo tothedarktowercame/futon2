@@ -2,7 +2,8 @@
   "Impl #2 (the LLM-turn fold) satisfies the SAME `futon2.aif.fold` interface as
    impl #1, with an INJECTED turn (incident-safe: no LLM in the JVM) and the
    SHARED coverage→rollout evaluation — E-close-the-loop §2/§6b."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.fold :as fold]
             [futon2.aif.fold-eval :as fe]
             [futon2.aif.fold-llm :as llm]))
@@ -53,10 +54,41 @@
       (is (re-find #"M-t" p))
       (is (re-find #"IF foo HOWEVER bar THEN baz" p))
       (is (re-find #":policy-holes" p) "asks for explicit holes")
+      (is (re-find #":pattern/revision" p))
+      (is (re-find #":warrant-kind" p))
+      (is (re-find #":obligation/id" p))
+      (is (re-find #":fold/refused" p))
       (is (re-find #"never fabricate|Do not fabricate" p) "coverage-discipline instruction"))))
 
 (deftest parse-construction-is-defensive
-  (is (= a-construction (llm/parse-construction a-construction)) "map passthrough")
-  (is (map? (llm/parse-construction (pr-str a-construction))) "edn string parses")
+  (is (= :legacy (:fold/schema (llm/parse-construction a-construction))))
+  (is (= :legacy
+         (:fold/schema (llm/parse-construction (pr-str a-construction)))))
+  (is (= :refusal
+         (:fold/schema
+          (llm/parse-construction
+           {:fold/refused true :why "cannot ground" :refusal/class :grounding}))))
   (is (nil? (llm/parse-construction "}{")) "garbage ⇒ nil, no throw")
   (is (nil? (llm/parse-construction 42)) "non-string/non-map ⇒ nil"))
+
+(deftest parse-tags-enriched-and-recorded-legacy-shapes
+  (let [enriched {:boxes [{:id :d
+                           :fits-pattern {:pattern/id :p
+                                          :pattern/revision "r1"}
+                           :warrant-kind :deduction :conditions []}]
+                  :wires [] :terminals [:d] :policy-holes []}
+        exemplar (edn/read-string
+                  (slurp "holes/labs/M-evaluate-policies/exhibit/fold-turn.edn"))]
+    (is (= :enriched (:fold/schema (llm/parse-construction enriched))))
+    (is (= :legacy (:fold/schema (llm/parse-construction exemplar))))))
+
+(deftest explicit-refusal-survives-the-llm-fold-boundary
+  (let [out (llm/llm-fold
+             [:p] {}
+             {:turn-fn (constantly {:fold/refused true
+                                    :why "required premise is unavailable"
+                                    :refusal/class :missing-premise})})
+        validation (fold/validate-fold-output-v1 out)]
+    (is (:fold/refused out))
+    (is (:ok validation))
+    (is (:fold/exceptional? validation))))

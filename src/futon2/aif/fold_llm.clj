@@ -23,7 +23,8 @@
    injected `turn-fn` — produced out-of-process (a bell to an agent, or a recorded
    fold-turn read from escrow). `turn-fn` nil ⇒ no construction ⇒ ΔG nil ⇒ the
    gate abstains; the fold never blocks and spawns nothing."
-  (:require [futon2.aif.fold-eval :as fe]
+  (:require [futon2.aif.fold :as fold]
+            [futon2.aif.fold-eval :as fe]
             [clojure.edn :as edn]
             [clojure.string :as str]))
 
@@ -41,21 +42,39 @@
        (str/join "\n\n" (for [p cascade]
                           (str "### " p "\n" (str/trim (str (get proses p "(prose unavailable)"))))))
        "\n\nRETURN ONLY EDN of this shape:\n"
-       "  {:boxes [{:id <kw> :role <str> :fits-pattern <pattern-id> :addresses-however <str>} ...]\n"
+       "  {:boxes [{:id <kw> :role <str>\n"
+       "            :fits-pattern {:pattern/id <id> :pattern/revision <revision>}\n"
+       "            :warrant-kind <one of :pattern :worked-example :deduction>\n"
+       "            :conditions [{:condition <str> :status <one of :established :absent :unchecked>\n"
+       "                          :witness <ref>} ...]\n"
+       "            :hole {:obligation/id <id> ...}} ...]\n"
        "   :wires [[<from-id> <to-id>] ...]\n"
        "   :terminals [<kw> ...]\n"
-       "   :policy-holes [{:unfolded-pattern <pattern-id-or-nil> :free <str> :why <str>} ...]}\n\n"
+       "   :policy-holes [{:obligation/id <id> :unfolded-pattern <pattern-id-or-nil>\n"
+       "                   :free <str> :why <str>} ...]}\n"
+       "For an absent condition use :obstruction <ref> instead of :witness. "
+       "A :deduction box may use :conditions []; other warrant kinds may not.\n"
+       "If no honest wiring can be written, return ONLY "
+       "{:fold/refused true :why <str> :refusal/class <kw>}. Never return nil.\n\n"
        "Surface as a policy-hole EVERYTHING you cannot ground in the prose + circumstance.\n"
        "Do not fabricate coverage — an honest hole is worth more than a hollow box."))
 
 (defn parse-construction
-  "PURE: parse an agent turn (EDN string) into a construction map. Returns nil on
-   unreadable output (the fold then yields no construction ⇒ the gate abstains)."
+  "PURE: parse and tag an agent turn as enriched, legacy, or refusal. Returns
+  nil on unreadable output (the fold then yields no construction)."
   [s]
-  (cond
-    (map? s) s
-    (string? s) (try (edn/read-string s) (catch Exception _ nil))
-    :else nil))
+  (let [parsed (cond
+                 (map? s) s
+                 (string? s) (try (edn/read-string s) (catch Exception _ nil))
+                 :else nil)]
+    (when (map? parsed)
+      (let [output {:wiring parsed :coverage-score-delta nil
+                    :policy-holes (vec (:policy-holes parsed))}
+            schema (cond
+                     (:fold/refused parsed) :refusal
+                     (fold/valid-fold-output-v1? output) :enriched
+                     :else :legacy)]
+        (assoc parsed :fold/schema schema)))))
 
 (defn construction->wiring
   "PURE: normalize a parsed construction into the `:wiring` shape the interface +
@@ -89,7 +108,11 @@
          prompt (fold-prompt cascade circumstance proses)
          constr (when turn-fn (parse-construction (turn-fn prompt)))
          wiring (construction->wiring constr)]
-     {:wiring       wiring
-      :coverage-score-delta      (fe/coverage-score-delta wiring)
-      :policy-holes (:policy-holes wiring)
-      :prose-read-results prose-results})))
+     (if (:fold/refused constr)
+       (assoc (select-keys constr
+                           [:fold/refused :why :refusal/class :fold/schema])
+              :prose-read-results prose-results)
+       {:wiring wiring
+        :coverage-score-delta (fe/coverage-score-delta wiring)
+        :policy-holes (:policy-holes wiring)
+        :prose-read-results prose-results}))))
