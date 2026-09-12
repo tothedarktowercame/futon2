@@ -27,6 +27,9 @@
             (update context :state-support #(vec (reverse %))) {entity row}]
            [:invalid-mass :invalid-mass context {entity (assoc row :spawned -1/10 :strengthened 3/5)}]
            [:unnormalised :invalid-mass context {entity (assoc row :spawned 1/5)}]
+           [:unnormalised-float :invalid-mass context
+            {entity (update (zipmap mb/state-support (repeat (/ 1.0 7.0)))
+                            :spawned + 0.001)}]
            [:multi-entity :joint-construction-required
             (assoc context :policy-entities [entity "other"]) {entity row}]]]
     (testing (name label)

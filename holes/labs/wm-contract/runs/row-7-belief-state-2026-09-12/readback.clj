@@ -1,6 +1,7 @@
 (require '[clojure.edn :as edn]
          '[clojure.java.io :as io]
-         '[futon2.aif.machine-belief :as mb])
+         '[futon2.aif.machine-belief :as mb]
+         '[futon2.aif.machine-model :as machine-model])
 (import '[java.security MessageDigest])
 
 (def input (edn/read-string (slurp "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/input.edn")))
@@ -27,7 +28,8 @@
         input-sum (reduce + (vals actual-row))]
     {:role role :entity/id entity :ok (:ok result)
      :refusal (:refusal result)
-     :coordinates (mapv (fn [s] {:state s :production (get actual-row s)
+     :admission (machine-model/row-sum-admission actual-row)
+     :coordinates (mapv (fn [s] {:state s :production (get output s)
                                   :lean-reference (get posterior s)
                                   :delta (- (double (get actual-row s))
                                             (double (get posterior s)))})
@@ -49,7 +51,9 @@
    :reordered-support (mb/belief-state-distribution
                        (update context :state-support #(vec (reverse %))) {eid valid-row})
    :invalid-mass (mb/belief-state-distribution context
-                                                {eid (assoc valid-row :spawned -1.0)})})
+                                                {eid (assoc valid-row :spawned -1.0)})
+   :unnormalized-float (mb/belief-state-distribution
+                        context {eid (update valid-row :spawned + 0.001)})})
 (def report {:schema :wm/belief-state-production-match-v1
              :input input :positive positives :negative-controls controls})
 (spit "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.edn"
