@@ -1,8 +1,0 @@
-{:record {:declarations
- {"DarkTower.WarMachine.Holes.DirichletConcentrations"
-  {:kind :def :source {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean" :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}}
-  "DarkTower.WarMachine.MachineAccumulationWitness.measuredMaximumResidual"
-  {:kind :theorem :module "DarkTower.WarMachine.MachineAccumulationWitness"
-   :proposition "The maximum absolute residual in the generated 294-coordinate table is 5/36028797018963968."
-   :axioms ["propext" "Classical.choice" "Quot.sound"]
-   :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAccumulationWitness.lean" :sha256 "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d"}}}}}
