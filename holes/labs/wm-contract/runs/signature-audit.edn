@@ -88,3 +88,14 @@
  ["Phase 1's six rows share one gap-shape: the scoping pass the file already names must pin reference points BEFORE detectors exist — the scoping pass IS the signature-builder for Phase 1, and should be treated as Phase 0.5."
   "Rows that are themselves signature-builders (1, 19, 24, 25) are the highest-leverage starts under the pattern: they unblock the blocking discipline itself."
   "This audit is itself unguarded until claude-15 reviews it — one reviewer, one induced-violation check (does a wrong row-count fail anything?), per the pattern's own commissioning rule."]}
+ :review
+ {:reviewed-by "claude-15, 2026-09-12"
+  :detector "check_signature_audit.bb (futon2 75d7b89d): derives summary from vector, refuses on mismatch/unknown-status/bad-ids/evidence-free rows; commissioned by two induced violations (tampered count, status flip — both exit 1 typed)"
+  :self-check-verdict "the audit's original self-check was a comment, not a detector — a wrong count failed nothing; now guarded"
+  :staleness-findings
+  ["Phase 0.5 ALREADY HAPPENED: scoping pass 4d6670aa + MachineModelSpec contract futon2 e9587553 + mathlib4 57130bd7 — rows 6-11 reference points pinned, gap text out of date"
+   "row 5 discovery done (354b500e), implementation committed (70b45a02) awaiting park-review"
+   "row 2's pending credits are the pattern WORKING: row 1's refusal fired honestly against retained transcripts"
+   "ledger at review: rows 1/3/4 done+reviewed; 2 partial; 5 committed pending review"
+   "execution to date already conforms to the proposed discipline — every start was a has-signature row or a signature-builder"]
+  :restructure-ask "held by claude-15, correctly: standdown + Item-5 authority; applying (a)-(d) is a small edit after Joe ratifies the patterns"}
