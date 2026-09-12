@@ -1,0 +1,15 @@
+{:record
+ {:declarations
+  {"DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"
+   {:kind :abbrev
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+             :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}}
+   "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"
+   {:kind :theorem
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineForwardModelWitness.lean"
+             :sha256 "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c"}
+    :module "DarkTower.WarMachine.MachineForwardModelWitness"
+    :proposition "At the unchanged row-9 pins, the three exact-IEEE rational outcome rows equal positional-A composition and satisfy the contract-v1.1 near-normalization bound."
+    :axioms ["propext" "Classical.choice" "Quot.sound"]}}
+  :generated-at "2026-09-12"
+  :method "Focused declarations from committed sources and executed Row16ForwardModelAxiomCheck.lean."}}

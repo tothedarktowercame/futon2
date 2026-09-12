@@ -1,0 +1,8 @@
+[{:gate :generator :exit 1 :finding :integral-mass-ratio-cast
+  :resolution "Follow-up 8b51f259 handles integer zero masses."}
+ {:gate :lean-elaboration :exit 1 :finding :constructor-disequalities-unsimplified
+  :resolution "Follow-ups 5d37b71e/e1d52211 simplify decidable outcome equalities."}
+ {:gate :lean-elaboration :exit 0 :warnings 4 :finding :redundant-tactics
+  :resolution "Follow-ups 3121f13b/d4c8c4eb remove the redundant tactics; final elaboration is clean."}
+ {:gate :axiom-check :exit 1 :finding :missing-generated-olean
+  :resolution "Built the committed witness dependency, then executed the focused checker."}]

@@ -1,0 +1,2 @@
+'DarkTower.WarMachine.Holes.PredictiveOutcomeKernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried' depends on axioms: [propext, Classical.choice, Quot.sound]
