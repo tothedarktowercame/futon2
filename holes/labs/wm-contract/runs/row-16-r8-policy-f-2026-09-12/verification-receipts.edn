@@ -1,0 +1,51 @@
+{:records
+ {"R8-policy-F-s4-consecutive-records-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R8-policy-F-s4-consecutive-records-v1"
+    :node :R8 :equation :policy-free-energy :quantity :F-pi
+    :declaration "machinePolicyFreeEnergy" :kind :lean-witness
+    :artifact
+    {:repo "mathlib4"
+     :path "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean"
+     :sha256 "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257"
+     :module "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness"
+     :declaration "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness.everyPinnedCandidateUsesMachinePolicyFreeEnergy"}
+    :subject-artifact
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean"
+     :sha256 "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57"
+     :declaration "DarkTower.WarMachine.MachinePolicyFreeEnergy.machinePolicyFreeEnergy"}
+    :claim "At the pinned consecutive S4 machinery records, all 145 candidate F_pi values (2,030 channel inputs) follow the symbolic-log machinePolicyFreeEnergy law under the explicitly selected floor arm; production replay is exact and the numerical interpretation differs by at most 3.552713678800501e-15."
+    :polarity :supports :scope :s4-run-2026-09-01-consecutive-records
+    :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean"
+     :sha256 "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257"
+     :module "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness"
+     :declaration "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness.everyPinnedCandidateUsesMachinePolicyFreeEnergy"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean"
+     :sha256 "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57"
+     :declaration "DarkTower.WarMachine.MachinePolicyFreeEnergy.machinePolicyFreeEnergy"}
+    {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/fixture.edn"
+     :sha256 "f70ce5382207d5a4918d2a9f6a10aa6d78869ee405b7e8e2cbc3be772346240a"}
+    {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/readback.edn"
+     :sha256 "f06f330caab92f51f91ed90acfe92c4c0a79badb8259b5c78661382a4fdc8580"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean"
+     :sha256 "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean"
+     :sha256 "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257"}]
+   :declaration-census
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/declaration-census.edn"
+    :sha256 "f565616efe2c3ca747ca718343e86f3f763662c994d6affe91f6519a37000760"
+    :selector [:record]}
+   :transcript
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/lean-transcript.txt"
+    :sha256 "24291d76584f8d7d7efe436d5f83a5e61191b67787ddc1638c07dd55a79d62a0"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain"
+               :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker
+   {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean"
+    :sha256 "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257"}}}}
