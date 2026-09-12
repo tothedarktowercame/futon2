@@ -233,6 +233,21 @@ operator workflow conversation (standdown 2026-09-12).
     schema 28, war-machine; bottom-up after a stale
     ruled-outcome-c dep surfaced) — next live tick performs the
     migrated accumulation step and persists depth fields.
+    SUBJECT-FILE FREEZE POLICY (2026-09-12, reviewer ruling from
+    the R6 packet-C admission refusal): the canonical merge
+    refused :node-witness-pin-mismatch because the softmax
+    carrier extension (mathlib4 bcdd2ee4) changed Holes.lean,
+    whose byte-sha is the pinned subject-artifact of the
+    admitted R4 and R17 claims — an unrelated edit to a shared
+    subject file invalidates every admitted pin on it. RULED:
+    files pinned as subject-artifacts by admitted claims are
+    FROZEN; carrier extensions and new declarations go in NEW
+    modules that import the frozen file. Repair dispatched
+    (codex-23): relocate softmaxWithFPi + softmaxWithFPi_zero
+    to their own module, restore Holes.lean byte-identical to
+    4dc0a76b, re-point the packet-C witness and fragment,
+    regenerate receipts. R4/R17 pins then match with zero
+    re-admissions.
     A-CONTENT RULED BY JOE (2026-09-12, operator): option (b) —
     MEASURE A from production under the contract's
     :observed-estimate authority (machine_model.clj:71-99,
