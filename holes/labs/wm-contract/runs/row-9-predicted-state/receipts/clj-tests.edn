@@ -1,0 +1,4 @@
+{:command "clojure -X:test :nses '[futon2.aif.machine-predictive-test]'"
+ :exit 0 :tests 2 :assertions 10
+ :tree-sha "71543de98caab666b632b055889ebf840b7f60a3"
+ :at "2026-09-12T19:00:34Z"}

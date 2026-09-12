@@ -1,0 +1,23 @@
+Script started on 2026-09-12 19:00:12+00:00 [COMMAND="lake env lean DarkTower/WarMachine/MachinePredictedStatePlan.lean" <not executed on terminal>]
+DarkTower/WarMachine/MachinePredictedStatePlan.lean:48:2: error: Type mismatch
+  hq
+has type
+  Normalised q
+but is expected to have type
+  (List.map (fun y => q y * (List.map (controlled.mass (y, a)) Status.all).sum) Status.all).sum = 1
+DarkTower/WarMachine/MachinePredictedStatePlan.lean:47:36: warning: This simp argument is unused:
+  controlled.normalised
+
+Hint: Omit it from the simp argument list.
+  simp only [List.sum_map_mul_left, c̵o̵n̵t̵r̵o̵l̵l̵e̵d̵.̵n̵o̵r̵m̵a̵l̵i̵s̵e̵d̵,̵ ̵mul_one]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+DarkTower/WarMachine/MachinePredictedStatePlan.lean:47:59: warning: This simp argument is unused:
+  mul_one
+
+Hint: Omit it from the simp argument list.
+  simp only [List.sum_map_mul_left, controlled.normalised,̵ ̵m̵u̵l̵_̵o̵n̵e̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+
+Script done on 2026-09-12 19:00:14+00:00 [COMMAND_EXIT_CODE="1"]

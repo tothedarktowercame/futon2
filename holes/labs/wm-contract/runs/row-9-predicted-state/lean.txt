@@ -1,0 +1,16 @@
+Script started on 2026-09-12 18:59:45+00:00 [COMMAND="lake env lean DarkTower/WarMachine/MachinePredictedStatePlan.lean" <not executed on terminal>]
+DarkTower/WarMachine/MachinePredictedStatePlan.lean:37:6: error(lean.unknownIdentifier): Unknown identifier `DarkTower.WarMachine.MachineQ.sum_swap`
+DarkTower/WarMachine/MachinePredictedStatePlan.lean:35:43: error: unsolved goals
+q : Posterior
+a : Action
+hq : Normalised q
+⊢ (List.map (fun s' => (List.map (fun s => q s * controlled.mass (s, a) s') Status.all).sum) Status.all).sum = 1
+DarkTower/WarMachine/MachinePredictedStatePlan.lean:61:17: error: Type mismatch
+  ih (predictedStateStep q a) (stepNonnegative q a hn)
+has type
+  Normalised (predictedStateStep q a) → ∀ r ∈ predictedStateSteps (predictedStateStep q a) as, Normalised r
+but is expected to have type
+  Normalised r
+DarkTower/WarMachine/MachinePredictedStatePlan.lean:62:10: error: unexpected token '('; expected command
+
+Script done on 2026-09-12 18:59:47+00:00 [COMMAND_EXIT_CODE="1"]

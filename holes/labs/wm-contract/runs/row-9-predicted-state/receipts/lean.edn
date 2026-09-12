@@ -1,0 +1,6 @@
+{:command "lake env lean DarkTower/WarMachine/MachinePredictedStatePlan.lean"
+ :exit 0 :tests 1 :assertions 5
+ :tree-sha "6ce906a4e54004ae0347e73ca42eeba09d445c46"
+ :at "2026-09-12T19:00:34Z"
+ :prior-attempts ["lean.txt" "lean-retry.txt"]
+ :successful-transcript "lean-final.txt"}
