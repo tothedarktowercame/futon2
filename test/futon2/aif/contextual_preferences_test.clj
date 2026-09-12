@@ -92,7 +92,7 @@
 (deftest derivation-only-api
   ;; Pure derivation only: binding derivation plus pure event derivation.
   ;; No mark-done, mutation, or adoption operation is exposed.
-  (is (= #{'derive-binding 'apply-event}
+  (is (= #{'derive-binding 'apply-event 'replay-episode}
          (set (keys (ns-publics 'futon2.aif.contextual-preferences))))))
 
 ;; --- Frozen fixture episode replay (caption-review feedback, events 1-11) ---
@@ -275,3 +275,38 @@
                                       :type :feedback-created})]
       (is (= :refused (:status r)))
       (is (= :episode-already-opened (:reason r))))))
+
+(deftest episode-batch-replay
+  (let [digest-d (get-in binding-fixture [:payload :digest])
+        complete (preferences/replay-episode
+                  (preferences/derive-binding binding-fixture)
+                  [{:event-id "e1" :actor "fixture-reviewer" :type :feedback-created}
+                   {:event-id "e2" :actor "fixture-transport" :type :delivery-attempted
+                    :recipient "A"}
+                   {:event-id "e3" :actor "A" :type :inbox-receipt
+                    :recipient "A" :digest digest-d :revision 2}
+                   {:event-id "e7" :actor "registry" :type :registry-exit
+                    :recipient "O"}
+                   {:event-id "e8" :actor "clock" :type :deadline-reached :tick 10}
+                   {:event-id "e9" :actor "A" :type :disputed :recipient "A"
+                    :claim "caption was correct"}
+                   {:event-id "e10" :actor "O" :type :inbox-receipt
+                    :recipient "O" :digest digest-d :revision 2}])]
+    (is (= :complete (:status complete)))
+    (is (= ["e1" "e2" "e3" "e7" "e8" "e9" "e10"] (:applied complete)))
+    (is (= {:required 2 :received 2} (get-in complete [:state :coverage])))
+    (is (true? (get-in complete [:state :delivery-complete])))
+    (is (= :overdue-free
+           (if (some #(= :overdue (:state (val %))) (:obligations (:state complete)))
+             :still-overdue :overdue-free)))
+    (is (= "caption was correct" (get-in complete [:state :disputes "A" :claim])))
+    ;; Batch replay stops at the first typed refusal with prior applied ids.
+    (let [refused (preferences/replay-episode
+                   (preferences/derive-binding binding-fixture)
+                   [{:event-id "f1" :actor "fixture-reviewer" :type :feedback-created}
+                    {:event-id "f2" :actor "A" :type :inbox-receipt
+                     :recipient "A" :digest "wrong" :revision 2}])]
+      (is (= :refused (:status refused)))
+      (is (= ["f1"] (:applied refused)))
+      (is (= :digest-mismatch (get-in refused [:refusal :reason]))))))
+

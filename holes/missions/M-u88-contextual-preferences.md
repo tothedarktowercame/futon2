@@ -126,3 +126,28 @@ along with independent review. Warrant and adapter evidence are supplied
 fixture assertions, not production authentication. No selector, ranking,
 preference masses, endpoints, transport, live agent interactions, binding
 adoption, or registry/worklist writes were added. U88 closure remains Joe's.
+
+## Fixture-episode milestone, 2026-09-12 (independent review pending)
+
+The previously open hole is implemented: `apply-event` derives the frozen
+caption-review episode (events 1-11) as pure functions over an activation
+binding — authorized feedback-created opening, transport acceptance that never
+counts as inbox receipt, digest+revision-matched per-recipient coverage where
+one recipient's receipt never discharges another's, exact-replay idempotence
+with typed conflicting-reuse refusal, registry exit as route evidence only
+(denominator unchanged; never inbox unavailability), deadline-reached turning
+pending obligations overdue without auto-satisfaction, disputes retained
+beside receipts, and amendments refused (unauthorized actor typed; no fixture
+pathway even for the authorized actor). `replay-episode` folds a whole event
+sequence, stopping at the first typed refusal. The API remains derivation-only
+(derive-binding, apply-event, replay-episode; no mark-done).
+
+Replay validation:
+`clojure -M:test -m cognitect.test-runner -n futon2.aif.contextual-preferences-test`
+passes 9 tests / 152 assertions. Both source and test pass clj-kondo (zero
+warnings/errors) and `futon4/dev/check-parens.el`.
+
+Scope exclusions unchanged: no selector, ranking, preference masses,
+endpoints, transport, live agent interaction, adoption, or registry/worklist
+writes. Closure/adoption of worklist `:U88` remains Joe's; independent review
+remains pending.

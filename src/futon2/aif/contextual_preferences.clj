@@ -264,3 +264,18 @@
         (if-not (authorized-actor? state (:actor e))
           (event-refusal :unauthorized-actor [:actor])
           (event-refusal :amendment-unsupported [:type]))))))
+
+(defn replay-episode
+  "Replay a sequence of events over a derived binding state, left to right.
+   Pure derivation: folds apply-event, stopping at the first typed refusal.
+   Returns {:status :complete/:refused :state ... :applied [event-ids]
+   :refusal {...}}. The complete episode state is the terminal derivation; no
+   adoption, mutation, or acceptance verdict is produced here."
+  [state events]
+  (loop [state state applied [] [e & more] events]
+    (if (nil? e)
+      {:status :complete :state state :applied applied}
+      (let [r (apply-event state e)]
+        (if (= :refused (:status r))
+          {:status :refused :state state :applied applied :refusal r}
+          (recur (:state r) (conj applied (:event-id e)) more))))))
