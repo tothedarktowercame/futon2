@@ -395,8 +395,25 @@ operator workflow conversation (standdown 2026-09-12).
     proved generally over the remaining candidates;
     record-local, internal branch not refuted. Registry: 32
     claims across R1, R2, R3a, R4, R6, R7, R13, R14, R16, R17.
-    (4) machineAction live-selector Lean extension (spec
-    first).
+    (4) SELECTOR SPEC DONE (2026-09-12,
+    TN-row15-selector-spec-2026-09-12.md 33118451; reviewer
+    spot-verified the law at its sources): the live selector
+    deterministically ranks admitted strategic policies by
+    log E_S - G_S/temperature with stable-exponentiation
+    normalization, ties broken by ascending policy-id, selects
+    the first; successful calls cannot abstain; every
+    comparison ranking must be a permutation of the candidate
+    domain or selection refuses. Schema-28 retains the chosen
+    policy + summary but NOT the full policy table,
+    temperature, or tie-break inputs — the pinned record
+    supports only the admitted divergence, not a positive
+    replay. Four packets: (4a) producer retention envelope
+    (:selection-proof-input on validated-selection, futon3c —
+    dispatched, codex-23); (4b) trace retention through
+    war_machine (additive, schema-ledger treatment); (4c)
+    ReasonBearingSelector.lean extension + compat theorem
+    (frozen files untouched); (4d) positive post-capture
+    witness at the first complete-envelope record.
 16. IN PROGRESS. Inventory done and reviewed (TN 6e6b2f5c): 18
     equation-bearing declarations — 4 admitted (26 claims), 4
     under row 15, 5 provable now from retained pins, 5 needing
