@@ -44,8 +44,16 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 Each row means: implement it in the running system, state it in
 Lean, and prove the implementation matches at reference points.
-(FUNDAMENTALS.edn names each; a scoping pass pins current state and
-acceptance per object before implementation packets go out.)
+Scoping DONE (SPEC-fundamentals-build, 4d6670aa, reviewed): build
+order is 7/8/10 parallel, then 9, then 6, then row 14; 11 a
+separate branch. Wave-0 shared contract DONE (futon2 e9587553 +
+mathlib4 57130bd7, reviewed 2026-09-12): MachineModelSpec v1 with
+typed refusals resolves the four semantic bindings (single-entity
+state, derived outcome authority with evidence vertex owed,
+declared-vs-measured kernel authority, finite registered parameter
+hypotheses; continuous Dirichlet a named exclusion). Rows 6-11
+implementation packets are ready to dispatch and HELD pending
+operator workflow conversation (standdown 2026-09-12).
 
 6. The predictive-outcome-kernel constructor.
 7. The belief-to-state distribution.
