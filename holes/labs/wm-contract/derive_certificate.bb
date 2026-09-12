@@ -17,6 +17,28 @@
     :not-r1-r17 :not-r2-r17 :not-fundamentals-inhabitants
     :not-above-witnessed-rung :not-task-success :not-mission-closure})
 
+;; SPEC-run-certificate-v1.md section 2: the negative scope is exact wording
+;; with source pointers, enforced as certificate content, not optional prose.
+(def negative-scope-entries
+  [{:claim :not-r1-r17
+    :why "unrealised R1->R17 learning edge; not realised until U91"
+    :source-pointer "futon2:holes/labs/wm-contract/aif-equations.edn:199-215"}
+   {:claim :not-r2-r17
+    :why "unrealised R2->R17 learning edge; not realised until U92"
+    :source-pointer "futon2:holes/labs/wm-contract/worklist.edn:1615-1626"}
+   {:claim :not-fundamentals-inhabitants
+    :why "no runtime inhabitants for uninhabited FUNDAMENTALS constructions"
+    :source-pointer "futon2:holes/labs/wm-contract/FUNDAMENTALS.edn:112-176"}
+   {:claim :not-above-witnessed-rung
+    :why "no behavior above the witnessed declaration rung; unfired drawn edges are not covered"
+    :source-pointer "mathlib4:DarkTower/WarMachine/Holes.lean:7617-7632"}
+   {:claim :not-task-success
+    :why "task success is not claimed; run count is not validation"
+    :source-pointer "futon2:holes/labs/wm-contract/RULINGS-walkthrough-2026-09-12.md:209-220"}
+   {:claim :not-mission-closure
+    :why "mission closure, empirical improvement and generalization are not claimed"
+    :source-pointer "futon2:holes/labs/wm-contract/RULINGS-walkthrough-2026-09-12.md:209-220"}])
+
 (defn sha256-bytes [bs]
   (let [d (.digest (java.security.MessageDigest/getInstance "SHA-256") bs)]
     (apply str (map #(format "%02x" (bit-and % 0xff)) d))))
@@ -267,7 +289,9 @@
                                    :pointer [:payload :judgment :selection-enaction])}
        :equation-bindings binds
        :checker checker
-       :scope {:checked (vec (sort scope-set))
+       :scope {:checked (vec (sort (remove #(str/starts-with? (name %) "not-")
+                                            scope-set)))
+               :not-checked negative-scope-entries
                :lean-attestation :suspended-vocabulary}})
     (catch clojure.lang.ExceptionInfo e
       (refusal (:refusal/class (ex-data e)) (.getMessage e)
