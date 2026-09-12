@@ -66,6 +66,11 @@ Primary evidence: `futon3c/holes/T-apm-recurring-failure-end-to-end.md`
 (790c0491), `futon3c/holes/technotes/TN-apm-defect-register.md`,
 `futon3c/holes/T-typed-submission-wrapper-cancellation-evidence.md` (987e8574).
 
+Validation layer: the agreed APM/WM-common runtime invariants and their
+validation obligations live in `NOTE-runtime-validation-invariants.md`
+(claude-15 × zai-5, 2026-09-12) — that note cites these patterns and owns
+only the invariant/obligation layer.
+
 ## The patterns (futon3/library/apparatus/)
 
 | # | pattern | one line |
