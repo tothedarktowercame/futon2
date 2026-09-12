@@ -1,0 +1,5 @@
+generator: 3 policies, 36 coordinates, independent exact-IEEE reference
+clj-kondo generator: errors 0, warnings 0
+clj-kondo verification: errors 0, warnings 0
+check-parens: OK
+disposable merge: R4-forward-model-float-carried-production-pins-v1 pending; refusals 0
