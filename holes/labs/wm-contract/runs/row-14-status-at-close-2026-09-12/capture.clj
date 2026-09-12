@@ -28,7 +28,7 @@
                  (cohort/start-attempt!
                   preregistration root
                   (term {:opportunity-id "row14/redirected"
-                         :trigger :machinery-capture
+                         :trigger :wallclock-cron
                          :machine-state {:tick 1}
                          :agent-roster []
                          :code-state {:git-sha "d30ed68f"
