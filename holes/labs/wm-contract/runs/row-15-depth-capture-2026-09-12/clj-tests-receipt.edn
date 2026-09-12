@@ -1,0 +1,10 @@
+{:command "clojure -M:test -e <four depth/scorer test-vars>"
+ :test-vars [futon2.aif.trace-test/trace-record-retains-depth-input-and-effective-depth-test
+             futon2.report.war-machine-test/configured-fold-options-preserve-absence
+             futon2.report.war-machine-test/live-star-map-efe-opts-adds-conservative-graph-blend
+             futon2.report.war-machine-test/live-gap-view-efe-opts-adds-conservative-gap-blend]
+ :exit 0
+ :tests 4
+ :assertions 26
+ :tree-sha "03a7bdd525f73b2bfc6beecdc92f025e985e7da5"
+ :at "2026-09-12T20:06:00Z"}

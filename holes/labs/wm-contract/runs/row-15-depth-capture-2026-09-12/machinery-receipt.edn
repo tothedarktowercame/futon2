@@ -1,0 +1,6 @@
+{:command "clojure -M holes/labs/wm-contract/runs/row-15-depth-capture-2026-09-12/capture_tick.clj"
+ :exit 0
+ :tests 1
+ :assertions 4
+ :tree-sha "4473c834d729d14d03c514443e668c3338c3e9e2"
+ :at "2026-09-12T19:57:18Z"}

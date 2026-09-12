@@ -1,0 +1,8 @@
+{:command "clj-kondo --lint scripts/futon2/report/war_machine.clj src/futon2/aif/trace.clj test/futon2/aif/trace_test.clj holes/labs/wm-contract/runs/row-15-depth-capture-2026-09-12/capture_tick.clj"
+ :exit 0
+ :tests 1
+ :assertions 2
+ :errors 0
+ :warnings 0
+ :tree-sha "03a7bdd525f73b2bfc6beecdc92f025e985e7da5"
+ :at "2026-09-12T20:04:00Z"}
