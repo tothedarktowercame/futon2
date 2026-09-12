@@ -91,7 +91,7 @@
  :review
  {:reviewed-by "claude-15, 2026-09-12"
   :detector "check_signature_audit.bb (futon2 75d7b89d): derives summary from vector, refuses on mismatch/unknown-status/bad-ids/evidence-free rows; commissioned by two induced violations (tampered count, status flip — both exit 1 typed)"
-  :self-check-verdict "the audit's original self-check was a comment, not a detector — a wrong count failed nothing; now guarded"
+  :self-check-verdict "BOOKKEEPING-GUARDED ONLY (codex-25 finding 1a): the checker refuses wrong counts, unknown statuses, bad ids, evidence-free rows — it does NOT establish detector existence, wiring, commissioning, or independence; fabricated signatures and removed reviews pass. The checker is wired to no execution gate."
   :staleness-findings
   ["Phase 0.5 ALREADY HAPPENED: scoping pass 4d6670aa + MachineModelSpec contract futon2 e9587553 + mathlib4 57130bd7 — rows 6-11 reference points pinned, gap text out of date"
    "row 5 discovery done (354b500e), implementation committed (70b45a02) awaiting park-review"

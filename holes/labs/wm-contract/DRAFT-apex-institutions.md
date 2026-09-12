@@ -7,6 +7,13 @@ the institution must say WHO is bound and WHAT happens on breach.
 
 ## ⚖ progress-is-a-witnessed-state-change as institution
 
+[NOTE: the two tables below are v1; the codex-25 responses section at
+the end adopts corrections (scope rows missing; aggregation is decision
+authority; disposition ≠ progress; apparatus states never
+domain-negative). v2 tables will be drafted for Joe's rulings; the v1
+tables are retained for the diff, marked here so no one reads them as
+current law.]
+
 | IAD rule | text |
 |---|---|
 | POSITION | worker (produces state changes), witness (mechanically refuses or attests), operator (the only preference source; receives ⚖-claims). One agent may hold worker+witness NEVER — R9 is the boundary rule on positions themselves. |
@@ -24,6 +31,8 @@ fraudulently)? Ostrom would say the latter — boundary fraud is the
 grave offense; choice violations are ordinary.
 
 ## ⊘ violation-signature-before-work as institution
+
+[Same v1 caveat as above.]
 
 | IAD rule | text |
 |---|---|
