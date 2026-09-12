@@ -3,4 +3,10 @@
   :finding "The imported witness .olean predated the new declarations."}
  {:command "lake build DarkTower.WarMachine.MachineBeliefStateWitness"
   :exit 0 :outcome :dependency-object-built
-  :finding "Target built; inherited Holes.lean sorry warnings were emitted, so the focused axiom check separately establishes no sorryAx in the subject or witness theorems."}]
+  :finding "Target built; inherited Holes.lean sorry warnings were emitted, so the focused axiom check separately establishes no sorryAx in the subject or witness theorems."}
+ {:command "clj-kondo --lint holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/verification-check.bb"
+  :exit 2 :outcome :unused-require
+  :finding "Removed the unused clojure.java.io require in follow-up commit 73edad98."}
+ {:command "/home/joe/code/futon4/dev/check-parens.sh ..."
+  :exit 126 :outcome :non-executable-script
+  :finding "Invoked the unchanged checker through bash; the commissioned gate then exited 0."}]

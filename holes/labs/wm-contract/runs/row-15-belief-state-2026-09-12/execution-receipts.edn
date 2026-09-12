@@ -1,0 +1,13 @@
+{:receipts
+ [{:gate :lean-elaboration :command "lake env lean DarkTower/WarMachine/MachineBeliefStateWitness.lean"
+   :exit 0 :tests 1 :assertions 3 :tree-sha "fd002c83c2aa00114e3b0cfa2dcedc15e87fbb75" :at "2026-09-12"}
+  {:gate :lean-axiom-check :command "lake env lean DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean"
+   :exit 0 :tests 4 :assertions 4 :tree-sha "fd002c83c2aa00114e3b0cfa2dcedc15e87fbb75" :at "2026-09-12"}
+  {:gate :clj-verification :command "bb holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/verification-check.bb"
+   :exit 0 :tests 2 :assertions 2 :tree-sha "73edad98d7be5c829da8a0fd54a82c016410774c" :at "2026-09-12"}
+  {:gate :clj-kondo :command "clj-kondo --lint holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/verification-check.bb"
+   :exit 0 :tests 1 :assertions 2 :tree-sha "73edad98d7be5c829da8a0fd54a82c016410774c" :at "2026-09-12"}
+  {:gate :check-parens :command "bash /home/joe/code/futon4/dev/check-parens.sh holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/verification-check.bb checks/witness-fragments/machineBeliefState.edn holes/labs/wm-contract/runs/row-15-belief-state-2026-09-12/verification-receipts.edn"
+   :exit 0 :tests 3 :assertions 3 :tree-sha "73edad98d7be5c829da8a0fd54a82c016410774c" :at "2026-09-12"}
+  {:gate :disposable-merge :command "wm15_tmp_dir=$(mktemp -d) && cp checks/witness-fragments/*.edn $wm15_tmp_dir/ && bb scripts/merge_witnesses.bb --fragments $wm15_tmp_dir --output $wm15_tmp_dir/merged.out"
+   :exit 0 :tests 2 :assertions 2 :tree-sha "73edad98d7be5c829da8a0fd54a82c016410774c" :at "2026-09-12"}]}

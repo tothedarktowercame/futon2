@@ -1,0 +1,6 @@
+{:exit 0
+ :new-admissions
+ [{:id "R1-belief-state-carried-trace-coordinates-v1" :status :pending :node :R1}
+  {:id "R1-belief-state-bootstrapped-trace-coordinates-v1" :status :pending :node :R1}]
+ :refusals 0
+ :input-sha256 "445d1c998cc2a7e8495d2c1c9823f433663a9909a3b29fb2f6340bf92c7f3bd0"}
