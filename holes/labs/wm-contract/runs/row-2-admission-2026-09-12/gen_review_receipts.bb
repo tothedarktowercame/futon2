@@ -42,7 +42,8 @@
             :verdict :approved
             :reviewer "claude-15"
             :reviewed-at "2026-09-12"
-            :basis "Verification receipt validated (subject copied, executed exit 0, typecheck+axiom-check passed, no sorryAx); merge over real fragments 24 pending 0 refusals, deterministic"
+            :basis (or (System/getenv "REVIEW_BASIS")
+                       "Verification receipt validated (subject copied, executed exit 0, typecheck+axiom-check passed, no sorryAx); merge over real fragments 24 pending 0 refusals, deterministic")
             :verification (get-in w [:verification :receipt])
             :dependencies [(locator (get-in w [:verification :receipt]))
                            (locator (:artifact w))
