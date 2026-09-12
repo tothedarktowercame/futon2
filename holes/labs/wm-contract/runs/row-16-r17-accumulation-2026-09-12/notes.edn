@@ -1,0 +1,13 @@
+{:schema :wm/row-16-r17-formal-evidence-v1
+ :coordinates 294
+ :maximum-exact-residual 5/36028797018963968
+ :maximum-at {:tick 2 :observation :active-repo-ratio :state :strengthened}
+ :bound 1/281474976710656
+ :production-evidence
+ {:path "holes/labs/wm-contract/runs/row-12-accumulation-2026-09-12/witness.edn"
+  :sha256 "919a7916d0e6e4fc51226e7b5331e830e8c94ff27bbd433c4251fa931f83b0d2"
+  :reexecuted false}
+ :controls [:recount-current-tick-only :dropped-middle-tick :support-mismatch]
+ :preflight [{:command "lake env lean DarkTower/WarMachine/MachineAccumulationWitness.lean"
+              :exit 1 :reason :missing-machine-accumulation-olean
+              :resolution "Built the existing dependency target, then ran the commissioned elaboration."}]}
