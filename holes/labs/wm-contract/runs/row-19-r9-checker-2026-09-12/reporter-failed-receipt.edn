@@ -1,0 +1,5 @@
+{:command "clojure -M -m real-pair-reporter"
+ :exit 1
+ :failure "Reporter namespace is retained outside the classpath; command stopped before loading the checker or reading the ledger."
+ :tree-sha "8d2089495b2448382a8329a154ad64a01d3f9531"
+ :at "2026-09-12T20:48:00Z"}

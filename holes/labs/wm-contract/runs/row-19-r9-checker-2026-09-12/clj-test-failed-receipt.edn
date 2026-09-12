@@ -1,0 +1,5 @@
+{:command "clojure -M:test -n futon2.aif.r9-checker-test"
+ :exit 1
+ :failure "futon2's :test alias declares an exec-fn but no main-opts; clojure.main treated -n as a file. No test namespace loaded."
+ :tree-sha "8d2089495b2448382a8329a154ad64a01d3f9531"
+ :at "2026-09-12T20:48:00Z"}
