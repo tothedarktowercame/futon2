@@ -1,0 +1,4 @@
+Running tests in #{"test"}
+Testing futon2.aif.policy-test
+Ran 56 tests containing 301 assertions.
+0 failures, 0 errors.

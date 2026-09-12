@@ -1,0 +1,13 @@
+{:receipts
+ [{:gate :policy-tests
+   :command "clojure -X:test :nses '[futon2.aif.policy-test]'"
+   :exit 0 :tests 56 :assertions 301
+   :tree-sha "5750251cd6310eaaec5e26dd5158db19cf6c7eb6" :at "2026-09-12"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/policy.clj test/futon2/aif/policy_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "5750251cd6310eaaec5e26dd5158db19cf6c7eb6" :at "2026-09-12"}
+  {:gate :check-parens
+   :command "bash /home/joe/code/futon4/dev/check-parens.sh src/futon2/aif/policy.clj test/futon2/aif/policy_test.clj holes/labs/wm-contract/runs/row-16-softmax-temperature-2026-09-12/positive-baseline.edn"
+   :exit 0 :tests 3 :assertions 3
+   :tree-sha "5750251cd6310eaaec5e26dd5158db19cf6c7eb6" :at "2026-09-12"}]}

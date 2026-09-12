@@ -1,0 +1,4 @@
+[{:command "clojure -M:test -n futon2.aif.policy-test"
+  :exit 1 :tests 0 :assertions 0 :finding :unsupported-main-option}
+ {:command "clojure -M:test test/futon2/aif/policy_test.clj"
+  :exit 0 :tests 0 :assertions 0 :finding :file-loaded-without-test-runner}]
