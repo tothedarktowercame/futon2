@@ -971,7 +971,18 @@ operator workflow conversation (standdown 2026-09-12).
     registry membership can never mean positively-complete.
     Seven packets specced; row 24's own breach detector is the
     full predicate's rejections, commissioned across transport
-    by row 25's tamper battery.
+    by row 25's tamper battery. PACKET 1 BUILD HALF DONE
+    (2026-09-12, mathlib4 6a0da690, receipts 3d9d1ce7,
+    reviewed): CertificateStates.lean — closed
+    node/connection/selection/record-family sums,
+    census-complete FullAttestation, the three candidate
+    readings as THREE SEPARATE definitions selected by a
+    bytes-pinned QualifyingRuling parameter (empty ruling
+    cannot certify); census decidability,
+    readingTwo<->readingThree-at-empty equivalences, and
+    refutedAtPin-cannot-satisfy-readingTwo proved; no sorryAx;
+    no emitter/frozen/registry changes. The ruling half stays
+    with Joe (§2C sheet above).
     :blocker DECISION SHEET FOR JOE (the row's own text requires
     his written rulings):
     (I) THE §2C READING — how a FULL-scope certificate treats
