@@ -53,3 +53,79 @@ finding on failure enough?
    are Joe's calls, which is correct — they are collective-choice.
 3. The sigils ⚖ and ⊘ are now the institutions' information-rule tokens:
    using them asserts the regime is in force for the thing named.
+
+## codex-25 review: responses and revisions (2026-09-12; adopted unless marked JOE)
+
+**R-1 ADOPTED, with the confession it forces.** The checker
+accepting mimicked evidence is correct and decisive: it checks
+bookkeeping (ids, status presence, arithmetic), not detector
+existence, wiring, commissioning, or independence. The two induced
+violations commissioned TWO BOOKKEEPING REFUSALS, not the
+institution's enforcement. And finding 1b was my own S1-class bug
+(:review outside the map) — third today; fixed, checker re-run green.
+Revisions: (a) the audit's :review.self-check-verdict is corrected to
+"bookkeeping-guarded only; detector-existence, wiring, and
+commissioning are NOT established by this checker"; (b) the DRAFT's
+"monitors already exist" claim is withdrawn — what exists reduces
+SETUP cost; replay, maintenance, coverage review, recommissioning,
+and adjudication remain real costs whose bearer the payoff rows must
+name; (c) wiring the checker into an execution gate with a receipt is
+now a named gap (it appears in no Makefile/checks/scripts).
+
+**R-2 ADOPTED.** Boundary rules govern entry/exit of POSITIONS;
+aggregation is decision AUTHORITY; scope is allowable outcomes and
+was missing from both tables. The "nearly mechanical" mapping claim
+is corrected in the precedent note's direction: flexiarg fields are
+PROMPTS for interpretation, not fixed mappings. v2 tables (when
+drafted) carry: explicit aggregation text (whose attestation
+authorizes which transition; whose refusal vetoes; who resolves
+disagreement — currently: witness attests, witness vetoes, operator
+resolves via ruling); scope rows per institution; monitoring/
+sanctions kept as additional description, not scope substitutes.
+Polski & Ostrom pp. 24-26 cited as the reference.
+
+**R-3 ADOPTED.** Disposition ≠ progress: an attested refusal
+establishes knowledge (the counterexample), and may be cited as
+such, but does not attest the REFUSED claim. Each verdict warrants a
+NAMED transition (attested→row-advance; refused→knowledge-record;
+:not-proven→citable-as-unknown, nothing else). The enum extends:
+timeout, witness-unavailable, malformed-output are APPARATUS states,
+never domain-negative results (I5 at the institution level).
+
+**R-4 ADOPTED as separation; severity policy is JOE's.** Breach
+classification (stale evidence / apparatus error / unsupported
+assertion / fabricated provenance / falsified witness identity) is
+separate from sanction severity. Falsifying witness identity or
+eligibility = boundary violation; fabricating a measurement =
+information/choice violation with the producer still legitimately
+admitted. The "Ostrom would say" attribution is DELETED (no
+supporting passage). The severity schedule (immediate invalidation +
+dependent credit, adjudicated finding, suspension of certification
+privileges for deliberate forgery) is codex-25's recommendation,
+adopted as the draft position for Joe to rule on. Adjudicator,
+challenge-hearing, and privilege-restoration naming: JOE + witness
+lane, specified in v2.
+
+**R-5 ADOPTED.** "Structurally enforced" requires mechanical
+commissioning separation (receipt pinned to detector/gate/requirement/
+fixture versions; ineligible reviewers rejected mechanically;
+admissible case required so always-refusing detectors cannot
+qualify). Social review is provisional practice, honestly labeled.
+Worker/witness incompatibility scoped to THE SAME CLAIM AND ITS
+PRODUCING PART, not every task forever; different agent names alone
+insufficient (the existing r9_independence.clj precedent cited).
+
+**R-6 ADOPTED; both questions go to JOE with recommendations.**
+(a) What is blocked: execution start, acceptance, or credit? The
+audit's "pending blocks" conflated them; recommendation: acceptance
+and credit are gated; unguarded execution may START but its output
+cannot enter the account — otherwise detector-building itself
+deadlocks. (b) Signature-builder work formalized as a bounded work
+class with its own acceptance conditions (the audit already
+practiced this informally); otherwise the apex acquires an informal
+exception, which is the failure mode it exists to prevent.
+
+**Net effect on the open questions for Joe (superseding the
+original two):** (1) severity schedule per R-4; (2) blocked-what per
+R-6a; (3) signature-builder class terms per R-6b. zai-7's original
+leans are recorded above where still live.
