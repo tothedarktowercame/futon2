@@ -1,0 +1,23 @@
+{:records
+ {"R17-dirichlet-accumulation-ieee-residuals-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachineAccumulationWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject {:id "R17-dirichlet-accumulation-ieee-residuals-v1"
+             :node :R17 :equation :dirichlet-accumulation :quantity :a-conc
+             :declaration "DirichletConcentrations" :kind :lean-witness
+             :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAccumulationWitness.lean" :sha256 "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d" :module "DarkTower.WarMachine.MachineAccumulationWitness" :declaration "DarkTower.WarMachine.MachineAccumulationWitness.measuredMaximumResidual"}
+             :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean" :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b" :declaration "DarkTower.WarMachine.Holes.DirichletConcentrations"}
+             :claim "At Row 12's 294 pinned coordinates production corresponds at IEEE semantics; exact-vs-float residuals are exhibited and bounded by 2^-48, with maximum 5/36028797018963968."
+             :polarity :supports :scope :row12-three-tick-ieee-correspondence :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineAccumulationWitness.lean" :sha256 "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d" :module "DarkTower.WarMachine.MachineAccumulationWitness" :declaration "DarkTower.WarMachine.MachineAccumulationWitness.measuredMaximumResidual"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean" :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b" :declaration "DarkTower.WarMachine.Holes.DirichletConcentrations"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean" :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAccumulation.lean" :sha256 "5de4c0068bd0d68a35ba3dc07a31be8b8f343f9599b78bc1ab97d72db49f5171"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAccumulationWitness.lean" :sha256 "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d"}]
+   :declaration-census {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/declaration-census.edn" :sha256 "2c9d51520461f11e58822041f0253b75f37edc75a8b42bdb545ecbd978e5ecd5" :selector [:record]}
+   :transcript {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/lean-transcript.txt" :sha256 "6245e6f989061518beeb13fa6cb978c1d40fe4f52d0648383e2977d11b85442b"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAccumulationWitness.lean" :sha256 "3ddc2a2d0e806f973e47a8b0c07669b7dffa2d5adabf082d300de7b43e61706d"}}}}

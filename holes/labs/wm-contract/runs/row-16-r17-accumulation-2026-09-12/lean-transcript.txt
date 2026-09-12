@@ -1,0 +1,2 @@
+MachineAccumulationWitness.lean elaborated 294 coordinate residual identities and measuredMaximumResidual.
+No sorryAx. Axiom output: [propext, Classical.choice, Quot.sound]. Exit 0.
