@@ -34,10 +34,13 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
    into the serving JVM.
 4. DONE (37f111c4, reloaded + live-probed 2026-09-12). The
    repaired end-of-run projection is in the running service.
-5. Make every terminal path produce a run record — the stop-line
-   repair path currently produces none
-   (`runner-did-not-observe-topology-route`, v3 cycle). Discovery
-   then fix.
+5. DONE (discovery 354b500e, fix 70b45a02, reviewed + reloaded
+   live 2026-09-12). Every terminal path produces a run record:
+   stop-line repair (STOP_LINE route, typed incomplete kind,
+   requested-not-enacted pin), initialization failure, cohort
+   stopping rule, and a fail-closed throw replacing the old
+   silent absence; pinned-production and historical record
+   shapes unchanged.
 
 ## Phase 1 — the six probability objects the mathematics assumes
 ## and the machine does not have (6)
