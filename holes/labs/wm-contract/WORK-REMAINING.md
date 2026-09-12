@@ -23,12 +23,13 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 2. Credit the three measurement proofs that already exist —
    observation, precision, prediction-error, each proven equal to
    production output — to their nodes through row 1.
-3. Make the click path record its two output-validator verdicts
-   (pass/fail + findings + input digests) inside the construction
-   record it saves. Without this no run of any kind can be
-   certified.
-4. Load the repaired end-of-run projection into the running service
-   (claude-15, at the current pause point).
+3. DONE (14dc45cc, reviewed; live 2026-09-12). The click path
+   records both output-validator verdicts (pass/fail + findings +
+   input digests) inside the construction record it saves, on
+   every status including refusal; digests recompute; reloaded
+   into the serving JVM.
+4. DONE (37f111c4, reloaded + live-probed 2026-09-12). The
+   repaired end-of-run projection is in the running service.
 5. Make every terminal path produce a run record — the stop-line
    repair path currently produces none
    (`runner-did-not-observe-topology-route`, v3 cycle). Discovery
