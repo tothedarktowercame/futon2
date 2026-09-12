@@ -32,11 +32,12 @@
                                       :configuration-digest "row14-cross-ledger"}
                          :semantic-epoch :row14})))
         cohort-attempt {:cohort/id cohort-id :attempt/id attempt}
-        trace-result (trace/write-trace!
-                      {:run/id run-id :cohort-attempt cohort-attempt
-                       :belief {} :observation {} :free-energy {}
-                       :ranked-actions [] :decision {} :mode :maintain}
-                      :dir trace-dir :date-str "2026-09-12" :return-record? true)
+        trace-result (binding [trace/*persist-policy-trace-details?* false]
+                       (trace/write-trace!
+                        {:run/id run-id :cohort-attempt cohort-attempt
+                         :belief {} :observation {} :free-energy {}
+                         :ranked-actions [] :decision {} :mode :maintain}
+                        :dir trace-dir :date-str "2026-09-12" :return-record? true))
         source {:run/id run-id :trace-path (:path trace-result)}
         _ (cohort/append-checkpoint!
            preregistration root attempt :selection
