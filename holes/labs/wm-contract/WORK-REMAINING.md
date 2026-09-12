@@ -347,10 +347,19 @@ operator workflow conversation (standdown 2026-09-12).
     reviewed production EFE composer (the sum is inline in the
     scorer; no production function accepts the retained scalars).
     BATCH B SPLIT TOO (codex-22 audit, verified by reviewer runs):
-    R6 softmax -> needs-capture (trace/strip-decision dissocs
-    :softmax-weights and :ranked-actions at trace.clj:171-178;
-    the lossy rankings cannot reconstruct the action-keyed
-    posterior) — capture-family candidate. Softmax NaN DEFECT
+    R6 softmax -> PROVABLE FROM RETAINED PINS (2026-09-12):
+    superseded by V7 slice-10 details-on retention (rank-keyed
+    posterior, ambient flag on in production) + the action-gap
+    TN's verified 148/148 bijective rank join + the R6 boundary
+    packet (futon2 abc62ef5/9cb5e33d/1f87a6b6/1a20f1aa,
+    reviewed): stringable-softmax-weights now refuses
+    :softmax-rank-join-incomplete (missing/extra/duplicate, with
+    offenders in the data) before append; passing path
+    byte-identical; no schema bump (admission tightened, shape
+    unchanged — ruling recorded in the docstring); test fixtures
+    bind details off suite-wide so the ambient env cannot leak
+    into default-shape claims; 54 tests/173 assertions at
+    1f87a6b6. R6 posterior proof packet dispatched (codex-23). Softmax NaN DEFECT
     REPAIRED (2026-09-12, futon2 5750251c/39f2fd0f, reviewed):
     guard at the single selection-scores seam (all softmax-weights
     arities and both direct callers route through it) refuses
