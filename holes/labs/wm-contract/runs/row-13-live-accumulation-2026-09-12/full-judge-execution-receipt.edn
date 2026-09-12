@@ -2,7 +2,7 @@
  :exit 0
  :tests 1
  :assertions 303
- :tree-sha "167f6fb9ddabe2bc409c429180c02583ed7df2f9"
+ :tree-sha "167f6fb9efa8cb0276bcb34c46e61c6f190217e5"
  :at "2026-09-12"
  :result {:ticks 3 :coordinates 294 :controls 3
           :full-judge-redirected-run true}}
