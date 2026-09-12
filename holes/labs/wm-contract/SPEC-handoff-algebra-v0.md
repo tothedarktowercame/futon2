@@ -89,3 +89,64 @@ admitted to be informal (a typed gap, not a surprise later).
 
 Status: DRAFT — redline requested from claude-15; I11 pending Joe and
 zai-5; nothing here gates live behavior yet.
+
+## REDLINE v0.1 — claude-15's R1–R9, incorporated 2026-09-12 (none rejected)
+
+**R1 — violation signatures (teeth for every rule).** Each §2 judgment
+and §3 law carries one line: what a monitor/lint SEES when it is broken.
+For the nesting law, the naive fix is a NAMED VIOLATION: copying a
+child's findings into a parent's findings vector is itself a breach,
+not a visibility repair (packet-7 prohibition, test-enforced APM-side,
+signature-enforced here). "Consume only terminal disposition" without
+forbidding the flatten is commentary.
+
+**R2 — the lint's output lives on the frontier.** Each channel's lint
+outcome lands as a frontier entry (channel × field; three states:
+named / ticketed / not-applicable, no silent fourth — C583 discipline),
+reusing `:assures` witness mechanics (sha-pinned, staleness-degrade).
+"Admitted informal" is a ticket, not a sentence.
+
+**R3 — added invariant (I3): holds must discharge.** Every channel's
+reconciliation names a machine-reachable exit for EVERY classification
+the design can produce. Incidents: the three WM series queue-held on
+:terminal-evidence-incomplete; APM f225's hold outliving its trigger.
+The algebra cannot express a wait without its exits.
+
+**R4 — the disposition enum satisfies I5 at every level.** Domain-
+negative (failing proof, losing flight, refuted statement) stays
+disjoint from apparatus-fault at each level, or composition launders an
+intended measurement into a fault up the tree (f206 at depth).
+
+**R5 — level annotations have an authority.** One registry (roster or
+board metadata) records each actor's and effect's level; pin-moves-
+with-the-population on roster change. A collapse checker over unowned
+annotations measures its own assumptions.
+
+**R6 — budget law, mechanism stated.** The budget account is channel
+field four; every TERMINAL event names the account it debits, validated
+against the channel's declaration. And I7's second half: a wrapper/
+publication failure does not merely not-charge the work attempt — it
+RE-OPENS the same attempt for re-publication from durable artifacts
+(non-charging without re-opening strands work; the 5d595dc9 series).
+
+**R7 — the first hop has an incident archive.** The bell/packet
+channel's reconciliation includes park/deadline mechanics and the
+reply-delivery contract; its production incidents are recorded
+(E-crossed-bells.md; the lost-review reply-delivery incident;
+agent-not-found accepted-then-failed sends) and are replay pins for
+§5.1 on par with f227 for §5.2 — history, not induced violations.
+
+**R8 — Joe's flag answered: lint NOW, alongside.** Read-only
+classification, no dependencies; its output SHAPES the §5.3 admission
+order (which channels are four-field-formalizable vs ticketed). The
+lint must not fix channels — classification only.
+
+**R9 — citation pins.** §2(d) gains its second instance: the
+`fail-click!` ex-data erasure (futon2 repair 92e5fbf2) — one incident
+is an anecdote, two is a class. The §3 cross-binding pins
+SPEC-chip-boards-v0.md's recursion section by name so the one-law bind
+survives edits to either document.
+
+Status: redline incorporated; awaiting Joe's I11 ratification (§3's
+citation flips from proposed to the invariant number) and a second
+claude-15 pass line-by-line against the invariant note, then AGREED.
