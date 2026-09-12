@@ -1,0 +1,46 @@
+{:records
+ {"R16-machineAction-internal-branches-20260912-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachineActionBranchesWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R16-machineAction-internal-branches-20260912-v1"
+    :node :R16 :equation :action :quantity :u :declaration "machineAction"
+    :kind :lean-witness :polarity :supports
+    :scope :machinery-capture-and-direct-invocations-2026-09-12
+    :as-of "2026-09-12"
+    :claim "At the retained internal-branch inputs, machineAction equals the controller-head, full-score first-max, habit last-max, absent-F_pi fallback and tie-control outputs; the retained exact no-op margin satisfies abstains. This scope excludes the distinct live reason-bearing selector."
+    :artifact {:repo "mathlib4"
+               :path "DarkTower/WarMachine/MachineActionBranchesWitness.lean"
+               :sha256 "95186ccb2fc6c6b4af71b9572c04751c5845555f0494d021f63d3fdda72dd486"
+               :module "DarkTower.WarMachine.MachineActionBranchesWitness"
+               :declaration "DarkTower.WarMachine.MachineActionBranchesWitness.allRetainedInternalBranches"}
+    :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
+                       :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"
+                       :declaration "DarkTower.WarMachine.MachineAction.machineAction"}}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionBranchesWitness.lean"
+     :sha256 "95186ccb2fc6c6b4af71b9572c04751c5845555f0494d021f63d3fdda72dd486"
+     :module "DarkTower.WarMachine.MachineActionBranchesWitness"
+     :declaration "DarkTower.WarMachine.MachineActionBranchesWitness.allRetainedInternalBranches"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
+     :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"
+     :declaration "DarkTower.WarMachine.MachineAction.machineAction"}
+    {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/manifest.edn"
+     :sha256 "e80f1fcaf34d441d44b6c0bf6a5d233ca79c275d44e8fad7c0dfbf69b74467ba"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
+     :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionBranchesWitness.lean"
+     :sha256 "95186ccb2fc6c6b4af71b9572c04751c5845555f0494d021f63d3fdda72dd486"}]
+   :declaration-census {:repo "futon2"
+                        :path "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/declaration-census.edn"
+                        :sha256 "f9c40cdf20e84ffb20689cc798319deeb1b6e4a404cbf2377b0e35562e4c962b"
+                        :selector [:record]}
+   :transcript {:repo "futon2"
+                :path "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/lean-transcript.txt"
+                :sha256 "279312ce21e0c39cde454d1d4c0d2b4fc40d59523fd36db9b2700da02eb74ac8"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain"
+               :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionBranchesWitness.lean"
+             :sha256 "95186ccb2fc6c6b4af71b9572c04751c5845555f0494d021f63d3fdda72dd486"}}}}
