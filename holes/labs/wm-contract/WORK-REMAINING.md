@@ -473,8 +473,22 @@ operator workflow conversation (standdown 2026-09-12).
     wake; the referential gap named as a limitation, not
     smoothed); credit wording narrow with catalogue-wide R20
     disclaimed; 2 tests/11 assertions; receipts commit-first
-    with two failure receipts retained. Packet 4 (R9/TRACE
-    non-credit record) dispatched (codex-22).
+    with two failure receipts retained. PACKET 4 DONE
+    (2026-09-12, futon2 f606d746/de21f664, reviewed): the
+    non-credit record pins Agency's provenance/trace-index
+    fields, records an EXECUTED zero-match bounded search for
+    any reviewer-identity comparison in the credited Agency
+    sources (rg, exit 1 — absence searched, not asserted),
+    corrects two drifted census pointers (full-loop
+    author=reviewer refusal now at full_loop_runner.clj:
+    3123-3135 — reviewer re-verified; review-execution
+    corroboration at 1631-1675), and delivers row 19's concrete
+    input spec (role bindings, producer/reviewer job fields,
+    required joins). No census or production changes.
+    ROW 17 COMPLETE: R10 credit blocked on the named integration
+    prerequisite; two narrow R20 credits on real evidence;
+    R9/TRACE non-credits recorded so available evidence cannot
+    silently upgrade into enforced assurance.
 18. Implement R20's chartered interoceptive commitment link — the
     genuinely missing piece, distinct from row 17's crediting.
 19. Implement R9, "No self-certification": the checks that prevent
