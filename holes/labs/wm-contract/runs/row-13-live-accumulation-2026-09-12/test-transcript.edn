@@ -1,0 +1,22 @@
+{:schema :wm/live-accumulation-machinery-test-v1
+ :status :executed-helper-seam
+ :at "2026-09-12"
+ :tree-sha "6e096a2a06e8086ea77cf7076915807b96b07527"
+ :chain [{:tick-id "t1" :previous-id nil}
+         {:tick-id "t2" :previous-id "t1"}
+         {:tick-id "t3" :previous-id "t2"}]
+ :assertions
+ {:update-input-equals-record-observation true
+  :update-input-equals-selected-mu-post true
+  :concentration-after-three-ticks 4.0}
+ :controls
+ [{:mutation :deleted-predecessor-state :refusal :accumulation-migration-required
+   :successful-trace-append false}
+  {:mutation :skipped-identity :refusal :carry-chain-gap
+   :successful-trace-append false}
+  {:mutation :support-mismatch :refusal :support-mismatch
+   :successful-trace-append false}]
+ :scope
+ {:helper "futon2.report.war-machine/accumulation-step-for-tick"
+  :full-judge-redirected-run false
+  :note "The scoped test did not invoke the complete judge scan pipeline; do not present this as the TN section 4 on-demand judge run."}}

@@ -1,0 +1,8 @@
+{:tree-sha "6e096a2a06e8086ea77cf7076915807b96b07527" :at "2026-09-12"
+ :gates
+ [{:command "clojure -M:test -e <scoped futon2.report.war-machine-accumulation-test runner>"
+   :exit 0 :tests 1 :assertions 11}
+  {:command "clj-kondo --lint scripts/futon2/report/war_machine.clj src/futon2/aif/trace.clj test/futon2/report/war_machine_accumulation_test.clj"
+   :exit 0 :errors 0 :warnings 0}
+  {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el <three row-13 files>"
+   :exit 0 :files 3}]}
