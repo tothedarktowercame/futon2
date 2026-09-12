@@ -137,3 +137,30 @@ standard: runs that do useful work, findings routed and repaired,
 breakdowns fixed in-lane. The gated click path (post fold-seam
 repair) is the substrate; the futility-index history is context Joe
 already holds, not a blocker. Row minting still awaits Joe's go.
+
+## Item 3 — Completion requirement: the PLoP 2026 paper is the completion list
+
+Joe (same day, later): "What we're trying to do in the futon 2026
+paper — part of it is scratch work motivated by realizing that what
+went on in the PLoP 2026 paper wasn't all it claimed to be. ... I
+remember the PLoP 2026 paper did have a working outer loop, to my
+knowledge. So I think we should reread that PLoP 2026 paper and use
+that as a completion list, because that's exactly what we're trying
+to re-architect with validation that the nodes work and the
+connections work. And that it is actually AIF... and that is not
+sort of a mock-up." Horizon: about one more week of work on the
+futon-2026 paper, "so that it's not a facade."
+
+Operationalized: extract every operational claim from
+p4ng/plop-2026.tex (sec-observation-plop, sec-what-this-is,
+sec-background, sec-overview, sec-catalog, sec-discussion-patterns,
+sec-conclusion — the catalogue's per-pattern implementation claims
+included), each with verbatim text + pointer, and classify against
+today's evidence with the assurance-frontier three-state accounting
+(V5, no silent fourth state): VALIDATED (named runtime evidence at
+pins), EXISTS-UNVALIDATED (code present, no commissioned evidence),
+ABSENT-OR-LOST (e.g. the outer loop since July), REFUTED (claim
+contradicted by record). Each non-validated row names what would
+close it. This list is the completion frame for the week; the
+backlog and instrument lanes feed it. The outer-loop row inherits
+Item 2 (amended): on-demand capability at the Empirics standard.
