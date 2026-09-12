@@ -202,7 +202,8 @@
    :imports [:a-conc]  ;; C453: BMR takes the full posterior and full/reduced priors (Dirichlet concentrations), not the scalar F. Earlier [:F] was the registry author's error.
    :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A') over Dirichlet concentrations a (prior), A (posterior), a' (reduced prior); a reduction is accepted when Delta F <= -3" :eq "friston2018bmr eq. 9 and Table 1 (Dirichlet), sign reversed: see :references :friston2018bmr :sign-convention"
    :code "bmr.clj:108-130; a4a.clj:126-159 (offline)" :note "No live consumer of per-tick F feeds this; R17 runs offline (r17_offline.clj)."
-   :lean "bayesFactorThreshold" :lean-status :closed :threshold-ref :kass1995}]
+   :lean "modelReductionDecision" :lean-status :closed :threshold-ref :kass1995
+   :lean-rebinding-note "REBOUND 2026-09-12 (claude-15, reviewer, from the row-16 capture-family carrier-lags-registry finding): :lean previously named 'bayesFactorThreshold' alone, but this row's :formal line asserts THREE laws (componentwise A' = A + a' - a; Dirichlet-normalizer Delta-F; acceptance iff Delta-F <= -3) — a threshold-only binding cannot support a model-reduction proof. The composite carrier modelReductionDecision (ModelReduction.lean, mathlib4 9fd88669, NEW module per the subject-file freeze policy) composes the three frozen Holes declarations BY REFERENCE with projection theorems recovering each at all inputs, an end-to-end V7-fixture instance, and an above-threshold rejection; Holes.lean untouched at 4dc0a76b. The R6 softmaxWithFPi rebinding is the precedent. The measurement proof remains blocked on capability-typed substrate data (recorded at row 16)."}]
 
  ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
