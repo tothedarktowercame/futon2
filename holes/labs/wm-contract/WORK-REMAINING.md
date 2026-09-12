@@ -214,8 +214,15 @@ operator workflow conversation (standdown 2026-09-12).
     ambiguity, R6 policy-set, R17 model-reduction — capture
     candidates for the row-13 trace envelope seam). Scope: 10
     proofs. BATCH A SPLIT (TN 7e19ef83, audit supersedes the
-    inventory's provable-now verdicts for these three): R4 needs
-    the row-6 leg-(c) repair (independent exact reference); R5
+    inventory's provable-now verdicts for these three): R4 DONE
+    (2026-09-12): R4-forward-model-float-carried-production-pins-v1
+    admitted at :verified-binding (futon2 09e47497/ebc519b0;
+    mathlib4 MachineForwardModelWitness.lean at 9de3305be6) —
+    three FloatCarriedRow instances from the repaired readback's
+    independent exact references, nearNormalised (excess exactly
+    2^-55), composition proved against exact positional-A; scope
+    :production-pins-float-carried-v1.1 defers exact kernel
+    normalization to row 14; R5
     risk needs a complete retained Q/C pair from the row-14
     consumer plus a reviewed production categorical-risk function
     (unsupported-risk classifies one boundary only; the
