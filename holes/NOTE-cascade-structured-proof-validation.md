@@ -253,6 +253,37 @@ named holes and/or creates named ones, and the gate reads that position —
 which is also what makes the cascade→hole→wiring triple the natural
 Petri/structured-proof object recorded under Ruling 2.
 
+## Ruling 4 (Joe, 2026-09-12): specification status, sequencing, and the AIF seam
+
+1. **Wiring persistence is part of the SPECIFICATION, not merely a gate.**
+   Joe: it is strange that RUN4 could be run at all under the view that
+   wiring needn't be persisted — that view is now excluded at spec level.
+   Normative statement: *a WM turn's deliverables are the cascade
+   (selected and scored), the wiring that fills it, and the holes it
+   names — persisted, always; this is what a turn IS, not a gate that a
+   turn passes.* The handoff-algebra spec already carries the general
+   form (§4: every channel's artifact demanded non-nil before its
+   structure is formalized); the RUN4-facing statement rides into
+   codex-10's validator-tightening pass, and the board spec picks it up
+   at zai-7's next pass. How twelve turns ran without it: the
+   `:selected-policy` construction kind recorded judgment with `:wiring
+   nil` and nothing in the spec said otherwise — a spec silence, now
+   closed.
+2. **Sequencing: core validated before backlog.** The core mechanisms
+   (gate + contract + correspondence + commissioning) get worked out and
+   validated — "ideally provably so" — before the backlog of other items
+   feeds in. zai-5 has a handle on that backlog; it enters only once the
+   machine works to this specification.
+3. **The AIF seam, recorded as open.** How wiring fits the AIF model is
+   explicitly unresolved (Joe: "that I can't really tell you"). His
+   pointer, recorded for whoever takes it up: **cascades fit in via the
+   policy, and the G over policy** — consistent with the fold contract's
+   existing gate (`:pass` iff cascade-score>0 and coverage-score-delta<0),
+   where cascade selection is the policy-side object and G-over-policy
+   the selection functional. Wiring's AIF role is a hole, in the Ruling-3
+   sense: a named interface awaiting its filling, not a blocker for the
+   mechanisms above.
+
 ## Landed mechanisms (2026-09-12, end of day)
 
 - **Demand side (codex-10, futon2 `61ad7453`):** RUN4 persists actual
