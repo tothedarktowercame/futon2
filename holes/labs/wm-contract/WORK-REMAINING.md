@@ -166,11 +166,16 @@ operator workflow conversation (standdown 2026-09-12).
     malformation; full-judge three-tick machinery evidence
     (row13-full-1..3, 294 coordinates delta 0.0,
     :full-judge-redirected-run true); three refusals before
-    append. LIVE STATE NOTE: the next live traced tick will
-    refuse :accumulation-migration-required BY DESIGN until the
-    runbook's explicit predecessor-state migration
-    (runs/row-13-live-accumulation-2026-09-12/NOTES.md) is
-    performed — a documented discharge, not an incident. The
+    append. MIGRATION DISCHARGED (2026-09-12, by the reviewer per
+    the runbook; receipt at runs/row-13-live-accumulation-
+    2026-09-12/migration-receipt.edn): predecessor record carries
+    :accumulation-state (98 coordinates at declared prior 1.0,
+    :last-tick bound to its own identity) via byte-surgery with
+    every other byte verified unchanged; byte-for-byte backup
+    retained beside the daily trace; no writer was running. The
+    next live traced tick performs a normal recurrence step — its
+    :accumulation-update-input is row 15's first real captured
+    belief update; verify that step on the next trace write. The
     shared :accumulation-update-input envelope is now retained
     per tick: row 15's belief-update capture prerequisite is
     SATISFIED at the seam (proof packet can follow after the

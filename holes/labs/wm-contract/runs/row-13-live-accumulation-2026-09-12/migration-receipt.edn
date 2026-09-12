@@ -1,0 +1,24 @@
+{:schema :wm/accumulation-migration-receipt-v1
+ :performed-by "claude-15"
+ :at "2026-09-12"
+ :runbook "holes/labs/wm-contract/runs/row-13-live-accumulation-2026-09-12/NOTES.md (Reload and migration)"
+ :daily-trace "data/wm-trace/wm-trace-2026-09-12.edn"
+ :writer-state "no trace-writer process running before or during migration (episodic scheduled runs; last write 17:28Z); nothing stopped or restarted"
+ :backup {:path "data/wm-trace/wm-trace-2026-09-12.edn.pre-migration-backup"
+          :sha256 "25a0a1e2257396c2d1db889375773c9cbed99b2ad26c57b4674e02ca1660d686"
+          :bytes 146680381}
+ :method "byte-surgery: :accumulation-state + :accumulation-initialization inserted before the final closing brace of the newest record; all other bytes byte-identical (prefix copied verbatim; no re-serialization); atomic os.replace; pre-swap size+mtime guard against concurrent writes"
+ :state {:constructed-by "futon2.aif.machine-accumulation/initialize (real function, bb -cp src)"
+         :observation-support-count 14 :state-support-count 7
+         :prior 1.0 :model/revision "wm-status-v1"
+         :last-tick "2026-09-12T17:28:09.498448087Z"}
+ :verification
+ {:identity-matches-predecessor true
+  :supports-sorted-and-complete true
+  :authority {:authority :declared :prior 1.0}
+  :initialization-record-unchanged-from-config true
+  :coordinates {:count 98 :all-exactly-prior true}
+  :rest-of-record-edn-equal-to-original true
+  :record-count-unchanged {:before 4 :after 4}
+  :new-size 146682828 :insertion-bytes 2447}
+ :next "the next live traced tick names this predecessor and performs a normal recurrence step; its :accumulation-update-input is the first live belief-update capture for row 15"}
