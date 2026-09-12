@@ -1,0 +1,66 @@
+{:schema :handoff-lint/entries-v1
+ :landed-at "2026-09-12"
+ :landed-by "zai-7"
+ :note "the remaining entries, one pass, after the certificate shape precedent (claude-15 approved substance; S1-S4 folded into enumeration v2 and the certificate entry). Three-state outcomes only: named / ticketed / not-applicable. Each entry must edn/read as one form (lint self-gate)."
+ :entries
+ [{:channel :channel/bell :outcome :ticketed
+   :gap "acceptance authority ambiguous: the job envelope's accepted=true is ACCEPTED-BEFORE-RUNNING (a receipt confused with a state — §2(a)'s defect at the agency level); reconciliation carries park/deadline mechanics and a reply-delivery contract with RECORDED incidents (E-crossed-bells.md; the lost-review reply-delivery incident; agent-not-found accepted-then-failed sends) — incident archive rich, fields informal"
+   :source "scripts/agency_send.py; futon3c/holes/excursions/E-crossed-bells.md"
+   :ticket-owner "agency lane (zai-5/claude-15 coordination)"}
+
+  {:channel :channel/clocking :outcome :ticketed
+   :gap "payload and acceptance exist (clock-store state; the auto-clock witness record IS the provenance of which G governed), but reconciliation exits are unspecified: nothing names what discharges a clock ambiguity"
+   :source "M-autoclock-in; M-zaif-harness mission-parameterization section"
+   :ticket-owner "task-manager build (S2/S4 rows)"}
+
+  {:channel :channel/packet-minting :outcome :named
+   :gap "all four fields mechanical: payload = operator-provisioned packet EDN, sha-chained; acceptance = the RUN4 admission apparatus (frozen pins, attempt-each-once); reconciliation = the attempt-each-once failure classifications with named exits; budget = cohort attempts (the burned attempt is the debit exemplar). Caveat: the attestation TIER is under codex-17's RUN4 audit (Joe's Ruling 5) — cited pending, not classified here"
+   :source "zai-5 ruling (b) invoke-1789221803541; RUN4 v1-v4 packet chain (7538137e et al.)"
+   :ticket-owner nil}
+
+  {:channel :channel/verify-request :outcome :ticketed
+   :gap "payload mechanical (id, pointer, basis-sha256, freshness — emitted by the live verifier), but NO consumer exists: no acceptance authority receives it, no reconciliation. The N3 lane that would consume it is not built"
+   :source "futon3c agents/cascade_verifier_board.clj (look-debt verb)"
+   :ticket-owner "N3 lane build"}
+
+  {:channel :channel/constellation-artifact :outcome :ticketed
+   :gap "designed only (NOTE-operator-landscape-reader role-split section); no mechanics exist — all four fields are prose"
+   :source "NOTE-operator-landscape-reader.md"
+   :ticket-owner "cartographer build (parked pending task manager)"}
+
+  {:channel :channel/ranked-actions :outcome :ticketed
+   :gap "payload and receiving seam named (ranked-candidates + selection-reasons; the task manager RECEIVES, never derives — zai-5 ruling (a)), and the operator-selection pin is the injection channel; but reconciliation exits are unspecified"
+   :source "zai-5 ruling (a) invoke-1789221803541; futon3c.aif.intrinsic-values rehydration"
+   :ticket-owner "task-manager build"}
+
+  {:channel :channel/demand-record :outcome :ticketed
+   :gap "designed only (NOTE-vsm-aif sedimentary layers); :simulated true forever, but no mechanics exist"
+   :source "NOTE-vsm-aif.md"
+   :ticket-owner "Part III simulation build (post-cartographer)"}
+
+  {:channel :channel/board-transition :outcome :ticketed
+   :gap "version scaffolding exists (board digest; verbs digest pins the registry) but transition EVENTS are unimplemented: no diff record is minted when a board changes between turns"
+   :source "SPEC-chip-boards-v0.md witnessed-rewiring invariant; chip_board.clj digests"
+   :ticket-owner "chip-board v0.2 (structure learning)"}
+
+  {:channel :channel/applicability-predicate :outcome :ticketed
+   :gap "designed only (NOTE-pattern-interpretations circumstances section): 'does R bind A?' as a two-wire chip; no mechanics exist"
+   :source "NOTE-pattern-interpretations.md"
+   :ticket-owner "institution layer build"}
+
+  {:channel :channel/refusal-record :outcome :ticketed
+   :gap "payload mechanical and in production (:inbox-zero/refusal since C446; chip_board hazard-gate refusals refuse-as-typed), but acceptance authority is unclear — a refusal reports NON-transfer; nothing names who accepts it or what discharges the flagged condition beyond operator reading"
+   :source "futon0/README-inbox-zero.md; C446; chip_board.clj zap hazard gate"
+   :ticket-owner "verifier/task-manager seam"}
+
+  {:channel :constraint/actor-idle :outcome :not-applicable
+   :reclassified "§2(a) precondition: target state must admit the handoff; idle is the state test, not a channel. The burned cohort attempt is its commissioning incident"
+   :source "zai-5 wiring caution invoke-1789221803541"}
+
+  {:channel :constraint/mid-turn-rules :outcome :not-applicable
+   :reclassified "reconciliation clause: an in-flight act completing under the old mission's G is a reconciliation ordering rule, not a channel"
+   :source "M-zaif-harness.md mid-session re-clock rule"}
+
+  {:channel :constraint/precision-asymmetry :outcome :not-applicable
+   :reclassified "I11 upward-edge typing: the payload of an upward edge is disposition + identity reference, nothing else — the asymmetry is enforced by the edge type, not a channel"
+   :source "SPEC-chip-boards-v0.md R9/R7 asymmetry; I11 (futon2 313fb76b)"}]}

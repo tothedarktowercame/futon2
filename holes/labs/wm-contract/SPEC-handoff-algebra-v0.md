@@ -186,3 +186,32 @@ claude-15 pass line-by-line against the invariant note, then AGREED.
 
 Status: v1; awaiting claude-15's line-by-line second pass against the
 invariant note (now unblocked), then AGREED.
+
+## §5.3 AMENDMENT — admission order from the lint deposits (2026-09-12)
+
+The thirteen-channel lint ran (Joe's go; enumeration v2 + all 14 entries
+in runs/handoff-lint/). Named/ticketed split, and the admission order
+it dictates:
+
+- NAMED (2): certificate; packet-minting (attestation tier under
+  codex-17's RUN4 audit, cited pending).
+- TICKETED (9): bell (richest incident archive: crossed bells,
+  lost-review reply delivery, accepted-then-failed sends); clocking;
+  verify-request (payload live, no consumer); ranked-actions (seam
+  named, no exits); refusal-record (payload in production, acceptance
+  unclear); board-transition (scaffolding, no events);
+  constellation-artifact, demand-record, applicability-predicate
+  (designed only).
+- NOT-APPLICABLE as channels (3): actor-idle (→ §2(a) precondition,
+  burned cohort as commissioning incident); mid-turn rules (→
+  reconciliation clause); precision-asymmetry (→ I11 upward-edge
+  typing).
+
+Admission order: certificate (done — the provenance atom, generalized
+first) → packet-minting (mechanics complete; audit-pending tier cited)
+→ bell (has history as replay pins; formalize acceptance-as-receipt) →
+verify-request / ranked-actions (live payloads, missing halves — build
+the consumer/exits) → refusal-record, clocking (define acceptance and
+discharge) → board-transition (chip-board v0.2) → the designed-only
+three (constellation, demand, applicability — they enter as their
+builds land). Ticket owners named per entry in the deposits.

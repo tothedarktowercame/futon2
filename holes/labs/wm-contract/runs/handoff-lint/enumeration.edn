@@ -1,9 +1,9 @@
-;; handoff-lint/enumeration.edn — the canonical channel enumeration, PINNED
-;; before any classification (SPEC-handoff-algebra-v0.md §1 + R2 + R8;
-;; Joe's go relayed by claude-15, 2026-09-12). Classification only: this
-;; lint fixes nothing. If the count disagrees with "thirteen" as spoken,
-;; that is a finding, not a problem.
-{:schema :handoff-lint/enumeration-v1
+;; handoff-lint/enumeration.edn — canonical channel enumeration, PINNED
+;; before any classification (SPEC-handoff-algebra-v0.md §1+R2+R8; Joe's
+;; go relayed by claude-15 2026-09-12). Classification only.
+;; v2: S2 folded — counts derived from the vector itself; S4 folded —
+;; per-entry :source pointers.
+{:schema :handoff-lint/enumeration-v2
  :pinned-at "2026-09-12"
  :pinned-by "zai-7"
  :source-corpus ["SPEC-chip-boards-v0.md"
@@ -11,33 +11,37 @@
                  "NOTE-operator-landscape-reader.md"
                  "NOTE-task-manager-outer-loop.md"
                  "NOTE-pattern-interpretations.md"
-                 "NOTE-vsm-aif.md"
-                 "zai-7 bell to claude-15, invoke-1789225259523"]
+                 "NOTE-vsm-aif.md"]
  :channels
- [;; --- the thirteen as spoken (zai-7's requirements bell), in that order ---
-  {:id :channel/bell  :spoken "bells (request/brief) as push"}
-  {:id :channel/clocking  :spoken "clocking as attribution"}
-  {:id :channel/packet-minting  :spoken "packet minting as the gate for pinned RUN4 lanes"}
-  {:id :channel/certificate  :spoken "certificates (any board -> witnesses)"}
-  {:id :channel/verify-request  :spoken "verify-request proposals (verifier -> lanes)"}
-  {:id :channel/constellation-artifact  :spoken "constellation artifacts (cartographer -> Workshop)"}
-  {:id :channel/ranked-actions  :spoken "ranked-actions (WM -> task manager)"}
-  {:id :channel/demand-record  :spoken "demand records (simulated agents -> priority seam)"}
-  {:id :channel/board-transition  :spoken "board-transition events (structure learning)"}
-  {:id :channel/applicability-predicate  :spoken "applicability predicates (institutions -> artifacts)"}
-  {:id :channel/refusal-record  :spoken "typed refusal records (:inbox-zero/refusal et al.)"}
-  {:id :constraint/actor-idle  :spoken "the actor-idle constraint on selection windows"}
-  {:id :constraint/mid-turn-rules  :spoken "mid-turn rules (in-flight acts complete under the old mission's G)"}
-  {:id :constraint/precision-asymmetry  :spoken "precision asymmetries at every boundary (self-authored = proposal)"}]
+ [{:id :channel/bell :spoken "bells (request/brief) as push"
+   :source "zai-7 requirements bell invoke-1789225259523; mechanics scripts/agency_send.py"}
+  {:id :channel/clocking :spoken "clocking as attribution"
+   :source "requirements bell; mechanics M-autoclock-in / clock-store (AGENTS.md restart-safety; mission docs)"}
+  {:id :channel/packet-minting :spoken "packet minting gates pinned RUN4 lanes"
+   :source "requirements bell; zai-5 ruling (b) invoke-1789221803541; RUN4 v1-v4 packet chain"}
+  {:id :channel/certificate :spoken "certificates (board -> witnesses)"
+   :source "requirements bell; futon3c agents/chip_board.clj at 52856d8f"}
+  {:id :channel/verify-request :spoken "verify-request proposals (verifier -> lanes)"
+   :source "ADDED beyond the requirements bell: futon3c agents/cascade_verifier_board.clj (the N1 verifier's sole output verb) + NOTE-agent-needs-from-issue-board.md N1"}
+  {:id :channel/constellation-artifact :spoken "constellation artifacts (cartographer -> Workshop)"
+   :source "requirements bell; NOTE-operator-landscape-reader.md role-split section (designed, not built)"}
+  {:id :channel/ranked-actions :spoken "ranked-actions (WM -> task manager)"
+   :source "requirements bell; zai-5 ruling (a) invoke-1789221803541"}
+  {:id :channel/demand-record :spoken "demand records (simulated agents -> priority seam)"
+   :source "requirements bell; NOTE-vsm-aif.md sedimentary-layers section (designed, not built)"}
+  {:id :channel/board-transition :spoken "board-transition events (structure learning)"
+   :source "requirements bell; SPEC-chip-boards-v0.md witnessed-rewiring invariant (versioning landed in digests; transition events unimplemented)"}
+  {:id :channel/applicability-predicate :spoken "applicability predicates (institutions -> artifacts)"
+   :source "requirements bell; NOTE-pattern-interpretations.md circumstances section (designed, not built)"}
+  {:id :channel/refusal-record :spoken "typed refusal records (:inbox-zero/refusal et al.)"
+   :source "ADDED beyond the requirements bell: futon0/README-inbox-zero.md + C446 (production since the silent-refusal fix); chip_board.clj hazard-gate refusals"}]
+ :constraints
+ [{:id :constraint/actor-idle :spoken "actor-idle constraint on selection windows"
+   :source "requirements bell; zai-5 wiring caution invoke-1789221803541 (burned cohort attempt)"}
+  {:id :constraint/mid-turn-rules :spoken "in-flight acts complete under the old mission's G"
+   :source "requirements bell; M-zaif-harness.md mid-session re-clock rule"}
+  {:id :constraint/precision-asymmetry :spoken "self-authored = proposal, level above ratifies"
+   :source "requirements bell; SPEC-chip-boards-v0.md R9/R7 asymmetry; I11 identity-reference clause"}]
  :enumeration-findings
- [;; FINDING E1: the spoken count was thirteen; the pinned enumeration is
-  ;; FOURTEEN, because the requirements bell listed typed refusals as a
-  ;; phenomenon but never as a numbered item. Refusal records are a
-  ;; channel by the four-field test (they have payload, authority, and
-  ;; consumers), so they are pinned. The three constraints (actor-idle,
-  ;; mid-turn, precision-asymmetry) are pinned as CONSTRAINTS, not
-  ;; channels: per claude-15's expected reclassifications they dissolve
-  ;; into the algebra's judgments (§2(a), reconciliation clause, I11
-  ;; upward-edge typing) and will classify not-applicable-as-channels.
-  {:finding/id :E1
-   :claim "spoken 13, pinned 14 channels + 3 constraints; refusal-record was spoken-of but unnumbered"}]}
+ [{:finding/id :E1
+   :claim "spoken 13; pinned 11 channels + 3 constraints = 14 entries. Two channels were spoken-OF but unnumbered (verify-request, refusal-record) and both pass the four-field test; the three constraints pin as constraints, expected to classify not-applicable-as-channels (into §2(a), reconciliation clause, I11 upward-edge typing)."}]}

@@ -1,59 +1,30 @@
-;; handoff-lint/entry-certificate.edn — FIRST frontier entry, landed ALONE
-;; as the shape precedent (Joe approved certificates-first; claude-15 R2:
-;; C583 :assures witness mechanics — sha-pinned, staleness-degrade; one
-;; accounting per V5, no parallel ledger). Shape review by claude-15
-;; BEFORE the remaining entries land.
 {:schema :handoff-lint/entry-v1
  :channel :channel/certificate
  :classified-at "2026-09-12"
  :classified-by "zai-7"
- :outcome :named  ;; all four fields exist in mechanics today, with pointers
+ :outcome :named
  :fields
  {:payload-type
-  "the chip-board run map as EDN: full trace (chip/verb/branch/effects),
-   end-reason, board digest, inputs digest, verbs digest (registry
-   provenance), and the typed lean/status map"
+  "the chip-board run map as EDN: full trace (chip/verb/branch/effects), end-reason, board digest, inputs digest, verbs digest (registry provenance), and the typed lean/status map"
   :acceptance-authority
-  "two-tier, both mechanical: (1) verify-trace replay — the runtime
-   re-runs the board against the pinned inputs with a no-op effect
-   handler and requires full-trace + end-reason + verbs-digest equality
-   (futon3c agents/chip_board.clj, verify-trace; regression tests
-   witness-defect-2 and -4 at futon3c 52856d8f); (2) the Lean witness
-   under the DECLARED registry — ChipBoardWitness.lean elaborates with
-   the run as readback fixture; its authority is typed and bounded:
-   {:status :witnessed-under-declared-registry
-    :assumption :registered-verbs-implement-declared-semantics
-    :runtime-correspondence :not-proven} (mathlib4 a9a24a3b9e,
-    e407ec20cb; futon3c 52856d8f). ACCEPTANCE IS A RECEIPT: replay
-   success is a receipt record, not a state (§2(a))."
+  "two-tier, both mechanical: (1) verify-trace replay — the runtime re-runs the board against the pinned inputs with a no-op effect handler and requires full-trace + end-reason + verbs-digest equality (futon3c agents/chip_board.clj, verify-trace; regression tests witness-defect-2 and -4); (2) the Lean witness under the DECLARED registry — ChipBoardWitness.lean elaborates with the run as readback fixture; authority typed and bounded: {:status :witnessed-under-declared-registry :assumption :registered-verbs-implement-declared-semantics :runtime-correspondence :not-proven}. ACCEPTANCE IS A RECEIPT, not a state (§2(a))."
   :reconciliation-procedure
-  "re-verify on demand: any consumer may re-run verify-trace against the
-   stored board + inputs (cheap, pure); a failed replay invalidates the
-   certificate for provenance auditing; registry replacement invalidates
-   via verbs-digest mismatch (witness defect 4, regression test); Lean
-   side re-elaborates the fixture. Exits: every classification the
-   design can produce has one — replay-ok / replay-mismatch /
-   registry-swap / witness-stale — each a typed terminal (I3
-   discharge: no wait without exits)."
+  "re-verify on demand: any consumer re-runs verify-trace against stored board + inputs (pure); four typed exits — replay-ok / replay-mismatch / registry-swap / witness-stale — each a typed terminal (I3: no wait without exits)"
   :budget-account
-  "fuel budget on the board itself (fuel-budget constant; exhaustion is
-   the typed :end/fuel-exhausted terminal) for generation; witness runs
-   charge the Lean/witness account, never the board's fuel (three
-   distinct accounts honored: work attempt = board run; wrapper/
-   publication = witness elaboration; environmental = registry state).
-   Terminal events name their account (the trace's per-chip fuel
-   decrement is the debit record)."}
+  "board fuel for generation (fuel-budget constant; :end/fuel-exhausted is typed); witness elaboration charges the Lean/witness account, never board fuel; registry state is the environmental account. Terminal events name their account (per-chip fuel decrement is the debit record)."}
  :evidence
- {:runtime "futon3c agents/chip_board.clj (head 52856d8f)"
+ {:runtime-head "futon3c 52856d8f"
   :inbox-zero-certificate "runs/chip-board-inbox-zero/run-2026-09-12.txt"
   :cascade-verifier-certificate "runs/chip-board-cascade-verifier/run-2026-09-12.edn"
   :witness-loop "runs/CHIP-BOARD-WITNESS-STATUS-2026-09-12.md (5 rounds, 5 defects, 0 workarounds)"
   :tests "chip_board_test.clj 17 tests / 51 assertions green at 52856d8f"}
  :assures
- {:witness-sha "pinned on commit (this file's sha256 in the commit that lands it)"
-  :staleness "re-derive: clj-kondo + the three board test namespaces at the cited futon3c head; degrade to :stale if the head moves without re-run"}}
+ {:witness-sha256
+  {:file "src/futon3c/agents/chip_board.clj"
+   :at-commit "52856d8f"
+   :sha256 "a0489ed3aa0ca184e8878e1dfda1bcb1e7f3dbc21e612dc6c098d7f8c0b4716c"}
+  :staleness "re-derive: clj-kondo + the three board test namespaces at the cited head; the pinned mechanism sha must match the file at that commit — degrade to :stale on any mismatch or head move without re-run"}
+ :lint-self-gate
+ "every deposit in this lint must edn/read as EXACTLY one form whose top-level keys match this schema (S1's mechanical check, now part of the lint's own gate)"
  :coordination-note
- "codex-17 is auditing WM Lean attestations over RUN4 (Joe's Ruling 5).
- This entry does NOT classify attestation semantics; where the
- certificate's Lean tier touches attestation carriers, that audit is
- cited as pending and left to its lane."}
+ "codex-17 is auditing WM Lean attestations over RUN4 (Joe's Ruling 5). This entry does not classify attestation semantics; where the certificate's Lean tier touches attestation carriers, that audit is cited as pending and left to its lane."}
