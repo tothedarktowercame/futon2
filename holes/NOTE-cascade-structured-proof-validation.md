@@ -282,7 +282,39 @@ Petri/structured-proof object recorded under Ruling 2.
    where cascade selection is the policy-side object and G-over-policy
    the selection functional. Wiring's AIF role is a hole, in the Ruling-3
    sense: a named interface awaiting its filling, not a blocker for the
-   mechanisms above.
+   mechanisms above. **[Superseded same day by Ruling 5: the G seam is
+   core, not open-and-waiting.]**
+
+## Ruling 5 (Joe, 2026-09-12): G is core, and the Lean attestation is a live liability
+
+Supersedes Ruling 4.3's "not a blocker" framing. Joe's argument, recorded
+because it re-orders the work:
+
+1. **G-over-cascades is core, not an extra.** Expected free energy is the
+   core of AIF; G is the variable that models it; "if we can't compute
+   that, then we can't do anything." The structured proof — the cascade
+   outline of Ruling 2 — **is computed by G over cascades/policies**: the
+   outline is G's output, not an authored annotation. The deliverable
+   chain therefore extends upward: *G evaluation over candidate
+   cascades/policies → selected cascade (the outline) → holes → wiring*,
+   each persisted, with correspondence checkable at each link — Ruling 2's
+   correspondence is the bottom link of a chain whose top is the G
+   computation's own record.
+2. **The target is a proved-AIF-valid system**, not merely a working one.
+   The provable layer is not optional polish; it is what "working to this
+   specification" means.
+3. **The live liability, to be dealt with now, not later:** the WM Lean
+   corpus currently attests validated RUN4 runs — and RUN4 wrote down no
+   wiring. A formal attestation standing over runs that lack the object
+   the specification now demands is invariant V4 violated in production
+   (a model not pinned to the runtime is a second, silently stale truth —
+   here it is the FIRST truth, which is worse). Immediate discovery
+   dispatched: enumerate every Lean attestation over RUN4 runs, the
+   runtime records each consumes, every attestation that holds over the
+   twelve `:wiring nil` runs, and the per-turn G/selection records that
+   exist today. Repair follows the audit: either the Lean statements
+   strengthen to demand the full deliverable chain, or the attestation
+   vocabulary narrows until it claims only what the runs contained.
 
 ## Landed mechanisms (2026-09-12, end of day)
 
