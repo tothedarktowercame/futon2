@@ -1,0 +1,5 @@
+Command: lake env lean DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean
+Exit: 0
+'DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness.pinnedCandidateCount' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness.everyPinnedCandidateUsesMachinePolicyFreeEnergy' depends on axioms: [propext, Classical.choice, Quot.sound]
+No declaration depends on sorryAx.

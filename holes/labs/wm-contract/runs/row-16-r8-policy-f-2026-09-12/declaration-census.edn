@@ -1,0 +1,15 @@
+{:record
+ {:declarations
+  {"DarkTower.WarMachine.MachinePolicyFreeEnergy.machinePolicyFreeEnergy"
+   {:kind :def
+    :source {:repo "mathlib4"
+             :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean"
+             :sha256 "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57"}}
+   "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness.everyPinnedCandidateUsesMachinePolicyFreeEnergy"
+   {:kind :theorem
+    :module "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness"
+    :proposition "Every one of the 145 pinned S4 candidate channel lists is evaluated by machinePolicyFreeEnergy using the exact retained binary64 rationals, tolerance zero, floor 1/100, and the floor arm."
+    :axioms ["propext" "Classical.choice" "Quot.sound"]
+    :source {:repo "mathlib4"
+             :path "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean"
+             :sha256 "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257"}}}}}
