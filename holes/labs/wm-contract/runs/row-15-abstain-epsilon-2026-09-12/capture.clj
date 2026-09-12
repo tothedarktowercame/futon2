@@ -1,5 +1,4 @@
-(require '[clojure.edn :as edn]
-         '[clojure.java.io :as io]
+(require '[clojure.java.io :as io]
          '[futon2.aif.policy :as policy]
          '[futon2.aif.trace :as trace])
 
