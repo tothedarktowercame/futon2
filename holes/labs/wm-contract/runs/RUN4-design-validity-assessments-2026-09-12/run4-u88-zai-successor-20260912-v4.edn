@@ -1,0 +1,88 @@
+{:schema :wm/run-design-validity-assessment-v1,
+ :assessment/id
+ "run4-u88-zai-successor-20260912-v4-design-validity-20260912",
+ :assessment/kind :retrospective-evidence-assessment,
+ :assessed-at "2026-09-12",
+ :assessor "codex-17",
+ :subject
+ {:cohort/id :run4-u88-zai-successor-20260912-v4,
+  :attempt/id "attempt-001"},
+ :basis
+ {:repository "futon2",
+  :commit "31f0b3e9ca6c2e9f8e6bbf944d89e6ee85773b65",
+  :path "holes/NOTE-cascade-structured-proof-validation.md",
+  :sha256
+  "a7d972ce9ad515c0db9bca7b98634158bd0a70a1b4b0ce391806d86350e5c161",
+  :ruling 5,
+  :required-chain
+  [:G-evaluation :selected-cascade :typed-holes :construction-wiring],
+  :audit
+  {:commit "053dc4f8",
+   :path
+   "holes/labs/wm-contract/TN-wm-lean-attestation-audit-2026-09-12.md"}},
+ :evidence
+ [{:role :selection,
+   :path
+   "/home/joe/run4/U88-zai-successor-20260912-v4/cohort/run4-u88-zai-successor-20260912-v4/attempt-001/002-selection.edn",
+   :sha256
+   "dde6e31335bc0a2273494cbb51871368c8351df771ad7cdd530d90645b0bd6de"}
+  {:role :construction,
+   :path
+   "/home/joe/run4/U88-zai-successor-20260912-v4/cohort/run4-u88-zai-successor-20260912-v4/attempt-001/003-construction.edn",
+   :sha256
+   "af7ad4b55801cc7986a2be118a6e755ebe40f6cfa906c1037c12d9742d602f6e"}
+  {:role :close,
+   :path
+   "/home/joe/run4/U88-zai-successor-20260912-v4/cohort/run4-u88-zai-successor-20260912-v4/attempt-001/007-closed.edn",
+   :sha256
+   "8c8428fcbba78288cf7b97443b415f7c5eec9783283957cfdd3c4e1268dd4beb"}],
+ :historical-outcome
+ {:recorded :grounded-change,
+  :preservation :unchanged,
+  :retroactively-invalidated? false},
+ :design-validity
+ {:status :not-established,
+  :scope :ruling-5-deliverable-chain-from-assessed-records},
+ :findings
+ [{:kind :construction-wiring-absent,
+   :evidence :construction,
+   :field [:payload :judgment :wiring],
+   :field-present? true,
+   :observed nil}
+  {:kind :selected-cascade-digest-absent,
+   :evidence :construction,
+   :scope [:payload :judgment :cascade],
+   :observed-keys
+   [:cascade-score
+    :construction-kind
+    :psi
+    :selected-action
+    :semilattice]}
+  {:kind :G-to-enacted-outline-join-not-established,
+   :evidence :selection,
+   :top-G
+   {:G 4.551083233140574,
+    :action
+    {:type :advance-mission, :target "M-expressions-of-interest"},
+    :rank 1},
+   :enacted-action
+   {:type :advance-mission, :target "M-u88-contextual-preferences"},
+   :actual-selection-authority
+   {:source :authenticated-operator-task-pin,
+    :operator "Joe",
+    :authority-ref
+    "Joe-authorized U88 task execution with Zai-2 and Zai-1; 2026-09-12",
+    :outer-loop-ranking-match-required? false},
+   :interpretation
+   :operator-selected-task-not-proof-of-G-selected-cascade}],
+ :not-claimed
+ {:retroactive-invalidation-of-grounded-change false,
+  :fabricated-or-reconstructed-wiring false,
+  :Lean-proof-or-attestation false,
+  :G-selected-enacted-outline false,
+  :overall-AIF-validity false,
+  :operator-selection-was-unauthorized false},
+ :preservation
+ {:source-bytes-match-audit-pins true,
+  :source-bytes-unchanged-after-assessment true,
+  :assessment-does-not-rewrite-history true}}

@@ -4,6 +4,8 @@ Discovery report for Joe's Ruling 5, requested by claude-15 (`invoke-17892277352
 
 ## Finding
 
+Addendum (2026-09-12): separate Ruling-5 design-validity assessments for [U88 successor v1](runs/RUN4-design-validity-assessments-2026-09-12/run4-u88-zai-successor-20260912-v1.edn) and [v4](runs/RUN4-design-validity-assessments-2026-09-12/run4-u88-zai-successor-20260912-v4.edn) pin the original checkpoints and preserve their grounded-change outcomes while recording that the required deliverable chain is not established.
+
 **Confirmed class-(a) Lean attestations over the twelve records: 0. This is not a finding that RUN4 satisfied the design.** The inspected Lean corpus contains no theorem instantiating full construction validity on these twelve executions. The named run-route certificates concern September 1 and September 4 fixtures, and the remaining generic/model theorems do not assert their Clojure correspondence. The route battery is a runtime checker of route properties; its green result is not a Lean proof of a cascade, typed holes, or construction wiring.
 
 There is a concrete production evidence gap: two of the twelve records close as `:grounded-change` while their ordinary construction judgment has `:wiring nil`. They are U88 Zai successor v1 and v4. Under Ruling 5 these records do not establish the required G → cascade → holes → wiring chain. Existing outcome labels must not be presented as proved-AIF-valid. That is a liability even without a false Lean theorem. No retrospective wiring or runtime proof may be fabricated.
