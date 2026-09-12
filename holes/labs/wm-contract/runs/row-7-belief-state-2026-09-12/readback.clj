@@ -23,14 +23,16 @@
         actual-row (get-in (retained-form capture) [field entity])
         context (assoc context-base :entity/id entity :policy-entities [entity])
         result (mb/belief-state-distribution context {entity actual-row})
-        output (get-in result [:belief-input :posteriors entity])]
+        output (get-in result [:belief-input :posteriors entity])
+        input-sum (reduce + (vals actual-row))]
     {:role role :entity/id entity :ok (:ok result)
-     :coordinates (mapv (fn [s] {:state s :production (get output s)
+     :refusal (:refusal result)
+     :coordinates (mapv (fn [s] {:state s :production (get actual-row s)
                                   :lean-reference (get posterior s)
-                                  :delta (- (double (get output s))
+                                  :delta (- (double (get actual-row s))
                                             (double (get posterior s)))})
                         mb/state-support)
-     :production-sum (reduce + (vals output))
+     :production-sum input-sum
      :lean-reference-sum (reduce + (vals posterior))
      :packet-9-input (:belief-input result)
      :same-entity (= entity (get-in result [:context :entity/id]))
