@@ -1,0 +1,6 @@
+{:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- scripts/futon2/report/war_machine.clj scripts/futon2/run_tick_once.clj scripts/wm_scheduled_run.clj holes/labs/wm-contract/row13_full_judge.clj"
+ :exit 0
+ :tests 4
+ :assertions 4
+ :tree-sha "729c14e152954161699171bbd27cb3eaf8d5487c"
+ :at "2026-09-12"}

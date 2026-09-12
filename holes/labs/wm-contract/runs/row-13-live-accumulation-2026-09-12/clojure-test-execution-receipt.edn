@@ -1,0 +1,6 @@
+{:command "clojure -X:test :nses '[futon2.report.war-machine-accumulation-test]'"
+ :exit 0
+ :tests 1
+ :assertions 11
+ :tree-sha "729c14e152954161699171bbd27cb3eaf8d5487c"
+ :at "2026-09-12"}

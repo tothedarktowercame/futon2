@@ -1,0 +1,7 @@
+{:command "clj-kondo --lint scripts/futon2/report/war_machine.clj scripts/futon2/run_tick_once.clj scripts/wm_scheduled_run.clj holes/labs/wm-contract/row13_full_judge.clj"
+ :exit 0
+ :tests 4
+ :assertions 0
+ :tree-sha "729c14e152954161699171bbd27cb3eaf8d5487c"
+ :at "2026-09-12"
+ :findings {:errors 0 :warnings 0 :info 1}}

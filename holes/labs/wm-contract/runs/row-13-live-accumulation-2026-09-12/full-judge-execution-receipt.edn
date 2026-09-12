@@ -1,0 +1,8 @@
+{:command "clojure -M -i holes/labs/wm-contract/row13_full_judge.clj -e nil"
+ :exit 0
+ :tests 1
+ :assertions 303
+ :tree-sha "167f6fb9ddabe2bc409c429180c02583ed7df2f9"
+ :at "2026-09-12"
+ :result {:ticks 3 :coordinates 294 :controls 3
+          :full-judge-redirected-run true}}
