@@ -922,8 +922,20 @@ operator workflow conversation (standdown 2026-09-12).
     refused, disposable-only. SECOND STANDING p4ng RED noted:
     the organization checker exposes a stale control-stages.edn
     pin (retained in receipts; p4ng-lane hygiene alongside the
-    declaration-rung red). Packet 3 (conditional batch)
-    dispatched (codex-23).
+    declaration-rung red). PACKET 3 DONE — ROW 21 COMPLETE
+    (2026-09-12, p4ng 268119cc/b3efb0ee, futon2 receipts
+    7bf2e4e0, reviewed): the three conditional edges carry
+    :status :conditional with exact activation conditions
+    (reviewer spot-checked R4->R8's two-flag condition),
+    distinct dashed rendering, :figure-sync
+    :awaits-figure-owner; the generator refuses a conditional
+    edge without its condition; final conformance 14 conformant
+    + 3 conditional-conformant (NAMED class) + 0
+    realised-undrawn + 1 retired-source — the twelve fully
+    disposed as 8 always-on + 3 conditional + 1 retired.
+    Figure edit-specs await the SVG owner. Third standing p4ng
+    red noted (tetrahedron diagnostic, retained in receipts).
+    Row 22 (firing audit) unblocked and dispatched (codex-23).
 22. For the drawn connections that have never fired in any recorded
     run: decide which the qualifying run must exercise (default:
     all that the full loop traverses) and mark the remainder
