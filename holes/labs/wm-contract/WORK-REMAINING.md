@@ -296,12 +296,33 @@ operator workflow conversation (standdown 2026-09-12).
     environment with FUTON_WM_TRACE_POLICY_DETAILS=1 (this
     machine, since V7 slice-10 5febaeee added the flag) —
     verified at pre-packet base e14caa8d, not a depth-capture
-    or packet defect; fix on the packet-5 bellback. ACTION joins
-    the needs-capture family (codex-22 split finding, no
-    synthetic substitutes): trace omits the
-    ranked-action input maps + selector option packet — capture
-    candidates for the row-13 trace envelope seam, alongside
-    belief update and the row-16 five.
+    or packet defect; fix on the packet-5 bellback. ACTION GAP
+    ANALYSIS DONE (2026-09-12, TN-row15-action-gap-2026-09-12.md
+    f3070db6; reviewer re-verified the strip pins at HEAD and the
+    live-record claims from the pinned record): schema-28 policy
+    details retain nearly all machineAction inputs; the rank/N
+    join to retained action maps is bijective in the real record
+    (148/148, verified), so the action-keyed posterior
+    reconstructs exactly. Gaps: (a) join completeness unenforced
+    (stringable-softmax-weights uses keep — silent drop
+    possible); (b) abstain epsilon not captured. SEMANTIC
+    FINDING (verified from the pinned record's :selection-law):
+    requested/applied :controller-head has internal rank 1 but
+    the live reason-bearing selector chose rank 139
+    (:moved-from-controller-head? true, :consulted-ranking
+    :live-selector-id) — the live decision is NOT an instance of
+    Lean machineAction's controller-head branch. RULED in-lane
+    per the no-facade principle (row 14 "build, not descope"):
+    the divergence is retained as a typed measurement claim from
+    existing pins (:diverged-from-machineAction, both ranks),
+    and the positive live-action path requires a reviewed Lean
+    extension of machineAction to the reason-bearing selector
+    boundary — narrowing to the internal decision is the facade
+    option and is not taken. Packet sequence: (1) R6 rank-join
+    boundary check (dispatched, codex-23); (2) abstain-epsilon
+    capture on the decision producer; (3) divergence witness
+    from existing pins; (4) machineAction live-selector Lean
+    extension (spec first).
 16. IN PROGRESS. Inventory done and reviewed (TN 6e6b2f5c): 18
     equation-bearing declarations — 4 admitted (26 claims), 4
     under row 15, 5 provable now from retained pins, 5 needing
