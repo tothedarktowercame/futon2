@@ -1,0 +1,1 @@
+{:executed? true, :schema :wm/selection-proof-input-v1, :reconstructed-policy-id "pi-s-9dbc2ceb3317bc38050c41ce", :policy-count 2, :exact? true, :actuation-executed? false, :read-only? true, :temperature 0.5, :selected-policy-id "pi-s-9dbc2ceb3317bc38050c41ce", :decision-id "phase7-shadow-2"}

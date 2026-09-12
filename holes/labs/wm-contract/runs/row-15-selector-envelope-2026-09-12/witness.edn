@@ -1,0 +1,16 @@
+{:schema :wm/selection-proof-input-witness-v1
+ :production-replay
+ {:executed? true :read-only? true :clicked? false
+  :decision-id "phase7-shadow-2" :temperature 0.5 :policy-count 2
+  :selected-policy-id "pi-s-9dbc2ceb3317bc38050c41ce"
+  :reconstructed-policy-id "pi-s-9dbc2ceb3317bc38050c41ce"
+  :exact? true}
+ :controls
+ [{:case :missing-policy :expected :missing-policy :observed :missing-policy
+   :refusal :selection-proof-input-incomplete :passed? true}
+  {:case :extra-policy :expected :extra-policy :observed :extra-policy
+   :refusal :selection-proof-input-incomplete :passed? true}
+  {:case :order-mutation :expected :policy-order-mutation
+   :observed :policy-order-mutation
+   :refusal :selection-proof-input-incomplete :passed? true}]
+ :selection-behavior-changed? false}

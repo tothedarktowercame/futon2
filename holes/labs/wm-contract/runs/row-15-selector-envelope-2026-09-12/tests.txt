@@ -1,0 +1,10 @@
+WARNING: Unknown module: org.apache.arrow.memory.core specified to --add-opens
+
+Running tests in #{"test"}
+
+Testing futon3c.peripheral.live-wm-selection-test
+
+Testing futon3c.peripheral.strategic-policies-test
+
+Ran 12 tests containing 62 assertions.
+0 failures, 0 errors.

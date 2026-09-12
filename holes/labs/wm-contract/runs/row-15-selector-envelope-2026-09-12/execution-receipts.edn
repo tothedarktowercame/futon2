@@ -1,0 +1,22 @@
+{:receipts
+ [{:gate :relevant-tests
+   :command "clojure -M:test -n futon3c.peripheral.live-wm-selection-test -n futon3c.peripheral.strategic-policies-test"
+   :exit 0 :tests 12 :assertions 62
+   :tree-sha "b615823b1e79ea7f7fc33aea68d5b525a1418256"
+   :at "2026-09-12" :transcript "tests.txt"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon3c/peripheral/live_wm_selection.clj test/futon3c/peripheral/live_wm_selection_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "b615823b1e79ea7f7fc33aea68d5b525a1418256"
+   :at "2026-09-12" :transcript "clj-kondo.txt"}
+  {:gate :check-parens
+   :command "bash /home/joe/code/futon4/dev/check-parens.sh src/futon3c/peripheral/live_wm_selection.clj test/futon3c/peripheral/live_wm_selection_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "b615823b1e79ea7f7fc33aea68d5b525a1418256"
+   :at "2026-09-12" :transcript "check-parens.txt"}
+  {:gate :production-read-only-replay
+   :command "clojure -M -e <validated-selection replay and independent score/rank reconstruction>"
+   :exit 0 :tests 1 :assertions 3
+   :tree-sha "b615823b1e79ea7f7fc33aea68d5b525a1418256"
+   :at "2026-09-12" :transcript "production-replay.txt"
+   :result {:exact? true :policy-count 2 :actuation-executed? false}}]}
