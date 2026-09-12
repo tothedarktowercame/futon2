@@ -100,7 +100,14 @@ operator workflow conversation (standdown 2026-09-12).
    measured action law exists). Live-filter wiring belongs to the
    integration owner after rows 7/9/10.
 9. The policy-conditioned state predictive.
-10. The machine preference distribution.
+10. DONE as source module + proofs + witness (futon2
+    b071b528/ebbbafde/a18e3f66; mathlib4 b9712a17..03bba0e7;
+    reviewed 2026-09-12). Twelve tagged masses exact vs Lean, sum
+    1, seven named zeros; support derived from the contract's
+    outcome authority; evidence consumption refuses; Q-positive/
+    C-zero typed :risk :infinite, no epsilon. Reviewer re-ran the
+    clj gate once (receipt had bound to the pre-commit tree); 3/32
+    green at HEAD. Row-14 consumer integration is a later row.
 11. The parameter kernels.
 
 ## Phase 2 — learning arrows and the remaining equations (5)
