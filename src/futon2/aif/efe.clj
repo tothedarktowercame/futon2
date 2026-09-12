@@ -34,6 +34,7 @@
             [futon2.aif.preference-module :as c-module]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.disposition-risk :as disposition]
+            [futon2.aif.machine-q-risk :as machine-q-risk]
             [futon2.aif.move-class-intensity :as move-intensity]))
 
 (defn- ambiguity
@@ -591,7 +592,8 @@
                          graph-feasibility-mode
                          move-class-intensity-weight survey-eig-weight
                          ruled-outcome-c-enabled? disposition-kernel
-                         ruled-outcome-c-weight seeded-c c-fold-provenance]
+                         ruled-outcome-c-weight seeded-c c-fold-provenance
+                         machine-q]
                   :or {info-weight default-info-weight
                        survey-eig-weight default-survey-eig-weight
                        survival-weight default-survival-weight
@@ -706,10 +708,20 @@
 	         (if disposition-risk
 	           (* (double ruled-outcome-c-weight) disposition-risk)
 	           0.0)
+	         machine-q-evaluation
+	         (when machine-q
+	           (let [q ((:provider machine-q) state action)
+	                 risk (machine-q-risk/risk q (:c machine-q))
+	                 weight (double (get machine-q :weight 1.0))]
+	             {:q q :c (:c machine-q) :risk risk :weight weight
+	              :G-machine-q-risk (* weight (:risk risk))}))
+	         machine-q-contribution
+	         (if machine-q-evaluation (:G-machine-q-risk machine-q-evaluation) 0.0)
 	         ;; foldC layer ids: :floor from channel-risk + :capability-zone-load
 	         ;; from zone-risk and :ruled-outcome-c from the disposition bridge
 	         ;; compose here as the recorded C-risk prefix.
-	         g-risk (+ channel-risk zone-risk ruled-outcome-c-contribution)
+	         g-risk (+ channel-risk zone-risk ruled-outcome-c-contribution
+	                   machine-q-contribution)
          ambiguity-terms (if learn-action?
                            {}
                            (ambiguity-by-channel next-var ambiguity-mode))
@@ -940,6 +952,9 @@
 
        (and ruled-outcome-c-enabled? c-fold-provenance)
        (assoc :c-fold-provenance c-fold-provenance)
+
+       machine-q-evaluation
+       (assoc :machine-q machine-q-evaluation)
 
        learn-action?
        (assoc :c-zone-load (assoc zone-evidence :risk zone-risk)
