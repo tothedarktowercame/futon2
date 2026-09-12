@@ -9,7 +9,7 @@ Two outcome-producing families exist, but neither currently supplies the live
 scorer with the row-6/9 machine Q.
 
 The live path is `war-machine/judge` (`scripts/futon2/report/war_machine.clj:
-5979-6011`) -> `efe/rank-actions` (`war_machine.clj:6391-6426`) -> one
+5979-6011`) -> `efe/rank-actions` (`war_machine.clj:6438`) -> one
 `efe/compute-efe` per candidate (`src/futon2/aif/efe.clj:967-998`) ->
 `forward-model/predict` (`efe.clj:629-642`; implementation
 `src/futon2/aif/forward_model.clj:312-340`). That predictor returns continuous
