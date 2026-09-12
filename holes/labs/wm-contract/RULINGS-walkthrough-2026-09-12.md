@@ -80,3 +80,60 @@ returned, checked, recorded, surfaced). The paper's claim of live
 operation is then evidence-bearing again, and the old failure mode
 (unattended futile churn) is answered by the gates and I6 streak
 stops rather than by not running.
+
+## Item 1b — Process-assurance column: ruled sloppy, redesign required
+
+Joe (same day, later): "Box 3 is telling me that many of the items are
+only validated 2 out of 7. And a bunch of them aren't censused. It
+just seems like a very sloppy piece of infographic work. And if you
+look in the column Process Assurance, there's all this duplicated
+text. Absent, parked, returned, checked, recorded, surfaced. I just
+don't know what that means. It's not communicating anything."
+
+What the column currently encodes (from
+ALIGN-rnode-process-census.md): seven work-lifecycle cells per node
+(commissioned, dispatched, parked, returned, checked, recorded,
+surfaced), each `exists` (running code refuses advancement or records
+the cell), `named-only`, or `absent` (no NODE-LINKED implementation
+found). Substantive fact the presentation buries: the Agency has
+generic machinery for several cells (dispatch receipts
+social/dispatch.clj:238-266, coordination ledger, durable parks
+parked_on.clj:332-395) but "none associates that conduct with a
+control-stage node. Generic machinery is not credited as an R-node
+assurance." So `absent` means not-node-linked, not
+no-such-machinery-anywhere — and the RUN4 click path now exercises
+most of the seven cells end-to-end without node credit.
+
+Redesign requirements (rides packet C with Item 1):
+1. The seven cells defined ONCE in a legend; per-node display is a
+   compact seven-cell strip (exists / named-only / absent as glyph
+   states), never repeated prose lists of absent cells.
+2. "not censused" stated once as scope (census covers the assurance
+   band + R16), not repeated per row as if it were a finding.
+3. The not-node-linked caveat stated where the column is introduced:
+   absent cells are a JOIN gap for generic machinery in several
+   cases, same disease as the contract join for the seven
+   declarations — and closing that join (crediting the RUN4 lifecycle
+   machinery to nodes where evidence supports it) is the census's own
+   candidate repair, separate from presentation.
+
+## Item 2 (amended) — Outer loop: on-demand capability at the Empirics standard, never the cron
+
+Joe (superseding Item 2's proposed disposition): "It's not about
+reinstalling the cron. No one should probably ever reinstall that
+cron job, to be honest. What was more interesting was just that we
+had the ability on demand to run the outer loop. ... I don't want
+your story about the defects of the old outer loop to prevent us from
+creating a new one that works well. The problems with the old outer
+loop are well known to me... I think the empirics section of the
+paper that we wrote showed how we fixed that. So that would be the
+standard that we should think about any new outer loop, not the old
+broken one, but the repaired one that actually worked."
+
+Revised disposition: the target is ON-DEMAND outer-loop capability —
+runnable when wanted, not scheduled churn — specified against the
+repaired Empirics loop (the paper's empirics section) as the
+standard: runs that do useful work, findings routed and repaired,
+breakdowns fixed in-lane. The gated click path (post fold-seam
+repair) is the substrate; the futility-index history is context Joe
+already holds, not a blocker. Row minting still awaits Joe's go.
