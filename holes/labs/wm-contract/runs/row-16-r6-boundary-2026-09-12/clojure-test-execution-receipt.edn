@@ -1,0 +1,11 @@
+{:command "clojure -X:test :nses '[futon2.aif.trace-test]'"
+ :exit 0 :tests 54 :assertions 173
+ :tree-sha "1f87a6b6e91eacdfef4fca8fdda4055edece21a9"
+ :at "2026-09-12"
+ :prior-attempts
+ [{:tree-sha "abc62ef57a81eeb591a887382a582a02274cd4e1"
+   :exit 1 :errors 45 :cause :pre-contract-shared-fixture-softmax}
+  {:tree-sha "9cb5e33d66e4e47b7c8ede27e9a7104958ec1557"
+   :exit 1 :errors 5 :cause :ambient-details-on-for-default-off-fixtures}
+  {:tree-sha "1f87a6b6e91eacdfef4fca8fdda4055edece21a9"
+   :exit 2 :cause :shell-quoting-error-before-test-start}]}
