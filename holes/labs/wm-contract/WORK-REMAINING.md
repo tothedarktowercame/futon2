@@ -214,8 +214,25 @@ operator workflow conversation (standdown 2026-09-12).
     digest e00e160d at the pre-change tree in a worktree —
     matches the committed pin); enabled test drives the REAL
     predictive-outcome-kernel and the C-flip reverses ranking;
-    38 tests/147 assertions. Packet 5 dispatched (trace
-    retention, codex-23); 2 and 6 follow packet 1.
+    38 tests/147 assertions. Packet 5 DONE (2026-09-12, futon2
+    65851e31/ff887374/e23bd7cb/0b90518e, reviewed): complete
+    per-ranked-action :machine-q pair retained through
+    strip-ranked-action; :machine-q-missing-q/-c,
+    :machine-q-incomplete, :support-mismatch refuse in
+    strip-ranked-action BEFORE any append (tests assert the trace
+    file does not exist after refusal); write/read exact = on
+    both full pairs; trace schema bumped to 28 with ledger note;
+    receipts commit-first with honest prior-attempt trail.
+    ROW-14 BUILD STATE: packets 3/4/5 done — the machine-Q link
+    exists end to end (producer-callable scorer option + adapter
+    + retention), opt-in and not yet live-wired. Remaining:
+    packet 1 (A-content, awaits Joe's decision above), packets
+    2/6 behind it, live wiring in the judge behind
+    retention+evidence per the TN. Serving JVM reloaded from
+    master (2026-09-12 post-packet-5: machine-q-risk, efe, trace
+    schema 28, war-machine; bottom-up after a stale
+    ruled-outcome-c dep surfaced) — next live tick performs the
+    migrated accumulation step and persists depth fields.
     :blocker DECISION NEEDED (packet 1 only — model content, not
     principle-settleable): no inspected authority declares a
     semantic status-to-disposition correspondence, and sorting two
