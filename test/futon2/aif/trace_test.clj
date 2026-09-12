@@ -470,6 +470,63 @@
                   (keys (get-in decoded
                                 [:decision :softmax-weights-by-candidate-id])))))))
 
+(defn- complete-softmax-output []
+  (assoc-in sample-judge-output [:decision :softmax-weights]
+            (into {} (map (juxt :action #(double (:rank %)))
+                          (:ranked-actions sample-judge-output)))))
+
+(deftest softmax-rank-join-reconstructs-action-keyed-posterior-test
+  (binding [trace/*persist-policy-trace-details?* true]
+    (let [output (complete-softmax-output)
+          expected (get-in output [:decision :softmax-weights])]
+      (trace/write-trace! output :dir *tmpdir* :date-str "2026-09-12")
+      (let [[record] (trace/read-trace :dir *tmpdir* :date-str "2026-09-12")
+            ranked (:ranked-actions record)
+            weights (get-in record [:decision :softmax-weights-by-candidate-id])
+            reconstructed
+            (into {} (map (fn [candidate]
+                            [(:action candidate)
+                             (get weights (str "rank/" (:rank candidate)))])
+                          ranked))]
+        (is (= expected reconstructed))
+        (is (= (count ranked) (count weights)))))))
+
+(deftest incomplete-softmax-rank-joins-refuse-before-append-test
+  (binding [trace/*persist-policy-trace-details?* true]
+    (doseq [[case-name mutate expected-detail]
+            [[:missing-weight
+              #(update-in % [:decision :softmax-weights]
+                          dissoc (get-in % [:ranked-actions 1 :action]))
+              :missing-ranked-keys]
+             [:extra-weight
+              #(assoc-in % [:decision :softmax-weights {:type :foreign}] 0.25)
+              :extra-weight-actions]
+             [:duplicate-rank
+              #(assoc-in % [:ranked-actions 1 :rank]
+                         (get-in % [:ranked-actions 0 :rank]))
+              :duplicate-rank-keys]]]
+      (let [date-str (name case-name)
+            path (io/file *tmpdir* (str "wm-trace-" date-str ".edn"))
+            refusal (try
+                      (trace/write-trace! (mutate (complete-softmax-output))
+                                          :dir *tmpdir* :date-str date-str)
+                      nil
+                      (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        (is (= :softmax-rank-join-incomplete (:refusal refusal)))
+        (is (seq (expected-detail refusal)))
+        (is (not (.exists path)) "rank-join refusal occurs before append")))))
+
+(deftest incomplete-softmax-is-byte-identical-when-details-are-off-test
+  (binding [trace/*persist-policy-trace-details?* false]
+    (let [incomplete (update-in (complete-softmax-output)
+                                [:decision :softmax-weights]
+                                dissoc (get-in sample-judge-output
+                                               [:ranked-actions 1 :action]))
+          without-weights (update incomplete :decision dissoc :softmax-weights)
+          strip-time #(dissoc % :timestamp)]
+      (is (= (strip-time (trace/trace-record without-weights))
+             (strip-time (trace/trace-record incomplete)))))))
+
 (deftest trace-record-pure-test
   (testing "trace-record is pure (modulo timestamp): same input → same shape"
     (let [r1 (trace/trace-record sample-judge-output)

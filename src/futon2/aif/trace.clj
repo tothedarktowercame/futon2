@@ -196,20 +196,39 @@
 
 (defn- stringable-softmax-weights
   [softmax-weights ranked-actions]
-  (into {}
-        (keep (fn [ranked-action]
-                (let [action (:action ranked-action)]
-                  (when (contains? softmax-weights action)
-                    [(ranked-candidate-id ranked-action)
-                     (get softmax-weights action)]))))
-        ranked-actions))
+  (let [rank-keys (mapv ranked-candidate-id ranked-actions)
+        duplicate-rank-keys (->> rank-keys frequencies
+                                 (keep (fn [[k n]] (when (> n 1) k)))
+                                 sort vec)
+        ranked-action-set (set (map :action ranked-actions))
+        weight-action-set (if (map? softmax-weights)
+                            (set (keys softmax-weights)) #{})
+        missing-actions (set/difference ranked-action-set weight-action-set)
+        extra-actions (set/difference weight-action-set ranked-action-set)]
+    (when (or (not (map? softmax-weights))
+              (seq duplicate-rank-keys) (seq missing-actions) (seq extra-actions))
+      (throw (ex-info "Softmax rank join is incomplete"
+                      {:refusal :softmax-rank-join-incomplete
+                       :path [:decision :softmax-weights]
+                       :missing-ranked-keys
+                       (mapv ranked-candidate-id
+                             (filter #(contains? missing-actions (:action %)) ranked-actions))
+                       :extra-weight-actions (vec extra-actions)
+                       :duplicate-rank-keys duplicate-rank-keys})))
+    (into {}
+          (map (fn [ranked-action]
+                 [(ranked-candidate-id ranked-action)
+                  (get softmax-weights (:action ranked-action))]))
+          ranked-actions)))
 
 (defn- strip-decision
   "Compact the decision for trace. The full softmax-weights map is
    keyed by action maps (non-stringable), so the default-off form drops it.
    When policy trace details are enabled, Q(π) is re-keyed by `rank/N`, the
    stable rank already retained by `strip-ranked-action`. Chosen-action /
-   abstain identity is preserved."
+   abstain identity is preserved. The details-on path refuses an incomplete
+   rank join before append; this changes admission, not the record shape, so
+   trace schema 28 does not advance."
   [d ranked-actions]
   (cond-> (dissoc d :softmax-weights :ranked-actions)
     *persist-policy-trace-details?*
