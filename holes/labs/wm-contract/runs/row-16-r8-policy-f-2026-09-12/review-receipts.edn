@@ -1,0 +1,58 @@
+{:records
+ {"R8-policy-F-s4-consecutive-records-v1"
+  {:subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean",
+     :sha256
+     "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57",
+     :declaration
+     "DarkTower.WarMachine.MachinePolicyFreeEnergy.machinePolicyFreeEnergy"},
+    :scope :s4-run-2026-09-01-consecutive-records,
+    :node :R8,
+    :as-of "2026-09-12",
+    :id "R8-policy-F-s4-consecutive-records-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePolicyFreeEnergy",
+    :artifact
+    {:repo "mathlib4",
+     :path
+     "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean",
+     :sha256
+     "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257",
+     :module
+     "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness.everyPinnedCandidateUsesMachinePolicyFreeEnergy"},
+    :quantity :F-pi,
+    :claim
+    "At the pinned consecutive S4 machinery records, all 145 candidate F_pi values (2,030 channel inputs) follow the symbolic-log machinePolicyFreeEnergy law under the explicitly selected floor arm; production replay is exact and the numerical interpretation differs by at most 3.552713678800501e-15.",
+    :equation :policy-free-energy},
+   :verdict :approved,
+   :reviewer "claude-15",
+   :reviewed-at "2026-09-12",
+   :basis
+   "Reviewed on bellback: reference is the registry's symbolic-Real.log convention — the Lean module states the law over exact binary64 rationals and symbolic_reference.py interprets the SAME exact expressions at 90-digit Decimal precision with its own Gauss-Legendre pi (independent numerical interpretation, not a second Clojure calc); reviewer recomputed candidate-1 active-repo-ratio at 90 digits independently — digit-for-digit match; production replay bit-identical through the real f-pi-for-candidate over 145 candidates/2030 coordinates; max delta 3.552713678800501e-15 within the declared 1e-12 criterion; real :incomplete-coverage refusal retained as the natural control plus commissioned invalid/deterministic/zero/absent-variance branches; scope and evidence-limit name S4 as redirected RUN9 machinery, not a scheduled tick; receipts commit-first; disposable merge 33 verified-binding + this claim pending, zero refusals",
+   :verification
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/verification-receipts.edn",
+    :sha256
+    "cd43e9bc05d1ecf8c58b4f514d5d8f74e37782c84af23940bc79127244a1a2e5",
+    :selector [:records "R8-policy-F-s4-consecutive-records-v1"]},
+   :dependencies
+   [{:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/verification-receipts.edn",
+     :sha256
+     "cd43e9bc05d1ecf8c58b4f514d5d8f74e37782c84af23940bc79127244a1a2e5"}
+    {:repo "mathlib4",
+     :path
+     "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean",
+     :sha256
+     "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean",
+     :sha256
+     "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57"}]}}}

@@ -1,35 +1,76 @@
-{:witnesses "machinePolicyFreeEnergy"
+{:witnesses "machinePolicyFreeEnergy",
  :node-witnesses
- [{:schema :wm/node-witness-v1
-   :id "R8-policy-F-s4-consecutive-records-v1"
-   :node :R8 :equation :policy-free-energy :quantity :F-pi
-   :declaration "machinePolicyFreeEnergy" :kind :lean-witness
-   :artifact
-   {:repo "mathlib4"
-    :path "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean"
-    :sha256 "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257"
-    :module "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness"
-    :declaration "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness.everyPinnedCandidateUsesMachinePolicyFreeEnergy"}
-   :subject-artifact
-   {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean"
-    :sha256 "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57"
-    :declaration "DarkTower.WarMachine.MachinePolicyFreeEnergy.machinePolicyFreeEnergy"}
-   :claim "At the pinned consecutive S4 machinery records, all 145 candidate F_pi values (2,030 channel inputs) follow the symbolic-log machinePolicyFreeEnergy law under the explicitly selected floor arm; production replay is exact and the numerical interpretation differs by at most 3.552713678800501e-15."
-   :polarity :supports :scope :s4-run-2026-09-01-consecutive-records
-   :evidence-limit "S4 was a redirected experimental RUN9 machinery run, not a scheduled production tick. The claim covers machinePolicyFreeEnergy only, at this pair of records; it does not establish scheduled-tick operation or policy selection."
-   :as-of "2026-09-12" :status :proposed
+ [{:schema :wm/node-witness-v1,
    :retained-evidence
-   {:source {:repo "futon2" :path "holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn"
-             :sha256 "aaeccaf477dfd16bcc73064aa979f1fefa9753e2eec4ccd053e5e17acf8efdbf"}
-    :fixture {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/fixture.edn"
-              :sha256 "f70ce5382207d5a4918d2a9f6a10aa6d78869ee405b7e8e2cbc3be772346240a"}
-    :readback {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/readback.edn"
-               :sha256 "8ad6e5faeccfabad7852ea4e6a67680e376e3517e4597756216e6852dd9e9156"}
-    :notes {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/NOTES.md"
-            :sha256 "21aca3e05d0ef70a962f7c8d156910b0232d667b9df613df7a730a479b4f669f"}}
+   {:source
+    {:repo "futon2",
+     :path "holes/labs/wm-contract/runs/2026-09-01-s4/wm-trace-s4.edn",
+     :sha256
+     "aaeccaf477dfd16bcc73064aa979f1fefa9753e2eec4ccd053e5e17acf8efdbf"},
+    :fixture
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/fixture.edn",
+     :sha256
+     "f70ce5382207d5a4918d2a9f6a10aa6d78869ee405b7e8e2cbc3be772346240a"},
+    :readback
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/readback.edn",
+     :sha256
+     "8ad6e5faeccfabad7852ea4e6a67680e376e3517e4597756216e6852dd9e9156"},
+    :notes
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/NOTES.md",
+     :sha256
+     "21aca3e05d0ef70a962f7c8d156910b0232d667b9df613df7a730a479b4f669f"}},
    :verification
-   {:status :verified
-    :receipt {:repo "futon2"
-              :path "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/verification-receipts.edn"
-              :sha256 "cd43e9bc05d1ecf8c58b4f514d5d8f74e37782c84af23940bc79127244a1a2e5"
-              :selector [:records "R8-policy-F-s4-consecutive-records-v1"]}}}]}
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/verification-receipts.edn",
+     :sha256
+     "cd43e9bc05d1ecf8c58b4f514d5d8f74e37782c84af23940bc79127244a1a2e5",
+     :selector [:records "R8-policy-F-s4-consecutive-records-v1"]}},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachinePolicyFreeEnergy.lean",
+    :sha256
+    "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57",
+    :declaration
+    "DarkTower.WarMachine.MachinePolicyFreeEnergy.machinePolicyFreeEnergy"},
+   :scope :s4-run-2026-09-01-consecutive-records,
+   :node :R8,
+   :evidence-limit
+   "S4 was a redirected experimental RUN9 machinery run, not a scheduled production tick. The claim covers machinePolicyFreeEnergy only, at this pair of records; it does not establish scheduled-tick operation or policy selection.",
+   :as-of "2026-09-12",
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r8-policy-f-2026-09-12/review-receipts.edn",
+     :sha256
+     "eb399917cd23762d3341ce141fe054bb251398f30b26a028f872f2141e81f147",
+     :selector [:records "R8-policy-F-s4-consecutive-records-v1"]}},
+   :status :admitted,
+   :id "R8-policy-F-s4-consecutive-records-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :declaration "machinePolicyFreeEnergy",
+   :artifact
+   {:repo "mathlib4",
+    :path
+    "DarkTower/WarMachine/MachinePolicyFreeEnergyMeasurementWitness.lean",
+    :sha256
+    "f3c401fe7b346d08d75865b4cdc6f87e8c4ac8467b440999f3aaffa625e88257",
+    :module
+    "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness",
+    :declaration
+    "DarkTower.WarMachine.MachinePolicyFreeEnergyMeasurementWitness.everyPinnedCandidateUsesMachinePolicyFreeEnergy"},
+   :quantity :F-pi,
+   :claim
+   "At the pinned consecutive S4 machinery records, all 145 candidate F_pi values (2,030 channel inputs) follow the symbolic-log machinePolicyFreeEnergy law under the explicitly selected floor arm; production replay is exact and the numerical interpretation differs by at most 3.552713678800501e-15.",
+   :equation :policy-free-energy}]}
