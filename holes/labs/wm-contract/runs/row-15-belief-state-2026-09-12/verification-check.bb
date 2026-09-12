@@ -1,7 +1,6 @@
 #!/usr/bin/env bb
 (require '[babashka.classpath :as cp]
-         '[clojure.edn :as edn]
-         '[clojure.java.io :as io])
+         '[clojure.edn :as edn])
 
 (cp/add-classpath "scripts")
 (require '[witnesses.node-witness :as nw])
