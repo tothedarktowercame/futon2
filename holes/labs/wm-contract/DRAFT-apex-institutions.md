@@ -138,3 +138,52 @@ exception, which is the failure mode it exists to prevent.
 original two):** (1) severity schedule per R-4; (2) blocked-what per
 R-6a; (3) signature-builder class terms per R-6b. zai-7's original
 leans are recorded above where still live.
+
+## ADDENDUM: the cue layer — how the institutions are triggered (Joe, 2026-09-12)
+
+The two apex institutions above govern WHAT counts as work and WHEN
+work may start; they were silent on HOW the regime is entered in
+conversation. The voxterm process cues (NOTE-voxterm-cue-institution.md)
+supply that trigger layer, and this addendum binds them into the
+institutions rather than leaving them a parallel protocol.
+
+**⚖ + cues.** The cue is a boundary-in event for the task-holder
+position; 🏁 is boundary-out via the departure record; credit remains
+only on the witnessed state change the ENTRY record named in advance
+(the cue specs' "no completion credit" / "does not assert success"
+clauses are this institution's exit rule stated in cue vocabulary).
+The cue itself is never evidence (the spec's own clause) — it creates
+the obligation whose discharge is the record. MONITORING gains its
+cheapest form: the cue-receipt lint (regex + lookup; a cue without a
+receipt is the violation signature).
+
+**⊘ + cues.** The 🎒 PATTERN CARD cue operationalizes
+signature-discipline at entry: the entry record the cue demands
+carries task, pattern/version, intended transition, and witness
+conditions — the signature-before-work fields, filled per task instead
+of per row. The card→use-citation check (carriage alone is not
+evidence of use) is ⊘'s commissioning discipline at the pattern level:
+the card is "commissioned" for the task only by its cited use.
+
+**Emitter asymmetry (restated for this document).** Operator cues
+obligate the receiver at full authority; agent cues are self-
+commitments at proposal precision — binding the emitter, conferring no
+authority (no self-clock, self-credit, or self-ratification). This is
+M-zaif-harness boundary 1 at cue grain, and it is why one vocabulary
+serves both voices without collapsing them.
+
+**Relation to the pending rulings (surfaced, not settled):**
+- Ruling 2 (what signature-pending blocks): the cue layer DEFAULTS to
+  recording acceptance and credit without mechanically blocking
+  execution — the EX-1 stance — so the week's cue round-trips generate
+  the data for the ruling rather than pre-empting it.
+- Ruling 3 (signature-builder class): 🎒 plus a departure record
+  whose unresolved-work field names the signature being built is the
+  natural entry ritual FOR that class; proposed as its terms when
+  Joe rules.
+
+**Status:** this addendum postdates codex-25's review; it extends the
+draft, does not revise the reviewed tables. The cue layer is itself
+pending Joe's read and one EX-1-style bounded run (🕒→🎒→🏁 with the
+two lint checks live) before any claim of enforcement is made — the
+same no-runtime-claim posture as LAYER4-PROCESS.
