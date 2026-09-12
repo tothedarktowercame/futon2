@@ -452,9 +452,19 @@ operator workflow conversation (standdown 2026-09-12).
     envelope-construction failure refuses the selection;
     production read-only replay reconstructed the selected id
     exactly (2 policies, temperature 0.5, no actuation);
-    12 tests/62 assertions; (4b) trace retention through
-    war_machine (additive, schema-ledger treatment) — HELD
-    until the cross-ledger packet's trace.clj edits land; (4c)
+    12 tests/62 assertions; (4b) TRACE RETENTION DONE
+    (2026-09-12, futon2 fc1891d0..b8bff35d, reviewed): the
+    envelope threads unchanged into the persisted decision
+    (byte-for-byte readback), three typed pre-append refusals,
+    schema stays 29 per the decision-field precedent. REVIEW
+    FINDING FIXED BY REVIEWER (aa77a39d): the R6 rank-join
+    boundary refused decisions with NO softmax-weights (nil ->
+    non-map -> all-missing) — nil now returns the historical
+    empty map, present maps keep the full check; both
+    war-machine ambient softmax errors clear. Remaining
+    standing ambient reds (U12 mutable criteria-source hash;
+    disposition-support fixture) dispatched as a hygiene packet
+    (codex-24); (4c)
     ReasonBearingSelector.lean extension + compat theorem
     (frozen files untouched); (4d) positive post-capture
     witness at the first complete-envelope record.
