@@ -202,8 +202,20 @@ operator workflow conversation (standdown 2026-09-12).
     expected-free-energy needs full scoring-input capture or a
     reviewed production EFE composer (the sum is inline in the
     scorer; no production function accepts the retained scalars).
-    Batch B in flight (codex-22: R6 softmax, R17 binding — same
-    audit discipline applies).
+    BATCH B SPLIT TOO (codex-22 audit, verified by reviewer runs):
+    R6 softmax -> needs-capture (trace/strip-decision dissocs
+    :softmax-weights and :ranked-actions at trace.clj:171-178;
+    the lossy rankings cannot reconstruct the action-keyed
+    posterior) — capture-family candidate; PLUS a discovered
+    production DEFECT: policy/softmax-weights at zero temperature
+    returns [##NaN ##NaN] (reviewer-reproduced) instead of a typed
+    refusal — repair item queued (typed zero/nonpositive-
+    temperature refusal + tests; violates the no-silent-default
+    contract discipline). R17 binding -> provable now WITH new
+    formal evidence: the row-12 witness references are independent
+    but exist only as Clojure values; a generated Lean witness
+    file must state the 294 exact reference equations and
+    elaborate (packet out, codex-22).
 
 ## Phase 3 — the assurance nodes (4)
 
