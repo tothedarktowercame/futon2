@@ -1,0 +1,7 @@
+{:command "lake env lean DarkTower/WarMachine/MachineBeliefDistribution.lean"
+ :exit 0
+ :tests 1
+ :assertions 3
+ :tree-sha "4750f9fa17eb09bb3d70c0ae12e4256cf3dcf5ec"
+ :at "2026-09-12T18:49:55Z"
+ :environment-correction "MachineModelSpec.olean was built after two pre-elaboration missing-object failures; lean-after-dependency-build.txt is the successful retained transcript."}

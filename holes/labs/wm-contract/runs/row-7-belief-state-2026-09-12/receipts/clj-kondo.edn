@@ -1,0 +1,7 @@
+{:command "clj-kondo --lint src/futon2/aif/machine_belief.clj test/futon2/aif/machine_belief_test.clj holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.clj"
+ :exit 0
+ :tests 1
+ :assertions 1
+ :tree-sha "5a7f517f59bb045352ea909b7458e372ea5d9209"
+ :at "2026-09-12T18:49:55Z"
+ :findings {:errors 0 :warnings 1 :warning :unused-binding}}

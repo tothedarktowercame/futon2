@@ -1,0 +1,5 @@
+Script started on 2026-09-12 18:49:12+00:00 [COMMAND="clj-kondo --lint src/futon2/aif/machine_belief.clj test/futon2/aif/machine_belief_test.clj holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.clj" <not executed on terminal>]
+holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.clj:26:9: warning: unused binding output
+linting took 10ms, errors: 0, warnings: 1
+
+Script done on 2026-09-12 18:49:12+00:00 [COMMAND_EXIT_CODE="2"]

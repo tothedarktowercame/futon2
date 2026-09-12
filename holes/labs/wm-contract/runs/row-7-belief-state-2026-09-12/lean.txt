@@ -1,0 +1,4 @@
+Script started on 2026-09-12 18:49:25+00:00 [COMMAND="lake env lean DarkTower/WarMachine/MachineBeliefDistribution.lean" <not executed on terminal>]
+DarkTower/WarMachine/MachineBeliefDistribution.lean:1:0: error: object file '/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/MachineModelSpec.olean' of module DarkTower.WarMachine.MachineModelSpec does not exist
+
+Script done on 2026-09-12 18:49:25+00:00 [COMMAND_EXIT_CODE="1"]
