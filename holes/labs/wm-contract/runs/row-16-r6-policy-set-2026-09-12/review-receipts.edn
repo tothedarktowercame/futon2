@@ -1,0 +1,58 @@
+{:records
+ {"R6-policy-set-production-20260912T172809-v1"
+  {:subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePolicySet.lean",
+     :sha256
+     "104fab58f500a7bad3b11de3cd482cd1f790d70d7cb976905561a5ca773b3d05",
+     :declaration
+     "DarkTower.WarMachine.MachinePolicySet.machinePolicySet"},
+    :scope :production-trace-details-record-20260912T172809-policy-set,
+    :node :R6,
+    :as-of "2026-09-12",
+    :id "R6-policy-set-production-20260912T172809-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machinePolicySet",
+    :artifact
+    {:repo "mathlib4",
+     :path
+     "DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean",
+     :sha256
+     "638b1627a1f7b3c3763de4d9cca4bc47d5cdec1cbcd342504ed4d49531567ac9",
+     :module "DarkTower.WarMachine.MachinePolicySetMeasurementWitness",
+     :declaration
+     "DarkTower.WarMachine.MachinePolicySetMeasurementWitness.exactProjectedSet"},
+    :quantity :pi,
+    :claim
+    "The 148 candidates projected from the pinned production details record form exactly machinePolicySet of that projected ranked list; every projected candidate is a member. The projection losslessly carries rank, controller-score binary64 bits, and the no-op marker.",
+    :equation :policy-set},
+   :verdict :approved,
+   :reviewer "claude-15",
+   :reviewed-at "2026-09-12",
+   :basis
+   "Reviewed on bellback: projection namespace machine_policy_set.clj read in full — declared and tested, exact raw binary64 bit pattern into Lean Int (lossless, no ordering claim, matching machinePolicySet's extensional membership law); reviewer independently recomputed the rank-1 candidate's bits (4611730693289401505) from the pinned record — matches the Lean witness first entry, 148 candidates confirmed; claim held to machinePolicySet, not widened to selectionPolicySet; production trace reader matched all 148 projected candidates with reorder/drop refusing :policy-set-projection-mismatch; count/membership/extensional theorems axiom-free; receipts commit-first with failed lint/native-axiom attempts retained; disposable merge 32 verified-binding + this claim pending, zero refusals",
+   :verification
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/verification-receipts.edn",
+    :sha256
+    "21ef99e3decd36cf343041b34128b81ffc76fd47df7516f63ce0ceacaf2f5092",
+    :selector
+    [:records "R6-policy-set-production-20260912T172809-v1"]},
+   :dependencies
+   [{:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/verification-receipts.edn",
+     :sha256
+     "21ef99e3decd36cf343041b34128b81ffc76fd47df7516f63ce0ceacaf2f5092"}
+    {:repo "mathlib4",
+     :path
+     "DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean",
+     :sha256
+     "638b1627a1f7b3c3763de4d9cca4bc47d5cdec1cbcd342504ed4d49531567ac9"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachinePolicySet.lean",
+     :sha256
+     "104fab58f500a7bad3b11de3cd482cd1f790d70d7cb976905561a5ca773b3d05"}]}}}
