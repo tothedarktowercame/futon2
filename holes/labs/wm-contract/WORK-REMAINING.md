@@ -435,8 +435,20 @@ operator workflow conversation (standdown 2026-09-12).
     production scheduled entrypoint through
     run-scheduled-dispatch!. The mechanism-level census cells
     (E-10-C/E-10-D exists-by-refusing-code) stand per the census
-    vocabulary. Packet 2 (R20 execution tripwires — real ledger
-    records DO exist for these) dispatched (codex-22).
+    vocabulary. PACKET 2 DONE (2026-09-12, futon2
+    2cc81a67/ba9b9890/00838b5e, reviewed): real ledger records
+    retained for worker-lost-on-restart, operator cancellation,
+    delivery failure + a successful control (reviewer
+    spot-checked the worker-lost fixture against the live
+    ledger — field-identical, redactions declared);
+    invoke-no-execution-evidence honestly typed
+    :no-real-ledger-instance (no induced failures); 32
+    chronology/single-terminal/execution/delivery assertions
+    over the fixtures; the credit artifact's maximum-claim
+    disclaims the catalogue-wide R20 node, VERIFY zeros
+    unchanged; source ledger sha + extraction time pinned; 24h
+    compaction of the worker-loss record noted honestly.
+    Packet 3 (R20 continuation credit) dispatched (codex-22).
 18. Implement R20's chartered interoceptive commitment link — the
     genuinely missing piece, distinct from row 17's crediting.
 19. Implement R9, "No self-certification": the checks that prevent
