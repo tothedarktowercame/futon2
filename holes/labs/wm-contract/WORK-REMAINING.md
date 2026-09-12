@@ -124,22 +124,15 @@ operator workflow conversation (standdown 2026-09-12).
     C-zero typed :risk :infinite, no epsilon. Reviewer re-ran the
     clj gate once (receipt had bound to the pre-commit tree); 3/32
     green at HEAD. Row-14 consumer integration is a later row.
-11. BLOCKED-BY row 6 (codex-24 discovery 2026-09-12, correct
-    refusal, no changes made): zero production
-    :wm/parameter-hypothesis-v1 registrations exist — only the
-    contract validator and a synthetic test fixture. Per the
-    spec's own build order (§ dependency table: completion "after
-    theta, likelihood and observation contract are bound").
-    UNBLOCK PLAN (no further scoping needed): once row 6's machine
-    A lands reviewed, register the two genuinely existing declared
-    alternatives as hypotheses — identity-B (transition-model-v1,
-    belief.clj:214) vs controlled-B (wm-status-action-prior-v1,
-    row 8) — each composed with the row-6 A into a states->
-    outcomes likelihood, with an explicitly recorded declared
-    prior over the two; all components exist in production source
-    with authority trails, so nothing is invented. Then
-    machine_parameters.clj + Bayes/compatibility Lean + witness
-    per §11.
+11. DONE (futon2 33791015..abb658a3, mathlib4 3b4fbfef..d8185c01;
+    reviewed 2026-09-12). Two real registered hypotheses
+    (identity-B vs controlled-B through the row-6 A), both passing
+    contract validation, placeholder-A caveat recorded in the
+    registrations with the row-6 pointer. Bayes posterior moves on
+    informative outcomes ({1,0}/{0,1}), preserved on
+    noninformative; posterior-predictive equals likelihood
+    marginal; zero-evidence, support-mismatch, and mutated-
+    registration controls refuse. PHASE 1 COMPLETE with this row.
 
 ## Phase 2 — learning arrows and the remaining equations (5)
 
