@@ -10,4 +10,8 @@
  :controls [:recount-current-tick-only :dropped-middle-tick :support-mismatch]
  :preflight [{:command "lake env lean DarkTower/WarMachine/MachineAccumulationWitness.lean"
               :exit 1 :reason :missing-machine-accumulation-olean
-              :resolution "Built the existing dependency target, then ran the commissioned elaboration."}]}
+              :resolution "Built the existing dependency target, then ran the commissioned elaboration."}
+             {:command "bb scripts/merge_witnesses.bb --output /tmp/row16-r17-registry.edn"
+              :exit 1 :reason :node-witness-subject-mismatch
+              :detail "aif-equations :lean is 'DirichletConcentrations (carrier only, Holes.lean:6935-6936)' while canonical fragment ownership and the declaration name are 'DirichletConcentrations'; validate! requires exact equality."}]
+ :admission-status :blocked-by-authority-identity}
