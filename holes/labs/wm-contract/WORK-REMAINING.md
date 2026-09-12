@@ -84,18 +84,23 @@ hypotheses; continuous Dirichlet a named exclusion). Rows 6-11
 implementation packets are ready to dispatch and HELD pending
 operator workflow conversation (standdown 2026-09-12).
 
-6. DONE (futon2 c1a66818..3503686d, mathlib4 b3f9dcae..ed6993c5;
-   reviewed 2026-09-12). Q(o|pi)=sum_s A(o|s)Q(s|pi) over row 9's
-   terminal; MachineQ bridge theorem proven (non-vacuous, pins the
-   QReading to the actual carriers); constant disposition adapter
-   fails the sensitivity control; twelve-outcome support from the
-   contract authority. NOTE forward to row 14: the witness's A
-   instance (wm-state-outcome-prior-v1) is an honest declared
-   prior whose CONTENT is positional placeholder (state i ->
-   outcome i mod 12); the constructor reads A from the model
-   instance, so row 14's integration must carry a reviewed
-   declared correspondence as the machine's A content, not this
-   placeholder.
+6. LEGS (a)+(b) DONE; LEG (c) REOPENED 2026-09-12 (codex-24
+   batch-A audit, TN 7e19ef83): the witness readback set
+   :lean-reference to the production row itself — circular, so
+   its 0.0 deltas were tautological. Caught by the batch-A
+   exact-reference audit, missed in the original review (a
+   mechanical delta check cannot detect reference circularity;
+   reviews now check reference independence). The Lean module,
+   bridge theorem, refusals, and sensitivity control all stand
+   (proven in Lean, independent). REPAIR (packet out, codex-24):
+   derive independent exact/rational references from the pinned
+   row-9 inputs; record production-vs-reference deltas plus the
+   :float-carried admission (production sums are 1.00000000000000005
+   /...06 exactly — within v1.1's bound, but the exact Lean
+   normalization must use the exact-rational reference, never the
+   production bytes as their own reference). Failed Lean attempt
+   retained unamended (mathlib4 c86eed2bba, removed f893753dfc).
+   Row-14 placeholder-A note unchanged.
 7. DONE (futon2 72950ab5..e6d52a2a, mathlib4 4750f9fa; reviewed
    2026-09-12). Leg (c) surfaced a real contract conflict —
    production float rows sum one ulp off 1 — settled as contract
@@ -187,9 +192,18 @@ operator workflow conversation (standdown 2026-09-12).
     additive input capture (R8 free-energy, R8 policy-F, R5
     ambiguity, R6 policy-set, R17 model-reduction — capture
     candidates for the row-13 trace envelope seam). Scope: 10
-    proofs. Batch A out (codex-24: R4 forward-model, R5 risk, R5
-    expected-free-energy); batch B queued (R6 softmax, R17
-    accumulation binding).
+    proofs. BATCH A SPLIT (TN 7e19ef83, audit supersedes the
+    inventory's provable-now verdicts for these three): R4 needs
+    the row-6 leg-(c) repair (independent exact reference); R5
+    risk needs a complete retained Q/C pair from the row-14
+    consumer plus a reviewed production categorical-risk function
+    (unsupported-risk classifies one boundary only; the
+    strict-positivity premise is unprovable on seven-zero C); R5
+    expected-free-energy needs full scoring-input capture or a
+    reviewed production EFE composer (the sum is inline in the
+    scorer; no production function accepts the retained scalars).
+    Batch B in flight (codex-22: R6 softmax, R17 binding — same
+    audit discipline applies).
 
 ## Phase 3 — the assurance nodes (4)
 
