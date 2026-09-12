@@ -452,7 +452,17 @@ operator workflow conversation (standdown 2026-09-12).
     envelope-construction failure refuses the selection;
     production read-only replay reconstructed the selected id
     exactly (2 policies, temperature 0.5, no actuation);
-    12 tests/62 assertions; (4b) TRACE RETENTION DONE
+    12 tests/62 assertions; (4c) LEAN EXTENSION DONE
+    (2026-09-12, mathlib4 817fb157, receipts f8a84067,
+    reviewed): ReasonBearingSelector.lean — new module, frozen
+    files sha-verified untouched; compat theorem over the full
+    old argument list holds by rfl; ln E_S - G_S/temperature
+    law with least-id tie theorem; typed refusals for
+    empty/incomplete/support-mismatch; PositiveSelectionWitness
+    is 4d's instantiation shape; scoped 8498-job build green,
+    no sorryAx. (4d) awaits the first post-reload record
+    carrying the selector envelope (capture stack deployed
+    2026-09-12). (4b) TRACE RETENTION DONE
     (2026-09-12, futon2 fc1891d0..b8bff35d, reviewed): the
     envelope threads unchanged into the persisted decision
     (byte-for-byte readback), three typed pre-append refusals,
