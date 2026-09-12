@@ -111,3 +111,46 @@ Cross-references: `NOTE-runtime-validation-invariants.md` (I8, V1–V3);
 `NOTE-apparatus-design-principles-index.md`;
 futon3c `TN-APM-pattern-first-development-2026-09-10.md` and the
 pattern-first blog evidence index.
+
+## Amendment 1 — WM sample scoring complete (2026-09-12, plan step 1)
+
+Report: `labs/wm-contract/CASCADE-RUBRIC-SCORING-2026-09-12.md` (zai-5,
+f12e0fae; scoring pins spot-checked by claude-15 against the run artifacts
+and the exemplar). Findings, which re-order the plan:
+
+1. **Persistence is the dominant gap, ahead of any schema field.** The WM
+   record holds essentially ONE full persisted wiring
+   (`labs/M-evaluate-policies/exhibit/fold-turn.edn`, 2026-07-03). All
+   twelve RUN4-era construction checkpoints carry `:wiring nil` — and the
+   numeric gate passed every one. **Twelve green gate-passes over a missing
+   artifact** is this note's primary WM exhibit for "the gate cannot see
+   the absence" (apparatus patterns `done-is-observed-running` /
+   `monitors-measure-the-work`; verbatim pointer:
+   `/home/joe/run4/U88-zai-successor-20260912-v4/cohort/run4-u88-zai-successor-20260912-v4/attempt-001/003-construction.edn`).
+2. **"Two patterns long" is the exact, uniform number** in the RUN4 era:
+   every cascade is the same `iching/hexagram-43-guai` +
+   `-44-gou` halo, score −0.703, eleven-plus consecutive turns, 0 boxes.
+   The exemplar shows the fuller shape is attainable: 6 patterns, 6 boxes,
+   linear chain, honest holes.
+3. **Exemplar scores ≈ 2.5/6**: M2 (warrant-per-step) and M4 (loud holes —
+   the best mechanism in the record) pass; M1 partial (decomposition
+   without named obligations); M3 (condition status), M5 (contrast), M6
+   (evidence-linked discharge) fail. Warrant reality within it: 2 real,
+   1 stretched, 1 decorative (side-by-side quotes in the report).
+4. **Schema delta** (for the fold output, per box): pattern revision;
+   warrant-kind enum (pattern / worked example / deduction); condition
+   triples `{:condition :status :witness|:obstruction}` replacing
+   unstatused `:addresses-however` prose; obligation id/owner/discharge
+   gate on holes; `:contrast` and `:evidence` fields for marks 5–6.
+   `:wires`/DAG usable as-is (Lean carriers already pin it).
+
+Verdict (zai-5, concurred by claude-15): Joe's "minor change" reading is
+right — the gap is demand-side (gate/schema), not capability — with the
+caveat that marks 5–6 were absent even in the hand-run exemplar, so
+capability there is untested rather than shown. **Plan re-order:** the
+checker-transfer probe (old step 3) is premature against nil wirings; the
+first implementation slice is (a) gate demands `:wiring` non-nil, then
+(b) marks 1–4 as mechanical schema demands, with marks 5–6 answered
+empirically by reviewed scoring after structure exists. Ownership note:
+the construction checkpoints live in the RUN4 runner chain; that chain has
+a named owner and this note does not commission changes to it.
