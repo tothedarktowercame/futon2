@@ -20,7 +20,7 @@
 (def controls
   {:missing-a-support
    (predictive/predictive-outcome-kernel
-    (update-in model [:A :rows] dissoc (first user/states))
+    (update-in model [:A :rows] dissoc (first (row9-var "states")))
     (:belief-input (row9-var "belief-result")) (row9-var "kernel") all-policies)
    :foreign-model
    (predictive/predictive-outcome-kernel
