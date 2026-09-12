@@ -1,0 +1,36 @@
+{:schema :wm/enriched-fold-rehearsal-run-record-v1
+ :mission {:id "M-u88-contextual-preferences" :status :open
+           :source "holes/missions/M-u88-contextual-preferences.md"
+           :sha256 "988c74ce4870e99eb6d60f72fb21487ddfbab3e9b71f8e6021e6617aee7b0b53"}
+ :source-run {:series "run4-u88-zai-successor-20260912-v4"
+              :cohort :run4-u88-zai-successor-20260912-v4
+              :attempt "attempt-001"
+              :selection {:path "/home/joe/run4/U88-zai-successor-20260912-v4/cohort/run4-u88-zai-successor-20260912-v4/attempt-001/002-selection.edn"
+                          :sha256 "dde6e31335bc0a2273494cbb51871368c8351df771ad7cdd530d90645b0bd6de"}
+              :construction {:path "/home/joe/run4/U88-zai-successor-20260912-v4/cohort/run4-u88-zai-successor-20260912-v4/attempt-001/003-construction.edn"
+                             :sha256 "af7ad4b55801cc7986a2be118a6e755ebe40f6cfa906c1037c12d9742d602f6e"}}
+ :rehearsal {:worker "zai-5"
+             :job "invoke-1789228389623-20416-1cb6bc77"
+             :started-at "2026-09-12T15:53:10.246776969Z"
+             :finished-at "2026-09-12T15:54:20.389998566Z"
+             :execution {:executed true :tool-events 3 :command-events 0}}
+ :artifacts {:packet {:path "packet.edn"
+                      :sha256 "bfce2626298cfe40d24dc7373425a6bde45b43e67bc7627774f4b1663733785f"}
+             :cascade {:path "selected-cascade.edn"
+                       :sha256 "f7b520f264edeea52f152940bcaecf9bf2f3cbd3f7d56cbd5b933eca9dca87b8"}
+             :fold-output {:path "fold-output.edn"
+                           :sha256 "ec49d32f63157e2206c5c88e64a7f932097488975a9f723597b01b658841fa6b"}
+             :validator-results {:path "validator-results.edn"
+                                 :sha256 "4d51e8fc8d93c9b1fa28912177ca5f85b25f8e170fb2b127d92a298807419e08"}}
+ :validators {:fold-output-v1 :green
+              :fold-correspondence :green
+              :runner-construction-gate :wired
+              :cohort-construction-gate :green}
+ :deliverables {:selection-and-G :pinned-from-real-run
+                :selected-cascade :persisted
+                :enriched-wiring :persisted
+                :holes :persisted}
+ :result {:runtime-validation :green
+          :task-success :not-claimed
+          :mission-closure :not-performed
+          :lean-attestation :suspended-vocabulary}}

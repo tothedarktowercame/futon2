@@ -1,0 +1,10 @@
+{:schema :wm/enriched-fold-rehearsal-cascade-v1
+ :mission "M-u88-contextual-preferences"
+ :source-checkpoint "/home/joe/run4/U88-zai-successor-20260912-v4/cohort/run4-u88-zai-successor-20260912-v4/attempt-001/003-construction.edn"
+ :psi "u88 contextual preferences — want: M-u88-contextual-preferences — OPEN — fixture episode milestone pending. have: OPEN — fixture episode milestone pending mission substrate: M-u88-contextual-preferences — OPEN — fixture episode milestone pending [open; advance open holes]"
+ :cascade-score -0.703
+ :shown ["iching/hexagram-43-guai" "iching/hexagram-44-gou"]
+ :descent [["iching/hexagram-43-guai" "iching/hexagram-44-gou"]
+           ["iching/hexagram-44-gou" "iching/hexagram-43-guai"]]
+ :selected-action {:type :advance-mission :target "M-u88-contextual-preferences"}
+ :selection-rationale "The genuine v4 production selection targeted the still-open U88 fixture-episode milestone. This rehearsal reuses that captured G/construction instead of synthesizing a favorable cascade."}

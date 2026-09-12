@@ -1,0 +1,27 @@
+{:wiring {:boxes [{:id :b1
+   :role "Commission the mission-closure independent review of the implemented fixture interpreter and frozen 11-event episode (commits ee5ab864, 5d595dc9, 0b5cd411): a bounded read-only reviewer seat verifying episode derivation, replay idempotence, and the no-adoption boundary, returning a terminal verdict marker."
+   :fits-pattern {:pattern/id "iching/hexagram-43-guai" :pattern/revision "86b57cb@2026-05-04"}
+   :warrant-kind :pattern
+   :conditions [{:condition "a clear obstacle remains: the mission record is OPEN with the fixture-episode milestone implemented but not independently closed" :status :established :witness "mission status line 'OPEN — fixture episode milestone pending' in the v4 selection rationale; commits 0b5cd411/5d595dc9/ee5ab864 on futon2 main"}
+                {:condition "momentum is sufficient: the milestone work passed its own gates before this turn" :status :established :witness "0b5cd411 commit message (8 tests / 143 assertions, clj-kondo, check-parens) and the v4 review-gate record (30 tool-events, passed)"}
+                {:condition "restraint: the review contract stays scoped to the fixture boundary and cannot mutate live lanes" :status :unchecked :witness "the bounded review-prompt shape used by today's in-loop reviews (invoke-1789215401163) is the available precedent; this turn does not dispatch, so the restraint is unexercised here"}]
+   :produces :closure-review-commission
+   :hole {:kind :sorry :discharge :independentReview :wanted "the review actually run and its terminal verdict consumed through the mission-closure path" :obligation/id "M-u88-closure-review"}}
+  {:id :b2
+   :role "Amend the mission record after the review verdict lands: replace the stale 'fixture episode milestone pending' status with the reviewed state and reconcile the mission's open-hole ledger, changing no source outside the mission record."
+   :fits-pattern {:pattern/id "iching/hexagram-44-gou" :pattern/revision "86b57cb@2026-05-04"}
+   :warrant-kind :deduction
+   :conditions [{:condition "a verdict exists to integrate (produced by :b1)" :status :absent :obstruction ":b1 is unexecuted in this fold turn; integrating a pending verdict would be the immediate-attachment failure mode"}
+                {:condition "the integration changes only what is stable: the record, not the interpreter" :status :established :witness "the interpreter and episode are frozen on main; this box names no code artifact"}]
+   :consumes [:closure-review-commission]
+   :produces :mission-record-closed-or-amended
+   :hole {:kind :sorry :discharge :missionClosure :wanted "the status-line amendment itself, once :b1's verdict exists" :obligation/id "M-u88-closure-review"}}]}
+ :coverage-score-delta -0.5
+ :policy-holes [{:free "live adoption, transport, or selector wiring for contextual preferences"
+   :why "the mission contract forbids adoption in this turn, and gou's THEN — integrate only what is stable — licenses the deferral rather than closing it: the live lane is exactly the sudden influence the pattern warns against attaching to immediately"
+   :unfolded-pattern "iching/hexagram-44-gou"
+   :obligation/id "M-u88-adoption-boundary"}
+  {:free "review methodology itself (verdict vocabulary, gate re-execution duties, marker protocol)"
+   :why "the two-pattern halo licenses commissioning the review (guai's decisive action) but grounds nothing about HOW a review is conducted; that methodology is warranted today only by the worked example of the in-loop reviews, not by any pattern in this cascade"
+   :unfolded-pattern "iching/hexagram-43-guai"
+   :obligation/id "M-u88-review-methodology"}]}

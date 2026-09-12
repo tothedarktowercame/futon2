@@ -1,0 +1,13 @@
+{:schema :wm/enriched-fold-runtime-validation-v1
+ :validated-at "2026-09-12T15:55:00Z"
+ :fold {:validator futon2.aif.fold/validate-fold-output-v1
+        :result {:ok true :fold/schema :enriched :findings []}}
+ :correspondence {:validator futon2.aif.fold/validate-fold-correspondence
+                  :cascade ["iching/hexagram-43-guai" "iching/hexagram-44-gou"]
+                  :result {:ok true :findings []}}
+ :runner-gate {:validator futon2.aif.full-loop-runner/construction-wiring-result
+               :status :wired}
+ :checkpoint-gate {:validator futon2.aif.full-loop-cohort/checkpoint-cell-errors
+                   :source-preregistration :run4-u88-zai-successor-20260912-v4
+                   :errors []}
+ :claim-boundary "Runtime validation only. No Lean attestation or Lean-validation claim is made."}

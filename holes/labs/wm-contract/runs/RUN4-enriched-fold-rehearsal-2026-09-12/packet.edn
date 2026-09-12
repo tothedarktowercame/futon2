@@ -1,0 +1,15 @@
+{:schema :wm/enriched-fold-rehearsal-packet-v1
+ :mission "M-u88-contextual-preferences"
+ :mission-status :open
+ :selected-cascade "selected-cascade.edn"
+ :fold-output "fold-output.edn"
+ :fold-worker {:agent "zai-5"
+               :job "invoke-1789228389623-20416-1cb6bc77"
+               :execution {:executed true :tool-events 3 :command-events 0}}
+ :contract {:fold-validator futon2.aif.fold/validate-fold-output-v1
+            :correspondence-validator futon2.aif.fold/validate-fold-correspondence
+            :runner-gate futon2.aif.full-loop-runner/construction-wiring-result
+            :checkpoint-gate futon2.aif.full-loop-cohort/append-checkpoint!}
+ :claim-boundary "Runtime validation only. This rehearsal makes no Lean-attestation or Lean-validation claim."
+ :task-result :not-claimed
+ :closure :not-performed}
