@@ -13,10 +13,11 @@
   :state [:addressed :falsified :foreclosed :refined :reopened :spawned :strengthened]}
  :declared-update "a[t+1,o,s] = a[t,o,s] + observation[t,o] * belief[t,s]"
  :initialization {:authority :declared :prior 1.0}
- :steps 3 :coordinates-per-step 98 :compared-coordinates 294
- :comparison {:lean-reference :declaredAccumulation
+ :steps-planned 3 :coordinates-per-step 98 :compared-coordinates 0
+ :comparison {:status :not-executed
+              :lean-reference :declaredAccumulation
               :clojure-production :futon2.aif.machine-accumulation/step
-              :maximum-absolute-delta 0.0 :zero-values-measured true}
+              :maximum-absolute-delta nil :zero-values-measured false}
  :controls [{:mutation :recount-current-tick-only :result :failed-recurrence}
             {:mutation :dropped-middle-tick :refusal :carry-chain-gap}
             {:mutation :support-mismatch :refusal :support-mismatch}]
