@@ -595,10 +595,25 @@ operator workflow conversation (standdown 2026-09-12).
     :r9/anchor-missing). Roles come from declared bindings
     verified against job targets — never inferred from name
     prefixes. Seven packets, strict deps (2-7 on 1; 3-6 on 2;
-    7 on 3). Packet 2 (pure identity/join checker) dispatched
-    BUILD-ONLY (codex-22): module + tests + one retained real
-    producer/reviewer pair execution; its own ADMISSION is
-    :awaiting-anchor by design.
+    7 on 3). PACKET 2 BUILT (2026-09-12, futon2
+    8d208949..3a74f2c9, reviewed; admission :awaiting-anchor by
+    design): r9_checker.clj implements the eight joins with
+    closed typed refusals; roles only from declared bindings
+    joined to job agent-ids (no prefix inference — reviewer
+    verified in source); the anchor check runs LAST and binds
+    the exact checker source sha, so a fully-joined pair still
+    refuses :r9/anchor-missing (fixture-verified). REAL-PAIR
+    RUN (reviewer spot-checked both jobs in the live ledger:
+    producer codex-17, reviewer claude-15, caller zai-7, both
+    with execution evidence): identity/distinct-seat/artifact
+    joins PASSED on real records; the review-request-digest
+    join refused honestly — the ledger trims prompt events so
+    the digest preimage is unrecoverable. RETENTION GAP
+    (anchor-era prerequisite): review commissions (or their
+    digest preimages) must be durably retained for reviewer
+    jobs, else the digest join can never pass on real data.
+    2 tests/12 assertions green; receipts commit-first with
+    failure receipts retained.
     :blocker DECISION NEEDED (packet 1 — the bootstrap anchor
     is an owner ruling; "author was Codex, reviewer was Claude"
     is not a rule since model-family names are not
