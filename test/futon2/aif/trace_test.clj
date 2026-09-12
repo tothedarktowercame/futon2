@@ -321,6 +321,52 @@
       (is (= [0.0 0.7] (mapv :structural-pressure rs))
           "trace preserves the structural-pressure term in ranked-actions"))))
 
+(def ^:private machine-q-support
+  [[:organization :abstained] [:organization :agent-unavailable]])
+
+(defn- machine-q-pair [policy-id q-mass]
+  (let [c-mass (zipmap machine-q-support [0.5 0.5])]
+    {:q {:policy/id policy-id :authority {:authority :declared-prior :name "A-v1"}
+         :model {:id "wm" :revision "v1"} :support machine-q-support
+         :mass q-mass :pins {:A "sha-a" :model "sha-model"}}
+     :c {:model {:id "wm" :revision "v1"} :support machine-q-support
+         :mass c-mass :provenance {:source "ruled-C" :sha256 "sha-c"}}
+     :risk {:ok true :policy/id policy-id :risk 0.1}
+     :weight 2.0 :G-machine-q-risk 0.2}))
+
+(defn- machine-q-output []
+  (update sample-judge-output :ranked-actions
+          (fn [actions]
+            (mapv (fn [action pair] (assoc action :machine-q pair)) actions
+                  [(machine-q-pair "policy-1" (zipmap machine-q-support [0.75 0.25]))
+                   (machine-q-pair "policy-2" (zipmap machine-q-support [0.25 0.75]))]))))
+
+(deftest machine-q-pairs-survive-write-read-exactly-test
+  (let [output (machine-q-output)
+        expected (mapv :machine-q (:ranked-actions output))]
+    (trace/write-trace! output :dir *tmpdir* :date-str "2026-09-12")
+    (let [[record] (trace/read-trace :dir *tmpdir* :date-str "2026-09-12")]
+      (is (= expected (mapv :machine-q (:ranked-actions record))))
+      (is (= 2 (count expected))))))
+
+(deftest incomplete-or-reordered-machine-q-refuses-before-append-test
+  (doseq [[expected mutate]
+          [[:machine-q-missing-q #(update-in % [:ranked-actions 0 :machine-q] dissoc :q)]
+           [:machine-q-missing-c #(update-in % [:ranked-actions 0 :machine-q] dissoc :c)]
+           [:support-mismatch #(update-in % [:ranked-actions 0 :machine-q :c :support]
+                                          (comp vec reverse))]]]
+    (let [path (io/file *tmpdir* "wm-trace-2026-09-12.edn")]
+      (is (= expected
+             (try (trace/write-trace! (mutate (machine-q-output))
+                                      :dir *tmpdir* :date-str "2026-09-12")
+                  nil
+                  (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e))))))
+      (is (not (.exists path)) "refusal occurs before any append"))))
+
+(deftest record-without-machine-q-remains-machine-q-free-test
+  (let [record (trace/trace-record sample-judge-output)]
+    (is (every? #(not (contains? % :machine-q)) (:ranked-actions record)))))
+
 (deftest goal-outcome-replay-inputs-survive-trace-test
   (let [expected (get-in sample-judge-output
                          [:ranked-actions 0 :goal-outcome-replay-inputs])

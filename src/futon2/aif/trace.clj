@@ -81,6 +81,37 @@
   ([] (daily-path default-trace-dir (today-date-string)))
   ([dir date-str] (str dir "/wm-trace-" date-str ".edn")))
 
+(defn- validated-machine-q
+  "Admit the complete scorer-produced Q/C pair before it reaches an append.
+   Retention is byte-for-byte; this boundary checks completeness and ordered
+   support only, leaving probability admission to the scorer's adapter."
+  [ranked-action]
+  (when (contains? ranked-action :machine-q)
+    (let [pair (:machine-q ranked-action)
+          q (:q pair)
+          c (:c pair)]
+      (when-not (map? q)
+        (throw (ex-info "Machine-Q trace requires Q"
+                        {:refusal :machine-q-missing-q :path [:machine-q :q]})))
+      (when-not (map? c)
+        (throw (ex-info "Machine-Q trace requires C"
+                        {:refusal :machine-q-missing-c :path [:machine-q :c]})))
+      (doseq [[part value fields]
+              [[:machine-q pair [:q :c :risk :weight :G-machine-q-risk]]
+               [:q q [:support :mass :policy/id :authority :pins]]
+               [:c c [:support :mass :model :provenance]]]
+              field fields]
+        (when-not (contains? value field)
+          (throw (ex-info "Machine-Q trace pair is incomplete"
+                          {:refusal :machine-q-incomplete
+                           :path [part field]}))))
+      (when-not (= (:support q) (:support c))
+        (throw (ex-info "Machine-Q trace support order mismatch"
+                        {:refusal :support-mismatch
+                         :path [:machine-q :support]
+                         :Q (:support q) :C (:support c)})))
+      pair)))
+
 (defn- strip-ranked-action
   "Compact a ranked-action entry for trace — keep the EFE summary plus
    the action. By default the deeply-nested :prediction remains omitted.
@@ -90,6 +121,9 @@
    `:predictability-bonus` + `:homeostatic-pressure`; v0.14 added `:time-pressure`; v0.15
    added `:horizon-steps`; v0.20 adds `:structural-pressure`."
   [r]
+  ;; Validate before constructing any record; write-trace! cannot append a
+  ;; partial or support-reordered machine-Q/C pair.
+  (let [machine-q (validated-machine-q r)]
   ;; :G-goal-outcome (R19, 2026-07-02): the belly's predictive-risk term was
   ;; computed per action but STRIPPED here — so no flight could show the belly
   ;; steering. Persist it: the R19 analog of R16's :act-gate-verdicts audit.
@@ -135,6 +169,8 @@
                    :move-class-intensity-mode :move-class-intensity-contribution
                    :move-class-intensity
                    :controller-score :rank :time-pressure :horizon-steps])
+    machine-q
+    (assoc :machine-q machine-q)
     (:c-fold-provenance r)
     (assoc :c-fold-provenance (:c-fold-provenance r)
            :G-ruled-outcome-c (:G-ruled-outcome-c r)
@@ -149,7 +185,7 @@
            ;; F_pi distinguishes a genuinely deterministic zero from a channel
            ;; for which the action model supplied no variance.
            :prediction-variance-status
-           (get-in r [:prediction :next-observation :variance-status]))))
+           (get-in r [:prediction :next-observation :variance-status])))))
 
 (defn- ranked-candidate-id
   "Tick-local stable candidate id retained across stripping. Rank is already
