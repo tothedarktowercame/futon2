@@ -1,8 +1,7 @@
 #!/usr/bin/env bb
 
 (require '[clojure.edn :as edn]
-         '[clojure.java.io :as io]
-         '[clojure.string :as str])
+         '[clojure.java.io :as io])
 (import '(java.security MessageDigest)
         '(java.time Instant))
 

@@ -1,0 +1,7 @@
+{:command "clj-kondo --lint holes/labs/wm-contract/runs/row-17-r20-tripwires-2026-09-12/extract_and_verify.bb"
+ :exit 2
+ :errors 0
+ :warnings 1
+ :finding "clojure.string was required but never used"
+ :tree-sha "2cc81a678027df8b7cef473c66aa98f835fe23f3"
+ :at "2026-09-12T20:22:00Z"}
