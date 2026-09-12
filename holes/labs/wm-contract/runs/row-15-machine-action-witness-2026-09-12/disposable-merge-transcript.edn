@@ -1,0 +1,14 @@
+{:command "bb scripts/merge_witnesses.bb --output /tmp/row15-machine-action-witness.edn"
+ :exit 0
+ :scope :all-real-witness-fragments
+ :claims
+ [{:id "R16-machineAction-live-selector-divergence-20260912-v1"
+   :status :verified-binding :polarity :refutes
+   :scope :production-trace-record-20260912T172809-live-selector-divergence}
+  {:id "R16-machineAction-internal-branches-20260912-v1"
+   :status :pending :polarity :supports
+   :scope :machinery-capture-and-direct-invocations-2026-09-12}]
+ :refusals []
+ :admission-count 35
+ :input-sha256 "832917a9726714014bcfc80cef664763c0573b79994d643b55947b799893ef8c"
+ :canonical-registry-written? false}
