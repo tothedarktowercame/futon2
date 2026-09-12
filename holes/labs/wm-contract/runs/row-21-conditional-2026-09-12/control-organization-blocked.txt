@@ -1,0 +1,2 @@
+{:pass? false, :drawn-edges 33, :classified 22, :unclassified 11, :errors [{:error :unpinned-or-absent-read, :read {:path "p4ng/empirics-futon/control-stages.edn", :sha256 "ff067a3cf57df8e105a637df713decac12cf726d9ae53791a516875335fd9fe0"}}]}
+control-organization-check: FAIL exit-convention=0-pass/1-fail

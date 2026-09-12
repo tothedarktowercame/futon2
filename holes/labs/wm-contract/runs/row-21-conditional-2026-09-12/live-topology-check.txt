@@ -1,0 +1,1 @@
+figure-4a-generator: PASS {:output /home/joe/code/p4ng/aif-control-map-live.svg, :current true} exit-convention=0-pass/1-fail

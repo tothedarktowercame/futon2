@@ -1,0 +1,11 @@
+{:schema :wm/row-21-conditional-delta-v1
+ :before {:p4ng-tree "5c84b6a420df270a037291901053cb4f57ab4201"
+          :drawn 29 :conformant 14 :conditional-conformant 0
+          :realised-undrawn 3 :retired-source [[:R3a :R8]]}
+ :after {:p4ng-tree "b3efb0ee817794dc8c6d4f4a2a1921c757cbceae"
+         :drawn 32 :conformant 14 :conditional-conformant 3
+         :realised-undrawn 0 :retired-source [[:R3a :R8]]}
+ :row-21-disposition {:always-on 8 :conditional 3 :retired-source 1}
+ :paper-svg {:status :awaits-figure-owner
+             :byte-edited? false
+             :spec "p4ng/empirics-futon/row-21-base-figure-edit-spec.edn"}}

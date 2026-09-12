@@ -1,0 +1,4 @@
+production_caller_controls: PASS positive expected-gap and negative missing-caller
+positive_receipt_reattestation_controls: PASS -- fresh receipt accepted; planted unre-attested drift rejected
+dependency_frontier_controls: PASS -- missing pair named; stale witness degraded; re-witness held
+negative_controls: FAIL -- tetrahedron's unknown-row-source failure did not name the row

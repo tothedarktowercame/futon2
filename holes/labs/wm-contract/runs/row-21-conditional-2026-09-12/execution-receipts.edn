@@ -1,0 +1,44 @@
+{:schema :wm/execution-receipts-v1
+ :subject :row-21-conditional-batch
+ :at "2026-09-12T21:34:20Z"
+ :receipts
+ [{:gate :conditional-controls
+   :command "empirics-futon/row21_conditional_control.sh"
+   :exit 0 :tests 4 :assertions 4
+   :tree-sha "268119cc339adc5e2395c549c32f6ac30aa4cd12"
+   :transcript "conditional-controls.txt"}
+  {:gate :disposable-conformance-generation
+   :command "env AIF_OUT=/tmp/row21-conditional-gate/ bb empirics-futon/gen_aif_dag.bb"
+   :exit 0 :tests 1 :assertions 8
+   :tree-sha "268119cc339adc5e2395c549c32f6ac30aa4cd12"
+   :transcript "conformance-generation.txt"}
+  {:gate :live-topology-check
+   :command "bb empirics-futon/gen_live_topology.bb --check"
+   :exit 0 :tests 1 :assertions 1
+   :tree-sha "b3efb0ee817794dc8c6d4f4a2a1921c757cbceae"
+   :transcript "live-topology-check.txt"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint empirics-futon/gen_aif_dag.bb empirics-futon/gen_live_topology.bb empirics-futon/row21_conditional_check.bb"
+   :exit 0 :tests 3 :assertions 3
+   :tree-sha "b3efb0ee817794dc8c6d4f4a2a1921c757cbceae"
+   :transcript "clj-kondo.txt"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- empirics-futon/gen_aif_dag.bb empirics-futon/gen_live_topology.bb empirics-futon/row21_conditional_check.bb"
+   :exit 0 :tests 3 :assertions 3
+   :tree-sha "b3efb0ee817794dc8c6d4f4a2a1921c757cbceae"
+   :transcript "check-parens.txt"}]
+ :blocked-gates
+ [{:gate :negative-controls
+   :command "bash empirics-futon/negative_controls.sh"
+   :exit 1 :tree-sha "b3efb0ee817794dc8c6d4f4a2a1921c757cbceae"
+   :transcript "negative-controls-blocked.txt"
+   :finding "Pre-existing tetrahedron unknown-row-source diagnostic failure; the dedicated Row 21 controls passed."}
+  {:gate :control-organization-check
+   :command "bb checks/control_organization_check.clj"
+   :exit 1 :tree-sha "b3efb0ee817794dc8c6d4f4a2a1921c757cbceae"
+   :transcript "control-organization-blocked.txt"
+   :finding "The edge population and classifications agree (33/22/11); the check refuses the unrelated stale control-stages.edn pin."}]
+ :attempts [{:gate :live-topology-check
+             :command "bb empirics-futon/gen_live_topology.bb --check"
+             :exit 1 :tree-sha "268119cc339adc5e2395c549c32f6ac30aa4cd12"
+             :finding "The generated footer named the pre-commit input tree. Follow-up b3efb0e regenerated after the ledger commit; the check then passed."}]}
