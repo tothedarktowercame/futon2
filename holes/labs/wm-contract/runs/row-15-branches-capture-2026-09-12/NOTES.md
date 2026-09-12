@@ -17,3 +17,12 @@ it is not claimed as a naturally observed F_pi vector.
 The tie control duplicates one real controller score onto a second real
 candidate and records both indices and the score. This is a commissioned
 mutation retained to expose deterministic tie behavior, not an observed tie.
+
+The first execution attempt generated an in-memory judgement and then refused
+while projecting it through `trace/trace-record`: the rank-join boundary found
+`rank/149` in the ranked list but absent from the decision softmax map. The
+attempt wrote no capture artifact and touched no external trace. The failure is
+retained in `failed-attempt.edn`. The follow-up removes that unnecessary second
+projection: this packet requires the complete in-memory decision and ranked
+actions, which the machinery result already supplies, and is not a trace-writer
+test. The mismatch remains a typed finding rather than being hidden.

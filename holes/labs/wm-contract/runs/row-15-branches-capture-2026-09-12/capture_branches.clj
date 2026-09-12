@@ -53,10 +53,6 @@
 (def judgement (:judgement result))
 (def ranked (:ranked-actions judgement))
 (def decision (:decision judgement))
-(def trace-record
-  (binding [trace/*persist-policy-trace-details?* true]
-    (trace/trace-record judgement)))
-
 (when-not (and (seq ranked)
                (= 0.01 (:abstain-epsilon decision))
                (:tau decision)
@@ -120,8 +116,7 @@
                         :ranked-actions ranked
                         :habit-prior-state (:habit-prior-state judgement)
                         :f-pi-by-candidate-id (:f-pi-by-candidate-id judgement)
-                        :selection-gain (:selection-gain judgement)}
-            :trace-record trace-record}}
+                        :selection-gain (:selection-gain judgement)}}}
    {:file "controller-head.edn" :branch :controller-head
     :value (direct-record :controller-head ranked strategic-opts)}
    {:file "full-score-first-max.edn" :branch :full-score-first-max

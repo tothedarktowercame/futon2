@@ -1,0 +1,13 @@
+{:schema :wm/machine-action-branches-capture-failed-attempt-v1
+ :command "clojure -M holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/capture_branches.clj"
+ :exit 1
+ :tree-sha "0e9ad207"
+ :scope :redirected-machinery-tick
+ :external-write? false
+ :failure {:refusal :softmax-rank-join-incomplete
+           :path [:decision :softmax-weights]
+           :missing-ranked-keys ["rank/149"]
+           :extra-weight-actions []
+           :duplicate-rank-keys []}
+ :stage :post-generation-trace-record-projection
+ :report "/tmp/clojure-10796603376974808207.edn"}
