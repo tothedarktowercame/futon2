@@ -14,6 +14,8 @@
             [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
+            [futon2.aif.close-loop :as close-loop]
+            [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.mission-registry :as missions]
@@ -1292,6 +1294,31 @@
   target-bearing mission actions."
   [entry]
   (construct-selected-action entry))
+
+(defn construction-wiring-result
+  "Produce and classify fold wiring for a construction.  The optional port is
+  for server-owned fold implementations and induced commissioning tests; its
+  result is subject to the same gate."
+  ([construction] (construction-wiring-result construction nil))
+  ([construction wiring-fn]
+   (let [result (if wiring-fn
+                  (wiring-fn construction)
+                  (or (:fold (close-loop/act-gate-from-lane-entry construction
+                                                                    construction))
+                      ;; The act gate omits a score-bearing fold for an empty
+                      ;; cascade, but the record still needs a wiring object.
+                      (fold-classical/classical-fold
+                       (vec (:shown construction)) construction)))
+         wiring (:wiring result)
+         refusal (:refusal result)]
+     (cond
+       (and (some? wiring) (nil? refusal)) {:status :wired :wiring wiring}
+       (and (nil? wiring) (cohort/valid-fold-wiring-refusal? refusal))
+       {:status :refused :refusal refusal}
+       :else {:status :invalid
+              :failure-kind (if (some? refusal)
+                              :fold-wiring-refusal-invalid
+                              :fold-wiring-missing)}))))
 
 (defn- mission-for-decision [entry target]
   (let [action (:action entry)]
@@ -3009,7 +3036,10 @@
                                        (mission-fn target)
                                        (mission-for-decision entry target))
                             :construction ((or (:construct-fn opts)
-                                               construct-for-decision) entry)))]
+                                               construct-for-decision) entry)))
+              wiring-result (when construction
+                              (construction-wiring-result
+                               construction (:construction-wiring-fn opts)))]
           (when-not construction
             (throw (ex-info "No construction for selected decision"
                             {:outcome :construction-failed
@@ -3017,6 +3047,12 @@
                              :target target
                              :selected-entry
                              (select-keys entry [:action :controller-score :G-efe])})))
+          (when (= :invalid (:status wiring-result))
+            (throw (ex-info "Construction fold wiring is missing or malformed"
+                            {:outcome :construction-failed
+                             :failure-kind (:failure-kind wiring-result)
+                             :failure-stage :construction
+                             :target target})))
           ;; A selected action enters the canonical trace—and therefore the
           ;; learned habit prior—only after its production construction path
           ;; has been demonstrated. Failed selections remain fully auditable
@@ -3037,18 +3073,28 @@
                                                      :actuation-contract
                                                      :repair-contract])
                               :sorries (vec (:policy-holes construction))
-                              :wiring nil
+                              :wiring (:wiring wiring-result)
                               :patterns (vec (:shown construction))
                               :deposit nil
                               :trace-path trace-path}
                                pinned-selection
                                (assoc :run4/task-pin (:identity pinned-selection)
                                       :run4/operator-selection
-                                      (:provenance pinned-selection)))
+                                      (:provenance pinned-selection))
+
+                               (= :refused (:status wiring-result))
+                               (assoc :wiring-refusal (:refusal wiring-result)))
                              (cond-> {:kind :decision-pinned-construction
                                       :selected-action (:action entry)}
                                pinned-selection
                                (assoc :run4/task-pin (:identity pinned-selection)))))
+          (when (= :refused (:status wiring-result))
+            (throw (ex-info "Construction fold wiring explicitly refused"
+                            {:outcome :construction-failed
+                             :failure-kind :fold-wiring-refused
+                             :failure-stage :construction
+                             :target target
+                             :wiring-refusal (:refusal wiring-result)})))
           (when historical-action?
             (when-not (:historical-verification-execute-fn opts)
               (throw (ex-info "Historical verification execution port missing"

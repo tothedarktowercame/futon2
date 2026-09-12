@@ -44,6 +44,16 @@
   (and (map? x) (contains? x :judgment) (contains? x :ground)
        (some? (:ground x))))
 
+(defn valid-fold-wiring-refusal?
+  "True only for the exact exceptional refusal carried by a construction."
+  [x]
+  (and (map? x)
+       (= #{:schema :kind :grounds} (set (keys x)))
+       (= :wm/fold-wiring-refusal-v1 (:schema x))
+       (keyword? (:kind x))
+       (map? (:grounds x))
+       (seq (:grounds x))))
+
 (defn cell? [x]
   (or (grounded-term? x) (typed-sorry? x)))
 
@@ -63,8 +73,18 @@
                                 :semantic-epoch))
           code-present (set (keys (:code-state judgment)))
           missing-code (mapv (fn [k] [:missing-code-state-key k])
-                             (sort (remove code-present code-required)))]
-      (into missing-top missing-code))))
+                             (sort (remove code-present code-required)))
+          wiring-errors
+          (when (= :construction checkpoint)
+            (let [wiring (:wiring judgment)
+                  refusal (:wiring-refusal judgment)
+                  valid-refusal? (valid-fold-wiring-refusal? refusal)]
+              (cond
+                (and (some? wiring) (nil? refusal)) []
+                (and (nil? wiring) valid-refusal?) []
+                (some? refusal) [:invalid-fold-wiring-refusal]
+                :else [:missing-fold-wiring])))]
+      (into (into missing-top missing-code) wiring-errors))))
 
 (defn preregistration-errors [p]
   (cond-> []

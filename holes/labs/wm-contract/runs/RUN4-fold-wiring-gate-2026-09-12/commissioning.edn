@@ -1,0 +1,32 @@
+{:schema :wm/assurance-frontier-witness-v1
+ :pattern "apparatus/monitors-measure-the-work"
+ :violation-signature "A RUN4 construction persists silent nil fold wiring and the attempt proceeds."
+ :state :witnessed
+ :mechanisms
+ [{:path "src/futon2/aif/full_loop_runner.clj"
+   :sha256 "7741eb6dda0e1c594643970fff17923ef59969a99145f6187a08ea777cf766c8"}
+  {:path "src/futon2/aif/full_loop_cohort.clj"
+   :sha256 "84f41c3949cbc0a3afee5db3f017104269acce6479093e2853e538625d7a846d"}]
+ :induced-runs
+ [{:case :silent-nil
+   :production-path :futon2.aif.full-loop-runner/run-opportunity!
+   :injection {:construction-wiring-fn :returns-no-wiring}
+   :observed {:outcome :incomplete
+              :failure-kind :fold-wiring-missing
+              :named-repair-id "fold-wiring-missing"
+              :construction :not-reached}}
+  {:case :typed-refusal
+   :production-path :futon2.aif.full-loop-runner/run-opportunity!
+   :injection {:schema :wm/fold-wiring-refusal-v1
+               :kind :construction-evidence-unavailable
+               :grounds {:source :induced-commissioning-fixture}}
+   :observed {:outcome :incomplete
+              :failure-kind :fold-wiring-refused
+              :named-repair-id "fold-wiring-refused"
+              :construction :persisted-exceptional}}]
+ :commands
+ ["clojure -M:test -m cognitect.test-runner -n futon2.aif.full-loop-cohort-test"
+  "clojure -M:test -m cognitect.test-runner -n futon2.aif.full-loop-runner-test"]
+ :results [{:tests 15 :assertions 62 :failures 0 :errors 0}
+           {:tests 135 :assertions 657 :failures 0 :errors 0}]
+ :scope "Nonnil/refusal floor only; enriched warrant validation follows the fold-contract authority."}

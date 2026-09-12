@@ -1507,6 +1507,53 @@
            (:repair/class (:repair-obligation (:data result)))))
     (is (= :construction (:failure-stage (first @findings))))))
 
+(deftest construction-fold-wiring-gate-is-commissioned-in-both-directions
+  (let [base (merge
+              (isolated-runner-opts)
+              {:repair-open-fn (constantly [])
+               :trace-fn (constantly "/tmp/fold-wiring-commissioning-trace.edn")
+               :construct-fn (fn [_] {:shown [:P1] :policy-holes []})})
+        missing-findings (atom [])
+        missing
+        (runner/run-opportunity!
+         (assoc base
+                :construction-wiring-fn (constantly {})
+                :repair-system-record-fn
+                (fn [finding]
+                  (swap! missing-findings conj finding)
+                  (assoc finding :repair/id "fold-wiring-missing"))))
+        refusal {:schema :wm/fold-wiring-refusal-v1
+                 :kind :construction-evidence-unavailable
+                 :grounds {:source :induced-commissioning-fixture}}
+        refused-findings (atom [])
+        refused
+        (runner/run-opportunity!
+         (assoc base
+                :construction-wiring-fn
+                (constantly {:refusal refusal})
+                :repair-system-record-fn
+                (fn [finding]
+                  (swap! refused-findings conj finding)
+                  (assoc finding :repair/id "fold-wiring-refused"))))]
+    (testing "induced silent nil fails loudly with a named finding"
+      (is (= :incomplete (:outcome missing)))
+      (is (= :fold-wiring-missing
+             (get-in missing [:data :failure-kind])))
+      (is (= "fold-wiring-missing"
+             (get-in missing [:data :repair-obligation :repair/id])))
+      (is (= :not-reached-construction
+             (get-in missing [:checkpoints :construction :sorry :kind]))))
+    (testing "typed grounded refusal is persisted, then closes exceptionally"
+      (is (= :incomplete (:outcome refused)))
+      (is (= :fold-wiring-refused
+             (get-in refused [:data :failure-kind])))
+      (is (= refusal
+             (get-in refused [:checkpoints :construction :judgment
+                              :wiring-refusal])))
+      (is (nil? (get-in refused [:checkpoints :construction :judgment :wiring])))
+      (is (= "fold-wiring-refused"
+             (get-in refused [:data :repair-obligation :repair/id]))))))
+
 (deftest rejected-review-preserves-authored-commit-in-morning-brief
   (let [queued (atom [])
         findings (atom [])

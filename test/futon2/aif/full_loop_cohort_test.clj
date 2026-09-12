@@ -173,6 +173,26 @@
             (cohort/read-edn prereg-path) :selection
             (term {:selected-mission "M-x"}))))))
 
+(deftest construction-checkpoint-refuses-silent-nil-wiring
+  (let [p (cohort/read-edn prereg-path)
+        base {:mission "M-x" :cascade {} :sorries [] :patterns [] :deposit nil}]
+    (is (= [:missing-fold-wiring]
+           (cohort/checkpoint-cell-errors p :construction
+                                          (term (assoc base :wiring nil)))))
+    (is (empty?
+         (cohort/checkpoint-cell-errors
+          p :construction
+          (term (assoc base
+                       :wiring nil
+                       :wiring-refusal
+                       {:schema :wm/fold-wiring-refusal-v1
+                        :kind :construction-evidence-unavailable
+                        :grounds {:source :commissioning}})))))
+    (is (= [:invalid-fold-wiring-refusal]
+           (cohort/checkpoint-cell-errors
+            p :construction
+            (term (assoc base :wiring nil :wiring-refusal false)))))))
+
 (deftest artifact-only-cannot-be-laundered-as-grounded
   (let [root (tmp-root)
         _ (cohort/activate! prereg-path root)
