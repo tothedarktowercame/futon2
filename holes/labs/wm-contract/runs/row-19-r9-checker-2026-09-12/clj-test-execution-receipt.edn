@@ -1,0 +1,8 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.r9-checker-test"
+ :exit 0
+ :tests 2
+ :assertions 12
+ :failures 0
+ :errors 0
+ :tree-sha "b66147e76053f582a270be1e66320e6760ceda21"
+ :at "2026-09-12T20:49:00Z"}

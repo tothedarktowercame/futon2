@@ -1,0 +1,8 @@
+{:command "clj-kondo --lint src/futon2/aif/r9_checker.clj test/futon2/aif/r9_checker_test.clj holes/labs/wm-contract/runs/row-19-r9-checker-2026-09-12/real_pair_reporter.clj"
+ :exit 0
+ :tests 1
+ :assertions 2
+ :errors 0
+ :warnings 0
+ :tree-sha "b66147e76053f582a270be1e66320e6760ceda21"
+ :at "2026-09-12T20:49:00Z"}

@@ -1,0 +1,7 @@
+{:command "clojure -M -e '(load-file \"holes/labs/wm-contract/runs/row-19-r9-checker-2026-09-12/real_pair_reporter.clj\")'"
+ :exit 0
+ :tests 1
+ :assertions 5
+ :tree-sha "b66147e76053f582a270be1e66320e6760ceda21"
+ :source-ledger-sha256 "d47e5c21669399ba7635ea5f23a8c495f8f23847112a52e2af00f58cdcea2475"
+ :at "2026-09-12T20:48:14.962399264Z"}
