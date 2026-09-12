@@ -1,0 +1,9 @@
+{:command "clj-kondo --config '{:linters {:namespace-name-mismatch {:level :off}}}' --lint holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/capture_branches.clj holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/repair_direct_controls.clj"
+ :exit 0
+ :tests 1
+ :assertions 2
+ :errors 0
+ :warnings 0
+ :tree-sha "842cd12220d36607f3b5da85bef2580aaa74bcce"
+ :at "2026-09-12T21:37:00Z"
+ :note "namespace-name-mismatch is inapplicable to executable artifacts under a dated hyphenated run directory; all semantic linters remain enabled"}

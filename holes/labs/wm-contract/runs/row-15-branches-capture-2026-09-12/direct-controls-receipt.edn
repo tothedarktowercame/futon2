@@ -1,0 +1,7 @@
+{:command "clojure -M holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/repair_direct_controls.clj"
+ :exit 0
+ :tests 2
+ :assertions 2
+ :tree-sha "1b3e2b04"
+ :at "2026-09-12T21:33:00Z"
+ :observed {:no-op :abstain :tie-selected-first? true}}
