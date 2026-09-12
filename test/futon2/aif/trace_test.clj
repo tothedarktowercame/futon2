@@ -7,6 +7,7 @@
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.belief :as belief]
             [futon2.aif.observation :as observation]
+            [futon2.aif.policy :as policy]
             [futon2.aif.trace :as trace])
   (:import (java.io File)
            (java.nio.file Files)
@@ -653,6 +654,23 @@
           "absence of the key at 26 or later means the flag was off on that
            tick; before 26 it means the producer predates the check, and only
            the version tells a reader which -- a false clean bill otherwise"))))
+
+(deftest redirected-trace-retains-resolved-abstain-epsilon-test
+  (testing "the production selector field passes strip-decision and a redirected write"
+    (let [epsilon 0.125
+          ranked [{:action {:type :address-sorry} :controller-score 0.1}
+                  {:action {:type :no-op} :controller-score 0.5}]
+          decision (policy/select-action ranked {:abstain-epsilon epsilon})
+          date "2026-09-12"
+          _ (trace/write-trace! (assoc sample-judge-output
+                                       :ranked-actions ranked
+                                       :decision decision)
+                                :dir *tmpdir* :date-str date)
+          persisted (first (trace/read-trace :dir *tmpdir* :date-str date))]
+      (is (= epsilon (:abstain-epsilon decision)))
+      (is (= epsilon (get-in persisted [:decision :abstain-epsilon])))
+      (is (not (contains? (:decision persisted) :softmax-weights))
+          "strip-decision still removes only the existing bulky selector detail"))))
 
 (deftest trace-record-carries-typed-mission-focus-test
   (testing "U21: present-only, a SECOND field beside :active-mission, and the

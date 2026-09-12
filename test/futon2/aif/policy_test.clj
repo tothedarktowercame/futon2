@@ -303,6 +303,23 @@
       ;; epsilon 0.5: 0.2 < 0.5 → abstain
       (is (= :abstain (:action (policy/select-action ranked-acts {:abstain-epsilon 0.5})))))))
 
+(deftest select-action-records-resolved-abstain-epsilon-test
+  (testing "default and explicit epsilon survive on abstain and chosen decisions"
+    (let [abstain-ranked (ranked [[:no-op 0.5] [:address-sorry 0.499]])
+          chosen-ranked (ranked [[:address-sorry 0.1] [:no-op 0.5]])
+          default-abstain (policy/select-action abstain-ranked)
+          explicit-abstain (policy/select-action abstain-ranked
+                                                  {:abstain-epsilon 0.125})
+          default-chosen (policy/select-action chosen-ranked)
+          explicit-chosen (policy/select-action chosen-ranked
+                                                 {:abstain-epsilon 0.125})]
+      (is (= :abstain (:action default-abstain)))
+      (is (= 0.01 (:abstain-epsilon default-abstain)))
+      (is (= 0.125 (:abstain-epsilon explicit-abstain)))
+      (is (not= :abstain (:action default-chosen)))
+      (is (= 0.01 (:abstain-epsilon default-chosen)))
+      (is (= 0.125 (:abstain-epsilon explicit-chosen))))))
+
 ;; ---------------------------------------------------------------------------
 ;; v0.13: default-mode-select — I6 compositional closure fallback
 ;; ---------------------------------------------------------------------------
