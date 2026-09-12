@@ -1,0 +1,18 @@
+{:schema :wm/row-15-input-and-findings-v1
+ :as-of "2026-09-12"
+ :retained-trace
+ {:repo "futon2" :path "data/wm-trace/wm-trace-2026-09-04.edn"
+  :sha256 "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120"
+  :selector {:record-index 0}}
+ :declarations
+ {:depth {:name "DarkTower.WarMachine.MachineDepth.machineDepth"
+          :status :not-reconstructible
+          :missing [:requested-policy-depth-config :effective-efe-horizon-steps]}
+  :temperature {:name "DarkTower.WarMachine.MachineTemperature.machineTemperature"
+                :status :reconstructible
+                :reference {:tau-spread 25.006118387130687 :selection-gain 1.0
+                            :tau-mode :selection-gain-only :tau 1.0}}
+  :action {:name "DarkTower.WarMachine.MachineAction.machineAction"
+           :status :not-reconstructible
+           :missing [:ranked-action-input-maps :selector-option-packet]}}
+ :evidence-limit "No synthetic input was substituted for either missing production input packet."}
