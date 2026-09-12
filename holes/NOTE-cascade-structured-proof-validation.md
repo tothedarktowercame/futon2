@@ -308,3 +308,15 @@ Petri/structured-proof object recorded under Ruling 2.
   packet dispatched for both (hole interface shape; correspondence:
   every cascade pattern folded-or-holed, out-of-cascade warrants a named
   finding).
+- **Ruling 2/3 gaps CLOSED (codex-21, futon2 `553a8bc9`):** in-box holes
+  require `:kind`/`:wanted`/`:obligation/id` (`:discharge`/`:satiety`
+  optional-but-typed); policy-holes require `:free`/`:why`/explicit
+  `:unfolded-pattern` key (nil valid)/`:obligation/id`; pure
+  `validate-fold-correspondence [output cascade]` reports
+  `:cascade-pattern-unaccounted` and `:box-warrant-outside-cascade` with
+  the deduction exemption, handling enriched and legacy pattern
+  references; the exemplar's real interface shapes pass with no false
+  findings. The contract half of Rulings 1–3 is complete; remaining on
+  this slice: codex-10's cohort-validator tightening to the enriched
+  contract (their sequencing; contract now ready), then V1 commissioning
+  of the correspondence check and the end-to-end rehearsal turn.
