@@ -219,3 +219,36 @@ extends the same rule to the work's content layer. Whether the landed
 packet-9 contract can already express box→outline-obligation
 correspondence is a named check at that packet's review; if not, it is one
 small follow-up, not a rework.
+
+## Ruling 3 (Joe, 2026-09-12): a hole is an interface, not a refusal
+
+Correction to how Ruling 1's no-op caveat was recorded: **a hole and a
+refusal are different objects.** A refusal declines a class of work
+(exceptional, typed, carries grounds — Ruling 1 stands for that case). A
+hole is **the interface: the typed boundary against which all of the wired
+machinery is being hooked up** — exactly a typed hole in Agda or a `sorry`
+in Lean. The futon stack's record of wanted work already IS named holes
+(the `holes/` directory convention, worklist rows, Lean sorries): "even if
+that work hasn't been written down as a specific record, if we start
+building something, it's going to be building to an interface."
+
+The flight triple, which was the design all along: **cascade = the
+high-level specification of what is going to be built; typed hole/sorry =
+the interface to which it will be built; wiring diagram = the detailed
+specification of exactly how.** That was the flight. The exemplar
+(`labs/M-evaluate-policies/exhibit/fold-turn.edn`) embodies it fully —
+in-box holes are `{:kind :sorry :discharge ... :satiety ... :wanted ...}`,
+DarkTower-shaped so `clean_to_lean.py` renders the structural check. The
+twelve `:wiring nil` checkpoints are therefore a REGRESSION from a working
+design, not a policy gap: "we shouldn't regress and say oh well, wiring is
+nil — none of that makes sense anymore."
+
+Consequences: (1) incomplete work is not refusal — it is wiring with named
+holes; the refusal outcome of Ruling 1 narrows to declining a work class.
+(2) Hole records must retain the full interface shape
+(`:kind`/`:discharge`/`:satiety`/`:wanted` plus the obligation id) — a
+hole reduced to a bare gap-marker fails this ruling; named check at the
+packet-9 review. (3) A turn's output is positioned against holes: it fills
+named holes and/or creates named ones, and the gate reads that position —
+which is also what makes the cascade→hole→wiring triple the natural
+Petri/structured-proof object recorded under Ruling 2.
