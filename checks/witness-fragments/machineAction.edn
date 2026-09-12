@@ -59,33 +59,65 @@
    :claim
    "The pinned reason-bearing live selector moved from machineAction's controller-head output at rank 1 to rank 139. This refutes correspondence at this record only, not the internal branch.",
    :equation :action}
-  {:schema :wm/node-witness-v1
-   :id "R16-machineAction-internal-branches-20260912-v1"
-   :node :R16 :equation :action :quantity :u
-   :declaration "machineAction" :kind :lean-witness :polarity :supports
-   :scope :machinery-capture-and-direct-invocations-2026-09-12
-   :as-of "2026-09-12" :status :proposed
-   :claim "At the retained internal-branch inputs, machineAction equals the controller-head, full-score first-max, habit last-max, absent-F_pi fallback and tie-control outputs; the retained exact no-op margin satisfies abstains. This scope excludes the distinct live reason-bearing selector."
-   :evidence-limit "This is a redirected machinery capture plus direct invocations of the production pure function, not a scheduled tick. The natural theorem covers the internal controller head before the reason-bearing override. The admitted live-selector refutation has a disjoint scope and remains unchanged."
-   :artifact {:repo "mathlib4"
-              :path "DarkTower/WarMachine/MachineActionBranchesWitness.lean"
-              :sha256 "95186ccb2fc6c6b4af71b9572c04751c5845555f0494d021f63d3fdda72dd486"
-              :module "DarkTower.WarMachine.MachineActionBranchesWitness"
-              :declaration "DarkTower.WarMachine.MachineActionBranchesWitness.allRetainedInternalBranches"}
-   :subject-artifact {:repo "mathlib4"
-                      :path "DarkTower/WarMachine/MachineAction.lean"
-                      :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"
-                      :declaration "DarkTower.WarMachine.MachineAction.machineAction"}
+  {:schema :wm/node-witness-v1,
    :retained-evidence
-   {:manifest {:repo "futon2"
-               :path "holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/manifest.edn"
-               :sha256 "e80f1fcaf34d441d44b6c0bf6a5d233ca79c275d44e8fad7c0dfbf69b74467ba"}
-    :notes {:repo "futon2"
-            :path "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/NOTES.md"
-            :sha256 "3a81fb7ccb85022eb0005e3633b3a8eb030dd96a7a8d574a2d3339df06d7ab24"}}
+   {:manifest
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/manifest.edn",
+     :sha256
+     "e80f1fcaf34d441d44b6c0bf6a5d233ca79c275d44e8fad7c0dfbf69b74467ba"},
+    :notes
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/NOTES.md",
+     :sha256
+     "3a81fb7ccb85022eb0005e3633b3a8eb030dd96a7a8d574a2d3339df06d7ab24"}},
    :verification
-   {:status :verified
-    :receipt {:repo "futon2"
-              :path "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/verification-receipts.edn"
-              :sha256 "4fcceab767ab8d0f8759b1fa3440c8aac0ac8fa72ff1c100ec0fd9ceb97e4929"
-              :selector [:records "R16-machineAction-internal-branches-20260912-v1"]}}}]}
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/verification-receipts.edn",
+     :sha256
+     "4fcceab767ab8d0f8759b1fa3440c8aac0ac8fa72ff1c100ec0fd9ceb97e4929",
+     :selector
+     [:records "R16-machineAction-internal-branches-20260912-v1"]}},
+   :subject-artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineAction.lean",
+    :sha256
+    "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692",
+    :declaration "DarkTower.WarMachine.MachineAction.machineAction"},
+   :scope :machinery-capture-and-direct-invocations-2026-09-12,
+   :node :R16,
+   :evidence-limit
+   "This is a redirected machinery capture plus direct invocations of the production pure function, not a scheduled tick. The natural theorem covers the internal controller head before the reason-bearing override. The admitted live-selector refutation has a disjoint scope and remains unchanged.",
+   :as-of "2026-09-12",
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/review-receipts.edn",
+     :sha256
+     "c56440acf923ff6ea7af2e0e3af3f26a9552121db165585081d381594736164a",
+     :selector
+     [:records "R16-machineAction-internal-branches-20260912-v1"]}},
+   :status :admitted,
+   :id "R16-machineAction-internal-branches-20260912-v1",
+   :kind :lean-witness,
+   :polarity :supports,
+   :declaration "machineAction",
+   :artifact
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/MachineActionBranchesWitness.lean",
+    :sha256
+    "95186ccb2fc6c6b4af71b9572c04751c5845555f0494d021f63d3fdda72dd486",
+    :module "DarkTower.WarMachine.MachineActionBranchesWitness",
+    :declaration
+    "DarkTower.WarMachine.MachineActionBranchesWitness.allRetainedInternalBranches"},
+   :quantity :u,
+   :claim
+   "At the retained internal-branch inputs, machineAction equals the controller-head, full-score first-max, habit last-max, absent-F_pi fallback and tie-control outputs; the retained exact no-op margin satisfies abstains. This scope excludes the distinct live reason-bearing selector.",
+   :equation :action}]}

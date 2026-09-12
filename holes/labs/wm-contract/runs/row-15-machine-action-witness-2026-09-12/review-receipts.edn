@@ -1,0 +1,55 @@
+{:records
+ {"R16-machineAction-internal-branches-20260912-v1"
+  {:subject
+   {:subject-artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineAction.lean",
+     :sha256
+     "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692",
+     :declaration "DarkTower.WarMachine.MachineAction.machineAction"},
+    :scope :machinery-capture-and-direct-invocations-2026-09-12,
+    :node :R16,
+    :as-of "2026-09-12",
+    :id "R16-machineAction-internal-branches-20260912-v1",
+    :kind :lean-witness,
+    :polarity :supports,
+    :declaration "machineAction",
+    :artifact
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineActionBranchesWitness.lean",
+     :sha256
+     "95186ccb2fc6c6b4af71b9572c04751c5845555f0494d021f63d3fdda72dd486",
+     :module "DarkTower.WarMachine.MachineActionBranchesWitness",
+     :declaration
+     "DarkTower.WarMachine.MachineActionBranchesWitness.allRetainedInternalBranches"},
+    :quantity :u,
+    :claim
+    "At the retained internal-branch inputs, machineAction equals the controller-head, full-score first-max, habit last-max, absent-F_pi fallback and tie-control outputs; the retained exact no-op margin satisfies abstains. This scope excludes the distinct live reason-bearing selector.",
+    :equation :action},
+   :verdict :approved,
+   :reviewer "claude-15",
+   :reviewed-at "2026-09-12",
+   :basis
+   "Reviewed on bellback: generator reuses the admitted machine-policy-set/project-candidate exclusively (verified in source — no second projection); the scored carrier uses retained positive posterior weights with frozen fullScoreIsPosteriorArgmax licensing the ordering, correctly avoiding signed-raw-bit order-inversion on negative scores; reviewer recomputed the natural controller-head candidate from the parsed capture (rank-1 score 8.790435039042109 -> bits 4621138193050540224, exact match) and verified the abstain theorem's values (real retained G values, the record's own resolved explicit epsilon 1e12 confirmed in the retained record); scope disjoint from the admitted :refutes claim (internal machinery/direct-invocation scope, live selection excluded); fragment ADDS the claim beside the divergence claim (both present, both resolving); receipts commit-first; disposable merge 34 verified-binding + this claim pending, zero refusals",
+   :verification
+   {:repo "futon2",
+    :path
+    "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/verification-receipts.edn",
+    :sha256
+    "4fcceab767ab8d0f8759b1fa3440c8aac0ac8fa72ff1c100ec0fd9ceb97e4929",
+    :selector
+    [:records "R16-machineAction-internal-branches-20260912-v1"]},
+   :dependencies
+   [{:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-15-machine-action-witness-2026-09-12/verification-receipts.edn",
+     :sha256
+     "4fcceab767ab8d0f8759b1fa3440c8aac0ac8fa72ff1c100ec0fd9ceb97e4929"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineActionBranchesWitness.lean",
+     :sha256
+     "95186ccb2fc6c6b4af71b9572c04751c5845555f0494d021f63d3fdda72dd486"}
+    {:repo "mathlib4",
+     :path "DarkTower/WarMachine/MachineAction.lean",
+     :sha256
+     "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"}]}}}
