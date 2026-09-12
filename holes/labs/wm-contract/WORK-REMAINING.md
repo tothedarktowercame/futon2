@@ -430,9 +430,24 @@ operator workflow conversation (standdown 2026-09-12).
     (controller-head, full-score first-max, habit last-max,
     no-op abstain, requested-posterior-F_pi-absent) + the
     commissioned first-max tie control; capture refusals and
-    lint findings retained; receipts commit-first. The
-    INTERNAL-BRANCHES WITNESS is queued for the next free
-    mathlib4 slot; (3) DIVERGENCE WITNESS ADMITTED
+    lint findings retained; receipts commit-first.
+    INTERNAL-BRANCHES CLAIM ADMITTED (2026-09-12, futon2
+    dbe4ca93/a22792e0; mathlib4 0a4309b1,
+    MachineActionBranchesWitness.lean): all internal
+    select-action branches proved equal to the retained outputs
+    (natural + direct controller-head, full-score first-max,
+    habit last-max, F_pi-absent fallback, first-max tie, exact
+    abstain at the record's own resolved epsilon — reviewer
+    recomputed the rank-1 bits and abstain values); scored
+    carrier via posterior weights with frozen
+    fullScoreIsPosteriorArgmax licensing (signed-bit inversion
+    avoided); coexists with the :refutes claim at disjoint
+    scope. Registry: 35 claims. ROW 15 MEASUREMENT PROOFS now
+    stand: belief state, temperature, depth (machinery scope),
+    action internal branches, action live-selector divergence
+    (:refutes) — remaining: belief update + production depth +
+    selector 4d, ALL waiting only on live capture-stack
+    records; (3) DIVERGENCE WITNESS ADMITTED
     (2026-09-12, futon2 f2afa6e8/623b9318; mathlib4 df87676b,
     NEW module, frozen files untouched):
     R16-machineAction-live-selector-divergence-20260912-v1 at
