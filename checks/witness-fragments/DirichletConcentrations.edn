@@ -32,7 +32,7 @@
    {:row12-witness {:repo "futon2" :path "holes/labs/wm-contract/runs/row-12-accumulation-2026-09-12/witness.edn"
                     :sha256 "919a7916d0e6e4fc51226e7b5331e830e8c94ff27bbd433c4251fa931f83b0d2"}
     :residual-notes {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/notes.edn"
-                     :sha256 "520ea5a42a66b361f1886e7f5ccec5facd4866838efda923c3b98b1f36076f49"}}
+                     :sha256 "224532239871d4147dec1a3b817ed4486f0b8452d4c7182df902bece808e610b"}}
    :verification {:status :verified
                   :receipt {:repo "futon2" :path "holes/labs/wm-contract/runs/row-16-r17-accumulation-2026-09-12/verification-receipts.edn"
                             :sha256 "2d7a9eb38e5a8200deec65b6295e791503c8301a0ca436b27f01d83e54e3bd5e" :selector [:records "R17-dirichlet-accumulation-ieee-residuals-v1"]}}}]}
