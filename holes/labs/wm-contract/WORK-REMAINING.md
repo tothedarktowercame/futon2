@@ -417,10 +417,18 @@ operator workflow conversation (standdown 2026-09-12).
     policy + summary but NOT the full policy table,
     temperature, or tie-break inputs — the pinned record
     supports only the admitted divergence, not a positive
-    replay. Four packets: (4a) producer retention envelope
-    (:selection-proof-input on validated-selection, futon3c —
-    dispatched, codex-23); (4b) trace retention through
-    war_machine (additive, schema-ledger treatment); (4c)
+    replay. Four packets: (4a) PRODUCER ENVELOPE DONE
+    (2026-09-12, futon3c b615823b, receipts 7e3ae715,
+    reviewed): successful validated-selection carries
+    :selection-proof-input with the complete ranked policy
+    table projected from pre-projection values; five closed
+    refusals incl. selected-not-ranked-head;
+    envelope-construction failure refuses the selection;
+    production read-only replay reconstructed the selected id
+    exactly (2 policies, temperature 0.5, no actuation);
+    12 tests/62 assertions; (4b) trace retention through
+    war_machine (additive, schema-ledger treatment) — HELD
+    until the cross-ledger packet's trace.clj edits land; (4c)
     ReasonBearingSelector.lean extension + compat theorem
     (frozen files untouched); (4d) positive post-capture
     witness at the first complete-envelope record.
