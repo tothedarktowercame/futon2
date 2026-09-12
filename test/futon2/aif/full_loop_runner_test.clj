@@ -84,6 +84,33 @@
     (is (= {:status :absent :reason :no-selected-entity}
            (select-keys absent [:status :reason])))))
 
+(deftest outcome-entity-at-close-types-every-selection-state
+  (is (= {:status :present :entity/id "entity-1" :source :selection-target}
+         (runner/outcome-entity-at-close
+          {:selection-reached? true :selection-made? true :entity-id "entity-1"}
+          {:entity/id "entity-1"})))
+  (is (= {:status :absent :reason :failed-before-selection}
+         (runner/outcome-entity-at-close {} {:status :absent})))
+  (is (= {:status :absent :reason :no-selection-made}
+         (runner/outcome-entity-at-close
+          {:selection-reached? true :selection-made? false} {:status :absent})))
+  (is (= {:status :absent :reason :selection-had-no-target}
+         (runner/outcome-entity-at-close
+          {:selection-reached? true :selection-made? true} {:status :absent}))))
+
+(deftest outcome-entity-at-close-refuses-an-identity-mismatch
+  (let [failure (try
+                  (runner/outcome-entity-at-close
+                   {:selection-reached? true :selection-made? true
+                    :entity-id "selection-entity"}
+                   {:entity/id "belief-entity"})
+                  nil
+                  (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= :entity-identity-mismatch (:refusal failure)))
+    (is (= "selection-entity" (get-in failure [:outcome-entity :entity/id])))
+    (is (= "belief-entity"
+           (get-in failure [:entity-state-at-close :entity/id])))))
+
 (deftest run-opportunity-surfaces-stable-run-identity
   (let [record-dir (.getPath
                     (.toFile

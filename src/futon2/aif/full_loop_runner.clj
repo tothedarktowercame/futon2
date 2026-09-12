@@ -2441,6 +2441,35 @@
                    :status :refused
                    :reason :ambiguous-tie)))))))
 
+(defn outcome-entity-at-close
+  "Name the exact selection target on every close, or retain why none exists.
+  Target classes and mission prose are deliberately not fallback identities.
+  Packet-1's belief snapshot is an independent copy of the identity and must
+  agree before the append-only close record is written."
+  [{:keys [selection-reached? selection-made? entity-id]} entity-state]
+  (let [outcome-entity
+        (cond
+          (some? entity-id)
+          {:status :present :entity/id entity-id :source :selection-target}
+
+          (not selection-reached?)
+          {:status :absent :reason :failed-before-selection}
+
+          (not selection-made?)
+          {:status :absent :reason :no-selection-made}
+
+          :else
+          {:status :absent :reason :selection-had-no-target})
+        state-id (:entity/id entity-state)]
+    (when (and state-id
+               (or (not= :present (:status outcome-entity))
+                   (not= state-id (:entity/id outcome-entity))))
+      (throw (ex-info "Close entity identities disagree"
+                      {:refusal :entity-identity-mismatch
+                       :outcome-entity outcome-entity
+                       :entity-state-at-close entity-state})))
+    outcome-entity))
+
 (defn- sorry [kind data]
   {:sorry (assoc data :kind kind)})
 
@@ -2909,9 +2938,12 @@
                                       (cond-> {:run/id run-id}
                                         trace-path (assoc :trace-path trace-path))
                                       (str (Instant/now))))
+                       outcome-entity (outcome-entity-at-close
+                                       @selected-entity-belief close-state)
                        closed (term (merge {:outcome outcome
                                             :grounded? (= :grounded-change outcome)
                                             :artifact-only? (= :artifact-only outcome)
+                                            :outcome-entity outcome-entity
                                             :entity-state-at-close close-state
                                             :morning-brief-ref brief-ref
                                             :delivery-qa-ref delivery-qa-ref
@@ -3108,7 +3140,9 @@
                                :run4/enacted-action (:action entry)))
             target (some-> entry selected-target)
             _ (reset! selected-entity-belief
-                      {:entity-id target
+                      {:selection-reached? true
+                       :selection-made? (boolean entry)
+                       :entity-id target
                        :belief (:belief judgement)
                        :run-id (:run/id judgement)})
             ranked-for-review (if stop-line
