@@ -1,0 +1,15 @@
+{:record
+ {:declarations
+  {"DarkTower.WarMachine.MachinePolicySet.machinePolicySet"
+   {:kind :def
+    :source {:repo "mathlib4"
+             :path "DarkTower/WarMachine/MachinePolicySet.lean"
+             :sha256 "104fab58f500a7bad3b11de3cd482cd1f790d70d7cb976905561a5ca773b3d05"}}
+   "DarkTower.WarMachine.MachinePolicySetMeasurementWitness.exactProjectedSet"
+   {:kind :theorem
+    :module "DarkTower.WarMachine.MachinePolicySetMeasurementWitness"
+    :proposition "For the 148 projected candidates from the pinned production trace, machinePolicySet pinnedRanked is extensionally exactly the set of members of pinnedRanked."
+    :axioms []
+    :source {:repo "mathlib4"
+             :path "DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
+             :sha256 "638b1627a1f7b3c3763de4d9cca4bc47d5cdec1cbcd342504ed4d49531567ac9"}}}}}

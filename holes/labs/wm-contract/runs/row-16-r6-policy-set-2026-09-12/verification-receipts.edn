@@ -1,0 +1,63 @@
+{:records
+ {"R6-policy-set-production-20260912T172809-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R6-policy-set-production-20260912T172809-v1"
+    :node :R6 :equation :policy-set :quantity :pi
+    :declaration "machinePolicySet" :kind :lean-witness
+    :artifact
+    {:repo "mathlib4"
+     :path "DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
+     :sha256 "638b1627a1f7b3c3763de4d9cca4bc47d5cdec1cbcd342504ed4d49531567ac9"
+     :module "DarkTower.WarMachine.MachinePolicySetMeasurementWitness"
+     :declaration "DarkTower.WarMachine.MachinePolicySetMeasurementWitness.exactProjectedSet"}
+    :subject-artifact
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicySet.lean"
+     :sha256 "104fab58f500a7bad3b11de3cd482cd1f790d70d7cb976905561a5ca773b3d05"
+     :declaration "DarkTower.WarMachine.MachinePolicySet.machinePolicySet"}
+    :claim "The 148 candidates projected from the pinned production details record form exactly machinePolicySet of that projected ranked list; every projected candidate is a member. The projection losslessly carries rank, controller-score binary64 bits, and the no-op marker."
+    :polarity :supports
+    :scope :production-trace-details-record-20260912T172809-policy-set
+    :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4"
+     :path "DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
+     :sha256 "638b1627a1f7b3c3763de4d9cca4bc47d5cdec1cbcd342504ed4d49531567ac9"
+     :module "DarkTower.WarMachine.MachinePolicySetMeasurementWitness"
+     :declaration "DarkTower.WarMachine.MachinePolicySetMeasurementWitness.exactProjectedSet"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicySet.lean"
+     :sha256 "104fab58f500a7bad3b11de3cd482cd1f790d70d7cb976905561a5ca773b3d05"
+     :declaration "DarkTower.WarMachine.MachinePolicySet.machinePolicySet"}
+    {:repo "futon2"
+     :path "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/fixture.edn"
+     :sha256 "1f071274b00078395677c85949716ea58b784f54857b35de8d27c0b423c48bc7"}
+    {:repo "futon2"
+     :path "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/readback.edn"
+     :sha256 "8df02129fcb564bad2fd734f6a323ae95083e20dce59631fb3e8d5649219d985"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/F12RuledCarrier.lean"
+     :sha256 "c8cff86e20348c02f8dbb41eaaa516bbf57529f6bc7bc525f547f58c5fbc2270"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
+     :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachinePolicySet.lean"
+     :sha256 "104fab58f500a7bad3b11de3cd482cd1f790d70d7cb976905561a5ca773b3d05"}
+    {:repo "mathlib4"
+     :path "DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
+     :sha256 "638b1627a1f7b3c3763de4d9cca4bc47d5cdec1cbcd342504ed4d49531567ac9"}]
+   :declaration-census
+   {:repo "futon2"
+    :path "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/declaration-census.edn"
+    :sha256 "c1b2087ecb8fa2326ea3bb0b1210674bdacb337de8ede354dfcd1148a4894d67"
+    :selector [:record]}
+   :transcript
+   {:repo "futon2"
+    :path "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/lean-transcript.txt"
+    :sha256 "d2b1a5b8881b141d9d00b860dbbc1fd2c6ff44acf0be0517539f4ffe4d1f1572"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain"
+               :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker
+   {:repo "mathlib4"
+    :path "DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
+    :sha256 "638b1627a1f7b3c3763de4d9cca4bc47d5cdec1cbcd342504ed4d49531567ac9"}}}}

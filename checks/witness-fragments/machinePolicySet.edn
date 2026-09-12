@@ -1,0 +1,46 @@
+{:witnesses "machinePolicySet"
+ :node-witnesses
+ [{:schema :wm/node-witness-v1
+   :status :proposed
+   :id "R6-policy-set-production-20260912T172809-v1"
+   :node :R6
+   :equation :policy-set
+   :quantity :pi
+   :declaration "machinePolicySet"
+   :kind :lean-witness
+   :polarity :supports
+   :scope :production-trace-details-record-20260912T172809-policy-set
+   :as-of "2026-09-12"
+   :claim "The 148 candidates projected from the pinned production details record form exactly machinePolicySet of that projected ranked list; every projected candidate is a member. The projection losslessly carries rank, controller-score binary64 bits, and the no-op marker."
+   :evidence-limit "This claim is extensional membership for machinePolicySet only. It does not claim selectionPolicySet branch agreement, posterior selection, score ordering, or selected/enacted equality."
+   :artifact
+   {:repo "mathlib4"
+    :path "DarkTower/WarMachine/MachinePolicySetMeasurementWitness.lean"
+    :sha256 "638b1627a1f7b3c3763de4d9cca4bc47d5cdec1cbcd342504ed4d49531567ac9"
+    :module "DarkTower.WarMachine.MachinePolicySetMeasurementWitness"
+    :declaration "DarkTower.WarMachine.MachinePolicySetMeasurementWitness.exactProjectedSet"}
+   :subject-artifact
+   {:repo "mathlib4"
+    :path "DarkTower/WarMachine/MachinePolicySet.lean"
+    :sha256 "104fab58f500a7bad3b11de3cd482cd1f790d70d7cb976905561a5ca773b3d05"
+    :declaration "DarkTower.WarMachine.MachinePolicySet.machinePolicySet"}
+   :retained-evidence
+   {:source
+    {:repo "futon2"
+     :path "data/wm-trace/wm-trace-2026-09-12.edn.pre-migration-backup"
+     :sha256 "25a0a1e2257396c2d1db889375773c9cbed99b2ad26c57b4674e02ca1660d686"}
+    :fixture
+    {:repo "futon2"
+     :path "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/fixture.edn"
+     :sha256 "1f071274b00078395677c85949716ea58b784f54857b35de8d27c0b423c48bc7"}
+    :readback
+    {:repo "futon2"
+     :path "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/readback.edn"
+     :sha256 "8df02129fcb564bad2fd734f6a323ae95083e20dce59631fb3e8d5649219d985"}}
+   :verification
+   {:status :verified
+    :receipt
+    {:repo "futon2"
+     :path "holes/labs/wm-contract/runs/row-16-r6-policy-set-2026-09-12/verification-receipts.edn"
+     :sha256 "21ef99e3decd36cf343041b34128b81ffc76fd47df7516f63ce0ceacaf2f5092"
+     :selector [:records "R6-policy-set-production-20260912T172809-v1"]}}}]}

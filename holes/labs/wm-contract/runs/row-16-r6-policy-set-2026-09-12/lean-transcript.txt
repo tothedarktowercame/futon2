@@ -1,0 +1,3 @@
+'DarkTower.WarMachine.MachinePolicySetMeasurementWitness.pinnedCandidateCount' does not depend on any axioms
+'DarkTower.WarMachine.MachinePolicySetMeasurementWitness.everyProjectedCandidateIsMember' does not depend on any axioms
+'DarkTower.WarMachine.MachinePolicySetMeasurementWitness.exactProjectedSet' does not depend on any axioms
