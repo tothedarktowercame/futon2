@@ -700,6 +700,11 @@
     (assoc :strategic-habit-state (:strategic-habit-state judge-output))
     (:habit-prior-state judge-output)
     (assoc :habit-prior-state (:habit-prior-state judge-output))
+    (:accumulation-state judge-output)
+    (assoc :accumulation-state (:accumulation-state judge-output)
+           :accumulation-update-input (:accumulation-update-input judge-output))
+    (:accumulation-initialization judge-output)
+    (assoc :accumulation-initialization (:accumulation-initialization judge-output))
     ;; I3: one keyword per tick, not per candidate, and inside the flag so the
     ;; default record stays byte-identical. Storing the prediction itself means
     ;; REPLAY does not need the mode — but READING does: under

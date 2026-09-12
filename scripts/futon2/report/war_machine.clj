@@ -50,6 +50,7 @@
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
+            [futon2.aif.machine-accumulation :as machine-accumulation]
             [futon2.aif.strategic-habit :as strategic-habit]
             [futon2.aif.mission-c :as mission-c] [futon2.aif.mission-epistemic-value :as mission-epistemic]
             [futon2.aif.mission-gauges :as mission-gauges]
@@ -1716,6 +1717,39 @@
    reader disagree and report a landed write as missing."
   [trace-record]
   (or (:run/id trace-record) (:timestamp trace-record)))
+
+(defn accumulation-step-for-tick
+  "Bind one trace-producing tick to the declared R17 recurrence."
+  [{:keys [previous-record tick-id entity-id observation belief-pre belief-post initialization]}]
+  (let [previous-id (some-> previous-record trace-record-identity)
+        _ (when-not (and tick-id entity-id)
+            (throw (ex-info "Accumulation identity missing" {:refusal :accumulation-identity-missing})))
+        pre (get belief-pre entity-id ::missing)
+        post (get belief-post entity-id ::missing)
+        _ (when (or (= ::missing pre) (= ::missing post))
+            (throw (ex-info "Single-entity accumulation belief missing"
+                            {:refusal :single-entity-belief-missing :entity/id entity-id})))
+        carried (if previous-record
+                  (or (:accumulation-state previous-record)
+                      (throw (ex-info "Existing trace predates accumulation state"
+                                      {:refusal :accumulation-migration-required :previous-id previous-id})))
+                  (do (when-not (and (= :declared (:authority initialization))
+                                     (number? (:prior initialization)))
+                        (throw (ex-info "Declared accumulation initialization required"
+                                        {:refusal :accumulation-initialization-required})))
+                      (machine-accumulation/initialize
+                       (vec (sort (keys observation))) (vec (sort (keys post))) (:prior initialization))))
+        input {:tick-id tick-id :previous-id previous-id :entity/id entity-id
+               :observation observation :belief-pre pre :belief-post post
+               :state-support (vec (sort (keys post)))
+               :observation-support (vec (sort (keys observation)))
+               :model/revision (:model/revision initialization)}
+        result (machine-accumulation/step carried {:id tick-id :previous-id previous-id
+                                                   :observation observation :belief post})]
+    (when-not (:ok result)
+      (throw (ex-info "Accumulation step refused"
+                      {:refusal (get-in result [:refusal :kind]) :detail (:refusal result)})))
+    {:state result :update-input input :initialization (when-not previous-record initialization)}))
 
 (defn- selected-mission-focus
   "The mission THIS tick selected, as a focus map, or nil when the decision is
@@ -5958,7 +5992,8 @@
   ([scan-data] (judge scan-data {}))
   ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
                       step-portfolio? eval-invariant-fallback?
-                      strategic-selection-fn wm-version run-id]
+                      strategic-selection-fn wm-version run-id
+                      accumulation-entity-id accumulation-initialization]
                :as judge-opts
                :or {trace? false include-advisory-lanes? true
                     step-portfolio? true eval-invariant-fallback? true}}]
@@ -6278,6 +6313,13 @@
                                                 driver-rejections)}
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
+        accumulation (when trace?
+                       (accumulation-step-for-tick
+                        {:previous-record prev-trace-record
+                         :tick-id (or run-id scan-id (:scan-id scan-data))
+                         :entity-id accumulation-entity-id
+                         :observation observation :belief-pre wm-belief-pre
+                         :belief-post wm-belief :initialization accumulation-initialization}))
         route2 (-> route1
                    (route-tag :R7 "futon2.aif.precision/update-precision-state")
                    (route-tag :R3 "futon2.report.war-machine/apply-arena-belief-events"))
@@ -6744,6 +6786,9 @@
                   :observation observation
                   :belief wm-belief
                   :belief-pre wm-belief-pre
+                  :accumulation-state (:state accumulation)
+                  :accumulation-update-input (:update-input accumulation)
+                  :accumulation-initialization (:initialization accumulation)
                   :prediction-errors prediction-errors
                   ;; AC1: the tick's typed prediction-triple omissions and
                   ;; refusals. Present-only at the trace boundary (trace.clj) --
