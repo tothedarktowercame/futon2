@@ -1,0 +1,56 @@
+;; sigil-registry.edn — the workshop pattern language's communication
+;; sigils (Joe, 2026-09-12: shorthand for agents, cross-provider, with
+;; mandatory links back to source so definitions are never invented).
+;;
+;; THE STANDARD (v0):
+;; - a sigil is (glyph, ASCII fallback, pattern id, pinned source sha,
+;;   one-line normative semantics);
+;; - emission is valid ONLY when the registry entry resolves to a pinned
+;;   source: using a sigil whose entry is stale, unpinned, or absent is
+;;   a violation (invented definition), detectable by lint — cheap
+;;   policing, per Ostrom: the cost of the check is a recorded quantity;
+;; - glyphs are plain unicode: they survive any provider's chat surface;
+;;   the ASCII fallback carries the same semantics where unicode dies;
+;; - the WR glyphs (● holds, ○ fails) remain in force — this registry
+;;   extends, never replaces;
+;; - composition: sigils combine on one line (the marks vocabulary
+;;   already parsed from narration composes the same way).
+{:schema :workshop/sigil-registry-v1
+ :registered-at "2026-09-12"
+ :registered-by "zai-7"
+ :compat "[\"● holds (WR-8)\" \"○ fails (WR-8)\"]"
+ :sigils
+ [{:sigil "◈" :ascii "[warrant]" :pattern "workshop/records-carry-warrant"
+   :semantics "this claim travels with its derivation — ask for it"
+   :source "futon3c data/pattern-staging/workshop/records-carry-warrant.flexiarg"}
+  {:sigil "▣" :ascii "[account]" :pattern "workshop/one-queryable-self-account"
+   :semantics "this state lives in the one queryable account, with provenance"
+   :source "futon3c data/pattern-staging/workshop/one-queryable-self-account.flexiarg"}
+  {:sigil "⇄" :ascii "[feedback]" :pattern "workshop/feedback-reaches-every-participant"
+   :semantics "this edge carries feedback to a participant who can act on it"
+   :source "futon3c data/pattern-staging/workshop/feedback-reaches-every-participant.flexiarg"}
+  {:sigil "⌖" :ascii "[choice]" :pattern "workshop/accountable-next-action-choice"
+   :semantics "this selection emits its account; preference received, not computed"
+   :source "futon3c data/pattern-staging/workshop/accountable-next-action-choice.flexiarg"}
+  {:sigil "⬡" :ascii "[holes]" :pattern "workshop/honest-holes-gate-composed-claims"
+   :semantics "this composition carries its holes or a typed none"
+   :source "futon3c data/pattern-staging/workshop/honest-holes-gate-composed-claims.flexiarg"}
+  {:sigil "⚖" :ascii "[work]" :pattern "workshop/progress-is-a-witnessed-state-change"
+   :semantics "work = witnessed state change; this claims work — where is the witness"
+   :source "futon3c data/pattern-staging/workshop/progress-is-a-witnessed-state-change.flexiarg"}
+  {:sigil "⊘" :ascii "[sig]" :pattern "workshop/violation-signature-before-work"
+   :semantics "no work without its breach detector; this is guarded / :signature-pending blocks"
+   :source "futon3c data/pattern-staging/workshop/violation-signature-before-work.flexiarg"}
+  ;; operational pair (runtime-native, not flexiarg-bound):
+  {:sigil "⌁" :ascii "[refuse]" :pattern "runtime/typed-refusal"
+   :semantics "a first-class cheap outcome — the refusal record, never a silent skip"
+   :source "chip_board.clj hazard gate; C446; I1"}
+  {:sigil "◌" :ascii "[notproven]" :pattern "runtime/honest-status"
+   :semantics "legal uncertainty, stated — never mimicked evidence"
+   :source "CHIP-BOARD-WITNESS-STATUS-2026-09-12.md (:runtime-correspondence :not-proven)"}]
+ :policing-cost-note
+ "The check (sigil resolves to a pinned entry) is a registry lookup —
+  the cheapest possible police. Ostrom's principle: monitoring must
+  cost less than defection gains; here the ratio is not estimated but
+  RECORDED (the witness price is a fuel line-item), which is the
+  Ostrom analogy made measurable."}
