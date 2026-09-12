@@ -1,0 +1,27 @@
+{:schema :wm/row20-census-render-delta-v1
+ :node :R11
+ :input
+ {:repo "futon2"
+  :path "holes/labs/wm-contract/ALIGN-rnode-process-census.md"
+  :sha256 "5e1a08741184d9b6dc0e4efa6c8d4b5c74d8bed87be046bb50bc54d88bd02a18"
+  :commit "59941798e8eb8b56868c8a365479ec40d458fb45"}
+ :before
+ {:repo "p4ng"
+  :path "sec-rnode-dossiers-generated.tex"
+  :commit "d7df9406e371459ac4ffe2f92c38899b6009c7c7"
+  :sha256 "0ce0223bbdd916ba8fd99ef0991369135a6cede46f441964502c3bf858186210"
+  :strip "......."
+  :census-scope-count 6}
+ :after
+ {:repo "p4ng"
+  :path "sec-rnode-dossiers-generated.tex"
+  :commit "a7d274162826b57bf7a3ecc6d4605be7c77268d1"
+  :sha256 "30d159165a7dbd40412d62ab5a37a8de048a61672827a7510771506e92340b8c"
+  :strip "-------"
+  :census-scope-count 7
+  :formal-rung "named"
+  :obligated-terminal-rung "named"
+  :at-obligated-state false
+  :cells ["absent" "absent" "absent" "absent" "absent" "absent" "absent"]}
+ :changed-as-intended? true
+ :completeness-claimed? false}
