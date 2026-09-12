@@ -133,3 +133,113 @@ The following pins identify the inspected source bytes and historical readback f
 - `p4ng/empirics-futon/gen_rnode_dossiers.py` — last-touch `e1ac30e3e567d7c7340433fd95182448c8b14bfc`, SHA-256 `22e1ff9ee891bf8296af6ea6489a61995f0ed418c397ee942a7e3ecc2fee4707`.
 
 Discovery checks completed: all seven names are absent from the 124-entry contract and each resolves to exactly one source declaration; 36 source/fixture hashes matched again after drafting; file:line references resolved; only this TN is committed. No Lean build, test suite, registry emission or paper regeneration was run.
+
+
+## Addendum — 2026-09-12: R3a host correction, Box 2 impact (PROPOSED)
+
+**Recommendation: move only the `:prediction-error` equation's host from R8 to
+R3a. Not applied; this addendum is the TN-9a second-read input.** The roster
+calls R3a “Prediction-error projection” and explicitly describes its belief-
+dependent producer and precision consumer (`p4ng/empirics-futon/control-stages.edn:20`).
+Calling it plumbing would assert it runs no equation, contradicting that basis.
+The existing Box 2 generator explains that exact distinction in its code-side
+placement comment (`p4ng/empirics-futon/gen_aif_dag.bb:41-52`).
+
+### Executed derivation and scope
+
+Executed the actual `p4ng/empirics-futon/gen_aif_dag.bb` three times with separate
+disposable `AIF_EQ` copies and `AIF_OUT` directories: unchanged registry, one-field
+host move, and R3a appended to plumbing. All three completed with exit 0. Captured
+the generator's own `theory-edges`, classification sets and per-node equation
+populations after each invocation. No canonical output or registry was written.
+The temporary readback wrapper initially had an unmatched map delimiter; after
+correcting the wrapper, all three exit-0 readbacks below were obtained. No test
+suite, Lean build or live machine execution was needed or claimed.
+
+This is the actual generator's rule: definitions/imports induce cross-node edges,
+self-edges are omitted, and symbols sharing an edge are merged
+(`p4ng/empirics-futon/gen_aif_dag.bb:63-66`). Classification then intersects the
+**drawn-status** edge set and subtracts explicit not-realised/path-dependent holes
+(`p4ng/empirics-futon/gen_aif_dag.bb:68-83`). “Realised-undrawn” below is that
+registry-derived category, **not new runtime evidence**. The generator includes
+retired equations in this derivation; no status filter occurs at lines 64-66.
+In particular `:free-energy` remains retired and its eps import remains counted
+(`futon2/holes/labs/wm-contract/aif-equations.edn:92-100`).
+
+### (a) Proposed host move: exact Box 2 edge delta
+
+| Theory edge | Symbol | Before | After |
+|---|---|---|---|
+| R1 -> R8 | mu | realised-undrawn | absent from theory/drawn union |
+| R8 -> R3 | eps | realised-undrawn | absent from theory/drawn union |
+| R8 -> R7 | eps | realised-undrawn | absent from theory/drawn union |
+| R1 -> R3a | mu | absent from theory/drawn union | realised-undrawn |
+| R2 -> R3a | o | absent from theory/drawn union | realised-undrawn |
+| R3a -> R3 | eps | absent from theory/drawn union | realised-undrawn |
+| R3a -> R7 | eps | absent from theory/drawn union | realised-undrawn |
+| R3a -> R8 | eps | omitted self-edge at R8 | realised-undrawn |
+
+These are all changed rows, including symbol-set comparison. R2 -> R8 remains
+unchanged: another R8 equation still imports o. The relevant producer/consumer
+rows are `aif-equations.edn:80` (eps imports o, mu), `:86` (precision imports eps),
+`:92` (free energy imports eps), `:102` (policy free energy), and `:113` (belief
+update imports eps). Paths in this paragraph are under
+`futon2/holes/labs/wm-contract/`.
+
+Counts, before -> after: theory 20 -> 22; drawn 21 -> 21; conformant 7 -> 7;
+missing 13 -> 15; realised-undrawn 10 -> 12; not-realised 2 -> 2;
+path-dependent 1 -> 1; plumbing edges 8 -> 8; unexplained drawn edges 6 -> 6.
+No existing drawn edge acquires conformance. This change corrects hosting; it
+does not claim the drawn-map join is repaired.
+
+**Realisation flags touched: none.** The prediction-error row has no `:realised`
+field. The proposed mutation changes only `:node`; all `:realised` values
+elsewhere, all statuses, the `:holes` populations, and all import/formal/Lean/code
+fields remain identical. The generator checks that hole edges remain theory
+edges (`gen_aif_dag.bb:73-76`); the mutated registry passed this check.
+
+Dossier population: R8 goes from three equations (`prediction-error`,
+`free-energy`, `policy-free-energy`) to two (`free-energy`, `policy-free-energy`).
+R3a goes from zero to one (`prediction-error`), retaining
+`machineChannelPredictionError` as that equation's unchanged Lean binding.
+No other equation population changes. R8 remains equation-bearing; R3a now
+unambiguously receives the AIF ladder. The checked module binding/formal line
+can license its transcription rungs only once the separate accounting join
+succeeds. No witnessed/runtime-validation promotion follows from moving a host
+(`p4ng/empirics-futon/gen_rnode_dossiers.py:329-372,375-382,459-470`).
+
+### Alternatives and recommendation
+
+**(b) Add R3a to plumbing instead:** all Box 2 edge rows, symbol sets and the
+counts above remain exactly at baseline (20 theory, seven conformant). R8 retains
+all three equations; R3a retains zero. Its Box 3 formal ceiling becomes named and
+its lifecycle has no census row. Although this suppresses the population refusal,
+it misdescribes the computation in the roster's R3a basis. It is not a defensible
+repair. No `:realised` flag changes. The absence of edge changes is measured, not
+assumed: no drawn-status edge is newly reclassified by adding that plumbing node.
+
+**(c) Leave misfiled:** no Box 2 delta, no population or realisation-flag delta.
+Box 2 accepts the existing code-side basis exception (`gen_aif_dag.bb:53-59`);
+Box 3 correctly refuses the ambiguous ceiling (`gen_rnode_dossiers.py:375-380`).
+Canonical Box 3 regeneration remains blocked even after accounting packet B2.
+
+Recommend (a), because it assigns the already recorded equation to the node
+whose recorded responsibility is to compute it. This is not a new equation,
+implementation, proof, or realised-edge claim. Proposed exact diff, **UNAPPLIED**:
+
+```diff
+-  {:id :prediction-error :defines :eps :node :R8 :class :theory-defined :ref :buckley2017
++  {:id :prediction-error :defines :eps :node :R3a :class :theory-defined :ref :buckley2017
+```
+
+Target: `futon2/holes/labs/wm-contract/aif-equations.edn:80`. Await the second read
+before applying it. Do not append R3a to plumbing. Canonical regeneration remains
+a separate reviewed step after both this correction and the accounting extension.
+
+### Input pins for this addendum
+
+- `futon2/holes/labs/wm-contract/aif-equations.edn`: SHA-256 `51b928561f6d8c13336266f48561295011d3220090c4d8a97b0ebb4cdcb3e99f`.
+- `p4ng/empirics-futon/gen_aif_dag.bb`: SHA-256 `841acd52bcd99e8b1de17de6f41b9deeaebcfc7019124d3553b8bb9c3d7a14d5`.
+- `p4ng/empirics-futon/control-map-edges.edn`: SHA-256 `161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec`.
+- `p4ng/empirics-futon/control-stages.edn`: SHA-256 `0dc90da2b870938f0014d82ac642d8738cc06965cb369108f26773a7d06ecb74`.
+- `p4ng/empirics-futon/gen_rnode_dossiers.py`: SHA-256 `c7294af5cf7b4cd7d8436b7d7c83e2539c3d6aecda1828139e96a379f4cea3b9`.
