@@ -560,7 +560,20 @@ operator workflow conversation (standdown 2026-09-12).
     formal line asserts three laws — carrier-lags-registry;
     composite formal subject in a NEW module first, then one
     real offline envelope retention, then the proof).
-    Seven-step split adopted. STEP 2 DONE — R8 POLICY-F CLAIM
+    Seven-step split adopted. STEP 6 (R5-A BRIDGE) DONE
+    (2026-09-12, mathlib4 e1701288, receipts a1179b23,
+    reviewed): AmbiguityBridge.lean states BOTH quantities on
+    their real carriers — categorical by reference to frozen
+    Holes.ambiguity; gaussianChannelAmbiguity matching
+    production's REAL aggregation (sum of 1/2 ln(2pi e
+    max(v,1e-9)), reviewer checked efe.clj); typed divergence
+    witness (unit variance vs deterministic categorical); ONE
+    genuine isolated agreement proven (deterministic row +
+    v = 1/(2pi e) both zero — no general bridge); no sorryAx,
+    frozen files untouched. Estimator recommendation recorded
+    in run NOTES (categorical estimator over row-9 Q + row-6 A;
+    Gaussian lane registered separately) — the build decision
+    is a later packet. STEP 2 DONE — R8 POLICY-F CLAIM
     ADMITTED (2026-09-12, futon2 f94c3712/bcf60667; mathlib4
     c58245bf): 145 candidates / 2030 channel coordinates from
     consecutive S4 records, production replay bit-identical,
