@@ -1,0 +1,15 @@
+ℹ [2702/2705] Replayed DarkTower.WarMachine.CascadeOrder
+info: DarkTower/WarMachine/CascadeOrder.lean:143:0: 'attempt001_2026_07_14_two_cycle_is_refused' depends on axioms: [propext]
+info: DarkTower/WarMachine/CascadeOrder.lean:144:0: 'dropping_reverse_edge_is_acyclic_but_not_a_semilattice' depends on axioms: [propext]
+info: DarkTower/WarMachine/CascadeOrder.lean:145:0: 'attempt008_2026_07_16_descent_is_accepted' depends on axioms: [propext]
+⚠ [2704/2705] Replayed DarkTower.WarMachine.Holes
+warning: DarkTower/WarMachine/Holes.lean:157:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:999:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7396:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7419:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7430:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7958:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7961:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7964:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7967:4: declaration uses `sorry`
+Build completed successfully (2705 jobs).

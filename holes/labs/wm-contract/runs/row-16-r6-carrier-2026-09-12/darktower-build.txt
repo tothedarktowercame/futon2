@@ -1,0 +1,888 @@
+ℹ [1/825] Replayed DarkTower.BV
+info: DarkTower/BV.lean:191:0: DarkTower.BV.Cong.seq_assoc.{u} {A : Type u} (S T U : BV A) : ((S.seq T).seq U).Cong (S.seq (T.seq U))
+info: DarkTower/BV.lean:192:0: DarkTower.BV.Step.q_down.{u} {A : Type u} (R T R' T' : BV A) :
+  ((R.par T).seq (R'.par T')).Step ((R.seq R').par (T.seq T'))
+info: DarkTower/BV.lean:193:0: DarkTower.BV.atom_q_down.{u} {A : Type u} (a b c d : A) :
+  (((atom a).par (atom b)).seq ((atom c).par (atom d))).Step (((atom a).seq (atom c)).par ((atom b).seq (atom d)))
+ℹ [767/825] Replayed DarkTower.ExotypeLiftVariantPreregistration
+info: DarkTower/ExotypeLiftVariantPreregistration.lean:202:0: 'ExotypeLiftVariant.randomAxis_not_navigable' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/ExotypeLiftVariantPreregistration.lean:203:0: 'ExotypeLiftVariant.random_control_obligation_is_reversed' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/ExotypeLiftVariantPreregistration.lean:204:0: 'ExotypeLiftVariant.separability_is_obliged' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/ExotypeLiftVariantPreregistration.lean:205:0: 'ExotypeLiftVariant.treatment_axis_is_obliged' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/ExotypeLiftVariantPreregistration.lean:206:0: 'ExotypeLiftVariant.random_control_has_no_forward_obligation' depends on axioms: [propext, Classical.choice, Quot.sound]
+ℹ [768/825] Replayed DarkTower.ExotypeGridPreregistration
+info: DarkTower/ExotypeGridPreregistration.lean:153:0: 'ExotypeGrid.bistability_not_navigable' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/ExotypeGridPreregistration.lean:154:0: 'ExotypeGrid.separability_is_obliged' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/ExotypeGridPreregistration.lean:155:0: 'ExotypeGrid.bistability_obligation_is_reversed' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/ExotypeGridPreregistration.lean:156:0: 'ExotypeGrid.sweep_axis_is_obliged' depends on axioms: [propext, Classical.choice, Quot.sound]
+✖ [7801/8510] Building DarkTower.MemoryArmPreregistration (1.0s)
+trace: .> LEAN_PATH=/home/joe/code/mathlib4/.lake/packages/Cli/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/batteries/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/Qq/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/aesop/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/importGraph/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/plausible/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/build/lib/lean /home/joe/.elan/toolchains/leanprover--lean4---v4.31.0-rc1/bin/lean /home/joe/code/mathlib4/DarkTower/MemoryArmPreregistration.lean -o /home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/MemoryArmPreregistration.olean -i /home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/MemoryArmPreregistration.ilean -c /home/joe/code/mathlib4/.lake/build/ir/DarkTower/MemoryArmPreregistration.c --setup /home/joe/code/mathlib4/.lake/build/ir/DarkTower/MemoryArmPreregistration.setup.json --json
+error: DarkTower/MemoryArmPreregistration.lean:268:18: type expected, got
+  (ReplicationPlan : Type ?u.2 → Type ?u.2)
+error: DarkTower/MemoryArmPreregistration.lean:295:19: type expected, got
+  (ProspectiveRegistration Trace Outcome : Type ?u.2 → Type (max 0 ?u.2))
+error: Lean exited with code 1
+ℹ [8514/8696] Replayed DarkTower.StableHomotopyCategory
+info: DarkTower/StableHomotopyCategory.lean:133:0: 'DarkTower.stableHomotopyCategory_isTriangulated' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/StableHomotopyCategory.lean:134:0: 'DarkTower.stableHomotopyCategory_nonempty_monoidalClosed' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/StableHomotopyCategory.lean:135:0: 'DarkTower.stableHomotopyCategory_exists_hpsGenerators' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/StableHomotopyCategory.lean:136:0: 'DarkTower.stableHomotopyCategory_exists_hpsWeakGenerators' depends on axioms: [propext, Classical.choice, Quot.sound]
+ℹ [8517/8696] Replayed DarkTower.WarMachine.CascadeOrder
+info: DarkTower/WarMachine/CascadeOrder.lean:143:0: 'attempt001_2026_07_14_two_cycle_is_refused' depends on axioms: [propext]
+info: DarkTower/WarMachine/CascadeOrder.lean:144:0: 'dropping_reverse_edge_is_acyclic_but_not_a_semilattice' depends on axioms: [propext]
+info: DarkTower/WarMachine/CascadeOrder.lean:145:0: 'attempt008_2026_07_16_descent_is_accepted' depends on axioms: [propext]
+ℹ [8518/8696] Replayed DarkTower.WarMachine.CommitmentTemperature
+info: DarkTower/WarMachine/CommitmentTemperature.lean:293:0: 'DarkTower.WarMachine.CommitmentTemperature.factorsThroughDiscard_iff_temperatureInvariant' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:294:0: 'DarkTower.WarMachine.CommitmentTemperature.not_governs_iff_factorsThroughDiscard' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/CommitmentTemperature.lean:295:0: 'DarkTower.WarMachine.CommitmentTemperature.discard_absorbs_upstream' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:296:0: 'DarkTower.WarMachine.CommitmentTemperature.live_selector_factors_through_discard' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:297:0: 'DarkTower.WarMachine.CommitmentTemperature.mode_only_ignores_temperature' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:298:0: 'DarkTower.WarMachine.CommitmentTemperature.live_selector_does_not_govern' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:299:0: 'DarkTower.WarMachine.CommitmentTemperature.single_term_argmax_annihilates_temperature' depends on axioms: [propext,
+ Quot.sound]
+info: DarkTower/WarMachine/CommitmentTemperature.lean:300:0: 'DarkTower.WarMachine.CommitmentTemperature.repairing_r8_changes_no_action' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:301:0: 'DarkTower.WarMachine.CommitmentTemperature.live_gain_repair_changes_no_action' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:302:0: 'DarkTower.WarMachine.CommitmentTemperature.default_branch_gain_repair_changes_no_action' depends on axioms: [propext,
+ Quot.sound]
+info: DarkTower/WarMachine/CommitmentTemperature.lean:303:0: 'DarkTower.WarMachine.CommitmentTemperature.record_sensitivity_is_not_governance' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:304:0: 'DarkTower.WarMachine.CommitmentTemperature.scores_move_action_does_not' does not depend on any axioms
+info: DarkTower/WarMachine/CommitmentTemperature.lean:305:0: 'DarkTower.WarMachine.CommitmentTemperature.habit_prior_governs' does not depend on any axioms
+ℹ [8519/8696] Replayed DarkTower.WarMachine.GainChain
+info: DarkTower/WarMachine/GainChain.lean:372:0: 'DarkTower.WarMachine.GainChain.substitution_2026_07_08_narrows_domain_is_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/GainChain.lean:373:0: 'DarkTower.WarMachine.GainChain.inert_until_data_is_not_a_discharged_precondition' depends on axioms: [propext]
+info: DarkTower/WarMachine/GainChain.lean:374:0: 'DarkTower.WarMachine.GainChain.strict_load_swallowed_gives_a_silent_success' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/GainChain.lean:375:0: 'DarkTower.WarMachine.GainChain.two_clocks_break_threaded_identity' depends on axioms: [propext]
+info: DarkTower/WarMachine/GainChain.lean:376:0: 'DarkTower.WarMachine.GainChain.domain_mismatch_is_a_record_not_a_silence' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/GainChain.lean:377:0: 'DarkTower.WarMachine.GainChain.gain_chain_sound_nonvacuous' depends on axioms: [propext]
+ℹ [8520/8696] Replayed DarkTower.WarMachine.CoverageReport
+info: DarkTower/WarMachine/CoverageReport.lean:234:0: 'DarkTower.WarMachine.CoverageReport.warm_customer_pays_uncovered_and_unrecorded_is_refused' does not depend on any axioms
+info: DarkTower/WarMachine/CoverageReport.lean:235:0: 'DarkTower.WarMachine.CoverageReport.adding_a_channel_does_not_satisfy_coverage' does not depend on any axioms
+info: DarkTower/WarMachine/CoverageReport.lean:236:0: 'DarkTower.WarMachine.CoverageReport.void_retains_the_instrument_finding' does not depend on any axioms
+info: DarkTower/WarMachine/CoverageReport.lean:237:0: 'DarkTower.WarMachine.CoverageReport.coverage_reported_nonvacuous' depends on axioms: [propext, Quot.sound]
+ℹ [8521/8696] Replayed DarkTower.WarMachine.PolicyGrade
+info: DarkTower/WarMachine/PolicyGrade.lean:169:0: 'DarkTower.WarMachine.PolicyGrade.wiringSensitive_needs_two_wirings' does not depend on any axioms
+info: DarkTower/WarMachine/PolicyGrade.lean:170:0: 'DarkTower.WarMachine.PolicyGrade.singleton_wiring_fails_sg4' does not depend on any axioms
+info: DarkTower/WarMachine/PolicyGrade.lean:171:0: 'DarkTower.WarMachine.PolicyGrade.grim_trigger_sharer_refused_by_sg2' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/PolicyGrade.lean:172:0: 'DarkTower.WarMachine.PolicyGrade.grim_trigger_snatcher_passes_sg2_fails_sg4' depends on axioms: [propext]
+info: DarkTower/WarMachine/PolicyGrade.lean:173:0: 'DarkTower.WarMachine.PolicyGrade.pattern_driven_g4_snatcher_earns_policy_grade' depends on axioms: [propext]
+ℹ [8529/8696] Replayed DarkTower.TypedHole
+info: DarkTower/TypedHole.lean:88:0: DarkTower.TypedHole.holeType.{uA, uB} (T : TypedHole) (a : T.poly.A) : Type uB
+info: DarkTower/TypedHole.lean:89:0: DarkTower.TypedHole.nodesBySatiety.{uA, uB} (T : TypedHole) : GradedObject SatietyGrade (Type uA)
+info: DarkTower/TypedHole.lean:90:0: DarkTower.TypedHole.gradedHoleType.{uA, uB} (T : TypedHole) (grade : SatietyGrade) (a : T.nodesBySatiety grade) :
+  Type uB
+ℹ [8530/8696] Replayed DarkTower.Comb
+info: DarkTower/Comb.lean:111:0: DarkTower.Comb.id.{uAP, uBP} (P : PFunctor.{uAP, uBP}) : Comb P P
+info: DarkTower/Comb.lean:112:0: DarkTower.Comb.comp.{uAP, uBP, uAQ, uBQ, uAR, uBR} {P : PFunctor.{uAP, uBP}} {Q : PFunctor.{uAQ, uBQ}}
+  {R : PFunctor.{uAR, uBR}} (f : Comb P Q) (g : Comb Q R) : Comb P R
+info: DarkTower/Comb.lean:113:0: DarkTower.Comb.comp_onDir.{uAP, uBP, uAQ, uBQ, uAR, uBR} {P : PFunctor.{uAP, uBP}} {Q : PFunctor.{uAQ, uBQ}}
+  {R : PFunctor.{uAR, uBR}} (f : Comb P Q) (g : Comb Q R) (a : P.A) (dir : R.B (g.onPos (f.onPos a))) :
+  (f.comp g).onDir a dir = f.onDir a (g.onDir (f.onPos a) dir)
+ℹ [8531/8696] Replayed DarkTower.Discharge
+info: DarkTower/Discharge.lean:111:0: 'DarkTower.Discharge.open_filled' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/Discharge.lean:112:0: 'DarkTower.Discharge.fill_commutes_with_discharge' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/Discharge.lean:113:0: 'DarkTower.Discharge.id' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/Discharge.lean:114:0: 'DarkTower.Discharge.comp' depends on axioms: [propext, Classical.choice, Quot.sound]
+ℹ [8533/8696] Replayed DarkTower.Fill
+info: DarkTower/Fill.lean:126:0: PFunctor.comp.{uA₁, uB₁, uA₂, uB₂} (P₂ : PFunctor.{uA₂, uB₂}) (P₁ : PFunctor.{uA₁, uB₁}) :
+  PFunctor.{max uA₁ uA₂ uB₂, max uB₁ uB₂}
+info: DarkTower/Fill.lean:127:0: PFunctor.comp.mk.{v, uA₁, uB₁, uA₂, uB₂} (P₂ : PFunctor.{uA₂, uB₂}) (P₁ : PFunctor.{uA₁, uB₁}) {α : Type v}
+  (x : ↑P₂ (↑P₁ α)) : ↑(P₂.comp P₁) α
+info: DarkTower/Fill.lean:128:0: PFunctor.comp.get.{v, uA₁, uB₁, uA₂, uB₂} (P₂ : PFunctor.{uA₂, uB₂}) (P₁ : PFunctor.{uA₁, uB₁}) {α : Type v}
+  (x : ↑(P₂.comp P₁) α) : ↑P₂ (↑P₁ α)
+info: DarkTower/Fill.lean:129:0: DarkTower.Fill.leftUnitEquiv.{uA₁, uB₁, v, u_1, u_2} (P₁ : PFunctor.{uA₁, uB₁}) (α : Type v) : ↑(fill I P₁) α ≃ ↑P₁ α
+info: DarkTower/Fill.lean:130:0: DarkTower.Fill.rightUnitEquiv.{uA₁, uB₁, v, u_1, u_2} (P₁ : PFunctor.{uA₁, uB₁}) (α : Type v) : ↑(fill P₁ I) α ≃ ↑P₁ α
+info: DarkTower/Fill.lean:131:0: DarkTower.Fill.assocEquiv.{uA₁, uB₁, uA₂, uB₂, uA₃, uB₃, v} (P₁ : PFunctor.{uA₁, uB₁}) (P₂ : PFunctor.{uA₂, uB₂})
+  (P₃ : PFunctor.{uA₃, uB₃}) (α : Type v) : ↑(fill (fill P₃ P₂) P₁) α ≃ ↑(fill P₃ (fill P₂ P₁)) α
+ℹ [8534/8696] Replayed DarkTower.ScopeQuery
+info: DarkTower/ScopeQuery.lean:249:0: DarkTower.ScopeQuery.answers.{uK, uR, uN, uV} {S : Sig} {N : Type uN} {V : Type uV} [DecidableEq S.Kind]
+  [DecidableEq S.Role] [DecidableEq N] [DecidableEq V] (q : Query S N V) (db : Store S N) : List (Binding V N)
+info: DarkTower/ScopeQuery.lean:250:0: DarkTower.ScopeQuery.queryComb.{uK, uR, uN, uV, u_1, u_2} {S : Sig} {N : Type uN} {V : Type uV} (q : Query S N V) :
+  Comb Fill.I (holePoly q)
+info: DarkTower/ScopeQuery.lean:251:0: DarkTower.ScopeQuery.answers_eq_fills.{uK, uR, uN, uV} {S : Sig} {N : Type uN} {V : Type uV} [DecidableEq S.Kind]
+  [DecidableEq S.Role] [DecidableEq N] [DecidableEq V] (q : Query S N V) (db : Store S N) : answers q db = fills q db
+ℹ [8536/8696] Replayed DarkTower.Coverage
+info: DarkTower/Coverage.lean:153:0: 'DarkTower.noOrphan' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/Coverage.lean:154:0: 'DarkTower.coverageComplete' does not depend on any axioms
+info: DarkTower/Coverage.lean:155:0: 'DarkTower.coverageComplete_by_cases' depends on axioms: [propext]
+info: DarkTower/Coverage.lean:156:0: 'DarkTower.cascadeFeed_routes_through_satiety' does not depend on any axioms
+info: DarkTower/Coverage.lean:157:0: 'DarkTower.discharge_routes_through_filled' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/Coverage.lean:158:0: 'DarkTower.ground_routes_through_filled' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/Coverage.lean:159:0: 'DarkTower.reply_routes_through_filled' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/Coverage.lean:160:0: 'DarkTower.compose_routes_through_comb_comp' does not depend on any axioms
+info: DarkTower/Coverage.lean:161:0: 'DarkTower.compose_direction_routes_through_comb_comp' does not depend on any axioms
+info: DarkTower/Coverage.lean:162:0: 'DarkTower.answer_routes_through_fills' depends on axioms: [propext]
+info: DarkTower/Coverage.lean:163:0: 'DarkTower.answer_queryComb_routes_from_fill_identity' does not depend on any axioms
+ℹ [8537/8696] Replayed DarkTower.QuillenAdjunction
+info: DarkTower/QuillenAdjunction.lean:71:0: 'DarkTower.QuillenAdjunction.preserves_cofibration' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/QuillenAdjunction.lean:72:0: 'DarkTower.QuillenAdjunction.preserves_trivial_cofibration' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/QuillenAdjunction.lean:73:0: 'DarkTower.QuillenAdjunction.id' depends on axioms: [propext, Classical.choice, Quot.sound]
+ℹ [8538/8696] Replayed DarkTower.QuillenEquivalence
+info: DarkTower/QuillenEquivalence.lean:75:0: 'DarkTower.QuillenEquivalence.id' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/QuillenEquivalence.lean:76:0: 'DarkTower.QuillenEquivalence.nonempty_quillenAdjunction' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/QuillenEquivalence.lean:77:0: 'DarkTower.QuillenEquivalence.weakEquivalence_iff_adjunct_apply' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+ℹ [8539/8696] Replayed DarkTower.GrothendieckTopos
+info: DarkTower/GrothendieckTopos.lean:65:0: 'DarkTower.sheaf_isGrothendieckTopos' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/GrothendieckTopos.lean:66:0: 'DarkTower.isGrothendieckTopos_of_equivalence' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/GrothendieckTopos.lean:67:0: 'DarkTower.isGrothendieckTopos_iff_of_equivalence' depends on axioms: [propext, Classical.choice, Quot.sound]
+ℹ [8540/8696] Replayed DarkTower.GeometricMorphism
+info: DarkTower/GeometricMorphism.lean:65:0: 'DarkTower.GeometricMorphism.id' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/GeometricMorphism.lean:66:0: 'DarkTower.GeometricMorphism.comp' depends on axioms: [propext, Classical.choice, Quot.sound]
+ℹ [8543/8696] Replayed DarkTower.FirstFlightsExample
+info: DarkTower/FirstFlightsExample.lean:246:0: DarkTower.FirstFlightsExample.checkpointChain : BV Checkpoint
+info: DarkTower/FirstFlightsExample.lean:247:0: DarkTower.ScopeQuery.answers.{uK, uR, uN, uV} {S : ScopeQuery.Sig} {N : Type uN} {V : Type uV} [DecidableEq S.Kind]
+  [DecidableEq S.Role] [DecidableEq N] [DecidableEq V] (q : ScopeQuery.Query S N V) (db : ScopeQuery.Store S N) :
+  List (ScopeQuery.Binding V N)
+info: DarkTower/FirstFlightsExample.lean:248:0: DarkTower.FirstFlightsExample.jointlyWithPair : BV Pattern
+info: DarkTower/FirstFlightsExample.lean:249:0: DarkTower.Fill.I.get.{v, u_1, u_2} {α : Type v} (x : ↑Fill.I α) : α
+⚠ [8545/8696] Replayed DarkTower.MetaCATokamakExample
+warning: DarkTower/MetaCATokamakExample.lean:338:28: This simp argument is unused:
+  partitionFunction
+
+Hint: Omit it from the simp argument list.
+  simp only [softmaxPolicy, p̵a̵r̵t̵i̵t̵i̵o̵n̵F̵u̵n̵c̵t̵i̵o̵n̵,̵ ̵softmaxWeights]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DarkTower/MetaCATokamakExample.lean:450:8: This simp argument is unused:
+  List.Pairwise
+
+Hint: Omit it from the simp argument list.
+  simp [L̵i̵s̵t̵.̵P̵a̵i̵r̵w̵i̵s̵e̵,̵ ̵fieldOrigin, Stage, TraceField]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DarkTower/MetaCATokamakExample.lean:450:36: This simp argument is unused:
+  Stage
+
+Hint: Omit it from the simp argument list.
+  simp [List.Pairwise, fieldOrigin, S̵t̵a̵g̵e̵,̵ ̵TraceField]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DarkTower/MetaCATokamakExample.lean:450:43: This simp argument is unused:
+  TraceField
+
+Hint: Omit it from the simp argument list.
+  simp [List.Pairwise, fieldOrigin, Stage,̵ ̵T̵r̵a̵c̵e̵F̵i̵e̵l̵d̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ℹ [8549/8696] Replayed DarkTower.WarMachine.MachineAction
+info: DarkTower/WarMachine/MachineAction.lean:215:0: 'DarkTower.WarMachine.MachineAction.Candidate' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:216:0: 'DarkTower.WarMachine.MachineAction.StrategicLaw' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:217:0: 'DarkTower.WarMachine.MachineAction.SelectionBoundary' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:218:0: 'DarkTower.WarMachine.MachineAction.firstArgmax' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:219:0: 'DarkTower.WarMachine.MachineAction.lastArgmax' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:220:0: 'DarkTower.WarMachine.MachineAction.strategicCandidates' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:221:0: 'DarkTower.WarMachine.MachineAction.actuationCandidates' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:222:0: 'DarkTower.WarMachine.MachineAction.machineAction' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:223:0: 'DarkTower.WarMachine.MachineAction.headAndPosteriorDisagree' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:224:0: 'DarkTower.WarMachine.MachineAction.strategicAndActuationDisagree' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:225:0: 'DarkTower.WarMachine.MachineAction.tiedArgmaxesDisagree' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:226:0: 'DarkTower.WarMachine.MachineAction.requestedPosteriorCanBecomeHead' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:227:0: 'DarkTower.WarMachine.MachineAction.fullScoreIsPosteriorArgmax' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineAction.lean:228:0: 'DarkTower.WarMachine.MachineAction.noOpCandidateSetsDiffer' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:229:0: 'DarkTower.WarMachine.MachineAction.enactedAction' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:230:0: 'DarkTower.WarMachine.MachineAction.selectionScore' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineAction.lean:231:0: 'DarkTower.WarMachine.MachineAction.posteriorWeight' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineAction.lean:232:0: 'DarkTower.WarMachine.MachineAction.posteriorOrderIsScoreOrder' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineAction.lean:233:0: 'DarkTower.WarMachine.MachineAction.productionDefaultBoundary' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:234:0: 'DarkTower.WarMachine.MachineAction.productionDefaultLaw' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:235:0: 'DarkTower.WarMachine.MachineAction.registryLaw' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:236:0: 'DarkTower.WarMachine.MachineAction.defaultRuleIsNotTheRegistryRule' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:237:0: 'DarkTower.WarMachine.MachineAction.defaultSelectionIsTheHead' depends on axioms: [propext]
+info: DarkTower/WarMachine/MachineAction.lean:238:0: 'DarkTower.WarMachine.MachineAction.habitPriorAloneMovesTheChoice' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:239:0: 'DarkTower.WarMachine.MachineAction.noOpExclusionMovesTheChoice' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:240:0: 'DarkTower.WarMachine.MachineAction.abstains' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineAction.lean:241:0: 'DarkTower.WarMachine.MachineAction.noOpArgmaxAbstains' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineAction.lean:242:0: 'DarkTower.WarMachine.MachineAction.requestedPosteriorDependsOnFPiEntered' does not depend on any axioms
+info: DarkTower/WarMachine/MachineAction.lean:243:0: 'DarkTower.WarMachine.MachineAction.selectedAndEnactedDisagree' does not depend on any axioms
+ℹ [8551/8696] Replayed DarkTower.WarMachine.MachineTemperature
+info: DarkTower/WarMachine/MachineTemperature.lean:279:0: 'DarkTower.WarMachine.MachineTemperature.gRange' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:280:0: 'DarkTower.WarMachine.MachineTemperature.adaptiveTemperature' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:281:0: 'DarkTower.WarMachine.MachineTemperature.adaptiveTemperatureReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:282:0: 'DarkTower.WarMachine.MachineTemperature.emptySpreadIsTheFloor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:283:0: 'DarkTower.WarMachine.MachineTemperature.degenerateSpreadIsTheFloor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:284:0: 'DarkTower.WarMachine.MachineTemperature.probeOpts' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:285:0: 'DarkTower.WarMachine.MachineTemperature.threeLawsDisagree' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:286:0: 'DarkTower.WarMachine.MachineTemperature.machineGamma' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:287:0: 'DarkTower.WarMachine.MachineTemperature.variationalGammaIsInverseBeta' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:288:0: 'DarkTower.WarMachine.MachineTemperature.engineeringGammaIsNotInverseBeta' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:289:0: 'DarkTower.WarMachine.MachineTemperature.gainFloorPreventsDivisionByZero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:290:0: 'DarkTower.WarMachine.MachineTemperature.selectionScore' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:291:0: 'DarkTower.WarMachine.MachineTemperature.largerTemperatureFlattensScores' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:292:0: 'DarkTower.WarMachine.MachineTemperature.zeroPriorOrderIsTemperatureInvariant' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:293:0: 'DarkTower.WarMachine.MachineTemperature.habitPriorMakesOrderTemperatureDependent' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:294:0: 'DarkTower.WarMachine.MachineTemperature.TauMode' does not depend on any axioms
+info: DarkTower/WarMachine/MachineTemperature.lean:295:0: 'DarkTower.WarMachine.MachineTemperature.MachineNumber' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:296:0: 'DarkTower.WarMachine.MachineTemperature.TemperatureOpts' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:297:0: 'DarkTower.WarMachine.MachineTemperature.TemperatureError' does not depend on any axioms
+info: DarkTower/WarMachine/MachineTemperature.lean:298:0: 'DarkTower.WarMachine.MachineTemperature.machineTemperature' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:299:0: 'DarkTower.WarMachine.MachineTemperature.gainOneReductions' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:300:0: 'DarkTower.WarMachine.MachineTemperature.betaIsNotFloored' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:301:0: 'DarkTower.WarMachine.MachineTemperature.missingBetaNeverFallsBack' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:302:0: 'DarkTower.WarMachine.MachineTemperature.policyFunctionDefault' does not depend on any axioms
+info: DarkTower/WarMachine/MachineTemperature.lean:303:0: 'DarkTower.WarMachine.MachineTemperature.liveArenaDefault' does not depend on any axioms
+info: DarkTower/WarMachine/MachineTemperature.lean:304:0: 'DarkTower.WarMachine.MachineTemperature.temperatureDefaultsDisagree' does not depend on any axioms
+info: DarkTower/WarMachine/MachineTemperature.lean:305:0: 'DarkTower.WarMachine.MachineTemperature.BetaSource' does not depend on any axioms
+info: DarkTower/WarMachine/MachineTemperature.lean:306:0: 'DarkTower.WarMachine.MachineTemperature.solvedThisTick' depends on axioms: [propext]
+info: DarkTower/WarMachine/MachineTemperature.lean:307:0: 'DarkTower.WarMachine.MachineTemperature.variationalModeCanCarryHeldBeta' depends on axioms: [propext]
+info: DarkTower/WarMachine/MachineTemperature.lean:308:0: 'DarkTower.WarMachine.MachineTemperature.temperatureScore' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineTemperature.lean:309:0: 'DarkTower.WarMachine.MachineTemperature.SelectionLaw' does not depend on any axioms
+info: DarkTower/WarMachine/MachineTemperature.lean:310:0: 'DarkTower.WarMachine.MachineTemperature.temperatureReachesChoice' does not depend on any axioms
+info: DarkTower/WarMachine/MachineTemperature.lean:311:0: 'DarkTower.WarMachine.MachineTemperature.selectionLawControlsTemperatureChannel' does not depend on any axioms
+ℹ [8553/8696] Replayed DarkTower.WarMachine.MachineTemperatureWitness
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:61:0: 'DarkTower.WarMachine.MachineTemperatureWitness.zeroBetaReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:62:0: 'DarkTower.WarMachine.MachineTemperatureWitness.negativeBetaReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:63:0: 'DarkTower.WarMachine.MachineTemperatureWitness.productionGainFloorReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:64:0: 'DarkTower.WarMachine.MachineTemperatureWitness.threeLawsReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:65:0: 'DarkTower.WarMachine.MachineTemperatureWitness.productionFloorGainOne' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:66:0: 'DarkTower.WarMachine.MachineTemperatureWitness.belowFloorBetaReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineTemperatureWitness.lean:67:0: 'DarkTower.WarMachine.MachineTemperatureWitness.nonfiniteBetaReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+ℹ [8554/8696] Replayed DarkTower.WarMachine.MachineActionWitness
+info: DarkTower/WarMachine/MachineActionWitness.lean:42:0: 'DarkTower.WarMachine.MachineActionWitness.scoreVectorReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineActionWitness.lean:43:0: 'DarkTower.WarMachine.MachineActionWitness.controllerHeadReference' does not depend on any axioms
+info: DarkTower/WarMachine/MachineActionWitness.lean:44:0: 'DarkTower.WarMachine.MachineActionWitness.posteriorReference' does not depend on any axioms
+info: DarkTower/WarMachine/MachineActionWitness.lean:45:0: 'DarkTower.WarMachine.MachineActionWitness.posteriorFallbackReference' does not depend on any axioms
+✖ [8559/8696] Building DarkTower.BaldwinPostRegistration (992ms)
+trace: .> LEAN_PATH=/home/joe/code/mathlib4/.lake/packages/Cli/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/batteries/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/Qq/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/aesop/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/importGraph/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/plausible/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/build/lib/lean /home/joe/.elan/toolchains/leanprover--lean4---v4.31.0-rc1/bin/lean /home/joe/code/mathlib4/DarkTower/BaldwinPostRegistration.lean -o /home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/BaldwinPostRegistration.olean -i /home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/BaldwinPostRegistration.ilean -c /home/joe/code/mathlib4/.lake/build/ir/DarkTower/BaldwinPostRegistration.c --setup /home/joe/code/mathlib4/.lake/build/ir/DarkTower/BaldwinPostRegistration.setup.json --json
+error: DarkTower/BaldwinPostRegistration.lean:214:19: Tactic `rcases` failed: `Obligation.axisNavigable costAxis` is not a free variable
+warning: DarkTower/BaldwinPostRegistration.lean:213:6: This simp argument is unused:
+  List.cons_append
+
+Hint: Omit it from the simp argument list.
+  simp only [Registration.obligations, battery, nullArm, holdOnlyArm, staticSearchArm,
+        List.flatMap_cons, List.flatMap_nil, List.map_cons, List.map_nil, List.append_nil,
+        List.c̵o̵ns̵_̵a̵p̵p̵e̵n̵d̵,̵ ̵L̵is̵t̵.̵n̵i̵l_append, List.mem_cons, List.not_mem_nil, or_false] at ho
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DarkTower/BaldwinPostRegistration.lean:213:24: This simp argument is unused:
+  List.nil_append
+
+Hint: Omit it from the simp argument list.
+  simp only [Registration.obligations, battery, nullArm, holdOnlyArm, staticSearchArm,
+        List.flatMap_cons, List.flatMap_nil, List.map_cons, List.map_nil, List.append_nil,
+        List.cons_append, List.n̵i̵l̵_̵a̵p̵p̵e̵n̵d̵,̵ ̵L̵i̵s̵t̵.̵mem_cons, List.not_mem_nil, or_false] at ho
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DarkTower/BaldwinPostRegistration.lean:213:41: This simp argument is unused:
+  List.mem_cons
+
+Hint: Omit it from the simp argument list.
+  simp only [Registration.obligations, battery, nullArm, holdOnlyArm, staticSearchArm,
+        List.flatMap_cons, List.flatMap_nil, List.map_cons, List.map_nil, List.append_nil,
+        List.cons_append, List.nil_append, List.m̵e̵m̵_̵c̵o̵ns̵,̵ ̵L̵i̵s̵t̵.̵n̵ot_mem_nil, or_false] at ho
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DarkTower/BaldwinPostRegistration.lean:213:56: This simp argument is unused:
+  List.not_mem_nil
+
+Hint: Omit it from the simp argument list.
+  simp only [Registration.obligations, battery, nullArm, holdOnlyArm, staticSearchArm,
+        List.flatMap_cons, List.flatMap_nil, List.map_cons, List.map_nil, List.append_nil,
+        List.cons_append, List.nil_append, List.mem_cons, L̵i̵s̵t̵.̵n̵ot̵_̵m̵e̵m̵_̵n̵i̵l̵,̵ ̵o̵r_false] at ho
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DarkTower/BaldwinPostRegistration.lean:213:74: This simp argument is unused:
+  or_false
+
+Hint: Omit it from the simp argument list.
+  simp only [Registration.obligations, battery, nullArm, holdOnlyArm, staticSearchArm,
+        List.flatMap_cons, List.flatMap_nil, List.map_cons, List.map_nil, List.append_nil,
+        List.cons_append, List.nil_append, List.mem_cons, List.not_mem_nil,̵ ̵o̵r̵_̵f̵a̵l̵s̵e̵] at ho
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+error: Lean exited with code 1
+ℹ [8560/8696] Built DarkTower.WarMachine.CascadeVerifierBoardWitness (1.3s)
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:152:0: BOARD|sha256:3a806b34dd46e94c4b91adead7b86105d7e0c682452392375a3cfbf90b863664
+END|end/yield
+DEBT|324
+REQUEST|wm-choice/c-grain|futon2/holes/labs/wm-contract/aif-equations.edn:1|a6d551bb9bfbc4ca451f3071710e3490926c369266ccccfe5bb4e87c80d3c09d|dated-not-revalidated|1
+METERS|1|5|0
+CHIP|ck/smell|smell-backlog||ck/look-first|ck/sing-clear
+CHIP|ck/look-first|look-debt|wm-choice/c-grain|ck/sing-debt|ck/yield
+CHIP|ck/sing-clear|sing||ck/yield|
+CHIP|ck/sing-debt|sing||ck/yield|
+CHIP|ck/yield|yield|||
+ROW|ck/smell|smell-backlog|true|sha256:3a806b34dd46e94c4b91adead7b86105d7e0c682452392375a3cfbf90b863664|observe
+ROW|ck/look-first|look-debt|true|sha256:3a806b34dd46e94c4b91adead7b86105d7e0c682452392375a3cfbf90b863664|verify-request
+ROW|ck/sing-debt|sing|true|sha256:3a806b34dd46e94c4b91adead7b86105d7e0c682452392375a3cfbf90b863664|report
+ROW|ck/yield|yield|true|sha256:3a806b34dd46e94c4b91adead7b86105d7e0c682452392375a3cfbf90b863664|yield-turn
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:163:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.boardHasNoZap' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:164:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.declaredEffectsAllowed' depends on axioms: [propext]
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:165:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.traceEffectsAllowed' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:166:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.cascadeHasNoActEffects' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:167:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.noZapAloneIsInsufficient' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:168:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.fixtureExecutes' depends on axioms: [propext]
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:169:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.fixtureWired' does not depend on any axioms
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:170:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.fixtureEffectsAllowed' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/CascadeVerifierBoardWitness.lean:171:0: 'DarkTower.WarMachine.CascadeVerifierBoardWitness.fixtureDeltasZero' does not depend on any axioms
+ℹ [8561/8696] Built DarkTower.WarMachine.ChipBoardWitness (1.7s)
+info: DarkTower/WarMachine/ChipBoardWitness.lean:261:0: BOARD|sha256:a09756448d0dfb11eb1cdd8e11ef03c2be473c836cd4e8f82b6e222e5fff52b4
+INPUTS|sha256:cb45070fa6189bec07bae3784eba70ea60d0382fd6c16dcd92d6dd30cc42dbd9
+END|end/yield
+CHIP|ck/keypress|keypress||ck/yield|ck/smell
+CHIP|ck/smell|smell||ck/look-first|ck/sing-clean
+CHIP|ck/look-first|look|futon5a|ck/feel-target|ck/yield
+CHIP|ck/feel-target|feel|futon5a|ck/sing-flag-live|ck/zap-commit
+CHIP|ck/zap-commit|zap|futon5a|ck/yield|ck/yield
+CHIP|ck/sing-clean|sing||ck/yield|
+CHIP|ck/sing-flag-live|sing||ck/yield|
+CHIP|ck/yield|yield|||
+ROW|ck/keypress|keypress|false|sha256:a09756448d0dfb11eb1cdd8e11ef03c2be473c836cd4e8f82b6e222e5fff52b4||
+ROW|ck/smell|smell|true|sha256:a09756448d0dfb11eb1cdd8e11ef03c2be473c836cd4e8f82b6e222e5fff52b4||observe
+ROW|ck/look-first|look|true|sha256:a09756448d0dfb11eb1cdd8e11ef03c2be473c836cd4e8f82b6e222e5fff52b4|futon5a|observe
+ROW|ck/feel-target|feel|false|sha256:a09756448d0dfb11eb1cdd8e11ef03c2be473c836cd4e8f82b6e222e5fff52b4|futon5a|
+ROW|ck/zap-commit|zap|true|sha256:a09756448d0dfb11eb1cdd8e11ef03c2be473c836cd4e8f82b6e222e5fff52b4|futon5a|commit:futon5a
+ROW|ck/yield|yield|true|sha256:a09756448d0dfb11eb1cdd8e11ef03c2be473c836cd4e8f82b6e222e5fff52b4||yield-turn
+info: DarkTower/WarMachine/ChipBoardWitness.lean:267:0: 'DarkTower.WarMachine.ChipBoardWitness.fixtureFollowsWires' does not depend on any axioms
+info: DarkTower/WarMachine/ChipBoardWitness.lean:268:0: 'DarkTower.WarMachine.ChipBoardWitness.fixtureTwoWires' depends on axioms: [propext]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:269:0: 'DarkTower.WarMachine.ChipBoardWitness.checkedObservationHasEitherWire' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:270:0: 'DarkTower.WarMachine.ChipBoardWitness.executorNamedHazard' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:271:0: 'DarkTower.WarMachine.ChipBoardWitness.nilZapExecutesWithoutFeel' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:272:0: 'DarkTower.WarMachine.ChipBoardWitness.replayDoesNotCertifyEffects' does not depend on any axioms
+info: DarkTower/WarMachine/ChipBoardWitness.lean:273:0: 'DarkTower.WarMachine.ChipBoardWitness.fixtureExecutes' depends on axioms: [propext]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:274:0: 'DarkTower.WarMachine.ChipBoardWitness.fixtureNamedHazard' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:275:0: 'DarkTower.WarMachine.ChipBoardWitness.fixtureDeltasZero' does not depend on any axioms
+info: DarkTower/WarMachine/ChipBoardWitness.lean:376:0: 'DarkTower.WarMachine.ChipBoardWitness.Repaired.repairedHazard' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:377:0: 'DarkTower.WarMachine.ChipBoardWitness.Repaired.nilZapNowImpossible' depends on axioms: [propext]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:378:0: 'DarkTower.WarMachine.ChipBoardWitness.Repaired.nilNowRefuses' does not depend on any axioms
+info: DarkTower/WarMachine/ChipBoardWitness.lean:379:0: 'DarkTower.WarMachine.ChipBoardWitness.Repaired.replayCertifiesModeledEffects' does not depend on any axioms
+info: DarkTower/WarMachine/ChipBoardWitness.lean:380:0: 'DarkTower.WarMachine.ChipBoardWitness.Repaired.alteredEffectsNowRefuse' does not depend on any axioms
+info: DarkTower/WarMachine/ChipBoardWitness.lean:381:0: 'DarkTower.WarMachine.ChipBoardWitness.Repaired.compareMoveReference' does not depend on any axioms
+info: DarkTower/WarMachine/ChipBoardWitness.lean:382:0: 'DarkTower.WarMachine.ChipBoardWitness.Repaired.fixtureStillExecutes' depends on axioms: [propext]
+info: DarkTower/WarMachine/ChipBoardWitness.lean:383:0: 'DarkTower.WarMachine.ChipBoardWitness.Repaired.fixtureFullHazard' depends on axioms: [propext, Quot.sound]
+ℹ [8562/8696] Built DarkTower.WarMachine.MachineDepthCaptureWitness (2.0s)
+info: DarkTower/WarMachine/MachineDepthCaptureWitness.lean:41:0: 'DarkTower.WarMachine.MachineDepthCaptureWitness.machineryCapture20260912Inputs' does not depend on any axioms
+info: DarkTower/WarMachine/MachineDepthCaptureWitness.lean:42:0: 'DarkTower.WarMachine.MachineDepthCaptureWitness.machineryCapture20260912MachineDepth' does not depend on any axioms
+ℹ [8563/8696] Built DarkTower.WarMachine.MachineDeclarationMeasurements (2.0s)
+info: DarkTower/WarMachine/MachineDeclarationMeasurements.lean:21:0: 'DarkTower.WarMachine.MachineDeclarationMeasurements.temperatureTrace20260904Row0' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+⚠ [8564/8696] Built DarkTower.WarMachine.Holes (6.8s)
+warning: DarkTower/WarMachine/Holes.lean:157:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:999:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7396:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7419:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7430:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7958:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7961:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7964:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7967:4: declaration uses `sorry`
+✔ [8565/8696] Built DarkTower.WarMachine.ModelUncertaintyEIGCollapsedNegative (3.6s)
+✔ [8566/8696] Built DarkTower.WarMachine.ObservationVectorPartialNegative (3.7s)
+✔ [8567/8696] Built DarkTower.WarMachine.ModelReductionFreeEnergyChangeTypeNegative (3.8s)
+✔ [8568/8696] Built DarkTower.WarMachine.HaveWantArrowWitness (3.9s)
+✔ [8569/8696] Built DarkTower.WarMachine.VariationalFreeEnergyNegative (3.9s)
+✔ [8570/8696] Built DarkTower.WarMachine.PredictiveOutcomeKernelWitness (4.0s)
+✔ [8571/8696] Built DarkTower.WarMachine.ActGateNegative (3.0s)
+✔ [8572/8696] Built DarkTower.WarMachine.FindDraft (4.2s)
+✔ [8573/8696] Built DarkTower.WarMachine.ObservationVectorWitness (4.2s)
+✔ [8574/8696] Built DarkTower.WarMachine.ParameterPriorKernelWitness (4.2s)
+✔ [8575/8696] Built DarkTower.WarMachine.CohortNegative (4.2s)
+✔ [8576/8696] Built DarkTower.WarMachine.GenerativeModelNegative (4.3s)
+✔ [8577/8696] Built DarkTower.WarMachine.BayesianModelReductionWitness (4.3s)
+✔ [8578/8696] Built DarkTower.WarMachine.GenerativeModelWitness (4.3s)
+✔ [8579/8696] Built DarkTower.WarMachine.TransitionKernelWitness (4.3s)
+ℹ [8580/8696] Built DarkTower.WarMachine.RunLifecycleContractDraft (4.4s)
+info: DarkTower/WarMachine/RunLifecycleContractDraft.lean:84:0: 'DarkTower.WarMachine.RunLifecycleContractDraft.current_cohort_does_not_require_unique_attempts' does not depend on any axioms
+info: DarkTower/WarMachine/RunLifecycleContractDraft.lean:85:0: 'DarkTower.WarMachine.RunLifecycleContractDraft.distinct_cohorts_have_distinct_keys' does not depend on any axioms
+info: DarkTower/WarMachine/RunLifecycleContractDraft.lean:86:0: 'DarkTower.WarMachine.RunLifecycleContractDraft.consumed_attempt_remains_inspectable' depends on axioms: [propext]
+info: DarkTower/WarMachine/RunLifecycleContractDraft.lean:87:0: 'DarkTower.WarMachine.RunLifecycleContractDraft.foreign_evidence_cannot_complete' depends on axioms: [propext]
+✔ [8581/8696] Built DarkTower.WarMachine.PolicyPriorKernelNegative (4.4s)
+✔ [8582/8696] Built DarkTower.WarMachine.BeliefStateWitness (4.4s)
+✔ [8583/8696] Built DarkTower.WarMachine.PredictiveOutcomeRiskWitness (4.4s)
+✔ [8584/8696] Built DarkTower.WarMachine.AlivenessNegative (4.4s)
+✔ [8585/8696] Built DarkTower.WarMachine.LogMultivariateBetaWitness (4.4s)
+✔ [8586/8696] Built DarkTower.WarMachine.ControlVocabularyNegative (4.5s)
+✔ [8587/8696] Built DarkTower.WarMachine.ChannelWitness (4.4s)
+✔ [8588/8696] Built DarkTower.WarMachine.FoldWitness (4.4s)
+ℹ [8589/8696] Built DarkTower.WarMachine.F11RuledReadings (4.6s)
+info: DarkTower/WarMachine/F11RuledReadings.lean:114:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.noApplicableDesignationEarnsNothing' does not depend on any axioms
+info: DarkTower/WarMachine/F11RuledReadings.lean:115:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.noApplicableDesignationVacuous' does not depend on any axioms
+info: DarkTower/WarMachine/F11RuledReadings.lean:116:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.contentMatches' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F11RuledReadings.lean:117:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.citationMatches' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F11RuledReadings.lean:118:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.independentExpectation' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F11RuledReadings.lean:119:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.citationSwapPreservesContent' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F11RuledReadings.lean:120:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.clauseSwapPreservesCitation' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F11RuledReadings.lean:121:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.finderCanNominateExcluded' depends on axioms: [propext]
+info: DarkTower/WarMachine/F11RuledReadings.lean:122:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.emptyDesignationVacuous' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F11RuledReadings.lean:123:0: 'DarkTower.WarMachine.Holes.F11RuledReadings.emptyDesignationEarnsNothing' depends on axioms: [propext, Quot.sound]
+✔ [8590/8696] Built DarkTower.WarMachine.VariationalFreeEnergyWitness (4.5s)
+✔ [8591/8696] Built DarkTower.WarMachine.PrecisionWitness (4.5s)
+✔ [8592/8696] Built DarkTower.WarMachine.SoftmaxWitness (4.7s)
+✔ [8593/8696] Built DarkTower.WarMachine.ObservationKernelWitness (4.7s)
+✔ [8594/8696] Built DarkTower.WarMachine.Run4Preregistration (4.7s)
+✔ [8595/8696] Built DarkTower.WarMachine.MachineVocabularyWitness (5.0s)
+✔ [8596/8696] Built DarkTower.WarMachine.LocalPreferenceModule (5.1s)
+✔ [8597/8696] Built DarkTower.WarMachine.ObservationVectorOutcomeNegative (3.7s)
+✔ [8598/8696] Built DarkTower.WarMachine.HaveWantArrowNegative (3.9s)
+✔ [8599/8696] Built DarkTower.WarMachine.FoldNegative (3.6s)
+✔ [8600/8696] Built DarkTower.WarMachine.BayesFactorThresholdWitness (3.0s)
+✔ [8601/8696] Built DarkTower.WarMachine.AmbiguityWitness (3.9s)
+✔ [8602/8696] Built DarkTower.WarMachine.ParameterPosteriorKernelWitness (3.9s)
+✔ [8603/8696] Built DarkTower.WarMachine.ExpectedFreeEnergyWitness (4.1s)
+✔ [8604/8696] Built DarkTower.WarMachine.ModelReductionFreeEnergyChangeWitness (4.4s)
+✔ [8605/8696] Built DarkTower.WarMachine.F11LegacyCarrier (3.7s)
+✔ [8606/8696] Built DarkTower.WarMachine.FoldEscrowRecordWitness (3.9s)
+✔ [8607/8696] Built DarkTower.WarMachine.PredictionErrorWitness (3.9s)
+✔ [8608/8696] Built DarkTower.WarMachine.MachineBeliefState (3.9s)
+✔ [8609/8696] Built DarkTower.WarMachine.MachineQ (4.1s)
+✔ [8610/8696] Built DarkTower.WarMachine.PreferenceDistributionWitness (3.0s)
+✔ [8611/8696] Built DarkTower.WarMachine.ExpectedInformationGainWitness (4.4s)
+✔ [8612/8696] Built DarkTower.WarMachine.PolicyPriorKernelWitness (4.1s)
+✔ [8613/8696] Built DarkTower.WarMachine.MachineObservation (4.1s)
+✔ [8614/8696] Built DarkTower.WarMachine.TransitionKernelBetaNegative (3.8s)
+✔ [8615/8696] Built DarkTower.WarMachine.DirichletConcentrationsWitness (4.2s)
+✔ [8616/8696] Built DarkTower.WarMachine.PreferenceLadderDraft (4.3s)
+✔ [8617/8696] Built DarkTower.WarMachine.ParameterPriorKernelOutcomeNegative (4.0s)
+✔ [8618/8696] Built DarkTower.WarMachine.ParameterPriorKernelHabitNegative (4.1s)
+✔ [8619/8696] Built DarkTower.WarMachine.TransitionKernelUncontrolledNegative (3.0s)
+✔ [8620/8696] Built DarkTower.WarMachine.PredictiveOutcomeKernelSoftmaxNegative (4.2s)
+✔ [8621/8696] Built DarkTower.WarMachine.BayesianModelReductionNegative (4.0s)
+✔ [8622/8696] Built DarkTower.WarMachine.PrecisionNegative (3.6s)
+✔ [8623/8696] Built DarkTower.WarMachine.BeliefUpdateFalsifier (4.4s)
+✔ [8624/8696] Built DarkTower.WarMachine.PredictiveOutcomeKernelUnconditionalNegative (4.3s)
+✔ [8625/8696] Built DarkTower.WarMachine.MachinePrecision (4.7s)
+✔ [8626/8696] Built DarkTower.WarMachine.F12D1Arms (5.6s)
+ℹ [8627/8696] Built DarkTower.WarMachine.F11AppliedConformance (4.0s)
+info: DarkTower/WarMachine/F11AppliedConformance.lean:259:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.Pattern' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:260:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.Clause' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:261:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.SourcePin' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:262:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.AsOf' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:263:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.TextSpan' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:264:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.TextCitation' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:265:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.State' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:266:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.eligible' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:267:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.emittedClauses' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:268:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.emittedCitations' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:269:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.expectedClauses' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:270:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.authoredCitations' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:271:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.expected' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:272:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.validText' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:273:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.model' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:274:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelContainment' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:275:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelTypedAbsence' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:276:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelContentF2' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:277:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelCitationF3' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:278:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelClausesNonempty' depends on axioms: [propext]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:279:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.repository' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:280:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.recordedStamp' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:281:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.recordedState' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:282:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.recordedQuery' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:283:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.designation' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:284:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelSelectsAsk' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:285:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelNonempty' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:286:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelExclusionF4' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:287:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelDiscriminatingF4' depends on axioms: [propext,
+ choice,
+ Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:288:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelVacuous' depends on axioms: [propext, choice, Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:289:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.modelVacuousEarnsNothing' depends on axioms: [propext,
+ choice,
+ Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:290:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.conformantImplementationExists' depends on axioms: [propext,
+ choice,
+ Quot.sound]
+info: DarkTower/WarMachine/F11AppliedConformance.lean:291:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.badModel' does not depend on any axioms
+info: DarkTower/WarMachine/F11AppliedConformance.lean:292:0: 'DarkTower.WarMachine.Holes.F11AppliedConformance.badModelRefuted' depends on axioms: [propext]
+✔ [8628/8696] Built DarkTower.WarMachine.BayesFactorThresholdNegative (3.1s)
+✔ [8629/8696] Built DarkTower.WarMachine.SoftmaxNegative (3.3s)
+✔ [8630/8696] Built DarkTower.WarMachine.ModelReductionFreeEnergyChangeValueNegative (2.8s)
+✔ [8631/8696] Built DarkTower.WarMachine.ParameterPosteriorKernelOutcomeNegative (2.0s)
+✔ [8632/8696] Built DarkTower.WarMachine.PredictionErrorNegative (2.0s)
+✔ [8633/8696] Built DarkTower.WarMachine.PreferenceDistributionPragmaticCostNegative (2.9s)
+✔ [8634/8696] Built DarkTower.WarMachine.ParameterPosteriorKernelPriorNegative (3.2s)
+✔ [8635/8696] Built DarkTower.WarMachine.PreferenceDistributionConditioningNegative (3.2s)
+✔ [8636/8696] Built DarkTower.WarMachine.DirichletConcentrationsEmptyNegative (2.0s)
+✔ [8637/8696] Built DarkTower.WarMachine.DirichletConcentrationsZeroNegative (3.0s)
+✔ [8638/8696] Built DarkTower.WarMachine.MachineObservationWitness (3.1s)
+✔ [8639/8696] Built DarkTower.WarMachine.DirichletConcentrationsNegative (3.1s)
+ℹ [8640/8696] Built DarkTower.WarMachine.PreferenceRiskSeparation (3.1s)
+info: DarkTower/WarMachine/PreferenceRiskSeparation.lean:71:0: 'DarkTower.WarMachine.PreferenceRiskSeparation.constantConditional' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskSeparation.lean:72:0: 'DarkTower.WarMachine.PreferenceRiskSeparation.predictiveMass' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskSeparation.lean:73:0: 'DarkTower.WarMachine.PreferenceRiskSeparation.constant_absorbs_prediction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskSeparation.lean:74:0: 'DarkTower.WarMachine.PreferenceRiskSeparation.RiskContribution' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskSeparation.lean:75:0: 'DarkTower.WarMachine.PreferenceRiskSeparation.riskAdmissible' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskSeparation.lean:76:0: 'DarkTower.WarMachine.PreferenceRiskSeparation.scalarKL' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskSeparation.lean:77:0: 'DarkTower.WarMachine.PreferenceRiskSeparation.preferred_zero_refuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskSeparation.lean:78:0: 'DarkTower.WarMachine.PreferenceRiskSeparation.grounded_seed_risk' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+✔ [8641/8696] Built DarkTower.WarMachine.F10RuledCarrier (7.4s)
+✔ [8642/8696] Built DarkTower.WarMachine.MachineModelSpec (3.4s)
+✔ [8643/8696] Built DarkTower.WarMachine.MachineTransition (3.5s)
+✔ [8644/8696] Built DarkTower.WarMachine.MachineBeliefStateWitness (3.5s)
+✔ [8645/8696] Built DarkTower.WarMachine.MachinePrecisionWitness (2.9s)
+✔ [8646/8696] Built DarkTower.WarMachine.F11Conformance (4.0s)
+✔ [8647/8696] Built DarkTower.WarMachine.MachineQWitness (3.0s)
+✔ [8648/8696] Built DarkTower.WarMachine.F12Conformance (2.6s)
+✔ [8649/8696] Built DarkTower.WarMachine.MachinePredictionError (3.8s)
+ℹ [8650/8696] Built DarkTower.WarMachine.Row15BeliefStateAxiomCheck (1.9s)
+info: DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean:3:0: 'DarkTower.WarMachine.MachineBeliefState.machineBeliefState' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean:4:0: 'DarkTower.WarMachine.MachineBeliefStateWitness.carriedTraceCoordinates' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean:5:0: 'DarkTower.WarMachine.MachineBeliefStateWitness.bootstrappedTraceCoordinates' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row15BeliefStateAxiomCheck.lean:6:0: 'DarkTower.WarMachine.MachineBeliefStateWitness.retainedTraceBeliefReferences' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+✔ [8651/8696] Built DarkTower.WarMachine.MachinePredictedStatePlan (2.1s)
+✔ [8652/8696] Built DarkTower.WarMachine.MachineBeliefDistribution (2.2s)
+✔ [8653/8696] Built DarkTower.WarMachine.FoldCWitness (2.2s)
+ℹ [8654/8696] Built DarkTower.WarMachine.MachineDirichletAccumulation (5.4s)
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:223:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.a4aPrior' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:224:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.a4aIncrement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:225:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.CorpusRecord' does not depend on any axioms
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:226:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.matchesCell' does not depend on any axioms
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:227:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.machineDirichletAccumulation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:228:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.declaredAccumulation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:229:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.machineAppendRaisesItsOwnCell' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:230:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.machineAppendMovesNoOtherCell' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:231:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.noSingleRecordProducesASoftUpdate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:232:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.oneHotDeclaredUpdateIsTheUnitIncrement' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:233:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.softDeclaredUpdateRaisesTwoCells' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:234:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.outcomePosition' does not depend on any axioms
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:235:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.machineCoordinatesAreNotStable' does not depend on any axioms
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:236:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.declaredCoordinatesAreFixedAndMachineCoordinatesAreNot' depends on axioms: [propext]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:237:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.RealisesDeclaredAccumulation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:238:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.declaredAccumulationRealisesItself' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:239:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.recountShaped' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulation.lean:240:0: 'DarkTower.WarMachine.MachineDirichletAccumulation.recountShapedDoesNotRealise' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+✔ [8655/8696] Built DarkTower.WarMachine.MachinePreferenceDistribution (2.5s)
+✔ [8656/8696] Built DarkTower.WarMachine.F11ReceiptCarrier (2.4s)
+ℹ [8657/8696] Built DarkTower.WarMachine.PreferenceRiskWitness (2.0s)
+info: DarkTower/WarMachine/PreferenceRiskWitness.lean:41:0: 'DarkTower.WarMachine.PreferenceRiskWitness.concrete_scalarKL' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskWitness.lean:42:0: 'DarkTower.WarMachine.PreferenceRiskWitness.same_twelve_support' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskWitness.lean:43:0: 'DarkTower.WarMachine.PreferenceRiskWitness.abstained_refuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+✔ [8658/8696] Built DarkTower.WarMachine.MachineForwardModelWitness (2.9s)
+✔ [8659/8696] Built DarkTower.WarMachine.F12AdmittingArm (2.3s)
+✔ [8660/8696] Built DarkTower.WarMachine.F12DischargeArm (2.3s)
+✔ [8661/8696] Built DarkTower.WarMachine.F11DischargeArm (2.6s)
+✔ [8662/8696] Built DarkTower.WarMachine.MachinePredictionErrorWitness (2.5s)
+✔ [8663/8696] Built DarkTower.WarMachine.MachineBeliefUpdate (2.5s)
+✖ [8664/8696] Building DarkTower.WarMachine.FoldCOrderNegative (2.1s)
+trace: .> LEAN_PATH=/home/joe/code/mathlib4/.lake/packages/Cli/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/batteries/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/Qq/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/aesop/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/importGraph/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/plausible/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/build/lib/lean /home/joe/.elan/toolchains/leanprover--lean4---v4.31.0-rc1/bin/lean /home/joe/code/mathlib4/DarkTower/WarMachine/FoldCOrderNegative.lean -o /home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/FoldCOrderNegative.olean -i /home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/FoldCOrderNegative.ilean -c /home/joe/code/mathlib4/.lake/build/ir/DarkTower/WarMachine/FoldCOrderNegative.c --setup /home/joe/code/mathlib4/.lake/build/ir/DarkTower/WarMachine/FoldCOrderNegative.setup.json --json
+error: DarkTower/WarMachine/FoldCOrderNegative.lean:12:2: Tactic `rfl` failed: The left-hand side
+  foldC ruledBase [addLayer, doubleLayer] o
+is not definitionally equal to the right-hand side
+  foldC ruledBase [doubleLayer, addLayer] o
+
+o : Outcome SeedObs
+⊢ foldC ruledBase [addLayer, doubleLayer] o = foldC ruledBase [doubleLayer, addLayer] o
+error: Lean exited with code 1
+✖ [8665/8696] Building DarkTower.WarMachine.FoldCFoldedNegative (2.1s)
+trace: .> LEAN_PATH=/home/joe/code/mathlib4/.lake/packages/Cli/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/batteries/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/Qq/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/aesop/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/importGraph/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/packages/plausible/.lake/build/lib/lean:/home/joe/code/mathlib4/.lake/build/lib/lean /home/joe/.elan/toolchains/leanprover--lean4---v4.31.0-rc1/bin/lean /home/joe/code/mathlib4/DarkTower/WarMachine/FoldCFoldedNegative.lean -o /home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/FoldCFoldedNegative.olean -i /home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/FoldCFoldedNegative.ilean -c /home/joe/code/mathlib4/.lake/build/ir/DarkTower/WarMachine/FoldCFoldedNegative.c --setup /home/joe/code/mathlib4/.lake/build/ir/DarkTower/WarMachine/FoldCFoldedNegative.setup.json --json
+error: DarkTower/WarMachine/FoldCFoldedNegative.lean:11:2: Tactic `rfl` failed: The left-hand side
+  foldC ruledBase [addLayer] o
+is not definitionally equal to the right-hand side
+  ruledBase o
+
+o : Outcome SeedObs
+⊢ foldC ruledBase [addLayer] o = ruledBase o
+error: Lean exited with code 1
+✔ [8666/8696] Built DarkTower.WarMachine.MachinePredictiveOutcome (2.2s)
+ℹ [8667/8696] Built DarkTower.WarMachine.Row16ForwardModelAxiomCheck (2.1s)
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:3:0: 'DarkTower.WarMachine.Holes.PredictiveOutcomeKernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:4:0: 'DarkTower.WarMachine.MachineForwardModelWitness.advanceTwiceRow' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:5:0: 'DarkTower.WarMachine.MachineForwardModelWitness.cascadeRow' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:6:0: 'DarkTower.WarMachine.MachineForwardModelWitness.advanceTwiceComposition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:7:0: 'DarkTower.WarMachine.MachineForwardModelWitness.cascadeComposition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:8:0: 'DarkTower.WarMachine.MachineForwardModelWitness.repeatedComposition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:9:0: 'DarkTower.WarMachine.MachineForwardModelWitness.inheritedExcess' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:10:0: 'DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+ℹ [8668/8696] Built DarkTower.WarMachine.PreferenceRiskBoundary (2.1s)
+info: DarkTower/WarMachine/PreferenceRiskBoundary.lean:59:0: 'DarkTower.WarMachine.PreferenceRiskBoundary.dropped_contribution_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskBoundary.lean:60:0: 'DarkTower.WarMachine.PreferenceRiskBoundary.contribution_delta' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskBoundary.lean:61:0: 'DarkTower.WarMachine.PreferenceRiskBoundary.zero_weight_preserves' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskBoundary.lean:62:0: 'DarkTower.WarMachine.PreferenceRiskBoundary.preference_projection_unchanged' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/PreferenceRiskBoundary.lean:63:0: 'DarkTower.WarMachine.PreferenceRiskBoundary.grounded_risk_sum' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+✔ [8669/8696] Built DarkTower.WarMachine.F12AttributionArm (2.4s)
+✔ [8670/8696] Built DarkTower.WarMachine.F11F4Reading (2.3s)
+✔ [8671/8696] Built DarkTower.WarMachine.F12CascadeDiffArm (2.7s)
+ℹ [8672/8696] Built DarkTower.WarMachine.Row2AdmissionAxiomCheck (2.0s)
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:5:0: 'DarkTower.WarMachine.MachineObservationWitness.emptyObservationHasFourteenZeros' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:6:0: 'DarkTower.WarMachine.MachinePrecisionWitness.oneStillError' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:7:0: 'DarkTower.WarMachine.MachinePrecisionWitness.threeStillErrors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:8:0: 'DarkTower.WarMachine.MachinePrecisionWitness.sevenStillErrors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:9:0: 'DarkTower.WarMachine.MachinePrecisionWitness.fifteenStillErrors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:10:0: 'DarkTower.WarMachine.MachinePrecisionWitness.fullWindowOfStillErrors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:11:0: 'DarkTower.WarMachine.MachinePrecisionWitness.windowBinds' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:12:0: 'DarkTower.WarMachine.MachinePrecisionWitness.unitError' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:13:0: 'DarkTower.WarMachine.MachinePrecisionWitness.halfError' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:14:0: 'DarkTower.WarMachine.MachinePrecisionWitness.tripleError' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:15:0: 'DarkTower.WarMachine.MachinePrecisionWitness.floorIsReached' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:16:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.basicTriple' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:17:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.unitVariance' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:18:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.emptyBeliefReadsTheObservation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:19:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.negativeError' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:20:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.exactZeroError' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:21:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.eighthVariance' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:22:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.zeroVarianceFloored' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:23:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.negativeVarianceFloored' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:24:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedIsOmitted' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:25:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.brokenModelRefuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:26:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.unobservedWithBrokenModelRefuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:27:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.malformedObservationRefuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row2AdmissionAxiomCheck.lean:28:0: 'DarkTower.WarMachine.MachinePredictionErrorWitness.bothModelMembersNamed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+✔ [8673/8696] Built DarkTower.WarMachine.F11NonSelfCertifying (2.9s)
+✔ [8674/8696] Built DarkTower.WarMachine.MachineBeliefUpdateWitness (2.4s)
+✔ [8675/8696] Built DarkTower.WarMachine.MachinePolicyFreeEnergy (2.4s)
+✔ [8676/8696] Built DarkTower.WarMachine.MachineAccumulation (4.1s)
+ℹ [8677/8696] Built DarkTower.WarMachine.MachineDirichletAccumulationWitness (4.3s)
+info: DarkTower/WarMachine/MachineDirichletAccumulationWitness.lean:59:0: 'DarkTower.WarMachine.MachineDirichletAccumulationWitness.priorReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulationWitness.lean:60:0: 'DarkTower.WarMachine.MachineDirichletAccumulationWitness.oneEdgeReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulationWitness.lean:61:0: 'DarkTower.WarMachine.MachineDirichletAccumulationWitness.twoEdgesReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulationWitness.lean:62:0: 'DarkTower.WarMachine.MachineDirichletAccumulationWitness.twoMissionRowReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulationWitness.lean:63:0: 'DarkTower.WarMachine.MachineDirichletAccumulationWitness.recountReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/MachineDirichletAccumulationWitness.lean:64:0: 'DarkTower.WarMachine.MachineDirichletAccumulationWitness.bmrThresholdReference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+✔ [8678/8696] Built DarkTower.WarMachine.MachineParameters (2.2s)
+✔ [8679/8696] Built DarkTower.WarMachine.F12SupportArm (2.0s)
+✔ [8680/8696] Built DarkTower.WarMachine.MachineContracts (3.8s)
+✔ [8681/8696] Built DarkTower.WarMachine.F11AmendedCarrier (2.2s)
+✔ [8682/8696] Built DarkTower.WarMachine.MachinePolicyFreeEnergyWitness (1.8s)
+✔ [8683/8696] Built DarkTower.WarMachine.F12O3FieldArm (1.6s)
+✔ [8684/8696] Built DarkTower.WarMachine.F11CitationField (1.0s)
+✔ [8685/8696] Built DarkTower.WarMachine.F12RuledCarrier (1.8s)
+ℹ [8686/8696] Built DarkTower.WarMachine.MachineAccumulationWitness (6.1s)
+info: DarkTower/WarMachine/MachineAccumulationWitness.lean:1189:0: 'DarkTower.WarMachine.MachineAccumulationWitness.measuredMaximumResidual' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+✔ [8687/8696] Built DarkTower.WarMachine.F12AntsExemplar (1.7s)
+ℹ [8688/8696] Built DarkTower.WarMachine.F12MiningExemplar (1.7s)
+info: DarkTower/WarMachine/F12MiningExemplar.lean:215:0: 'DarkTower.WarMachine.Holes.miningSelected' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:216:0: 'DarkTower.WarMachine.Holes.miningAdmitted' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:217:0: 'DarkTower.WarMachine.Holes.miningRepo' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:218:0: 'DarkTower.WarMachine.Holes.miningPrecedence' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:219:0: 'DarkTower.WarMachine.Holes.miningActingOrder' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:220:0: 'DarkTower.WarMachine.Holes.organiseMining' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:221:0: 'DarkTower.WarMachine.Holes.miningScoreCannotMove' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:222:0: 'DarkTower.WarMachine.Holes.organiseMiningConformant' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:223:0: 'DarkTower.WarMachine.Holes.organiseMiningEdge01' depends on axioms: [propext]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:224:0: 'DarkTower.WarMachine.Holes.organiseMiningEdge12' depends on axioms: [propext]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:225:0: 'DarkTower.WarMachine.Holes.organiseMiningNotEdge02' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:226:0: 'DarkTower.WarMachine.Holes.organiseMiningHasOrganisedEdge' depends on axioms: [propext]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:227:0: 'DarkTower.WarMachine.Holes.organiseMiningTransitiveClosure' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:228:0: 'DarkTower.WarMachine.Holes.organiseMiningTransitiveClosureSansO3' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:229:0: 'DarkTower.WarMachine.Holes.organiseMiningTransitiveClosureNotConformant' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:230:0: 'DarkTower.WarMachine.Holes.organiseMiningInventedEdge' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:231:0: 'DarkTower.WarMachine.Holes.organiseMiningInventedEdgeFailsO2' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:232:0: 'DarkTower.WarMachine.Holes.organiseMiningInventedEdgeNotConformant' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:233:0: 'DarkTower.WarMachine.Holes.organiseMiningPrecedenceMoves' does not depend on any axioms
+info: DarkTower/WarMachine/F12MiningExemplar.lean:234:0: 'DarkTower.WarMachine.Holes.organiseMiningPrecedenceMovesSansO4' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/F12MiningExemplar.lean:235:0: 'DarkTower.WarMachine.Holes.organiseMiningPrecedenceMovesNotConformant' depends on axioms: [propext]
+ℹ [8689/8696] Built DarkTower.WarMachine.F12SnatchExemplar (2.2s)
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:301:0: 'DarkTower.WarMachine.Holes.snatchSelected' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:302:0: 'DarkTower.WarMachine.Holes.snatchAdded' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:303:0: 'DarkTower.WarMachine.Holes.snatchAdmitted' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:304:0: 'DarkTower.WarMachine.Holes.snatchRepo' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:305:0: 'DarkTower.WarMachine.Holes.snatchPrecedenceBefore' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:306:0: 'DarkTower.WarMachine.Holes.snatchPrecedenceAfter' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:307:0: 'DarkTower.WarMachine.Holes.snatchActingOrderBefore' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:308:0: 'DarkTower.WarMachine.Holes.snatchActingOrderAfter' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:309:0: 'DarkTower.WarMachine.Holes.snatchScoreBefore' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:310:0: 'DarkTower.WarMachine.Holes.snatchScoreAfter' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:311:0: 'DarkTower.WarMachine.Holes.organiseSnatch' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:312:0: 'DarkTower.WarMachine.Holes.organiseSnatchConformant' depends on axioms: [propext]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:313:0: 'DarkTower.WarMachine.Holes.organiseSnatchPrecedenceMoves' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:314:0: 'DarkTower.WarMachine.Holes.organiseSnatchActingAndScoreMove' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:315:0: 'DarkTower.WarMachine.Holes.organiseSnatchEdge02' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:316:0: 'DarkTower.WarMachine.Holes.snatchPrecedencePerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:317:0: 'DarkTower.WarMachine.Holes.snatchActingOrderNotPerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:318:0: 'DarkTower.WarMachine.Holes.organiseSnatchRecordedEdges' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:319:0: 'DarkTower.WarMachine.Holes.organiseSnatchRecordedEdgesSansO3' depends on axioms: [propext]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:320:0: 'DarkTower.WarMachine.Holes.organiseSnatchRecordedEdge1822' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:321:0: 'DarkTower.WarMachine.Holes.organiseSnatchNotEdge1822' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:322:0: 'DarkTower.WarMachine.Holes.organiseSnatchNotEdge1018' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:323:0: 'DarkTower.WarMachine.Holes.organiseSnatchRefusesAddedEndpoint' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:324:0: 'DarkTower.WarMachine.Holes.snatchOrganisedEdgeList' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:325:0: 'DarkTower.WarMachine.Holes.snatchInAdded' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:326:0: 'DarkTower.WarMachine.Holes.snatchInAdded_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:327:0: 'DarkTower.WarMachine.Holes.snatchOnlyEdge02SurvivesTheSubtraction' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:328:0: 'DarkTower.WarMachine.Holes.snatchOrganisedEdgeListLength' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:329:0: 'DarkTower.WarMachine.Holes.organiseSnatchRecordedEdgesNotConformant' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:330:0: 'DarkTower.WarMachine.Holes.organiseSnatchActingFlat' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:331:0: 'DarkTower.WarMachine.Holes.organiseSnatchActingFlatConformant' depends on axioms: [propext]
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:332:0: 'DarkTower.WarMachine.Holes.organiseSnatchActingFlatScoreFlat' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:333:0: 'DarkTower.WarMachine.Holes.organiseSnatchActingFlatScoreFlatSansO4' does not depend on any axioms
+info: DarkTower/WarMachine/F12SnatchExemplar.lean:334:0: 'DarkTower.WarMachine.Holes.organiseSnatchActingFlatScoreFlatNotConformant' depends on axioms: [propext, Quot.sound]
+ℹ [8690/8696] Built DarkTower.WarMachine.MachinePolicySet (3.3s)
+info: DarkTower/WarMachine/MachinePolicySet.lean:69:0: 'DarkTower.WarMachine.Holes.CandidateActionSpace' does not depend on any axioms
+info: DarkTower/WarMachine/MachinePolicySet.lean:70:0: 'DarkTower.WarMachine.MachinePolicySet.machinePolicySet' does not depend on any axioms
+info: DarkTower/WarMachine/MachinePolicySet.lean:71:0: 'DarkTower.WarMachine.MachinePolicySet.productionFixtureReadback' depends on axioms: [propext, Quot.sound]
+info: DarkTower/WarMachine/MachinePolicySet.lean:72:0: 'DarkTower.WarMachine.MachinePolicySet.productionRulesReadback' depends on axioms: [propext, Quot.sound]
+✔ [8691/8696] Built DarkTower.WarMachine.F12FifthSnatchExemplar (1.6s)
+✔ [8692/8696] Built DarkTower.WarMachine.F12SixthSnatchExemplar (1.6s)
+✔ [8693/8696] Built DarkTower.WarMachine.F12SecondSnatchExemplar (1.7s)
+✔ [8694/8696] Built DarkTower.WarMachine.F12ThirdSnatchExemplar (1.6s)
+✔ [8695/8696] Built DarkTower.WarMachine.F12FourthSnatchExemplar (1.7s)
+Some required targets logged failures:
+- DarkTower.MemoryArmPreregistration
+- DarkTower.BaldwinPostRegistration
+- DarkTower.WarMachine.FoldCOrderNegative
+- DarkTower.WarMachine.FoldCFoldedNegative
+error: build failed

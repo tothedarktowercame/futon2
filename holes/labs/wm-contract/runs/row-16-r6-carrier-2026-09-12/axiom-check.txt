@@ -1,0 +1,2 @@
+'DarkTower.WarMachine.Holes.softmaxWithFPi' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.Holes.softmaxWithFPi_zero' depends on axioms: [propext, Classical.choice, Quot.sound]

@@ -1,0 +1,7 @@
+{:command "lake env lean DarkTower/WarMachine/Holes.lean"
+ :exit 0
+ :tests 1
+ :assertions 2
+ :tree-sha "bcdd2ee406a5031c6d2be4760bcaab57a35d7366"
+ :at "2026-09-12T20:26:19Z"
+ :transcript "holes-elaboration.txt"}

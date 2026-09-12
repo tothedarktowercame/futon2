@@ -1,0 +1,9 @@
+DarkTower/WarMachine/Holes.lean:157:4: warning: declaration uses `sorry`
+DarkTower/WarMachine/Holes.lean:999:4: warning: declaration uses `sorry`
+DarkTower/WarMachine/Holes.lean:7396:4: warning: declaration uses `sorry`
+DarkTower/WarMachine/Holes.lean:7419:4: warning: declaration uses `sorry`
+DarkTower/WarMachine/Holes.lean:7430:4: warning: declaration uses `sorry`
+DarkTower/WarMachine/Holes.lean:7958:4: warning: declaration uses `sorry`
+DarkTower/WarMachine/Holes.lean:7961:4: warning: declaration uses `sorry`
+DarkTower/WarMachine/Holes.lean:7964:4: warning: declaration uses `sorry`
+DarkTower/WarMachine/Holes.lean:7967:4: warning: declaration uses `sorry`
