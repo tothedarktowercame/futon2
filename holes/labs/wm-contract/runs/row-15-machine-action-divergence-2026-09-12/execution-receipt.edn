@@ -1,0 +1,6 @@
+{:command "lake env lean DarkTower/WarMachine/MachineActionDivergenceWitness.lean"
+ :exit 0 :tests 2 :assertions 4
+ :tree-sha "df87676b12dd04109ea76370223c6489f1debc43"
+ :at "2026-09-12"
+ :typecheck :passed :axiom-check :passed :sorryAx false
+ :transcript "lean-transcript.txt"}

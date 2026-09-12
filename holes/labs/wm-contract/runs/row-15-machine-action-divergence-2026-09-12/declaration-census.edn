@@ -1,0 +1,13 @@
+{:record
+ {:declarations
+  {"DarkTower.WarMachine.MachineAction.machineAction"
+   {:kind :def
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
+             :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"}}
+   "DarkTower.WarMachine.MachineActionDivergenceWitness.liveSelectorDivergesFromMachineActionControllerHead"
+   {:kind :theorem
+    :module "DarkTower.WarMachine.MachineActionDivergenceWitness"
+    :proposition "For any retained tail and score list, machineAction's controller-head branch selects pinned rank 1, while the pinned live-selected rank 139 is unequal to it."
+    :axioms ["propext" "Classical.choice" "Quot.sound"]
+    :source {:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean"
+             :sha256 "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253"}}}}}

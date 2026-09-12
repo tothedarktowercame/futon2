@@ -1,0 +1,46 @@
+{:records
+ {"R16-machineAction-live-selector-divergence-20260912-v1"
+  {:executed? true :exit 0 :result :passed
+   :command "lake env lean DarkTower/WarMachine/MachineActionDivergenceWitness.lean"
+   :typecheck :passed :axiom-check :passed
+   :subject
+   {:id "R16-machineAction-live-selector-divergence-20260912-v1"
+    :node :R16 :equation :action :quantity :u :declaration "machineAction"
+    :kind :lean-witness
+    :artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean"
+               :sha256 "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253"
+               :module "DarkTower.WarMachine.MachineActionDivergenceWitness"
+               :declaration "DarkTower.WarMachine.MachineActionDivergenceWitness.liveSelectorDivergesFromMachineActionControllerHead"}
+    :subject-artifact {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
+                       :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"
+                       :declaration "DarkTower.WarMachine.MachineAction.machineAction"}
+    :claim "The pinned reason-bearing live selector moved from machineAction's controller-head output at rank 1 to rank 139. This refutes correspondence at this record only, not the internal branch."
+    :polarity :refutes
+    :scope :production-trace-record-20260912T172809-live-selector-divergence
+    :as-of "2026-09-12"}
+   :dependencies
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean"
+     :sha256 "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253"
+     :module "DarkTower.WarMachine.MachineActionDivergenceWitness"
+     :declaration "DarkTower.WarMachine.MachineActionDivergenceWitness.liveSelectorDivergesFromMachineActionControllerHead"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
+     :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"
+     :declaration "DarkTower.WarMachine.MachineAction.machineAction"}
+    {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/fixture.edn"
+     :sha256 "1a78c6fe3c211a1f713256001472d8c3f9136664beb132b0ddd68424ee3082a9"}]
+   :import-closure
+   [{:repo "mathlib4" :path "DarkTower/WarMachine/MachineAction.lean"
+     :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"}
+    {:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean"
+     :sha256 "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253"}]
+   :declaration-census
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/declaration-census.edn"
+    :sha256 "6a7dd23ff9426109d8a0a127d0b5e3e0f8ecf3eafc379dd383a82e574c6bba60"
+    :selector [:record]}
+   :transcript
+   {:repo "futon2" :path "holes/labs/wm-contract/runs/row-15-machine-action-divergence-2026-09-12/lean-transcript.txt"
+    :sha256 "be97d3991e4b7ddaf29777fc97e9cc81e516c8ee3f74e976d202f4f6e9042e05"}
+   :toolchain {:repo "mathlib4" :path "lean-toolchain"
+               :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+   :checker {:repo "mathlib4" :path "DarkTower/WarMachine/MachineActionDivergenceWitness.lean"
+             :sha256 "fe15c22c43a2fac89d9734270e21dbc5245e79cd9a9745ea6ab49cf75b06a253"}}}}
