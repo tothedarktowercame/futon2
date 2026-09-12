@@ -1,0 +1,1 @@
+DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean:1:0: error: object file '/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/PolicyPosterior.olean' of module DarkTower.WarMachine.PolicyPosterior does not exist

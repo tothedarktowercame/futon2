@@ -1,0 +1,4 @@
+DarkTower/WarMachine/PolicyPosterior.lean:27:0: error: Unexpected name `DarkTower.WarMachine.PolicyPosterior` after `end`: The current section is unnamed
+
+Hint: Delete the name `DarkTower.WarMachine.PolicyPosterior` to end the current unnamed scope; outer named scopes can then be closed using additional `end` command(s):
+  end ̵D̵a̵r̵k̵T̵o̵w̵e̵r̵.̵W̵a̵r̵M̵a̵c̵h̵i̵n̵e̵.̵P̵o̵l̵i̵c̵y̵P̵o̵s̵t̵e̵r̵i̵o̵r̵

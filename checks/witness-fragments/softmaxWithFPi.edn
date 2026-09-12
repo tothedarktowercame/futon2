@@ -16,14 +16,14 @@
    :artifact
    {:repo "mathlib4"
     :path "DarkTower/WarMachine/MachinePolicyPosteriorWitness.lean"
-    :sha256 "ff2baad9b581105c53005324c527edad692c08090413677d3ac584a954eadd48"
+    :sha256 "8cfa95399fc001739b06f7962b8a05af5114d090cc8f530eafd987e252331215"
     :module "DarkTower.WarMachine.MachinePolicyPosteriorWitness"
     :declaration "DarkTower.WarMachine.MachinePolicyPosteriorWitness.measuredMaximumResidual"}
    :subject-artifact
    {:repo "mathlib4"
-    :path "DarkTower/WarMachine/Holes.lean"
-    :sha256 "1a4116f594baa0aa2534bb21ed820651a763148491579b7dbe5b134077144f23"
-    :declaration "DarkTower.WarMachine.Holes.softmaxWithFPi"}
+    :path "DarkTower/WarMachine/PolicyPosterior.lean"
+    :sha256 "59817e0a9ff296a95d7cfcc59d4f1709fb2d38d8cfbbc156ba7c489f12da114b"
+    :declaration "DarkTower.WarMachine.PolicyPosterior.softmaxWithFPi"}
    :retained-evidence
    {:fixture {:repo "futon2"
               :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/fixture.edn"
@@ -32,6 +32,6 @@
    {:status :verified
     :receipt {:repo "futon2"
               :path "holes/labs/wm-contract/runs/row-16-r6-posterior-2026-09-12/verification-receipts.edn"
-              :sha256 "7888d53fcce5d58b39dd65d2cf555d91c24616bb4a79aad0b9b84fef7921b701"
+              :sha256 "3936b656c7f4a82bf968c0a9d62b3a783e192ccd025abbcebbf4fe5cdc58c51c"
               :selector [:records "R6-policy-posterior-production-20260912T172809-f-absent-v1"]}}
    :review {:status :pending :reviewer "claude-15"}}]}

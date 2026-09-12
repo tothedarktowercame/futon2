@@ -1,0 +1,1 @@
+/tmp/Row16PolicyPosteriorRelocationAxiomCheck.lean:1:0: error: object file '/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/MachinePolicyPosteriorWitness.olean' of module DarkTower.WarMachine.MachinePolicyPosteriorWitness does not exist

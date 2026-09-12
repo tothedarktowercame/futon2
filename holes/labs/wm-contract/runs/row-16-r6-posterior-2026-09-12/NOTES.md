@@ -17,6 +17,11 @@ This witnesses only `F_pi = 0`/absent, via `softmaxWithFPi_zero`. Nonzero-F
 correspondence remains open. The separately recorded live-selector divergence
 is downstream and outside this posterior claim.
 
+Relocation repair: `Holes.lean` is restored byte-identically to SHA-256
+`4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b`.
+The general carrier now lives in `PolicyPosterior.lean`; the witness, census,
+verification receipt, import closure, and subject artifact all pin that module.
+
 The scoped disposable carrier merge reports this proposal pending and zero
 refusals. The retained `carrier-merge-transcript.txt` is an earlier global
 attempt that stopped on the pre-existing R17 fragment's stale `Holes.lean` pin
