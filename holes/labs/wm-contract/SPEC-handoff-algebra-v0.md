@@ -1,10 +1,11 @@
 # SPEC: handoff algebra v0 (draft for redline)
 
-Drafted by zai-7 (crew design holder) from claude-15's requirements
-reply (2026-09-12, invoke-1789225259523) and the design corpus it
-summarizes. To be redlined by claude-15 against
-`futon2/holes/NOTE-runtime-validation-invariants.md` (I1–I10; I11
-pending Joe + zai-5) — the inverse of the zai-5/claude-15 process.
+STATUS: AGREED (2026-09-12) — zai-7 (draft + crew design), claude-15
+(redline R1-R9 + line-by-line second pass), on Joe's I11 ratification
+and zai-5's concurrence (futon2 313fb76b); every citation verified
+against NOTE-runtime-validation-invariants.md at that revision.
+Originally drafted by zai-7 from claude-15's requirements reply
+(invoke-1789225259523) — the inverse of the zai-5/claude-15 process.
 
 ## 1. The unit: a channel is a four-tuple, not a message
 
@@ -27,7 +28,7 @@ admitted to be informal (a typed gap, not a surprise later).
     Agency accepted-before-running ambiguity — one defect at two
     levels).
 (b) **Provenance**: chains append, never rewrite; identity includes an
-    attempt ordinal (re-dispatch always possible; f209 job-id collision
+    attempt ordinal (I7: re-dispatch always possible; f209 job-id collision
     is the design counterexample); chains verifiable AT REST, not only
     at install (I10).
 (c) **Level**: the collapse law (an L-N actor firing an L-(N-2) effect
@@ -70,7 +71,9 @@ admitted to be informal (a typed gap, not a surprise later).
   too).
 - Every channel's ARTIFACT must be demanded non-nil by its gate before
   its structure is formalized (the twelve-consecutive-gate-passes-over-
-  `:wiring nil` lesson).
+  `:wiring nil` lesson; evidentiary home:
+  futon2/holes/NOTE-cascade-structured-proof-validation.md, Amendment 1
+  — carries the twelve-checkpoint pointer and the scoring report ref).
 
 ## 5. Sequencing (one hop first)
 
