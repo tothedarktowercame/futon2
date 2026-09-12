@@ -1,0 +1,29 @@
+{:schema :wm/belief-state-input-v1
+ :source [{:path "data/wm-trace/wm-trace-2026-09-04.edn"
+           :sha256 "f343432d772986ddc2f7fe38107913afc997201ebae9b6240dff152e235b1120"
+           :form 0
+           :field :mu-post
+           :role :carried
+           :entity/id "arxana/stack/futon-v1/leaf/2/2"
+           :timestamp "2026-09-04T07:46:52.742121237Z"
+           :posterior {:spawned 0.10532904980883244
+                       :refined 0.14086253396643547
+                       :strengthened 0.31240050666821867
+                       :addressed 0.09555013225308848
+                       :falsified 0.07447381184188043
+                       :foreclosed 0.1660549156527121
+                       :reopened 0.10532904980883244}}
+          {:path "data/wm-trace/wm-trace-2026-05-23.edn"
+           :sha256 "78fe7aaff4e9d3d38f0f4d761a972384e28e557252e47167e5270b6a90fe4a6f"
+           :form 0
+           :field :mu-pre
+           :role :bootstrapped
+           :entity/id "arxana/stack/futon-v1/leaf/2/2"
+           :timestamp "2026-05-23T00:00:24.123959658Z"
+           :posterior {:spawned 0.14285714285714285
+                       :refined 0.14285714285714285
+                       :strengthened 0.14285714285714285
+                       :addressed 0.14285714285714285
+                       :falsified 0.14285714285714285
+                       :foreclosed 0.14285714285714285
+                       :reopened 0.14285714285714285}}]}
