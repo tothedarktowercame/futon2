@@ -12,6 +12,39 @@ per Item 5. Update this file in place; git holds history.
 and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 + 4 papers + 7 standing tracker rows.**
 
+## Execution leadership (delegated by Joe, 2026-09-12)
+
+codex-26 owns completion and the former operator decision queue, following
+Joe's subsequent emacs-repl instruction to take over the lead. See
+[LEAD-DECISIONS-2026-09-12.md](LEAD-DECISIONS-2026-09-12.md) for exact decisions
+and commissioning requirements. Older inline "Joe decision" blockers below
+are superseded by that document; unresolved implementation/evidence remains
+open. The completion bar in Item 5 is unchanged. This tracker remains the
+single task authority; the lead document records policy and findings.
+
+- Row 18: fixed v1 m=1 with no open genuine trips, m=1/2 otherwise; distinct
+  trip identities, floor 1/2, no added operator gate. Law commissioned before
+  live use; mode applicability and refusal propagation must be tested.
+- Row 19: cross-agent genesis with pinned job evidence and explicitly
+  delegated canonical-branch acceptance; authenticated anchor and commission
+  retention still to build. No fabricated operator signature.
+- Rows 22/24: real horizon >=2, complete F_pi/detail coverage and both flags
+  enabled; no aspirational connection exemptions. Joined continuation firing
+  required. Two-level certificate with no whole-node exceptions; exact legacy
+  item-11 retirement only, preserving live R8 obligations.
+- Rows 14/16: no promotion of belief argmax to observed ground truth; measured
+  inputs remain required. Build the categorical ambiguity estimator; record
+  Gaussian entropy separately.
+- Row 24 finding: the current Lean state algebra is not yet the complete
+  rejecting predicate. Missing/incorrect records, unfired mandatory edges,
+  and refused selection/enaction must be rejected by the completed checker.
+  Reproducer compiled with no sorryAx; see runs/row-24-lead-audit-2026-09-12/
+  (independent review pending).
+- Row 18 sensitivity evidence: 147 retained candidates, four multipliers,
+  three temperature laws; both engineering modes respond, variational mode
+  does not, and the gain floor can erase modulation. See
+  runs/row-18-lead-audit-2026-09-12/ (review pending; not live-trip credit).
+
 ## Signature discipline (adopted by Joe 2026-09-12)
 
 Per the apex patterns (progress-is-a-witnessed-state-change,

@@ -1,0 +1,37 @@
+{
+  "schema": "wm/lead-audit-execution-v1",
+  "row": 24,
+  "author": "codex-26",
+  "independent-review": "pending",
+  "at": "2026-09-12T23:54:59.590076+00:00",
+  "futon2-head": "845ad99695616b9ecfe9425e6ef1477160b888a0",
+  "mathlib4-head": "0a4309b1f9fb62a9cff149cd01ad92a7cb4cab32",
+  "command": "lake env lean /home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-lead-audit-2026-09-12/CurrentPredicateCounterexample.lean",
+  "cwd": "/home/joe/code/mathlib4",
+  "exit": 0,
+  "stdout": "'Row24LeadAudit.precursor_accepts_incomplete_run' depends on axioms: [propext, Classical.choice, Quot.sound]",
+  "source-pins": [
+    {
+      "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/CertificateStates.lean",
+      "sha256": "83bb3bbbea3bad9a9d56568704300427f94e1bf1539ad322041e3cae8beab778"
+    },
+    {
+      "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/CertificateStates.olean",
+      "sha256": "7898d439a49a0887e324229c5acd247ddba1697c245892cefdb1032c8bb4c118"
+    },
+    {
+      "path": "/home/joe/code/mathlib4/lean-toolchain",
+      "sha256": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-24-lead-audit-2026-09-12/CurrentPredicateCounterexample.lean",
+      "sha256": "ee8bc03c6e4e5786a9b103efe04ea1716af3f5b24a0689aed475aa08ef47f2fd"
+    }
+  ],
+  "earlier-attempt": {
+    "exit": 1,
+    "source-sha256": "8f2e36af9f9ef76d7a1cbfad99de551cebc129efe129af3b85b0ba59a8d8d808",
+    "finding": "Direct by decide failed to synthesize Decidable (qualifyingRun ruling bad); the failed elaboration printed sorryAx. Replaced with explicit unfolding and simplification. Failed attempt is not a proof receipt."
+  },
+  "scope": "The existing precursor predicate accepts this constructed bad value. Not a run attestation or a repair of the final checker."
+}

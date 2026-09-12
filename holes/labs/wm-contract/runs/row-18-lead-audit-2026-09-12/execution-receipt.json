@@ -1,0 +1,49 @@
+{
+  "schema": "wm/lead-audit-execution-v1",
+  "row": 18,
+  "author": "codex-26",
+  "independent-review": "pending",
+  "at": "2026-09-12T23:57:15.411705+00:00",
+  "futon2-head": "845ad99695616b9ecfe9425e6ef1477160b888a0",
+  "command": "bb -cp src holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/gain_probe.bb data/wm-trace/wm-trace-2026-09-12.edn holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12",
+  "cwd": "/home/joe/code/futon2",
+  "exit": 0,
+  "candidate-count": 147,
+  "controls": {
+    "positive-modes-change": true,
+    "variational-mode-ignores-gain": true,
+    "floor-can-hide-modulation": true
+  },
+  "checks": [
+    {
+      "command": "clj-kondo --lint holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/gain_probe.bb",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "command": "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/gain_probe.bb",
+      "exit": 0,
+      "stdout": "OK"
+    }
+  ],
+  "source-pins": [
+    {
+      "path": "holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/gain_probe.bb",
+      "sha256": "8ac55b0f02e3c79d17eb31e82a80caab0172496408a248d1758d0f445af94723"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/input.edn",
+      "sha256": "1818dd14eabe7274815e1298b7d59909b06f98d853db52a84ec1f3e229f20235"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/result.edn",
+      "sha256": "8193604566d620cda2a3a29856dd9efa6a47b51421652d2077100816fd8f97fd"
+    },
+    {
+      "path": "src/futon2/aif/policy.clj",
+      "sha256": "b0dc9a1a440c18ec1464ee96abb9c76401a02295e8e3e7f0840b105242236628"
+    }
+  ],
+  "scope": "Controller-only intervention on scores from first retained trace form. No observed trip-response calibration, independent review, or live selection/enaction claim."
+}
