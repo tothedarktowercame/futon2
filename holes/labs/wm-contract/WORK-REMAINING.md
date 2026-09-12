@@ -249,9 +249,34 @@ operator workflow conversation (standdown 2026-09-12).
     (2026-09-12): R14 trace claim admitted (codex-22 da91d1f5..
     8867439b + mathlib4 0c738057/1023b2f4; admission 1a93c20f;
     registry 51 entries b15b15f2) — tau-spread and tau reproduced
-    from trace record 0, deltas 0.0. DEPTH and ACTION join the
-    needs-capture family (codex-22 split finding, no synthetic
-    substitutes): trace omits :policy-depth/:horizon-steps and the
+    from trace record 0, deltas 0.0. DEPTH CAPTURE DONE
+    (2026-09-12, futon2 3b581fbd..0430b558, reviewed): judgement +
+    trace retain :horizon-steps (the exact EFE input — nil is an
+    observed value selecting the single-step path) and
+    :policy-depth-used (derived with EFE's own gate condition),
+    beside the configured request; present-only propagation,
+    historical records unchanged; redirected machinery capture
+    retained (requested 3, :anticipation-events-unavailable,
+    effective 1), no live trace or JVM touched; self-caught
+    golden-failure repair to present-only in e2052a93. Depth
+    proof packet dispatched at machinery-capture scope
+    (codex-24); a production-scoped claim follows the first live
+    record carrying the fields. RELOAD PLAN: reload trace +
+    war_machine namespaces on the serving JVM from master ONCE
+    after row-14 packet 5 lands (single reload covers depth
+    capture + machine-Q retention; next live tick then also
+    performs the migrated accumulation step). REVIEW FINDING
+    (queued, one line, held to avoid a concurrent edit on
+    trace_test.clj while packet 5 is in flight):
+    support-typed-scoring-shadow-is-non-authoritative-test
+    asserts the default-off decision shape without binding
+    *persist-policy-trace-details?* false, so it fails in any
+    environment with FUTON_WM_TRACE_POLICY_DETAILS=1 (this
+    machine, since V7 slice-10 5febaeee added the flag) —
+    verified at pre-packet base e14caa8d, not a depth-capture
+    or packet defect; fix on the packet-5 bellback. ACTION joins
+    the needs-capture family (codex-22 split finding, no
+    synthetic substitutes): trace omits the
     ranked-action input maps + selector option packet — capture
     candidates for the row-13 trace envelope seam, alongside
     belief update and the row-16 five.
