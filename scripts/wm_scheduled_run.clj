@@ -95,7 +95,7 @@
           ;; (builds toward nothing). Degrades safely: store down -> [] -> the
           ;; static floor; never throws the run.
           belly (try (cv/maybe-refresh!) (catch Exception _ {:entries []}))
-          {:keys [judgement]} (wm/generate-war-machine days)
+          {:keys [judgement]} (wm/generate-war-machine days (wm/accumulation-config))
           ;; R16 close-the-loop (live-wired 2026-07-02): act-gates over the
           ;; judged actions; first :pass is ENACTED (artifact-only — escrow
           ;; impl #2 else fold-engine impl #1) and the :realized-outcome

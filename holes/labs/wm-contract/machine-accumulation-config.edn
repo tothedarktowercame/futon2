@@ -1,0 +1,6 @@
+{:schema :wm/accumulation-live-config-v1
+ :accumulation-entity-id "arxana/stack/futon-v1/leaf/2/2"
+ :accumulation-initialization
+ {:authority :declared :prior 1.0 :model/revision "wm-status-v1"}
+ :single-entity-contract
+ "holes/labs/wm-contract/CONTRACT-machine-model-v1.md:24"}

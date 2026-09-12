@@ -251,7 +251,7 @@
   ([selector version-stamp] (diagnostic-judge-opts selector version-stamp nil nil))
   ([selector version-stamp run-id] (diagnostic-judge-opts selector version-stamp run-id nil))
   ([selector version-stamp run-id trace-dir]
-   (cond-> {:trace? true
+   (cond-> (merge {:trace? true
             ;; :F9, 2026-09-05. ON. Until this row the diagnostic tick ran with
             ;; the advisory lane off, so `:cascade-policies` was `[]` on all 48
             ;; recorded S1b/S2/S4/S5 ticks and the machine never constructed a
@@ -269,6 +269,7 @@
             :eval-invariant-fallback? false
             :strategic-selection-fn selector
             :wm-version version-stamp}
+                   (wm/accumulation-config))
      run-id (assoc :run-id run-id)
      ;; U55: present-only, so an unredirected tick passes no :trace-dir and
      ;; war-machine takes its own default — the live path is byte-unchanged.

@@ -79,6 +79,18 @@
 (def ^:private default-wm-trace-dir
   (str (System/getProperty "user.home") "/code/futon2/data/wm-trace"))
 
+(def ^:private accumulation-config-path
+  "/home/joe/code/futon2/holes/labs/wm-contract/machine-accumulation-config.edn")
+
+(defn accumulation-config []
+  (let [x (clojure.edn/read-string (slurp accumulation-config-path))]
+    (when-not (and (= :wm/accumulation-live-config-v1 (:schema x))
+                   (:accumulation-entity-id x) (:accumulation-initialization x))
+      (throw (ex-info "Accumulation configuration missing or malformed"
+                      {:refusal :accumulation-configuration-invalid
+                       :path accumulation-config-path})))
+    (select-keys x [:accumulation-entity-id :accumulation-initialization])))
+
 ;; A one-shot production JVM dereferences this at most once, on the first tick
 ;; after the learned-prior flip. Test/report JVMs may call judge repeatedly;
 ;; memoising the immutable corpus fold prevents repeated 760-record cold reads.
@@ -6313,7 +6325,7 @@
                                                 driver-rejections)}
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
-        accumulation (when trace?
+        accumulation (when (or trace? accumulation-entity-id)
                        (accumulation-step-for-tick
                         {:previous-record prev-trace-record
                          :tick-id (or run-id scan-id (:scan-id scan-data))
