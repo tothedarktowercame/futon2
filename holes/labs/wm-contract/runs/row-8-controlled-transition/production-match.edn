@@ -1,0 +1,52 @@
+{:schema :wm/controlled-transition-witness-v1
+ :row 8
+ :at "2026-09-12"
+ :authority {:kind :declared-prior :name "wm-status-action-prior-v1"
+             :empirical-claim false}
+ :real-inputs
+ {:model-snapshot {:path "holes/labs/wm-contract/runs/F1-machine-q/03-machine-grain-q.edn"
+                   :sha256 "5ff86734aca3af2bcd988159f4721217ce8e61445ab6c39a7256235b81d18207"
+                   :run-id "c149f9de-669c-4817-9b0e-ed4aad77db79"}
+  :action-snapshot {:path "holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn"
+                    :sha256 "d88e228406957d045b95d593df06abd941a6ca180fd6d6b252ad977685235206"
+                    :classes [:advance-mission :apply-cascade]}}
+ :state-support [:addressed :falsified :foreclosed :refined :reopened :spawned :strengthened]
+ :complete-rows
+ {:support-in-every-row [:addressed :falsified :foreclosed :refined :reopened :spawned :strengthened]
+  :mass-rule {:named "one at the listed successor; explicit zero at every other support member"
+              :exact-values [0 1]}
+  :successor
+  {[:addressed :advance-mission] :addressed
+   [:falsified :advance-mission] :falsified
+   [:foreclosed :advance-mission] :foreclosed
+   [:refined :advance-mission] :strengthened
+   [:reopened :advance-mission] :reopened
+   [:spawned :advance-mission] :refined
+   [:strengthened :advance-mission] :strengthened
+   [:addressed :apply-cascade] :foreclosed
+   [:falsified :apply-cascade] :reopened
+   [:foreclosed :apply-cascade] :foreclosed
+   [:refined :apply-cascade] :refined
+   [:reopened :apply-cascade] :reopened
+   [:spawned :apply-cascade] :spawned
+   [:strengthened :apply-cascade] :strengthened}}
+ :applied-belief-step
+ {:input {:spawned 1 :addressed 0 :falsified 0 :foreclosed 0 :refined 0 :reopened 0 :strengthened 0}
+  :action :advance-mission
+  :clojure {:addressed 0 :falsified 0 :foreclosed 0 :refined 1 :reopened 0 :spawned 0 :strengthened 0}
+  :lean {:addressed 0 :falsified 0 :foreclosed 0 :refined 1 :reopened 0 :spawned 0 :strengthened 0}
+  :per-coordinate-delta {:addressed 0 :falsified 0 :foreclosed 0 :refined 0 :reopened 0 :spawned 0 :strengthened 0}}
+ :negative-controls
+ [{:mutation :declared-distinct-actions-with-identical-rows
+   :refusal :controlled-actions-indistinguishable}
+  {:mutation :unsupported-action :refusal :unsupported-action}
+  {:mutation :support-order-reversed :refusal :support-order-mismatch}
+  {:mutation :identity-labelled-observed-without-measurement
+   :refusal :measurement-pointer-missing}]
+ :divergence
+ {:measured-action-conditioned-law :absent
+  :disposition "declared prior only; no empirical claim"
+  :identity-B "representable only as a named declared prior"}
+ :pins
+ {:clojure-source {:sha256 "697b54db1a9f40844f9feff3622f95414dfcd3d019a7469272fc5d9a109ab6f8"}
+  :lean-source {:sha256 "e7dccd649a603a9315ddac739ec88201aa2de689a54e78a6fb2c60beae8a01fc"}}}

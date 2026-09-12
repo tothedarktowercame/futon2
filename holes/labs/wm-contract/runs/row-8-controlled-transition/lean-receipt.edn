@@ -1,0 +1,3 @@
+{:command "lake env lean DarkTower/WarMachine/MachineTransition.lean"
+ :exit 0 :errors 0 :warnings 0 :declarations 6
+ :tree-sha "c1c71011bbfaa54607474992d9a8cfb4da10fbb6" :at "2026-09-12"}
