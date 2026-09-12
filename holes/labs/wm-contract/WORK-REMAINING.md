@@ -320,7 +320,16 @@ operator workflow conversation (standdown 2026-09-12).
     assertions; redirected evidence retained both directions.
     RETENTION STACK 1-3 COMPLETE — future closes carry entity,
     belief row, and literal ledger joins. Packet 4
-    (disposition-coverage report) dispatched (codex-24);
+    (disposition-coverage report) DONE (2026-09-12, futon2
+    3dc6405c/a99ba1c1, reviewed): dated re-runnable coverage
+    reporter + artifact — 84 cells (83 zero), observed
+    dispositions {agent-unavailable build-failed grounded-change
+    incomplete no-selection substrate-unavailable},
+    never-observed {abstained artifact-only cancelled
+    dispatch-failed grounded-no-change guardrail-refusal}, sole
+    observed status :strengthened; retention opportunities
+    stated as observations only; capture stack marked
+    undeployed pending reload. RETENTION PACKETS 1-4 DONE;
     packet 5 (status coverage) accrues naturally; 1b waits on
     retained data + the categorical-authority ruling at its
     review. RELOAD NOTE: schema-29 + close-capture code needs
