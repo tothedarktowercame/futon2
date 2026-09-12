@@ -1,7 +1,6 @@
-(ns row-15-branches-capture.capture-branches)
+(ns holes.labs.wm-contract.runs.row-15-branches-capture-2026-09-12.capture-branches)
 
 (require '[clojure.java.io :as io]
-         '[clojure.edn :as edn]
          '[futon2.aif.policy :as policy]
          '[futon2.aif.trace :as trace])
 (load-file "scripts/futon2/report/war_machine.clj")

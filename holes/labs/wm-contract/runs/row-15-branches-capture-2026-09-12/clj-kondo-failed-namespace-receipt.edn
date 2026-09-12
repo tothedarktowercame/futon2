@@ -1,0 +1,7 @@
+{:command "clj-kondo --lint holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/capture_branches.clj holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/repair_direct_controls.clj"
+ :exit 3
+ :errors 2
+ :warnings 1
+ :tree-sha "232e4bf933d444f5f9aaf2ffea0b597fe637a3d1"
+ :finding :namespace-path-mismatch
+ :at "2026-09-12T21:35:00Z"}
