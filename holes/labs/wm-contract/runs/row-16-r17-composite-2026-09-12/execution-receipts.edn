@@ -1,0 +1,30 @@
+{:subject
+ {:repo "mathlib4"
+  :path "DarkTower/WarMachine/ModelReduction.lean"
+  :sha256 "d097bdd209c21a946c37ecfd6e941189975007702cf94e3529ba86716f63c15e"
+  :tree-sha "9fd88669f5cc5ef57eb422de930cf5276f19294c"}
+ :frozen-import
+ {:path "DarkTower/WarMachine/Holes.lean"
+  :sha256 "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"}
+ :receipts
+ [{:gate :lean-elaboration-and-axiom-check
+   :command "lake env lean DarkTower/WarMachine/ModelReduction.lean"
+   :exit 0 :tests 5 :assertions 5
+   :tree-sha "9fd88669f5cc5ef57eb422de930cf5276f19294c"
+   :at "2026-09-12T23:24:00Z"
+   :sorryAx false
+   :axioms ["propext" "Classical.choice" "Quot.sound"]}
+  {:gate :scoped-darktower-build
+   :command "lake build DarkTower.WarMachine.ModelReduction"
+   :exit 0 :tests 2705 :assertions 5
+   :tree-sha "9fd88669f5cc5ef57eb422de930cf5276f19294c"
+   :at "2026-09-12T23:25:00Z"
+   :result "Build completed successfully (2705 jobs)."
+   :import-note "Lake replay reports frozen Holes.lean's pre-existing sorry declarations; every new theorem's printed axiom set excludes sorryAx."}]
+ :toolchain
+ {:path "lean-toolchain"
+  :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+ :fixture
+ {:path "holes/labs/wm-contract/runs/V7-R17-node-sim/00-r17.edn"
+  :selector [:equations :model-reduction 2 :id]
+  :value :identity}}
