@@ -77,7 +77,7 @@
                    deltas (into {} (for [o (:support result)]
                                      [o (exact-delta (get row o) (get reference o))]))
                    decimal-sum (reduce + 0M (map (comp bigdec str val) row))]
-               [id {:production row :lean-reference-exact reference
+               [id {:production row :independent-exact-reference reference
                     :deltas-exact deltas
                     :max-absolute-double-delta
                     (reduce max 0.0 (map #(Math/abs (double %)) (vals deltas)))

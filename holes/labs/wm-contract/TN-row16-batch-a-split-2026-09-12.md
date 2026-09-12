@@ -28,6 +28,28 @@ and record the production-vs-reference deltas and `:float-carried` admission
 explicitly. The model-revision and missing-support controls are already
 retained and can be reused.
 
+### Follow-up exact-reference result
+
+Commit `b3ca7b0b` replaced the circular comparison with a separate exact-IEEE
+rational recurrence over the pinned successor table and positional A. Its
+first commissioned run established that the pinned input itself sums to
+`36028797018963969/36028797018963968`; the independently pushed reference
+therefore has that same sum. The production rows differ from the independent
+reference by at most `1/36028797018963968` (double magnitude
+`2.775557561562891E-17`). Their coordinate-decimal sums are respectively
+`1.00000000000000005` and `1.00000000000000006`, while IEEE reduction reports
+`1.0`; all rows receive `:float-carried`.
+
+This discharges the circularity but reveals that the requested *exactly
+normalised* rational `PredictiveOutcomeKernel` cannot be constructed from the
+unchanged exact-IEEE pins: exact transition/A composition preserves the input
+excess. Dividing by the sum would be a renormalization, contradicting both the
+packet's unchanged-push instruction and contract v1.1. The admissible Lean
+object at these pins is `MachineModelSpec.FloatCarriedRow`, with an exact proof
+of its near-normalization bound. An exact `ProbabilityKernel` requires either
+a separately authorised normalized mathematical source row or a contract
+change; neither was supplied here.
+
 An attempted witness was committed in mathlib4 at `c86eed2bba`; its first and
 only elaboration exited 1, including failure of the exact normalization goal.
 The non-elaborating files were removed by a follow-up commit; the failed commit
