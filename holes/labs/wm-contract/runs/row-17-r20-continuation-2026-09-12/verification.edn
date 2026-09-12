@@ -1,0 +1,1 @@
+{:schema :wm/agency-continuation-verification-v1, :work-remaining/row 17, :ok true, :tests 2, :assertions 11, :at "2026-09-12T20:28:47.308667414Z", :checks [:park-id-job-suppression-join :resume-names-dependency-job :one-completed-dependency :one-surviving-release-record :invented-dependency-accepted :no-early-wake :deadline-wake-once]}
