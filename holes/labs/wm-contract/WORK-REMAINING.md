@@ -177,9 +177,15 @@ operator workflow conversation (standdown 2026-09-12).
     witnesses. Depth/temperature/action in flight (part 2,
     codex-22); update-capture packet waits on the row-13 TN's
     shared-seam answer.
-16. Write measurement proofs for the remaining equation-bearing
-    nodes not covered by rows 2 and 15 (inventory first; roughly
-    five).
+16. IN PROGRESS. Inventory done and reviewed (TN 6e6b2f5c): 18
+    equation-bearing declarations — 4 admitted (26 claims), 4
+    under row 15, 5 provable now from retained pins, 5 needing
+    additive input capture (R8 free-energy, R8 policy-F, R5
+    ambiguity, R6 policy-set, R17 model-reduction — capture
+    candidates for the row-13 trace envelope seam). Scope: 10
+    proofs. Batch A out (codex-24: R4 forward-model, R5 risk, R5
+    expected-free-energy); batch B queued (R6 softmax, R17
+    accumulation binding).
 
 ## Phase 3 — the assurance nodes (4)
 
