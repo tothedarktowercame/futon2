@@ -1,0 +1,8 @@
+{:command "clojure -M:test -e <two abstain-epsilon test-vars>"
+ :test-vars [futon2.aif.policy-test/select-action-records-resolved-abstain-epsilon-test
+             futon2.aif.trace-test/redirected-trace-retains-resolved-abstain-epsilon-test]
+ :exit 0
+ :tests 2
+ :assertions 9
+ :tree-sha "c59124946c00e9af96ca968b166524f6a0d172c5"
+ :at "2026-09-12"}

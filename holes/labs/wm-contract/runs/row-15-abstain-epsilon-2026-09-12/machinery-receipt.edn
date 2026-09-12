@@ -1,0 +1,6 @@
+{:command "clojure -M holes/labs/wm-contract/runs/row-15-abstain-epsilon-2026-09-12/capture.clj"
+ :exit 0
+ :tests 1
+ :assertions 4
+ :tree-sha "c59124946c00e9af96ca968b166524f6a0d172c5"
+ :at "2026-09-12"}

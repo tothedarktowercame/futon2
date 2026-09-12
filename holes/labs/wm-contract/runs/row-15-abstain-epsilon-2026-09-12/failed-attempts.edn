@@ -1,0 +1,22 @@
+{:attempts
+ [{:gate :ambient-suites
+   :tree-sha "46774fde619bc00fbbb3946b9dfb5368c7dc51d5"
+   :exit 1
+   :tests 211 :assertions 969
+   :finding :epsilon-wrapper-assoc-arity}
+  {:gate :ambient-suites
+   :tree-sha "b4263e1e7fbd4431eae64c9221cb42bbdf28da23"
+   :exit 1
+   :tests 211 :assertions 1033 :failures 1 :errors 3
+   :packet-failures 0
+   :ambient-findings [:mutable-mission-criteria-digest
+                      :policy-detail-fixture-rank-joins
+                      :disposition-support-mismatch]}
+  {:gate :redirected-machinery-capture
+   :tree-sha "7187ea30ae27922486a5abd139b140416df489d8"
+   :exit 1
+   :finding :ambient-policy-details-enabled}
+  {:gate :clj-kondo
+   :tree-sha "c59124946c00e9af96ca968b166524f6a0d172c5"
+   :exit 2 :errors 0 :warnings 1
+   :finding :unused-clojure-edn-require}]}

@@ -1,0 +1,8 @@
+{:command "clj-kondo --lint src/futon2/aif/policy.clj test/futon2/aif/policy_test.clj test/futon2/aif/trace_test.clj holes/labs/wm-contract/runs/row-15-abstain-epsilon-2026-09-12/capture.clj"
+ :exit 0
+ :tests 1
+ :assertions 2
+ :errors 0
+ :warnings 0
+ :tree-sha "947d94757d0f9e1aab25c7e3414e5d5de82fefb8"
+ :at "2026-09-12"}

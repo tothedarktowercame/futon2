@@ -1,0 +1,1 @@
+{:schema :wm/abstain-epsilon-capture-v1, :scope :redirected-machinery-trace, :input {:abstain-epsilon 0.125}, :decision {:action {:type :address-sorry}, :abstain-epsilon 0.125}, :persisted {:action {:type :address-sorry}, :abstain-epsilon 0.125}, :checks {:decision-value? true, :persisted-present? true, :persisted-value? true, :softmax-stripped? true}}
