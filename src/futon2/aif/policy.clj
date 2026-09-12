@@ -185,6 +185,12 @@
                                     f-pi-scaling]
                              :or {f-pi-policy-posterior? false
                                   f-pi-scaling :unscaled}}]
+   (when-not (finite-pos? tau)
+     (let [kind (if (and (number? tau) (Double/isFinite (double tau)))
+                  :nonpositive-temperature
+                  :nonfinite-temperature)]
+       (throw (ex-info (name kind)
+                       {:refusal {:kind kind :temperature tau}}))))
    (when (seq g-totals)
      (let [n (count g-totals)
            lps (or log-priors (repeat n 0.0))

@@ -1,0 +1,7 @@
+{:schema :wm/softmax-positive-baseline-v1
+ :command "clojure -M -e (require futon2.aif.policy); invoke softmax-weights"
+ :tree-sha "57d28239"
+ :g-totals [0.0 0.5 1.0]
+ :temperature 1.0
+ :weights [0.506480391055654 0.3071958857184984 0.1863237232258476]
+ :at "2026-09-12"}

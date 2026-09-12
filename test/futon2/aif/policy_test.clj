@@ -1,6 +1,7 @@
 (ns futon2.aif.policy-test
   "Tests for R6: action selection policy (softmax + abstain)."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation :as obs]
             [futon2.aif.policy :as policy]))
 
@@ -71,6 +72,29 @@
 (deftest softmax-weights-empty-test
   (testing "empty input returns nil"
     (is (nil? (policy/softmax-weights [] 0.1)))))
+
+(defn- temperature-refusal [tau]
+  (try
+    (policy/softmax-weights [0.0 1.0] tau)
+    nil
+    (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
+
+(deftest softmax-weights-refuses-invalid-temperature-test
+  (testing "zero and negative temperatures refuse before division"
+    (is (= {:kind :nonpositive-temperature :temperature 0.0}
+           (temperature-refusal 0.0)))
+    (is (= {:kind :nonpositive-temperature :temperature -1.0}
+           (temperature-refusal -1.0))))
+  (testing "NaN is a typed nonfinite refusal"
+    (let [r (temperature-refusal ##NaN)]
+      (is (= :nonfinite-temperature (:kind r)))
+      (is (Double/isNaN (:temperature r))))))
+
+(deftest softmax-weights-production-tau-baseline-unchanged-test
+  (let [baseline (edn/read-string
+                  (slurp "holes/labs/wm-contract/runs/row-16-softmax-temperature-2026-09-12/positive-baseline.edn"))]
+    (is (= (:weights baseline)
+           (policy/softmax-weights (:g-totals baseline) (:temperature baseline))))))
 
 (deftest softmax-weights-f-pi-flag-off-ignores-options-test
   (let [g [0.2 0.4 0.8]
