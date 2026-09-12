@@ -544,6 +544,39 @@ operator workflow conversation (standdown 2026-09-12).
     optional here). Packets 2-5 wait on (i)-(iii).
 19. Implement R9, "No self-certification": the checks that prevent
     the system from certifying its own work must exist and refuse.
+    SCOPING DONE (2026-09-12, TN-row19-scoping-2026-09-12.md
+    f607f521; reviewer verified the boundary pins incl. the
+    review-execution gate at full_loop_runner.clj:1631-1675 and
+    the census's own recorded self-credit incident at
+    ALIGN:175-185). Five certification boundaries inventoried
+    (witness admission, full-loop discharge, working-evidence
+    promotion, census/verdict editing, registry merge); the key
+    finding is about OUR OWN admission flow: review receipts
+    name a reviewer string but not the author/reviewer Agency
+    jobs, so independence is asserted, not checked — the checker
+    joins real producer and reviewer jobs (packet-4 input spec:
+    role binding, agent-ids, artifact-ref, request digest,
+    trace->job, chronology, review execution) and refuses
+    closed (:r9/author-equals-reviewer, missing/unjoinable,
+    :r9/anchor-missing). Roles come from declared bindings
+    verified against job targets — never inferred from name
+    prefixes. Seven packets, strict deps (2-7 on 1; 3-6 on 2;
+    7 on 3). Packet 2 (pure identity/join checker) dispatched
+    BUILD-ONLY (codex-22): module + tests + one retained real
+    producer/reviewer pair execution; its own ADMISSION is
+    :awaiting-anchor by design.
+    :blocker DECISION NEEDED (packet 1 — the bootstrap anchor
+    is an owner ruling; "author was Codex, reviewer was Claude"
+    is not a rule since model-family names are not
+    authenticated identities): Joe selects the genesis
+    authority for certifying the checker itself — (1)
+    operator-signed anchor over exact source/test hashes,
+    later versions admitted by the previous anchored version +
+    distinct-agent review; (2) cross-agent genesis (unequal
+    agent-ids + immutable ledger pins + operator-owned branch
+    rule); (3) threshold genesis (operator + two distinct
+    agent reviews). Until ruled, the checker refuses its own
+    admission with :r9/anchor-missing.
 20. Extend the evidence census to R11 ("Hierarchical shared
     budget") and R15 ("Hierarchy and timescale"), currently outside
     census scope entirely; each needs its own working-evidence row
