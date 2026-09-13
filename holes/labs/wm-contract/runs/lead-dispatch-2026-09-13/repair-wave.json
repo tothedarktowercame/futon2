@@ -337,10 +337,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-full-predicate-rejections.request.json",
       "dispatch": "accepted",
       "scope": "additive full qualifying predicate rejection precursor; no certification or live run"
+    },
+    {
+      "packet": "codex-23-offline-lifecycle-reconciliation",
+      "job-id": "invoke-1789271800626-20620-737f8c90",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789271800626-20620-737f8c90",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-offline-lifecycle-reconciliation.request.json",
+      "dispatch": "accepted",
+      "scope": "independent lead payload review and offline accepted-job lifecycle reconciliation; no integration"
     }
   ],
   "current-awaiting": [
-    "invoke-1789271308775-20617-e4c52270",
+    "invoke-1789271800626-20620-737f8c90",
     "invoke-1789271480848-20618-2dfdb941",
     "invoke-1789271626448-20619-d2157ce9"
   ]
