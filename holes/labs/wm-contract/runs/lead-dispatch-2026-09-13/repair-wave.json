@@ -369,11 +369,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-complete-lifecycle-authority.request.json",
       "dispatch": "accepted",
       "scope": "strict lifecycle schemas and independent completeness authority; no production integration"
+    },
+    {
+      "packet": "codex-22-e2b-event-field-subject",
+      "job-id": "invoke-1789272468856-20624-f5f4af34",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789272468856-20624-f5f4af34",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e2b-event-field-subject.request.json",
+      "dispatch": "accepted",
+      "scope": "E2b independent cohort/event and exact field subject repair; no actuation"
     }
   ],
   "current-awaiting": [
     "invoke-1789272310436-20623-02d0f136",
-    "invoke-1789271983880-20621-173b7165",
+    "invoke-1789272468856-20624-f5f4af34",
     "invoke-1789272111078-20622-4dcfc158"
   ]
 }
