@@ -841,10 +841,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-completeness-validator.request.json",
       "dispatch": "accepted",
       "scope": "pure synthetic-scope completeness schema/independent census joins; production refusal"
+    },
+    {
+      "packet": "codex-23-completeness-lead-origin-review",
+      "job-id": "invoke-1789287133511-20730-975351f2",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789287133511-20730-975351f2",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-completeness-lead-origin-review.request.json",
+      "dispatch": "accepted",
+      "scope": "independent lead subject-join review and bounded origin/chronology audit, no implementation"
     }
   ],
   "current-awaiting": [
-    "invoke-1789286571614-20728-0d746a9a"
+    "invoke-1789287133511-20730-975351f2"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
