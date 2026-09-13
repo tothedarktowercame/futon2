@@ -617,10 +617,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-revision-independent-review.request.json",
       "dispatch": "accepted",
       "scope": "independent lead revision fix review only; no implementation or production"
+    },
+    {
+      "packet": "codex-23-feedback-pre-postcommit-contract",
+      "job-id": "invoke-1789278425378-20674-3cbc85a3",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789278425378-20674-3cbc85a3",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-pre-postcommit-contract.request.json",
+      "dispatch": "accepted",
+      "scope": "read-only prospective versus retrospective feedback contract; no implementation"
     }
   ],
   "current-awaiting": [
-    "invoke-1789278299742-20672-05cd72f3"
+    "invoke-1789278425378-20674-3cbc85a3"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
