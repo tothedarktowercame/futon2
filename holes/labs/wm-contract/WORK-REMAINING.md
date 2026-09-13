@@ -1,35 +1,55 @@
 # The work remaining — the single execution authority
 
-## Delegation scoreboard
+## Leadership
 
-| Outcome since delegation | Count |
+Execution leadership returned to claude-15 (Joe, emacs-repl, 2026-09-13
+~16:40Z). No further dispatches to or from codex-26; its queued row-19
+follow-on (job20750) was cancelled. The recorded decisions in
+[LEAD-DECISIONS-2026-09-12.md](LEAD-DECISIONS-2026-09-12.md) and the paper
+exclusion list in [CONVERGENCE-PLAN-2026-09-13.md](CONVERGENCE-PLAN-2026-09-13.md)
+remain in force as decisions. The E6b storage chain and the undeployed
+row-19/Task1 serving integration are outside the paper dependency path and
+get no further seat time; row 19's honest typed state (checker refusing
+:r9/anchor-missing, commissions unretained, serving undeployed) is what the
+certificate attests. Joe's scope instruction: minimum glue code to make the
+system run; no new bookkeeping systems.
+
+## Scoreboard
+
+| Outcome since 2026-09-12 delegation | Count |
 | --- | ---: |
 | Tracker rows closed | **0** |
 | New witness claims admitted | **0** (35 → 35 total) |
 
-Baseline: claude-15's independent audit delivered in job20737 on 2026-09-13. These are outcome counts, not commit or test counts. This documentation update claims no closure or admission and does not rerun that audit.
+## The core closure list (build order)
 
-## Active work and priorities
+1. **The machinery run.** Review the row-26 entrypoint (codex-22: futon3c
+   51269db9 + futon2 402632e6 + receipts 9133afbe), then execute ONE bounded
+   machinery-test run through the gated click path, recorded as a build-phase
+   machinery test claiming nothing (ruling Item 5 Operationalized 1/3;
+   settlement 1d84fd66). Effective section-5 configuration retained or the
+   gap reported, never invented.
+2. **Evidence reads off that run's records:** rows 13, 15, 23 first; row-14
+   measured-A candidates as the data licenses.
+3. **Row 22:** the marking packet at the ruled configuration.
+4. **Row 16:** close the census with honest typed absences.
+5. **Rows 24/25:** the minimal certificate — strict acquisition adapter
+   bridging derive-certificate output to the Lean states per
+   TN-row24-f11-false-certificate-path-2026-09-13.md; the qualifying
+   predicate evaluated honestly, a false result reportable.
+6. **Row 28** run + certificate; **rows 29–32** paper text aligned to
+   exactly what the certificate attests — nothing on the exclusion list
+   cited as validated capability.
 
-- **Task 1 / Row 19:** job `invoke-1789317564390-20750-04477de9` repairs actual-wrapper ownership after review `futon3c d4f11a85`. Executed duplicate attempt finalizes/unregisters original running worker; previous lifetime separation accepted narrowly. No deployment or closure; September14 timebox unchanged.
+Per-packet history stays in [the lead log](LEAD-PACKET-LOG-2026-09-13.md).
+Summaries report rows closed and claims admitted.
 
-- **E6b storage chain: parked.** Before any further storage packet, name the tracker row it can close, the specific witness admission it feeds, and the missing evidence the packet will supply. If it cannot name these, do not dispatch it. Isolated machinery acceptance alone is not progress on this scoreboard.
-- **Convergence seats:** codex-22 prepares the Row26 gated on-demand entrypoint; codex-24 job invoke-1789317645010-20751-e5949e94 implements the isolated typed-gap Lean generator; job20746 ended without implementation and the acquisition bridge remains missing. See [plan and paper exclusions](CONVERGENCE-PLAN-2026-09-13.md) and [current jobs](runs/lead-dispatch-2026-09-13/repair-wave.json). Standing ruling permits a reviewed bounded machinery test on the existing gated path; no qualifying/candidate claim before readiness. Paper window: approximately six days, exact deadline unconfirmed. Today’s closure target is reviewable Row26 construction; no closure yet.
+## Recorded decisions (made under the former codex-26 delegation; still in force)
 
-
-Row 19 completion still requires serving retention verification, lifecycle/startup/internal-resume integration, and safe first-install fencing. Historical commission20588 remains absent; fresh author/reviewer commissions require verified retention. This status update authorizes no live reload/restart/holds/provisioning or production mutation beyond a separately reviewed bounded machinery test on the already authorized gated click path. All other open row obligations and Item 5's completion bar remain unchanged.
-
-Per-packet history is preserved in [the lead log](LEAD-PACKET-LOG-2026-09-13.md). Future summaries report rows closed and claims admitted; packet details belong in that log.
-
-## Delegated decisions
-
-codex-26 owns completion and the former operator decision queue, following
-Joe's subsequent emacs-repl instruction to take over the lead. See
-[LEAD-DECISIONS-2026-09-12.md](LEAD-DECISIONS-2026-09-12.md) for exact decisions
-and commissioning requirements. Older inline "Joe decision" blockers below
-are superseded by that document; unresolved implementation/evidence remains
-open. The completion bar in Item 5 is unchanged. This tracker remains the
-single task authority; the lead document records policy and findings.
+See [LEAD-DECISIONS-2026-09-12.md](LEAD-DECISIONS-2026-09-12.md) for exact
+decisions. Older inline "Joe decision" blockers below are superseded by that
+document; unresolved implementation/evidence remains open. The completion
+bar in Item 5 is unchanged. This tracker remains the single task authority.
 
 - Row 18: fixed v1 m=1 with no open genuine trips, m=1/2 otherwise; distinct
   trip identities, floor 1/2, no added operator gate. Law commissioned before
