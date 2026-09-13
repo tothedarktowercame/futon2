@@ -144,7 +144,17 @@ belief.clj.
    fixed, discrete policies), and the hybrid discrete/continuous
    arrangement each match the book's stated default pattern for
    exactly our situation.
-3. GAP: no recorded Markov-blanket partition (Q1). Two past disputes
+3. GAP: no recorded Markov-blanket partition (Q1). FIRST RESPONSE
+   (Joe, 2026-09-13, emacs-repl, on reading this note): "I think the
+   blanket for this paper is the REPL, most likely! the futon-2026
+   closure over the operator changes that." Reading: for the
+   plop-2026 paper's system the blanket sits at the REPL -- the
+   operator interface is the sensory/active surface -- while the
+   futon-2026 paper's closure over the operator redraws the boundary
+   to include the operator inside the system. Two papers, two blanket
+   placements over one stack: exactly the book's point (6.3) that the
+   boundary is a modeling choice at a scale. Not yet a :choices
+   ruling; recorded here as the live candidate answer. Two past disputes
    were boundary questions in disguise. PROPOSED: a :choices entry
    (:markov-blanket) recording the four-way partition above, for
    Joe's ruling.
