@@ -52,8 +52,8 @@ current packet cannot supply that conversion.
 The gradient branch additionally clips proposals to floor/ceiling and records
 hit counters; clipped or unconverged results do not instantiate a root. The
 bisection branch returns `:bracketed? false` on same-sign endpoints.
-`carry-beta` qualifies only converged and bracketed solves; otherwise it
-retains the prior as `:held-unsolved`, while missing fields are
+`carry-beta` carries converged solves unless `:bracketed?` is explicitly false;
+otherwise it retains the prior as `:held-unsolved`, while missing fields are
 `:held-absent`. `policy/effective-temperature` uses beta only in
 `:variational-beta-gamma` and refuses absent/nonpositive beta; engineering
 gain floors and spread temperatures are different laws. None of held,

@@ -1348,3 +1348,7 @@ Row 18 activation09752ed7/28416d99 reviewed with six matching pins and retained1
 ## Lead review update — real genesis draft, 2026-09-13
 
 Row19 draft7ca8e617/10bcf636/77a04049 reviewed: four artifact pins plus checker pin match. Independent current ledger read confirms author20588 trace/index/artifact/digest, but exact commission preimage absent. Pending draft accepted only at that scope; cannot admit by adding review alone. Prepare reviewed retention deployment before fresh author/reviewer commissions; no historical reconstruction or live mutation. See row-19-real-genesis-draft-2026-09-13/lead-review.md. Delayed row18 job20589 remains consumed under15edf3a6/repair20593.
+
+## Lead review update — repaired fixed-field checker, 2026-09-13
+
+Row18 checker19c34cc9/3a6f56da/15f441b3 accepted at fixed-input scope after4pins and raw positive/induced-failure review. Four refusal expectations now asserted, induced wrong expectation exits1; no rerun. Retained145/2 field uses:none not:both; c1/c2 fail sufficient bound, uniqueness unknown. Lead corrected leftover contradictory bracket prose. No runtime or theorem-instance admission. Next independent packet moves to measured-A categorical state authority while retention deployment preparation remains pending.

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "holes/labs/wm-contract/row18_field_applicability.clj",
+    "expected": "0133aa53e090ef03eb26f7de080026a54db244111a2233d54d793f3f4fcfe521",
+    "actual": "0133aa53e090ef03eb26f7de080026a54db244111a2233d54d793f3f4fcfe521",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/TN-row18-field-applicability-2026-09-13.md",
+    "expected": "6b17a92d813e0b7c05d7b5871a165a42fce56672225c8b65b3a3b61031f37b6f",
+    "actual": "6b17a92d813e0b7c05d7b5871a165a42fce56672225c8b65b3a3b61031f37b6f",
+    "matches": true
+  },
+  {
+    "path": "data/wm-trace/wm-trace-2026-09-12.edn",
+    "expected": "3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175",
+    "actual": "3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/input.edn",
+    "expected": "1818dd14eabe7274815e1298b7d59909b06f98d853db52a84ec1f3e229f20235",
+    "actual": "1818dd14eabe7274815e1298b7d59909b06f98d853db52a84ec1f3e229f20235",
+    "matches": true
+  }
+]
