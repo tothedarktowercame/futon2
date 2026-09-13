@@ -1,0 +1,4 @@
+{:command "clojure -M:test holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/readback.clj"
+ :exit 0 :tests 1 :assertions 5 :tree-sha "a03b569da7d9b969777e26f973013bafa5c8c54e"
+ :at "2026-09-13" :supersedes "readback-receipt.edn"
+ :stdout "subject-binding-readback.stdout" :stderr "subject-binding-readback.stderr"}

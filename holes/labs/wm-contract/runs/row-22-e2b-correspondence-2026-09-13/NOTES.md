@@ -12,7 +12,8 @@ scoring/posterior proof and R9 pre-enact authorization as separate external
 dependencies. Production mode refuses, no selector or enactment ran, and the
 first-passing live boundary remains unchanged.
 
-Pins: source `b0d222fa7627489f73049a77b77720485ad501133884e78f870d7b335e43d270`;
-test `45a23236832f50ab18639cf5e3e49e283c88e20a7c0fe3f28c057e6a0f0596fc`;
-dependency spec `232627db0cd677d7b1ed842b158783f9341074d2a7330a67731fad7c5abfdab3`;
-readback `5251a5e4086856fa118d460466bba2e6b4d27a6a693bceab48329977a6f3a5f8`.
+Pins after exact-subject repair: source
+`0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933`;
+test `d1a8dec32437697d4905ed2e92f7701b5ef1d67f13cca6370e3ebae55b62aa6f`;
+dependency spec `8662e432e9513c7a01726a5276f74f9d6293643fbf2a6c8288dba5e32f84217c`;
+readback `c887bb5583744b6b3d25f4595e795d01f1d49b1dc46478b8fb54059802495030`.
