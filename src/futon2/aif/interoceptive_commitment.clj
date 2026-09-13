@@ -12,6 +12,11 @@
 (def genuine-actions #{:stop-line :park-and-summon :discharge})
 (def known-actions (conj genuine-actions :record))
 (def terminal-statuses #{:resolved :superseded})
+(def repair-statuses #{:open :awaiting-validation :resolved :superseded})
+(def allowed-status-edges
+  #{[:open :awaiting-validation]
+    [:awaiting-validation :resolved]
+    [:open :superseded]})
 
 (defn- refuse! [reason data]
   (throw (ex-info (str "Interoceptive commitment refused: " (name reason))
@@ -48,9 +53,13 @@
   (reduce-kv
    (fn [rows path {:keys [sha256 record] :as entry}]
      (when-not (and (string? path) (pin? sha256) (map? record)
-                    (safe-id? (:repair/id record)) (keyword? (:repair/status record)))
+                    (safe-id? (:repair/id record)))
        (refuse! :interoceptive/malformed-repair-record
                 {:path path :entry entry}))
+     (when-not (contains? repair-statuses (:repair/status record))
+       (refuse! :interoceptive/unknown-repair-status
+                {:path path :repair/id (:repair/id record)
+                 :status (:repair/status record)}))
      (conj rows (assoc record :authority/path path :authority/sha256 sha256)))
    [] records))
 
@@ -63,9 +72,7 @@
                   {:repair/id id :statuses [(:repair/status old)
                                             (:repair/status row)]}))
        (when (and old
-                  (not (contains? #{[:open :awaiting-validation]
-                                    [:open :resolved] [:open :superseded]
-                                    [:awaiting-validation :resolved]}
+                  (not (contains? allowed-status-edges
                                   [(:repair/status old) (:repair/status row)])))
          (refuse! :interoceptive/contradictory-discharge
                   {:repair/id id :statuses [(:repair/status old)
@@ -97,6 +104,11 @@
   [{:keys [trip-authority repair-authority]}]
   (let [trip-auth (authority! :trip trip-authority)
         repair-auth (authority! :repair repair-authority)
+        _ (when-not (= (:authority-class trip-auth)
+                       (:authority-class repair-auth))
+            (refuse! :interoceptive/authority-class-mismatch
+                     {:trip-authority-class (:authority-class trip-auth)
+                      :repair-authority-class (:authority-class repair-auth)}))
         trips (mapv trip-entry! (:records trip-auth))
         trip-ids (mapv #(get-in % [:record :trip/id]) trips)
         _ (when-not (= (count trip-ids) (count (distinct trip-ids)))

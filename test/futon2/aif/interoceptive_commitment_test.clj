@@ -40,9 +40,13 @@
       (is (= 1/2 (:machine-confidence two)))
       (is (= ["trip-real-1" "trip-real-2"] (:open-trip-ids two))))
     (let [one-discharged (conj [f1 f2]
+                               (repair-entry "implementations" "repair-trip-1"
+                                             "trip-real-1" :awaiting-validation)
                                (repair-entry "resolutions" "repair-trip-1"
                                              "trip-real-1" :resolved))
           all-discharged (conj one-discharged
+                               (repair-entry "implementations" "repair-trip-2"
+                                             "trip-real-2" :awaiting-validation)
                                (repair-entry "resolutions" "repair-trip-2"
                                              "trip-real-2" :resolved))]
       (is (= 1/2 (:machine-confidence
@@ -86,10 +90,36 @@
       (is (= :interoceptive/unknown-mode
              (refusal #(commitment/confidence-snapshot
                         (input [(assoc-in t [:record :trip/action] :mystery)] [f]))))))
+    (testing "repair status and validation sequence are owned by tripwire"
+      (is (= :interoceptive/unknown-repair-status
+             (refusal #(commitment/confidence-snapshot
+                        (input [t] [(repair-entry "findings" "repair-trip"
+                                                 "trip-real" :not-a-repair-status)])))))
+      (is (= :interoceptive/contradictory-discharge
+             (refusal #(commitment/confidence-snapshot
+                        (input [t] [f (repair-entry "resolutions" "repair-trip"
+                                                   "trip-real" :resolved)]))))))
     (testing "authority refuses closed"
       (is (= :interoceptive/authority-unavailable
              (refusal #(commitment/confidence-snapshot
                         (assoc-in base [:trip-authority :read-status] :unreadable)))))
       (is (= :interoceptive/unpinned-authority
              (refusal #(commitment/confidence-snapshot
-                        (assoc-in base [:repair-authority :revision] nil))))))))
+                        (assoc-in base [:repair-authority :revision] nil)))))
+      (is (= :interoceptive/authority-class-mismatch
+             (refusal #(commitment/confidence-snapshot
+                        (assoc-in base [:repair-authority :authority-class]
+                                  :test)))))
+      (let [resolved (input [t]
+                            [f (repair-entry "implementations" "repair-trip"
+                                             "trip-real" :awaiting-validation)
+                             (repair-entry "resolutions" "repair-trip"
+                                           "trip-real" :resolved)])]
+        (is (= :interoceptive/authority-class-mismatch
+               (refusal #(commitment/confidence-snapshot
+                          (assoc-in resolved [:repair-authority :authority-class]
+                                    :test)))))))
+    (testing "a refused check named discharge is not a resolution"
+      (is (= :interoceptive/missing-finding-join
+             (refusal #(commitment/confidence-snapshot
+                        (input [(trip "trip-refused-check" :discharge)] []))))))))
