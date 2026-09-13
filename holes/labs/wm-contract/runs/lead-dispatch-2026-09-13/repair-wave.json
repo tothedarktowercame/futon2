@@ -529,11 +529,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-feedback-verifier.request.json",
       "dispatch": "accepted",
       "scope": "pure isolated E6b feedback verifier; no runtime"
+    },
+    {
+      "packet": "codex-24-authority-reader-strictness",
+      "job-id": "invoke-1789275643187-20650-785a8c56",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789275643187-20650-785a8c56",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-authority-reader-strictness.request.json",
+      "dispatch": "accepted",
+      "scope": "isolated strict parser pointer and immutable source-value repair; no emitter"
     }
   ],
   "current-awaiting": [
     "invoke-1789275482764-20648-32e941f8",
-    "invoke-1789275396053-20646-184767dd",
+    "invoke-1789275643187-20650-785a8c56",
     "invoke-1789275481498-20647-0e31dc03"
   ]
 }
