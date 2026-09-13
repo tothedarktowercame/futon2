@@ -1,0 +1,17 @@
+(require '[clojure.edn :as edn] '[futon2.aif.machine-slow-feedback-provenance :as p] '[futon2.aif.machine-slow-feedback-provenance-test :as t] '[futon2.aif.machine-slow-state-carrier :as c])
+(defn decode [d] (edn/read-string (String. (.decode (java.util.Base64/getDecoder) (:bytes/base64 d)) "UTF-8")))
+(defn desc [x] (let [bs (.getBytes (pr-str x) "UTF-8") h (#'t/sha256 bs)] {:bytes/base64 (.encodeToString (java.util.Base64/getEncoder) bs) :source-sha256 h :value-sha256 h}))
+(defn replace-original [i role x]
+ (let [d (desc x)] (-> i (assoc-in [:original-sources role] d) (assoc-in [:proposal-evidence :input/digests role] (:value-sha256 d)) (assoc-in [:proposal-evidence :source/digests role] (:source-sha256 d)))))
+(let [i (#'t/input)
+      original (decode (get-in i [:canonical-outputs :e3]))
+      changed (update original :sources #(vec (reverse %)))
+      d (desc changed)
+      e2b (assoc (decode (get-in i [:original-sources :e2b-subject])) :canonical/e3-digest (:value-sha256 d))
+      relation (assoc-in (decode (get-in i [:original-sources :lifecycle-relation])) [:subject :e3/digest] (:value-sha256 d))
+      edited (-> i (assoc-in [:canonical-outputs :e3] d) (assoc-in [:proposal-evidence :canonical/digests :e3] (:value-sha256 d)) (replace-original :e2b-subject e2b) (replace-original :lifecycle-relation relation))
+      projection (c/project-transition (select-keys edited [:proposal-evidence :original-sources]))
+      out (p/construct (assoc edited :carrier-projection projection))]
+ (assert (not= (:sources original) (:sources changed)))
+ (assert (= :structural-artifact (:status out)))
+ (prn {:status (:status out) :original-order (mapv :label (:sources original)) :accepted-order (mapv :label (:sources changed))}))
