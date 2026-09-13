@@ -1,0 +1,18 @@
+{
+  "schema": "wm/tracker-policy-reconciliation-v1",
+  "scope": "row24 stale operator-decision wording only",
+  "policy_path": "holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md",
+  "policy_sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+  "policy_commit": "74091f56406fae77ce6180f2b772e11be801558e",
+  "tracker_before_sha256": "a6b8bd3688a17a77ae84d5dc39a71de5b0fe7da8313000ecc6e921d6420e12df",
+  "tracker_after_sha256": "5c1a53addc2493eb7fe2b6b0d75a6f572714cba88c0568605567cc2c36c4fa13",
+  "checks": [
+    "single row24 retained",
+    "obsolete decision-sheet blocker removed",
+    "all-node closure and empty whole-node exemptions retained",
+    "only exact legacy scalar retirement preserved",
+    "emitter/hash verification/tamper battery remain open"
+  ],
+  "tests_rerun": false,
+  "reason": "documentation-only reconciliation with already-authorized policy"
+}

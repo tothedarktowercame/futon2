@@ -1276,24 +1276,23 @@ operator workflow conversation (standdown 2026-09-12).
     cannot certify); census decidability,
     readingTwo<->readingThree-at-empty equivalences, and
     refutedAtPin-cannot-satisfy-readingTwo proved; no sorryAx;
-    no emitter/frozen/registry changes. The ruling half stays
-    with Joe (§2C sheet above).
-    :blocker DECISION SHEET FOR JOE (the row's own text requires
-    his written rulings):
-    (I) THE §2C READING — how a FULL-scope certificate treats
-    typed partials: (1) attest typed state as-is (census-
-    complete honesty, "full" != all-positive); (2) require
-    positive closure (today un-certifiable, correctly); (3)
-    two-level — always attest the complete typed census, plus a
-    separate QualifyingRun predicate requiring positive closure
-    except items Joe ruled non-load-bearing in writing (TN
-    argues fewest semantic traps; not chosen for him).
-    (II) THE 17-ITEM NEGATIVE-SCOPE INVENTORY (TN §3): each
-    item must close before row 28 or receive Joe's written
-    rule-out by exact bytes — includes confirming the J2
-    R8-free-energy retirement as permitted negative scope
-    (item 11) and the R11/R15 0/7 absences (item 16). Existing
-    negative-scope prose does NOT count as rulings.
+    no emitter/frozen/registry changes.
+    POLICY RESOLVED under Joe's delegated leadership by
+    LEAD-DECISIONS-2026-09-12.md §§3–4: reading three, complete
+    typed FullAttestation plus a separate QualifyingRun requiring
+    positive closure, record consistency/identity, selection/enaction,
+    equation bindings and required edge firing in the exact run.
+    Whole-node ruledOutItems is empty; R11/R15 remain required.
+    Only inventory item 11's exact legacy R8 scalar obligation is
+    retired at the pinned J2 authority. R8 and live policy F_pi are
+    not exempt. Items 1–10 and 12–17 still require their evidence.
+    IMPLEMENTATION OPEN: the existing qualifyingRun precursor
+    accepts the retained inconsistent-record/unfired-edge/refused-
+    selection counterexample. Current codex-24 packet 20619 builds
+    the additive rejecting predicate precursor; its dispatch is not
+    validation or completion. The F11-owned emitter, external hash
+    verification, generated Lean witnesses and row-25 tamper battery
+    remain required. No routine operator decision blocks this row.
 25. Write the run→certificate→Lean-file generator with tamper tests
     (every mutated certificate fails), on the September-1 proof
     pattern.
