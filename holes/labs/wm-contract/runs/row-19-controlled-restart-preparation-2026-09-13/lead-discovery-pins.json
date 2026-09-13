@@ -1,0 +1,23 @@
+[
+  {
+    "path": "holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/restart-preflight.sh",
+    "commit": "ce37a339",
+    "expected": "c8503026a7fd16be57e09a727ce724e0ac006a0450bc3a360d0000c8ab6dd9fc",
+    "actual": "c8503026a7fd16be57e09a727ce724e0ac006a0450bc3a360d0000c8ab6dd9fc",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/RUNBOOK.md",
+    "commit": "ce37a339",
+    "expected": "01a402c015d12b0d6ef8bb7c8e89ceebb651ea3cad5978c1d1ec735c384b58ae",
+    "actual": "01a402c015d12b0d6ef8bb7c8e89ceebb651ea3cad5978c1d1ec735c384b58ae",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/DISCOVERY.md",
+    "commit": "e387eb00",
+    "expected": "abb8ed93a33e0e4dbc46762987b458629d62abf3f453ee11bd7abf9733595ba1",
+    "actual": "abb8ed93a33e0e4dbc46762987b458629d62abf3f453ee11bd7abf9733595ba1",
+    "matches": true
+  }
+]

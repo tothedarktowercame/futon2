@@ -1384,3 +1384,7 @@ Row19 restart26d5a1dc/89919c59/aa6add26 reviewed4commit-bound pins/gates. Named 
 ## Lead adoption — declaration edge contracts, 2026-09-13
 
 Row22 f19e346f/4356b6f6/bdd8e657 adopted for implementation with occurrence identity, bounded dispatch tick-plan and non-qualifying no-change clarifications.15pins current match; trackerpin matches877fa299 historical bytes. E1–E6 conserve budget/exact-enactment/R9/scheduling/temporal-direction obligations; no edge firing or node admission. First next packet pure E1 ranked-to-proposal mapping with explicit cost/utility/budget authority and full accounting; runtime restrictions/enactment later. See row-22-edge-specification-2026-09-13/lead-adoption.md.
+
+## Lead review update — honest restart discovery, 2026-09-13
+
+ce37a339/e9e9b135/e387eb00 accepted as discovery only:3commit-bound pins, JSON actual/arbitrary-file outputs remain unverified, seven lexical creator sites independently enumerated. Next isolated common ingress/drain controller and authenticated verification lane; initial old-service transition separately unresolved. Prospective independently reviewed startup snapshot may be established without inventing historical loaded-byte equivalence. No live installation/restart or new R9 commissions yet.
