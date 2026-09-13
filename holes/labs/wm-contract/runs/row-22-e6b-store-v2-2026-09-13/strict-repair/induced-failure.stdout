@@ -1,0 +1,6 @@
+
+FAIL in (induced-strict-store-v2-failure) (NO_SOURCE_FILE:1)
+induced strict store-v2 repair failure
+expected: false
+  actual: false
+

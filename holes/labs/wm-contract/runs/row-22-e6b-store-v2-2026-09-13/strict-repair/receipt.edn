@@ -1,0 +1,30 @@
+{:schema :wm/execution-receipt-v1 :at "2026-09-13T07:13:01Z"
+ :tree-sha "6550f39ce5865bf6f83703c7f2e5020520b2d3b4"
+ :scope :isolated-test :authority/status :none
+ :gates
+ [{:gate :focused-tests
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-store-v2-test futon2.aif.machine-slow-feedback-store-test futon2.aif.machine-slow-feedback-provenance-test]'"
+   :exit 0 :tests 28 :assertions 100 :failures 0 :errors 0 :stdout "tests.stdout"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_store_v2.clj test/futon2/aif/machine_slow_feedback_store_v2_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_store_v2.clj test/futon2/aif/machine_slow_feedback_store_v2_test.clj"
+   :exit 0 :stdout "parens.stdout"}
+  {:gate :induced-runner-failure
+   :command "clojure -M -e '(require (quote clojure.test)) (let [c (ref clojure.test/*initial-report-counters*) v (with-meta (fn [] nil) {:test (fn [] (clojure.test/is false \"induced strict store-v2 repair failure\")) :name (quote induced-strict-store-v2-failure) :ns *ns*})] (binding [clojure.test/*report-counters* c] (clojure.test/test-vars [v])) (System/exit (if (zero? (+ (:fail @c) (:error @c))) 0 1)))'"
+   :exit 1 :expected-exit 1 :failures 1 :stdout "induced-failure.stdout"}]
+ :failed-history
+ [{:tree-sha "09db2adfa3db4b96c21f8fb1f48bfb038d563c90" :exit 1
+   :finding :unclosed-recovery-form :stdout "attempt-1-tests.stdout"}
+  {:tree-sha "db496e433a8d650fdb147a3b793cad7cc02e916c" :exit 0
+   :tests 25 :assertions 95 :stdout "attempt-2-tests.stdout"}]
+ :controls [:forged-head-current :strict-genesis-schema :genesis-state-digest
+            :legacy-format-refusal :missing-provenance :corrupt-provenance
+            :publication-crash-windows :stable-retry]
+ :pins
+ {:source "d510fcf523e5984c1adf6cc0b5fc022235894686085e8b0b7f3ac9ed0b142ec4"
+  :test "62076bbcce891d982fc3a112af5c6612116525cdac83a872ca45b2a9b7e20190"
+  :legacy-store "d9ee5f848419567e41f328a6b9fe14951f2568efcff4ee2dccbcac87a6bcd1fd"
+  :provenance "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90"
+  :carrier "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965"}}
