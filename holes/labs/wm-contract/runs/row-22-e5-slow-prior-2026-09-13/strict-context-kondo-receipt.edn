@@ -1,0 +1,5 @@
+{:command "clj-kondo --lint src/futon2/aif/machine_slow_prior_evidence.clj test/futon2/aif/machine_slow_prior_evidence_test.clj"
+ :exit 0 :tests 2 :assertions 2
+ :tree-sha "bb3459d561b0cb35b33b56d6377ccb1eb6fb3f77" :at "2026-09-13"
+ :stdout "strict-context-kondo.stdout" :stderr ""}
+
