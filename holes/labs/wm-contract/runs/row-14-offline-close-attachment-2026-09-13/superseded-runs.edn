@@ -1,0 +1,7 @@
+{:runs
+ [{:tree-sha "787ce2d1" :gate :clj-kondo :exit 2 :errors 0 :warnings 1
+   :finding "Unused java.nio.file.Files import in the new test."}
+  {:tree-sha "31fa78a8" :gate :test :exit 0 :tests 4 :assertions 16
+   :finding "Green run superseded after adding explicit context-time and mutation controls."}
+  {:tree-sha "31fa78a8" :gate :clj-kondo :exit 0 :errors 0 :warnings 0}
+  {:tree-sha "31fa78a8" :gate :check-parens :exit 0 :output "OK"}]}

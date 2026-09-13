@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint src/futon2/aif/categorical_state_close_attachment.clj test/futon2/aif/categorical_state_close_attachment_test.clj holes/labs/wm-contract/row14_f11_close_context_discovery.clj"
+ :exit 0 :errors 0 :warnings 0
+ :tree-sha "35e5b8ef239fcdffa2510ff6923f8cc12a69911f"
+ :at "2026-09-13T03:48:08Z" :output "kondo-output.txt"}

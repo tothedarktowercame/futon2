@@ -1,0 +1,4 @@
+{:command "clojure -X:test :nses '[futon2.aif.categorical-state-close-attachment-test]'"
+ :exit 0 :tests 4 :assertions 18 :failures 0 :errors 0
+ :tree-sha "35e5b8ef239fcdffa2510ff6923f8cc12a69911f"
+ :at "2026-09-13T03:48:08Z" :output "test-output.txt"}
