@@ -4,7 +4,7 @@
   (:import [java.nio.channels FileChannel OverlappingFileLockException]
            [java.nio.file Files LinkOption OpenOption StandardOpenOption]))
 
-(def default-lock-path "/home/joe/code/futon2/data/.wm-interoceptive-snapshot.lock")
+(def default-lock-path "/tmp/futon2-wm-interoceptive-snapshot.lock")
 (def ^:dynamic *lock-path* nil)
 (def ^:dynamic *lock-held?* false)
 
