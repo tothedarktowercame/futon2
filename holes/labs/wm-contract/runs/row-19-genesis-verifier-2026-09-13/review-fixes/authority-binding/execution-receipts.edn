@@ -1,0 +1,16 @@
+{:schema :wm/row-19-genesis-authority-binding-receipts-v1
+ :at "2026-09-13T02:34:23Z"
+ :tree-sha "03f34fa0b252a127581b380892024847b0ae6298"
+ :pins {"src/futon3c/agency/r9_genesis.clj" "46b875cefaa5f735c57080e1dc687f6712ec8c9b73b1077f63ac7559aa37fe52"
+        "test/futon3c/agency/r9_genesis_test.clj" "5131c7b944035f5e5a29e862926cc0643b7801a2d7a2468ca754098f87443252"
+        "scripts/row19_genesis_verifier_test.clj" "da8ed1e05a9402f78aacc9f4d299f739f264fa090791a3c6749dd8363f56430b"
+        "lead-review.md" "2663138c129bc33b7b003a555374e587cd167fa96d7776687b4ed846b5f378b9"}
+ :gates
+ [{:kind :focused-test :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"test/resources\" \"scripts\" \"dev\"]}' -M -m row19-genesis-verifier-test"
+   :exit 0 :tests 1 :assertions 15 :pass 15 :fail 0 :error 0 :raw "focused-test.raw.txt"}
+  {:kind :induced-runner-failure :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"test/resources\" \"scripts\" \"dev\"]}' -M -m row19-genesis-verifier-test --induced-failure"
+   :exit 1 :expected-exit 1 :tests 1 :assertions 16 :pass 15 :fail 1 :error 0 :raw "induced-failure.raw.txt"}
+  {:kind :clj-kondo :command "clj-kondo --lint src/futon3c/agency/r9_genesis.clj test/futon3c/agency/r9_genesis_test.clj scripts/row19_genesis_verifier_test.clj"
+   :exit 0 :errors 0 :warnings 0 :raw "clj-kondo.raw.txt"}
+  {:kind :check-parens :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/r9_genesis.clj test/futon3c/agency/r9_genesis_test.clj scripts/row19_genesis_verifier_test.clj"
+   :exit 0 :files 3 :raw "check-parens.raw.txt"}]}
