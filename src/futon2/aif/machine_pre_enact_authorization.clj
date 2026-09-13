@@ -4,7 +4,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.r9-checker :as r9])
+            [futon2.aif.r9-checker :as r9]
+            [futon2.aif.machine-portfolio-restriction :as e2a])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
            (java.nio.charset CodingErrorAction StandardCharsets)
@@ -67,8 +68,8 @@
   (and (= #{:candidate/occurrence-id :action :construction :field-pins
             :producer/id :claim/id :artifact/ref :trace/id}
           (set (keys subject)))
-       (every? nonblank? ((juxt :candidate/occurrence-id :producer/id :claim/id
-                                :artifact/ref :trace/id) subject))
+       (some? (:candidate/occurrence-id subject))
+       (every? nonblank? ((juxt :producer/id :claim/id :artifact/ref :trace/id) subject))
        (map? (:action subject)) (seq (:action subject))
        (map? (:construction subject)) (seq (:construction subject))
        (= [:ranked-support :field-membership :costs :utilities :budgets]
@@ -77,11 +78,14 @@
        (= (count (:field-pins subject)) (count (distinct (map :label (:field-pins subject)))))))
 (defn- before? [a b]
   (try (.isBefore (Instant/parse a) (Instant/parse b)) (catch Throwable _ false)))
+(defn- canonical-pending-subject [pending]
+  (select-keys pending [:model/id :model/revision :run/id :cohort/id :tick/index
+                        :event/id :phase :authorization-at :subject]))
 
 (defn verify-pre-enact
   "Resolve independent pinned pending/verdict/review records and verify that an
    independent R9 verdict names the exact not-yet-enacted subject."
-  [{:keys [mode evidence-root evidence]}]
+  [{:keys [mode evidence-root evidence e2a-resolver]}]
   (when-not (contains? #{:isolated-test :production} mode)
     (refuse! :e3/mode-unknown "Unknown mode" {:mode mode}))
   (when (= :production mode)
@@ -89,7 +93,8 @@
              "Serving R9 retention/genesis and pending-event authority are not installed" {}))
   (when-not (= #{:pending :verdict :review} (set (keys evidence)))
     (refuse! :e3/evidence-set-incomplete "Pending, verdict and review records are required" {}))
-  (let [resolved (mapv #(resolve-one! evidence-root % (evidence %)) [:pending :verdict :review])
+  (let [restricted (e2a/restrict-portfolio e2a-resolver)
+        resolved (mapv #(resolve-one! evidence-root % (evidence %)) [:pending :verdict :review])
         records (into {} (map (juxt :label :record) resolved))
         pending (:pending records) verdict (:verdict records) review (:review records)
         subject (:subject pending)
@@ -105,6 +110,19 @@
       (refuse! :e3/pending-context-invalid "Pending context/subject is incomplete" {}))
     (when-not (= :pending-pre-enact (:phase pending))
       (refuse! :e3/not-pending-pre-enact "Context is post-event or retroactive" {:phase (:phase pending)}))
+    (let [occurrence (first (filter #(= (:candidate/occurrence-id subject) (:candidate/id %))
+                                    (:approved-support restricted)))
+          expected-pins (mapv #(select-keys % [:label :sha256])
+                              (get-in restricted [:source :e1-verification :sources]))]
+      (when-not (= (select-keys pending [:model/id :model/revision :run/id :tick/index])
+                   (:identity restricted))
+        (refuse! :e3/e2a-identity-mismatch "Pending context differs from resolved E2a" {}))
+      (when-not occurrence
+        (refuse! :e3/occurrence-not-approved "Pending occurrence is not in resolved E2a support" {}))
+      (when-not (= (:action occurrence) (:action subject))
+        (refuse! :e3/e2a-action-mismatch "Pending action differs from resolved occurrence" {}))
+      (when-not (= expected-pins (:field-pins subject))
+        (refuse! :e3/e2a-field-source-mismatch "Pending field pins differ from resolved E2a bytes" {})))
     (doseq [[label record] [[:verdict verdict] [:review review]]]
       (when-not (= :isolated-test (:scope record))
         (refuse! :e3/scope-laundering "All evidence must retain isolated scope" {:label label}))
@@ -116,7 +134,7 @@
       (refuse! :e3/canonical-r9-evidence-missing "Canonical R9 input is absent" {}))
     (let [expected-r9-subject {:boundary :e3/pre-enact
                                :artifact-ref (:artifact/ref subject)
-                               :digest (sha-text subject)}
+                               :digest (sha-text (canonical-pending-subject pending))}
           r9-input (:r9/input review)]
       (when-not (= expected-r9-subject (:subject r9-input))
         (refuse! :e3/canonical-r9-subject-mismatch "Canonical R9 input names another subject" {}))
@@ -127,7 +145,13 @@
         (refuse! :e3/canonical-r9-provenance-mismatch "Canonical R9 roles/traces differ" {}))
       (let [checked (r9/check-independence r9-input)]
         (when-not (= checked (:canonical-admission verdict))
-          (refuse! :e3/canonical-r9-admission-mismatch "Verdict is not the canonical checked result" {}))))
+          (refuse! :e3/canonical-r9-admission-mismatch "Verdict is not the canonical checked result" {}))
+        (when-not (and (= (:completed-at review) (get-in r9-input [:reviewer-job :finished-at]))
+                       (= (:completed-at review) (:admission-at r9-input))
+                       (= (:completed-at review) (:at checked))
+                       (before? (:at checked) (:authorization-at pending)))
+          (refuse! :e3/canonical-r9-time-mismatch
+                   "Canonical review/admission time is not the pre-enact review time" {}))))
     (when (or (not (nonblank? (:producer/id subject)))
               (not (nonblank? (:reviewer/id review))))
       (refuse! :e3/identity-missing "Producer or reviewer identity missing" {}))

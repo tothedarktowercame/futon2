@@ -1,18 +1,22 @@
 (ns futon2.aif.machine-pre-enact-authorization-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-pre-enact-authorization :as e3]
+            [futon2.aif.machine-budget-authority :as authority]
             [futon2.aif.r9-checker :as r9])
   (:import (java.nio.charset StandardCharsets)
            (java.nio.file Files)
            (java.security MessageDigest)))
 
-(def ids {:model/id :wm :model/revision "rev-1" :run/id "run-1"
-          :cohort/id "cohort-1" :tick/index 7 :event/id "pending-7"})
-(def subject {:candidate/occurrence-id "occ-2" :action {:type :inspect :target "x"}
+(def e1-root "holes/labs/wm-contract/runs/row-22-e1-authority-resolution-2026-09-13/fixtures")
+(def e1-files {:ranked-support "ranked-support.edn" :field-membership "field-membership.edn"
+               :costs "costs.edn" :utilities "utilities.edn" :budgets "budgets.edn"})
+(def ids {:model/id :wm-e1-fixture :model/revision "model-v3" :run/id "e1-authority-run"
+          :cohort/id "cohort-1" :tick/index 4 :event/id "pending-7"})
+(def subject {:candidate/occurrence-id [:e1-authority-run 4 0]
+              :action {:type :advance-mission :target "M-alpha"}
               :construction {:policy/id "p2" :missions ["m1"]}
-              :field-pins (mapv (fn [label digit] {:label label :sha256 (apply str (repeat 64 digit))})
-                                [:ranked-support :field-membership :costs :utilities :budgets]
-                                ["1" "2" "3" "4" "5"])
+              :field-pins []
               :producer/id "codex-22" :claim/id "claim-e3"
               :artifact/ref "artifact-e3" :trace/id "trace-producer"})
 (def pending (merge {:schema/version :wm/e3-pending-construction-v1 :scope :isolated-test
@@ -21,6 +25,16 @@
 (defn- sha [bytes]
   (apply str (map #(format "%02x" (bit-and 0xff %))
                   (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bytes))))))
+(defn- file-sha [path] (sha (Files/readAllBytes (.toPath (io/file path)))))
+(def e1-config
+  {:resolver/version authority/resolver-version :mode :isolated-test :root e1-root
+   :sources (into {} (map (fn [[label filename]]
+                            [label {:relative-path filename
+                                    :sha256 (file-sha (io/file e1-root filename))}]) e1-files))})
+(alter-var-root #'subject assoc :field-pins
+                (mapv (fn [[label filename]] {:label label :sha256 (file-sha (io/file e1-root filename))})
+                      e1-files))
+(alter-var-root #'pending assoc :subject subject)
 (def checker-sha (apply str (repeat 64 "c")))
 (def verification {:path "isolated-verification.edn" :sha256 (apply str (repeat 64 "d"))})
 (def commission {:agent-id "claude-15" :prompt "review exact E3 subject"
@@ -31,10 +45,13 @@
                   :artifact-ref "artifact-e3" :trace-id "trace-producer"}
    :reviewer-job {:job-id "review-job" :agent-id "claude-15"
                   :request-digest (r9/request-digest commission)
-                  :trace-id "trace-review" :finished-at "2026-09-13T11:58:00Z"
+                  :trace-id "trace-review" :finished-at "2026-09-13T11:59:00Z"
                   :execution {:executed true :tool-events 1}}
    :subject {:boundary :e3/pre-enact :artifact-ref "artifact-e3"
-             :digest (sha (.getBytes (pr-str subject) StandardCharsets/UTF_8))}
+             :digest (sha (.getBytes (pr-str (select-keys pending
+                                                          [:model/id :model/revision :run/id :cohort/id
+                                                           :tick/index :event/id :phase :authorization-at :subject]))
+                                    StandardCharsets/UTF_8))}
    :review-commission commission :verification-receipt verification
    :review-receipt {:reviewer "claude-15" :verification verification}
    :trace->job {"trace-producer" "producer-job" "trace-review" "review-job"}
@@ -54,7 +71,7 @@
                     :completed-at "2026-09-13T11:59:00Z" :subject subject :r9/input r9-input} ids))
 (defn- config [records]
   (let [root (Files/createTempDirectory "e3-" (make-array java.nio.file.attribute.FileAttribute 0))]
-    {:mode :isolated-test :evidence-root (str root)
+    {:mode :isolated-test :evidence-root (str root) :e2a-resolver e1-config
      :evidence (into {} (for [[label record] records
                              :let [bytes (.getBytes (pr-str record) StandardCharsets/UTF_8)
                                    name (str (name label) ".edn")]]
@@ -106,6 +123,25 @@
                              :review (assoc review :completed-at "2026-09-13T12:01:00Z")}))))
     (is (= :e3/not-pending-pre-enact
            (refusal (config {:pending (assoc pending :phase :enacted)
+                             :verdict verdict :review review})))))
+  (testing "canonical chronology and complete event subject"
+    (let [late (-> r9-input
+                   (assoc-in [:reviewer-job :finished-at] "2026-09-13T12:30:00Z")
+                   (assoc :admission-at "2026-09-13T12:30:00Z"))]
+      (is (= :e3/canonical-r9-time-mismatch
+             (refusal (config {:pending pending
+                               :verdict (assoc verdict :canonical-admission
+                                               (r9/check-independence late))
+                               :review (assoc review :completed-at "2026-09-13T12:30:00Z"
+                                             :r9/input late)})))))
+    (let [changed (fn [record] (assoc record :run/id "borrowed-run" :event/id "borrowed-event"))]
+      (is (= :e3/e2a-identity-mismatch
+             (refusal (config {:pending (changed pending) :verdict (changed verdict)
+                               :review (changed review)}))))))
+  (testing "same action at another occurrence is not interchangeable"
+    (is (= :e3/occurrence-not-approved
+           (refusal (config {:pending (assoc-in pending [:subject :candidate/occurrence-id]
+                                               [:e1-authority-run 4 1])
                              :verdict verdict :review review})))))
   (is (= :e3/production-authority-unavailable
          (refusal {:mode :production}))))
