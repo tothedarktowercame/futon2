@@ -1,0 +1,9 @@
+# Row26 entrypoint review — run packet not yet ready
+
+Reviewed402632e6/51269db9/9133afbe. New client/test bytes match402632e6 (not included in worker pin manifest; lead-pins.json adds them). Four current dependency pins match; tracker/plan and HTTP have subsequent lead/Row19 edits, recorded as mismatches rather than passing current pins. Retained futon2 raw2tests7/gates inspected. Futon3c14tests114 receipt contains a summary and says raw transcript retained; full raw transcript not independently retrieved, so do not claim independent raw verification of that suite.
+
+Executed lead-status-control.clj exited0: accepted click with no running? or terminal status returns result run/id=requested, outcome=nil, terminal=nil. Missing status must refuse. Source also assigns requested run ID regardless of actual server observed ID. Poll timeout starts only after POST and HTTP operations have no explicit bound. These need correction before a bounded real run.
+
+Read-only live GET /api/alpha/wm/click retained: idle, old click has run-id-observation and run-binding fields, run-record absent; serving-runner-code availability unavailable. This is not loaded-source verification. New HTTP run-id forwarding is not deployed. Prefer truthful server-observed identity over requiring a reload solely to echo a requested ID.
+
+Standing ruling settlement1d84fd66 allows a reviewed bounded build-phase machinery test; example docs' unresolved blanket prohibition is stale. Next packet: fix client refusal/run identity/bounds, then supply concrete existing-gated-path preflight (actual seat roles, effective section5 settings, output paths and terminal observation), no execute/reload yet. Lack of effective settings is an explicit blocker/limitation; no invented defaults. Row26 not closed. Zero rows closed / zero new claims admitted.

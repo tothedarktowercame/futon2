@@ -1,0 +1,63 @@
+[
+  {
+    "repo": "futon2",
+    "path": "src/futon2/aif/full_loop_runner.clj",
+    "expected": "0bb61f3cceb26f52762af3a084503771ff3d853f1883edeaa229d83ec77cc71b",
+    "actual": "0bb61f3cceb26f52762af3a084503771ff3d853f1883edeaa229d83ec77cc71b",
+    "match": true
+  },
+  {
+    "repo": "futon2",
+    "path": "src/futon2/aif/full_loop_cli.clj",
+    "expected": "3df96899eb860e1b79687262d86764a740927ba7dfcfbee76ecee2095bf72fc3",
+    "actual": "3df96899eb860e1b79687262d86764a740927ba7dfcfbee76ecee2095bf72fc3",
+    "match": true
+  },
+  {
+    "repo": "futon2",
+    "path": "deps.edn",
+    "expected": "9389f9d24fa83a0c7c02f36419ec8870b3b7595270d8d0be74838f72eb4e0960",
+    "actual": "9389f9d24fa83a0c7c02f36419ec8870b3b7595270d8d0be74838f72eb4e0960",
+    "match": true
+  },
+  {
+    "repo": "futon2",
+    "path": "holes/labs/wm-contract/WORK-REMAINING.md",
+    "expected": "6a5ea21c456edaeed04c61781ae9de912c027971cb934013b73052312b0e6bb1",
+    "actual": "f3cba6398c82eeaac5d2ad828632c826efbcee29f15423d9f337490fd95c0592",
+    "match": false
+  },
+  {
+    "repo": "futon2",
+    "path": "holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md",
+    "expected": "c74379dac28e2ff0663cba394552cd1abec9722f86b808beb9494cf97b870900",
+    "actual": "8656824061db951460896fec3345ddcc5dcb7dc070c7ae1214eaabd5d31cc0c5",
+    "match": false
+  },
+  {
+    "repo": "futon3c",
+    "path": "src/futon3c/wm/runner_service.clj",
+    "expected": "7bfc413847f45aca94f70c805c5584e5176d111185b3e49cfcb5fd02743ef0ee",
+    "actual": "7bfc413847f45aca94f70c805c5584e5176d111185b3e49cfcb5fd02743ef0ee",
+    "match": true
+  },
+  {
+    "repo": "futon3c",
+    "path": "src/futon3c/transport/http.clj",
+    "expected": "4536d1ac2939a801404c62f0a1140c969c3198cc7ee73a6fb50f70946d828a25",
+    "actual": "d44028388a0a163fcbf2885c29dc7ea3e482fcbf018568fca40346f853cf50ef",
+    "match": false
+  },
+  {
+    "path": "src/futon2/aif/on_demand_entrypoint.clj",
+    "implementation-commit": "402632e6",
+    "sha256": "4b1b8c83184e24d2e661fd5cbed104918fac6409289f58bf9276f8eef3730500",
+    "match": true
+  },
+  {
+    "path": "test/futon2/aif/on_demand_entrypoint_test.clj",
+    "implementation-commit": "402632e6",
+    "sha256": "9c4a59bf8683d1b51afb0c809494b3d966d3c5026e805d0975f58d3c8b460be2",
+    "match": true
+  }
+]
