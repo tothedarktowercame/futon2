@@ -377,11 +377,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e2b-event-field-subject.request.json",
       "dispatch": "accepted",
       "scope": "E2b independent cohort/event and exact field subject repair; no actuation"
+    },
+    {
+      "packet": "codex-24-certificate-occurrence-subjects",
+      "job-id": "invoke-1789272807699-20625-8a928038",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789272807699-20625-8a928038",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-certificate-occurrence-subjects.request.json",
+      "dispatch": "accepted",
+      "scope": "exact selected/enacted occurrence and divergence event subjects; no certification or runtime"
     }
   ],
   "current-awaiting": [
     "invoke-1789272310436-20623-02d0f136",
     "invoke-1789272468856-20624-f5f4af34",
-    "invoke-1789272111078-20622-4dcfc158"
+    "invoke-1789272807699-20625-8a928038"
   ]
 }
