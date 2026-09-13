@@ -537,10 +537,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-authority-reader-strictness.request.json",
       "dispatch": "accepted",
       "scope": "isolated strict parser pointer and immutable source-value repair; no emitter"
+    },
+    {
+      "packet": "codex-23-e6b-resolved-authority-ledger",
+      "job-id": "invoke-1789275806231-20653-46354848",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789275806231-20653-46354848",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-resolved-authority-ledger.request.json",
+      "dispatch": "accepted",
+      "scope": "pure E6b resolved authority and exact ledger universe; no runtime"
     }
   ],
   "current-awaiting": [
-    "invoke-1789275482764-20648-32e941f8",
+    "invoke-1789275806231-20653-46354848",
     "invoke-1789275643187-20650-785a8c56",
     "invoke-1789275481498-20647-0e31dc03"
   ]
