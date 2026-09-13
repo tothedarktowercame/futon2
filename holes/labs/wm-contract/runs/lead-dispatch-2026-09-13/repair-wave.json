@@ -97,11 +97,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-canonical-softmax-lemmas.request.json",
       "dispatch": "accepted",
       "scope": "additive canonical real softmax lemmas; no runtime or admission"
+    },
+    {
+      "packet": "codex-22-snapshot-coordination",
+      "job-id": "invoke-1789266414941-20581-608ecb5c",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789266414941-20581-608ecb5c",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-snapshot-coordination.request.json",
+      "dispatch": "accepted",
+      "scope": "snapshot writer coordination and typed reader failures; no live integration or admission"
     }
   ],
   "current-awaiting": [
     "invoke-1789266076215-20579-63bce1a0",
-    "invoke-1789265794127-20576-2981ec65",
+    "invoke-1789266414941-20581-608ecb5c",
     "invoke-1789266166922-20580-4f039823"
   ]
 }

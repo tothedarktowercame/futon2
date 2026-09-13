@@ -136,6 +136,12 @@ is not yet a verified join to Agency's normalized request digest.
   unavailable and run binding unavailable. See `runs/row-14-current-capture-discovery-2026-09-13/`.
   This is one located attempt, not an all-root census or observed-state authority.
 
+- Row 18 production manifest `6fecd35e/3c6a8c36`, receipts `57ff314a`:
+  four source/output hashes verified; retained 273-record production audit
+  explicitly refuses runtime qualification. Bounded audit accepted; reader/writer
+  snapshot coordination and typed IO/path hardening are next. No global confidence
+  or node admission. See production-manifest `lead-audit-review.md`.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
