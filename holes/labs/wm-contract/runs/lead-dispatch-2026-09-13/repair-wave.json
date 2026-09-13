@@ -713,10 +713,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-isolated-canonical-fixture-retention.request.json",
       "dispatch": "accepted",
       "scope": "independent closure correction review and explicit unauthenticated isolated fixture retention"
+    },
+    {
+      "packet": "codex-23-retained-canonical-replay",
+      "job-id": "invoke-1789281236714-20698-46a2e0ef",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789281236714-20698-46a2e0ef",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retained-canonical-replay.request.json",
+      "dispatch": "accepted",
+      "scope": "fresh isolated retained-config canonical replay; no fixture mutation"
     }
   ],
   "current-awaiting": [
-    "invoke-1789280872156-20696-86f49279"
+    "invoke-1789281236714-20698-46a2e0ef"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
