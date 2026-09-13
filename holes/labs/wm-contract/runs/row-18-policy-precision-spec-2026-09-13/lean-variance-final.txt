@@ -1,0 +1,10 @@
+COMMAND: lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionVariance.olean DarkTower/WarMachine/InteroceptivePolicyPrecisionVariance.lean
+TREE: ff0ab6e5ea2093af0919716eb271d803baf805ec
+EXIT: 0
+'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.weightedVariance_nonnegative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.weightedVariance_le_range_sq_div_four' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.expectedG_hasDerivAt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.evidenceDelta_hasDerivAt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.canonical_derivativeCertificate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.canonical_unique_positive_root_discharged' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.canonical_prior_rate_root_order_discharged' depends on axioms: [propext, Classical.choice, Quot.sound]

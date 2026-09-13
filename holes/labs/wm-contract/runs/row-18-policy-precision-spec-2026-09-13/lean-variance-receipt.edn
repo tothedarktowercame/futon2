@@ -1,0 +1,47 @@
+{:schema :wm/execution-receipt-v1
+ :row 18
+ :packet :canonical-variance-and-derivative-certificate
+ :at "2026-09-13"
+ :cwd "/home/joe/code/mathlib4"
+ :tree-sha "ff0ab6e5ea2093af0919716eb271d803baf805ec"
+ :command "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionVariance.olean DarkTower/WarMachine/InteroceptivePolicyPrecisionVariance.lean"
+ :exit 0
+ :printed-axiom-checks 7
+ :sorryAx 0
+ :stdout ["'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.weightedVariance_nonnegative' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.weightedVariance_le_range_sq_div_four' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.expectedG_hasDerivAt' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.evidenceDelta_hasDerivAt' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.canonical_derivativeCertificate' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.canonical_unique_positive_root_discharged' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionVariance.canonical_prior_rate_root_order_discharged' depends on axioms: [propext, Classical.choice, Quot.sound]"]
+ :pins [{:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionVariance.lean" :sha256 "e09142aec8d41c5b3f0d23e22764e85ba8718a2f6d0e9b348f0390734fa9a927" :olean-sha256 "2e3ff0b7828ad32e3167be8a98fbc52a1b6c56ac1389576e6fd843b408a7a05c"}
+        {:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :sha256 "bad1323f975ec6ed052de465e4caff1e086c32865737931d9cb90d4d515500b2" :olean-sha256 "ff03a969ea9745286aa1b56af8449de9b25eb2a8e3ec368db9234467ada100fc"}
+        {:path "DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.lean" :sha256 "afbe1d5dfe9eb9192c2226c34220b4aa8fc345b833f88608cf42129f6341b77e" :olean-sha256 "0f5128639109766958bd4df3b651e4935aa1f223fe0e15147f0c48dd2018cdc7"}
+        {:path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+        {:path "lake-manifest.json" :sha256 "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"}
+        {:path "futon2:holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-unique-root-v1.md" :sha256 "1b87b6c44622eeadf0d1fa16444462f1df21c1d2a796c109e184b7f65bf62f0c"}
+        {:path "futon2:holes/labs/wm-contract/runs/row-18-policy-precision-spec-2026-09-13/lead-unique-root-review.md" :sha256 "64380c3c2bc404aa11a859e6b1f50dcb61dcc9eab20e630593f4de8df94c306c"}]
+ :failed-attempts
+ [{:tree-sha "deb422925a" :exit 1 :finding :initial-finite-sum-and-quotient-algebra-obligations}
+  {:tree-sha "7269edad77" :exit 1 :finding :remaining-sum-distribution-and-derivative-normal-form-obligations}
+  {:tree-sha "2904594248" :exit 0 :finding :proof-green-with-linter-warnings}
+  {:tree-sha "112aced8bf" :exit 1 :finding :overaggressive-composition-simplification}
+  {:tree-sha "412f43d3f9" :exit 1 :finding :exponential-derivative-coefficient-not-definitional}
+  {:tree-sha "ff0ab6e5ea" :exit 0 :finding :final-green}]
+ :proved [:actual-occurrence-indexed-weighted-variance
+          :variance-nonnegative
+          :popoviciu-range-bound
+          :canonical-expected-g-derivative
+          :canonical-evidence-delta-derivative
+          :canonical-derivative-certificate
+          :canonical-global-unique-positive-root-without-caller-certificate
+          :canonical-prior-rate-ordering-without-caller-certificate]
+ :negative-signature
+ {:empty-support :outside-nonempty-instance
+  :nonpositive-habit :inadmissible-probabilistic-application
+  :criterion-failure :uniqueness-unknown
+  :float-solver-correspondence :not-proved
+  :held-state-branch :not-proved
+  :runtime-adoption :none}
+ :scope "Exact-real fixed canonical finite posterior only; analytic certificate discharged, with no floating solver, retained-field, runtime, adoption, or admission claim."}
