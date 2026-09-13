@@ -33,10 +33,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-interoceptive-beta-spec.request.json",
       "dispatch": "accepted",
       "scope": "review/repair/specification, no admission"
+    },
+    {
+      "packet": "codex-23-external-archive-repair",
+      "job-id": "invoke-1789264991776-20570-bb79d2d7",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789264991776-20570-bb79d2d7",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-external-archive-repair.request.json",
+      "dispatch": "accepted",
+      "scope": "external immutable archive and lifetime identity repair, no admission"
     }
   ],
   "current-awaiting": [
-    "invoke-1789264446621-20564-4ca99bf6",
+    "invoke-1789264991776-20570-bb79d2d7",
     "invoke-1789264565170-20566-684d1b8d",
     "invoke-1789264731668-20568-5ea7cb21"
   ]

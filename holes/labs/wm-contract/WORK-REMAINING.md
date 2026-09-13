@@ -90,6 +90,13 @@ is not yet a verified join to Agency's normalized request digest.
   removes commission evidence; the test runner lacks failure-sensitive exit
   and the parens invocation never called the checker. codex-23 is repairing
   durability and execution receipts, preserving hot-ledger expiry.
+- Row 19 first repair `futon3c/002c6d27..b12674f3`, receipts `5712367e`:
+  lead re-review `9b3c3df0` verified source/runner pins, failure-sensitive
+  8-assertion run, induced failing exit, and real parens invocation. These
+  receipt defects are repaired. Archive still lives indefinitely in the hot
+  ledger atom/file, and expired requested job IDs can mix new commissions
+  with old archived joins. Changes requested; codex-23 dispatched to separate
+  immutable archive storage and enforce lifetime identity before admission.
 - codex-24 corrected the three false review hash strings in `ad9f9dc2` and
   delivered declaration-grain discovery `335cf4b5`; the lead verified its
   eleven source hashes. J1 means engineering-only row-18 modulation is not
