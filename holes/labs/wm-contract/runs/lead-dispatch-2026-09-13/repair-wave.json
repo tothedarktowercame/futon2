@@ -465,11 +465,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e5-slow-prior-evidence.request.json",
       "dispatch": "accepted",
       "scope": "pure E5 slow prior shaping evidence with separate depth; no runtime"
+    },
+    {
+      "packet": "codex-24-cross-family-layer-relations",
+      "job-id": "invoke-1789274481837-20637-ef731f39",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789274481837-20637-ef731f39",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-cross-family-layer-relations.request.json",
+      "dispatch": "accepted",
+      "scope": "cross-layer projections and typed cross-family causal joins; no certificate"
     }
   ],
   "current-awaiting": [
     "invoke-1789274230654-20635-7c172b9a",
     "invoke-1789274368566-20636-025e61a8",
-    "invoke-1789274107711-20634-cd967f95"
+    "invoke-1789274481837-20637-ef731f39"
   ]
 }
