@@ -1,0 +1,21 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-slow-feedback-evidence-test
+
+Testing futon2.aif.machine-slow-feedback-provenance-test
+
+FAIL in (ordered-canonical-source-manifest-refusals) (machine_slow_feedback_provenance_test.clj:199)
+duplicate E2b witness and E1 subject pins refuse
+expected: (= :e6b-provenance/source-manifest-invalid (refusal i))
+  actual: (not (= :e6b-provenance/source-manifest-invalid :e6b-provenance/closure-join-mismatch))
+
+Testing futon2.aif.machine-slow-state-carrier-test
+
+Ran 23 tests containing 120 assertions.
+1 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-16201382409745455992.edn

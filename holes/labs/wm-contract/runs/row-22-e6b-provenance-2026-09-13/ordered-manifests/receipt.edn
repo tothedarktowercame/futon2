@@ -1,0 +1,34 @@
+{:schema :wm/execution-receipt-v1
+ :at "2026-09-13T06:54:26Z"
+ :tree-sha "e5d6a92a1bcab5df48f0f31484c513a63b69c7be"
+ :scope :isolated-test :authority/status :none
+ :gates
+ [{:gate :focused-tests
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-provenance-test futon2.aif.machine-slow-state-carrier-test futon2.aif.machine-slow-feedback-evidence-test]'"
+   :exit 0 :tests 23 :assertions 120 :failures 0 :errors 0
+   :stdout "tests.stdout" :stderr "tests.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_provenance.clj test/futon2/aif/machine_slow_feedback_provenance_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_provenance.clj test/futon2/aif/machine_slow_feedback_provenance_test.clj"
+   :exit 0 :stdout "parens.stdout" :stderr "parens.stderr"}
+  {:gate :induced-runner-failure :exit 1 :expected-exit 1 :failures 1
+   :command "clojure -M -e '(require (quote clojure.test)) (let [c (ref clojure.test/*initial-report-counters*) v (with-meta (fn [] nil) {:test (fn [] (clojure.test/is false \"induced ordered-manifest gate failure\")) :name (quote induced-ordered-manifest-failure) :ns *ns*})] (binding [clojure.test/*report-counters* c] (clojure.test/test-vars [v])) (System/exit (if (zero? (+ (:fail @c) (:error @c))) 0 1)))'"
+   :stdout "induced-failure.stdout" :stderr "induced-failure.stderr"}]
+ :failed-history
+ [{:tree-sha "2a54d606331fa37be06e131cea904fc40deeba27" :exit 1
+   :summary "attempt-1.summary.edn"}
+  {:tree-sha "2703f03b2ea80fae45c1ec768dc01529d0f7c7b5" :exit 1
+   :tests 23 :assertions 120 :failures 1 :errors 0 :stdout "attempt-2.stdout"}]
+ :controls
+ [:coherently-propagated-e3-source-reversal :duplicate-e3-source
+  :extra-e3-source :duplicate-e2b-witness :duplicate-e2b-subject-e1-pin]
+ :pins
+ {:source "3380ca6966f4960d5586791aac312f9aa0d6906210c9a3ec54302d12f052bfe6"
+  :test "5bb9bfbc80934a43818e515a65de50dc8d3cf4c7e5e5745df63f489272b18693"
+  :carrier-source "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965"
+  :prospective-source "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"
+  :capture-manifest "eca79640929ae7a7fb06fb12a2315d6172f11fc853489c9d0f4d7b7157ff119e"
+  :canonical-e3-output "c74c564de43d2acb8c7124a16016eaefaffe4747f00d0a9483db2408dd43b206"
+  :canonical-e2b-output "e771087a5aee7da06f5139c9676845e4966f01ae6fad0156565fbf9c1e90b383"}}

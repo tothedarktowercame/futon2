@@ -1,0 +1,5 @@
+{:tree-sha "2a54d606331fa37be06e131cea904fc40deeba27"
+ :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-provenance-test futon2.aif.machine-slow-state-carrier-test futon2.aif.machine-slow-feedback-evidence-test]'"
+ :exit 1 :tests 23 :assertions 115 :failures 5 :errors 1
+ :finding "Exact-key validation rejected legitimate path/count metadata in canonical E2b source entries."
+ :raw-temporary-path "/tmp/row22-e6b-provenance-order-tests.raw"}
