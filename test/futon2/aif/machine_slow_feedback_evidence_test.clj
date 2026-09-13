@@ -123,7 +123,7 @@
           [[:missing-success #(update % :outcome dissoc :fast/succeeded?) :e6b/outcome-authority-invalid]
            [:nonterminal #(assoc-in % [:outcome :terminal/status] :pending) :e6b/outcome-authority-invalid]
            [:unwitnessed #(assoc-in % [:outcome :fast/witnessed?] false) :e6b/outcome-authority-invalid]
-           [:missing-class #(update-in % [:prior-state :slow/intrinsics] dissoc :close-hole)
+           [:missing-class #(update-in % [:prior-state :slow/intrinsics] dissoc :advance-capability)
             :e6b/prior-state-incomplete-or-stale]
            [:stale-prior #(assoc-in % [:prior-state :state/revision] "slow-3")
             :e6b/prior-state-incomplete-or-stale]

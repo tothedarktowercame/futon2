@@ -203,6 +203,8 @@
           matches (filterv #(= application-id (:application/id %)) entries)]
       (when-not (= expected-next claimed)
         (refuse! :e6b/next-state-mismatch "Claimed next state differs from production replay" {}))
+      (when (empty? matches)
+        (refuse! :e6b/feedback-not-applied "No committed application" {}))
       (when (> (count matches) 1)
         (refuse! :e6b/duplicate-feedback "Duplicate application identity" {}))
       (when (or (seq (filter #(and (not= application-id (:application/id %))
@@ -219,7 +221,6 @@
         (refuse! :e6b/application-universe-incomplete
                  "Independent complete application universe is absent or conflicting" {}))
       (cond
-        (empty? matches) (refuse! :e6b/feedback-not-applied "No committed application" {})
         (not= expected-entry (first matches))
         (refuse! :e6b/feedback-conflict "Committed application pins conflict" {}))
       {:schema/version schema-version :scope :isolated-test
