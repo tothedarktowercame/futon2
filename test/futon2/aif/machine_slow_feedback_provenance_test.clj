@@ -21,6 +21,15 @@
     {:bytes/base64 (.encodeToString (Base64/getEncoder) bs)
      :source-sha256 (sha256 bs)
      :value-sha256 (sha256 (.getBytes (pr-str value) "UTF-8"))}))
+(defn- value-descriptor [value]
+  (let [bs (.getBytes (pr-str value) "UTF-8")]
+    {:bytes/base64 (.encodeToString (Base64/getEncoder) bs)
+     :source-sha256 (sha256 bs) :value-sha256 (sha256 bs)}))
+(defn- record-at [input path]
+  (edn/read-string
+   (String. (.decode (Base64/getDecoder) (get-in input (conj path :bytes/base64))) "UTF-8")))
+(defn- update-record [input path f & args]
+  (assoc-in input path (value-descriptor (apply f (record-at input path) args))))
 (def closure-paths
   {:e3/pending "e3/pending.edn" :e3/verdict "e3/verdict.edn"
    :e3/review "e3/review.edn" :r9/input "config/r9-input.edn"
@@ -94,3 +103,61 @@
             :e6b-provenance/expected-head-mismatch]
            [:candidate-bool #(assoc % :verified? true) :e6b-provenance/schema-invalid]]]
     (testing (name label) (is (= expected (refusal (changed (input))))))))
+
+(deftest canonical-input-output-closure-refusals
+  (testing "coherently re-pinned E3 input cannot borrow a stale canonical output"
+    (let [i (update-record (input) [:canonical-closure :e3/pending]
+                           assoc :run/id "borrowed-run")
+          pending-pin (get-in i [:canonical-closure :e3/pending :source-sha256])
+          i (update-record i [:canonical-closure :config/e3]
+                           assoc-in [:evidence :pending :sha256] pending-pin)
+          e3-config (record-at i [:canonical-closure :config/e3])
+          i (update-record i [:canonical-closure :config/canonical] assoc :e3 e3-config)]
+      (is (= :e6b-provenance/closure-join-mismatch (refusal i)))))
+  (testing "coherently re-pinned E2b witness set cannot borrow a stale output"
+    (let [roles [:e2b/context :e2b/selection :e2b/enactment]
+          i (reduce (fn [x role]
+                      (update-record x [:canonical-closure role]
+                                     assoc-in [:subject :identity :run/id] "borrowed-run"))
+                    (input) roles)
+          witness-pins (into {} (map (fn [role]
+                                       [(keyword (name role))
+                                        (get-in i [:canonical-closure role :source-sha256])]) roles))
+          i (reduce (fn [x [role pin]]
+                      (update-record x [:canonical-closure :config/e2b]
+                                     assoc-in [:witnesses role :sha256] pin))
+                    i witness-pins)
+          e2b-config (record-at i [:canonical-closure :config/e2b])
+          i (update-record i [:canonical-closure :config/canonical] assoc :e2b e2b-config)]
+      (is (= :e6b-provenance/closure-join-mismatch (refusal i)))))
+  (testing "coherently re-pinned E1 source cannot hide behind stale E3/E2b outputs"
+    (let [i (update-record (input) [:canonical-closure :e1/ranked-support]
+                           assoc :borrowed true)
+          pin (get-in i [:canonical-closure :e1/ranked-support :source-sha256])
+          i (update-record i [:canonical-closure :config/e1]
+                           assoc-in [:sources :ranked-support :sha256] pin)
+          i (update-record i [:canonical-closure :config/e2b]
+                           assoc-in [:e2a-resolver :sources :ranked-support :sha256] pin)
+          i (update-record i [:canonical-closure :config/e3]
+                           assoc-in [:e2a-resolver :sources :ranked-support :sha256] pin)
+          e2b-config (record-at i [:canonical-closure :config/e2b])
+          e3-config (record-at i [:canonical-closure :config/e3])
+          i (update-record i [:canonical-closure :config/canonical]
+                           assoc :e2b e2b-config :e3 e3-config)]
+      (is (= :e6b-provenance/closure-join-mismatch (refusal i)))))
+  (testing "cross-subject review/admission cannot be coherently re-labelled"
+    (let [borrowed (apply str (repeat 64 "b"))
+          i (update-record (input) [:canonical-closure :r9/input]
+                           assoc-in [:subject :digest] borrowed)
+          r9 (record-at i [:canonical-closure :r9/input])
+          i (update-record i [:canonical-closure :e3/review] assoc :r9/input r9)
+          i (update-record i [:canonical-closure :e3/verdict]
+                           assoc-in [:canonical-admission :subject-digest] borrowed)
+          review-pin (get-in i [:canonical-closure :e3/review :source-sha256])
+          verdict-pin (get-in i [:canonical-closure :e3/verdict :source-sha256])
+          i (update-record i [:canonical-closure :config/e3]
+                           #(-> % (assoc-in [:evidence :review :sha256] review-pin)
+                                (assoc-in [:evidence :verdict :sha256] verdict-pin)))
+          e3-config (record-at i [:canonical-closure :config/e3])
+          i (update-record i [:canonical-closure :config/canonical] assoc :e3 e3-config)]
+      (is (= :e6b-provenance/closure-join-mismatch (refusal i))))))

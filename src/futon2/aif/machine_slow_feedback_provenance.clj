@@ -62,6 +62,13 @@
   (into {} (map (fn [[role pin]] [role (:sha256 pin)]) (:sources config))))
 (defn- witness-pin-map [config]
   (into {} (map (fn [[role pin]] [role (:sha256 pin)]) (:witnesses config))))
+(defn- labelled-pins [xs]
+  (into {} (map (juxt :label :sha256) xs)))
+(defn- e3-identity [x]
+  (select-keys x [:model/id :model/revision :run/id :tick/index :cohort/id :event/id]))
+(defn- canonical-pending-subject [pending]
+  (select-keys pending [:model/id :model/revision :run/id :cohort/id :tick/index
+                        :event/id :phase :authorization-at :subject]))
 
 (defn- validate-closure! [closure outputs proposal]
   (when-not (= (set closure-roles) (set (keys closure)))
@@ -72,9 +79,13 @@
         o (into {} (map (fn [role] [role (descriptor! role (outputs role))]) output-roles))
         e1 (get-in c [:config/e1 :record]) e2b-cfg (get-in c [:config/e2b :record])
         e3-cfg (get-in c [:config/e3 :record]) canonical (get-in c [:config/canonical :record])
+        pending (get-in c [:e3/pending :record])
         review (get-in c [:e3/review :record]) verdict (get-in c [:e3/verdict :record])
         r9-input (get-in c [:r9/input :record]) admission (:canonical-admission verdict)
         e3-output (get-in o [:e3 :record]) e2b-output (get-in o [:e2b :record])
+        e2b-context (get-in c [:e2b/context :record])
+        e2b-selection (get-in c [:e2b/selection :record])
+        e2b-enactment (get-in c [:e2b/enactment :record])
         proposal-common {:model/id (get-in proposal [:identity :model/id])
                          :model/revision (get-in proposal [:identity :model/revision])
                          :run/id (get-in proposal [:identity :run/id])
@@ -102,6 +113,34 @@
              {:e3/pending (get-in e3-cfg [:evidence :pending :sha256])
               :e3/verdict (get-in e3-cfg [:evidence :verdict :sha256])
               :e3/review (get-in e3-cfg [:evidence :review :sha256])})
+          ;; Canonical outputs must name the exact resolved source bytes.  A
+          ;; coherently re-pinned config is not allowed to borrow stale output.
+          (= (labelled-pins (:sources e3-output))
+             {:pending (:source-sha256 (c :e3/pending))
+              :verdict (:source-sha256 (c :e3/verdict))
+              :review (:source-sha256 (c :e3/review))})
+          (= (labelled-pins (get-in e2b-output [:sources :e2a :e1-verification :sources]))
+             (pin-map e1))
+          (= (labelled-pins (get-in e2b-output [:sources :witnesses]))
+             (witness-pin-map e2b-cfg))
+          (= (:subject e2b-output)
+             (:subject e2b-context) (:subject e2b-selection) (:subject e2b-enactment))
+          (= (:event/id e2b-output)
+             (:event/id e2b-context) (:event/id e2b-selection) (:event/id e2b-enactment))
+          (= (:identity e2b-output) (:binding e2b-selection) (:binding e2b-enactment))
+          (= (:selected e2b-output)
+             {:candidate/id (:selected/occurrence-id e2b-selection)
+              :action (:selected/action e2b-selection)}
+             {:candidate/id (:selected/occurrence-id e2b-enactment)
+              :action (:selected/action e2b-enactment)})
+          (= (:enacted e2b-output)
+             {:candidate/id (:enacted/occurrence-id e2b-enactment)
+              :action (:enacted/action e2b-enactment)})
+          (= (labelled-pins (get-in e2b-output [:subject :e1-source-pins])) (pin-map e1))
+          (= (e3-identity pending) (e3-identity verdict) (e3-identity review)
+             (e3-identity (:identity e3-output)))
+          (= (:subject pending) (:subject verdict) (:subject review) (:subject e3-output))
+          (= (labelled-pins (:field-pins (:subject pending))) (pin-map e1))
           (= (get-in proposal [:canonical/digests :e3]) (value-digest e3-output))
           (= (get-in proposal [:canonical/digests :e2b]) (value-digest e2b-output))
           (= :mechanism-authorized (:decision e3-output))
@@ -118,6 +157,15 @@
              (get-in e2b-output [:selected :action])
              (get-in e2b-output [:enacted :action]))
           (= :admitted (:decision admission))
+          (= {:boundary :e3/pre-enact
+              :artifact-ref (:artifact/ref (:subject pending))
+              :digest (value-digest (canonical-pending-subject pending))}
+             (:subject r9-input))
+          (= (value-digest (canonical-pending-subject pending)) (:subject-digest admission))
+          (= (:artifact/ref (:subject pending)) (:artifact/ref review))
+          (= (:claim/id (:subject pending)) (:claim/id review))
+          (= (:trace/id (:subject pending)) (:producer-trace/id review))
+          (= (:artifact/ref (:subject pending)) (get-in r9-input [:producer-job :artifact-ref]))
           (= (:checker-source-sha256 r9-input) (:checker-source-sha256 admission))
           (= (:bootstrap-anchor r9-input) (:bootstrap-anchor admission))
           (= (get-in r9-input [:role-binding :author]) (get-in admission [:roles :author]))
