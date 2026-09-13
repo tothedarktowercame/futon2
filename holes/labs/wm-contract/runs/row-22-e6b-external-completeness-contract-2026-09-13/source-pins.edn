@@ -1,0 +1,40 @@
+{:schema :wm/e6b-external-completeness-contract-pins-v1
+ :scope :read-only-design
+ :pins
+ [{:role :projection
+   :path "src/futon2/aif/machine_slow_feedback_retrospective_projection.clj"
+   :sha256 "7fcdf28c03e5e6efd4fcaa3900c8352613e46fe317b6deb5f6272125eafef300"}
+  {:role :capture-codec
+   :path "src/futon2/aif/machine_slow_feedback_capture.clj"
+   :sha256 "702ccb1f8e120b8d1b8f133dbc66d154099159760e26b5a7dca7b6844d5a0c71"}
+  {:role :store-law
+   :path "src/futon2/aif/machine_slow_feedback_store_v2.clj"
+   :sha256 "662c8e955b7bb5299d15616856a07342e9ea2923ca65704685602bca16c7c1b8"}
+  {:role :unchanged-consumer
+   :path "src/futon2/aif/machine_slow_feedback_evidence.clj"
+   :sha256 "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"}
+  {:role :review-pattern
+   :path "src/futon2/aif/r9_checker.clj"
+   :sha256 "b3469b8027c36e2db17943efabb6b26878c1dee3d71b9eda809e50d602094722"}
+  {:role :projection-contract
+   :path "holes/labs/wm-contract/CONTRACT-e6b-retrospective-projection-v1-2026-09-13.md"
+   :sha256 "7ade7f986f24ba27220f510d423b52f37765da65c7220530876221084e705d06"}
+  {:role :capture-contract
+   :path "holes/labs/wm-contract/CONTRACT-e6b-complete-capture-codec-v1-2026-09-13.md"
+   :sha256 "3b96643273c106face3edbb48ce2cda37a05fec9b43f58cc58de3ec2a4187a22"}
+  {:role :storage-mapping-contract
+   :path "holes/labs/wm-contract/CONTRACT-e6b-common-state-carrier-v1-2026-09-13.md"
+   :sha256 "9075fc97c9bd35859c5783aee80145ccfd8e515d71bd8280fefea5b9e78e9158"}
+  {:role :delegated-authority-policy
+   :path "holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md"
+   :sha256 "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea"}]
+ :available {:structural-capture true
+             :ledger-source-envelope true
+             :subject-draft true}
+ :unavailable {:retained-acquisition :absent
+               :independent-writer-inventory :absent
+               :independent-review :absent
+               :acceptance :absent
+               :production-config :absent
+               :freshness :absent
+               :later-prior-acquisition :absent}}
