@@ -185,11 +185,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-field-checker-review-repair.request.json",
       "dispatch": "accepted",
       "scope": "same-byte field checker, genuine assertion runner and branch correspondence; no admission"
+    },
+    {
+      "packet": "codex-22-activation-lease-repair",
+      "job-id": "invoke-1789268617553-20595-0ab8e81f",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789268617553-20595-0ab8e81f",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-activation-lease-repair.request.json",
+      "dispatch": "accepted",
+      "scope": "receipt permissions and independently evidenced capture deployment lease; no activation"
     }
   ],
   "current-awaiting": [
     "invoke-1789268217741-20592-b1a06d77",
-    "invoke-1789267583456-20587-72fa9e36",
+    "invoke-1789268617553-20595-0ab8e81f",
     "invoke-1789268523667-20593-7f23f6ff"
   ]
 }
