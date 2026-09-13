@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint src/futon2/aif/interoceptive_manifest.clj test/futon2/aif/interoceptive_manifest_test.clj holes/labs/wm-contract/runs/row-18-production-manifest-2026-09-13/production_manifest_readback.clj"
+ :exit 0 :tests 3 :assertions 0
+ :tree-sha "e06b6ae085f22732b740a555c80cd08bf7664f99"
+ :at "2026-09-13T02:22:26Z" :transcript "linting took 16ms, errors: 0, warnings: 0"}

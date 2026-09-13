@@ -1,0 +1,12 @@
+{:command "clojure -M holes/labs/wm-contract/runs/row-18-production-manifest-2026-09-13/production_manifest_readback.clj"
+ :exit 0 :tests 1 :assertions 1
+ :tree-sha "e06b6ae085f22732b740a555c80cd08bf7664f99"
+ :at "2026-09-13T02:22:26Z"
+ :stdout "{:refusal :interoceptive/runtime-qualification-unavailable, :manifest-count 273, :output \"holes/labs/wm-contract/runs/row-18-production-manifest-2026-09-13/production-manifest-output.edn\"}"
+ :stderr ""
+ :output {:path "production-manifest-output.edn"
+          :sha256 "e1ee15c10608bee5941ee57020e17d8a2a47b909f22ccc97072b73dc6d0615c0"
+          :bytes 45242 :records 273}
+ :source-sha256 {:adapter "7f4e4b2fee9b7d69e3d4bbffa57ab78b311eba3012e2ab98c57cca14db809c39"
+                 :test "9d2fa927a1a40f2c2c35823b0c37bfcff389e65ad853d108723fdf636aa23ef3"
+                 :reader "c96d8c91581d74a8346986039c04379f6af9a66d8740a68bd6f2db4d86c3417a"}}
