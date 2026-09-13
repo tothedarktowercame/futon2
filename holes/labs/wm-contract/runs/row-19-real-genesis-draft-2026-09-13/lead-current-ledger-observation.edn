@@ -1,0 +1,10 @@
+{:scope :read-only-current-ledger-projection
+ :source "/tmp/futon3c-invoke-jobs.edn"
+ :reader :single-byte-buffer-clojure-edn-without-http-initialization
+ :job-id "invoke-1789267707053-20588-bc3b4e37"
+ :trace-id "invoke-d49e37de-6b62-4c45-881f-1ef7578c77a9"
+ :trace-index-job-id "invoke-1789267707053-20588-bc3b4e37"
+ :artifact-ref "7b591a4e71e54dcb2abdf88a4989d8a9481264fc"
+ :request-digest "ac04ae241090d135c586b4f28198c14f124997ca25e717d5f2edf161bf24e17a"
+ :request-commission :absent
+ :not-a-historical-ledger-byte-pin true}

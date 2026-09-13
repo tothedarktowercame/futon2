@@ -1344,3 +1344,7 @@ Row 18 applicability packet b2bc299f/d78c9007 reviewed with all seven pins match
 ## Lead review update — activation boundary, 2026-09-13
 
 Row 18 activation09752ed7/28416d99 reviewed with six matching pins and retained13tests/44assertions. Lead28f35c21 independently reviewed by codex22. Current production still activation-receipt-unavailable. Receipt file writability, independently evidenced stable writer census/deployment interval, and acquired-lock/expiry binding require repair; see runs/row-18-activation-boundary-2026-09-13/lead-review.md. No activation or logical-history repair claimed.
+
+## Lead review update — real genesis draft, 2026-09-13
+
+Row19 draft7ca8e617/10bcf636/77a04049 reviewed: four artifact pins plus checker pin match. Independent current ledger read confirms author20588 trace/index/artifact/digest, but exact commission preimage absent. Pending draft accepted only at that scope; cannot admit by adding review alone. Prepare reviewed retention deployment before fresh author/reviewer commissions; no historical reconstruction or live mutation. See row-19-real-genesis-draft-2026-09-13/lead-review.md. Delayed row18 job20589 remains consumed under15edf3a6/repair20593.

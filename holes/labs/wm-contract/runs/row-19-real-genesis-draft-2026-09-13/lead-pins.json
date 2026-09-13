@@ -1,0 +1,32 @@
+[
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-19-real-genesis-draft-2026-09-13/root-resolution.edn",
+    "expected": "4f0f536d202e4d72a058e830565a9aa4f250670f8a6baefaedd742c9c3c2e017",
+    "actual": "4f0f536d202e4d72a058e830565a9aa4f250670f8a6baefaedd742c9c3c2e017",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-19-real-genesis-draft-2026-09-13/author-job-snapshot.edn",
+    "expected": "e684c096cf32be8037d1f800e43331859b44adb6a6813a5fa9c134bc288bee6d",
+    "actual": "e684c096cf32be8037d1f800e43331859b44adb6a6813a5fa9c134bc288bee6d",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-19-real-genesis-draft-2026-09-13/genesis-evidence-draft.edn",
+    "expected": "65436cf66c93ad81ec1ff6bf04243579c950769167f0cdbd89413ef7ea0bbcec",
+    "actual": "65436cf66c93ad81ec1ff6bf04243579c950769167f0cdbd89413ef7ea0bbcec",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-19-real-genesis-draft-2026-09-13/REVIEWER-PACKET.md",
+    "expected": "301f781d43152bb0a6b4f9fa38096c0ab48c1f13d88517ef6cca61cb93aea52a",
+    "actual": "301f781d43152bb0a6b4f9fa38096c0ab48c1f13d88517ef6cca61cb93aea52a",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-19-real-genesis-draft-2026-09-13/check_draft.clj",
+    "expected": "b2d370cc75c449f2166281ba44cff57b18ac28532b10c6e1e18f900e3ff9c446",
+    "actual": "b2d370cc75c449f2166281ba44cff57b18ac28532b10c6e1e18f900e3ff9c446",
+    "matches": true
+  }
+]
