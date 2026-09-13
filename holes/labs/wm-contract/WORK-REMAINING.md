@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest ingress durable review: 30b7de55 / 13f64ac1 has two matching source pins and retained 7-test/25-assertion gates. Single-state verification repair accepted narrowly. Executed isolated controls expose accepted non-EDN payload breaking recovery and two controllers overwriting a durably accepted resume. Payload validation, exclusive store ownership and atomic initialization remain required before integration. See [review](runs/row-19-ingress-controller-2026-09-13/lead-durable-review.md).
+
 - Latest categorical acceptance: 46b94b94 / 0fc3997c repairs exact resolved-subject and evidence-scope findings; all six pins and retained 7-test/38-assertion gates match. Accepted only at the independently configured resolver boundary. Exact close/context attachment, real annotation acquisition and measured cells remain open. See [acceptance](runs/row-14-resolved-acceptance-subject-2026-09-13/lead-acceptance.md).
 
 - Latest ingress review: controller 67211f8d source/test commit bytes match; gates f1372c9c summarize 4 tests/17 assertions without retained full raw output. Durable deferred-resume recovery and a single-state verification snapshot are still owed before integration; no serving fence or restart readiness. See [review](runs/row-19-ingress-controller-2026-09-13/lead-review.md).
