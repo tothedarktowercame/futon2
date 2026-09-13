@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest authority-buffer review: 2d2918ea/169ec4ca two pins/raw2tests9 verified; executed trailing/duplicate JSON, nil pointer and mutable Date controls expose boundary failures. Repair required before reader acceptance. See [review](runs/row-24-authority-buffer-2026-09-13/lead-review.md).
+
 - Latest E6 contract42f2a9bd reviewed against eight source pins; E5 prerequisite updated to7ec1e99a and paired-arm scope clarified. Pure E6a/E6b implementations next, no runtime or exactly-once storage claim. See [review](runs/row-22-e6-spec-review-2026-09-13/lead-review.md).
 
 - Latest F11 authority contract review: 6f0a5982 ten source pins verified. Lead corrected early same-buffer ownership, drawing-ledger versus corrected-edge authority, and lifecycle-specific chronology. Design only; no emitter/code or certificate. See [review](runs/row-24-f11-producer-authority-2026-09-13/lead-review.md).

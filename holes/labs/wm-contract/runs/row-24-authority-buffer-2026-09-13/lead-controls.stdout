@@ -1,0 +1,5 @@
+{:control :json, :input "{\"a\":1} {\"b\":2}", :value {:a 1}}
+{:control :json, :input "{\"a\":1,\"a\":2}", :value {:a 2}}
+{:control :nil-pointer, :result {:pointer [nil :missing], :source-sha256 "21ad9df55213533841f9b7f0f9c45cc48a9a2f1f1a13896719b7faef34afdcbb", :value {:a 1}, :value-sha256 "21ad9df55213533841f9b7f0f9c45cc48a9a2f1f1a13896719b7faef34afdcbb"}}
+{:control :mutable-before, :value {:date #inst "2026-01-01T00:00:00.000-00:00"}}
+{:control :mutable-after, :result {:pointer [:date], :source-sha256 "231e85b55cc46942236b5cbf5acbc179205934dc31d21d4b38f91ac45e19d6c1", :value #inst "1970-01-01T00:00:00.000-00:00", :value-sha256 "5f365a5ca689d756adf9dbe241d04ef1962e8f025fc3507d3f9849f04de17328"}}

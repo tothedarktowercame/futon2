@@ -1,0 +1,20 @@
+{
+  "command": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-24-authority-buffer-2026-09-13/lead-controls.clj"
+  ],
+  "exit": 0,
+  "pins": [
+    {
+      "path": "src/futon2/aif/authority_buffer.clj",
+      "sha256": "ea1e45be8af340e33cc6721db46279b659e902dce4eaee126b99f000541b01c3",
+      "matches_subject": true
+    },
+    {
+      "path": "test/futon2/aif/authority_buffer_test.clj",
+      "sha256": "98ce1e45a91741bef594460f579013969da7199b9dd3160614b626d65683c7cc",
+      "matches_subject": true
+    }
+  ]
+}
