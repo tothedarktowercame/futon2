@@ -97,6 +97,12 @@ is not yet a verified join to Agency's normalized request digest.
   ledger atom/file, and expired requested job IDs can mix new commissions
   with old archived joins. Changes requested; codex-23 dispatched to separate
   immutable archive storage and enforce lifetime identity before admission.
+- Row 19 separate archive `futon3c/009cb3fb..2e4ed7ef`, receipts
+  `c5829fb4`: source/runner hashes and retained 14-assertion gates verified.
+  Separate storage and archived-ID reuse defects repaired. Lead review in
+  `runs/row-19-commission-retention-2026-09-13/review-fixes/r1-separate-store/lead-review.md`
+  requests post-publication sync-failure retry, existing archive digest validation
+  before hot deletion, and full hot/archive join comparison. No admission.
 - codex-24 corrected the three false review hash strings in `ad9f9dc2` and
   delivered declaration-grain discovery `335cf4b5`; the lead verified its
   eleven source hashes. J1 means engineering-only row-18 modulation is not
