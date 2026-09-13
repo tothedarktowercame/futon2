@@ -1,0 +1,46 @@
+{:schema :wm/execution-receipt-v1
+ :row 18
+ :packet :canonical-global-unique-root-criterion
+ :at "2026-09-13"
+ :cwd "/home/joe/code/mathlib4"
+ :tree-sha "9c9b1f719d2a53aed25e7c329447517cf6819ea5"
+ :dependency-compilation
+ {:command "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.olean DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.lean"
+  :exit 0
+  :scope :accepted-owned-prerequisite-only
+  :broad-build false
+  :printed-axiom-checks 10
+  :sorryAx 0}
+ :command "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.olean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean"
+ :exit 0
+ :printed-axiom-checks 3
+ :sorryAx 0
+ :stdout ["'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.root_localisation' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.derivative_lt_one_above_half_range' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.canonical_unique_positive_root' depends on axioms: [propext, Classical.choice, Quot.sound]"]
+ :pins [{:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :sha256 "679d7681900242d8325dea77c938261bab15e9b004b286b7b533a2617b5bfb07" :olean-sha256 "2fb80aae1b738805ad015de25ec3cd02ef1d8efb12b8184816096749a5226589"}
+        {:path "DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.lean" :sha256 "afbe1d5dfe9eb9192c2226c34220b4aa8fc345b833f88608cf42129f6341b77e" :olean-sha256 "0f5128639109766958bd4df3b651e4935aa1f223fe0e15147f0c48dd2018cdc7"}
+        {:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionProposal.lean" :sha256 "779027d3eeaf887d67d0f29cb89e793e2ad95805880c9d04bb8beb6f164d0298" :olean-sha256 "fe1eea8c472833cf15b1c4674f0987e505c97455eba3c5eaaff44d0cbf5b5354"}
+        {:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionBounded.lean" :sha256 "b69f98d3b69535d07c09765d2d8dfecfcbb5905511676f0bf3ca08fd4c58a7e4" :olean-sha256 "a2511140fce621ded116bfe8282be842b5a486beb053f0592ba7175fe03734fc"}
+        {:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionPositiveDomain.lean" :sha256 "1ac96fe674c1d9cb4f29dc39ad0707269c5d8e9090cba3920e926b5652f547c0" :olean-sha256 "375a2e0ae8e717df755d9120b82f11508febba35e3a072c6416410434712b770"}
+        {:path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+        {:path "lake-manifest.json" :sha256 "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"}
+        {:path "futon2:holes/labs/wm-contract/runs/row-18-policy-precision-spec-2026-09-13/lead-finite-posterior-review.md" :sha256 "abea056b93ab87a636d0cea4bb538b3a71089f7b5e5f01c5dec633c634e731f2"}]
+ :failed-attempts
+ [{:tree-sha "bb31e951d7" :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :exit 1 :finding :missing-accepted-prerequisite-olean}
+  {:tree-sha "bb31e951d7" :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :exit 1 :finding :proof-obligations-in-division-convexity-and-equality-orientation}
+  {:tree-sha "9c9b1f719d" :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :exit 0 :finding :elaboration-green-before-owned-olean-output}]
+ :proved [:canonical-root-localisation
+          :derivative-upper-bound-above-half-range
+          :positive-root-existence-under-criterion
+          :global-positive-root-uniqueness-under-certificate
+          :zero-range-case-included
+          :positive-habit-exp-log]
+ :negative-signature
+ {:canonical-derivative-certificate :still-premise
+  :variance-bound-specialization :still-premise
+  :criterion-failure :uniqueness-unknown
+  :float-solver-correspondence :not-proved
+  :held-state-branch :not-proved
+  :adoption :none}
+ :scope "Exact-real canonical finite posterior under c > 3R/2 and an explicit derivative/variance certificate only; no claim that a retained field or floating solver satisfies the certificate, and no runtime integration, adoption, or admission."}
