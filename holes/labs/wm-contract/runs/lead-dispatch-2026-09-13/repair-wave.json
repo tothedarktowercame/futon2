@@ -265,11 +265,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-restart-discovery-repair.request.json",
       "dispatch": "accepted",
       "scope": "honest restart discovery preflight and actual drain/source inventory; no live changes"
+    },
+    {
+      "packet": "codex-22-ranked-budget-mapping",
+      "job-id": "invoke-1789270203622-20608-2b0d1351",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789270203622-20608-2b0d1351",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-ranked-budget-mapping.request.json",
+      "dispatch": "accepted",
+      "scope": "E1 full occurrence-ranked support to budget proposals pure mapping; no runtime selection"
     }
   ],
   "current-awaiting": [
     "invoke-1789270029042-20606-b16ad815",
-    "invoke-1789269728949-20604-dad130de",
+    "invoke-1789270203622-20608-2b0d1351",
     "invoke-1789269880118-20605-85835087"
   ]
 }
