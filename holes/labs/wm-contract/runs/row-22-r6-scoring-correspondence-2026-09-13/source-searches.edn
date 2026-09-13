@@ -1,0 +1,19 @@
+{:schema/version :wm/row22-r6-scoring-source-searches-v1
+ :captured-at "2026-09-13"
+ :workdir "/home/joe/code/futon2"
+ :searches
+ [{:command ["rg" "-n" "--fixed-strings" ":step-score-delta"
+             "src/futon2/aif/efe.clj" "src/futon2/aif/policy.clj"]
+   :exit 1
+   :stdout ""
+   :meaning :no-live-r6-reader}
+  {:command ["rg" "-n" "\\(:prior|:prior action|:prior entry"
+             "src/futon2/aif/efe.clj" "src/futon2/aif/policy.clj"]
+   :exit 1
+   :stdout ""
+   :meaning :no-live-r6-prior-reader}
+  {:command ["rg" "-n" "step-score-delta|\\(:prior|:prior move|:prior %"
+             "src/futon2/aif/rollout.clj"]
+   :exit 0
+   :stdout "295:  :step-score-delta)\n308:     `:step-score-delta`      — a finite `:step-score-delta` (negative = benefit).\n317:   `:refused` — a partial map with a numeric fallback: `:step-score-delta` or\n389:  (let [total (reduce + 0.0 (map #(double (or (:prior %) 0.0)) ms))]\n391:      (mapv #(assoc % :prior (/ (double (:prior %)) total)) ms)\n455:   Negative :step-score-delta is a benefit. Already-satisfied capability steps get zero\n513:                                        :advances-cap :prior :step-score-delta\n538:                                  :prior (:prior move)\n"
+   :meaning :fields-read-by-rollout}]}
