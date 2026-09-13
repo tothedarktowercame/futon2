@@ -1,0 +1,10 @@
+[
+  {
+    "path": "src/futon3c/agency/invoke_lifecycle_snapshot.clj",
+    "sha256": "d288a58d6a927cfa7cdb1dd4210b58fc894317eff1f72cd3be450268ee83ccca"
+  },
+  {
+    "path": "test/futon3c/agency/invoke_lifecycle_snapshot_test.clj",
+    "sha256": "a9f0d49f5b73539f51e0019f0cabd799a7e12517c38964e9549e9fb758738d04"
+  }
+]

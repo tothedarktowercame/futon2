@@ -1,0 +1,9 @@
+# Independent snapshot failure/byte repair acceptance: job20632
+
+Reviewed dd870146/e24d1599/514844e8 source, tests and retained gates. Both final source pins match; raw7tests18assertions, clean kondo and explicit parens agree. Disclosed earlier syntax failure is retained. Induced output reports one failure/exit1, but receipt command is still a placeholder; no exact induced argv reconstructed. No passing checks rerun.
+
+mutate! now marks the boundary poisoned when callback throws or its returned generation does not advance. Subsequent supported capture!/mutate! calls refuse. Partial side effects are not falsely rolled back. The operation guard refuses nested capture/mutation. Captured text is retained and each resolver allocates a defensive copy; mutation of one read no longer changes later replay. Unserializable record refusal occurs before capture publication. Actual isolated controller generation is preserved rather than overwritten in its provider.
+
+Accepted at cooperative isolated API scope only. Boundary remains a map of accessible atoms and callbacks: arbitrary same-process code can reset those fields, and the returned generation is a trusted callback assertion until an actual controller record is captured and compared. There is no tamper-resistant encapsulation or independently measured live writer ownership. The producer still lacks real source providers, external completeness acceptance and deployment. No live atomic snapshot, restart readiness or retention/genesis authority is established. This review closes the commissioned failure/byte behavior at the explicit API scope, not these production obligations.
+
+Codex23 may next implement the separate required pure E4 dispatch/bounded-tick/R2/predecessor evidence route while serving ownership/deployment obligations remain open. No HTTP integration or actual scheduling/run is authorized by that packet.

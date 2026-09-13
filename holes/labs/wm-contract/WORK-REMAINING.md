@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest snapshot hardening acceptance: dd870146/514844e8 two pins/raw7tests18 verified. Poisoned failure refusal and defensive replay copies accepted only for cooperative isolated API use; accessible boundary atoms/callbacks are not tamper-resistant live ownership. Real providers/deployment/completeness remain open; codex23 moves to required pure E4 causal route. See [acceptance](runs/row-19-lifecycle-snapshot-2026-09-13/lead-poison-acceptance.md).
+
 - Latest Row24 record/connection review: 0f02c59e/ea750169 five pins/nine final axioms verified. Executed local Lean proofs show record causal references ignored and arbitrary nonempty edge causal record accepted. Exact actual/expected pin and family-specific causal joins remain unimplemented; no full certificate. See [review](runs/row-24-record-connection-binding-2026-09-13/lead-review.md).
 
 - Latest E3 canonical review: 069645d0/10f4646e three pins/raw3tests28 verified. Canonical checker executes, but executed late-review and borrowed-run/event controls still mechanism-authorize because canonical time/context and wrapper checks are disconnected. Exact canonical event/time and resolved field subject binding required. See [review](runs/row-22-e3-pre-enact-2026-09-13/lead-canonical-review.md).
