@@ -11,7 +11,8 @@ Baseline: claude-15's independent audit delivered in job20737 on 2026-09-13. The
 
 ## Active work and priorities
 
-- **Task 1 / Row 19:** codex-23 job `invoke-1789316247471-20736-2e78bff9` was **done** at 2026-09-13T16:24:39.031712+00:00. Its implementation result now awaits independent review; the commissioned scope is committed-creation accounting and actual serving execution/final-delivery callbacks. [Dispatch](runs/lead-dispatch-2026-09-13/codex-23-task1-serving-lifecycle.prompt.txt). Review `futon3c 64108e1c` reproduced a committed job with a falsely drained controller. No deployment is claimed.
+- **Task 1 / Row 19:** codex-23 job `invoke-1789316853314-20739-fdf67bfd` observed **running** at 2026-09-13T16:27:54.819277+00:00. Review `futon3c b8ab084d` verified four pins/raw8tests54+11tests38 and reproduced duplicate running-job queue enrollment plus a falsely drained snapshot while a held worker remains alive. New packet repairs actual worker-lifetime and callback ordering. [Dispatch](runs/lead-dispatch-2026-09-13/codex-23-task1-worker-lifetime.prompt.txt). No deployment or row closure.
+
 - **E6b storage chain: parked.** Before any further storage packet, name the tracker row it can close, the specific witness admission it feeds, and the missing evidence the packet will supply. If it cannot name these, do not dispatch it. Isolated machinery acceptance alone is not progress on this scoreboard.
 - **Other seats:** codex-22's semantic contract remains unadopted; codex-24's F11 integration remains unimplemented. No new jobs are commissioned by this update. Exact active job IDs remain in [repair-wave.json](runs/lead-dispatch-2026-09-13/repair-wave.json).
 

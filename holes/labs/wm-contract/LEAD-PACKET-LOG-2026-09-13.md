@@ -446,3 +446,7 @@ Row22 f19e346f/4356b6f6/bdd8e657 adopted for implementation with occurrence iden
 ## Lead review update — honest restart discovery, 2026-09-13
 
 ce37a339/e9e9b135/e387eb00 accepted as discovery only:3commit-bound pins, JSON actual/arbitrary-file outputs remain unverified, seven lexical creator sites independently enumerated. Next isolated common ingress/drain controller and authenticated verification lane; initial old-service transition separately unresolved. Prospective independently reviewed startup snapshot may be established without inventing historical loaded-byte equivalence. No live installation/restart or new R9 commissions yet.
+
+## Task1 lifecycle review b8ab084d
+
+Job20736 reviewed; four pins/raw gates checked without passing-suite rerun. Two executed isolated controls reveal phantom queue after duplicate creation and terminal-before-worker-exit false drain. New invoke-1789316853314-20739-fdf67bfd repairs actual serving lifetime/order. Scoreboard remains 0 rows closed / 0 new claims admitted.
