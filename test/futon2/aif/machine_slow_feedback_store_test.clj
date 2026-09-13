@@ -106,7 +106,7 @@
 
 (deftest corrupt-and-malformed-retained-bytes-refuse
   (doseq [[label replacement expected]
-          [[:digest "{:schema :wrong}" :e6b-store/object-digest-mismatch]
+          [[:digest "{:schema :wrong}" :e6b-store/head-invalid]
            [:trailing "{} {}" :e6b-store/invalid-edn-cardinality]
            [:utf8 (byte-array [(unchecked-byte 0xc3) (byte 0x28)]) :e6b-store/invalid-edn]]]
     (testing (name label)
@@ -150,6 +150,37 @@
         (aset-byte ^bytes obj 0 (byte 0))
         (is (not= (seq obj) (seq original)))
         (is (= 1 (:generation (store/capture s))))))
+    (store/release! s)))
+
+(deftest self-consistent-digests-cannot-break-parent-revision-join
+  (let [[_ s] (initialized)
+        _ (store/compare-and-commit! s (proposal s "a1" "e1" "r1" 1))
+        _ (store/compare-and-commit! s (proposal s "a2" "e2" "r2" 2))
+        recovered (store/recover s)
+        [gen-digest one-digest two-digest] (:chain-digests recovered)
+        read-tx (fn [d] (edn/read-string
+                         (slurp (.toFile (.resolve ^java.nio.file.Path (:txdir s)
+                                                  (str d ".edn"))))))
+        publish-forged! (fn [tx]
+                          (let [bs (.getBytes (pr-str tx) "UTF-8") d (#'store/sha256 bs)]
+                            (Files/write (.resolve ^java.nio.file.Path (:txdir s) (str d ".edn"))
+                                         bs (into-array StandardOpenOption
+                                                        [StandardOpenOption/CREATE_NEW]))
+                            d))
+        one' (assoc-in (read-tx one-digest) [:next :revision] "forged-r1")
+        one'-digest (publish-forged! one')
+        two' (-> (read-tx two-digest)
+                 (assoc-in [:prior :transaction-sha256] one'-digest)
+                 (assoc-in [:proposal :prior :transaction-sha256] one'-digest))
+        two'-digest (publish-forged! two')
+        head (edn/read-string (slurp (.toFile ^java.nio.file.Path (:head s))))
+        head' (-> head
+                  (assoc :transaction-sha256 two'-digest)
+                  (assoc-in [:application-index 0 :transaction-sha256] one'-digest)
+                  (assoc-in [:application-index 1 :transaction-sha256] two'-digest))]
+    (is (string? gen-digest))
+    (spit (.toFile ^java.nio.file.Path (:head s)) (pr-str head'))
+    (is (= :e6b-store/chain-invalid (refusal #(store/recover s))))
     (store/release! s)))
 
 (deftest invalid-state-does-not-publish
