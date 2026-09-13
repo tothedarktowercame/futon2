@@ -913,18 +913,27 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-task1-wrapper-ownership.request.json",
       "dispatch": "accepted",
       "scope": "Row19 actual wrapper ownership repair, no live changes"
+    },
+    {
+      "packet": "codex-24-typed-gap-generator",
+      "job-id": "invoke-1789317645010-20751-e5949e94",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789317645010-20751-e5949e94",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-typed-gap-generator.request.json",
+      "dispatch": "accepted",
+      "scope": "one executable isolated typed-gap Lean generator, acquisition remains external"
     }
   ],
   "current-awaiting": [
     "invoke-1789317125316-20741-fbc2431e",
-    "invoke-1789317305541-20746-c7f7105b",
-    "invoke-1789317564390-20750-04477de9"
+    "invoke-1789317564390-20750-04477de9",
+    "invoke-1789317645010-20751-e5949e94"
   ],
   "codex24-next-boundary": {
-    "status": "commissioned",
-    "job-id": "invoke-1789317305541-20746-c7f7105b",
-    "review": "cf5a5a81",
-    "closure-target": "Rows24/25 executable typed negative certificate bridge; no admission yet"
+    "status": "commissioned-after-incomplete",
+    "completed-job": "invoke-1789317305541-20746-c7f7105b",
+    "completed-job-outcome": "no implementation, files or gates",
+    "job-id": "invoke-1789317645010-20751-e5949e94",
+    "scope": "isolated structural generator only; no row closure"
   },
   "codex22-next-boundary": {
     "status": "commissioned",
