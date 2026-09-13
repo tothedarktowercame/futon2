@@ -1,0 +1,8 @@
+{:schema :wm/execution-receipt-v1
+ :gate :lean-owned-module
+ :command "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/FullCertificateEventBinding.olean DarkTower/WarMachine/FullCertificateEventBinding.lean"
+ :exit 0
+ :checks {:theorems 6 :axiom-checks 6 :sorryAx 0 :failed-attempts 0
+          :warnings 3}
+ :tree-sha "8493dc2ef7725ce353da032a0afa6cf8829cd6ea"
+ :at "2026-09-13T04:14:36Z"}
