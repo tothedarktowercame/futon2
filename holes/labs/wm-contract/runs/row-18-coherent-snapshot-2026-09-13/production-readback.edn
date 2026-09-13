@@ -1,0 +1,7 @@
+{:ok false
+ :refusal :interoceptive/contradictory-discharge
+ :data {:repair/id "repair-attempt-006-late-author-artifact"
+        :statuses [:open :resolved]
+        :refusal :interoceptive/contradictory-discharge}
+ :scope :read-only-canonical-production-stores
+ :claim "Physical capture completed under the shared lock; the logical constructor refused the retained contradictory history. No global confidence is claimed."}

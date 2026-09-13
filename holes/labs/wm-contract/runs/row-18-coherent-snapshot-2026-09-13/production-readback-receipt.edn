@@ -1,0 +1,7 @@
+{:command "clojure -M -e '(require interoceptive-manifest; call production-manifest!; print bounded result/refusal)'"
+ :exit 0
+ :result :typed-refusal
+ :refusal :interoceptive/contradictory-discharge
+ :tree-sha "05ff643f256c3c3ab979c29faf003d481a9a8879"
+ :at "2026-09-13T02:33:00Z"
+ :stdout "{:ok false, :refusal :interoceptive/contradictory-discharge, :data {:repair/id \"repair-attempt-006-late-author-artifact\", :statuses [:open :resolved], :refusal :interoceptive/contradictory-discharge}}"}
