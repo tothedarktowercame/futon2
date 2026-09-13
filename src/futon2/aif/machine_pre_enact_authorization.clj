@@ -71,7 +71,8 @@
                                 :artifact/ref :trace/id) subject))
        (map? (:action subject)) (seq (:action subject))
        (map? (:construction subject)) (seq (:construction subject))
-       (vector? (:field-pins subject)) (seq (:field-pins subject))
+       (= [:ranked-support :field-membership :costs :utilities :budgets]
+          (mapv :label (:field-pins subject)))
        (every? valid-pin? (:field-pins subject))
        (= (count (:field-pins subject)) (count (distinct (map :label (:field-pins subject)))))))
 (defn- before? [a b]

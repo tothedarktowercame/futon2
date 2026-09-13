@@ -10,7 +10,9 @@
           :cohort/id "cohort-1" :tick/index 7 :event/id "pending-7"})
 (def subject {:candidate/occurrence-id "occ-2" :action {:type :inspect :target "x"}
               :construction {:policy/id "p2" :missions ["m1"]}
-              :field-pins [{:label :ranked :sha256 (apply str (repeat 64 "a"))}]
+              :field-pins (mapv (fn [label digit] {:label label :sha256 (apply str (repeat 64 digit))})
+                                [:ranked-support :field-membership :costs :utilities :budgets]
+                                ["1" "2" "3" "4" "5"])
               :producer/id "codex-22" :claim/id "claim-e3"
               :artifact/ref "artifact-e3" :trace/id "trace-producer"})
 (def pending (merge {:schema/version :wm/e3-pending-construction-v1 :scope :isolated-test
