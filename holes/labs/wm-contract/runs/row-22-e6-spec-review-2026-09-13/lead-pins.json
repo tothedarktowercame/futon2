@@ -1,0 +1,50 @@
+[
+  {
+    "path": "src/futon2/aif/machine_slow_prior_evidence.clj",
+    "expected": "60634bdac1b180d63b3d0b57d5c970404cf3054f72edad027051a683ca228a8a",
+    "actual": "60634bdac1b180d63b3d0b57d5c970404cf3054f72edad027051a683ca228a8a",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/temporal_hierarchy.clj",
+    "expected": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "actual": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/hierarchical_budget_adapter.clj",
+    "expected": "525bcb8aa4aad49c9cd02c22dfeabc7406aced8aacbb5731317e182eddb691e1",
+    "actual": "525bcb8aa4aad49c9cd02c22dfeabc7406aced8aacbb5731317e182eddb691e1",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/machine_portfolio_restriction.clj",
+    "expected": "316ddd364e2deaea98172558148fd770c2d5d4a930e32fb8e4825f454b6c51ab",
+    "actual": "316ddd364e2deaea98172558148fd770c2d5d4a930e32fb8e4825f454b6c51ab",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/machine_pre_enact_authorization.clj",
+    "expected": "d559e91587630f35ab26e9cb6beb30695f1142702ec13bc03eca3994ac170627",
+    "actual": "d559e91587630f35ab26e9cb6beb30695f1142702ec13bc03eca3994ac170627",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/machine_enactment_correspondence.clj",
+    "expected": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933",
+    "actual": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/enact.clj",
+    "expected": "13801b26cb67ae73c1a070a08e7bb3c2d257e4eeeab3cb6bb847e90c8a6f0c3e",
+    "actual": "13801b26cb67ae73c1a070a08e7bb3c2d257e4eeeab3cb6bb847e90c8a6f0c3e",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/temporal_hierarchy.clj",
+    "expected": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "actual": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "match": true
+  }
+]
