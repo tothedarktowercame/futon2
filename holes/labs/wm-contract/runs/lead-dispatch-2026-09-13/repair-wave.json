@@ -145,11 +145,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-derivative-certificate.request.json",
       "dispatch": "accepted",
       "scope": "canonical derivative and variance certificate construction; no admission"
+    },
+    {
+      "packet": "codex-22-activation-boundary",
+      "job-id": "invoke-1789267583456-20587-72fa9e36",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789267583456-20587-72fa9e36",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-activation-boundary.request.json",
+      "dispatch": "accepted",
+      "scope": "independent touchup review and verified activation boundary; no live activation"
     }
   ],
   "current-awaiting": [
     "invoke-1789267081400-20585-e90f7e51",
-    "invoke-1789266961066-20584-f212ec9f",
+    "invoke-1789267583456-20587-72fa9e36",
     "invoke-1789267209896-20586-d5170f88"
   ]
 }
