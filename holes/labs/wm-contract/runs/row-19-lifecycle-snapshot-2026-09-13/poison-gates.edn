@@ -1,0 +1,19 @@
+{:schema :wm/execution-receipts-v1
+ :source {:repo "futon3c" :commit "dd870146"
+          :tree-sha "1cf2d95fa452e6aff89f49eda1eae384729b3be2"
+          :files {"src/futon3c/agency/invoke_lifecycle_snapshot.clj"
+                  "d288a58d6a927cfa7cdb1dd4210b58fc894317eff1f72cd3be450268ee83ccca"
+                  "test/futon3c/agency/invoke_lifecycle_snapshot_test.clj"
+                  "a9f0d49f5b73539f51e0019f0cabd799a7e12517c38964e9549e9fb758738d04"}}
+ :runs
+ [{:gate :focused-test :command "clojure -M:test -n futon3c.agency.invoke-lifecycle-snapshot-test"
+   :exit 0 :tests 7 :assertions 18 :failures 0 :errors 0
+   :stdout "poison-test.stdout" :stderr "poison-test.stderr"}
+  {:gate :clj-kondo :command "clj-kondo --lint src/futon3c/agency/invoke_lifecycle_snapshot.clj test/futon3c/agency/invoke_lifecycle_snapshot_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "poison-kondo.stdout" :stderr "poison-kondo.stderr"}
+  {:gate :check-parens :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/invoke_lifecycle_snapshot.clj test/futon3c/agency/invoke_lifecycle_snapshot_test.clj"
+   :exit 0 :stdout "poison-parens.stdout" :stderr "poison-parens.stderr"}
+  {:gate :induced-runner-failure :command "clojure -M -e <row19.poison-induced; exit from counters>"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :errors 0
+   :stdout "poison-induced.stdout" :stderr "poison-induced.stderr"}]
+ :failed-history "poison-failures.edn"}

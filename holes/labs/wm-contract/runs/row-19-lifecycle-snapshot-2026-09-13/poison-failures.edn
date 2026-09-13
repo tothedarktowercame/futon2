@@ -1,0 +1,3 @@
+{:attempts
+ [{:source-commit "e1cf716e" :test-exit 1 :kondo-exit 3 :parens-exit 1
+   :finding "EDN round-trip guard outer let was not closed before catch"}]}
