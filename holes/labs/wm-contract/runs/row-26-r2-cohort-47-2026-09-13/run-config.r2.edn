@@ -1,0 +1,8 @@
+{:schema/version :wm/on-demand-whole-loop-v1
+ :run/id "wm-machinery-test-2026-09-13-claude-15-r2"
+ :author "claude-15"
+ :reviewer "codex-22"
+ :repair-reviewer "codex-24"
+ :opportunity-count 1
+ :poll-ms 2000
+ :timeout-ms 3600000}
