@@ -40,6 +40,24 @@ SHA-256. Candidate-owned acceptance is rejected. Every evidence and review
 source is strict UTF-8, exactly one EDN form, hashed and parsed from the same
 bytes, then checked against mutation during validation.
 
+Rubric assertions are likewise not candidate fields. Each candidate carries
+only opaque evidence-claim references. The same fixed resolver supplies pinned
+`:wm/categorical-state-evidence-claim-v1` forms whose own entity, run, cohort,
+attempt, checkpoint, observation time, assertion, and payload are validated
+against the independently supplied attempt context. The validator derives the
+rubric match from those resolved assertions. A wrapper cannot disguise a target
+disposition or posterior as an operator note, change an evidence time, or cite
+evidence about another entity.
+
+The attempt context, not the candidate, fixes action start/completion, evidence
+cutoff, disposition-recorded time, entity, and run/cohort/attempt/checkpoint.
+It also fixes resolver scope (`:test` or `:production`) and named configuration
+provenance. The validated envelope retains that scope and provenance. Test
+fixtures therefore remain test-qualified even when structurally successful.
+Limitations are mandatory: retrospective status is recomputed from cutoff and
+annotation timestamps, and missingness, selection, method, and rubric are
+retained inseparably.
+
 This rubric operationalizes the existing lifecycle descriptions in
 `belief.clj:37-42` and
 `futon3/library/structure/interest-event-vocabulary.flexiarg:70-136`; it does

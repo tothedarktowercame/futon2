@@ -6,166 +6,193 @@
 
 (defn edn-bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
 (defn pointer [path bs] {:path (str path) :sha256 (sut/sha256-bytes bs)})
-
-(defn base-observation [evidence-pointer]
-  {:schema sut/schema
-   :observation/id "test/observation-1"
-   :subject {:entity/id "entity/test-1"}
-   :point {:run/id "run-test-1" :cohort/id :cohort/test :attempt/id "attempt-1"
-           :checkpoint/ref "cohort/test/attempt-1/closed"
-           :state-point :post-action-pre-disposition-at-close
-           :action/started-at "2026-09-12T11:59:00Z"
-           :action/completed-at "2026-09-12T12:00:00Z"
-           :evidence/cutoff-at "2026-09-12T12:01:00Z"
-           :disposition/recorded-at "2026-09-12T12:02:00Z"
-           :annotation/created-at "2026-09-13T08:00:00Z"}
-   :categorical-status {:domain :wm/status-v1 :value :strengthened}
-   :observation/method :reviewed-categorical-annotation
-   :rubric {:id sut/rubric-id :assertions [:support-gained]}
-   :evidence {:items [{:kind :operator-note
-                       :observed-at "2026-09-12T12:00:30Z"
-                       :source evidence-pointer}]}
-   :authority {:observer/ref :authority/observer-a :review/ref :authority/review-a}
-   :limitations {:retrospective? true :cohort :isolated-production-shaped-test
-                 :missingness :not-a-production-observation}})
-
-(defn review-for [observation observer-id]
-  {:schema sut/review-schema :role :categorical-state-reviewer
-   :reviewer/id "reviewer/test-b" :observer/id observer-id
-   :verdict :accepted :rubric/id sut/rubric-id
-   :subject (sut/subject observation) :subject/sha256 (sut/subject-digest observation)
-   :reviewed-at "2026-09-13T09:00:00Z"})
-
+(defn write-record! [dir filename record]
+  (let [path (.resolve dir filename) bs (edn-bytes record)]
+    (Files/write path bs (make-array java.nio.file.OpenOption 0))
+    (pointer path bs)))
 (defn refusal [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
 
-(defn fixture []
-  (let [dir (Files/createTempDirectory "categorical-state-test" (make-array java.nio.file.attribute.FileAttribute 0))
-        evidence-path (.resolve dir "evidence.edn") evidence-bytes (edn-bytes {:fact :support-gained})
-        observation (base-observation (pointer evidence-path evidence-bytes))
-        observer-path (.resolve dir "observer.edn")
-        observer-bytes (edn-bytes {:schema sut/authority-schema
-                               :role :categorical-state-observer
-                               :principal/id "observer/test-a"})
-        review-path (.resolve dir "review.edn") review-bytes (edn-bytes (review-for observation "observer/test-a"))]
-    (Files/write evidence-path evidence-bytes (make-array java.nio.file.OpenOption 0))
-    (Files/write observer-path observer-bytes (make-array java.nio.file.OpenOption 0))
-    (Files/write review-path review-bytes (make-array java.nio.file.OpenOption 0))
-    {:observation observation :review-path review-path :review-bytes review-bytes
-     :authority {:expected {:subject (:subject observation)
-                            :point (select-keys (:point observation)
-                                                [:run/id :cohort/id :attempt/id :checkpoint/ref])}
-                 :resolver (fn [kind ref]
-                             (case [kind ref]
-                               [:observer :authority/observer-a]
-                               (pointer observer-path observer-bytes)
-                               [:review :authority/review-a] (pointer review-path review-bytes)
-                               nil))}}))
+(def base-point
+  {:run/id "run-test-1" :cohort/id :cohort/test :attempt/id "attempt-1"
+   :checkpoint/ref "cohort/test/attempt-1/closed"
+   :state-point :post-action-pre-disposition-at-close
+   :action/started-at "2026-09-12T11:59:00Z"
+   :action/completed-at "2026-09-12T12:00:00Z"
+   :evidence/cutoff-at "2026-09-12T12:01:00Z"
+   :disposition/recorded-at "2026-09-12T12:02:00Z"
+   :annotation/created-at "2026-09-13T08:00:00Z"})
 
-(deftest production-shaped-isolated-qualification-test
-  (let [{:keys [observation authority]} (fixture)
-        result (sut/validate-observation! observation authority)]
+(defn observation [claim-ref]
+  {:schema sut/schema :observation/id "test/observation-1"
+   :subject {:entity/id "entity/test-1"} :point base-point
+   :categorical-status {:domain :wm/status-v1 :value :strengthened}
+   :observation/method :reviewed-categorical-annotation
+   :rubric {:id sut/rubric-id}
+   :evidence {:claims [{:claim/ref claim-ref}]}
+   :authority {:observer/ref :authority/observer-a :review/ref :authority/review-a}
+   :limitations {:retrospective? true :missingness :selected-attempts-only
+                 :selection :selection-target-present
+                 :method :reviewed-categorical-annotation :rubric sut/rubric-id}})
+
+(defn evidence-claim [assertion]
+  {:schema sut/evidence-claim-schema :claim/id "claim/test-1"
+   :claim/type :categorical-status-evidence
+   :subject {:entity/id "entity/test-1"}
+   :point (assoc (select-keys base-point [:run/id :cohort/id :attempt/id :checkpoint/ref])
+                 :observed-at "2026-09-12T12:00:30Z")
+   :assertion assertion :payload {:kind :operator-note :fact :support-gained}})
+
+(defn review-for [candidate observer-id]
+  {:schema sut/review-schema :role :categorical-state-reviewer
+   :reviewer/id "reviewer/test-b" :observer/id observer-id
+   :verdict :accepted :rubric/id sut/rubric-id
+   :subject (sut/subject candidate) :subject/sha256 (sut/subject-digest candidate)
+   :authority/scope :test
+   :authority/provenance {:config/id :test/categorical-authority :revision :v1}
+   :reviewed-at "2026-09-13T09:00:00Z"})
+
+(defn fixture
+  ([] (fixture (evidence-claim :support-gained)))
+  ([claim]
+   (let [dir (Files/createTempDirectory "categorical-state-test"
+                                         (make-array java.nio.file.attribute.FileAttribute 0))
+         claim-ref :evidence/claim-a candidate (observation claim-ref)
+         records {[:evidence claim-ref] (write-record! dir "claim.edn" claim)
+                  [:observer :authority/observer-a]
+                  (write-record! dir "observer.edn"
+                                 {:schema sut/authority-schema
+                                  :role :categorical-state-observer
+                                  :principal/id "observer/test-a"
+                                  :authority/scope :test
+                                  :authority/provenance
+                                  {:config/id :test/categorical-authority :revision :v1}})
+                  [:review :authority/review-a]
+                  (write-record! dir "review.edn" (review-for candidate "observer/test-a"))}
+         expected {:subject {:entity/id "entity/test-1"}
+                   :point (dissoc base-point :annotation/created-at :state-point)
+                   :authority/scope :test
+                   :authority/provenance {:config/id :test/categorical-authority
+                                          :revision :v1}}]
+     {:dir dir :candidate candidate :records records
+      :authority {:expected expected :resolver (fn [kind ref] (get records [kind ref]))}})))
+
+(deftest grounded-claim-qualification-test
+  (let [{:keys [candidate authority]} (fixture)
+        result (sut/validate-observation! candidate authority)]
     (is (= :qualified (:status result)))
-    (is (= :strengthened (get-in result [:observation :categorical-status :value])))
-    (is (= :isolated-production-shaped-test (get-in result [:limitations :cohort])))))
+    (is (= [:support-gained] (:derived-rubric-assertions result)))
+    (is (= :test (:authority/scope result)))
+    (is (= true (get-in result [:limitations :retrospective?])))
+    (is (= :selected-attempts-only (get-in result [:limitations :missingness])))))
 
-(deftest substitution-and-rubric-refusals-test
-  (let [{:keys [observation authority]} (fixture)]
-    (is (= :derived-state-not-observation
-           (refusal #(sut/validate-observation!
-                      (assoc observation :observation/method :derived-unique-argmax-of-mu-post)
-                      authority))))
-    (is (= :state-domain-mismatch
-           (refusal #(sut/validate-observation!
-                      (assoc-in observation [:categorical-status :value] :live) authority))))
-    (is (= :state-domain-mismatch
-           (refusal #(sut/validate-observation!
-                      (assoc-in observation [:categorical-status :value] :state/strengthened)
-                      authority))))
-    (is (= :ambiguous-categorical-evidence
-           (refusal #(sut/validate-observation!
-                      (assoc-in observation [:rubric :assertions]
-                                [:support-gained :framing-sharpened]) authority))))
-    (is (= :insufficient-categorical-evidence
-           (refusal #(sut/validate-observation!
-                      (assoc-in observation [:rubric :assertions] [:unknown-assertion])
-                      authority))))))
+(deftest evidence-claim-is-authoritative-test
+  (is (= :evidence-entity-mismatch
+         (let [{:keys [candidate authority]}
+               (fixture (assoc-in (evidence-claim :support-gained)
+                                  [:subject :entity/id] "entity/other"))]
+           (refusal #(sut/validate-observation! candidate authority)))))
+  (is (= :evidence-point-mismatch
+         (let [{:keys [candidate authority]}
+               (fixture (assoc-in (evidence-claim :support-gained) [:point :run/id] "run/other"))]
+           (refusal #(sut/validate-observation! candidate authority)))))
+  (is (= :evidence-after-cutoff
+         (let [{:keys [candidate authority]}
+               (fixture (assoc-in (evidence-claim :support-gained) [:point :observed-at]
+                                  "2026-09-12T12:01:30Z"))]
+           (refusal #(sut/validate-observation! candidate authority)))))
+  (is (= :forbidden-evidence-source
+         (let [{:keys [candidate authority]}
+               (fixture (assoc (evidence-claim :support-gained)
+                               :payload {:kind :operator-note
+                                         :target-disposition :grounded-change}))]
+           (refusal #(sut/validate-observation! candidate authority)))))
+  (is (= :unsupported-evidence-assertion
+         (let [{:keys [candidate authority]} (fixture (evidence-claim :invented-status-proof))]
+           (refusal #(sut/validate-observation! candidate authority))))))
 
-(deftest authority-is-external-and-subject-bound-test
-  (let [{:keys [observation authority]} (fixture)]
+(deftest independent-context-binds-time-and-point-test
+  (let [{:keys [candidate authority]} (fixture)]
+    (is (= :observation-time-mismatch
+           (refusal #(sut/validate-observation!
+                      (assoc-in candidate [:point :evidence/cutoff-at] "2026-09-12T12:00:45Z")
+                      authority))))
+    (is (= :observation-entity-mismatch
+           (refusal #(sut/validate-observation!
+                      candidate (assoc-in authority [:expected :subject :entity/id] "entity/other")))))
+    (is (= :observation-identity-mismatch
+           (refusal #(sut/validate-observation!
+                      candidate (assoc-in authority [:expected :point :attempt/id] "attempt/other")))))
+    (is (= :authority-scope-missing
+           (refusal #(sut/validate-observation! candidate
+                                                (update authority :expected dissoc :authority/scope)))))
+    (is (= :authority-provenance-missing
+           (refusal #(sut/validate-observation!
+                      candidate (update authority :expected dissoc :authority/provenance)))))))
+
+(deftest identities-authority-and-review-binding-test
+  (let [{:keys [candidate authority dir records]} (fixture)]
+    (is (= :missing-identity
+           (refusal #(sut/validate-observation! (assoc candidate :observation/id "") authority))))
     (is (= :candidate-owned-review
-           (refusal #(sut/validate-observation! (assoc observation :review {:verdict :accepted}) authority))))
+           (refusal #(sut/validate-observation! (assoc candidate :review {:verdict :accepted}) authority))))
     (is (= :authority-not-found
            (refusal #(sut/validate-observation!
-                      (assoc-in observation [:authority :review/ref] :authority/forged)
-                      authority))))
-    (is (= :self-review
-           (refusal #(sut/validate-observation!
-                      observation
-                      (update authority :resolver
-                              (fn [resolve]
-                                (fn [kind ref]
-                                  (let [v (resolve kind ref)]
-                                    (if (= kind :review)
-                                      (let [record (assoc (review-for observation "observer/test-a")
-                                                          :reviewer/id "observer/test-a")
-                                            bs (edn-bytes record)
-                                            path (Files/createTempFile "self-review" ".edn"
-                                                                       (make-array java.nio.file.attribute.FileAttribute 0))]
-                                        (Files/write path bs (make-array java.nio.file.OpenOption 0))
-                                        (pointer path bs)) v)))))))))
-    (is (= :borrowed-review
-           (refusal #(sut/validate-observation!
-                      observation
-                      (update authority :resolver
-                              (fn [resolve]
-                                (fn [kind ref]
-                                  (if (= kind :observer)
-                                    (let [record {:schema sut/authority-schema
-                                                  :role :categorical-state-observer
-                                                  :principal/id "observer/other"}
-                                          bs (edn-bytes record)
-                                          path (Files/createTempFile "other-observer" ".edn"
-                                                                     (make-array java.nio.file.attribute.FileAttribute 0))]
-                                      (Files/write path bs (make-array java.nio.file.OpenOption 0))
-                                      (pointer path bs))
-                                    (resolve kind ref)))))))))
-    (is (= :review-subject-mismatch
-           (refusal #(sut/validate-observation!
-                      (-> observation
-                          (assoc-in [:categorical-status :value] :refined)
-                          (assoc-in [:rubric :assertions] [:framing-sharpened]))
-                      authority))))
-    (is (= :review-subject-mismatch
-           (refusal #(sut/validate-observation!
-                      (assoc-in observation [:evidence :items 0 :kind] :artifact-inspection)
-                      authority))))))
+                      (assoc-in candidate [:authority :review/ref] :review/forged) authority))))
+    (let [observer (write-record! dir "blank-observer.edn"
+                                  {:schema sut/authority-schema :role :categorical-state-observer
+                                   :principal/id "" :authority/scope :test
+                                   :authority/provenance {:config/id :test/categorical-authority
+                                                          :revision :v1}})
+          a (assoc authority :resolver #(get (assoc records [:observer :authority/observer-a] observer)
+                                             [%1 %2]))]
+      (is (= :observer-unauthorized (refusal #(sut/validate-observation! candidate a)))))
+    (let [p (write-record! dir "self-review.edn"
+                           (assoc (review-for candidate "observer/test-a")
+                                  :reviewer/id "observer/test-a"))
+          a (assoc authority :resolver #(get (assoc records [:review :authority/review-a] p) [%1 %2]))]
+      (is (= :self-review (refusal #(sut/validate-observation! candidate a)))))
+    (let [ref :evidence/other
+          p (write-record! dir "other-claim.edn"
+                           (assoc (evidence-claim :support-gained) :claim/id "claim/other"))
+          changed (assoc-in candidate [:evidence :claims 0 :claim/ref] ref)
+          a (assoc authority :resolver #(get (assoc records [:evidence ref] p) [%1 %2]))]
+      (is (= :review-subject-mismatch
+             (refusal #(sut/validate-observation! changed a)))))))
 
-(deftest temporal-and-evidence-refusals-test
-  (let [{:keys [observation authority]} (fixture)]
-    (is (= :temporal-outcome-leakage
+(deftest limitations-substitution-and-ambiguity-test
+  (let [{:keys [candidate authority dir records]} (fixture)]
+    (is (= :limitations-missing
+           (refusal #(sut/validate-observation! (dissoc candidate :limitations) authority))))
+    (is (= :retrospective-flag-mismatch
            (refusal #(sut/validate-observation!
-                      (assoc-in observation [:point :evidence/cutoff-at] "2026-09-12T12:03:00Z")
+                      (assoc-in candidate [:limitations :retrospective?] false) authority))))
+    (is (= :derived-state-not-observation
+           (refusal #(sut/validate-observation!
+                      (assoc candidate :observation/method :derived-unique-argmax-of-mu-post)
                       authority))))
-    (is (= :forbidden-evidence-source
+    (is (= :state-domain-mismatch
            (refusal #(sut/validate-observation!
-                      (assoc-in observation [:evidence :items 0 :kind] :target-disposition)
-                      authority))))
-    (is (= :evidence-after-cutoff
-           (refusal #(sut/validate-observation!
-                      (assoc-in observation [:evidence :items 0 :observed-at]
-                                "2026-09-12T12:01:30Z") authority))))
-    (is (= :missing-source
-           (refusal #(sut/validate-observation!
-                      (assoc-in observation [:evidence :items 0 :source :path] "/absent/test.edn")
-                      authority))))))
+                      (assoc-in candidate [:categorical-status :value] :live) authority))))
+    (let [ref :evidence/claim-b
+          claim (assoc (evidence-claim :framing-sharpened) :claim/id "claim/test-2")
+          p (write-record! dir "claim-b.edn" claim)
+          c (-> candidate
+                (update-in [:evidence :claims] conj {:claim/ref ref})
+                (assoc-in [:authority :review/ref] :authority/review-b))
+          review-p (write-record! dir "review-b.edn" (review-for c "observer/test-a"))
+          rs (assoc records [:evidence ref] p [:review :authority/review-b] review-p)
+          a (assoc authority :resolver #(get rs [%1 %2]))]
+      (is (= :ambiguous-categorical-evidence
+             (refusal #(sut/validate-observation! c a)))))))
 
-(deftest strict-source-and-mutation-controls-test
+(deftest strict-source-controls-test
   (let [good (edn-bytes {:a 1})
-        bad-utf8 (byte-array [(unchecked-byte 0xc3) (unchecked-byte 0x28)])
-        ptr {:path "virtual" :sha256 (sut/sha256-bytes bad-utf8)}]
+        bad-utf8 (byte-array [(unchecked-byte 0xc3) (unchecked-byte 0x28)])]
     (is (= :invalid-utf8
-           (refusal #(sut/read-pinned-form! ptr {:read-bytes (constantly bad-utf8)}))))
+           (refusal #(sut/read-pinned-form!
+                      {:path "virtual" :sha256 (sut/sha256-bytes bad-utf8)}
+                      {:read-bytes (constantly bad-utf8)}))))
     (is (= :multiple-forms
            (let [bs (.getBytes "{:a 1} {:b 2}" StandardCharsets/UTF_8)]
              (refusal #(sut/read-pinned-form!
@@ -176,33 +203,5 @@
              (refusal #(sut/read-pinned-form!
                         {:path "virtual" :sha256 (sut/sha256-bytes good)}
                         {:read-bytes (fn [_]
-                                       (if (= 1 (swap! calls inc)) good (edn-bytes {:a 2})))})))))))
-
-(deftest exact-identity-and-conflict-controls-test
-  (let [{:keys [observation authority]} (fixture)]
-    (is (= :missing-identity
-           (refusal #(sut/validate-observation! (update observation :point dissoc :run/id)
-                                                authority))))
-    (is (= :observation-entity-mismatch
-           (refusal #(sut/validate-observation!
-                      observation (assoc-in authority [:expected :subject :entity/id] "entity/other")))))
-    (is (= :observation-identity-mismatch
-           (refusal #(sut/validate-observation!
-                      observation (assoc-in authority [:expected :point :run/id] "run-other")))))
-    ;; Each record is independently valid under a resolver that supplies its
-    ;; exact review; only the collection-level point conflict refuses.
-    (let [other (-> observation
-                    (assoc :observation/id "test/observation-2")
-                    (assoc-in [:categorical-status :value] :refined)
-                    (assoc-in [:rubric :assertions] [:framing-sharpened])
-                    (assoc-in [:authority :review/ref] :authority/review-b))
-          dir (Files/createTempDirectory "categorical-conflict" (make-array java.nio.file.attribute.FileAttribute 0))
-          path (.resolve dir "review.edn") bs (edn-bytes (review-for other "observer/test-a"))
-          _ (Files/write path bs (make-array java.nio.file.OpenOption 0))
-          resolve0 (:resolver authority)
-          authority2 (assoc authority :resolver
-                            (fn [kind ref]
-                              (if (= [kind ref] [:review :authority/review-b])
-                                (pointer path bs) (resolve0 kind ref))))]
-      (is (= :categorical-observation-conflict
-             (refusal #(sut/validate-observations! [observation other] authority2)))))))
+                                       (if (= 1 (swap! calls inc)) good
+                                           (edn-bytes {:a 2})))})))))))

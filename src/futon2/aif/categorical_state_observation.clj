@@ -19,6 +19,7 @@
 (def rubric-id :wm/categorical-state-rubric-v1)
 (def authority-schema :wm/categorical-state-authority-v1)
 (def review-schema :wm/categorical-state-review-v1)
+(def evidence-claim-schema :wm/categorical-state-evidence-claim-v1)
 
 (def rubric
   "Evidence assertions required by the existing seven lifecycle semantics.
@@ -36,12 +37,18 @@
   #{:target-disposition :model-posterior :posterior-argmax
     :interest-event-type :interest-projected-standing})
 
+(def supported-assertions (set (mapcat identity (vals rubric))))
+
 (defn- refuse! [reason path & [data]]
   (throw (ex-info (str "Categorical state observation refused: " (name reason))
                   (merge {:refusal reason :path path} data))))
 
 (defn- demand! [pred reason path & [data]]
   (when-not pred (refuse! reason path data)))
+
+(defn- nonblank? [x]
+  (and (or (string? x) (keyword? x) (symbol? x))
+       (not (str/blank? (name x)))))
 
 (defn sha256-bytes [bytes]
   (let [digest (.digest (MessageDigest/getInstance "SHA-256") bytes)]
@@ -106,47 +113,83 @@
 (defn subject-digest [observation]
   (sha256-bytes (.getBytes (pr-str (subject observation)) StandardCharsets/UTF_8)))
 
-(defn- classify-rubric! [observation]
+(defn- classify-rubric! [observation assertions]
   (let [declared (get-in observation [:categorical-status :value])
-        assertions (set (get-in observation [:rubric :assertions]))
+        assertions (set assertions)
         matches (->> rubric
                      (keep (fn [[status required]]
                              (when (every? assertions required) status)))
                      set)]
     (demand! (= rubric-id (get-in observation [:rubric :id]))
              :rubric-version-mismatch [:rubric :id])
-    (demand! (seq assertions) :insufficient-categorical-evidence [:rubric :assertions])
-    (demand! (seq matches) :insufficient-categorical-evidence [:rubric :assertions])
+    (demand! (seq assertions) :insufficient-categorical-evidence [:evidence])
+    (demand! (every? supported-assertions assertions) :unsupported-evidence-assertion
+             [:evidence] {:assertions assertions})
+    (demand! (seq matches) :insufficient-categorical-evidence [:evidence])
     (demand! (= 1 (count matches)) :ambiguous-categorical-evidence
              [:rubric :assertions] {:matching-statuses matches})
     (demand! (= declared (first matches)) :rubric-state-mismatch
              [:categorical-status :value] {:rubric-status (first matches)})))
 
-(defn- validate-time! [observation]
+(defn- validate-time! [observation expected]
   (let [p (:point observation)
         action-start (instant! (:action/started-at p) [:point :action/started-at])
         action-end (instant! (:action/completed-at p) [:point :action/completed-at])
         cutoff (instant! (:evidence/cutoff-at p) [:point :evidence/cutoff-at])
         disposition-at (instant! (:disposition/recorded-at p) [:point :disposition/recorded-at])
         annotation-at (instant! (:annotation/created-at p) [:point :annotation/created-at])]
+    (doseq [k [:action/started-at :action/completed-at :evidence/cutoff-at
+               :disposition/recorded-at]]
+      (demand! (= (get-in expected [:point k]) (get p k))
+               :observation-time-mismatch [:point k]))
     (demand! (not (.isAfter action-start action-end)) :temporal-order-invalid [:point])
     (demand! (not (.isAfter action-end cutoff)) :temporal-order-invalid [:point])
     (demand! (.isBefore cutoff disposition-at) :temporal-outcome-leakage [:point])
     (demand! (not (.isBefore annotation-at cutoff)) :temporal-order-invalid [:point])
-    (doseq [[idx evidence] (map-indexed vector (get-in observation [:evidence :items]))]
-      (demand! (not (forbidden-evidence-kinds (:kind evidence)))
-               :forbidden-evidence-source [:evidence :items idx :kind])
-      (demand! (not (.isAfter (instant! (:observed-at evidence)
-                                        [:evidence :items idx :observed-at]) cutoff))
-               :evidence-after-cutoff [:evidence :items idx :observed-at]))))
+    {:annotation-at annotation-at :cutoff cutoff}))
 
-(defn- validate-evidence! [observation io-opts]
-  (let [items (get-in observation [:evidence :items])]
+(defn- forbidden-payload? [x]
+  (cond
+    (map? x) (or (some forbidden-evidence-kinds (keys x))
+                 (some forbidden-payload? (vals x)))
+    (coll? x) (some forbidden-payload? x)
+    :else (forbidden-evidence-kinds x)))
+
+(declare authority-record!)
+
+(defn- validate-evidence! [observation expected resolver io-opts]
+  (let [items (get-in observation [:evidence :claims])
+        expected-point (:point expected)
+        expected-entity (get-in expected [:subject :entity/id])
+        cutoff (instant! (:evidence/cutoff-at expected-point) [:expected :point :evidence/cutoff-at])]
     (demand! (and (vector? items) (seq items)) :insufficient-categorical-evidence
-             [:evidence :items])
-    (doseq [[idx item] (map-indexed vector items)]
-      (demand! (keyword? (:kind item)) :malformed-evidence [:evidence :items idx])
-      (read-pinned-form! (:source item) io-opts))))
+             [:evidence :claims])
+    (mapv
+     (fn [idx item]
+       (let [ref (:claim/ref item)
+             claim (authority-record! resolver :evidence ref io-opts)
+             cp (:point claim)]
+         (demand! (= evidence-claim-schema (:schema claim)) :malformed-evidence-claim
+                  [:evidence :claims idx])
+         (demand! (nonblank? (:claim/id claim)) :malformed-evidence-claim
+                  [:evidence :claims idx :claim/id])
+         (demand! (= :categorical-status-evidence (:claim/type claim))
+                  :forbidden-evidence-source [:evidence :claims idx :claim/type])
+         (demand! (= expected-entity (get-in claim [:subject :entity/id]))
+                  :evidence-entity-mismatch [:evidence :claims idx :subject])
+         (doseq [k [:run/id :cohort/id :attempt/id :checkpoint/ref]]
+           (demand! (= (get expected-point k) (get cp k))
+                    :evidence-point-mismatch [:evidence :claims idx :point k]))
+         (demand! (not (.isAfter (instant! (:observed-at cp)
+                                           [:evidence :claims idx :point :observed-at]) cutoff))
+                  :evidence-after-cutoff [:evidence :claims idx :point :observed-at])
+         (demand! (not (forbidden-payload? (:payload claim)))
+                  :forbidden-evidence-source [:evidence :claims idx :payload])
+         (demand! (supported-assertions (:assertion claim))
+                  :unsupported-evidence-assertion [:evidence :claims idx :assertion])
+         {:ref ref :claim/id (:claim/id claim) :assertion (:assertion claim)
+          :observed-at (:observed-at cp)}))
+     (range) items)))
 
 (defn- authority-record! [resolver kind ref io-opts]
   (demand! (fn? resolver) :authority-resolver-missing [:authority])
@@ -163,13 +206,19 @@
   [observation {:keys [resolver io-opts expected]}]
   (demand! (= schema (:schema observation)) :unsupported-schema [:schema])
   (demand! (not (contains? observation :review)) :candidate-owned-review [:review])
+  (demand! (nonblank? (:observation/id observation)) :missing-identity [:observation/id])
   (demand! (= :post-action-pre-disposition-at-close (get-in observation [:point :state-point]))
            :wrong-conditioning-point [:point :state-point])
   (doseq [k [:run/id :cohort/id :attempt/id :checkpoint/ref]]
-    (demand! (some? (get-in observation [:point k])) :missing-identity [:point k]))
-  (demand! (some? (get-in observation [:subject :entity/id]))
+    (demand! (nonblank? (get-in observation [:point k])) :missing-identity [:point k]))
+  (demand! (nonblank? (get-in observation [:subject :entity/id]))
            :missing-identity [:subject :entity/id])
   (demand! (map? expected) :expected-context-missing [:expected])
+  (demand! (#{:test :production} (:authority/scope expected))
+           :authority-scope-missing [:expected :authority/scope])
+  (demand! (and (nonblank? (get-in expected [:authority/provenance :config/id]))
+                (nonblank? (get-in expected [:authority/provenance :revision])))
+           :authority-provenance-missing [:expected :authority/provenance])
   (demand! (= (get-in expected [:subject :entity/id])
               (get-in observation [:subject :entity/id]))
            :observation-entity-mismatch [:subject :entity/id])
@@ -183,10 +232,22 @@
              [:categorical-status :value])
     (demand! (= :reviewed-categorical-annotation (:observation/method observation))
              :derived-state-not-observation [:observation/method]))
-  (classify-rubric! observation)
-  (validate-time! observation)
-  (validate-evidence! observation io-opts)
-  (let [observer-ref (get-in observation [:authority :observer/ref])
+  (let [{:keys [annotation-at cutoff]} (validate-time! observation expected)
+        limitations (:limitations observation)
+        retrospective? (.isAfter annotation-at cutoff)]
+    (demand! (map? limitations) :limitations-missing [:limitations])
+    (doseq [k [:retrospective? :missingness :selection :method :rubric]]
+      (demand! (contains? limitations k) :limitations-missing [:limitations k]))
+    (demand! (= retrospective? (:retrospective? limitations))
+             :retrospective-flag-mismatch [:limitations :retrospective?])
+    (demand! (= :reviewed-categorical-annotation (:method limitations))
+             :limitations-method-mismatch [:limitations :method])
+    (demand! (= rubric-id (:rubric limitations))
+             :limitations-rubric-mismatch [:limitations :rubric]))
+  (let [resolved-claims (validate-evidence! observation expected resolver io-opts)
+        assertions (mapv :assertion resolved-claims)
+        _ (classify-rubric! observation assertions)
+        observer-ref (get-in observation [:authority :observer/ref])
         review-ref (get-in observation [:authority :review/ref])
         observer (authority-record! resolver :observer observer-ref io-opts)
         review (authority-record! resolver :review review-ref io-opts)
@@ -194,8 +255,18 @@
     (demand! (= authority-schema (:schema observer)) :observer-unauthorized [:authority :observer/ref])
     (demand! (= :categorical-state-observer (:role observer))
              :observer-unauthorized [:authority :observer/ref])
+    (demand! (nonblank? (:principal/id observer)) :observer-unauthorized [:authority :observer/ref])
+    (demand! (= (:authority/scope expected) (:authority/scope observer))
+             :observer-unauthorized [:authority :observer/ref])
+    (demand! (= (:authority/provenance expected) (:authority/provenance observer))
+             :observer-unauthorized [:authority :observer/ref])
     (demand! (= review-schema (:schema review)) :review-unauthorized [:authority :review/ref])
     (demand! (= :categorical-state-reviewer (:role review))
+             :review-unauthorized [:authority :review/ref])
+    (demand! (nonblank? (:reviewer/id review)) :review-unauthorized [:authority :review/ref])
+    (demand! (= (:authority/scope expected) (:authority/scope review))
+             :review-unauthorized [:authority :review/ref])
+    (demand! (= (:authority/provenance expected) (:authority/provenance review))
              :review-unauthorized [:authority :review/ref])
     (demand! (not= (:principal/id observer) (:reviewer/id review))
              :self-review [:authority :review/ref])
@@ -219,18 +290,21 @@
      :subject/sha256 digest
      :observer-origin observer-ref
      :review-origin review-ref
+     :resolved-evidence-claims resolved-claims
+     :derived-rubric-assertions assertions
      :method :reviewed-categorical-annotation
      :cohort (get-in observation [:point :cohort/id])
+     :authority/scope (:authority/scope expected)
+     :authority/provenance (:authority/provenance expected)
+     :conditioning-point expected
      :limitations (:limitations observation)}))
 
 (defn validate-observations!
   "Validate observations and refuse disagreeing labels at one exact point."
   [observations authority]
   (let [validated (mapv #(validate-observation! % authority) observations)
-        groups (group-by #(vector (get-in % [:observation :subject :entity/id])
-                                  (select-keys (get-in % [:observation :point])
-                                               [:run/id :cohort/id :attempt/id :checkpoint/ref
-                                                :evidence/cutoff-at]))
+        groups (group-by #(select-keys (:conditioning-point %)
+                                      [:subject :point :authority/scope])
                          validated)]
     (doseq [[point xs] groups]
       (when (< 1 (count (set (map #(get-in % [:observation :categorical-status :value]) xs))))
