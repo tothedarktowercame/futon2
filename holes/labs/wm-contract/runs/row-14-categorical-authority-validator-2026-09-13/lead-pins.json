@@ -1,0 +1,44 @@
+[
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-authority-spec-2026-09-13/lead-review.md",
+    "expected": "1381ce9572bc632fabc85b761c3b6e1d96daed004acfb85a30ae98da4bfc1767",
+    "actual": "1381ce9572bc632fabc85b761c3b6e1d96daed004acfb85a30ae98da4bfc1767",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row14-categorical-state-observation-v1.md",
+    "expected": "13e6b59b077960e3b370d42a857e0f06f9209de341d0a85134e23c775ce7aac5",
+    "actual": "13e6b59b077960e3b370d42a857e0f06f9209de341d0a85134e23c775ce7aac5",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/categorical_state_observation.clj",
+    "expected": "12e0eb222e27e8bb0fe1bb7f7e31dd93e4d1193c49c6357cc05fc60c851fd826",
+    "actual": "12e0eb222e27e8bb0fe1bb7f7e31dd93e4d1193c49c6357cc05fc60c851fd826",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/test/futon2/aif/categorical_state_observation_test.clj",
+    "expected": "0c3a526216c78efdf7682ff5ff8fdf5a55da2e45331e80d392790b394461f019",
+    "actual": "0c3a526216c78efdf7682ff5ff8fdf5a55da2e45331e80d392790b394461f019",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/belief.clj",
+    "expected": "39c1dabaf7be878b638ee1f14f22e4d54f2b5b9ed1a2cc09bdd7b63d1b27a595",
+    "actual": "39c1dabaf7be878b638ee1f14f22e4d54f2b5b9ed1a2cc09bdd7b63d1b27a595",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon3/library/structure/interest-event-vocabulary.flexiarg",
+    "expected": "b51296613be9c61bddf9b58d082eaaecbad91ef139373f73438762b2e0943405",
+    "actual": "b51296613be9c61bddf9b58d082eaaecbad91ef139373f73438762b2e0943405",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/CONTRACT-machine-model-v1.md",
+    "expected": "5a81d2d18b9d0339139ea308a079db610af78b2931fcd06e9445879b2c04c9fb",
+    "actual": "5a81d2d18b9d0339139ea308a079db610af78b2931fcd06e9445879b2c04c9fb",
+    "matches": true
+  }
+]

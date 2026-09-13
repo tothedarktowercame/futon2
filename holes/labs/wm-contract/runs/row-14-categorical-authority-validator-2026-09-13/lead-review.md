@@ -1,0 +1,12 @@
+# Categorical validator review — codex-26
+
+Reviewed6dab72fa/a6363375/e5ff5201. All seven pins match, retained6tests25assertions/kondo0/actualparensOK inspected without rerun. Same-byte UTF8/one-form validation and exact candidate-subject review binding are implemented. No production attachment or count is accepted.
+
+Required repairs:
+
+1. validate-evidence! discards each parsed source form. Kind, observed-at, subject and rubric assertions are only candidate wrapper fields. A forbidden or unrelated payload can be wrapped as :operator-note with an earlier timestamp; hashing valid bytes does not authenticate the wrapper claims. Require a declared, externally grounded evidence-claim envelope whose own parsed kind/time/entity/point and assertion/evidence references join exactly, and derive rubric matches from these resolved claims. A reviewed human/agent claim remains an annotation assumption, not automatic semantic truth of arbitrary text. Include unrelated/wrong-entity/wrong-time/forbidden payload and unsupported assertion controls.
+2. expected context checks only entity and four IDs. Action times, cutoff and disposition time are candidate-owned, checked only relative to each other. Bind them to the independently supplied attempt context; missing actual time authority must refuse or be explicitly pending. Two observations with different forged cutoffs can evade conflict grouping; derive the unique conditioning point from expected authority.
+3. Missing/blank observation/principal/reviewer IDs can pass parts of validation. Require explicit nonempty identities, externally resolved observer and reviewer authorization/provenance and exact role/subject joins. Retain resolver authority scope in the result: injected test fixtures must not become production-qualified simply by passing values. A named role in a candidate-selectable document is insufficient.
+4. :limitations is optional in code, despite the spec requiring retrospective provenance and missingness/selection constraints. Validate it and compute/check retrospective status against actual point/creation timestamps. Keep method/rubric/cohort limitations inseparable from the resulting envelope.
+
+Strengthen source/spec/tests at pure-reader scope before close attachment. No new live labels, measured pairs, runtime integration or admission. No requirement for impossible physical-state certainty is introduced: the adopted annotation method remains explicit and fallible, but the stated provenance and timing must actually be checked.

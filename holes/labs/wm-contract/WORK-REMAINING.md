@@ -1372,3 +1372,7 @@ Selective loaderdc10cbca/c269ea7c reviewed with4matching pins and raw gates. Rej
 ## Lead review update — controller resolution, 2026-09-13
 
 Row18 controller2f39b95d/6c064ff6 accepted narrowly after6source/test/reader pins and3actual controller pins match, retained17tests58assertions/gates reviewed. Controller diagnostic unavailable; production entrypoint lease-unavailable and no lock created. Real lease-aware controllers/direct reload mediation plus deployment evidence remain owed, as does logical-history refusal. Codex22 may advance required row22 edge specification next; no controller exemption or node admission.
+
+## Lead review update — categorical validator, 2026-09-13
+
+Row14 validator6dab72fa/a6363375/e5ff5201 reviewed7pins/gates. Candidate-subject binding/same-byte reading exist, but evidence payload joins are discarded, expected context omits temporal authority, missing/blank principal identities and absent limitations/scope can pass. Repair pure boundary before close attachment; no counts or production qualification. See row-14-categorical-authority-validator-2026-09-13/lead-review.md.
