@@ -59,7 +59,9 @@
    (fn [idx row]
      (let [id (:repair/id row) old (get idx id)]
        (when (and old (= (:repair/status old) (:repair/status row)))
-         (refuse! :interoceptive/duplicate-repair-identity {:repair/id id}))
+         (refuse! :interoceptive/contradictory-discharge
+                  {:repair/id id :statuses [(:repair/status old)
+                                            (:repair/status row)]}))
        (when (and old
                   (not (contains? #{[:open :awaiting-validation]
                                     [:open :resolved] [:open :superseded]
