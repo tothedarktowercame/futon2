@@ -1,0 +1,8 @@
+{:control :duplicate-top-level-key
+ :mutation "insert a second :scope :isolated in the pinned input"
+ :input-sha256 "51e46f000245ff3b56d3dd9514203afe03bd86f7417d051b4808920c3edee3f6"
+ :command "bb holes/labs/wm-contract/typed_gap_census_to_lean.bb <duplicate.edn> <out.lean> 51e46f..."
+ :exit 1
+ :observed "java.lang.IllegalArgumentException: Duplicate key: :scope"
+ :output-created? false
+ :finding :strict-rejection-is-untyped-reader-exception}
