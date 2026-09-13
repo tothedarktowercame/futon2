@@ -1,0 +1,5 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-slow-prior-evidence-test"
+ :exit 0 :tests 4 :assertions 25
+ :tree-sha "8dd5044dc084575011566cb3bfccfccd7fb11ff5" :at "2026-09-13"
+ :stdout "test.stdout" :stderr ""}
+

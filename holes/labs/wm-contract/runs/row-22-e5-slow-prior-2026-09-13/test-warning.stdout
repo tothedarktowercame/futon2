@@ -1,0 +1,8 @@
+Running tests in #{"test"}
+WARNING: identity already refers to: #'clojure.core/identity in namespace: futon2.aif.machine-slow-prior-evidence-test, being replaced by: #'futon2.aif.machine-slow-prior-evidence-test/identity
+
+Testing futon2.aif.machine-slow-prior-evidence-test
+
+Ran 4 tests containing 25 assertions.
+0 failures, 0 errors.
+
