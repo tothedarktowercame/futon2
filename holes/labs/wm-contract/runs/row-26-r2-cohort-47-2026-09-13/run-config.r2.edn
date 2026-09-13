@@ -4,5 +4,6 @@
  :reviewer "codex-22"
  :repair-reviewer "codex-24"
  :opportunity-count 1
+ :transport-timeout-ms 30000
  :poll-ms 2000
  :timeout-ms 3600000}
