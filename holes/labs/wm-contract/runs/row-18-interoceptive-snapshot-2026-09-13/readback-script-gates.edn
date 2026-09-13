@@ -1,0 +1,8 @@
+{:tree-sha "4c65f354a9508cfa6e8d3fd654bbb0a953ee4b9b"
+ :at "2026-09-13T02:01:17Z"
+ :gates
+ [{:command "clj-kondo --lint holes/labs/wm-contract/runs/row-18-interoceptive-snapshot-2026-09-13/actual_reader_readback.clj"
+   :exit 0 :tests 1 :assertions 0
+   :transcript "linting took 6ms, errors: 0, warnings: 0"}
+  {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- holes/labs/wm-contract/runs/row-18-interoceptive-snapshot-2026-09-13/actual_reader_readback.clj"
+   :exit 0 :tests 1 :assertions 1 :transcript ""}]}

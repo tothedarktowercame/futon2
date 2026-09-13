@@ -1,4 +1,4 @@
-{:command "clojure -M -e <bounded actual-reader projection retained in review history>"
+{:command "clojure -M holes/labs/wm-contract/runs/row-18-interoceptive-snapshot-2026-09-13/actual_reader_readback.clj"
  :exit 0 :at "2026-09-13T01:58:45Z"
  :reader :futon2.aif.tripwire/repair-snapshot
  :source
