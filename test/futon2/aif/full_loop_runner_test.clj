@@ -2141,6 +2141,29 @@
                 "/repo" before {:artifact-ref "facade01234567890abcdef1234567890abcdef1"})))
         "a changed descendant outside the tolerated author window is rejected")))
 
+(deftest artifact-binding-corroborates-the-authors-done-line-not-the-job-stamp
+  ;; attempt-002, 2026-09-13: Agency stamps the job's :artifact-ref with the
+  ;; pre-dispatch head, so an author who really commits was condemned as a
+  ;; mismatch.  The DONE line's sha is the author's claim.
+  (let [opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head "authored789" :observed-at-ms 2000})
+              :resolve-commit-sha-fn
+              (fn [_ commit] (when (= commit "9a6a012f") "authored789"))
+              :ancestor-fn (fn [_ ancestor descendant]
+                             (and (= ancestor "base000") (= descendant "authored789")))
+              :commit-time-ms-fn (fn [& _] 1500)}
+        before {:repo "/repo" :head "base000" :observed-at-ms 1000}
+        binding (runner/fresh-artifact-binding
+                 opts "/repo" before
+                 {:artifact-ref "base000"
+                  :events [{:type "text"
+                            :text "validations pass\nFULL_LOOP_AUTHOR: DONE 9a6a012f"}]})]
+    (is (= "9a6a012f" (:text-artifact-ref binding))
+        "the claim comes from the DONE line, not the dispatch-time job stamp")
+    (is (= "authored789" (:commit binding)))
+    (is (:corroborates? binding))
+    (is (false? (:disagreement? binding)))))
+
 (deftest artifact-binding-requires-a-resolvable-matching-claim
   (let [opts {:repo-head-observation-fn
               (fn [repo] {:repo repo :head "concurrent-head" :observed-at-ms 2000})

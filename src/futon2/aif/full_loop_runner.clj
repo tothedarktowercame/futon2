@@ -518,6 +518,21 @@
     (boolean (f repo ancestor descendant))
     (zero? (:exit (git repo "merge-base" "--is-ancestor" ancestor descendant)))))
 
+(declare job-text)
+
+(defn- author-claimed-ref
+  "The sha the author's own FULL_LOOP_AUTHOR: DONE line claims.  The Agency
+  job's :artifact-ref is stamped at dispatch with the pre-dispatch head, so
+  corroborating against it condemns every author who actually commits
+  (attempt-002, 2026-09-13: observed 9a6a012f, corroborated against the
+  base 2e5e7409, mismatch).  The text claim is the author's; the job field
+  is only a fallback for jobs with no readable marker."
+  [author-job]
+  (or (some->> (job-text author-job)
+               (re-find #"(?m)^FULL_LOOP_AUTHOR:\s*DONE\b[ \t]*([0-9a-fA-F]{7,40})")
+               second)
+      (:artifact-ref author-job)))
+
 (defn fresh-artifact-binding
   "Observe and validate the commit produced by one fresh author dispatch.
   The claimed commit must resolve to the validated repository HEAD.
@@ -530,7 +545,7 @@
           (let [after (observe-repo-head opts repo)
                 before-head (:head before)
                 observed-head (:head after)
-                text-ref (:artifact-ref author-job)
+                text-ref (author-claimed-ref author-job)
                 start-ms (:observed-at-ms before)
                 end-ms (:observed-at-ms after)
                 changed? (and before-head observed-head (not= before-head observed-head))
