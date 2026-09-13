@@ -43,4 +43,8 @@
   :interoceptive/unpinned-authority]
  :typed-exclusions [:shadow-record :test-root :discharged]
  :not-claimed [:live-open-genuine-trip :integration :task-gain-composition
-               :calibration :safer-enaction]}
+               :calibration :safer-enaction]
+ :next-dependency {:kind :complete-production-manifest-adapter
+                   :owed [:trip-store-completeness :repair-store-completeness
+                          :source-ownership :content-pins]
+                   :note "The bounded reader sample is not a global production confidence census."}}
