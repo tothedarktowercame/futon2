@@ -137,10 +137,10 @@
     (is (= :e6b-completeness/authority-join-invalid
            (refusal #(completeness/validate
                       (replace-record config :writer-inventory
-                                      #(assoc % :authority/owner (:candidate/id config)))))))
+                                      (fn [x] (assoc x :authority/owner (:candidate/id config))))))))
     (is (= :e6b-completeness/authority-join-invalid
            (refusal #(completeness/validate
-                      (replace-record config :acceptance #(assoc % :scope :production))))))
+                      (replace-record config :acceptance (fn [x] (assoc x :scope :production)))))))
     (store/release! store)))
 
 (deftest census-review-and-chronology-controls
