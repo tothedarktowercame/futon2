@@ -1,0 +1,29 @@
+{:tree-sha "8eb1261eafa393ac8e068ad2fe85fee0a74c08a2"
+ :at "2026-09-13T07:35:41Z"
+ :history
+ [{:gate :focused-test-attempt-1
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-capture-test futon2.aif.machine-slow-feedback-store-v2-test]'"
+   :exit 1 :tests 16 :assertions 73 :failures 0 :errors 1
+   :finding "The malformed-UTF8 control used checked byte coercion and failed before invoking the codec. Corrected in follow-up commit 6f251358."
+   :stdout "test-attempt1.stdout" :stderr "test-attempt1.stderr"}
+  {:gate :superseded-focused-test
+   :tree-sha "6f251358a71e82ade1f607cd247a3d235232e532"
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-capture-test futon2.aif.machine-slow-feedback-store-v2-test]'"
+   :exit 0 :tests 16 :assertions 76
+   :reason "Superseded by the same focused run after complete parent/state join validation was added."
+   :stdout "test-final.stdout" :stderr "test-final.stderr"}]
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-capture-test futon2.aif.machine-slow-feedback-store-v2-test]'"
+   :exit 0 :tests 16 :assertions 76
+   :stdout "test-final2.stdout" :stderr "test-final2.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_capture.clj test/futon2/aif/machine_slow_feedback_capture_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo-final.stdout" :stderr "kondo-final.stderr"}
+  {:gate :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_capture.clj test/futon2/aif/machine_slow_feedback_capture_test.clj"
+   :exit 0 :files 2 :stdout "parens-final.stdout" :stderr "parens-final.stderr"}
+  {:gate :induced-runner-failure
+   :command "clojure -Sdeps '{:paths [\"/tmp\"]}' -M:test -m cognitect.test-runner -d /tmp -n codex23-capture-codec-induced-test"
+   :exit 1 :tests 1 :assertions 1 :failures 1
+   :stdout "induced.stdout" :stderr "induced.stderr"}]}

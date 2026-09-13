@@ -1,0 +1,64 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-slow-feedback-capture-test
+
+ERROR in (strict-readback-controls) (RT.java:1153)
+Uncaught exception, not in assertion.
+expected: nil
+  actual: java.lang.IllegalArgumentException: Value out of range for byte: 195
+ at clojure.lang.RT.byteCast (RT.java:1153)
+    futon2.aif.machine_slow_feedback_capture_test$fn__6624.invokeStatic (machine_slow_feedback_capture_test.clj:69)
+    futon2.aif.machine_slow_feedback_capture_test/fn (machine_slow_feedback_capture_test.clj:65)
+    clojure.test$test_var$fn__9856.invoke (test.clj:717)
+    clojure.test$test_var.invokeStatic (test.clj:717)
+    clojure.test$test_var.invoke (test.clj:708)
+    clojure.test$test_vars$fn__9882$fn__9887.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars$fn__9882.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars.invokeStatic (test.clj:731)
+    clojure.test$test_all_vars.invokeStatic (test.clj:737)
+    clojure.test$test_ns.invokeStatic (test.clj:758)
+    clojure.test$test_ns.invoke (test.clj:743)
+    clojure.core$map$fn__5935.invoke (core.clj:2772)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.boundedLength (RT.java:1790)
+    clojure.lang.RestFn.applyTo (RestFn.java:130)
+    clojure.core$apply.invokeStatic (core.clj:669)
+    clojure.test$run_tests.invokeStatic (test.clj:768)
+    clojure.test$run_tests.doInvoke (test.clj:768)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.core$apply.invoke (core.clj:662)
+    cognitect.test_runner$test.invokeStatic (test_runner.clj:74)
+    cognitect.test_runner$test.invoke (test_runner.clj:62)
+    cognitect.test_runner.api$do_test.invokeStatic (api.clj:14)
+    cognitect.test_runner.api$do_test.invoke (api.clj:6)
+    cognitect.test_runner.api$test.invokeStatic (api.clj:28)
+    cognitect.test_runner.api$test.invoke (api.clj:16)
+    clojure.lang.Var.invoke (Var.java:384)
+    clojure.run.exec$exec.invokeStatic (exec.clj:88)
+    clojure.run.exec$exec.invoke (exec.clj:78)
+    clojure.run.exec$_main$fn__220.invoke (exec.clj:227)
+    clojure.run.exec$_main.invokeStatic (exec.clj:223)
+    clojure.run.exec$_main.doInvoke (exec.clj:191)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.main$main_opt.invokeStatic (main.clj:514)
+    clojure.main$main_opt.invoke (main.clj:510)
+    clojure.main$main.invokeStatic (main.clj:664)
+    clojure.main$main.doInvoke (main.clj:616)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.main.main (main.java:40)
+
+Testing futon2.aif.machine-slow-feedback-store-v2-test
+
+Ran 16 tests containing 73 assertions.
+0 failures, 1 errors.

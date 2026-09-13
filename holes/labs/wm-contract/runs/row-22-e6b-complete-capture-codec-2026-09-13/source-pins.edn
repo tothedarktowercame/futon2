@@ -1,0 +1,12 @@
+{:tree-sha "8eb1261eafa393ac8e068ad2fe85fee0a74c08a2"
+ :pins
+ [{:path "src/futon2/aif/machine_slow_feedback_capture.clj"
+   :sha256 "bb65d3144a698e47b80ee71d06d5c6b2c2406bd565aba6ec4414eadaae885fae"}
+  {:path "test/futon2/aif/machine_slow_feedback_capture_test.clj"
+   :sha256 "4fa166beb23afe9b8b783d4ce443a79f5613fd2cc4400c523023f000a9fe294c"}
+  {:path "holes/labs/wm-contract/CONTRACT-e6b-complete-capture-codec-v1-2026-09-13.md"
+   :sha256 "0245ab210045560736e8ffac495a38403c0799acfefb423e1204cd18db591d3d"}
+  {:path "src/futon2/aif/machine_slow_feedback_store_v2.clj"
+   :sha256 "3697274ef13c7064a574d266788f2bb50ab621ac73a1817b4e1a01421adcb888"}
+  {:path "src/futon2/aif/machine_slow_feedback_provenance.clj"
+   :sha256 "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90"}]}
