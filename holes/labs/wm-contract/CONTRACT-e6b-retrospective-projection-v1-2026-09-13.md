@@ -37,3 +37,15 @@ source digest separately from the row-vector digest. Future completeness
 `:ledger/sha256` must bind those full source bytes; accepting the vector digest
 alone is insufficient. This clarification grants no completeness authority,
 filesystem staging, retrospective success, or production permission.
+
+## Additive ledger-source envelope
+
+The projection now retains both representations. `:application-ledger` remains
+the original ordered row-vector descriptor and `:digest-roles :ledger/derived`
+keeps its original meaning. `:application-ledger/source` encodes the complete
+consumer record, while `:digest-roles :ledger-source/raw` names that distinct
+raw SHA. Neither digest is silently repurposed.
+
+`:completeness-subject/draft` binds the capture raw SHA, full ledger-source raw
+SHA, and exact target transition subject. Its authority is explicitly `:none`;
+it is the subject an independent reviewer must accept, not an acceptance.

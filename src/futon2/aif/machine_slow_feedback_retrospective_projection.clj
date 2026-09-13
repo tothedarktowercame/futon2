@@ -41,6 +41,18 @@
                                          :outcome (get-in row [:input/digests :outcome]))
                :output/digest (:output/digest row))))
 
+(defn encode-ledger-source
+  "Deterministically encode the unchanged verifier's complete ledger source.
+   This is representation only and supplies no completeness authority."
+  [rows]
+  (when-not (and (vector? rows) (seq rows))
+    (refuse! :e6b-retrospective/ledger-source-invalid {}))
+  (let [checked (mapv ledger-row rows)
+        record (array-map :schema/version :wm/e6b-application-ledger-v1
+                          :scope :isolated-test
+                          :entries checked)]
+    {:record record :descriptor (encoded :derived-application-ledger-source record)}))
+
 (defn project
   "Revalidate CAPTURE-PIN and extract TARGET-APPLICATION-ID. The result is an
    immutable structural draft and explicitly refuses completeness authority."
@@ -89,7 +101,10 @@
           proposal (:proposal-evidence p-record)
           next-record (get-in proposal [:next :state])
           next-encoded (encoded :derived-complete-next-record next-record)
-          ledger-encoded (encoded :derived-six-field-application-ledger ledger)]
+          ledger-encoded (encoded :derived-six-field-application-ledger ledger)
+          ledger-source (encode-ledger-source ledger)
+          ledger-source-encoded (:descriptor ledger-source)
+          transition-subject (get-in target [:transaction :application :transition/subject])]
       (when-not (= (:sha256 next-encoded) (get-in target [:ledger-row :output/digest]))
         (refuse! :e6b-retrospective/next-output-digest-disagreement {}))
       (array-map
@@ -103,12 +118,13 @@
                            :chain-digests (:chain-digests c))
        :target (array-map :application/id target-application-id
                           :index-entry (:entry target)
-                          :transition/subject (get-in target [:transaction :application
-                                                             :transition/subject])
+                          :transition/subject transition-subject
                           :transaction/descriptor (:transaction/descriptor target)
                           :provenance/descriptor (:provenance/descriptor target))
        :application-ledger ledger-encoded
        :application-ledger/records ledger
+       :application-ledger/source ledger-source-encoded
+       :application-ledger/source-record (:record ledger-source)
        :next-state next-encoded
        :next-state/record next-record
        :original-sources (:original-sources p-record)
@@ -117,9 +133,16 @@
        :digest-roles (array-map
                       :capture/raw (:sha256 validated)
                       :ledger/derived (:sha256 ledger-encoded)
+                      :ledger-source/raw (:sha256 ledger-source-encoded)
                       :next-record/derived (:sha256 next-encoded)
                       :prior-carrier (get-in p-record [:carrier-projection :prior :sha256])
                       :next-carrier (get-in p-record [:carrier-projection :next :sha256]))
+       :completeness-subject/draft
+       (array-map :schema :wm/e6b-completeness-subject-draft-v1
+                  :authority/status :none
+                  :capture/raw-sha256 (:sha256 validated)
+                  :ledger-source/raw-sha256 (:sha256 ledger-source-encoded)
+                  :target/transition-subject transition-subject)
        :completeness (array-map :status :refused
                                 :refusal :e6b-retrospective/completeness-authority-unavailable)
        :restart-authorized? false))))
