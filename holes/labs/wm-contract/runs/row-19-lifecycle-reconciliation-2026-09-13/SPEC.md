@@ -13,6 +13,20 @@ active sources must name the controller's closed generation; waiting-writer
 must be zero. Duplicate, omitted, extra, partial, unknown-state, missing-source,
 pin-mismatch, trace-conflict and stale-generation inputs refuse.
 
+Every snapshot now requires explicit isolated/production scope and named
+producer provenance. IDs are nonempty strings in vectors or maps and duplicate
+vectors refuse before set construction. UTF-8 decoding is strict. Deferred
+resumes carry the same controller generation and their order, map keys, pending
+status, payload map and requested-job-id must agree exactly.
+
+A seventh independently configured completeness-authority snapshot binds the
+controller generation, exact digests of all six data sources, and the complete
+job/trace universe. Its universe must equal the hot ledger and each trace pin.
+Only authority marked independent-fixture can support isolated positives.
+Production scope refuses unconditionally until a genuinely independently owned
+production completeness authority exists; a candidate boolean, matching count,
+borrowed authority file or relabelled fixture cannot qualify.
+
 Deferred resumes are reported separately and never counted as accepted jobs.
 A complete census is evidence that this isolated snapshot has zero accepted
 work in flight. It always states restart-authorized false: source authority,
