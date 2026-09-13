@@ -1154,4 +1154,3 @@ lifecycle strips); R3a hosting correction + Box 2 regeneration;
 certificate spec + mechanical emitter with tamper controls;
 projection repair (row 4 loads it); runner hardening against
 misattributed author claims; the PLoP completion list.
-
