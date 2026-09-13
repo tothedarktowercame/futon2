@@ -585,10 +585,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-authorization-before-enactment.request.json",
       "dispatch": "accepted",
       "scope": "canonical authorization before exact enactment E6b repair; isolated"
+    },
+    {
+      "packet": "codex-23-e6b-store-ledger-protocol",
+      "job-id": "invoke-1789277051031-20666-2a6e65e9",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789277051031-20666-2a6e65e9",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-store-ledger-protocol.request.json",
+      "dispatch": "accepted",
+      "scope": "read-only E6b joint state ledger ownership protocol; no store creation"
     }
   ],
   "current-awaiting": [
-    "invoke-1789276825664-20664-3f4ae29c"
+    "invoke-1789277051031-20666-2a6e65e9"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
