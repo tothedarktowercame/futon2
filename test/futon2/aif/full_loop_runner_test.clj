@@ -2164,6 +2164,28 @@
     (is (:corroborates? binding))
     (is (false? (:disagreement? binding)))))
 
+(deftest artifact-binding-reads-a-done-line-surviving-only-in-the-full-result
+  ;; attempt-003 round 2: Agency trims event text at ~2000 chars, so the DONE
+  ;; line at the end of a long reply survives only in :result.
+  (let [opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head "revised123" :observed-at-ms 2000})
+              :resolve-commit-sha-fn
+              (fn [_ commit] (when (= commit "33ca99b0") "revised123"))
+              :ancestor-fn (fn [_ ancestor descendant]
+                             (and (= ancestor "prior000") (= descendant "revised123")))
+              :commit-time-ms-fn (fn [& _] 1500)}
+        before {:repo "/repo" :head "prior000" :observed-at-ms 1000}
+        long-reply (str (apply str (repeat 2500 "x"))
+                        "\nFULL_LOOP_AUTHOR: DONE 33ca99b0")
+        binding (runner/fresh-artifact-binding
+                 opts "/repo" before
+                 {:artifact-ref "prior000"
+                  :result long-reply
+                  :events [{:type "text" :text (subs long-reply 0 2000)}]})]
+    (is (= "33ca99b0" (:text-artifact-ref binding)))
+    (is (:corroborates? binding))
+    (is (false? (:disagreement? binding)))))
+
 (deftest artifact-binding-requires-a-resolvable-matching-claim
   (let [opts {:repo-head-observation-fn
               (fn [repo] {:repo repo :head "concurrent-head" :observed-at-ms 2000})

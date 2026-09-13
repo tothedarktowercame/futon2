@@ -1479,8 +1479,15 @@
   ;; The prompt itself names all verdict markers, so including it makes every
   ;; review look approved. Agency persists the response prefix in
   ;; :result-summary; require the reviewer to put its verdict first.
+  ;; :result is the full response and must be read too: Agency trims event
+  ;; text at ~2000 chars, so a terminal marker at the end of a longer reply
+  ;; survives only there (attempt-003 round 2, 2026-09-13: the author's DONE
+  ;; line was trimmed from the text event and the binding fell back to the
+  ;; dispatch-time :artifact-ref, condemning a corroborable commit).
   (str/join "\n"
-            (concat (keep identity [(:result-summary job) (:terminal-message job)])
+            (concat (keep identity [(:result-summary job)
+                                    (:terminal-message job)
+                                    (:result job)])
                     (keep :text (remove #(= "prompt" (:type %)) (:events job))))))
 
 (defn- review-verdict [job]
