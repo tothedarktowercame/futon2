@@ -1,0 +1,18 @@
+{:schema :wm/r9-author-job-snapshot-v1
+ :source {:path "/tmp/futon3c-invoke-jobs.edn"
+          :sha256 "052f092e9337a6fda354054fbbea65e9ffa6198a4f11e0b86ba8feaf6dce94ac"
+          :read-mode :single-byte-buffer}
+ :job {:caller "codex-26" :execution {:executed true :tool-events 28 :command-events 28}
+       :job-id "invoke-1789267707053-20588-bc3b4e37" :agent-id "codex-23"
+       :artifact-ref "7b591a4e71e54dcb2abdf88a4989d8a9481264fc"
+       :started-at "2026-09-13T02:48:27.784843145Z"
+       :delivery {:status "delivered" :surface "bell"
+                  :destination "caller codex-26 via /api/alpha/invoke/jobs/invoke-1789267707053-20588-bc3b4e37"
+                  :recorded-at "2026-09-13T02:54:40.746827894Z" :note "bell-job-ready"}
+       :state "done" :trace-id "invoke-d49e37de-6b62-4c45-881f-1ef7578c77a9"
+       :finished-at "2026-09-13T02:54:38.373326710Z"
+       :created-at "2026-09-13T02:48:27.054019402Z" :surface "bell"
+       :request-digest "ac04ae241090d135c586b4f28198c14f124997ca25e717d5f2edf161bf24e17a"}
+ :trace-authority {:trace-id "invoke-d49e37de-6b62-4c45-881f-1ef7578c77a9"
+                   :trace->job "invoke-1789267707053-20588-bc3b4e37"}
+ :findings [:request-commission-absent]}

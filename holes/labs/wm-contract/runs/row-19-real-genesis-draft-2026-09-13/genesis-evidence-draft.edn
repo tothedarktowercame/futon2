@@ -1,0 +1,32 @@
+{:schema :wm/r9-real-genesis-evidence-draft-v1
+ :status :pending
+ :not-an-anchor true
+ :not-admission true
+ :kind :genesis
+ :root {:authority-root-id "joe-wm-delegation-2026-09-12"
+        :delegate "codex-26" :resolution "root-resolution.edn"
+        :review-commit "e72b3e39"}
+ :author {:agent-id "codex-23"
+          :job-id "invoke-1789267707053-20588-bc3b4e37"
+          :trace-id "invoke-d49e37de-6b62-4c45-881f-1ef7578c77a9"
+          :job-snapshot "author-job-snapshot.edn"
+          :commission {:status :absent
+                       :request-digest "ac04ae241090d135c586b4f28198c14f124997ca25e717d5f2edf161bf24e17a"
+                       :refusal :request-commission-missing
+                       :no-reconstruction true}}
+ :reviewer {:status :pending-independent-agency-review
+            :agent-id nil :job-id nil :trace-id nil :commission nil :acceptance nil}
+ :artifacts {:source {:id "r9-authority-source"
+                      :path "src/futon3c/agency/r9_authority.clj"
+                      :sha256 "0da31d553e9546595e12a111a99fdebecafa16a54a56bfcb04c1467ab6cb02b1"}
+             :tests {:id "r9-genesis-tests"
+                     :path "test/futon3c/agency/r9_genesis_test.clj"
+                     :sha256 "58c8c8e5254ee140bb9c8b28790ac51e8b767a579f818c51491ee25cc2748ca1"}
+             :review {:id "byte-boundary-lead-review"
+                      :path "holes/labs/wm-contract/runs/row-19-genesis-verifier-2026-09-13/review-fixes/byte-hardening/lead-review.md"
+                      :sha256 "d288dec2a280d8a889e9e9034e679a309994a05e2ac9497af4c820d466aa293b"}}
+ :dependency-pins {"src/futon3c/agency/r9_genesis.clj" "20f151108650e3aa778ddbd9a38cd5a0ac563462b3a6c1f2e5fe9476a07e28b4"
+                   "scripts/row19_genesis_verifier_test.clj" "da8ed1e05a9402f78aacc9f4d299f739f264fa090791a3c6749dd8363f56430b"}
+ :missing [:author-request-commission-preimage
+           :independent-reviewer-job :independent-reviewer-request-commission
+           :independent-reviewer-trace-authority :exact-subject-acceptance]}

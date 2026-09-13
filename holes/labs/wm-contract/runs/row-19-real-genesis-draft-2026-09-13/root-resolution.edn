@@ -1,0 +1,14 @@
+{:status :verified
+ :authority/schema :wm/external-root-resolution-v1
+ :authority-origin :reviewed-host-process-boundary
+ :verification-scope :production
+ :provenance {:source "/home/joe/.codex/sessions/2026/09/12/rollout-2026-09-12T23-41-24-01a097ff-471a-72d3-b10b-54d01eaa14e0.jsonl"
+              :session-id "01a097ff-471a-72d3-b10b-54d01eaa14e0"
+              :line 50
+              :record-sha256 "84c30bfd3e12081e0e0eb774f38e931e18281f670301b475451b32d7c04b8a39"
+              :trust-review-path "holes/labs/wm-contract/runs/row-19-external-root-discovery-2026-09-13/lead-host-origin-review.edn"
+              :trust-review-sha256 "34e85869987503eeb68a80e4996feeaf167f838d9d5a9715e13268a9bcb5b264"
+              :trust-review-commit "e72b3e39"
+              :trust-review-commit-full "e72b3e390025eebb7801c13d46aab3f59a3726d1"}
+ :authority-root-id "joe-wm-delegation-2026-09-12"
+ :delegate "codex-26"}
