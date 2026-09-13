@@ -1,0 +1,2 @@
+{:case :review-after-authorization, :decision :mechanism-authorized, :authorization-at "2026-09-13T12:00:00Z", :actual-review-finished "2026-09-13T12:30:00Z"}
+{:case :borrowed-canonical-event, :decision :mechanism-authorized, :identity {:model/id :wm, :model/revision "rev-1", :run/id "different-run", :cohort/id "cohort-1", :tick/index 7, :event/id "different-event"}, :canonical-input-unchanged true}

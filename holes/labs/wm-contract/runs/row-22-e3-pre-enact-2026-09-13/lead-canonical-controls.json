@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-22-e3-pre-enact-2026-09-13/lead-canonical-join-controls.clj"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "exit": 0
+}
