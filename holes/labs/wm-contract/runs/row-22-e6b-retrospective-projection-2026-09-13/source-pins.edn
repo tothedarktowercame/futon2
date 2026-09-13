@@ -1,0 +1,14 @@
+{:tree-sha "c3acc2d8da9d75131afe9748b864b49059df968b"
+ :pins
+ [{:path "src/futon2/aif/machine_slow_feedback_retrospective_projection.clj"
+   :sha256 "3abbaa94cadcb25d8c5da8531bf60c21ec5d871b460b968b7de959470e46fa2c"}
+  {:path "test/futon2/aif/machine_slow_feedback_retrospective_projection_test.clj"
+   :sha256 "361e5a2003d64f43797172531351dea54ce36eb523083b262463886a4120af97"}
+  {:path "holes/labs/wm-contract/CONTRACT-e6b-retrospective-projection-v1-2026-09-13.md"
+   :sha256 "c78c313e409ada5462bc7f6229280792c742519ff45480a3a0c108c91276ecdd"}
+  {:path "src/futon2/aif/machine_slow_feedback_capture.clj"
+   :sha256 "702ccb1f8e120b8d1b8f133dbc66d154099159760e26b5a7dca7b6844d5a0c71"}
+  {:path "src/futon2/aif/machine_slow_feedback_provenance.clj"
+   :sha256 "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90"}
+  {:path "src/futon2/aif/machine_slow_feedback_store_v2.clj"
+   :sha256 "662c8e955b7bb5299d15616856a07342e9ea2923ca65704685602bca16c7c1b8"}]}
