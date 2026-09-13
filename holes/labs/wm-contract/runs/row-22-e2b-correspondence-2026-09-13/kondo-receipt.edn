@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint src/futon2/aif/machine_enactment_correspondence.clj test/futon2/aif/machine_enactment_correspondence_test.clj"
+ :exit 0 :tests 2 :assertions 2
+ :tree-sha "b5b743442125cb8f8a5fb033321c6e4c7fbaabbf"
+ :at "2026-09-13" :stdout "kondo.stdout" :stderr "kondo.stderr"}

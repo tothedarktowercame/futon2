@@ -1,0 +1,4 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-enactment-correspondence-test"
+ :exit 0 :tests 5 :assertions 18
+ :tree-sha "b5b743442125cb8f8a5fb033321c6e4c7fbaabbf"
+ :at "2026-09-13" :stdout "test.stdout" :stderr "test.stderr"}
