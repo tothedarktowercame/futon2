@@ -1364,3 +1364,7 @@ Row18 bc1b4856/fdd99673/8d09b84a reviewed: six pins match and retained16tests49a
 ## Lead decision — categorical annotation method, 2026-09-13
 
 Row14 proposal21131c3f reviewed:16current pins match; tracker17th matches author commit before subsequent lead edits. Permit independently adjudicated categorical annotations as explicit evidence-acquisition method, not proof of physical/latent ground truth. Qualifying use requires versioned seven-state evidence rubric, exact temporal/evidence cutoff, independent observer/reviewer authority and exact-subject acceptance; inline names/verdicts insufficient. No existing CP-close/F11 pair qualifies, no counts. Next bounded pure authority validator/spec packet; close attachment later. See runs/row-14-measured-a-authority-spec-2026-09-13/lead-review.md.
+
+## Lead route decision — retention deployment, 2026-09-13
+
+Selective loaderdc10cbca/c269ea7c reviewed with4matching pins and raw gates. Rejected for serving deployment: caller-asserted ingress proof, insufficient Var rollback controls, and input-form hashes reported as loaded identity. Stop expanding this route; retain offline experiment and disable live targets. Next concrete controlled-restart preparation from separate operator shell with actual ingress/service discovery; no execution yet. Retention implementation remains narrowly accepted; fresh R9 commissions still blocked on verified serving retention. See row-19-selective-loader-2026-09-13/lead-review.md.

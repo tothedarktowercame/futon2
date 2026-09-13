@@ -1,0 +1,26 @@
+[
+  {
+    "path": "src/futon3c/agency/selective_form_loader.clj",
+    "expected": "fcfbbff4ee84aa58ff2863e28cb5ead1d5abfad9f15fbce90551800343b4352d",
+    "actual": "fcfbbff4ee84aa58ff2863e28cb5ead1d5abfad9f15fbce90551800343b4352d",
+    "matches": true
+  },
+  {
+    "path": "test/futon3c/agency/selective_form_loader_test.clj",
+    "expected": "da04aac6bb360740bb384659a98b8695fee3d77ec23fe2ed540a2aa8785bc037",
+    "actual": "da04aac6bb360740bb384659a98b8695fee3d77ec23fe2ed540a2aa8785bc037",
+    "matches": true
+  },
+  {
+    "path": "scripts/row19_selective_loader_test.clj",
+    "expected": "ad72f6d38f6eddd5873bb75751e6c427f6547f2f2b029017febd3dda905565cb",
+    "actual": "ad72f6d38f6eddd5873bb75751e6c427f6547f2f2b029017febd3dda905565cb",
+    "matches": true
+  },
+  {
+    "path": "src/futon3c/transport/http.clj",
+    "expected": "defb1ed3b0deeb16ba15857f8efe5ac4e53ed6c442723dfae8808b38406f65fb",
+    "actual": "defb1ed3b0deeb16ba15857f8efe5ac4e53ed6c442723dfae8808b38406f65fb",
+    "matches": true
+  }
+]
