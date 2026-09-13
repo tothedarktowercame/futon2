@@ -401,11 +401,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-isolated-atomic-lifecycle-source.request.json",
       "dispatch": "accepted",
       "scope": "independent lead scope/harness review and isolated atomic lifecycle source; no live integration"
+    },
+    {
+      "packet": "codex-24-selection-relation-and-authority",
+      "job-id": "invoke-1789273332919-20628-ad27e2f1",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789273332919-20628-ad27e2f1",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-selection-relation-and-authority.request.json",
+      "dispatch": "accepted",
+      "scope": "ordinary occurrence equality and cross-layer divergence authority; no certification"
     }
   ],
   "current-awaiting": [
     "invoke-1789273186397-20627-87a22198",
     "invoke-1789272964694-20626-939e1dfb",
-    "invoke-1789272807699-20625-8a928038"
+    "invoke-1789273332919-20628-ad27e2f1"
   ]
 }
