@@ -1,0 +1,5 @@
+[{:command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-evidence-test]'"
+  :exit 1 :tree-sha "2903165425307dc02e2954d4303227d9b2e1cbf5"
+  :tests 5 :assertions 33 :failures 3 :errors 0
+  :findings ["borrowed model/run refused at prior identity before canonical-specific assertion"
+             "fixture derivation overwrote planted stale review artifact digest"]}]
