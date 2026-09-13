@@ -1,5 +1,6 @@
 (ns futon2.aif.machine-slow-feedback-store-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-slow-feedback-store :as store])
   (:import (java.nio.file Files StandardOpenOption)
@@ -21,7 +22,8 @@
              :state-sha256 (:state-sha256 h)}
      :next {:revision next-revision :state {:value value}}
      :application {:application/id id :feedback/event-id event
-                   :transition/subject {:tick value} :input/digests {:input (str value)}
+                   :transition/subject {:tick value}
+                   :input/digests {:input (apply str (repeat 64 (str value)))}
                    :output/digest (apply str (repeat 64 "c")) :status :committed}
      :authority authority :committed-at (format "2026-09-13T00:0%d:00Z" value)}))
 
@@ -36,7 +38,10 @@
     (let [s2 (store/isolated-store root "fixture-store") r (store/recover s2)]
       (is (= 2 (get-in r [:head :generation])))
       (is (= ["a1" "a2"] (mapv :application/id (:applications r))))
-      (is (false? (:restart-authorized? (store/capture s2))))
+      (let [capture (store/capture s2)]
+        (is (= 3 (count (:chain-digests capture))))
+        (is (= (set (:chain-digests capture)) (set (keys (:objects capture)))))
+        (is (false? (:restart-authorized? capture))))
       (store/release! s2))))
 
 (deftest no-implicit-init-and-exclusive-owner
@@ -152,4 +157,25 @@
         p (assoc-in (proposal s "a1" "e1" "r1" 1) [:next :state] {})]
     (is (= :e6b-store/state-invalid (refusal #(store/compare-and-commit! s p))))
     (is (= before (:head-digest (store/recover s))))
+    (store/release! s)))
+
+(deftest invented-head-state-refuses
+  (let [[_ s] (initialized) path (.toFile ^java.nio.file.Path (:head s))
+        head (edn/read-string (slurp path))
+        invented (assoc head :state/revision "invented"
+                        :state-sha256 (apply str (repeat 64 "d")))]
+    (spit path (pr-str invented))
+    (is (= :e6b-store/head-invalid (refusal #(store/recover s))))
+    (is (= :e6b-store/head-invalid (refusal #(store/capture s))))
+    (store/release! s)))
+
+(deftest non-edn-application-refuses-before-publication
+  (let [[_ s] (initialized) before (:head-digest (store/recover s))
+        object-count (count (.listFiles (.toFile ^java.nio.file.Path (:txdir s))))
+        p (assoc-in (proposal s "a1" "e1" "r1" 1)
+                    [:application :transition/subject :object] (Object.))]
+    (is (#{:e6b-store/unserializable :e6b-store/invalid-edn}
+         (refusal #(store/compare-and-commit! s p))))
+    (is (= before (:head-digest (store/recover s))))
+    (is (= object-count (count (.listFiles (.toFile ^java.nio.file.Path (:txdir s))))))
     (store/release! s)))

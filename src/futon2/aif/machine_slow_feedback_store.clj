@@ -56,10 +56,48 @@
     (when-not (= state back) (refuse! :e6b-store/state-unserializable {})))
   state)
 (defn- valid-authority! [a]
-  (when-not (and (map? a) (re-matches hex64 (:verifier/source-sha256 a ""))
+  (when-not (and (= #{:verifier/source-sha256 :evidence-source-sha256s} (set (keys a)))
+                 (re-matches hex64 (:verifier/source-sha256 a ""))
                  (map? (:evidence-source-sha256s a))
+                 (every? keyword? (keys (:evidence-source-sha256s a)))
                  (every? #(re-matches hex64 %) (vals (:evidence-source-sha256s a))))
     (refuse! :e6b-store/authority-invalid {})) a)
+(defn- roundtrip! [label x]
+  (try
+    (when-not (= x (strict-edn (form-bytes x) label))
+      (refuse! :e6b-store/unserializable {:label label}))
+    (catch clojure.lang.ExceptionInfo e (throw e))
+    (catch Throwable e
+      (throw (ex-info "value is not strict EDN"
+                      {:refusal :e6b-store/unserializable :label label} e))))
+  x)
+(defn- valid-application! [a]
+  (when-not (and (= #{:application/id :feedback/event-id :transition/subject
+                      :input/digests :output/digest :status} (set (keys a)))
+                 (every? nonblank? ((juxt :application/id :feedback/event-id) a))
+                 (map? (:transition/subject a)) (seq (:transition/subject a))
+                 (map? (:input/digests a)) (seq (:input/digests a))
+                 (every? #(re-matches hex64 %) (vals (:input/digests a)))
+                 (re-matches hex64 (:output/digest a "")) (= :committed (:status a)))
+    (refuse! :e6b-store/application-invalid {}))
+  (roundtrip! :application a))
+(defn- valid-proposal! [p]
+  (let [{:keys [prior next application authority committed-at]} p]
+    (when-not (and (= #{:prior :next :application :authority :committed-at} (set (keys p)))
+                   (= #{:revision :transaction-sha256 :state-sha256} (set (keys prior)))
+                   (= #{:revision :state} (set (keys next)))
+                   (every? nonblank? [(:revision prior) (:revision next)])
+                   (not= (:revision prior) (:revision next))
+                   (every? #(re-matches hex64 %) [(:transaction-sha256 prior "")
+                                                  (:state-sha256 prior "")])
+                   (instant? committed-at))
+      (refuse! :e6b-store/proposal-invalid {}))
+    (valid-state! (:state next)) (valid-application! application) (valid-authority! authority)
+    (roundtrip! :proposal p)))
+(defn- state-view [tx]
+  (if (= :wm/e6b-state-genesis-v1 (:schema tx))
+    {:revision (:state/revision tx) :state-sha256 (:state-sha256 tx)}
+    {:revision (get-in tx [:next :revision]) :state-sha256 (get-in tx [:next :state-sha256])}))
 
 (defmacro ^:private with-lock [store & body]
   `(let [^ReentrantLock l# (:lock ~store)]
@@ -138,56 +176,85 @@
 (defn- validate-chain! [store]
   (let [head-r (read-form ^Path (:head store)) head (:form head-r)
         head-tx (:form (read-form (tx-path store (:transaction-sha256 head))))]
-    (when-not (and (= :wm/e6b-state-head-v1 (:schema head))
+    (when-not (and (= #{:schema :store/id :generation :state/revision :state-sha256
+                        :transaction-sha256 :application-index} (set (keys head)))
+                   (= :wm/e6b-state-head-v1 (:schema head))
                    (= (:store-id store) (:store/id head))
                    (nat-int? (:generation head)) (re-matches hex64 (:transaction-sha256 head ""))
-                   (vector? (:application-index head)))
+                   (re-matches hex64 (:state-sha256 head ""))
+                   (nonblank? (:state/revision head)) (vector? (:application-index head))
+                   (= (:generation head) (:generation head-tx))
+                   (= {:revision (:state/revision head) :state-sha256 (:state-sha256 head)}
+                      (state-view head-tx)))
       (refuse! :e6b-store/head-invalid {}))
     (loop [digest (:transaction-sha256 head) expected (:generation head)
-           ids #{} events #{} priors #{} collected []]
+           child-prior nil ids #{} events #{} priors #{} collected [] chain []]
       (let [r (read-form (tx-path store digest)) tx (:form r)]
         (when-not (= digest (:digest r)) (refuse! :e6b-store/object-digest-mismatch {:digest digest}))
-        (when-not (and (= (:store-id store) (:store/id tx)) (= expected (:generation tx)))
+        (when-not (and (= (:store-id store) (:store/id tx)) (= expected (:generation tx))
+                       (or (nil? child-prior)
+                           (= (select-keys child-prior [:revision :state-sha256]) (state-view tx))))
           (refuse! :e6b-store/chain-invalid {:digest digest}))
         (if (= :wm/e6b-state-genesis-v1 (:schema tx))
           (do
-            (when-not (and (zero? expected) (= #{} (set (keys (:prior tx))))
+            (when-not (and (= #{:schema :store/id :generation :prior :state :state/revision
+                                :state-sha256 :application :authority :committed-at}
+                              (set (keys tx)))
+                           (zero? expected) (= {} (:prior tx))
                            (nil? (:application tx))
+                           (nonblank? (:state/revision tx)) (instant? (:committed-at tx))
                            (= (:state-sha256 tx) (sha256 (form-bytes (:state tx)))))
               (refuse! :e6b-store/genesis-invalid {}))
+            (valid-state! (:state tx)) (valid-authority! (:authority tx)) (roundtrip! :genesis tx)
             (let [ordered (vec (reverse collected))]
               (when-not (= ordered (:application-index head))
                 (refuse! :e6b-store/application-index-invalid {}))
               {:head head :head-digest (:digest head-r) :current head-tx
-               :applications ordered}))
+               :applications ordered :chain-digests (vec (reverse (conj chain digest)))}))
           (let [app (:application tx) id (:application/id app) event (:feedback/event-id app)
                 prior-rev (get-in tx [:prior :revision])
                 entry {:application/id id :feedback/event-id event
                        :prior-state/revision prior-rev :transaction-sha256 digest}]
-            (when-not (and (= :wm/e6b-state-transaction-v1 (:schema tx)) (pos-int? expected)
+            (when-not (and (= #{:schema :store/id :generation :prior :next :application
+                                :authority :committed-at :proposal} (set (keys tx)))
+                           (= :wm/e6b-state-transaction-v1 (:schema tx)) (pos-int? expected)
+                           (= #{:revision :transaction-sha256 :state-sha256 :generation}
+                              (set (keys (:prior tx))))
+                           (= #{:revision :state :state-sha256} (set (keys (:next tx))))
                            (= (dec expected) (get-in tx [:prior :generation]))
+                           (re-matches hex64 (get-in tx [:prior :transaction-sha256] ""))
+                           (re-matches hex64 (get-in tx [:prior :state-sha256] ""))
                            (every? nonblank? [id event prior-rev (get-in tx [:next :revision])])
+                           (not= prior-rev (get-in tx [:next :revision]))
                            (= (get-in tx [:next :state-sha256])
                               (sha256 (form-bytes (get-in tx [:next :state]))))
+                           (= (:committed-at tx) (get-in tx [:proposal :committed-at]))
+                           (= (:application tx) (get-in tx [:proposal :application]))
+                           (= (:authority tx) (get-in tx [:proposal :authority]))
+                           (= (dissoc (:prior tx) :generation) (get-in tx [:proposal :prior]))
+                           (= (dissoc (:next tx) :state-sha256) (get-in tx [:proposal :next]))
                            (not (ids id)) (not (events event)) (not (priors prior-rev)))
               (refuse! :e6b-store/transaction-invalid {:digest digest}))
+            (valid-proposal! (:proposal tx)) (roundtrip! :transaction tx)
             (recur (get-in tx [:prior :transaction-sha256]) (dec expected)
-                   (conj ids id) (conj events event) (conj priors prior-rev)
-                   (conj collected entry))))))))
+                   (:prior tx) (conj ids id) (conj events event) (conj priors prior-rev)
+                   (conj collected entry) (conj chain digest))))))))
 
 (defn initialize!
-  [store {:keys [state revision authority committed-at]}]
+  [store {:keys [state revision authority committed-at] :as input}]
   (with-lock store
     (when (or (Files/exists ^Path (:head store) (make-array LinkOption 0))
               (seq (iterator-seq (.iterator (Files/newDirectoryStream ^Path (:txdir store))))))
       (refuse! :e6b-store/already-initialized-or-interrupted {}))
-    (valid-state! state) (valid-authority! authority)
-    (when-not (and (nonblank? revision) (instant? committed-at))
+    (valid-state! state) (valid-authority! authority) (roundtrip! :genesis-input input)
+    (when-not (and (= #{:state :revision :authority :committed-at} (set (keys input)))
+                   (nonblank? revision) (instant? committed-at))
       (refuse! :e6b-store/genesis-input-invalid {}))
     (let [tx {:schema :wm/e6b-state-genesis-v1 :store/id (:store-id store) :generation 0
               :prior {} :state state :state/revision revision
               :state-sha256 (sha256 (form-bytes state)) :application nil
               :authority authority :committed-at committed-at}]
+      (roundtrip! :genesis tx)
       (try
         (let [digest (publish-object! store tx)
               head {:schema :wm/e6b-state-head-v1 :store/id (:store-id store) :generation 0
@@ -199,6 +266,7 @@
 (defn compare-and-commit!
   [store {:keys [prior next application authority committed-at] :as proposal}]
   (with-lock store
+    (valid-proposal! proposal)
     (let [{:keys [head applications]} (validate-chain! store)
           existing (first (filter #(= (:application/id application) (:application/id %)) applications))]
       (if existing
@@ -214,11 +282,6 @@
       (when (or (some #(= (:feedback/event-id application) (:feedback/event-id %)) applications)
                 (some #(= (:revision prior) (:prior-state/revision %)) applications))
         (refuse! :e6b-store/feedback-conflict {}))
-      (valid-state! (:state next)) (valid-authority! authority)
-      (when-not (and (every? nonblank? [(:revision next) (:application/id application)
-                                        (:feedback/event-id application) committed-at])
-                     (instant? committed-at) (= :committed (:status application)))
-        (refuse! :e6b-store/proposal-invalid {}))
       (let [generation (inc (:generation head))
             tx {:schema :wm/e6b-state-transaction-v1 :store/id (:store-id store)
                 :generation generation :prior (assoc prior :generation (:generation head))
@@ -240,13 +303,13 @@
 (defn recover [store] (with-lock store (validate-chain! store)))
 (defn capture [store]
   (with-lock store
-    (let [{:keys [head head-digest applications]} (validate-chain! store)
-          digests (into [(:transaction-sha256 head)] (map :transaction-sha256 applications))
-          objects (into {} (for [d (distinct digests)
+    (let [{:keys [head head-digest applications chain-digests]} (validate-chain! store)
+          objects (into {} (for [d chain-digests
                                  :let [bs (:bytes (read-form (tx-path store d)))]]
                              [d (aclone ^bytes bs)]))]
       {:schema :wm/e6b-store-capture-v1 :scope :isolated-test
        :store/id (:store-id store) :generation (:generation head)
-       :head-digest head-digest :application-universe applications :objects objects
+       :head-digest head-digest :chain-digests chain-digests
+       :application-universe applications :objects objects
        :completeness-authority :absent :local-chain-consistent? true
        :rollback-freshness? :unproved :restart-authorized? false})))
