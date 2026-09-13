@@ -45,7 +45,7 @@
     (is (= (:proposal-evidence input) (:proposal-evidence out)))
     (is (= (set carrier/source-roles) (set (keys (:original-sources out)))))
     (is (not= (get-in out [:prior :carrier :slow/intrinsics])
-              (get-in out [:next :carrier :slow/intrinsics]))))
+              (get-in out [:next :carrier :slow/intrinsics])))))
 
 (deftest carrier-projection-retains-state-and-fixed-order
   (let [out (carrier/project-transition (bundle))]
