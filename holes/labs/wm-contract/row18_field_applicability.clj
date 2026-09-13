@@ -175,6 +175,13 @@
                {:expected expected :actual actual}))
     actual))
 
+(defn- compact-field [field]
+  (let [order (:support-order field)]
+    (-> field
+        (dissoc :support-order)
+        (assoc :support-order-sha256
+               (sha256 (.getBytes (pr-str order) "UTF-8"))))))
+
 (defn -main [& [trace-path audit-input-path mode]]
   (when-not (and trace-path audit-input-path)
     (refuse! :usage {:required ["TRACE" "AUDIT-INPUT"]}))
@@ -191,5 +198,5 @@
           :source {:path trace-path :sha256 actual :edn-form-index 0}
           :audit-input {:path audit-input-path :sha256 (:sha256 audit-read)
                         :edn-form-index 0}
-          :field (inspect-field (:value trace-read))
+          :field (compact-field (inspect-field (:value trace-read)))
           :controls controls})))
