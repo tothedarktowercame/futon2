@@ -188,14 +188,14 @@
          (demand! (supported-assertions (:assertion claim))
                   :unsupported-evidence-assertion [:evidence :claims idx :assertion])
          {:ref ref :claim/id (:claim/id claim) :assertion (:assertion claim)
-          :observed-at (:observed-at cp)}))
+          :observed-at (:observed-at cp) :source (::source (meta claim))}))
      (range) items)))
 
 (defn- authority-record! [resolver kind ref io-opts]
   (demand! (fn? resolver) :authority-resolver-missing [:authority])
   (let [resolved (resolver kind ref)]
     (demand! (map? resolved) :authority-not-found [:authority kind])
-    (read-pinned-form! resolved io-opts)))
+    (with-meta (read-pinned-form! resolved io-opts) {::source resolved})))
 
 (defn validate-observation!
   "Return a qualified envelope or throw ex-info with :refusal.
@@ -206,6 +206,8 @@
   [observation {:keys [resolver io-opts expected]}]
   (demand! (= schema (:schema observation)) :unsupported-schema [:schema])
   (demand! (not (contains? observation :review)) :candidate-owned-review [:review])
+  (demand! (not (contains? (:rubric observation) :assertions))
+           :candidate-owned-rubric-assertions [:rubric :assertions])
   (demand! (nonblank? (:observation/id observation)) :missing-identity [:observation/id])
   (demand! (= :post-action-pre-disposition-at-close (get-in observation [:point :state-point]))
            :wrong-conditioning-point [:point :state-point])
@@ -290,6 +292,8 @@
      :subject/sha256 digest
      :observer-origin observer-ref
      :review-origin review-ref
+     :observer-source (::source (meta observer))
+     :review-source (::source (meta review))
      :resolved-evidence-claims resolved-claims
      :derived-rubric-assertions assertions
      :method :reviewed-categorical-annotation

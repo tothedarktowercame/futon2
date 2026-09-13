@@ -83,6 +83,9 @@
     (is (= :qualified (:status result)))
     (is (= [:support-gained] (:derived-rubric-assertions result)))
     (is (= :test (:authority/scope result)))
+    (is (re-matches #"[0-9a-f]{64}"
+                    (get-in result [:resolved-evidence-claims 0 :source :sha256])))
+    (is (re-matches #"[0-9a-f]{64}" (get-in result [:review-source :sha256])))
     (is (= true (get-in result [:limitations :retrospective?])))
     (is (= :selected-attempts-only (get-in result [:limitations :missingness])))))
 
@@ -164,6 +167,9 @@
   (let [{:keys [candidate authority dir records]} (fixture)]
     (is (= :limitations-missing
            (refusal #(sut/validate-observation! (dissoc candidate :limitations) authority))))
+    (is (= :candidate-owned-rubric-assertions
+           (refusal #(sut/validate-observation!
+                      (assoc-in candidate [:rubric :assertions] [:support-gained]) authority))))
     (is (= :retrospective-flag-mismatch
            (refusal #(sut/validate-observation!
                       (assoc-in candidate [:limitations :retrospective?] false) authority))))
