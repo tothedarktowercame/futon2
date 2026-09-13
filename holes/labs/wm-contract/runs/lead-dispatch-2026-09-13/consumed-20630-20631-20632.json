@@ -1,0 +1,37 @@
+{
+  "delayed_batch": [
+    {
+      "job": "20630",
+      "review_commit": "fe949b1080d393e483aaa4df7737695695588abf",
+      "review_path": "holes/labs/wm-contract/runs/row-22-e3-pre-enact-2026-09-13/lead-canonical-review.md",
+      "verified_review_exists": true
+    },
+    {
+      "job": "20631",
+      "review_commit": "9b8e3e89f2b05498f6f0e869029a8b8b8c3094fa",
+      "review_path": "holes/labs/wm-contract/runs/row-24-record-connection-binding-2026-09-13/lead-review.md",
+      "verified_review_exists": true
+    },
+    {
+      "job": "20632",
+      "review_commit": "0e79d88039805ebd8e518e1c1e09a601f1c49098",
+      "review_path": "holes/labs/wm-contract/runs/row-19-lifecycle-snapshot-2026-09-13/lead-poison-acceptance.md",
+      "verified_review_exists": true
+    }
+  ],
+  "current_activity": [
+    {
+      "job-id": "invoke-1789274230654-20635-7c172b9a",
+      "state": "running"
+    },
+    {
+      "job-id": "invoke-1789274368566-20636-025e61a8",
+      "state": "running"
+    },
+    {
+      "job-id": "invoke-1789274481837-20637-ef731f39",
+      "state": "running"
+    }
+  ],
+  "action": "consumed idempotently; no redispatch; all obligations remain open"
+}
