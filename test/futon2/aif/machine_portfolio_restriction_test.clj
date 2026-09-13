@@ -74,9 +74,11 @@
                #(restriction/restrict-portfolio (config))))))
     (testing "unknown occurrence"
       (is (= :e2a/unknown-portfolio-id
-             (with-e1 (update-in e1 [:response :selected]
-                                 conj {:id [:unknown 9] :action {:type :no-op}
-                                       :proposal/action {:type :no-op} :rank 9})
+             (with-e1 (-> e1
+                          (update-in [:response :selected]
+                                     conj {:id [:unknown 9] :action {:type :no-op}
+                                           :proposal/action {:type :no-op} :rank 9})
+                          (update-in [:response :selected-ids] conj [:unknown 9]))
                #(restriction/restrict-portfolio (config))))))
     (testing "duplicate selected occurrence"
       (is (= :e2a/duplicate-selected-id
