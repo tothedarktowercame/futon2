@@ -19,6 +19,15 @@ isolated complete job/commission/receipt/trace-index/anchor record and compares
 the retained admission exactly. Its anchor is fixture data, never production
 genesis evidence.
 
+Canonical event repair pins at `6d3bb688a178ae0e5d649efccc5ab44b992cad0e`:
+
+- E3 source `d559e91587630f35ab26e9cb6beb30695f1142702ec13bc03eca3994ac170627`
+- test `f9f164f994a2f04d0a410dd948e630d7ed0bbcdfb967442ef4427245674010c0`
+- spec `7737ed717c41b3ffef39291775b6bee388dc03866167db6e27b37270eb4ed3b8`
+- canonical R9 checker dependency `b3469b8027c36e2db17943efabb6b26878c1dee3d71b9eda809e50d602094722`
+- E2a restriction dependency `316ddd364e2deaea98172558148fd770c2d5d4a930e32fb8e4825f454b6c51ab`
+- E1 authority dependency `13c6fb05c2a75ff5c673ed2df49e9d555db210d9269588396ea71ce97964253e`
+
 Source pins at the tested commit:
 
 - implementation `ce4360e640bfc65f31770aa1f9a73e6cb14defae69bf71026f37aa6575e604f4`

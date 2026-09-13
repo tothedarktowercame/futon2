@@ -1,0 +1,4 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-pre-enact-authorization-test"
+ :exit 0 :tests 3 :assertions 31 :tree-sha "6d3bb688a178ae0e5d649efccc5ab44b992cad0e"
+ :at "2026-09-13" :stdout "canonical-event-test.stdout" :stderr ""}
+

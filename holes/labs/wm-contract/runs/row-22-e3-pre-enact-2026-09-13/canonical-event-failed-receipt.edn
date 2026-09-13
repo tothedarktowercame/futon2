@@ -1,0 +1,5 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-pre-enact-authorization-test"
+ :exit 1 :tests 3 :assertions 31 :failures 1 :errors 0 :tree-sha "44589482"
+ :at "2026-09-13" :cause :expected-old-wrapper-chronology-refusal
+ :observed :e3/canonical-r9-time-mismatch}
+
