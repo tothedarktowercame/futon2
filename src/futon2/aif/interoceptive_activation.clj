@@ -29,13 +29,28 @@
     :drawbridge-proof-eval-reload
     :dev-admin-load-file
     :direct-in-jvm-require-reload})
+(def production-controller-authority
+  {:systemd-process-start-restart
+   {:artifact/path "/home/joe/code/futon3c/scripts/restart-fdev-detached.sh"
+    :artifact/sha256 "9c7f2334f182444c37383f41317133781a441541f097d8d801cc502451ac0dd6"
+    :status :not-lease-aware}
+   :drawbridge-proof-eval-reload
+   {:artifact/path "/home/joe/code/futon3c/scripts/proof-eval.sh"
+    :artifact/sha256 "fde514ee2b623a46262cc23d940587b6e335f75f9e870e7fdb0e36d817a59506"
+    :status :not-lease-aware}
+   :dev-admin-load-file
+   {:artifact/path "/home/joe/code/futon3c/admin/futon3c/admin.clj"
+    :artifact/sha256 "991058114751850fbad337f075eed66c95c1b4501e5a773c649c253a14111f39"
+    :status :not-lease-aware}
+   :direct-in-jvm-require-reload
+   {:artifact/path nil :artifact/sha256 nil :status :uncontrolled}})
 
 ;; Filled from committed source bytes; activation receipts must match all pins.
 (def required-source-pins
   {"/home/joe/code/futon2/src/futon2/aif/interoceptive_store_lock.clj"
-   "2d334c208b82fd377950a4f2ae3bd176f0922bb02bde7a0ca2240818ac64b262"
+   "5f60c4c00c12fef5a00c56b352c32a0d14d727dacf71a57d9fbaeb72d0ae354a"
    "/home/joe/code/futon2/src/futon2/aif/interoceptive_manifest.clj"
-   "d7db4a4a73f0ecb188a3740b1310cda6aa7500180aa420a086948a937316264c"
+   "8f469c85c7e30004b593fd8b40d38fe7b30d9c6b37d08542be7d99996c633d3d"
    "/home/joe/code/futon2/src/futon2/aif/tripwire.clj"
    "a75b2a571d76fa93486ff8807dc4fdc93a2f6ca125042f0d3087cbdcb933aeae"
    "/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj"
@@ -157,7 +172,8 @@
   "Validate an already independently authenticated record. This pure layer
   cannot authenticate its caller; only resolve-production-participation! may
   authorize production."
-  [record {:keys [now-ms source-pins lock-probe process-probe boot-id capability]
+  [record {:keys [now-ms source-pins lock-probe process-probe boot-id capability
+                  controller-authority controller-probe]
            :or {now-ms (System/currentTimeMillis)}}]
   (when-not (= :wm/interoceptive-writer-participation-v1 (:schema record))
     (refuse! :interoceptive/activation-schema {:schema (:schema record)}))
@@ -194,16 +210,26 @@
       (refuse! :interoceptive/activation-process-census-digest-mismatch
                {:declared (get-in record [:host :process-census-sha256])
                 :measured measured})))
-  (let [controls (get-in record [:lease :controls])
-        surfaces (set (map :surface controls))]
-    (when-not (and (= required-control-surfaces surfaces)
-                   (every? #(and (= :lease-enforced (:status %))
-                                 (string? (:artifact/path %))
-                                 (re-matches #"[0-9a-f]{64}"
-                                             (or (:artifact/sha256 %) "")))
-                           controls))
+  (let [controls (into {} (map (juxt :surface #(dissoc % :surface)))
+                       (get-in record [:lease :controls]))]
+    (when-not (= required-control-surfaces (set (keys controller-authority))
+                 (set (keys controls)))
       (refuse! :interoceptive/activation-lease-controls-unverified
-               {:required required-control-surfaces :controls controls})))
+               {:required required-control-surfaces :controls controls
+                :authority controller-authority}))
+    (doseq [[surface expected] controller-authority]
+      (when-let [path (:artifact/path expected)]
+        (when-not (= (:artifact/sha256 expected) (controller-probe path))
+          (refuse! :interoceptive/activation-controller-source-mismatch
+                   {:surface surface :expected (:artifact/sha256 expected)})))
+      (when-not (= expected (get controls surface))
+        (refuse! :interoceptive/activation-controller-claim-mismatch
+                 {:surface surface :expected expected :claimed (get controls surface)})))
+    (let [unsupported (into {} (remove (fn [[_ x]] (= :lease-enforced (:status x))))
+                            controller-authority)]
+      (when (seq unsupported)
+        (refuse! :interoceptive/activation-controller-unavailable
+                 {:controllers unsupported}))))
   (when-not (and (= deployment-lease-path (get-in record [:lease :path]))
                  (= :host-launch-reload-lock-v1 (get-in record [:lease :protocol]))
                  (string? (get-in record [:lease :generation]))
@@ -297,6 +323,31 @@
         (refuse! :interoceptive/activation-process-probe-failed
                  {:process/id (:process/id process) :cause (.getMessage e)})))))
 
+(defn- host-controller-probe [path]
+  (let [p (Paths/get path (make-array String 0))]
+    (when-not (Files/isRegularFile p (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+      (refuse! :interoceptive/activation-controller-unavailable {:path path}))
+    (sha256-bytes (read-stable-bytes! p))))
+
+(defn production-controller-status!
+  "Resolve the independently configured production controller bytes. Current
+  artifacts are pinned but not lease-aware, so a bit-identical audit still
+  returns the typed unsupported-surface refusal."
+  []
+  (doseq [[surface {:keys [artifact/path artifact/sha256]}]
+          production-controller-authority
+          :when path]
+    (let [measured (host-controller-probe path)]
+      (when-not (= sha256 measured)
+        (refuse! :interoceptive/activation-controller-source-mismatch
+                 {:surface surface :path path :expected sha256 :measured measured}))))
+  (let [unsupported (into {} (remove (fn [[_ x]] (= :lease-enforced (:status x))))
+                          production-controller-authority)]
+    (if (seq unsupported)
+      (refuse! :interoceptive/activation-controller-unavailable
+               {:controllers unsupported})
+      {:status :lease-enforced :controllers production-controller-authority})))
+
 (defn resolve-production-participation!
   "Read only the fixed root-owned host receipt. Missing or unauthenticated
   host evidence refuses; there is no caller-supplied production mode."
@@ -313,6 +364,8 @@
                               {:capability production-capability
                                :source-pins (real-source-pins)
                                :boot-id (str/trim (slurp "/proc/sys/kernel/random/boot_id"))
+                               :controller-authority production-controller-authority
+                               :controller-probe host-controller-probe
                                :lock-probe host-lock-probe
                                :process-probe host-process-probe}))))
 
@@ -336,7 +389,7 @@
   the caller's entire physical capture."
   [f]
   (try
-    (store-lock/with-lock-at
+    (store-lock/with-existing-lock-at
      deployment-lease-path
      (fn []
        (let [admission (resolve-production-participation!)

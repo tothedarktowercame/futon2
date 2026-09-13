@@ -17,6 +17,13 @@
    :loaded-source-pins activation/required-source-pins
    :writer-entrypoints (vec activation/required-writers)})
 
+(def test-controller-authority
+  (into {} (map (fn [surface]
+                  [surface {:status :lease-enforced
+                            :artifact/path (str "/test-controller/" (name surface))
+                            :artifact/sha256 (apply str (repeat 64 "d"))}]))
+        activation/required-control-surfaces))
+
 (def valid-record
   (let [processes [process-record]
         census-edn (activation/process-census-edn processes)]
@@ -33,11 +40,8 @@
    :lease {:path activation/deployment-lease-path
            :protocol :host-launch-reload-lock-v1
            :generation "deployment-1" :status :enforced
-           :controls (mapv (fn [surface]
-                             {:surface surface :status :lease-enforced
-                              :artifact/path (str "/root-controlled/" (name surface))
-                              :artifact/sha256 (apply str (repeat 64 "d"))})
-                           activation/required-control-surfaces)}
+           :controls (mapv (fn [[surface control]] (assoc control :surface surface))
+                           test-controller-authority)}
    :lock lock-record
    :lease-lock (assoc lock-record :path activation/deployment-lease-path)}))
 
@@ -54,6 +58,8 @@
 
 (defn opts []
   {:now-ms 1500 :source-pins activation/required-source-pins :boot-id "boot-1"
+   :controller-authority test-controller-authority
+   :controller-probe (fn [_] (apply str (repeat 64 "d")))
    :lock-probe identity :process-probe observable})
 
 (defn refusal [f]
@@ -138,12 +144,66 @@
   (let [admission {:authority-class :production :receipt-sha256 "before"
                    :lock lock-record :lease-lock (:lease-lock valid-record)
                    :lease (:lease valid-record)}]
-    (with-redefs [activation/resolve-production-participation!
-                  (fn [] (assoc admission :receipt-sha256 "after"))]
-      (is (= :interoceptive/activation-boundary-changed
-             (refusal #(activation/revalidate-production-participation! admission)))))))
+    (doseq [changed [(assoc admission :receipt-sha256 "after")
+                     (assoc-in admission [:lease :generation] "generation-2")
+                     (assoc-in admission [:lock :file-key] "replacement-inode")]]
+      (with-redefs [activation/resolve-production-participation! (constantly changed)]
+        (is (= :interoceptive/activation-boundary-changed
+               (refusal #(activation/revalidate-production-participation! admission))))))))
 
 (deftest lease-control-surface-gap-refuses
   (is (= :interoceptive/activation-lease-controls-unverified
          (refusal #(activation/validate-participation
-                    (update-in valid-record [:lease :controls] pop) (opts))))))
+                    (update-in valid-record [:lease :controls] pop) (opts)))))
+  (let [authority activation/production-controller-authority
+        record (assoc-in valid-record [:lease :controls]
+                         (mapv (fn [[surface control]] (assoc control :surface surface))
+                               authority))]
+    (is (= :interoceptive/activation-controller-unavailable
+           (refusal #(activation/validate-participation
+                      record
+                      (assoc (opts)
+                             :controller-authority authority
+                             :controller-probe
+                             (fn [path]
+                               (:artifact/sha256
+                                (some (fn [[_ control]]
+                                        (when (= path (:artifact/path control)) control))
+                                      authority))))))))))
+
+(deftest preprovisioned-lock-and-protected-interval-controls
+  (let [dir (Files/createTempDirectory "activation-lease-"
+                                       (make-array FileAttribute 0))
+        missing (.resolve dir "missing.lock")
+        lease (.resolve dir "deployment.lease")
+        admission {:authority-class :production :receipt-sha256 "same"
+                   :lock lock-record :lease-lock (assoc lock-record :path (str lease))
+                   :lease {:generation "generation-1"}}]
+    (is (= :interoceptive/lock-io-failure
+           (refusal #(store-lock/with-existing-lock-at (str missing) identity))))
+    (is (not (Files/exists missing (make-array java.nio.file.LinkOption 0))))
+    (spit (.toFile lease) "")
+    (with-redefs [activation/deployment-lease-path (str lease)
+                  activation/resolve-production-participation! (constantly admission)]
+      (is (= :interoceptive/lock-contention
+             (activation/with-production-participation
+              (fn [_]
+                @(future
+                   (refusal #(store-lock/with-existing-lock-at (str lease) identity)))))))
+      (let [calls (atom 0)]
+        (with-redefs [activation/resolve-production-participation!
+                      (fn []
+                        (if (= 1 (swap! calls inc)) admission
+                            (throw (ex-info "expired"
+                                            {:refusal :interoceptive/activation-stale}))))]
+          (is (= :interoceptive/activation-stale
+                 (refusal #(activation/with-production-participation
+                            (fn [_] :capture-completed)))))))
+      (is (= :interoceptive/missing-finding-join
+             (refusal #(activation/with-production-participation
+                        (fn [_]
+                          (throw (ex-info "logical refusal"
+                                          {:refusal :interoceptive/missing-finding-join})))))))
+      (is (= :released-after-logical-refusal
+             (store-lock/with-existing-lock-at
+              (str lease) (constantly :released-after-logical-refusal)))))))

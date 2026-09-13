@@ -23,6 +23,14 @@ Production activation requires operator work outside the writer JVM:
    controller, so an honest receipt cannot claim activation. Its future
    controller must increment/check a deployment generation or mechanically
    acquire the lease at the evaluator boundary; convention is insufficient.
+   The reader independently hashes the controller artifacts against its
+   configured authority. At this packet's pins the restart controller is
+   `restart-fdev-detached.sh` (`9c7f2334...`), Drawbridge controller is
+   `proof-eval.sh` (`fde514ee...`), and dev-admin controller is `admin.clj`
+   (`99105811...`). None acquires this lease, and direct in-JVM reload has no
+   controller artifact. Their configured statuses are therefore
+   `:not-lease-aware`/`:uncontrolled`, which forces
+   `:activation-controller-unavailable`; receipt labels cannot override it.
 3. Deploy the exact pinned lock, manifest, tripwire and repair-obligation
    source. Enumerate every live process capable of reaching the five canonical
    writer entrypoints. For each, retain PID, `/proc` start ticks, executable,

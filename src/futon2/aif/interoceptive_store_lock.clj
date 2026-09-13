@@ -33,7 +33,7 @@
           (recur candidate (next names)))))
     file))
 
-(defn- with-lock-path [lock-path f]
+(defn- with-lock-path* [lock-path create? f]
   (let [path (safe-parent! lock-path)
         identity (str path)
         held (.get held-locks)]
@@ -44,9 +44,9 @@
         (with-open [channel (FileChannel/open
                              (.toPath file)
                              (into-array OpenOption
-                                         [StandardOpenOption/CREATE
-                                          StandardOpenOption/WRITE
-                                          LinkOption/NOFOLLOW_LINKS]))]
+                                         (cond-> [StandardOpenOption/WRITE
+                                                  LinkOption/NOFOLLOW_LINKS]
+                                           create? (conj StandardOpenOption/CREATE))))]
           (when-not (Files/isRegularFile path
                                          (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
             (refuse! :interoceptive/lock-path-refused {:path lock-path} nil))
@@ -75,6 +75,9 @@
         (catch Throwable e
           (refuse! :interoceptive/lock-io-failure {:path lock-path} e)))))))
 
+(defn- with-lock-path [lock-path f]
+  (with-lock-path* lock-path true f))
+
 (defn with-store-lock [f]
   (with-lock-path (or *lock-path* default-lock-path) f))
 
@@ -83,6 +86,12 @@
   symlink and inode checks as the store lock."
   [path f]
   (with-lock-path path f))
+
+(defn with-existing-lock-at
+  "Acquire a preprovisioned lock without CREATE. Production readers use this
+  so a missing lock is a refusal and never a filesystem mutation."
+  [path f]
+  (with-lock-path* path false f))
 
 (defn with-store-lock-for [root f]
   (let [root-file (.toFile (.normalize (.toAbsolutePath (.toPath (java.io.File. root)))))

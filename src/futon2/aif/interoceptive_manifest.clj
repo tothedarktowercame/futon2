@@ -161,8 +161,8 @@
   []
   (activation/with-production-participation
    (fn [participation]
-     (binding [store-lock/*lock-path* (get-in participation [:lock :path])]
-       (store-lock/with-store-lock
+     (store-lock/with-existing-lock-at
+      (get-in participation [:lock :path])
         (fn []
           (activation/revalidate-production-participation! participation)
           (let [audit (capture tripwire/default-trip-root repair/default-root :test)
@@ -176,4 +176,4 @@
                                          :authority-class :production)
                         :snapshot (commitment/confidence-snapshot input)}]
             (activation/revalidate-production-participation! participation)
-            result)))))))
+            result))))))
