@@ -58,6 +58,18 @@ Limitations are mandatory: retrospective status is recomputed from cutoff and
 annotation timestamps, and missingness, selection, method, and rubric are
 retained inseparably.
 
+Reviewer acceptance is checked only after evidence claims and the observer
+origin have been resolved. Its v1 acceptance subject contains the candidate
+subject, every complete parsed evidence-claim record and exact source digest,
+the complete observer authority record and digest, and the independent context
+including identity, action/cutoff/disposition times, scope and provenance.
+Changing bytes behind an unchanged reference, changing context or observer,
+moving between test and production, or changing acquisition limitations makes
+the old review unusable. Evidence claims themselves declare the same scope and
+authority provenance as the independent context; absent or cross-scope claims
+refuse. Review authenticates this fallible adjudicated assertion and its
+method—it does not prove a physically true hidden state.
+
 This rubric operationalizes the existing lifecycle descriptions in
 `belief.clj:37-42` and
 `futon3/library/structure/interest-event-vocabulary.flexiarg:70-136`; it does

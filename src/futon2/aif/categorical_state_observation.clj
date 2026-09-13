@@ -20,6 +20,7 @@
 (def authority-schema :wm/categorical-state-authority-v1)
 (def review-schema :wm/categorical-state-review-v1)
 (def evidence-claim-schema :wm/categorical-state-evidence-claim-v1)
+(def acceptance-subject-schema :wm/categorical-state-acceptance-subject-v1)
 
 (def rubric
   "Evidence assertions required by the existing seven lifecycle semantics.
@@ -113,6 +114,22 @@
 (defn subject-digest [observation]
   (sha256-bytes (.getBytes (pr-str (subject observation)) StandardCharsets/UTF_8)))
 
+(defn acceptance-subject
+  "Complete immutable subject an independent reviewer accepts. Resolved source
+  pointers and records are included; changing bytes behind a stable reference,
+  context, observer origin, scope, provenance, or limitations changes this value."
+  [observation resolved-claims observer observer-source expected]
+  [acceptance-subject-schema
+   (subject observation)
+   resolved-claims
+   {:ref (get-in observation [:authority :observer/ref])
+    :source observer-source
+    :record observer}
+   expected])
+
+(defn acceptance-subject-digest [frozen-subject]
+  (sha256-bytes (.getBytes (pr-str frozen-subject) StandardCharsets/UTF_8)))
+
 (defn- classify-rubric! [observation assertions]
   (let [declared (get-in observation [:categorical-status :value])
         assertions (set assertions)
@@ -175,6 +192,11 @@
                   [:evidence :claims idx :claim/id])
          (demand! (= :categorical-status-evidence (:claim/type claim))
                   :forbidden-evidence-source [:evidence :claims idx :claim/type])
+         (demand! (= (:authority/scope expected) (:authority/scope claim))
+                  :evidence-scope-mismatch [:evidence :claims idx :authority/scope])
+         (demand! (= (:authority/provenance expected) (:authority/provenance claim))
+                  :evidence-provenance-mismatch
+                  [:evidence :claims idx :authority/provenance])
          (demand! (= expected-entity (get-in claim [:subject :entity/id]))
                   :evidence-entity-mismatch [:evidence :claims idx :subject])
          (doseq [k [:run/id :cohort/id :attempt/id :checkpoint/ref]]
@@ -188,7 +210,8 @@
          (demand! (supported-assertions (:assertion claim))
                   :unsupported-evidence-assertion [:evidence :claims idx :assertion])
          {:ref ref :claim/id (:claim/id claim) :assertion (:assertion claim)
-          :observed-at (:observed-at cp) :source (::source (meta claim))}))
+          :observed-at (:observed-at cp) :source (::source (meta claim))
+          :claim claim}))
      (range) items)))
 
 (defn- authority-record! [resolver kind ref io-opts]
@@ -252,8 +275,7 @@
         observer-ref (get-in observation [:authority :observer/ref])
         review-ref (get-in observation [:authority :review/ref])
         observer (authority-record! resolver :observer observer-ref io-opts)
-        review (authority-record! resolver :review review-ref io-opts)
-        digest (subject-digest observation)]
+        observer-source (::source (meta observer))]
     (demand! (= authority-schema (:schema observer)) :observer-unauthorized [:authority :observer/ref])
     (demand! (= :categorical-state-observer (:role observer))
              :observer-unauthorized [:authority :observer/ref])
@@ -262,46 +284,51 @@
              :observer-unauthorized [:authority :observer/ref])
     (demand! (= (:authority/provenance expected) (:authority/provenance observer))
              :observer-unauthorized [:authority :observer/ref])
-    (demand! (= review-schema (:schema review)) :review-unauthorized [:authority :review/ref])
-    (demand! (= :categorical-state-reviewer (:role review))
-             :review-unauthorized [:authority :review/ref])
-    (demand! (nonblank? (:reviewer/id review)) :review-unauthorized [:authority :review/ref])
-    (demand! (= (:authority/scope expected) (:authority/scope review))
-             :review-unauthorized [:authority :review/ref])
-    (demand! (= (:authority/provenance expected) (:authority/provenance review))
-             :review-unauthorized [:authority :review/ref])
-    (demand! (not= (:principal/id observer) (:reviewer/id review))
-             :self-review [:authority :review/ref])
-    (demand! (= :accepted (:verdict review)) :categorical-observation-unreviewed
-             [:authority :review/ref])
-    (demand! (= (subject observation) (:subject review)) :review-subject-mismatch
-             [:authority :review/ref])
-    (demand! (= digest (:subject/sha256 review)) :review-subject-mismatch
-             [:authority :review/ref])
-    (demand! (= (:principal/id observer) (:observer/id review))
-             :borrowed-review [:authority :review/ref])
-    (demand! (= rubric-id (:rubric/id review)) :review-subject-mismatch
-             [:authority :review/ref])
-    (demand! (not (.isBefore (instant! (:reviewed-at review) [:reviewed-at])
-                             (instant! (get-in observation [:point :annotation/created-at])
-                                       [:point :annotation/created-at])))
-             :temporal-order-invalid [:reviewed-at])
-    {:schema :wm/validated-categorical-state-observation-v1
-     :status :qualified
-     :observation observation
-     :subject/sha256 digest
-     :observer-origin observer-ref
-     :review-origin review-ref
-     :observer-source (::source (meta observer))
-     :review-source (::source (meta review))
-     :resolved-evidence-claims resolved-claims
-     :derived-rubric-assertions assertions
-     :method :reviewed-categorical-annotation
-     :cohort (get-in observation [:point :cohort/id])
-     :authority/scope (:authority/scope expected)
-     :authority/provenance (:authority/provenance expected)
-     :conditioning-point expected
-     :limitations (:limitations observation)}))
+    (let [frozen-subject (acceptance-subject observation resolved-claims
+                                             observer observer-source expected)
+          digest (acceptance-subject-digest frozen-subject)
+          review (authority-record! resolver :review review-ref io-opts)]
+      (demand! (= review-schema (:schema review)) :review-unauthorized [:authority :review/ref])
+      (demand! (= :categorical-state-reviewer (:role review))
+               :review-unauthorized [:authority :review/ref])
+      (demand! (nonblank? (:reviewer/id review)) :review-unauthorized [:authority :review/ref])
+      (demand! (= (:authority/scope expected) (:authority/scope review))
+               :review-unauthorized [:authority :review/ref])
+      (demand! (= (:authority/provenance expected) (:authority/provenance review))
+               :review-unauthorized [:authority :review/ref])
+      (demand! (not= (:principal/id observer) (:reviewer/id review))
+               :self-review [:authority :review/ref])
+      (demand! (= :accepted (:verdict review)) :categorical-observation-unreviewed
+               [:authority :review/ref])
+      (demand! (= frozen-subject (:subject review)) :review-subject-mismatch
+               [:authority :review/ref])
+      (demand! (= digest (:subject/sha256 review)) :review-subject-mismatch
+               [:authority :review/ref])
+      (demand! (= (:principal/id observer) (:observer/id review))
+               :borrowed-review [:authority :review/ref])
+      (demand! (= rubric-id (:rubric/id review)) :review-subject-mismatch
+               [:authority :review/ref])
+      (demand! (not (.isBefore (instant! (:reviewed-at review) [:reviewed-at])
+                               (instant! (get-in observation [:point :annotation/created-at])
+                                         [:point :annotation/created-at])))
+               :temporal-order-invalid [:reviewed-at])
+      {:schema :wm/validated-categorical-state-observation-v1
+       :status :qualified
+       :observation observation
+       :subject frozen-subject
+       :subject/sha256 digest
+       :observer-origin observer-ref
+       :review-origin review-ref
+       :observer-source observer-source
+       :review-source (::source (meta review))
+       :resolved-evidence-claims resolved-claims
+       :derived-rubric-assertions assertions
+       :method :reviewed-categorical-annotation
+       :cohort (get-in observation [:point :cohort/id])
+       :authority/scope (:authority/scope expected)
+       :authority/provenance (:authority/provenance expected)
+       :conditioning-point expected
+       :limitations (:limitations observation)})))
 
 (defn validate-observations!
   "Validate observations and refuse disagreeing labels at one exact point."

@@ -41,13 +41,15 @@
    :subject {:entity/id "entity/test-1"}
    :point (assoc (select-keys base-point [:run/id :cohort/id :attempt/id :checkpoint/ref])
                  :observed-at "2026-09-12T12:00:30Z")
-   :assertion assertion :payload {:kind :operator-note :fact :support-gained}})
+   :assertion assertion :payload {:kind :operator-note :fact :support-gained}
+   :authority/scope :test
+   :authority/provenance {:config/id :test/categorical-authority :revision :v1}})
 
-(defn review-for [candidate observer-id]
+(defn review-for [frozen-subject observer-id]
   {:schema sut/review-schema :role :categorical-state-reviewer
    :reviewer/id "reviewer/test-b" :observer/id observer-id
    :verdict :accepted :rubric/id sut/rubric-id
-   :subject (sut/subject candidate) :subject/sha256 (sut/subject-digest candidate)
+   :subject frozen-subject :subject/sha256 (sut/acceptance-subject-digest frozen-subject)
    :authority/scope :test
    :authority/provenance {:config/id :test/categorical-authority :revision :v1}
    :reviewed-at "2026-09-13T09:00:00Z"})
@@ -58,23 +60,33 @@
    (let [dir (Files/createTempDirectory "categorical-state-test"
                                          (make-array java.nio.file.attribute.FileAttribute 0))
          claim-ref :evidence/claim-a candidate (observation claim-ref)
-         records {[:evidence claim-ref] (write-record! dir "claim.edn" claim)
-                  [:observer :authority/observer-a]
-                  (write-record! dir "observer.edn"
-                                 {:schema sut/authority-schema
-                                  :role :categorical-state-observer
-                                  :principal/id "observer/test-a"
-                                  :authority/scope :test
-                                  :authority/provenance
-                                  {:config/id :test/categorical-authority :revision :v1}})
-                  [:review :authority/review-a]
-                  (write-record! dir "review.edn" (review-for candidate "observer/test-a"))}
+         claim-source (write-record! dir "claim.edn" claim)
+         observer-record {:schema sut/authority-schema
+                          :role :categorical-state-observer
+                          :principal/id "observer/test-a"
+                          :authority/scope :test
+                          :authority/provenance
+                          {:config/id :test/categorical-authority :revision :v1}}
+         observer-source (write-record! dir "observer.edn" observer-record)
          expected {:subject {:entity/id "entity/test-1"}
                    :point (dissoc base-point :annotation/created-at :state-point)
                    :authority/scope :test
                    :authority/provenance {:config/id :test/categorical-authority
-                                          :revision :v1}}]
+                                          :revision :v1}}
+         resolved-claim {:ref claim-ref :claim/id (:claim/id claim)
+                         :assertion (:assertion claim)
+                         :observed-at (get-in claim [:point :observed-at])
+                         :source claim-source :claim claim}
+         frozen-subject (sut/acceptance-subject candidate [resolved-claim]
+                                                observer-record observer-source expected)
+         review-source (write-record! dir "review.edn"
+                                      (review-for frozen-subject "observer/test-a"))
+         records {[:evidence claim-ref] claim-source
+                  [:observer :authority/observer-a] observer-source
+                  [:review :authority/review-a] review-source}]
      {:dir dir :candidate candidate :records records
+      :observer-record observer-record :observer-source observer-source
+      :expected expected :frozen-subject frozen-subject
       :authority {:expected expected :resolver (fn [kind ref] (get records [kind ref]))}})))
 
 (deftest grounded-claim-qualification-test
@@ -114,6 +126,56 @@
          (let [{:keys [candidate authority]} (fixture (evidence-claim :invented-status-proof))]
            (refusal #(sut/validate-observation! candidate authority))))))
 
+(deftest complete-resolved-subject-controls-test
+  (let [{:keys [candidate authority dir records observer-record observer-source expected]}
+        (fixture)
+        replacement (assoc (evidence-claim :support-gained)
+                           :payload {:kind :operator-note :fact :different-grounded-evidence})
+        replacement-source (write-record! dir "replacement.edn" replacement)
+        replaced-records (assoc records [:evidence :evidence/claim-a] replacement-source)
+        replaced-authority (assoc authority :resolver #(get replaced-records [%1 %2]))]
+    (is (= :review-subject-mismatch
+           (refusal #(sut/validate-observation! candidate replaced-authority))))
+    (let [resolved {:ref :evidence/claim-a :claim/id (:claim/id replacement)
+                    :assertion (:assertion replacement)
+                    :observed-at (get-in replacement [:point :observed-at])
+                    :source replacement-source :claim replacement}
+          frozen (sut/acceptance-subject candidate [resolved]
+                                         observer-record observer-source expected)
+          review-source (write-record! dir "replacement-review.edn"
+                                       (review-for frozen "observer/test-a"))
+          rs (assoc replaced-records [:review :authority/review-a] review-source)
+          a (assoc authority :resolver #(get rs [%1 %2]))]
+      (is (= :qualified (:status (sut/validate-observation! candidate a)))))
+    (let [production-expected (-> expected
+                                  (assoc :authority/scope :production)
+                                  (assoc-in [:authority/provenance :revision] :production-v1))
+          production-observer (assoc observer-record :authority/scope :production
+                                     :authority/provenance
+                                     (:authority/provenance production-expected))
+          observer-p (write-record! dir "production-observer.edn" production-observer)
+          rs (assoc records [:observer :authority/observer-a] observer-p)
+          a {:expected production-expected :resolver #(get rs [%1 %2])}]
+      (is (= :evidence-scope-mismatch
+             (refusal #(sut/validate-observation! candidate a)))))
+    (let [claim (dissoc (evidence-claim :support-gained) :authority/provenance)
+          p (write-record! dir "missing-provenance-claim.edn" claim)
+          rs (assoc records [:evidence :evidence/claim-a] p)
+          a (assoc authority :resolver #(get rs [%1 %2]))]
+      (is (= :evidence-provenance-mismatch
+             (refusal #(sut/validate-observation! candidate a)))))
+    (let [new-start "2026-09-12T11:58:30Z"
+          c (assoc-in candidate [:point :action/started-at] new-start)
+          a (assoc-in authority [:expected :point :action/started-at] new-start)]
+      (is (= :review-subject-mismatch
+             (refusal #(sut/validate-observation! c a)))))
+    (let [other-observer (assoc observer-record :principal/id "observer/test-c")
+          p (write-record! dir "changed-observer.edn" other-observer)
+          rs (assoc records [:observer :authority/observer-a] p)
+          a (assoc authority :resolver #(get rs [%1 %2]))]
+      (is (= :review-subject-mismatch
+             (refusal #(sut/validate-observation! candidate a)))))))
+
 (deftest independent-context-binds-time-and-point-test
   (let [{:keys [candidate authority]} (fixture)]
     (is (= :observation-time-mismatch
@@ -134,7 +196,7 @@
                       candidate (update authority :expected dissoc :authority/provenance)))))))
 
 (deftest identities-authority-and-review-binding-test
-  (let [{:keys [candidate authority dir records]} (fixture)]
+  (let [{:keys [candidate authority dir records frozen-subject]} (fixture)]
     (is (= :missing-identity
            (refusal #(sut/validate-observation! (assoc candidate :observation/id "") authority))))
     (is (= :candidate-owned-review
@@ -151,7 +213,7 @@
                                              [%1 %2]))]
       (is (= :observer-unauthorized (refusal #(sut/validate-observation! candidate a)))))
     (let [p (write-record! dir "self-review.edn"
-                           (assoc (review-for candidate "observer/test-a")
+                           (assoc (review-for frozen-subject "observer/test-a")
                                   :reviewer/id "observer/test-a"))
           a (assoc authority :resolver #(get (assoc records [:review :authority/review-a] p) [%1 %2]))]
       (is (= :self-review (refusal #(sut/validate-observation! candidate a)))))
@@ -164,7 +226,8 @@
              (refusal #(sut/validate-observation! changed a)))))))
 
 (deftest limitations-substitution-and-ambiguity-test
-  (let [{:keys [candidate authority dir records]} (fixture)]
+  (let [{:keys [candidate authority dir records observer-record observer-source expected]}
+        (fixture)]
     (is (= :limitations-missing
            (refusal #(sut/validate-observation! (dissoc candidate :limitations) authority))))
     (is (= :candidate-owned-rubric-assertions
@@ -186,7 +249,14 @@
           c (-> candidate
                 (update-in [:evidence :claims] conj {:claim/ref ref})
                 (assoc-in [:authority :review/ref] :authority/review-b))
-          review-p (write-record! dir "review-b.edn" (review-for c "observer/test-a"))
+          resolved-a (get-in (sut/validate-observation! candidate authority)
+                             [:resolved-evidence-claims 0])
+          resolved-b {:ref ref :claim/id (:claim/id claim) :assertion (:assertion claim)
+                      :observed-at (get-in claim [:point :observed-at])
+                      :source p :claim claim}
+          frozen (sut/acceptance-subject c [resolved-a resolved-b]
+                                         observer-record observer-source expected)
+          review-p (write-record! dir "review-b.edn" (review-for frozen "observer/test-a"))
           rs (assoc records [:evidence ref] p [:review :authority/review-b] review-p)
           a (assoc authority :resolver #(get rs [%1 %2]))]
       (is (= :ambiguous-categorical-evidence
