@@ -1,0 +1,30 @@
+{:schema :wm/execution-receipts-v1
+ :source-tree {:repo "futon3c" :commit "26d5a1dc"}
+ :runs
+ [{:gate :focused-test
+   :command "clojure -M:test -n futon3c.agency.selective-form-loader-test"
+   :exit 0 :tests 2 :assertions 14 :failures 0 :errors 0
+   :stdout "Running tests in #{\"test\"}\nTesting futon3c.agency.selective-form-loader-test\nRan 2 tests containing 14 assertions.\n0 failures, 0 errors."}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon3c/agency/selective_form_loader.clj test/futon3c/agency/selective_form_loader_test.clj"
+   :exit 0 :errors 0 :warnings 0
+   :stdout "linting took 42ms, errors: 0, warnings: 0"}
+  {:gate :check-parens-first-attempt
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli \"src/futon3c/agency/selective_form_loader.clj\" \"test/futon3c/agency/selective_form_loader_test.clj\")'"
+   :exit 255
+   :stderr "Wrong number of arguments: arxana-check-parens-cli takes CLI arguments after --"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/selective_form_loader.clj test/futon3c/agency/selective_form_loader_test.clj"
+   :exit 0 :stdout "OK"}
+  {:gate :restart-preflight
+   :command "bash -n holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/restart-preflight.sh; holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/restart-preflight.sh 1942869"
+   :exit 1 :expected :typed-refusal
+   :refusals [:restart/full-tree-acceptance-absent
+              :restart/ingress-fence-acceptance-absent
+              :restart/archive-store-not-provisioned
+              :restart/source-worktree-dirty]
+   :observed {:cwd "/home/joe/code/futon3c"
+              :service :futon3c-zone.service
+              :ports [7070 6768]
+              :cmdline-sha256 "958384c6a77a2856cb401c2727fc7b0174cc9afa2ae1e5d9a0f7043cb4042ab7"
+              :hot-ledger-sha256 "1629406d7a4b06ec88db4ab094b0da494d60e66bb2b96c6b80a14989991c52f4"}}]}
