@@ -1,0 +1,7 @@
+{:attempts
+ [{:source-commit "6795b1a5" :test-exit 1 :kondo-exit 3 :parens-exit 1
+   :finding "nested shorthand functions and unmatched form; test reader stopped before assertions"
+   :raw-combined "attempt-1-test.combined"}
+  {:source-commit "5449e75d" :test-exit 1 :kondo-exit 3 :parens-exit 1
+   :finding "EOF while reading from line 56; test reader stopped before assertions"
+   :raw-combined "attempt-2-test.combined"}]}

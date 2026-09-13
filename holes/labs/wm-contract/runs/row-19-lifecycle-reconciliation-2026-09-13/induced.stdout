@@ -1,0 +1,11 @@
+#object[clojure.lang.Namespace 0x9f46d94 "row19.reconcile-induced"]
+#'row19.reconcile-induced/induced-failure
+
+Testing row19.reconcile-induced
+
+FAIL in (induced-failure) (NO_SOURCE_FILE:1)
+expected: false
+  actual: false
+
+Ran 1 tests containing 1 assertions.
+1 failures, 0 errors.

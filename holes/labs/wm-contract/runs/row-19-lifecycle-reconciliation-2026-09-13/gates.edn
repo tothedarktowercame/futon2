@@ -1,0 +1,17 @@
+{:schema :wm/execution-receipts-v1
+ :source {:repo "futon3c" :commit "7309d81c"
+          :tree-sha "175272aacc71c3b982f27b6b73e52f14bafa9019"
+          :files {"src/futon3c/agency/invoke_lifecycle_reconciliation.clj"
+                  "0329347373460f70571dca0dd9537a18c892c444a860e06923a420df4c491688"
+                  "test/futon3c/agency/invoke_lifecycle_reconciliation_test.clj"
+                  "8c84d4b0bf69d62182291bb579b6f8c0a5c6d41594545f81ed907fa7d7f3e74f"}}
+ :runs
+ [{:gate :focused-test :command "clojure -M:test -n futon3c.agency.invoke-lifecycle-reconciliation-test"
+   :exit 0 :tests 3 :assertions 15 :failures 0 :errors 0 :stdout "test.stdout" :stderr "test.stderr"}
+  {:gate :clj-kondo :command "clj-kondo --lint src/futon3c/agency/invoke_lifecycle_reconciliation.clj test/futon3c/agency/invoke_lifecycle_reconciliation_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/invoke_lifecycle_reconciliation.clj test/futon3c/agency/invoke_lifecycle_reconciliation_test.clj"
+   :exit 0 :stdout "parens.stdout" :stderr "parens.stderr"}
+  {:gate :induced-runner-failure :command "clojure -M -e <one failing clojure.test; exit from counters>"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :errors 0 :stdout "induced.stdout" :stderr "induced.stderr"}]
+ :failed-history "failed-reader-attempts.edn"}

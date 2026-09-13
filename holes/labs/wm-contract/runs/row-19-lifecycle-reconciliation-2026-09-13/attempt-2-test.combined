@@ -1,0 +1,8 @@
+WARNING: Unknown module: org.apache.arrow.memory.core specified to --add-opens
+
+Running tests in #{"test"}
+Syntax error reading source at (futon3c/agency/invoke_lifecycle_reconciliation_test.clj:88:1).
+EOF while reading, starting at line 56
+
+Full report at:
+/tmp/clojure-6130911714321758632.edn
