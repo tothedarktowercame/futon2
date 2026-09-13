@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest R6 contractdba62e40 twelve pins verified: E5 shapes rollout fields with no live R6 scoring consumer. E6a is blocked on a reviewed semantic hop, not just verifier plumbing. No prior/G mapping adopted; next design assessment only. See [review](runs/row-22-r6-scoring-correspondence-2026-09-13/lead-review.md).
+
 - Latest E6b authority9e262537/b6281dda five pins/raw4tests25 reviewed; executed borrowed model with unchanged canonical inputs still replays. Full canonical context/field/event and outcome artifact/chronology joins required. See [review](runs/row-22-e6b-feedback-2026-09-13/lead-authority-review.md).
 
 - Latest authority reader23614af7/c5f1ab84 two pins/raw5tests20 verified; additional Date replay control exits0. Accepted cooperative isolated helper only; external digest/format trust and F11 integration remain open. See [acceptance](runs/row-24-authority-buffer-repair-2026-09-13/lead-acceptance.md).

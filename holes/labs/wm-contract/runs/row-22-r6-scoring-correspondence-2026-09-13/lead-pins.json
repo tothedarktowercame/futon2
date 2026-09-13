@@ -1,0 +1,62 @@
+[
+  {
+    "path": "src/futon2/aif/efe.clj",
+    "sha256": "1dd3b83d0c78a8388889d35c32a6bde12cd9ee55eed5ce8c0b570f3005fd1b83",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/policy.clj",
+    "sha256": "b0dc9a1a440c18ec1464ee96abb9c76401a02295e8e3e7f0840b105242236628",
+    "match": true
+  },
+  {
+    "path": "scripts/futon2/report/war_machine.clj",
+    "sha256": "50d02bb7179087597f468f361e16206d93400b1e410e27ce1c261bdde801981f",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/habit_prior.clj",
+    "sha256": "23f631d82dbbace7f8b854b243ef31ebed11fabfe55e24b41020857b11007f9f",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/policy_precision.clj",
+    "sha256": "2e7164ecf965fe9553822a537fb543d212ec1641daeca6652b05a47a62ad094b",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/rollout.clj",
+    "sha256": "3d32c605511cea48d6002bcc970155098b3428c761ca5c323aae059cf9336e70",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/machine_slow_prior_evidence.clj",
+    "sha256": "60634bdac1b180d63b3d0b57d5c970404cf3054f72edad027051a683ca228a8a",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/machine_forward_influence.clj",
+    "sha256": "45235295bc2cb99adde26b07100845a50bd002a0aabcec20cef41731c21474b6",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/trace.clj",
+    "sha256": "858a4ae3a837fa4755da1c307732bd4b7b887eff3e04bd2d97e139cc70afb356",
+    "match": true
+  },
+  {
+    "path": "holes/labs/wm-contract/TN-row18-field-applicability-2026-09-13.md",
+    "sha256": "3d5c2ce644964a6aafb89200179e29dd45baba87bb17624aa25a61b3424ddfcd",
+    "match": true
+  },
+  {
+    "path": "holes/labs/wm-contract/TN-row22-e6-spec-2026-09-13.md",
+    "sha256": "6f0704838ea893bda8d13eb41e5d4e2b346d14fc406cfbd7dbe8a213d1853d07",
+    "match": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6-spec-review-2026-09-13/lead-review.md",
+    "sha256": "f4405083cdf50dd9b3fa4f3570e2f5f104a7726725608cac13da5da0f287c1d8",
+    "match": true
+  }
+]
