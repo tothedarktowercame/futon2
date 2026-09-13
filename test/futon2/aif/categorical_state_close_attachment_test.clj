@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.categorical-state-close-attachment :as sut]
             [futon2.aif.categorical-state-observation :as observation]
-            [futon2.aif.categorical-state-observation-test :as fixture]))
+            [futon2.aif.categorical-state-observation-test :as fixture])
+  (:import (java.nio.file Files Path)))
 
 (defn refusal [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
@@ -96,6 +97,11 @@
     (let [f (replace-context-record fx (assoc-in (:context fx) [:subject :entity/id] "other"))]
       (is (= :observation-entity-mismatch
              (refusal #(sut/attach-from-context! (:context-ref f) (:authority f))))))
+    (let [f (replace-context-record
+             fx (assoc-in (:context fx) [:point :action/started-at]
+                          "2026-09-12T11:58:00Z"))]
+      (is (= :observation-time-mismatch
+             (refusal #(sut/attach-from-context! (:context-ref f) (:authority f))))))
     (is (= :attachment-authority-not-found
            (refusal #(sut/attach-from-context! {:status :qualified} (:authority fx)))))))
 
@@ -108,6 +114,17 @@
         stale (replace-context-record (assoc fx :records rs) context)]
     (is (= :source-digest-mismatch
            (refusal #(sut/attach-from-context! (:context-ref stale) (:authority stale)))))
+    (let [context-pointer (get (:records fx) [:context (:context-ref fx)])
+          context-path (:path context-pointer)
+          calls (atom 0)
+          read-bytes (fn [path]
+                       (let [actual (Files/readAllBytes
+                                     (Path/of ^String path (make-array String 0)))]
+                         (if (and (= path context-path) (= 2 (swap! calls inc)))
+                           (fixture/edn-bytes {:mutated true}) actual)))
+          a (assoc (:authority fx) :io-opts {:read-bytes read-bytes})]
+      (is (= :source-mutated
+             (refusal #(sut/attach-from-context! (:context-ref fx) a)))))
     (let [production (replace-context-record
                       fx (-> (:context fx)
                              (assoc :authority/scope :production)
