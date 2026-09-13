@@ -1,0 +1,63 @@
+{
+  "schema": "wm/delayed-reply-verification-v1",
+  "checked_at": "2026-09-13T03:45:27.888741+00:00",
+  "consumed_job": "invoke-1789270740665-20611-33e6755e",
+  "successor_job": "invoke-1789271039934-20615-eb6ce892",
+  "acceptance_commit": "48df6680",
+  "acceptance_sha256": "21a7b1040134e8dd4932db4e3daecf76c06d857298d7e48b2d87197a712116b4",
+  "source_pins_verified": [
+    {
+      "path": "holes/labs/wm-contract/runs/row-14-categorical-authority-grounding-repair-2026-09-13/lead-review.md",
+      "sha256": "bbcd9ca41917f8defbe066f504b6b3ea55392d37c1a76964f282a0d1fb2bc733",
+      "source_commit": "46b94b94"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-14-categorical-authority-grounding-repair-2026-09-13/lead-counterexamples.clj",
+      "sha256": "a23e269feb9b596474e5b05accc75f4fa55e7cd28686418badd1d3e0a69a93f2",
+      "source_commit": "46b94b94"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-14-categorical-authority-grounding-repair-2026-09-13/lead-counterexamples.stdout.edn",
+      "sha256": "6ed1922f84a1de633f104712b80fa0e67673e7403214c1005bcf7265c45ccfe2",
+      "source_commit": "46b94b94"
+    },
+    {
+      "path": "holes/labs/wm-contract/SPEC-row14-categorical-state-observation-v1.md",
+      "sha256": "ea2b73efbb94f40cef5a7d5208a510a4f88f073891f52e206490dd7304f8fe3e",
+      "source_commit": "46b94b94"
+    },
+    {
+      "path": "src/futon2/aif/categorical_state_observation.clj",
+      "sha256": "8d48ecf867e2b6df7ce720b48ace3cf699bb9e19c05481c3d11369fb8d678fb2",
+      "source_commit": "46b94b94"
+    },
+    {
+      "path": "test/futon2/aif/categorical_state_observation_test.clj",
+      "sha256": "b21559d6b9678e40634fd6c4a248218a1f9ad8893ec01a65cd48dc49be6b7ded",
+      "source_commit": "46b94b94"
+    }
+  ],
+  "retained_gates_verified": true,
+  "tests_rerun": false,
+  "new_dispatches": 0,
+  "manifest_sha256": "6459adc2563a186f5b61c4f5fe52f848a29f72a03c5ad4dc7a42177b1ca83c0a",
+  "current_jobs": [
+    {
+      "job-id": "invoke-1789270909238-20613-342acd92",
+      "state": "done",
+      "artifact-ref": "30b7de55"
+    },
+    {
+      "job-id": "invoke-1789270833872-20612-217afbfa",
+      "state": "running",
+      "artifact-ref": null
+    },
+    {
+      "job-id": "invoke-1789271039934-20615-eb6ce892",
+      "state": "running",
+      "artifact-ref": null
+    }
+  ],
+  "result": "already-reviewed-and-superseded",
+  "wm_completion": "unfinished"
+}
