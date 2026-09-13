@@ -15,6 +15,15 @@
   [:commission :dispatch :run-launch :tick-entries :observations
    :predecessor-predictions :r8-occurrences])
 
+(def ^:private schemas
+  {:commission :wm/e4-commission-v1
+   :dispatch :wm/e4-dispatch-v1
+   :run-launch :wm/e4-run-launch-v1
+   :tick-entries :wm/e4-tick-entry-v1
+   :observations :wm/e4-r2-observation-v1
+   :predecessor-predictions :wm/e4-predecessor-v1
+   :r8-occurrences :wm/e4-r8-occurrences-v1})
+
 (defn- refuse! [kind data]
   (throw (ex-info (name kind) (assoc data :refusal kind))))
 
@@ -91,6 +100,15 @@
       (refuse! refusal {:keys ks}))
     (zipmap ks rows)))
 
+(defn- schemas! [resolved]
+  (doseq [[role expected] schemas
+          :let [record (get-in resolved [role :record])
+                records (if (#{:tick-entries :observations
+                               :predecessor-predictions :r8-occurrences} role)
+                          record [record])]]
+    (when-not (and (seq records) (every? #(= expected (:schema %)) records))
+      (refuse! :e4/source-schema-mismatch {:role role :expected expected}))))
+
 (defn verify-route!
   "Verify one bounded, ordered R10 -> tick -> R2/(predecessor) -> R8 route.
    Returns fixture evidence only for fixture authority and never authorizes a
@@ -103,6 +121,12 @@
         predictions (r :predecessor-predictions) r8s (r :r8-occurrences)
         plan (:tick/plan commission)
         run-id (:run/id launch) model-id (:model/id launch) revision (:model/revision launch)]
+    (schemas! resolved)
+    ;; No production completeness/ownership authority exists yet.  Refusing is
+    ;; safer than allowing a caller to promote fixture resolvers with a label.
+    (when (= :independently-retained-production (:scope authority))
+      (refuse! :e4/production-authority-unavailable
+               {:required :independent-dispatch-run-and-complete-tick-source-acceptance}))
     (when-not (and (= :wm/e4-commission-v1 (:schema commission))
                    (= :R10 (:node commission)) (nonblank? (:commission/id commission)))
       (refuse! :e4/invalid-commission {:commission commission}))

@@ -122,4 +122,9 @@
         bad (assoc-in authority [:sources :commission :sha256] (apply str (repeat 64 "0")))]
     (is (= :e4/source-digest-mismatch (refusal bad))))
   (is (= :e4/untrusted-source-scope
-         (refusal (assoc (fixture {}) :scope :candidate-asserted-production)))))
+         (refusal (assoc (fixture {}) :scope :candidate-asserted-production))))
+  (is (= :e4/production-authority-unavailable
+         (refusal (assoc (fixture {}) :scope :independently-retained-production))))
+  (is (= :e4/source-schema-mismatch
+         (refusal (fixture {:observations
+                            (assoc-in (:observations records) [1 :schema] :candidate/schema)})))))
