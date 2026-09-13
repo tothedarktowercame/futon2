@@ -132,6 +132,110 @@
     {:record record :bytes/base64 (:bytes/base64 descriptor)
      :source-sha256 (:source-sha256 descriptor) :value-sha256 (:value-sha256 descriptor)}))
 
+(defn- valid-proposal-shape! [proposal]
+  (exact-keys! :identity
+               #{:model/id :model/revision :run/id :source/tick-index
+                 :destination/tick-index} (:identity proposal))
+  (exact-keys! :transition-subject
+               #{:model/id :model/revision :run/id :source/tick-index
+                 :destination/tick-index :candidate/occurrence-id :action
+                 :fast/action-class :prior-state/revision :next-state/revision
+                 :feedback/event-id} (:transition/subject proposal))
+  (exact-keys! :prior-wrapper #{:state/revision :state :state-sha256} (:prior proposal))
+  (exact-keys! :next-wrapper #{:state/revision :state :state-sha256} (:next proposal))
+  (exact-keys! :canonical-digests #{:e3 :e2b} (:canonical/digests proposal))
+  (exact-keys! :validator #{:source-sha256 :dependency-sha256s} (:validator proposal))
+  (exact-keys! :dependencies #{:temporal-hierarchy :intrinsic-values}
+               (get-in proposal [:validator :dependency-sha256s]))
+  (when-not (and (every? #(re-matches hex64 %)
+                         (concat (vals (:input/digests proposal))
+                                 (vals (:source/digests proposal))
+                                 (vals (:canonical/digests proposal))
+                                 [(:source-sha256 (:validator proposal))]
+                                 (vals (get-in proposal [:validator :dependency-sha256s]))))
+                 (every? nonblank? ((juxt :application/id :feedback/event-id) proposal))
+                 (instant? (:committed-at proposal)))
+    (refuse! :e6b-carrier/proposal-shape-invalid {})))
+
+(defn- valid-context! [context]
+  (exact-keys! :context
+               #{:schema/version :scope :model/id :model/revision :run/id :tick/index
+                 :destination/tick-index :prior-state/revision :next-state/revision
+                 :feedback/event-id :application/id :candidate/occurrence-id :action
+                 :fast/action-class :outcome-reviewer/id :outcome-observer/id
+                 :prior-state/as-of :destination/as-of :canonical/e3-context
+                 :canonical/e2b-context :canonical/field-subject} context)
+  (when-not (and (= :wm/e6b-transition-context-v1 (:schema/version context))
+                 (= :isolated-test (:scope context))
+                 (or (keyword? (:model/id context)) (nonblank? (:model/id context)))
+                 (every? nonblank? ((juxt :model/revision :run/id :prior-state/revision
+                                         :next-state/revision :feedback/event-id :application/id
+                                         :outcome-reviewer/id :outcome-observer/id) context))
+                 (nat-int? (:tick/index context))
+                 (= (inc (:tick/index context)) (:destination/tick-index context))
+                 (some? (:candidate/occurrence-id context))
+                 (map? (:action context)) (seq (:action context))
+                 (keyword? (:fast/action-class context))
+                 (instant? (:prior-state/as-of context))
+                 (instant? (:destination/as-of context))
+                 (every? map? ((juxt :canonical/e3-context :canonical/e2b-context
+                                     :canonical/field-subject) context)))
+    (refuse! :e6b-carrier/context-invalid {})))
+
+(defn- validate-structural-joins! [proposal sources prior next]
+  (let [context (get-in sources [:context :record])
+        subject (:transition/subject proposal)
+        identity (:identity proposal)
+        e2b (get-in sources [:e2b-subject :record])
+        outcome (get-in sources [:outcome :record])
+        feedback (get-in next [:state :slow/feedback])
+        update (:update feedback)
+        cls (:fast/action-class context)]
+    (valid-context! context)
+    (when-not (and
+               (= identity {:model/id (:model/id context)
+                            :model/revision (:model/revision context)
+                            :run/id (:run/id context)
+                            :source/tick-index (:tick/index context)
+                            :destination/tick-index (:destination/tick-index context)})
+               (= subject {:model/id (:model/id context)
+                           :model/revision (:model/revision context)
+                           :run/id (:run/id context)
+                           :source/tick-index (:tick/index context)
+                           :destination/tick-index (:destination/tick-index context)
+                           :candidate/occurrence-id (:candidate/occurrence-id context)
+                           :action (:action context) :fast/action-class cls
+                           :prior-state/revision (:prior-state/revision context)
+                           :next-state/revision (:next-state/revision context)
+                           :feedback/event-id (:feedback/event-id context)})
+               (= (:application/id proposal) (:application/id context))
+               (= (:feedback/event-id proposal) (:feedback/event-id context))
+               (= (:committed-at proposal) (:destination/as-of context))
+               (= (:state/revision (:prior proposal)) (:prior-state/revision context)
+                  (:state/revision prior))
+               (= (:state/revision (:next proposal)) (:next-state/revision context)
+                  (:state/revision next))
+               (= (:candidate/occurrence-id context) (:candidate/occurrence-id e2b)
+                  (:candidate/occurrence-id outcome))
+               (= (:action context) (:action e2b) (:action outcome))
+               (= cls (:fast/action-class e2b) (:fast/action-class outcome)
+                  (get-in feedback [:outcome :fast/action-class]) (:class update))
+               (= (select-keys outcome [:fast/action-class :fast/witnessed? :fast/succeeded?])
+                  (:outcome feedback))
+               (= (:run/id context) (:outer-loop-run-id update))
+               (= (:destination/as-of context) (:as-of update))
+               (= (:outcome/evidence-id outcome) (:evidence-ref feedback))
+               (= [(:outcome/evidence-id outcome)] (:evidence-refs update))
+               (= (:slow/mode prior) (get-in next [:state :slow/previous-mode]))
+               (= (select-keys prior [:model/id :model/revision :run/id])
+                  (select-keys next [:model/id :model/revision :run/id]))
+               (= (:tick/index next) (inc (:tick/index prior)))
+               (= (:predecessor/revision next) (:state/revision prior))
+               (= (:feedback/event-id next) (:feedback/event-id context))
+               (= (:canonical/e3-digest e2b) (get-in proposal [:canonical/digests :e3]))
+               (= (:canonical/e2b-digest e2b) (get-in proposal [:canonical/digests :e2b])))
+      (refuse! :e6b-carrier/transition-subject-mismatch {}))))
+
 (defn project-transition
   "Structurally project carriers from proposal evidence and exact source bytes."
   [{:keys [proposal-evidence original-sources] :as bundle}]
@@ -149,6 +253,7 @@
                  (= (set source-roles) (set (keys (:input/digests proposal-evidence))))
                  (= (set source-roles) (set (keys (:source/digests proposal-evidence)))))
     (refuse! :e6b-carrier/proposal-shape-invalid {}))
+  (valid-proposal-shape! proposal-evidence)
   (let [sources (into {} (map (fn [role]
                                 [role (decode-source! role (original-sources role)
                                                       proposal-evidence)]) source-roles))
@@ -159,21 +264,7 @@
                    (= (:state-sha256 (:next proposal-evidence)) (value-digest next)))
       (refuse! :e6b-carrier/proposal-record-mismatch {}))
     (valid-prior! prior) (valid-next! next)
-    (let [subject (:transition/subject proposal-evidence)]
-      (when-not (and (= (:model/id prior) (:model/id subject))
-                     (= (:model/revision prior) (:model/revision subject))
-                     (= (:run/id prior) (:run/id subject))
-                     (= (:tick/index prior) (:source/tick-index subject))
-                     (= (:tick/index next) (inc (:tick/index prior)))
-                     (= (:destination/tick-index subject) (:tick/index next))
-                     (= (:state/revision prior) (:prior-state/revision subject)
-                        (:predecessor/revision next))
-                     (= (:state/revision next) (:next-state/revision subject))
-                     (= (:feedback/event-id next) (:feedback/event-id subject)
-                        (:feedback/event-id proposal-evidence))
-                     (= (select-keys prior [:model/id :model/revision :run/id])
-                        (select-keys next [:model/id :model/revision :run/id])))
-        (refuse! :e6b-carrier/transition-subject-mismatch {})))
+    (validate-structural-joins! proposal-evidence sources prior next)
     {:schema :wm/e6b-carrier-projection-v1 :scope :isolated-test
      :status :structurally-projected :authority/status :none
      :proposal-evidence proposal-evidence :original-sources sources

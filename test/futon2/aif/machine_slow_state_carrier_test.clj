@@ -37,6 +37,10 @@
                    :source-sha256 (digest bs) :value-sha256 (vd record)})
         (assoc-in [:proposal-evidence :source/digests role] (digest bs))
         (assoc-in [:proposal-evidence :input/digests role] (vd record)))))
+(defn- replace-next [b next]
+  (-> b
+      (assoc-in [:proposal-evidence :next :state] next)
+      (assoc-in [:proposal-evidence :next :state-sha256] (vd next))))
 
 (deftest projects-both-carriers-with-distinct-digest-roles
   (let [input (bundle) out (carrier/project-transition input)]
@@ -106,3 +110,37 @@
          (refusal (assoc (bundle) :verified? true))))
   (is (= :e6b-carrier/schema-invalid
          (refusal (assoc-in (bundle) [:proposal-evidence :verified?] true)))))
+
+(deftest refuses-unjoined-proposal-and-successor-metadata
+  (doseq [[label mutate expected]
+          [[:nil-identity #(assoc-in % [:proposal-evidence :identity] nil)
+            :e6b-carrier/schema-invalid]
+           [:borrowed-occurrence
+            #(assoc-in % [:proposal-evidence :transition/subject
+                          :candidate/occurrence-id] "borrowed")
+            :e6b-carrier/transition-subject-mismatch]
+           [:missing-application #(assoc-in % [:proposal-evidence :application/id] nil)
+            :e6b-carrier/proposal-shape-invalid]
+           [:borrowed-time #(assoc-in % [:proposal-evidence :committed-at]
+                                     "2026-09-13T14:00:00Z")
+            :e6b-carrier/transition-subject-mismatch]
+           [:borrowed-action #(assoc-in % [:proposal-evidence :transition/subject :action]
+                                       {:type :other})
+            :e6b-carrier/transition-subject-mismatch]
+           [:borrowed-class #(assoc-in % [:proposal-evidence :transition/subject
+                                          :fast/action-class] :explore)
+            :e6b-carrier/transition-subject-mismatch]
+           [:wrapper-revision #(assoc-in % [:proposal-evidence :next :state/revision] "other")
+            :e6b-carrier/transition-subject-mismatch]
+           [:malformed-feedback
+            (fn [b]
+              (replace-next b (assoc-in (get-in b [:proposal-evidence :next :state])
+                                        [:state :slow/feedback :update :as-of] "bad-time")))
+            :e6b-carrier/next-state-invalid]
+           [:borrowed-evidence-ref
+            (fn [b]
+              (replace-next b (assoc-in (get-in b [:proposal-evidence :next :state])
+                                        [:state :slow/feedback :evidence-ref] "borrowed")))
+            :e6b-carrier/transition-subject-mismatch]]]
+    (testing (name label)
+      (is (= expected (refusal (mutate (bundle))))))))
