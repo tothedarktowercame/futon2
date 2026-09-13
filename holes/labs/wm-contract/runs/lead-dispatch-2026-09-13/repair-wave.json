@@ -473,10 +473,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-cross-family-layer-relations.request.json",
       "dispatch": "accepted",
       "scope": "cross-layer projections and typed cross-family causal joins; no certificate"
+    },
+    {
+      "packet": "codex-23-e4-payload-and-completeness",
+      "job-id": "invoke-1789274887203-20638-76cae5b8",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789274887203-20638-76cae5b8",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e4-payload-and-completeness.request.json",
+      "dispatch": "accepted",
+      "scope": "pure E4 typed payload/input and independent full support repair; no runtime"
     }
   ],
   "current-awaiting": [
-    "invoke-1789274230654-20635-7c172b9a",
+    "invoke-1789274887203-20638-76cae5b8",
     "invoke-1789274368566-20636-025e61a8",
     "invoke-1789274481837-20637-ef731f39"
   ]
