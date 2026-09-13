@@ -1,0 +1,5 @@
+{:schema :wm/execution-receipt-v1 :row 18 :at "2026-09-13"
+ :tree-sha "2f171ccb5841589e139259d887983c589c2b9c58"
+ :command "clj-kondo --lint holes/labs/wm-contract/row18_field_applicability.clj"
+ :exit 0 :errors 0 :warnings 0
+ :stdout "linting took 11ms, errors: 0, warnings: 0"}
