@@ -1,0 +1,32 @@
+{:schema :wm/execution-receipt-v1
+ :row 18
+ :packet :interoceptive-policy-precision-specification
+ :at "2026-09-13"
+ :cwd "/home/joe/code/mathlib4"
+ :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionProposal.lean"
+ :tree-sha "5aafacb7b1d2d3ea115bd4d24fc5d1744085fc3d"
+ :exit 0
+ :declarations 10
+ :printed-axiom-checks 5
+ :sorryAx 0
+ :stdout ["'DarkTower.WarMachine.InteroceptivePolicyPrecisionProposal.noInteroceptionReduction' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionProposal.adjustedPriorRatePositive' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionProposal.adjustedPriorMean' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionProposal.positiveReciprocity' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionProposal.priorMeanReductionDoesNotImplyPosteriorGammaReduction' depends on axioms: [propext, Classical.choice, Quot.sound]"]
+ :pins [{:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionProposal.lean"
+         :sha256 "779027d3eeaf887d67d0f29cb89e793e2ad95805880c9d04bb8beb6f164d0298"}
+        {:path "DarkTower/WarMachine/MachineTemperature.lean"
+         :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"}
+        {:path "lean-toolchain"
+         :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}]
+ :failed-attempt
+ {:tree-sha "ebee489190"
+  :exit 1
+  :finding :adjusted-prior-mean-proof-left-a-division-goal
+  :stdout ["InteroceptivePolicyPrecisionProposal.lean:34:63: error: unsolved goals"
+           "betaPrior m : R; hbeta : betaPrior != 0; hm : m != 0"
+           "goal: betaPrior = adjustedPriorRate betaPrior m * m"
+           "adjustedPriorMean depended on sorryAx in this failed elaboration"]
+  :repair "Unfold adjustedPriorRate with rw before field_simp; follow-up commit 5aafacb7b1. Failed history retained, never counted as a proof receipt."}
+ :scope "Lean elaboration and axiom inspection of the proposal only; no production correspondence, field monotonicity, adoption, integration, or admission."}
