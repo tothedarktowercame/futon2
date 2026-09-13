@@ -1,0 +1,36 @@
+{
+  "source_commit": "a03b569da7d9b969777e26f973013bafa5c8c54e",
+  "receipt_commit": "9e08d67f30ebd8937242d58287c7bc786d73d1c8",
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_enactment_correspondence.clj",
+      "sha256": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933"
+    },
+    {
+      "path": "test/futon2/aif/machine_enactment_correspondence_test.clj",
+      "sha256": "d1a8dec32437697d4905ed2e92f7701b5ef1d67f13cca6370e3ebae55b62aa6f"
+    },
+    {
+      "path": "holes/labs/wm-contract/SPEC-row22-e2b-runtime-dependencies-2026-09-13.md",
+      "sha256": "8662e432e9513c7a01726a5276f74f9d6293643fbf2a6c8288dba5e32f84217c"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/readback.clj",
+      "sha256": "c887bb5583744b6b3d25f4595e795d01f1d49b1dc46478b8fb54059802495030"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/fixtures/context.edn",
+      "sha256": "ddbc82772282b985195a9734a912841cef63806e1bca06b59b248d5786d1591b"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/fixtures/selection.edn",
+      "sha256": "810e5d437cf62f3de6ef2c43b17e7b3693c5e801e299d89837cfc1c8ef9b245e"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/fixtures/enactment.edn",
+      "sha256": "adb640964313374ea3cd853147f501f900cbab6ca596e07b6793b4329a0e96b2"
+    }
+  ],
+  "retained_gates": "6 tests/23 assertions, readback 5 assertions, clean kondo and actual parens; all exits 0, empty stderr",
+  "rerun": false
+}
