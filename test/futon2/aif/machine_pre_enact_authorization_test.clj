@@ -1,6 +1,7 @@
 (ns futon2.aif.machine-pre-enact-authorization-test
   (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.machine-pre-enact-authorization :as e3])
+            [futon2.aif.machine-pre-enact-authorization :as e3]
+            [futon2.aif.r9-checker :as r9])
   (:import (java.nio.charset StandardCharsets)
            (java.nio.file Files)
            (java.security MessageDigest)))
@@ -15,19 +16,40 @@
 (def pending (merge {:schema/version :wm/e3-pending-construction-v1 :scope :isolated-test
                      :phase :pending-pre-enact :authorization-at "2026-09-13T12:00:00Z"
                      :subject subject} ids))
-(def verdict (merge {:schema/version :wm/e3-independence-verdict-v1 :scope :isolated-test
-                     :verdict :independent :reviewer/id "claude-15"
-                     :review-trace/id "trace-review" :subject subject} ids))
-(def review (merge {:schema/version :wm/e3-independent-review-v1 :scope :isolated-test
-                    :reviewer/id "claude-15" :claim/id "claim-e3"
-                    :artifact/ref "artifact-e3" :producer-trace/id "trace-producer"
-                    :review-trace/id "trace-review" :execution/status :executed
-                    :authority/ref "isolated-fixture-authority"
-                    :completed-at "2026-09-13T11:59:00Z" :subject subject} ids))
-
 (defn- sha [bytes]
   (apply str (map #(format "%02x" (bit-and 0xff %))
                   (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bytes))))))
+(def checker-sha (apply str (repeat 64 "c")))
+(def verification {:path "isolated-verification.edn" :sha256 (apply str (repeat 64 "d"))})
+(def commission {:agent-id "claude-15" :prompt "review exact E3 subject"
+                 :caller "fixture-owner" :surface "isolated-test"})
+(def r9-input
+  {:role-binding {:author "codex-22" :reviewer "claude-15"}
+   :producer-job {:job-id "producer-job" :agent-id "codex-22"
+                  :artifact-ref "artifact-e3" :trace-id "trace-producer"}
+   :reviewer-job {:job-id "review-job" :agent-id "claude-15"
+                  :request-digest (r9/request-digest commission)
+                  :trace-id "trace-review" :finished-at "2026-09-13T11:58:00Z"
+                  :execution {:executed true :tool-events 1}}
+   :subject {:boundary :e3/pre-enact :artifact-ref "artifact-e3"
+             :digest (sha (.getBytes (pr-str subject) StandardCharsets/UTF_8))}
+   :review-commission commission :verification-receipt verification
+   :review-receipt {:reviewer "claude-15" :verification verification}
+   :trace->job {"trace-producer" "producer-job" "trace-review" "review-job"}
+   :checker-source-sha256 checker-sha
+   :bootstrap-anchor {:schema :wm/r9-bootstrap-anchor-v1 :status :anchored
+                      :authority "isolated-fixture-only" :checker-source-sha256 checker-sha}
+   :admission-at "2026-09-13T11:59:00Z"
+   :ledger-source {:scope :isolated-fixture}})
+(def canonical-admission (r9/check-independence r9-input))
+(def verdict (merge {:schema/version :wm/e3-independence-verdict-v1 :scope :isolated-test
+                     :reviewer/id "claude-15" :review-trace/id "trace-review"
+                     :canonical-admission canonical-admission :subject subject} ids))
+(def review (merge {:schema/version :wm/e3-independent-review-v1 :scope :isolated-test
+                    :reviewer/id "claude-15" :claim/id "claim-e3"
+                    :artifact/ref "artifact-e3" :producer-trace/id "trace-producer"
+                    :review-trace/id "trace-review" :authority/ref "isolated-fixture-authority"
+                    :completed-at "2026-09-13T11:59:00Z" :subject subject :r9/input r9-input} ids))
 (defn- config [records]
   (let [root (Files/createTempDirectory "e3-" (make-array java.nio.file.attribute.FileAttribute 0))]
     {:mode :isolated-test :evidence-root (str root)
@@ -50,10 +72,12 @@
 (deftest closed-controls
   (testing "missing, self and unknown verdicts"
     (is (= :e3/evidence-set-incomplete (refusal (config {:pending pending :review review}))))
-    (is (= :e3/self-review (refusal (config {:pending pending :review review
-                                              :verdict (assoc verdict :verdict :self)}))))
-    (is (= :e3/unknown-verdict (refusal (config {:pending pending :review review
-                                                 :verdict (assoc verdict :verdict :unknown)})))))
+    (is (= :e3/canonical-r9-admission-mismatch
+           (refusal (config {:pending pending :review review
+                             :verdict (assoc verdict :canonical-admission {:decision :self})}))))
+    (is (= :e3/canonical-r9-admission-mismatch
+           (refusal (config {:pending pending :review review
+                             :verdict (assoc verdict :canonical-admission {:decision :unknown})})))))
   (testing "borrowed candidate, producer, trace, stale field and context"
     (doseq [changed [(assoc subject :candidate/occurrence-id "occ-other")
                      (assoc subject :producer/id "other-producer")
@@ -65,10 +89,14 @@
            (refusal (config {:pending pending :review review
                              :verdict (assoc verdict :event/id "borrowed-event")})))))
   (testing "review and temporal controls"
-    (is (= :e3/self-review
-           (refusal (config {:pending pending :verdict verdict
-                             :review (assoc review :reviewer/id "codex-22")}))))
-    (is (= :e3/review-join-mismatch
+    (let [self-input (-> r9-input
+                         (assoc-in [:role-binding :reviewer] "codex-22")
+                         (assoc-in [:reviewer-job :agent-id] "codex-22"))]
+      (is (= :r9/author-equals-reviewer
+             (refusal (config {:pending pending
+                               :verdict (assoc verdict :reviewer/id "codex-22")
+                               :review (assoc review :reviewer/id "codex-22" :r9/input self-input)})))))
+    (is (= :e3/canonical-r9-provenance-mismatch
            (refusal (config {:pending pending :verdict verdict
                              :review (assoc review :review-trace/id "wrong")}))))
     (is (= :e3/review-not-pre-enact
@@ -79,3 +107,24 @@
                              :verdict verdict :review review})))))
   (is (= :e3/production-authority-unavailable
          (refusal {:mode :production}))))
+
+(deftest malformed-and-laundered-subjects-refuse
+  (doseq [bad [(assoc subject :candidate/occurrence-id nil)
+               (assoc subject :action {}) (assoc subject :construction {})
+               (assoc subject :claim/id "") (assoc subject :artifact/ref nil)
+               (assoc subject :trace/id "") (assoc subject :field-pins [])
+               (assoc subject :field-pins [{:label :ranked :sha256 "bad"}])]]
+    (is (= :e3/pending-context-invalid
+           (refusal (config {:pending (assoc pending :subject bad)
+                             :verdict (assoc verdict :subject bad)
+                             :review (assoc review :subject bad)})))))
+  (is (= :e3/scope-laundering
+         (refusal (config {:pending pending :verdict (assoc verdict :scope :production)
+                           :review review}))))
+  (is (= :e3/scope-laundering
+         (refusal (config {:pending pending :verdict verdict
+                           :review (assoc review :scope :production)}))))
+  (is (= :r9/review-execution-missing
+         (refusal (config {:pending pending :verdict verdict
+                           :review (assoc-in review [:r9/input :reviewer-job :execution]
+                                             {:executed false :tool-events 0})}))))))
