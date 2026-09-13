@@ -166,7 +166,7 @@
                          {:digest digest :provenance-sha256 pd}))
               (when-not (= expected tx)
                 (refuse! :e6b-capture/transaction-provenance-disagreement
-                         {:digest digest :provenance-sha256 pd}))))))
+                         {:digest digest :provenance-sha256 pd}))))))))
     (let [reachable (set (keep :provenance-sha256 (rest txs)))]
       (when-not (= reachable (set (keys decoded-provenance)))
         (refuse! :e6b-capture/provenance-reachability-invalid
