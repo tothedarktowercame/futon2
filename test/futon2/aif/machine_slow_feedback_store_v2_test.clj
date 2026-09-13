@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-slow-feedback-provenance :as provenance]
             [futon2.aif.machine-slow-feedback-provenance-test :as provenance-test]
-            [futon2.aif.machine-slow-feedback-store-v2 :as store])
+            [futon2.aif.machine-slow-feedback-store-v2 :as store]
+            [futon2.aif.machine-slow-feedback-store :as legacy])
   (:import (java.nio.file Files StandardOpenOption)
            (java.nio.file.attribute FileAttribute)
            (java.util Base64)))
@@ -29,6 +30,9 @@
       [root s artifact])))
 (defn- pin [artifact]
   {:bytes/base64 (:bytes/base64 artifact) :expected-sha256 (:sha256 artifact)})
+(defn- write-form! [path x]
+  (Files/write path (.getBytes (pr-str x) "UTF-8")
+               (into-array StandardOpenOption [StandardOpenOption/TRUNCATE_EXISTING])))
 
 (deftest publish-recover-capture-and-stable-retry
   (let [[root s artifact] (setup) tx (store/commit! s (pin artifact))
@@ -98,3 +102,31 @@
     (is (some? (refusal #(store/commit! s changed))))
     (is (= 1 (get-in (store/recover s) [:head :generation])))
     (store/release! s)))
+
+(deftest forged-head-current-state-refuses
+  (let [[_ s artifact] (setup) _ (store/commit! s (pin artifact))
+        path ^java.nio.file.Path (:head s)
+        head (:record (#'store/read-object path))]
+    (write-form! path (assoc head :state/revision "invented"
+                             :state-sha256 (apply str (repeat 64 "f"))))
+    (is (= :e6b-store-v2/head-current-mismatch (refusal #(store/recover s))))
+    (is (= :e6b-store-v2/head-current-mismatch (refusal #(store/capture s))))
+    (store/release! s)))
+
+(deftest legacy-store-is-not-silently-upgraded
+  (let [root (dir) s (legacy/isolated-store root "legacy-store")]
+    (legacy/initialize! s {:state {:value 0} :revision "r0" :authority authority
+                           :committed-at "2026-09-13T00:00:00Z"})
+    (legacy/release! s)
+    (is (= :e6b-store-v2/legacy-or-interrupted-store
+           (refusal #(store/isolated-store root "legacy-store"))))))
+
+(deftest strict-genesis-and-head-schemas-refuse
+  (doseq [mutate [#(assoc % :extra true) #(assoc % :state-sha256 (apply str (repeat 64 "0")))]]
+    (let [[_ s _] (setup) h (store/recover s)
+          digest (get-in h [:head :transaction-sha256])
+          path (.resolve ^java.nio.file.Path (:txdir s) (str digest ".edn"))
+          genesis (:record (#'store/read-object path))]
+      (write-form! path (mutate genesis))
+      (is (some? (refusal #(store/recover s))))
+      (store/release! s))))
