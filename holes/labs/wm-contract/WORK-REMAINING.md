@@ -193,6 +193,12 @@ is not yet a verified join to Agency's normalized request digest.
   Secure lock/verified writer activation and independent touch-up review remain
   before live use. See coherent-snapshot/lead-source-protocol-review.md.
 
+- Row19 configured authority `04343e0e/5a1df387`: four pins verified,
+  successor subject/trace/scope relation repaired. New reader review requests
+  same-byte hashing/parsing, exact raw JSONL records, actual artifact-byte digest
+  verification, and rejection of scope/status relabelling. See successor-configured-
+  authority/lead-review.md. No real external-root authentication/admission.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,

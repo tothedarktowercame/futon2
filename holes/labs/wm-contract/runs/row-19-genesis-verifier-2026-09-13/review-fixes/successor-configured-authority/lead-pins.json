@@ -1,0 +1,6 @@
+{
+  "src/futon3c/agency/r9_genesis.clj": "20f151108650e3aa778ddbd9a38cd5a0ac563462b3a6c1f2e5fe9476a07e28b4",
+  "src/futon3c/agency/r9_authority.clj": "56c3f31b3e1281e3129e61782a27d3934bcfbff1975fa4a4d4c65854e74ddde7",
+  "test/futon3c/agency/r9_genesis_test.clj": "c2d9c2de43287bc562f9a971d4a1251f2aa780dcf0aae98bce7397aaaff5b5f6",
+  "scripts/row19_genesis_verifier_test.clj": "da8ed1e05a9402f78aacc9f4d299f739f264fa090791a3c6749dd8363f56430b"
+}
