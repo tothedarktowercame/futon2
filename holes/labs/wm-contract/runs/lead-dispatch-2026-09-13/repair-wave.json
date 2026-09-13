@@ -769,10 +769,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-chain-invariants.request.json",
       "dispatch": "accepted",
       "scope": "isolated v2 strict schema/HEAD/parent/provenance/conflict/version invariants; no production"
+    },
+    {
+      "packet": "codex-23-store-v2-genesis-validation",
+      "job-id": "invoke-1789283747939-20712-ca2da13c",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789283747939-20712-ca2da13c",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-genesis-validation.request.json",
+      "dispatch": "accepted",
+      "scope": "isolated shared complete genesis validation before publication and on recovery"
     }
   ],
   "current-awaiting": [
-    "invoke-1789283425654-20710-5c128522"
+    "invoke-1789283747939-20712-ca2da13c"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
