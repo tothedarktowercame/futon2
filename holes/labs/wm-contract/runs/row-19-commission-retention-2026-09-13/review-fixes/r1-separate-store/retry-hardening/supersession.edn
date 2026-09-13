@@ -1,0 +1,9 @@
+{:schema :wm/execution-receipt-supersession-v1
+ :at "2026-09-13T02:16:24Z"
+ :review "../lead-review.md"
+ :supersedes "../execution-receipts.edn"
+ :reason [:post-publication-force-retry :stored-digest-validation
+          :complete-hot-archive-join-equivalence]
+ :replacement "execution-receipts.edn"
+ :prior-history-retained? true
+ :anchor-created? false}
