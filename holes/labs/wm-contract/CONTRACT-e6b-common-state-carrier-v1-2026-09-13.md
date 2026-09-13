@@ -157,12 +157,24 @@ After independent completeness acceptance, a read adapter must:
 1. validate the v2 transaction and provenance bytes;
 2. emit the original seven records from retained bytes and the complete
    computed-next record as `:next-state`;
-3. emit the ledger entry using exactly the four-key compatibility input view
-   and complete-next-record output digest;
+3. emit exactly `{:application/id ... :feedback/event-id ...
+   :prior-state/revision ... :status :committed :input/digests ...
+   :output/digest ...}` using the transaction prior revision, four-key
+   compatibility input view and complete-next-record output digest. Do not
+   copy the store-only `:transition/subject` into this exact ledger schema;
 4. require transition/application/event/revision fields to equal both the
    transaction and proposal evidence; and
 5. accept the universe only from a separate completeness authority binding the
    full capture and ordered application index.
+
+Re-running unchanged `verify-feedback` also requires its configured canonical
+E3/E2b inputs and their transitive pinned evidence, not only the two canonical
+output digests. Durable provenance must retain or independently resolve that
+exact input closure with authenticated configuration bindings. The seven
+transition records alone are insufficient for restart replay. Missing canonical
+input closure refuses; no default anchor, borrowed current configuration, or
+synthetic review may fill it. This closure and store-v2 implementation remain
+separate from the first pure carrier codec.
 
 Carrier digests serve HEAD continuity; original record-value digests serve
 unchanged retrospective replay. Both subjects are retained and joined.
