@@ -1,0 +1,18 @@
+'DarkTower.WarMachine.FullCertificateResolvedEvidence.resolved_implies_full' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateResolvedEvidence.rejects_wrong_nonempty_reference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateResolvedEvidence.rejects_same_source_changed_bytes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateResolvedEvidence.rejects_cross_run_borrowed_record' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateResolvedEvidence.rejects_unresolved_nonempty_causal_reference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateResolvedEvidence.rejects_wrong_corrected_edge_subject' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

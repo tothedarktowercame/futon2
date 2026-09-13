@@ -1,0 +1,9 @@
+{:schema :wm/source-olean-pins-v1
+ :mathlib4-tree "3616df4e28d7b0d5ff4a0902606d170fbb1915b6"
+ :lean-version "Lean 4.31.0-rc1 fd009949156901e6cf15b6d9bf1122294b8e697a"
+ :pins
+ [{:path "DarkTower/WarMachine/FullCertificateResolvedEvidence.lean" :sha256 "70e4b40d577406cf87e127570c44e255ad5f27310290a7d60b9a95223d95e53e"}
+  {:path ".lake/build/lib/lean/DarkTower/WarMachine/FullCertificateResolvedEvidence.olean" :sha256 "b8b4d1d12c00c03bc5584f01217ce50e47b865dc91c8f80419056063ab1a3fa4"}
+  {:path "DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean" :sha256 "8a8e8aef58160c0037369c690c82767046cbfda72f2d10dba67356327bcc9a67"}
+  {:path ".lake/build/lib/lean/DarkTower/WarMachine/FullCertificateRecordConnectionBinding.olean" :sha256 "75b21a255cc88867f6d3c3ef27b7adbec635072047aeb3fc738a5870529b0ada"}
+  {:path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}]}
