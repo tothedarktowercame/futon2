@@ -22,17 +22,24 @@
 (defn records
   ([] (records :exploitation 3))
   ([mode depth]
-   {:unshaped (merge {:schema/version :wm/e5-unshaped-candidates-v1 :scope :isolated-test
+   (let [weights (hierarchy/mode-prior-weights mode)
+         weight-authority {:id :futon2.aif.temporal-hierarchy/strategic-modes
+                           :revision "temporal-hierarchy-source-v1"}]
+   {:context (merge {:schema/version :wm/e5-expected-context-v1 :scope :isolated-test
+                     :identity binding-id :unshaped-candidates candidates
+                     :slow/mode mode :weight-table/authority weight-authority
+                     :weight-table weights} binding-id)
+    :unshaped (merge {:schema/version :wm/e5-unshaped-candidates-v1 :scope :isolated-test
                       :candidates candidates} binding-id)
     :slow-state (merge {:schema/version :wm/e5-slow-state-authority-v1 :scope :isolated-test
                         :slow/mode mode :slow/intrinsics {:close-hole {:alpha 4.0 :beta 2.0}}
-                        :weight-table/revision "temporal-hierarchy-source-v1"
-                        :weight-table (hierarchy/mode-prior-weights mode)} binding-id)
+                        :weight-table/authority weight-authority
+                        :weight-table weights} binding-id)
     :shaped (merge {:schema/version :wm/e5-shaped-candidates-v1 :scope :isolated-test
                     :candidates (production-shaped candidates mode)
                     :depth/unchanged {:requested depth :effective depth}} binding-id)
     :depth (merge {:schema/version :wm/e5-independent-depth-authority-v1 :scope :isolated-test
-                   :horizon/requested depth :horizon/effective depth} binding-id)}))
+                   :horizon/requested depth :horizon/effective depth} binding-id)})))
 (defn- sha [bytes]
   (apply str (map #(format "%02x" (bit-and 0xff %))
                   (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bytes))))))
@@ -74,8 +81,9 @@
            (refusal (config (assoc-in (records) [:slow-state :weight-table "close-hole"] 0.2)))))
     (is (= :e5/invalid-weight
            (with-redefs [hierarchy/mode-prior-weights (fn [_] {"close-hole" -0.1})]
-             (refusal (config (assoc (records) :slow-state
-                                     (assoc (:slow-state (records)) :weight-table {"close-hole" -0.1})))))))
+             (refusal (config (-> (records)
+                                  (assoc-in [:slow-state :weight-table] {"close-hole" -0.1})
+                                  (assoc-in [:context :weight-table] {"close-hole" -0.1})))))))
     (doseq [field [:prior :step-score-delta]]
       (is (= :e5/unshaped-domain-invalid
              (refusal (config (update-in (records) [:unshaped :candidates 0] dissoc field))))))
@@ -101,3 +109,17 @@
                             (apply str (repeat 64 "0"))))))
   (is (= :e5/mode-unknown (refusal (assoc (config (records)) :mode :unknown))))
   (is (= :e5/production-authority-unavailable (refusal {:mode :production}))))
+
+(deftest fixed-context-rejects-borrowed-or-stale-source-cohorts
+  (let [borrowed (into {} (map (fn [[k v]] [k (assoc v :run/id "borrowed-run")]) (records)))]
+    (is (= :e5/expected-context-mismatch
+           (refusal (config (assoc-in borrowed [:context :identity :run/id] "run-e5"))))))
+  (is (= :e5/expected-context-mismatch
+         (refusal (config (assoc-in (records) [:unshaped :candidates 0 :prior] 0.6)))))
+  (is (= :e5/expected-context-mismatch
+         (refusal (config (assoc-in (records) [:slow-state :weight-table/authority :revision]
+                                    "stale-revision")))))
+  (let [missing-id (into {} (map (fn [[k v]] [k (dissoc v :model/id)]) (records)))]
+    (is (= :e5/cross-run-or-scope (refusal (config missing-id)))))
+  (is (= :e5/slow-authority-invalid
+         (refusal (config (records :not-a-strategic-mode 3))))))

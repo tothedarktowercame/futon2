@@ -14,7 +14,8 @@
 
 (def schema-version :wm/r15-r6-slow-prior-evidence-v1)
 (def ^:private schemas
-  {:unshaped :wm/e5-unshaped-candidates-v1
+  {:context :wm/e5-expected-context-v1
+   :unshaped :wm/e5-unshaped-candidates-v1
    :slow-state :wm/e5-slow-state-authority-v1
    :shaped :wm/e5-shaped-candidates-v1
    :depth :wm/e5-independent-depth-authority-v1})
@@ -58,6 +59,18 @@
   (and (number? x) (Double/isFinite (double x))))
 (defn- identity-of [record]
   (select-keys record [:model/id :model/revision :run/id :tick/index]))
+(defn- valid-identity? [binding]
+  (and (= #{:model/id :model/revision :run/id :tick/index} (set (keys binding)))
+       (or (keyword? (:model/id binding))
+           (and (string? (:model/id binding)) (not (str/blank? (:model/id binding)))))
+       (every? #(and (string? %) (not (str/blank? %)))
+               ((juxt :model/revision :run/id) binding))
+       (nat-int? (:tick/index binding))))
+(defn- valid-weight-authority? [authority]
+  (and (= #{:id :revision} (set (keys authority)))
+       (= :futon2.aif.temporal-hierarchy/strategic-modes (:id authority))
+       (string? (:revision authority))
+       (re-matches #"[A-Za-z0-9][A-Za-z0-9._/-]+" (:revision authority))))
 (defn- valid-candidate? [candidate]
   (and (= #{:candidate/occurrence-id :action :move/class :prior :step-score-delta}
           (set (keys candidate)))
@@ -82,26 +95,37 @@
   (when (= :production mode)
     (refuse! :e5/production-authority-unavailable "Independent production sources are absent" {}))
   (when-not (= (set (keys schemas)) (set (keys sources)))
-    (refuse! :e5/source-set-incomplete "All four sources are required" {}))
-  (let [resolved (mapv #(resolve! root % (sources %)) [:unshaped :slow-state :shaped :depth])
+    (refuse! :e5/source-set-incomplete "All five sources are required" {}))
+  (let [resolved (mapv #(resolve! root % (sources %)) [:context :unshaped :slow-state :shaped :depth])
         records (into {} (map (juxt :label :record) resolved))
-        input (:unshaped records) slow (:slow-state records)
+        context (:context records) input (:unshaped records) slow (:slow-state records)
         claimed (:shaped records) depth (:depth records)
         identities (mapv identity-of (vals records))
         candidates (:candidates input)
         ids (mapv :candidate/occurrence-id candidates)
         mode-value (:slow/mode slow)
         weights (:weight-table slow)]
-    (when-not (and (apply = identities) (= :isolated-test (:scope input)
+    (when-not (and (every? valid-identity? identities)
+                   (apply = identities) (= :isolated-test (:scope context) (:scope input)
                    (:scope slow) (:scope claimed) (:scope depth)))
       (refuse! :e5/cross-run-or-scope "Sources disagree on identity or scope" {}))
     (when-not (and (vector? candidates) (seq candidates) (every? valid-candidate? candidates)
                    (= (count ids) (count (distinct ids))))
       (refuse! :e5/unshaped-domain-invalid "Unshaped occurrence domain is incomplete" {}))
     (when-not (and (keyword? mode-value) (map? (:slow/intrinsics slow))
-                   (not (str/blank? (str (:weight-table/revision slow))))
+                   (valid-weight-authority? (:weight-table/authority slow))
+                   (seq weights)
                    (= weights (hierarchy/mode-prior-weights mode-value)))
       (refuse! :e5/slow-authority-invalid "Slow mode/weight authority is absent or stale" {}))
+    (when-not (= {:identity (identity-of input)
+                  :unshaped-candidates candidates
+                  :slow/mode mode-value
+                  :weight-table/authority (:weight-table/authority slow)
+                  :weight-table weights}
+                 (select-keys context [:identity :unshaped-candidates :slow/mode
+                                       :weight-table/authority :weight-table]))
+      (refuse! :e5/expected-context-mismatch
+               "Resolved sources differ from independently fixed context" {}))
     (when-not (every? #(and (finite-number? %) (pos? (double %))) (vals weights))
       (refuse! :e5/invalid-weight "Weights must be finite and positive" {}))
     (when-not (and (pos-int? (:horizon/requested depth))
@@ -119,7 +143,7 @@
       {:schema/version schema-version :scope :isolated-test
        :identity (first identities) :slow/mode mode-value
        :slow/intrinsics (:slow/intrinsics slow)
-       :weight-table {:revision (:weight-table/revision slow) :weights weights}
+       :weight-table {:authority (:weight-table/authority slow) :weights weights}
        :depth {:authority :independent :requested (:horizon/requested depth)
                :effective (:horizon/effective depth) :unchanged true}
        :unshaped candidates :shaped actual

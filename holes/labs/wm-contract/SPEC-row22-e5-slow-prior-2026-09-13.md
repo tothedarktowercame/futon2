@@ -1,15 +1,21 @@
 # Row 22 E5: R15 slow state to R6 candidate shaping
 
-The verifier reads four independently pinned, strict one-form UTF-8 EDN
-sources: the complete unshaped occurrence domain, slow-state and weight-table
-authority, claimed shaped output, and independent R13 depth authority. All
+The verifier reads five independently pinned, strict one-form UTF-8 EDN
+sources: a fixed expected context, the complete unshaped occurrence domain,
+slow-state and weight-table authority, claimed shaped output, and independent
+R13 depth authority. All
 sources must share model revision, run, tick, and isolated scope.
 
-The weight table must equal the actual `temporal-hierarchy/mode-prior-weights`
-result for the resolved slow mode and carry a revision. Weights must be finite
-and positive. Every unshaped occurrence has an explicit positive prior and
+The fixed context binds the typed model/revision/run/tick, complete ordered
+unshaped occurrences/actions, slow mode, exact table, and table authority. The
+authority has the canonical `strategic-modes` id and a meaningful revision.
+The weight table must be nonempty and equal the actual
+`temporal-hierarchy/mode-prior-weights` result for a recognized resolved mode.
+Weights must be finite and positive. Every unshaped occurrence has an explicit positive prior and
 finite step cost. The verifier calls the actual `apply-slow-prior` function and
-requires byte-value equality with the claimed full output. For recognized
+requires EDN value equality with the claimed full output. This is not a claim
+that alternate EDN serializations have identical bytes; each input's retained
+SHA-256 separately pins its serialized bytes. For recognized
 classes, `prior' = prior * weight` and `delta' = delta - ln(weight)`; the base
 delta is retained. Unrecognized classes remain unchanged, matching production.
 IEEE `double` and `Math/log` semantics are claimed, not exact real arithmetic.
@@ -25,4 +31,3 @@ The future runtime seam is immediately after the complete R6 occurrence domain
 and R15 slow state are captured, and before R6 scoring. This packet does not
 wire that seam. Production refuses until those four sources have independently
 owned production retention and pins.
-
