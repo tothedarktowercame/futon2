@@ -30,6 +30,26 @@
    (String. (.decode (Base64/getDecoder) (get-in input (conj path :bytes/base64))) "UTF-8")))
 (defn- update-record [input path f & args]
   (assoc-in input path (value-descriptor (apply f (record-at input path) args))))
+(defn- replace-original [input role record]
+  (let [d (value-descriptor record)]
+    (-> input
+        (assoc-in [:original-sources role] d)
+        (assoc-in [:proposal-evidence :input/digests role] (:value-sha256 d))
+        (assoc-in [:proposal-evidence :source/digests role] (:source-sha256 d)))))
+(defn- with-e3-output-sources [input f]
+  (let [e3 (update (record-at input [:canonical-outputs :e3]) :sources f)
+        d (value-descriptor e3)
+        e2b (assoc (record-at input [:original-sources :e2b-subject])
+                   :canonical/e3-digest (:value-sha256 d))
+        relation (assoc-in (record-at input [:original-sources :lifecycle-relation])
+                           [:subject :e3/digest] (:value-sha256 d))
+        changed (-> input
+                    (assoc-in [:canonical-outputs :e3] d)
+                    (assoc-in [:proposal-evidence :canonical/digests :e3] (:value-sha256 d))
+                    (replace-original :e2b-subject e2b)
+                    (replace-original :lifecycle-relation relation))]
+    (assoc changed :carrier-projection
+           (carrier/project-transition (select-keys changed [:proposal-evidence :original-sources])))))
 (def closure-paths
   {:e3/pending "e3/pending.edn" :e3/verdict "e3/verdict.edn"
    :e3/review "e3/review.edn" :r9/input "config/r9-input.edn"
@@ -161,3 +181,19 @@
           e3-config (record-at i [:canonical-closure :config/e3])
           i (update-record i [:canonical-closure :config/canonical] assoc :e3 e3-config)]
       (is (= :e6b-provenance/closure-join-mismatch (refusal i))))))
+
+(deftest ordered-canonical-source-manifest-refusals
+  (testing "lead control: coherently propagated reversed E3 manifest still refuses"
+    (is (= :e6b-provenance/source-manifest-invalid
+           (refusal (with-e3-output-sources (input) #(vec (reverse %)))))))
+  (testing "duplicate and extra E3 source roles cannot collapse through map conversion"
+    (doseq [mutate [#(conj % (first %))
+                    #(conj % {:label :extra :sha256 (apply str (repeat 64 "e"))})]]
+      (is (= :e6b-provenance/source-manifest-invalid
+             (refusal (with-e3-output-sources (input) mutate))))))
+  (testing "duplicate E2b witness and E1 subject pins refuse"
+    (doseq [path [[:canonical-outputs :e2b :sources :witnesses]
+                  [:canonical-outputs :e2b :subject :e1-source-pins]]]
+      (let [i (update-record (input) [:canonical-outputs :e2b]
+                             update-in (subvec (vec path) 2) #(conj % (first %)))]
+        (is (= :e6b-provenance/source-manifest-invalid (refusal i)))))))

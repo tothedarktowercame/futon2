@@ -18,6 +18,10 @@
    :e1/ranked-support :e1/field-membership :e1/costs :e1/utilities :e1/budgets
    :e2b/context :e2b/selection :e2b/enactment])
 (def output-roles [:e3 :e2b])
+(def ^:private e3-source-order [:pending :verdict :review])
+(def ^:private e2b-witness-order [:context :selection :enactment])
+(def ^:private e1-source-order
+  [:ranked-support :field-membership :costs :utilities :budgets])
 (def ^:private hex64 #"[0-9a-f]{64}")
 (defn- refuse! [kind data] (throw (ex-info (name kind) (assoc data :refusal kind))))
 (defn- nonblank? [x] (and (string? x) (not (str/blank? x))))
@@ -62,8 +66,18 @@
   (into {} (map (fn [[role pin]] [role (:sha256 pin)]) (:sources config))))
 (defn- witness-pin-map [config]
   (into {} (map (fn [[role pin]] [role (:sha256 pin)]) (:witnesses config))))
-(defn- labelled-pins [xs]
-  (into {} (map (juxt :label :sha256) xs)))
+(defn- ordered-pins! [boundary expected-order xs]
+  (when-not (and (vector? xs)
+                 (= expected-order (mapv :label xs))
+                 (= (count xs) (count (distinct (map :label xs))))
+                 (every? #(and (= #{:label :sha256} (set (keys %)))
+                               (keyword? (:label %))
+                               (string? (:sha256 %))
+                               (re-matches hex64 (:sha256 %))) xs))
+    (refuse! :e6b-provenance/source-manifest-invalid {:boundary boundary}))
+  (mapv :sha256 xs))
+(defn- configured-pins [config-map order]
+  (mapv #(get-in config-map [% :sha256]) order))
 (defn- e3-identity [x]
   (select-keys x [:model/id :model/revision :run/id :tick/index :cohort/id :event/id]))
 (defn- canonical-pending-subject [pending]
@@ -115,14 +129,14 @@
               :e3/review (get-in e3-cfg [:evidence :review :sha256])})
           ;; Canonical outputs must name the exact resolved source bytes.  A
           ;; coherently re-pinned config is not allowed to borrow stale output.
-          (= (labelled-pins (:sources e3-output))
-             {:pending (:source-sha256 (c :e3/pending))
-              :verdict (:source-sha256 (c :e3/verdict))
-              :review (:source-sha256 (c :e3/review))})
-          (= (labelled-pins (get-in e2b-output [:sources :e2a :e1-verification :sources]))
-             (pin-map e1))
-          (= (labelled-pins (get-in e2b-output [:sources :witnesses]))
-             (witness-pin-map e2b-cfg))
+          (= (ordered-pins! :e3/output-sources e3-source-order (:sources e3-output))
+             (mapv #(:source-sha256 (c (keyword "e3" (name %)))) e3-source-order))
+          (= (ordered-pins! :e2b/output-e1-sources e1-source-order
+                            (get-in e2b-output [:sources :e2a :e1-verification :sources]))
+             (configured-pins (:sources e1) e1-source-order))
+          (= (ordered-pins! :e2b/output-witnesses e2b-witness-order
+                            (get-in e2b-output [:sources :witnesses]))
+             (configured-pins (:witnesses e2b-cfg) e2b-witness-order))
           (= (:subject e2b-output)
              (:subject e2b-context) (:subject e2b-selection) (:subject e2b-enactment))
           (= (:event/id e2b-output)
@@ -136,11 +150,15 @@
           (= (:enacted e2b-output)
              {:candidate/id (:enacted/occurrence-id e2b-enactment)
               :action (:enacted/action e2b-enactment)})
-          (= (labelled-pins (get-in e2b-output [:subject :e1-source-pins])) (pin-map e1))
+          (= (ordered-pins! :e2b/subject-e1-pins e1-source-order
+                            (get-in e2b-output [:subject :e1-source-pins]))
+             (configured-pins (:sources e1) e1-source-order))
           (= (e3-identity pending) (e3-identity verdict) (e3-identity review)
              (e3-identity (:identity e3-output)))
           (= (:subject pending) (:subject verdict) (:subject review) (:subject e3-output))
-          (= (labelled-pins (:field-pins (:subject pending))) (pin-map e1))
+          (= (ordered-pins! :e3/pending-field-pins e1-source-order
+                            (:field-pins (:subject pending)))
+             (configured-pins (:sources e1) e1-source-order))
           (= (get-in proposal [:canonical/digests :e3]) (value-digest e3-output))
           (= (get-in proposal [:canonical/digests :e2b]) (value-digest e2b-output))
           (= :mechanism-authorized (:decision e3-output))
