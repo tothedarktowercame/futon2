@@ -143,7 +143,8 @@
   []
   (let [audit (capture tripwire/default-trip-root repair/default-root :test)]
     (refuse! :interoceptive/runtime-qualification-unavailable
-             {:manifest (dissoc audit :constructor-input)
+             {:manifest (assoc (dissoc audit :constructor-input)
+                               :authority-class :production-audit)
               :writer-seam {:trip "tripwire/write-trip-report!"
                             :repair ["repair-obligation/write-new!"
                                      "repair-obligation/write-new-or-identical!"
