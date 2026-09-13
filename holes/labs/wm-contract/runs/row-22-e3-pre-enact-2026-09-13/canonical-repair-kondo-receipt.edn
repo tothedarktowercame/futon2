@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint src/futon2/aif/machine_pre_enact_authorization.clj test/futon2/aif/machine_pre_enact_authorization_test.clj"
+ :exit 0 :tests 2 :assertions 2
+ :tree-sha "069645d0a96b07d746328df22e37ec1d40107ae9" :at "2026-09-13"
+ :stdout "canonical-repair-kondo.stdout" :stderr ""}

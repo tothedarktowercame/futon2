@@ -1,0 +1,10 @@
+Running tests in #{"test"}
+Syntax error reading source at (futon2/aif/machine_pre_enact_authorization_test.clj:130:86).
+Unmatched delimiter: )
+
+After the syntax repair, the next run reported:
+Ran 3 tests containing 25 assertions.
+14 failures, 1 errors.
+All failures returned :e3/pending-context-invalid because the positive fixture's
+keyword :model/id was incorrectly restricted to a nonblank string.
+

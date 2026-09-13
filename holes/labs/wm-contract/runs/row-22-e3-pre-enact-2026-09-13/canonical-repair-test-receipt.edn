@@ -1,0 +1,4 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-pre-enact-authorization-test"
+ :exit 0 :tests 3 :assertions 28
+ :tree-sha "069645d0a96b07d746328df22e37ec1d40107ae9" :at "2026-09-13"
+ :stdout "canonical-repair-test.stdout" :stderr ""}

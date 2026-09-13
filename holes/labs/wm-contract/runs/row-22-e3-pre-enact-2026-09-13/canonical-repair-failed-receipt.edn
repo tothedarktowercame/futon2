@@ -1,0 +1,6 @@
+{:commands ["clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-pre-enact-authorization-test"]
+ :attempts [{:tree-sha "174c4e8a" :exit 1 :tests 0 :assertions 0 :cause :unmatched-delimiter}
+            {:tree-sha "69b803a4" :exit 1 :tests 3 :assertions 25
+             :failures 14 :errors 1 :cause :overrestricted-model-id}]
+ :at "2026-09-13" :stdout "canonical-repair-failed.stdout"}
+
