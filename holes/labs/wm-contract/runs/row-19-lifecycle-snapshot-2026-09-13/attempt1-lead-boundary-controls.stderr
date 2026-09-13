@@ -1,0 +1,7 @@
+WARNING: Unknown module: org.apache.arrow.memory.core specified to --add-opens
+WARNING: update already refers to: #'clojure.core/update in namespace: clj-http.client, being replaced by: #'clj-http.client/update
+Execution error (FileNotFoundException) at futon3c.wm.run4-historical-packet-roundtrip-test/eval179286$loading (run4_historical_packet_roundtrip_test.clj:1).
+Could not locate futon2/aif/hermetic_repair_fixture__init.class, futon2/aif/hermetic_repair_fixture.clj or futon2/aif/hermetic_repair_fixture.cljc on classpath. Please check that namespaces with dashes use underscores in the Clojure file name.
+
+Full report at:
+/tmp/clojure-11088525304170754668.edn

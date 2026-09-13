@@ -1,0 +1,2 @@
+{:case :failed-mutation-recaptured, :generation 1, :partial-change true}
+{:case :resolver-buffer-mutable, :original-first-byte 123, :observed-first-byte 32}

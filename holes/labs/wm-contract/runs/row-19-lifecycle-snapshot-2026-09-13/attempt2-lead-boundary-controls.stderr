@@ -1,0 +1,5 @@
+Syntax error reading source at (/home/joe/code/futon2/holes/labs/wm-contract/runs/row-19-lifecycle-snapshot-2026-09-13/lead-boundary-controls.clj:27:1).
+EOF while reading, starting at line 18
+
+Full report at:
+/tmp/clojure-13086869226246608415.edn

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "clojure",
+    "-Sdeps",
+    "{:paths [\"src\" \"test\"]}",
+    "-M",
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-19-lifecycle-snapshot-2026-09-13/lead-boundary-controls.clj"
+  ],
+  "cwd": "/home/joe/code/futon3c",
+  "exit": 0,
+  "failed_attempts": [
+    "attempt1-lead-controls.json",
+    "attempt2-lead-controls.json"
+  ]
+}
