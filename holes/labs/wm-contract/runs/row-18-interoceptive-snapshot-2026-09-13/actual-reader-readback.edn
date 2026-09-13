@@ -15,7 +15,7 @@
         :trip/action :park-and-summon
         :repair/id "repair-unscoped-trip-de2b087f-2ec8-4ccc-a550-e1ab1b70adbd-invariant-tripped"
         :statuses [:open :awaiting-validation :resolved]}
- :raw-output
+ :derived-readback
  {:matching-repair-records 3
   :result {:schema :wm/interoceptive-commitment-v1
            :open-trip-ids []
@@ -31,6 +31,6 @@
                        :repair {:source-root "/home/joe/code/futon2/data/wm-repair-obligations"
                                 :revision "cc55f095519a9b8b91fd540334f73a1aef16fea5ce735773b3371005e16d5cef"
                                 :authority-class :production}}}}
- :maximum-claim "One retained genuine production trip is joined through the actual repair reader and is discharged through the required validation state. No retained open genuine production pair was found or claimed."
+ :maximum-claim "One selected retained genuine production trip is joined through the actual repair reader and is discharged through the required validation state. This bounded selection makes no claim about any other production trip record or global confidence."
  :refused-check-gap {:source "src/futon2/aif/tripwire.clj:642-666"
                      :finding "The :discharge action names a refused check, creates no repair finding, and therefore refuses :interoceptive/missing-finding-join."}}

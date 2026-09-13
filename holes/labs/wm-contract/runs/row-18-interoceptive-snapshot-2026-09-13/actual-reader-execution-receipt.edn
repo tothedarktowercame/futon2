@@ -1,12 +1,8 @@
 {:command "clojure -M holes/labs/wm-contract/runs/row-18-interoceptive-snapshot-2026-09-13/actual_reader_readback.clj"
- :exit 0 :tests 1 :assertions 1
- :tree-sha "4c65f354a9508cfa6e8d3fd654bbb0a953ee4b9b"
- :at "2026-09-13T02:01:17Z"
- :source-sha256
- {:constructor "f4d6eadbb4c8f8b479c799161f1528748e0b7a3a124cf8e72b0323a8b2345d3c"
-  :test "c9ee4d657bd48370d0178258c42b00545af6e34df960b73ad8552f08bc75b443"
-  :reader "289fbb20fb5acb052c93102ff3067eef62172ed905e88e20fe7d70d1d0b9ee3a"}
- :result {:trip/action :park-and-summon :matching-repair-records 3
-          :statuses [:open :awaiting-validation :resolved]
-          :machine-confidence 1 :classification :discharged}
- :transcript "actual-reader-readback.edn"}
+ :exit 0 :tests 1 :assertions 3 :tree-sha "34d63e01817edc9b33d07d99eb99bf01c899696a"
+ :at "2026-09-13T02:07:58Z"
+ :source-sha256 {:constructor "fab126f60e703bc692851b7709a0e3b14c3bcd7c3b0f2dcafa3851043aabdb7e"
+                 :test "252cbb364b894a82f005534150d2a9cda010f8090cddf0dca1f5e0220894a2b2"
+                 :reader "4e66f9315206e65c6b969d78201f5aec2a692e9286d609adf2036c8f9b1cc860"}
+ :stdout-stderr "actual-reader-stdout-stderr.edn"
+ :counts {:selected-trip-records 1 :matching-repair-records 3}}
