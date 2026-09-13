@@ -1,0 +1,25 @@
+{:schema :wm/execution-receipts-v1
+ :source {:repo "futon3c" :commit "d2e362fb"
+          :tree-sha "5ccc9bff6e6b2b58172be8341b4b5796471bc1c4"
+          :files {"src/futon3c/agency/invoke_ingress_controller.clj"
+                  "5d18f1777a374a7275790f703f5030c5f9ccca5af22ad769695e834dd44e8aa4"
+                  "test/futon3c/agency/invoke_ingress_controller_test.clj"
+                  "fc5d8bab2bcb847eeb886e43d2ddfabb5270ace9014080ac55574fb4400a3864"}}
+ :runs
+ [{:gate :focused-test
+   :command "clojure -M:test -n futon3c.agency.invoke-ingress-controller-test"
+   :exit 0 :tests 10 :assertions 33 :failures 0 :errors 0
+   :stdout "ownership-test.stdout" :stderr "ownership-test.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon3c/agency/invoke_ingress_controller.clj test/futon3c/agency/invoke_ingress_controller_test.clj"
+   :exit 0 :errors 0 :warnings 0
+   :stdout "ownership-kondo.stdout" :stderr "ownership-kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/invoke_ingress_controller.clj test/futon3c/agency/invoke_ingress_controller_test.clj"
+   :exit 0 :stdout "ownership-parens.stdout" :stderr "ownership-parens.stderr"}
+  {:gate :induced-runner-failure
+   :command "clojure -M -e <defined row19.owner-induced/induced-failure; System/exit from test counters>"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :errors 0
+   :stdout "ownership-induced.stdout" :stderr "ownership-induced.stderr"}]
+ :history [{:source-commit "c5dd3103" :tests 9 :assertions 31
+            :exit 0 :note "superseded after adding cross-process exclusion control"}]}
