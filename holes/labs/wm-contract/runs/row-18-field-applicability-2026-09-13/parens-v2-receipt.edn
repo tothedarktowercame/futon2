@@ -1,0 +1,4 @@
+{:schema :wm/execution-receipt-v1 :row 18 :at "2026-09-13"
+ :tree-sha "3a6f56da5d69c9c3889a567c5a03b162fffda460"
+ :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/row18_field_applicability.clj"
+ :exit 0 :checks 1 :stdout "OK"}

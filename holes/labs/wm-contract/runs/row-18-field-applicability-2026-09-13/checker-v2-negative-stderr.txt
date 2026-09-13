@@ -1,0 +1,6 @@
+#'row18-field-applicability/-main
+Execution error (ExceptionInfo) at row18-field-applicability/refuse! (row18_field_applicability.clj:19).
+commissioned-control-mismatch
+
+Full report at:
+/tmp/clojure-7616642985555707496.edn

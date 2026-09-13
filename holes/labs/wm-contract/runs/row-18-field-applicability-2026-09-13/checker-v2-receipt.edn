@@ -1,0 +1,14 @@
+{:schema :wm/execution-receipt-v1 :row 18 :packet :field-applicability-repair
+ :at "2026-09-13" :tree-sha "3a6f56da5d69c9c3889a567c5a03b162fffda460"
+ :positive {:command "clojure -M -e '(load-file \"holes/labs/wm-contract/row18_field_applicability.clj\") (apply row18-field-applicability/-main [\"data/wm-trace/wm-trace-2026-09-12.edn\" \"holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/input.edn\"])'"
+            :exit 0 :assertions 4 :stdout "checker-v2-stdout.txt" :stderr ""}
+ :negative {:command "clojure -M -e '(load-file \"holes/labs/wm-contract/row18_field_applicability.clj\") (apply row18-field-applicability/-main [\"data/wm-trace/wm-trace-2026-09-12.edn\" \"holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/input.edn\" \"--negative-wrong-expectation\"])'"
+            :exit 1 :expected-exit :nonzero
+            :detected :commissioned-control-mismatch
+            :stdout-stderr "checker-v2-negative-stderr.txt"}
+ :pins [{:path "holes/labs/wm-contract/row18_field_applicability.clj" :sha256 "0133aa53e090ef03eb26f7de080026a54db244111a2233d54d793f3f4fcfe521"}
+        {:path "holes/labs/wm-contract/TN-row18-field-applicability-2026-09-13.md" :sha256 "6b17a92d813e0b7c05d7b5871a165a42fce56672225c8b65b3a3b61031f37b6f"}
+        {:path "data/wm-trace/wm-trace-2026-09-12.edn" :sha256 "3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175"}
+        {:path "holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/input.edn" :sha256 "1818dd14eabe7274815e1298b7d59909b06f98d853db52a84ec1f3e229f20235"}]
+ :supersedes "checker-receipt.edn"
+ :finding "Four exact refusal expectations pass, including mutation-after-read; an induced wrong expectation exits nonzero."}
