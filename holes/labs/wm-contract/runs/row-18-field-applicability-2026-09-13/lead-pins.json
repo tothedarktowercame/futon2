@@ -1,0 +1,44 @@
+[
+  {
+    "path": "holes/labs/wm-contract/row18_field_applicability.clj",
+    "expected": "39e95ad12bd0cae8438349ffdf50ce533474b340ad30f118e0ad132976292437",
+    "actual": "39e95ad12bd0cae8438349ffdf50ce533474b340ad30f118e0ad132976292437",
+    "matches": true
+  },
+  {
+    "path": "data/wm-trace/wm-trace-2026-09-12.edn",
+    "expected": "3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175",
+    "actual": "3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-18-lead-audit-2026-09-12/input.edn",
+    "expected": "1818dd14eabe7274815e1298b7d59909b06f98d853db52a84ec1f3e229f20235",
+    "actual": "1818dd14eabe7274815e1298b7d59909b06f98d853db52a84ec1f3e229f20235",
+    "matches": true
+  },
+  {
+    "path": "src/futon2/aif/policy_precision.clj",
+    "expected": "2e7164ecf965fe9553822a537fb543d212ec1641daeca6652b05a47a62ad094b",
+    "actual": "2e7164ecf965fe9553822a537fb543d212ec1641daeca6652b05a47a62ad094b",
+    "matches": true
+  },
+  {
+    "path": "src/futon2/aif/beta_habit.clj",
+    "expected": "9e481c6bc27ca74691d4dbf30105066ee9eb48e5df0aefa14163764bd4dcc446",
+    "actual": "9e481c6bc27ca74691d4dbf30105066ee9eb48e5df0aefa14163764bd4dcc446",
+    "matches": true
+  },
+  {
+    "path": "src/futon2/aif/policy.clj",
+    "expected": "b0dc9a1a440c18ec1464ee96abb9c76401a02295e8e3e7f0840b105242236628",
+    "actual": "b0dc9a1a440c18ec1464ee96abb9c76401a02295e8e3e7f0840b105242236628",
+    "matches": true
+  },
+  {
+    "path": "scripts/futon2/report/war_machine.clj",
+    "expected": "50d02bb7179087597f468f361e16206d93400b1e410e27ce1c261bdde801981f",
+    "actual": "50d02bb7179087597f468f361e16206d93400b1e410e27ce1c261bdde801981f",
+    "matches": true
+  }
+]

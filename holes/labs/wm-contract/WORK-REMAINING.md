@@ -1336,3 +1336,7 @@ lifecycle strips); R3a hosting correction + Box 2 regeneration;
 certificate spec + mechanical emitter with tamper controls;
 projection repair (row 4 loads it); runner hardening against
 misattributed author claims; the PLoP completion list.
+
+## Lead review update — retained field checker, 2026-09-13
+
+Row 18 applicability packet b2bc299f/d78c9007 reviewed with all seven pins matching. Recorded :none placement and reported failed c>3R/2 criterion remain non-qualifying/uniqueness unknown. Executable receipt needs same-buffer parsing, genuine failure-sensitive assertions (old three assertions were only printed refusal values), and accurate carry-beta bracket guard correspondence. See runs/row-18-field-applicability-2026-09-13/lead-review.md. No test rerun or runtime admission.
