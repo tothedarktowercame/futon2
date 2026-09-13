@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest provenancee5d6a92a/88c719d9 seven pins/raw23tests120 accepted ordered structural manifests only. Exact order/uniqueness now checked; retained path/count metadata not authority. Pure strict serialized readback next; no store-v2/publication. See [acceptance](runs/row-22-e6b-provenance-2026-09-13/ordered-manifests/lead-acceptance.md).
+
 - Latest provenancef142cf3d/cb09cbd8 seven pins/raw22tests115 reviewed; stale-output repairs hold. Executed reordered E3 output source manifest still constructs after coherent digest updates; labelled-pins loses order/duplicates. Exact ordered-manifest repair next, no storage. See [review](runs/row-22-e6b-provenance-2026-09-13/closure-repair/lead-review.md).
 
 - Latest provenance18a35e0e/5c29c9e4 seven pins/raw21tests111 reviewed. Executed borrowed E3 pending run with coherently updated config pins still yields artifact under unchanged canonical outputs. Exact closure-input/output joins required; no store work. See [review](runs/row-22-e6b-provenance-2026-09-13/lead-review.md).
