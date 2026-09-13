@@ -817,10 +817,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retrospective-pure-projection.request.json",
       "dispatch": "accepted",
       "scope": "pure pinned capture source/ledger projection; completeness absent, no retrospective success"
+    },
+    {
+      "packet": "codex-23-retrospective-ledger-source",
+      "job-id": "invoke-1789285990764-20724-4517441a",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789285990764-20724-4517441a",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retrospective-ledger-source.request.json",
+      "dispatch": "accepted",
+      "scope": "independent contract review and pure ledger-source envelope; authority absent"
     }
   ],
   "current-awaiting": [
-    "invoke-1789285599845-20722-edaabab7"
+    "invoke-1789285990764-20724-4517441a"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
