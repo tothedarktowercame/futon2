@@ -737,10 +737,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-provenance-canonical-input-output-joins.request.json",
       "dispatch": "accepted",
       "scope": "pure provenance canonical input/output exact joins repair"
+    },
+    {
+      "packet": "codex-23-provenance-ordered-manifests",
+      "job-id": "invoke-1789282312552-20704-e8a2cdc3",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789282312552-20704-e8a2cdc3",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-provenance-ordered-manifests.request.json",
+      "dispatch": "accepted",
+      "scope": "pure provenance strict ordered unique canonical manifests repair"
     }
   ],
   "current-awaiting": [
-    "invoke-1789281937826-20702-a2c1b591"
+    "invoke-1789282312552-20704-e8a2cdc3"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
