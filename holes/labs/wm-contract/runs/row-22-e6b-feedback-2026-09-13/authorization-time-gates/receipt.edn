@@ -1,0 +1,30 @@
+{:schema :wm/execution-receipts-v1
+ :source-commits ["17e85c05" "61db346f"]
+ :tree-sha "61db346f"
+ :at "2026-09-13T05:30:00Z"
+ :pins
+ {:e3-source "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260"
+  :e6b-source "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab"
+  :e3-test "50558cf363717c53cfb818a6db9d77814a8beb732e41549a2c66f478f7b45a12"
+  :e6b-test "ff0634310d58c4a463010513e502bb942ba57569fe6815a97a1b1d1efdb0b5b0"
+  :spec "9b174dfa060eb935b3bdc28a239fbabec9f13496dc4cae0e69c29be52936dd11"}
+ :gates
+ [{:gate :focused-tests
+   :command "clojure -X:test :nses '[futon2.aif.machine-pre-enact-authorization-test futon2.aif.machine-slow-feedback-evidence-test]'"
+   :exit 0 :tests 10 :assertions 76 :failures 0 :errors 0
+   :stdout "test2.stdout" :stderr "test2.stderr"}
+  {:gate :induced-failure
+   :command "clojure -M:test -e '(load-file \"holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/induced_failure.clj\")'"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :errors 0
+   :stdout "induced.stdout" :stderr "induced.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_pre_enact_authorization.clj src/futon2/aif/machine_slow_feedback_evidence.clj test/futon2/aif/machine_pre_enact_authorization_test.clj test/futon2/aif/machine_slow_feedback_evidence_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo2.stdout" :stderr "kondo2.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_pre_enact_authorization.clj src/futon2/aif/machine_slow_feedback_evidence.clj test/futon2/aif/machine_pre_enact_authorization_test.clj test/futon2/aif/machine_slow_feedback_evidence_test.clj"
+   :exit 0 :stdout "parens2.stdout" :stderr "parens2.stderr"}]
+ :failed-history
+ [{:tree-sha "17e85c05" :gate :focused-tests :exit 1
+   :tests 10 :assertions 76 :failures 1 :errors 0
+   :cause :stale-control-time-preceded-new-authorization
+   :stdout "test.stdout" :stderr "test.stderr"}]}

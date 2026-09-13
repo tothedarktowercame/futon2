@@ -1,0 +1,14 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-pre-enact-authorization-test
+
+Testing futon2.aif.machine-slow-feedback-evidence-test
+
+FAIL in (lifecycle-relation-time-and-observer-controls) (machine_slow_feedback_evidence_test.clj:265)
+outcome-before-enactment
+expected: (= expected (refusal (fixture f)))
+  actual: (not (= :e6b/outcome-review-unresolved :e6b/canonical-context-mismatch))
+
+Ran 10 tests containing 76 assertions.
+1 failures, 0 errors.

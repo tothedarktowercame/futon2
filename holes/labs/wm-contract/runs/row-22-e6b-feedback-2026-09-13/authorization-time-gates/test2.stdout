@@ -1,0 +1,9 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-pre-enact-authorization-test
+
+Testing futon2.aif.machine-slow-feedback-evidence-test
+
+Ran 10 tests containing 76 assertions.
+0 failures, 0 errors.
