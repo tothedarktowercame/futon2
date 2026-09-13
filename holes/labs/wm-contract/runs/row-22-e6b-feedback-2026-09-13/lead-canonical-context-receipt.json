@@ -1,0 +1,30 @@
+{
+  "command": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/lead-canonical-context.clj"
+  ],
+  "exit": 0,
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+      "sha256": "8f4ef2ecb49aa3b24a09b7c26294852b452301471311dc85f0e96044c559080f"
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_evidence_test.clj",
+      "sha256": "1acc563edb478bf5b7a052d2b8d61b9a1f42d6744a54788da4b0bd68717d97f5"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/SPEC.md",
+      "sha256": "28a102b67c93d6bdbe47b76959a8e5c21f24b75193038bf8c304f5094323cfcf"
+    },
+    {
+      "path": "src/futon2/aif/temporal_hierarchy.clj",
+      "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+    },
+    {
+      "path": "src/futon2/aif/intrinsic_values.clj",
+      "sha256": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"
+    }
+  ]
+}

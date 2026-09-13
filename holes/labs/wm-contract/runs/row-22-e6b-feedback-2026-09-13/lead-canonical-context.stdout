@@ -1,0 +1,1 @@
+{:control :borrowed-model-with-unchanged-canonical-inputs, :identity {:model/id :wm-e1-fixture, :model/revision "borrowed-model", :run/id "e1-authority-run", :tick/index 4}, :replay true}
