@@ -53,12 +53,18 @@ must precede the deterministic destination-state time. Plausible identifiers or
 E3 authorization and E2b selection/enactment retain distinct cohort/event
 identities. The verifier does not force them equal. The separately resolved
 lifecycle relation instead binds both complete canonical contexts and result
-digests, their ordered field subject, and the occurrence/action/class. It also
+digests, the E3 verifier's canonical review/admission and authorization times,
+their ordered field subject, and the occurrence/action/class. It also
 binds the enactment instant and the observer's origin/authority reference to
 the exact outcome subject. Every prior intrinsic timestamp must parse; the
 fixed prior timestamp is the latest entry timestamp, strictly before enactment,
 which is no later than terminal outcome. Thus malformed entries cannot vanish
 from chronology through filtering.
+
+The E3 verifier derives its time receipt from the same pinned pending and
+review inputs whose canonical R9 join it checks: executed review/admission is
+strictly before authorization. E6b requires that exact time receipt in the
+lifecycle subject and requires authorization to be no later than enactment.
 
 This does not persist anything or prove that a live store prevents duplicates.
 No actual independently owned outcome authority, complete application universe,

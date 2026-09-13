@@ -84,6 +84,9 @@
 (deftest exact-pending-subject-is-mechanically-authorized
   (let [out (e3/verify-pre-enact (config {:pending pending :verdict verdict :review review}))]
     (is (= :mechanism-authorized (:decision out)))
+    (is (= {:review-admission-at "2026-09-13T11:59:00Z"
+            :authorization-at "2026-09-13T12:00:00Z"}
+           (:time out)))
     (is (= subject (:subject out)))
     (is (= :unavailable (get-in out [:external-dependencies :production-authority])))
     (is (= :required (get-in out [:external-dependencies :r6-scoring-and-posterior])))))

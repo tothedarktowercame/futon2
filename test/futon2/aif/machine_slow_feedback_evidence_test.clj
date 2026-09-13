@@ -24,10 +24,10 @@
                  :action {:type :advance-mission :target "M-alpha"}
                  :fast/action-class :advance-capability
                  :outcome-reviewer/id "reviewer-1" :outcome-observer/id "observer-1"
-                 :prior-state/as-of "2026-09-13T04:00:00Z"
-                 :destination/as-of "2026-09-13T05:00:00Z"}))
+                 :prior-state/as-of "2026-09-13T11:00:00Z"
+                 :destination/as-of "2026-09-13T13:00:00Z"}))
 (def prior-entry {:alpha 2.0 :beta 2.0 :intrinsic-value 0.5
-                  :n-emissions 2 :n-followthrough 1 :as-of "2026-09-13T04:00:00Z"})
+                  :n-emissions 2 :n-followthrough 1 :as-of "2026-09-13T11:00:00Z"})
 (def prior
   (merge common {:schema/version :wm/e6b-prior-slow-state-v1 :state/revision "slow-4"
                  :slow/mode :exploitation
@@ -60,7 +60,7 @@
                  :candidate/occurrence-id [:e1-authority-run 4 0]
                  :action {:type :advance-mission :target "M-alpha"}
                  :terminal/status :succeeded :fast/action-class :advance-capability
-                 :terminal/at "2026-09-13T04:30:00Z"
+                 :terminal/at "2026-09-13T12:30:00Z"
                  :fast/witnessed? true :fast/succeeded? true
                  :outcome/evidence-id "outcome-1" :outcome/authority-ref "review-1"
                  :outcome/producer-id "worker-1" :outcome/reviewer-id "reviewer-1"}))
@@ -98,10 +98,11 @@
       :subject {:e3/context (:canonical/e3-context context)
                 :e2b/context (:canonical/e2b-context context)
                 :field/subject (:canonical/field-subject context)
+                :e3/time (:time canonical-e3)
                 :e3/digest (vd canonical-e3) :e2b/digest (vd canonical-e2b)
                 :candidate/occurrence-id (:candidate/occurrence-id context)
                 :action (:action context) :fast/action-class (:fast/action-class context)}
-      :enactment/at "2026-09-13T04:15:00Z"
+      :enactment/at "2026-09-13T12:15:00Z"
       :observer/origin :independent-fixture-observer
       :observer/authority-ref "fixture-observer-authority-1"
       :observer/subject {:observer/id "observer-1"
@@ -111,12 +112,12 @@
      :outcome-review {:schema/version :wm/e6b-outcome-review-v1 :scope :isolated-test
                       :review/outcome :accepted :subject outcome-subject
                       :reviewer/id "reviewer-1" :review/id "review-1"
-                      :observer/id "observer-1" :reviewed-at "2026-09-13T04:45:00Z"
+                      :observer/id "observer-1" :reviewed-at "2026-09-13T12:45:00Z"
                       :review/artifact-sha256 nil}
      :outcome-review-artifact
      {:schema/version :wm/e6b-outcome-review-artifact-v1 :scope :isolated-test
       :subject outcome-subject :review/id "review-1" :reviewer/id "reviewer-1"
-      :observer/id "observer-1" :reviewed-at "2026-09-13T04:45:00Z" :executed? true}
+      :observer/id "observer-1" :reviewed-at "2026-09-13T12:45:00Z" :executed? true}
      :application-ledger {:schema/version :wm/e6b-application-ledger-v1 :scope :isolated-test
                           :entries [entry]}
      :application-universe {:schema/version :wm/e6b-application-universe-v1
@@ -241,6 +242,10 @@
            [:borrowed-field
             #(assoc-in % [:lifecycle-relation :subject :field/subject :e2b/approved-domain] [])
             :e6b/canonical-context-mismatch]
+           [:borrowed-authorization-time
+            #(assoc-in % [:lifecycle-relation :subject :e3/time :authorization-at]
+                       "2026-09-13T11:30:00Z")
+            :e6b/canonical-context-mismatch]
            [:malformed-prior-time
             #(assoc-in % [:prior-state :slow/intrinsics :explore :as-of] "not-an-instant")
             :e6b/prior-state-incomplete-or-stale]
@@ -257,4 +262,15 @@
             #(assoc-in % [:lifecycle-relation :observer/subject :outcome/subject :run/id] "other")
             :e6b/outcome-review-unresolved]]]
     (testing (name label)
-      (is (= expected (refusal (fixture f)))))))
+      (is (= expected (refusal (fixture f))))))
+  (testing "authorization equal to enactment is the admitted boundary"
+    (is (:replay/identical?
+         (e6b/verify-feedback
+          (fixture #(assoc-in % [:lifecycle-relation :enactment/at]
+                              "2026-09-13T12:00:00Z"))))))
+  (testing "changed canonical E3 evidence pin refuses before relation use"
+    (let [cfg (fixture identity)
+          label :pending]
+      (is (= :e6b/canonical-e3-unavailable
+             (refusal (assoc-in cfg [:canonical :e3 :evidence label :sha256]
+                                (apply str (repeat 64 "0")))))))))

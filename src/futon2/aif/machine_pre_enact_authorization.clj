@@ -169,6 +169,8 @@
     {:schema/version schema-version :scope :isolated-test
      :decision :mechanism-authorized :phase :pre-enact
      :identity (select-keys pending ids) :subject subject
+     :time {:review-admission-at (:completed-at review)
+            :authorization-at (:authorization-at pending)}
      :verdict :independent :reviewer/id (:reviewer/id review)
      :sources (mapv #(dissoc % :record) resolved)
      :external-dependencies

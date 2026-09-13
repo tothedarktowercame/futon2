@@ -161,6 +161,7 @@
                          :e2b/approved-domain (get-in canonical-e2b [:subject :approved-domain])}
           relation-subject {:e3/context e3-context :e2b/context e2b-context
                             :field/subject field-subject
+                            :e3/time (:time canonical-e3)
                             :e3/digest (value-digest canonical-e3)
                             :e2b/digest (value-digest canonical-e2b)
                             :candidate/occurrence-id occurrence
@@ -187,7 +188,15 @@
                    (= :e3-authorizes-e2b-enactment (:relation/type relation))
                    (= relation-subject (:subject relation))
                    (nonblank? (:relation/id relation))
-                   (some? (instant (:enactment/at relation))))
+                   (some? (instant (:enactment/at relation)))
+                   (some? (instant (get-in canonical-e3 [:time :review-admission-at])))
+                   (some? (instant (get-in canonical-e3 [:time :authorization-at])))
+                   (.isBefore (instant (get-in canonical-e3 [:time :review-admission-at]))
+                              (instant (get-in canonical-e3 [:time :authorization-at])))
+                   (let [authorized-at (instant (get-in canonical-e3 [:time :authorization-at]))
+                         enacted-at (instant (:enactment/at relation))]
+                     (or (= authorized-at enacted-at)
+                         (.isBefore authorized-at enacted-at))))
       (refuse! :e6b/canonical-context-mismatch
                "Canonical E3/E2b context or ordered field subject differs" {})))
     (when-not (and (= common (identity-of outcome))
