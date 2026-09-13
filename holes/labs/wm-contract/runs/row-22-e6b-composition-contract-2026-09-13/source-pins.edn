@@ -1,6 +1,7 @@
 {:schema :wm/read-only-source-pins-v1
  :at "2026-09-13T06:20:00Z"
- :repo {:name :futon2 :branch "main" :head "ca8d7ce0"}
+ :repo {:name :futon2 :branch "main"
+        :head "5ed03bf24b9d9ad8f39dbc18016f72bb14a8f0c8"}
  :sources
  [{:path "src/futon2/aif/machine_slow_feedback_evidence.clj"
    :sha256 "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab"}
