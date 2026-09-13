@@ -1,0 +1,66 @@
+[
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/capture.clj",
+    "sha256": "57ad2897739f72bfc5cff2fbdd624b2e048b2c67511e017d5faf8b7ecddc5ba4"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/verify-capture.clj",
+    "sha256": "3a0986ec265c4c3dae9599647487c8b406ea1248a03c17a09d3b7d035389fee9"
+  },
+  {
+    "path": "holes/labs/wm-contract/e6b-canonical-replay-closure-2026-09-13.edn",
+    "sha256": "9886fe233db291bcbf5fbe5679f453420f59212066b5bb01d21dd003c97d3ebc"
+  },
+  {
+    "path": "holes/labs/wm-contract/CONTRACT-e6b-canonical-replay-closure-v1-2026-09-13.md",
+    "sha256": "a8d5f7c76b2af5e72e821a0991ed1e18a5a13ec78b170c514d09e4aa79498dbf"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/independent-dependency-review.md",
+    "sha256": "36e353144dec179d778e9e12d55f01f743bf21b7b0ed43c414c54ce17af1c1e1"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/capture-manifest.edn",
+    "sha256": "eca79640929ae7a7fb06fb12a2315d6172f11fc853489c9d0f4d7b7157ff119e"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/e3/pending.edn",
+    "sha256": "55de54598d2521115da14b4ce74996d7bbacccfc21ecc5bfc01d0ce26c992154",
+    "bytes": 1053
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/e3/verdict.edn",
+    "sha256": "ac3b628fdc3f3c6efd84a273473f8e84a31988c947b5d3c26d953acc7cbd8976",
+    "bytes": 2074
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/e3/review.edn",
+    "sha256": "f4f23834f3bade70127561d828a1d65e2ce1f113325da5551c9412ebe05e1a1b",
+    "bytes": 2679
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/config/r9-input.edn",
+    "sha256": "569b9d61cea721f021836194e7d73a1a3e6454146b3c8f4523235ae507c03879",
+    "bytes": 1455
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/config/e2b-config.edn",
+    "sha256": "eb3b6aa30755635762431a0637887ea32bbf1493f926848709df6c89fd91b583",
+    "bytes": 1291
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/config/e3-config.edn",
+    "sha256": "bb19c70ed80afecd1b1004f1957103e140c1fa864124cf8071d8756e1d013308",
+    "bytes": 1287
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/config/canonical-config.edn",
+    "sha256": "3bd7c792631834105b8311067766e24dd761d3a5d407a3d3948d3e1de360d4c8",
+    "bytes": 2591
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/config/e1-config.edn",
+    "sha256": "a48b96cfc005cd28b37408657b5ee5d4f85acae9ec60f0c8cd71d9fad865f248",
+    "bytes": 790
+  }
+]

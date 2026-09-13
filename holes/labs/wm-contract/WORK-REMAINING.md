@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest canonical fixture2146be99/9cc5fac0 six receipt pins/eight artifact hashes verified; retained readback accepted unauthenticated test bytes only. Canonical replay from retained config remains unchecked; no portable/archive/production authority. See [review](runs/row-22-e6b-canonical-fixture-2026-09-13/lead-acceptance.md).
+
 - Latest closureb00e6d35 listed pins verified; lead added missing R11 adapter/arbiter dependencies. E3 durable inputs remain absent; refusal is a contract, not executable resolver. New isolated fixture capture must remain unauthenticated test material, never historical20588 or production genesis. See [review](runs/row-22-e6b-canonical-closure-review-2026-09-13/lead-review.md).
 
 - Latest codeccbbee14e/02b8e8a3 four pins/raw18tests98 accepted structural-only: decoded source/lifecycle/review subject joins hold and distinct event IDs retained. Canonical transitive input closure inventory next; no store-v2/adapter or authority. See [acceptance](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-subject-joins/lead-acceptance.md).
