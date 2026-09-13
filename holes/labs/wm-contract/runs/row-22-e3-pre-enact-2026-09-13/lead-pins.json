@@ -1,0 +1,14 @@
+[
+  {
+    "path": "src/futon2/aif/machine_pre_enact_authorization.clj",
+    "sha256": "ce4360e640bfc65f31770aa1f9a73e6cb14defae69bf71026f37aa6575e604f4"
+  },
+  {
+    "path": "test/futon2/aif/machine_pre_enact_authorization_test.clj",
+    "sha256": "8db1c7fa4943b23b8b29bdb574fe5aa92a237009f79201e06d5a2a7677fdb37c"
+  },
+  {
+    "path": "holes/labs/wm-contract/SPEC-row22-e3-pre-enact-2026-09-13.md",
+    "sha256": "89bb6d8df9df9c14e56fbfb5ce4b7218963e66ffb7230b94ac9a30b2af75c42a"
+  }
+]
