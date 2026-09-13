@@ -321,11 +321,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-deferred-store-ownership.request.json",
       "dispatch": "accepted",
       "scope": "deferred payload validation, exclusive ownership and atomic initialization; no integration"
+    },
+    {
+      "packet": "codex-22-e2a-portfolio-restriction",
+      "job-id": "invoke-1789271480848-20618-2dfdb941",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789271480848-20618-2dfdb941",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e2a-portfolio-restriction.request.json",
+      "dispatch": "accepted",
+      "scope": "independent lead touch-up review and pure E2a portfolio restriction; no runtime wiring"
     }
   ],
   "current-awaiting": [
     "invoke-1789271308775-20617-e4c52270",
-    "invoke-1789270833872-20612-217afbfa",
+    "invoke-1789271480848-20618-2dfdb941",
     "invoke-1789271039934-20615-eb6ce892"
   ]
 }
