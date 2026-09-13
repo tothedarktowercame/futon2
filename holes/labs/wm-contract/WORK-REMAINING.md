@@ -108,6 +108,24 @@ is not yet a verified join to Agency's normalized request digest.
   origin/authentication and durable admission binding remain open. This is
   not an operator signature or a created anchor.
 
+### Second snapshot review and beta specification review — 2026-09-13
+
+- Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
+  test, reader and four retained trip/repair hashes. Named authority-class,
+  unknown-status and direct-transition controls fixed. Re-review `feff9b02`
+  found terminal initial finding bypass and invalid parens/raw-reader claims;
+  codex-22 has the bounded correction. Selected discharged-trip readback
+  does not establish a complete production confidence census.
+- Beta proposal `d48d6843`, Lean receipt `e6f7ae8b`: lead verified source
+  hashes and prior-rate algebra scope. Re-review `6ddc788a` distinguishes
+  unrestricted affine evidence from bounded finite-policy evidence. codex-24
+  is proving the bounded-continuous conditional root-ordering theorem and
+  specifying uniqueness/numerical obligations. Proposal remains unadopted;
+  no engineering-only integration substitutes for J1.
+- Current follow-up job IDs, exact commissions and accepted responses are in
+  `runs/lead-dispatch-2026-09-13/repair-wave.json`; old bellbacks are consumed
+  idempotently, not dispatched again.
+
 ## Signature discipline (adopted by Joe 2026-09-12)
 
 Per the apex patterns (progress-is-a-witnessed-state-change,

@@ -41,11 +41,27 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-external-archive-repair.request.json",
       "dispatch": "accepted",
       "scope": "external immutable archive and lifetime identity repair, no admission"
+    },
+    {
+      "packet": "codex-22-initial-history-and-raw-receipts",
+      "job-id": "invoke-1789265183477-20571-79b56743",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789265183477-20571-79b56743",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-initial-history-and-raw-receipts.request.json",
+      "dispatch": "accepted",
+      "scope": "review repair or bounded theorem; no admission"
+    },
+    {
+      "packet": "codex-24-bounded-policy-root-proof",
+      "job-id": "invoke-1789265350956-20573-a7db5e1d",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789265350956-20573-a7db5e1d",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-bounded-policy-root-proof.request.json",
+      "dispatch": "accepted",
+      "scope": "review repair or bounded theorem; no admission"
     }
   ],
   "current-awaiting": [
     "invoke-1789264991776-20570-bb79d2d7",
-    "invoke-1789264565170-20566-684d1b8d",
-    "invoke-1789264731668-20568-5ea7cb21"
+    "invoke-1789265183477-20571-79b56743",
+    "invoke-1789265350956-20573-a7db5e1d"
   ]
 }
