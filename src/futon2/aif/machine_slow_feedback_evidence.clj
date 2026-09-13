@@ -15,13 +15,14 @@
            [java.security MessageDigest]))
 
 (def schema-version :wm/r16-r15-feedback-evidence-v1)
-(def source-order [:context :prior-state :e2b-subject :outcome
+(def source-order [:context :prior-state :e2b-subject :lifecycle-relation :outcome
                    :outcome-review :outcome-review-artifact :next-state
                    :application-ledger :application-universe])
 (def ^:private schemas
   {:context :wm/e6b-transition-context-v1
    :prior-state :wm/e6b-prior-slow-state-v1
    :e2b-subject :wm/e6b-e2b-subject-v1
+   :lifecycle-relation :wm/e6b-lifecycle-relation-v1
    :outcome :wm/e6b-outcome-authority-v1
    :outcome-review :wm/e6b-outcome-review-v1
    :outcome-review-artifact :wm/e6b-outcome-review-artifact-v1
@@ -74,20 +75,21 @@
 
 (defn- finite-positive? [x]
   (and (number? x) (Double/isFinite (double x)) (pos? (double x))))
+(defn- instant [x]
+  (try (java.time.Instant/parse x) (catch Throwable _ nil)))
 (defn- valid-entry? [x]
   (and (= #{:alpha :beta :intrinsic-value :n-emissions :n-followthrough :as-of}
           (set (keys x)))
        (finite-positive? (:alpha x)) (finite-positive? (:beta x))
        (number? (:intrinsic-value x)) (Double/isFinite (double (:intrinsic-value x)))
-       (nat-int? (:n-emissions x)) (nat-int? (:n-followthrough x))))
+       (nat-int? (:n-emissions x)) (nat-int? (:n-followthrough x))
+       (some? (instant (:as-of x)))))
 (defn- identity-of [x]
   (select-keys x [:model/id :model/revision :run/id :tick/index]))
 (defn- valid-identity? [x]
   (and (or (keyword? (:model/id x)) (nonblank? (:model/id x)))
        (nonblank? (:model/revision x)) (nonblank? (:run/id x))
        (nat-int? (:tick/index x))))
-(defn- instant [x]
-  (try (java.time.Instant/parse x) (catch Throwable _ nil)))
 
 (defn verify-feedback
   [{:keys [mode evidence-root sources canonical]}]
@@ -101,6 +103,7 @@
   (let [resolved (mapv #(resolve! evidence-root % (sources %)) source-order)
         records (into {} (map (juxt :label :record) resolved))
         context (:context records) prior (:prior-state records) e2b (:e2b-subject records)
+        relation (:lifecycle-relation records)
         outcome (:outcome records) outcome-review (:outcome-review records)
         review-artifact (:outcome-review-artifact records) claimed (:next-state records)
         ledger (:application-ledger records) universe (:application-universe records)
@@ -155,7 +158,14 @@
                              (select-keys canonical-e2b [:cohort/id :event/id]))
           field-subject {:e3/field-pins (get-in canonical-e3 [:subject :field-pins])
                          :e2b/e1-source-pins (get-in canonical-e2b [:subject :e1-source-pins])
-                         :e2b/approved-domain (get-in canonical-e2b [:subject :approved-domain])}]
+                         :e2b/approved-domain (get-in canonical-e2b [:subject :approved-domain])}
+          relation-subject {:e3/context e3-context :e2b/context e2b-context
+                            :field/subject field-subject
+                            :e3/digest (value-digest canonical-e3)
+                            :e2b/digest (value-digest canonical-e2b)
+                            :candidate/occurrence-id occurrence
+                            :action (:action context)
+                            :fast/action-class (:fast/action-class context)}]
     (when-not (and (= (:canonical/e3-context context) e3-context)
                    (= (:canonical/e2b-context context) e2b-context)
                    (= (:canonical/field-subject context) field-subject)
@@ -173,7 +183,11 @@
                    (= occurrence (get-in canonical-e3 [:subject :candidate/occurrence-id]))
                    (= (:action context) (get-in canonical-e3 [:subject :action]))
                    (= (value-digest canonical-e2b) (:canonical/e2b-digest e2b))
-                   (= (value-digest canonical-e3) (:canonical/e3-digest e2b)))
+                   (= (value-digest canonical-e3) (:canonical/e3-digest e2b))
+                   (= :e3-authorizes-e2b-enactment (:relation/type relation))
+                   (= relation-subject (:subject relation))
+                   (nonblank? (:relation/id relation))
+                   (some? (instant (:enactment/at relation))))
       (refuse! :e6b/canonical-context-mismatch
                "Canonical E3/E2b context or ordered field subject differs" {})))
     (when-not (and (= common (identity-of outcome))
@@ -195,17 +209,27 @@
                                         :candidate/occurrence-id :action :fast/action-class
                                         :terminal/status :terminal/at :fast/witnessed? :fast/succeeded?
                                         :outcome/evidence-id :outcome/producer-id])
-          prior-at (last (sort (keep (comp instant :as-of val)
-                                     (:slow/intrinsics prior))))
+          prior-times (mapv (comp instant :as-of val) (:slow/intrinsics prior))
+          prior-at (last (sort prior-times))
+          enactment-at (instant (:enactment/at relation))
           terminal-at (instant (:terminal/at outcome))
           reviewed-at (instant (:reviewed-at outcome-review))
           destination-at (instant (:destination/as-of context))]
-      (when-not (and terminal-at reviewed-at destination-at prior-at
-                     (.isBefore prior-at terminal-at)
+      (when-not (and terminal-at reviewed-at destination-at prior-at enactment-at
+                     (= prior-at (instant (:prior-state/as-of context)))
+                     (.isBefore prior-at enactment-at)
+                     (or (= enactment-at terminal-at) (.isBefore enactment-at terminal-at))
                      (or (= terminal-at reviewed-at) (.isBefore terminal-at reviewed-at))
                      (.isBefore reviewed-at destination-at)
                      (= (:outcome-reviewer/id context) (:reviewer/id outcome-review))
                      (= (:outcome-observer/id context) (:observer/id outcome-review))
+                     (= {:observer/id (:observer/id outcome-review)
+                         :observer/origin (:observer/origin relation)
+                         :observer/authority-ref (:observer/authority-ref relation)
+                         :outcome/subject outcome-subject}
+                        (:observer/subject relation))
+                     (keyword? (:observer/origin relation))
+                     (nonblank? (:observer/authority-ref relation))
                      (not= (:reviewer/id outcome-review) (:observer/id outcome-review))
                      (= :accepted (:review/outcome outcome-review))
                      (= outcome-subject (:subject outcome-review))

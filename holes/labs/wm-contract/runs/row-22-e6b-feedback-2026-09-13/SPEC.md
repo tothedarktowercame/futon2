@@ -17,9 +17,10 @@ Pinned computation dependencies:
   `ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b`:
   transitive Beta update through `next-update-record`.
 
-Nine source roles are required from one externally configured root with exact
+Ten source roles are required from one externally configured root with exact
 SHA-256 pins: fixed transition context, complete prior state, exact authorized
-E2b subject, independently witnessed terminal outcome, its exact-subject
+E2b subject, an independently fixed E3-to-E2b lifecycle relation,
+independently witnessed terminal outcome, its exact-subject
 independent review, the review's retained artifact bytes, claimed next state,
 application ledger and independently complete application universe. Each file
 is read into one byte buffer, hashed and parsed as strict single-form UTF-8 EDN.
@@ -48,6 +49,16 @@ bytes. The review artifact repeats the subject and execution facts. Prior-state
 time precedes terminal outcome time, which is no later than review time; review
 must precede the deterministic destination-state time. Plausible identifiers or
 64-character strings without those resolved bytes are not authority.
+
+E3 authorization and E2b selection/enactment retain distinct cohort/event
+identities. The verifier does not force them equal. The separately resolved
+lifecycle relation instead binds both complete canonical contexts and result
+digests, their ordered field subject, and the occurrence/action/class. It also
+binds the enactment instant and the observer's origin/authority reference to
+the exact outcome subject. Every prior intrinsic timestamp must parse; the
+fixed prior timestamp is the latest entry timestamp, strictly before enactment,
+which is no later than terminal outcome. Thus malformed entries cannot vanish
+from chronology through filtering.
 
 This does not persist anything or prove that a live store prevents duplicates.
 No actual independently owned outcome authority, complete application universe,
