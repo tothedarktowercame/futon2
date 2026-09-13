@@ -50,9 +50,9 @@ The output is exactly:
  :application/id <fixed context id>
  :feedback/event-id <fixed context event>
  :prior {:state/revision ... :state <complete prior state>
-         :state-sha256 <digest of canonical strict EDN>}
+         :state-sha256 <digest under the explicitly pinned value-serialization convention>}
  :next {:state/revision ... :state <complete recomputed next record>
-        :state-sha256 <digest of canonical strict EDN>}
+        :state-sha256 <digest under the explicitly pinned value-serialization convention>}
  :input/digests {:context ... :prior ... :e2b ... :lifecycle-relation ...
                  :outcome ... :outcome-review ...
                  :outcome-review-artifact ...}
@@ -64,7 +64,7 @@ The output is exactly:
  :authority/status :proposal-evidence-only}
 ```
 
-Every digest is computed from the same resolved byte buffer or canonical EDN
+Every digest is computed from the same resolved byte buffer or serialized EDN
 value actually checked. `:committed-at` is fixed before storage, so retry bytes
 are stable. The candidate may point at configured evidence identities but may
 not supply a resolver root, validation status, source digest, clock value, or
@@ -75,11 +75,25 @@ the pinned inputs. It does not establish that those sources are production
 authorities, that the proposal was committed, or that the application universe
 is complete.
 
+The current verifier and store use UTF-8 `pr-str` SHA-256 for value digests;
+this is not a canonical EDN encoding. Preserve that exact pinned convention
+where existing joins require it, and keep raw-source digests separate from
+value digests. No silent canonicalization migration is authorized.
+
+Prior and next evidence records have distinct schemas. Their complete records
+must be retained, but they must not be silently treated as the same store-state
+carrier. Before a store adapter is implemented, specify an exact common state
+projection, its digest encoding, and how the record's metadata/revision joins
+to it. This carrier decision is outside the initial prospective validator.
+
 ## Owner-held compare and commit
 
 The composition adapter accepts the proposal evidence only from an injected,
 configured validator call. While holding the store's lifetime lease and
-process lock, it reads and validates HEAD. It requires:
+process lock, it reads and validates HEAD. It first resolves an existing stable
+application ID: an exact retained proposal retry returns that transaction,
+while any changed subject refuses. Only a new application takes the following
+current-HEAD checks. It requires:
 
 - HEAD store identity and generation match the configured store;
 - HEAD state revision equals the proposal prior revision;
