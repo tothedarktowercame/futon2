@@ -5,5 +5,5 @@
  :stdout "production-participation-stdout.txt"
  :stderr "production-participation-stderr.txt"
  :runner-sha256 "e7669d91b581a8e1db6ee4a136dbe3d3be89c9dc533393b14ec861d7e77e2898"
- :tree-sha "430441a3f3905e7c020fe2363ffc05a004e6c297"
+ :tree-sha "cd49b01cb4772d49d952168d6b6de71a1876bed9"
  :at "2026-09-13T02:40:37Z"}
