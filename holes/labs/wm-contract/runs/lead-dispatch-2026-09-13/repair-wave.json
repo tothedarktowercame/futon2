@@ -849,10 +849,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-completeness-lead-origin-review.request.json",
       "dispatch": "accepted",
       "scope": "independent lead subject-join review and bounded origin/chronology audit, no implementation"
+    },
+    {
+      "packet": "codex-23-completeness-origin-chronology",
+      "job-id": "invoke-1789287380095-20732-7117cccc",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789287380095-20732-7117cccc",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-completeness-origin-chronology.request.json",
+      "dispatch": "accepted",
+      "scope": "pure tenth-role independently configured origin and retained-artifact chronology repair"
     }
   ],
   "current-awaiting": [
-    "invoke-1789287133511-20730-975351f2"
+    "invoke-1789287380095-20732-7117cccc"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
