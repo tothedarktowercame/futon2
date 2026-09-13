@@ -1,0 +1,28 @@
+{:schema :wm/r11-census-refresh-discovery-v1
+ :at "2026-09-13"
+ :tree-sha "00e4dc0708296d618b698dd2103579f8c8f99b1c"
+ :result :stopped-at-discovery
+ :reason :original-denominator-is-lifecycle-cells-not-run-opportunities
+ :old-count {:exists 0 :lifecycle-cells 7 :strip "-------"}
+ :new-count :not-defined-by-original-procedure
+ :current-evidence-read-only
+ {:cohort-attempt-directories 5
+  :on-demand-click-bindings-on-2026-09-13 6
+  :note "Five attempt directories across cohorts 47/48 plus r1's pre-attempt capacity refusal make the six machinery clicks; this population is not an input to the original census."}
+ :pins
+ [{:path "holes/labs/wm-contract/TN-r11-census-refresh-discovery-2026-09-13.md"
+   :sha256 "9436037744e1c6e7cb5240b0b9060022c22bb3061da41ffdda73cdb905972d0b"}
+  {:path "holes/labs/wm-contract/ALIGN-rnode-process-census.md"
+   :sha256 "b22ed0ce0d27ae599799fb92e3de827f1d880defce44f4f242ae95028068f49b"}
+  {:path "holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md"
+   :sha256 "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d"}
+  {:path "holes/labs/wm-contract/v7_r11_node_sim.clj"
+   :sha256 "ba77a787aabe22153e6fb45e3158fdaba783d921b2dcdcb874e78f9347807cc2"}
+  {:path "holes/labs/wm-contract/runs/V7-R11-node-sim/00-r11.edn"
+   :sha256 "b80a827f5260fb5bce9cfe34ba9192ca3a4d3690d005194cf0d3de5501323042"}
+  {:path "holes/labs/wm-contract/runs/row-20-r11-census-2026-09-12/execution-receipts.edn"
+   :sha256 "ca84a7eeb1cba08fa1da514769b32a90cceab418303061055badaf6490160f82"}
+  {:repo :p4ng :path "empirics-futon/gen_rnode_dossiers.py"
+   :sha256 "7d1b92dc384d4031c21fe6083a28612758f6f27613bfd720f174222ee0e1fa3a"}]
+ :gates {:not-run "No script or source was changed. The task explicitly required stopping rather than inventing a new counting method."}
+ :mutations {:serving-jvms false :census false :generated-publication false :data false}}
