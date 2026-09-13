@@ -1,3 +1,7 @@
+## Task 1 serving review — creator failure accounting
+
+Job20734 reviewed in futon3c 64108e1c; five pins/raw6tests21 verified. Actual temporary-file post-rename failure retains committed job but reports drained with zero counts. Executed control retained. New invoke-1789316247471-20736-2e78bff9 repairs this and implements execution/final-delivery lifecycle in actual HTTP source, inactive by default. No live changes. Startup reconciliation, internal resumes and first-install fence remain owed.
+
 # The work remaining — the single execution authority
 
 - Joe Task1 execution resumed: read-only live ledger at16:05Z has7507jobs/0commissions, including fresh20734 missing commission. Actual common HTTP creator ingress integration job20734 running offline; remaining lifecycle seams and safe first installation follow. No live mutation. See [baseline and work](runs/task1-serving-evidence-2026-09-13/progress.md).

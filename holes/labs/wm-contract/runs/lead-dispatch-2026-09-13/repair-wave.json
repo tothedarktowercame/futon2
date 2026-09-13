@@ -865,10 +865,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-task1-serving-creator-integration.request.json",
       "dispatch": "accepted",
       "scope": "Joe Task1: offline common serving creator integration, no live activation"
+    },
+    {
+      "packet": "codex-23-task1-serving-lifecycle",
+      "job-id": "invoke-1789316247471-20736-2e78bff9",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789316247471-20736-2e78bff9",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-task1-serving-lifecycle.request.json",
+      "dispatch": "accepted",
+      "scope": "Task1 actual serving committed-creation repair and execution/delivery callbacks, offline only"
     }
   ],
   "current-awaiting": [
-    "invoke-1789315476118-20734-4279de32"
+    "invoke-1789316247471-20736-2e78bff9"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
@@ -883,11 +891,9 @@
     "constraint": "No prior/G/temperature change; no runtime or edge retirement"
   },
   "codex23-next-boundary": {
-    "status": "task1-serving-integration-running",
-    "completed-job": "invoke-1789287380095-20732-7117cccc",
-    "review": "holes/labs/wm-contract/runs/row-22-e6b-review-origin-2026-09-13/lead-review.md",
-    "next-packet": "Identify independently owned writer/lease/census and exact retained review-origin/configuration sources before any authority acquisition or retrospective integration.",
-    "blocker": "Current evidence is synthetic only; no real independently owned acquisition/census/review-origin/configuration acceptance.",
-    "constraints": "No live mutation, no fabricated acceptance, no production authority or retrospective success; no successor dispatched."
+    "status": "task1-serving-lifecycle-running",
+    "completed-job": "invoke-1789315476118-20734-4279de32",
+    "review-commit": "futon3c 64108e1c",
+    "constraints": "No live activation; startup reconciliation, parked resumes and first-install fence still required"
   }
 }
