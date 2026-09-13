@@ -1,0 +1,12 @@
+
+Running tests in #{"/tmp"}
+
+Testing codex23-ledger-envelope-induced-test
+
+FAIL in (deliberate-failure) (codex23_ledger_envelope_induced_test.clj:5)
+induced ledger envelope runner sensitivity
+expected: false
+  actual: false
+
+Ran 1 tests containing 1 assertions.
+1 failures, 0 errors.
