@@ -1,0 +1,1 @@
+{:control :head-current-mismatch, :accepted-head {:state/revision "invented-head-revision", :state-sha256 "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}, :actual-next {:revision "slow-5", :state-sha256 "1376408c5552d7307ca999559aad34da9fe7fb6a03b2a7a046e401d37c17ae3e"}, :capture-generation 1, :restart-authorized? false}

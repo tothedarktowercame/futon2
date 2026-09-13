@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest store-v2 5e78192a/c9b50fe1 five pins/raw25tests95 reviewed; executed invented HEAD revision/digest still recover and capture against a different current transaction. Strict schema/parent/provenance/conflict/version-boundary repair required; no acceptance. See [review](runs/row-22-e6b-store-v2-2026-09-13/lead-review/review.md).
+
 - Latest provenance readbackb204d909/95b87dd0 seven pins/raw24tests132 accepted exact constructor-representation structural readback. Cached fields rebuilt from bytes; external pin ownership remains owed. Isolated store-v2 provenance publication/recovery next; no production or semantic write authority. See [acceptance](runs/row-22-e6b-provenance-2026-09-13/readback/lead-acceptance.md).
 
 - Latest provenancee5d6a92a/88c719d9 seven pins/raw23tests120 accepted ordered structural manifests only. Exact order/uniqueness now checked; retained path/count metadata not authority. Pure strict serialized readback next; no store-v2/publication. See [acceptance](runs/row-22-e6b-provenance-2026-09-13/ordered-manifests/lead-acceptance.md).
