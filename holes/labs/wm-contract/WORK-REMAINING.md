@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest E5 review: 8dd5044d/7c1c7c45 five pins/raw4tests25 verified. Executed absent identities and unknown slow mode/nil weights still yield E5 envelopes. Strict fixed context and recognized weight authority required; no runtime. See [review](runs/row-22-e5-slow-prior-2026-09-13/lead-review.md).
+
 - Latest E4 review: 0c0aa613/a91c4dd9 two pins/raw4tests21 verified. Executed absent observations, nil actions and simultaneous support deletion all still verify. Payload/input/completeness repair required; no production edge. See [review](runs/row-22-e4-causal-evidence-2026-09-13/lead-review.md).
 
 2026-09-12 (v2, reordered under RULINGS Item 5). One task per row,

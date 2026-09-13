@@ -1,0 +1,35 @@
+{
+  "command": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-22-e5-slow-prior-2026-09-13/lead-controls.clj"
+  ],
+  "exit": 0,
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_prior_evidence.clj",
+      "sha256": "8df07893f4e87cf431e6d0656576e9b7d5f58514316d4423039eb9a782a297a4",
+      "matches_subject": true
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_prior_evidence_test.clj",
+      "sha256": "6d46827ed87852fca9e9a8e0959ebb78cc43331037d1d9b59428a2e14350c5ab",
+      "matches_subject": true
+    },
+    {
+      "path": "src/futon2/aif/temporal_hierarchy.clj",
+      "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+      "matches_subject": true
+    },
+    {
+      "path": "holes/labs/wm-contract/SPEC-row22-e5-slow-prior-2026-09-13.md",
+      "sha256": "cc5b30ac31a14140a5ecd3320acdecc47a55056a50691ae2ab22a7ff93370590",
+      "matches_subject": true
+    },
+    {
+      "path": "src/futon2/aif/policy_depth.clj",
+      "sha256": "24fba07ef6458570ddd7e5f4dd3b4bc6ec0b49432ead8af06b51e29e0d369786",
+      "matches_subject": true
+    }
+  ]
+}
