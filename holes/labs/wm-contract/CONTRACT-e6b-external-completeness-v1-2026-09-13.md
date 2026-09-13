@@ -137,13 +137,17 @@ exist. It must not invoke `verify-feedback` or mint an acceptance.
 ## Frozen validator schemas and roles
 
 The pure validator configuration has exactly
-`{:mode :authority-root :candidate/id :target-application-id :roles}`. `:mode`
+`{:mode :authority-root :candidate/id :target-application-id
+  :expected-review-origin :roles}`. `:mode`
 is `:isolated-test` or `:production`; production refuses unconditionally in v1.
+`:expected-review-origin` is independently configured and has exactly
+`{:origin/kind :origin/id :origin/owner
+  :origin/provenance-review-sha256}`. It is not derived from role records.
 `:roles` has exactly these externally configured immutable-buffer roles:
 
 `[:capture-artifact :writer-inventory :complete-census
   :completeness-subject :acquisition-boundary :review-commission
-  :review-execution :review-artifact :acceptance]`.
+  :review-execution :review-artifact :review-origin :acceptance]`.
 
 Each role value is exactly `{:bytes/base64 ... :expected-sha256 ...}`. Projection
 is derived by invoking the pure capture-to-retrospective projection; it is not a
@@ -177,6 +181,12 @@ After strict one-buffer decoding, records have these exact schemas/keys:
 - `:wm/e6b-completeness-review-v1`:
   `:schema :scope :authority/root :reviewer/id :job/id :trace/id
    :subject/raw-sha256 :boundary/id :outcome :reviewed-at`.
+- `:wm/e6b-review-origin-v1`:
+  `:schema :scope :authority/root :origin/kind :origin/id :origin/owner
+   :origin/provenance-review-sha256 :reviewer/id :commission/id
+   :commission/raw-sha256 :subject/raw-sha256 :job/id :trace/id
+   :review-artifact/raw-sha256 :artifact/retained-at :terminal/status
+   :finished-at`.
 - `:wm/e6b-completeness-acceptance-v1`:
   `:schema :scope :authority/root :authority/owner :reviewer/id :job/id
    :trace/id :commission/id :subject/raw-sha256
@@ -189,3 +199,11 @@ statuses must be `:closed`, `:reconciled`, and `:held-through-capture`, while
 execution is `:completed` and review/acceptance outcomes are `:accepted`.
 These labels are necessary but never sufficient without every byte, identity,
 chronology, inventory, census, projection, and exact-subject join above.
+
+The origin record must exactly match independently configured expected origin,
+and bind the exact review-commission bytes, subject, reviewer job/trace, and
+retained review artifact. Chronology is
+`execution.started-at <= review.reviewed-at <= origin.artifact/retained-at
+ <= execution.finished-at = origin.finished-at <= acceptance.accepted-at`.
+The terminal status is `:completed`. A synthetic expected origin validates only
+the equality mechanism and cannot authenticate itself or production.
