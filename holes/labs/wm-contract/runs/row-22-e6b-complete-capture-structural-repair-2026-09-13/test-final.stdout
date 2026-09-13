@@ -1,0 +1,11 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-slow-feedback-capture-test
+
+Testing futon2.aif.machine-slow-feedback-provenance-test
+
+Testing futon2.aif.machine-slow-feedback-store-v2-test
+
+Ran 26 tests containing 116 assertions.
+0 failures, 0 errors.

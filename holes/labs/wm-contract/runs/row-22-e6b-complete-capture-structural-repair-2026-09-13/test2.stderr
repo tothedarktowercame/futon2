@@ -1,0 +1,5 @@
+Syntax error compiling at (futon2/aif/machine_slow_feedback_capture.clj:170:51).
+Unable to resolve symbol: txs in this context
+
+Full report at:
+/tmp/clojure-13183710386468966217.edn

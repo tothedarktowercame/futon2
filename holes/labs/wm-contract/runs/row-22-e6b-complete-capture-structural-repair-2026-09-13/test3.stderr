@@ -1,0 +1,5 @@
+Syntax error compiling at (futon2/aif/machine_slow_feedback_capture_test.clj:46:3).
+No such namespace: provenance
+
+Full report at:
+/tmp/clojure-10975041830628318295.edn

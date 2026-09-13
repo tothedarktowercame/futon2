@@ -1,0 +1,5 @@
+Syntax error reading source at (futon2/aif/machine_slow_feedback_capture.clj:284:1).
+EOF while reading, starting at line 86
+
+Full report at:
+/tmp/clojure-2677314317238908736.edn

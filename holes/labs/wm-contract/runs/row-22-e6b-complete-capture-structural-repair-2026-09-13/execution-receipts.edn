@@ -1,0 +1,27 @@
+{:tree-sha "1efc1611ce60c4c81c02a98386c57831d8c546ae"
+ :at "2026-09-13T07:44:17Z"
+ :history
+ [{:attempt 1 :exit 1 :finding :unclosed-validation-form
+   :stdout "test1.stdout" :stderr "test1.stderr"}
+  {:attempt 2 :exit 1 :finding :validation-scope-closed-too-early
+   :stdout "test2.stdout" :stderr "test2.stderr"}
+  {:attempt 3 :exit 1 :finding :missing-test-provenance-require
+   :stdout "test3.stdout" :stderr "test3.stderr"}
+  {:attempt 4 :exit 1 :tests 26 :assertions 116 :failures 1 :errors 0
+   :finding :forged-control-index-not-coherently-updated
+   :stdout "test4.stdout" :stderr "test4.stderr"}]
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-capture-test futon2.aif.machine-slow-feedback-store-v2-test futon2.aif.machine-slow-feedback-provenance-test]'"
+   :exit 0 :tests 26 :assertions 116
+   :stdout "test-final.stdout" :stderr "test-final.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_store_v2.clj src/futon2/aif/machine_slow_feedback_capture.clj test/futon2/aif/machine_slow_feedback_capture_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_store_v2.clj src/futon2/aif/machine_slow_feedback_capture.clj test/futon2/aif/machine_slow_feedback_capture_test.clj"
+   :exit 0 :files 3 :stdout "parens.stdout" :stderr "parens.stderr"}
+  {:gate :induced-runner-failure
+   :command "clojure -Sdeps '{:paths [\"/tmp\"]}' -M:test -m cognitect.test-runner -d /tmp -n codex23-capture-repair-induced-test"
+   :exit 1 :tests 1 :assertions 1 :failures 1
+   :stdout "induced.stdout" :stderr "induced.stderr"}]}

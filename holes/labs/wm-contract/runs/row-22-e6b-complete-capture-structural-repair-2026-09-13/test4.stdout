@@ -1,0 +1,15 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-slow-feedback-capture-test
+
+FAIL in (provenance-expected-parent-must-be-the-actual-parent) (machine_slow_feedback_capture_test.clj:165)
+expected: (= :e6b-capture/provenance-parent-disagreement (refusal (fn* [] (codec/construct c'))))
+  actual: (not (= :e6b-capture/provenance-parent-disagreement :e6b-capture/chain-index-invalid))
+
+Testing futon2.aif.machine-slow-feedback-provenance-test
+
+Testing futon2.aif.machine-slow-feedback-store-v2-test
+
+Ran 26 tests containing 116 assertions.
+1 failures, 0 errors.
