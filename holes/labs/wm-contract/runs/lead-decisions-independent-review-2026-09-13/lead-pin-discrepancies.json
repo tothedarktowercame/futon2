@@ -1,0 +1,25 @@
+{
+  "review-commit": "90fefed462a082eaf685fe7f921846b6b28413d3",
+  "review-disposition": "hash-match-claim-requires-independent-correction",
+  "discrepancies": [
+    {
+      "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/CertificateStates.lean",
+      "receipt-sha256": "83bb3bbbea3bad9a9d56568704300427f94e1bf1539ad322041e3cae8beab778",
+      "actual-sha256": "83bb3bbbea3bad9a9d56568704300427f94e1bf1539ad322041e3cae8beab778",
+      "finding": "Review says this file hash was recomputed and matched, but prints a different digest."
+    },
+    {
+      "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/CertificateStates.olean",
+      "receipt-sha256": "7898d439a49a0887e324229c5acd247ddba1697c245892cefdb1032c8bb4c118",
+      "actual-sha256": "7898d439a49a0887e324229c5acd247ddba1697c245892cefdb1032c8bb4c118",
+      "finding": "Review says this file hash was recomputed and matched, but prints a different digest."
+    },
+    {
+      "path": "/home/joe/code/mathlib4/lean-toolchain",
+      "receipt-sha256": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "actual-sha256": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "finding": "Review says this file hash was recomputed and matched, but prints a different digest."
+    }
+  ],
+  "test-rerun": false
+}

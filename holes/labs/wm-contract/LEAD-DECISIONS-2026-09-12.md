@@ -52,6 +52,12 @@ not implement this edge. The composer must expose applicable/inapplicable
 mode evidence, and the qualifying configuration must exercise an applicable
 reviewed law; changing the variational law requires its own specification and
 witness. Never silently change mode or claim an edge from an unused value.
+For k>0, a composed value absorbed by the existing gain floor must yield
+`:modulation-saturated` with non-qualifying status; an unused gain in
+`:variational-beta-gamma` must yield `:modulation-inapplicable-mode` with
+non-qualifying status. Neither is firing evidence. Commissioning requires an
+applicable mode with enough headroom to change the actual applied gain and
+corresponding temperature/weights. The task-gain posterior remains separate.
 Required snapshot refusals must also survive the caller's broad selection
 fallback. These are implementation obligations, not requests to the operator.
 
@@ -75,8 +81,16 @@ technical acceptance; this must be labeled delegated acceptance, never a
 fabricated Joe signature. If codex-26 authors a component, another agent must
 perform its independent review. Model-family names confer no identity.
 
-The anchor schema and its verification must bind this delegation, branch
-acceptance, reviewed bytes, and job evidence. A caller-supplied map containing
+The authority root must be external to the candidate anchor/acceptance record:
+an independently retained operator/delegation event with verified origin and
+immutable content pin, or an operator-controlled signature/append-only
+authority record. A copied quotation authored by the candidate's author, an
+asserted operator name, or mutable branch membership is insufficient. Locate
+and independently verify that root before genesis acceptance. The anchor
+schema must bind that external root, delegated branch acceptance, author job,
+distinct reviewer job, exact review commission digest, reviewed source/test
+bytes, and (for successors) the previously anchored checker. A candidate
+cannot introduce or authorize its own root. A caller-supplied map containing
 :status :anchored and a nonempty :authority string is not authenticated
 genesis. Existing r9_checker.clj only checks that shape and source equality;
 it remains machinery awaiting the real anchor-verification boundary.
@@ -134,11 +148,23 @@ coverage. Retain effective runtime settings and their joined inputs, not just
 environment declarations. Cold-start and incomplete-coverage ticks must not
 be promoted to F-present firing evidence.
 
-No aspirational exclusion is granted for the seven class-(c) candidates:
-R11->R16, R6->R11, R7->R14, R9->R16, R10->R8, R15->R13, R15->R16.
-They remain required implementation/evidence work unless source-level review
-establishes a mistaken connection claim and repairs its specification with
-the affected obligations accounted for. Unimplemented is not optional.
+Correction following independent review F3 (2026-09-13): the exact drawn
+R7->R14 identity is already retired as a channel-precision/selection-gain
+conflation by J1. It is not required positive firing work. Sources:
+`p4ng/empirics-futon/control-map-edges.edn` :j1-r7-r14-conflation and
+:r7-r14-conflates-two-precisions; `aif-equations.edn` :choices
+:temperature-update preserves the ruling. Retain the retired identity as
+such; identify and attest the correctly declared variational beta/gamma
+connection (including its actual consumer) instead. Do not rename a node-level
+stroke without matching producer, value, and consumer declarations.
+
+The other six candidates are R11->R16, R6->R11, R9->R16, R10->R8,
+R15->R13, R15->R16. Their required underlying capabilities are not waived.
+Audit every endpoint at declaration grain before issuing an implementation
+batch; distinguish hierarchical-budget arbitration from actuation in
+particular. Correct mistaken arrows through explicit specification repair
+with replacement obligations accounted for. Missing evidence is not grounds
+for an aspirational exclusion.
 The four continuation edges R6->R13, R13->R14, R14->R16, R16->R2 require
 joined firing evidence. Historic or coarse route evidence does not replace
 same-run evidence at the claimed grain.
@@ -147,9 +173,12 @@ same-run evidence at the claimed grain.
 
 Do not admit unique argmax of a near-uniform belief as an observed categorical
 state. Preserve it as a labeled model-derived proxy. The measured-A owner must
-establish an observed status authority or a reviewed estimator that handles
-latent-state uncertainty, while preserving Joe's no-invented-mass/no-smoothing
-measurement requirements. Missing state rows require retention work and real
+establish an observed categorical status authority, preserving Joe's
+no-invented-mass/no-smoothing measurement requirements. A latent-state or
+fractional estimator may be retained only as a separately named model-derived
+proxy, with its own authority, uncertainty and correspondence witness. It
+cannot discharge the measured-A cell under this ruling. Observed categorical
+records remain the authority; absent measurements remain typed absent. Missing state rows require retention work and real
 data; they cannot be completed by a placeholder or guessed prior.
 
 Build the categorical R5 ambiguity estimator over row-9 Q and row-6 A, with
@@ -175,3 +204,13 @@ bridge. Keep the J2 legacy R8 scalar retirement closed.
 
 This file records decisions and findings; it does not mark implementation,
 commissioning, admission, or the qualifying run complete.
+
+## Independent review follow-up — 2026-09-13
+
+codex-24 review `90fefed4` raised F1–F4; the requirements above incorporate
+all four. No affected admission may proceed before its implementation checks
+these constraints. The review's three imported-Lean/toolchain digest strings
+differ from the executed receipt and current bytes; the lead retained the
+mismatch in `runs/lead-decisions-independent-review-2026-09-13/lead-pin-discrepancies.json`
+and requested independent correction. Original executions have not been
+rerun. A correct substantive finding does not cure an incorrect hash claim.

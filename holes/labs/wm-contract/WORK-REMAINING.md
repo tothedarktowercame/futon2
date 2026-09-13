@@ -29,7 +29,9 @@ single task authority; the lead document records policy and findings.
   delegated canonical-branch acceptance; authenticated anchor and commission
   retention still to build. No fabricated operator signature.
 - Rows 22/24: real horizon >=2, complete F_pi/detail coverage and both flags
-  enabled; no aspirational connection exemptions. Joined continuation firing
+  enabled; no aspirational connection exemptions. J1's erroneous R7->R14
+  stroke is retired, with its correct gamma obligation to identify and attest.
+  Joined continuation firing
   required. Two-level certificate with no whole-node exceptions; exact legacy
   item-11 retirement only, preserving live R8 obligations.
 - Rows 14/16: no promotion of belief argmax to observed ground truth; measured
@@ -60,8 +62,12 @@ is not yet a verified join to Agency's normalized request digest.
   digest preimage at the Agency invoke boundary, persist/read it through
   event trimming, commission missing/tampered input refusals. Authentication
   and genesis admission remain a separate packet.
-- **codex-24, independent review:** commit 867565de decisions and row-18/24
-  probes, including policy conflicts and exact receipt/source bindings.
+- **codex-24, independent review:** review `90fefed4` returned F1–F4.
+  Lead incorporated non-qualifying saturation/inapplicable modes, an external
+  genesis authority root, J1's retired R7->R14 identity plus declaration-level
+  replacement audit, and strictly observed categorical measured-A authority.
+  Three incorrect digest strings in the review require independent correction;
+  exact mismatches retained alongside the review. No admission credit yet.
 - **codex-26:** shared tracker, review and sequencing. Measured-A follow-up
   source check found 82 physical closes in the census's `data/wm-full-loop`
   root, zero with either new `:entity-state-at-close` or `:outcome-entity`
