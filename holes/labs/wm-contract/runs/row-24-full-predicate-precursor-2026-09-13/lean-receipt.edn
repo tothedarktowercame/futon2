@@ -1,0 +1,11 @@
+{:command "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/FullCertificatePredicate.olean DarkTower/WarMachine/FullCertificatePredicate.lean"
+ :cwd "/home/joe/code/mathlib4"
+ :exit 0
+ :theorems 8
+ :sorry-ax false
+ :tree-sha "b9bbcb833e7d3b729e2abc36f2c6f1d728ebda6b"
+ :futon2-spec-sha "e1642859"
+ :toolchain "Lean 4.31.0-rc1 fd009949156901e6cf15b6d9bf1122294b8e697a"
+ :at "2026-09-13T03:58:08Z"
+ :stdout "lean.stdout.txt"
+ :stderr "lean.stderr.txt"}

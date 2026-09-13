@@ -1,0 +1,24 @@
+'DarkTower.WarMachine.FullCertificatePredicate.rejects_existing_lead_counterexample' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificatePredicate.rejects_missing_record_family' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificatePredicate.rejects_unclosed_node' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificatePredicate.rejects_unfired_edge' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificatePredicate.rejects_selection_mismatch' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificatePredicate.rejects_absent_equation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificatePredicate.rejects_mismatched_declaration' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificatePredicate.rejects_unauthorized_negative_scope' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
