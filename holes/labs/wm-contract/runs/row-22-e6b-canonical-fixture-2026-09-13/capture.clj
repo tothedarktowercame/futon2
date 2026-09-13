@@ -12,15 +12,15 @@
 (defn sha256 [^bytes bs]
   (apply str (map #(format "%02x" (bit-and 255 %))
                   (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bs))))))
-(defn bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
+(defn form-bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
 (defn retain! [relative x]
-  (let [path (.resolve output-root relative) bs (bytes x)]
+  (let [path (.resolve output-root relative) bs (form-bytes x)]
     (Files/createDirectories (.getParent path)
                              (make-array java.nio.file.attribute.FileAttribute 0))
     (Files/write path bs (make-array OpenOption 0))
     {:path (str (.resolve (Path/of "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured"
                                   (make-array String 0)) relative))
-     :sha256 (sha256 bs) :value-sha256 (sha256 (bytes (edn/read-string (String. bs "UTF-8"))))
+     :sha256 (sha256 bs) :value-sha256 (sha256 (form-bytes (edn/read-string (String. bs "UTF-8"))))
      :bytes (alength bs)}))
 
 (let [e3-root (str (.resolve output-root "e3"))
