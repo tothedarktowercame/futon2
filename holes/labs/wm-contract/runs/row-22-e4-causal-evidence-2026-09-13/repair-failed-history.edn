@@ -1,0 +1,4 @@
+[{:command "clojure -X:test :nses '[futon2.aif.scheduled-route-evidence-test]'"
+  :exit 1 :tree-sha "1c5199533847ac7ebe67e3c29d285055cb1b12af"
+  :tests 6 :assertions 29 :failures 0 :errors 1
+  :finding "malformed UTF-8 fixture used checked byte coercion for 0xc3; follow-up 6b6a03e2 uses unchecked-byte"}]

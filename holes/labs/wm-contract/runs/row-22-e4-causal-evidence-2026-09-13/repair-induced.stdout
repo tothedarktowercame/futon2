@@ -1,0 +1,10 @@
+
+Testing user
+
+FAIL in (deliberate-runner-failure) (induced_failure.clj:3)
+induced E4 coverage failure
+expected: (= :complete :dropped-candidate)
+  actual: (not (= :complete :dropped-candidate))
+
+Ran 1 tests containing 1 assertions.
+1 failures, 0 errors.
