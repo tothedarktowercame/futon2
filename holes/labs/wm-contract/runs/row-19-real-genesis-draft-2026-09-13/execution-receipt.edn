@@ -1,0 +1,13 @@
+{:schema :wm/r9-real-genesis-draft-receipt-v1
+ :tree-sha "7ca8e617a140d7adbc96a87d36454b0566e1508e"
+ :at "2026-09-13T03:01:01Z"
+ :command "clojure -M -e <read-only draft checker retained in shell transcript>"
+ :exit 0 :checks 7 :passed 7
+ :pins {"root-resolution.edn" "4f0f536d202e4d72a058e830565a9aa4f250670f8a6baefaedd742c9c3c2e017"
+        "author-job-snapshot.edn" "e684c096cf32be8037d1f800e43331859b44adb6a6813a5fa9c134bc288bee6d"
+        "genesis-evidence-draft.edn" "65436cf66c93ad81ec1ff6bf04243579c950769167f0cdbd89413ef7ea0bbcec"
+        "REVIEWER-PACKET.md" "301f781d43152bb0a6b4f9fa38096c0ab48c1f13d88517ef6cca61cb93aea52a"}
+ :result :pending-by-evidence
+ :raw "draft-checker.raw.edn"
+ :superseded-attempt {:exit 0 :finding :stdout-contained-clojure-main-warning
+                      :disposition :repeated-cleanly-with--M}}

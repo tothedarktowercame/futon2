@@ -1,0 +1,1 @@
+{:checker :row19-real-genesis-draft, :checks 7, :passed 7, :status :pending-by-evidence, :missing [:author-request-commission-preimage :independent-reviewer-job :independent-reviewer-request-commission :independent-reviewer-trace-authority :exact-subject-acceptance]}
