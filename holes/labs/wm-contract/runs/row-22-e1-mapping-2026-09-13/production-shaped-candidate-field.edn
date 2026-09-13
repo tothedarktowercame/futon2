@@ -1,0 +1,25 @@
+{:schema/version :wm/r6-ranked-support-fixture-v1
+ :scope :commissioned-production-shaped-fixture
+ :production-claim :none
+ :source
+ {:path "holes/labs/wm-contract/runs/row-15-branches-capture-2026-09-12/machinery-capture.edn"
+  :sha256 "b19ab31679a5667a2b6e4ae4afc2f9d7277cb9ce9bb4574b8f03227075022366"
+  :use "action field shape only; duplicate occurrence commissioned here"}
+ :identity {:model/id :wm-test-model
+            :model/revision "fixture-revision-1"
+            :run/id "commissioned-e1-run"
+            :tick/index 7}
+ :ranked-support
+ [{:candidate/id [:commissioned-e1-run 7 0]
+   :rank 1
+   :action {:type :advance-mission :target "M-expressions-of-interest"}}
+  {:candidate/id [:commissioned-e1-run 7 1]
+   :rank 2
+   :action {:type :advance-mission :target "M-expressions-of-interest"}}
+  {:candidate/id [:commissioned-e1-run 7 2]
+   :rank 3
+   :action {:type :no-op :target nil}}]
+ :production-authority-status
+ {:status :typed-absence
+  :missing [:field-membership :budgets :costs :utilities]
+  :meaning "The retained production record has no independently pinned E1 authorities; it cannot be submitted as a positive production mapping."}}
