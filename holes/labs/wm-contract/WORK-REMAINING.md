@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Job20676 ended incomplete with no implementation/tests; verifier hash unchanged and scoped tree clean. No success accepted. Continuation split to independent contract review plus private transition-core extraction; public prospective API deferred. See [receipt](runs/row-22-e6b-composition-contract-2026-09-13/lead-incomplete-packet-receipt.json).
+
 - Latest split contract6aa72c48/6b3eea81 six pins verified. Lead corrected pr-str versus canonical digests, retry-before-current-HEAD order, and deferred explicit common state carrier. Prospective validator only next; no store adapter or production authority. See [review](runs/row-22-e6b-composition-contract-2026-09-13/lead-review.md).
 
 - Latest independent3cd0de95 accepts lead79c957a2 isolated revision identity; two current pins match, retained14tests39 gates consumed without rerun. Composition remains open: existing verify-feedback requires an already committed application, so cannot authorize its own first commit. Pre/postcommit contract next, no synthetic committed authority. See [boundary](runs/row-22-e6b-store-protocol-2026-09-13/schema-gates/lead-composition-boundary.md).

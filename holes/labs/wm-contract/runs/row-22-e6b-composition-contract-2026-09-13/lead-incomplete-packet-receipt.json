@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789278592555-20676-8b3acfe2",
+  "observed-state": "done",
+  "implementation-status": "incomplete",
+  "reported-result": "No files changed; no tests run; available turn exhausted",
+  "verified-source-sha256": "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab",
+  "source-matches-prepacket": true,
+  "scoped-git-status": "source and test clean",
+  "next-unit": "independent contract review and private transition-core extraction only; defer public prospective API"
+}
