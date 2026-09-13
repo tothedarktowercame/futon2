@@ -226,7 +226,7 @@
 
 (deftest strict-utf8-reporting-decoder
   (let [authority (fixture {})
-        malformed (byte-array [(byte 0xc3) (byte 0x28)])]
+        malformed (byte-array [(unchecked-byte 0xc3) (unchecked-byte 0x28)])]
     (is (= :e4/invalid-utf8
            (refusal (-> authority
                         (assoc-in [:sources :commission :sha256] (sha malformed))
