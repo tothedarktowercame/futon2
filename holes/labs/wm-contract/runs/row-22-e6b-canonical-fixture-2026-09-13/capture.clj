@@ -1,10 +1,10 @@
-(require '[clojure.edn :as edn]
-         '[clojure.java.io :as io]
-         '[futon2.aif.machine-enactment-correspondence-test :as e2bt]
-         '[futon2.aif.machine-pre-enact-authorization-test :as e3t])
-(import '(java.nio.charset StandardCharsets)
-        '(java.nio.file Files OpenOption Path)
-        '(java.security MessageDigest))
+(ns wm-contract.capture-e6b-canonical-fixture
+  (:require [clojure.edn :as edn]
+            [futon2.aif.machine-enactment-correspondence-test :as e2bt]
+            [futon2.aif.machine-pre-enact-authorization-test :as e3t])
+  (:import (java.nio.charset StandardCharsets)
+           (java.nio.file Files OpenOption Path)
+           (java.security MessageDigest)))
 
 (def output-root
   (Path/of "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured"

@@ -1,8 +1,9 @@
-(require '[clojure.edn :as edn])
-(import '(java.nio.charset CodingErrorAction StandardCharsets)
-        '(java.nio ByteBuffer)
-        '(java.nio.file Files Path)
-        '(java.security MessageDigest))
+(ns wm-contract.verify-e6b-canonical-fixture
+  (:require [clojure.edn :as edn])
+  (:import (java.nio.charset CodingErrorAction StandardCharsets)
+           (java.nio ByteBuffer)
+           (java.nio.file Files Path)
+           (java.security MessageDigest)))
 
 (def manifest-path
   (Path/of "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/capture-manifest.edn"
@@ -30,8 +31,11 @@
           record (strict-read buffer)
           value-bytes (.getBytes (pr-str record) StandardCharsets/UTF_8)]
       (assert (= bytes (alength buffer)) (str role " byte count"))
-      (assert (= sha256 (user/sha256 buffer)) (str role " raw digest"))
-      (assert (= value-sha256 (user/sha256 value-bytes)) (str role " value digest"))))
+      (assert (= sha256 (wm-contract.verify-e6b-canonical-fixture/sha256 buffer))
+              (str role " raw digest"))
+      (assert (= value-sha256
+                 (wm-contract.verify-e6b-canonical-fixture/sha256 value-bytes))
+              (str role " value digest"))))
   (prn {:status :strict-readback-passed
         :records (count (:records manifest))
         :manifest-sha256 (sha256 manifest-bytes)
