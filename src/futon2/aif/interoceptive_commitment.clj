@@ -52,15 +52,27 @@
 (defn- repair-rows! [records]
   (reduce-kv
    (fn [rows path {:keys [sha256 record] :as entry}]
-     (when-not (and (string? path) (pin? sha256) (map? record)
+     (let [stage (cond
+                   (and (string? path) (str/starts-with? path "findings/")) :finding
+                   (and (string? path) (str/starts-with? path "implementations/")) :implementation
+                   (and (string? path) (str/starts-with? path "resolutions/")) :resolution
+                   :else nil)]
+       (when-not (and stage (string? path) (pin? sha256) (map? record)
                     (safe-id? (:repair/id record)))
-       (refuse! :interoceptive/malformed-repair-record
-                {:path path :entry entry}))
-     (when-not (contains? repair-statuses (:repair/status record))
-       (refuse! :interoceptive/unknown-repair-status
-                {:path path :repair/id (:repair/id record)
-                 :status (:repair/status record)}))
-     (conj rows (assoc record :authority/path path :authority/sha256 sha256)))
+         (refuse! :interoceptive/malformed-repair-record
+                  {:path path :entry entry}))
+       (when-not (contains? repair-statuses (:repair/status record))
+         (refuse! :interoceptive/unknown-repair-status
+                  {:path path :repair/id (:repair/id record)
+                   :status (:repair/status record)}))
+       (when-not (case stage
+                   :finding (= :open (:repair/status record))
+                   :implementation (= :awaiting-validation (:repair/status record))
+                   :resolution (contains? terminal-statuses (:repair/status record)))
+         (refuse! :interoceptive/repair-stage-status-mismatch
+                  {:path path :stage stage :repair/id (:repair/id record)
+                   :status (:repair/status record)}))
+       (conj rows (assoc record :authority/path path :authority/sha256 sha256))))
    [] records))
 
 (defn- index-repairs! [rows]

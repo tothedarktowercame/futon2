@@ -100,6 +100,11 @@
              (refusal #(commitment/confidence-snapshot
                         (input [t] [f (repair-entry "resolutions" "repair-trip"
                                                    "trip-real" :resolved)]))))))
+    (testing "a terminal status cannot be smuggled into the initial finding"
+      (is (= :interoceptive/repair-stage-status-mismatch
+             (refusal #(commitment/confidence-snapshot
+                        (input [t] [(repair-entry "findings" "repair-trip"
+                                                 "trip-real" :resolved)]))))))
     (testing "authority refuses closed"
       (is (= :interoceptive/authority-unavailable
              (refusal #(commitment/confidence-snapshot
