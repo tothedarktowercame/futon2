@@ -84,7 +84,7 @@
              (refusal #(commitment/confidence-snapshot
                         (input [(assoc-in t [:record :trip/id] "bad/id")] [f]))))))
     (testing "contradictory discharge and unknown modes"
-      (is (= :interoceptive/contradictory-discharge
+      (is (= :interoceptive/repair-stage-status-mismatch
              (refusal #(commitment/confidence-snapshot
                         (input [t] [f (repair-entry "resolutions" "repair-trip"
                                                    "trip-real" :open)])))))
