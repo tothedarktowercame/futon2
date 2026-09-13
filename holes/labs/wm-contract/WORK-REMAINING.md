@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest E6b relation078b8be9/39e0f51b six pins/raw7tests41 reviewed. Executed baseline enacts04:15 before canonical authorization12:00 yet replays. Authorization-to-enactment join still required; lead terminal fix independently reviewed. See [review](runs/row-22-e6b-feedback-2026-09-13/lead-relation-review.md).
+
 - Latest semantic alternatives5af92246 eight pins reviewed, analysis-only. Policy-prior option B remains unadopted under standing no-prior-change constraint; identity regression clarified for normalization constants. E6a semantic decision remains open, codex22 idle. See [review](runs/row-22-e5-e6-semantic-integration-2026-09-13/lead-review.md).
 
 - Latest E6b context70027ede/6707c78a five pins/raw5tests33 reviewed. Executed terminal-time review gap fixed by lead; changed-source6tests34/kondo/parens pass. Independent lead-edit review and remaining cross-canonical/time audit next; no production qualification. See [review](runs/row-22-e6b-feedback-2026-09-13/lead-context-review.md).

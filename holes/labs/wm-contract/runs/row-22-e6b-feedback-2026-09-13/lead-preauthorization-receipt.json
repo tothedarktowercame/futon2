@@ -1,0 +1,34 @@
+{
+  "command": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/lead-preauthorization-control.clj"
+  ],
+  "exit": 0,
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+      "sha256": "a2a17bae923d4ab8e050040a6e591d107731857243b4eba9abd4447b8ed29511"
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_evidence_test.clj",
+      "sha256": "643d97958598769e7ce6d81f78a511fdfe8fcb75ab58b210386ba79c11edd82b"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/SPEC.md",
+      "sha256": "79096e9486e2e5b7cf6f33a1725d8f5bd4c5e774476ff7d56b16c62903ccd294"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/independent-terminal-review.md",
+      "sha256": "1eade48ace3674a63e2913ab1b5e31aa0878414941ed4ec187c215fbcc2ed4e2"
+    },
+    {
+      "path": "src/futon2/aif/temporal_hierarchy.clj",
+      "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+    },
+    {
+      "path": "src/futon2/aif/intrinsic_values.clj",
+      "sha256": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"
+    }
+  ]
+}
