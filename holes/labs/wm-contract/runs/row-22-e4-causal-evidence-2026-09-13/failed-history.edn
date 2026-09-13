@@ -1,0 +1,9 @@
+[{:command "clojure -M:test -n futon2.aif.scheduled-route-evidence-test"
+  :exit 1
+  :finding "futon2 :test is an exec-fn; -n was interpreted as a file"
+  :retained-output "Execution error (FileNotFoundException): -n (No such file or directory)"}
+ {:command "clojure -X:test :nses '[futon2.aif.scheduled-route-evidence-test]'"
+  :exit 1
+  :tree-sha "74e14bde257b39607fd5390503488694ac56023a"
+  :tests 4 :assertions 15 :errors 14
+  :finding "local expected digest binding shadowed the sha256 function; repaired in follow-up 2fe25a45"}]
