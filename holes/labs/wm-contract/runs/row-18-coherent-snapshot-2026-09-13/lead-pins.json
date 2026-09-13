@@ -1,0 +1,8 @@
+{
+  "src/futon2/aif/interoceptive_store_lock.clj": "8636ec65bf8c734a3a7d4c3db5dd5137a5e7d80aecfad03d9c0f528d37b98844",
+  "src/futon2/aif/interoceptive_manifest.clj": "284c96c48a255b4621150962988e10859692bf1e694d698d74fd56ba0f3649bc",
+  "src/futon2/aif/tripwire.clj": "a75b2a571d76fa93486ff8807dc4fdc93a2f6ca125042f0d3087cbdcb933aeae",
+  "src/futon2/aif/repair_obligation.clj": "f61ede50822955695d5510248f0592883ed6f83d74be08a23ba37f649e33254a",
+  "data/wm-repair-obligations/findings/repair-attempt-006-late-author-artifact.edn": "03de9d8123b0b593c2199884171ee66794c6f9eba1ab7b6d4578baff1ee10687",
+  "data/wm-repair-obligations/resolutions/repair-attempt-006-late-author-artifact.edn": "0f938a7cfa778f3ce996eba4be69377cb3bb33632b1735f659f80e402c60b09b"
+}

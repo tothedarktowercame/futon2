@@ -167,6 +167,13 @@ is not yet a verified join to Agency's normalized request digest.
   substitution is not admissible. Pin and domain finding retained under current
   capture discovery; reconcile the measured variable before qualifying counts.
 
+- Row18 coordination `e94871a5/05ff643f`: four source pins verified;
+  review requests thread-and-lock-specific reentrancy, fresh-root writer support,
+  actual concurrency tests, typed IO/path hardening, reproducible readback and
+  serving-writer participation evidence. Actual retained repair history refuses
+  open->resolved, but physical live coherence is not established by reader lock
+  alone. See coherent-snapshot/lead-review.md. No admission.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,

@@ -121,11 +121,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-root-uniqueness.request.json",
       "dispatch": "accepted",
       "scope": "sufficient exact-field global positive-root uniqueness; no runtime admission"
+    },
+    {
+      "packet": "codex-22-coordination-review-repair",
+      "job-id": "invoke-1789266961066-20584-f212ec9f",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789266961066-20584-f212ec9f",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-coordination-review-repair.request.json",
+      "dispatch": "accepted",
+      "scope": "thread/lock ownership, writer regressions and participation repair; no deployment/admission"
     }
   ],
   "current-awaiting": [
     "invoke-1789266556788-20582-2f6b238c",
-    "invoke-1789266414941-20581-608ecb5c",
+    "invoke-1789266961066-20584-f212ec9f",
     "invoke-1789266681599-20583-b80af8f3"
   ]
 }
