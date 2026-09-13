@@ -1,0 +1,44 @@
+[
+  {
+    "path": "src/futon2/aif/machine_slow_feedback_store.clj",
+    "expected": "e569358979b585d3a8ae5e55ac9c3447ba072f46428d3eaf84419d4784f7ceba",
+    "current": "e569358979b585d3a8ae5e55ac9c3447ba072f46428d3eaf84419d4784f7ceba",
+    "historical": "e569358979b585d3a8ae5e55ac9c3447ba072f46428d3eaf84419d4784f7ceba",
+    "match": true
+  },
+  {
+    "path": "test/futon2/aif/machine_slow_feedback_store_test.clj",
+    "expected": "e8b144714667b61cfc8600a9a2d85a386132770b95876a1cd7968d79240c8000",
+    "current": "e8b144714667b61cfc8600a9a2d85a386132770b95876a1cd7968d79240c8000",
+    "historical": "e8b144714667b61cfc8600a9a2d85a386132770b95876a1cd7968d79240c8000",
+    "match": true
+  },
+  {
+    "path": "holes/labs/wm-contract/TN-row22-e6b-store-protocol-2026-09-13.md",
+    "expected": "620156fdb354b013765b2fa9b9137ecd0db49a6bdcc579ee86ebb6649706086e",
+    "current": "620156fdb354b013765b2fa9b9137ecd0db49a6bdcc579ee86ebb6649706086e",
+    "historical": "620156fdb354b013765b2fa9b9137ecd0db49a6bdcc579ee86ebb6649706086e",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "expected": "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab",
+    "current": "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab",
+    "historical": "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/temporal_hierarchy.clj",
+    "expected": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "current": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "historical": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "match": true
+  },
+  {
+    "path": "src/futon2/aif/intrinsic_values.clj",
+    "expected": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b",
+    "current": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b",
+    "historical": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b",
+    "match": true
+  }
+]

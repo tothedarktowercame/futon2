@@ -1,0 +1,4 @@
+{
+  "src/futon2/aif/machine_slow_feedback_store.clj": "d9ee5f848419567e41f328a6b9fe14951f2568efcff4ee2dccbcac87a6bcd1fd",
+  "test/futon2/aif/machine_slow_feedback_store_test.clj": "10dd42bd1162ee2e1ddd75a131defd4d89a9ea799e52dc2101bec800cfe2175b"
+}

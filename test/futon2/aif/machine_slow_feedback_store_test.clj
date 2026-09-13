@@ -210,3 +210,25 @@
     (is (= before (:head-digest (store/recover s))))
     (is (= object-count (count (.listFiles (.toFile ^java.nio.file.Path (:txdir s))))))
     (store/release! s)))
+
+(deftest consumed-revision-cannot-become-next-state
+  (let [[_ s] (initialized)]
+    (try
+      (store/compare-and-commit! s (proposal s "a1" "e1" "r1" 1))
+      (let [before (:head-digest (store/recover s))]
+        (is (= :e6b-store/revision-reused
+               (refusal #(store/compare-and-commit! s (proposal s "a2" "e2" "r0" 2)))))
+        (is (= before (:head-digest (store/recover s)))))
+      (store/compare-and-commit! s (proposal s "a2" "e2" "r2" 2))
+      (let [r (store/recover s)
+            tx (-> (:current r)
+                   (assoc-in [:next :revision] "r0")
+                   (assoc-in [:proposal :next :revision] "r0"))
+            bs (.getBytes (pr-str tx) "UTF-8") d (#'store/sha256 bs)
+            h (-> (:head r) (assoc :state/revision "r0" :transaction-sha256 d)
+                  (assoc-in [:application-index 1 :transaction-sha256] d))]
+        (Files/write (.resolve ^java.nio.file.Path (:txdir s) (str d ".edn"))
+                     bs (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW]))
+        (spit (.toFile ^java.nio.file.Path (:head s)) (pr-str h))
+        (is (= :e6b-store/transaction-invalid (refusal #(store/recover s)))))
+      (finally (store/release! s)))))

@@ -188,7 +188,7 @@
                       (state-view head-tx)))
       (refuse! :e6b-store/head-invalid {}))
     (loop [digest (:transaction-sha256 head) expected (:generation head)
-           child-prior nil ids #{} events #{} priors #{} collected [] chain []]
+           child-prior nil ids #{} events #{} priors #{(:state/revision head)} collected [] chain []]
       (let [r (read-form (tx-path store digest)) tx (:form r)]
         (when-not (= digest (:digest r)) (refuse! :e6b-store/object-digest-mismatch {:digest digest}))
         (when-not (and (= (:store-id store) (:store/id tx)) (= expected (:generation tx))
@@ -282,6 +282,8 @@
       (when (or (some #(= (:feedback/event-id application) (:feedback/event-id %)) applications)
                 (some #(= (:revision prior) (:prior-state/revision %)) applications))
         (refuse! :e6b-store/feedback-conflict {}))
+      (when (some #(= (:revision next) (:prior-state/revision %)) applications)
+        (refuse! :e6b-store/revision-reused {}))
       (let [generation (inc (:generation head))
             tx {:schema :wm/e6b-state-transaction-v1 :store/id (:store-id store)
                 :generation generation :prior (assoc prior :generation (:generation head))

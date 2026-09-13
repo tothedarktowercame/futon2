@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest store77adef59/7566bb79 six pins/raw13tests36 verified; HEAD/payload/chain repairs hold. Executed repeated revision commits then prevents continuation. Lead rejects historical destination revisions at publication and recovery; changed-source14tests39/kondo/parens pass, independent review next. See [review](runs/row-22-e6b-store-protocol-2026-09-13/schema-gates/lead-review.md).
+
 - Latest isolated store b97186c0/6e526b66 five pins/raw10tests27 reviewed. Executed HEAD/state mismatch still captures consistent, and unreadable application publishes successfully then fails recovery. Common strict publication/recovery schemas and complete chain joins required; no production acceptance. See [review](runs/row-22-e6b-store-protocol-2026-09-13/lead-store-review.md).
 
 - Latest E6b store c65b241f seven pins reviewed; lead corrected torn digest-file publication, lease lifetime, retry timestamp, genesis and rollback limits. Isolated implementation only after independent correction review; no store exists in production. See [review](runs/row-22-e6b-store-protocol-2026-09-13/lead-review.md).
