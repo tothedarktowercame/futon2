@@ -1,0 +1,16 @@
+{:schema :wm/read-only-source-pins-v1
+ :at "2026-09-13T06:20:00Z"
+ :repo {:name :futon2 :branch "main" :head "ca8d7ce0"}
+ :sources
+ [{:path "src/futon2/aif/machine_slow_feedback_evidence.clj"
+   :sha256 "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab"}
+  {:path "src/futon2/aif/machine_slow_feedback_store.clj"
+   :sha256 "d9ee5f848419567e41f328a6b9fe14951f2568efcff4ee2dccbcac87a6bcd1fd"}
+  {:path "src/futon2/aif/machine_pre_enact_authorization.clj"
+   :sha256 "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260"}
+  {:path "src/futon2/aif/machine_enactment_correspondence.clj"
+   :sha256 "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933"}
+  {:path "src/futon2/aif/temporal_hierarchy.clj"
+   :sha256 "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"}
+  {:path "src/futon2/aif/intrinsic_values.clj"
+   :sha256 "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"}]}
