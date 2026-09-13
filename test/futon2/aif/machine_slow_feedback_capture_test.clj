@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-slow-feedback-capture :as codec]
+            [futon2.aif.machine-slow-feedback-provenance :as provenance]
             [futon2.aif.machine-slow-feedback-store-v2 :as store]
             [futon2.aif.machine-slow-feedback-store-v2-test :as store-test])
   (:import (java.nio.charset StandardCharsets)
