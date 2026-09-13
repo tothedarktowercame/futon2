@@ -1,0 +1,18 @@
+{:source "/home/joe/.codex/sessions/2026/09/12/rollout-2026-09-12T23-41-24-01a097ff-471a-72d3-b10b-54d01eaa14e0.jsonl"
+ :source-status "located-not-authenticated-genesis"
+ :event-line 50
+ :event-sha "84c30bfd3e12081e0e0eb774f38e931e18281f670301b475451b32d7c04b8a39"
+ :result
+ {:refusal :r9/external-root-unverified
+  :reason :host-user-role-record-has-no-independent-origin-authentication
+  :resolution
+  {:status :located-not-authenticated
+   :reason :host-user-role-record-has-no-independent-origin-authentication
+   :authority-origin :host-session-log
+   :source "/home/joe/.codex/sessions/2026/09/12/rollout-2026-09-12T23-41-24-01a097ff-471a-72d3-b10b-54d01eaa14e0.jsonl"
+   :line 50
+   :record-sha256 "84c30bfd3e12081e0e0eb774f38e931e18281f670301b475451b32d7c04b8a39"
+   :ownership {:expected-user "joe"
+               :administrator "joe/root"
+               :mutable? true
+               :cryptographic-operator-signature? false}}}}

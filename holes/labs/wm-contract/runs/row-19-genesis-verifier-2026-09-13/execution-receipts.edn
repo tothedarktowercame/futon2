@@ -1,0 +1,27 @@
+{:schema :wm/row-19-genesis-verifier-receipts-v1
+ :source-tree {:repo "futon3c"
+               :tree-sha "580f1a2a97e914ca6724b7abea53de114a633144"
+               :pins
+               {"src/futon3c/agency/r9_genesis.clj" "adcef119423cf9954f31f51316244cc4094742ccbfde224a45ada8709746a337"
+                "test/futon3c/agency/r9_genesis_test.clj" "03aeb1a27d1187a284c508f693d4389becabd64562e5051ce7c5ff43b48f855b"
+                "test/resources/r9-genesis/source-backed-authority.edn" "daf86064abd296cba6b991b737116469d5f5bd4e5f41012fe9d0ae09d5f61512"
+                "scripts/row19_genesis_verifier_test.clj" "8bceb850545392db74051da288541328480a52a4be491084912fb4c8a843688d"}}
+ :at "2026-09-13T02:25:40Z"
+ :gates
+ [{:kind :focused-test
+   :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"test/resources\" \"scripts\" \"dev\"]}' -M -m row19-genesis-verifier-test"
+   :exit 0 :tests 1 :assertions 12 :pass 12 :fail 0 :error 0
+   :raw "positive-test.raw.txt"}
+  {:kind :induced-failing-runner-control
+   :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"test/resources\" \"scripts\" \"dev\"]}' -M -m row19-genesis-verifier-test --induced-failure"
+   :exit 1 :tests 1 :assertions 13 :pass 12 :fail 1 :error 0
+   :expected-exit 1 :raw "induced-failure.raw.txt"}
+  {:kind :clj-kondo
+   :command "clj-kondo --lint src/futon3c/agency/r9_genesis.clj test/futon3c/agency/r9_genesis_test.clj scripts/row19_genesis_verifier_test.clj"
+   :exit 0 :errors 0 :warnings 0 :raw "clj-kondo.raw.txt"}
+  {:kind :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/r9_genesis.clj test/futon3c/agency/r9_genesis_test.clj scripts/row19_genesis_verifier_test.clj"
+   :exit 0 :files 3 :raw "check-parens.raw.txt"}]
+ :actual-candidate {:status :refused
+                    :refusal :r9/external-root-unverified
+                    :raw "actual-candidate-root-probe.edn"}}
