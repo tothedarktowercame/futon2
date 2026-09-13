@@ -97,6 +97,9 @@
              #(restriction/restrict-portfolio (config)))))
     (is (= :e2a/accounting-order-mismatch
            (with-e1 (update e1 :accounting #(vec (reverse %)))
+             #(restriction/restrict-portfolio (config)))))
+    (is (= :e2a/forged-selected-id-set
+           (with-e1 (assoc-in e1 [:response :selected-ids] #{[:forged 0]})
              #(restriction/restrict-portfolio (config)))))))
 
 (deftest missing-verification-and-replay-mutation-refuse-or-diverge

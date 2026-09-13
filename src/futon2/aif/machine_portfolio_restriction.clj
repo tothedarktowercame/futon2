@@ -40,6 +40,10 @@
     (when-not (= (count selected-list) (count selected-set))
       (refuse! :e2a/duplicate-selected-id "R11 selected occurrences contain duplicates"
                {:selected-ids selected-list}))
+    (when-not (= selected-set (:selected-ids response))
+      (refuse! :e2a/forged-selected-id-set
+               "R11 selected-id index disagrees with selected occurrence rows"
+               {:row-ids selected-set :indexed-ids (:selected-ids response)}))
     (when-not (= (count rejected-list) (count rejected-set))
       (refuse! :e2a/duplicate-rejected-id "R11 rejected occurrences contain duplicates"
                {:rejected-ids rejected-list}))
