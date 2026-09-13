@@ -1,0 +1,44 @@
+[
+  {
+    "role": "source",
+    "path": "src/futon2/aif/machine_slow_feedback_provenance.clj",
+    "sha256": "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90",
+    "historical-match": true
+  },
+  {
+    "role": "test",
+    "path": "test/futon2/aif/machine_slow_feedback_provenance_test.clj",
+    "sha256": "e75d193dfb4566d5443c95e5282053574017e47a7b0425a00aa073cd7875300b",
+    "historical-match": true
+  },
+  {
+    "role": "carrier-source",
+    "path": "src/futon2/aif/machine_slow_state_carrier.clj",
+    "sha256": "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965",
+    "historical-match": true
+  },
+  {
+    "role": "prospective-source",
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500",
+    "historical-match": true
+  },
+  {
+    "role": "capture-manifest",
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/capture-manifest.edn",
+    "sha256": "eca79640929ae7a7fb06fb12a2315d6172f11fc853489c9d0f4d7b7157ff119e",
+    "historical-match": true
+  },
+  {
+    "role": "canonical-e3-output",
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-replay-2026-09-13/e3-output.edn",
+    "sha256": "c74c564de43d2acb8c7124a16016eaefaffe4747f00d0a9483db2408dd43b206",
+    "historical-match": true
+  },
+  {
+    "role": "canonical-e2b-output",
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-replay-2026-09-13/e2b-output.edn",
+    "sha256": "e771087a5aee7da06f5139c9676845e4966f01ae6fad0156565fbf9c1e90b383",
+    "historical-match": true
+  }
+]

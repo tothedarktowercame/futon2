@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest provenance readbackb204d909/95b87dd0 seven pins/raw24tests132 accepted exact constructor-representation structural readback. Cached fields rebuilt from bytes; external pin ownership remains owed. Isolated store-v2 provenance publication/recovery next; no production or semantic write authority. See [acceptance](runs/row-22-e6b-provenance-2026-09-13/readback/lead-acceptance.md).
+
 - Latest provenancee5d6a92a/88c719d9 seven pins/raw23tests120 accepted ordered structural manifests only. Exact order/uniqueness now checked; retained path/count metadata not authority. Pure strict serialized readback next; no store-v2/publication. See [acceptance](runs/row-22-e6b-provenance-2026-09-13/ordered-manifests/lead-acceptance.md).
 
 - Latest provenancef142cf3d/cb09cbd8 seven pins/raw22tests115 reviewed; stale-output repairs hold. Executed reordered E3 output source manifest still constructs after coherent digest updates; labelled-pins loses order/duplicates. Exact ordered-manifest repair next, no storage. See [review](runs/row-22-e6b-provenance-2026-09-13/closure-repair/lead-review.md).

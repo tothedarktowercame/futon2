@@ -1,0 +1,7 @@
+# Strict provenance readback accepted narrowly
+
+b204d909/95b87dd0 seven current/historical pins verified. Raw retained gates: 24 tests/132 assertions, zero failures/errors, clean kondo/parens, deliberate failure exit 1. Cached-record failure retained. No passing checks rerun.
+
+Readback checks the externally supplied raw digest, strict UTF-8/one EDN form and exact envelope fields. It strips descriptor record caches before reconstruction; then requires rebuilt record, hash and base64 bytes to equal the captured artifact. Thus cached disagreement refuses rather than substituting a parsed view. Acceptance is deliberately representation-specific to the constructor's pr-str encoding: equivalent re-serializations may refuse. External expected-pin ownership and all semantic/configuration authority remain external; source/record equality does not establish a committed transition.
+
+Next bounded implementation: isolated store-v2 provenance publication/recovery, using readback on exact expected digest and joining provenance's expected HEAD/carrier/retrospective view to the transaction. Preserve v1 explicit compatibility and no implicit migration; fresh temporary v2 fixtures only. No prospective-execution-to-write authority, real initialization, production root, completeness acceptance or runtime consumer. Required failures include missing/corrupt/disagreeing provenance and every pre/post-HEAD publication window.
