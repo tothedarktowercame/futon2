@@ -729,10 +729,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-pure-provenance-envelope.request.json",
       "dispatch": "accepted",
       "scope": "pure structural provenance envelope, no store publication or authority"
+    },
+    {
+      "packet": "codex-23-provenance-canonical-input-output-joins",
+      "job-id": "invoke-1789281937826-20702-a2c1b591",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789281937826-20702-a2c1b591",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-provenance-canonical-input-output-joins.request.json",
+      "dispatch": "accepted",
+      "scope": "pure provenance canonical input/output exact joins repair"
     }
   ],
   "current-awaiting": [
-    "invoke-1789281469455-20700-93a54cb7"
+    "invoke-1789281937826-20702-a2c1b591"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
