@@ -102,6 +102,11 @@
       (is (= :r6-r11/scope-laundering
              (refusal #(authority/resolve-and-map (config root))))))))
 
+(deftest isolated-files-cannot-enable-production-mode
+  (is (= :r6-r11/production-authority-unavailable
+         (refusal #(authority/resolve-and-map
+                    (assoc (config fixture-root) :mode :production))))))
+
 (deftest cross-run-and-unsupported-transformation-refuse-after-valid-hashing
   (testing "source-derived identities must agree"
     (let [root (copy-fixtures)]

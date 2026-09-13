@@ -20,7 +20,9 @@ not execution authority.
 
 Limitations: fixtures and their resolver configuration are explicitly
 `:isolated-test`; they establish the byte-resolution mechanism, not production
-authority or E1 firing. A production deployment still needs independently
+authority or E1 firing. `:production` mode currently refuses
+`:r6-r11/production-authority-unavailable`, so relabelled test files cannot
+promote themselves. A production deployment still needs independently
 owned production paths and immutable expected pins for the complete ranked
 support plus field, cost, utility and budget sources. E2, selection, enactment,
 and live integration remain untouched. Row 18 remains open.

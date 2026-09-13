@@ -120,6 +120,11 @@
 (defn- common-metadata! [mode resolved]
   (when-not (contains? #{:isolated-test :production} mode)
     (refuse! :r6-r11/resolver-mode-unknown "Unknown resolver mode" {:mode mode}))
+  (when (= :production mode)
+    (refuse! :r6-r11/production-authority-unavailable
+             "No independently owned production E1 authority configuration is installed"
+             {:mode mode
+              :required :externally-owned-production-source-configuration}))
   (let [records (mapv :record resolved)
         bindings (mapv :binding records)
         scopes (mapv :scope records)
@@ -132,9 +137,6 @@
                {:scopes scopes}))
     (when (and (= :isolated-test mode) (not= :isolated-test scope))
       (refuse! :r6-r11/scope-laundering "Test configuration cannot claim production scope"
-               {:mode mode :scope scope}))
-    (when (and (= :production mode) (not= :production scope))
-      (refuse! :r6-r11/scope-laundering "Production resolution requires production-scoped sources"
                {:mode mode :scope scope}))
     {:binding (first bindings) :scope scope}))
 
