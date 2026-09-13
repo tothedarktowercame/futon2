@@ -557,7 +557,12 @@
   ],
   "current-awaiting": [
     "invoke-1789275806231-20653-46354848",
-    "invoke-1789275643187-20650-785a8c56",
     "invoke-1789275888536-20655-71c132fb"
-  ]
+  ],
+  "codex24-next-boundary": {
+    "status": "reader-reviewed-integration-unimplemented",
+    "completed-job": "invoke-1789275643187-20650-785a8c56",
+    "review": "holes/labs/wm-contract/runs/row-24-authority-buffer-repair-2026-09-13/lead-acceptance.md",
+    "scope": "F11-owned consumer integration remains separate; no emitter mutation"
+  }
 }

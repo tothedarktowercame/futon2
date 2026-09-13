@@ -1,0 +1,18 @@
+{
+  "command": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-24-authority-buffer-repair-2026-09-13/lead-date-control.clj"
+  ],
+  "exit": 0,
+  "pins": [
+    {
+      "path": "src/futon2/aif/authority_buffer.clj",
+      "sha256": "a91c436b32dec858ac656de5ce140e3909e2f3d3295f5dc3a954f5bcb0377f42"
+    },
+    {
+      "path": "test/futon2/aif/authority_buffer_test.clj",
+      "sha256": "d3a7543509823f004558aec8fe81d3064da50158655d6d04333ae7f10063881c"
+    }
+  ]
+}

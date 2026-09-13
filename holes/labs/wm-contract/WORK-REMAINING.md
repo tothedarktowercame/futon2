@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest authority reader23614af7/c5f1ab84 two pins/raw5tests20 verified; additional Date replay control exits0. Accepted cooperative isolated helper only; external digest/format trust and F11 integration remain open. See [acceptance](runs/row-24-authority-buffer-repair-2026-09-13/lead-acceptance.md).
+
 - Latest E6a384c57a5/9184b164 nine pins/raw4tests14 verified; accepted refusal precursor only. Canonical R6 scoring/posterior correspondence missing, E2a/E3/E2b not reached. Next bounded R6 source/input contract. See [review](runs/row-22-e6a-forward-influence-2026-09-13/lead-review.md).
 
 - Latest E6b review:0d0ea33b/197d78eb five pins/raw4tests22 verified. Executed extra conflicting application and unresolved R9/outcome authority still replay successfully. Exact ledger universe and resolved authority repair required. See [review](runs/row-22-e6b-feedback-2026-09-13/lead-review.md).
