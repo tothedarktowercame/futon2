@@ -33,7 +33,7 @@
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
 
 (defn- with-e1 [e1 f]
-  (with-redefs [authority/resolve-and-map (fn [_] e1)] (f)))
+  (refusal #(with-redefs [authority/resolve-and-map (fn [_] e1)] (f))))
 
 (deftest canonical-portfolio-restricts-full-support-by-occurrence
   (let [out (restriction/restrict-portfolio (config))
