@@ -1,0 +1,49 @@
+{:schema :wm/execution-receipt-v1
+ :row 18
+ :packet :finite-policy-bounded-refinement
+ :at "2026-09-13"
+ :cwd "/home/joe/code/mathlib4"
+ :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionBounded.lean"
+ :tree-sha "168bd082c572ed6014bc741d0a8b66f580a8c3fc"
+ :exit 0
+ :printed-axiom-checks 2
+ :sorryAx 0
+ :stdout ["'DarkTower.WarMachine.InteroceptivePolicyPrecisionBounded.finitePolicyDeltaBound' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionBounded.increasedRateLowersGammaAtUniquePositiveRoot' depends on axioms: [propext, Classical.choice, Quot.sound]"]
+ :pins [{:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionBounded.lean"
+         :sha256 "b69f98d3b69535d07c09765d2d8dfecfcbb5905511676f0bf3ca08fd4c58a7e4"}
+        {:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionProposal.lean"
+         :sha256 "779027d3eeaf887d67d0f29cb89e793e2ad95805880c9d04bb8beb6f164d0298"}
+        {:path "DarkTower/WarMachine/MachineTemperature.lean"
+         :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"}
+        {:path "lean-toolchain"
+         :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}
+        {:path "futon2:holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-proposal-v1.md"
+         :sha256 "f9434037cf208b4ca161cdcfce8ec1ad3874b193f01146e43cea74388aa2cecd"}
+        {:path "futon2:holes/labs/wm-contract/runs/row-18-policy-precision-spec-2026-09-13/lead-review.md"
+         :sha256 "69f35f03a186984ac775c438cddda3928d26aa5e3d9d02f717aad835108ac1e5"}]
+ :failed-attempts
+ [{:tree-sha "6fb6a2f0fb"
+   :exit 1
+   :finding :proposal-olean-not-built
+   :stdout "object file InteroceptivePolicyPrecisionProposal.olean does not exist"
+   :repair "Restated the two abstract proposal definitions locally; no dependency rebuild."}
+  {:tree-sha "272d3e2cb9"
+   :exit 1
+   :finding :fixed-point-equality-orientation
+   :stdout ["line 83: hb1root type mismatch" "line 105: hb2 root equality orientation mismatch"
+            "conditional theorem depended on sorryAx in this failed elaboration"]
+   :repair "Unfolded PosteriorRoot and discharged both equalities arithmetically."}
+  {:tree-sha "1b9cca9a3f"
+   :exit 0
+   :finding :uniqueness-hypothesis-unused
+   :stdout "linter warning: hunique is not explicitly referenced"
+   :repair "Strengthened the conclusion to expose uniqueness of the located positive branch and used the premise explicitly."}]
+ :negative-signature
+ {:unrestricted-affine-counterexample :history-not-finite-policy-reversal
+  :held-unsolved :nonqualifying
+  :held-absent :nonqualifying
+  :multiple-positive-roots :refuse-branch-credit
+  :bisection-or-finite-sign-scan :insufficient-for-global-uniqueness
+  :floating-continuity :not-proved-by-exact-real-theorem}
+ :scope "Exact-real bounded finite-distribution theorem and conditional root ordering only; no production float continuity, root uniqueness at a field, runtime correspondence, adoption, integration, or admission."}
