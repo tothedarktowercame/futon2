@@ -825,10 +825,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retrospective-ledger-source.request.json",
       "dispatch": "accepted",
       "scope": "independent contract review and pure ledger-source envelope; authority absent"
+    },
+    {
+      "packet": "codex-23-e6b-completeness-contract",
+      "job-id": "invoke-1789286337517-20726-dbd42b39",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789286337517-20726-dbd42b39",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-completeness-contract.request.json",
+      "dispatch": "accepted",
+      "scope": "read-only externally owned completeness contract; no acceptance or implementation"
     }
   ],
   "current-awaiting": [
-    "invoke-1789285990764-20724-4517441a"
+    "invoke-1789286337517-20726-dbd42b39"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
