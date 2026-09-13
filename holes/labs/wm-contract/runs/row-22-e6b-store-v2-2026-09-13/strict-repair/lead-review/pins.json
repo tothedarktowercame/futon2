@@ -1,0 +1,41 @@
+{
+  "pins": [
+    {
+      "role": "source",
+      "path": "src/futon2/aif/machine_slow_feedback_store_v2.clj",
+      "sha256": "d510fcf523e5984c1adf6cc0b5fc022235894686085e8b0b7f3ac9ed0b142ec4",
+      "commit": "6550f39c",
+      "match": true
+    },
+    {
+      "role": "test",
+      "path": "test/futon2/aif/machine_slow_feedback_store_v2_test.clj",
+      "sha256": "62076bbcce891d982fc3a112af5c6612116525cdac83a872ca45b2a9b7e20190",
+      "commit": "6550f39c",
+      "match": true
+    },
+    {
+      "role": "legacy-store",
+      "path": "src/futon2/aif/machine_slow_feedback_store.clj",
+      "sha256": "d9ee5f848419567e41f328a6b9fe14951f2568efcff4ee2dccbcac87a6bcd1fd",
+      "commit": "6550f39c",
+      "match": true
+    },
+    {
+      "role": "provenance",
+      "path": "src/futon2/aif/machine_slow_feedback_provenance.clj",
+      "sha256": "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90",
+      "commit": "6550f39c",
+      "match": true
+    },
+    {
+      "role": "carrier",
+      "path": "src/futon2/aif/machine_slow_state_carrier.clj",
+      "sha256": "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965",
+      "commit": "6550f39c",
+      "match": true
+    }
+  ],
+  "job": "invoke-1789283425654-20710-5c128522",
+  "state": "done"
+}

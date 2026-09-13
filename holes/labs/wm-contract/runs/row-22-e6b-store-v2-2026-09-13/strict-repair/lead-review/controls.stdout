@@ -1,0 +1,2 @@
+{:control :self-consistent-untyped-genesis, :accepted true, :generation 0}
+{:control :non-edn-authority, :refusal :e6b-store-v2/invalid-edn, :head-published? true}
