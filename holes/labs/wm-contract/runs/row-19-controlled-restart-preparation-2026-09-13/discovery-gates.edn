@@ -1,0 +1,15 @@
+{:schema :wm/execution-receipts-v1
+ :tree-sha "ce37a339"
+ :runs
+ [{:name :bash-syntax
+   :command "bash -n holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/restart-preflight.sh"
+   :exit 0 :stdout "" :stderr ""}
+  {:name :actual-read-only-discovery
+   :command "holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/restart-preflight.sh 1942869"
+   :exit 1 :expected :typed-refusal
+   :stdout-file "actual.stdout.json" :stderr-file "actual.stderr"}
+  {:name :arbitrary-existing-files-control
+   :command "holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/restart-preflight.sh 1942869 /etc/hosts /etc/hosts"
+   :exit 1 :expected :acceptance-authority-unverified
+   :stdout-file "existing-files-control.stdout.json"
+   :stderr-file "existing-files-control.stderr"}]}
