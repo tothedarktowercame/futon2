@@ -4,7 +4,8 @@
  :differing-fields {},
  :drift-mismatch-count-live 0,
  :laws-identical? true,
- :live-path "runs/F11-find/01-find-snatch-live.edn",
+ :live-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/01-find-snatch-live.edn",
  :live-sha256
  "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce",
  :pin-path "futon3:checks/find-snatch.edn",

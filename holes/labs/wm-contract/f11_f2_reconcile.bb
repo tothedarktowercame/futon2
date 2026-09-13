@@ -31,8 +31,14 @@
 
 (def task-home (System/getenv "HOME"))
 (def pin-path (str task-home "/code/futon3/checks/find-snatch.edn"))
-(def live-path "runs/F11-find/01-find-snatch-live.edn")
-(def out-path "runs/F11-find/02-reconciliation.edn")
+;; Anchor the run-store paths to this script's own directory, exactly as the
+;; classpath above is anchored.  cwd-relative paths made the gate crash with
+;; FileNotFoundException from any other invocation directory (observed
+;; 2026-09-13 running the r3 author validations from the repo root) -- a
+;; false failure in the mission's own acceptance machinery.
+(def lab-dir (.getParent (io/file *file*)))
+(def live-path (str (io/file lab-dir "runs/F11-find/01-find-snatch-live.edn")))
+(def out-path (str (io/file lab-dir "runs/F11-find/02-reconciliation.edn")))
 
 (defn sha256 [path]
   (let [d (java.security.MessageDigest/getInstance "SHA-256")]
