@@ -142,6 +142,12 @@ is not yet a verified join to Agency's normalized request digest.
   snapshot coordination and typed IO/path hardening are next. No global confidence
   or node admission. See production-manifest `lead-audit-review.md`.
 
+- Row 19 genesis verifier `futon3c/580f1a2a`: four pins match; source review
+  requests independent commission API resolution, mandatory real artifact pins,
+  exact acceptance-subject binding and explicit resolver provenance. Current root
+  function is a refusal stub, not an authenticated reader. See genesis-verifier
+  `lead-review.md`. No verifier or R9 admission.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,

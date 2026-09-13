@@ -105,10 +105,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-snapshot-coordination.request.json",
       "dispatch": "accepted",
       "scope": "snapshot writer coordination and typed reader failures; no live integration or admission"
+    },
+    {
+      "packet": "codex-23-genesis-subject-binding",
+      "job-id": "invoke-1789266556788-20582-2f6b238c",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789266556788-20582-2f6b238c",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-genesis-subject-binding.request.json",
+      "dispatch": "accepted",
+      "scope": "independent commission and exact acceptance-subject binding repair; no admission"
     }
   ],
   "current-awaiting": [
-    "invoke-1789266076215-20579-63bce1a0",
+    "invoke-1789266556788-20582-2f6b238c",
     "invoke-1789266414941-20581-608ecb5c",
     "invoke-1789266166922-20580-4f039823"
   ]
