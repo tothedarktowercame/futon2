@@ -417,11 +417,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e3-strict-canonical-evidence.request.json",
       "dispatch": "accepted",
       "scope": "E3 strict subject/scope and canonical R9 evidence; isolated only"
+    },
+    {
+      "packet": "codex-24-record-connection-run-joins",
+      "job-id": "invoke-1789273596368-20631-e4f52311",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789273596368-20631-e4f52311",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-record-connection-run-joins.request.json",
+      "dispatch": "accepted",
+      "scope": "additive exact run record-family and connection joins; no full certification"
     }
   ],
   "current-awaiting": [
     "invoke-1789273186397-20627-87a22198",
     "invoke-1789273488827-20630-3781e301",
-    "invoke-1789273332919-20628-ad27e2f1"
+    "invoke-1789273596368-20631-e4f52311"
   ]
 }
