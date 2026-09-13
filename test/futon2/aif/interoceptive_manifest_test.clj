@@ -118,9 +118,10 @@
               (.getPath trips) {:trip/id "trip-api" :trip/action :stop-line})
         finding (repair/record-system-failure!
                  (.getPath repairs)
-                 {:attempt-id "attempt-api" :repair-id "repair-api"
+                  {:attempt-id "attempt-api" :repair-id "repair-api"
                   :repair-class :machine-failure :failure-stage :test
-                  :outcome :failed :error "commissioned"})
+                  :outcome :failed :error "commissioned"
+                  :failure-data {:trip/id "trip-api"}})
         implementation (repair/record-implementation!
                         (.getPath repairs) finding
                         {:attempt-id "implementation-api" :commit "abc"
