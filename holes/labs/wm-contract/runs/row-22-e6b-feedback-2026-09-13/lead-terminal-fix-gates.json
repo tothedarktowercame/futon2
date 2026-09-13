@@ -1,0 +1,50 @@
+{
+  "gates": [
+    {
+      "gate": "test",
+      "command": "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-slow-feedback-evidence-test",
+      "exit": 0,
+      "tests": 6,
+      "assertions": 34,
+      "stdout": "lead-terminal-fix-test.stdout",
+      "retention": "exact output copied from exec tool result; no rerun"
+    },
+    {
+      "gate": "kondo",
+      "command": [
+        "clj-kondo",
+        "--lint",
+        "src/futon2/aif/machine_slow_feedback_evidence.clj",
+        "test/futon2/aif/machine_slow_feedback_evidence_test.clj"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "parens",
+      "command": [
+        "emacs",
+        "--batch",
+        "-Q",
+        "-l",
+        "/home/joe/code/futon4/dev/check-parens.el",
+        "--eval",
+        "(arxana-check-parens-cli)",
+        "--",
+        "--no-defaults",
+        "src/futon2/aif/machine_slow_feedback_evidence.clj",
+        "test/futon2/aif/machine_slow_feedback_evidence_test.clj"
+      ],
+      "exit": 0
+    }
+  ],
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+      "sha256": "6b2d5155463d13efef01c0c568a7f3276bbb8e3606e2809410eb530b96ef06bd"
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_evidence_test.clj",
+      "sha256": "d4cb5a6ec0c95c42d65662f9ec3b3ac7d0ea9ffd2f121d9bfffeacf41b59553d"
+    }
+  ]
+}

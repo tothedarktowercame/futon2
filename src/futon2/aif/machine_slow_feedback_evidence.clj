@@ -193,7 +193,7 @@
     (let [outcome-subject (select-keys outcome
                                        [:model/id :model/revision :run/id :tick/index
                                         :candidate/occurrence-id :action :fast/action-class
-                                        :terminal/status :fast/witnessed? :fast/succeeded?
+                                        :terminal/status :terminal/at :fast/witnessed? :fast/succeeded?
                                         :outcome/evidence-id :outcome/producer-id])
           prior-at (last (sort (keep (comp instant :as-of val)
                                      (:slow/intrinsics prior))))

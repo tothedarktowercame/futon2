@@ -1,0 +1,30 @@
+{
+  "command": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/lead-terminal-time.clj"
+  ],
+  "exit": 0,
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+      "sha256": "0acd02d62449b95a3959cfeb51eaae34af71f28e6e0d153c0b46f92c724a987c"
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_evidence_test.clj",
+      "sha256": "2eb663579e571f9ccb6110ba13208c666e50aa24e855af1515545c5430e0ba93"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/SPEC.md",
+      "sha256": "073924f0156721beac78be24cc2ddd1952398104b58772bc72d06191f878fb2b"
+    },
+    {
+      "path": "src/futon2/aif/temporal_hierarchy.clj",
+      "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+    },
+    {
+      "path": "src/futon2/aif/intrinsic_values.clj",
+      "sha256": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"
+    }
+  ]
+}

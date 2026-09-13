@@ -82,7 +82,7 @@
         outcome-subject (select-keys outcome
                                      [:model/id :model/revision :run/id :tick/index
                                       :candidate/occurrence-id :action :fast/action-class
-                                      :terminal/status :fast/witnessed? :fast/succeeded?
+                                      :terminal/status :terminal/at :fast/witnessed? :fast/succeeded?
                                       :outcome/evidence-id :outcome/producer-id])
         transition-subject {:model/id (:model/id context) :model/revision (:model/revision context)
                             :run/id (:run/id context) :source/tick-index 4 :destination/tick-index 5
@@ -207,3 +207,11 @@
          (refusal (assoc-in (fixture identity) [:canonical :e3] nil))))
   (is (= :e6b/production-authority-unavailable
          (refusal (assoc (fixture identity) :mode :production)))))
+
+(deftest changed-terminal-time-invalidates-retained-review
+  (is (= :e6b/outcome-review-unresolved
+         (refusal (fixture
+                    (fn [rs]
+                      (let [changed (assoc-in rs [:outcome :terminal/at] "2026-09-13T04:10:00Z")]
+                        (assoc-in changed [:application-ledger :entries 0 :input/digests :outcome]
+                                  (vd (:outcome changed))))))))))
