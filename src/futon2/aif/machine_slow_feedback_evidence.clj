@@ -293,7 +293,7 @@
               (refuse! :e6b/scope-mismatch "All resolved sources must retain isolated scope"
                        {:label label :scope (:scope record)})))
         core-records (dissoc records :next-state :application-ledger :application-universe)
-        {:keys [context prior application-id common destination actual-state expected-next
+        {:keys [context application-id common destination actual-state expected-next
                 input-subject transition-subject]}
         (validate-transition-core core-records canonical source-pins)
         claimed (:next-state records)
