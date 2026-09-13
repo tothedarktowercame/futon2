@@ -793,10 +793,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-head-buffer.request.json",
       "dispatch": "accepted",
       "scope": "independent ledger-mapping correction review and isolated validated HEAD-byte retention only"
+    },
+    {
+      "packet": "codex-23-store-v2-capture-codec",
+      "job-id": "invoke-1789284598571-20718-c8c93b62",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789284598571-20718-c8c93b62",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-capture-codec.request.json",
+      "dispatch": "accepted",
+      "scope": "pure deterministic isolated capture encoding/readback; no completeness or adapter"
     }
   ],
   "current-awaiting": [
-    "invoke-1789284189362-20716-a2ca39b4"
+    "invoke-1789284598571-20718-c8c93b62"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
