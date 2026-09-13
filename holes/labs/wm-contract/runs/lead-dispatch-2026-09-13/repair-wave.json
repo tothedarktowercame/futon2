@@ -433,11 +433,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-snapshot-failure-and-byte-ownership.request.json",
       "dispatch": "accepted",
       "scope": "failed mutation refusal and retained snapshot byte ownership; isolated only"
+    },
+    {
+      "packet": "codex-22-e3-canonical-event-time",
+      "job-id": "invoke-1789273950508-20633-661be716",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789273950508-20633-661be716",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e3-canonical-event-time.request.json",
+      "dispatch": "accepted",
+      "scope": "canonical E3 complete event/time and resolved E2a subject; no authorization"
     }
   ],
   "current-awaiting": [
     "invoke-1789273806999-20632-e2760ee7",
-    "invoke-1789273488827-20630-3781e301",
+    "invoke-1789273950508-20633-661be716",
     "invoke-1789273596368-20631-e4f52311"
   ]
 }
