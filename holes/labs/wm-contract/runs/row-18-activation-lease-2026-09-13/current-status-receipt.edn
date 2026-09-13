@@ -2,4 +2,4 @@
  :exit 0 :tests 1 :assertions 1 :result :expected-typed-refusal
  :refusal :interoceptive/activation-lease-unavailable
  :stdout "current-status.stdout" :stderr "current-status.stderr"
- :tree-sha "bc1b4856184c116700150483a1975bfbfb15fa3d" :at "2026-09-13T03:10:13Z"}
+ :tree-sha "fdd9967302b470bea6cc1190f86273a0d96e8d79" :at "2026-09-13T03:11:53Z"}
