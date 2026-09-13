@@ -1,0 +1,20 @@
+{:schema :wm/execution-receipts-v1
+ :source {:repo "futon3c" :commit "3fac43f6"
+          :tree-sha "0e5cbf7fcbe8184dc4e698001e6c3e5473023cdb"
+          :files {"src/futon3c/agency/invoke_ingress_controller.clj"
+                  "bbfac24d0c8bbda2e619a8314d8f3bd92d6ed4505d2e24c86d7a20c06687cffe"
+                  "test/futon3c/agency/invoke_ingress_controller_test.clj"
+                  "f3cbd6c5f2dd02c982966cb72948a53f8800883d985dcfdca379c80899482264"}}
+ :runs
+ [{:gate :focused-test
+   :command "clojure -M:test -n futon3c.agency.invoke-ingress-controller-test"
+   :exit 0 :tests 10 :assertions 34 :failures 0 :errors 0
+   :stdout "release-test.stdout" :stderr "release-test.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon3c/agency/invoke_ingress_controller.clj test/futon3c/agency/invoke_ingress_controller_test.clj"
+   :exit 0 :errors 0 :warnings 0
+   :stdout "release-kondo.stdout" :stderr "release-kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/invoke_ingress_controller.clj test/futon3c/agency/invoke_ingress_controller_test.clj"
+   :exit 0 :stdout "release-parens.stdout" :stderr "release-parens.stderr"}]
+ :supersedes {:receipt "ownership-gates.edn" :reason "released-controller guard changed final source"}}
