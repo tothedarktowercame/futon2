@@ -16,7 +16,10 @@
    :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/observation.clj:103-146" :basis "observe constructs the fourteen values; runs/F8-observe/clojure-readback.txt has no run identity, so :witnessed is not licensed."}
    :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no F3-form accepted-run certificate for o" :what-would-license "A refusing accepted-run record carrying the raw world input, all fourteen produced coordinates, and an independent machineObservation reference."} :converged? false}
 
-  {:id :prediction-error :defines :eps :node :R8
+  ;; :node aligned R8->R3a 2026-09-13: the registry re-noded eps to R3a
+  ;; (aif-equations.edn; all admitted prediction-error witnesses sit at
+  ;; :node :R3a). R8 keeps the free-energy quantities only.
+  {:id :prediction-error :defines :eps :node :R3a
    :formal "eps_k := o_k - mu_k"
    :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/MachinePredictionError.lean:160-181" :basis "The reviewed producer and typed outcomes are recorded at aif-equations.edn:80-85."}
    :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/free_energy.clj:203-278" :basis "compute-prediction-error implements the typed formula; runs/F8-prediction-error/clojure-readback.txt has no run identity."}
