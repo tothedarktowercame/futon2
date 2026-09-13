@@ -2024,6 +2024,64 @@
            (mapv :verdict (get-in result [:data :reviews]))))
     (is (= (:reviews build) (:reviews (first deliveries))))))
 
+(deftest review-failure-finding-carries-the-authority-qualified-attempt-id
+  ;; r6 (2026-09-13): the review-failure finding recorded from the outer
+  ;; catch was named by the bare per-cohort ordinal ("attempt-002"), which
+  ;; collided with a July finding of the same name in the shared durable
+  ;; store; the CREATE_NEW refusal then escaped to the initialization
+  ;; boundary and the review verdict was mistyped :initialization-failed.
+  ;; Review-failure findings must carry the same ea1 authority-qualified
+  ;; attempt id that system-failure findings already carry.
+  (let [root (.getPath (.toFile (Files/createTempDirectory
+                                 "wm-r6-seam-" (make-array FileAttribute 0))))
+        prereg-path (str root "/cohort.edn")
+        _ (tiny-target-prereg prereg-path)
+        _ (cohort/activate! prereg-path root)
+        authority {:preregistration prereg-path :data-root root
+                   :cohort-id :test-cohort-exhaustion
+                   :sha256 (digest/sha256 (slurp prereg-path))}
+        expected-id (:id (cohort/execution-identity
+                          (:authority (cohort/execution-context authority))
+                          "attempt-001"))
+        findings (atom [])
+        result
+        (runner/run-opportunity!
+         (merge
+          (isolated-runner-opts)
+          {:cohort? true
+           :execution-cohort authority
+           :revision-rounds 0
+           :repair-open-fn (constantly [])
+           :repair-record-fn (fn [finding]
+                               (swap! findings conj finding)
+                               (assoc finding :repair/id "captured-review-finding"))
+           :trace-fn (constantly "/tmp/r6-seam-trace.edn")
+           :construct-fn (fn [_] {:shown [:P1] :psi :psi :cascade-score 1.0
+                                  :semilattice [] :policy-holes []})
+           :mission-fn (fn [target] {:id target})
+           :dispatch-fn (fn [_ agent _ _ _]
+                          {:job-id (if (= agent "zai-5")
+                                     "author-job" "review-job")})
+           :poll-fn (fn [_ job-id]
+                      (if (= job-id "author-job")
+                        {:job-id job-id :state "done" :artifact-ref "abc123"
+                         :feature-card feature-card-claim
+                         :execution successful-execution}
+                        {:job-id job-id :state "done"
+                         :execution successful-execution
+                         :result-summary
+                         "FULL_LOOP_REVIEW: REQUEST_CHANGES fail closed"}))
+           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})}))]
+    (is (= :build-failed (:outcome result)))
+    (is (= 1 (count @findings)))
+    (let [finding (first @findings)]
+      (is (= :request-changes (:review-verdict finding)))
+      (is (re-matches #"ea1-[0-9a-f]{64}--attempt-001" (:attempt-id finding))
+          "the finding is named by the authority-qualified execution identity")
+      (is (= expected-id (:attempt-id finding)))
+      (is (not= "attempt-001" (:attempt-id finding))
+          "bare per-cohort ordinals collide across cohorts in the shared store"))))
+
 (deftest zero-revision-rounds-preserve-single-shot-records
   (let [{:keys [result phases dispatches]}
         (run-revision-attempt

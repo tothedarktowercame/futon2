@@ -3796,7 +3796,15 @@
                             (let [finding
                                   ((or (:repair-record-fn opts)
                                        repair/record-review-failure!)
-                                   {:attempt-id attempt-id
+                                   ;; The finding id derives from this field.
+                                   ;; Local attempt ordinals restart per
+                                   ;; cohort; only the authority-qualified id
+                                   ;; is unique across the shared findings
+                                   ;; store (r6, 2026-09-13: bare
+                                   ;; "attempt-002" collided with a July
+                                   ;; finding and the review verdict was
+                                   ;; mistyped :initialization-failed).
+                                   {:attempt-id external-attempt-id
                                     :target target
                                     :commit commit
                                     :selected-entry (:selected-entry failure-data)
@@ -3913,7 +3921,10 @@
                                    (#{:request-changes :reject} verdict))
                           ((or (:repair-record-fn opts)
                                repair/record-review-failure!)
-                           {:attempt-id attempt-id
+                           ;; Authority-qualified for the same reason as the
+                           ;; recovery-rejection site above: bare ordinals
+                           ;; collide across cohorts in the shared store.
+                           {:attempt-id external-attempt-id
                             :target (:target failure)
                             :commit (:commit failure)
                             :selected-entry (:selected-entry failure)
