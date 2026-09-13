@@ -657,10 +657,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-common-state-contract.request.json",
       "dispatch": "accepted",
       "scope": "read-only common state carrier and continuity contract; no adapter"
+    },
+    {
+      "packet": "codex-23-feedback-carrier-provenance-contract-repair",
+      "job-id": "invoke-1789279380265-20684-50a6046c",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789279380265-20684-50a6046c",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-carrier-provenance-contract-repair.request.json",
+      "dispatch": "accepted",
+      "scope": "design repair for exact retrospective digest joins and durable evidence; no adapter"
     }
   ],
   "current-awaiting": [
-    "invoke-1789279223496-20682-83bb1a23"
+    "invoke-1789279380265-20684-50a6046c"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
