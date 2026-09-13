@@ -1,0 +1,14 @@
+{:tree-sha "d2b45b0cfaef47d8e9cafa93d1f29585a423d7f7"
+ :pins
+ [{:path "src/futon2/aif/machine_slow_feedback_completeness.clj"
+   :sha256 "d1428d81f188fc1ed29a2e36be0427ef2ec8d25a7c5eb0bb054b5db2ef88324b"}
+  {:path "test/futon2/aif/machine_slow_feedback_completeness_test.clj"
+   :sha256 "cec2f67110e3f37004abad8b87a3a4c788c5cfc5bee64df85ec9b25fbc89b7b6"}
+  {:path "holes/labs/wm-contract/CONTRACT-e6b-external-completeness-v1-2026-09-13.md"
+   :sha256 "1d959c2859f9a5fd0b602dda510b464e5221d89fe9a95877a0eee5a294be9a93"}
+  {:path "src/futon2/aif/machine_slow_feedback_retrospective_projection.clj"
+   :sha256 "7fcdf28c03e5e6efd4fcaa3900c8352613e46fe317b6deb5f6272125eafef300"}
+  {:path "src/futon2/aif/machine_slow_feedback_capture.clj"
+   :sha256 "702ccb1f8e120b8d1b8f133dbc66d154099159760e26b5a7dca7b6844d5a0c71"}
+  {:path "src/futon2/aif/machine_slow_feedback_evidence.clj"
+   :sha256 "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"}]}

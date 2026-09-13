@@ -1,0 +1,5 @@
+Syntax error reading source at (futon2/aif/machine_slow_feedback_completeness_test.clj:140:41).
+Nested #()s are not allowed
+
+Full report at:
+/tmp/clojure-12032246107971689105.edn

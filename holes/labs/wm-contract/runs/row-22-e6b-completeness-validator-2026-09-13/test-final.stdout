@@ -1,0 +1,9 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-slow-feedback-completeness-test
+
+Testing futon2.aif.machine-slow-feedback-retrospective-projection-test
+
+Ran 9 tests containing 49 assertions.
+0 failures, 0 errors.

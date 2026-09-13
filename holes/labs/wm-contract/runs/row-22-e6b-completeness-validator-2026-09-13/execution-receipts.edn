@@ -1,0 +1,23 @@
+{:tree-sha "d2b45b0cfaef47d8e9cafa93d1f29585a423d7f7"
+ :at "2026-09-13T08:08:32Z"
+ :history
+ [{:gate :focused-test-attempt-1 :tree-sha "be23be6e5850c0d562b0e1c3a3c900f0aa104af0"
+   :exit 1 :finding :nested-anonymous-test-form
+   :stdout "test-attempt1.stdout" :stderr "test-attempt1.stderr"}
+  {:gate :superseded-focused-test :tree-sha "7f8ca853"
+   :exit 0 :tests 8 :assertions 43
+   :reason "Superseded after adding census/pin/boundary adversarial controls."
+   :stdout "test-superseded.stdout" :stderr "test-superseded.stderr"}]
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-completeness-test futon2.aif.machine-slow-feedback-retrospective-projection-test]'"
+   :exit 0 :tests 9 :assertions 49 :stdout "test-final.stdout" :stderr "test-final.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_completeness.clj test/futon2/aif/machine_slow_feedback_completeness_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_completeness.clj test/futon2/aif/machine_slow_feedback_completeness_test.clj"
+   :exit 0 :files 2 :stdout "parens.stdout" :stderr "parens.stderr"}
+  {:gate :induced-runner-failure
+   :command "clojure -Sdeps '{:paths [\"/tmp\"]}' -M:test -m cognitect.test-runner -d /tmp -n codex23-completeness-validator-induced-test"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :stdout "induced.stdout" :stderr "induced.stderr"}]}
