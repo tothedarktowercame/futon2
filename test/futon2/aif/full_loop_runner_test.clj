@@ -1715,9 +1715,6 @@
                 (fn [finding]
                   (swap! refused-findings conj finding)
                   (assoc finding :repair/id "fold-wiring-refused"))))]
-    (assert-construction-validator-record! missing)
-    (assert-construction-validator-record! refused)
-    (is (false? (get-in refused [:checkpoints :construction :judgment :correspondence-validation :ok])))
     (testing "induced enriched-invalid output fails loudly with a named finding"
       (is (= :incomplete (:outcome missing)))
       (is (= :fold-output-invalid
@@ -1726,20 +1723,96 @@
              (get-in missing [:data :error-data :fold-findings 0 :finding])))
       (is (= "fold-output-invalid"
              (get-in missing [:data :repair-obligation :repair/id])))
-      (is (false? (get-in missing [:checkpoints :construction :judgment
-                                  :shape-validation :ok])))
-      (is (seq (get-in missing [:checkpoints :construction :judgment
-                               :shape-validation :findings]))))
-    (testing "typed grounded refusal is persisted, then closes exceptionally"
+      (is (= :not-reached-construction
+             (get-in missing [:checkpoints :construction :sorry :kind])))
+      (is (= :fold-output-invalid
+             (get-in missing [:data :error-data :failure-kind]))))
+    (testing "typed fold refusal is classified before construction persistence"
       (is (= :incomplete (:outcome refused)))
       (is (= :fold-wiring-refused
              (get-in refused [:data :failure-kind])))
-      (is (= refusal
-             (get-in refused [:checkpoints :construction :judgment
-                              :wiring-refusal])))
-      (is (nil? (get-in refused [:checkpoints :construction :judgment :wiring])))
+      (is (= :not-reached-construction
+             (get-in refused [:checkpoints :construction :sorry :kind])))
+      (is (= refusal (get-in refused [:data :error-data :wiring-refusal])))
       (is (= "fold-wiring-refused"
              (get-in refused [:data :repair-obligation :repair/id]))))))
+
+(deftest repair-construction-fold-holes-carry-real-obligation
+  (let [obligation {:repair/id "repair-attempt-001"
+                    :repair/class :machine-failure
+                    :attempt-id "attempt-001"
+                    :failure-stage :construction
+                    :failure-kind :untyped-failure}
+        construction (runner/construct-for-decision
+                      {:action {:type :repair-machine-failure
+                                :target (:repair/id obligation)
+                                :repair-obligation obligation}})
+        result (runner/construction-wiring-result construction)
+        holes (get-in result [:fold-output :policy-holes])
+        prereg (edn/read-string (slurp cohort/default-preregistration))
+        cell {:judgment {:mission (:repair/id obligation)
+                         :cascade (select-keys construction
+                                               [:psi :semilattice :construction-kind
+                                                :selected-action :repair-contract])
+                         :sorries holes
+                         :wiring (:wiring result)
+                         :fold-output (:fold-output result)
+                         :patterns (vec (:shown construction))
+                         :deposit nil}
+              :ground {:kind :test}}]
+    (is (seq holes) "the real repair cascade exposes its unmatched patterns")
+    (is (every? #(= (:repair/id obligation) (:obligation/id %)) holes))
+    (is (every? #(and (seq (:free %)) (seq (:why %))) holes))
+    (is (empty? (cohort/checkpoint-cell-errors prereg :construction cell))
+        "the cohort's production validator, not a copied predicate, admits the fold")))
+
+(declare tiny-target-prereg)
+
+(deftest refused-construction-append-is-atomic-and-repair-selection-is-truthful
+  (let [root (.getPath (.toFile (Files/createTempDirectory
+                                 "wm-r3-seam-" (make-array FileAttribute 0))))
+        prereg-path (str root "/cohort.edn")
+        _ (tiny-target-prereg prereg-path)
+        _ (cohort/activate! prereg-path root)
+        raw (slurp prereg-path)
+        authority {:preregistration prereg-path :data-root root
+                   :cohort-id :test-cohort-exhaustion
+                   :sha256 (digest/sha256 raw)}
+        obligation {:repair/id "repair-attempt-001"
+                    :repair/status :open
+                    :repair/class :machine-failure
+                    :attempt-id "attempt-001"
+                    :failure-stage :construction
+                    :failure-kind :untyped-failure}
+        invalid-fold {:wiring {:boxes [] :wires [] :terminals []}
+                      :coverage-score-delta nil
+                      :policy-holes [{:unfolded-pattern "futon-theory/stop-the-line"}]}
+        result (runner/run-opportunity!
+                (merge (isolated-runner-opts)
+                       {:cohort? true
+                        :execution-cohort authority
+                        :repair-open-fn (constantly [obligation])
+                        :construction-wiring-fn (constantly invalid-fold)
+                        :repair-system-record-fn
+                        (fn [finding]
+                          (assoc finding :repair/id "repair-r3-induced"))}))
+        events (->> (file-seq (io/file root "test-cohort-exhaustion" "attempt-001"))
+                    (filter #(.isFile %))
+                    (map #(edn/read-string (slurp %)))
+                    (filter map?)
+                    vec)
+        construction-events (filter #(= :construction (:checkpoint/type %)) events)]
+    (is (= :incomplete (:outcome result)))
+    (is (= :fold-output-invalid (get-in result [:data :failure-kind])))
+    (is (= :not-reached-construction
+           (get-in result [:checkpoints :construction :sorry :kind])))
+    (is (= 1 (count construction-events)))
+        "only close!'s typed construction sorry is durable")
+    (is (= :not-reached-construction
+           (get-in (first construction-events) [:payload :sorry :kind])))
+    (is (= :repair-action-not-traced
+           (get-in result [:checkpoints :selection :judgment :trace-persistence])))
+    (is (= :incomplete (:outcome (cohort/closed-execution authority "attempt-001"))))))
 
 (deftest production-construction-requires-server-fold-port
   (let [construction {:shown ["iching/hexagram-43-guai"]}

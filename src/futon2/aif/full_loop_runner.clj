@@ -1380,11 +1380,28 @@
    (construction-wiring-result construction wiring-fn false))
   ([construction wiring-fn required?]
    (let [port-missing? (and required? (not (fn? wiring-fn)))
-         result (when-not port-missing?
-                  (if wiring-fn
-                    (wiring-fn construction)
-                    (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
-                        (fold-classical/classical-fold (vec (:shown construction)) construction))))
+         repair-id (get-in construction [:repair-contract :repair-id])
+         result0 (when-not port-missing?
+                   (if wiring-fn
+                     (wiring-fn construction)
+                     (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
+                         (fold-classical/classical-fold (vec (:shown construction)) construction))))
+         ;; The classical fold can only name the patterns it could not fold.  A
+         ;; stop-line construction additionally owns the real obligation that
+         ;; makes each remainder actionable.  Enrich only the production fold;
+         ;; injected folds remain unmodified so their contract violations are
+         ;; observable at the gate.
+         result (if (and (nil? wiring-fn) (map? result0) (seq repair-id)
+                         (vector? (:policy-holes result0)))
+                  (update result0 :policy-holes
+                          (fn [holes]
+                            (mapv (fn [{:keys [unfolded-pattern] :as hole}]
+                                    (assoc hole
+                                           :free (str "Unfolded repair pattern " unfolded-pattern)
+                                           :why (str "Required by stop-line obligation " repair-id)
+                                           :obligation/id repair-id))
+                                  holes)))
+                  result0)
          patterns (vec (:shown construction))
          validation (fold/validate-fold-output-v1 result)
          correspondence (fold/validate-fold-correspondence result patterns)
@@ -2777,12 +2794,15 @@
                  :external-attempt-id external-attempt-id
                  :execution-identity execution-identity)
         checkpoint! (fn [checkpoint cell]
-                      (swap! checkpoints assoc checkpoint cell)
+                      ;; The in-memory checkpoint denotes the same admitted
+                      ;; event as the durable cohort.  Never publish it before
+                      ;; an enabled durable append has succeeded.
                       (when cohort?
                         (if cohort-source
                           (cohort/append-checkpoint! cohort-source (:data-root execution-cohort)
                                                      attempt-id checkpoint cell)
                           (cohort/append-checkpoint! attempt-id checkpoint cell)))
+                      (swap! checkpoints assoc checkpoint cell)
                       cell)
         persist-selection!
         (fn [trace-path]
@@ -3205,7 +3225,9 @@
                                                         :selection-gain
                                                         :habit-prior-applied?])
                                           :discrimination discrimination)))
-                                     :trace-persistence :after-construction}
+                                     :trace-persistence (if repair-action?
+                                                          :repair-action-not-traced
+                                                          :after-construction)}
                                     (cond-> {:kind :wm-judgement
                                              :decision (:decision judgement)}
                                      pinned-selection
@@ -3274,20 +3296,32 @@
                              :target target
                              :selected-entry
                              (select-keys entry [:action :controller-score :G-efe])})))
+          (when (= :invalid (:status wiring-result))
+            (throw (ex-info "Construction fold wiring is missing or malformed"
+                            {:outcome :construction-failed
+                             :failure-kind (:failure-kind wiring-result)
+                             :fold-findings (:findings wiring-result)
+                             :failure-stage :construction
+                             :target target})))
+          (when (= :refused (:status wiring-result))
+            (throw (ex-info "Construction fold wiring explicitly refused"
+                            {:outcome :construction-failed
+                             :failure-kind :fold-wiring-refused
+                             :failure-stage :construction
+                             :target target
+                             :wiring-refusal (:fold-output wiring-result)})))
           ;; A selected action enters the canonical trace—and therefore the
           ;; learned habit prior—only after its production construction path
           ;; has been demonstrated. Failed selections remain fully auditable
           ;; in the cohort and stop-line finding, but cannot reinforce E(pi).
-          (let [trace-path (when (and (not repair-action?)
-                                           (not= :invalid (:status wiring-result)))
+          (let [trace-path (when-not repair-action?
                              ((or (:trace-fn opts) trace/write-trace!)
                               (assoc judgement :trace/reason
                                      {:kind :routing-rule
                                       :rule :constructed-selection-persisted
-                                      :question "Does the constructed selection require operator review?"})))]
-          (persist-selection! trace-path)
-          (checkpoint! :construction
-                       (term (cond-> {:mission (str target)
+                                      :question "Does the constructed selection require operator review?"})))
+                construction-cell
+                (term (cond-> {:mission (str target)
                               :cascade (select-keys construction
                                                     [:psi :cascade-score :semilattice
                                                      :construction-kind
@@ -3326,21 +3360,9 @@
                              (cond-> {:kind :decision-pinned-construction
                                       :selected-action (:action entry)}
                                pinned-selection
-                               (assoc :run4/task-pin (:identity pinned-selection)))))
-          (when (= :invalid (:status wiring-result))
-            (throw (ex-info "Construction fold wiring is missing or malformed"
-                            {:outcome :construction-failed
-                             :failure-kind (:failure-kind wiring-result)
-                             :fold-findings (:findings wiring-result)
-                             :failure-stage :construction
-                             :target target})))
-          (when (= :refused (:status wiring-result))
-            (throw (ex-info "Construction fold wiring explicitly refused"
-                            {:outcome :construction-failed
-                             :failure-kind :fold-wiring-refused
-                             :failure-stage :construction
-                             :target target
-                             :wiring-refusal (:fold-output wiring-result)})))
+                               (assoc :run4/task-pin (:identity pinned-selection))))]
+          (persist-selection! trace-path)
+          (checkpoint! :construction construction-cell)
           (when historical-action?
             (when-not (:historical-verification-execute-fn opts)
               (throw (ex-info "Historical verification execution port missing"
