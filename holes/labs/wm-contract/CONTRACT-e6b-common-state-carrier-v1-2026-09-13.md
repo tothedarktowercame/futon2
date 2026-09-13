@@ -40,13 +40,18 @@ Projection from a checked prior record copies the six identity/revision fields
 and its top-level `:slow/mode` and `:slow/intrinsics`. Projection from a
 computed next record copies its identity/revision fields and
 `[:state :slow/mode]` / `[:state :slow/intrinsics]`. No other keys are ignored:
-both source records must first satisfy their complete schemas, and their exact
-records and raw/value digests are retained alongside the projection.
+before projection, a future adapter must validate the complete prior schema and
+complete computed-next schema: exact key sets, identity types, intrinsic entry
+keys/types/timestamps, predecessor/event joins, and every nested state field
+produced by `advance-slow-state`. Current selective core checks do not establish
+this complete-schema property. Exact original records and raw/value digests are
+retained alongside the projection.
 
-`carrier-sha256 = SHA-256(UTF-8(pr-str(carrier)))`. The adapter must serialize
-once, validate strict EDN round-trip equality, and hash those same bytes. Map
-printing order therefore remains a pinned implementation convention, not a
-claim of canonical EDN.
+The constructor emits an `array-map` in exactly the key order shown above;
+nested maps preserve checked parsed iteration order. It serializes exactly once
+as UTF-8 `pr-str`, validates strict EDN round-trip equality, retains those bytes,
+and defines `carrier-sha256 = SHA-256(retained-carrier-bytes)`. Re-serialization
+is not an identity check. This is a pinned convention, not canonical EDN.
 
 ## Joins and continuity
 
@@ -89,19 +94,25 @@ adapter may construct only:
  :application {:application/id <proposal application id>
                :feedback/event-id <proposal event id>
                :transition/subject <proposal exact subject>
-               :input/digests <proposal exact seven value digests>
-               :output/digest <next carrier digest>
+               :input/digests {:context <value digest of :context>
+                               :prior <value digest of :prior-state>
+                               :e2b <value digest of :e2b-subject>
+                               :outcome <value digest of :outcome>}
+               :output/digest <value digest of complete computed-next record>
                :status :committed}
  :authority {:verifier/source-sha256 <proposal validator pin>
              :evidence-source-sha256s <proposal exact seven raw pins>}
- :committed-at <proposal fixed destination time>}
+ :committed-at <proposal fixed destination time>
+ :provenance-sha256 <immutable provenance object digest>}
 ```
 
-The adapter retains the complete proposal evidence, both original evidence
-records, their source/value hashes, both carriers and carrier bytes. The owner,
-not the candidate, supplies an immutable expected-HEAD record containing store
-ID, generation, HEAD transaction digest, prior revision and prior carrier
-digest. That record is compared while holding the store lease.
+The four-key map is the explicit compatibility view expected exactly by
+unchanged retrospective `verify-feedback` (`machine_slow_feedback_evidence.clj:
+390-419`). The other three prospective value digests remain mandatory in
+provenance. Likewise, application output names the complete next-record value
+digest, while HEAD continuity names the next carrier digest. Both subjects and
+both digests are retained and cross-bound; neither is copied into the other's
+field. The owner, not the candidate, supplies the expected HEAD.
 
 Stable retry lookup by application ID occurs before comparison with the current
 HEAD: an existing transaction returns only when its retained proposal,
@@ -109,6 +120,52 @@ expected-HEAD binding, carriers, pins and fixed time are identical. A changed
 retry refuses. For a new ID, every expected-HEAD field must equal the current
 owner-held HEAD before commit. Candidate-supplied HEAD, generation, authority,
 status, digest or time fields refuse.
+
+## Durable provenance and atomic relation
+
+The current strict transaction/proposal key sets
+(`machine_slow_feedback_store.clj:84-96,219-238`) cannot retain this material
+and are not silently extended. Implementation requires a content-addressed
+`:wm/e6b-transition-provenance-v1` containing the complete proposal evidence;
+all seven original source records, exact base64-encoded bytes, raw and value
+digests; complete prior and computed-next records; both carriers, retained
+carrier bytes and carrier digests; the four-key retrospective input view; the
+complete-next-record output digest; and the owner-issued expected HEAD (store,
+generation, transaction, revision and prior-carrier digest).
+
+Every byte field is decoded, hashed, strictly parsed from that same buffer and
+compared with its retained record/value digest. Every duplicated field must
+agree. The provenance object is strict-round-tripped, serialized once and
+content-addressed. A strict `:wm/e6b-state-transaction-v2` and proposal schema
+add exactly one mandatory `:provenance-sha256`; recovery refuses an absent,
+corrupt, schema-invalid or disagreeing provenance object.
+
+Publication order is: sync and no-overwrite-publish provenance; sync and
+no-overwrite-publish its transaction; atomically replace and directory-sync
+HEAD. A pre-HEAD crash may leave unreachable immutable objects but cannot expose
+a reachable transaction without provenance. Recovery follows HEAD and validates
+transaction then complete provenance before returning; capture includes both
+objects. Uncertain publication poisons the owner. Stable retry first resolves
+the existing application transaction and provenance and requires exact bytes
+and digests; only a new ID proceeds to current-HEAD comparison. This is durable
+restart evidence, not a memory-only sidecar.
+
+## Storage-to-retrospective mapping
+
+After independent completeness acceptance, a read adapter must:
+
+1. validate the v2 transaction and provenance bytes;
+2. emit the original seven records from retained bytes and the complete
+   computed-next record as `:next-state`;
+3. emit the ledger entry using exactly the four-key compatibility input view
+   and complete-next-record output digest;
+4. require transition/application/event/revision fields to equal both the
+   transaction and proposal evidence; and
+5. accept the universe only from a separate completeness authority binding the
+   full capture and ordered application index.
+
+Carrier digests serve HEAD continuity; original record-value digests serve
+unchanged retrospective replay. Both subjects are retained and joined.
 
 ## Separation of evidence stages
 
@@ -137,7 +194,12 @@ None of these stages substitutes for another.
 - computed-next relabelled as later prior without independently retained
   acquisition/readback authority;
 - loss of either original record or confusion of raw-source, value and carrier
-  hashes; and
+  hashes;
+- seven-role digests copied into the four-key ledger view, or a carrier digest
+  copied into the complete-next output field;
+- missing/corrupt/orphaned provenance, transaction/provenance disagreement,
+  HEAD reaching a transaction before provenance is durable, or capture omitting
+  provenance bytes; and
 - post-commit completeness or retrospective success asserted before an
   independently accepted complete capture.
 
