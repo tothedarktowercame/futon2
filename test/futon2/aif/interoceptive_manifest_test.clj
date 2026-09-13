@@ -157,6 +157,18 @@
     (is (= :interoceptive/writer-participation-unverified
            (refusal manifest/production-manifest!)))))
 
+(deftest partial-logical-publication-refuses
+  (let [[trips repairs] (roots)
+        _ (tripwire/write-trip-report!
+           (.getPath trips) {:trip/id "trip-without-finding" :trip/action :stop-line})
+        input (:constructor-input
+               (manifest/capture (.getPath trips) (.getPath repairs) :test))
+        production-input (-> input
+                             (assoc-in [:trip-authority :authority-class] :production)
+                             (assoc-in [:repair-authority :authority-class] :production))]
+    (is (= :interoceptive/missing-finding-join
+           (refusal #(commitment/confidence-snapshot production-input))))))
+
 (deftest cross-process-exclusion
   (let [[trips _] (roots)
         lock-path (str (.getPath trips) "/process.lock")
