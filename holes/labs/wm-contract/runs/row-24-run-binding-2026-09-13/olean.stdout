@@ -1,0 +1,18 @@
+'DarkTower.WarMachine.FullCertificateRunBinding.runBound_implies_full' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRunBinding.rejects_cross_run_node_reuse' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRunBinding.rejects_cross_run_equation_reuse' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRunBinding.rejects_mismatched_claim_declaration_subject' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRunBinding.rejects_borrowed_divergence_authority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRunBinding.rejects_unauthorized_divergence_class' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,9 @@
+{:schema :wm/execution-receipt-v1
+ :gate :lean-owned-module
+ :commands ["lake env lean DarkTower/WarMachine/FullCertificateRunBinding.lean"
+            "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/FullCertificateRunBinding.olean DarkTower/WarMachine/FullCertificateRunBinding.lean"]
+ :exit [0 0]
+ :checks {:theorems 6 :axiom-checks 6 :sorryAx 0 :failed-attempts 0}
+ :tree-sha "1cfaf67474c27fc8ed81132a1953c19c231a323f"
+ :at "2026-09-13T04:05:41Z"
+ :note "The first command is the final elaboration gate; the second emits the owned olean required for downstream imports. No source or harness changed between them."}

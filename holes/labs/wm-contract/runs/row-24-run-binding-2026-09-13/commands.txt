@@ -1,0 +1,11 @@
+cwd: /home/joe/code/mathlib4
+lake env lean DarkTower/WarMachine/FullCertificateRunBinding.lean
+exit: 0
+stdout: lean.stdout
+stderr: lean.stderr
+
+cwd: /home/joe/code/mathlib4
+lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/FullCertificateRunBinding.olean DarkTower/WarMachine/FullCertificateRunBinding.lean
+exit: 0
+stdout: olean.stdout
+stderr: olean.stderr
