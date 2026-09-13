@@ -161,6 +161,12 @@ is not yet a verified join to Agency's normalized request digest.
   joins remain owed; no new measured cells. See current-capture discovery's
   `categorical-event-authority-discovery.md` and source pins.
 
+- Measured-A vocabulary authority located in futon3's interest-event-vocabulary
+  flexiarg. It distinguishes reopened EVENT from resulting live STANDING; WM's
+  seven-state domain includes reopened but not live. Direct standing/event label
+  substitution is not admissible. Pin and domain finding retained under current
+  capture discovery; reconcile the measured variable before qualifying counts.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
