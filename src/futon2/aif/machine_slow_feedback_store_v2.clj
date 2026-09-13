@@ -90,11 +90,29 @@
   "Acquire a fresh isolated store-v2 owner. Existing non-v2 stores refuse."
   [root store-id]
   (let [s (legacy/isolated-store root store-id)
-        pdir (.resolve ^Path (:root s) "provenance")]
-    (Files/createDirectories pdir (make-array java.nio.file.attribute.FileAttribute 0))
-    (assoc s :schema :wm/e6b-isolated-store-v2 :provenance-dir pdir)))
+        pdir (.resolve ^Path (:root s) "provenance")
+        marker (.resolve ^Path (:root s) "FORMAT.edn")
+        expected {:schema :wm/e6b-store-format-v2 :scope :isolated-test :store/id store-id}]
+    (try
+      (if (Files/exists marker (make-array LinkOption 0))
+        (when-not (= expected (:record (read-object marker)))
+          (refuse! :e6b-store-v2/format-invalid {}))
+        (do
+          ;; A pre-existing HEAD or transaction is legacy/interrupted state;
+          ;; never add a marker and silently reinterpret it as v2.
+          (when (or (Files/exists ^Path (:head s) (make-array LinkOption 0))
+                    (seq (iterator-seq (.iterator (Files/newDirectoryStream ^Path (:txdir s))))))
+            (refuse! :e6b-store-v2/legacy-or-interrupted-store {}))
+          (let [bs (form-bytes expected)]
+            (Files/write marker bs (into-array StandardOpenOption
+                                               [StandardOpenOption/CREATE_NEW
+                                                StandardOpenOption/WRITE
+                                                StandardOpenOption/SYNC]))
+            (force-dir! ^Path (:root s)))))
+      (Files/createDirectories pdir (make-array java.nio.file.attribute.FileAttribute 0))
+      (assoc s :schema :wm/e6b-isolated-store-v2 :provenance-dir pdir :format marker)
+      (catch Throwable e (legacy/release! s) (throw e)))))
 (defn release! [store] (legacy/release! store))
-(defn initialize! [store input] (legacy/initialize! store input))
 
 (defn- provenance-path [store digest]
   (.resolve ^Path (:provenance-dir store) (str digest ".edn")))
@@ -121,6 +139,10 @@
             :state-sha256 (get-in projection [:next :sha256])}
      :application (assoc app-view :transition/subject (:transition/subject proposal))
      :committed-at (:committed-at proposal) :provenance-sha256 provenance-sha}))
+(defn- parent-head [store generation prior]
+  {:store/id (:store-id store) :generation (dec generation)
+   :transaction-sha256 (:transaction-sha256 prior)
+   :state/revision (:revision prior) :state-sha256 (:state-sha256 prior)})
 (defn- tx-joins? [store tx digest expected-generation child]
   (and (= #{:schema :store/id :generation :prior :next :application
             :committed-at :provenance-sha256} (set (keys tx)))
@@ -134,17 +156,35 @@
 
 (defn- recover* [store]
   (let [head-r (read-object ^Path (:head store)) head (:record head-r)]
-    (when-not (and (= :wm/e6b-state-head-v1 (:schema head)) (= (:store-id store) (:store/id head))
-                   (nat-int? (:generation head)) (vector? (:application-index head)))
+    (when-not (and (= #{:schema :store/id :generation :state/revision :state-sha256
+                        :transaction-sha256 :application-index} (set (keys head)))
+                   (= :wm/e6b-state-head-v2 (:schema head)) (= (:store-id store) (:store/id head))
+                   (nat-int? (:generation head)) (vector? (:application-index head))
+                   (string? (:state/revision head)) (re-matches hex64 (:state-sha256 head ""))
+                   (re-matches hex64 (:transaction-sha256 head "")))
       (refuse! :e6b-store-v2/head-invalid {}))
     (loop [digest (:transaction-sha256 head) generation (:generation head)
-           child nil apps [] txs [] provs {}]
+           child nil apps [] txs [] provs {} revisions #{(:state/revision head)}]
       (let [{:keys [record] actual-sha :sha256} (read-object (tx-path store digest)) tx record]
         (when-not (= digest actual-sha) (refuse! :e6b-store-v2/transaction-digest-mismatch {}))
-        (if (= :wm/e6b-state-genesis-v1 (:schema tx))
+        (when (and (nil? child)
+                   (not= {:generation (:generation head) :revision (:state/revision head)
+                          :state-sha256 (:state-sha256 head)}
+                         (if (= :wm/e6b-state-genesis-v2 (:schema tx))
+                           {:generation (:generation tx) :revision (:state/revision tx)
+                            :state-sha256 (:state-sha256 tx)}
+                           {:generation (:generation tx) :revision (get-in tx [:next :revision])
+                            :state-sha256 (get-in tx [:next :state-sha256])})))
+          (refuse! :e6b-store-v2/head-current-mismatch {}))
+        (if (= :wm/e6b-state-genesis-v2 (:schema tx))
           (do
-            (when-not (and (zero? generation) (= (:store-id store) (:store/id tx))
+            (when-not (and (= #{:schema :store/id :generation :prior :state :state/revision
+                                :state-sha256 :application :authority :committed-at}
+                              (set (keys tx)))
+                           (zero? generation) (= (:store-id store) (:store/id tx))
+                           (= {} (:prior tx)) (nil? (:application tx))
                            (= digest (sha256 (form-bytes tx)))
+                           (= (:state-sha256 tx) (sha256 (form-bytes (:state tx))))
                            (or (nil? child)
                                (= (select-keys (:prior child) [:revision :state-sha256])
                                   {:revision (:state/revision tx) :state-sha256 (:state-sha256 tx)}))
@@ -152,11 +192,15 @@
               (refuse! :e6b-store-v2/chain-invalid {}))
             {:head head :head-digest (:sha256 head-r) :current (first txs)
              :applications (vec (reverse apps)) :transactions (vec (reverse txs))
-             :provenance provs :chain-digests (vec (reverse (conj (mapv :digest txs) digest)))})
+             :provenance provs :state-revisions revisions
+             :chain-digests (vec (reverse (conj (mapv :digest txs) digest)))})
           (do
             (when-not (tx-joins? store tx digest generation child)
               (refuse! :e6b-store-v2/transaction-invalid {:digest digest}))
             (let [p (read-provenance! store (:provenance-sha256 tx))
+                  _ (when-not (= (get-in p [:record :expected-head])
+                                 (parent-head store generation (:prior tx)))
+                      (refuse! :e6b-store-v2/provenance-parent-mismatch {:digest digest}))
                   expected (expected-tx store generation
                                        (dissoc (:prior tx) :generation) p (:provenance-sha256 tx))]
               (when-not (= tx expected)
@@ -167,11 +211,36 @@
                            :prior-state/revision (:prior-state/revision a)
                            :transaction-sha256 digest :provenance-sha256 (:provenance-sha256 tx)}]
                 (when (or (some #(= (:application/id entry) (:application/id %)) apps)
-                          (some #(= (:feedback/event-id entry) (:feedback/event-id %)) apps))
+                          (some #(= (:feedback/event-id entry) (:feedback/event-id %)) apps)
+                          (contains? revisions (get-in tx [:prior :revision])))
                   (refuse! :e6b-store-v2/application-conflict {}))
                 (recur (get-in tx [:prior :transaction-sha256]) (dec generation) tx
                        (conj apps entry) (conj txs (assoc tx :digest digest))
-                       (assoc provs (:provenance-sha256 tx) p))))))))))
+                       (assoc provs (:provenance-sha256 tx) p)
+                       (conj revisions (get-in tx [:prior :revision]))))))))))
+
+(defn initialize!
+  [store {:keys [state revision authority committed-at] :as input}]
+  (with-owner store
+    (when (or (Files/exists ^Path (:head store) (make-array LinkOption 0))
+              (seq (iterator-seq (.iterator (Files/newDirectoryStream ^Path (:txdir store))))))
+      (refuse! :e6b-store-v2/already-initialized-or-interrupted {}))
+    (when-not (and (= #{:state :revision :authority :committed-at} (set (keys input)))
+                   (map? state) (seq state) (string? revision) (seq revision)
+                   (map? authority) (string? committed-at)
+                   (= state (strict-edn (form-bytes state) :genesis-state)))
+      (refuse! :e6b-store-v2/genesis-input-invalid {}))
+    (let [tx {:schema :wm/e6b-state-genesis-v2 :store/id (:store-id store) :generation 0
+              :prior {} :state state :state/revision revision
+              :state-sha256 (sha256 (form-bytes state)) :application nil
+              :authority authority :committed-at committed-at}]
+      (try
+        (let [digest (publish! store :transaction ^Path (:txdir store) tx)
+              head {:schema :wm/e6b-state-head-v2 :store/id (:store-id store) :generation 0
+                    :state/revision revision :state-sha256 (:state-sha256 tx)
+                    :transaction-sha256 digest :application-index []}]
+          (write-head! store head) (recover* store))
+        (catch Throwable e (reset! (:poisoned? store) true) (throw e))))))
 
 (defn commit!
   "Publish a revalidated provenance artifact, then its transaction, then HEAD."
@@ -192,6 +261,13 @@
                         :transaction-sha256 (:transaction-sha256 head)
                         :state/revision (:state/revision head) :state-sha256 (:state-sha256 head)})
             (refuse! :e6b-store-v2/stale-head {}))
+          (let [event-id (get-in record [:proposal-evidence :feedback/event-id])
+                prior-revision (get-in record [:proposal-evidence :prior :state/revision])
+                next-revision (get-in record [:proposal-evidence :next :state/revision])]
+            (when (or (some #(= event-id (:feedback/event-id %)) (:applications recovered))
+                      (some #(= prior-revision (:prior-state/revision %)) (:applications recovered))
+                      (contains? (:state-revisions recovered) next-revision))
+              (refuse! :e6b-store-v2/feedback-conflict {})))
           (try
             (let [pd (publish! store :provenance ^Path (:provenance-dir store) (:record p))
                   generation (inc (:generation head))
@@ -204,7 +280,7 @@
                   entry {:application/id (:application/id a) :feedback/event-id (:feedback/event-id a)
                          :prior-state/revision (:prior-state/revision a)
                          :transaction-sha256 td :provenance-sha256 pd}
-                  head' {:schema :wm/e6b-state-head-v1 :store/id (:store-id store)
+                  head' {:schema :wm/e6b-state-head-v2 :store/id (:store-id store)
                          :generation generation :state/revision (get-in tx [:next :revision])
                          :state-sha256 (get-in tx [:next :state-sha256])
                          :transaction-sha256 td
