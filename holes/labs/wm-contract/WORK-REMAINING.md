@@ -1356,3 +1356,7 @@ Row18 checker19c34cc9/3a6f56da/15f441b3 accepted at fixed-input scope after4pins
 ## Lead review update — retention deployment preparation, 2026-09-13
 
 TN69ff088c reviewed against complete retention diff and matching HTTP source hash. Proposed queue holds do not reject new bell acceptance; actual admission/quiescence boundary and selective loader artifact still owed. No executable deployment approved. Next bounded offline loader/procedure packet must address old function bodies blocked on writer lock and final archive joins; no live mutation. See runs/row-19-retention-deployment-preparation-2026-09-13/lead-review.md. Older20585/86/87 resume remains superseded by current manifest.
+
+## Lead review update — activation lease source, 2026-09-13
+
+Row18 bc1b4856/fdd99673/8d09b84a reviewed: six pins match and retained16tests49assertions/gates inspected without rerun. Permission/same-byte/census-digest/protected revalidation accepted conditionally. Actual activation still lease-unavailable; controller artifacts not byte-resolved, direct reload enforcement absent, interval controls and production no-create lock opening owed. See runs/row-18-activation-lease-2026-09-13/lead-review.md. No deployed coherence or confidence.
