@@ -118,7 +118,7 @@
     (is (= :e3/canonical-r9-provenance-mismatch
            (refusal (config {:pending pending :verdict verdict
                              :review (assoc review :review-trace/id "wrong")}))))
-    (is (= :e3/review-not-pre-enact
+    (is (= :e3/canonical-r9-time-mismatch
            (refusal (config {:pending pending :verdict verdict
                              :review (assoc review :completed-at "2026-09-13T12:01:00Z")}))))
     (is (= :e3/not-pending-pre-enact
