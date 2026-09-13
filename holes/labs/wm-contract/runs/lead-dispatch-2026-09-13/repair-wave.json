@@ -753,10 +753,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-provenance-strict-readback.request.json",
       "dispatch": "accepted",
       "scope": "pure strict serialized provenance decoder; no store"
+    },
+    {
+      "packet": "codex-23-isolated-store-v2-provenance",
+      "job-id": "invoke-1789282844646-20708-9df3173a",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789282844646-20708-9df3173a",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-isolated-store-v2-provenance.request.json",
+      "dispatch": "accepted",
+      "scope": "fresh temporary isolated store-v2 provenance publication/recovery only"
     }
   ],
   "current-awaiting": [
-    "invoke-1789282605353-20706-38f6bf6a"
+    "invoke-1789282844646-20708-9df3173a"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
