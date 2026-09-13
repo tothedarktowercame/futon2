@@ -553,10 +553,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-r6-scoring-correspondence-contract.request.json",
       "dispatch": "accepted",
       "scope": "read-only canonical R6 scoring correspondence contract; no field search"
+    },
+    {
+      "packet": "codex-23-e6b-canonical-context",
+      "job-id": "invoke-1789276169068-20658-98c0142a",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789276169068-20658-98c0142a",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-canonical-context.request.json",
+      "dispatch": "accepted",
+      "scope": "pure E6b complete canonical context and review artifact/time joins"
     }
   ],
   "current-awaiting": [
-    "invoke-1789275806231-20653-46354848",
+    "invoke-1789276169068-20658-98c0142a",
     "invoke-1789275888536-20655-71c132fb"
   ],
   "codex24-next-boundary": {
