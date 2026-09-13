@@ -114,6 +114,11 @@ is not yet a verified join to Agency's normalized request digest.
   origin/authentication and durable admission binding remain open. This is
   not an operator signature or a created anchor.
 
+- Row 18 bounded proof `mathlib4/168bd082`, receipt `cfa2deaa`: all six
+  pins verified and conditional range/root-order theorems reviewed without rerun.
+  Positive-beta domain refinement remains; production uniqueness and solver
+  correspondence remain unproved. See policy-precision `lead-bounded-review.md`.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
