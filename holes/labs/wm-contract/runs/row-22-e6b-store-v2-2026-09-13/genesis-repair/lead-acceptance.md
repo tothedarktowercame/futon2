@@ -1,0 +1,11 @@
+# Genesis repair independent review — narrow acceptance
+
+Reviewed source/test commit `4f69ad66`, contract `76a9c56f`, and receipts `dcb80e53`. Five current and committed pins match. Source/test bytes at the focused-test commit equal the later contract commit. Retained raw gates show 30 tests / 113 assertions, zero failures/errors, clean kondo/parens, and one deliberate runner failure. No passing checks were rerun.
+
+The shared `valid-genesis!` now runs before initialization publication and on recovered genesis. It validates the exact record keys, stored and traversed generation zero, carrier shape and revision, state digest, parseable time, typed fixture-only authority, complete strict EDN round-trip, and child prior joins. This closes the two executed prior-review counterexamples: nil authority/time and publication of an unreadable authority object. V1 source is unchanged.
+
+The retained self-consistent rehash controls now reach semantic checks for nil authority/time. Nonzero generation can be rejected earlier by HEAD/current equality; that control alone does not prove the child-to-genesis branch, whose generation-zero check is present in source. The Object control rejects an extra authority key before round-trip; the complete round-trip is independently visible before publication. These are coverage limits, not claims that every semantic path was exercised.
+
+Accept only this isolated genesis repair and retained structural store mechanism. Fixture authority is a shape, not independently authenticated evidence; timestamps are parsed with Java Instant. No prospective execution authority, installed-code identity, production ownership, rollback freshness, complete application authority, later-prior acquisition, runtime adapter or restart authorization follows.
+
+Next bounded packet: source-pinned read-only storage-to-retrospective reconstruction contract. Check what exact owner capture/HEAD/provenance inputs are available, define the deterministic mapping into unchanged verify-feedback, and name external completeness and later-prior boundaries. Do not synthesize completeness, execute production actions, or implement an adapter before its input contract is reviewed. All WM production and full-certificate obligations remain open.
