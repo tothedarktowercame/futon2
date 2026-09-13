@@ -489,11 +489,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e5-fixed-context-and-mode.request.json",
       "dispatch": "accepted",
       "scope": "pure E5 fixed context and recognized mode repair; no runtime"
+    },
+    {
+      "packet": "codex-24-f11-producer-authority-contract",
+      "job-id": "invoke-1789275137982-20641-f684332b",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789275137982-20641-f684332b",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-f11-producer-authority-contract.request.json",
+      "dispatch": "accepted",
+      "scope": "read-only F11 producer authority/acquisition contract; no emitter edits"
     }
   ],
   "current-awaiting": [
     "invoke-1789274887203-20638-76cae5b8",
     "invoke-1789275024902-20639-981e63a5",
-    "invoke-1789274481837-20637-ef731f39"
+    "invoke-1789275137982-20641-f684332b"
   ]
 }
