@@ -6,7 +6,7 @@
            (java.nio.file Files)
            (java.security MessageDigest)))
 
-(def identity {:model/id :wm-e5 :model/revision "model-5" :run/id "run-e5" :tick/index 8})
+(def binding-id {:model/id :wm-e5 :model/revision "model-5" :run/id "run-e5" :tick/index 8})
 (def candidates
   [{:candidate/occurrence-id [:run-e5 8 0] :action {:type :work :target "same"}
     :move/class :close-hole :prior 0.5 :step-score-delta -0.25}
@@ -23,16 +23,16 @@
   ([] (records :exploitation 3))
   ([mode depth]
    {:unshaped (merge {:schema/version :wm/e5-unshaped-candidates-v1 :scope :isolated-test
-                      :candidates candidates} identity)
+                      :candidates candidates} binding-id)
     :slow-state (merge {:schema/version :wm/e5-slow-state-authority-v1 :scope :isolated-test
                         :slow/mode mode :slow/intrinsics {:close-hole {:alpha 4.0 :beta 2.0}}
                         :weight-table/revision "temporal-hierarchy-source-v1"
-                        :weight-table (hierarchy/mode-prior-weights mode)} identity)
+                        :weight-table (hierarchy/mode-prior-weights mode)} binding-id)
     :shaped (merge {:schema/version :wm/e5-shaped-candidates-v1 :scope :isolated-test
                     :candidates (production-shaped candidates mode)
-                    :depth/unchanged {:requested depth :effective depth}} identity)
+                    :depth/unchanged {:requested depth :effective depth}} binding-id)
     :depth (merge {:schema/version :wm/e5-independent-depth-authority-v1 :scope :isolated-test
-                   :horizon/requested depth :horizon/effective depth} identity)}))
+                   :horizon/requested depth :horizon/effective depth} binding-id)}))
 (defn- sha [bytes]
   (apply str (map #(format "%02x" (bit-and 0xff %))
                   (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bytes))))))
