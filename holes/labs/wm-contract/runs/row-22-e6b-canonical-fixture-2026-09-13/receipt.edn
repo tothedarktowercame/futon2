@@ -1,0 +1,28 @@
+{:schema :wm/execution-receipts-v1
+ :source-commits ["2d0b46c4" "5da70a27" "c60ec244" "2146be99"]
+ :tree-sha "2146be99e08f432a01f1471ea986891ac2371aee"
+ :at "2026-09-13T06:30:59Z"
+ :pins
+ {:capture "57ad2897739f72bfc5cff2fbdd624b2e048b2c67511e017d5faf8b7ecddc5ba4"
+  :readback "3a0986ec265c4c3dae9599647487c8b406ea1248a03c17a09d3b7d035389fee9"
+  :inventory "9886fe233db291bcbf5fbe5679f453420f59212066b5bb01d21dd003c97d3ebc"
+  :contract "a8d5f7c76b2af5e72e821a0991ed1e18a5a13ec78b170c514d09e4aa79498dbf"
+  :independent-review "36e353144dec179d778e9e12d55f01f743bf21b7b0ed43c414c54ce17af1c1e1"
+  :capture-manifest "eca79640929ae7a7fb06fb12a2315d6172f11fc853489c9d0f4d7b7157ff119e"}
+ :gates
+ [{:gate :capture
+   :command "clojure -M:test holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/capture.clj"
+   :exit 0 :records 8 :stdout "capture.stdout" :stderr "capture.stderr"}
+  {:gate :strict-readback
+   :command "clojure -M holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/verify-capture.clj"
+   :exit 0 :records 8 :stdout "readback.stdout" :stderr "readback.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --config '{:linters {:namespace-name-mismatch {:level :off}}}' --lint holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/capture.clj holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/verify-capture.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/capture.clj holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/verify-capture.clj"
+   :exit 0 :stdout "parens.stdout" :stderr "parens.stderr"}]
+ :failed-history
+ [{:gate :clj-kondo :exit 3 :errors 2 :warnings 0
+   :cause :script-namespace-path-lint
+   :stdout "kondo-failed.stdout" :stderr "kondo-failed.stderr"}]}

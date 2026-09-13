@@ -1,0 +1,3 @@
+holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/capture.clj:1:5: error: Namespace name does not match file name: wm-contract.capture-e6b-canonical-fixture
+holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/verify-capture.clj:1:5: error: Namespace name does not match file name: wm-contract.verify-e6b-canonical-fixture
+linting took 11ms, errors: 2, warnings: 0

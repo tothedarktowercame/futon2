@@ -1,0 +1,1 @@
+{:status :captured-isolated-fixture, :records 8, :manifest {:path "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/capture-manifest.edn", :sha256 "eca79640929ae7a7fb06fb12a2315d6172f11fc853489c9d0f4d7b7157ff119e", :value-sha256 "eca79640929ae7a7fb06fb12a2315d6172f11fc853489c9d0f4d7b7157ff119e", :bytes 3033}, :authority :unauthenticated-test-data}
