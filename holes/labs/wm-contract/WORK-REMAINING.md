@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest E5 fixed-context repair: 86b66bcc/06c11b65 five pins/raw5tests30 verified at repair and receipt commits; accepted isolated canonical replay only. Codex22 awaits reviewed E6 contract20644; no duplicate implementation dispatch. See [acceptance](runs/row-22-e5-slow-prior-2026-09-13/lead-strict-context-acceptance.md).
+
 - Latest E4 repair: 6b6a03e2/8e0936c7 three pins/raw6tests30 verified, accepted isolated evidence joins only. Real history completeness, production ownership and R8 numerical/arithmetic qualification remain open. See [acceptance](runs/row-22-e4-causal-evidence-2026-09-13/lead-repair-acceptance.md).
 
 - Latest Row24 cross-layer review: 119bd84a/13824797 five pins/six final axiom checks verified, accepted structural-only. Expected typed targets, membership completeness and byte-authenticated F11 production remain external. Next is a concrete producer authority/acquisition contract, no emitter mutation. See [review](runs/row-24-cross-layer-2026-09-13/lead-review.md).

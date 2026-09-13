@@ -509,7 +509,12 @@
   ],
   "current-awaiting": [
     "invoke-1789275223688-20644-cfeb3e3a",
-    "invoke-1789275024902-20639-981e63a5",
     "invoke-1789275137982-20641-f684332b"
-  ]
+  ],
+  "codex22-next-boundary": {
+    "status": "awaiting-reviewed-e6-contract",
+    "completed-job": "invoke-1789275024902-20639-981e63a5",
+    "dependency-job": "invoke-1789275223688-20644-cfeb3e3a",
+    "review": "holes/labs/wm-contract/runs/row-22-e5-slow-prior-2026-09-13/lead-strict-context-acceptance.md"
+  }
 }
