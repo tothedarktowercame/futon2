@@ -1,0 +1,21 @@
+{:schema :wm/execution-receipts-v1
+ :supersedes "gates.edn"
+ :source-commit "0c0aa613"
+ :tree-sha "1f8b7ed7bfe9c85ea7e249503866e50b030a03b0"
+ :source-sha256 "97cbdc52f7214de0c4d1a8beb0cefbbc96380592592b33f71ced1d7aca8eab19"
+ :test-sha256 "01a454d33399bd9da5ad17868c724965a2d2d794f795d316193f0d679aae7834"
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.scheduled-route-evidence-test]'"
+   :exit 0 :tests 4 :assertions 21 :failures 0 :errors 0
+   :stdout "final-test.stdout" :stderr "final-test.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/scheduled_route_evidence.clj test/futon2/aif/scheduled_route_evidence_test.clj holes/labs/wm-contract/runs/row-22-e4-causal-evidence-2026-09-13/induced_failure.clj"
+   :exit 0 :errors 0 :warnings 0
+   :stdout "final-kondo.stdout" :stderr "final-kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/scheduled_route_evidence.clj test/futon2/aif/scheduled_route_evidence_test.clj holes/labs/wm-contract/runs/row-22-e4-causal-evidence-2026-09-13/induced_failure.clj"
+   :exit 0 :stdout "final-parens.stdout" :stderr "final-parens.stderr"}]
+ :induced-failure {:receipt "gates.edn" :exit 1 :tests 1 :assertions 1}
+ :failed-history "failed-history.edn"
+ :at "2026-09-13T00:00:00Z"}
