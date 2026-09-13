@@ -1,0 +1,4 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-portfolio-restriction-test"
+ :exit 0 :tests 5 :assertions 20
+ :tree-sha "ac386260fbd5a9c594beecbe082ed0eddb5edd55"
+ :at "2026-09-13" :stdout "test.stdout" :stderr "test.stderr"}

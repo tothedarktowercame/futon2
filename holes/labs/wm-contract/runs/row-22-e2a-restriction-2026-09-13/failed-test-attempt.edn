@@ -1,0 +1,7 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-portfolio-restriction-test"
+ :exit 1 :tests 5 :assertions 20 :errors 9
+ :tree-sha "68ae41e86934d6fec739dcd18a41f5d6fbbe7ab5"
+ :failure {:kind :test-harness-failed-to-capture-ex-info
+           :cause "with-e1 invoked commissioned refusal directly instead of returning ex-data :refusal"}
+ :retention-note "Runner output was 9709 tokens and returned truncated; totals and repeated ExceptionInfo causes are retained without claiming complete stdout."
+ :repair-commit "ac386260fbd5a9c594beecbe082ed0eddb5edd55"}

@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint holes/labs/wm-contract/runs/row-22-e2a-restriction-2026-09-13/readback.clj"
+ :exit 0 :tests 1 :assertions 1
+ :tree-sha "0b4af1d8c8ce6ab3ca165573eddd151c0f62ce20"
+ :at "2026-09-13" :stdout "readback-kondo.stdout" :stderr "readback-kondo.stderr"}
