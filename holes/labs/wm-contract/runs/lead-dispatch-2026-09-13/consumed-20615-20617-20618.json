@@ -1,0 +1,50 @@
+{
+  "schema": "wm/resumed-batch-consumption-v1",
+  "checked_at": "2026-09-13T04:02:51.876215+00:00",
+  "manifest_sha256": "b3a8c0ef6cce55c8587c73a84671fbdfd1e281263091195d6a5602345994fbb4",
+  "reviews_verified": [
+    {
+      "consumed_job": "invoke-1789271039934-20615-eb6ce892",
+      "review_commit": "5ac24b13",
+      "review_path": "holes/labs/wm-contract/runs/row-14-offline-close-attachment-2026-09-13/lead-acceptance.md",
+      "review_sha256": "3ee49b030da449816ddae68196c183d53197c1ea4e3af84b8edc461dd001d51f",
+      "current_successor": "invoke-1789272111078-20622-4dcfc158"
+    },
+    {
+      "consumed_job": "invoke-1789271308775-20617-e4c52270",
+      "review_commit": "9d3e1db4",
+      "review_path": "holes/labs/wm-contract/runs/row-19-ingress-controller-2026-09-13/lead-ownership-acceptance.md",
+      "review_sha256": "d3361d7e3b564cf6f39808f4bb441b5b3d6467f12f5fe5332f8675b468417547",
+      "current_successor": "invoke-1789271800626-20620-737f8c90"
+    },
+    {
+      "consumed_job": "invoke-1789271480848-20618-2dfdb941",
+      "review_commit": "148292a9",
+      "review_path": "holes/labs/wm-contract/runs/row-22-e2a-restriction-2026-09-13/lead-acceptance.md",
+      "review_sha256": "758054c31bf89fb16e453d38a877aab52eb0f35c486101cc4879eb77ccc87ea1",
+      "current_successor": "invoke-1789271983880-20621-173b7165"
+    }
+  ],
+  "current_jobs": [
+    {
+      "job-id": "invoke-1789271800626-20620-737f8c90",
+      "state": "done",
+      "artifact-ref": "232df039"
+    },
+    {
+      "job-id": "invoke-1789271983880-20621-173b7165",
+      "state": "running",
+      "artifact-ref": null
+    },
+    {
+      "job-id": "invoke-1789272111078-20622-4dcfc158",
+      "state": "running",
+      "artifact-ref": null
+    }
+  ],
+  "retained_continuation": "park-cc312f0b-2af9-4dd4-bb37-676dd4746f70",
+  "new_dispatches": 0,
+  "tests_rerun": false,
+  "admission": false,
+  "result": "superseded replies consumed; current dependencies retained"
+}
