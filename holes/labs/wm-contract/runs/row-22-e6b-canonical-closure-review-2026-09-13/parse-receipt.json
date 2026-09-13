@@ -1,0 +1,6 @@
+{
+  "command": "clojure -M holes/labs/wm-contract/runs/row-22-e6b-canonical-closure-review-2026-09-13/parse.clj",
+  "exit": 0,
+  "stdout": ":one-form-ok",
+  "superseded": "parse-failed-history.txt"
+}

@@ -1,0 +1,1 @@
+Initial clojure -M -e reader-check invocation had an unmatched parenthesis in the command expression; exit 1, EOF while reading starting at line 1. This was a harness error, not a manifest parse result. Corrected with retained parse.clj.
