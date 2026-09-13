@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest lifecycle review: 7309d81c/416e9b20 two source pins and retained 3-test/15-assertion gates verified. Executed omitted-source-fields control incorrectly yields complete-census/zero-in-flight; strict schemas/UTF-8/deferred joins and independently bound complete universe/scope remain required before drain evidence. No real reconciliation. See [review](runs/row-19-lifecycle-reconciliation-2026-09-13/lead-review.md).
+
 - Latest Row 24 precursor review: b9bbcb833e/e1642859/c3666309 accepted as structural rejection machinery only. Ten current pins plus historical tracker pin verified; eight raw axiom checks have no sorryAx. Explicit run/claim/declaration joins and exact-subject divergence authority remain unimplemented, as do real record joins and F11 external byte verification. No full certificate. See [review](runs/row-24-full-predicate-precursor-2026-09-13/lead-acceptance.md).
 
 - Latest E2a acceptance: bbd44b21/d47de33c reviewed, four pins and final 5-test/21-assertion raw gates match. Stable approved-occurrence restriction accepted as isolated mechanism only. 3dd5a89a independently reviewed lead binding fix. Production E1 authority, actual restricted-domain scoring/selection, exact enactment and R9 authorization remain open; pure E2b verification is next. See [acceptance](runs/row-22-e2a-restriction-2026-09-13/lead-acceptance.md).
