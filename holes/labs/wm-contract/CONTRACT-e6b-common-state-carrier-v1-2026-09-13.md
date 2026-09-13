@@ -280,10 +280,15 @@ completeness acceptance, the smallest future adapter has one behavior:
    record, not the next carrier; the ordered full six-field application ledger;
    and a separately accepted complete application universe. Canonical E3/E2b
    configuration must come from the retained closure, never working defaults.
-5. Preserve the captured application order exactly. Store capture rows add
-   transaction/provenance digests, so they are not themselves the unchanged
-   ledger schema; deterministic projection must remove only those two named
-   store fields and must reject any other missing or extra field.
+5. Preserve the captured application order exactly. Each capture index row has
+   exactly five keys: application ID, feedback event ID, prior-state revision,
+   transaction digest, and provenance digest. Removing the last two produces
+   only three fields, not a retrospective ledger row. Resolve each indexed
+   transaction and provenance by those exact digests; join all three index
+   identities to its application and derive the six-field row in step 3 from
+   that transaction application. Require exact index schemas, unique ordered
+   membership, and one-to-one coverage of all non-genesis chain transactions.
+   Never invent status or input/output digests from an index row.
 
 ### External completeness subject
 

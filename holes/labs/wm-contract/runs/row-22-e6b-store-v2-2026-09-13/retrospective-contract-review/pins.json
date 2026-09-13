@@ -1,0 +1,31 @@
+{
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_store_v2.clj",
+      "sha256": "27654817da8ee9fdf92c562478f8811d32fdde70015cc4c7deff8220636082a2",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_provenance.clj",
+      "sha256": "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+      "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_state_carrier.clj",
+      "sha256": "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965",
+      "match": true
+    },
+    {
+      "path": "holes/labs/wm-contract/CONTRACT-e6b-store-v2-genesis-v1-2026-09-13.md",
+      "sha256": "989bb0ba8e069b64b99bd4982dd4a1e90dfe6241efeee0569f7dcff5ae5f3945",
+      "match": true
+    }
+  ],
+  "job": "invoke-1789284017934-20714-528ac8c1",
+  "state": "done"
+}

@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest retrospective contract ecf7fcd9 five source pins verified; HEAD bytes absent confirmed. Lead corrected capture-index versus six-field ledger projection: resolve exact transactions, never synthesize missing status/digests. Independent correction review plus exact validated HEAD-buffer retention next; no adapter/completeness. See [review](runs/row-22-e6b-store-v2-2026-09-13/retrospective-contract-review/lead-review.md).
+
 - Latest store-v2 genesis4f69ad66/76a9c56f/dcb80e53 five pins/raw30tests113 accepted shared isolated genesis validation only; complete EDN check precedes publication and recovery repeats schema/carrier/authority/time checks. Next read-only storage-to-retrospective input contract; no adapter or completeness authority. See [acceptance](runs/row-22-e6b-store-v2-2026-09-13/genesis-repair/lead-acceptance.md).
 
 - Latest store-v2 6550f39c/19523ff3 five pins/raw28tests100 reviewed. Executed self-consistently rehashed nil genesis authority/time still captures; non-EDN authority publishes HEAD before refusing. Shared complete genesis validation and pre-publication round-trip repair required. See [review](runs/row-22-e6b-store-v2-2026-09-13/strict-repair/lead-review/review.md).
