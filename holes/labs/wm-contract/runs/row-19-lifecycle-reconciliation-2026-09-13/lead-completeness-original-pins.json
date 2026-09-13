@@ -1,0 +1,10 @@
+[
+  {
+    "path": "src/futon3c/agency/invoke_lifecycle_reconciliation.clj",
+    "sha256": "3518e418e5522798b15369b97216cc78d40a62f9730f4df4f7bfd30f2804a505"
+  },
+  {
+    "path": "test/futon3c/agency/invoke_lifecycle_reconciliation_test.clj",
+    "sha256": "88188989349318da32392e745bd6752dad6b1c909c12a0c91f0cd3afc3252c4f"
+  }
+]

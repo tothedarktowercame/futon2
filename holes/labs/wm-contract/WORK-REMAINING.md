@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest lifecycle completeness review: a03739e3/f7d67a56 two pins/raw gates verified; explicit schemas, deferred generation and fixed complete job/trace authority accepted at isolated scope. Lead moved five top-level adversarial forms into runner scope and retained result authority scope; changed-source 4-test/27-assertion gates pass. Independent touch-up review and isolated atomic source production remain next; no real drain/serving claim. See [acceptance](runs/row-19-lifecycle-reconciliation-2026-09-13/lead-completeness-acceptance.md).
+
 - Latest E2b subject acceptance: a03b569d/9e08d67f seven pins and raw 6-test/23-assertion gates verified. Nonempty independent cohort/event and exact resolved field/domain subject repair accepted only at isolated scope. Production authority, R6 proof and R9 pre-enact authorization remain open; pure E3 is next. See [acceptance](runs/row-22-e2b-correspondence-2026-09-13/lead-subject-acceptance.md).
 
 - Latest Row 24 run-binding review: 1cfaf674/d43b755b seven source/olean/toolchain pins and both retained six-axiom gates match. Node/equation fixed-run joins accepted structurally only. Ordinary selection match still lacks occurrence/run subjects; divergence occurrence IDs are not joined to independently fixed events. Exact event-subject refinement remains required, as do record/connection joins and external byte authentication. No certificate. See [review](runs/row-24-run-binding-2026-09-13/lead-review.md).
