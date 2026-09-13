@@ -1,0 +1,34 @@
+[{:gate :futon2-focused-test
+  :command "clojure -X:test :nses '[futon2.aif.on-demand-entrypoint-test]'"
+  :exit 0 :tests 2 :assertions 7
+  :tree-sha "402632e6cf81a6f111a376c5a1bd4ff93fcadf27"
+  :at "2026-09-13T16:36:26+00:00"
+  :stdout "Running tests in #{\"test\"}\nTesting futon2.aif.on-demand-entrypoint-test\nRan 2 tests containing 7 assertions.\n0 failures, 0 errors."}
+ {:gate :futon3c-focused-test
+  :command "clojure -M:test -n futon3c.wm.runner-service-test"
+  :exit 0 :tests 14 :assertions 114
+  :tree-sha "51269db9daaec17d86988eaaead4de7139cd0288"
+  :at "2026-09-13T16:36:26+00:00"
+  :stdout-summary "Ran 14 tests containing 114 assertions. 0 failures, 0 errors. Full raw output retained in the invoking job transcript."}
+ {:gate :futon2-clj-kondo
+  :command "clj-kondo --lint src/futon2/aif/on_demand_entrypoint.clj test/futon2/aif/on_demand_entrypoint_test.clj"
+  :exit 0 :errors 0 :warnings 0
+  :tree-sha "402632e6cf81a6f111a376c5a1bd4ff93fcadf27"
+  :at "2026-09-13T16:36:26+00:00"
+  :stdout "linting took 11ms, errors: 0, warnings: 0"}
+ {:gate :futon3c-clj-kondo
+  :command "clj-kondo --lint src/futon3c/transport/http.clj test/futon3c/wm/runner_service_test.clj"
+  :exit 0 :errors 0 :warnings 0
+  :tree-sha "51269db9daaec17d86988eaaead4de7139cd0288"
+  :at "2026-09-13T16:36:26+00:00"
+  :stdout "src/futon3c/transport/http.clj:7786:18: info: Redundant boolean coercion: expression already has type boolean\nlinting took 254ms, errors: 0, warnings: 0"}
+ {:gate :futon2-check-parens
+  :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/on_demand_entrypoint.clj test/futon2/aif/on_demand_entrypoint_test.clj"
+  :exit 0 :files 2
+  :tree-sha "402632e6cf81a6f111a376c5a1bd4ff93fcadf27"
+  :at "2026-09-13T16:36:26+00:00" :stdout "OK"}
+ {:gate :futon3c-check-parens
+  :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/transport/http.clj test/futon3c/wm/runner_service_test.clj"
+  :exit 0 :files 2
+  :tree-sha "51269db9daaec17d86988eaaead4de7139cd0288"
+  :at "2026-09-13T16:36:26+00:00" :stdout "OK"}]
