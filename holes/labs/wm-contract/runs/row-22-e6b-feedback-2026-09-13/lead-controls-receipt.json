@@ -1,0 +1,30 @@
+{
+  "command": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/lead-controls.clj"
+  ],
+  "exit": 0,
+  "verified-pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+      "sha256": "c21972b7cae3c739cc3f391eb96da5d4102bdd557a8616272946901df1beebab"
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_evidence_test.clj",
+      "sha256": "636648ab84645ba0841447cad12411fbb2c0480793aeee314e2041a2f29cb1e0"
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/SPEC.md",
+      "sha256": "2db02fca625569d28a0efdb6ebc02f98c56522cb63f445426eef71273ba83769"
+    },
+    {
+      "path": "src/futon2/aif/temporal_hierarchy.clj",
+      "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+    },
+    {
+      "path": "src/futon2/aif/intrinsic_values.clj",
+      "sha256": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"
+    }
+  ]
+}
