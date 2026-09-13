@@ -1,5 +1,6 @@
 (ns futon2.aif.machine-budget-authority-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-budget-authority :as authority])
@@ -133,3 +134,12 @@
       (Files/delete (.toPath (io/file root "budgets.edn")))
       (is (= :r6-r11/source-unreadable
              (refusal #(authority/resolve-and-map cfg)))))))
+
+(deftest identity-binding-cannot-overwrite-resolved-input
+  (let [root (copy-fixtures)]
+    (doseq [[_ filename] files]
+      (let [file (io/file root filename)
+            record (edn/read-string (slurp file))]
+        (spit file (pr-str (assoc-in record [:binding :scope] :production)))))
+    (is (= :r6-r11/identity-shape-invalid
+           (refusal #(authority/resolve-and-map (config root)))))))

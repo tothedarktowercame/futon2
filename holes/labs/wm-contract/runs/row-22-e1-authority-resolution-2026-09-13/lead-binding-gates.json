@@ -1,0 +1,16 @@
+{
+  "source_pins": {
+    "src/futon2/aif/machine_budget_authority.clj": "13c6fb05c2a75ff5c673ed2df49e9d555db210d9269588396ea71ce97964253e",
+    "src/futon2/aif/machine_budget_mapping.clj": "5072c34fa55db6683faeef38ac2b8026107c9ef0c9d7174a9a4026ab3ec2110f",
+    "test/futon2/aif/machine_budget_authority_test.clj": "863ddd403b7f9ed4b5e2ccc401571302903814c8ef35fd8e2fd3f092eb9396f6"
+  },
+  "test_command": "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-budget-authority-test",
+  "test_stdout": "lead-binding-test.stdout",
+  "test_stderr": "lead-binding-test.stderr",
+  "tests": 8,
+  "assertions": 19,
+  "failures": 0,
+  "errors": 0,
+  "kondo": "zero warnings/errors",
+  "parens": "arxana-check-parens-cli explicit source/test paths: OK"
+}

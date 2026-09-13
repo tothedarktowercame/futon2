@@ -1,0 +1,7 @@
+# Independent E1 authority review and lead touch-up
+
+All four NOTES pins match d53b88e4 source bytes. Retained a08f17f2 gates show 7 tests/18 assertions, kondo zero warnings/errors and explicit parens OK. Read all resolver code and its refusal controls. Five same-buffer sources now supply ordered support and exact values; supported transformations refuse. Production use explicitly remains unavailable. These repair the previous independent-byte-resolution findings at isolated scope.
+
+Lead found that `merge` of the common binding into the resolved mapper input allowed extra binding fields to overwrite scope/support/authorities. The lead touch-up requires exactly the four model/revision/run/tick binding keys. A regression writes rehashed fixtures whose common binding contains production scope and verifies identity-shape-invalid. Changed-source focused run passed 8 tests/19 assertions, zero failures/errors; raw output retained, kondo zero warnings/errors and actual explicit parens OK. Current source hashes are in lead-binding-gates.json.
+
+Accept the author's byte-resolution machinery narrowly; the lead touch-up awaits independent review. No production configuration, E1 firing, E2 restriction, runtime enactment or admission follows. Next packet independently reviews the small lead edit, then specifies and implements pure E2a exact portfolio restriction over full occurrence support. Preserve all required R6 selection obligations and typed empty/unknown/conflicting restrictions. No live integration.

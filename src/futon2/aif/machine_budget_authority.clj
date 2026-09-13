@@ -129,6 +129,13 @@
         bindings (mapv :binding records)
         scopes (mapv :scope records)
         scope (first scopes)]
+    (doseq [binding bindings]
+      (when-not (and (map? binding)
+                     (= #{:model/id :model/revision :run/id :tick/index}
+                        (set (keys binding))))
+        (refuse! :r6-r11/identity-shape-invalid
+                 "Identity binding may contain only model/run/tick fields"
+                 {:binding binding})))
     (when-not (apply = bindings)
       (refuse! :r6-r11/cross-run-authority "Resolved authorities disagree on identity"
                {:bindings bindings}))
