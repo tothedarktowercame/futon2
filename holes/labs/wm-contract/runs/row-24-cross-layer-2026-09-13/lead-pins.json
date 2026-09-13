@@ -1,0 +1,32 @@
+[
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateCrossLayerBinding.lean",
+    "expected": "4b2124823e62aa1c68053d3be92e7a10a9f4c38ac19dccad16fe2fbbaab0f05e",
+    "actual": "4b2124823e62aa1c68053d3be92e7a10a9f4c38ac19dccad16fe2fbbaab0f05e",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/FullCertificateCrossLayerBinding.olean",
+    "expected": "110a8275fbcd686cb76b011b9856e6b4a6f0cc690324d54efff45ab1d70ee196",
+    "actual": "110a8275fbcd686cb76b011b9856e6b4a6f0cc690324d54efff45ab1d70ee196",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateResolvedEvidence.lean",
+    "expected": "70e4b40d577406cf87e127570c44e255ad5f27310290a7d60b9a95223d95e53e",
+    "actual": "70e4b40d577406cf87e127570c44e255ad5f27310290a7d60b9a95223d95e53e",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/FullCertificateResolvedEvidence.olean",
+    "expected": "b8b4d1d12c00c03bc5584f01217ce50e47b865dc91c8f80419056063ab1a3fa4",
+    "actual": "b8b4d1d12c00c03bc5584f01217ce50e47b865dc91c8f80419056063ab1a3fa4",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/lean-toolchain",
+    "expected": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+    "actual": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+    "match": true
+  }
+]
