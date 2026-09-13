@@ -1,6 +1,7 @@
 (ns futon2.aif.find-reconciliation
   "Pure comparison of F11 snapshots by scenario, round and receipt identity."
-  (:require [clojure.set :as set]))
+  (:require [clojure.edn]
+            [clojure.set :as set]))
 
 (defn- indexed [rows key-fn]
   (group-by key-fn rows))
@@ -109,6 +110,62 @@
              :when (and (not (certificate-volatile-fields k))
                         (not= (get committed k) (get recomputed k)))]
          {:field k :committed (get committed k) :recomputed (get recomputed k)})))
+
+(def ^:private pin-expectation-keys
+  #{:schema :pin-path :pin-sha256 :authority :basis})
+
+(def ^:private pin-authority-keys
+  #{:kind :commit :commit-author :commit-date :commit-subject :blob-sha :rederive})
+
+(defn read-pin-expectation
+  "Parse and structurally validate the committed pin expectation from its
+   raw text: exactly one EDN form, the exact key set, the declared schema,
+   a well-formed digest, and a complete git authority block.  Typed throw
+   on any defect; the checker must not trust a malformed expectation."
+  [text]
+  (let [forms (try (with-open [r (java.io.PushbackReader.
+                                  (java.io.StringReader. text))]
+                     (loop [acc []]
+                       (let [v (clojure.edn/read {:eof ::eof} r)]
+                         (if (= ::eof v) acc (recur (conj acc v))))))
+                   (catch Exception e
+                     (throw (ex-info "pin expectation is not readable EDN"
+                                     {:error :pin-expectation/unreadable} e))))
+        _ (when (not= 1 (count forms))
+            (throw (ex-info "pin expectation must be exactly one EDN form"
+                            {:error :pin-expectation/not-one-form
+                             :forms (count forms)})))
+        m (first forms)
+        errors (cond-> []
+                 (not (map? m)) (conj :not-a-map)
+                 (and (map? m) (not= pin-expectation-keys (set (keys m))))
+                 (conj :wrong-key-set)
+                 (not= :wm/f2-pin-expectation-v1 (:schema m)) (conj :wrong-schema)
+                 (not (string? (:pin-path m))) (conj :pin-path-not-string)
+                 (not (and (string? (:pin-sha256 m))
+                           (re-matches #"[0-9a-f]{64}" (:pin-sha256 m))))
+                 (conj :pin-sha256-malformed)
+                 (not (and (map? (:authority m))
+                           (= pin-authority-keys (set (keys (:authority m))))
+                           (= :futon3-git-history (get-in m [:authority :kind]))
+                           (re-matches #"[0-9a-f]{40}" (str (get-in m [:authority :commit])))
+                           (re-matches #"[0-9a-f]{40}" (str (get-in m [:authority :blob-sha])))))
+                 (conj :authority-malformed)
+                 (not (string? (:basis m))) (conj :basis-not-string))]
+    (when (seq errors)
+      (throw (ex-info "pin expectation failed structural validation"
+                      {:error :pin-expectation/invalid :errors errors})))
+    m))
+
+(defn pin-drift
+  "Nil when the observed pin digest matches its validated expectation;
+   otherwise a typed refusal naming both digests."
+  [expectation observed-sha256]
+  (when (not= (:pin-sha256 expectation) observed-sha256)
+    {:error :pin-expectation/pin-drifted
+     :expected (:pin-sha256 expectation)
+     :observed observed-sha256
+     :authority (get-in expectation [:authority :commit])}))
 
 (defn report [pin live]
   (let [{:keys [pairs structural-differences]} (comparison pin live)

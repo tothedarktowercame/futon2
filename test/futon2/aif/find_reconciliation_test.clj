@@ -1,5 +1,6 @@
 (ns futon2.aif.find-reconciliation-test
   (:require [clojure.edn :as edn]
+            [clojure.string]
             [clojure.test :refer [deftest is]]
             [futon2.aif.find-reconciliation :as reconciliation]))
 
@@ -104,3 +105,35 @@
           drift (reconciliation/certificate-drift cert moved)]
       (is (= #{:live-sha256 :records-reconcile?} (set (map :field drift))))
       (is (= "bb" (:committed (first (filter #(= :live-sha256 (:field %)) drift))))))))
+
+(def committed-expectation-text
+  (slurp "holes/labs/wm-contract/runs/F11-find/00-pin-expectation.edn"))
+
+(deftest pin-expectation-validates-structure-and-refuses-defects
+  (let [m (reconciliation/read-pin-expectation committed-expectation-text)]
+    (is (= :wm/f2-pin-expectation-v1 (:schema m))
+        "the committed expectation itself passes full validation")
+    (is (= "e63eaef83194c6100ac403c2ad2c5bf4efce81f8"
+           (get-in m [:authority :commit]))))
+  (letfn [(errs [text] (try (reconciliation/read-pin-expectation text) nil
+                            (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (is (= :pin-expectation/not-one-form
+           (:error (errs (str committed-expectation-text " :trailing")))))
+    (is (some #{:wrong-schema}
+              (:errors (errs (clojure.string/replace committed-expectation-text
+                                                     "f2-pin-expectation-v1" "other-v9")))))
+    (is (some #{:pin-sha256-malformed}
+              (:errors (errs (clojure.string/replace committed-expectation-text
+                                                     #"c11673[0-9a-f]+" "nothex")))))
+    (is (some #{:wrong-key-set}
+              (:errors (errs "{:schema :wm/f2-pin-expectation-v1}"))))))
+
+(deftest pin-drift-refuses-hermetically
+  ;; Hermetic: no filesystem, no futon3 mutation -- the decision is pure.
+  (let [m (reconciliation/read-pin-expectation committed-expectation-text)]
+    (is (nil? (reconciliation/pin-drift m (:pin-sha256 m))))
+    (let [refusal (reconciliation/pin-drift m (apply str (repeat 64 "0")))]
+      (is (= :pin-expectation/pin-drifted (:error refusal)))
+      (is (= (:pin-sha256 m) (:expected refusal)))
+      (is (= (apply str (repeat 64 "0")) (:observed refusal)))
+      (is (= "e63eaef83194c6100ac403c2ad2c5bf4efce81f8" (:authority refusal))))))

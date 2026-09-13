@@ -1,6 +1,11 @@
 {:schema :wm/f2-pin-expectation-v1
  :pin-path "futon3:checks/find-snatch.edn"
  :pin-sha256 "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce"
- :supplied-by "claude-15"
- :supplied-at "2026-09-13"
- :basis "M-f11's F2 choice: acknowledged-clause, route, and as-of content are checked against an INDEPENDENTLY SUPPLIED expectation. This committed record is that expectation for the pin side; the live futon3 checkout no longer supplies its own standard."}
+ :authority {:kind :futon3-git-history
+             :commit "e63eaef83194c6100ac403c2ad2c5bf4efce81f8"
+             :commit-author "Joseph Corneli"
+             :commit-date "2026-09-08T04:57:15+00:00"
+             :commit-subject "F11: reconcile find fixture with live library"
+             :blob-sha "739d21cd5dce0bec9ee7efc70e99fb6196500c17"
+             :rederive "cd ~/code/futon3 && git cat-file blob e63eaef8:checks/find-snatch.edn | sha256sum"}
+ :basis "M-f11's F2 choice: checked against an independently supplied expectation. The digest is bound to futon3's pre-existing committed history (commit e63eaef8, 2026-09-08, authored by Joe -- five days before this record and not by its transcriber); claude-15 transcribed it and anyone can re-derive it from the :rederive command."}
