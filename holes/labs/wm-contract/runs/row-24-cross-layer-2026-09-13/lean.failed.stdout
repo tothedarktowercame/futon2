@@ -1,0 +1,27 @@
+DarkTower/WarMachine/FullCertificateCrossLayerBinding.lean:84:28: error(lean.invalidField): Invalid field `key`: The environment does not contain `DarkTower.WarMachine.FullCertificateResolvedEvidence.ResolvedRecord.key`, so it is not possible to project the field `key` from an expression
+  r
+of type `ResolvedRecord`
+'DarkTower.WarMachine.FullCertificateCrossLayerBinding.crossLayer_implies_full' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateCrossLayerBinding.rejects_cross_layer_record_mismatch' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateCrossLayerBinding.rejects_wrong_nonempty_cross_family_reference' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateCrossLayerBinding.rejects_ambiguous_composite_record_identity' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateCrossLayerBinding.rejects_wrong_family_causal_target' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateCrossLayerBinding.rejects_wrong_review_claim' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

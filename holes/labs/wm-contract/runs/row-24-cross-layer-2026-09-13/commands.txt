@@ -1,0 +1,3 @@
+lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/FullCertificateCrossLayerBinding.olean DarkTower/WarMachine/FullCertificateCrossLayerBinding.lean
+attempt 1 tree ec9952a070: exit 1; lean.failed.stdout/stderr
+final tree 119bd84ad7075b26cdedbf15fe5d95998dfe032f: exit 0; lean.stdout/stderr

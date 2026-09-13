@@ -1,0 +1,5 @@
+{:pins [{:path "FullCertificateCrossLayerBinding.lean" :sha256 "4b2124823e62aa1c68053d3be92e7a10a9f4c38ac19dccad16fe2fbbaab0f05e"}
+        {:path "FullCertificateCrossLayerBinding.olean" :sha256 "110a8275fbcd686cb76b011b9856e6b4a6f0cc690324d54efff45ab1d70ee196"}
+        {:path "FullCertificateResolvedEvidence.lean" :sha256 "70e4b40d577406cf87e127570c44e255ad5f27310290a7d60b9a95223d95e53e"}
+        {:path "FullCertificateResolvedEvidence.olean" :sha256 "b8b4d1d12c00c03bc5584f01217ce50e47b865dc91c8f80419056063ab1a3fa4"}
+        {:path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}]}
