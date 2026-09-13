@@ -161,6 +161,7 @@
                (assoc-in [:provenance-objects pd]
                          (.decode (Base64/getDecoder) ^String (:bytes/base64 forged)))
                (update :provenance-objects dissoc old-p)
+               (assoc-in [:application-universe 0 :provenance-sha256] pd)
                (replace-last-tx (assoc tx :provenance-sha256 pd)))]
     (is (= :e6b-capture/provenance-parent-disagreement
            (refusal #(codec/construct c'))))
