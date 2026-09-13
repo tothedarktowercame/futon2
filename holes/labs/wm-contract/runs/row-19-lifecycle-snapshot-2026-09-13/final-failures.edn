@@ -1,0 +1,9 @@
+{:attempts
+ [{:source-commit "b8e02796" :test-exit 1 :kondo-exit 3 :parens-exit 1
+   :finding "generation-control let form missed its closing delimiter"}
+  {:source-commit "5dad9ab6" :test-exit 1 :kondo-exit 0 :parens-exit 0
+   :tests 4 :assertions 10 :errors 1
+   :finding "future conveyed provider-record-invalid through ExecutionException; control did not unwrap it"}
+  {:command "induced failure followed by sha256sum and git rev-parse in one semicolon shell"
+   :observed-exit 0
+   :finding "trailing git command masked induced exit; superseded by separately executed exit-1 control in gates.edn"}]}
