@@ -83,16 +83,20 @@
 (defn decode-input [bs expected]
   (when-not (and (string? expected) (re-matches #"[0-9a-f]{64}" expected)
                  (= expected (sha256 bs))) (refuse :pin-mismatch nil))
-  (let [decoder (doto (.newDecoder java.nio.charset.StandardCharsets/UTF_8)
-                  (.onMalformedInput java.nio.charset.CodingErrorAction/REPORT)
-                  (.onUnmappableCharacter java.nio.charset.CodingErrorAction/REPORT))
-        text (str (.decode decoder (java.nio.ByteBuffer/wrap bs)))
-        eof (Object.)]
-    (with-open [reader (java.io.PushbackReader. (java.io.StringReader. text))]
-      (let [x (edn/read {:eof eof} reader)]
-        (when (or (identical? eof x) (not (identical? eof (edn/read {:eof eof} reader))))
-          (refuse :input-exhaustion nil))
-        x))))
+  (try
+    (let [decoder (doto (.newDecoder java.nio.charset.StandardCharsets/UTF_8)
+                    (.onMalformedInput java.nio.charset.CodingErrorAction/REPORT)
+                    (.onUnmappableCharacter java.nio.charset.CodingErrorAction/REPORT))
+          text (str (.decode decoder (java.nio.ByteBuffer/wrap bs)))
+          eof (Object.)]
+      (with-open [reader (java.io.PushbackReader. (java.io.StringReader. text))]
+        (let [x (edn/read {:eof eof} reader)]
+          (when (or (identical? eof x) (not (identical? eof (edn/read {:eof eof} reader))))
+            (refuse :input-exhaustion nil))
+          x)))
+    (catch clojure.lang.ExceptionInfo e
+      (if (:refusal (ex-data e)) (throw e) (refuse :malformed-input (ex-message e))))
+    (catch Exception e (refuse :malformed-input (ex-message e)))))
 (defn main [& args]
   (when-not (= 3 (count args)) (refuse :usage "INPUT OUTPUT EXPECTED-SHA256"))
   (let [[in out expected] args
@@ -102,4 +106,10 @@
     (prn {:status :generated-only :scope :isolated :authority/status :none
           :input-sha256 expected :lean-sha256 (sha256 (.getBytes source "UTF-8"))
           :lean-checked? false :output out})))
-(when (= *file* (System/getProperty "babashka.file")) (apply main *command-line-args*))
+(when (= *file* (System/getProperty "babashka.file"))
+  (try (apply main *command-line-args*)
+       (catch clojure.lang.ExceptionInfo e
+         (if-let [k (:refusal (ex-data e))]
+           (do (binding [*out* *err*] (prn {:refusal k :data (:data (ex-data e))}))
+               (System/exit 1))
+           (throw e)))))

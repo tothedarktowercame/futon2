@@ -9,6 +9,10 @@
    :selection {:state :refused-shape :reason "no evidence"}
    :families (mapv #(hash-map :family % :state :typed-gap :reason "not acquired") families)})
 (defn denied? [f] (try (f) false (catch Exception _ true)))
+(defn refused? [f]
+  (try (f) false
+       (catch clojure.lang.ExceptionInfo e (keyword? (:refusal (ex-data e))))
+       (catch Exception _ false)))
 (deftest generation-and-refusals
   (let [source (generate fixture)]
     (is (= source (generate fixture)))
@@ -28,11 +32,11 @@
   (let [bs (.getBytes (pr-str fixture) "UTF-8")]
     (is (= fixture (decode-input bs (sha256 bs))))
     (is (denied? #(decode-input bs (apply str (repeat 64 "0"))))))
-  (doseq [s ["{} {}" "{:a 1 :a 2}" "" ]]
+  (doseq [s ["{} {}" "{:a 1 :a 2}" "" "{:unclosed"]]
     (let [bs (.getBytes s "UTF-8")]
-      (is (denied? #(decode-input bs (sha256 bs))))))
+      (is (refused? #(decode-input bs (sha256 bs))))))
   (let [bs (byte-array [(unchecked-byte 255)])]
-    (is (denied? #(decode-input bs (sha256 bs))))))
+    (is (refused? #(decode-input bs (sha256 bs))))))
 (let [r (run-tests)]
   (when (pos? (+ (:fail r) (:error r))) (System/exit 1)))
 (spit "holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/input.edn" (pr-str fixture))
