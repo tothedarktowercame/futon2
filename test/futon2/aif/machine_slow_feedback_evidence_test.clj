@@ -253,7 +253,7 @@
             #(assoc-in % [:context :prior-state/as-of] "2026-09-13T03:00:00Z")
             :e6b/outcome-review-unresolved]
            [:outcome-before-enactment
-            #(assoc-in % [:lifecycle-relation :enactment/at] "2026-09-13T04:40:00Z")
+            #(assoc-in % [:lifecycle-relation :enactment/at] "2026-09-13T12:40:00Z")
             :e6b/outcome-review-unresolved]
            [:borrowed-observer-origin
             #(assoc-in % [:lifecycle-relation :observer/subject :observer/origin] :other-origin)
