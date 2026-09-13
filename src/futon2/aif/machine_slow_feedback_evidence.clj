@@ -91,23 +91,14 @@
        (nonblank? (:model/revision x)) (nonblank? (:run/id x))
        (nat-int? (:tick/index x))))
 
-(defn verify-feedback
-  [{:keys [mode evidence-root sources canonical]}]
-  (when-not (contains? #{:isolated-test :production} mode)
-    (refuse! :e6b/mode-unknown "Unknown verifier mode" {:mode mode}))
-  (when (= :production mode)
-    (refuse! :e6b/production-authority-unavailable
-             "Independent production feedback authority is unavailable" {}))
-  (when-not (= (set source-order) (set (keys sources)))
-    (refuse! :e6b/source-set-incomplete "Every E6b source is required" {}))
-  (let [resolved (mapv #(resolve! evidence-root % (sources %)) source-order)
-        records (into {} (map (juxt :label :record) resolved))
-        context (:context records) prior (:prior-state records) e2b (:e2b-subject records)
+(defn- validate-transition-core
+  "Validate and replay the transition sources. Ledger, universe and claimed
+   next-state records are deliberately outside this pure core."
+  [records canonical source-pins]
+  (let [context (:context records) prior (:prior-state records) e2b (:e2b-subject records)
         relation (:lifecycle-relation records)
         outcome (:outcome records) outcome-review (:outcome-review records)
-        review-artifact (:outcome-review-artifact records) claimed (:next-state records)
-        ledger (:application-ledger records) universe (:application-universe records)
-        source-pins (into {} (map (juxt :label :sha256)) resolved)
+        review-artifact (:outcome-review-artifact records)
         source-tick (:tick/index context) destination (:destination/tick-index context)
         cls (:fast/action-class outcome) occurrence (:candidate/occurrence-id context)
         application-id (:application/id context)
@@ -277,10 +268,40 @@
                               :candidate/occurrence-id occurrence :action (:action context)
                               :fast/action-class cls :prior-state/revision (:prior-state/revision context)
                               :next-state/revision (:next-state/revision context)
-                              :feedback/event-id (:feedback/event-id context)}
-          expected-entry {:application/id application-id :feedback/event-id (:feedback/event-id context)
-                          :prior-state/revision (:prior-state/revision context) :status :committed
-                          :input/digests input-subject :output/digest (value-digest expected-next)}
+                              :feedback/event-id (:feedback/event-id context)}]
+      {:context context :prior prior :application-id application-id
+       :common common :destination destination :actual-state actual-state
+       :expected-next expected-next :input-subject input-subject
+       :transition-subject transition-subject
+       :canonical-digests {:e3 (value-digest canonical-e3)
+                           :e2b (value-digest canonical-e2b)}})))
+
+(defn verify-feedback
+  [{:keys [mode evidence-root sources canonical]}]
+  (when-not (contains? #{:isolated-test :production} mode)
+    (refuse! :e6b/mode-unknown "Unknown verifier mode" {:mode mode}))
+  (when (= :production mode)
+    (refuse! :e6b/production-authority-unavailable
+             "Independent production feedback authority is unavailable" {}))
+  (when-not (= (set source-order) (set (keys sources)))
+    (refuse! :e6b/source-set-incomplete "Every E6b source is required" {}))
+  (let [resolved (mapv #(resolve! evidence-root % (sources %)) source-order)
+        records (into {} (map (juxt :label :record) resolved))
+        source-pins (into {} (map (juxt :label :sha256)) resolved)
+        _ (doseq [[label record] records]
+            (when-not (= :isolated-test (:scope record))
+              (refuse! :e6b/scope-mismatch "All resolved sources must retain isolated scope"
+                       {:label label :scope (:scope record)})))
+        core-records (dissoc records :next-state :application-ledger :application-universe)
+        {:keys [context prior application-id common destination actual-state expected-next
+                input-subject transition-subject]}
+        (validate-transition-core core-records canonical source-pins)
+        claimed (:next-state records)
+        ledger (:application-ledger records) universe (:application-universe records)
+        expected-entry {:application/id application-id
+                        :feedback/event-id (:feedback/event-id context)
+                        :prior-state/revision (:prior-state/revision context) :status :committed
+                        :input/digests input-subject :output/digest (value-digest expected-next)}
           universe-ids (:complete/application-ids universe)
           entries (:entries ledger)
           ids (mapv :application/id entries)
@@ -316,4 +337,4 @@
        :dependencies {:temporal-hierarchy/sha256
                       "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
                       :intrinsic-values/sha256
-                      "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"}})))
+                      "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"}}))
