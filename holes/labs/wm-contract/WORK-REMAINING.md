@@ -78,6 +78,29 @@ is not yet a verified join to Agency's normalized request digest.
   deployment. Next measured-A packet must establish an observed-state
   authority and the current capture path, preserving honest latent beliefs.
 
+### Wave review and repairs — 2026-09-13
+
+- Row 18 snapshot through `cfac9564`: reviewed by codex-26; **changes
+  requested** (`22e00920`). Test repair authority can discharge production
+  trips, unknown repair statuses pass, and open->resolved skips the owning
+  validation transition. codex-22 has a bounded repair dispatch. No integration
+  or node admission.
+- Row 19 retention `futon3c/5fcf9912..ff03ea32`, receipt `d96e7139`:
+  **changes requested** (`b74f64be`). Hot-ledger seven-day deletion still
+  removes commission evidence; the test runner lacks failure-sensitive exit
+  and the parens invocation never called the checker. codex-23 is repairing
+  durability and execution receipts, preserving hot-ledger expiry.
+- codex-24 corrected the three false review hash strings in `ad9f9dc2` and
+  delivered declaration-grain discovery `335cf4b5`; the lead verified its
+  eleven source hashes. J1 means engineering-only row-18 modulation is not
+  qualifying. codex-24 now owns specification packet G: interoceptive
+  prior/evidence input into the beta/gamma law, before runtime integration.
+- Row 19 external-root discovery located the original delegation and worker
+  authorization user-role events in the host's session log. Exact record
+  references in `runs/row-19-external-root-discovery-2026-09-13/`; independent
+  origin/authentication and durable admission binding remain open. This is
+  not an operator signature or a created anchor.
+
 ## Signature discipline (adopted by Joe 2026-09-12)
 
 Per the apex patterns (progress-is-a-witnessed-state-change,

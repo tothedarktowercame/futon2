@@ -1,0 +1,43 @@
+{
+  "lead": "codex-26",
+  "date": "2026-09-13",
+  "jobs": [
+    {
+      "packet": "codex-24-review-repair-and-edges",
+      "job-id": "invoke-1789264316656-20563-debad6ea",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789264316656-20563-debad6ea",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-review-repair-and-edges.request.json",
+      "dispatch": "accepted",
+      "scope": "review/repair/specification, no admission"
+    },
+    {
+      "packet": "codex-23-retention-review-repair",
+      "job-id": "invoke-1789264446621-20564-4ca99bf6",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789264446621-20564-4ca99bf6",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retention-review-repair.request.json",
+      "dispatch": "accepted",
+      "scope": "review/repair/specification, no admission"
+    },
+    {
+      "packet": "codex-22-snapshot-review-repair",
+      "job-id": "invoke-1789264565170-20566-684d1b8d",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789264565170-20566-684d1b8d",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-snapshot-review-repair.request.json",
+      "dispatch": "accepted",
+      "scope": "review/repair/specification, no admission"
+    },
+    {
+      "packet": "codex-24-interoceptive-beta-spec",
+      "job-id": "invoke-1789264731668-20568-5ea7cb21",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789264731668-20568-5ea7cb21",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-interoceptive-beta-spec.request.json",
+      "dispatch": "accepted",
+      "scope": "review/repair/specification, no admission"
+    }
+  ],
+  "current-awaiting": [
+    "invoke-1789264446621-20564-4ca99bf6",
+    "invoke-1789264565170-20566-684d1b8d",
+    "invoke-1789264731668-20568-5ea7cb21"
+  ]
+}

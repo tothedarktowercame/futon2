@@ -25,6 +25,18 @@ measurement is authorized by this document.
 
 ## 1. Row 18: bounded initial response, commissioned before live use
 
+**Qualification constraint clarified 2026-09-13:** the fixed-half snapshot
+below is standalone engineering machinery. J1 requires theory-aligned
+beta/gamma dynamics, so no engineering-only temperature run discharges the
+qualifying commitment obligation. TN-row22-declaration-edge-audit-2026-09-13.md
+identifies the actual posterior-beta -> variational temperature -> policy-score
+chain. Specification packet G (codex-24) must define and justify interoceptive
+input at the prior/evidence seam, preserve the original zero-evidence law,
+positivity and gamma=1/beta, and establish the actual response/refusal
+conditions before integration. A half prior mean would not imply a half
+posterior gamma. No new beta equation is adopted merely by commissioning
+that investigation.
+
 Choose the fixed single-factor candidate for v1: m(0)=1; m(k)=1/2 for k>0.
 Floor 1/2. k counts distinct durable open genuine trip identities, not repeated
 observations and not wire names. One trip resolving while another remains
@@ -214,3 +226,11 @@ differ from the executed receipt and current bytes; the lead retained the
 mismatch in `runs/lead-decisions-independent-review-2026-09-13/lead-pin-discrepancies.json`
 and requested independent correction. Original executions have not been
 rerun. A correct substantive finding does not cure an incorrect hash claim.
+
+Review correction `ad9f9dc2` mechanically restored all three incorrect pins;
+the lead checked the corrected values against the original receipt. The
+row-22 discovery `335cf4b5` has eleven source hashes, all recomputed and
+matched by the lead. Its gamma/interoception specification is next work, not
+an admitted implementation. External operator event candidates were located
+in the host session log; references and unfulfilled authentication obligations
+are retained in `runs/row-19-external-root-discovery-2026-09-13/`.

@@ -1,0 +1,37 @@
+{
+  "schema": "wm/external-operator-event-discovery-v1",
+  "source": "/home/joe/.codex/sessions/2026/09/12/rollout-2026-09-12T23-41-24-01a097ff-471a-72d3-b10b-54d01eaa14e0.jsonl",
+  "session-id": "01a097ff-471a-72d3-b10b-54d01eaa14e0",
+  "events": [
+    {
+      "line": 50,
+      "record-sha256-including-newline": "84c30bfd3e12081e0e0eb774f38e931e18281f670301b475451b32d7c04b8a39",
+      "timestamp": "2026-09-12T23:48:38.988Z",
+      "type": "response_item",
+      "role": "user",
+      "message": "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: joe\nTo: codex-26\nOrigin: operator\nCaller: joe\n---\n\nWell, given that I really don't have an opinion about any of these questions, My suggestion. Is the... You take over the lead. On finishing the remaining work. Because these to me seem like questions which are about bookkeeping, which is not a topic I'm very interested in.\n"
+    },
+    {
+      "line": 279,
+      "record-sha256-including-newline": "f690d10830932bb73988ddf200a403a171d710f9ec70706e6799244f799bb2f9",
+      "timestamp": "2026-09-13T01:44:06.998Z",
+      "type": "response_item",
+      "role": "user",
+      "message": "--- CURRENT TURN ---\nSurface: emacs-repl\nFrom: joe\nTo: codex-26\nOrigin: operator\nCaller: joe\n---\n\nyes, codex 22 23 and 24 can help with any needed dispatches\n"
+    }
+  ],
+  "status": "located-not-authenticated-genesis",
+  "scope": "Host-retained user-role records external to candidate anchor and acceptance artifact. Source was read, not edited.",
+  "remaining": [
+    "independent verification of host/event origin and exact record bytes",
+    "trusted resolver must bind authorized source independently of candidate input",
+    "document host ownership and mutability assumptions; a hash alone authenticates no origin",
+    "bind independent author/reviewer jobs and commissions plus reviewed source/test bytes",
+    "durable root reference retention and successor-checker verification"
+  ],
+  "no-claims": [
+    "operator cryptographic signature",
+    "immutable filesystem",
+    "R9 admission"
+  ]
+}
