@@ -1,0 +1,4 @@
+{:command "clojure -X:test :nses '[futon2.aif.categorical-state-observation-test]'"
+ :exit 0 :tests 6 :assertions 32 :failures 0 :errors 0
+ :tree-sha "b5419475caaee625ed0d181d13e1d338a906ccc9"
+ :at "2026-09-13T03:32:23Z" :output "test-output.txt"}
