@@ -1,7 +1,9 @@
 (ns futon2.aif.interoceptive-manifest-test
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.interoceptive-manifest :as manifest]
-            [futon2.aif.interoceptive-store-lock :as store-lock])
+            [futon2.aif.interoceptive-store-lock :as store-lock]
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.tripwire :as tripwire])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -21,6 +23,12 @@
 
 (defn refusal [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
+
+(defn wait-for-file! [file]
+  (loop [n 100]
+    (cond (.exists ^java.io.File file) true
+          (zero? n) false
+          :else (do (Thread/sleep 25) (recur (dec n))))))
 
 (deftest valid-production-shaped-test-history
   (let [[trips repair] (roots)
@@ -81,3 +89,84 @@
                     #(throw (Exception. "commissioned failure")))))
       (is (= :released
              (store-lock/with-store-lock (constantly :released)))))))
+
+(deftest thread-ownership-and-lock-identity
+  (let [[trips _] (roots)
+        lock-a (str (.getPath trips) "/a.lock")
+        lock-b (str (.getPath trips) "/b.lock")]
+    (binding [store-lock/*lock-path* lock-a]
+      (store-lock/with-store-lock
+       (fn []
+         (is (= :interoceptive/lock-contention
+                @(future (refusal #(store-lock/with-store-lock identity))))))))
+    (binding [store-lock/*lock-path* lock-a]
+      (is (= :different-lock-acquired
+             (store-lock/with-store-lock
+              #(binding [store-lock/*lock-path* lock-b]
+                 (store-lock/with-store-lock (constantly :different-lock-acquired)))))))
+    (is (= :released-after-thread-contention
+           (binding [store-lock/*lock-path* lock-a]
+             (store-lock/with-store-lock (constantly :released-after-thread-contention)))))))
+
+(deftest fresh-root-production-writer-apis
+  (let [base (.toFile (Files/createTempDirectory "writer-apis-"
+                                                  (make-array FileAttribute 0)))
+        trips (java.io.File. base "fresh-trips")
+        repairs (doto (java.io.File. base "fresh-repairs") .mkdir)
+        trip (tripwire/write-trip-report!
+              (.getPath trips) {:trip/id "trip-api" :trip/action :stop-line})
+        finding (repair/record-system-failure!
+                 (.getPath repairs)
+                 {:attempt-id "attempt-api" :repair-id "repair-api"
+                  :repair-class :machine-failure :failure-stage :test
+                  :outcome :failed :error "commissioned"})
+        implementation (repair/record-implementation!
+                        (.getPath repairs) finding
+                        {:attempt-id "implementation-api" :commit "abc"
+                         :reviewer :reviewer :review-job "review-api"
+                         :witness {:resolved? true :dial-moved? true}})
+        resolution (repair/resolve!
+                    (.getPath repairs) (assoc finding :repair/implementation implementation)
+                    {:attempt-id "validation-api" :commit "abc"
+                     :reviewer :reviewer :review-job "review-api-2"
+                     :witness {:resolved? true :dial-moved? true}
+                     :validation {:production-shaped? true}})]
+    (is (.isFile (java.io.File. trip)))
+    (is (= :open (:repair/status finding)))
+    (is (= :awaiting-validation (:repair/status implementation)))
+    (is (= :resolved (:repair/status resolution)))
+    (is (= 1 (get-in (manifest/test-snapshot (.getPath trips) (.getPath repairs))
+                     [:snapshot :machine-confidence])))))
+
+(deftest symlink-and-participation-refusals
+  (let [[trips repair-root] (roots)
+        linked (java.io.File. (.getParentFile trips) "linked")]
+    (Files/createSymbolicLink (.toPath linked) (.toPath trips)
+                              (make-array java.nio.file.attribute.FileAttribute 0))
+    (is (= :interoceptive/source-path-refused
+           (refusal #(manifest/capture (.getPath linked) (.getPath repair-root) :test))))
+    (is (= :interoceptive/writer-participation-unverified
+           (refusal manifest/production-manifest!)))))
+
+(deftest cross-process-exclusion
+  (let [[trips _] (roots)
+        lock-path (str (.getPath trips) "/process.lock")
+        ready (java.io.File. trips "child-ready")
+        expression (str "(require '[futon2.aif.interoceptive-store-lock :as l])"
+                        "(binding [l/*lock-path* " (pr-str lock-path) "]"
+                        " (l/with-store-lock #(do (spit " (pr-str (.getPath ready))
+                        " \"ready\") (Thread/sleep 1500))))")
+        process (.start (ProcessBuilder.
+                         (into-array String
+                                     ["java" "-cp" (System/getProperty "java.class.path")
+                                      "clojure.main" "-e" expression])))]
+    (try
+      (is (wait-for-file! ready))
+      (is (= :interoceptive/lock-contention
+             (binding [store-lock/*lock-path* lock-path]
+               (refusal #(store-lock/with-store-lock identity)))))
+      (is (zero? (.waitFor process)))
+      (is (= :acquired-after-child
+             (binding [store-lock/*lock-path* lock-path]
+               (store-lock/with-store-lock (constantly :acquired-after-child)))))
+      (finally (.destroyForcibly process)))))

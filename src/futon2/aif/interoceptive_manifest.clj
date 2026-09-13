@@ -1,17 +1,14 @@
 (ns futon2.aif.interoceptive-manifest
   "Complete-directory manifest adapter for R20 trip/repair evidence.
 
-  Production roots are owned constants, never caller labels. The independent
-  CREATE_NEW writers have no common store lock, so production capture retains
-  a stable audit manifest but refuses runtime qualification as non-atomic."
+  Production roots are owned constants, never caller labels. Coordinated
+  source exists, but production qualification refuses until deployment
+  evidence establishes that every live writer executes it."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.c-fold-config :as digest]
-            [futon2.aif.interoceptive-commitment :as commitment]
-            [futon2.aif.interoceptive-store-lock :as store-lock]
-            [futon2.aif.repair-obligation :as repair]
-            [futon2.aif.tripwire :as tripwire])
+            [futon2.aif.interoceptive-commitment :as commitment])
   (:import [java.nio ByteBuffer]
            [java.nio.charset CodingErrorAction StandardCharsets]
            [java.nio.file Files]
@@ -49,10 +46,26 @@
                    {:path path :cause (.getMessage e)}))))))
 
 (defn- directory! [path role]
-  (let [f (io/file path)]
+  (let [f (.getAbsoluteFile (io/file path))
+        target (.toPath f)]
+    (loop [p (.getRoot target) names (iterator-seq (.iterator target))]
+      (when-let [name (first names)]
+        (let [candidate (.resolve p name)]
+          (when (Files/isSymbolicLink candidate)
+            (refuse! :interoceptive/source-path-refused
+                     {:path path :role role :entry (str candidate)}))
+          (recur candidate (next names)))))
     (when-not (and (.isDirectory f) (not (Files/isSymbolicLink (.toPath f))))
       (refuse! :interoceptive/directory-unavailable {:path path :role role}))
     f))
+
+(defn- read-bytes! [f phase]
+  (try
+    (Files/readAllBytes (.toPath ^java.io.File f))
+    (catch Throwable e
+      (refuse! :interoceptive/source-read-failed
+               {:path (.getPath ^java.io.File f)
+                :phase phase :cause (.getMessage e)}))))
 
 (defn- list-files! [dir role]
   (let [xs (.listFiles ^java.io.File dir)]
@@ -73,7 +86,7 @@
 
 (defn- capture-files [files prefix]
   (mapv (fn [f]
-          (let [bytes (Files/readAllBytes (.toPath ^java.io.File f))
+          (let [bytes (read-bytes! f :capture)
                 relative (str prefix (.getName ^java.io.File f))]
             {:path relative :sha256 (sha256-bytes bytes)
              :byte-count (alength bytes) :record (strict-edn bytes relative)}))
@@ -82,7 +95,7 @@
 (defn- recensus! [groups]
   (mapv (fn [{:keys [prefix dir role]}]
           [prefix (mapv (fn [f]
-                          (let [bytes (Files/readAllBytes (.toPath ^java.io.File f))]
+                          (let [bytes (read-bytes! f :recensus)]
                             [(.getName ^java.io.File f)
                              (sha256-bytes bytes)]))
                         (list-files! dir role))]) groups))
@@ -138,18 +151,11 @@
     (assoc manifest :snapshot (commitment/confidence-snapshot (:constructor-input manifest)))))
 
 (defn production-manifest!
-  "Capture canonical production roots while every authorized writer shares
-  the cross-process lock. Partial logical trip/finding publication still
-  refuses in the pure constructor."
+  "Refuse until deployment evidence establishes that every live canonical
+  writer is executing the coordinated source. Source presence is not
+  deployment evidence."
   []
-  (store-lock/with-store-lock
-   (fn []
-     (let [audit (capture tripwire/default-trip-root repair/default-root :test)
-           input (-> (:constructor-input audit)
-                     (assoc-in [:trip-authority :authority-class] :production)
-                     (assoc-in [:repair-authority :authority-class] :production))]
-       {:schema :wm/interoceptive-production-snapshot-v1
-        :capture-boundary :cross-process-file-lock
-        :manifest (assoc (dissoc audit :constructor-input)
-                         :authority-class :production)
-        :snapshot (commitment/confidence-snapshot input)}))))
+  (refuse! :interoceptive/writer-participation-unverified
+           {:required :all-live-canonical-trip-and-repair-writers
+            :activation :reload-or-restart-with-independent-deployment-receipt
+            :scope :source-implemented-not-deployed}))

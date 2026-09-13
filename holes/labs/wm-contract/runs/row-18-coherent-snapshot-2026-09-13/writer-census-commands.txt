@@ -1,0 +1,26 @@
+COMMAND 1
+rg -n '(/home/joe/code/futon2/data/(wm-tripwires/trips|wm-repair-obligations)|default-trip-root|default-root)' /home/joe/code/futon2/src /home/joe/code/futon2/scripts /home/joe/code/futon3c/src /home/joe/code/futon3c/scripts --glob '*.clj' --glob '*.bb'
+
+RELEVANT RESULT
+/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj:21:(def default-root "/home/joe/code/futon2/data/wm-repair-obligations")
+/home/joe/code/futon2/src/futon2/aif/tripwire.clj:26:(def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+
+COMMAND 2
+rg -n '(write-trip-report!|record-review-failure!|record-system-failure!|record-implementation!|commit-historical-verification!|supersede!|resolve!)' /home/joe/code/futon2/src /home/joe/code/futon2/scripts /home/joe/code/futon3c/src /home/joe/code/futon3c/scripts --glob '*.clj' --glob '*.bb'
+
+RESULT SUMMARY
+All production call sites resolve to futon2.aif.tripwire/write-trip-report! or
+the public futon2.aif.repair-obligation functions. Their publications resolve
+to write-new!, write-new-or-identical!, or write-new-durable!, which share the
+coordination module. No futon3c source/script direct call site was returned.
+
+COMMAND 3
+rg -n '(Files/write|Files/writeString|\(spit)' /home/joe/code/futon2/src /home/joe/code/futon2/scripts /home/joe/code/futon3c/src /home/joe/code/futon3c/scripts --glob '*.clj' --glob '*.bb'
+
+RESULT CLASSIFICATION
+The only direct writes in the owning source files are repair_obligation.clj:117
+and tripwire.clj:475. tripwire_calibration.clj:144 writes the separate retained
+calibration report and binds trip/repair roots to newly-created temporary
+directories. All other returned direct writes target unrelated stores. The
+full command is reproducible and the exhaustive output is intentionally not
+misrepresented as a claim about files outside these four searched roots.
