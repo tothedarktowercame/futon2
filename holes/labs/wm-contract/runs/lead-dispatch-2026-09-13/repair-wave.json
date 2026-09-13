@@ -425,10 +425,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-record-connection-run-joins.request.json",
       "dispatch": "accepted",
       "scope": "additive exact run record-family and connection joins; no full certification"
+    },
+    {
+      "packet": "codex-23-snapshot-failure-and-byte-ownership",
+      "job-id": "invoke-1789273806999-20632-e2760ee7",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789273806999-20632-e2760ee7",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-snapshot-failure-and-byte-ownership.request.json",
+      "dispatch": "accepted",
+      "scope": "failed mutation refusal and retained snapshot byte ownership; isolated only"
     }
   ],
   "current-awaiting": [
-    "invoke-1789273186397-20627-87a22198",
+    "invoke-1789273806999-20632-e2760ee7",
     "invoke-1789273488827-20630-3781e301",
     "invoke-1789273596368-20631-e4f52311"
   ]
