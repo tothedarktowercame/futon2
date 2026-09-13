@@ -1,0 +1,5 @@
+{:command "clojure -M holes/labs/wm-contract/runs/row-18-coherent-snapshot-2026-09-13/production_participation_readback.clj && test ! -e /run/futon2/wm-interoceptive-deployment.lease && test ! -e /run/futon2/wm-interoceptive-snapshot.lock"
+ :exit 0 :tests 3 :assertions 3 :result :expected-typed-refusal-and-no-files-created
+ :refusal :interoceptive/activation-lease-unavailable
+ :stdout "production-status.stdout" :stderr "production-status.stderr"
+ :tree-sha "2f39b95dacad11bd4d70ce906c5e513977cd2122" :at "2026-09-13T03:17:53Z"}
