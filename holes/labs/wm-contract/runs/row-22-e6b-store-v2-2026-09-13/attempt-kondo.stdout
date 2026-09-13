@@ -1,0 +1,4 @@
+src/futon2/aif/machine_slow_feedback_store_v2.clj:6:14: warning: namespace clojure.java.io is required but never used
+test/futon2/aif/machine_slow_feedback_store_v2_test.clj:2:14: warning: namespace clojure.edn is required but never used
+linting took 20ms, errors: 0, warnings: 2
+

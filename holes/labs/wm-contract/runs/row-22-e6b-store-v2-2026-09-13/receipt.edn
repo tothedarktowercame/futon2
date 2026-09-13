@@ -1,0 +1,33 @@
+{:schema :wm/execution-receipt-v1
+ :at "2026-09-13T07:04:22Z"
+ :tree-sha "5e78192a692c052ad1c95819501e173b314964fc"
+ :scope :isolated-test :authority/status :none
+ :gates
+ [{:gate :focused-tests
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-store-v2-test futon2.aif.machine-slow-feedback-store-test futon2.aif.machine-slow-feedback-provenance-test]'"
+   :exit 0 :tests 25 :assertions 95 :failures 0 :errors 0 :stdout "tests.stdout"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_store_v2.clj test/futon2/aif/machine_slow_feedback_store_v2_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_store_v2.clj test/futon2/aif/machine_slow_feedback_store_v2_test.clj"
+   :exit 0 :stdout "parens.stdout"}
+  {:gate :induced-runner-failure
+   :command "clojure -M -e '(require (quote clojure.test)) (let [c (ref clojure.test/*initial-report-counters*) v (with-meta (fn [] nil) {:test (fn [] (clojure.test/is false \"induced store-v2 gate failure\")) :name (quote induced-store-v2-failure) :ns *ns*})] (binding [clojure.test/*report-counters* c] (clojure.test/test-vars [v])) (System/exit (if (zero? (+ (:fail @c) (:error @c))) 0 1)))'"
+   :exit 1 :expected-exit 1 :failures 1 :stdout "induced-failure.stdout"}]
+ :failed-history
+ [{:tree-sha "eb92f4c3ad494e6d058b51bcc8880b79176ebb9e" :exit 1
+   :tests 25 :assertions 78 :errors 5 :finding :digest-function-shadowed :stdout "attempt-1-tests.stdout"}
+  {:tree-sha "6e81468b263e4b5fac5379b3b991a35c3959d7ab" :exit 0
+   :tests 25 :assertions 95 :stdout "attempt-2-tests.stdout"}
+  {:tree-sha "6e81468b263e4b5fac5379b3b991a35c3959d7ab" :exit 2
+   :warnings 2 :finding :unused-requires :stdout "attempt-kondo.stdout"}]
+ :controls [:invalid-provenance-no-publication :provenance-crash-window
+            :transaction-crash-window :head-crash-window :stable-retry
+            :missing-provenance :corrupt-provenance :changed-provenance]
+ :pins
+ {:source "81b9d2729e8f331cec55265de404e2dd08b7b665e2b9c52a0a6c8d06a26c248e"
+  :test "fb667b0c52311dea36aafbb6bca3da8330b205d93b122756e60303a2f0e57391"
+  :legacy-store "d9ee5f848419567e41f328a6b9fe14951f2568efcff4ee2dccbcac87a6bcd1fd"
+  :provenance "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90"
+  :carrier "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965"}}
