@@ -193,10 +193,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-activation-lease-repair.request.json",
       "dispatch": "accepted",
       "scope": "receipt permissions and independently evidenced capture deployment lease; no activation"
+    },
+    {
+      "packet": "codex-23-retention-deployment-preparation",
+      "job-id": "invoke-1789268785971-20597-9cdd4852",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789268785971-20597-9cdd4852",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retention-deployment-preparation.request.json",
+      "dispatch": "accepted",
+      "scope": "prepare exact serving retention deployment and verification; no live mutation"
     }
   ],
   "current-awaiting": [
-    "invoke-1789268217741-20592-b1a06d77",
+    "invoke-1789268785971-20597-9cdd4852",
     "invoke-1789268617553-20595-0ab8e81f",
     "invoke-1789268523667-20593-7f23f6ff"
   ]
