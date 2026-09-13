@@ -180,6 +180,12 @@ is not yet a verified join to Agency's normalized request digest.
   real authority adapters remain owed. See authority-binding/lead-review.md.
   No production root authentication or admission.
 
+- Conditional uniqueness `mathlib4/15712715fc`, receipt `18162f25`:
+  thirteen source/config/olean pins verified; root localisation/existence/order
+  accepted conditional on explicit DerivativeCertificate. Construct actual
+  canonical variance derivative and range-bound certificate next; no field or
+  float correctness claim. See policy-precision/lead-unique-root-review.md.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
