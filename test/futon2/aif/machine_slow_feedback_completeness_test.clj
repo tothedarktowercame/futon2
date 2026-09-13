@@ -198,3 +198,24 @@
                                   {:bytes/base64 (.encodeToString (Base64/getEncoder) bs)
                                    :expected-sha256 (sha256 bs)}))))))
     (store/release! store)))
+
+(defn- rebind-subject [config changes]
+  (let [changed (replace-record config :completeness-subject
+                 #(update % :capture merge changes))
+        subject-pin (get-in changed [:roles :completeness-subject :expected-sha256])
+        reviewed (replace-record changed :review-artifact
+                   #(assoc % :subject/raw-sha256 subject-pin))
+        review-pin (get-in reviewed [:roles :review-artifact :expected-sha256])]
+    (reduce (fn [c role]
+              (replace-record c role
+                #(cond-> (assoc % :subject/raw-sha256 subject-pin)
+                   (not= role :review-commission) (assoc :review-artifact/raw-sha256 review-pin))))
+            reviewed [:review-commission :review-execution :acceptance])))
+
+(deftest coherent-subject-store-and-generation-refuse
+  (let [{:keys [store config]} (fixture)]
+    (try
+      (doseq [changes [{:store/id "borrowed-store"} {:owner/generation 999}]]
+        (is (= :e6b-completeness/authority-join-invalid
+               (refusal #(completeness/validate (rebind-subject config changes))))))
+      (finally (store/release! store)))))

@@ -1,0 +1,46 @@
+{
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_completeness.clj",
+      "sha256": "d1428d81f188fc1ed29a2e36be0427ef2ec8d25a7c5eb0bb054b5db2ef88324b",
+      "match": true
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_completeness_test.clj",
+      "sha256": "cec2f67110e3f37004abad8b87a3a4c788c5cfc5bee64df85ec9b25fbc89b7b6",
+      "match": true
+    },
+    {
+      "path": "holes/labs/wm-contract/CONTRACT-e6b-external-completeness-v1-2026-09-13.md",
+      "sha256": "1d959c2859f9a5fd0b602dda510b464e5221d89fe9a95877a0eee5a294be9a93",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_retrospective_projection.clj",
+      "sha256": "7fcdf28c03e5e6efd4fcaa3900c8352613e46fe317b6deb5f6272125eafef300",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_capture.clj",
+      "sha256": "702ccb1f8e120b8d1b8f133dbc66d154099159760e26b5a7dca7b6844d5a0c71",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+      "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500",
+      "match": true
+    }
+  ],
+  "job": "invoke-1789286571614-20728-0d746a9a",
+  "state": "done",
+  "lead-correction-pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_completeness.clj",
+      "sha256": "0c9f94a791f45348b75c54748f71c505ec0c024af585ad51c0e30480acdc0571"
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_completeness_test.clj",
+      "sha256": "d5325d94fb3f154fe3804f8ca400480849389d32a0bb38be956f70bbc099d750"
+    }
+  ]
+}
