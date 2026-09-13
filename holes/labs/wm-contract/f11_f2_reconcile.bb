@@ -19,13 +19,18 @@
 ;;   --negative  mutate one live `:if-text` and confirm the classifier stops
 ;;               calling the difference lines-only.
 
-(require '[clojure.edn :as edn]
-         '[clojure.java.io :as io]
+(require '[babashka.classpath :as cp]
+         '[clojure.java.io :as io])
+(cp/add-classpath (.getCanonicalPath
+                   (io/file (.getParent (io/file *file*)) "../../../src")))
+
+(require '[futon2.aif.find-reconciliation :as reconciliation]
+         '[clojure.edn :as edn]
          '[clojure.pprint :as pprint]
          '[clojure.string :as str])
 
-(def home (System/getenv "HOME"))
-(def pin-path (str home "/code/futon3/checks/find-snatch.edn"))
+(def task-home (System/getenv "HOME"))
+(def pin-path (str task-home "/code/futon3/checks/find-snatch.edn"))
 (def live-path "runs/F11-find/01-find-snatch-live.edn")
 (def out-path "runs/F11-find/02-reconciliation.edn")
 
@@ -35,73 +40,7 @@
          (map #(format "%02x" %))
          str/join)))
 
-(defn receipt-pairs
-  "Every (pinned receipt, live receipt) pair, keyed by scenario/round/pattern."
-  [pin live]
-  (for [[sp sl] (map vector (:scenarios pin) (:scenarios live))
-        [rp rl] (map vector (:round-results sp) (:round-results sl))
-        [id recp] (:receipts (:find rp))
-        :let [recl (get-in rl [:find :receipts id])]
-        :when recl]
-    {:scenario [(:treatment sp) (:disposition sp)] :round (:round rp) :pattern id
-     :pinned recp :live recl}))
-
-(defn classify
-  "Which fields of a receipt pair differ.  `:if-lines`/`:however-lines` are
-   coordinates into the flexiarg; `:if-text`/`:however-text` are the clause
-   itself.  F2 is about the clause, so the two must be counted apart."
-  [{:keys [pinned live]}]
-  (let [wp (:warrant pinned) wl (:warrant live)
-        keys* (sort (distinct (concat (keys wp) (keys wl))))]
-    (into (sorted-set)
-          (concat (for [k (sort (distinct (concat (keys pinned) (keys live))))
-                        :when (and (not= k :warrant) (not= (get pinned k) (get live k)))]
-                    k)
-                  (for [k keys* :when (not= (get wp k) (get wl k))]
-                    (keyword "warrant" (name k)))))))
-
-(defn report [pin live]
-  (let [pairs (receipt-pairs pin live)
-        diffs (remove (comp empty? classify) pairs)
-        fields (frequencies (mapcat classify diffs))
-        line-fields #{:warrant/if-lines :warrant/however-lines}
-        text-fields #{:warrant/if-text :warrant/however-text :warrant/file :route}
-        rounds (fn [xs] (count (distinct (map (juxt :scenario :round) xs))))
-        all-rounds (rounds pairs)]
-    (sorted-map
-     :as-of-pin (:as-of pin)
-     :as-of-live (:as-of live)
-     :repository-count-pin (count (:repository pin))
-     :repository-count-live (count (:repository live))
-     :repository-added (vec (sort (remove (set (:repository pin)) (:repository live))))
-     :repository-removed (vec (sort (remove (set (:repository live)) (:repository pin))))
-     :drift-mismatch-count-live (:mismatch-count (:drift live))
-     :laws-identical? (= (:laws pin) (:laws live))
-     :receipts-compared (count pairs)
-     :receipts-differing (count diffs)
-     :rounds-total all-rounds
-     :rounds-differing (rounds diffs)
-     :differing-fields (into (sorted-map) fields)
-     ;; The finding, stated so it can be false: every difference is a line
-     ;; coordinate and no difference is a clause text, a warrant file or a
-     ;; retrieval route.
-     :difference-is-line-coordinates-only?
-     (and (seq diffs)
-          (every? #(every? line-fields (classify %)) diffs)
-          (zero? (reduce + 0 (map #(get fields % 0) text-fields))))
-     :shifted-patterns
-     (into (sorted-map)
-           (for [[id ps] (group-by :pattern diffs)
-                 :let [p (first ps)]]
-             [id (sorted-map
-                  :if-lines-pin (get-in p [:pinned :warrant :if-lines])
-                  :if-lines-live (get-in p [:live :warrant :if-lines])
-                  :however-lines-pin (get-in p [:pinned :warrant :however-lines])
-                  :however-lines-live (get-in p [:live :warrant :however-lines])
-                  :if-text-identical? (= (get-in p [:pinned :warrant :if-text])
-                                         (get-in p [:live :warrant :if-text]))
-                  :however-text-identical? (= (get-in p [:pinned :warrant :however-text])
-                                              (get-in p [:live :warrant :however-text])))])))))
+(def report reconciliation/report)
 
 (defn -main [& args]
   (let [pin (edn/read-string (slurp pin-path))

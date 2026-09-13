@@ -1,7 +1,7 @@
 {:as-of-live "e58576cec0f14c3da4667ed452d522c561487ee8",
- :as-of-pin "2734ac570ed78d9bf822a5013cc48e53e68c8ff9",
- :difference-is-line-coordinates-only? true,
- :differing-fields #:warrant{:however-lines 96, :if-lines 96},
+ :as-of-pin "e58576cec0f14c3da4667ed452d522c561487ee8",
+ :difference-is-line-coordinates-only? false,
+ :differing-fields {},
  :drift-mismatch-count-live 0,
  :laws-identical? true,
  :live-path "runs/F11-find/01-find-snatch-live.edn",
@@ -9,96 +9,15 @@
  "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce",
  :pin-path "futon3:checks/find-snatch.edn",
  :pin-sha256
- "839897ef8fe44952403700bd237389449ae4735d3da7df8239b1b94dc7ef4dfa",
+ "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce",
+ :receipt-populations-identical? true,
  :receipts-compared 96,
- :receipts-differing 96,
- :repository-added
- [:grim-cuts-the-cascade-and-never-widens-it
-  :have-a-temperament
-  :lead-with-the-exchange-rule
-  :play-the-authored-order-first
-  :promote-the-remedy-before-the-exit
-  :widen-the-cascade-only-on-evidence],
+ :receipts-differing 0,
+ :repository-added [],
  :repository-count-live 24,
- :repository-count-pin 18,
+ :repository-count-pin 24,
  :repository-removed [],
- :rounds-differing 33,
+ :rounds-differing 0,
  :rounds-total 33,
- :shifted-patterns
- {:a-free-mark-is-always-worth-assigning
-  {:however-lines-live [19 20],
-   :however-lines-pin [18 19],
-   :however-text-identical? true,
-   :if-lines-live [15 16],
-   :if-lines-pin [14 15],
-   :if-text-identical? true},
-  :an-unmodelled-response-stops-the-line
-  {:however-lines-live [21 23],
-   :however-lines-pin [19 21],
-   :however-text-identical? true,
-   :if-lines-live [17 18],
-   :if-lines-pin [15 16],
-   :if-text-identical? true},
-  :ask-for-surplus-not-surrender
-  {:however-lines-live [20 21],
-   :however-lines-pin [19 20],
-   :however-text-identical? true,
-   :if-lines-live [16 17],
-   :if-lines-pin [15 16],
-   :if-text-identical? true},
-  :consult-the-remedy-before-exiting
-  {:however-lines-live [22 24],
-   :however-lines-pin [20 22],
-   :however-text-identical? true,
-   :if-lines-live [18 19],
-   :if-lines-pin [16 17],
-   :if-text-identical? true},
-  :escalate-only-as-far-as-you-can-lose
-  {:however-lines-live [20 22],
-   :however-lines-pin [18 20],
-   :however-text-identical? true,
-   :if-lines-live [17 17],
-   :if-lines-pin [15 15],
-   :if-text-identical? true},
-  :exchange-when-both-sides-gain
-  {:however-lines-live [21 22],
-   :however-lines-pin [18 19],
-   :however-text-identical? true,
-   :if-lines-live [17 18],
-   :if-lines-pin [14 15],
-   :if-text-identical? true},
-  :forced-play-needs-a-loss-floor
-  {:however-lines-live [20 21],
-   :however-lines-pin [18 19],
-   :however-text-identical? true,
-   :if-lines-live [17 17],
-   :if-lines-pin [15 15],
-   :if-text-identical? true},
-  :price-the-final-round-as-final
-  {:however-lines-live [20 21],
-   :however-lines-pin [18 19],
-   :however-text-identical? true,
-   :if-lines-live [16 17],
-   :if-lines-pin [14 15],
-   :if-text-identical? true},
-  :probe-before-committing
-  {:however-lines-live [21 22],
-   :however-lines-pin [19 20],
-   :however-text-identical? true,
-   :if-lines-live [17 18],
-   :if-lines-pin [15 16],
-   :if-text-identical? true},
-  :re-enter-after-observed-repair
-  {:however-lines-live [20 21],
-   :however-lines-pin [18 19],
-   :however-text-identical? true,
-   :if-lines-live [16 17],
-   :if-lines-pin [14 15],
-   :if-text-identical? true},
-  :use-talk-to-make-a-testable-offer
-  {:however-lines-live [19 20],
-   :however-lines-pin [18 19],
-   :however-text-identical? true,
-   :if-lines-live [16 16],
-   :if-lines-pin [15 15],
-   :if-text-identical? true}}}
+ :shifted-patterns {},
+ :structural-differences []}
