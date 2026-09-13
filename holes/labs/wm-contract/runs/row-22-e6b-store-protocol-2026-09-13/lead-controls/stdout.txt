@@ -1,0 +1,2 @@
+{:control :head-transaction-mismatch, :recover-accepted true, :capture-consistent true}
+{:control :unreadable-application-published, :commit-returned true, :recovery :e6b-store/invalid-edn}

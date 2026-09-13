@@ -1,0 +1,37 @@
+[
+  {
+    "path": "src/futon2/aif/machine_slow_feedback_store.clj",
+    "expected": "68d209ae11d3414985c68f6fd144bd4e85467e180cf225a217d7dc978ed9fb06",
+    "current": "68d209ae11d3414985c68f6fd144bd4e85467e180cf225a217d7dc978ed9fb06",
+    "historical": "68d209ae11d3414985c68f6fd144bd4e85467e180cf225a217d7dc978ed9fb06",
+    "matches": true
+  },
+  {
+    "path": "test/futon2/aif/machine_slow_feedback_store_test.clj",
+    "expected": "8cd6a80716bae9ec246c936e7280621380daeb5650ec98d4deb13d56c67aa6a6",
+    "current": "8cd6a80716bae9ec246c936e7280621380daeb5650ec98d4deb13d56c67aa6a6",
+    "historical": "8cd6a80716bae9ec246c936e7280621380daeb5650ec98d4deb13d56c67aa6a6",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/TN-row22-e6b-store-protocol-2026-09-13.md",
+    "expected": "620156fdb354b013765b2fa9b9137ecd0db49a6bdcc579ee86ebb6649706086e",
+    "current": "620156fdb354b013765b2fa9b9137ecd0db49a6bdcc579ee86ebb6649706086e",
+    "historical": "620156fdb354b013765b2fa9b9137ecd0db49a6bdcc579ee86ebb6649706086e",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-store-protocol-2026-09-13/independent-lead-review.md",
+    "expected": "f9fc300e0045ddf4b597ebf259e6a20c4408398a04a0d86d379ab0e1b8213b11",
+    "current": "f9fc300e0045ddf4b597ebf259e6a20c4408398a04a0d86d379ab0e1b8213b11",
+    "historical": "f9fc300e0045ddf4b597ebf259e6a20c4408398a04a0d86d379ab0e1b8213b11",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-store-protocol-2026-09-13/source-pins.edn",
+    "expected": "2ea722fe264af5750f15349afef04f7391f2123b2deadaf8836b9a18f16243a9",
+    "current": "2ea722fe264af5750f15349afef04f7391f2123b2deadaf8836b9a18f16243a9",
+    "historical": "2ea722fe264af5750f15349afef04f7391f2123b2deadaf8836b9a18f16243a9",
+    "matches": true
+  }
+]

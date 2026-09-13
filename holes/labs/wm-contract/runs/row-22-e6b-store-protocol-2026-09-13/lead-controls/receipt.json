@@ -1,0 +1,7 @@
+{
+  "command": "clojure -M:test holes/labs/wm-contract/runs/row-22-e6b-store-protocol-2026-09-13/lead-controls/control.clj",
+  "exit": 0,
+  "scope": "isolated temporary directories only",
+  "controls": 2,
+  "passing_suite_rerun": false
+}

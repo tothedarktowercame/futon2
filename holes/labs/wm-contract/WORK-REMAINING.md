@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest isolated store b97186c0/6e526b66 five pins/raw10tests27 reviewed. Executed HEAD/state mismatch still captures consistent, and unreadable application publishes successfully then fails recovery. Common strict publication/recovery schemas and complete chain joins required; no production acceptance. See [review](runs/row-22-e6b-store-protocol-2026-09-13/lead-store-review.md).
+
 - Latest E6b store c65b241f seven pins reviewed; lead corrected torn digest-file publication, lease lifetime, retry timestamp, genesis and rollback limits. Isolated implementation only after independent correction review; no store exists in production. See [review](runs/row-22-e6b-store-protocol-2026-09-13/lead-review.md).
 
 - Latest E6b61db346f/8d5c1550 five pins/raw10tests76 accepted isolated replay only: verified E3 review/admission < authorization <= enactment now joined. Live storage/authority remain open; separate store/ledger protocol next. See [acceptance](runs/row-22-e6b-feedback-2026-09-13/authorization-time-gates/lead-acceptance.md).
