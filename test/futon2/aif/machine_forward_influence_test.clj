@@ -3,7 +3,8 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-forward-influence :as e6a]
             [futon2.aif.machine-slow-prior-evidence :as e5]
-            [futon2.aif.machine-slow-prior-evidence-test :as e5-fixture])
+            [futon2.aif.machine-slow-prior-evidence-test :as e5-fixture]
+            [futon2.aif.temporal-hierarchy :as hierarchy])
   (:import (java.nio.charset StandardCharsets)
            (java.nio.file Files)
            (java.security MessageDigest)))
@@ -20,6 +21,11 @@
                          (do (Files/write (.resolve root name) bytes (make-array java.nio.file.OpenOption 0))
                              [label {:relative-path name :sha256 (sha bytes)}])))}))
 (defn- arm-config [mode] (e5-fixture/config (e5-fixture/records mode 3)))
+(defn- shaped [rows mode]
+  (mapv (fn [move] (-> move (assoc :candidate/occurrence-id (:move/id move)) (dissoc :move/id)))
+        (hierarchy/apply-slow-prior
+         (mapv #(-> % (assoc :move/id (:candidate/occurrence-id %))
+                    (dissoc :candidate/occurrence-id)) rows) mode)))
 (defn- base-config []
   (let [a-config (arm-config :exploitation) b-config (arm-config :exploration)
         a (e5/verify-shaping a-config) b (e5/verify-shaping b-config)
@@ -91,7 +97,7 @@
                       (-> (e5-fixture/records mode 3)
                           (assoc-in [:context :unshaped-candidates] rows)
                           (assoc-in [:unshaped :candidates] rows)
-                          (assoc-in [:shaped :candidates] (e5-fixture/production-shaped rows mode))))
+                          (assoc-in [:shaped :candidates] (shaped rows mode))))
         a-config (e5-fixture/config (arm-records :exploitation))
         b-config (e5-fixture/config (arm-records :exploration))
         a (e5/verify-shaping a-config) b (e5/verify-shaping b-config)
