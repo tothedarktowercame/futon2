@@ -16,13 +16,15 @@
 
 (def schema-version :wm/r16-r15-feedback-evidence-v1)
 (def source-order [:context :prior-state :e2b-subject :outcome
-                   :outcome-review :next-state :application-ledger :application-universe])
+                   :outcome-review :outcome-review-artifact :next-state
+                   :application-ledger :application-universe])
 (def ^:private schemas
   {:context :wm/e6b-transition-context-v1
    :prior-state :wm/e6b-prior-slow-state-v1
    :e2b-subject :wm/e6b-e2b-subject-v1
    :outcome :wm/e6b-outcome-authority-v1
    :outcome-review :wm/e6b-outcome-review-v1
+   :outcome-review-artifact :wm/e6b-outcome-review-artifact-v1
    :next-state :wm/e6b-next-slow-state-v1
    :application-ledger :wm/e6b-application-ledger-v1
    :application-universe :wm/e6b-application-universe-v1})
@@ -84,6 +86,8 @@
   (and (or (keyword? (:model/id x)) (nonblank? (:model/id x)))
        (nonblank? (:model/revision x)) (nonblank? (:run/id x))
        (nat-int? (:tick/index x))))
+(defn- instant [x]
+  (try (java.time.Instant/parse x) (catch Throwable _ nil)))
 
 (defn verify-feedback
   [{:keys [mode evidence-root sources canonical]}]
@@ -97,7 +101,8 @@
   (let [resolved (mapv #(resolve! evidence-root % (sources %)) source-order)
         records (into {} (map (juxt :label :record) resolved))
         context (:context records) prior (:prior-state records) e2b (:e2b-subject records)
-        outcome (:outcome records) outcome-review (:outcome-review records) claimed (:next-state records)
+        outcome (:outcome records) outcome-review (:outcome-review records)
+        review-artifact (:outcome-review-artifact records) claimed (:next-state records)
         ledger (:application-ledger records) universe (:application-universe records)
         source-pins (into {} (map (juxt :label :sha256)) resolved)
         source-tick (:tick/index context) destination (:destination/tick-index context)
@@ -118,8 +123,12 @@
                                             :feedback/event-id :application/id) context))
                    (some? occurrence) (map? (:action context)) (seq (:action context))
                    (keyword? (:fast/action-class context))
-                   (try (java.time.Instant/parse (:destination/as-of context)) true
-                        (catch Throwable _ false)))
+                   (instant (:destination/as-of context))
+                   (map? (:canonical/e3-context context))
+                   (map? (:canonical/e2b-context context))
+                   (map? (:canonical/field-subject context))
+                   (nonblank? (:outcome-reviewer/id context))
+                   (nonblank? (:outcome-observer/id context)))
       (refuse! :e6b/transition-context-invalid "Fixed transition context is incomplete" {}))
     (doseq [[label record] records]
       (when-not (= :isolated-test (:scope record))
@@ -133,7 +142,21 @@
                    (contains? (:slow/intrinsics prior) cls))
       (refuse! :e6b/prior-state-incomplete-or-stale
                "Prior state must be complete and contain the outcome class" {}))
-    (when-not (and (= common (identity-of e2b))
+    (let [e3-context (select-keys (:identity canonical-e3)
+                                  [:model/id :model/revision :run/id :cohort/id :tick/index :event/id])
+          e2b-context (merge (:identity canonical-e2b)
+                             (select-keys canonical-e2b [:cohort/id :event/id]))
+          field-subject {:e3/field-pins (get-in canonical-e3 [:subject :field-pins])
+                         :e2b/e1-source-pins (get-in canonical-e2b [:subject :e1-source-pins])
+                         :e2b/approved-domain (get-in canonical-e2b [:subject :approved-domain])}]
+    (when-not (and (= (:canonical/e3-context context) e3-context)
+                   (= (:canonical/e2b-context context) e2b-context)
+                   (= (:canonical/field-subject context) field-subject)
+                   (= (select-keys common [:model/id :model/revision :run/id :tick/index])
+                      (select-keys e3-context [:model/id :model/revision :run/id :tick/index]))
+                   (= (select-keys common [:model/id :model/revision :run/id :tick/index])
+                      (:identity canonical-e2b))
+                   (= common (identity-of e2b))
                    (= occurrence (:candidate/occurrence-id e2b))
                    (= (:action context) (:action e2b))
                    (= (:fast/action-class context) (:fast/action-class e2b))
@@ -144,7 +167,8 @@
                    (= (:action context) (get-in canonical-e3 [:subject :action]))
                    (= (value-digest canonical-e2b) (:canonical/e2b-digest e2b))
                    (= (value-digest canonical-e3) (:canonical/e3-digest e2b)))
-      (refuse! :e6b/e2b-subject-mismatch "Outcome is not bound to exact authorized enactment" {}))
+      (refuse! :e6b/canonical-context-mismatch
+               "Canonical E3/E2b context or ordered field subject differs" {})))
     (when-not (and (= common (identity-of outcome))
                    (= occurrence (:candidate/occurrence-id outcome))
                    (= (:action context) (:action outcome))
@@ -163,13 +187,33 @@
                                        [:model/id :model/revision :run/id :tick/index
                                         :candidate/occurrence-id :action :fast/action-class
                                         :terminal/status :fast/witnessed? :fast/succeeded?
-                                        :outcome/evidence-id :outcome/producer-id])]
-      (when-not (and (= :accepted (:review/outcome outcome-review))
+                                        :outcome/evidence-id :outcome/producer-id])
+          prior-at (last (sort (keep (comp instant :as-of val)
+                                     (:slow/intrinsics prior))))
+          terminal-at (instant (:terminal/at outcome))
+          reviewed-at (instant (:reviewed-at outcome-review))
+          destination-at (instant (:destination/as-of context))]
+      (when-not (and terminal-at reviewed-at destination-at prior-at
+                     (.isBefore prior-at terminal-at)
+                     (or (= terminal-at reviewed-at) (.isBefore terminal-at reviewed-at))
+                     (.isBefore reviewed-at destination-at)
+                     (= (:outcome-reviewer/id context) (:reviewer/id outcome-review))
+                     (= (:outcome-observer/id context) (:observer/id outcome-review))
+                     (not= (:reviewer/id outcome-review) (:observer/id outcome-review))
+                     (= :accepted (:review/outcome outcome-review))
                      (= outcome-subject (:subject outcome-review))
                      (= (:outcome/reviewer-id outcome) (:reviewer/id outcome-review))
                      (= (:outcome/authority-ref outcome) (:review/id outcome-review))
-                     (nonblank? (:review/artifact-sha256 outcome-review))
-                     (re-matches #"[0-9a-f]{64}" (:review/artifact-sha256 outcome-review)))
+                     (= (:outcome-review-artifact source-pins)
+                        (:review/artifact-sha256 outcome-review))
+                     (= {:subject outcome-subject :review/id (:review/id outcome-review)
+                         :reviewer/id (:reviewer/id outcome-review)
+                         :observer/id (:observer/id outcome-review)
+                         :reviewed-at (:reviewed-at outcome-review)
+                         :executed? true}
+                        (select-keys review-artifact
+                                     [:subject :review/id :reviewer/id :observer/id
+                                      :reviewed-at :executed?])))
         (refuse! :e6b/outcome-review-unresolved
                  "Outcome review does not bind the exact outcome subject" {})))
     (let [production-outcome (select-keys outcome [:fast/action-class :fast/witnessed?

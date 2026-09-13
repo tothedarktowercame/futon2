@@ -23,6 +23,7 @@
                  :application/id "apply-1" :candidate/occurrence-id [:e1-authority-run 4 0]
                  :action {:type :advance-mission :target "M-alpha"}
                  :fast/action-class :advance-capability
+                 :outcome-reviewer/id "reviewer-1" :outcome-observer/id "observer-1"
                  :destination/as-of "2026-09-13T05:00:00Z"}))
 (def prior-entry {:alpha 2.0 :beta 2.0 :intrinsic-value 0.5
                   :n-emissions 2 :n-followthrough 1 :as-of "2026-09-13T04:00:00Z"})
@@ -35,6 +36,17 @@
    :e2b (#'e2bt/config)})
 (def canonical-e3 (canonical-e3-verifier/verify-pre-enact (:e3 canonical-config)))
 (def canonical-e2b (canonical-e2b-verifier/verify-correspondence (:e2b canonical-config)))
+(alter-var-root
+ #'context assoc
+ :canonical/e3-context
+ (select-keys (:identity canonical-e3)
+              [:model/id :model/revision :run/id :cohort/id :tick/index :event/id])
+ :canonical/e2b-context
+ (merge (:identity canonical-e2b) (select-keys canonical-e2b [:cohort/id :event/id]))
+ :canonical/field-subject
+ {:e3/field-pins (get-in canonical-e3 [:subject :field-pins])
+  :e2b/e1-source-pins (get-in canonical-e2b [:subject :e1-source-pins])
+  :e2b/approved-domain (get-in canonical-e2b [:subject :approved-domain])})
 (def e2b
   (merge common {:schema/version :wm/e6b-e2b-subject-v1
                  :candidate/occurrence-id [:e1-authority-run 4 0]
@@ -47,6 +59,7 @@
                  :candidate/occurrence-id [:e1-authority-run 4 0]
                  :action {:type :advance-mission :target "M-alpha"}
                  :terminal/status :succeeded :fast/action-class :advance-capability
+                 :terminal/at "2026-09-13T04:30:00Z"
                  :fast/witnessed? true :fast/succeeded? true
                  :outcome/evidence-id "outcome-1" :outcome/authority-ref "review-1"
                  :outcome/producer-id "worker-1" :outcome/reviewer-id "reviewer-1"}))
@@ -81,7 +94,12 @@
      :outcome-review {:schema/version :wm/e6b-outcome-review-v1 :scope :isolated-test
                       :review/outcome :accepted :subject outcome-subject
                       :reviewer/id "reviewer-1" :review/id "review-1"
-                      :review/artifact-sha256 (apply str (repeat 64 "a"))}
+                      :observer/id "observer-1" :reviewed-at "2026-09-13T04:45:00Z"
+                      :review/artifact-sha256 nil}
+     :outcome-review-artifact
+     {:schema/version :wm/e6b-outcome-review-artifact-v1 :scope :isolated-test
+      :subject outcome-subject :review/id "review-1" :reviewer/id "reviewer-1"
+      :observer/id "observer-1" :reviewed-at "2026-09-13T04:45:00Z" :executed? true}
      :application-ledger {:schema/version :wm/e6b-application-ledger-v1 :scope :isolated-test
                           :entries [entry]}
      :application-universe {:schema/version :wm/e6b-application-universe-v1
@@ -95,7 +113,10 @@
   (let [dir (.toFile (Files/createTempDirectory "e6b" (make-array java.nio.file.attribute.FileAttribute 0)))
         records0 (f (base-records))
         ledger-bytes (.getBytes (str (pr-str (:application-ledger records0)) "\n") "UTF-8")
-        records (assoc-in records0 [:application-universe :ledger/sha256] (digest ledger-bytes))
+        artifact-bytes (.getBytes (str (pr-str (:outcome-review-artifact records0)) "\n") "UTF-8")
+        records (-> records0
+                    (assoc-in [:application-universe :ledger/sha256] (digest ledger-bytes))
+                    (assoc-in [:outcome-review :review/artifact-sha256] (digest artifact-bytes)))
         sources (into {}
                       (for [label e6b/source-order
                             :let [file (io/file dir (str (name label) ".edn"))
@@ -144,13 +165,35 @@
          (refusal (fixture #(assoc-in % [:application-universe :complete/application-ids] [])))))
   (is (= :e6b/transition-context-invalid
          (refusal (fixture #(assoc-in % [:context :destination/tick-index] 7)))))
-  (is (= :e6b/e2b-subject-mismatch
+  (is (= :e6b/canonical-context-mismatch
          (refusal (fixture #(assoc-in % [:e2b-subject :canonical/e3-digest]
                                       (apply str (repeat 64 "0")))))))
   (is (= :e6b/outcome-review-unresolved
          (refusal (fixture #(assoc-in % [:outcome-review :review/id] "nonexistent-review")))))
   (is (= :e6b/outcome-authority-invalid
          (refusal (fixture #(assoc-in % [:outcome :fast/action-class] :explore))))))
+
+(deftest canonical-context-and-review-chronology-controls
+  (doseq [[label path value]
+          [[:model [:context :model/revision] "borrowed-model"]
+           [:run [:context :run/id] "borrowed-run"]
+           [:tick [:context :tick/index] 3]
+           [:event [:context :canonical/e3-context :event/id] "borrowed-event"]
+           [:field [:context :canonical/field-subject :e3/field-pins] []]]]
+    (testing (name label)
+      (is (#{:e6b/canonical-context-mismatch :e6b/transition-context-invalid}
+           (refusal (fixture #(assoc-in % path value)))))))
+  (testing "missing canonical expected subject"
+    (is (= :e6b/transition-context-invalid
+           (refusal (fixture #(update % :context dissoc :canonical/field-subject))))))
+  (testing "stale or implausible review chronology"
+    (is (= :e6b/outcome-review-unresolved
+           (refusal (fixture #(assoc-in % [:outcome-review :reviewed-at]
+                                      "2026-09-13T03:00:00Z"))))))
+  (testing "plausible reference without artifact pin is not authority"
+    (is (= :e6b/outcome-review-unresolved
+           (refusal (fixture #(assoc-in % [:outcome-review :review/artifact-sha256]
+                                      (apply str (repeat 64 "f")))))))))
 
 (deftest replay-and-byte-authority-controls
   (let [cfg (fixture identity)
