@@ -51,8 +51,9 @@ typed refusals from `restart-preflight.sh`.
 
 1. From a separate shell, record PID/cgroup/cwd/cmdline, unit properties,
    ports, repo-qualified revisions, dependency/classpath pins, disk space,
-   ownership and modes. Run the read-only preflight with the two reviewed
-   acceptance records. Any refusal stops the procedure.
+   ownership and modes. The present preflight is discovery-only and always
+   refuses: file existence is not acceptance. A future independently reviewed
+   authority reader, outside this script, must resolve the two records.
 2. Activate the reviewed upstream ingress fence. Prove all eight creation
    surfaces reject new work. Wait until active, queued, and in-flight invoke
    creation/delivery/execution joins are zero. Re-run the proof immediately
@@ -66,17 +67,21 @@ typed refusals from `restart-preflight.sh`.
 4. Execute only `systemctl --user restart futon3c-zone.service` from that
    external shell. Startup reads and compacts the hot ledger; therefore the
    backup and quiescence checks precede startup. Do not restore an old ledger
-   over a newer one. If startup fails, keep ingress rejected and either fix
-   forward at the accepted tree or start the prior fully pinned tree against
-   the untouched originals; never delete archive evidence.
-5. Confirm a new process start time and PID, exact cwd/cgroup/unit, ports,
-   launcher/dependency/tree pins, and `GET /api/alpha/agents`. Confirm the
-   expected agents reconnect before releasing ingress.
-6. Only then issue a fresh, non-historical test invoke. Read its exact
-   normalized request commission through the API, wait for final delivery and
-   execution joins, allow expiry/archive handling, and prove keyed archive
-   readback has the same commission, digest and immutable join. Do not use or
-   reconstruct author job 20588.
+   over a newer one. If startup might have written any ledger or archive byte,
+   keep ingress rejected and fix forward at a newly accepted tree. Returning
+   to old code is permitted only with mechanical proof that failure preceded
+   every state read/write; uncertainty requires roll-forward. Never delete
+   archive evidence.
+5. A verification lane that remains reachable while public ingress is held is
+   not implemented. Until one exists, the procedure stops here with
+   `:restart/held-ingress-verification-lane-absent`; it cannot claim readiness.
+   The needed lane must be local-only, authenticate the operator, expose
+   process/source identity and one bounded retention/archive operation, and be
+   outside the rejected public creation paths.
+6. That future lane must perform a bounded explicit archive operation after a
+   fresh test job reaches final delivery/execution joins, then compare keyed
+   readback immediately. It must not wait seven days, alter the global clock,
+   or reconstruct author job 20588.
 7. Release ingress last. Retain the preflight, backup hashes, systemd journal
    interval, process identity, API output and archive readback as the operator
    execution record.

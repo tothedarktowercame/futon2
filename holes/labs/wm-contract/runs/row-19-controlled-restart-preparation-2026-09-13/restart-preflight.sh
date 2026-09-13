@@ -10,8 +10,11 @@ refusals=()
 
 refuse() { refusals+=("$1"); }
 [[ "$pid" =~ ^[0-9]+$ && -r "/proc/$pid/cmdline" ]] || refuse ":restart/process-unavailable"
+# Paths are discovery inputs only. This script has no authority resolver and
+# therefore never promotes their existence or contents to acceptance.
 [[ -n "$source_acceptance" && -f "$source_acceptance" ]] || refuse ":restart/full-tree-acceptance-absent"
 [[ -n "$ingress_acceptance" && -f "$ingress_acceptance" ]] || refuse ":restart/ingress-fence-acceptance-absent"
+refuse ":restart/acceptance-authority-unverified"
 
 if [[ -r "/proc/$pid/cgroup" ]]; then
   grep -qx '0::/user.slice/user-1000.slice/user@1000.service/futon.slice/futon-services.slice/futon3c-zone.service' "/proc/$pid/cgroup" \
@@ -25,21 +28,17 @@ fi
 [[ -f /tmp/futon3c-invoke-jobs.edn ]] || refuse ":restart/hot-ledger-absent"
 [[ -d /tmp/futon3c-invoke-jobs.edn.commissions ]] || refuse ":restart/archive-store-not-provisioned"
 
-# A dirty broad classpath checkout cannot be certified by the HTTP-file pin.
-if [[ -n "$(git -C /home/joe/code/futon3c status --porcelain --untracked-files=no)" ]]; then
-  refuse ":restart/source-worktree-dirty"
-fi
-
-printf '{:schema :wm/row19-restart-preflight-v1\n'
-printf ' :pid %s\n' "$pid"
-printf ' :cwd %q\n' "$(readlink "/proc/$pid/cwd" 2>/dev/null || true)"
-printf ' :cmdline-sha256 %q\n' "$(sha256sum "/proc/$pid/cmdline" 2>/dev/null | cut -d' ' -f1 || true)"
-printf ' :service :futon3c-zone.service\n'
-printf ' :ports [7070 6768]\n'
-printf ' :hot-ledger {:path %q :sha256 %q}\n' /tmp/futon3c-invoke-jobs.edn "$(sha256sum /tmp/futon3c-invoke-jobs.edn 2>/dev/null | cut -d' ' -f1 || true)"
-printf ' :status %s\n' "$([[ ${#refusals[@]} -eq 0 ]] && printf ':ready-for-independent-review' || printf ':refused')"
-printf ' :refusals ['
-printf ' %s' "${refusals[@]:-}"
-printf ']}'
-printf '\n'
-[[ ${#refusals[@]} -eq 0 ]]
+cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null || true)"
+cmd_sha="$(sha256sum "/proc/$pid/cmdline" 2>/dev/null | cut -d' ' -f1 || true)"
+ledger_sha="$(sha256sum /tmp/futon3c-invoke-jobs.edn 2>/dev/null | cut -d' ' -f1 || true)"
+source_path_status="$([[ -n "$source_acceptance" && -f "$source_acceptance" ]] && echo present-unverified || echo absent)"
+ingress_path_status="$([[ -n "$ingress_acceptance" && -f "$ingress_acceptance" ]] && echo present-unverified || echo absent)"
+printf '%s\n' "${refusals[@]}" | jq -Rsc \
+  --argjson pid "$pid" --arg cwd "$cwd" --arg cmd "$cmd_sha" --arg ledger "$ledger_sha" \
+  --arg source "$source_path_status" --arg ingress "$ingress_path_status" \
+  '{schema:"wm/row19-restart-discovery-v2",status:"discovery-unverified",
+    pid:$pid,cwd:$cwd,cmdline_sha256:$cmd,service:"futon3c-zone.service",ports:[7070,6768],
+    hot_ledger:{path:"/tmp/futon3c-invoke-jobs.edn",sha256:$ledger},
+    supplied_paths:{source_acceptance:$source,ingress_acceptance:$ingress},
+    refusals:(split("\n")|map(select(length>0)))}'
+exit 1
