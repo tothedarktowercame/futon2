@@ -22,7 +22,11 @@
        (filter #(.isFile ^java.io.File %))
        (remove #(let [p (.getPath ^java.io.File %)]
                   (or (str/includes? p "/.git/")
-                      (str/includes? p "/target/"))))
+                      (str/includes? p "/target/")
+                      ;; scratch fixture copies inside retained run dirs are
+                      ;; evidence, not pointer targets (2026-09-13: a scratch
+                      ;; aif-equations.edn shadowed the registry).
+                      (str/includes? p "/scratch/"))))
        (map #(.getCanonicalFile ^java.io.File %))
        distinct
        vec))
