@@ -1,0 +1,17 @@
+{:tree-sha "8238a109c0f75471a268b934c22bdbbed1a9be6d"
+ :at "2026-09-13T16:46:20+00:00"
+ :source-pins
+ {:source "4a969a385c646fde874fc62fafea9ef62cbd72f2e3e57ca54041635997de9239"
+  :test "1e11be678449bf2da877509d502f31d627d3d340ea27baa1f5506062c75bcf6b"
+  :preflight "cd6cffdd6f4d9040fe9dcdba5336bf667904191be2173cddca2f1e2bd99f36ed"
+  :lead-live-status "bc0079170a0ff7c3e372fcbe0f4eda8cbbc0108754943ca3f40ed46759a1983b"}
+ :gates
+ [{:kind :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.on-demand-entrypoint-test]'"
+   :exit 0 :tests 4 :assertions 21 :raw "repair-test.raw.txt"}
+  {:kind :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/on_demand_entrypoint.clj test/futon2/aif/on_demand_entrypoint_test.clj"
+   :exit 0 :errors 0 :warnings 0 :raw "repair-kondo.raw.txt"}
+  {:kind :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/on_demand_entrypoint.clj test/futon2/aif/on_demand_entrypoint_test.clj holes/labs/wm-contract/runs/row-26-on-demand-entrypoint-2026-09-13/run-config.example.edn holes/labs/wm-contract/runs/row-26-on-demand-entrypoint-2026-09-13/run-config.preflight.edn"
+   :exit 0 :files 4 :raw "repair-parens.raw.txt"}]}

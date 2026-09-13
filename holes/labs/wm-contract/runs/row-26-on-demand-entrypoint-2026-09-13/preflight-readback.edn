@@ -1,0 +1,27 @@
+{:schema/version :wm/row26-preflight-readback-v1
+ :observed-at "2026-09-13T16:43:44Z"
+ :read-only true
+ :click-status
+ {:command "curl -sS --max-time 5 http://127.0.0.1:7070/api/alpha/wm/click"
+  :exit 0
+  :raw "lead-live-status.json"
+  :running? false
+  :serving-runner-code {:availability :unavailable
+                        :reason :not-recorded-in-this-process-image}}
+ :seat-observations
+ [{:command "curl -sS --max-time 5 http://127.0.0.1:7070/api/alpha/agents/zai-5"
+   :agent-id "zai-5" :role :author :status :idle :invoke-ready? true}
+  {:command "curl -sS --max-time 5 http://127.0.0.1:7070/api/alpha/agents/claude-15"
+   :agent-id "claude-15" :role :reviewer :status :invoking :invoke-ready? true}
+  {:command "curl -sS --max-time 5 http://127.0.0.1:7070/api/alpha/agents/codex-26"
+   :agent-id "codex-26" :role :repair-reviewer :status :invoking :invoke-ready? true}]
+ :effective-settings
+ {:status :unavailable
+  :required {:anticipation-horizon 3 :cascade-rollout-depth 5
+             :trace-policy-details true :f-pi-dark true
+             :f-pi-policy-posterior true}
+  :reason :no-read-only-loaded-process-settings-endpoint}
+ :effective-output-paths
+ {:status :unavailable
+  :reason :code-defaults-do-not-establish-loaded-process-configuration}
+ :execution :not-performed}
