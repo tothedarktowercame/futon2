@@ -1,0 +1,19 @@
+{:schema :wm/execution-receipts-v1
+ :source {:repo "futon3c" :commit "be83071d"
+          :tree-sha "ef28f3598c2c1e91dd08ae20c011d86b9c5edabf"
+          :files {"src/futon3c/agency/invoke_ingress_controller.clj"
+                  "bbfac24d0c8bbda2e619a8314d8f3bd92d6ed4505d2e24c86d7a20c06687cffe"
+                  "test/futon3c/agency/invoke_ingress_controller_test.clj"
+                  "0eb378b929104b938a1a230c8c6d606dd9730c2553c22fabb7286d3642e4f9bb"}}
+ :runs
+ [{:gate :focused-test
+   :command "clojure -M:test -n futon3c.agency.invoke-ingress-controller-test"
+   :exit 0 :tests 10 :assertions 36 :failures 0 :errors 0
+   :stdout "retry-test.stdout" :stderr "retry-test.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon3c/agency/invoke_ingress_controller.clj test/futon3c/agency/invoke_ingress_controller_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "retry-kondo.stdout" :stderr "retry-kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/invoke_ingress_controller.clj test/futon3c/agency/invoke_ingress_controller_test.clj"
+   :exit 0 :stdout "retry-parens.stdout" :stderr "retry-parens.stderr"}]
+ :supersedes {:receipt "release-gates.edn" :reason "persistence retry control changed final tests"}}
