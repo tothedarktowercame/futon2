@@ -1,0 +1,12 @@
+{:schema :wm/row19-selective-loader-receipts-v1 :at "2026-09-13T03:15:09Z"
+ :tree-sha "dc10cbca832b7ff3c408e250a9fbc1d0382ec71b"
+ :pins {"src/futon3c/agency/selective_form_loader.clj" "fcfbbff4ee84aa58ff2863e28cb5ead1d5abfad9f15fbce90551800343b4352d"
+        "test/futon3c/agency/selective_form_loader_test.clj" "da04aac6bb360740bb384659a98b8695fee3d77ec23fe2ed540a2aa8785bc037"
+        "scripts/row19_selective_loader_test.clj" "ad72f6d38f6eddd5873bb75751e6c427f6547f2f2b029017febd3dda905565cb"
+        "src/futon3c/transport/http.clj" "defb1ed3b0deeb16ba15857f8efe5ac4e53ed6c442723dfae8808b38406f65fb"}
+ :gates [{:kind :focused-test :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"scripts\" \"dev\"]}' -M -m row19-selective-loader-test" :exit 0 :tests 1 :assertions 13 :pass 13 :fail 0 :error 0 :raw "focused-test.raw.txt"}
+         {:kind :induced-failure :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"scripts\" \"dev\"]}' -M -m row19-selective-loader-test --induced-failure" :exit 1 :expected-exit 1 :tests 1 :assertions 14 :pass 13 :fail 1 :error 0 :raw "induced-failure.raw.txt"}
+         {:kind :clj-kondo :command "clj-kondo --lint src/futon3c/agency/selective_form_loader.clj test/futon3c/agency/selective_form_loader_test.clj scripts/row19_selective_loader_test.clj" :exit 0 :errors 0 :warnings 0 :raw "clj-kondo.raw.txt"}
+         {:kind :check-parens :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/agency/selective_form_loader.clj test/futon3c/agency/selective_form_loader_test.clj scripts/row19_selective_loader_test.clj" :exit 0 :files 3 :raw "check-parens.raw.txt"}]
+ :superseded [{:tree-sha "2de72ab8" :finding :kondo-two-warnings :exit 2}
+              {:tree-sha "9cd96667" :finding :test-expanded-after-clean-gates}]}

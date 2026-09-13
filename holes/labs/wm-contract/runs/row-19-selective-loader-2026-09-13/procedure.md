@@ -1,0 +1,7 @@
+# Review boundary and controlled-restart alternative
+
+The loader is a concrete artifact, but `activate-http-retention!` refuses at HEAD because no pre-creation fence rejects every ingress surface. Queue hold is insufficient: bells continue queueing, and a caller can enter the old `create-invoke-job!` body before blocking on the writer lock. The loader requires two identical independently measured fence generations, before and under the writer lock, with zero active and zero already-entered/waiting creators.
+
+No speculative fence is installed by this packet. If a separately reviewed ingress fence is not built, the sound alternative is a controlled process restart: stop external ingress upstream of the JVM; observe zero active workers, zero queued creators, and stable hot-ledger bytes; fsync immutable backups and verify archive-directory writability; start the pinned `futon3c/master` source; verify loaded code identity before reopening ingress. Startup recovery/compaction can write, so it must occur only after the archive prerequisite and backups are established. Never restore an older hot ledger over newer evidence.
+
+The post-load archive probe must wait until the probe job's state, trace, artifact, execution, terminal, and delivery fields are final. Archiving earlier would create a legitimate later hot/archive disagreement. Only then may its exact archive projection be published and compared; it remains a non-R9 machinery probe.

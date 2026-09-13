@@ -1,0 +1,6 @@
+
+FAIL in () (row19_selective_loader_test.clj:7)
+induced loader runner failure
+expected: :pass
+  actual: :induced
+{:runner :row19-selective-loader, :tests 1, :assertions 14, :pass 13, :fail 1, :error 0, :exit 1}

@@ -1,0 +1,18 @@
+{:schema :wm/row19-selective-activation-finding-v1
+ :status :refused
+ :refusal :loader/ingress-fence-unavailable
+ :source-census {:creation-calls [{:line 1164 :surface :auto-bellback}
+                                  {:line 1293 :surface :parked-resume}
+                                  {:line 4532 :surface :direct-invoke}
+                                  {:line 5222 :surface :bell}
+                                  {:line 5350 :surface :invoke-announce}
+                                  {:line 5697 :surface :whistle-stream}
+                                  {:line 5858 :surface :whistle}]
+                 :queue-hold-rejects-ingress? false
+                 :old-creator-may-wait-on-writer-lock? true}
+ :required-proof {:schema :agency/invoke-ingress-quiescence-v1
+                  :authority :independently-measured
+                  :admission-rejected? true :active-creations 0 :waiting-creations 0
+                  :all-creation-surfaces-covered? true :generation-token :stable}
+ :safe-alternative :controlled-restart-after-external-ingress-stop-and-quiescence
+ :no-live-action true}
