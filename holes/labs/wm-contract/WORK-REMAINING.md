@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest E6b store c65b241f seven pins reviewed; lead corrected torn digest-file publication, lease lifetime, retry timestamp, genesis and rollback limits. Isolated implementation only after independent correction review; no store exists in production. See [review](runs/row-22-e6b-store-protocol-2026-09-13/lead-review.md).
+
 - Latest E6b61db346f/8d5c1550 five pins/raw10tests76 accepted isolated replay only: verified E3 review/admission < authorization <= enactment now joined. Live storage/authority remain open; separate store/ledger protocol next. See [acceptance](runs/row-22-e6b-feedback-2026-09-13/authorization-time-gates/lead-acceptance.md).
 
 - Latest E6b relation078b8be9/39e0f51b six pins/raw7tests41 reviewed. Executed baseline enacts04:15 before canonical authorization12:00 yet replays. Authorization-to-enactment join still required; lead terminal fix independently reviewed. See [review](runs/row-22-e6b-feedback-2026-09-13/lead-relation-review.md).

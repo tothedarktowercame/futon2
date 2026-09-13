@@ -47,8 +47,9 @@ and lifetime file lease, in this order:
 3. read the current HEAD and its immutable transaction bytes once;
 4. validate schema, byte digest, generation, state revision and application
    index;
-5. perform the pure computation outside no lock (callers may prepare a
-   proposal), then reacquire both locks and repeat step 3;
+5. callers may prepare pure proposals outside the process lock, but the owner
+   retains its lifetime OS lease throughout; reacquire the process lock and
+   revalidate the lease and step 3 before committing;
 6. compare the proposal's exact prior revision and prior transaction digest;
 7. publish one transaction and advance HEAD as described below.
 
@@ -85,10 +86,22 @@ An immutable transaction has schema `:wm/e6b-state-transaction-v1` and exactly:
  :committed-at RFC3339}
 ```
 
+The schema tag must be included in the serialized transaction. `committed-at`
+must be fixed by the immutable request/context or returned from an existing
+application before preparing new bytes; retry must not generate a fresh clock
+value and turn the same application into conflicting content.
+
 Its filename is the SHA-256 of the exact strict UTF-8 EDN bytes. Publication is
-CREATE_NEW into `transactions/`, file sync, and transaction-directory sync.
-Existing identical bytes are an idempotent retry; an existing name with
-different bytes is a digest conflict.
+a unique temporary file in the transaction directory, complete write and file
+sync, followed by atomic **no-overwrite** publication to the digest name and
+transaction-directory sync. On the intended local filesystem, a hard-link
+publication from the synced temporary inode is one candidate primitive; its
+atomic/no-overwrite guarantees must be tested and unsupported filesystems must
+refuse. Never use overwrite rename or stream into the final digest filename.
+A crash during the write then leaves only temporary bytes, not a truncated
+digest object. Existing identical final bytes are an idempotent retry; an
+existing name with different bytes is corruption and must not be replaced.
+Temporary-link cleanup follows durable final publication.
 
 HEAD is `:wm/e6b-state-head-v1` containing store id, generation, current state
 revision, transaction digest, state digest, and the complete ordered
@@ -118,7 +131,13 @@ followed by a separate ledger write.
   establish a new owner generation.
 
 Initialization is a separate CREATE_NEW genesis transaction and HEAD, allowed
-only with an independently reviewed explicit initial slow state. Existing
+only with an independently reviewed explicit initial slow state. Define a
+distinct generation-zero genesis schema with no predecessor/application, fixed
+initial state and source authority. Normal transactions must increment exactly
+one generation, match store identity, and terminate their acyclic predecessor
+chain at that exact genesis. Interrupted genesis with no HEAD must return an
+explicit incomplete-initialization refusal for reviewed recovery; it must not
+silently bootstrap again or select an orphan. Existing
 bytes always refuse initialization. This is not a migration default.
 
 ## Complete snapshot and external acceptance
@@ -134,7 +153,10 @@ must return an independently retained `:wm/e6b-store-completeness-v1` acceptance
 binding the exact capture digest, owner/store id, generation, application
 universe, writer inventory, source pins, reviewer identity and outcome. The
 store producer cannot mint this record. Missing, borrowed, stale, fixture, or
-rejected acceptance refuses production reconciliation. Snapshot output always
+rejected acceptance refuses production reconciliation. Local hash-chain validity does not detect wholesale rollback of HEAD to an
+older valid generation. Any freshness or rollback-resistance claim requires an
+independently retained expected head/generation; absent that, report only local
+chain consistency. Snapshot output always
 states `:restart-authorized? false`.
 
 ## First installation and runtime obligations

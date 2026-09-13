@@ -1,0 +1,30 @@
+[
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/temporal_hierarchy.clj",
+    "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+  },
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/intrinsic_values.clj",
+    "sha256": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"
+  },
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab"
+  },
+  {
+    "path": "/home/joe/code/futon3c/src/futon3c/agency/invoke_ingress_controller.clj",
+    "sha256": "966dba69d13c3f39431dd73369716e53d07a171e09b09818529113c00db52756"
+  },
+  {
+    "path": "/home/joe/code/futon3c/src/futon3c/agency/invoke_lifecycle_snapshot.clj",
+    "sha256": "d288a58d6a927cfa7cdb1dd4210b58fc894317eff1f72cd3be450268ee83ccca"
+  },
+  {
+    "path": "/home/joe/code/futon3c/src/futon3c/agency/invoke_lifecycle_reconciliation.clj",
+    "sha256": "9820f667dcc8df4ed329a9171ddc4763ac82662d294b932e4768ff2aa0174a6c"
+  },
+  {
+    "path": "/home/joe/code/futon3c/src/futon3c/transport/http.clj",
+    "sha256": "defb1ed3b0deeb16ba15857f8efe5ac4e53ed6c442723dfae8808b38406f65fb"
+  }
+]
