@@ -1,0 +1,7 @@
+
+Running tests in #{"test"}
+Syntax error reading source at (futon2/aif/machine_slow_state_carrier_test.clj:109:1).
+EOF while reading, starting at line 41
+
+Full report at:
+/tmp/clojure-16244156545335078152.edn

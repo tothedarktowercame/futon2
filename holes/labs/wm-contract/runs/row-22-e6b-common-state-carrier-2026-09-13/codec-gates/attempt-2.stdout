@@ -1,0 +1,23 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-slow-feedback-evidence-test
+
+Testing futon2.aif.machine-slow-state-carrier-test
+
+FAIL in (refuses-bytes-digests-and-candidate-booleans) (machine_slow_state_carrier_test.clj:107)
+expected: (= :e6b-carrier/proposal-shape-invalid (refusal (assoc-in (bundle) [:proposal-evidence :verified?] true)))
+  actual: (not (= :e6b-carrier/proposal-shape-invalid :e6b-carrier/schema-invalid))
+
+FAIL in (refuses-schema-coordinate-and-subject-mutations) (machine_slow_state_carrier_test.clj:99)
+nonfinite-coordinate
+expected: (= expected (refusal (mutate (bundle))))
+  actual: (not (= :e6b-carrier/coordinate-invalid :e6b-carrier/proposal-record-mismatch))
+
+Ran 14 tests containing 81 assertions.
+2 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-4163264732498797126.edn
