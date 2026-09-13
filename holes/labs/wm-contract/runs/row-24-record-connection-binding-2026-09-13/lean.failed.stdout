@@ -1,0 +1,97 @@
+DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean:103:14: error: Function expected at
+  h.right.right.left.right
+but this term has type
+  List.map RecordFamilyPresence.family att.recordFamilies = allRecordFamilies ∧
+    ∀ s ∈ expected.records,
+      recordSubjectValid fixed s ∧
+        RecordFamilyPresence.presentAndConsistent s.family s.evidenceSource ∈ att.recordFamilies
+
+Note: Expected a function because this term is being applied to the argument
+  s
+DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean:118:18: error: Function expected at
+  h.right.right.left.right
+but this term has type
+  List.map RecordFamilyPresence.family att.recordFamilies = allRecordFamilies ∧
+    ∀ s ∈ expected.records,
+      recordSubjectValid fixed s ∧
+        RecordFamilyPresence.presentAndConsistent s.family s.evidenceSource ∈ att.recordFamilies
+
+Note: Expected a function because this term is being applied to the argument
+  s
+DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean:125:14: error: Function expected at
+  h.right.right.right.right
+but this term has type
+  List.map (fun x => x.connectionId) att.connectionStates = req.requiredConnections ∧
+    ∀ s ∈ expected.connections,
+      connectionSubjectValid fixed s ∧
+        { connectionId := s.connectionId, state := ConnectionState.firedClassified s.classification s.evidenceSource } ∈
+          att.connectionStates
+
+Note: Expected a function because this term is being applied to the argument
+  s
+DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean:132:19: error: Function expected at
+  h.right.right.right.right
+but this term has type
+  List.map (fun x => x.connectionId) att.connectionStates = req.requiredConnections ∧
+    ∀ s ∈ expected.connections,
+      connectionSubjectValid fixed s ∧
+        { connectionId := s.connectionId, state := ConnectionState.firedClassified s.classification s.evidenceSource } ∈
+          att.connectionStates
+
+Note: Expected a function because this term is being applied to the argument
+  s
+DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean:140:18: error: Function expected at
+  h.right.right.right.right
+but this term has type
+  List.map (fun x => x.connectionId) att.connectionStates = req.requiredConnections ∧
+    ∀ s ∈ expected.connections,
+      connectionSubjectValid fixed s ∧
+        { connectionId := s.connectionId, state := ConnectionState.firedClassified s.classification s.evidenceSource } ∈
+          att.connectionStates
+
+Note: Expected a function because this term is being applied to the argument
+  s
+DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean:147:9: error: Function expected at
+  h.right.right.right.right
+but this term has type
+  List.map (fun x => x.connectionId) att.connectionStates = req.requiredConnections ∧
+    ∀ s ∈ expected.connections,
+      connectionSubjectValid fixed s ∧
+        { connectionId := s.connectionId, state := ConnectionState.firedClassified s.classification s.evidenceSource } ∈
+          att.connectionStates
+
+Note: Expected a function because this term is being applied to the argument
+  s
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.recordConnectionBound_implies_eventBound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.recordConnectionBound_implies_full' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_cross_run_family_reuse' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_missing_family' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_mismatched_family_evidence_source' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_cross_run_edge_reuse' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_wrong_connection_endpoint' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_wrong_connection_classification' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_stale_causal_reference' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

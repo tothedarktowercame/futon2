@@ -1,0 +1,16 @@
+cwd: /home/joe/code/mathlib4
+lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/FullCertificateRecordConnectionBinding.olean DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean
+attempt 1 tree: 3b4a828755
+exit: 1
+stdout: lean.failed.stdout
+stderr: lean.failed.stderr
+
+same argv; attempt 2 tree: ce681f0c69
+exit: 1
+stdout: lean.failed-2.stdout
+stderr: lean.failed-2.stderr
+
+same argv; final tree: 0f02c59e6f6590798730a3ebaa525e75d8024e95
+exit: 0
+stdout: lean.stdout
+stderr: lean.stderr

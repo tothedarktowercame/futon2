@@ -1,0 +1,27 @@
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.recordConnectionBound_implies_eventBound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.recordConnectionBound_implies_full' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_cross_run_family_reuse' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_missing_family' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_mismatched_family_evidence_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_cross_run_edge_reuse' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_wrong_connection_endpoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_wrong_connection_classification' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateRecordConnectionBinding.rejects_stale_causal_reference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
