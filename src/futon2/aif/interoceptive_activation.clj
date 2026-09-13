@@ -101,7 +101,7 @@
   "Validate an already independently authenticated record. This pure layer
   cannot authenticate its caller; only resolve-production-participation! may
   authorize production."
-  [record {:keys [now-ms source-pins lock-probe process-probe capability]
+  [record {:keys [now-ms source-pins lock-probe process-probe boot-id capability]
            :or {now-ms (System/currentTimeMillis)}}]
   (when-not (= :wm/interoceptive-writer-participation-v1 (:schema record))
     (refuse! :interoceptive/activation-schema {:schema (:schema record)}))
@@ -122,6 +122,7 @@
               :valid-until-ms (:valid-until-ms record)}))
   (when-not (and (true? (get-in record [:host :census-complete?]))
                  (string? (get-in record [:host :boot-id]))
+                 (= boot-id (get-in record [:host :boot-id]))
                  (= required-writer-census-sha256
                     (get-in record [:host :writer-census-sha256]))
                  (re-matches #"[0-9a-f]{64}"
@@ -220,5 +221,6 @@
       (validate-participation record
                               {:capability production-capability
                                :source-pins (real-source-pins)
+                               :boot-id (str/trim (slurp "/proc/sys/kernel/random/boot_id"))
                                :lock-probe host-lock-probe
                                :process-probe host-process-probe}))))

@@ -31,7 +31,7 @@
   (select-keys process [:process/id :pid :start-ticks :exe :cmdline-sha256]))
 
 (defn opts []
-  {:now-ms 1500 :source-pins activation/required-source-pins
+  {:now-ms 1500 :source-pins activation/required-source-pins :boot-id "boot-1"
    :lock-probe identity :process-probe observable})
 
 (defn refusal [f]
