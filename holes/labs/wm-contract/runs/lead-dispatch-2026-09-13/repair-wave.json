@@ -601,10 +601,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-isolated-feedback-store.request.json",
       "dispatch": "accepted",
       "scope": "independent protocol review and isolated tempfile feedback store; no production"
+    },
+    {
+      "packet": "codex-23-feedback-store-chain-publication-repair",
+      "job-id": "invoke-1789277924393-20670-f08014a0",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789277924393-20670-f08014a0",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-store-chain-publication-repair.request.json",
+      "dispatch": "accepted",
+      "scope": "isolated feedback store full publication schemas and chain joins; no production"
     }
   ],
   "current-awaiting": [
-    "invoke-1789277244471-20668-210c6ff7"
+    "invoke-1789277924393-20670-f08014a0"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
