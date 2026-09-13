@@ -94,6 +94,22 @@
           (zero? (or (:receipts-differing report) -1))
           (true? (:laws-identical? report))))))
 
+(def ^:private certificate-volatile-fields
+  "Identity fields that legitimately differ between two certifications of
+   the same records: when it ran and under which run identity."
+  #{:certificate/generated-at :certificate/run-id})
+
+(defn certificate-drift
+  "Field-level drift between a committed certificate and a recomputed one,
+   ignoring only the volatile identity fields.  Empty means the committed
+   certificate still describes exactly what recomputation observes; any
+   entry names the field, the committed value, and the recomputed value."
+  [committed recomputed]
+  (vec (for [k (sort (distinct (concat (keys committed) (keys recomputed))))
+             :when (and (not (certificate-volatile-fields k))
+                        (not= (get committed k) (get recomputed k)))]
+         {:field k :committed (get committed k) :recomputed (get recomputed k)})))
+
 (defn report [pin live]
   (let [{:keys [pairs structural-differences]} (comparison pin live)
         diffs (remove (comp empty? classify) pairs)

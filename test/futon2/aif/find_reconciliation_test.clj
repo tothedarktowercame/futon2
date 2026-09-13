@@ -92,3 +92,15 @@
                           (reconciliation/certificate
                            (assoc rep :pin-sha256 "a" :live-sha256 "b" :pin-path "p" :live-path "l")
                            {:generated-at "t"})))))
+
+(deftest certificate-drift-ignores-only-volatile-identity
+  (let [rep (assoc (reconciliation/report recorded recorded)
+                   :pin-path "p" :pin-sha256 "aa" :live-path "l" :live-sha256 "bb")
+        cert (reconciliation/certificate rep {:run-id "r1" :generated-at "t1"})
+        recert (reconciliation/certificate rep {:run-id "r2" :generated-at "t2"})]
+    (is (empty? (reconciliation/certificate-drift cert recert))
+        "re-certification of the same records under a new run identity is not drift")
+    (let [moved (assoc recert :live-sha256 "cc" :records-reconcile? false)
+          drift (reconciliation/certificate-drift cert moved)]
+      (is (= #{:live-sha256 :records-reconcile?} (set (map :field drift))))
+      (is (= "bb" (:committed (first (filter #(= :live-sha256 (:field %)) drift))))))))

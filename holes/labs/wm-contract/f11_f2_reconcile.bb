@@ -48,9 +48,34 @@
 
 (def report reconciliation/report)
 
+(defn- recompute-certificate [pin live]
+  (reconciliation/certificate
+   (assoc (report pin live)
+          :pin-path "futon3:checks/find-snatch.edn"
+          :pin-sha256 (sha256 pin-path)
+          :live-path live-path
+          :live-sha256 (sha256 live-path))
+   {:run-id "f11-f2-reconcile/--check"
+    :generated-at (str (java.time.Instant/now))}))
+
 (defn -main [& args]
   (let [pin (edn/read-string (slurp pin-path))
         live (edn/read-string (slurp live-path))]
+    (if (some #{"--check"} args)
+      ;; The certificate's verification leg: the committed certificate must
+      ;; describe exactly what recomputation over the pinned records observes.
+      (let [cert-path (str (io/file lab-dir "runs/F11-find/03-certificate.edn"))
+            committed (edn/read-string (slurp cert-path))
+            drift (reconciliation/certificate-drift
+                   committed (recompute-certificate pin live))]
+        (if (seq drift)
+          (do (println "f11-f2-reconcile: FAIL committed certificate drifted:"
+                       (pr-str drift) "exit-convention=0-pass/1-fail")
+              (System/exit 1))
+          (do (println "f11-f2-reconcile: PASS committed certificate verified"
+                       "records-reconcile?" (:records-reconcile? committed)
+                       "exit-convention=0-pass/1-fail")
+              (System/exit 0))))
     (if (some #{"--negative"} args)
       (let [mutated (update-in live [:scenarios 0 :round-results 0 :find :receipts
                                      (first (get-in live [:scenarios 0 :round-results 0 :find :selected]))
@@ -84,6 +109,6 @@
                          (pr-str (keys (:differing-fields r)))
                          (:difference-is-line-coordinates-only? r)
                          (:drift-mismatch-count-live r)))
-        (println (str "wrote " out-path))))))
+        (println (str "wrote " out-path)))))))
 
 (apply -main *command-line-args*)
