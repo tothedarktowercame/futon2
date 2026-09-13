@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint src/futon2/aif/interoceptive_store_lock.clj src/futon2/aif/interoceptive_manifest.clj src/futon2/aif/tripwire.clj src/futon2/aif/repair_obligation.clj test/futon2/aif/interoceptive_manifest_test.clj"
+ :exit 0 :errors 0 :warnings 0
+ :tree-sha "05ff643f256c3c3ab979c29faf003d481a9a8879"
+ :at "2026-09-13T02:31:48Z"}

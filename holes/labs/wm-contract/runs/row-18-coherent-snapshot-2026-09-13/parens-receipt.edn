@@ -1,0 +1,5 @@
+{:command "emacs --batch -Q -l ../futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/interoceptive_store_lock.clj src/futon2/aif/interoceptive_manifest.clj src/futon2/aif/tripwire.clj src/futon2/aif/repair_obligation.clj test/futon2/aif/interoceptive_manifest_test.clj"
+ :exit 0 :stdout "OK"
+ :tree-sha "05ff643f256c3c3ab979c29faf003d481a9a8879"
+ :at "2026-09-13T02:31:48Z"
+ :supersedes-failed-attempt "parens-failed-attempt.edn"}

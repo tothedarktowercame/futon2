@@ -1,0 +1,7 @@
+{:command "clojure -X:test :nses '[futon2.aif.interoceptive-manifest-test]'"
+ :exit 0
+ :tests 3
+ :assertions 13
+ :tree-sha "05ff643f256c3c3ab979c29faf003d481a9a8879"
+ :at "2026-09-13T02:31:48Z"
+ :stdout "Running tests in #{\"test\"}\nTesting futon2.aif.interoceptive-manifest-test\nRan 3 tests containing 13 assertions.\n0 failures, 0 errors."}

@@ -1,0 +1,6 @@
+{:command "emacs --batch -Q -l ../futon4/dev/check-parens.el --eval '(arxana-check-parens-cli FILE1 FILE2 FILE3 FILE4 FILE5)'"
+ :exit 255
+ :failure :wrong-number-of-arguments
+ :note "The CLI parses explicit paths after --; corrected invocation is retained separately."
+ :tree-sha "05ff643f256c3c3ab979c29faf003d481a9a8879"
+ :at "2026-09-13T02:31:48Z"}
