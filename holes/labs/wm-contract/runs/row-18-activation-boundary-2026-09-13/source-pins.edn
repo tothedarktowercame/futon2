@@ -1,0 +1,8 @@
+{:tree-sha "09752ed715c78a546bb2930c198435e4eefd08ec"
+ :sha256
+ {"src/futon2/aif/interoceptive_activation.clj" "3250bdfc52ad3bd1c1c5a39b8bb496d5e37b255c6ca045fd8bb52551e2315032"
+  "src/futon2/aif/interoceptive_store_lock.clj" "fe65e829a354902166851f5a2dc9d31dcfd187a28274f0d20f634b2f984f8b1d"
+  "src/futon2/aif/interoceptive_manifest.clj" "4b062a25184d47e7a63f1685fb09cb23008f21cc0391398426821b4c23ac0d42"
+  "test/futon2/aif/interoceptive_activation_test.clj" "1034e58150814fccfe1e02a75bfd8ef75a81c4f8422c5b555697b736c86f06b6"
+  "test/futon2/aif/interoceptive_manifest_test.clj" "18a980a107399edc07029870c9460556eb92be636311f82f545db57bf5acf29a"
+  "holes/labs/wm-contract/runs/row-18-coherent-snapshot-2026-09-13/production_participation_readback.clj" "35ed3fdaf9e7332df7674d9ee115d2101a700f91b5e759c40bc0646333732e29"}}

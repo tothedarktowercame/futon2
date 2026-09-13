@@ -1,0 +1,7 @@
+{:command "clojure -M holes/labs/wm-contract/runs/row-18-coherent-snapshot-2026-09-13/production_participation_readback.clj"
+ :exit 0 :tests 1 :assertions 1
+ :result :expected-typed-refusal
+ :refusal :interoceptive/activation-receipt-unavailable
+ :stdout "current-status.stdout" :stderr "current-status.stderr"
+ :tree-sha "09752ed715c78a546bb2930c198435e4eefd08ec"
+ :at "2026-09-13T02:53:12Z"}
