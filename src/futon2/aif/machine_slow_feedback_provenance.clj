@@ -255,3 +255,46 @@
        :record record :text (String. bs StandardCharsets/UTF_8)
        :bytes/base64 (.encodeToString (Base64/getEncoder) bs)
        :sha256 (sha256 bs)})))
+
+(defn readback
+  "Decode pinned serialized provenance bytes and revalidate them from their
+   original descriptors. EXPECTED-SHA256 is supplied by an external owner;
+   cached parsed records and status labels in the artifact are never trusted."
+  [{:keys [bytes/base64 expected-sha256] :as input}]
+  (exact-keys! :readback-input #{:bytes/base64 :expected-sha256} input)
+  (when-not (and (string? base64) (string? expected-sha256)
+                 (re-matches hex64 expected-sha256))
+    (refuse! :e6b-provenance/readback-schema-invalid {}))
+  (let [bs (try (.decode (Base64/getDecoder) ^String base64)
+                (catch Throwable e
+                  (throw (ex-info "invalid provenance base64"
+                                  {:refusal :e6b-provenance/bytes-invalid} e))))]
+    (when-not (= expected-sha256 (sha256 bs))
+      (refuse! :e6b-provenance/readback-pin-mismatch {}))
+    (let [record (strict-edn bs)]
+      (exact-keys! :provenance-record
+                   #{:schema :scope :status :authority/status :proposal-evidence
+                     :original-sources :canonical-closure :carrier-projection
+                     :expected-head :retrospective-application-view :committed-at}
+                   record)
+      (when-not (and (= :wm/e6b-transition-provenance-v1 (:schema record))
+                     (= :isolated-test (:scope record))
+                     (= :structurally-validated (:status record))
+                     (= :none (:authority/status record))
+                     (= #{:inputs :outputs} (set (keys (:canonical-closure record)))))
+        (refuse! :e6b-provenance/readback-schema-invalid {}))
+      (let [strip-cache #(dissoc % :record)
+            rebuilt (construct
+                     {:proposal-evidence (:proposal-evidence record)
+                      :original-sources (:original-sources record)
+                      :canonical-closure (update-vals (get-in record [:canonical-closure :inputs])
+                                                      strip-cache)
+                      :canonical-outputs (update-vals (get-in record [:canonical-closure :outputs])
+                                                      strip-cache)
+                      :carrier-projection (:carrier-projection record)
+                      :expected-head (:expected-head record)})]
+        (when-not (and (= record (:record rebuilt))
+                       (= expected-sha256 (:sha256 rebuilt))
+                       (= base64 (:bytes/base64 rebuilt)))
+          (refuse! :e6b-provenance/readback-revalidation-mismatch {}))
+        rebuilt))))

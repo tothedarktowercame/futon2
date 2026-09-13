@@ -1,6 +1,7 @@
 (ns futon2.aif.machine-slow-feedback-provenance-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-slow-feedback-provenance :as provenance]
             [futon2.aif.machine-slow-state-carrier :as carrier]
@@ -82,6 +83,13 @@
 (defn- refusal [x]
   (try (provenance/construct x) nil
        (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
+(defn- readback-refusal [x]
+  (try (provenance/readback x) nil
+       (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
+(defn- artifact-input [artifact]
+  {:bytes/base64 (:bytes/base64 artifact) :expected-sha256 (:sha256 artifact)})
+(defn- bytes-input [^bytes bs]
+  {:bytes/base64 (.encodeToString (Base64/getEncoder) bs) :expected-sha256 (sha256 bs)})
 
 (deftest deterministic-complete-provenance-envelope
   (let [a (provenance/construct (input)) b (provenance/construct (input))]
@@ -197,3 +205,37 @@
       (let [i (update-record (input) [:canonical-outputs :e2b]
                              update-in (subvec (vec path) 2) #(conj % (first %)))]
         (is (= :e6b-provenance/source-manifest-invalid (refusal i)))))))
+
+(deftest strict-serialized-provenance-readback
+  (let [artifact (provenance/construct (input)) in (artifact-input artifact)]
+    (is (= artifact (provenance/readback in)))
+    (is (= :e6b-provenance/readback-pin-mismatch
+           (readback-refusal (assoc in :expected-sha256 (apply str (repeat 64 "0"))))))
+    (is (= :e6b-provenance/readback-pin-mismatch
+           (readback-refusal
+            {:bytes/base64 (.encodeToString (Base64/getEncoder)
+                                            (.getBytes (str (:text artifact) " ") "UTF-8"))
+             :expected-sha256 (:sha256 artifact)})))
+    (is (= :e6b-provenance/invalid-edn
+           (readback-refusal (bytes-input (byte-array [(unchecked-byte 0xc3) (byte 0x28)])))))
+    (is (= :e6b-provenance/invalid-edn-cardinality
+           (readback-refusal (bytes-input (.getBytes (str (:text artifact) " nil") "UTF-8")))))
+    (let [duplicate (str/replace-first (:text artifact)
+                                       ":status :structurally-validated"
+                                       ":status :structurally-validated :status :structurally-validated")]
+      (is (= :e6b-provenance/invalid-edn
+             (readback-refusal (bytes-input (.getBytes duplicate "UTF-8"))))))
+    (doseq [changed [(assoc (:record artifact) :schema :wm/borrowed)
+                     (assoc-in (:record artifact)
+                               [:canonical-closure :inputs :e3/pending :record :subject
+                                :candidate/occurrence-id]
+                               [:borrowed 0 0])
+                     (update-in (:record artifact) [:canonical-closure :inputs]
+                                dissoc :e3/pending)]]
+      (is (some? (readback-refusal (bytes-input (.getBytes (pr-str changed) "UTF-8"))))))
+    (let [first-read (provenance/readback in)
+          caller-mutated (assoc-in first-read [:record :status] :borrowed)
+          second-read (provenance/readback in)]
+      (is (= :borrowed (get-in caller-mutated [:record :status])))
+      (is (= artifact second-read))
+      (is (not= caller-mutated second-read)))))
