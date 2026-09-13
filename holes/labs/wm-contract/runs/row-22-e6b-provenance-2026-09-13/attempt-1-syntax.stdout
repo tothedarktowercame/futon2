@@ -1,0 +1,8 @@
+
+Running tests in #{"test"}
+
+Syntax error reading source at (futon2/aif/machine_slow_feedback_provenance_test.clj:83:92).
+Unmatched delimiter: )
+
+Full report at:
+/tmp/clojure-12780070189142306091.edn

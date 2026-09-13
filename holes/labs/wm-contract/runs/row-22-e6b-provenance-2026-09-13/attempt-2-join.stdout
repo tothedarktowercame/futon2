@@ -1,0 +1,32 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.machine-slow-feedback-evidence-test
+
+Testing futon2.aif.machine-slow-feedback-provenance-test
+
+FAIL in (carrier-head-and-interface-refusals) (machine_slow_feedback_provenance_test.clj:96)
+head-revision
+expected: (= expected (refusal (changed (input))))
+  actual: (not (= :e6b-provenance/expected-head-mismatch :e6b-provenance/closure-join-mismatch))
+
+FAIL in (carrier-head-and-interface-refusals) (machine_slow_feedback_provenance_test.clj:96)
+head-pin
+expected: (= expected (refusal (changed (input))))
+  actual: (not (= :e6b-provenance/expected-head-mismatch :e6b-provenance/closure-join-mismatch))
+
+ERROR in (deterministic-complete-provenance-envelope) (machine_slow_feedback_provenance.clj:22)
+Uncaught exception, not in assertion.
+expected: nil
+  actual: clojure.lang.ExceptionInfo: closure-join-mismatch
+{:refusal :e6b-provenance/closure-join-mismatch}
+
+Testing futon2.aif.machine-slow-state-carrier-test
+
+Ran 21 tests containing 106 assertions.
+2 failures, 1 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-9033571842069880381.edn
