@@ -17,9 +17,10 @@ Pinned computation dependencies:
   `ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b`:
   transitive Beta update through `next-update-record`.
 
-Seven source roles are required from one externally configured root with exact
+Eight source roles are required from one externally configured root with exact
 SHA-256 pins: fixed transition context, complete prior state, exact authorized
-E2b subject, independently witnessed terminal outcome, claimed next state,
+E2b subject, independently witnessed terminal outcome, its exact-subject
+independent review, claimed next state,
 application ledger and independently complete application universe. Each file
 is read into one byte buffer, hashed and parsed as strict single-form UTF-8 EDN.
 Production mode refuses unconditionally.
@@ -27,11 +28,17 @@ Production mode refuses unconditionally.
 The verifier requires `t+1`, explicit prior and next revisions, a prior entry
 for the exact outcome class, boolean success consistent with terminal status,
 distinct outcome producer/reviewer identities and an E3-authorized exact E2b
-occurrence/action. It invokes the actual pure update and compares the entire
+occurrence/action. The externally configured canonical E3 and E2b resolver
+inputs are replayed through their actual pure verifiers; their complete outputs
+must match digests in the E6b subject. A reference label alone is insufficient.
+It invokes the actual pure update and compares the entire
 next state. The external universe must name exactly the application expected
-for this feedback event; the ledger must contain exactly one committed entry
-whose input and output digests match. Replay verifies the same committed bytes
-without applying another update.
+for this feedback event, bind the full fixed transition subject and exact ledger
+source digest, and enumerate every ledger application ID in order. Duplicate
+IDs and any other application reusing the event or prior revision refuse. The
+ledger must contain exactly one committed entry for this transition whose input
+and output digests match. Replay verifies the same committed bytes without
+applying another update.
 
 This does not persist anything or prove that a live store prevents duplicates.
 No actual independently owned outcome authority, complete application universe,

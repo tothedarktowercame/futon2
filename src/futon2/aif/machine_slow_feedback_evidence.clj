@@ -5,6 +5,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [futon2.aif.machine-enactment-correspondence :as e2b]
+            [futon2.aif.machine-pre-enact-authorization :as e3]
             [futon2.aif.temporal-hierarchy :as hierarchy])
   (:import [java.io PushbackReader StringReader]
            [java.nio ByteBuffer]
@@ -14,12 +16,13 @@
 
 (def schema-version :wm/r16-r15-feedback-evidence-v1)
 (def source-order [:context :prior-state :e2b-subject :outcome
-                   :next-state :application-ledger :application-universe])
+                   :outcome-review :next-state :application-ledger :application-universe])
 (def ^:private schemas
   {:context :wm/e6b-transition-context-v1
    :prior-state :wm/e6b-prior-slow-state-v1
    :e2b-subject :wm/e6b-e2b-subject-v1
    :outcome :wm/e6b-outcome-authority-v1
+   :outcome-review :wm/e6b-outcome-review-v1
    :next-state :wm/e6b-next-slow-state-v1
    :application-ledger :wm/e6b-application-ledger-v1
    :application-universe :wm/e6b-application-universe-v1})
@@ -83,7 +86,7 @@
        (nat-int? (:tick/index x))))
 
 (defn verify-feedback
-  [{:keys [mode evidence-root sources]}]
+  [{:keys [mode evidence-root sources canonical]}]
   (when-not (contains? #{:isolated-test :production} mode)
     (refuse! :e6b/mode-unknown "Unknown verifier mode" {:mode mode}))
   (when (= :production mode)
@@ -94,17 +97,29 @@
   (let [resolved (mapv #(resolve! evidence-root % (sources %)) source-order)
         records (into {} (map (juxt :label :record) resolved))
         context (:context records) prior (:prior-state records) e2b (:e2b-subject records)
-        outcome (:outcome records) claimed (:next-state records)
+        outcome (:outcome records) outcome-review (:outcome-review records) claimed (:next-state records)
         ledger (:application-ledger records) universe (:application-universe records)
+        source-pins (into {} (map (juxt :label :sha256)) resolved)
         source-tick (:tick/index context) destination (:destination/tick-index context)
         cls (:fast/action-class outcome) occurrence (:candidate/occurrence-id context)
         application-id (:application/id context)
-        common (identity-of context)]
+        common (identity-of context)
+        canonical-e3 (try (e3/verify-pre-enact (:e3 canonical))
+                          (catch Throwable x
+                            (refuse! :e6b/canonical-e3-unavailable
+                                     "Canonical E3 evidence did not resolve" {:cause (.getMessage x)})))
+        canonical-e2b (try (e2b/verify-correspondence (:e2b canonical))
+                           (catch Throwable x
+                             (refuse! :e6b/canonical-e2b-unavailable
+                                      "Canonical E2b evidence did not resolve" {:cause (.getMessage x)})))]
     (when-not (and (= :isolated-test (:scope context)) (valid-identity? context)
                    (= (inc source-tick) destination)
                    (every? nonblank? ((juxt :prior-state/revision :next-state/revision
                                             :feedback/event-id :application/id) context))
-                   (some? occurrence) (map? (:action context)) (seq (:action context)))
+                   (some? occurrence) (map? (:action context)) (seq (:action context))
+                   (keyword? (:fast/action-class context))
+                   (try (java.time.Instant/parse (:destination/as-of context)) true
+                        (catch Throwable _ false)))
       (refuse! :e6b/transition-context-invalid "Fixed transition context is incomplete" {}))
     (doseq [[label record] records]
       (when-not (= :isolated-test (:scope record))
@@ -121,13 +136,19 @@
     (when-not (and (= common (identity-of e2b))
                    (= occurrence (:candidate/occurrence-id e2b))
                    (= (:action context) (:action e2b))
-                   (= :enacted (:status e2b))
-                   (= :mechanism-authorized (:r9/pre-enact-decision e2b))
-                   (nonblank? (:r9/authorization-ref e2b)))
+                   (= (:fast/action-class context) (:fast/action-class e2b))
+                   (= (:selected canonical-e2b) (:enacted canonical-e2b))
+                   (= {:candidate/id occurrence :action (:action context)} (:enacted canonical-e2b))
+                   (= :mechanism-authorized (:decision canonical-e3))
+                   (= occurrence (get-in canonical-e3 [:subject :candidate/occurrence-id]))
+                   (= (:action context) (get-in canonical-e3 [:subject :action]))
+                   (= (value-digest canonical-e2b) (:canonical/e2b-digest e2b))
+                   (= (value-digest canonical-e3) (:canonical/e3-digest e2b)))
       (refuse! :e6b/e2b-subject-mismatch "Outcome is not bound to exact authorized enactment" {}))
     (when-not (and (= common (identity-of outcome))
                    (= occurrence (:candidate/occurrence-id outcome))
                    (= (:action context) (:action outcome))
+                   (= (:fast/action-class context) cls)
                    (keyword? cls) (contains? #{:succeeded :failed} (:terminal/status outcome))
                    (true? (:fast/witnessed? outcome))
                    (instance? Boolean (:fast/succeeded? outcome))
@@ -138,6 +159,19 @@
                    (every? nonblank? ((juxt :outcome/producer-id :outcome/reviewer-id) outcome)))
       (refuse! :e6b/outcome-authority-invalid
                "A boolean terminal independently witnessed outcome is required" {}))
+    (let [outcome-subject (select-keys outcome
+                                       [:model/id :model/revision :run/id :tick/index
+                                        :candidate/occurrence-id :action :fast/action-class
+                                        :terminal/status :fast/witnessed? :fast/succeeded?
+                                        :outcome/evidence-id :outcome/producer-id])]
+      (when-not (and (= :accepted (:review/outcome outcome-review))
+                     (= outcome-subject (:subject outcome-review))
+                     (= (:outcome/reviewer-id outcome) (:reviewer/id outcome-review))
+                     (= (:outcome/authority-ref outcome) (:review/id outcome-review))
+                     (nonblank? (:review/artifact-sha256 outcome-review))
+                     (re-matches #"[0-9a-f]{64}" (:review/artifact-sha256 outcome-review)))
+        (refuse! :e6b/outcome-review-unresolved
+                 "Outcome review does not bind the exact outcome subject" {})))
     (let [production-outcome (select-keys outcome [:fast/action-class :fast/witnessed?
                                                     :fast/succeeded?])
           actual-state (hierarchy/advance-slow-state
@@ -153,21 +187,39 @@
                          :state actual-state}
           input-subject {:context (value-digest context) :prior (value-digest prior)
                          :e2b (value-digest e2b) :outcome (value-digest outcome)}
-          expected-entry {:application/id application-id :status :committed
+          transition-subject {:model/id (:model/id context) :model/revision (:model/revision context)
+                              :run/id (:run/id context) :source/tick-index source-tick
+                              :destination/tick-index destination
+                              :candidate/occurrence-id occurrence :action (:action context)
+                              :fast/action-class cls :prior-state/revision (:prior-state/revision context)
+                              :next-state/revision (:next-state/revision context)
+                              :feedback/event-id (:feedback/event-id context)}
+          expected-entry {:application/id application-id :feedback/event-id (:feedback/event-id context)
+                          :prior-state/revision (:prior-state/revision context) :status :committed
                           :input/digests input-subject :output/digest (value-digest expected-next)}
           universe-ids (:complete/application-ids universe)
-          matches (filterv #(= application-id (:application/id %)) (:entries ledger))]
+          entries (:entries ledger)
+          ids (mapv :application/id entries)
+          matches (filterv #(= application-id (:application/id %)) entries)]
       (when-not (= expected-next claimed)
         (refuse! :e6b/next-state-mismatch "Claimed next state differs from production replay" {}))
-      (when-not (and (= (:feedback/event-id context) (:feedback/event-id universe))
-                     (= [application-id] universe-ids)
+      (when (> (count matches) 1)
+        (refuse! :e6b/duplicate-feedback "Duplicate application identity" {}))
+      (when (or (seq (filter #(and (not= application-id (:application/id %))
+                                   (= (:feedback/event-id context) (:feedback/event-id %))) entries))
+                (seq (filter #(and (not= application-id (:application/id %))
+                                   (= (:prior-state/revision context) (:prior-state/revision %))) entries)))
+        (refuse! :e6b/feedback-conflict "Event or prior revision has another application" {}))
+      (when-not (and (= transition-subject (:transition/subject universe))
+                     (= (:application-ledger source-pins) (:ledger/sha256 universe))
+                     (= ids universe-ids) (= (count ids) (count (distinct ids)))
                      (= :independently-configured-complete (:authority/status universe))
-                     (nonblank? (:authority/owner universe)))
+                     (nonblank? (:authority/owner universe))
+                     (= (value-digest transition-subject) (:transition/subject-digest universe)))
         (refuse! :e6b/application-universe-incomplete
                  "Independent complete application universe is absent or conflicting" {}))
       (cond
         (empty? matches) (refuse! :e6b/feedback-not-applied "No committed application" {})
-        (> (count matches) 1) (refuse! :e6b/duplicate-feedback "Duplicate application" {})
         (not= expected-entry (first matches))
         (refuse! :e6b/feedback-conflict "Committed application pins conflict" {}))
       {:schema/version schema-version :scope :isolated-test
