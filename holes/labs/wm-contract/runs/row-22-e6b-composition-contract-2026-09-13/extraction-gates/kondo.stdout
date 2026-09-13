@@ -1,0 +1,2 @@
+src/futon2/aif/machine_slow_feedback_evidence.clj:296:25: warning: unused binding prior
+linting took 23ms, errors: 0, warnings: 1

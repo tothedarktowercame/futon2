@@ -1,0 +1,29 @@
+{:schema :wm/execution-receipts-v1
+ :source-commits ["47490433" "8a613ac1"] :tree-sha "8a613ac1"
+ :at "2026-09-13T06:35:00Z"
+ :pins
+ {:source "f2bdb2abc1dace3d9b97fe7600c98f8d2ee2d3b96034d42c621cfdf96a3cd900"
+  :test "ff0634310d58c4a463010513e502bb942ba57569fe6815a97a1b1d1efdb0b5b0"
+  :independent-review "21e6b9a0d07d1419426d3c009b0e6ad733e13d012f7a1e9014ac41b3f283357b"
+  :e3 "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260"
+  :e2b "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933"
+  :temporal-hierarchy "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+  :intrinsic-values "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"}
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-evidence-test]'"
+   :exit 0 :tests 7 :assertions 44 :failures 0 :errors 0
+   :stdout "test2.stdout" :stderr "test2.stderr"}
+  {:gate :induced-failure
+   :command "clojure -M:test -e '(load-file \"holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/induced_failure.clj\")'"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :errors 0
+   :stdout "induced.stdout" :stderr "induced.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_evidence.clj test/futon2/aif/machine_slow_feedback_evidence_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo2.stdout" :stderr "kondo2.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_evidence.clj test/futon2/aif/machine_slow_feedback_evidence_test.clj"
+   :exit 0 :stdout "parens2.stdout" :stderr "parens2.stderr"}]
+ :failed-history
+ [{:tree-sha "47490433" :gate :clj-kondo :exit 2 :warnings 1
+   :cause :unused-wrapper-prior-binding :stdout "kondo.stdout" :stderr "kondo.stderr"}]}
