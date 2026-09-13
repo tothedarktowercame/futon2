@@ -4,7 +4,8 @@
    This codec establishes byte/digest and structural reachability only.  Its
    output has no authority, completeness, freshness, or restart semantics."
   (:require [clojure.edn :as edn]
-            [futon2.aif.machine-slow-feedback-provenance :as provenance])
+            [futon2.aif.machine-slow-feedback-provenance :as provenance]
+            [futon2.aif.machine-slow-feedback-store-v2 :as store])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
            (java.nio.charset CodingErrorAction StandardCharsets)
@@ -110,6 +111,11 @@
                             :transaction-sha256 :provenance-sha256])
                    (= applications (mapv tx-index-row (rest chain) (rest txs))))
       (refuse! :e6b-capture/chain-index-invalid {}))
+    (when-not (= (count (conj (mapv :prior-state/revision applications)
+                              (:state/revision head)))
+                 (count (distinct (conj (mapv :prior-state/revision applications)
+                                        (:state/revision head)))))
+      (refuse! :e6b-capture/state-revision-conflict {}))
     (doseq [[generation digest tx] (map vector (range) chain txs)]
       (when-not (and (= (:store/id record) (:store/id tx))
                      (= generation (:generation tx)))
@@ -121,7 +127,9 @@
                          :state-sha256 :application :authority :committed-at} tx)
           (when-not (and (= :wm/e6b-state-genesis-v2 (:schema tx))
                          (= {} (:prior tx)) (nil? (:application tx)))
-            (refuse! :e6b-capture/genesis-invalid {})))
+            (refuse! :e6b-capture/genesis-invalid {}))
+          (store/validate-captured-genesis!
+           (:store/id record) tx 0 (second txs)))
         (do
           (exact-keys! :e6b-capture/transaction-schema-invalid
                        #{:schema :store/id :generation :prior :next :application
@@ -143,8 +151,22 @@
             (when-not p (refuse! :e6b-capture/missing-provenance {:digest pd}))
             ;; Reuse the reviewed pure provenance validation over these exact
             ;; captured bytes; do not trust its cached parsed record.
-            (provenance/readback {:bytes/base64 (:bytes/base64 p)
-                                  :expected-sha256 pd})))))
+            (let [validated (provenance/readback {:bytes/base64 (:bytes/base64 p)
+                                                  :expected-sha256 pd})
+                  parent-head {:store/id (:store/id record)
+                               :generation (dec generation)
+                               :transaction-sha256 (get-in tx [:prior :transaction-sha256])
+                               :state/revision (get-in tx [:prior :revision])
+                               :state-sha256 (get-in tx [:prior :state-sha256])}
+                  expected (store/expected-captured-transaction
+                            (:store/id record) generation
+                            (dissoc (:prior tx) :generation) validated pd)]
+              (when-not (= parent-head (get-in validated [:record :expected-head]))
+                (refuse! :e6b-capture/provenance-parent-disagreement
+                         {:digest digest :provenance-sha256 pd}))
+              (when-not (= expected tx)
+                (refuse! :e6b-capture/transaction-provenance-disagreement
+                         {:digest digest :provenance-sha256 pd}))))))
     (let [reachable (set (keep :provenance-sha256 (rest txs)))]
       (when-not (= reachable (set (keys decoded-provenance)))
         (refuse! :e6b-capture/provenance-reachability-invalid

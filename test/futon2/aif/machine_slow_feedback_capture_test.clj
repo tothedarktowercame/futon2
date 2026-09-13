@@ -22,6 +22,34 @@
   (let [bs (.getBytes (pr-str r) StandardCharsets/UTF_8)]
     {:bytes/base64 (.encodeToString (Base64/getEncoder) bs)
      :expected-sha256 (#'codec/sha256 bs)}))
+(defn- decode-bytes [^bytes bs] (edn/read-string (String. bs StandardCharsets/UTF_8)))
+(defn- encode-record [r] (.getBytes (pr-str r) StandardCharsets/UTF_8))
+(defn- replace-last-tx [capture tx]
+  (let [old (last (:chain-digests capture)) bs (encode-record tx) digest (#'codec/sha256 bs)
+        index (assoc-in (:application-universe capture) [(dec (count (:application-universe capture)))
+                                                         :transaction-sha256] digest)
+        head (decode-bytes (.decode (Base64/getDecoder)
+                                    ^String (get-in capture [:head-object :bytes/base64])))
+        head' (assoc head :transaction-sha256 digest :application-index index
+                     :state/revision (get-in tx [:next :revision])
+                     :state-sha256 (get-in tx [:next :state-sha256]))
+        hb (encode-record head') hd (#'codec/sha256 hb)]
+    (-> capture
+        (assoc :head-digest hd
+               :head-object {:bytes/base64 (.encodeToString (Base64/getEncoder) hb)
+                             :source-sha256 hd}
+               :application-universe index
+               :chain-digests (assoc (:chain-digests capture)
+                                     (dec (count (:chain-digests capture))) digest))
+        (update :transaction-objects #(assoc (dissoc % old) digest bs)))))
+(defn- rebuild-provenance [record]
+  (provenance/construct
+   {:proposal-evidence (:proposal-evidence record)
+    :original-sources (update-vals (:original-sources record) #(dissoc % :record))
+    :canonical-closure (update-vals (get-in record [:canonical-closure :inputs]) #(dissoc % :record))
+    :canonical-outputs (update-vals (get-in record [:canonical-closure :outputs]) #(dissoc % :record))
+    :carrier-projection (:carrier-projection record)
+    :expected-head (:expected-head record)}))
 
 (deftest deterministic-genesis-and-non-genesis-roundtrip
   (doseq [committed? [false true]]
@@ -96,6 +124,61 @@
            (refusal #(codec/readback (artifact-from-record bad-head)))))
     (is (= :e6b-capture/schema-invalid
            (refusal #(codec/readback (artifact-from-record omitted)))))
+    (store/release! s)))
+
+(deftest transaction-provenance-and-state-joins-refuse-coherent-rehashes
+  (let [[s c] (setup-capture true)
+        old (last (:chain-digests c)) tx (decode-bytes (get (:transaction-objects c) old))]
+    (is (= :e6b-capture/transaction-provenance-disagreement
+           (refusal #(codec/construct
+                      (replace-last-tx c (assoc-in tx [:application :status] :borrowed))))))
+    (let [state (assoc-in (get-in tx [:next :state]) [:slow/intrinsics :alpha :alpha] 99.0)
+          changed (assoc tx :next (assoc (:next tx) :state state
+                                         :state-sha256 (#'codec/sha256 (encode-record state))))]
+      (is (= :e6b-capture/transaction-provenance-disagreement
+             (refusal #(codec/construct (replace-last-tx c changed))))))
+    ;; Reusing the consumed prior revision as HEAD destination is rejected by
+    ;; the linear revision census before provenance could disguise it.
+    (let [revision (get-in tx [:prior :revision])
+          state (assoc (get-in tx [:next :state]) :state/revision revision)
+          changed (assoc tx :next {:revision revision :state state
+                                   :state-sha256 (#'codec/sha256 (encode-record state))})]
+      (is (= :e6b-capture/state-revision-conflict
+             (refusal #(codec/construct (replace-last-tx c changed))))))
+    (store/release! s)))
+
+(deftest provenance-expected-parent-must-be-the-actual-parent
+  (let [[s c] (setup-capture true)
+        old-tx (last (:chain-digests c)) tx (decode-bytes (get (:transaction-objects c) old-tx))
+        old-p (:provenance-sha256 tx)
+        p-record (decode-bytes (get (:provenance-objects c) old-p))
+        forged (rebuild-provenance
+                (assoc-in p-record [:expected-head :transaction-sha256]
+                          (apply str (repeat 64 "f"))))
+        pd (:sha256 forged)
+        c' (-> c
+               (assoc-in [:provenance-objects pd]
+                         (.decode (Base64/getDecoder) ^String (:bytes/base64 forged)))
+               (update :provenance-objects dissoc old-p)
+               (replace-last-tx (assoc tx :provenance-sha256 pd)))]
+    (is (= :e6b-capture/provenance-parent-disagreement
+           (refusal #(codec/construct c'))))
+    (store/release! s)))
+
+(deftest genesis-semantics-are-replayed-not-assumed
+  (let [[s c] (setup-capture false)
+        old (first (:chain-digests c)) genesis (decode-bytes (get (:transaction-objects c) old))
+        forged (assoc genesis :authority nil) bs (encode-record forged) digest (#'codec/sha256 bs)
+        head (decode-bytes (.decode (Base64/getDecoder)
+                                    ^String (get-in c [:head-object :bytes/base64])))
+        head' (assoc head :transaction-sha256 digest) hb (encode-record head') hd (#'codec/sha256 hb)
+        c' (-> c
+               (assoc :head-digest hd
+                      :head-object {:bytes/base64 (.encodeToString (Base64/getEncoder) hb)
+                                    :source-sha256 hd}
+                      :chain-digests [digest]
+                      :transaction-objects {digest bs}))]
+    (is (= :e6b-store-v2/genesis-authority-invalid (refusal #(codec/construct c'))))
     (store/release! s)))
 
 (deftest coherent-prior-generation-refuses

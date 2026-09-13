@@ -21,10 +21,14 @@ only buffer hashed, strictly decoded, and Base64 encoded. The codec validates:
 - exact HEAD schema, raw digest, store, generation, current transaction, and
   application-index joins;
 - a unique ordered genesis-to-HEAD transaction chain with generation and parent
-  joins;
+  generation/revision/state-digest joins and linear revision uniqueness;
 - exact index-to-transaction application identities and complete reachable
-  provenance membership; and
-- every provenance object through the reviewed pure provenance readback.
+  provenance membership, with unique application/event/prior identities;
+- every provenance object through the reviewed pure provenance readback, then
+  exact provenance expected-parent, application, computed-next carrier/state
+  digest, and commit-time reconstruction of its transaction; and
+- genesis through the same store-v2 carrier, authority, timestamp, state digest,
+  strict roundtrip, and generation law used by isolated recovery.
 
 Readback requires an externally supplied raw SHA-256, parses the exact supplied
 bytes, repeats all validation, reconstructs via the constructor, and requires

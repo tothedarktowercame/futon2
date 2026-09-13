@@ -203,6 +203,19 @@
             :state-sha256 (get-in projection [:next :sha256])}
      :application (assoc app-view :transition/subject (:transition/subject proposal))
      :committed-at (:committed-at proposal) :provenance-sha256 provenance-sha}))
+
+(defn validate-captured-genesis!
+  "Apply the store-v2 genesis law to an already decoded record. Pure: performs
+   no filesystem access and grants no authority beyond structural validity."
+  [store-id tx expected-generation child]
+  (valid-genesis! {:store-id store-id} tx expected-generation child)
+  tx)
+
+(defn expected-captured-transaction
+  "Reconstruct the exact store-v2 transaction from decoded provenance and an
+   independently supplied parent. Pure helper for immutable capture replay."
+  [store-id generation prior provenance-artifact provenance-sha]
+  (expected-tx {:store-id store-id} generation prior provenance-artifact provenance-sha))
 (defn- parent-head [store generation prior]
   {:store/id (:store-id store) :generation (dec generation)
    :transaction-sha256 (:transaction-sha256 prior)
