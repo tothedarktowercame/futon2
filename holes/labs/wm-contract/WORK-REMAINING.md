@@ -124,6 +124,12 @@ is not yet a verified join to Agency's normalized request digest.
   Positive-beta domain refinement remains; production uniqueness and solver
   correspondence remain unproved. See policy-precision `lead-bounded-review.md`.
 
+- Positive-beta refinement `mathlib4/47c09120`, receipt `62a112dc`:
+  nine pins verified and conditional theorem accepted at positive-real scope.
+  Next additive proof packet specializes the canonical softmax to Real.exp and
+  proves finite-support normalization/alignment/continuity. Frozen carrier edits
+  are unnecessary; global root uniqueness and runtime correspondence remain open.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,

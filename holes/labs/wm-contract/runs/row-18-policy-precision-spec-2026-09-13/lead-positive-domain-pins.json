@@ -1,0 +1,38 @@
+[
+  {
+    "path": "DarkTower/WarMachine/InteroceptivePolicyPrecisionPositiveDomain.lean",
+    "sha256": "1ac96fe674c1d9cb4f29dc39ad0707269c5d8e9090cba3920e926b5652f547c0"
+  },
+  {
+    "path": "DarkTower/WarMachine/InteroceptivePolicyPrecisionProposal.lean",
+    "sha256": "779027d3eeaf887d67d0f29cb89e793e2ad95805880c9d04bb8beb6f164d0298"
+  },
+  {
+    "path": "DarkTower/WarMachine/InteroceptivePolicyPrecisionBounded.lean",
+    "sha256": "b69f98d3b69535d07c09765d2d8dfecfcbb5905511676f0bf3ca08fd4c58a7e4"
+  },
+  {
+    "path": "DarkTower/WarMachine/MachineTemperature.lean",
+    "sha256": "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"
+  },
+  {
+    "path": "DarkTower/WarMachine/PolicyPosterior.lean",
+    "sha256": "59817e0a9ff296a95d7cfcc59d4f1709fb2d38d8cfbbc156ba7c489f12da114b"
+  },
+  {
+    "path": "DarkTower/WarMachine/Holes.lean",
+    "sha256": "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"
+  },
+  {
+    "path": "lean-toolchain",
+    "sha256": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"
+  },
+  {
+    "path": "futon2:holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-proposal-v1.md",
+    "sha256": "39fede0495a92f23d4f000cc45c54207dd9ba6083acc173093d462000f127f63"
+  },
+  {
+    "path": "futon2:holes/labs/wm-contract/runs/row-18-policy-precision-spec-2026-09-13/lead-bounded-review.md",
+    "sha256": "a8fbcfc96ba24dc198cf876d31e9e2c32085e4992d9106db0b4e6208906758c9"
+  }
+]
