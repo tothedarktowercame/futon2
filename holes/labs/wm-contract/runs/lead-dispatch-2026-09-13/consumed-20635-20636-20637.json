@@ -1,0 +1,39 @@
+{
+  "at": "2026-09-13T04:58:37.350227+00:00",
+  "verdict": "superseded; no rerun or duplicate dispatch",
+  "reviews": [
+    {
+      "job": "20635",
+      "review-commit": "4c03837d",
+      "artifact": "holes/labs/wm-contract/runs/row-22-e4-causal-evidence-2026-09-13/lead-review.md",
+      "sha256": "a4b304f4b36f231dc70773b7b1836f779105d84cf55cfd5ebcc812f4c62bc2a4"
+    },
+    {
+      "job": "20636",
+      "review-commit": "85f00f48",
+      "artifact": "holes/labs/wm-contract/runs/row-22-e5-slow-prior-2026-09-13/lead-review.md",
+      "sha256": "ca68057978d217de0ed3d583030eb4675ae61d6064ac9b9454d7bc613957ec9d"
+    },
+    {
+      "job": "20637",
+      "review-commit": "bb3459d5",
+      "artifact": "holes/labs/wm-contract/runs/row-24-cross-layer-2026-09-13/lead-review.md",
+      "sha256": "6bdeaa659211fc2bc1491b0ca8c3ac2c486ab2269b08e7d29bc400babb781525"
+    }
+  ],
+  "current-activity": [
+    {
+      "job-id": "invoke-1789275482764-20648-32e941f8",
+      "state": "running"
+    },
+    {
+      "job-id": "invoke-1789275396053-20646-184767dd",
+      "state": "running"
+    },
+    {
+      "job-id": "invoke-1789275481498-20647-0e31dc03",
+      "state": "running"
+    }
+  ],
+  "remaining": "All production acquisition, deployment, runtime and full qualification obligations remain open."
+}
