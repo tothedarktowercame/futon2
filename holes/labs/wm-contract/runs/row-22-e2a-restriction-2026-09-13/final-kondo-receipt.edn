@@ -1,0 +1,5 @@
+{:command "clj-kondo --lint src/futon2/aif/machine_portfolio_restriction.clj test/futon2/aif/machine_portfolio_restriction_test.clj"
+ :exit 0 :tests 2 :assertions 2
+ :tree-sha "bbd44b21b64161f73e14916b026d50b7289ee7b8"
+ :at "2026-09-13" :supersedes "kondo-receipt.edn"
+ :stdout "final-kondo.stdout" :stderr "final-kondo.stderr"}

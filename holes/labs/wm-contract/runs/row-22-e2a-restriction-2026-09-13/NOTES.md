@@ -23,8 +23,8 @@ by this packet.
 Pins:
 
 - source `machine_portfolio_restriction.clj`:
-  `0d3428b3031704b79a1a7d914610cb9753499b79a42220fed4d288bedd064cac`
+  `316ddd364e2deaea98172558148fd770c2d5d4a930e32fb8e4825f454b6c51ab`
 - test `machine_portfolio_restriction_test.clj`:
-  `734fdd65600ef0fa04054a211bf3354b88ce5deeeaff6d4061f43640e2a68da5`
+  `4edfda36abb71ed16295b685fc007a9d7237081a6ec1cdf80be8aad9a99b5ba0`
 - seam specification: `46d9a2c27439529b955e953da3efa47d48ee0e1e0d7511ef026526381680b814`
 - readback: `e15f3cbb248875aba0a9f662ca5ac995e5c0fabbcbe4af183b094f1925dee8ec`

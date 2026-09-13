@@ -1,0 +1,8 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-portfolio-restriction-test"
+ :exit 1 :tests 5 :assertions 21 :failures 1 :errors 0
+ :tree-sha "22179585bbfa08ef0e6e7cf778ba81e7a967c41c"
+ :failure {:control :unknown-occurrence
+           :expected :e2a/unknown-portfolio-id
+           :actual :e2a/forged-selected-id-set
+           :cause "negative fixture added an unknown selected row without updating the canonical selected-id index"}
+ :repair-commit "bbd44b21b64161f73e14916b026d50b7289ee7b8"}
