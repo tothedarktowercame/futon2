@@ -1,0 +1,15 @@
+{
+  "at": "2026-09-13T16:36:24.832421+00:00",
+  "ruling": "holes/labs/wm-contract/RULINGS-walkthrough-2026-09-12.md",
+  "sha256": "9a20cbb57e57c9c9f5c3c19e67be663de1b7f779d45b92734b01f48c53a575e0",
+  "sections": [
+    "Item5 Operationalized1",
+    "Item5 Operationalized3"
+  ],
+  "decision": "bounded reviewed machinery test permitted; qualifying run still requires readiness",
+  "execution": "none; entrypoint packet awaits review",
+  "scoreboard": {
+    "rows-closed": 0,
+    "new-claims-admitted": 0
+  }
+}
