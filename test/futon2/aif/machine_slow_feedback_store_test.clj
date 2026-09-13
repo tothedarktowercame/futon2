@@ -53,6 +53,18 @@
                                            :committed-at "2026-09-13T00:00:00Z"}))))
     (store/release! s)))
 
+(deftest cross-process-owner-refuses
+  (let [[root s] (initialized)
+        form (str "(require '[futon2.aif.machine-slow-feedback-store :as s])"
+                  "(try (s/isolated-store \"" (.getAbsolutePath root) "\" \"fixture-store\")"
+                  " (System/exit 9) (catch clojure.lang.ExceptionInfo e"
+                  " (if (= :e6b-store/already-owned (:refusal (ex-data e)))"
+                  " (System/exit 0) (System/exit 8))))")
+        p (-> (ProcessBuilder. ^java.util.List ["clojure" "-M" "-e" form])
+              (.directory (io/file ".")) (.redirectErrorStream true) .start)]
+    (is (= 0 (.waitFor p)))
+    (store/release! s)))
+
 (deftest stale-and-conflicting-applications
   (let [[_ s] (initialized) p1 (proposal s "a1" "e1" "r1" 1)]
     (store/compare-and-commit! s p1)
@@ -87,6 +99,38 @@
     (Files/delete path)
     (is (= :e6b-store/missing-object (refusal #(store/recover s))))
     (store/release! s)))
+
+(deftest corrupt-and-malformed-retained-bytes-refuse
+  (doseq [[label replacement expected]
+          [[:digest "{:schema :wrong}" :e6b-store/object-digest-mismatch]
+           [:trailing "{} {}" :e6b-store/invalid-edn-cardinality]
+           [:utf8 (byte-array [(byte 0xc3) (byte 0x28)]) :e6b-store/invalid-edn]]]
+    (testing (name label)
+      (let [[_ s] (initialized) r (store/recover s)
+            path (.resolve ^java.nio.file.Path (:txdir s)
+                           (str (get-in r [:head :transaction-sha256]) ".edn"))
+            bs (if (string? replacement) (.getBytes replacement "UTF-8") replacement)]
+        (Files/write path bs (into-array StandardOpenOption
+                                         [StandardOpenOption/TRUNCATE_EXISTING]))
+        (is (= expected (refusal #(store/recover s))))
+        (store/release! s)))))
+
+(deftest interrupted-genesis-never-silently-reinitializes
+  (let [root (dir) s (store/isolated-store root "fixture-store")]
+    (is (thrown? Exception
+                 (binding [store/*stage-hook* (fn [at _]
+                                                (when (= at :transaction-published)
+                                                  (throw (ex-info "crash" {}))))]
+                   (store/initialize! s {:state {:value 0} :revision "r0"
+                                         :authority authority
+                                         :committed-at "2026-09-13T00:00:00Z"}))))
+    (store/release! s)
+    (let [s2 (store/isolated-store root "fixture-store")]
+      (is (= :e6b-store/already-initialized-or-interrupted
+             (refusal #(store/initialize! s2 {:state {:value 0} :revision "r0"
+                                               :authority authority
+                                               :committed-at "2026-09-13T00:00:00Z"}))))
+      (store/release! s2))))
 
 (deftest capture-is-immutable-and-commit-serialized
   (let [[_ s] (initialized) p (proposal s "a1" "e1" "r1" 1)
