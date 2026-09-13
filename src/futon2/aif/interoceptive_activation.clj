@@ -53,8 +53,10 @@
   (apply str (map #(format "%02x" (bit-and 0xff %))
                   (.digest (MessageDigest/getInstance "SHA-256") bytes))))
 
-(defn process-census-sha256 [processes]
-  (sha256-bytes (.getBytes (pr-str processes) StandardCharsets/UTF_8)))
+(defn process-census-edn [processes] (pr-str processes))
+
+(defn process-census-sha256 [census-edn]
+  (sha256-bytes (.getBytes census-edn StandardCharsets/UTF_8)))
 
 (defn- strict-edn [bytes path]
   (let [text (try
@@ -182,8 +184,13 @@
                  (re-matches #"[0-9a-f]{64}"
                              (or (get-in record [:host :process-census-sha256]) "")))
     (refuse! :interoceptive/activation-host-census-invalid {:host (:host record)}))
-  (let [measured (process-census-sha256 (:processes record))]
-    (when-not (= measured (get-in record [:host :process-census-sha256]))
+  (let [census-edn (get-in record [:host :process-census-edn])
+        parsed (when (string? census-edn)
+                 (strict-edn (.getBytes census-edn StandardCharsets/UTF_8)
+                             :embedded-process-census))
+        measured (when (string? census-edn) (process-census-sha256 census-edn))]
+    (when-not (and (= parsed (:processes record))
+                   (= measured (get-in record [:host :process-census-sha256])))
       (refuse! :interoceptive/activation-process-census-digest-mismatch
                {:declared (get-in record [:host :process-census-sha256])
                 :measured measured})))

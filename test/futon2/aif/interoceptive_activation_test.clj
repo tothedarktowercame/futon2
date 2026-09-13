@@ -18,7 +18,8 @@
    :writer-entrypoints (vec activation/required-writers)})
 
 (def valid-record
-  (let [processes [process-record]]
+  (let [processes [process-record]
+        census-edn (activation/process-census-edn processes)]
    {:schema :wm/interoceptive-writer-participation-v1
    :receipt-sha256 (apply str (repeat 64 "b"))
    :writer-entrypoints (vec activation/required-writers)
@@ -26,7 +27,8 @@
    :observed-at-ms 1000 :valid-until-ms 2000
    :host {:census-complete? true :boot-id "boot-1"
           :writer-census-sha256 activation/required-writer-census-sha256
-          :process-census-sha256 (activation/process-census-sha256 processes)}
+          :process-census-edn census-edn
+          :process-census-sha256 (activation/process-census-sha256 census-edn)}
    :processes processes
    :lease {:path activation/deployment-lease-path
            :protocol :host-launch-reload-lock-v1
@@ -43,10 +45,12 @@
   (select-keys process [:process/id :pid :start-ticks :exe :cmdline-sha256]))
 
 (defn with-processes [record processes]
-  (-> record
-      (assoc :processes processes)
-      (assoc-in [:host :process-census-sha256]
-                (activation/process-census-sha256 processes))))
+  (let [census-edn (activation/process-census-edn processes)]
+    (-> record
+        (assoc :processes processes)
+        (assoc-in [:host :process-census-edn] census-edn)
+        (assoc-in [:host :process-census-sha256]
+                  (activation/process-census-sha256 census-edn)))))
 
 (defn opts []
   {:now-ms 1500 :source-pins activation/required-source-pins :boot-id "boot-1"

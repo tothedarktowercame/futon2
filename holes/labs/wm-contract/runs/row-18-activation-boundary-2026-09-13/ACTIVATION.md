@@ -31,8 +31,10 @@ Production activation requires operator work outside the writer JVM:
    required writers; any missing or nonparticipating process refuses.
 4. While holding the deployment lease, the operator verifier enumerates
    `/proc/[0-9]*/cmdline`, selects every process whose classpath or command can
-   reach the canonical writer entrypoints, records the exact ordered process
-   vector, and computes SHA-256 over its EDN bytes. It records the boot id,
+   reach the canonical writer entrypoints, retains that exact ordered vector as
+   the receipt's `:process-census-edn` string, and computes SHA-256 over those
+   same UTF-8 bytes. The reader reparses the string, compares it with
+   `:processes`, and recomputes the digest. It records the boot id,
    digest, the pinned writer-census digest, and a validity interval no longer
    than five minutes. It writes exactly one EDN form to the fixed root-owned,
    non-symlink `/etc/futon2/wm-interoceptive-participation.edn`, whose parent is
