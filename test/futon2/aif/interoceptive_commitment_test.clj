@@ -48,7 +48,7 @@
       (is (= 1/2 (:machine-confidence
                   (commitment/confidence-snapshot (input [t1 t2] one-discharged)))))
       (is (= 1 (:machine-confidence
-                (commitment/confidence-snapshot (input [t1 t2] all-discharged)))))))
+                (commitment/confidence-snapshot (input [t1 t2] all-discharged))))))))
 
 (deftest exclusions-are-retained-and-not-counted
   (let [shadow (trip "trip-shadow" :record)
