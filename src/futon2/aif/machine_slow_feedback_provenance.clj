@@ -286,7 +286,7 @@
       (let [strip-cache #(dissoc % :record)
             rebuilt (construct
                      {:proposal-evidence (:proposal-evidence record)
-                      :original-sources (:original-sources record)
+                      :original-sources (update-vals (:original-sources record) strip-cache)
                       :canonical-closure (update-vals (get-in record [:canonical-closure :inputs])
                                                       strip-cache)
                       :canonical-outputs (update-vals (get-in record [:canonical-closure :outputs])
