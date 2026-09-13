@@ -1,6 +1,5 @@
 (ns futon2.aif.machine-slow-feedback-store-v2-test
-  (:require [clojure.edn :as edn]
-            [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-slow-feedback-provenance :as provenance]
             [futon2.aif.machine-slow-feedback-provenance-test :as provenance-test]
             [futon2.aif.machine-slow-feedback-store-v2 :as store])

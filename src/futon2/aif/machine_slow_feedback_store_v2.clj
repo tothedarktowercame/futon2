@@ -3,7 +3,6 @@
    revalidated structural provenance artifact.  No production constructor or
    authority upgrade is provided."
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [futon2.aif.machine-slow-feedback-provenance :as provenance]
             [futon2.aif.machine-slow-feedback-store :as legacy])
   (:import (java.io FileOutputStream PushbackReader StringReader)
