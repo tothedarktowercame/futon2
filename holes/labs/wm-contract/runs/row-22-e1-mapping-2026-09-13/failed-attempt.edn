@@ -1,0 +1,6 @@
+{:command "clojure -M:test -n futon2.aif.machine-budget-mapping-test"
+ :exit 1
+ :tree-sha "64899007e88405346b134a3c55ad9e91e51e6339"
+ :outcome :runner-invocation-error
+ :stdout "Execution error (FileNotFoundException) at java.io.FileInputStream/open0 (FileInputStream.java:-2).\n-n (No such file or directory)\n\nFull report at:\n/tmp/clojure-8414812118874713819.edn\n"
+ :repair "Use this repository's cognitect runner main: -m cognitect.test-runner -n <namespace>."}

@@ -1,0 +1,5 @@
+{:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- src/futon2/aif/machine_budget_mapping.clj test/futon2/aif/machine_budget_mapping_test.clj holes/labs/wm-contract/runs/row-22-e1-mapping-2026-09-13/production-shaped-candidate-field.edn"
+ :exit 0 :tests 3 :assertions 3
+ :tree-sha "df32a9cffb9dfe5666e3894ee26aeb07e9b00c85"
+ :at "2026-09-13"
+ :stdout "parens.stdout" :stderr "parens.stderr"}

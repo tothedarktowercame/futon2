@@ -1,0 +1,5 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-budget-mapping-test"
+ :exit 0 :tests 5 :assertions 22
+ :tree-sha "df32a9cffb9dfe5666e3894ee26aeb07e9b00c85"
+ :at "2026-09-13"
+ :stdout "test.stdout" :stderr "test.stderr"}
