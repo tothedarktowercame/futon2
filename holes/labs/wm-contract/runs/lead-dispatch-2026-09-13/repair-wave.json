@@ -497,10 +497,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-f11-producer-authority-contract.request.json",
       "dispatch": "accepted",
       "scope": "read-only F11 producer authority/acquisition contract; no emitter edits"
+    },
+    {
+      "packet": "codex-23-e6-forward-feedback-contract",
+      "job-id": "invoke-1789275223688-20644-cfeb3e3a",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789275223688-20644-cfeb3e3a",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6-forward-feedback-contract.request.json",
+      "dispatch": "accepted",
+      "scope": "E6 forward/feedback contract and read-only seams; no runtime"
     }
   ],
   "current-awaiting": [
-    "invoke-1789274887203-20638-76cae5b8",
+    "invoke-1789275223688-20644-cfeb3e3a",
     "invoke-1789275024902-20639-981e63a5",
     "invoke-1789275137982-20641-f684332b"
   ]
