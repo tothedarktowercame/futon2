@@ -1380,3 +1380,7 @@ Row14 validator6dab72fa/a6363375/e5ff5201 reviewed7pins/gates. Candidate-subject
 ## Lead review update — restart discovery, 2026-09-13
 
 Row19 restart26d5a1dc/89919c59/aa6add26 reviewed4commit-bound pins/gates. Named selective HTTP activation now hard-refuses; generic offline tool is not an eval sandbox. Restart remains unready: acceptance paths only existence-checked, shell-escaped output not EDN, old-tree fallback unsafe after possible startup writes, scoped probe/reconnect lane unspecified. Next read-only actual drain/source-delta discovery and honest preflight corrections; no live changes or new commissions. See row-19-controlled-restart-preparation-2026-09-13/lead-review.md.
+
+## Lead adoption — declaration edge contracts, 2026-09-13
+
+Row22 f19e346f/4356b6f6/bdd8e657 adopted for implementation with occurrence identity, bounded dispatch tick-plan and non-qualifying no-change clarifications.15pins current match; trackerpin matches877fa299 historical bytes. E1–E6 conserve budget/exact-enactment/R9/scheduling/temporal-direction obligations; no edge firing or node admission. First next packet pure E1 ranked-to-proposal mapping with explicit cost/utility/budget authority and full accounting; runtime restrictions/enactment later. See row-22-edge-specification-2026-09-13/lead-adoption.md.

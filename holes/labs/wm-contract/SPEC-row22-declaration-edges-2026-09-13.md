@@ -1,6 +1,7 @@
 # Row 22 declaration-edge repair specification (2026-09-13)
 
-Status: proposed for lead adoption.  This document refines the reviewed discovery
+Status: adopted for bounded implementation by codex-26; no edge firing or admission.
+This document refines the reviewed discovery
 in `TN-row22-declaration-edge-audit-2026-09-13.md`; it changes neither the edge
 ledger nor production.  Every qualification below requires retained records from
 one joined run.  A unit test or redirected fixture can commission a refusal but
@@ -10,8 +11,9 @@ cannot establish that a production edge fired.
 
 Every delivered value must carry `:model/id`, `:model/revision`, `:run/id`,
 `:tick/index`, producer declaration and source revision.  Candidate-bearing
-records additionally carry a stable `:candidate/id` and the ordered candidate
-support.  A transformation output repeats the input pins and names its function
+records additionally carry a stable occurrence-level `:candidate/id` and the ordered candidate
+support. Equal semantic actions at different occurrences remain distinct; neither
+action-key deduplication nor posterior renormalization may hide missing candidates.  A transformation output repeats the input pins and names its function
 and source hash.  Same-tick edges require equal run and tick.  Feedback edges
 require the source tick `t`, the destination tick `t+1`, and a predecessor link.
 Missing, duplicate, reordered, cross-run, stale, or revision-mismatched joins
@@ -119,8 +121,11 @@ it consumes no scheduler value.
 **Replacement route and law.** Retire the direct data edge and conserve the
 scheduling obligation as:
 
-1. `R10 scheduled-dispatch receipt -> tick-entry identity`: one successful
-   dispatch authorizes exactly one run/tick start;
+1. `R10 scheduled-dispatch receipt -> run/tick-entry identity`: one successful
+   dispatch authorizes one idempotent run launch and its explicitly declared
+   bounded tick plan. A single-tick commission permits exactly one tick; a
+   multi-tick commission retains its ordered tick identities and does not
+   collapse them into a one-job/one-tick fiction;
 2. `tick-entry -> R2 observation record`; and
 3. `R2 observation + predecessor prediction -> R8 F-pi`, joined by run/tick,
    predecessor tick, candidate action identity, model revision and complete
@@ -171,7 +176,8 @@ and enacted result for the same run/tick.  It qualifies only if the selected
 action demonstrably depends on the shaped candidate table; merely carrying a
 mode label does not qualify.  Control: permute mode weights while holding all
 other inputs fixed and require the predicted selection change or an honest
-no-change result at that field; a consumer that ignores the table fails.
+no-change result at that field; an unchanged selection is non-qualifying for
+behavioral influence at that field. A consumer that ignores the table fails.
 
 ### E6b feedback: R16 witnessed outcome at t -> R15 state at t+1
 
