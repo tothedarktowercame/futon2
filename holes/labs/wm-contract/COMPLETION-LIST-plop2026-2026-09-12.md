@@ -22,6 +22,14 @@ The commission names four explicit result labels despite referring to “three-s
 
 ## Promises
 
+**RULED 2026-09-13 (P001-P005):** the companion resolves to futon-2026
+(formal + preregistered experimental material; blanket split). plop-2026
+additionally gains a Methods section carrying the Lean certificate, added
+only when the relevant certificate exists. Rows P001-P005 are
+RULED-PENDING-CERTIFICATE; full ruling in
+DECISION-SHEET-companion-reference-2026-09-13.md.
+
+
 | ID | Claim (short verbatim quote; source) | State | Evidence and exact limit | What closes the gap | futon-2026 echo |
 | --- | --- | --- | --- | --- | --- |
 | P001 | `the preregistered experiment reported in the companion paper` — `p4ng/plop-2026.tex:3` | UNCLASSIFIED | **TEX**, **DORMANT**: Promise destination is not identified by a resolved active experimental report. | Resolve the intended companion and restore an active evidence-linked destination; instrument packets A/B/C and the witnessed-rung carrier must preserve unresolved obligations. | FUTON distinguishes a separate mathematical companion |
