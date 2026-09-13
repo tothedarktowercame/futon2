@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest canonical replay73ad4deb/ed9e8111 five output/receipt plus eight source pins verified; retained E3/E2b successes and two exact refusals accepted isolated test replay only. No constructors, production authority or installed-code proof. Pure provenance envelope next, no store-v2 publication. See [acceptance](runs/row-22-e6b-canonical-replay-2026-09-13/lead-acceptance.md).
+
 - Latest canonical fixture2146be99/9cc5fac0 six receipt pins/eight artifact hashes verified; retained readback accepted unauthenticated test bytes only. Canonical replay from retained config remains unchecked; no portable/archive/production authority. See [review](runs/row-22-e6b-canonical-fixture-2026-09-13/lead-acceptance.md).
 
 - Latest closureb00e6d35 listed pins verified; lead added missing R11 adapter/arbiter dependencies. E3 durable inputs remain absent; refusal is a contract, not executable resolver. New isolated fixture capture must remain unauthenticated test material, never historical20588 or production genesis. See [review](runs/row-22-e6b-canonical-closure-review-2026-09-13/lead-review.md).

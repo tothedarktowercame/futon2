@@ -1,0 +1,7 @@
+# Retained canonical replay accepted as isolated machinery
+
+Reviewed 73ad4deb/ed9e8111. Five receipt/output pins and eight source declaration pins match (lead-pins.json). Read full harness: no test namespace/constructor imports; pinned capture config feeds E3/E2b directly. Retained outputs report mechanism-authorized and exact-occurrence-and-action. Missing pending and changed selection pin produce the documented refusals; harness checks those exact refusals. Raw replay/kondo/parens passed, initial syntax failure retained. No passing rerun.
+
+Acceptance is a successful replay in a fresh local process over retained repository-relative test configuration. Source files are hash-checked after namespace load, so this is not independent installed-code attestation or mutation-proof loader ownership. Fixture anchor/jobs/commission remain synthetic unauthenticated test data. No historical20588, real genesis, completeness or production qualification.
+
+Next bounded unit: pure provenance-envelope construction and validation, with externally supplied retained source/config closure, prospective proposal and carrier projection. Verify every byte/hash/value/duplicate-subject relationship and preserve both retrospective and carrier digest views. Structural result only; actual prospective execution/config ownership remains a separate trusted caller requirement. No v2 store publication or postcommit acceptance yet.

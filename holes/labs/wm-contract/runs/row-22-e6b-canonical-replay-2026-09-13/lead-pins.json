@@ -1,0 +1,54 @@
+[
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-replay-2026-09-13/replay.clj",
+    "sha256": "7107dae95fe757b5649208e15fd61a65459bc45726eb8bb57d7411488e37dc9e"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/capture-manifest.edn",
+    "sha256": "eca79640929ae7a7fb06fb12a2315d6172f11fc853489c9d0f4d7b7157ff119e"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-replay-2026-09-13/e3-output.edn",
+    "sha256": "c74c564de43d2acb8c7124a16016eaefaffe4747f00d0a9483db2408dd43b206"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-replay-2026-09-13/e2b-output.edn",
+    "sha256": "e771087a5aee7da06f5139c9676845e4966f01ae6fad0156565fbf9c1e90b383"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-canonical-replay-2026-09-13/refusals.edn",
+    "sha256": "583d811bb92193483edbe57b08ee7304b1ee0213bce71b89fa4cbdda9402cec0"
+  },
+  {
+    "path": "src/futon2/aif/machine_pre_enact_authorization.clj",
+    "sha256": "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260"
+  },
+  {
+    "path": "src/futon2/aif/machine_enactment_correspondence.clj",
+    "sha256": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933"
+  },
+  {
+    "path": "src/futon2/aif/machine_portfolio_restriction.clj",
+    "sha256": "316ddd364e2deaea98172558148fd770c2d5d4a930e32fb8e4825f454b6c51ab"
+  },
+  {
+    "path": "src/futon2/aif/machine_budget_authority.clj",
+    "sha256": "13c6fb05c2a75ff5c673ed2df49e9d555db210d9269588396ea71ce97964253e"
+  },
+  {
+    "path": "src/futon2/aif/machine_budget_mapping.clj",
+    "sha256": "5072c34fa55db6683faeef38ac2b8026107c9ef0c9d7174a9a4026ab3ec2110f"
+  },
+  {
+    "path": "src/futon2/aif/hierarchical_budget_adapter.clj",
+    "sha256": "525bcb8aa4aad49c9cd02c22dfeabc7406aced8aacbb5731317e182eddb691e1"
+  },
+  {
+    "path": "src/futon2/aif/hierarchical_budget.clj",
+    "sha256": "a0581c1d7135324b1190795ba56dfc9fa834869474a297155678d88d71e5216b"
+  },
+  {
+    "path": "src/futon2/aif/r9_checker.clj",
+    "sha256": "b3469b8027c36e2db17943efabb6b26878c1dee3d71b9eda809e50d602094722"
+  }
+]
