@@ -134,6 +134,13 @@
       (when-not (= :isolated-test (:scope record))
         (refuse! :e6b/scope-mismatch "All resolved sources must retain isolated scope"
                  {:label label :scope (:scope record)})))
+    (when-not (and (= (select-keys common [:model/id :model/revision :run/id :tick/index])
+                      (select-keys (:identity canonical-e3)
+                                   [:model/id :model/revision :run/id :tick/index]))
+                   (= (select-keys common [:model/id :model/revision :run/id :tick/index])
+                      (:identity canonical-e2b)))
+      (refuse! :e6b/canonical-context-mismatch
+               "Transition identity differs from canonical E3/E2b" {}))
     (when-not (and (= common (identity-of prior))
                    (= (:prior-state/revision context) (:state/revision prior))
                    (map? (:slow/intrinsics prior)) (seq (:slow/intrinsics prior))

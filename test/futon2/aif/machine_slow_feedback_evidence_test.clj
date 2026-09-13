@@ -116,7 +116,8 @@
         artifact-bytes (.getBytes (str (pr-str (:outcome-review-artifact records0)) "\n") "UTF-8")
         records (-> records0
                     (assoc-in [:application-universe :ledger/sha256] (digest ledger-bytes))
-                    (assoc-in [:outcome-review :review/artifact-sha256] (digest artifact-bytes)))
+                    (update-in [:outcome-review :review/artifact-sha256]
+                               #(or % (digest artifact-bytes))))
         sources (into {}
                       (for [label e6b/source-order
                             :let [file (io/file dir (str (name label) ".edn"))
