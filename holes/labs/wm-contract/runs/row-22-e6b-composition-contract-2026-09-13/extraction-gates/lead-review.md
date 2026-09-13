@@ -1,0 +1,7 @@
+# Private transition extraction accepted narrowly
+
+Reviewed 47490433/8a613ac1 and 4a70d651 receipts. Seven current/historical pins verified. Retained raw focused gates report 7 tests/44 assertions with no failures/errors, clean kondo/parens; induced failure is retained with exit 1. No passing checks rerun. Independent review of lead0bee8942 consumed.
+
+Diff preserves transition checks and computation in a private core; public wrapper still resolves all ten records, validates their scope, compares claimed next state and enforces committed ledger/universe evidence. Ledger and universe records are removed before the core call. The core adds canonical output digests for prospective use. The earlier all-record scope check changes refusal precedence for multiply-invalid input (scope may refuse before canonical resolution); this is conservative rejection, not exact diagnostic-order equivalence. No prospective API, storage or production authority exists yet.
+
+Next bounded unit: public isolated validate-transition with exactly seven configured source roles, rejecting ledger/universe/claimed-next inputs. Invoke the reviewed private core; return complete prior/computed-next records and exact source/canonical/dependency provenance as proposal evidence only. Keep raw/value digest distinction and existing retrospective gates. No store-state carrier decision, adapter, publication or runtime wiring.

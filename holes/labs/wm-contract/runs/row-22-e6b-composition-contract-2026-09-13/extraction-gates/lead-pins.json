@@ -1,0 +1,44 @@
+[
+  {
+    "role": "source",
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "f2bdb2abc1dace3d9b97fe7600c98f8d2ee2d3b96034d42c621cfdf96a3cd900",
+    "historical-match": true
+  },
+  {
+    "role": "test",
+    "path": "test/futon2/aif/machine_slow_feedback_evidence_test.clj",
+    "sha256": "ff0634310d58c4a463010513e502bb942ba57569fe6815a97a1b1d1efdb0b5b0",
+    "historical-match": true
+  },
+  {
+    "role": "independent-review",
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-composition-contract-2026-09-13/independent-lead-review.md",
+    "sha256": "21e6b9a0d07d1419426d3c009b0e6ad733e13d012f7a1e9014ac41b3f283357b",
+    "historical-match": true
+  },
+  {
+    "role": "e3",
+    "path": "src/futon2/aif/machine_pre_enact_authorization.clj",
+    "sha256": "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260",
+    "historical-match": true
+  },
+  {
+    "role": "e2b",
+    "path": "src/futon2/aif/machine_enactment_correspondence.clj",
+    "sha256": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933",
+    "historical-match": true
+  },
+  {
+    "role": "temporal-hierarchy",
+    "path": "src/futon2/aif/temporal_hierarchy.clj",
+    "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "historical-match": true
+  },
+  {
+    "role": "intrinsic-values",
+    "path": "src/futon2/aif/intrinsic_values.clj",
+    "sha256": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b",
+    "historical-match": true
+  }
+]

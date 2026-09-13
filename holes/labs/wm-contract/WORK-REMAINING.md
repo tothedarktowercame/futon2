@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest extraction8a613ac1/4a70d651 seven pins/raw7tests44 accepted isolated private refactor. Retrospective ledger requirement remains; earlier scope rejection conservatively changes invalid-input precedence. Independent0bee8942 review consumed. Public prospective validator next, no store adapter. See [review](runs/row-22-e6b-composition-contract-2026-09-13/extraction-gates/lead-review.md).
+
 - Job20676 ended incomplete with no implementation/tests; verifier hash unchanged and scoped tree clean. No success accepted. Continuation split to independent contract review plus private transition-core extraction; public prospective API deferred. See [receipt](runs/row-22-e6b-composition-contract-2026-09-13/lead-incomplete-packet-receipt.json).
 
 - Latest split contract6aa72c48/6b3eea81 six pins verified. Lead corrected pr-str versus canonical digests, retry-before-current-HEAD order, and deferred explicit common state carrier. Prospective validator only next; no store adapter or production authority. See [review](runs/row-22-e6b-composition-contract-2026-09-13/lead-review.md).
