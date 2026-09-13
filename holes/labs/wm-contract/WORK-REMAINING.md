@@ -148,6 +148,12 @@ is not yet a verified join to Agency's normalized request digest.
   function is a refusal stub, not an authenticated reader. See genesis-verifier
   `lead-review.md`. No verifier or R9 admission.
 
+- Canonical finite posterior `mathlib4/b57a10de`, receipt `7c1eb0d6`:
+  nine source/spec pins and three owned olean pins verified; normalization,
+  occurrence alignment, continuity and conditional root-order connection accepted.
+  Next analytic packet establishes a sufficient global-uniqueness criterion
+  without changing retained fields/priors. Float correspondence remains open.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,

@@ -1,0 +1,50 @@
+[
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.lean",
+    "sha256": "afbe1d5dfe9eb9192c2226c34220b4aa8fc345b833f88608cf42129f6341b77e"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/InteroceptivePolicyPrecisionProposal.lean",
+    "sha256": "779027d3eeaf887d67d0f29cb89e793e2ad95805880c9d04bb8beb6f164d0298"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionProposal.olean",
+    "sha256": "fe1eea8c472833cf15b1c4674f0987e505c97455eba3c5eaaff44d0cbf5b5354"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/InteroceptivePolicyPrecisionBounded.lean",
+    "sha256": "b69f98d3b69535d07c09765d2d8dfecfcbb5905511676f0bf3ca08fd4c58a7e4"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionBounded.olean",
+    "sha256": "a2511140fce621ded116bfe8282be842b5a486beb053f0592ba7175fe03734fc"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/InteroceptivePolicyPrecisionPositiveDomain.lean",
+    "sha256": "1ac96fe674c1d9cb4f29dc39ad0707269c5d8e9090cba3920e926b5652f547c0"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionPositiveDomain.olean",
+    "sha256": "375a2e0ae8e717df755d9120b82f11508febba35e3a072c6416410434712b770"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/PolicyPosterior.lean",
+    "sha256": "59817e0a9ff296a95d7cfcc59d4f1709fb2d38d8cfbbc156ba7c489f12da114b"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean",
+    "sha256": "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/lean-toolchain",
+    "sha256": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-proposal-v1.md",
+    "sha256": "cbc928bdad6b0cc9c27822722a6c77fa581d0201352d02291e5f5663d9eaf9b8"
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-18-policy-precision-spec-2026-09-13/lead-positive-domain-review.md",
+    "sha256": "03193127885395c0d00172a920ddb9443e8f2daafd0624ac7210e6ea84e93d1c"
+  }
+]

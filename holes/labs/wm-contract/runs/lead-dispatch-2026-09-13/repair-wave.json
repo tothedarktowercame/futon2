@@ -113,11 +113,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-genesis-subject-binding.request.json",
       "dispatch": "accepted",
       "scope": "independent commission and exact acceptance-subject binding repair; no admission"
+    },
+    {
+      "packet": "codex-24-root-uniqueness",
+      "job-id": "invoke-1789266681599-20583-b80af8f3",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789266681599-20583-b80af8f3",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-root-uniqueness.request.json",
+      "dispatch": "accepted",
+      "scope": "sufficient exact-field global positive-root uniqueness; no runtime admission"
     }
   ],
   "current-awaiting": [
     "invoke-1789266556788-20582-2f6b238c",
     "invoke-1789266414941-20581-608ecb5c",
-    "invoke-1789266166922-20580-4f039823"
+    "invoke-1789266681599-20583-b80af8f3"
   ]
 }
