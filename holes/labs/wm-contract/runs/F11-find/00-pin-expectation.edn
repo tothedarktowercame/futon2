@@ -1,0 +1,6 @@
+{:schema :wm/f2-pin-expectation-v1
+ :pin-path "futon3:checks/find-snatch.edn"
+ :pin-sha256 "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce"
+ :supplied-by "claude-15"
+ :supplied-at "2026-09-13"
+ :basis "M-f11's F2 choice: acknowledged-clause, route, and as-of content are checked against an INDEPENDENTLY SUPPLIED expectation. This committed record is that expectation for the pin side; the live futon3 checkout no longer supplies its own standard."}

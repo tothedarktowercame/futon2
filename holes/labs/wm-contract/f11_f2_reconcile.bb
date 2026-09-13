@@ -63,8 +63,19 @@
         live (edn/read-string (slurp live-path))]
     (if (some #{"--check"} args)
       ;; The certificate's verification leg: the committed certificate must
-      ;; describe exactly what recomputation over the pinned records observes.
-      (let [cert-path (str (io/file lab-dir "runs/F11-find/03-certificate.edn"))
+      ;; describe exactly what recomputation over the pinned records observes,
+      ;; and the pin itself must match its committed, independently supplied
+      ;; expectation (M-f11's F2 choice) before any comparison is trusted.
+      (let [expectation (edn/read-string
+                         (slurp (str (io/file lab-dir "runs/F11-find/00-pin-expectation.edn"))))
+            observed-pin-sha (sha256 pin-path)
+            _ (when-not (= (:pin-sha256 expectation) observed-pin-sha)
+                (println "f11-f2-reconcile: FAIL pin drifted from its committed expectation:"
+                         (pr-str {:expected (:pin-sha256 expectation)
+                                  :observed observed-pin-sha})
+                         "exit-convention=0-pass/1-fail")
+                (System/exit 1))
+            cert-path (str (io/file lab-dir "runs/F11-find/03-certificate.edn"))
             committed (edn/read-string (slurp cert-path))
             drift (reconciliation/certificate-drift
                    committed (recompute-certificate pin live))]
