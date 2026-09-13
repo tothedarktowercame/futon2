@@ -1,0 +1,43 @@
+{:row 18
+ :packet [1 2]
+ :scope :pure-snapshot-machinery
+ :law {:id :wm/interoceptive-confidence-fixed-half-v1
+       :zero-open 1 :positive-open 1/2 :floor 1/2
+       :operator-gate :none
+       :authority :declared-engineering-response
+       :ruling "holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:26-48"}
+ :reader-pins
+ {:trip-record
+  {:source "src/futon2/aif/tripwire.clj:462-475"
+   :identity :trip/id :schema :trip/schema-version :mode :trip/action}
+  :trip-finding-join
+  {:source "src/futon2/aif/tripwire.clj:538-559"
+   :join [:trip/id [:failure-data :trip/id]]}
+  :repair-snapshot
+  {:source "src/futon2/aif/tripwire.clj:118-142"
+   :shape '{relative-path {:sha256 sha256 :record repair-record}}
+   :discharge-identity :repair/id}}
+ :actual-retained-record
+ {:path "data/wm-tripwires/trips/trip-68317faa-4c02-47ff-aacd-e73860a2ce2c.edn"
+  :sha256 "4de9d7d7838927eca1d841c0e804252514fada4166bfc624b3aa2cfe746ba354"
+  :trip/id "trip-68317faa-4c02-47ff-aacd-e73860a2ce2c"
+  :trip/action :record
+  :classification :shadow-record
+  :claim-limitation "Real retained row establishes reader shape only; it is not a genuine open-trip claim."}
+ :commissioned-law-readback
+ [{:state :zero-open :open-trip-ids [] :machine-confidence 1}
+  {:state :one-open :open-trip-ids ["trip-real-1"] :machine-confidence 1/2}
+  {:state :two-open :open-trip-ids ["trip-real-1" "trip-real-2"] :machine-confidence 1/2}
+  {:state :one-of-two-discharged :open-trip-ids ["trip-real-2"] :machine-confidence 1/2}
+  {:state :all-discharged :open-trip-ids [] :machine-confidence 1}]
+ :executed-refusals
+ [:interoceptive/missing-finding-join
+  :interoceptive/duplicate-trip-identity
+  :interoceptive/malformed-trip
+  :interoceptive/contradictory-discharge
+  :interoceptive/unknown-mode
+  :interoceptive/authority-unavailable
+  :interoceptive/unpinned-authority]
+ :typed-exclusions [:shadow-record :test-root :discharged]
+ :not-claimed [:live-genuine-trip :integration :task-gain-composition
+               :calibration :safer-enaction]}

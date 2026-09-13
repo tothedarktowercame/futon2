@@ -1,0 +1,11 @@
+{:command "clojure -X:test :nses '[futon2.aif.interoceptive-commitment-test]'"
+ :exit 0 :tests 3 :assertions 17
+ :tree-sha "18ef28877c3440b45a0af468b4005a5100eb42c6"
+ :at "2026-09-13T01:51:07Z"
+ :transcript "Ran 3 tests containing 17 assertions. 0 failures, 0 errors."
+ :prior-attempts
+ [{:tree-sha "13491e5a" :exit 1
+   :finding :test-source-eof :disposition :authoring-defect-fixed-by-follow-up}
+  {:tree-sha "8f2f4f18" :exit 1 :tests 3 :assertions 17 :failures 1
+   :finding :control-expected-contradictory-discharge-but-received-duplicate-repair-identity
+   :disposition :refusal-typed-at-the-discharge-state-boundary-by-follow-up}]}
