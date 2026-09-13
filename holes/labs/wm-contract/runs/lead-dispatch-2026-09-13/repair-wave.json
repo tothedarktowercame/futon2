@@ -569,10 +569,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e5-r6-semantic-contract.request.json",
       "dispatch": "accepted",
       "scope": "read-only E5-to-R6 semantic contract assessment; no model change"
+    },
+    {
+      "packet": "codex-23-e6b-terminal-review-audit",
+      "job-id": "invoke-1789276503835-20662-3355953f",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789276503835-20662-3355953f",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-terminal-review-audit.request.json",
+      "dispatch": "accepted",
+      "scope": "independent lead terminal fix review and bounded E6b relation audit"
     }
   ],
   "current-awaiting": [
-    "invoke-1789276169068-20658-98c0142a",
+    "invoke-1789276503835-20662-3355953f",
     "invoke-1789276248223-20659-0c1e3903"
   ],
   "codex24-next-boundary": {
