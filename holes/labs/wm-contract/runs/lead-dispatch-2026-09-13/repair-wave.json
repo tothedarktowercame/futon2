@@ -593,10 +593,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-store-ledger-protocol.request.json",
       "dispatch": "accepted",
       "scope": "read-only E6b joint state ledger ownership protocol; no store creation"
+    },
+    {
+      "packet": "codex-23-isolated-feedback-store",
+      "job-id": "invoke-1789277244471-20668-210c6ff7",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789277244471-20668-210c6ff7",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-isolated-feedback-store.request.json",
+      "dispatch": "accepted",
+      "scope": "independent protocol review and isolated tempfile feedback store; no production"
     }
   ],
   "current-awaiting": [
-    "invoke-1789277051031-20666-2a6e65e9"
+    "invoke-1789277244471-20668-210c6ff7"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
