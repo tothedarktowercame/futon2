@@ -1360,3 +1360,7 @@ TN69ff088c reviewed against complete retention diff and matching HTTP source has
 ## Lead review update — activation lease source, 2026-09-13
 
 Row18 bc1b4856/fdd99673/8d09b84a reviewed: six pins match and retained16tests49assertions/gates inspected without rerun. Permission/same-byte/census-digest/protected revalidation accepted conditionally. Actual activation still lease-unavailable; controller artifacts not byte-resolved, direct reload enforcement absent, interval controls and production no-create lock opening owed. See runs/row-18-activation-lease-2026-09-13/lead-review.md. No deployed coherence or confidence.
+
+## Lead decision — categorical annotation method, 2026-09-13
+
+Row14 proposal21131c3f reviewed:16current pins match; tracker17th matches author commit before subsequent lead edits. Permit independently adjudicated categorical annotations as explicit evidence-acquisition method, not proof of physical/latent ground truth. Qualifying use requires versioned seven-state evidence rubric, exact temporal/evidence cutoff, independent observer/reviewer authority and exact-subject acceptance; inline names/verdicts insufficient. No existing CP-close/F11 pair qualifies, no counts. Next bounded pure authority validator/spec packet; close attachment later. See runs/row-14-measured-a-authority-spec-2026-09-13/lead-review.md.
