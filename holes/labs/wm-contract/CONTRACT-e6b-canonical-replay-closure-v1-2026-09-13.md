@@ -27,12 +27,19 @@ Therefore immutable restart replay needs all of:
 - pinned declarations for E3, E2b, E2a, E1 mapping/resolution and R9, with
   loaded/installed code identity recorded separately when one exists.
 
-The retained E1 and E2b fixtures are byte-pinned in the inventory. E3's three
-records and embedded R9 closure are constructed into temporary directories by
-the test source (`machine_pre_enact_authorization_test.clj:22-79`) and have no
-durable independently owned byte artifacts. The fixture's anchor is a literal
-shape, not authenticated genesis. Consequently even isolated durable restart
-replay is incomplete; production authority is unavailable.
+The retained E1 and E2b fixtures are byte-pinned in the inventory. A dedicated
+capture now retains the exact newly generated E3 pending/verdict/review bytes,
+embedded R9 input and complete E1/E2b/E3/canonical config values at
+`runs/row-22-e6b-canonical-fixture-2026-09-13/captured/`. Raw-buffer and parsed
+`pr-str` value hashes are recorded separately even where their bytes happen to
+match. This removes temporary-path/current-default dependence for mechanical
+isolated fixture replay.
+
+Ownership remains the pinned test constructor
+(`machine_pre_enact_authorization_test.clj:22-79`). Its anchor, commission,
+jobs, trace joins and receipts are synthetic unauthenticated test data—not
+historical job 20588, authenticated genesis, or production authority. External
+authentication, installed-code identity and completeness remain unavailable.
 
 An eventual resolver must select this closure by an independently configured
 identity, read each file once, strictly decode/parse and hash the same buffer,

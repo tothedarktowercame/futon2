@@ -1,6 +1,6 @@
 {:schema :wm/e6b-canonical-replay-closure-v1
  :scope :isolated-fixture-inventory
- :status :incomplete-for-durable-replay
+ :status :captured-unauthenticated-isolated-fixture
  :config-owner
  {:required :independent-external-owner
   :isolated-fixture-owner :test-source-construction
@@ -59,18 +59,20 @@
  :e3-config
  {:mode :isolated-test
   :owner :test-source-construction
-  :evidence-root :fresh-temporary-directory
+  :evidence-root "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/e3"
   :evidence
-  {:pending {:schema :wm/e3-pending-construction-v1 :retained-bytes :unavailable}
-   :verdict {:schema :wm/e3-independence-verdict-v1 :retained-bytes :unavailable}
-   :review {:schema :wm/e3-independent-review-v1 :retained-bytes :unavailable}}
+  {:pending {:schema :wm/e3-pending-construction-v1 :sha256 "55de54598d2521115da14b4ce74996d7bbacccfc21ecc5bfc01d0ce26c992154"}
+   :verdict {:schema :wm/e3-independence-verdict-v1 :sha256 "ac3b628fdc3f6efd84a273473f8e84a31988c947b5d3c26d953acc7cbd8976"}
+   :review {:schema :wm/e3-independent-review-v1 :sha256 "f4f23834f3bade70127561d828a1d65e2ce1f113325da5551c9412ebe05e1a1b"}}
   :e2a-resolver :shared-e1-config
   :fixture-declaration
   {:path "test/futon2/aif/machine_pre_enact_authorization_test.clj"
    :sha256 "50558cf363717c53cfb818a6db9d77814a8beb732e41549a2c66f478f7b45a12"}}
  :e3-r9-input-closure
  {:location [:e3-config :evidence :review :r9/input]
-  :retained-exact-bytes :unavailable
+  :retained-exact-bytes
+  {:path "holes/labs/wm-contract/runs/row-22-e6b-canonical-fixture-2026-09-13/captured/config/r9-input.edn"
+   :sha256 "569b9d61cea721f021836194e7d73a1a3e6454146b3c8f4523235ae507c03879"}
   :required-fields
   [:role-binding :producer-job :reviewer-job :subject :review-commission
    :verification-receipt :review-receipt :trace->job :checker-source-sha256
@@ -79,8 +81,8 @@
   {:fixture-shape :wm/r9-bootstrap-anchor-v1
    :independent-authentication :unavailable
    :production-genesis :unavailable}
-  :commission-preimage :unavailable-as-durable-fixture-artifact
-  :job-trace-authority :unavailable-as-durable-fixture-artifact}
+  :commission-preimage :retained-synthetic-fixture-only
+  :job-trace-authority :retained-synthetic-fixture-only}
  :fixture-declarations
  [{:role :e3-fixture-constructor
    :path "test/futon2/aif/machine_pre_enact_authorization_test.clj"
@@ -89,7 +91,7 @@
    :path "test/futon2/aif/machine_enactment_correspondence_test.clj"
    :sha256 "d1a8dec32437697d4905ed2e92f7701b5ef1d67f13cca6370e3ebae55b62aa6f"}]
  :acquisition
- {:isolated-replay :refuses-until-e3-three-record-bytes-and-r9-input-closure-are-retained
+ {:isolated-replay :mechanically-retained-unauthenticated-test-fixture
   :production :unavailable
   :refusal :e6b/canonical-input-closure-unavailable}
  :non-authority
