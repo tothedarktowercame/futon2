@@ -66,7 +66,7 @@
   (let [[s capture] (setup-capture true) a (codec/construct capture)
         valid-bytes (.decode (Base64/getDecoder) ^String (:bytes/base64 a))]
     (doseq [[label bs expected]
-            [[:invalid-utf8 (byte-array [(byte 0xc3) (byte 0x28)]) :e6b-capture/invalid-edn]
+            [[:invalid-utf8 (byte-array [(unchecked-byte 0xc3) (byte 0x28)]) :e6b-capture/invalid-edn]
              [:trailing (.getBytes (str (String. valid-bytes StandardCharsets/UTF_8) " nil")
                                    StandardCharsets/UTF_8)
               :e6b-capture/invalid-edn-cardinality]
