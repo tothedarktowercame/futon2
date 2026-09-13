@@ -361,10 +361,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-certificate-run-subject-joins.request.json",
       "dispatch": "accepted",
       "scope": "additive exact run/claim/declaration and divergence subject joins; no producer or certificate admission"
+    },
+    {
+      "packet": "codex-23-complete-lifecycle-authority",
+      "job-id": "invoke-1789272310436-20623-02d0f136",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789272310436-20623-02d0f136",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-complete-lifecycle-authority.request.json",
+      "dispatch": "accepted",
+      "scope": "strict lifecycle schemas and independent completeness authority; no production integration"
     }
   ],
   "current-awaiting": [
-    "invoke-1789271800626-20620-737f8c90",
+    "invoke-1789272310436-20623-02d0f136",
     "invoke-1789271983880-20621-173b7165",
     "invoke-1789272111078-20622-4dcfc158"
   ]
