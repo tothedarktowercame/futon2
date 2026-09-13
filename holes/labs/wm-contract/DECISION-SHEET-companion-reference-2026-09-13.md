@@ -52,3 +52,22 @@ construction, and the qualifying-run series (row 26 machinery now
 demonstrated end to end) gives futon-2026 a real preregistered
 experiment to report. Option B builds a second evidence home the
 completion list already marks dormant.
+
+## RULING (Joe, 2026-09-13, emacs-repl)
+
+"I am happy with your decisions. the one addition is not an empirics
+section but a lean certificate, as part of a new Methods section. To
+add when we have the relevant certificate!"
+
+Applied reading: Option A stands -- \xzaif and the companion promises
+resolve to futon-2026, which owns the formal treatment and the
+preregistered experimental report. The one amendment to A: plop-2026
+additionally gains a NEW METHODS SECTION whose content is the Lean
+certificate (machine-checked), added ONLY when the relevant certificate
+exists -- not an empirics section, and nothing is added now. The
+certificate's identity is not pinned by this ruling; the natural
+candidates are the run-certificate chain the repair-attempt-001 work is
+building (:wm/f2-reconciliation-certificate-v1 and successors) and the
+M-f11 Lean acceptance (F1-F4 witnessed, find sorry discharged), to be
+settled when one exists to pin. P001-P005 close to
+RULED-PENDING-CERTIFICATE.
