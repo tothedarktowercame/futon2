@@ -29,7 +29,7 @@ and live integration remain untouched. Row 18 remains open.
 
 Source hashes:
 
-- `machine_budget_authority.clj`: `2e8e61136da76dd4d916f6794ab85a7b69842ff6b768ad71f1eaead7a0f7f29b`
+- `machine_budget_authority.clj`: `9b205741fe3843d027ca993a7d054c37c33aeca946e700b71611c698441816af`
 - `machine_budget_mapping.clj`: `5072c34fa55db6683faeef38ac2b8026107c9ef0c9d7174a9a4026ab3ec2110f`
-- `machine_budget_authority_test.clj`: `de894955ae8aef40b4cb6cfa3cbb24fae48a7443c21a855bae6d0ff527504bac`
+- `machine_budget_authority_test.clj`: `390ad19e69ff59577202ff4cb9701375fa2a4313ef9012bfe682c56a3a8cdba8`
 - `readback.clj`: `9d078bda20f09cbd6e001e4f9c60c1fcb2037386b007050ffeed51f70739b01e`
