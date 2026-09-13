@@ -1340,3 +1340,7 @@ misattributed author claims; the PLoP completion list.
 ## Lead review update — retained field checker, 2026-09-13
 
 Row 18 applicability packet b2bc299f/d78c9007 reviewed with all seven pins matching. Recorded :none placement and reported failed c>3R/2 criterion remain non-qualifying/uniqueness unknown. Executable receipt needs same-buffer parsing, genuine failure-sensitive assertions (old three assertions were only printed refusal values), and accurate carry-beta bracket guard correspondence. See runs/row-18-field-applicability-2026-09-13/lead-review.md. No test rerun or runtime admission.
+
+## Lead review update — activation boundary, 2026-09-13
+
+Row 18 activation09752ed7/28416d99 reviewed with six matching pins and retained13tests/44assertions. Lead28f35c21 independently reviewed by codex22. Current production still activation-receipt-unavailable. Receipt file writability, independently evidenced stable writer census/deployment interval, and acquired-lock/expiry binding require repair; see runs/row-18-activation-boundary-2026-09-13/lead-review.md. No activation or logical-history repair claimed.

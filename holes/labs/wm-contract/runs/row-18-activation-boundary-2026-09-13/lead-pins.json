@@ -1,0 +1,38 @@
+[
+  {
+    "path": "src/futon2/aif/interoceptive_activation.clj",
+    "expected": "7f970ca3dfc561c140d5558ec35adc3f575fcaacdb33426d23644295d2815ba8",
+    "actual": "7f970ca3dfc561c140d5558ec35adc3f575fcaacdb33426d23644295d2815ba8",
+    "matches": true
+  },
+  {
+    "path": "src/futon2/aif/interoceptive_store_lock.clj",
+    "expected": "fe65e829a354902166851f5a2dc9d31dcfd187a28274f0d20f634b2f984f8b1d",
+    "actual": "fe65e829a354902166851f5a2dc9d31dcfd187a28274f0d20f634b2f984f8b1d",
+    "matches": true
+  },
+  {
+    "path": "src/futon2/aif/interoceptive_manifest.clj",
+    "expected": "4b062a25184d47e7a63f1685fb09cb23008f21cc0391398426821b4c23ac0d42",
+    "actual": "4b062a25184d47e7a63f1685fb09cb23008f21cc0391398426821b4c23ac0d42",
+    "matches": true
+  },
+  {
+    "path": "test/futon2/aif/interoceptive_activation_test.clj",
+    "expected": "2229247fb5277e077447ec4f293eaae74d47394724e23de856a145af0d51bb77",
+    "actual": "2229247fb5277e077447ec4f293eaae74d47394724e23de856a145af0d51bb77",
+    "matches": true
+  },
+  {
+    "path": "test/futon2/aif/interoceptive_manifest_test.clj",
+    "expected": "18a980a107399edc07029870c9460556eb92be636311f82f545db57bf5acf29a",
+    "actual": "18a980a107399edc07029870c9460556eb92be636311f82f545db57bf5acf29a",
+    "matches": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-18-coherent-snapshot-2026-09-13/production_participation_readback.clj",
+    "expected": "35ed3fdaf9e7332df7674d9ee115d2101a700f91b5e759c40bc0646333732e29",
+    "actual": "35ed3fdaf9e7332df7674d9ee115d2101a700f91b5e759c40bc0646333732e29",
+    "matches": true
+  }
+]
