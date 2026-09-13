@@ -21,7 +21,7 @@
 (defn- sha256 [^bytes bs]
   (apply str (map #(format "%02x" (bit-and 255 %))
                   (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bs))))))
-(defn- bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
+(defn- form-bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
 (defn- strict-edn [^bytes bs path]
   (try
     (let [d (doto (.newDecoder StandardCharsets/UTF_8)
@@ -46,7 +46,7 @@
   (with-open [ch (FileChannel/open p (into-array StandardOpenOption [StandardOpenOption/READ]))]
     (.force ch true)))
 (defn- publish! [store kind ^Path dir record]
-  (let [bs (bytes record) digest (sha256 bs) final (.resolve dir (str digest ".edn"))
+  (let [bs (form-bytes record) digest (sha256 bs) final (.resolve dir (str digest ".edn"))
         tmp (Files/createTempFile dir (str "." (name kind) "-") ".tmp"
                                   (make-array java.nio.file.attribute.FileAttribute 0))]
     (try
@@ -67,7 +67,7 @@
   (let [root ^Path (:root store) tmp (Files/createTempFile root ".head-v2-" ".tmp"
                                                                (make-array java.nio.file.attribute.FileAttribute 0))]
     (try
-      (write-sync! tmp (bytes head))
+      (write-sync! tmp (form-bytes head))
       (when *stage-hook* (*stage-hook* :head-synced store))
       (Files/move tmp ^Path (:head store)
                   (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE
@@ -131,7 +131,7 @@
        (or (nil? child)
            (= (select-keys (:prior child) [:revision :state-sha256])
               {:revision (get-in tx [:next :revision]) :state-sha256 (get-in tx [:next :state-sha256])}))
-       (= digest (sha256 (bytes tx)))))
+       (= digest (sha256 (form-bytes tx)))))
 
 (defn- recover* [store]
   (let [head-r (read-object ^Path (:head store)) head (:record head-r)]
@@ -140,12 +140,12 @@
       (refuse! :e6b-store-v2/head-invalid {}))
     (loop [digest (:transaction-sha256 head) generation (:generation head)
            child nil apps [] txs [] provs {}]
-      (let [{:keys [record sha256]} (read-object (tx-path store digest)) tx record]
-        (when-not (= digest sha256) (refuse! :e6b-store-v2/transaction-digest-mismatch {}))
+      (let [{:keys [record] actual-sha :sha256} (read-object (tx-path store digest)) tx record]
+        (when-not (= digest actual-sha) (refuse! :e6b-store-v2/transaction-digest-mismatch {}))
         (if (= :wm/e6b-state-genesis-v1 (:schema tx))
           (do
             (when-not (and (zero? generation) (= (:store-id store) (:store/id tx))
-                           (= digest (sha256 (bytes tx)))
+                           (= digest (sha256 (form-bytes tx)))
                            (or (nil? child)
                                (= (select-keys (:prior child) [:revision :state-sha256])
                                   {:revision (:state/revision tx) :state-sha256 (:state-sha256 tx)}))
