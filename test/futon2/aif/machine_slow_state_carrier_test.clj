@@ -76,7 +76,7 @@
            [:nonfinite-coordinate
             (fn [b]
               (let [record (assoc-in (get-in b [:proposal-evidence :prior :state])
-                                     [:slow/intrinsics :advance-capability :alpha] ##NaN)
+                                     [:slow/intrinsics :advance-capability :alpha] ##Inf)
                     b' (assoc-in b [:proposal-evidence :prior :state] record)]
                 (-> (replace-source b' :prior-state record)
                     (assoc-in [:proposal-evidence :prior :state-sha256] (vd record)))))
@@ -104,5 +104,5 @@
                             (apply str (repeat 64 "0"))))))
   (is (= :e6b-carrier/schema-invalid
          (refusal (assoc (bundle) :verified? true))))
-  (is (= :e6b-carrier/proposal-shape-invalid
+  (is (= :e6b-carrier/schema-invalid
          (refusal (assoc-in (bundle) [:proposal-evidence :verified?] true)))))
