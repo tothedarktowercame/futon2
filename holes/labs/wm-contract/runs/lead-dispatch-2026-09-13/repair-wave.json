@@ -233,10 +233,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-categorical-authority-validator.request.json",
       "dispatch": "accepted",
       "scope": "rubric/time/independent annotation authority pure validator; no close attachment/counts"
+    },
+    {
+      "packet": "codex-23-controlled-restart-preparation",
+      "job-id": "invoke-1789269574308-20603-34324870",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789269574308-20603-34324870",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-controlled-restart-preparation.request.json",
+      "dispatch": "accepted",
+      "scope": "disable selective live route and prepare actual controlled restart procedure; no execution"
     }
   ],
   "current-awaiting": [
-    "invoke-1789269071839-20600-7064b994",
+    "invoke-1789269574308-20603-34324870",
     "invoke-1789269255942-20601-2892d280",
     "invoke-1789269432375-20602-be4977da"
   ]
