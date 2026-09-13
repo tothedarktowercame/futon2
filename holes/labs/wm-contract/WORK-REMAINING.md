@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Joe Task1 execution resumed: read-only live ledger at16:05Z has7507jobs/0commissions, including fresh20734 missing commission. Actual common HTTP creator ingress integration job20734 running offline; remaining lifecycle seams and safe first installation follow. No live mutation. See [baseline and work](runs/task1-serving-evidence-2026-09-13/progress.md).
+
 - Latest review-origin79f3285f/9aa74597/cbc5f6a9 four pins/raw12tests59 accepted isolated origin/chronology joins only. Real acquisition/census/origin/configuration authority remains absent; current synthetic join branch has no commissioned successor. Older subject controls need coherent origin refresh before future subject edits. See [review](runs/row-22-e6b-review-origin-2026-09-13/lead-review.md).
 
 - Latest completeness audit35981f16/a92540b6/1a7aa894 four audit pins+two lead pins verified, independent14999ca7 correction accepted narrowly. Raw two controls confirm review-after-terminal accepted and coherent unresolved job/trace labels accepted. Tenth configured origin plus retained-artifact chronology repair next; no real authority. See [review](runs/row-22-e6b-completeness-authority-audit-2026-09-13/lead-review.md).

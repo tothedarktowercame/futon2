@@ -857,9 +857,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-completeness-origin-chronology.request.json",
       "dispatch": "accepted",
       "scope": "pure tenth-role independently configured origin and retained-artifact chronology repair"
+    },
+    {
+      "packet": "codex-23-task1-serving-creator-integration",
+      "job-id": "invoke-1789315476118-20734-4279de32",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789315476118-20734-4279de32",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-task1-serving-creator-integration.request.json",
+      "dispatch": "accepted",
+      "scope": "Joe Task1: offline common serving creator integration, no live activation"
     }
   ],
-  "current-awaiting": [],
+  "current-awaiting": [
+    "invoke-1789315476118-20734-4279de32"
+  ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
     "completed-job": "invoke-1789275643187-20650-785a8c56",
@@ -873,7 +883,7 @@
     "constraint": "No prior/G/temperature change; no runtime or edge retirement"
   },
   "codex23-next-boundary": {
-    "status": "real-authority-acquisition-blocked",
+    "status": "task1-serving-integration-running",
     "completed-job": "invoke-1789287380095-20732-7117cccc",
     "review": "holes/labs/wm-contract/runs/row-22-e6b-review-origin-2026-09-13/lead-review.md",
     "next-packet": "Identify independently owned writer/lease/census and exact retained review-origin/configuration sources before any authority acquisition or retrospective integration.",
