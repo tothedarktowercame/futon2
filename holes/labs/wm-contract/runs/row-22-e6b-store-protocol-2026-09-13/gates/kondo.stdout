@@ -1,0 +1,5 @@
+src/futon2/aif/machine_slow_feedback_store.clj:7:66: warning: Unused import OutputStreamWriter
+src/futon2/aif/machine_slow_feedback_store.clj:7:85: warning: Unused import BufferedWriter
+src/futon2/aif/machine_slow_feedback_store.clj:23:1: warning: bytes already refers to #'clojure.core/bytes
+test/futon2/aif/machine_slow_feedback_store_test.clj:2:14: warning: namespace clojure.edn is required but never used
+linting took 20ms, errors: 0, warnings: 4

@@ -1,0 +1,6 @@
+WARNING: bytes already refers to: #'clojure.core/bytes in namespace: futon2.aif.machine-slow-feedback-store, being replaced by: #'futon2.aif.machine-slow-feedback-store/bytes
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-4050920045523356793.edn

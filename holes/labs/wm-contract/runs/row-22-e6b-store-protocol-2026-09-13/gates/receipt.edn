@@ -1,0 +1,37 @@
+{:schema :wm/execution-receipts-v1
+ :source-commits ["4c27e17a" "5669f297" "f8f9da12" "018836ea" "b97186c0"]
+ :tree-sha "b97186c0"
+ :at "2026-09-13T05:55:00Z"
+ :pins
+ {:source "68d209ae11d3414985c68f6fd144bd4e85467e180cf225a217d7dc978ed9fb06"
+  :test "8cd6a80716bae9ec246c936e7280621380daeb5650ec98d4deb13d56c67aa6a6"
+  :protocol "620156fdb354b013765b2fa9b9137ecd0db49a6bdcc579ee86ebb6649706086e"
+  :lead-review "f9fc300e0045ddf4b597ebf259e6a20c4408398a04a0d86d379ab0e1b8213b11"
+  :dependency-pins "2ea722fe264af5750f15349afef04f7391f2123b2deadaf8836b9a18f16243a9"}
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-store-test]'"
+   :exit 0 :tests 10 :assertions 27 :failures 0 :errors 0
+   :stdout "test-final2.stdout" :stderr "test-final2.stderr"}
+  {:gate :induced-failure
+   :command "clojure -M:test -e '(load-file \"holes/labs/wm-contract/runs/row-22-e6b-store-protocol-2026-09-13/induced_failure.clj\")'"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :errors 0
+   :stdout "induced.stdout" :stderr "induced.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_store.clj test/futon2/aif/machine_slow_feedback_store_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo2.stdout" :stderr "kondo2.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_store.clj test/futon2/aif/machine_slow_feedback_store_test.clj"
+   :exit 0 :stdout "parens2.stdout" :stderr "parens2.stderr"}]
+ :failed-history
+ [{:tree-sha "4c27e17a" :exit 1 :tests 7 :assertions 18 :errors 2
+   :causes [:retry-branch-did-not-return :test-read-genesis-instead-of-head-transaction]
+   :stdout "test.stdout" :stderr "test.stderr"}
+  {:tree-sha "5669f297" :exit 0 :tests 7 :assertions 20
+   :note "intermediate pass before required ownership/byte controls were added"
+   :stdout "test2.stdout" :stderr "test2.stderr"}
+  {:tree-sha "018836ea" :exit 1 :tests 10 :assertions 25 :errors 1
+   :cause :invalid-utf8-fixture-byte-cast
+   :stdout "test-final.stdout" :stderr "test-final.stderr"}
+  {:tree-sha "018836ea" :gate :clj-kondo :exit 2 :warnings 4
+   :stdout "kondo.stdout" :stderr "kondo.stderr"}]}
