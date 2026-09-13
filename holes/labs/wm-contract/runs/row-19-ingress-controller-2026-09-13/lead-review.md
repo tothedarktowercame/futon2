@@ -1,0 +1,10 @@
+# Independent ingress controller review
+
+Reviewed complete controller and test source at 67211f8d; both current files equal commit bytes, with hashes retained in lead-source-pins.sha256. Receipt f1372c9c declares 4 tests/17 assertions, kondo zero warnings and explicit actual parens invocation, preserving initial lint failure. Unlike the prior packets, this directory contains only summarized gate output in gates.edn, not full raw command stdout/stderr. No tests were rerun by the lead.
+
+The isolated waiting/queue/execution/delivery accounting and refusal after close are useful. The first-installation gap and absent serving integration are honestly preserved. Integration is not yet commissioned because:
+
+1. Deferred resume persistence defaults to a successful no-op. There is no restore constructor or reader, so the stated crash-before-ack replay property has not been implemented or tested. The persistence callback receives the entire state including opaque entrant Object tokens, rather than a serializable durable projection. Implement a required durable adapter (or explicitly test-only mode), strict isolated restart recovery and stable-id retry/ack behavior before claiming this property.
+2. verification-snapshot reads state once for counters and again via drained?. Concurrent transitions can return counters and drained status from different generations/states. Compute all fields from the same immutable captured state; document that an open drained snapshot is not a fenced restart authorization.
+
+Next bounded packet repairs these controller internals with temporary-store persistence/recovery and concurrency controls. Refuse missing/corrupt persisted state and failed publication without falsely acknowledging work. Retain raw stdout/stderr and exact exit statuses for changed-source gates. No HTTP wiring, local listener, live reload, restart, or storage mutation. All accepted queued/in-flight work and D13/commission invariants remain required. The broad initial deployment transition remains open.
