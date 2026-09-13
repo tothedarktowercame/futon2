@@ -1,7 +1,8 @@
 (ns futon2.aif.find-reconciliation
   "Pure comparison of F11 snapshots by scenario, round and receipt identity."
   (:require [clojure.edn]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [clojure.string :as str]))
 
 (defn- indexed [rows key-fn]
   (group-by key-fn rows))
@@ -117,12 +118,25 @@
 (def ^:private pin-authority-keys
   #{:kind :commit :commit-author :commit-date :commit-subject :blob-sha :rederive})
 
+(def ^:private pin-authority-text-fields
+  "Authority fields that carry provenance a reviewer re-derives by hand.
+   A blank or non-string value here is an expectation that cannot be
+   independently re-checked, so validation refuses it."
+  [:commit-author :commit-date :commit-subject :rederive])
+
 (defn read-pin-expectation
   "Parse and structurally validate the committed pin expectation from its
    raw text: exactly one EDN form, the exact key set, the declared schema,
-   a well-formed digest, and a complete git authority block.  Typed throw
-   on any defect; the checker must not trust a malformed expectation."
-  [text]
+   a well-formed digest, a complete git authority block with non-blank
+   provenance fields, and a :pin-path exactly equal to DECLARED-PIN-PATH --
+   the identifier of the file the caller actually hashes.  Typed throw on
+   any defect; the checker must not trust a malformed expectation, and a
+   declaration naming some other file must not validate."
+  [text declared-pin-path]
+  (when-not (and (string? declared-pin-path)
+                 (not (str/blank? declared-pin-path)))
+    (throw (ex-info "caller must declare the pin path it hashes"
+                    {:error :pin-expectation/declared-path-missing})))
   (let [forms (try (with-open [r (java.io.PushbackReader.
                                   (java.io.StringReader. text))]
                      (loop [acc []]
@@ -142,6 +156,9 @@
                  (conj :wrong-key-set)
                  (not= :wm/f2-pin-expectation-v1 (:schema m)) (conj :wrong-schema)
                  (not (string? (:pin-path m))) (conj :pin-path-not-string)
+                 (and (string? (:pin-path m))
+                      (not= declared-pin-path (:pin-path m)))
+                 (conj :pin-path-mismatch)
                  (not (and (string? (:pin-sha256 m))
                            (re-matches #"[0-9a-f]{64}" (:pin-sha256 m))))
                  (conj :pin-sha256-malformed)
@@ -151,10 +168,18 @@
                            (re-matches #"[0-9a-f]{40}" (str (get-in m [:authority :commit])))
                            (re-matches #"[0-9a-f]{40}" (str (get-in m [:authority :blob-sha])))))
                  (conj :authority-malformed)
+                 (and (map? (:authority m))
+                      (not (every? #(let [v (get-in m [:authority %])]
+                                      (and (string? v)
+                                           (not (str/blank? v))))
+                                   pin-authority-text-fields)))
+                 (conj :authority-fields-blank)
                  (not (string? (:basis m))) (conj :basis-not-string))]
     (when (seq errors)
       (throw (ex-info "pin expectation failed structural validation"
-                      {:error :pin-expectation/invalid :errors errors})))
+                      {:error :pin-expectation/invalid :errors errors
+                       :declared-pin-path declared-pin-path
+                       :expectation-pin-path (:pin-path m)})))
     m))
 
 (defn pin-drift

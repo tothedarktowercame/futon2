@@ -30,7 +30,17 @@
          '[clojure.string :as str])
 
 (def task-home (System/getenv "HOME"))
-(def pin-path (str task-home "/code/futon3/checks/find-snatch.edn"))
+;; The pin is named once, by its repo-qualified identifier, and the hashed
+;; filesystem path is DERIVED from it.  Review round 2 (r6, codex-24) found
+;; the declaration and the hard-coded hashed path could diverge silently:
+;; the expectation's :pin-path was accepted unread while a different file
+;; was hashed.  Deriving the path from the identifier removes that seam,
+;; and read-pin-expectation now refuses a declaration naming anything else.
+(def pin-id "futon3:checks/find-snatch.edn")
+(defn pin-id->path [id]
+  (let [[repo rel] (str/split id #":" 2)]
+    (str task-home "/code/" repo "/" rel)))
+(def pin-path (pin-id->path pin-id))
 ;; Anchor the run-store paths to this script's own directory, exactly as the
 ;; classpath above is anchored.  cwd-relative paths made the gate crash with
 ;; FileNotFoundException from any other invocation directory (observed
@@ -51,7 +61,7 @@
 (defn- recompute-certificate [pin live]
   (reconciliation/certificate
    (assoc (report pin live)
-          :pin-path "futon3:checks/find-snatch.edn"
+          :pin-path pin-id
           :pin-sha256 (sha256 pin-path)
           :live-path live-path
           :live-sha256 (sha256 live-path))
@@ -68,12 +78,18 @@
       ;; expectation (M-f11's F2 choice) before any comparison is trusted.
       (let [expectation (try
                           (reconciliation/read-pin-expectation
-                           (slurp (str (io/file lab-dir "runs/F11-find/00-pin-expectation.edn"))))
+                           (slurp (str (io/file lab-dir "runs/F11-find/00-pin-expectation.edn")))
+                           pin-id)
                           (catch clojure.lang.ExceptionInfo e
                             (println "f11-f2-reconcile: FAIL pin expectation invalid:"
                                      (pr-str (ex-data e)) "exit-convention=0-pass/1-fail")
                             (System/exit 1)))
-            _ (when-let [drift (reconciliation/pin-drift expectation (sha256 pin-path))]
+            ;; Hash the file the VALIDATED declaration names; equality with
+            ;; pin-id is already enforced, so declaration and digest now
+            ;; refer to the same file by construction.
+            _ (when-let [drift (reconciliation/pin-drift
+                                expectation
+                                (sha256 (pin-id->path (:pin-path expectation))))]
                 (println "f11-f2-reconcile: FAIL pin drifted from its committed expectation:"
                          (pr-str drift) "exit-convention=0-pass/1-fail")
                 (System/exit 1))
@@ -103,7 +119,7 @@
                        "finding=:clause-text-differs exit-convention=0-pass/1-fail")
               (System/exit 0))))
       (let [r (assoc (report pin live)
-                     :pin-path "futon3:checks/find-snatch.edn"
+                     :pin-path pin-id
                      :pin-sha256 (sha256 pin-path)
                      :live-path live-path
                      :live-sha256 (sha256 live-path))]

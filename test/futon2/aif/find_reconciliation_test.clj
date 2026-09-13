@@ -1,7 +1,7 @@
 (ns futon2.aif.find-reconciliation-test
   (:require [clojure.edn :as edn]
             [clojure.string]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.find-reconciliation :as reconciliation]))
 
 (def recorded
@@ -109,13 +109,18 @@
 (def committed-expectation-text
   (slurp "holes/labs/wm-contract/runs/F11-find/00-pin-expectation.edn"))
 
+(def declared-pin-id "futon3:checks/find-snatch.edn")
+
 (deftest pin-expectation-validates-structure-and-refuses-defects
-  (let [m (reconciliation/read-pin-expectation committed-expectation-text)]
+  (let [m (reconciliation/read-pin-expectation committed-expectation-text
+                                               declared-pin-id)]
     (is (= :wm/f2-pin-expectation-v1 (:schema m))
         "the committed expectation itself passes full validation")
     (is (= "e63eaef83194c6100ac403c2ad2c5bf4efce81f8"
            (get-in m [:authority :commit]))))
-  (letfn [(errs [text] (try (reconciliation/read-pin-expectation text) nil
+  (letfn [(errs [text] (try (reconciliation/read-pin-expectation
+                             text declared-pin-id)
+                            nil
                             (catch clojure.lang.ExceptionInfo e (ex-data e))))]
     (is (= :pin-expectation/not-one-form
            (:error (errs (str committed-expectation-text " :trailing")))))
@@ -128,9 +133,60 @@
     (is (some #{:wrong-key-set}
               (:errors (errs "{:schema :wm/f2-pin-expectation-v1}"))))))
 
+(deftest pin-path-declaration-must-match-the-hashed-file
+  ;; Review round 2 (r6, codex-24): any string used to be accepted as
+  ;; :pin-path while the checker hashed its own hard-coded path, so a
+  ;; mismatched declaration validated.  Both directions must now refuse.
+  (testing "an expectation declaring some other file refuses"
+    (let [mutated (clojure.string/replace committed-expectation-text
+                                          declared-pin-id
+                                          "futon3:checks/other-file.edn")
+          data (try (reconciliation/read-pin-expectation mutated declared-pin-id)
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (some #{:pin-path-mismatch} (:errors data)))
+      (is (= declared-pin-id (:declared-pin-path data)))
+      (is (= "futon3:checks/other-file.edn" (:expectation-pin-path data)))))
+  (testing "a caller hashing some other file cannot validate the committed expectation"
+    (let [data (try (reconciliation/read-pin-expectation
+                     committed-expectation-text "futon3:checks/other-file.edn")
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (some #{:pin-path-mismatch} (:errors data)))))
+  (testing "a caller that declares no path at all refuses before parsing"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"declare the pin path"
+                          (reconciliation/read-pin-expectation
+                           committed-expectation-text "  ")))))
+
+(deftest authority-provenance-fields-must-be-nonblank-strings
+  ;; Review round 2 (r6, codex-24): blank or non-string :commit-author,
+  ;; :commit-date, :commit-subject, and :rederive were accepted because only
+  ;; the key set, kind, commit, and blob hash were validated.
+  (letfn [(errs [text] (try (reconciliation/read-pin-expectation
+                             text declared-pin-id)
+                            nil
+                            (catch clojure.lang.ExceptionInfo e
+                              (:errors (ex-data e)))))]
+    (is (some #{:authority-fields-blank}
+              (errs (clojure.string/replace committed-expectation-text
+                                            "\"Joseph Corneli\"" "\"\"")))
+        "a blank commit author cannot be independently re-checked")
+    (is (some #{:authority-fields-blank}
+              (errs (clojure.string/replace committed-expectation-text
+                                            "\"2026-09-08T04:57:15+00:00\"" "123")))
+        "a non-string commit date refuses")
+    (is (some #{:authority-fields-blank}
+              (errs (clojure.string/replace
+                     committed-expectation-text
+                     #":rederive \"[^\"]+\"" ":rederive \"   \"")))
+        "a blank rederive command leaves the digest unverifiable")
+    (is (nil? (errs committed-expectation-text))
+        "the committed expectation itself carries all four fields non-blank")))
+
 (deftest pin-drift-refuses-hermetically
   ;; Hermetic: no filesystem, no futon3 mutation -- the decision is pure.
-  (let [m (reconciliation/read-pin-expectation committed-expectation-text)]
+  (let [m (reconciliation/read-pin-expectation committed-expectation-text
+                                               declared-pin-id)]
     (is (nil? (reconciliation/pin-drift m (:pin-sha256 m))))
     (let [refusal (reconciliation/pin-drift m (apply str (repeat 64 "0")))]
       (is (= :pin-expectation/pin-drifted (:error refusal)))
