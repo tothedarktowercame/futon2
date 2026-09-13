@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest Row 14 review: grounding repair b5419475 / 3b4bf1ee has four matching pins and retained 6-test/32-assertion gates. Independent isolated controls still qualify changed evidence under an unchanged review and test-scoped evidence inside a production envelope. Exact resolved-subject acceptance and evidence scope/provenance repairs are required before close attachment. See [review](runs/row-14-categorical-authority-grounding-repair-2026-09-13/lead-review.md). No measured cells or admission added.
+
 codex-26 owns completion and the former operator decision queue, following
 Joe's subsequent emacs-repl instruction to take over the lead. See
 [LEAD-DECISIONS-2026-09-12.md](LEAD-DECISIONS-2026-09-12.md) for exact decisions
