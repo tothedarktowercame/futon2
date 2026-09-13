@@ -1,0 +1,9 @@
+{:tree-sha "a92540b6c4d020942770a170a9126066b1577cc6"
+ :at "2026-09-13T08:14:02Z"
+ :command "clojure -M:test holes/labs/wm-contract/runs/row-22-e6b-completeness-authority-audit-2026-09-13/audit-controls.clj"
+ :exit 0 :controls 2 :accepted-counterexamples 2
+ :stdout "audit.stdout" :stderr "audit.stderr"
+ :history [{:tree-sha "2f27e397a4aacadb4d62b4fdbededfd2dd95192a"
+            :exit 1
+            :finding "The fake-label control changed review bytes without rebinding execution/acceptance artifact hashes, so it correctly refused before testing origin authentication."
+            :stdout "attempt1.stdout" :stderr "attempt1.stderr"}]}

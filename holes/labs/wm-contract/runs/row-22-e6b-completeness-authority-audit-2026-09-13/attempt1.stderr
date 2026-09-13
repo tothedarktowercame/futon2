@@ -1,0 +1,5 @@
+Execution error (ExceptionInfo) at futon2.aif.machine-slow-feedback-completeness/refuse! (machine_slow_feedback_completeness.clj:19).
+authority-join-invalid
+
+Full report at:
+/tmp/clojure-16583597683502843535.edn
