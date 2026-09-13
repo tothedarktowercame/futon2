@@ -217,7 +217,7 @@
                 (recur (get-in tx [:prior :transaction-sha256]) (dec generation) tx
                        (conj apps entry) (conj txs (assoc tx :digest digest))
                        (assoc provs (:provenance-sha256 tx) p)
-                       (conj revisions (get-in tx [:prior :revision]))))))))))
+                       (conj revisions (get-in tx [:prior :revision])))))))))))
 
 (defn initialize!
   [store {:keys [state revision authority committed-at] :as input}]
