@@ -249,11 +249,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-declaration-edge-specifications.request.json",
       "dispatch": "accepted",
       "scope": "required declaration-level edge specification repairs; no obligation retirement/admission"
+    },
+    {
+      "packet": "codex-24-categorical-payload-and-time",
+      "job-id": "invoke-1789269880118-20605-85835087",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789269880118-20605-85835087",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-categorical-payload-and-time.request.json",
+      "dispatch": "accepted",
+      "scope": "categorical payload/context-time/principal/scope/limitations repair; no close attachment"
     }
   ],
   "current-awaiting": [
     "invoke-1789269574308-20603-34324870",
     "invoke-1789269728949-20604-dad130de",
-    "invoke-1789269432375-20602-be4977da"
+    "invoke-1789269880118-20605-85835087"
   ]
 }
