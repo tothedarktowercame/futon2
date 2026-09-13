@@ -1,0 +1,10 @@
+{:schema :wm/superseded-gate-history-v1
+ :tree-sha "6dab72fa"
+ :runs
+ [{:command "clojure -X:test :nses '[futon2.aif.categorical-state-observation-test]'"
+   :exit 0 :tests 6 :assertions 25 :failures 0 :errors 0
+   :finding "Successful assertions, but namespace emitted a clojure.core/bytes replacement warning."}
+  {:command "clj-kondo --lint src/futon2/aif/categorical_state_observation.clj test/futon2/aif/categorical_state_observation_test.clj"
+   :exit 2 :errors 0 :warnings 2
+   :finding "Unused clojure.test/testing import and clojure.core/bytes name replacement."}]
+ :repair "Follow-up commit a6363375 renamed the helper and removed the unused import; final receipts are separate."}
