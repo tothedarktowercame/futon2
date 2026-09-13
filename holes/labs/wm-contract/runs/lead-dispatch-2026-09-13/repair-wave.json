@@ -777,10 +777,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-genesis-validation.request.json",
       "dispatch": "accepted",
       "scope": "isolated shared complete genesis validation before publication and on recovery"
+    },
+    {
+      "packet": "codex-23-store-v2-retrospective-contract",
+      "job-id": "invoke-1789284017934-20714-528ac8c1",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789284017934-20714-528ac8c1",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-retrospective-contract.request.json",
+      "dispatch": "accepted",
+      "scope": "source-pinned read-only storage-to-retrospective contract; no adapter"
     }
   ],
   "current-awaiting": [
-    "invoke-1789283747939-20712-ca2da13c"
+    "invoke-1789284017934-20714-528ac8c1"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
