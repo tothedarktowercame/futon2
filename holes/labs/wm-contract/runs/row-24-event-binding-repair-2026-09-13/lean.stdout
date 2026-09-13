@@ -1,0 +1,34 @@
+DarkTower/WarMachine/FullCertificateEventBinding.lean:100:5: warning: Variable name `hsel` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+DarkTower/WarMachine/FullCertificateEventBinding.lean:109:5: warning: Variable name `haction` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+'DarkTower.WarMachine.FullCertificateEventBinding.eventBound_implies_runBound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateEventBinding.eventBound_implies_full' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateEventBinding.rejects_cross_run_ordinary_match' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateEventBinding.rejects_same_action_wrong_occurrence' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateEventBinding.rejects_match_selected_enacted_occurrence_mismatch' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateEventBinding.rejects_borrowed_divergence_occurrence_pair' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateEventBinding.rejects_mismatched_exact_subject_pin' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FullCertificateEventBinding.rejects_unshared_divergence_authority_pin' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

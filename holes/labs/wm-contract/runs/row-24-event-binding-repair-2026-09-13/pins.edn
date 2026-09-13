@@ -1,0 +1,13 @@
+{:schema :wm/source-olean-pins-v1
+ :mathlib4-tree "4cbdfe0d0d0e7a6464399df88de639bf7b4d5ca3"
+ :lean-version "Lean 4.31.0-rc1 fd009949156901e6cf15b6d9bf1122294b8e697a"
+ :pins
+ [{:path "DarkTower/WarMachine/FullCertificateEventBinding.lean" :sha256 "783ead4723c6d9adb3e4d373a4d2c57ecae07d66383a35009e7c9d7aa599cff6"}
+  {:path ".lake/build/lib/lean/DarkTower/WarMachine/FullCertificateEventBinding.olean" :sha256 "f64c388840a9bb5371953e25b32117b221901445e6d8cbe2e19cf314f7cf996b"}
+  {:path "DarkTower/WarMachine/FullCertificateRunBinding.lean" :sha256 "693d48ffa7acf285caea77e324e4895ee19b51eb23a05c0bf752668f7e3aef9e"}
+  {:path ".lake/build/lib/lean/DarkTower/WarMachine/FullCertificateRunBinding.olean" :sha256 "051a079daa9372ff82647bf711830d925b243383a870d05d29ad8e077334ca45"}
+  {:path "DarkTower/WarMachine/FullCertificatePredicate.lean" :sha256 "b1055f6354e1335a9df219abaf606b88814f78249c97d891c2581436f22fef97"}
+  {:path ".lake/build/lib/lean/DarkTower/WarMachine/FullCertificatePredicate.olean" :sha256 "fbc8d977b96d6f04e2b2bd6d2e4fb6a6800566faa93b37329534de6606cfd20b"}
+  {:path "DarkTower/WarMachine/CertificateStates.lean" :sha256 "83bb3bbbea3bad9a9d56568704300427f94e1bf1539ad322041e3cae8beab778"}
+  {:path ".lake/build/lib/lean/DarkTower/WarMachine/CertificateStates.olean" :sha256 "7898d439a49a0887e324229c5acd247ddba1697c245892cefdb1032c8bb4c118"}
+  {:path "lean-toolchain" :sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"}]}
