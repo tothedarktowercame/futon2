@@ -161,6 +161,26 @@
       (is (some? (refusal #(completeness/validate without-both)))))
     (store/release! store)))
 
+(deftest census-identity-pin-and-boundary-controls
+  (let [{:keys [store config]} (fixture)
+        census-record (:record (#'completeness/resolve-role
+                                :complete-census (get-in config [:roles :complete-census])))
+        first-entry (first (:ordered-universe census-record))]
+    (doseq [[role mutate]
+            [[:complete-census (fn [x] (assoc x :ordered-universe
+                                               [first-entry first-entry]))]
+             [:complete-census (fn [x] (assoc x :owner/generation 99))]
+             [:acquisition-boundary (fn [x] (assoc x :boundary/id "borrowed-boundary"))]
+             [:acceptance (fn [x] (assoc x :review-artifact/raw-sha256
+                                         (apply str (repeat 64 "e"))))]
+             [:review-commission (fn [x] (dissoc x :issued-at))]]]
+      (is (some? (refusal #(completeness/validate (replace-record config role mutate))))))
+    (is (= :e6b-completeness/role-pin-mismatch
+           (refusal #(completeness/validate
+                      (assoc-in config [:roles :complete-census :expected-sha256]
+                                (apply str (repeat 64 "0")))))))
+    (store/release! store)))
+
 (deftest malformed-role-and-missing-role-refuse
   (let [{:keys [store config]} (fixture)
         bad-bytes (byte-array [(unchecked-byte 0xc3) (byte 0x28)])]
