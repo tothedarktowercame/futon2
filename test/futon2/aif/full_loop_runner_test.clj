@@ -1806,7 +1806,7 @@
     (is (= :fold-output-invalid (get-in result [:data :failure-kind])))
     (is (= :not-reached-construction
            (get-in result [:checkpoints :construction :sorry :kind])))
-    (is (= 1 (count construction-events)))
+    (is (= 1 (count construction-events))
         "only close!'s typed construction sorry is durable")
     (is (= :not-reached-construction
            (get-in (first construction-events) [:payload :sorry :kind])))
