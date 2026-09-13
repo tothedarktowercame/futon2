@@ -665,10 +665,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-carrier-provenance-contract-repair.request.json",
       "dispatch": "accepted",
       "scope": "design repair for exact retrospective digest joins and durable evidence; no adapter"
+    },
+    {
+      "packet": "codex-23-feedback-pure-carrier-codec",
+      "job-id": "invoke-1789279601947-20686-965fca2d",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789279601947-20686-965fca2d",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-pure-carrier-codec.request.json",
+      "dispatch": "accepted",
+      "scope": "independent contract correction review and pure carrier codec only"
     }
   ],
   "current-awaiting": [
-    "invoke-1789279380265-20684-50a6046c"
+    "invoke-1789279601947-20686-965fca2d"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
