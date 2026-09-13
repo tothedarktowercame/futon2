@@ -1,0 +1,36 @@
+{:schema :wm/execution-receipt-v1
+ :at "2026-09-13T06:58:39Z"
+ :tree-sha "b204d9097a622e9d611f44134bddc06ec9854139"
+ :scope :isolated-test :authority/status :none
+ :gates
+ [{:gate :focused-tests
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-provenance-test futon2.aif.machine-slow-state-carrier-test futon2.aif.machine-slow-feedback-evidence-test]'"
+   :exit 0 :tests 24 :assertions 132 :failures 0 :errors 0
+   :stdout "tests-final.stdout" :stderr "tests-final.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_provenance.clj test/futon2/aif/machine_slow_feedback_provenance_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_provenance.clj test/futon2/aif/machine_slow_feedback_provenance_test.clj"
+   :exit 0 :stdout "parens.stdout" :stderr "parens.stderr"}
+  {:gate :induced-runner-failure
+   :command "clojure -M -e '(require (quote clojure.test)) (let [c (ref clojure.test/*initial-report-counters*) v (with-meta (fn [] nil) {:test (fn [] (clojure.test/is false \"induced provenance readback failure\")) :name (quote induced-provenance-readback-failure) :ns *ns*})] (binding [clojure.test/*report-counters* c] (clojure.test/test-vars [v])) (System/exit (if (zero? (+ (:fail @c) (:error @c))) 0 1)))'"
+   :exit 1 :expected-exit 1 :failures 1
+   :stdout "induced-failure.stdout" :stderr "induced-failure.stderr"}]
+ :failed-history
+ [{:tree-sha "aa425840496cbeac0630af1c3d9b14a0e0fc0560"
+   :exit 1 :tests 24 :assertions 130 :failures 0 :errors 2
+   :finding :cached-original-source-records-rejected-by-carrier
+   :stdout "tests.stdout" :stderr "tests.stderr"}]
+ :controls
+ [:external-pin-mismatch :changed-bytes-stale-pin :invalid-utf8 :trailing-edn
+  :duplicate-key :wrong-schema :cached-subject-disagreement :missing-closure
+  :caller-view-mutation]
+ :pins
+ {:source "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90"
+  :test "e75d193dfb4566d5443c95e5282053574017e47a7b0425a00aa073cd7875300b"
+  :carrier-source "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965"
+  :prospective-source "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"
+  :capture-manifest "eca79640929ae7a7fb06fb12a2315d6172f11fc853489c9d0f4d7b7157ff119e"
+  :canonical-e3-output "c74c564de43d2acb8c7124a16016eaefaffe4747f00d0a9483db2408dd43b206"
+  :canonical-e2b-output "e771087a5aee7da06f5139c9676845e4966f01ae6fad0156565fbf9c1e90b383"}}
