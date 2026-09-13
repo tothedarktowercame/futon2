@@ -1,0 +1,7 @@
+# Minimal negative bridge review
+
+ba98e3f8 reviewed: all six pins match current sources. Source inspection confirms derive-certificate emits runtime-certificate-v1, not the accepted FullAttestation chain. No passing gates or compiler were rerun.
+
+Accept the missing bridge finding; amend the implementation sequence. CertificateStates explicitly permits typedGap record families and unvalidated/typedAbsence nodes in CensusComplete. FullCertificatePredicate.rejects_missing_record_family proves not FullQualifyingRun for arbitrary requirement/evidence values from an explicit family gap. CrossLayerQualifyingRun implies FullQualifyingRun. Thus a generated negative theorem need not invent positive records or construct every missing refinement argument. Distinguish an independently configured complete universe and explicitly acquired status records (including gaps) from missing universe/status acquisition. Only the latter refuses acquisition outright.
+
+Next implement one bounded acquisition-to-Lean negative bridge using these existing structures/theorems. Require exact pinned inputs; no empty-list defaults, synthetic authority promotion, positive qualification, existing-emitter mutation, or live run. Isolated fixture validates mechanics; real missing authority remains refusal. Integration into F11 follows review. Target rows24/25; no E6b storage dependency demonstrated. Scoreboard 0 rows closed / 0 new claims admitted.

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "holes/labs/wm-contract/derive_certificate.bb",
+    "sha256": "55cc537828e3a4890e268cb07e0590f3ccc1b4feeb7b2acb622baf69268b1c47"
+  },
+  {
+    "path": "holes/labs/wm-contract/derive_certificate_controls.bb",
+    "sha256": "f50956ddd61b050d61926100771f0c961f8e59ffa6ffee9d99211116bdc2b0fc"
+  },
+  {
+    "path": "holes/labs/wm-contract/SPEC-run-certificate-v1.md",
+    "sha256": "dbfdf6a7efbbbf7198202b2f2f26f10e1e7db6f22fe8d9957e0ce17b15207dec"
+  },
+  {
+    "path": "src/futon2/aif/authority_buffer.clj",
+    "sha256": "a91c436b32dec858ac656de5ce140e3909e2f3d3295f5dc3a954f5bcb0377f42"
+  },
+  {
+    "path": "DarkTower/WarMachine/CertificateStates.lean",
+    "sha256": "83bb3bbbea3bad9a9d56568704300427f94e1bf1539ad322041e3cae8beab778"
+  },
+  {
+    "path": "DarkTower/WarMachine/FullCertificateCrossLayerBinding.lean",
+    "sha256": "4b2124823e62aa1c68053d3be92e7a10a9f4c38ac19dccad16fe2fbbaab0f05e"
+  }
+]
