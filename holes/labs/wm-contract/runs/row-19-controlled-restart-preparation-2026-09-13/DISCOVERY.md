@@ -40,7 +40,7 @@ the futon3c relative `dev/src/resources/library` plus these local repositories:
 
 | repository | observed HEAD |
 |---|---|
-| futon3c | `dc10cbca` at process-era discovery; exact loaded baseline otherwise unknown |
+| futon3c | `26d5a1dc` at this discovery; exact loaded baseline unknown |
 | futon0 | `fb1cfb0111d8` |
 | futon1 | `26ab382e6721` |
 | futon1b | `14621cf328f0` |
