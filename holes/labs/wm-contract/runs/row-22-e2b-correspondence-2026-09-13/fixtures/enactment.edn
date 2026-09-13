@@ -1,0 +1,10 @@
+{:schema/version :wm/r16-enactment-witness-v1
+ :scope :isolated-test
+ :binding {:model/id :wm-e1-fixture :model/revision "model-v3"
+           :run/id "e1-authority-run" :tick/index 4}
+ :cohort/id "e2b-isolated-cohort-1"
+ :status :enacted
+ :selected/occurrence-id [:e1-authority-run 4 0]
+ :selected/action {:type :advance-mission :target "M-alpha"}
+ :enacted/occurrence-id [:e1-authority-run 4 0]
+ :enacted/action {:type :advance-mission :target "M-alpha"}}

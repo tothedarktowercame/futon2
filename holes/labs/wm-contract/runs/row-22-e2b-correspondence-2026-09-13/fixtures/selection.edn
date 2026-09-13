@@ -1,0 +1,11 @@
+{:schema/version :wm/r6-selection-witness-v1
+ :scope :isolated-test
+ :binding {:model/id :wm-e1-fixture :model/revision "model-v3"
+           :run/id "e1-authority-run" :tick/index 4}
+ :cohort/id "e2b-isolated-cohort-1"
+ :approved-domain/occurrence-ids
+ [[:e1-authority-run 4 0] [:e1-authority-run 4 2]]
+ :selected/occurrence-id [:e1-authority-run 4 0]
+ :selected/action {:type :advance-mission :target "M-alpha"}
+ :selection-proof {:status :external-dependency
+                   :dependency :r6-scoring-and-posterior-proof}}
