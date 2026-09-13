@@ -929,19 +929,26 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-row26-status-and-run-preflight.request.json",
       "dispatch": "accepted",
       "scope": "Row26 client integrity/bounds and concrete read-only run preflight; no click"
+    },
+    {
+      "packet": "codex-24-review-lead-typed-gap-generator",
+      "job-id": "invoke-1789318071986-20757-f1be996f",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789318071986-20757-f1be996f",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-review-lead-typed-gap-generator.request.json",
+      "dispatch": "accepted",
+      "scope": "independent review of lead executable generator only"
     }
   ],
   "current-awaiting": [
     "invoke-1789317564390-20750-04477de9",
-    "invoke-1789317645010-20751-e5949e94",
-    "invoke-1789317792036-20755-10d84dd0"
+    "invoke-1789317792036-20755-10d84dd0",
+    "invoke-1789318071986-20757-f1be996f"
   ],
   "codex24-next-boundary": {
-    "status": "commissioned-after-incomplete",
-    "completed-job": "invoke-1789317305541-20746-c7f7105b",
-    "completed-job-outcome": "no implementation, files or gates",
-    "job-id": "invoke-1789317645010-20751-e5949e94",
-    "scope": "isolated structural generator only; no row closure"
+    "status": "independent-review",
+    "job-id": "invoke-1789318071986-20757-f1be996f",
+    "lead-implementation": "16e0116e",
+    "prior-job": "partial4678d697 superseded by completed lead implementation"
   },
   "codex22-next-boundary": {
     "status": "commissioned",
