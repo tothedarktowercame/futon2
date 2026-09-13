@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest E6a384c57a5/9184b164 nine pins/raw4tests14 verified; accepted refusal precursor only. Canonical R6 scoring/posterior correspondence missing, E2a/E3/E2b not reached. Next bounded R6 source/input contract. See [review](runs/row-22-e6a-forward-influence-2026-09-13/lead-review.md).
+
 - Latest E6b review:0d0ea33b/197d78eb five pins/raw4tests22 verified. Executed extra conflicting application and unresolved R9/outcome authority still replay successfully. Exact ledger universe and resolved authority repair required. See [review](runs/row-22-e6b-feedback-2026-09-13/lead-review.md).
 
 - Latest authority-buffer review: 2d2918ea/169ec4ca two pins/raw2tests9 verified; executed trailing/duplicate JSON, nil pointer and mutable Date controls expose boundary failures. Repair required before reader acceptance. See [review](runs/row-24-authority-buffer-2026-09-13/lead-review.md).

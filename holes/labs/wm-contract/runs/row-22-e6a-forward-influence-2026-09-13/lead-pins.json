@@ -1,0 +1,47 @@
+[
+  {
+    "path": "src/futon2/aif/machine_forward_influence.clj",
+    "sha256": "45235295bc2cb99adde26b07100845a50bd002a0aabcec20cef41731c21474b6",
+    "matches_final_subject": true
+  },
+  {
+    "path": "test/futon2/aif/machine_forward_influence_test.clj",
+    "sha256": "58bb3b278322385a18136675c5a0ddd988bc3bd6361cae268afd579bb1288680",
+    "matches_final_subject": true
+  },
+  {
+    "path": "holes/labs/wm-contract/SPEC-row22-e6a-forward-influence-2026-09-13.md",
+    "sha256": "a30f149bbac830f470c6374139438e46e45d0a49b16910bd00e1477d9dfd5059",
+    "matches_final_subject": true
+  },
+  {
+    "path": "src/futon2/aif/machine_slow_prior_evidence.clj",
+    "sha256": "60634bdac1b180d63b3d0b57d5c970404cf3054f72edad027051a683ca228a8a",
+    "matches_final_subject": true
+  },
+  {
+    "path": "src/futon2/aif/machine_budget_authority.clj",
+    "sha256": "13c6fb05c2a75ff5c673ed2df49e9d555db210d9269588396ea71ce97964253e",
+    "matches_final_subject": true
+  },
+  {
+    "path": "src/futon2/aif/machine_portfolio_restriction.clj",
+    "sha256": "316ddd364e2deaea98172558148fd770c2d5d4a930e32fb8e4825f454b6c51ab",
+    "matches_final_subject": true
+  },
+  {
+    "path": "src/futon2/aif/machine_pre_enact_authorization.clj",
+    "sha256": "d559e91587630f35ab26e9cb6beb30695f1142702ec13bc03eca3994ac170627",
+    "matches_final_subject": true
+  },
+  {
+    "path": "src/futon2/aif/machine_enactment_correspondence.clj",
+    "sha256": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933",
+    "matches_final_subject": true
+  },
+  {
+    "path": "src/futon2/aif/temporal_hierarchy.clj",
+    "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "matches_final_subject": true
+  }
+]
