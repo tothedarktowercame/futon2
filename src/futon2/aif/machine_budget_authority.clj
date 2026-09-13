@@ -74,8 +74,10 @@
                {:root (str root-path) :path (str path)}))
     path))
 
-(defn- read-source! [root label {:keys [relative-path sha256] :as pin}]
-  (when-not (and (map? pin) (string? sha256) (re-matches #"[0-9a-f]{64}" sha256))
+(defn- read-source! [root label {relative-path :relative-path
+                                 expected-sha :sha256 :as pin}]
+  (when-not (and (map? pin) (string? expected-sha)
+                 (re-matches #"[0-9a-f]{64}" expected-sha))
     (refuse! :r6-r11/source-pin-missing "Configured authority pin is missing"
              {:source-label label :pin pin}))
   (let [path (contained-path! root relative-path)]
@@ -88,10 +90,10 @@
                                 {:source-label label :path (str path)
                                  :cause (.getMessage failure)})))
           actual-sha (sha256 bytes)]
-      (when-not (= sha256 actual-sha)
+      (when-not (= expected-sha actual-sha)
         (refuse! :r6-r11/source-pin-mismatch "Authority source bytes changed"
                  {:source-label label :path (str path)
-                  :expected-sha256 sha256 :actual-sha256 actual-sha}))
+                  :expected-sha256 expected-sha :actual-sha256 actual-sha}))
       {:label label :path (str path) :relative-path relative-path
        :sha256 actual-sha :bytes-count (alength bytes)
        :record (one-form! (decode-utf8! bytes path) path)})))
