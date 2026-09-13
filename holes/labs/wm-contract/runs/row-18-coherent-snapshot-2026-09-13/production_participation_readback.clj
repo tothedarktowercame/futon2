@@ -7,4 +7,4 @@
     (let [data (ex-data e)]
       (prn {:ok false :refusal (:refusal data) :data data})
       (System/exit
-       (if (= :interoceptive/activation-receipt-unavailable (:refusal data)) 0 1)))))
+       (if (= :interoceptive/activation-lease-unavailable (:refusal data)) 0 1)))))

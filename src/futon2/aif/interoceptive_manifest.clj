@@ -159,17 +159,21 @@
   "Capture only after independently provisioned host evidence establishes
   exact source, process, writer coverage, freshness, and stable lock identity."
   []
-  (let [participation (activation/resolve-production-participation!)]
-    (binding [store-lock/*lock-path* (get-in participation [:lock :path])]
-      (store-lock/with-store-lock
-       (fn []
-         (let [audit (capture tripwire/default-trip-root repair/default-root :test)
-               input (-> (:constructor-input audit)
-                         (assoc-in [:trip-authority :authority-class] :production)
-                         (assoc-in [:repair-authority :authority-class] :production))]
-           {:schema :wm/interoceptive-production-snapshot-v1
-            :capture-boundary :verified-cross-process-file-lock
-            :participation participation
-            :manifest (assoc (dissoc audit :constructor-input)
-                             :authority-class :production)
-            :snapshot (commitment/confidence-snapshot input)}))))))
+  (activation/with-production-participation
+   (fn [participation]
+     (binding [store-lock/*lock-path* (get-in participation [:lock :path])]
+       (store-lock/with-store-lock
+        (fn []
+          (activation/revalidate-production-participation! participation)
+          (let [audit (capture tripwire/default-trip-root repair/default-root :test)
+                input (-> (:constructor-input audit)
+                          (assoc-in [:trip-authority :authority-class] :production)
+                          (assoc-in [:repair-authority :authority-class] :production))
+                result {:schema :wm/interoceptive-production-snapshot-v1
+                        :capture-boundary :verified-cross-process-file-lock
+                        :participation participation
+                        :manifest (assoc (dissoc audit :constructor-input)
+                                         :authority-class :production)
+                        :snapshot (commitment/confidence-snapshot input)}]
+            (activation/revalidate-production-participation! participation)
+            result)))))))

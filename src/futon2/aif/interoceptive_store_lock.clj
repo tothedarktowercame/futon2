@@ -78,6 +78,12 @@
 (defn with-store-lock [f]
   (with-lock-path (or *lock-path* default-lock-path) f))
 
+(defn with-lock-at
+  "Acquire an explicitly named coordination lock using the same ownership,
+  symlink and inode checks as the store lock."
+  [path f]
+  (with-lock-path path f))
+
 (defn with-store-lock-for [root f]
   (let [root-file (.toFile (.normalize (.toAbsolutePath (.toPath (java.io.File. root)))))
         root-path (.getPath root-file)

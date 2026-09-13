@@ -14,6 +14,7 @@
            [java.security MessageDigest]))
 
 (def production-receipt-path "/etc/futon2/wm-interoceptive-participation.edn")
+(def deployment-lease-path "/run/futon2/wm-interoceptive-deployment.lease")
 (def max-receipt-lifetime-ms 300000)
 (def required-writer-census-sha256
   "039d5319ade70150844c1e27f3d63cb01cb3a3f732ce29c11395359bc208eb51")
@@ -23,19 +24,27 @@
     :repair/record-implementation
     :repair/record-verification
     :repair/record-resolution})
+(def required-control-surfaces
+  #{:systemd-process-start-restart
+    :drawbridge-proof-eval-reload
+    :dev-admin-load-file
+    :direct-in-jvm-require-reload})
 
 ;; Filled from committed source bytes; activation receipts must match all pins.
 (def required-source-pins
   {"/home/joe/code/futon2/src/futon2/aif/interoceptive_store_lock.clj"
-   "fe65e829a354902166851f5a2dc9d31dcfd187a28274f0d20f634b2f984f8b1d"
+   "2d334c208b82fd377950a4f2ae3bd176f0922bb02bde7a0ca2240818ac64b262"
    "/home/joe/code/futon2/src/futon2/aif/interoceptive_manifest.clj"
-   "4b062a25184d47e7a63f1685fb09cb23008f21cc0391398426821b4c23ac0d42"
+   "d7db4a4a73f0ecb188a3740b1310cda6aa7500180aa420a086948a937316264c"
    "/home/joe/code/futon2/src/futon2/aif/tripwire.clj"
    "a75b2a571d76fa93486ff8807dc4fdc93a2f6ca125042f0d3087cbdcb933aeae"
    "/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj"
    "f61ede50822955695d5510248f0592883ed6f83d74be08a23ba37f649e33254a"})
 
 (defonce ^:private production-capability (Object.))
+(def ^:dynamic *after-receipt-read-hook* (fn [] nil))
+
+(declare read-stable-bytes! validate-participation)
 
 (defn- refuse! [reason data]
   (throw (ex-info "Interoceptive activation refused" (assoc data :refusal reason))))
@@ -43,6 +52,9 @@
 (defn- sha256-bytes [bytes]
   (apply str (map #(format "%02x" (bit-and 0xff %))
                   (.digest (MessageDigest/getInstance "SHA-256") bytes))))
+
+(defn process-census-sha256 [processes]
+  (sha256-bytes (.getBytes (pr-str processes) StandardCharsets/UTF_8)))
 
 (defn- strict-edn [bytes path]
   (let [text (try
@@ -73,7 +85,7 @@
                  [path (sha256-bytes (Files/readAllBytes (.toPath file)))])))
         required-source-pins))
 
-(defn- secure-root-owned-receipt! [path]
+(defn- secure-receipt! [path required-owner]
   (let [absolute (.toAbsolutePath (.normalize path))]
     (loop [p (.getRoot absolute) names (iterator-seq (.iterator absolute))]
       (when-let [name (first names)]
@@ -87,15 +99,57 @@
                                      (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])))
           parent-owner (str (Files/getOwner parent
                                             (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])))
-          permissions (Files/getPosixFilePermissions parent (make-array LinkOption 0))]
-      (when-not (and (= "root" owner parent-owner)
-                     (not-any? permissions
+          permissions (Files/getPosixFilePermissions parent (make-array LinkOption 0))
+          file-permissions (Files/getPosixFilePermissions absolute
+                                                           (make-array LinkOption 0))]
+      (when-not (and (= required-owner owner parent-owner)
+                     (not-any? (set permissions)
+                               [PosixFilePermission/GROUP_WRITE
+                                PosixFilePermission/OTHERS_WRITE])
+                     (not-any? (set file-permissions)
                                [PosixFilePermission/GROUP_WRITE
                                 PosixFilePermission/OTHERS_WRITE]))
         (refuse! :interoceptive/activation-receipt-untrusted
                  {:path (str absolute) :owner owner :parent-owner parent-owner
-                  :parent-permissions (mapv str permissions)})))
+                  :parent-permissions (mapv str permissions)
+                  :file-permissions (mapv str file-permissions)})))
     absolute))
+
+(defn read-test-participation!
+  "Exercise the real strict, stable-byte receipt reader on an isolated file.
+  The result is always test authority, regardless of record contents."
+  [path opts]
+  (let [p (Paths/get path (make-array String 0))
+        owner (str (Files/getOwner p (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])))]
+    (secure-receipt! p owner)
+    (let [bytes (read-stable-bytes! p)]
+      (validate-participation
+       (assoc (strict-edn bytes path) :receipt-sha256 (sha256-bytes bytes)) opts))))
+
+(defn- read-stable-bytes! [path]
+  (try
+    (let [before [(Files/getAttribute path "basic:fileKey"
+                                      (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+                  (Files/getAttribute path "basic:size"
+                                      (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+                  (Files/getAttribute path "basic:lastModifiedTime"
+                                      (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))]
+          bytes (Files/readAllBytes path)
+          _ (*after-receipt-read-hook*)
+          after [(Files/getAttribute path "basic:fileKey"
+                                     (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+                 (Files/getAttribute path "basic:size"
+                                     (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+                 (Files/getAttribute path "basic:lastModifiedTime"
+                                     (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))]]
+      (when-not (= before after)
+        (refuse! :interoceptive/activation-receipt-changed
+                 {:path (str path) :before before :after after}))
+      bytes)
+    (catch clojure.lang.ExceptionInfo e (throw e))
+    (catch Throwable e
+      (refuse! :interoceptive/activation-receipt-io
+               {:path (str path) :cause (.getMessage e)}))))
 
 (defn validate-participation
   "Validate an already independently authenticated record. This pure layer
@@ -128,6 +182,26 @@
                  (re-matches #"[0-9a-f]{64}"
                              (or (get-in record [:host :process-census-sha256]) "")))
     (refuse! :interoceptive/activation-host-census-invalid {:host (:host record)}))
+  (let [measured (process-census-sha256 (:processes record))]
+    (when-not (= measured (get-in record [:host :process-census-sha256]))
+      (refuse! :interoceptive/activation-process-census-digest-mismatch
+               {:declared (get-in record [:host :process-census-sha256])
+                :measured measured})))
+  (let [controls (get-in record [:lease :controls])
+        surfaces (set (map :surface controls))]
+    (when-not (and (= required-control-surfaces surfaces)
+                   (every? #(and (= :lease-enforced (:status %))
+                                 (string? (:artifact/path %))
+                                 (re-matches #"[0-9a-f]{64}"
+                                             (or (:artifact/sha256 %) "")))
+                           controls))
+      (refuse! :interoceptive/activation-lease-controls-unverified
+               {:required required-control-surfaces :controls controls})))
+  (when-not (and (= deployment-lease-path (get-in record [:lease :path]))
+                 (= :host-launch-reload-lock-v1 (get-in record [:lease :protocol]))
+                 (string? (get-in record [:lease :generation]))
+                 (= :enforced (get-in record [:lease :status])))
+    (refuse! :interoceptive/activation-lease-unavailable {:lease (:lease record)}))
   (let [processes (:processes record)
         ids (mapv :process/id processes)
         nonparticipants (filterv #(not= :participating (:coordination/status %)) processes)
@@ -164,15 +238,25 @@
                    (string? (:file-key observed)))
       (refuse! :interoceptive/activation-lock-mismatch
                {:declared declared :observed observed})))
+  (let [declared (:lease-lock record)
+        observed (lock-probe declared)]
+    (when-not (and (= deployment-lease-path (:path declared)) (= declared observed)
+                   (= "root" (:parent-owner observed))
+                   (false? (:parent-writable-by-service? observed))
+                   (string? (:file-key observed)))
+      (refuse! :interoceptive/activation-lease-lock-mismatch
+               {:declared declared :observed observed})))
   {:schema :wm/interoceptive-writer-participation-admission-v1
    :authority-class (if (identical? capability production-capability)
                       :production :test)
    :receipt-sha256 (:receipt-sha256 record)
    :lock (:lock record)
+   :lease-lock (:lease-lock record)
+   :lease (:lease record)
    :valid-until-ms (:valid-until-ms record)})
 
-(defn- host-lock-probe [_]
-  (let [path (Paths/get store-lock/default-lock-path (make-array String 0))
+(defn- host-lock-probe [declared]
+  (let [path (Paths/get (:path declared) (make-array String 0))
         parent (.getParent path)]
     (when-not (and (Files/isRegularFile path (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
                    (not (Files/isSymbolicLink path)))
@@ -214,8 +298,8 @@
     (when-not (and (Files/isRegularFile path (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
                    (not (Files/isSymbolicLink path)))
       (refuse! :interoceptive/activation-receipt-unavailable {:path production-receipt-path}))
-    (secure-root-owned-receipt! path)
-    (let [bytes (Files/readAllBytes path)
+    (secure-receipt! path "root")
+    (let [bytes (read-stable-bytes! path)
           record (assoc (strict-edn bytes production-receipt-path)
                         :receipt-sha256 (sha256-bytes bytes))]
       (validate-participation record
@@ -224,3 +308,37 @@
                                :boot-id (str/trim (slurp "/proc/sys/kernel/random/boot_id"))
                                :lock-probe host-lock-probe
                                :process-probe host-process-probe}))))
+
+(defn revalidate-production-participation!
+  "Re-read every host/process/lock input while the deployment lease and store
+  lock are held. Refuse if the receipt generation, bytes, expiry, process or
+  either acquired lock identity changed."
+  [admission]
+  (when-not (= :production (:authority-class admission))
+    (refuse! :interoceptive/activation-test-authority {:authority admission}))
+  (let [current (resolve-production-participation!)]
+    (when-not (= (select-keys admission [:receipt-sha256 :lock :lease-lock :lease])
+                 (select-keys current [:receipt-sha256 :lock :lease-lock :lease]))
+      (refuse! :interoceptive/activation-boundary-changed
+               {:before (select-keys admission [:receipt-sha256 :lock :lease-lock :lease])
+                :after (select-keys current [:receipt-sha256 :lock :lease-lock :lease])}))
+    current))
+
+(defn with-production-participation
+  "Hold the independently provisioned launch/reload lease for resolution and
+  the caller's entire physical capture."
+  [f]
+  (try
+    (store-lock/with-lock-at
+     deployment-lease-path
+     (fn []
+       (let [admission (resolve-production-participation!)
+             result (f admission)]
+         (revalidate-production-participation! admission)
+         result)))
+    (catch clojure.lang.ExceptionInfo e
+      (if (#{:interoceptive/lock-path-refused :interoceptive/lock-io-failure}
+            (:refusal (ex-data e)))
+        (refuse! :interoceptive/activation-lease-unavailable
+                 {:path deployment-lease-path :cause (:refusal (ex-data e))})
+        (throw e)))))
