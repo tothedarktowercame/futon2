@@ -1,0 +1,42 @@
+[
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/InteroceptivePolicyPrecisionVariance.lean",
+    "sha256": "e09142aec8d41c5b3f0d23e22764e85ba8718a2f6d0e9b348f0390734fa9a927"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionVariance.olean",
+    "sha256": "2e3ff0b7828ad32e3167be8a98fbc52a1b6c56ac1389576e6fd843b408a7a05c"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean",
+    "sha256": "bad1323f975ec6ed052de465e4caff1e086c32865737931d9cb90d4d515500b2"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.olean",
+    "sha256": "ff03a969ea9745286aa1b56af8449de9b25eb2a8e3ec368db9234467ada100fc"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.lean",
+    "sha256": "afbe1d5dfe9eb9192c2226c34220b4aa8fc345b833f88608cf42129f6341b77e"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/.lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.olean",
+    "sha256": "0f5128639109766958bd4df3b651e4935aa1f223fe0e15147f0c48dd2018cdc7"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/lean-toolchain",
+    "sha256": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/lake-manifest.json",
+    "sha256": "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-unique-root-v1.md",
+    "sha256": "1b87b6c44622eeadf0d1fa16444462f1df21c1d2a796c109e184b7f65bf62f0c"
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-18-policy-precision-spec-2026-09-13/lead-unique-root-review.md",
+    "sha256": "64380c3c2bc404aa11a859e6b1f50dcb61dcc9eab20e630593f4de8df94c306c"
+  }
+]

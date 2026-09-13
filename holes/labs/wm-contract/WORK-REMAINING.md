@@ -199,6 +199,12 @@ is not yet a verified join to Agency's normalized request digest.
   verification, and rejection of scope/status relabelling. See successor-configured-
   authority/lead-review.md. No real external-root authentication/admission.
 
+- Canonical derivative/variance `mathlib4/ff0ab6e5ea`, receipt `2dab51e2`:
+  ten source/config/olean pins verified; actual variance certificate and
+  certificate-free sufficient uniqueness/order theorems accepted at exact-real
+  scope. Next retained-field applicability and floating solved/held correspondence;
+  prior response not adopted, no integration/admission.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
