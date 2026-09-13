@@ -8,7 +8,9 @@
            (java.nio.file.attribute FileAttribute)
            (java.util Base64)))
 
-(def authority {:verifier/source-sha256 (apply str (repeat 64 "a"))
+(def authority {:schema :wm/e6b-genesis-authority-v1
+                :scope :isolated-test :status :fixture-only
+                :verifier/source-sha256 (apply str (repeat 64 "a"))
                 :evidence-source-sha256s {:fixture (apply str (repeat 64 "b"))}})
 (defn- dir [] (.toFile (Files/createTempDirectory "e6b-store-v2-"
                                                    (make-array FileAttribute 0))))
@@ -114,8 +116,10 @@
     (store/release! s)))
 
 (deftest legacy-store-is-not-silently-upgraded
-  (let [root (dir) s (legacy/isolated-store root "legacy-store")]
-    (legacy/initialize! s {:state {:value 0} :revision "r0" :authority authority
+  (let [root (dir) s (legacy/isolated-store root "legacy-store")
+        legacy-authority (select-keys authority
+                                      [:verifier/source-sha256 :evidence-source-sha256s])]
+    (legacy/initialize! s {:state {:value 0} :revision "r0" :authority legacy-authority
                            :committed-at "2026-09-13T00:00:00Z"})
     (legacy/release! s)
     (is (= :e6b-store-v2/legacy-or-interrupted-store
@@ -129,4 +133,36 @@
           genesis (:record (#'store/read-object path))]
       (write-form! path (mutate genesis))
       (is (some? (refusal #(store/recover s))))
+      (store/release! s))))
+
+(deftest semantic-genesis-forgeries-refuse-after-self-consistent-rehash
+  (doseq [mutate [#(assoc % :authority nil)
+                  #(assoc % :committed-at nil)
+                  #(assoc % :generation 7)
+                  #(assoc-in % [:state :state/revision] "borrowed")]]
+    (let [[_ s _] (setup) h (store/recover s)
+          old (get-in h [:head :transaction-sha256])
+          old-path (.resolve ^java.nio.file.Path (:txdir s) (str old ".edn"))
+          forged (mutate (:record (#'store/read-object old-path)))
+          bs (.getBytes (pr-str forged) "UTF-8") digest (#'store/sha256 bs)
+          new-path (.resolve ^java.nio.file.Path (:txdir s) (str digest ".edn"))
+          head (assoc (:head h) :transaction-sha256 digest)]
+      (Files/write new-path bs (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW]))
+      (write-form! ^java.nio.file.Path (:head s) head)
+      (is (some? (refusal #(store/recover s))))
+      (store/release! s))))
+
+(deftest invalid-genesis-input-publishes-neither-object-nor-head
+  (doseq [bad [{:state {:not :a-carrier} :revision "r0" :authority authority
+                :committed-at "2026-09-13T00:00:00Z"}
+               {:state (get-in (#'provenance-test/input) [:carrier-projection :prior :carrier])
+                :revision "slow-4" :authority (assoc authority :opaque (Object.))
+                :committed-at "2026-09-13T00:00:00Z"}
+               {:state (get-in (#'provenance-test/input) [:carrier-projection :prior :carrier])
+                :revision "slow-4" :authority authority :committed-at "not-time"}]]
+    (let [root (dir) s (store/isolated-store root "invalid-genesis")]
+      (is (some? (refusal #(store/initialize! s bad))))
+      (is (not (Files/exists ^java.nio.file.Path (:head s) (make-array java.nio.file.LinkOption 0))))
+      (is (empty? (iterator-seq (.iterator
+                                 (Files/newDirectoryStream ^java.nio.file.Path (:txdir s))))))
       (store/release! s))))

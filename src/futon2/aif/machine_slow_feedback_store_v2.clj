@@ -11,6 +11,7 @@
            (java.nio.charset CodingErrorAction StandardCharsets)
            (java.nio.file Files LinkOption Path StandardCopyOption StandardOpenOption)
            (java.security MessageDigest)
+           (java.time Instant)
            (java.util Base64 Arrays)
            (java.util.concurrent.locks ReentrantLock)))
 
@@ -21,6 +22,8 @@
   (apply str (map #(format "%02x" (bit-and 255 %))
                   (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bs))))))
 (defn- form-bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
+(defn- instant? [x] (try (Instant/parse x) true (catch Throwable _ false)))
+(defn- finite-number? [x] (and (number? x) (Double/isFinite (double x))))
 (defn- strict-edn [^bytes bs path]
   (try
     (let [d (doto (.newDecoder StandardCharsets/UTF_8)
@@ -38,6 +41,67 @@
   (when-not (Files/isRegularFile p (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
     (refuse! :e6b-store-v2/missing-object {:path (str p)}))
   (let [bs (Files/readAllBytes p)] {:bytes bs :sha256 (sha256 bs) :record (strict-edn bs p)}))
+(defn- roundtrip! [label x]
+  (try
+    (when-not (= x (strict-edn (form-bytes x) label))
+      (refuse! :e6b-store-v2/unserializable {:label label}))
+    (catch clojure.lang.ExceptionInfo e (throw e))
+    (catch Throwable e
+      (throw (ex-info "not strict EDN" {:refusal :e6b-store-v2/unserializable
+                                         :label label} e))))
+  x)
+(defn- valid-authority! [authority]
+  (when-not (and (= #{:schema :scope :status :verifier/source-sha256
+                      :evidence-source-sha256s} (set (keys authority)))
+                 (= :wm/e6b-genesis-authority-v1 (:schema authority))
+                 (= :isolated-test (:scope authority)) (= :fixture-only (:status authority))
+                 (re-matches hex64 (:verifier/source-sha256 authority ""))
+                 (map? (:evidence-source-sha256s authority))
+                 (seq (:evidence-source-sha256s authority))
+                 (every? keyword? (keys (:evidence-source-sha256s authority)))
+                 (every? #(and (string? %) (re-matches hex64 %))
+                         (vals (:evidence-source-sha256s authority))))
+    (refuse! :e6b-store-v2/genesis-authority-invalid {}))
+  (roundtrip! :genesis-authority authority))
+(defn- valid-carrier! [state revision]
+  (when-not
+   (and (= #{:schema :model/id :model/revision :run/id :tick/index :state/revision
+             :slow/mode :slow/intrinsics} (set (keys state)))
+        (= :wm/e6b-store-state-carrier-v1 (:schema state))
+        (or (keyword? (:model/id state)) (and (string? (:model/id state)) (seq (:model/id state))))
+        (every? #(and (string? %) (seq %)) [(:model/revision state) (:run/id state) revision])
+        (nat-int? (:tick/index state)) (= revision (:state/revision state))
+        (keyword? (:slow/mode state)) (map? (:slow/intrinsics state)) (seq (:slow/intrinsics state))
+        (every?
+         (fn [[class entry]]
+           (and (keyword? class)
+                (= #{:alpha :beta :intrinsic-value :n-emissions :n-followthrough :as-of}
+                   (set (keys entry)))
+                (every? finite-number? ((juxt :alpha :beta :intrinsic-value) entry))
+                (every? nat-int? ((juxt :n-emissions :n-followthrough) entry))
+                (instant? (:as-of entry))))
+         (:slow/intrinsics state)))
+    (refuse! :e6b-store-v2/genesis-state-invalid {}))
+  (roundtrip! :genesis-state state))
+(defn- valid-genesis! [store tx expected-generation child]
+  (when-not (and (= #{:schema :store/id :generation :prior :state :state/revision
+                      :state-sha256 :application :authority :committed-at}
+                    (set (keys tx)))
+                 (= :wm/e6b-state-genesis-v2 (:schema tx))
+                 (= (:store-id store) (:store/id tx))
+                 (zero? expected-generation) (zero? (:generation tx))
+                 (= {} (:prior tx)) (nil? (:application tx))
+                 (string? (:state/revision tx)) (seq (:state/revision tx))
+                 (instant? (:committed-at tx)))
+    (refuse! :e6b-store-v2/genesis-invalid {}))
+  (valid-carrier! (:state tx) (:state/revision tx))
+  (valid-authority! (:authority tx))
+  (when-not (and (= (:state-sha256 tx) (sha256 (form-bytes (:state tx))))
+                 (or (nil? child)
+                     (= (select-keys (:prior child) [:revision :state-sha256])
+                        {:revision (:state/revision tx) :state-sha256 (:state-sha256 tx)})))
+    (refuse! :e6b-store-v2/genesis-invalid {}))
+  (roundtrip! :genesis tx))
 (defn- write-sync! [^Path p ^bytes bs]
   (with-open [out (FileOutputStream. (.toFile p))]
     (.write out bs) (.flush out) (.sync (.getFD out))))
@@ -178,16 +242,8 @@
           (refuse! :e6b-store-v2/head-current-mismatch {}))
         (if (= :wm/e6b-state-genesis-v2 (:schema tx))
           (do
-            (when-not (and (= #{:schema :store/id :generation :prior :state :state/revision
-                                :state-sha256 :application :authority :committed-at}
-                              (set (keys tx)))
-                           (zero? generation) (= (:store-id store) (:store/id tx))
-                           (= {} (:prior tx)) (nil? (:application tx))
-                           (= digest (sha256 (form-bytes tx)))
-                           (= (:state-sha256 tx) (sha256 (form-bytes (:state tx))))
-                           (or (nil? child)
-                               (= (select-keys (:prior child) [:revision :state-sha256])
-                                  {:revision (:state/revision tx) :state-sha256 (:state-sha256 tx)}))
+            (valid-genesis! store tx generation child)
+            (when-not (and (= digest (sha256 (form-bytes tx)))
                            (= (vec (reverse apps)) (:application-index head)))
               (refuse! :e6b-store-v2/chain-invalid {}))
             {:head head :head-digest (:sha256 head-r) :current (first txs)
@@ -226,14 +282,15 @@
               (seq (iterator-seq (.iterator (Files/newDirectoryStream ^Path (:txdir store))))))
       (refuse! :e6b-store-v2/already-initialized-or-interrupted {}))
     (when-not (and (= #{:state :revision :authority :committed-at} (set (keys input)))
-                   (map? state) (seq state) (string? revision) (seq revision)
-                   (map? authority) (string? committed-at)
-                   (= state (strict-edn (form-bytes state) :genesis-state)))
+                   (map? state) (string? revision) (string? committed-at))
       (refuse! :e6b-store-v2/genesis-input-invalid {}))
     (let [tx {:schema :wm/e6b-state-genesis-v2 :store/id (:store-id store) :generation 0
               :prior {} :state state :state/revision revision
               :state-sha256 (sha256 (form-bytes state)) :application nil
               :authority authority :committed-at committed-at}]
+      ;; The complete durable record is checked and strict-round-tripped before
+      ;; either its immutable object or HEAD can exist.
+      (valid-genesis! store tx 0 nil)
       (try
         (let [digest (publish! store :transaction ^Path (:txdir store) tx)
               head {:schema :wm/e6b-state-head-v2 :store/id (:store-id store) :generation 0
