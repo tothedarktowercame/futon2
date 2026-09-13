@@ -111,7 +111,22 @@
         e1-pins (pins c [:e1/ranked-support :e1/field-membership :e1/costs
                          :e1/utilities :e1/budgets])
         e2b-pins (pins c [:e2b/context :e2b/selection :e2b/enactment])
-        e3-pins (pins c [:e3/pending :e3/verdict :e3/review])]
+        e3-pins (pins c [:e3/pending :e3/verdict :e3/review])
+        e3-output-pins (ordered-pins! :e3/output-sources e3-source-order #{}
+                                      (:sources e3-output))
+        e2b-output-e1-pins
+        (ordered-pins! :e2b/output-e1-sources e1-source-order
+                       #{:path :relative-path :bytes-count}
+                       (get-in e2b-output [:sources :e2a :e1-verification :sources]))
+        e2b-output-witness-pins
+        (ordered-pins! :e2b/output-witnesses e2b-witness-order #{:path :bytes-count}
+                       (get-in e2b-output [:sources :witnesses]))
+        e2b-subject-e1-pins
+        (ordered-pins! :e2b/subject-e1-pins e1-source-order #{}
+                       (get-in e2b-output [:subject :e1-source-pins]))
+        pending-field-pins
+        (ordered-pins! :e3/pending-field-pins e1-source-order #{}
+                       (:field-pins (:subject pending)))]
     (when-not
      (and (= canonical {:e3 e3-cfg :e2b e2b-cfg})
           (= r9-input (:r9/input review))
@@ -132,15 +147,11 @@
               :e3/review (get-in e3-cfg [:evidence :review :sha256])})
           ;; Canonical outputs must name the exact resolved source bytes.  A
           ;; coherently re-pinned config is not allowed to borrow stale output.
-          (= (ordered-pins! :e3/output-sources e3-source-order #{} (:sources e3-output))
+          (= e3-output-pins
              (mapv #(:source-sha256 (c (keyword "e3" (name %)))) e3-source-order))
-          (= (ordered-pins! :e2b/output-e1-sources e1-source-order
-                            #{:path :relative-path :bytes-count}
-                            (get-in e2b-output [:sources :e2a :e1-verification :sources]))
+          (= e2b-output-e1-pins
              (configured-pins (:sources e1) e1-source-order))
-          (= (ordered-pins! :e2b/output-witnesses e2b-witness-order
-                            #{:path :bytes-count}
-                            (get-in e2b-output [:sources :witnesses]))
+          (= e2b-output-witness-pins
              (configured-pins (:witnesses e2b-cfg) e2b-witness-order))
           (= (:subject e2b-output)
              (:subject e2b-context) (:subject e2b-selection) (:subject e2b-enactment))
@@ -155,14 +166,12 @@
           (= (:enacted e2b-output)
              {:candidate/id (:enacted/occurrence-id e2b-enactment)
               :action (:enacted/action e2b-enactment)})
-          (= (ordered-pins! :e2b/subject-e1-pins e1-source-order #{}
-                            (get-in e2b-output [:subject :e1-source-pins]))
+          (= e2b-subject-e1-pins
              (configured-pins (:sources e1) e1-source-order))
           (= (e3-identity pending) (e3-identity verdict) (e3-identity review)
              (e3-identity (:identity e3-output)))
           (= (:subject pending) (:subject verdict) (:subject review) (:subject e3-output))
-          (= (ordered-pins! :e3/pending-field-pins e1-source-order #{}
-                            (:field-pins (:subject pending)))
+          (= pending-field-pins
              (configured-pins (:sources e1) e1-source-order))
           (= (get-in proposal [:canonical/digests :e3]) (value-digest e3-output))
           (= (get-in proposal [:canonical/digests :e2b]) (value-digest e2b-output))
