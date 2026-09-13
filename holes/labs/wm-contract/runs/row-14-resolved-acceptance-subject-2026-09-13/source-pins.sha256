@@ -1,0 +1,6 @@
+bbcd9ca41917f8defbe066f504b6b3ea55392d37c1a76964f282a0d1fb2bc733  /home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-categorical-authority-grounding-repair-2026-09-13/lead-review.md
+a23e269feb9b596474e5b05accc75f4fa55e7cd28686418badd1d3e0a69a93f2  /home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-categorical-authority-grounding-repair-2026-09-13/lead-counterexamples.clj
+6ed1922f84a1de633f104712b80fa0e67673e7403214c1005bcf7265c45ccfe2  /home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-categorical-authority-grounding-repair-2026-09-13/lead-counterexamples.stdout.edn
+ea2b73efbb94f40cef5a7d5208a510a4f88f073891f52e206490dd7304f8fe3e  /home/joe/code/futon2/holes/labs/wm-contract/SPEC-row14-categorical-state-observation-v1.md
+8d48ecf867e2b6df7ce720b48ace3cf699bb9e19c05481c3d11369fb8d678fb2  /home/joe/code/futon2/src/futon2/aif/categorical_state_observation.clj
+b21559d6b9678e40634fd6c4a248218a1f9ad8893ec01a65cd48dc49be6b7ded  /home/joe/code/futon2/test/futon2/aif/categorical_state_observation_test.clj

@@ -1,0 +1,7 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.categorical-state-observation-test
+
+Ran 7 tests containing 38 assertions.
+0 failures, 0 errors.

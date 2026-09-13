@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint src/futon2/aif/categorical_state_observation.clj test/futon2/aif/categorical_state_observation_test.clj"
+ :exit 0 :errors 0 :warnings 0
+ :tree-sha "46b94b94c244827f631fdf2e11e3e38db09b938f"
+ :at "2026-09-13T03:41:56Z" :output "kondo-output.txt"}
