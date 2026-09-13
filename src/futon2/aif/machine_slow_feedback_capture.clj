@@ -95,7 +95,13 @@
                    (= (:head-digest record) (get-in record [:head-object :digest]))
                    (= (last chain) (:transaction-sha256 head))
                    (= applications (:application-index head))
-                   (= (:generation record) (dec (count chain))))
+                   (= (:generation record) (dec (count chain)))
+                   (= {:revision (:state/revision head) :state-sha256 (:state-sha256 head)}
+                      (let [current (peek txs)]
+                        (if (= :wm/e6b-state-genesis-v2 (:schema current))
+                          {:revision (:state/revision current)
+                           :state-sha256 (:state-sha256 current)}
+                          (select-keys (:next current) [:revision :state-sha256])))))
       (refuse! :e6b-capture/head-join-invalid {}))
     (when-not (and (vector? chain) (seq chain) (= (count chain) (count (distinct chain)))
                    (= (count applications) (dec (count chain)))
@@ -109,13 +115,29 @@
                      (= generation (:generation tx)))
         (refuse! :e6b-capture/transaction-identity-invalid {:digest digest}))
       (if (zero? generation)
-        (when-not (= :wm/e6b-state-genesis-v2 (:schema tx))
-          (refuse! :e6b-capture/genesis-invalid {}))
         (do
+          (exact-keys! :e6b-capture/genesis-invalid
+                       #{:schema :store/id :generation :prior :state :state/revision
+                         :state-sha256 :application :authority :committed-at} tx)
+          (when-not (and (= :wm/e6b-state-genesis-v2 (:schema tx))
+                         (= {} (:prior tx)) (nil? (:application tx)))
+            (refuse! :e6b-capture/genesis-invalid {})))
+        (do
+          (exact-keys! :e6b-capture/transaction-schema-invalid
+                       #{:schema :store/id :generation :prior :next :application
+                         :committed-at :provenance-sha256} tx)
           (when-not (= :wm/e6b-state-transaction-v2 (:schema tx))
             (refuse! :e6b-capture/transaction-schema-invalid {:digest digest}))
-          (when-not (= (nth chain (dec generation)) (get-in tx [:prior :transaction-sha256]))
+          (let [parent (nth txs (dec generation))
+                parent-state (if (= :wm/e6b-state-genesis-v2 (:schema parent))
+                               {:revision (:state/revision parent)
+                                :state-sha256 (:state-sha256 parent)}
+                               (select-keys (:next parent) [:revision :state-sha256]))]
+            (when-not (and (= (nth chain (dec generation))
+                              (get-in tx [:prior :transaction-sha256]))
+                           (= parent-state (select-keys (:prior tx) [:revision :state-sha256])))
             (refuse! :e6b-capture/parent-disagreement {:digest digest}))
+            )
           (let [pd (:provenance-sha256 tx) p (decoded-provenance pd)]
             (when-not p (refuse! :e6b-capture/missing-provenance {:digest pd}))
             ;; Reuse the reviewed pure provenance validation over these exact
