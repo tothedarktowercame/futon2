@@ -1,8 +1,10 @@
 (ns futon2.aif.machine-budget-mapping
-  "Pure E1 boundary from the complete ordered R6 candidate support to the
+  "Pure E1 construction helper from the complete ordered R6 candidate support to the
    canonical R11 ranked-field arbiter.  Occurrence identity, not semantic
-   action equality, is the mapping key.  Cost, utility, membership and budget
-   values are accepted only with pinned independent authority records."
+   action equality, is the mapping key. This namespace validates a supplied
+   value graph but does not resolve its pins. Production callers must enter via
+   `futon2.aif.machine-budget-authority/resolve-and-map`; calling this helper
+   directly is unchecked machinery, not verified E1 authority."
   (:require [clojure.string :as str]
             [futon2.aif.hierarchical-budget-adapter :as r11]))
 
@@ -201,8 +203,9 @@
      :complete-accounting? (= (count ids) (count accounting))}))
 
 (defn map-ranked-support
-  "Map one complete, pinned R6 ranked support into the canonical R11 request.
-   Returns request, response, bijection, full accounting, and a replay receipt."
+  "Unchecked pure helper: map a supplied R6 support/value graph into the
+   canonical R11 request. Returns request, response, bijection, full accounting,
+   and replay. Pin resolution belongs to machine-budget-authority."
   [input]
   (let [output (checked-output input)]
     (assoc output :replay/receipt {:schema/version schema-version

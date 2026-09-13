@@ -1,0 +1,10 @@
+{:schema/version :wm/r11-utility-authority-v1
+ :authority :declared-source
+ :source/id :fixture/utilities
+ :source/revision "fixture-v1"
+ :scope :isolated-test
+ :binding {:model/id :wm-e1-fixture :model/revision "model-v3"
+           :run/id "e1-authority-run" :tick/index 4}
+ :values {[:e1-authority-run 4 0] 8
+          [:e1-authority-run 4 1] 7
+          [:e1-authority-run 4 2] 1}}

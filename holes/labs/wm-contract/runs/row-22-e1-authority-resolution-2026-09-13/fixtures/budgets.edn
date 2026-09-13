@@ -1,0 +1,8 @@
+{:schema/version :wm/r11-budget-authority-v1
+ :authority :declared-source
+ :source/id :fixture/budgets
+ :source/revision "fixture-v1"
+ :scope :isolated-test
+ :binding {:model/id :wm-e1-fixture :model/revision "model-v3"
+           :run/id "e1-authority-run" :tick/index 4}
+ :values {:root 5 :fields {:mission-field 5 :idle-field 1}}}

@@ -1,0 +1,10 @@
+{:schema/version :wm/r11-cost-authority-v1
+ :authority :declared-source
+ :source/id :fixture/costs
+ :source/revision "fixture-v1"
+ :scope :isolated-test
+ :binding {:model/id :wm-e1-fixture :model/revision "model-v3"
+           :run/id "e1-authority-run" :tick/index 4}
+ :values {[:e1-authority-run 4 0] 4
+          [:e1-authority-run 4 1] 2
+          [:e1-authority-run 4 2] 1}}

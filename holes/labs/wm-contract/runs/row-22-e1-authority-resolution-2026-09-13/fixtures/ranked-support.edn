@@ -1,0 +1,14 @@
+{:schema/version :wm/r6-ranked-support-authority-v1
+ :authority :declared-source
+ :source/id :fixture/r6-ranked-support
+ :source/revision "fixture-v1"
+ :scope :isolated-test
+ :binding {:model/id :wm-e1-fixture :model/revision "model-v3"
+           :run/id "e1-authority-run" :tick/index 4}
+ :ordered-support
+ [{:candidate/id [:e1-authority-run 4 0] :rank 1
+   :action {:type :advance-mission :target "M-alpha"}}
+  {:candidate/id [:e1-authority-run 4 1] :rank 2
+   :action {:type :advance-mission :target "M-alpha"}}
+  {:candidate/id [:e1-authority-run 4 2] :rank 3
+   :action {:type :no-op :target nil}}]}
