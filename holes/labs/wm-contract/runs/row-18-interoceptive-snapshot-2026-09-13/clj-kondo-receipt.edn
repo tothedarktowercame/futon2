@@ -1,5 +1,5 @@
 {:command "clj-kondo --lint src/futon2/aif/interoceptive_commitment.clj test/futon2/aif/interoceptive_commitment_test.clj"
  :exit 0 :tests 2 :assertions 0
- :tree-sha "cfac956474ff6e11b7648327dc55f6dc1335d3dd"
- :at "2026-09-13T01:51:59Z"
- :transcript "linting took 11ms, errors: 0, warnings: 0"}
+ :tree-sha "36e798c5fd9845c9d1f550174ab5fdd4404ba008"
+ :at "2026-09-13T01:58:45Z"
+ :transcript "linting took 12ms, errors: 0, warnings: 0"}

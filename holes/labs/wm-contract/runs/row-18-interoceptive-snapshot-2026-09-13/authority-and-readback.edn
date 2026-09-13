@@ -36,8 +36,11 @@
   :interoceptive/malformed-trip
   :interoceptive/contradictory-discharge
   :interoceptive/unknown-mode
+  :interoceptive/unknown-repair-status
+  :interoceptive/authority-class-mismatch
+  :interoceptive/contradictory-join
   :interoceptive/authority-unavailable
   :interoceptive/unpinned-authority]
  :typed-exclusions [:shadow-record :test-root :discharged]
- :not-claimed [:live-genuine-trip :integration :task-gain-composition
+ :not-claimed [:live-open-genuine-trip :integration :task-gain-composition
                :calibration :safer-enaction]}
