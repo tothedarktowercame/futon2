@@ -1,0 +1,31 @@
+{:schema :wm/e6b-storage-retrospective-source-pins-v1
+ :captured-at "2026-09-13T07:20:00Z"
+ :repo "futon2"
+ :scope :read-only-source-inventory
+ :authority/status :none
+ :roles
+ [{:role :store-v2
+   :path "src/futon2/aif/machine_slow_feedback_store_v2.clj"
+   :sha256 "27654817da8ee9fdf92c562478f8811d32fdde70015cc4c7deff8220636082a2"
+   :lines {:format-and-owner [153 179] :provenance-readback [181 209]
+           :recovery [221 276] :capture [348 362]}}
+  {:role :provenance
+   :path "src/futon2/aif/machine_slow_feedback_provenance.clj"
+   :sha256 "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90"
+   :lines {:retrospective-view [221 257] :strict-readback [259 300]}}
+  {:role :retrospective-verifier
+   :path "src/futon2/aif/machine_slow_feedback_evidence.clj"
+   :sha256 "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"
+   :lines {:verify-feedback [368 429]}}
+  {:role :carrier-codec
+   :path "src/futon2/aif/machine_slow_state_carrier.clj"
+   :sha256 "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965"}
+  {:role :isolated-genesis-contract
+   :path "holes/labs/wm-contract/CONTRACT-e6b-store-v2-genesis-v1-2026-09-13.md"
+   :sha256 "989bb0ba8e069b64b99bd4982dd4a1e90dfe6241efeee0569f7dcff5ae5f3945"}]
+ :findings
+ {:head-bytes-in-capture :absent
+  :completeness-authority :absent
+  :production-authority :unavailable
+  :later-prior-acquisition :unavailable
+  :smallest-next-packet :capture-head-bytes}}

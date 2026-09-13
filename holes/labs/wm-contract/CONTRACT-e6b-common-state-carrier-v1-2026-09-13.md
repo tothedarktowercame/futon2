@@ -217,3 +217,102 @@ None of these stages substitutes for another.
 
 Production roots, writer ownership, later-prior acquisition, completeness,
 rollback freshness, runtime wiring and first-install transition remain open.
+
+## Actual store-v2 to retrospective reconstruction (2026-09-13 refinement)
+
+This section refines, rather than replaces, **Storage-to-retrospective
+mapping** above. It is pinned to the exact sources listed in
+`storage-retrospective-source-pins.edn`.
+
+### Bytes actually available
+
+`machine-slow-feedback-store-v2/capture` returns transaction bytes keyed by
+every ordered chain digest (including genesis), provenance bytes keyed by each
+reachable provenance digest, the ordered `:application-universe`, generation,
+and `:head-digest` (`machine_slow_feedback_store_v2.clj:348-362`). It does
+**not** return the HEAD bytes. Therefore a capture alone cannot reproduce and
+hash the HEAD record named by `:head-digest`; a pure read adapter must refuse
+`:e6b-retrospective/head-bytes-unavailable` until either capture adds the exact
+HEAD buffer or an independently pinned HEAD descriptor is supplied. A digest
+label is not a byte witness.
+
+For every non-genesis transaction, recovery has already followed its
+`:provenance-sha256`, hashed the exact provenance buffer, and invoked
+`provenance/readback` (`store_v2.clj:184-194,256-263`). Readback discards all
+cached parsed `:record` values and reconstructs from the encoded original
+descriptors (`machine_slow_feedback_provenance.clj:259-300`). Thus the durable
+provenance contains:
+
+- all seven original transition-source descriptors and records under
+  `[:original-sources]`, retaining distinct raw-source and parsed-value hashes;
+- both canonical E3/E2b output descriptors and the full canonical input closure
+  under `[:canonical-closure]`, including distinct E3 and E2b lifecycle/event
+  identifiers rather than forcing them equal;
+- the complete proposal, prior and computed-next records, both carrier
+  projections and carrier hashes; and
+- the owner-supplied expected parent HEAD and fixed transition time.
+
+### Deterministic pure projection
+
+Given strict capture bytes, independently pinned HEAD bytes, and an external
+completeness acceptance, the smallest future adapter has one behavior:
+`capture -> verify-feedback input`. It must, in this order:
+
+1. Strictly decode the HEAD from one buffer, require its raw SHA-256 equals
+   `:head-digest`, and require store id/generation/current transaction and state
+   joins identical to `store-v2/recover` (`store_v2.clj:221-276`).
+2. Strictly decode every transaction in `:chain-digests`, hash the same buffers,
+   follow every provenance digest, and call `provenance/readback` on the exact
+   captured provenance bytes. Missing, extra, unreachable, or unlisted objects
+   refuse; the adapter may not consult the current filesystem.
+3. For the target transaction, emit the unchanged retrospective application
+   ledger entry by selecting exactly
+   `{:application/id :feedback/event-id :prior-state/revision :status
+     :input/digests :output/digest}` from the transaction application. The
+   transaction-only `:transition/subject`, `:transaction-sha256`, and
+   `:provenance-sha256` remain provenance and must not enter that exact ledger
+   row. `:input/digests` must have exactly `[:context :prior :e2b :outcome]`;
+   `:output/digest` is the complete computed-next-record value digest, never the
+   carrier or transaction digest (`provenance.clj:234-250`).
+4. Recreate the ten-source input required by unchanged `verify-feedback`
+   (`machine_slow_feedback_evidence.clj:368-419`): seven exact original record
+   bytes from provenance; `:next-state` from the retained complete computed-next
+   record, not the next carrier; the ordered full six-field application ledger;
+   and a separately accepted complete application universe. Canonical E3/E2b
+   configuration must come from the retained closure, never working defaults.
+5. Preserve the captured application order exactly. Store capture rows add
+   transaction/provenance digests, so they are not themselves the unchanged
+   ledger schema; deterministic projection must remove only those two named
+   store fields and must reject any other missing or extra field.
+
+### External completeness subject
+
+The store returns `:completeness-authority :absent` and
+`:restart-authorized? false`; it cannot approve its own census. The required
+external record must be independently owned and bind at least: format
+`:wm/e6b-store-capture-v2`, store id, owner generation, exact HEAD raw digest,
+an exact digest of the serialized complete capture, ordered chain digests,
+ordered application IDs with their transaction and provenance digests, and an
+accepted review outcome over that exact subject. A candidate boolean, count,
+or copied application index refuses. No such production acceptance exists.
+
+### Remaining representation and authority gaps
+
+- HEAD bytes are absent from capture, so the pure adapter is not yet
+  implementable from capture alone.
+- No independently owned completeness/freshness acceptance exists; the store's
+  `:absent` marker is honest and mandatory.
+- Provenance is structural isolated-fixture evidence (`:authority/status
+  :none`), not authenticated production evidence or installed-code identity.
+- A computed successor remains a computed successor. Nothing in capture turns
+  it into the independently acquired prior record required for the next
+  transition; that still refuses
+  `:e6b-adapter/prior-acquisition-authority-unavailable`.
+- Production store ownership, first-install fencing, runtime wiring, and the
+  permanently absent historical 20588 commission remain outside this mapping.
+
+After review of this contract, the smallest executable packet is therefore
+not yet the full adapter: first add exact immutable HEAD bytes to isolated v2
+capture with digest/readback controls. Only then can a pure reconstruction
+adapter be commissioned, still requiring an externally supplied completeness
+acceptance and never synthesizing one.
