@@ -689,10 +689,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-carrier-lead-identity-review.request.json",
       "dispatch": "accepted",
       "scope": "independent lead prior/context identity correction review only"
+    },
+    {
+      "packet": "codex-23-carrier-decoded-source-identity-repair",
+      "job-id": "invoke-1789280435715-20692-6244fa95",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789280435715-20692-6244fa95",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-carrier-decoded-source-identity-repair.request.json",
+      "dispatch": "accepted",
+      "scope": "codec decoded source and lifecycle review identity joins; no store"
     }
   ],
   "current-awaiting": [
-    "invoke-1789280274907-20690-e17c8ed6"
+    "invoke-1789280435715-20692-6244fa95"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
