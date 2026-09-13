@@ -1,0 +1,30 @@
+{
+  "consumed_reviews": [
+    {
+      "job": "20631",
+      "review_commit": "9b8e3e89f2b05498f6f0e869029a8b8b8c3094fa",
+      "review_path": "holes/labs/wm-contract/runs/row-24-record-connection-binding-2026-09-13/lead-review.md",
+      "review_sha256": "f263b2a00a347b8a9285046c1d6637e76521d35d5d14fae2f79b636f63930b60"
+    },
+    {
+      "job": "20632",
+      "review_commit": "0e79d88039805ebd8e518e1c1e09a601f1c49098",
+      "review_path": "holes/labs/wm-contract/runs/row-19-lifecycle-snapshot-2026-09-13/lead-poison-acceptance.md",
+      "review_sha256": "c778d04dab3ece76eb0a4b9fc47e6bdfb26409a4c34aa0a7829e51afe35a5887"
+    },
+    {
+      "job": "20633",
+      "review_commit": "79560f468abad9061cf3d487c55d3a32ddd8b918",
+      "review_path": "holes/labs/wm-contract/runs/row-22-e3-pre-enact-2026-09-13/lead-event-acceptance.md",
+      "review_sha256": "80eb23de6aa005c964e40966e4dcbec52b0920eb7144ca2c338c8e625fb3a4e5"
+    }
+  ],
+  "current_awaiting": [
+    "invoke-1789274230654-20635-7c172b9a",
+    "invoke-1789274368566-20636-025e61a8",
+    "invoke-1789274481837-20637-ef731f39"
+  ],
+  "witnessed_activity": "all three current jobs running",
+  "action": "no redispatch; existing bounded continuation retained",
+  "task_complete": false
+}
