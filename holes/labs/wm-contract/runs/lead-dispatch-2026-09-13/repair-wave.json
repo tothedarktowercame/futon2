@@ -801,10 +801,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-capture-codec.request.json",
       "dispatch": "accepted",
       "scope": "pure deterministic isolated capture encoding/readback; no completeness or adapter"
+    },
+    {
+      "packet": "codex-23-capture-resolved-structure",
+      "job-id": "invoke-1789285190755-20720-23df28ec",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789285190755-20720-23df28ec",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-capture-resolved-structure.request.json",
+      "dispatch": "accepted",
+      "scope": "independent lead review and pure resolved capture structural joins; no adapter"
     }
   ],
   "current-awaiting": [
-    "invoke-1789284598571-20718-c8c93b62"
+    "invoke-1789285190755-20720-23df28ec"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
