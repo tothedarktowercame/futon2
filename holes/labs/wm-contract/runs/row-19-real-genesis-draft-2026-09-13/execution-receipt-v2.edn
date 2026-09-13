@@ -1,0 +1,8 @@
+{:schema :wm/r9-real-genesis-draft-receipt-v2
+ :tree-sha "10bcf63681eec177321d48a00088ab919e6c6a93"
+ :at "2026-09-13T03:01:42Z"
+ :command "clojure -M holes/labs/wm-contract/runs/row-19-real-genesis-draft-2026-09-13/check_draft.clj"
+ :exit 0 :checks 7 :passed 7 :result :pending-by-evidence
+ :checker-sha256 "b2d370cc75c449f2166281ba44cff57b18ac28532b10c6e1e18f900e3ff9c446"
+ :raw "draft-checker-v2.raw.edn"
+ :supersedes "execution-receipt.edn"}
