@@ -1,0 +1,45 @@
+{
+  "runs": [
+    {
+      "gate": "test",
+      "argv": [
+        "clojure",
+        "-M:test",
+        "-n",
+        "futon3c.agency.invoke-ingress-controller-test"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "kondo",
+      "argv": [
+        "clj-kondo",
+        "--lint",
+        "src/futon3c/agency/invoke_ingress_controller.clj",
+        "test/futon3c/agency/invoke_ingress_controller_test.clj"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "parens",
+      "argv": [
+        "emacs",
+        "-Q",
+        "--batch",
+        "-l",
+        "/home/joe/code/futon4/dev/check-parens.el",
+        "--eval",
+        "(arxana-check-parens-cli)",
+        "--",
+        "--no-defaults",
+        "src/futon3c/agency/invoke_ingress_controller.clj",
+        "test/futon3c/agency/invoke_ingress_controller_test.clj"
+      ],
+      "exit": 0
+    }
+  ],
+  "pins": {
+    "src/futon3c/agency/invoke_ingress_controller.clj": "966dba69d13c3f39431dd73369716e53d07a171e09b09818529113c00db52756",
+    "test/futon3c/agency/invoke_ingress_controller_test.clj": "2d8f83ca7398631a47a8a045b2144a1ba95d52a6aa11357cb354305d42ad9cee"
+  }
+}
