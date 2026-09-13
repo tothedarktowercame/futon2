@@ -1,0 +1,20 @@
+{
+  "command": [
+    "clojure",
+    "-M:test",
+    "holes/labs/wm-contract/runs/row-22-e4-causal-evidence-2026-09-13/lead-controls.clj"
+  ],
+  "exit": 0,
+  "pins": [
+    {
+      "path": "src/futon2/aif/scheduled_route_evidence.clj",
+      "sha256": "97cbdc52f7214de0c4d1a8beb0cefbbc96380592592b33f71ced1d7aca8eab19",
+      "matches_subject_commit": true
+    },
+    {
+      "path": "test/futon2/aif/scheduled_route_evidence_test.clj",
+      "sha256": "01a454d33399bd9da5ad17868c724965a2d2d794f795d316193f0d679aae7834",
+      "matches_subject_commit": true
+    }
+  ]
+}

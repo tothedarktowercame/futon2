@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest E4 review: 0c0aa613/a91c4dd9 two pins/raw4tests21 verified. Executed absent observations, nil actions and simultaneous support deletion all still verify. Payload/input/completeness repair required; no production edge. See [review](runs/row-22-e4-causal-evidence-2026-09-13/lead-review.md).
+
 2026-09-12 (v2, reordered under RULINGS Item 5). One task per row,
 plain language, build order. **A QUALIFYING RUN is a run with every
 node defined, validated, and working, provably so, whose
