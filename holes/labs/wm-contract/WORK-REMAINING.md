@@ -18,7 +18,7 @@ system run; no new bookkeeping systems.
 
 | Outcome since 2026-09-12 delegation | Count |
 | --- | ---: |
-| Tracker rows closed | **0** |
+| Tracker rows closed | **1** (row 26, 2026-09-13) |
 | New witness claims admitted | **0** (35 → 35 total) |
 
 ## The core closure list (build order)
@@ -1121,9 +1121,25 @@ operator workflow conversation (standdown 2026-09-12).
 25. Write the run→certificate→Lean-file generator with tamper tests
     (every mutated certificate fails), on the September-1 proof
     pattern.
-26. Build the on-demand whole-loop entry point over the gated click
-    path (MANDATED; repaired-Empirics standard: real work, findings
-    routed, breakdowns fixed in-lane).
+26. DONE (2026-09-13, claude-15 review). The on-demand whole-loop
+    entry point over the gated click path is built, reviewed, and
+    demonstrated end to end. Client: futon2 402632e6 + hardening
+    8238a109 (typed transport refusals); run-id passthrough futon3c
+    51269db9; server-owned cohort binding futon3c 2cbb6f67 (payload
+    carries no cohort authority). Three machinery-test runs prove the
+    Empirics standard clause by clause: REAL WORK — r3's attempt-002
+    dispatched an author turn that committed the F11 F2-reconciliation
+    parcel (futon2 9a6a012f, gates green); FINDINGS ROUTED — r1's
+    exhausted-default-cohort discovery (TN 0bca47c1) produced cohort 47
+    (a6d3e825), r2's construction-seam failure (TN 142dc1ae) produced
+    the reviewed seam fix, r3 deposited the artifact-binding-mismatch
+    obligation into the field; BREAKDOWNS FIXED IN-LANE — the seam fix
+    (5abdc358, reviewed, 149/766 tests) landed construction checkpoints
+    durably (attempt-002 has all seven, typed sorries, no mislabels).
+    Runs recorded as build-phase machinery tests throughout; receipts
+    under runs/row-26-*/. Residual (not this row's): the author-wait
+    window (~2m16s) is shorter than a real gated author turn — r3's
+    authored commit landed after close, unbound to the attempt.
 27. Complete the F11 mission: the F2 reconciliation committed
     through author → independent review → gates; discharges
     repair-024.
