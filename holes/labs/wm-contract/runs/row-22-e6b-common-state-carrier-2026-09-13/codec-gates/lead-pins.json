@@ -1,0 +1,44 @@
+[
+  {
+    "role": "source",
+    "path": "src/futon2/aif/machine_slow_state_carrier.clj",
+    "sha256": "49a577c79cd533bbd74ddfa6134776ed81513e0a2bfb6e5d24c34fe0c4e14fe8",
+    "historical-match": true
+  },
+  {
+    "role": "test",
+    "path": "test/futon2/aif/machine_slow_state_carrier_test.clj",
+    "sha256": "3ec8c6da0adf448cf8ba5301f6ef894b77f835f450511fba1b8afd82c6fd2afa",
+    "historical-match": true
+  },
+  {
+    "role": "contract",
+    "path": "holes/labs/wm-contract/CONTRACT-e6b-common-state-carrier-v1-2026-09-13.md",
+    "sha256": "e3d6e14895d297584a204b4f26e1e9c91a2e63fb1bc0d6d54b819ece4ff608de",
+    "historical-match": true
+  },
+  {
+    "role": "prospective-verifier",
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500",
+    "historical-match": true
+  },
+  {
+    "role": "temporal-hierarchy",
+    "path": "src/futon2/aif/temporal_hierarchy.clj",
+    "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "historical-match": true
+  },
+  {
+    "role": "intrinsic-values",
+    "path": "src/futon2/aif/intrinsic_values.clj",
+    "sha256": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b",
+    "historical-match": true
+  },
+  {
+    "role": "independent-review",
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-common-state-carrier-2026-09-13/independent-lead-review.md",
+    "sha256": "c29ed28405b0bf121da8170d83eb372b1def8eba257a50610463adc740959de1",
+    "historical-match": true
+  }
+]

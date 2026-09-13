@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest codec6097cad0/0cd37be8 raw14tests81 reviewed. Executed nil identity and borrowed occurrence still structurally project with original context unchanged. Full decoded-context/proposal joins required; no authority escalation claimed. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-gates/lead-review.md).
+
 - Latest carrier contractfd93f7cf digest mapping/provenance design reviewed against two unchanged pins. Lead specified exact six-field retrospective ledger and durable canonical E3/E2b input closure. Pure carrier codec next; store-v2/adapter/restart replay remain unimplemented. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/lead-repair-review.md).
 
 - Latest common-carrier5ba1e504 two implementation pins verified. Store seven-input/carrier-output digests differ from retrospective four-input/next-record subjects; durable original-evidence/expected-HEAD retention lacks schema. Contract repair required before adapter. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/lead-review.md).
