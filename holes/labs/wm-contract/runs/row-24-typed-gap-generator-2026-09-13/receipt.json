@@ -1,0 +1,34 @@
+{
+  "tests": {
+    "command": "bb holes/labs/wm-contract/typed_gap_census_controls.bb",
+    "exit": 0,
+    "tests": 2,
+    "assertions": 18
+  },
+  "generation": {
+    "exit": 0,
+    "final-source-reproduces-compiled-bytes": true
+  },
+  "lean": {
+    "cwd": "/home/joe/code/mathlib4",
+    "command": "lake env lean /home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/GeneratedTypedGap.lean",
+    "exit": 0,
+    "axiom-checks": 3,
+    "sorryAx": false
+  },
+  "tamper": {
+    "command": "lake env lean /home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/TamperedTypedGap.lean",
+    "expected-exit": 1,
+    "change": "remove all family entries; census and rejection witness fail"
+  },
+  "kondo": {
+    "exit": 0,
+    "warnings": 0,
+    "errors": 0
+  },
+  "parens": {
+    "exit": 0
+  },
+  "scope": "isolated structural code generation, no acquisition authority, no emitter integration",
+  "history": "initial parse failure in failed-history.edn; 17-assertion pass superseded by explicit surrogate refusal (18 assertions); generated Lean bytes unchanged"
+}

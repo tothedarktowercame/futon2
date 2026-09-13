@@ -1,0 +1,50 @@
+[
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/typed_gap_census_to_lean.bb",
+    "sha256": "47df8b2cb6634ac5fef10bae846c33bdb41166be3f2f50c0293e23bd4f3acc9c"
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/typed_gap_census_controls.bb",
+    "sha256": "ddc97d354b9946c31c2e318388a8e5f401e8e45858c6575394ddc2311c93ef1c"
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/input.edn",
+    "sha256": "7a464e4f98e957e435e50a043e8aaacb7158015e1ddab6869062c2195e44b0bd"
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/GeneratedTypedGap.lean",
+    "sha256": "afb80fc611b743502ef23a77d8e254bdde9014222ff7ca22de2153ba712d04fc"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean",
+    "sha256": "8a8e8aef58160c0037369c690c82767046cbfda72f2d10dba67356327bcc9a67"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateEventBinding.lean",
+    "sha256": "783ead4723c6d9adb3e4d373a4d2c57ecae07d66383a35009e7c9d7aa599cff6"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateCrossLayerBinding.lean",
+    "sha256": "4b2124823e62aa1c68053d3be92e7a10a9f4c38ac19dccad16fe2fbbaab0f05e"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateRunBinding.lean",
+    "sha256": "693d48ffa7acf285caea77e324e4895ee19b51eb23a05c0bf752668f7e3aef9e"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateResolvedEvidence.lean",
+    "sha256": "70e4b40d577406cf87e127570c44e255ad5f27310290a7d60b9a95223d95e53e"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificatePredicate.lean",
+    "sha256": "b1055f6354e1335a9df219abaf606b88814f78249c97d891c2581436f22fef97"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/CertificateStates.lean",
+    "sha256": "83bb3bbbea3bad9a9d56568704300427f94e1bf1539ad322041e3cae8beab778"
+  },
+  {
+    "path": "/home/joe/code/mathlib4/lean-toolchain",
+    "sha256": "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"
+  }
+]

@@ -1,0 +1,1 @@
+{:status :generated-only, :scope :isolated, :authority/status :none, :input-sha256 "7a464e4f98e957e435e50a043e8aaacb7158015e1ddab6869062c2195e44b0bd", :lean-sha256 "afb80fc611b743502ef23a77d8e254bdde9014222ff7ca22de2153ba712d04fc", :lean-checked? false, :output "holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/GeneratedTypedGap.lean"}

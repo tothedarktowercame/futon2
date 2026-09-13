@@ -1,0 +1,9 @@
+/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/TamperedTypedGap.lean:14:42: error: Tactic `decide` proved that the proposition
+  CensusComplete att
+is false
+/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/TamperedTypedGap.lean:17:83: error: Tactic `decide` proved that the proposition
+  RecordFamilyPresence.typedGap RecordFamily.fullLoopCheckpoints "not acquired" ∈ att.recordFamilies
+is false
+'GeneratedTypedGap.census' depends on axioms: [sorryAx]
+'GeneratedTypedGap.rejects' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'GeneratedTypedGap.rejects_cross' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]

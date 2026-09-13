@@ -1,0 +1,3 @@
+'GeneratedTypedGap.census' does not depend on any axioms
+'GeneratedTypedGap.rejects' depends on axioms: [propext, Classical.choice, Quot.sound]
+'GeneratedTypedGap.rejects_cross' depends on axioms: [propext, Classical.choice, Quot.sound]
