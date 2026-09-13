@@ -1,13 +1,15 @@
 (ns futon2.aif.authority-buffer
   "Immutable, single-read authority acquisition. This helper authenticates a
   caller-configured path/digest pair; it grants no production authority."
-  (:require [cheshire.core :as json]
-            [clojure.edn :as edn])
+  (:require [clojure.edn :as edn]
+            [clojure.walk :as walk])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
            (java.nio.charset CodingErrorAction StandardCharsets)
            (java.nio.file Files Path)
-           (java.security MessageDigest)))
+           (java.security MessageDigest)
+           (com.fasterxml.jackson.core JsonFactory JsonParser$Feature)
+           (com.fasterxml.jackson.databind ObjectMapper)))
 
 (defn- refuse! [reason data]
   (throw (ex-info (name reason) (assoc data :refusal reason))))
@@ -27,10 +29,11 @@
 (defn- parse-one-edn [s]
   (try
     (with-open [r (PushbackReader. (StringReader. s))]
-      (let [v (edn/read {:eof ::eof} r)
-            tail (edn/read {:eof ::eof} r)]
-        (when (= v ::eof) (refuse! :authority-malformed {:format :edn :reason :empty}))
-        (when-not (= tail ::eof)
+      (let [eof (Object.)
+            v (edn/read {:eof eof} r)
+            tail (edn/read {:eof eof} r)]
+        (when (identical? v eof) (refuse! :authority-malformed {:format :edn :reason :empty}))
+        (when-not (identical? tail eof)
           (refuse! :authority-trailing-form {:format :edn}))
         v))
     (catch clojure.lang.ExceptionInfo e (throw e))
@@ -39,8 +42,18 @@
 
 (defn- parse-one-json [s]
   (try
-    ;; Cheshire/Jackson rejects non-whitespace trailing input.
-    (json/parse-string-strict s true)
+    (let [factory (doto (JsonFactory.)
+                    (.enable JsonParser$Feature/STRICT_DUPLICATE_DETECTION))
+          mapper (ObjectMapper.)]
+      (with-open [parser (.createParser factory ^String s)]
+        (when-not (.nextToken parser)
+          (refuse! :authority-malformed {:format :json :reason :empty}))
+        (let [v (.readValue mapper parser Object)]
+          (when (.nextToken parser)
+            (refuse! :authority-trailing-form {:format :json}))
+          (walk/postwalk
+           #(if (instance? java.util.Map %) (into {} %) %)
+           v))))
     (catch Exception e
       (refuse! :authority-malformed {:format :json :cause (.getMessage e)}))))
 
@@ -59,13 +72,22 @@
     (when-not (= expected-sha256 observed)
       (refuse! :authority-pin-mismatch
                {:path path :expected expected-sha256 :observed observed}))
-    (let [text (strict-utf8 frozen)
-          value (case format
-                  :edn (parse-one-edn text)
-                  :json (parse-one-json text)
-                  (refuse! :authority-format-unsupported {:format format}))]
-      {:path path :format format :source-sha256 observed
-       :source-text text :value value})))
+    (let [text (strict-utf8 frozen)]
+      ;; Parse now to refuse bad input, but retain only immutable source text;
+      ;; pointer reads reparse after rechecking its digest.
+      (case format
+        :edn (parse-one-edn text)
+        :json (parse-one-json text)
+        (refuse! :authority-format-unsupported {:format format}))
+      {:path path :format format :source-sha256 observed :source-text text})))
+
+(defn canonical [x]
+  (cond
+    (map? x) (into (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
+                   (map (fn [[k v]] [k (canonical v)])) x)
+    (set? x) (mapv canonical (sort-by pr-str x))
+    (sequential? x) (mapv canonical x)
+    :else x))
 
 (defn resolve-pointer!
   "Resolve an exact vector pointer from the captured parsed value. The raw
@@ -73,15 +95,27 @@
   [capture pointer]
   (when-not (and (vector? pointer) (seq pointer))
     (refuse! :authority-pointer-ambiguous {:pointer pointer}))
-  (loop [v (:value capture), ks pointer]
-    (if-let [k (first ks)]
-      (let [present? (cond (map? v) (contains? v k)
+  (let [text (:source-text capture)
+        observed (sha256 (.getBytes ^String text StandardCharsets/UTF_8))]
+    (when-not (= observed (:source-sha256 capture))
+      (refuse! :authority-capture-mutated {:expected (:source-sha256 capture)
+                                           :observed observed}))
+    (loop [v (case (:format capture)
+               :edn (parse-one-edn text)
+               :json (parse-one-json text)
+               (refuse! :authority-format-unsupported {:format (:format capture)}))
+           idx 0]
+      (if (< idx (count pointer))
+      (let [k (nth pointer idx)
+            _ (when-not (or (keyword? k) (string? k) (integer? k) (nil? k) (false? k))
+                (refuse! :authority-pointer-ambiguous {:pointer pointer :at k}))
+            present? (cond (map? v) (contains? v k)
                            (vector? v) (and (integer? k) (<= 0 k) (< k (count v)))
                            :else false)]
         (when-not present?
           (refuse! :authority-pointer-missing {:pointer pointer :at k}))
-        (recur (get v k) (next ks)))
+        (recur (get v k) (inc idx)))
       {:pointer pointer
        :source-sha256 (:source-sha256 capture)
        :value v
-       :value-sha256 (sha256 (.getBytes (pr-str v) StandardCharsets/UTF_8))})))
+       :value-sha256 (sha256 (.getBytes (pr-str (canonical v)) StandardCharsets/UTF_8))}))))

@@ -38,3 +38,33 @@
           c (subject/capture! {:path (str p) :expected-sha256 d :format :edn})]
       (is (= :authority-pointer-missing (refusal #(subject/resolve-pointer! c [:b]))))
       (is (= :authority-pointer-ambiguous (refusal #(subject/resolve-pointer! c [])))))))
+
+(deftest json-exhaustion-duplicates-and-scalars
+  (doseq [text ["{\"a\":1} {\"b\":2}" "{\"a\":1,\"a\":2}"
+                "{\"outer\":{\"a\":1,\"a\":2}}"]]
+    (let [p (temp-file text) d (subject/sha256 (Files/readAllBytes p))]
+      (is (contains? #{:authority-malformed :authority-trailing-form}
+                     (refusal #(subject/capture! {:path (str p) :expected-sha256 d :format :json}))))))
+  (doseq [text ["null" "false"]]
+    (let [p (temp-file text) d (subject/sha256 (Files/readAllBytes p))]
+      (is (= text (:source-text
+                   (subject/capture! {:path (str p) :expected-sha256 d :format :json})))))))
+
+(deftest false-nil-eof-and-mutation
+  (let [p (temp-file "{nil {:x 1} false {:x 2} :futon2.aif.authority-buffer/eof 3}")
+        d (subject/sha256 (Files/readAllBytes p))
+        c (subject/capture! {:path (str p) :expected-sha256 d :format :edn})]
+    (is (= 1 (:value (subject/resolve-pointer! c [nil :x]))))
+    (is (= 2 (:value (subject/resolve-pointer! c [false :x]))))
+    (is (= 3 (:value (subject/resolve-pointer! c [:futon2.aif.authority-buffer/eof]))))
+    (is (= :authority-pointer-missing
+           (refusal #(subject/resolve-pointer! c [nil :x :trailing]))))
+    (is (= :authority-capture-mutated
+           (refusal #(subject/resolve-pointer! (assoc c :source-text "{:forged 1}") [:forged]))))))
+
+(deftest canonical-value-order
+  (let [a (temp-file "{:v {:b 2 :a 1}}") b (temp-file "{:v {:a 1 :b 2}}")
+        ca (subject/capture! {:path (str a) :expected-sha256 (subject/sha256 (Files/readAllBytes a)) :format :edn})
+        cb (subject/capture! {:path (str b) :expected-sha256 (subject/sha256 (Files/readAllBytes b)) :format :edn})]
+    (is (= (:value-sha256 (subject/resolve-pointer! ca [:v]))
+           (:value-sha256 (subject/resolve-pointer! cb [:v]))))))
