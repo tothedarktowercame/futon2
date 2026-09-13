@@ -1,0 +1,23 @@
+{
+  "kondo": {
+    "chunk_id": "8691b9",
+    "wall_time_seconds": 0.000002365,
+    "exit_code": 0,
+    "original_token_count": 11,
+    "output": "linting took 23ms, errors: 0, warnings: 0\n"
+  },
+  "parens": {
+    "chunk_id": "82bc8b",
+    "wall_time_seconds": 0.000002715,
+    "exit_code": 0,
+    "original_token_count": 1,
+    "output": "OK\n"
+  },
+  "test": {
+    "chunk_id": "9c74b9",
+    "wall_time_seconds": 0.000002835,
+    "exit_code": 0,
+    "original_token_count": 28,
+    "output": "\nRunning tests in #{\"test\"}\n\nTesting futon2.aif.interoceptive-manifest-test\n\nRan 10 tests containing 32 assertions.\n0 failures, 0 errors.\n"
+  }
+}

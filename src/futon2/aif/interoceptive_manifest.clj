@@ -75,6 +75,7 @@
     (doseq [f xs]
       (when-not (or (and (= role :repair-findings)
                          (= ".publication.lock" (.getName ^java.io.File f))
+                         (not (Files/isSymbolicLink (.toPath ^java.io.File f)))
                          (.isFile ^java.io.File f))
                     (and (.isFile ^java.io.File f)
                          (not (Files/isSymbolicLink (.toPath ^java.io.File f)))

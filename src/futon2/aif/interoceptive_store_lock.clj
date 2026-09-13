@@ -79,7 +79,7 @@
   (with-lock-path (or *lock-path* default-lock-path) f))
 
 (defn with-store-lock-for [root f]
-  (let [root-file (.getAbsoluteFile (java.io.File. root))
+  (let [root-file (.toFile (.normalize (.toAbsolutePath (.toPath (java.io.File. root)))))
         root-path (.getPath root-file)
         canonical-data "/home/joe/code/futon2/data/"
         path (or *lock-path*

@@ -186,6 +186,13 @@ is not yet a verified join to Agency's normalized request digest.
   canonical variance derivative and range-bound certificate next; no field or
   float correctness claim. See policy-precision/lead-unique-root-review.md.
 
+- Row18 source protocol repairs through `82bcad95` reviewed; lead fixed
+  normalized canonical-root lock selection and publication-lock symlink handling.
+  Final targeted run10tests/32assertions, kondo/parens pass. Source protocol accepted
+  narrowly; production still unconditionally refuses participation-unverified.
+  Secure lock/verified writer activation and independent touch-up review remain
+  before live use. See coherent-snapshot/lead-source-protocol-review.md.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,

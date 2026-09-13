@@ -191,3 +191,24 @@
              (binding [store-lock/*lock-path* lock-path]
                (store-lock/with-store-lock (constantly :acquired-after-child)))))
       (finally (.destroyForcibly process)))))
+
+(deftest normalized-store-lock-selection
+  (with-redefs-fn {#'store-lock/with-lock-path (fn [path _] path)}
+    (fn []
+      (is (= store-lock/default-lock-path
+             (store-lock/with-store-lock-for
+              "/home/joe/code/./futon2/data/wm-tripwires/trips" identity)))
+      (is (= store-lock/default-lock-path
+             (store-lock/with-store-lock-for
+              "/home/joe/code/futon2/data/wm-repair-obligations/../wm-tripwires/trips"
+              identity))))))
+
+(deftest publication-lock-symlink-refuses
+  (let [[trips repair-root] (roots)
+        target (write! trips "one.edn"
+                       {:trip/id "one" :trip/schema-version 1 :trip/action :record})
+        link (java.io.File. repair-root "findings/.publication.lock")]
+    (Files/createSymbolicLink (.toPath link) (.toPath target)
+                             (make-array FileAttribute 0))
+    (is (= :interoceptive/unexpected-structural-entry
+           (refusal #(manifest/capture (.getPath trips) (.getPath repair-root) :test))))))

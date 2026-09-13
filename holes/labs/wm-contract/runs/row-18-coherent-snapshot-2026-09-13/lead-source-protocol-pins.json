@@ -1,0 +1,8 @@
+{
+  "src/futon2/aif/interoceptive_store_lock.clj": "337c7f327f122c4ac5123a24212022ff45fa155406620384c0aebe1de96b1f33",
+  "src/futon2/aif/interoceptive_manifest.clj": "f4df7b64777c56fc07fe0e465fcfbeb262c7f34e7ddabd149a72f6aba50a4896",
+  "src/futon2/aif/tripwire.clj": "a75b2a571d76fa93486ff8807dc4fdc93a2f6ca125042f0d3087cbdcb933aeae",
+  "src/futon2/aif/repair_obligation.clj": "f61ede50822955695d5510248f0592883ed6f83d74be08a23ba37f649e33254a",
+  "test/futon2/aif/interoceptive_manifest_test.clj": "75eaba5e0873b45115f80254afafa618878cf133512e6ba9a1659d89c0ef500a",
+  "holes/labs/wm-contract/runs/row-18-coherent-snapshot-2026-09-13/production_participation_readback.clj": "e7669d91b581a8e1db6ee4a136dbe3d3be89c9dc533393b14ec861d7e77e2898"
+}
