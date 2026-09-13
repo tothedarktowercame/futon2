@@ -633,10 +633,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-prospective-validator.request.json",
       "dispatch": "accepted",
       "scope": "independent contract correction review and isolated prospective validator only"
+    },
+    {
+      "packet": "codex-23-feedback-private-core-extraction",
+      "job-id": "invoke-1789278702458-20678-9e6d23ae",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789278702458-20678-9e6d23ae",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-private-core-extraction.request.json",
+      "dispatch": "accepted",
+      "scope": "private transition core extraction only after incomplete20676; no new public API"
     }
   ],
   "current-awaiting": [
-    "invoke-1789278592555-20676-8b3acfe2"
+    "invoke-1789278702458-20678-9e6d23ae"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
