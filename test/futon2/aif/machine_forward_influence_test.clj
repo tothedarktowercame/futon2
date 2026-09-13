@@ -55,6 +55,8 @@
     (is (= :e6a/r6-scoring-correspondence-unavailable (:refusal data)))
     (is (true? (:changed? data)))
     (is (= [:run-e5 8 0] (:first-changed-occurrence data)))
+    (is (= 5 (count (get-in data [:arms :a :sources]))))
+    (is (= 5 (count (get-in data [:arms :b :sources]))))
     (is (= {:e2a :not-reached :e3 :not-reached :e2b :not-reached} (:downstream data)))))
 
 (deftest asserted-or-borrowed-scoring-cannot-cross-boundary

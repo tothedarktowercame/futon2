@@ -101,4 +101,8 @@
                   (some (fn [[a b]] (when (not= a b) (:candidate/occurrence-id a)))
                         (map vector (:shaped arm-a) (:shaped arm-b)))
                   :downstream {:e2a :not-reached :e3 :not-reached :e2b :not-reached}
+                  :arms {:a {:arm/id :a :slow/mode (:slow/mode arm-a)
+                             :shaped (:shaped arm-a) :sources (:sources arm-a)}
+                         :b {:arm/id :b :slow/mode (:slow/mode arm-b)
+                             :shaped (:shaped arm-b) :sources (:sources arm-b)}}
                   :sources (mapv #(dissoc % :record) resolved)})))))
