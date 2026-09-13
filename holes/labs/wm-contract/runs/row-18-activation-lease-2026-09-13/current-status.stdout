@@ -1,0 +1,1 @@
+{:ok false, :refusal :interoceptive/activation-lease-unavailable, :data {:path "/run/futon2/wm-interoceptive-deployment.lease", :cause :interoceptive/lock-path-refused, :refusal :interoceptive/activation-lease-unavailable}}

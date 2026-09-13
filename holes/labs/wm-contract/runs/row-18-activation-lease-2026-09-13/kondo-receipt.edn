@@ -1,0 +1,3 @@
+{:command "clj-kondo --lint src/futon2/aif/interoceptive_activation.clj src/futon2/aif/interoceptive_store_lock.clj src/futon2/aif/interoceptive_manifest.clj test/futon2/aif/interoceptive_activation_test.clj test/futon2/aif/interoceptive_manifest_test.clj holes/labs/wm-contract/runs/row-18-coherent-snapshot-2026-09-13/production_participation_readback.clj"
+ :exit 0 :errors 0 :warnings 0 :tree-sha "bc1b4856184c116700150483a1975bfbfb15fa3d"
+ :at "2026-09-13T03:10:13Z"}

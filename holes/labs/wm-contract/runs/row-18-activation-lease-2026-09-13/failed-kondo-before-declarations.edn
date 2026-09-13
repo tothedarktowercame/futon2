@@ -1,0 +1,2 @@
+{:command "clj-kondo --lint interoceptive_activation.clj interoceptive_manifest.clj"
+ :exit 3 :errors 4 :finding "forward declarations and manifest let binding were incomplete"}

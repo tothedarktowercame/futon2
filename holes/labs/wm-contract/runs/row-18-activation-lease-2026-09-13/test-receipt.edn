@@ -1,0 +1,8 @@
+{:command "clojure -X:test :nses '[futon2.aif.interoceptive-activation-test futon2.aif.interoceptive-manifest-test]'"
+ :exit 0 :tests 16 :assertions 49 :failures 0 :errors 0
+ :tree-sha "bc1b4856184c116700150483a1975bfbfb15fa3d"
+ :at "2026-09-13T03:10:13Z"
+ :stdout "Running tests in #{\"test\"}\nTesting futon2.aif.interoceptive-activation-test\nTesting futon2.aif.interoceptive-manifest-test\nRan 16 tests containing 49 assertions.\n0 failures, 0 errors."
+ :failed-attempts ["failed-kondo-before-declarations.edn"
+                   "failed-java-permission-set.edn"
+                   "failed-insecure-fixture-permissions.edn"]}

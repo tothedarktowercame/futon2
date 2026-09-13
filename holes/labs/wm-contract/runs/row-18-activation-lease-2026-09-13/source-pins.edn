@@ -1,0 +1,7 @@
+{:tree-sha "bc1b4856184c116700150483a1975bfbfb15fa3d"
+ :sha256 {"src/futon2/aif/interoceptive_activation.clj" "3d476516828c6f7d2d0d6f539feba4e003b262c1ec99d63b0977c371feb0d027"
+          "src/futon2/aif/interoceptive_store_lock.clj" "2d334c208b82fd377950a4f2ae3bd176f0922bb02bde7a0ca2240818ac64b262"
+          "src/futon2/aif/interoceptive_manifest.clj" "d7db4a4a73f0ecb188a3740b1310cda6aa7500180aa420a086948a937316264c"
+          "test/futon2/aif/interoceptive_activation_test.clj" "e281d8073af86c017b550598afa3372c4dd7855e5e0ae0b2506ae757a2c4405f"
+          "test/futon2/aif/interoceptive_manifest_test.clj" "131becbe37286c39bf5a0f140cb11e6370279bf8e22eb0722fdd141c24ad6992"
+          "production_participation_readback.clj" "a6a388be2cb710c4f2203254b821a98484e4b161d8e1590180744fca4e6ba6b1"}}

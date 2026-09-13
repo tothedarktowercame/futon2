@@ -1,0 +1,4 @@
+{:command "clojure -X:test :nses '[futon2.aif.interoceptive-activation-test futon2.aif.interoceptive-manifest-test]'"
+ :exit 1 :tests 15 :assertions 47 :errors 2
+ :report "/tmp/clojure-4921069055350383556.edn"
+ :finding "java.util.Set was used as a Clojure predicate/collection"}

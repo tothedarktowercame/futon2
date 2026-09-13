@@ -1,0 +1,4 @@
+{:command "clojure -X:test :nses '[futon2.aif.interoceptive-activation-test futon2.aif.interoceptive-manifest-test]'"
+ :exit 1 :tests 15 :assertions 48 :failures 1 :errors 1
+ :report "/tmp/clojure-6943153591102153613.edn"
+ :finding "isolated positive fixture inherited group-write permission and was correctly refused"}
