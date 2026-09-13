@@ -1,6 +1,5 @@
 (ns futon2.aif.machine-slow-feedback-store-test
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-slow-feedback-store :as store])
   (:import (java.nio.file Files StandardOpenOption)
@@ -104,7 +103,7 @@
   (doseq [[label replacement expected]
           [[:digest "{:schema :wrong}" :e6b-store/object-digest-mismatch]
            [:trailing "{} {}" :e6b-store/invalid-edn-cardinality]
-           [:utf8 (byte-array [(byte 0xc3) (byte 0x28)]) :e6b-store/invalid-edn]]]
+           [:utf8 (byte-array [(unchecked-byte 0xc3) (byte 0x28)]) :e6b-store/invalid-edn]]]
     (testing (name label)
       (let [[_ s] (initialized) r (store/recover s)
             path (.resolve ^java.nio.file.Path (:txdir s)

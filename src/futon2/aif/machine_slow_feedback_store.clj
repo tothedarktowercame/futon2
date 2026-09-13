@@ -4,7 +4,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str])
-  (:import (java.io PushbackReader StringReader FileOutputStream OutputStreamWriter BufferedWriter)
+  (:import (java.io PushbackReader StringReader FileOutputStream)
            (java.nio ByteBuffer)
            (java.nio.channels FileChannel OverlappingFileLockException)
            (java.nio.charset CodingErrorAction StandardCharsets)
@@ -20,7 +20,7 @@
 (defn- sha256 [^bytes bs]
   (apply str (map #(format "%02x" (bit-and 255 %))
                   (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bs))))))
-(defn- bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
+(defn- form-bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
 (defn- nonblank? [x] (and (string? x) (not (str/blank? x))))
 (defn- instant? [x] (try (Instant/parse x) true (catch Throwable _ false)))
 
@@ -52,7 +52,7 @@
 (defn- valid-state! [state]
   (when-not (and (map? state) (seq state))
     (refuse! :e6b-store/state-invalid {}))
-  (let [back (strict-edn (bytes state) "state")]
+  (let [back (strict-edn (form-bytes state) "state")]
     (when-not (= state back) (refuse! :e6b-store/state-unserializable {})))
   state)
 (defn- valid-authority! [a]
@@ -98,7 +98,7 @@
       true (finally (.unlock l)))))
 
 (defn- publish-object! [store form]
-  (let [bs (bytes form) digest (sha256 bs) final (.resolve ^Path (:txdir store) (str digest ".edn"))
+  (let [bs (form-bytes form) digest (sha256 bs) final (.resolve ^Path (:txdir store) (str digest ".edn"))
         tmp (Files/createTempFile ^Path (:txdir store) ".transaction-" ".tmp"
                                   (make-array java.nio.file.attribute.FileAttribute 0))]
     (try
@@ -119,7 +119,7 @@
       (finally (Files/deleteIfExists tmp)))))
 
 (defn- write-head! [store head]
-  (let [bs (bytes head) root ^Path (:root store)
+  (let [bs (form-bytes head) root ^Path (:root store)
         tmp (Files/createTempFile root ".head-" ".tmp"
                                   (make-array java.nio.file.attribute.FileAttribute 0))]
     (try
@@ -153,7 +153,7 @@
           (do
             (when-not (and (zero? expected) (= #{} (set (keys (:prior tx))))
                            (nil? (:application tx))
-                           (= (:state-sha256 tx) (sha256 (bytes (:state tx)))))
+                           (= (:state-sha256 tx) (sha256 (form-bytes (:state tx)))))
               (refuse! :e6b-store/genesis-invalid {}))
             (let [ordered (vec (reverse collected))]
               (when-not (= ordered (:application-index head))
@@ -168,7 +168,7 @@
                            (= (dec expected) (get-in tx [:prior :generation]))
                            (every? nonblank? [id event prior-rev (get-in tx [:next :revision])])
                            (= (get-in tx [:next :state-sha256])
-                              (sha256 (bytes (get-in tx [:next :state]))))
+                              (sha256 (form-bytes (get-in tx [:next :state]))))
                            (not (ids id)) (not (events event)) (not (priors prior-rev)))
               (refuse! :e6b-store/transaction-invalid {:digest digest}))
             (recur (get-in tx [:prior :transaction-sha256]) (dec expected)
@@ -186,7 +186,7 @@
       (refuse! :e6b-store/genesis-input-invalid {}))
     (let [tx {:schema :wm/e6b-state-genesis-v1 :store/id (:store-id store) :generation 0
               :prior {} :state state :state/revision revision
-              :state-sha256 (sha256 (bytes state)) :application nil
+              :state-sha256 (sha256 (form-bytes state)) :application nil
               :authority authority :committed-at committed-at}]
       (try
         (let [digest (publish-object! store tx)
@@ -222,7 +222,7 @@
       (let [generation (inc (:generation head))
             tx {:schema :wm/e6b-state-transaction-v1 :store/id (:store-id store)
                 :generation generation :prior (assoc prior :generation (:generation head))
-                :next (assoc next :state-sha256 (sha256 (bytes (:state next))))
+                :next (assoc next :state-sha256 (sha256 (form-bytes (:state next))))
                 :application application :authority authority :committed-at committed-at
                 :proposal proposal}]
         (try
