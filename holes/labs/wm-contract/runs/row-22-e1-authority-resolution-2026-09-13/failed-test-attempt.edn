@@ -1,0 +1,8 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-budget-authority-test"
+ :exit 1 :tests 6 :assertions 8 :errors 8
+ :tree-sha "63719e6765e5ea5410fe5d9b12dbe02a8b4d99d5"
+ :failure {:class "java.lang.ClassCastException"
+           :site "machine_budget_authority.clj:90"
+           :cause "destructured :sha256 string shadowed the sha256 function"}
+ :retention-note "Tool output was 7529 tokens and returned truncated; this record retains the runner totals, repeated exception class/site, cause, and tested tree without pretending to contain complete stdout."
+ :repair-commit "a6da8bc013a4ae68283d8e76ae0f1854cffa4838"}

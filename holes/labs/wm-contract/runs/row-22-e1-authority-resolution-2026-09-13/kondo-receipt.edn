@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint src/futon2/aif/machine_budget_authority.clj src/futon2/aif/machine_budget_mapping.clj test/futon2/aif/machine_budget_authority_test.clj"
+ :exit 0 :tests 3 :assertions 3
+ :tree-sha "a6da8bc013a4ae68283d8e76ae0f1854cffa4838"
+ :at "2026-09-13" :stdout "kondo.stdout" :stderr "kondo.stderr"}
