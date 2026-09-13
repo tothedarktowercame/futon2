@@ -241,11 +241,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-controlled-restart-preparation.request.json",
       "dispatch": "accepted",
       "scope": "disable selective live route and prepare actual controlled restart procedure; no execution"
+    },
+    {
+      "packet": "codex-22-declaration-edge-specifications",
+      "job-id": "invoke-1789269728949-20604-dad130de",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789269728949-20604-dad130de",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-declaration-edge-specifications.request.json",
+      "dispatch": "accepted",
+      "scope": "required declaration-level edge specification repairs; no obligation retirement/admission"
     }
   ],
   "current-awaiting": [
     "invoke-1789269574308-20603-34324870",
-    "invoke-1789269255942-20601-2892d280",
+    "invoke-1789269728949-20604-dad130de",
     "invoke-1789269432375-20602-be4977da"
   ]
 }
