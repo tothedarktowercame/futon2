@@ -38,6 +38,14 @@ calls acknowledge-resume! only after durable acceptance. A crash before ACK
 replays the same identity; after ACK it cannot replay. Conflict on identical id
 with changed payload refuses.
 
+Each controller acquires an OS file lock before recovery and holds it until
+explicit release. Same-JVM and cross-process competitors refuse before reading
+or writing. Fresh initialization uses CREATE_NEW while holding that ownership,
+so it cannot replace evidence between an existence check and publication.
+Resume payloads are maps whose requested-job-id exactly equals the deferred id;
+the full projection must survive strict EDN write/read equality before any disk
+or memory publication.
+
 Waiting, accepted, executing, and delivery counters deliberately do not recover
 from this store. Startup must reconcile those lifecycle identities against the
 hot invoke ledger, durable turn queues, and delivery records before opening.
