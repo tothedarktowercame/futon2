@@ -57,8 +57,9 @@
 (deftest exclusions-are-retained-and-not-counted
   (let [shadow (trip "trip-shadow" :record)
         result (commitment/confidence-snapshot (input [shadow] []))
-        test-input (assoc-in (input [(trip "trip-test" :stop-line)] [])
-                             [:trip-authority :authority-class] :test)
+        test-input (-> (input [(trip "trip-test" :stop-line)] [])
+                       (assoc-in [:trip-authority :authority-class] :test)
+                       (assoc-in [:repair-authority :authority-class] :test))
         test-result (commitment/confidence-snapshot test-input)]
     (is (= 1 (:machine-confidence result)))
     (is (= :shadow-record (get-in result [:excluded 0 :reason])))
