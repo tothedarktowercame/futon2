@@ -577,10 +577,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-terminal-review-audit.request.json",
       "dispatch": "accepted",
       "scope": "independent lead terminal fix review and bounded E6b relation audit"
+    },
+    {
+      "packet": "codex-23-e6b-authorization-before-enactment",
+      "job-id": "invoke-1789276825664-20664-3f4ae29c",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789276825664-20664-3f4ae29c",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-authorization-before-enactment.request.json",
+      "dispatch": "accepted",
+      "scope": "canonical authorization before exact enactment E6b repair; isolated"
     }
   ],
   "current-awaiting": [
-    "invoke-1789276503835-20662-3355953f"
+    "invoke-1789276825664-20664-3f4ae29c"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
