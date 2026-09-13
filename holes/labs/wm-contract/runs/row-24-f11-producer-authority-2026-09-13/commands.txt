@@ -1,0 +1,7 @@
+Read-only commands executed:
+rg -n "defn|certificate|source|sha256|run|route|equation|selection|scope" holes/labs/wm-contract/derive_certificate.bb
+find holes/labs/wm-contract/runs/certificate-v1-emitter-controls-2026-09-12 -maxdepth 2 -type f | sort
+sha256sum of derive_certificate.bb, SPEC-run-certificate-v1.md, aif-equations.edn, control-map-edges.edn and six additive Lean sources
+git rev-parse HEAD in futon2, mathlib4 and p4ng
+
+No test, compiler, emitter, live evaluation or certificate generation command was run.
