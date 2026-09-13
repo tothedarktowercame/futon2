@@ -21,3 +21,8 @@ Pins at tested tree `469a097dc8aebbc8a6c468fb815bd08217ef1195`:
 - E3 `d559e91587630f35ab26e9cb6beb30695f1142702ec13bc03eca3994ac170627`
 - E2b `0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933`
 - production shaping law `e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef`
+
+Final provenance repair at `384c57a5de003f7e5f2f27a424e97633e9d23541` retains both complete
+five-source E5 arm manifests in the typed R6 refusal. Source pin:
+`45235295bc2cb99adde26b07100845a50bd002a0aabcec20cef41731c21474b6`;
+test pin: `58bb3b278322385a18136675c5a0ddd988bc3bd6361cae268afd579bb1288680`.
