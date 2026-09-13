@@ -1,0 +1,4 @@
+{:command "clojure -M:test -m cognitect.test-runner -n futon2.aif.machine-forward-influence-test"
+ :exit 1 :tests 0 :assertions 0 :tree-sha "26372561" :at "2026-09-13"
+ :cause :private-fixture-helper :stdout "test-failed.stdout" :stderr ""}
+

@@ -1,0 +1,4 @@
+{:command "clj-kondo --lint src/futon2/aif/machine_forward_influence.clj test/futon2/aif/machine_forward_influence_test.clj"
+ :exit 0 :tests 2 :assertions 2 :tree-sha "469a097dc8aebbc8a6c468fb815bd08217ef1195"
+ :at "2026-09-13" :stdout "kondo.stdout" :stderr ""}
+

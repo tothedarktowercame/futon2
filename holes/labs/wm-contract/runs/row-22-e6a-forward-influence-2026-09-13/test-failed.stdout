@@ -1,0 +1,4 @@
+Running tests in #{"test"}
+Syntax error (IllegalStateException) compiling e5-fixture/production-shaped at (futon2/aif/machine_forward_influence_test.clj:94:59).
+var: #'futon2.aif.machine-slow-prior-evidence-test/production-shaped is not public
+
