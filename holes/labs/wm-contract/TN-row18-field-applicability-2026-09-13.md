@@ -60,7 +60,20 @@ gain floors and spread temperatures are different laws. None of held,
 saturated, inapplicable, or non-`:both` states qualifies for the theorem.
 
 `row18_field_applicability.clj` is a nonintegrated checker for this fixed
-artifact. It pins the source, calls the production alignment function, checks
+artifact. It hashes and strictly decodes the same byte buffers it parses,
+pins the audit input independently, calls the production alignment function, checks
 habit/prior authority and support order, evaluates the sufficient inequality
 as BigDecimal rational arithmetic, and commissions missing-F_pi,
-missing-prior, and missing-habit refusals. It writes no production state.
+missing-prior, missing-habit, and mutation-after-read refusals. Its runner
+asserts the exact refusal map; an induced wrong expectation exits nonzero. It
+writes no production state (the mutation control uses and deletes a temporary
+file).
+
+The actual `carry-beta` qualification is `(converged? && not (false?
+bracketed?))`, not strictly `(converged? && bracketed? true)`. Thus a bisect
+result with `false` holds, a bisect result with `true` may carry if converged,
+and a gradient result whose bracket key is absent may carry if converged.
+Unconverged results hold regardless. This is production's lifecycle rule; it
+is weaker than theorem qualification. A carried gradient result remains a
+floating approximation, and clipping/floor/ceiling hits remain recorded
+nonqualifying causes rather than exact roots.

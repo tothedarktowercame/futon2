@@ -6,8 +6,14 @@
             [clojure.java.io :as io]
             [futon2.aif.habit-prior :as habit]
             [futon2.aif.policy-precision :as precision])
-  (:import [java.io PushbackReader]
+  (:import [java.io PushbackReader StringReader]
+           [java.nio ByteBuffer]
+           [java.nio.charset CodingErrorAction StandardCharsets]
+           [java.nio.file Files OpenOption]
            [java.security MessageDigest]))
+
+(def audit-input-sha256
+  "1818dd14eabe7274815e1298b7d59909b06f98d853db52a84ec1f3e229f20235")
 
 (defn- refuse! [reason data]
   (throw (ex-info (name reason) (assoc data :refusal reason))))
@@ -16,9 +22,32 @@
   (apply str (map #(format "%02x" (bit-and (int %) 0xff))
                   (.digest (MessageDigest/getInstance "SHA-256") bytes))))
 
-(defn- read-first [path]
-  (with-open [r (PushbackReader. (io/reader path))]
+(defn- strict-utf8 [bytes]
+  (str (.decode (doto (.newDecoder StandardCharsets/UTF_8)
+                  (.onMalformedInput CodingErrorAction/REPORT)
+                  (.onUnmappableCharacter CodingErrorAction/REPORT))
+                (ByteBuffer/wrap bytes))))
+
+(defn- parse-first-buffer [bytes]
+  (with-open [r (PushbackReader. (StringReader. (strict-utf8 bytes)))]
     (edn/read {:eof ::eof :default tagged-literal} r)))
+
+(defn- read-pinned-first
+  ([path expected] (read-pinned-first path expected nil))
+  ([path expected after-read!]
+   (let [file (.toPath (io/file path))
+         bytes (Files/readAllBytes file)
+         actual (sha256 bytes)]
+     (when-not (= expected actual)
+       (refuse! :source-pin-mismatch {:path path :expected expected :actual actual}))
+     (when after-read! (after-read!))
+     ;; Parsing is deliberately from BYTES, never a reopened path.
+     (let [value (parse-first-buffer bytes)
+           after (sha256 (Files/readAllBytes file))]
+       (when-not (= actual after)
+         (refuse! :source-mutated-after-read
+                  {:path path :before actual :after after}))
+       {:value value :sha256 actual :bytes bytes}))))
 
 (defn- decimal-rational [x]
   (when-not (and (number? x) (Double/isFinite (double x)))
@@ -96,6 +125,10 @@
           :exact-root? false
           :reason :floating-exp-and-residual-have-no-outward-rounded-real-interval}}))))
 
+(defn- refusal-of [f]
+  (try (f) :failed-to-refuse
+       (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
+
 (defn commissioned-controls []
   (let [base {:ranked-actions [{:action {:type :no-op}
                                 :controller-score 1.0
@@ -107,25 +140,56 @@
                {"rank/1" {:candidate-identity [:no-op [:unscoped nil]]
                            :status :present :value 0.0}}}
               :policy-precision-state {:solve {:beta-prior 1.0}}}
-        refusal (fn [x]
-                  (try (inspect-field x) :failed-to-refuse
-                       (catch clojure.lang.ExceptionInfo e
-                         (:refusal (ex-data e)))))]
-    {:missing-f-pi (refusal (assoc-in base [:f-pi-by-candidate-id :status] :absent))
-     :missing-prior (refusal (assoc-in base [:policy-precision-state :solve] {}))
-     :missing-habit (refusal (update-in base [:ranked-actions 0]
-                                       dissoc :habit-prior-source))}))
+        temp (Files/createTempFile "row18-mutated-after-read" ".edn"
+                                   (make-array java.nio.file.attribute.FileAttribute 0))]
+    (try
+      (Files/write temp (.getBytes "{:v 1}" "UTF-8") (make-array OpenOption 0))
+      (let [expected (sha256 (Files/readAllBytes temp))]
+        {:missing-f-pi
+         (refusal-of #(inspect-field
+                       (assoc-in base [:f-pi-by-candidate-id :status] :absent)))
+         :missing-prior
+         (refusal-of #(inspect-field
+                       (assoc-in base [:policy-precision-state :solve] {})))
+         :missing-habit
+         (refusal-of #(inspect-field
+                       (update-in base [:ranked-actions 0]
+                                  dissoc :habit-prior-source)))
+         :mutation-after-read
+         (refusal-of #(read-pinned-first
+                       (str temp) expected
+                       (fn [] (Files/write temp (.getBytes "{:v 2}" "UTF-8")
+                                           (make-array OpenOption 0)))))} )
+      (finally (Files/deleteIfExists temp)))))
 
-(defn -main [& [trace-path audit-input-path]]
+(def expected-controls
+  {:missing-f-pi :f-pi-authority-absent
+   :missing-prior :beta-prior-authority-absent
+   :missing-habit :habit-authority-absent
+   :mutation-after-read :source-mutated-after-read})
+
+(defn assert-controls! [expected]
+  (let [actual (commissioned-controls)]
+    (when-not (= expected actual)
+      (refuse! :commissioned-control-mismatch
+               {:expected expected :actual actual}))
+    actual))
+
+(defn -main [& [trace-path audit-input-path mode]]
   (when-not (and trace-path audit-input-path)
     (refuse! :usage {:required ["TRACE" "AUDIT-INPUT"]}))
-  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file trace-path)))
-        audit (edn/read-string (slurp audit-input-path))
+  (let [audit-read (read-pinned-first audit-input-path audit-input-sha256)
+        audit (:value audit-read)
         expected (get-in audit [:source :sha256])
-        actual (sha256 bytes)]
-    (when-not (= expected actual)
-      (refuse! :source-pin-mismatch {:expected expected :actual actual}))
+        trace-read (read-pinned-first trace-path expected)
+        actual (:sha256 trace-read)
+        control-expectation (if (= mode "--negative-wrong-expectation")
+                              (assoc expected-controls :missing-habit :wrong)
+                              expected-controls)
+        controls (assert-controls! control-expectation)]
     (prn {:schema :wm/row18-field-applicability-v1
           :source {:path trace-path :sha256 actual :edn-form-index 0}
-          :field (inspect-field (read-first trace-path))
-          :controls (commissioned-controls)})))
+          :audit-input {:path audit-input-path :sha256 (:sha256 audit-read)
+                        :edn-form-index 0}
+          :field (inspect-field (:value trace-read))
+          :controls controls})))
