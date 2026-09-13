@@ -1376,3 +1376,7 @@ Row18 controller2f39b95d/6c064ff6 accepted narrowly after6source/test/reader pin
 ## Lead review update — categorical validator, 2026-09-13
 
 Row14 validator6dab72fa/a6363375/e5ff5201 reviewed7pins/gates. Candidate-subject binding/same-byte reading exist, but evidence payload joins are discarded, expected context omits temporal authority, missing/blank principal identities and absent limitations/scope can pass. Repair pure boundary before close attachment; no counts or production qualification. See row-14-categorical-authority-validator-2026-09-13/lead-review.md.
+
+## Lead review update — restart discovery, 2026-09-13
+
+Row19 restart26d5a1dc/89919c59/aa6add26 reviewed4commit-bound pins/gates. Named selective HTTP activation now hard-refuses; generic offline tool is not an eval sandbox. Restart remains unready: acceptance paths only existence-checked, shell-escaped output not EDN, old-tree fallback unsafe after possible startup writes, scoped probe/reconnect lane unspecified. Next read-only actual drain/source-delta discovery and honest preflight corrections; no live changes or new commissions. See row-19-controlled-restart-preparation-2026-09-13/lead-review.md.

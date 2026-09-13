@@ -1,0 +1,34 @@
+[
+  {
+    "repo": "/home/joe/code/futon3c",
+    "commit": "26d5a1dc",
+    "path": "src/futon3c/agency/selective_form_loader.clj",
+    "expected": "b5357c5c09865a799536006ae8f87e711dd9bb140abbaef7b61a4d3140e58811",
+    "actual": "b5357c5c09865a799536006ae8f87e711dd9bb140abbaef7b61a4d3140e58811",
+    "matches": true
+  },
+  {
+    "repo": "/home/joe/code/futon3c",
+    "commit": "26d5a1dc",
+    "path": "test/futon3c/agency/selective_form_loader_test.clj",
+    "expected": "53a1c21c369a990739cd64c16ae0e214e14a9430ecd6518a3450305188c20038",
+    "actual": "53a1c21c369a990739cd64c16ae0e214e14a9430ecd6518a3450305188c20038",
+    "matches": true
+  },
+  {
+    "repo": "/home/joe/code/futon2",
+    "commit": "89919c59",
+    "path": "holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/RUNBOOK.md",
+    "expected": "b5e30dc2388ddfc04bb5e83f0fabf3d63f60a3b3c7975b9dde22d3c99980beb6",
+    "actual": "b5e30dc2388ddfc04bb5e83f0fabf3d63f60a3b3c7975b9dde22d3c99980beb6",
+    "matches": true
+  },
+  {
+    "repo": "/home/joe/code/futon2",
+    "commit": "89919c59",
+    "path": "holes/labs/wm-contract/runs/row-19-controlled-restart-preparation-2026-09-13/restart-preflight.sh",
+    "expected": "2b384d83c435c7572d155a51b00056bdf2ec895867116a45628a580b059760e9",
+    "actual": "2b384d83c435c7572d155a51b00056bdf2ec895867116a45628a580b059760e9",
+    "matches": true
+  }
+]
