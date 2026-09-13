@@ -67,7 +67,7 @@
           (let [actual (sha256 (Files/readAllBytes (Path/of path (make-array String 0))))]
             (when-not (= pin actual)
               (throw (ex-info "source declaration pin mismatch"
-                              {:path path :expected pin :actual actual}))))
+                              {:path path :expected pin :actual actual})))))
       canonical-pin (get-in manifest [:records :config/canonical :sha256])
       canonical (pinned-read (.resolve capture-root "config/canonical-config.edn") canonical-pin)
       e3-output (e3/verify-pre-enact (:e3 canonical))
