@@ -123,8 +123,12 @@ field may satisfy it.
 The following checks distinguish the alternatives without claiming a real
 edge firing:
 
-- **Identity:** all weights one gives byte-identical R6 scores/posterior and
-  unchanged support under each proposed adapter.
+- **Identity:** all weights one must preserve support and the base probability
+  law. Byte-identical raw scores require an explicit normalization convention: a
+  newly normalized product prior can add a common log-normalization constant,
+  preserving real softmax probabilities without preserving raw scores. Floating
+  equality and rounding require separate checks; do not infer byte identity
+  from analytic softmax invariance.
 - **Prior-only:** with fixed G/F_pi/tau and two equal-base policies, changing one
   class weight changes only the named policy-prior term. Learned-habit bytes
   remain fixed and separately visible.

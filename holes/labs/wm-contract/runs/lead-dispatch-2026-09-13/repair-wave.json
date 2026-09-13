@@ -580,13 +580,18 @@
     }
   ],
   "current-awaiting": [
-    "invoke-1789276503835-20662-3355953f",
-    "invoke-1789276248223-20659-0c1e3903"
+    "invoke-1789276503835-20662-3355953f"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
     "completed-job": "invoke-1789275643187-20650-785a8c56",
     "review": "holes/labs/wm-contract/runs/row-24-authority-buffer-repair-2026-09-13/lead-acceptance.md",
     "scope": "F11-owned consumer integration remains separate; no emitter mutation"
+  },
+  "codex22-next-boundary": {
+    "status": "semantic-contract-unadopted",
+    "completed-job": "invoke-1789276248223-20659-0c1e3903",
+    "review": "holes/labs/wm-contract/runs/row-22-e5-e6-semantic-integration-2026-09-13/lead-review.md",
+    "constraint": "No prior/G/temperature change; no runtime or edge retirement"
   }
 }

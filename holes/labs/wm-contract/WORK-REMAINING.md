@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest semantic alternatives5af92246 eight pins reviewed, analysis-only. Policy-prior option B remains unadopted under standing no-prior-change constraint; identity regression clarified for normalization constants. E6a semantic decision remains open, codex22 idle. See [review](runs/row-22-e5-e6-semantic-integration-2026-09-13/lead-review.md).
+
 - Latest E6b context70027ede/6707c78a five pins/raw5tests33 reviewed. Executed terminal-time review gap fixed by lead; changed-source6tests34/kondo/parens pass. Independent lead-edit review and remaining cross-canonical/time audit next; no production qualification. See [review](runs/row-22-e6b-feedback-2026-09-13/lead-context-review.md).
 
 - Latest R6 contractdba62e40 twelve pins verified: E5 shapes rollout fields with no live R6 scoring consumer. E6a is blocked on a reviewed semantic hop, not just verifier plumbing. No prior/G mapping adopted; next design assessment only. See [review](runs/row-22-r6-scoring-correspondence-2026-09-13/lead-review.md).
