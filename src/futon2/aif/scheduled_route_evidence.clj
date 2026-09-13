@@ -66,17 +66,17 @@
     (refuse! :e4/untrusted-source-scope {:scope scope}))
   (into {}
         (for [role source-roles
-              :let [{:keys [sha256 resolve]} (get sources role)]]
+              :let [{expected-sha :sha256 :keys [resolve]} (get sources role)]]
           (do
-            (when-not (and (re-matches #"[0-9a-f]{64}" (or sha256 "")) (fn? resolve))
+            (when-not (and (re-matches #"[0-9a-f]{64}" (or expected-sha "")) (fn? resolve))
               (refuse! :e4/missing-source-authority {:role role}))
             (let [bs (resolve)]
               (when-not (instance? (Class/forName "[B") bs)
                 (refuse! :e4/source-not-bytes {:role role}))
               (let [actual (sha256 bs)]
-                (when-not (= sha256 actual)
+                (when-not (= expected-sha actual)
                   (refuse! :e4/source-digest-mismatch
-                           {:role role :expected sha256 :actual actual}))
+                           {:role role :expected expected-sha :actual actual}))
                 [role {:sha256 actual :record (read-one-edn bs role)}]))))))
 
 (defn- unique-ordered! [xs refusal data]
