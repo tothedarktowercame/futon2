@@ -133,3 +133,59 @@ for the schemas and resolver joins above. Its positive case may use an
 explicitly labelled independently constructed isolated fixture; production
 mode must unconditionally refuse until real acquisition and review records
 exist. It must not invoke `verify-feedback` or mint an acceptance.
+
+## Frozen validator schemas and roles
+
+The pure validator configuration has exactly
+`{:mode :authority-root :candidate/id :target-application-id :roles}`. `:mode`
+is `:isolated-test` or `:production`; production refuses unconditionally in v1.
+`:roles` has exactly these externally configured immutable-buffer roles:
+
+`[:capture-artifact :writer-inventory :complete-census
+  :completeness-subject :acquisition-boundary :review-commission
+  :review-execution :review-artifact :acceptance]`.
+
+Each role value is exactly `{:bytes/base64 ... :expected-sha256 ...}`. Projection
+is derived by invoking the pure capture-to-retrospective projection; it is not a
+role and cannot be supplied by the candidate.
+
+After strict one-buffer decoding, records have these exact schemas/keys:
+
+- `:wm/e6b-writer-inventory-v1`:
+  `:schema :scope :authority/owner :authority/root :store/id
+   :owner/generation :boundary/id :writers :covered-writer-roles :issued-at`.
+- `:wm/e6b-complete-census-v1`:
+  `:schema :scope :authority/owner :authority/root :store/id
+   :owner/generation :boundary/id :writer-inventory/raw-sha256
+   :capture/raw-sha256 :ledger-source/raw-sha256 :target/transition-subject
+   :ordered-universe :acquired-at`.
+- `:wm/e6b-acquisition-boundary-v1`:
+  `:schema :scope :owner/id :authority/root :candidate/id :store/id
+   :owner/generation :boundary/id :writer-inventory/raw-sha256
+   :complete-census/raw-sha256 :intake/status :lifecycle/status
+   :lease/status :closed-at :capture-started-at :capture-finished-at`.
+- `:wm/e6b-completeness-subject-v1`: exactly the subject shape above, with
+  concrete scope `:isolated-test` or `:production` and acquisition additionally
+  binding `:complete-census/raw-sha256`.
+- `:wm/e6b-review-commission-v1`:
+  `:schema :scope :authority/root :commission/id :reviewer/id :candidate/id
+   :subject/raw-sha256 :boundary/id :issued-at`.
+- `:wm/e6b-review-execution-v1`:
+  `:schema :scope :authority/root :commission/id :reviewer/id :job/id
+   :trace/id :subject/raw-sha256 :review-artifact/raw-sha256 :status
+   :started-at :finished-at`.
+- `:wm/e6b-completeness-review-v1`:
+  `:schema :scope :authority/root :reviewer/id :job/id :trace/id
+   :subject/raw-sha256 :boundary/id :outcome :reviewed-at`.
+- `:wm/e6b-completeness-acceptance-v1`:
+  `:schema :scope :authority/root :authority/owner :reviewer/id :job/id
+   :trace/id :commission/id :subject/raw-sha256
+   :review-artifact/raw-sha256 :boundary/id :outcome :accepted-at`.
+
+All IDs are nonblank typed strings; generations are natural integers; digests
+are lowercase SHA-256; writer lists and ordered universes are nonempty vectors
+with unique typed identities; timestamps are RFC-3339 instants. The acquisition
+statuses must be `:closed`, `:reconciled`, and `:held-through-capture`, while
+execution is `:completed` and review/acceptance outcomes are `:accepted`.
+These labels are necessary but never sufficient without every byte, identity,
+chronology, inventory, census, projection, and exact-subject join above.
