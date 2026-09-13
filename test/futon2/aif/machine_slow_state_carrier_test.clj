@@ -144,3 +144,14 @@
             :e6b-carrier/transition-subject-mismatch]]]
     (testing (name label)
       (is (= expected (refusal (mutate (bundle))))))))
+
+(deftest prior-and-next-cannot-borrow-another-run
+  (let [b (bundle)
+        prior (assoc (get-in b [:proposal-evidence :prior :state]) :run/id "borrowed")
+        next (assoc (get-in b [:proposal-evidence :next :state]) :run/id "borrowed")
+        edited (-> (replace-source b :prior-state prior)
+                   (assoc-in [:proposal-evidence :prior :state] prior)
+                   (assoc-in [:proposal-evidence :prior :state-sha256] (vd prior))
+                   (assoc-in [:proposal-evidence :next :state] next)
+                   (assoc-in [:proposal-evidence :next :state-sha256] (vd next)))]
+    (is (= :e6b-carrier/transition-subject-mismatch (refusal edited)))))

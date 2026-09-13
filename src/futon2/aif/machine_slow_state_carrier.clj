@@ -208,6 +208,8 @@
                            :prior-state/revision (:prior-state/revision context)
                            :next-state/revision (:next-state/revision context)
                            :feedback/event-id (:feedback/event-id context)})
+               (= (select-keys prior [:model/id :model/revision :run/id :tick/index])
+                  (select-keys context [:model/id :model/revision :run/id :tick/index]))
                (= (:application/id proposal) (:application/id context))
                (= (:feedback/event-id proposal) (:feedback/event-id context))
                (= (:committed-at proposal) (:destination/as-of context))

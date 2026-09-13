@@ -1,0 +1,12 @@
+(require '[futon2.aif.machine-slow-state-carrier :as c] '[futon2.aif.machine-slow-state-carrier-test :as t])
+(let [b (#'t/bundle)
+      prior (assoc (get-in b [:proposal-evidence :prior :state]) :run/id "borrowed")
+      next (assoc (get-in b [:proposal-evidence :next :state]) :run/id "borrowed")
+      edited (-> (#'t/replace-source b :prior-state prior)
+                 (assoc-in [:proposal-evidence :prior :state] prior)
+                 (assoc-in [:proposal-evidence :prior :state-sha256] (#'t/vd prior))
+                 (assoc-in [:proposal-evidence :next :state] next)
+                 (assoc-in [:proposal-evidence :next :state-sha256] (#'t/vd next)))
+      o (c/project-transition edited)]
+ (assert (= :structurally-projected (:status o)))
+ (prn {:status (:status o) :carrier-run (get-in o [:prior :carrier :run/id]) :context-run (get-in o [:original-sources :context :record :run/id])}))

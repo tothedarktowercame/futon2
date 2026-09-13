@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest codecc102aafc/cd2ea001 four pins/raw15tests90 reviewed. Executed borrowed prior+next run still projects under unchanged context. Lead restored prior-to-context identity/tick join; changed-source16tests91/kondo/parens pass, independent review next. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-join-repair/lead-review.md).
+
 - Latest codec6097cad0/0cd37be8 raw14tests81 reviewed. Executed nil identity and borrowed occurrence still structurally project with original context unchanged. Full decoded-context/proposal joins required; no authority escalation claimed. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-gates/lead-review.md).
 
 - Latest carrier contractfd93f7cf digest mapping/provenance design reviewed against two unchanged pins. Lead specified exact six-field retrospective ledger and durable canonical E3/E2b input closure. Pure carrier codec next; store-v2/adapter/restart replay remain unimplemented. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/lead-repair-review.md).

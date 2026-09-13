@@ -1,0 +1,22 @@
+[
+  {
+    "path": "src/futon2/aif/machine_slow_state_carrier.clj",
+    "sha256": "b39a46cc97e44a79af359a7b23a395a42062bd4258d3753b7190d3745a9b7016",
+    "historical-match": true
+  },
+  {
+    "path": "test/futon2/aif/machine_slow_state_carrier_test.clj",
+    "sha256": "00b627ba8e9b9a6f66a30b89b222637c2ded5656abdc38898cb8f41103825eb5",
+    "historical-match": true
+  },
+  {
+    "path": "holes/labs/wm-contract/CONTRACT-e6b-common-state-carrier-v1-2026-09-13.md",
+    "sha256": "e3d6e14895d297584a204b4f26e1e9c91a2e63fb1bc0d6d54b819ece4ff608de",
+    "historical-match": true
+  },
+  {
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500",
+    "historical-match": true
+  }
+]
