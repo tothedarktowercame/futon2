@@ -462,3 +462,7 @@ Six source pins verified. Complete census may contain explicitly acquired typed 
 ## Machinery-test scope settlement — source ruling checked
 
 Read RULINGS-walkthrough-2026-09-12.md Item5 Operationalized1 (lines239–242) and3 (lines247–252). The ruling explicitly contemplates build-phase machinery tests and mandates the on-demand entrypoint. Corrected convergence item1's blanket execution block: concrete reviewed bounded run may proceed on the existing authorized gated click path, with build-phase labels, no qualifying/candidate/admission credit and no gate bypass. Section5 effective configuration and run evidence must be retained; declarations alone do not establish it. No cron or unrelated service controls authorized. Job20741's current offline implementation scope is unchanged pending review; no run executed by this settlement. Scoreboard 0 rows closed / 0 new claims admitted.
+
+## Worker ownership review d4f11a85
+
+Five historical pins and retained gates verified; actual duplicate wrapper control changes original to failed and unregisters its worker. New invoke-1789317564390-20750-04477de9 fixes owner-only cleanup. No production claims; scoreboard remains zero/zero.

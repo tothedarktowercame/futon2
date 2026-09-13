@@ -905,12 +905,20 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-negative-certificate-bridge.request.json",
       "dispatch": "accepted",
       "scope": "Row24/25 isolated acquired typed census to existing Lean negative theorem, no live/emitter changes"
+    },
+    {
+      "packet": "codex-23-task1-wrapper-ownership",
+      "job-id": "invoke-1789317564390-20750-04477de9",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789317564390-20750-04477de9",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-task1-wrapper-ownership.request.json",
+      "dispatch": "accepted",
+      "scope": "Row19 actual wrapper ownership repair, no live changes"
     }
   ],
   "current-awaiting": [
-    "invoke-1789316853314-20739-fdf67bfd",
     "invoke-1789317125316-20741-fbc2431e",
-    "invoke-1789317305541-20746-c7f7105b"
+    "invoke-1789317305541-20746-c7f7105b",
+    "invoke-1789317564390-20750-04477de9"
   ],
   "codex24-next-boundary": {
     "status": "commissioned",
@@ -924,10 +932,9 @@
     "scope": "CONVERGENCE-PLAN-2026-09-13.md"
   },
   "codex23-next-boundary": {
-    "status": "task1-worker-lifetime-running",
-    "completed-job": "invoke-1789316247471-20736-2e78bff9",
-    "review-commit": "futon3c b8ab084d",
-    "closure-target": "Row19 serving retention and safe drain prerequisite; later authentic R9 genesis admission",
-    "constraints": "No deployment or admission; storage chain parked"
+    "status": "commissioned",
+    "job-id": "invoke-1789317564390-20750-04477de9",
+    "review": "futon3c d4f11a85",
+    "closure-target": "Row19 safe serving worker ownership prerequisite"
   }
 }
