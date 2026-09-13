@@ -1,0 +1,29 @@
+{:schema :wm/execution-receipts-v1
+ :source-commits ["51da6697" "77adef59"] :tree-sha "77adef59"
+ :at "2026-09-13T06:10:00Z"
+ :pins
+ {:source "e569358979b585d3a8ae5e55ac9c3447ba072f46428d3eaf84419d4784f7ceba"
+  :test "e8b144714667b61cfc8600a9a2d85a386132770b95876a1cd7968d79240c8000"
+  :protocol "620156fdb354b013765b2fa9b9137ecd0db49a6bdcc579ee86ebb6649706086e"
+  :e6b-verifier "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab"
+  :temporal-hierarchy "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+  :intrinsic-values "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"}
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-store-test]'"
+   :exit 0 :tests 13 :assertions 36 :failures 0 :errors 0
+   :stdout "test2.stdout" :stderr "test2.stderr"}
+  {:gate :induced-failure
+   :command "clojure -M:test -e '(load-file \"holes/labs/wm-contract/runs/row-22-e6b-store-protocol-2026-09-13/induced_failure.clj\")'"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :errors 0
+   :stdout "induced.stdout" :stderr "induced.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_store.clj test/futon2/aif/machine_slow_feedback_store_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_store.clj test/futon2/aif/machine_slow_feedback_store_test.clj"
+   :exit 0 :stdout "parens.stdout" :stderr "parens.stderr"}]
+ :failed-history
+ [{:tree-sha "51da6697" :exit 1 :tests 12 :assertions 34 :failures 1 :errors 0
+   :cause :corrupt-current-object-now-refuses-at-head-join
+   :stdout "test.stdout" :stderr "test.stderr"}]}

@@ -1,0 +1,9 @@
+
+Testing user
+
+FAIL in (deliberate-store-sensitivity-failure) (induced_failure.clj:3)
+expected: (= :atomic-joint-publication :split-state-and-ledger)
+  actual: (not (= :atomic-joint-publication :split-state-and-ledger))
+
+Ran 1 tests containing 1 assertions.
+1 failures, 0 errors.
