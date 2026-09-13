@@ -1,0 +1,5 @@
+
+FAIL in (induced-carrier-failure) (NO_SOURCE_FILE:1)
+induced carrier gate failure
+expected: false
+  actual: false

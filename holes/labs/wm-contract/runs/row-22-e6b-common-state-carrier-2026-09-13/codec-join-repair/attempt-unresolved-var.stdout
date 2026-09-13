@@ -1,0 +1,5 @@
+Syntax error compiling var at (REPL:1:32).
+Unable to resolve var: futon2.aif.machine-slow-state-carrier-test/refuses-unjoined-proposal-and-successor-metadata in this context
+
+Full report at:
+/tmp/clojure-11303481822554119792.edn

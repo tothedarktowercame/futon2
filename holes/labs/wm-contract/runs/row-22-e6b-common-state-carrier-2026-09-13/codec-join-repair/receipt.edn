@@ -1,0 +1,29 @@
+{:schema :wm/execution-receipts-v1
+ :source-commit "c102aafc7da60e5d011defb4f26eb5f383032d78"
+ :tree-sha "c102aafc7da60e5d011defb4f26eb5f383032d78"
+ :at "2026-09-13T06:14:52Z"
+ :pins
+ {:source "b39a46cc97e44a79af359a7b23a395a42062bd4258d3753b7190d3745a9b7016"
+  :test "00b627ba8e9b9a6f66a30b89b222637c2ded5656abdc38898cb8f41103825eb5"
+  :contract "e3d6e14895d297584a204b4f26e1e9c91a2e63fb1bc0d6d54b819ece4ff608de"
+  :prospective-verifier "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"}
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-state-carrier-test futon2.aif.machine-slow-feedback-evidence-test]'"
+   :exit 0 :tests 15 :assertions 90 :failures 0 :errors 0
+   :stdout "test.stdout" :stderr "test.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_state_carrier.clj test/futon2/aif/machine_slow_state_carrier_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_state_carrier.clj test/futon2/aif/machine_slow_state_carrier_test.clj"
+   :exit 0 :stdout "parens.stdout" :stderr "parens.stderr"}
+  {:gate :induced-failure
+   :command "clojure -M -e '(require (quote clojure.test)) (let [c (ref clojure.test/*initial-report-counters*) v (with-meta (fn [] nil) {:test (fn [] (clojure.test/is false \"induced carrier gate failure\")) :name (quote induced-carrier-failure) :ns *ns*})] (binding [clojure.test/*report-counters* c] (clojure.test/test-vars [v])) (System/exit (if (zero? (+ (:fail @c) (:error @c))) 0 1)))'"
+   :exit 1 :tests 1 :assertions 1 :failures 1
+   :stdout "induced.stdout" :stderr "induced.stderr"}]
+ :failed-history
+ [{:gate :induced-runner :exit 1 :cause :namespace-not-required
+   :stdout "attempt-unresolved-var.stdout" :stderr "attempt-unresolved-var.stderr"}
+  {:gate :induced-runner :exit 0 :cause :test-vars-not-failure-sensitive
+   :stdout "attempt-non-sensitive.stdout" :stderr "attempt-non-sensitive.stderr"}]}
