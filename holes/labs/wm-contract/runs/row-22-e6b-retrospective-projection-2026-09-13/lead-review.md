@@ -1,0 +1,9 @@
+# Retrospective projection independent review
+
+Reviewed `c3acc2d8` / `089e9d8e`: six current and committed pins match. Read retained 12-test/45-assertion success, clean kondo/parens, actual deliberate failure, and initial complete-next extraction failure. Passing checks were not rerun. Consumer source is additionally pinned.
+
+Accept ordered row extraction and retention as a structural draft only. Capture readback precedes decoding of immutable descriptors; each index is resolved to its exact transaction/provenance, the six-field row comes from the application, and target next record is `[:next :state]`. The raw digest equals current verifier pr-str value digest for that exact representation; this is not a serialization-independent semantic hash. Tests exercise a single application, not a multi-transition production ledger.
+
+One representation prerequisite remains before external completeness: `:application-ledger` currently encodes the vector of rows. The unchanged consumer first requires `:schema/version :wm/e6b-application-ledger-v1`, then isolated scope and `:entries`. An authority binding only the vector digest cannot satisfy `:ledger/sha256`, which binds the full source record's raw bytes. Add a deterministic complete source envelope while retaining the row-vector digest distinctly. Do not repurpose the old digest or fabricate completeness.
+
+Lead documents this distinction in the projection contract. Next worker independently reviews that correction, then implements the small pure envelope addition and exact raw/value/source distinctions with decoding/hash controls. No filesystem staging, verifier call, external authority or success fixture is authorized. All later-prior, freshness, installed-code, production, historical20588 and full-certificate obligations remain open.

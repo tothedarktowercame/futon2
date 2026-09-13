@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest retrospective projectionc3acc2d8/089e9d8e six pins/raw12tests45 accepted row/source retention draft only. Consumer needs schema/scope/entries ledger envelope; current row-vector digest is not full ledger-source digest. Lead contract clarification and bounded pure envelope addition next before completeness authority. See [review](runs/row-22-e6b-retrospective-projection-2026-09-13/lead-review.md).
+
 - Latest capture structure1efc1611/65474cfa five pins/raw26tests116 accepted represented genesis/parent/provenance/state/application joins only. Independente6d70feb lead generation review consumed (five historical pins). Pure retrospective source/ledger projection next, completeness must remain typed absent. See [acceptance](runs/row-22-e6b-complete-capture-structural-repair-2026-09-13/lead-acceptance.md).
 
 - Latest capture codec8eb1261e/532b9dfe five pins/raw16tests76 reviewed; executed coherent prior-generation999 accepted against parent0. Lead equality repair passes17tests77+kondo/parens. Independent review plus exact genesis/transaction/provenance structural joins next; no adapter/completeness. See [review](runs/row-22-e6b-complete-capture-codec-2026-09-13/lead-review/review.md).

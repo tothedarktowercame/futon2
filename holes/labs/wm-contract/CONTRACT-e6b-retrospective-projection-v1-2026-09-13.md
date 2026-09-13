@@ -25,3 +25,15 @@ owned record must bind the exact capture raw hash, derived ledger bytes/hash,
 target transition subject, and reviewed outcome before the unchanged ten-source
 retrospective verifier can be called. This module neither creates that record
 nor invokes the verifier.
+
+## Lead consumer-boundary clarification
+
+The current `:application-ledger` descriptor encodes only the ordered row
+vector. It is a draft projection, not yet the unchanged verifier's ledger
+source. That source must be the complete map
+`{:schema/version :wm/e6b-application-ledger-v1 :scope :isolated-test :entries rows}`.
+A bounded follow-up must deterministically encode this map and retain its raw
+source digest separately from the row-vector digest. Future completeness
+`:ledger/sha256` must bind those full source bytes; accepting the vector digest
+alone is insufficient. This clarification grants no completeness authority,
+filesystem staging, retrospective success, or production permission.
