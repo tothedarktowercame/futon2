@@ -18,6 +18,9 @@
 (def source-order [:context :prior-state :e2b-subject :lifecycle-relation :outcome
                    :outcome-review :outcome-review-artifact :next-state
                    :application-ledger :application-universe])
+(def prospective-source-order
+  [:context :prior-state :e2b-subject :lifecycle-relation :outcome
+   :outcome-review :outcome-review-artifact])
 (def ^:private schemas
   {:context :wm/e6b-transition-context-v1
    :prior-state :wm/e6b-prior-slow-state-v1
@@ -275,6 +278,92 @@
        :transition-subject transition-subject
        :canonical-digests {:e3 (value-digest canonical-e3)
                            :e2b (value-digest canonical-e2b)}})))
+
+(defn- validator-source-digest []
+  (let [resource (io/resource "futon2/aif/machine_slow_feedback_evidence.clj")]
+    (when-not resource
+      (refuse! :e6b/validator-source-unavailable
+               "Validator source resource is unavailable" {}))
+    (with-open [in (io/input-stream resource)]
+      (digest (.readAllBytes in)))))
+
+(defn validate-transition
+  "Prospectively replay one independently configured seven-source transition.
+
+   The candidate may select only a configured evidence-set identity. Resolver
+   roots, pins, canonical inputs, clock values, status and authority remain in
+   trusted-config. Success is proposal evidence only: it is neither a store
+   write nor production/completeness authority."
+  [{:keys [candidate trusted-config] :as request}]
+  (when-not (= #{:candidate :trusted-config} (set (keys request)))
+    (refuse! :e6b/prospective-request-invalid
+             "Prospective request has an unsupported top-level field" {}))
+  (when-not (and (= #{:evidence-set/id} (set (keys candidate)))
+                 (nonblank? (:evidence-set/id candidate)))
+    (refuse! :e6b/candidate-authority-forbidden
+             "Candidate may supply only a configured evidence-set identity" {}))
+  (when-not (= #{:mode :evidence-sets :validator/source-sha256}
+               (set (keys trusted-config)))
+    (refuse! :e6b/trusted-config-invalid
+             "Trusted prospective configuration has the wrong shape" {}))
+  (when-not (= :isolated-test (:mode trusted-config))
+    (refuse! :e6b/production-authority-unavailable
+             "Independent production transition authority is unavailable" {}))
+  (let [evidence-id (:evidence-set/id candidate)
+        configured (get (:evidence-sets trusted-config) evidence-id)
+        expected-validator-pin (:validator/source-sha256 trusted-config)
+        actual-validator-pin (validator-source-digest)]
+    (when-not configured
+      (refuse! :e6b/evidence-set-unconfigured
+               "Candidate evidence-set is not independently configured"
+               {:evidence-set/id evidence-id}))
+    (when-not (= #{:evidence-root :sources :canonical} (set (keys configured)))
+      (refuse! :e6b/trusted-config-invalid
+               "Configured evidence-set has the wrong shape"
+               {:evidence-set/id evidence-id}))
+    (when-not (= (set prospective-source-order) (set (keys (:sources configured))))
+      (refuse! :e6b/prospective-source-set-invalid
+               "Exactly seven prospective source roles are required" {}))
+    (when-not (and (string? expected-validator-pin)
+                   (re-matches #"[0-9a-f]{64}" expected-validator-pin)
+                   (= expected-validator-pin actual-validator-pin))
+      (refuse! :e6b/validator-source-pin-mismatch
+               "Configured validator source pin differs from loaded resource" {}))
+    (let [resolved (mapv #(resolve! (:evidence-root configured) %
+                                    (get-in configured [:sources %]))
+                         prospective-source-order)
+          records (into {} (map (juxt :label :record) resolved))
+          source-pins (into {} (map (juxt :label :sha256)) resolved)
+          {:keys [context prior application-id common destination expected-next
+                  transition-subject canonical-digests]}
+          (validate-transition-core records (:canonical configured) source-pins)
+          value-pins (into {} (map (fn [[label record]] [label (value-digest record)])) records)
+          identity (assoc common :source/tick-index (:tick/index context)
+                          :destination/tick-index destination)]
+      {:schema :wm/e6b-transition-proposal-evidence-v1
+       :scope :isolated-test
+       :status :prospectively-validated
+       :identity (dissoc identity :tick/index)
+       :transition/subject transition-subject
+       :application/id application-id
+       :feedback/event-id (:feedback/event-id context)
+       :prior {:state/revision (:prior-state/revision context)
+               :state prior
+               :state-sha256 (value-digest prior)}
+       :next {:state/revision (:next-state/revision context)
+              :state expected-next
+              :state-sha256 (value-digest expected-next)}
+       :input/digests value-pins
+       :source/digests source-pins
+       :canonical/digests canonical-digests
+       :committed-at (:destination/as-of context)
+       :validator {:source-sha256 actual-validator-pin
+                   :dependency-sha256s
+                   {:temporal-hierarchy
+                    "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+                    :intrinsic-values
+                    "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"}}
+       :authority/status :proposal-evidence-only})))
 
 (defn verify-feedback
   [{:keys [mode evidence-root sources canonical]}]

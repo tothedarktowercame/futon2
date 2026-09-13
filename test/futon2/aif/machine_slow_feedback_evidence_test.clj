@@ -147,6 +147,85 @@
 (defn- refusal [cfg]
   (try (e6b/verify-feedback cfg) nil
        (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
+(defn- prospective-config [f]
+  (let [cfg (fixture f)
+        source-bytes (with-open [in (io/input-stream
+                                     (io/resource
+                                      "futon2/aif/machine_slow_feedback_evidence.clj"))]
+                       (.readAllBytes in))]
+    {:candidate {:evidence-set/id "fixture-transition-1"}
+     :trusted-config
+     {:mode :isolated-test
+      :validator/source-sha256 (digest source-bytes)
+      :evidence-sets
+      {"fixture-transition-1"
+       {:evidence-root (:evidence-root cfg)
+        :sources (select-keys (:sources cfg) e6b/prospective-source-order)
+        :canonical (:canonical cfg)}}}}))
+(defn- prospective-refusal [cfg]
+  (try (e6b/validate-transition cfg) nil
+       (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
+
+(deftest prospective-transition-is-proposal-evidence-only
+  (let [out (e6b/validate-transition (prospective-config identity))]
+    (is (= :wm/e6b-transition-proposal-evidence-v1 (:schema out)))
+    (is (= :proposal-evidence-only (:authority/status out)))
+    (is (= (set e6b/prospective-source-order) (set (keys (:source/digests out)))))
+    (is (= (set e6b/prospective-source-order) (set (keys (:input/digests out)))))
+    (is (= prior (get-in out [:prior :state])))
+    (is (= 3.0 (get-in out [:next :state :state :slow/intrinsics
+                            :advance-capability :alpha])))
+    (is (= "apply-1" (:application/id out)))
+    (is (nil? (:application out)))
+    (is (nil? (:storage-enforcement? out)))))
+
+(deftest prospective-boundary-rejects-candidate-authority-and-extra-roles
+  (let [cfg (prospective-config identity)]
+    (is (= :e6b/candidate-authority-forbidden
+           (prospective-refusal (assoc-in cfg [:candidate :status] :accepted))))
+    (is (= :e6b/candidate-authority-forbidden
+           (prospective-refusal (assoc-in cfg [:candidate :evidence-root] "/tmp/borrowed"))))
+    (is (= :e6b/prospective-source-set-invalid
+           (prospective-refusal
+            (assoc-in cfg [:trusted-config :evidence-sets "fixture-transition-1"
+                           :sources :application-ledger]
+                      {:relative-path "ledger.edn" :sha256 (apply str (repeat 64 "0"))}))))
+    (is (= :e6b/prospective-source-set-invalid
+           (prospective-refusal
+            (assoc-in cfg [:trusted-config :evidence-sets "fixture-transition-1"
+                           :sources :next-state]
+                      {:relative-path "next.edn" :sha256 (apply str (repeat 64 "0"))}))))))
+
+(deftest prospective-reuses-canonical-review-and-chronology-refusals
+  (doseq [[label f expected]
+          [[:borrowed-context #(assoc-in % [:context :run/id] "borrowed-run")
+            :e6b/canonical-context-mismatch]
+           [:borrowed-review #(assoc-in % [:outcome-review :review/id] "borrowed-review")
+            :e6b/outcome-review-unresolved]
+           [:bad-time #(assoc-in % [:outcome-review :reviewed-at] "2026-09-13T03:00:00Z")
+            :e6b/outcome-review-unresolved]
+           [:invalid-prior #(assoc-in % [:prior-state :slow/intrinsics
+                                         :advance-capability :alpha] ##NaN)
+            :e6b/prior-state-incomplete-or-stale]]]
+    (testing (name label)
+      (is (= expected (prospective-refusal (prospective-config f))))))
+  (let [cfg (prospective-config identity)]
+    (is (= :e6b/source-pin-mismatch
+           (prospective-refusal
+            (assoc-in cfg [:trusted-config :evidence-sets "fixture-transition-1"
+                           :sources :context :sha256]
+                      (apply str (repeat 64 "0")))))))
+  (let [cfg (prospective-config identity)
+        root (get-in cfg [:trusted-config :evidence-sets "fixture-transition-1" :evidence-root])
+        rel (get-in cfg [:trusted-config :evidence-sets "fixture-transition-1"
+                         :sources :outcome :relative-path])
+        bytes (.getBytes "#object[java.lang.Object 0x1 \"x\"]\n" "UTF-8")]
+    (Files/write (.toPath (io/file root rel)) bytes (make-array java.nio.file.OpenOption 0))
+    (is (= :e6b/source-malformed
+           (prospective-refusal
+            (assoc-in cfg [:trusted-config :evidence-sets "fixture-transition-1"
+                           :sources :outcome :sha256]
+                      (digest bytes)))))))
 
 (deftest replays-exact-feedback-without-storage-claim
   (let [out (e6b/verify-feedback (fixture identity))]
