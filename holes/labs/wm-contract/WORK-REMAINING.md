@@ -154,6 +154,13 @@ is not yet a verified join to Agency's normalized request digest.
   Next analytic packet establishes a sufficient global-uniqueness criterion
   without changing retained fields/priors. Float correspondence remains open.
 
+- Measured-A categorical-source discovery: interest-event posterior-state comes
+  from authored checkpoint assertions, not numeric WM argmax. Inspected source
+  labels operator rationale as paraphrased; replay vocabulary path is absent and
+  standalone push does not invoke replay validation. Authority and exact close
+  joins remain owed; no new measured cells. See current-capture discovery's
+  `categorical-event-authority-discovery.md` and source pins.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
