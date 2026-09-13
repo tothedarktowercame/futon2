@@ -136,7 +136,8 @@
 
 (defn- tx-path [store digest] (.resolve ^Path (:txdir store) (str digest ".edn")))
 (defn- validate-chain! [store]
-  (let [head-r (read-form ^Path (:head store)) head (:form head-r)]
+  (let [head-r (read-form ^Path (:head store)) head (:form head-r)
+        head-tx (:form (read-form (tx-path store (:transaction-sha256 head))))]
     (when-not (and (= :wm/e6b-state-head-v1 (:schema head))
                    (= (:store-id store) (:store/id head))
                    (nat-int? (:generation head)) (re-matches hex64 (:transaction-sha256 head ""))
@@ -157,7 +158,7 @@
             (let [ordered (vec (reverse collected))]
               (when-not (= ordered (:application-index head))
                 (refuse! :e6b-store/application-index-invalid {}))
-              {:head head :head-digest (:digest head-r) :current tx
+              {:head head :head-digest (:digest head-r) :current head-tx
                :applications ordered}))
           (let [app (:application tx) id (:application/id app) event (:feedback/event-id app)
                 prior-rev (get-in tx [:prior :revision])
@@ -204,7 +205,7 @@
         (let [old (:form (read-form (tx-path store (:transaction-sha256 existing))))]
           (if (= proposal (:proposal old))
             old
-            (refuse! :e6b-store/application-conflict {:application/id (:application/id application)}))))
+            (refuse! :e6b-store/application-conflict {:application/id (:application/id application)})))
         (do
       (when-not (and (= (:revision prior) (:state/revision head))
                      (= (:transaction-sha256 prior) (:transaction-sha256 head))
@@ -234,7 +235,7 @@
                        :state-sha256 (get-in tx [:next :state-sha256])
                        :transaction-sha256 digest :application-index (conj applications entry)}]
             (write-head! store head') tx)
-          (catch Throwable e (reset! (:poisoned? store) true) (throw e))))))))
+          (catch Throwable e (reset! (:poisoned? store) true) (throw e)))))))))
 
 (defn recover [store] (with-lock store (validate-chain! store)))
 (defn capture [store]
