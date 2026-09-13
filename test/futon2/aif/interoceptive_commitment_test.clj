@@ -67,7 +67,11 @@
         base (input [t] [f])]
     (testing "genuine report must join its finding"
       (is (= :interoceptive/missing-finding-join
-             (refusal #(commitment/confidence-snapshot (input [t] []))))))
+             (refusal #(commitment/confidence-snapshot (input [t] [])))))
+      (is (= :interoceptive/contradictory-join
+             (refusal #(commitment/confidence-snapshot
+                        (input [t] [(repair-entry "findings" "repair-other"
+                                                 "trip-other" :open)]))))))
     (testing "duplicate and malformed identity"
       (is (= :interoceptive/duplicate-trip-identity
              (refusal #(commitment/confidence-snapshot (input [t t] [f])))))

@@ -105,6 +105,11 @@
         repairs (index-repairs! repair-rows)
         trip->repair (finding-by-trip! repair-rows)
         production? (= :production (:authority-class trip-auth))
+        _ (when (and production?
+                     (seq (remove (set trip-ids) (keys trip->repair))))
+            (refuse! :interoceptive/contradictory-join
+                     {:finding-trip-ids (vec (remove (set trip-ids)
+                                                     (keys trip->repair)))}))
         classified
         (mapv
          (fn [{:keys [record path sha256]}]
