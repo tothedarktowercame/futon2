@@ -126,6 +126,38 @@ The refinement module proves the finite-distribution range bound and the
 conditional lower-gamma theorem under continuity, boundedness and uniqueness
 of the new positive root.
 
+The follow-up
+`InteroceptivePolicyPrecisionPositiveDomain.lean` needs continuity and the
+delta bound only on `Set.Ioi 0`. Its IVT interval begins at the positive
+baseline root, so every point used by the proof remains positive. It also
+proves its local `appliedGamma` is definitionally equal to the imported
+canonical `MachineTemperature.machineGamma`.
+
+The locally restated `PosteriorRoot` is exactly the proposal definition
+`beta = priorRate + evidenceDelta beta`; it cannot currently be related by a
+Lean theorem without importing the proposal module, whose olean is deliberately
+not rebuilt in this packet. Correspondence is therefore source-text and hash
+pinned in the receipt, not claimed as compiled import correspondence.
+
+### Exact softmax instantiation boundary
+
+The canonical `PolicyPosterior.softmaxWithFPi` has the ruled score placement
+`log(habit pi) - G(pi)/tau - F_pi(pi)`, so with `tau=beta` it is the required
+`:both` posterior shape. However its current carrier accepts arbitrary `exp`
+and `log` functions and returns a `List ℝ`; it provides only the zero-F_pi
+reduction theorem. It has no theorem that the returned list is nonnegative,
+normalised, indexed one-to-one with the policy list, or continuous in positive
+beta. Consequently this packet cannot instantiate `FiniteWeights` or the
+positive-domain continuity premise from that frozen declaration without
+inventing assumptions.
+
+The exact missing lemma boundary is a canonical finite policy-indexed posterior
+using `Real.exp`, nonempty support and positive normalizer, with proofs of
+nonnegativity, normalization, unchanged support alignment, and continuity in
+`beta > 0` for both `pi` and `pi0` under the ruled `:both` placement. Once that
+exists, the finite expectation bound applies directly; global positive-root
+uniqueness remains a separate obligation.
+
 It does not prove the production solver converges, brackets uniquely, or moves
 gamma monotonically on a retained field. Those are mandatory commissioned
 checks before adoption. No runtime implementation is authorized by this
