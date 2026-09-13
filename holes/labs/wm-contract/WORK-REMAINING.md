@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest Row 24 precursor review: b9bbcb833e/e1642859/c3666309 accepted as structural rejection machinery only. Ten current pins plus historical tracker pin verified; eight raw axiom checks have no sorryAx. Explicit run/claim/declaration joins and exact-subject divergence authority remain unimplemented, as do real record joins and F11 external byte verification. No full certificate. See [review](runs/row-24-full-predicate-precursor-2026-09-13/lead-acceptance.md).
+
 - Latest E2a acceptance: bbd44b21/d47de33c reviewed, four pins and final 5-test/21-assertion raw gates match. Stable approved-occurrence restriction accepted as isolated mechanism only. 3dd5a89a independently reviewed lead binding fix. Production E1 authority, actual restricted-domain scoring/selection, exact enactment and R9 authorization remain open; pure E2b verification is next. See [acceptance](runs/row-22-e2a-restriction-2026-09-13/lead-acceptance.md).
 
 - Latest ingress ownership review: c5dd3103..be83071d repaired prior payload/competing-owner failures at controller scope. Lead 232df039 aligns persisted/recovered payload identity with intake; changed-source 11-test/38-assertion gates pass with raw evidence. Independent review of touch-up and offline lifecycle reconciliation are next. No live ingress fence/deployment or restart readiness. See [review](runs/row-19-ingress-controller-2026-09-13/lead-ownership-acceptance.md).
