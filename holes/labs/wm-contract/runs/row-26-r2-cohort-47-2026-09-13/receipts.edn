@@ -1,0 +1,35 @@
+{:schema :wm/row26-r2-cohort-staging-receipts-v1
+ :at "2026-09-13T16:59:00Z"
+ :implementation
+ {:futon2-tree "a6d3e825070c398208816c0cdb87f2a23f881237"
+  :futon3c-tree "64fd8b394d8e7dbae34cd61bd73a5f0dc19ae78b"
+  :pins
+  [{:repo :futon2 :path "holes/labs/M-aif-full-loop-47/cohort.edn" :sha256 "16ed56a17fff7c4116dd8e7b329156943e1c088d191f0d9e97b4ca1ad76fd6b8"}
+   {:repo :futon2 :path "data/wm-full-loop-machinery-47/wm-contract-machinery-47-v1/activation.edn" :sha256 "bf9f0d79b812ac3509e665028f0d1d83e27758c1b018caccd243d556845b2721"}
+   {:repo :futon3c :path "holes/labs/wm-contract/cohort-47-execution-binding.edn" :sha256 "1828798b33ec554e3b8dfd53bd48565b948597b1478b5a379ff05afa82fd1384"}
+   {:repo :futon3c :path "src/futon3c/wm/machinery_execution_cohort.clj" :sha256 "932321a5ba80bea3c783ef5706d445be3ca5e2a418b40660021b3d78b11d9ef9"}
+   {:repo :futon3c :path "src/futon3c/wm/runner_service.clj" :sha256 "17210a48730ab71bb6b035d8975765ddf0e00576470ca1f6577d58dd21d54e40"}
+   {:repo :futon3c :path "test/futon3c/wm/machinery_execution_cohort_test.clj" :sha256 "95a6aead12c8074285462df368528f42474096b239e00893075400f8b5b57136"}]}
+ :gates
+ [{:kind :focused-test
+   :command "clojure -M:test -n futon3c.wm.machinery-execution-cohort-test"
+   :repo :futon3c :tree-sha "64fd8b394d8e7dbae34cd61bd73a5f0dc19ae78b"
+   :exit 0 :tests 3 :assertions 9 :raw "test.raw.txt"}
+  {:kind :clj-kondo
+   :command "clj-kondo --lint src/futon3c/wm/machinery_execution_cohort.clj src/futon3c/wm/runner_service.clj test/futon3c/wm/machinery_execution_cohort_test.clj"
+   :repo :futon3c :tree-sha "64fd8b394d8e7dbae34cd61bd73a5f0dc19ae78b"
+   :exit 0 :errors 0 :warnings 0 :raw "kondo.raw.txt"}
+  {:kind :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/wm/machinery_execution_cohort.clj src/futon3c/wm/runner_service.clj test/futon3c/wm/machinery_execution_cohort_test.clj holes/labs/wm-contract/cohort-47-execution-binding.edn"
+   :repo :futon3c :tree-sha "64fd8b394d8e7dbae34cd61bd73a5f0dc19ae78b"
+   :exit 0 :files 4 :raw "parens.raw.txt"}
+  {:kind :execution-context
+   :command "clojure -M -e '(require (quote [futon2.aif.full-loop-cohort :as c])) (let [b {:preregistration \"/home/joe/code/futon2/holes/labs/M-aif-full-loop-47/cohort.edn\" :data-root \"/home/joe/code/futon2/data/wm-full-loop-machinery-47\" :cohort-id :wm-contract-machinery-47-v1 :sha256 \"16ed56a17fff7c4116dd8e7b329156943e1c088d191f0d9e97b4ca1ad76fd6b8\"} x (c/execution-context b) p (c/execution-preflight b)] (prn {:cohort-id (:cohort-id p) :target (:target p) :remaining (:remaining p) :existing-attempts (- (:target p) (:remaining p)) :authority (:authority x) :activation (c/read-edn \"/home/joe/code/futon2/data/wm-full-loop-machinery-47/wm-contract-machinery-47-v1/activation.edn\")}) (assert (= 3 (:target p) (:remaining p))) (assert (= 0 (- (:target p) (:remaining p)))))'"
+   :repo :futon2 :tree-sha "a6d3e825070c398208816c0cdb87f2a23f881237"
+   :exit 0 :target 3 :remaining 3 :existing-attempts 0
+   :raw "execution-context.raw.edn"}]
+ :failed-history
+ [{:command "clojure -M:test -n futon3c.wm.machinery-execution-cohort-test"
+   :repo :futon3c :tree-sha "2cbb6f67"
+   :exit 1 :tests 3 :assertions 9 :errors 1 :raw "failed-test.raw.txt"
+   :finding "The test attempted to dynamically bind a constant. Follow-up commit 64fd8b39 removed that invalid test binding before the one final passing run."}]}

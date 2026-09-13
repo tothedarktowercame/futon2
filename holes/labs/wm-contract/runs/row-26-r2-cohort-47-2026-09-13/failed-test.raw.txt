@@ -1,0 +1,11 @@
+WARNING: Unknown module: org.apache.arrow.memory.core specified to --add-opens
+
+Running tests in #{"test"}
+
+Testing futon3c.wm.machinery-execution-cohort-test
+
+ERROR in (missing-and-mismatched-binding-refuse) (Var.java:327)
+Uncaught exception: Can't dynamically bind non-dynamic var: futon3c.wm.machinery-execution-cohort/binding-sha256
+
+Ran 3 tests containing 9 assertions.
+0 failures, 1 errors.
