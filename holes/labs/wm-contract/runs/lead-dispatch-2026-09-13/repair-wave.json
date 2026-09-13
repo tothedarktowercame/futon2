@@ -513,16 +513,27 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-authority-buffer-reader.request.json",
       "dispatch": "accepted",
       "scope": "independent lead-doc review and isolated retained-buffer reader; no emitter edits"
+    },
+    {
+      "packet": "codex-22-e6a-forward-verifier",
+      "job-id": "invoke-1789275481498-20647-0e31dc03",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789275481498-20647-0e31dc03",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e6a-forward-verifier.request.json",
+      "dispatch": "accepted",
+      "scope": "pure isolated E6a forward verifier; no runtime"
+    },
+    {
+      "packet": "codex-23-e6b-feedback-verifier",
+      "job-id": "invoke-1789275482764-20648-32e941f8",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789275482764-20648-32e941f8",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-feedback-verifier.request.json",
+      "dispatch": "accepted",
+      "scope": "pure isolated E6b feedback verifier; no runtime"
     }
   ],
   "current-awaiting": [
-    "invoke-1789275223688-20644-cfeb3e3a",
-    "invoke-1789275396053-20646-184767dd"
-  ],
-  "codex22-next-boundary": {
-    "status": "awaiting-reviewed-e6-contract",
-    "completed-job": "invoke-1789275024902-20639-981e63a5",
-    "dependency-job": "invoke-1789275223688-20644-cfeb3e3a",
-    "review": "holes/labs/wm-contract/runs/row-22-e5-slow-prior-2026-09-13/lead-strict-context-acceptance.md"
-  }
+    "invoke-1789275482764-20648-32e941f8",
+    "invoke-1789275396053-20646-184767dd",
+    "invoke-1789275481498-20647-0e31dc03"
+  ]
 }
