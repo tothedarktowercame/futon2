@@ -1,0 +1,8 @@
+{:schema/version :wm/on-demand-whole-loop-v1
+ :run/id "REPLACE-WITH-REVIEWED-RUN-ID"
+ :author "REPLACE-WITH-AUTHOR-SEAT"
+ :reviewer "REPLACE-WITH-DISTINCT-REVIEWER-SEAT"
+ :repair-reviewer "REPLACE-WITH-REPAIR-REVIEWER-SEAT"
+ :opportunity-count 1
+ :poll-ms 1000
+ :timeout-ms 7200000}

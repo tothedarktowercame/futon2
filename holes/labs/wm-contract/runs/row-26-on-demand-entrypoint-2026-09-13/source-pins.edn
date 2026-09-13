@@ -1,0 +1,17 @@
+{:schema/version :wm/row26-entrypoint-source-pins-v1
+ :captured-at "2026-09-13"
+ :sources
+ [{:repo :futon2 :path "src/futon2/aif/full_loop_runner.clj"
+   :sha256 "0bb61f3cceb26f52762af3a084503771ff3d853f1883edeaa229d83ec77cc71b"}
+  {:repo :futon2 :path "src/futon2/aif/full_loop_cli.clj"
+   :sha256 "3df96899eb860e1b79687262d86764a740927ba7dfcfbee76ecee2095bf72fc3"}
+  {:repo :futon2 :path "deps.edn"
+   :sha256 "9389f9d24fa83a0c7c02f36419ec8870b3b7595270d8d0be74838f72eb4e0960"}
+  {:repo :futon2 :path "holes/labs/wm-contract/WORK-REMAINING.md"
+   :sha256 "6a5ea21c456edaeed04c61781ae9de912c027971cb934013b73052312b0e6bb1"}
+  {:repo :futon2 :path "holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md"
+   :sha256 "c74379dac28e2ff0663cba394552cd1abec9722f86b808beb9494cf97b870900"}
+  {:repo :futon3c :path "src/futon3c/wm/runner_service.clj"
+   :sha256 "7bfc413847f45aca94f70c805c5584e5176d111185b3e49cfcb5fd02743ef0ee"}
+  {:repo :futon3c :path "src/futon3c/transport/http.clj"
+   :sha256 "4536d1ac2939a801404c62f0a1140c969c3198cc7ee73a6fb50f70946d828a25"}]}
