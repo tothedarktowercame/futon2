@@ -1,0 +1,6 @@
+{:tree-sha "4e433fe9e829c7618f981d9a8cd906c1be72a8e4"
+ :at "2026-09-13T08:01:01Z"
+ :command "clojure -M -e '(require (quote clojure.edn)) ... strict schema/count/digest-shape assertions'"
+ :exit 0 :pins 9 :unavailable 7
+ :stdout "parse.stdout" :stderr "parse.stderr"
+ :note "No executable source or test suite was run; this receipt validates the committed design inventory syntax and shape."}
