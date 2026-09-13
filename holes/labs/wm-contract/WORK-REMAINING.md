@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest common-carrier5ba1e504 two implementation pins verified. Store seven-input/carrier-output digests differ from retrospective four-input/next-record subjects; durable original-evidence/expected-HEAD retention lacks schema. Contract repair required before adapter. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/lead-review.md).
+
 - Latest prospective19b07730/50ec2792 seven pins/raw10tests63 accepted cooperative isolated proposal evidence only. Source-resource hash is not installed-Var proof; dependency pins are reviewed source declarations. Common store-state carrier design next; no adapter/publication/runtime authority. See [review](runs/row-22-e6b-composition-contract-2026-09-13/prospective-gates/lead-review.md).
 
 - Latest extraction8a613ac1/4a70d651 seven pins/raw7tests44 accepted isolated private refactor. Retrospective ledger requirement remains; earlier scope rejection conservatively changes invalid-input precedence. Independent0bee8942 review consumed. Public prospective validator next, no store adapter. See [review](runs/row-22-e6b-composition-contract-2026-09-13/extraction-gates/lead-review.md).

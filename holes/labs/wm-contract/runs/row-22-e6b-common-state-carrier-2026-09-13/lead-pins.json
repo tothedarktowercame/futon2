@@ -1,0 +1,12 @@
+[
+  {
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500",
+    "historical-match": true
+  },
+  {
+    "path": "src/futon2/aif/machine_slow_feedback_store.clj",
+    "sha256": "d9ee5f848419567e41f328a6b9fe14951f2568efcff4ee2dccbcac87a6bcd1fd",
+    "historical-match": true
+  }
+]
