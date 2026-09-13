@@ -1,0 +1,31 @@
+{
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_capture.clj",
+      "reviewed-sha256": "bb65d3144a698e47b80ee71d06d5c6b2c2406bd565aba6ec4414eadaae885fae",
+      "current-sha256": "1b9cb33bffc1265b48b80ee9b74bfb4253f76b65fd91d602cc4631252958d905"
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_capture_test.clj",
+      "reviewed-sha256": "4fa166beb23afe9b8b783d4ce443a79f5613fd2cc4400c523023f000a9fe294c",
+      "current-sha256": "de3b3855d68230b6f8ec184bed78f8adfea0e32e5c07bcd3afbe709577a90e05"
+    },
+    {
+      "path": "holes/labs/wm-contract/CONTRACT-e6b-complete-capture-codec-v1-2026-09-13.md",
+      "reviewed-sha256": "0245ab210045560736e8ffac495a38403c0799acfefb423e1204cd18db591d3d",
+      "current-sha256": "0245ab210045560736e8ffac495a38403c0799acfefb423e1204cd18db591d3d"
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_store_v2.clj",
+      "reviewed-sha256": "3697274ef13c7064a574d266788f2bb50ab621ac73a1817b4e1a01421adcb888",
+      "current-sha256": "3697274ef13c7064a574d266788f2bb50ab621ac73a1817b4e1a01421adcb888"
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_provenance.clj",
+      "reviewed-sha256": "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90",
+      "current-sha256": "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90"
+    }
+  ],
+  "job": "invoke-1789284598571-20718-c8c93b62",
+  "state": "done"
+}

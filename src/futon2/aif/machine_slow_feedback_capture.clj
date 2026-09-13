@@ -133,7 +133,8 @@
                                {:revision (:state/revision parent)
                                 :state-sha256 (:state-sha256 parent)}
                                (select-keys (:next parent) [:revision :state-sha256]))]
-            (when-not (and (= (nth chain (dec generation))
+            (when-not (and (= (dec generation) (get-in tx [:prior :generation]))
+                           (= (nth chain (dec generation))
                               (get-in tx [:prior :transaction-sha256]))
                            (= parent-state (select-keys (:prior tx) [:revision :state-sha256])))
             (refuse! :e6b-capture/parent-disagreement {:digest digest}))

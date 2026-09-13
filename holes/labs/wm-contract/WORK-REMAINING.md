@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest capture codec8eb1261e/532b9dfe five pins/raw16tests76 reviewed; executed coherent prior-generation999 accepted against parent0. Lead equality repair passes17tests77+kondo/parens. Independent review plus exact genesis/transaction/provenance structural joins next; no adapter/completeness. See [review](runs/row-22-e6b-complete-capture-codec-2026-09-13/lead-review/review.md).
+
 - Latest HEAD buffer fbcc9721/2aa0b5e3 six pins/raw11tests54 accepted isolated same-buffer immutable descriptor; independent7301f6d7 lead mapping review consumed (two historical pins). Full capture still contains transaction/provenance arrays; deterministic pure capture encoding/readback next before exact-byte completeness and adapter. See [acceptance](runs/row-22-e6b-store-v2-2026-09-13/head-buffer/lead-acceptance.md).
 
 - Latest retrospective contract ecf7fcd9 five source pins verified; HEAD bytes absent confirmed. Lead corrected capture-index versus six-field ledger projection: resolve exact transactions, never synthesize missing status/digests. Independent correction review plus exact validated HEAD-buffer retention next; no adapter/completeness. See [review](runs/row-22-e6b-store-v2-2026-09-13/retrospective-contract-review/lead-review.md).

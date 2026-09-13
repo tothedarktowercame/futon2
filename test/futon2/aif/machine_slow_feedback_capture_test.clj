@@ -97,3 +97,21 @@
     (is (= :e6b-capture/schema-invalid
            (refusal #(codec/readback (artifact-from-record omitted)))))
     (store/release! s)))
+
+(deftest coherent-prior-generation-refuses
+  (let [[s c] (setup-capture true)]
+  (try
+    (let [old (last (:chain-digests c))
+          tx (edn/read-string (String. ^bytes (get (:transaction-objects c) old) "UTF-8"))
+          bad (assoc-in tx [:prior :generation] 999)
+          bs (.getBytes (pr-str bad) "UTF-8") d (#'codec/sha256 bs)
+          index (assoc-in (:application-universe c) [0 :transaction-sha256] d)
+          head (edn/read-string (String. (.decode (Base64/getDecoder) ^String (get-in c [:head-object :bytes/base64])) "UTF-8"))
+          head' (assoc head :transaction-sha256 d :application-index index)
+          hb (.getBytes (pr-str head') "UTF-8") hd (#'codec/sha256 hb)
+          c' (-> c (assoc :head-digest hd :head-object {:bytes/base64 (.encodeToString (Base64/getEncoder) hb) :source-sha256 hd}
+                         :application-universe index :chain-digests (assoc (:chain-digests c) 1 d))
+                 (update :transaction-objects #(assoc (dissoc % old) d bs)))
+          result (refusal #(codec/construct c'))]
+      (is (= :e6b-capture/parent-disagreement result)))
+    (finally (store/release! s)))))
