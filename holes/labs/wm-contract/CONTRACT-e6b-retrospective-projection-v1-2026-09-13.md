@@ -9,7 +9,8 @@ The derived ledger has exactly six fields per row: application ID, event ID,
 prior revision, committed status, the exact four-key retrospective input digest
 view, and complete-next-record output digest. It is encoded deterministically
 and labelled derived; it is not an original source byte stream. The target's
-complete next record is independently encoded the same way and its raw digest
+complete next-state record (the proposal's `[:next :state]`, not its wrapper)
+is independently encoded the same way and its raw digest
 must equal the transaction application's output digest.
 
 The projection retains the target's seven original source descriptors, full

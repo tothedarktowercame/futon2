@@ -87,7 +87,7 @@
           ledger (mapv :ledger-row resolved)
           p-record (get-in target [:provenance :record])
           proposal (:proposal-evidence p-record)
-          next-record (:next proposal)
+          next-record (get-in proposal [:next :state])
           next-encoded (encoded :derived-complete-next-record next-record)
           ledger-encoded (encoded :derived-six-field-application-ledger ledger)]
       (when-not (= (:sha256 next-encoded) (get-in target [:ledger-row :output/digest]))
