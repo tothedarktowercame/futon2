@@ -122,6 +122,11 @@ is not yet a verified join to Agency's normalized request digest.
   found terminal initial finding bypass and invalid parens/raw-reader claims;
   codex-22 has the bounded correction. Selected discharged-trip readback
   does not establish a complete production confidence census.
+- Row 18 snapshot correction `7253ab33..6a07caac`: source/test/reader
+  pins match; named initial-finding bypass and executable reader/parens receipts
+  accepted at bounded engineering scope. See snapshot `lead-bounded-acceptance.md`.
+  Complete production manifest adapter is next; no global confidence or gamma
+  integration/admission is established by the selected discharged example.
 - Beta proposal `d48d6843`, Lean receipt `e6f7ae8b`: lead verified source
   hashes and prior-rate algebra scope. Re-review `6ddc788a` distinguishes
   unrestricted affine evidence from bounded finite-policy evidence. codex-24

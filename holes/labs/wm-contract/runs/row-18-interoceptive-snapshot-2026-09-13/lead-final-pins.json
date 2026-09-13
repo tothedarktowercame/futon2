@@ -1,0 +1,5 @@
+{
+  "src/futon2/aif/interoceptive_commitment.clj": "fab126f60e703bc692851b7709a0e3b14c3bcd7c3b0f2dcafa3851043aabdb7e",
+  "test/futon2/aif/interoceptive_commitment_test.clj": "252cbb364b894a82f005534150d2a9cda010f8090cddf0dca1f5e0220894a2b2",
+  "holes/labs/wm-contract/runs/row-18-interoceptive-snapshot-2026-09-13/actual_reader_readback.clj": "4e66f9315206e65c6b969d78201f5aec2a692e9286d609adf2036c8f9b1cc860"
+}
