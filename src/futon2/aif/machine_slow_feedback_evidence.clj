@@ -1,0 +1,182 @@
+(ns futon2.aif.machine-slow-feedback-evidence
+  "Pure E6b verifier. It replays one pinned temporal feedback update and checks
+   independently supplied complete application evidence. It neither persists
+   state nor enforces exactly-once storage."
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
+            [futon2.aif.temporal-hierarchy :as hierarchy])
+  (:import [java.io PushbackReader StringReader]
+           [java.nio ByteBuffer]
+           [java.nio.charset CodingErrorAction StandardCharsets]
+           [java.nio.file Files LinkOption Path]
+           [java.security MessageDigest]))
+
+(def schema-version :wm/r16-r15-feedback-evidence-v1)
+(def source-order [:context :prior-state :e2b-subject :outcome
+                   :next-state :application-ledger :application-universe])
+(def ^:private schemas
+  {:context :wm/e6b-transition-context-v1
+   :prior-state :wm/e6b-prior-slow-state-v1
+   :e2b-subject :wm/e6b-e2b-subject-v1
+   :outcome :wm/e6b-outcome-authority-v1
+   :next-state :wm/e6b-next-slow-state-v1
+   :application-ledger :wm/e6b-application-ledger-v1
+   :application-universe :wm/e6b-application-universe-v1})
+
+(defn- refuse! [kind message data]
+  (throw (ex-info message (assoc data :refusal kind))))
+(defn- nonblank? [x] (and (string? x) (not (str/blank? x))))
+(defn- hex [bytes] (apply str (map #(format "%02x" (bit-and 0xff %)) bytes)))
+(defn- digest [bytes]
+  (hex (.digest (doto (MessageDigest/getInstance "SHA-256") (.update bytes)))))
+(defn- value-digest [x] (digest (.getBytes (pr-str x) StandardCharsets/UTF_8)))
+
+(defn- strict-form! [bytes path]
+  (try
+    (let [decoder (doto (.newDecoder StandardCharsets/UTF_8)
+                    (.onMalformedInput CodingErrorAction/REPORT)
+                    (.onUnmappableCharacter CodingErrorAction/REPORT))
+          rdr (PushbackReader. (StringReader. (str (.decode decoder (ByteBuffer/wrap bytes)))))
+          eof (Object.) form (edn/read {:eof eof} rdr) tail (edn/read {:eof eof} rdr)]
+      (when (identical? eof form) (refuse! :e6b/source-empty "Empty source" {:path (str path)}))
+      (when-not (identical? eof tail)
+        (refuse! :e6b/source-trailing-form "Trailing EDN form" {:path (str path)}))
+      form)
+    (catch clojure.lang.ExceptionInfo e (throw e))
+    (catch Throwable e
+      (refuse! :e6b/source-malformed "Malformed strict UTF-8 EDN"
+               {:path (str path) :cause (.getName (class e))}))))
+
+(defn- resolve! [root label pin]
+  (let [{:keys [relative-path sha256]} pin
+        base (.normalize (.toAbsolutePath (.toPath (io/file root))))
+        rel (Path/of (str relative-path) (make-array String 0))
+        path (.normalize (.toAbsolutePath (.resolve base rel)))]
+    (when-not (and (string? sha256) (re-matches #"[0-9a-f]{64}" sha256))
+      (refuse! :e6b/source-pin-missing "Source pin missing" {:label label}))
+    (when (or (.isAbsolute rel) (not (.startsWith path base)))
+      (refuse! :e6b/source-path-escape "Source path escapes configured root" {:label label}))
+    (when-not (Files/isRegularFile path (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+      (refuse! :e6b/source-unreadable "Source is not a regular file" {:label label}))
+    (let [bytes (Files/readAllBytes path) actual (digest bytes)
+          record (strict-form! bytes path)]
+      (when-not (= sha256 actual)
+        (refuse! :e6b/source-pin-mismatch "Source bytes changed" {:label label}))
+      (when-not (= (schemas label) (:schema/version record))
+        (refuse! :e6b/source-schema-mismatch "Source schema differs" {:label label}))
+      {:label label :sha256 actual :record record})))
+
+(defn- finite-positive? [x]
+  (and (number? x) (Double/isFinite (double x)) (pos? (double x))))
+(defn- valid-entry? [x]
+  (and (= #{:alpha :beta :intrinsic-value :n-emissions :n-followthrough :as-of}
+          (set (keys x)))
+       (finite-positive? (:alpha x)) (finite-positive? (:beta x))
+       (number? (:intrinsic-value x)) (Double/isFinite (double (:intrinsic-value x)))
+       (nat-int? (:n-emissions x)) (nat-int? (:n-followthrough x))))
+(defn- identity-of [x]
+  (select-keys x [:model/id :model/revision :run/id :tick/index]))
+(defn- valid-identity? [x]
+  (and (or (keyword? (:model/id x)) (nonblank? (:model/id x)))
+       (nonblank? (:model/revision x)) (nonblank? (:run/id x))
+       (nat-int? (:tick/index x))))
+
+(defn verify-feedback
+  [{:keys [mode evidence-root sources]}]
+  (when-not (contains? #{:isolated-test :production} mode)
+    (refuse! :e6b/mode-unknown "Unknown verifier mode" {:mode mode}))
+  (when (= :production mode)
+    (refuse! :e6b/production-authority-unavailable
+             "Independent production feedback authority is unavailable" {}))
+  (when-not (= (set source-order) (set (keys sources)))
+    (refuse! :e6b/source-set-incomplete "Every E6b source is required" {}))
+  (let [resolved (mapv #(resolve! evidence-root % (sources %)) source-order)
+        records (into {} (map (juxt :label :record) resolved))
+        context (:context records) prior (:prior-state records) e2b (:e2b-subject records)
+        outcome (:outcome records) claimed (:next-state records)
+        ledger (:application-ledger records) universe (:application-universe records)
+        source-tick (:tick/index context) destination (:destination/tick-index context)
+        cls (:fast/action-class outcome) occurrence (:candidate/occurrence-id context)
+        application-id (:application/id context)
+        common (identity-of context)]
+    (when-not (and (= :isolated-test (:scope context)) (valid-identity? context)
+                   (= (inc source-tick) destination)
+                   (every? nonblank? ((juxt :prior-state/revision :next-state/revision
+                                            :feedback/event-id :application/id) context))
+                   (some? occurrence) (map? (:action context)) (seq (:action context)))
+      (refuse! :e6b/transition-context-invalid "Fixed transition context is incomplete" {}))
+    (doseq [[label record] records]
+      (when-not (= :isolated-test (:scope record))
+        (refuse! :e6b/scope-mismatch "All resolved sources must retain isolated scope"
+                 {:label label :scope (:scope record)})))
+    (when-not (and (= common (identity-of prior))
+                   (= (:prior-state/revision context) (:state/revision prior))
+                   (map? (:slow/intrinsics prior)) (seq (:slow/intrinsics prior))
+                   (every? keyword? (keys (:slow/intrinsics prior)))
+                   (every? valid-entry? (vals (:slow/intrinsics prior)))
+                   (contains? (:slow/intrinsics prior) cls))
+      (refuse! :e6b/prior-state-incomplete-or-stale
+               "Prior state must be complete and contain the outcome class" {}))
+    (when-not (and (= common (identity-of e2b))
+                   (= occurrence (:candidate/occurrence-id e2b))
+                   (= (:action context) (:action e2b))
+                   (= :enacted (:status e2b))
+                   (= :mechanism-authorized (:r9/pre-enact-decision e2b))
+                   (nonblank? (:r9/authorization-ref e2b)))
+      (refuse! :e6b/e2b-subject-mismatch "Outcome is not bound to exact authorized enactment" {}))
+    (when-not (and (= common (identity-of outcome))
+                   (= occurrence (:candidate/occurrence-id outcome))
+                   (= (:action context) (:action outcome))
+                   (keyword? cls) (contains? #{:succeeded :failed} (:terminal/status outcome))
+                   (true? (:fast/witnessed? outcome))
+                   (instance? Boolean (:fast/succeeded? outcome))
+                   (= (= :succeeded (:terminal/status outcome)) (:fast/succeeded? outcome))
+                   (nonblank? (:outcome/evidence-id outcome))
+                   (nonblank? (:outcome/authority-ref outcome))
+                   (not= (:outcome/producer-id outcome) (:outcome/reviewer-id outcome))
+                   (every? nonblank? ((juxt :outcome/producer-id :outcome/reviewer-id) outcome)))
+      (refuse! :e6b/outcome-authority-invalid
+               "A boolean terminal independently witnessed outcome is required" {}))
+    (let [production-outcome (select-keys outcome [:fast/action-class :fast/witnessed?
+                                                    :fast/succeeded?])
+          actual-state (hierarchy/advance-slow-state
+                        (select-keys prior [:slow/mode :slow/intrinsics]) production-outcome
+                        {:as-of (:destination/as-of context) :run-id (:run/id context)
+                         :evidence-ref (:outcome/evidence-id outcome)})
+          expected-next {:schema/version :wm/e6b-next-slow-state-v1 :scope :isolated-test
+                         :model/id (:model/id context) :model/revision (:model/revision context)
+                         :run/id (:run/id context) :tick/index destination
+                         :state/revision (:next-state/revision context)
+                         :predecessor/revision (:prior-state/revision context)
+                         :feedback/event-id (:feedback/event-id context)
+                         :state actual-state}
+          input-subject {:context (value-digest context) :prior (value-digest prior)
+                         :e2b (value-digest e2b) :outcome (value-digest outcome)}
+          expected-entry {:application/id application-id :status :committed
+                          :input/digests input-subject :output/digest (value-digest expected-next)}
+          universe-ids (:complete/application-ids universe)
+          matches (filterv #(= application-id (:application/id %)) (:entries ledger))]
+      (when-not (= expected-next claimed)
+        (refuse! :e6b/next-state-mismatch "Claimed next state differs from production replay" {}))
+      (when-not (and (= (:feedback/event-id context) (:feedback/event-id universe))
+                     (= [application-id] universe-ids)
+                     (= :independently-configured-complete (:authority/status universe))
+                     (nonblank? (:authority/owner universe)))
+        (refuse! :e6b/application-universe-incomplete
+                 "Independent complete application universe is absent or conflicting" {}))
+      (cond
+        (empty? matches) (refuse! :e6b/feedback-not-applied "No committed application" {})
+        (> (count matches) 1) (refuse! :e6b/duplicate-feedback "Duplicate application" {})
+        (not= expected-entry (first matches))
+        (refuse! :e6b/feedback-conflict "Committed application pins conflict" {}))
+      {:schema/version schema-version :scope :isolated-test
+       :identity common :destination/tick-index destination
+       :application expected-entry :state actual-state
+       :replay/identical? true :storage-enforcement? false
+       :production-edge-fired? false
+       :sources (mapv #(dissoc % :record) resolved)
+       :dependencies {:temporal-hierarchy/sha256
+                      "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+                      :intrinsic-values/sha256
+                      "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"}})))
