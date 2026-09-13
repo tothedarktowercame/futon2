@@ -127,4 +127,4 @@
   (is (= :r9/review-execution-missing
          (refusal (config {:pending pending :verdict verdict
                            :review (assoc-in review [:r9/input :reviewer-job :execution]
-                                             {:executed false :tool-events 0})}))))))
+                                             {:executed false :tool-events 0})})))))
