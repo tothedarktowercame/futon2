@@ -450,3 +450,7 @@ ce37a339/e9e9b135/e387eb00 accepted as discovery only:3commit-bound pins, JSON a
 ## Task1 lifecycle review b8ab084d
 
 Job20736 reviewed; four pins/raw gates checked without passing-suite rerun. Two executed isolated controls reveal phantom queue after duplicate creation and terminal-before-worker-exit false drain. New invoke-1789316853314-20739-fdf67bfd repairs actual serving lifetime/order. Scoreboard remains 0 rows closed / 0 new claims admitted.
+
+## Joint convergence plan and paper exclusions
+
+See [plan of record](CONVERGENCE-PLAN-2026-09-13.md), including the named paper exclusion list. Row26 preparation pulled forward; real run restriction unresolved. Zero rows closed / zero new claims admitted; approximately six-day paper window, exact deadline unconfirmed.
