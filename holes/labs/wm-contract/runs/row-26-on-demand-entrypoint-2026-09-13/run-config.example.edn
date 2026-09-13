@@ -4,5 +4,6 @@
  :reviewer "REPLACE-WITH-DISTINCT-REVIEWER-SEAT"
  :repair-reviewer "REPLACE-WITH-REPAIR-REVIEWER-SEAT"
  :opportunity-count 1
+ :transport-timeout-ms 5000
  :poll-ms 1000
  :timeout-ms 7200000}

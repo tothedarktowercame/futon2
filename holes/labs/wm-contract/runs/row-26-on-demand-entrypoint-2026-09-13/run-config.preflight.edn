@@ -1,0 +1,29 @@
+{:schema/version :wm/on-demand-whole-loop-v1
+ :run/id "row26-build-phase-20260913-01"
+ :author "zai-5"
+ :reviewer "claude-15"
+ :repair-reviewer "codex-26"
+ :opportunity-count 1
+ :transport-timeout-ms 5000
+ :poll-ms 1000
+ :timeout-ms 7200000
+ :scope :build-phase-machinery-test
+ :authorization {:settlement "1d84fd66"
+                 :claim :permission-for-one-reviewed-bounded-machinery-test}
+ :required-effective-settings
+ {:anticipation-horizon 3
+  :cascade-rollout-depth 5
+  :trace-policy-details true
+  :f-pi-dark true
+  :f-pi-policy-posterior true
+  :loaded-process-readback :unavailable}
+ :required-output-readback
+ {:phase-log :unavailable
+  :run-record-dir :unavailable
+  :cohort-dir :unavailable
+  :trace-path :unavailable
+  :repair-store :unavailable
+  :morning-brief-store :unavailable
+  :click-run-binding-dir :unavailable
+  :terminal-projection-dir :unavailable
+  :historical-projection-dir :unavailable}}
