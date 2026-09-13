@@ -1,0 +1,10 @@
+
+Testing user
+
+FAIL in (deliberate-ledger-sensitivity-failure) (induced_failure.clj:3)
+induced E6b ledger failure
+expected: (= :exactly-once :duplicate-feedback)
+  actual: (not (= :exactly-once :duplicate-feedback))
+
+Ran 1 tests containing 1 assertions.
+1 failures, 0 errors.

@@ -1,0 +1,5 @@
+[{:command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-evidence-test]'"
+  :exit 1 :tree-sha "9408078c5fa3be1130ce0af7680c5e69471a8f4b"
+  :tests 4 :assertions 25 :failures 2 :errors 0
+  :findings ["missing-class control removed old class name rather than fixed action class"
+             "empty ledger reached universe mismatch before typed not-applied refusal"]}]
