@@ -1,0 +1,44 @@
+[
+  {
+    "role": "source",
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500",
+    "historical-match": true
+  },
+  {
+    "role": "test",
+    "path": "test/futon2/aif/machine_slow_feedback_evidence_test.clj",
+    "sha256": "44e5353500e2e6545408ca5b0303805b9298004979e679b6cd45c961e094dc94",
+    "historical-match": true
+  },
+  {
+    "role": "contract",
+    "path": "holes/labs/wm-contract/CONTRACT-e6b-prospective-retrospective-v1-2026-09-13.md",
+    "sha256": "0e7a5549f64c65ed85bb6a60f0bf8a8435f622c28be7e4bc46e531512f41f584",
+    "historical-match": true
+  },
+  {
+    "role": "e3",
+    "path": "src/futon2/aif/machine_pre_enact_authorization.clj",
+    "sha256": "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260",
+    "historical-match": true
+  },
+  {
+    "role": "e2b",
+    "path": "src/futon2/aif/machine_enactment_correspondence.clj",
+    "sha256": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933",
+    "historical-match": true
+  },
+  {
+    "role": "temporal-hierarchy",
+    "path": "src/futon2/aif/temporal_hierarchy.clj",
+    "sha256": "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef",
+    "historical-match": true
+  },
+  {
+    "role": "intrinsic-values",
+    "path": "src/futon2/aif/intrinsic_values.clj",
+    "sha256": "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b",
+    "historical-match": true
+  }
+]

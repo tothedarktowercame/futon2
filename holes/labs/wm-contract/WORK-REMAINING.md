@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest prospective19b07730/50ec2792 seven pins/raw10tests63 accepted cooperative isolated proposal evidence only. Source-resource hash is not installed-Var proof; dependency pins are reviewed source declarations. Common store-state carrier design next; no adapter/publication/runtime authority. See [review](runs/row-22-e6b-composition-contract-2026-09-13/prospective-gates/lead-review.md).
+
 - Latest extraction8a613ac1/4a70d651 seven pins/raw7tests44 accepted isolated private refactor. Retrospective ledger requirement remains; earlier scope rejection conservatively changes invalid-input precedence. Independent0bee8942 review consumed. Public prospective validator next, no store adapter. See [review](runs/row-22-e6b-composition-contract-2026-09-13/extraction-gates/lead-review.md).
 
 - Job20676 ended incomplete with no implementation/tests; verifier hash unchanged and scoped tree clean. No success accepted. Continuation split to independent contract review plus private transition-core extraction; public prospective API deferred. See [receipt](runs/row-22-e6b-composition-contract-2026-09-13/lead-incomplete-packet-receipt.json).
