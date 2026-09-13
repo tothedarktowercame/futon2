@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest E2b review: b5b74344/3a9eedbe four pins/raw 5-test/18-assertion gates verified. Executed missing-cohort control still qualifies; witnesses also lack exact E2a source-pin subject binding. Cohort/event authority and exact field-subject repair required before same-event qualification. No actual enactment/R9 authorization. See [review](runs/row-22-e2b-correspondence-2026-09-13/lead-review.md).
+
 - Latest lifecycle review: 7309d81c/416e9b20 two source pins and retained 3-test/15-assertion gates verified. Executed omitted-source-fields control incorrectly yields complete-census/zero-in-flight; strict schemas/UTF-8/deferred joins and independently bound complete universe/scope remain required before drain evidence. No real reconciliation. See [review](runs/row-19-lifecycle-reconciliation-2026-09-13/lead-review.md).
 
 - Latest Row 24 precursor review: b9bbcb833e/e1642859/c3666309 accepted as structural rejection machinery only. Ten current pins plus historical tracker pin verified; eight raw axiom checks have no sorryAx. Explicit run/claim/declaration joins and exact-subject divergence authority remain unimplemented, as do real record joins and F11 external byte verification. No full certificate. See [review](runs/row-24-full-predicate-precursor-2026-09-13/lead-acceptance.md).

@@ -1,0 +1,1 @@
+{:scope :isolated-test, :cohort/id nil, :correspondence :exact-occurrence-and-action}
