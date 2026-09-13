@@ -1,0 +1,93 @@
+{:schema :wm/e6b-canonical-replay-closure-v1
+ :scope :isolated-fixture-inventory
+ :status :incomplete-for-durable-replay
+ :config-owner
+ {:required :independent-external-owner
+  :isolated-fixture-owner :test-source-construction
+  :production-owner :unavailable}
+ :entry
+ {:caller "futon2.aif.machine-slow-feedback-evidence/validate-transition-core"
+  :roles [:e3 :e2b]}
+ :call-graph
+ [[:e6b :e3/verify-pre-enact]
+  [:e3 :e2a/restrict-portfolio]
+  [:e3 :r9/check-independence]
+  [:e2b :e2a/restrict-portfolio]
+  [:e2a :e1/resolve-and-map]
+  [:e1 :machine-budget-mapping/map-ranked-support]]
+ :source-declarations
+ [{:role :e6b :path "src/futon2/aif/machine_slow_feedback_evidence.clj"
+   :sha256 "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"}
+  {:role :e3 :path "src/futon2/aif/machine_pre_enact_authorization.clj"
+   :sha256 "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260"}
+  {:role :e2b :path "src/futon2/aif/machine_enactment_correspondence.clj"
+   :sha256 "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933"}
+  {:role :e2a :path "src/futon2/aif/machine_portfolio_restriction.clj"
+   :sha256 "316ddd364e2deaea98172558148fd770c2d5d4a930e32fb8e4825f454b6c51ab"}
+  {:role :e1-resolver :path "src/futon2/aif/machine_budget_authority.clj"
+   :sha256 "13c6fb05c2a75ff5c673ed2df49e9d555db210d9269588396ea71ce97964253e"}
+  {:role :e1-mapper :path "src/futon2/aif/machine_budget_mapping.clj"
+   :sha256 "5072c34fa55db6683faeef38ac2b8026107c9ef0c9d7174a9a4026ab3ec2110f"}
+  {:role :r9 :path "src/futon2/aif/r9_checker.clj"
+   :sha256 "b3469b8027c36e2db17943efabb6b26878c1dee3d71b9eda809e50d602094722"}]
+ :installed-code-identity {:status :unavailable
+                           :note "Source bytes are declarations, not loaded Var identity."}
+ :shared-e1-config
+ {:resolver/version :wm/r6-r11-authority-resolver-v1
+  :mode :isolated-test
+  :root "holes/labs/wm-contract/runs/row-22-e1-authority-resolution-2026-09-13/fixtures"
+  :owner :test-source-construction
+  :sources
+  {:ranked-support {:path "ranked-support.edn" :sha256 "61cc2938f38a4c2ac5e3d7c48543db06c4b146cdf2239c33c2e8ee67e397ea79"}
+   :field-membership {:path "field-membership.edn" :sha256 "95f9ae99de4ebac2eb5a873fe04d8cf7b1c0cf28c40de294c2807f1338dd56d6"}
+   :costs {:path "costs.edn" :sha256 "14ecb59a96b5bb138e86338e008044d50acfd137918b891cb9974652e2da0231"}
+   :utilities {:path "utilities.edn" :sha256 "17a0e579dcd49cd80b0409b762e0c098928ab2c8fde2c049608e584a41b24bfd"}
+   :budgets {:path "budgets.edn" :sha256 "4a2e99503b5867f32458d7f4e029e2c4461aa52f1dd0d5f7e33b75f3751ce267"}}}
+ :e2b-config
+ {:mode :isolated-test
+  :owner :test-source-construction
+  :witness-root "holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/fixtures"
+  :witnesses
+  {:context {:path "context.edn" :sha256 "ddbc82772282b985195a9734a912841cef63806e1bca06b59b248d5786d1591b"}
+   :selection {:path "selection.edn" :sha256 "810e5d437cf62f3de6ef2c43b17e7b3693c5e801e299d89837cfc1c8ef9b245e"}
+   :enactment {:path "enactment.edn" :sha256 "adb640964313374ea3cd853147f501f900cbab6ca596e07b6793b4329a0e96b2"}}
+  :e2a-resolver :shared-e1-config}
+ :e3-config
+ {:mode :isolated-test
+  :owner :test-source-construction
+  :evidence-root :fresh-temporary-directory
+  :evidence
+  {:pending {:schema :wm/e3-pending-construction-v1 :retained-bytes :unavailable}
+   :verdict {:schema :wm/e3-independence-verdict-v1 :retained-bytes :unavailable}
+   :review {:schema :wm/e3-independent-review-v1 :retained-bytes :unavailable}}
+  :e2a-resolver :shared-e1-config
+  :fixture-declaration
+  {:path "test/futon2/aif/machine_pre_enact_authorization_test.clj"
+   :sha256 "50558cf363717c53cfb818a6db9d77814a8beb732e41549a2c66f478f7b45a12"}}
+ :e3-r9-input-closure
+ {:location [:e3-config :evidence :review :r9/input]
+  :retained-exact-bytes :unavailable
+  :required-fields
+  [:role-binding :producer-job :reviewer-job :subject :review-commission
+   :verification-receipt :review-receipt :trace->job :checker-source-sha256
+   :bootstrap-anchor :admission-at :ledger-source]
+  :anchor
+  {:fixture-shape :wm/r9-bootstrap-anchor-v1
+   :independent-authentication :unavailable
+   :production-genesis :unavailable}
+  :commission-preimage :unavailable-as-durable-fixture-artifact
+  :job-trace-authority :unavailable-as-durable-fixture-artifact}
+ :fixture-declarations
+ [{:role :e3-fixture-constructor
+   :path "test/futon2/aif/machine_pre_enact_authorization_test.clj"
+   :sha256 "50558cf363717c53cfb818a6db9d77814a8beb732e41549a2c66f478f7b45a12"}
+  {:role :e2b-fixture-config
+   :path "test/futon2/aif/machine_enactment_correspondence_test.clj"
+   :sha256 "d1a8dec32437697d4905ed2e92f7701b5ef1d67f13cca6370e3ebae55b62aa6f"}]
+ :acquisition
+ {:isolated-replay :refuses-until-e3-three-record-bytes-and-r9-input-closure-are-retained
+  :production :unavailable
+  :refusal :e6b/canonical-input-closure-unavailable}
+ :non-authority
+ [:no-synthetic-anchor :no-synthetic-review :no-synthetic-completeness
+  :no-current-working-defaults :no-production-claim]}
