@@ -1,0 +1,38 @@
+{
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_store_v2.clj",
+      "sha256": "3697274ef13c7064a574d266788f2bb50ab621ac73a1817b4e1a01421adcb888",
+      "match": true
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_store_v2_test.clj",
+      "sha256": "9e1d6091908dba42084e2040d07f02693f43abdf7433337a144f051568b399f7",
+      "match": true
+    },
+    {
+      "path": "holes/labs/wm-contract/CONTRACT-e6b-common-state-carrier-v1-2026-09-13.md",
+      "sha256": "9075fc97c9bd35859c5783aee80145ccfd8e515d71bd8280fefea5b9e78e9158",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_provenance.clj",
+      "sha256": "0a6baaf94b3bbc32dbc5341dabe1983e2607d5c03acacc15cf272938a2461b90",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+      "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_state_carrier.clj",
+      "sha256": "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965",
+      "match": true
+    }
+  ],
+  "independent-review-historical-pins": 2,
+  "job": "invoke-1789284189362-20716-a2ca39b4",
+  "state": "done",
+  "passing-reruns": false
+}

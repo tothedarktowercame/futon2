@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest HEAD buffer fbcc9721/2aa0b5e3 six pins/raw11tests54 accepted isolated same-buffer immutable descriptor; independent7301f6d7 lead mapping review consumed (two historical pins). Full capture still contains transaction/provenance arrays; deterministic pure capture encoding/readback next before exact-byte completeness and adapter. See [acceptance](runs/row-22-e6b-store-v2-2026-09-13/head-buffer/lead-acceptance.md).
+
 - Latest retrospective contract ecf7fcd9 five source pins verified; HEAD bytes absent confirmed. Lead corrected capture-index versus six-field ledger projection: resolve exact transactions, never synthesize missing status/digests. Independent correction review plus exact validated HEAD-buffer retention next; no adapter/completeness. See [review](runs/row-22-e6b-store-v2-2026-09-13/retrospective-contract-review/lead-review.md).
 
 - Latest store-v2 genesis4f69ad66/76a9c56f/dcb80e53 five pins/raw30tests113 accepted shared isolated genesis validation only; complete EDN check precedes publication and recovery repeats schema/carrier/authority/time checks. Next read-only storage-to-retrospective input contract; no adapter or completeness authority. See [acceptance](runs/row-22-e6b-store-v2-2026-09-13/genesis-repair/lead-acceptance.md).
