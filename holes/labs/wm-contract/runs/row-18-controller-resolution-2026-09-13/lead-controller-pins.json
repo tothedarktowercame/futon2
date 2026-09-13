@@ -1,0 +1,20 @@
+[
+  {
+    "path": "/home/joe/code/futon3c/scripts/restart-fdev-detached.sh",
+    "expected": "9c7f2334f182444c37383f41317133781a441541f097d8d801cc502451ac0dd6",
+    "actual": "9c7f2334f182444c37383f41317133781a441541f097d8d801cc502451ac0dd6",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon3c/scripts/proof-eval.sh",
+    "expected": "fde514ee2b623a46262cc23d940587b6e335f75f9e870e7fdb0e36d817a59506",
+    "actual": "fde514ee2b623a46262cc23d940587b6e335f75f9e870e7fdb0e36d817a59506",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon3c/admin/futon3c/admin.clj",
+    "expected": "991058114751850fbad337f075eed66c95c1b4501e5a773c649c253a14111f39",
+    "actual": "991058114751850fbad337f075eed66c95c1b4501e5a773c649c253a14111f39",
+    "matches": true
+  }
+]

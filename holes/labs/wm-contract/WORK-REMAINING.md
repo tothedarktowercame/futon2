@@ -1368,3 +1368,7 @@ Row14 proposal21131c3f reviewed:16current pins match; tracker17th matches author
 ## Lead route decision — retention deployment, 2026-09-13
 
 Selective loaderdc10cbca/c269ea7c reviewed with4matching pins and raw gates. Rejected for serving deployment: caller-asserted ingress proof, insufficient Var rollback controls, and input-form hashes reported as loaded identity. Stop expanding this route; retain offline experiment and disable live targets. Next concrete controlled-restart preparation from separate operator shell with actual ingress/service discovery; no execution yet. Retention implementation remains narrowly accepted; fresh R9 commissions still blocked on verified serving retention. See row-19-selective-loader-2026-09-13/lead-review.md.
+
+## Lead review update — controller resolution, 2026-09-13
+
+Row18 controller2f39b95d/6c064ff6 accepted narrowly after6source/test/reader pins and3actual controller pins match, retained17tests58assertions/gates reviewed. Controller diagnostic unavailable; production entrypoint lease-unavailable and no lock created. Real lease-aware controllers/direct reload mediation plus deployment evidence remain owed, as does logical-history refusal. Codex22 may advance required row22 edge specification next; no controller exemption or node admission.

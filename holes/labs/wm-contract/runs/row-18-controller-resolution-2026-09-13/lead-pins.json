@@ -1,0 +1,38 @@
+[
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/interoceptive_activation.clj",
+    "expected": "9b70fa4fbc06fcd55488753ea35b4c3725da01e6e124d69aa072e3d762755d12",
+    "actual": "9b70fa4fbc06fcd55488753ea35b4c3725da01e6e124d69aa072e3d762755d12",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/interoceptive_store_lock.clj",
+    "expected": "5f60c4c00c12fef5a00c56b352c32a0d14d727dacf71a57d9fbaeb72d0ae354a",
+    "actual": "5f60c4c00c12fef5a00c56b352c32a0d14d727dacf71a57d9fbaeb72d0ae354a",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/interoceptive_manifest.clj",
+    "expected": "8f469c85c7e30004b593fd8b40d38fe7b30d9c6b37d08542be7d99996c633d3d",
+    "actual": "8f469c85c7e30004b593fd8b40d38fe7b30d9c6b37d08542be7d99996c633d3d",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/test/futon2/aif/interoceptive_activation_test.clj",
+    "expected": "bd67974ead0e173cd9ed9017ac47b81b5246a817ea389e2a9b93d9b0a3a8a20e",
+    "actual": "bd67974ead0e173cd9ed9017ac47b81b5246a817ea389e2a9b93d9b0a3a8a20e",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/test/futon2/aif/interoceptive_manifest_test.clj",
+    "expected": "131becbe37286c39bf5a0f140cb11e6370279bf8e22eb0722fdd141c24ad6992",
+    "actual": "131becbe37286c39bf5a0f140cb11e6370279bf8e22eb0722fdd141c24ad6992",
+    "matches": true
+  },
+  {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-18-controller-resolution-2026-09-13/controller_readback.clj",
+    "expected": "e87c93b9294a9c5f6d95be35cfceba04d0f04e98bfd82b72e717db086a3b4f83",
+    "actual": "e87c93b9294a9c5f6d95be35cfceba04d0f04e98bfd82b72e717db086a3b4f83",
+    "matches": true
+  }
+]
