@@ -3,6 +3,6 @@
  :tests 1
  :assertions 1
  :tree-sha "f19e346fe57460704d544e082a8e454e8f30408d"
- :at "2026-09-13T03:25:33Z"
+ :at "2026-09-13T03:26:06Z"
  :stdout "check-parens.stdout"
  :stderr "check-parens.stderr"}
