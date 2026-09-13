@@ -1,0 +1,32 @@
+{:schema :wm/execution-receipts-v1
+ :subject :row-19-invoke-commission-retention
+ :at "2026-09-13T01:49:50Z"
+ :source {:repo "futon3c"
+          :tree-sha "ff03ea32a52c1436d480082caa77a3bebb2a52cb"
+          :http-source-sha256 "0947f981ef82340939a5f64ac36faa86142607a507f41e17571016a14e92480f"}
+ :receipts
+ [{:gate :targeted-test
+   :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\"]}' -M -e '(require (quote futon3c.transport.http-test))(clojure.test/test-vars [(resolve (quote futon3c.transport.http-test/invoke-request-commission-survives-event-trimming-and-rejoins-digest))])'"
+   :exit 0 :tests 1 :assertions 6
+   :tree-sha "ff03ea32a52c1436d480082caa77a3bebb2a52cb"
+   :transcript "test.txt"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon3c/transport/http.clj test/futon3c/transport/http_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "ff03ea32a52c1436d480082caa77a3bebb2a52cb"
+   :transcript "clj-kondo.txt"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- src/futon3c/transport/http.clj test/futon3c/transport/http_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "ff03ea32a52c1436d480082caa77a3bebb2a52cb"
+   :transcript "check-parens.txt"}]
+ :attempts
+ [{:gate :namespace-test
+   :command "clojure -M:test -n futon3c.transport.http-test"
+   :exit 1 :tree-sha "5fcf9912b750a3dc9620f91252c4ebed6fcffc1b"
+   :finding "Fixture timestamp crossed the tombstone deletion horizon; full namespace also had unrelated standing failures."}
+  {:gate :targeted-test-alias
+   :command "clojure -M:test -v futon3c.transport.http-test/invoke-request-commission-survives-event-trimming-and-rejoins-digest"
+   :exit 1 :tree-sha "ff03ea32a52c1436d480082caa77a3bebb2a52cb"
+   :finding "Test-runner discovery was blocked by absent unrelated futon2.aif.hermetic-repair-fixture."}]}
+ :scope {:anchor-created? false :r9-admission-changed? false}}

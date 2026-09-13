@@ -1,0 +1,3 @@
+Command: emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- src/futon3c/transport/http.clj test/futon3c/transport/http_test.clj
+Exit: 0
+Files: 2

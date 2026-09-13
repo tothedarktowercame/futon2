@@ -1,0 +1,6 @@
+Command: clojure -Sdeps '{:paths ["src" "resources" "library" "test"]}' -M -e '(require ...)(clojure.test/test-vars [...])'
+Target: futon3c.transport.http-test/invoke-request-commission-survives-event-trimming-and-rejoins-digest
+Exit: 0
+Tests: 1
+Assertions: 6
+The round trip retained the exact prompt/digest after event trimming; missing and tampered commissions refused.
