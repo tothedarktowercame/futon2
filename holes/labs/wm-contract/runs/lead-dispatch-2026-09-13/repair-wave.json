@@ -81,10 +81,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-positive-beta-domain.request.json",
       "dispatch": "accepted",
       "scope": "positive-beta domain refinement; no admission"
+    },
+    {
+      "packet": "codex-23-genesis-verifier",
+      "job-id": "invoke-1789266076215-20579-63bce1a0",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789266076215-20579-63bce1a0",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-genesis-verifier.request.json",
+      "dispatch": "accepted",
+      "scope": "genesis verifier implementation and authority discovery; no anchor or admission"
     }
   ],
   "current-awaiting": [
-    "invoke-1789265669898-20575-2c98e6ce",
+    "invoke-1789266076215-20579-63bce1a0",
     "invoke-1789265794127-20576-2981ec65",
     "invoke-1789265913819-20577-be296850"
   ]

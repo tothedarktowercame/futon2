@@ -103,6 +103,11 @@ is not yet a verified join to Agency's normalized request digest.
   `runs/row-19-commission-retention-2026-09-13/review-fixes/r1-separate-store/lead-review.md`
   requests post-publication sync-failure retry, existing archive digest validation
   before hot deletion, and full hot/archive join comparison. No admission.
+- Row 19 retry hardening `futon3c/0d40a359`, receipts `10b556db`:
+  all three pins verified, retained 18-assertion run and induced failing exit
+  reviewed, named retry/digest/full-join defects repaired. Retention prerequisite
+  accepted at configured local-store scope; see retry-hardening/lead-acceptance.md.
+  External-root/trace genesis verifier is next; no anchor, deployment, or admission.
 - codex-24 corrected the three false review hash strings in `ad9f9dc2` and
   delivered declaration-grain discovery `335cf4b5`; the lead verified its
   eleven source hashes. J1 means engineering-only row-18 modulation is not

@@ -1,0 +1,5 @@
+{
+  "src/futon3c/transport/http.clj": "defb1ed3b0deeb16ba15857f8efe5ac4e53ed6c442723dfae8808b38406f65fb",
+  "test/futon3c/transport/http_test.clj": "359045444dffeb554539e81db4da08ae0f5293f6ed863d91f2c34ce2d5c3ed68",
+  "scripts/row19_commission_retention_test.clj": "7b835c2ddea540f85aaf7cd7bef721e3ccfc48c94e0bd3b70d15fabbd769864b"
+}
