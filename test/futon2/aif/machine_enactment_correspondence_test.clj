@@ -3,7 +3,8 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-budget-authority :as authority]
-            [futon2.aif.machine-enactment-correspondence :as correspondence])
+            [futon2.aif.machine-enactment-correspondence :as correspondence]
+            [futon2.aif.machine-portfolio-restriction :as e2a])
   (:import (java.nio.file Files StandardCopyOption)
            (java.security MessageDigest)))
 
@@ -25,13 +26,15 @@
   ([] (config witness-root))
   ([root]
    {:mode :isolated-test :e2a-resolver (e1-config) :witness-root (str root)
-    :witnesses {:selection {:relative-path "selection.edn"
+    :witnesses {:context {:relative-path "context.edn"
+                          :sha256 (digest (io/file root "context.edn"))}
+                :selection {:relative-path "selection.edn"
                             :sha256 (digest (io/file root "selection.edn"))}
                 :enactment {:relative-path "enactment.edn"
                             :sha256 (digest (io/file root "enactment.edn"))}}}))
 (defn- copy-witnesses []
   (let [dir (.toFile (Files/createTempDirectory "e2b-" (make-array java.nio.file.attribute.FileAttribute 0)))]
-    (doseq [name ["selection.edn" "enactment.edn"]]
+    (doseq [name ["context.edn" "selection.edn" "enactment.edn"]]
       (Files/copy (.toPath (io/file witness-root name)) (.toPath (io/file dir name))
                   (into-array StandardCopyOption [StandardCopyOption/REPLACE_EXISTING])))
     dir))
@@ -48,7 +51,8 @@
     (is (= :required-external-dependency
            (get-in out [:r9-pre-enact-authorization :status])))
     (is (= :external-dependency (get-in out [:selection-proof :status])))
-    (is (= 2 (count (get-in out [:sources :witnesses]))))))
+    (is (= 3 (count (get-in out [:sources :witnesses]))))
+    (is (= "e2b-selection-enactment-event-1" (:event/id out)))))
 
 (deftest caller-shaped-selection-and-verified-labels-are-ignored
   (let [out (correspondence/verify-correspondence
@@ -73,12 +77,39 @@
       (is (= :e2b/cross-run-witness
              (refusal #(correspondence/verify-correspondence (config root))))))))
 
+(deftest independent-cohort-event-and-subject-controls
+  (testing "missing context cohort"
+    (let [root (copy-witnesses)]
+      (replace-in! root "context.edn" ":cohort/id \"e2b-isolated-cohort-1\""
+                   ":cohort/id nil")
+      (is (= :e2b/context-identity-missing
+             (refusal #(correspondence/verify-correspondence (config root)))))))
+  (testing "borrowed cohort agreed by both witnesses does not override context"
+    (let [root (copy-witnesses)]
+      (doseq [name ["selection.edn" "enactment.edn"]]
+        (replace-in! root name "e2b-isolated-cohort-1" "borrowed-cohort"))
+      (is (= :e2b/cross-cohort-witness
+             (refusal #(correspondence/verify-correspondence (config root)))))))
+  (testing "changed event agreed by both witnesses does not override context"
+    (let [root (copy-witnesses)]
+      (doseq [name ["selection.edn" "enactment.edn"]]
+        (replace-in! root name "e2b-selection-enactment-event-1" "other-event"))
+      (is (= :e2b/cross-event-witness
+             (refusal #(correspondence/verify-correspondence (config root)))))))
+  (testing "same run/tick but replacement E1 bytes make witnesses stale"
+    (let [restricted (e2a/restrict-portfolio (e1-config))
+          stale (assoc-in restricted [:source :e1-verification :sources 0 :sha256]
+                          (apply str (repeat 64 "0")))]
+      (is (= :e2b/context-subject-mismatch
+             (refusal #(with-redefs [e2a/restrict-portfolio (fn [_] stale)]
+                         (correspondence/verify-correspondence (config)))))))))
+
 (deftest domain-and-occurrence-identity-controls
   (testing "approved domain is complete and ordered"
     (let [root (copy-witnesses)]
       (replace-in! root "selection.edn"
-                   "[[:e1-authority-run 4 0] [:e1-authority-run 4 2]]"
-                   "[[:e1-authority-run 4 2] [:e1-authority-run 4 0]]")
+                   ":approved-domain/occurrence-ids\n [[:e1-authority-run 4 0] [:e1-authority-run 4 2]]"
+                   ":approved-domain/occurrence-ids\n [[:e1-authority-run 4 2] [:e1-authority-run 4 0]]")
       (is (= :e2b/approved-domain-mismatch
              (refusal #(correspondence/verify-correspondence (config root)))))))
   (testing "equal action at rejected occurrence is not approved"
@@ -105,7 +136,9 @@
 (deftest action-proof-divergence-and-production-controls
   (testing "selected action bytes must come from approved occurrence"
     (let [root (copy-witnesses)]
-      (replace-in! root "selection.edn" "M-alpha" "M-tampered")
+      (replace-in! root "selection.edn"
+                   ":selected/action {:type :advance-mission :target \"M-alpha\"}"
+                   ":selected/action {:type :advance-mission :target \"M-tampered\"}")
       (is (= :e2b/selected-action-mutation
              (refusal #(correspondence/verify-correspondence (config root)))))))
   (testing "selection proof remains an external dependency"

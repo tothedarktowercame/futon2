@@ -20,6 +20,7 @@
 (assert (= 2 (count (:approved-domain output))))
 (assert (= :required-external-dependency
            (get-in output [:r9-pre-enact-authorization :status])))
+(assert (= "e2b-selection-enactment-event-1" (:event/id output)))
 
 (prn {:scope (:scope output) :identity (:identity output)
       :cohort/id (:cohort/id output)
@@ -28,4 +29,5 @@
       :correspondence (:correspondence output)
       :selection-proof (:selection-proof output)
       :r9-pre-enact-authorization (:r9-pre-enact-authorization output)
-      :production-claim :none :assertions 4})
+      :event/id (:event/id output)
+      :production-claim :none :assertions 5})

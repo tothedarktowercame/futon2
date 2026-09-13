@@ -4,6 +4,7 @@
    It does not select, enact, or retroactively supply R9 authorization."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.machine-portfolio-restriction :as e2a])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
@@ -13,7 +14,8 @@
 
 (def schema-version :wm/r11-r6-enactment-correspondence-v1)
 (def ^:private witness-schemas
-  {:selection :wm/r6-selection-witness-v1
+  {:context :wm/e2b-event-context-v1
+   :selection :wm/r6-selection-witness-v1
    :enactment :wm/r16-enactment-witness-v1})
 
 (defn- refuse! [kind message data]
@@ -74,6 +76,17 @@
        (= #{:model/id :model/revision :run/id :tick/index}
           (set (keys binding)))))
 
+(defn- nonblank? [value]
+  (and (string? value) (not (str/blank? value))))
+
+(defn- resolved-subject [restricted]
+  {:identity (:identity restricted)
+   :e1-source-pins
+   (mapv #(select-keys % [:label :sha256])
+         (get-in restricted [:source :e1-verification :sources]))
+   :approved-domain
+   (mapv #(select-keys % [:candidate/id :action]) (:approved-support restricted))})
+
 (defn verify-correspondence
   "Re-resolve E2a plus pinned selection/enactment witnesses and verify exact
    selected occurrence == enacted occurrence and action bytes."
@@ -83,14 +96,16 @@
   (when (= :production mode)
     (refuse! :e2b/production-authority-unavailable
              "No independently configured production E2b witness authority is installed" {}))
-  (when-not (= #{:selection :enactment} (set (keys witnesses)))
-    (refuse! :e2b/witness-set-incomplete "Selection and enactment witnesses are required" {}))
+  (when-not (= #{:context :selection :enactment} (set (keys witnesses)))
+    (refuse! :e2b/witness-set-incomplete
+             "Independent context, selection and enactment witnesses are required" {}))
   (let [restricted (e2a/restrict-portfolio e2a-resolver)
         resolved (mapv #(resolve-witness! witness-root % (witnesses %))
-                       [:selection :enactment])
+                       [:context :selection :enactment])
         records (into {} (map (juxt :label (comp :record identity)) resolved))
-        selection (:selection records) enactment (:enactment records)
+        context (:context records) selection (:selection records) enactment (:enactment records)
         binding (:identity restricted)
+        subject (resolved-subject restricted)
         approved (:approved-support restricted)
         approved-ids (mapv :candidate/id approved)
         selected-id (:selected/occurrence-id selection)
@@ -98,15 +113,37 @@
         enacted-id (:enacted/occurrence-id enactment)
         enacted-action (:enacted/action enactment)
         source (first (filter #(= selected-id (:candidate/id %)) approved))]
-    (doseq [[label record] records]
+    (when-not (and (nonblank? (:cohort/id context)) (nonblank? (:event/id context)))
+      (refuse! :e2b/context-identity-missing
+               "Independent cohort and event identities must be nonempty"
+               {:cohort/id (:cohort/id context) :event/id (:event/id context)}))
+    (when-not (and (= :isolated-test (:scope context))
+                   (exact-binding? (:binding context))
+                   (= binding (:binding context)))
+      (refuse! :e2b/context-identity-mismatch
+               "Independent context scope/identity differs from E2a"
+               {:expected binding :actual (:binding context)
+                :scope (:scope context)}))
+    (when-not (= subject (:subject context))
+      (refuse! :e2b/context-subject-mismatch
+               "Independent context does not bind the resolved E2a subject"
+               {:expected subject :actual (:subject context)}))
+    (doseq [[label record] (select-keys records [:selection :enactment])]
       (when-not (= :isolated-test (:scope record))
         (refuse! :e2b/scope-laundering "Isolated witness claims another scope"
                  {:label label :scope (:scope record)}))
       (when-not (and (exact-binding? (:binding record)) (= binding (:binding record)))
         (refuse! :e2b/cross-run-witness "Witness identity differs from E2a"
                  {:label label :expected binding :actual (:binding record)}))
-      (when-not (= (:cohort/id selection) (:cohort/id record))
-        (refuse! :e2b/cross-cohort-witness "Witness cohort differs" {:label label})))
+      (when-not (= (:cohort/id context) (:cohort/id record))
+        (refuse! :e2b/cross-cohort-witness
+                 "Witness cohort differs from independent context" {:label label}))
+      (when-not (= (:event/id context) (:event/id record))
+        (refuse! :e2b/cross-event-witness
+                 "Witness event differs from independent context" {:label label}))
+      (when-not (= subject (:subject record))
+        (refuse! :e2b/witness-subject-mismatch
+                 "Witness is stale for the resolved E2a field" {:label label})))
     (when-not (= approved-ids (:approved-domain/occurrence-ids selection))
       (refuse! :e2b/approved-domain-mismatch
                "Selection witness does not name the full ordered approved domain"
@@ -144,7 +181,9 @@
       (refuse! :e2b/enacted-action-mutation
                "Enacted action bytes differ from selected action" {}))
     {:schema/version schema-version
-     :scope :isolated-test :identity binding :cohort/id (:cohort/id selection)
+     :scope :isolated-test :identity binding
+     :cohort/id (:cohort/id context) :event/id (:event/id context)
+     :subject subject
      :approved-domain approved
      :selected {:candidate/id selected-id :action selected-action}
      :enacted {:candidate/id enacted-id :action enacted-action}

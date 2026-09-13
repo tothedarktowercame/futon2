@@ -1,7 +1,9 @@
 {:schema/version :wm/e2b-isolated-witness-pins-v1
  :scope :isolated-test :production-claim :none
  :witnesses
- {:selection {:relative-path "selection.edn"
-              :sha256 "992e044c2427fe5a2117767cece82661842bcdb8961d9d201850b880cd2792d1"}
+ {:context {:relative-path "context.edn"
+            :sha256 "ddbc82772282b985195a9734a912841cef63806e1bca06b59b248d5786d1591b"}
+  :selection {:relative-path "selection.edn"
+              :sha256 "810e5d437cf62f3de6ef2c43b17e7b3693c5e801e299d89837cfc1c8ef9b245e"}
   :enactment {:relative-path "enactment.edn"
-              :sha256 "8b9dd0d0ca4b29abe98bb2292c1ce9a3bf2cbdaddfaf0254e04ff742efabacfe"}}}
+              :sha256 "adb640964313374ea3cd853147f501f900cbab6ca596e07b6793b4329a0e96b2"}}}

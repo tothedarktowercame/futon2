@@ -3,6 +3,21 @@
  :binding {:model/id :wm-e1-fixture :model/revision "model-v3"
            :run/id "e1-authority-run" :tick/index 4}
  :cohort/id "e2b-isolated-cohort-1"
+ :event/id "e2b-selection-enactment-event-1"
+ :subject
+  {:identity {:model/id :wm-e1-fixture :model/revision "model-v3"
+              :run/id "e1-authority-run" :tick/index 4}
+   :e1-source-pins
+   [{:label :ranked-support :sha256 "61cc2938f38a4c2ac5e3d7c48543db06c4b146cdf2239c33c2e8ee67e397ea79"}
+    {:label :field-membership :sha256 "95f9ae99de4ebac2eb5a873fe04d8cf7b1c0cf28c40de294c2807f1338dd56d6"}
+    {:label :costs :sha256 "14ecb59a96b5bb138e86338e008044d50acfd137918b891cb9974652e2da0231"}
+    {:label :utilities :sha256 "17a0e579dcd49cd80b0409b762e0c098928ab2c8fde2c049608e584a41b24bfd"}
+    {:label :budgets :sha256 "4a2e99503b5867f32458d7f4e029e2c4461aa52f1dd0d5f7e33b75f3751ce267"}]
+   :approved-domain
+   [{:candidate/id [:e1-authority-run 4 0]
+     :action {:type :advance-mission :target "M-alpha"}}
+    {:candidate/id [:e1-authority-run 4 2]
+     :action {:type :no-op :target nil}}]}
  :status :enacted
  :selected/occurrence-id [:e1-authority-run 4 0]
  :selected/action {:type :advance-mission :target "M-alpha"}

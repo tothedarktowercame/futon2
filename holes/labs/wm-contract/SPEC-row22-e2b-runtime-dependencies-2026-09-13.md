@@ -23,3 +23,10 @@ No generic divergence is admitted. A future typed divergence requires its own
 adopted reason vocabulary and independently pinned authority tied to the exact
 subject. Until then mismatch refuses. Production witness authority is currently
 unavailable, and this packet makes no selector or enactment source change.
+
+The cohort and event identities come from a third independently pinned context
+record, not from agreement between selection and enactment witnesses. That
+context binds the exact five resolved E1 source hashes and the complete approved
+occurrence/action domain. Both witnesses repeat that entire subject. Missing or
+borrowed cohort/event identity and same-run replacement field bytes therefore
+refuse as stale rather than qualifying by pairwise agreement.
