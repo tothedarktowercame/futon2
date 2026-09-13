@@ -1,0 +1,5 @@
+Syntax error reading source at (holes/labs/wm-contract/runs/row-22-e6b-canonical-replay-2026-09-13/replay.clj:84:62).
+Unmatched delimiter: ]
+
+Full report at:
+/tmp/clojure-15888386613865755325.edn
