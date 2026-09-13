@@ -1,0 +1,13 @@
+WARNING: Unknown module: org.apache.arrow.memory.core specified to --add-opens
+
+Running tests in #{"test"}
+
+Testing futon3c.agency.invoke-lifecycle-reconciliation-test
+
+FAIL in (incomplete-and-conflicting-censuses-refuse) (invoke_lifecycle_reconciliation_test.clj:97)
+missing source, stale generation, unknown delivery
+expected: :reconcile/delivery-state-unknown
+actual: :reconcile/delivery-records-invalid
+
+Ran 4 tests containing 21 assertions.
+1 failures, 0 errors.

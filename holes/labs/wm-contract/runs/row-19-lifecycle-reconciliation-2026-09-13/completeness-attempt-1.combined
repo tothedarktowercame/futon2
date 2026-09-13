@@ -1,0 +1,8 @@
+WARNING: Unknown module: org.apache.arrow.memory.core specified to --add-opens
+
+Running tests in #{"test"}
+Execution error (IllegalArgumentException) at futon3c.agency.invoke-lifecycle-reconciliation-test/eval2316 (invoke_lifecycle_reconciliation_test.clj:138).
+Value out of range for byte: 195
+
+Full report at:
+/tmp/clojure-10448743086377230286.edn

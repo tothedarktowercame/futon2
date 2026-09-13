@@ -1,0 +1,8 @@
+{:attempts
+ [{:source-commit "718d370d" :test-exit 1 :kondo-exit 3 :parens-exit 1
+   :finding "malformed-byte fixture used checked byte conversion and final test form had an extra delimiter"
+   :raw-combined "completeness-attempt-1.combined"}
+  {:source-commit "01ec41dd" :test-exit 1 :kondo-exit 0 :parens-exit 0
+   :tests 4 :assertions 21 :failures 1
+   :finding "unknown delivery was correctly refused earlier by strict delivery-record validation; expected code was too late"
+   :raw-combined "completeness-attempt-2.combined"}]}
