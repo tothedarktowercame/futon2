@@ -289,11 +289,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-resolved-categorical-review-subject.request.json",
       "dispatch": "accepted",
       "scope": "exact resolved categorical subject and evidence scope; no attachment"
+    },
+    {
+      "packet": "codex-22-e1-independent-byte-authority",
+      "job-id": "invoke-1789270833872-20612-217afbfa",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789270833872-20612-217afbfa",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e1-independent-byte-authority.request.json",
+      "dispatch": "accepted",
+      "scope": "E1 independent support/value bytes and scope; no E2 runtime integration"
     }
   ],
   "current-awaiting": [
     "invoke-1789270343067-20609-8f6eaa26",
-    "invoke-1789270203622-20608-2b0d1351",
+    "invoke-1789270833872-20612-217afbfa",
     "invoke-1789270740665-20611-33e6755e"
   ]
 }
