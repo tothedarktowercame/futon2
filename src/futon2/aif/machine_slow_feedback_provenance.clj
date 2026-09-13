@@ -89,11 +89,11 @@
           (= r9-input (:r9/input review))
           (= e1 (:e2a-resolver e3-cfg) (:e2a-resolver e2b-cfg))
           (= e1-pins
-             {:ranked-support (get (pin-map e1) :ranked-support)
-              :field-membership (get (pin-map e1) :field-membership)
-              :costs (get (pin-map e1) :costs)
-              :utilities (get (pin-map e1) :utilities)
-              :budgets (get (pin-map e1) :budgets)})
+             {:e1/ranked-support (get (pin-map e1) :ranked-support)
+              :e1/field-membership (get (pin-map e1) :field-membership)
+              :e1/costs (get (pin-map e1) :costs)
+              :e1/utilities (get (pin-map e1) :utilities)
+              :e1/budgets (get (pin-map e1) :budgets)})
           (= e2b-pins
              {:e2b/context (get (witness-pin-map e2b-cfg) :context)
               :e2b/selection (get (witness-pin-map e2b-cfg) :selection)
