@@ -4,6 +4,7 @@
    All inputs remain unauthenticated structural evidence. This namespace does
    not execute a transition, own HEAD, publish storage, or confer authority."
   (:require [clojure.edn :as edn]
+            [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.machine-slow-state-carrier :as carrier])
   (:import (java.io PushbackReader StringReader)
@@ -66,11 +67,13 @@
   (into {} (map (fn [[role pin]] [role (:sha256 pin)]) (:sources config))))
 (defn- witness-pin-map [config]
   (into {} (map (fn [[role pin]] [role (:sha256 pin)]) (:witnesses config))))
-(defn- ordered-pins! [boundary expected-order xs]
+(defn- ordered-pins! [boundary expected-order allowed-metadata xs]
   (when-not (and (vector? xs)
                  (= expected-order (mapv :label xs))
                  (= (count xs) (count (distinct (map :label xs))))
-                 (every? #(and (= #{:label :sha256} (set (keys %)))
+                 (every? #(and (set/subset? (set (keys %))
+                                             (into #{:label :sha256} allowed-metadata))
+                               (every? (set (keys %)) [:label :sha256])
                                (keyword? (:label %))
                                (string? (:sha256 %))
                                (re-matches hex64 (:sha256 %))) xs))
@@ -129,12 +132,14 @@
               :e3/review (get-in e3-cfg [:evidence :review :sha256])})
           ;; Canonical outputs must name the exact resolved source bytes.  A
           ;; coherently re-pinned config is not allowed to borrow stale output.
-          (= (ordered-pins! :e3/output-sources e3-source-order (:sources e3-output))
+          (= (ordered-pins! :e3/output-sources e3-source-order #{} (:sources e3-output))
              (mapv #(:source-sha256 (c (keyword "e3" (name %)))) e3-source-order))
           (= (ordered-pins! :e2b/output-e1-sources e1-source-order
+                            #{:path :relative-path :bytes-count}
                             (get-in e2b-output [:sources :e2a :e1-verification :sources]))
              (configured-pins (:sources e1) e1-source-order))
           (= (ordered-pins! :e2b/output-witnesses e2b-witness-order
+                            #{:path :bytes-count}
                             (get-in e2b-output [:sources :witnesses]))
              (configured-pins (:witnesses e2b-cfg) e2b-witness-order))
           (= (:subject e2b-output)
@@ -150,13 +155,13 @@
           (= (:enacted e2b-output)
              {:candidate/id (:enacted/occurrence-id e2b-enactment)
               :action (:enacted/action e2b-enactment)})
-          (= (ordered-pins! :e2b/subject-e1-pins e1-source-order
+          (= (ordered-pins! :e2b/subject-e1-pins e1-source-order #{}
                             (get-in e2b-output [:subject :e1-source-pins]))
              (configured-pins (:sources e1) e1-source-order))
           (= (e3-identity pending) (e3-identity verdict) (e3-identity review)
              (e3-identity (:identity e3-output)))
           (= (:subject pending) (:subject verdict) (:subject review) (:subject e3-output))
-          (= (ordered-pins! :e3/pending-field-pins e1-source-order
+          (= (ordered-pins! :e3/pending-field-pins e1-source-order #{}
                             (:field-pins (:subject pending)))
              (configured-pins (:sources e1) e1-source-order))
           (= (get-in proposal [:canonical/digests :e3]) (value-digest e3-output))
