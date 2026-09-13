@@ -57,10 +57,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-bounded-policy-root-proof.request.json",
       "dispatch": "accepted",
       "scope": "review repair or bounded theorem; no admission"
+    },
+    {
+      "packet": "codex-23-archive-publication-retry",
+      "job-id": "invoke-1789265669898-20575-2c98e6ce",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789265669898-20575-2c98e6ce",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-archive-publication-retry.request.json",
+      "dispatch": "accepted",
+      "scope": "archive publication retry and full join consistency; no admission"
     }
   ],
   "current-awaiting": [
-    "invoke-1789264991776-20570-bb79d2d7",
+    "invoke-1789265669898-20575-2c98e6ce",
     "invoke-1789265183477-20571-79b56743",
     "invoke-1789265350956-20573-a7db5e1d"
   ]
