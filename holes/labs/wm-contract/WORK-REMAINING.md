@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest E3 event acceptance: 6d3bb688/ea8c40c5 six dependency/source pins and raw3tests31 verified. Canonical full pending-event digest/time joins and re-resolved E2a field/occurrence accepted isolated only. Equal completion/admission timestamps conservative; production/genesis/R6/construction/consumer remain open. Pure E5 is next. See [acceptance](runs/row-22-e3-pre-enact-2026-09-13/lead-event-acceptance.md).
+
 - Latest snapshot hardening acceptance: dd870146/514844e8 two pins/raw7tests18 verified. Poisoned failure refusal and defensive replay copies accepted only for cooperative isolated API use; accessible boundary atoms/callbacks are not tamper-resistant live ownership. Real providers/deployment/completeness remain open; codex23 moves to required pure E4 causal route. See [acceptance](runs/row-19-lifecycle-snapshot-2026-09-13/lead-poison-acceptance.md).
 
 - Latest Row24 record/connection review: 0f02c59e/ea750169 five pins/nine final axioms verified. Executed local Lean proofs show record causal references ignored and arbitrary nonempty edge causal record accepted. Exact actual/expected pin and family-specific causal joins remain unimplemented; no full certificate. See [review](runs/row-24-record-connection-binding-2026-09-13/lead-review.md).

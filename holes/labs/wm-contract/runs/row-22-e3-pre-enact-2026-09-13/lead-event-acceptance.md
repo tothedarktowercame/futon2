@@ -1,0 +1,9 @@
+# Independent canonical event acceptance: job20633
+
+Reviewed44589482/a55e04a0/6d3bb688 andea8c40c5. Six source/test/spec/canonical-R9/E2a/E1 authority pins match. Retained final3tests31assertions, clean kondo and actual parens match; prior wrong-expectation failure is retained. No passing checks rerun.
+
+Canonical subject digest now includes model/revision/run/cohort/tick/event, pending phase/authorization time and complete construction subject. Its exact checked admission must equal retained verdict. Canonical reviewer completion, input admission time, output admission time and wrapper completion must match and precede pending authorization. This closes the demonstrated late-job/early-wrapper and borrowed-event reuse controls. The equal timestamp requirement is a conservative implementation restriction, stronger than mere chronological ordering; it is not a claim that independently generated production timestamps will be identical.
+
+E2a is re-resolved through E1's byte authority and the pending model/run/tick, occurrence membership, complete action and ordered five source hashes are compared. Relaxing occurrence-id from string to some? supports canonical vector occurrence IDs; resolved approved membership provides its actual authority. Previous missing subject and all-record scope checks remain. Canonical fixture anchor remains explicitly isolated, not real genesis or independent host admission. Pending construction map semantics beyond its exact digest remain an external construction authority obligation.
+
+Accepted as isolated pre-enact mechanism only. No E3 production firing, R6 posterior proof, actual independent production pending event, serving retention/genesis, or consumer wiring established. User's all-node/edge bar remains unchanged. Next bounded E5 verifier can proceed independently while those dependencies remain open; no real authorization granted.
