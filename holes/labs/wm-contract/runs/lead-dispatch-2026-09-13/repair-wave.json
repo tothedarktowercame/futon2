@@ -649,10 +649,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-public-prospective-validator.request.json",
       "dispatch": "accepted",
       "scope": "public isolated prospective validator around reviewed private core only"
+    },
+    {
+      "packet": "codex-23-feedback-common-state-contract",
+      "job-id": "invoke-1789279223496-20682-83bb1a23",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789279223496-20682-83bb1a23",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-common-state-contract.request.json",
+      "dispatch": "accepted",
+      "scope": "read-only common state carrier and continuity contract; no adapter"
     }
   ],
   "current-awaiting": [
-    "invoke-1789278962878-20680-1528b541"
+    "invoke-1789279223496-20682-83bb1a23"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
