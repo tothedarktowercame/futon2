@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest Row 14 offline join: 31fa78a8/35e5b8ef/2a071ff8 reviewed; six pins including F11 bytes and retained 4-test/18-assertion gates match. Accepted at trusted configured-context scope only. F11 retains five typed identity/authority absences, no labels/pairs/counts. Real acquisition and capture deployment remain open; worker moves to required full-predicate rejection work. See [acceptance](runs/row-14-offline-close-attachment-2026-09-13/lead-acceptance.md).
+
 - Latest E1 authority review: d53b88e4/a08f17f2 four pins and retained 7-test/18-assertion gates verified. Byte-resolution mechanism accepted only at isolated scope; production authority still unavailable. Lead rejected extra identity-binding fields that could overwrite resolved input; new regression and changed-source 8-test/19-assertion gates pass. Independent review of lead touch-up and pure E2a restriction are next; no edge firing. See [review](runs/row-22-e1-authority-resolution-2026-09-13/lead-acceptance.md).
 
 - Latest ingress durable review: 30b7de55 / 13f64ac1 has two matching source pins and retained 7-test/25-assertion gates. Single-state verification repair accepted narrowly. Executed isolated controls expose accepted non-EDN payload breaking recovery and two controllers overwriting a durably accepted resume. Payload validation, exclusive store ownership and atomic initialization remain required before integration. See [review](runs/row-19-ingress-controller-2026-09-13/lead-durable-review.md).
