@@ -1,0 +1,4 @@
+{:command "clojure -X:test :nses '[futon2.aif.interoceptive-manifest-test]'"
+ :exit 1 :tests 6 :assertions 23 :errors 1
+ :finding "future control passed with-store-lock without its callback"
+ :retained-report "/tmp/clojure-8958599523386968983.edn"}

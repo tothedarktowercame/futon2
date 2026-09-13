@@ -1,0 +1,4 @@
+{:command "clojure -X:test :nses '[futon2.aif.interoceptive-manifest-test]'"
+ :exit 1 :tests 0 :assertions 0
+ :finding "nested anonymous function reader error at test line 100"
+ :retained-report "/tmp/clojure-7863795391203810666.edn"}

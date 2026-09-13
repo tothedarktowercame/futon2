@@ -1,0 +1,1 @@
+{:ok false, :refusal :interoceptive/writer-participation-unverified, :data {:required :all-live-canonical-trip-and-repair-writers, :activation :reload-or-restart-with-independent-deployment-receipt, :scope :source-implemented-not-deployed, :refusal :interoceptive/writer-participation-unverified}}

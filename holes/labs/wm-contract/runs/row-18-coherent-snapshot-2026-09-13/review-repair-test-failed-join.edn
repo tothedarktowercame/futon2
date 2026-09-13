@@ -1,0 +1,4 @@
+{:command "clojure -X:test :nses '[futon2.aif.interoceptive-manifest-test]'"
+ :exit 1 :tests 7 :assertions 28 :errors 1
+ :finding "actual-writer fixture omitted finding.failure-data trip/id; constructor correctly refused missing-finding-join"
+ :retained-report "/tmp/clojure-17703199944645466520.edn"}

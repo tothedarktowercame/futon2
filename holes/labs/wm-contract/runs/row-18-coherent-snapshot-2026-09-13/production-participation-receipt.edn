@@ -1,0 +1,9 @@
+{:command "clojure -M holes/labs/wm-contract/runs/row-18-coherent-snapshot-2026-09-13/production_participation_readback.clj"
+ :exit 0 :tests 1 :assertions 1
+ :result :expected-typed-refusal
+ :refusal :interoceptive/writer-participation-unverified
+ :stdout "production-participation-stdout.txt"
+ :stderr "production-participation-stderr.txt"
+ :runner-sha256 "e7669d91b581a8e1db6ee4a136dbe3d3be89c9dc533393b14ec861d7e77e2898"
+ :tree-sha "430441a3f3905e7c020fe2363ffc05a004e6c297"
+ :at "2026-09-13T02:40:37Z"}
