@@ -45,23 +45,41 @@ assumption: no observation likelihood or incident calibration currently says
 that an open trip should double the Gamma rate. It must never be described as
 measured evidence, and a half prior mean is not a half posterior gamma.
 
-## Monotonicity verdict
+## Monotonicity verdict — refined after independent review
 
-The required applied-confidence reduction is **not a theorem of this
-adjustment**. The evidence term depends on beta through both posteriors. The
-new Lean module gives a unique-positive-root counterexample: with
-`delta(beta)=2*beta-3`, rates 1 and 2 have roots 2 and 1, so the reduced prior
-mean increases posterior gamma from 1/2 to 1. Multiple roots make branch
-identity additionally ambiguous. A production `:held-unsolved` or
-`:held-absent` state does not establish a newly solved adjusted posterior and
-cannot be credited as applied reduction.
+The original proposal's affine example `delta(beta)=2*beta-3` remains useful
+only as **unrestricted-domain history**: it shows that prior-rate algebra alone
+does not imply posterior monotonicity, but it is unbounded and therefore is not
+an actual finite-softmax policy-field reversal.
+
+For the real exact finite-policy model,
+`delta(beta)=E_pi[G]-E_pi0[G]` is bounded by `max(G)-min(G)`. The new
+`InteroceptivePolicyPrecisionBounded.lean` proves that bound for any two finite
+normalised nonnegative weight vectors. It also proves: continuity and global
+boundedness of delta, a positive baseline root, a strictly increased prior
+rate, and **uniqueness of the new positive root** imply existence of a new root
+strictly above the baseline root and hence strictly lower gamma. Baseline-root
+uniqueness is unnecessary.
+
+This conditional theorem does not license the Clojure field. Exact-real
+softmax continuity follows only after the production score/support model is
+represented in Lean; floating evaluation is not continuous as an exact-real
+function. Production bisection convergence and opposite signs at two bracket
+ends prove a located numerical branch, not global positive-root uniqueness. A
+finite sign scan also cannot exclude an even-multiplicity root or variation
+between samples. Multiple roots make branch identity ambiguous. A production
+`:held-unsolved` or `:held-absent` state does not establish a newly solved
+adjusted posterior and cannot be credited as applied reduction.
 
 Therefore v1 is admissible only as a **field-checked hypothesis**:
 
 1. At identical pinned `G`, `F_pi`, `ln E`, candidate identities, solver
    bracket/options, and unadjusted beta prior, solve arms `m=1` and `m=1/2`.
-2. Both arms must converge, bracket, have a unique root under the checker's
-   stated uniqueness test, and return finite positive beta.
+2. Both arms must converge, bracket, and return finite positive beta. The new
+   arm additionally needs global positive-root uniqueness established by a
+   reviewed analytic theorem (for example strict monotonicity of
+   `b-delta(b)` on `b>0`) or a verified interval/root certificate covering the
+   whole positive domain. Bisection or a sampled sign scan alone is insufficient.
 3. The open-trip arm qualifies only when its applied gamma is strictly lower
    than baseline. Equality or increase is `:counterexample-no-reduction`, not
    firing evidence. Multiple roots are `:multiple-roots`; unsolved and absent
@@ -101,8 +119,12 @@ New module
 * exact reduction to the old prior/equation at `m=1`;
 * positivity of the adjusted rate for positive inputs;
 * exact prior-mean scaling and positive `gamma=1/beta` reciprocity;
-* a concrete counterexample to general posterior monotonicity;
+* a concrete unrestricted-delta counterexample to algebra-only monotonicity;
 * the closed typed outcome vocabulary for a later checker.
+
+The refinement module proves the finite-distribution range bound and the
+conditional lower-gamma theorem under continuity, boundedness and uniqueness
+of the new positive root.
 
 It does not prove the production solver converges, brackets uniquely, or moves
 gamma monotonically on a retained field. Those are mandatory commissioned
