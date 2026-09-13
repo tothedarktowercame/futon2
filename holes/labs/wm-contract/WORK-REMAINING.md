@@ -130,6 +130,12 @@ is not yet a verified join to Agency's normalized request digest.
   proves finite-support normalization/alignment/continuity. Frozen carrier edits
   are unnecessary; global root uniqueness and runtime correspondence remain open.
 
+- Measured-A read-only current capture discovery: service last-click points to
+  a September 12 F11 attempt outside the default July close root. Pinned close
+  lacks both new entity/state fields; service reports loaded runner identity
+  unavailable and run binding unavailable. See `runs/row-14-current-capture-discovery-2026-09-13/`.
+  This is one located attempt, not an all-root census or observed-state authority.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,

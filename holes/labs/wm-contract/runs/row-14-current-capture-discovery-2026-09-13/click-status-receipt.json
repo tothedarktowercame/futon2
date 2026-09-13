@@ -1,0 +1,7 @@
+{
+  "method": "GET",
+  "url": "http://localhost:7070/api/alpha/wm/click",
+  "at": "2026-09-13T02:23:57.152821+00:00",
+  "sha256": "8e9ceb4ee45c47413a5dd8e2ff3128b81e00417dfcdb069ef75ffa5e0237f01c",
+  "scope": "read-only service status; no reload or loop invocation"
+}
