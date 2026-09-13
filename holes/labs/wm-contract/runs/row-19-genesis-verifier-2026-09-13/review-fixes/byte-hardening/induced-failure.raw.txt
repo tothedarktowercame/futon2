@@ -1,0 +1,6 @@
+
+FAIL in () (row19_genesis_verifier_test.clj:13)
+induced genesis runner control
+expected: :passing-run
+  actual: :induced-failure
+{:runner :row19-genesis-verifier, :tests 1, :assertions 32, :pass 31, :fail 1, :error 0, :exit 1, :induced-failure? "--induced-failure"}
