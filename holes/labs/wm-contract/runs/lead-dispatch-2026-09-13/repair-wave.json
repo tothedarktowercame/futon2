@@ -761,10 +761,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-isolated-store-v2-provenance.request.json",
       "dispatch": "accepted",
       "scope": "fresh temporary isolated store-v2 provenance publication/recovery only"
+    },
+    {
+      "packet": "codex-23-store-v2-chain-invariants",
+      "job-id": "invoke-1789283425654-20710-5c128522",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789283425654-20710-5c128522",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-chain-invariants.request.json",
+      "dispatch": "accepted",
+      "scope": "isolated v2 strict schema/HEAD/parent/provenance/conflict/version invariants; no production"
     }
   ],
   "current-awaiting": [
-    "invoke-1789282844646-20708-9df3173a"
+    "invoke-1789283425654-20710-5c128522"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
