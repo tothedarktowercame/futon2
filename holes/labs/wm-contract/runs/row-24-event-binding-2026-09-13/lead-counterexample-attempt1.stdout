@@ -1,0 +1,7 @@
+/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-event-binding-2026-09-13/LeadOccurrenceMismatch.lean:16:12: error: Expected type must not contain free variables
+  { run := fixed.identity, occurrenceId := "selected-occurrence", actionId := "same-action", sourceRef := "selection",
+        sourcePin := pin }.occurrenceId ≠
+    { run := fixed.identity, occurrenceId := "substituted-occurrence", actionId := "same-action",
+        sourceRef := "enactment", sourcePin := pin }.occurrenceId
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables

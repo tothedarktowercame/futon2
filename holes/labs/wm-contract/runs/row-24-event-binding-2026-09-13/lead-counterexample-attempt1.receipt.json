@@ -1,0 +1,12 @@
+{
+  "cwd": "/home/joe/code/mathlib4",
+  "argv": [
+    "lake",
+    "env",
+    "lean",
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-event-binding-2026-09-13/LeadOccurrenceMismatch.lean"
+  ],
+  "exit": 1,
+  "scope": "new local predicate counterexample only; no full qualifying certificate",
+  "dependency_rebuild": false
+}
