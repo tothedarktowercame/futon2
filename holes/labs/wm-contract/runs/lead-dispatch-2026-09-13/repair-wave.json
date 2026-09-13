@@ -345,11 +345,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-offline-lifecycle-reconciliation.request.json",
       "dispatch": "accepted",
       "scope": "independent lead payload review and offline accepted-job lifecycle reconciliation; no integration"
+    },
+    {
+      "packet": "codex-22-e2b-exact-enactment-verifier",
+      "job-id": "invoke-1789271983880-20621-173b7165",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789271983880-20621-173b7165",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e2b-exact-enactment-verifier.request.json",
+      "dispatch": "accepted",
+      "scope": "pure exact occurrence selection/enactment witness verification; no action or authorization"
     }
   ],
   "current-awaiting": [
     "invoke-1789271800626-20620-737f8c90",
-    "invoke-1789271480848-20618-2dfdb941",
+    "invoke-1789271983880-20621-173b7165",
     "invoke-1789271626448-20619-d2157ce9"
   ]
 }
