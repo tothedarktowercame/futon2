@@ -393,10 +393,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e3-pre-enact-subject.request.json",
       "dispatch": "accepted",
       "scope": "pure exact-subject pre-enact independence verifier; no runtime authorization"
+    },
+    {
+      "packet": "codex-23-isolated-atomic-lifecycle-source",
+      "job-id": "invoke-1789273186397-20627-87a22198",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789273186397-20627-87a22198",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-isolated-atomic-lifecycle-source.request.json",
+      "dispatch": "accepted",
+      "scope": "independent lead scope/harness review and isolated atomic lifecycle source; no live integration"
     }
   ],
   "current-awaiting": [
-    "invoke-1789272310436-20623-02d0f136",
+    "invoke-1789273186397-20627-87a22198",
     "invoke-1789272964694-20626-939e1dfb",
     "invoke-1789272807699-20625-8a928038"
   ]
