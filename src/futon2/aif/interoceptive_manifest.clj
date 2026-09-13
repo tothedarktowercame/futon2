@@ -8,7 +8,11 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.c-fold-config :as digest]
-            [futon2.aif.interoceptive-commitment :as commitment])
+            [futon2.aif.interoceptive-activation :as activation]
+            [futon2.aif.interoceptive-commitment :as commitment]
+            [futon2.aif.interoceptive-store-lock :as store-lock]
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.tripwire :as tripwire])
   (:import [java.nio ByteBuffer]
            [java.nio.charset CodingErrorAction StandardCharsets]
            [java.nio.file Files]
@@ -152,11 +156,20 @@
     (assoc manifest :snapshot (commitment/confidence-snapshot (:constructor-input manifest)))))
 
 (defn production-manifest!
-  "Refuse until deployment evidence establishes that every live canonical
-  writer is executing the coordinated source. Source presence is not
-  deployment evidence."
+  "Capture only after independently provisioned host evidence establishes
+  exact source, process, writer coverage, freshness, and stable lock identity."
   []
-  (refuse! :interoceptive/writer-participation-unverified
-           {:required :all-live-canonical-trip-and-repair-writers
-            :activation :reload-or-restart-with-independent-deployment-receipt
-            :scope :source-implemented-not-deployed}))
+  (let [participation (activation/resolve-production-participation!)]
+    (binding [store-lock/*lock-path* (get-in participation [:lock :path])]
+      (store-lock/with-store-lock
+       (fn []
+         (let [audit (capture tripwire/default-trip-root repair/default-root :test)
+               input (-> (:constructor-input audit)
+                         (assoc-in [:trip-authority :authority-class] :production)
+                         (assoc-in [:repair-authority :authority-class] :production))]
+           {:schema :wm/interoceptive-production-snapshot-v1
+            :capture-boundary :verified-cross-process-file-lock
+            :participation participation
+            :manifest (assoc (dissoc audit :constructor-input)
+                             :authority-class :production)
+            :snapshot (commitment/confidence-snapshot input)}))))))

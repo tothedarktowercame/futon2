@@ -1,0 +1,224 @@
+(ns futon2.aif.interoceptive-activation
+  "Independent host evidence required before coordinated production capture.
+
+  The fixed receipt and lock are provisioned by the operator outside the JVM.
+  A caller-supplied map, root label, or test receipt cannot activate production."
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
+            [futon2.aif.interoceptive-store-lock :as store-lock])
+  (:import [java.nio ByteBuffer]
+           [java.nio.charset CodingErrorAction StandardCharsets]
+           [java.nio.file Files LinkOption Paths]
+           [java.nio.file.attribute PosixFilePermission]
+           [java.security MessageDigest]))
+
+(def production-receipt-path "/etc/futon2/wm-interoceptive-participation.edn")
+(def max-receipt-lifetime-ms 300000)
+(def required-writer-census-sha256
+  "039d5319ade70150844c1e27f3d63cb01cb3a3f732ce29c11395359bc208eb51")
+(def required-writers
+  #{:tripwire/write-trip-report
+    :repair/record-finding
+    :repair/record-implementation
+    :repair/record-verification
+    :repair/record-resolution})
+
+;; Filled from committed source bytes; activation receipts must match all pins.
+(def required-source-pins
+  {"/home/joe/code/futon2/src/futon2/aif/interoceptive_store_lock.clj"
+   "fe65e829a354902166851f5a2dc9d31dcfd187a28274f0d20f634b2f984f8b1d"
+   "/home/joe/code/futon2/src/futon2/aif/interoceptive_manifest.clj"
+   "4b062a25184d47e7a63f1685fb09cb23008f21cc0391398426821b4c23ac0d42"
+   "/home/joe/code/futon2/src/futon2/aif/tripwire.clj"
+   "a75b2a571d76fa93486ff8807dc4fdc93a2f6ca125042f0d3087cbdcb933aeae"
+   "/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj"
+   "f61ede50822955695d5510248f0592883ed6f83d74be08a23ba37f649e33254a"})
+
+(defonce ^:private production-capability (Object.))
+
+(defn- refuse! [reason data]
+  (throw (ex-info "Interoceptive activation refused" (assoc data :refusal reason))))
+
+(defn- sha256-bytes [bytes]
+  (apply str (map #(format "%02x" (bit-and 0xff %))
+                  (.digest (MessageDigest/getInstance "SHA-256") bytes))))
+
+(defn- strict-edn [bytes path]
+  (let [text (try
+               (str (.decode (doto (.newDecoder StandardCharsets/UTF_8)
+                               (.onMalformedInput CodingErrorAction/REPORT)
+                               (.onUnmappableCharacter CodingErrorAction/REPORT))
+                             (ByteBuffer/wrap bytes)))
+               (catch Throwable e
+                 (refuse! :interoceptive/activation-non-utf8
+                          {:path path :cause (.getMessage e)})))]
+    (with-open [r (java.io.PushbackReader. (java.io.StringReader. text))]
+      (try
+        (let [value (edn/read {:eof ::empty} r)]
+          (when (or (= ::empty value) (not= ::end (edn/read {:eof ::end} r)))
+            (refuse! :interoceptive/activation-not-one-form {:path path}))
+          value)
+        (catch clojure.lang.ExceptionInfo e (throw e))
+        (catch Throwable e
+          (refuse! :interoceptive/activation-malformed
+                   {:path path :cause (.getMessage e)}))))))
+
+(defn- real-source-pins []
+  (into {}
+        (map (fn [[path _]]
+               (let [file (io/file path)]
+                 (when-not (.isFile file)
+                   (refuse! :interoceptive/activation-source-unavailable {:path path}))
+                 [path (sha256-bytes (Files/readAllBytes (.toPath file)))])))
+        required-source-pins))
+
+(defn- secure-root-owned-receipt! [path]
+  (let [absolute (.toAbsolutePath (.normalize path))]
+    (loop [p (.getRoot absolute) names (iterator-seq (.iterator absolute))]
+      (when-let [name (first names)]
+        (let [candidate (.resolve p name)]
+          (when (Files/isSymbolicLink candidate)
+            (refuse! :interoceptive/activation-receipt-untrusted
+                     {:path (str absolute) :symlink (str candidate)}))
+          (recur candidate (next names)))))
+    (let [parent (.getParent absolute)
+          owner (str (Files/getOwner absolute
+                                     (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])))
+          parent-owner (str (Files/getOwner parent
+                                            (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])))
+          permissions (Files/getPosixFilePermissions parent (make-array LinkOption 0))]
+      (when-not (and (= "root" owner parent-owner)
+                     (not-any? permissions
+                               [PosixFilePermission/GROUP_WRITE
+                                PosixFilePermission/OTHERS_WRITE]))
+        (refuse! :interoceptive/activation-receipt-untrusted
+                 {:path (str absolute) :owner owner :parent-owner parent-owner
+                  :parent-permissions (mapv str permissions)})))
+    absolute))
+
+(defn validate-participation
+  "Validate an already independently authenticated record. This pure layer
+  cannot authenticate its caller; only resolve-production-participation! may
+  authorize production."
+  [record {:keys [now-ms source-pins lock-probe process-probe capability]
+           :or {now-ms (System/currentTimeMillis)}}]
+  (when-not (= :wm/interoceptive-writer-participation-v1 (:schema record))
+    (refuse! :interoceptive/activation-schema {:schema (:schema record)}))
+  (when-not (= required-writers (set (:writer-entrypoints record)))
+    (refuse! :interoceptive/activation-writer-coverage
+             {:required required-writers :observed (set (:writer-entrypoints record))}))
+  (when-not (= required-source-pins (:source-pins record) source-pins)
+    (refuse! :interoceptive/activation-source-mismatch
+             {:required required-source-pins :receipt (:source-pins record)
+              :observed source-pins}))
+  (when-not (and (integer? (:observed-at-ms record))
+                 (integer? (:valid-until-ms record))
+                 (<= (- (:valid-until-ms record) (:observed-at-ms record))
+                     max-receipt-lifetime-ms)
+                 (<= (:observed-at-ms record) now-ms (:valid-until-ms record)))
+    (refuse! :interoceptive/activation-stale
+             {:now-ms now-ms :observed-at-ms (:observed-at-ms record)
+              :valid-until-ms (:valid-until-ms record)}))
+  (when-not (and (true? (get-in record [:host :census-complete?]))
+                 (string? (get-in record [:host :boot-id]))
+                 (= required-writer-census-sha256
+                    (get-in record [:host :writer-census-sha256]))
+                 (re-matches #"[0-9a-f]{64}"
+                             (or (get-in record [:host :process-census-sha256]) "")))
+    (refuse! :interoceptive/activation-host-census-invalid {:host (:host record)}))
+  (let [processes (:processes record)
+        ids (mapv :process/id processes)
+        nonparticipants (filterv #(not= :participating (:coordination/status %)) processes)
+        covered (into #{} (mapcat :writer-entrypoints) processes)]
+    (when-not (and (vector? processes) (seq processes)
+                   (= (count ids) (count (distinct ids))))
+      (refuse! :interoceptive/activation-process-census-invalid {:process/ids ids}))
+    (when (seq nonparticipants)
+      (refuse! :interoceptive/activation-nonparticipating-writer
+               {:processes (mapv :process/id nonparticipants)}))
+    (doseq [process processes]
+      (when-not (and (= required-source-pins (:loaded-source-pins process))
+                     (string? (:deployment/id process))
+                     (integer? (:loaded-at-ms process))
+                     (<= (:loaded-at-ms process) (:observed-at-ms record)))
+        (refuse! :interoceptive/activation-process-source-unverified
+                 {:process/id (:process/id process)})))
+    (when-not (= required-writers covered)
+      (refuse! :interoceptive/activation-process-writer-coverage
+               {:required required-writers :covered covered}))
+    (doseq [process processes]
+      (let [observable (select-keys process
+                                    [:process/id :pid :start-ticks :exe
+                                     :cmdline-sha256])]
+        (when-not (= observable (process-probe process))
+          (refuse! :interoceptive/activation-process-changed
+                   {:process/id (:process/id process)})))))
+  (let [declared (:lock record)
+        observed (lock-probe declared)]
+    (when-not (and (= store-lock/default-lock-path (:path declared))
+                   (= declared observed)
+                   (= "root" (:parent-owner observed))
+                   (false? (:parent-writable-by-service? observed))
+                   (string? (:file-key observed)))
+      (refuse! :interoceptive/activation-lock-mismatch
+               {:declared declared :observed observed})))
+  {:schema :wm/interoceptive-writer-participation-admission-v1
+   :authority-class (if (identical? capability production-capability)
+                      :production :test)
+   :receipt-sha256 (:receipt-sha256 record)
+   :lock (:lock record)
+   :valid-until-ms (:valid-until-ms record)})
+
+(defn- host-lock-probe [_]
+  (let [path (Paths/get store-lock/default-lock-path (make-array String 0))
+        parent (.getParent path)]
+    (when-not (and (Files/isRegularFile path (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+                   (not (Files/isSymbolicLink path)))
+      (refuse! :interoceptive/activation-lock-unavailable {:path (str path)}))
+    {:path (str path)
+     :file-key (str (Files/getAttribute path "basic:fileKey"
+                                        (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])))
+     :owner (str (Files/getOwner path (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])))
+     :parent-owner (str (Files/getOwner parent (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])))
+     :parent-writable-by-service?
+     (boolean (some #{PosixFilePermission/GROUP_WRITE PosixFilePermission/OTHERS_WRITE}
+                    (Files/getPosixFilePermissions parent (make-array LinkOption 0))))}))
+
+(defn- host-process-probe [process]
+  (let [pid (:pid process)
+        path (Paths/get (str "/proc/" pid) (make-array String 0))]
+    (when-not (Files/isDirectory path (make-array LinkOption 0))
+      (refuse! :interoceptive/activation-process-missing {:process/id (:process/id process)}))
+    (try
+      (let [stat (slurp (str path "/stat"))
+            close (.lastIndexOf stat ")")
+            fields (str/split (subs stat (+ close 2)) #" ")
+            start-ticks (nth fields 19)
+            exe (str (.toRealPath (Paths/get (str path "/exe") (make-array String 0))
+                                  (make-array LinkOption 0)))
+            cmdline (Files/readAllBytes (Paths/get (str path "/cmdline")
+                                                   (make-array String 0)))]
+        {:process/id (:process/id process) :pid pid :start-ticks start-ticks
+         :exe exe :cmdline-sha256 (sha256-bytes cmdline)})
+      (catch Throwable e
+        (refuse! :interoceptive/activation-process-probe-failed
+                 {:process/id (:process/id process) :cause (.getMessage e)})))))
+
+(defn resolve-production-participation!
+  "Read only the fixed root-owned host receipt. Missing or unauthenticated
+  host evidence refuses; there is no caller-supplied production mode."
+  []
+  (let [path (Paths/get production-receipt-path (make-array String 0))]
+    (when-not (and (Files/isRegularFile path (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+                   (not (Files/isSymbolicLink path)))
+      (refuse! :interoceptive/activation-receipt-unavailable {:path production-receipt-path}))
+    (secure-root-owned-receipt! path)
+    (let [bytes (Files/readAllBytes path)
+          record (assoc (strict-edn bytes production-receipt-path)
+                        :receipt-sha256 (sha256-bytes bytes))]
+      (validate-participation record
+                              {:capability production-capability
+                               :source-pins (real-source-pins)
+                               :lock-probe host-lock-probe
+                               :process-probe host-process-probe}))))

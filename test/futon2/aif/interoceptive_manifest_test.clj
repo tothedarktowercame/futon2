@@ -154,7 +154,7 @@
                               (make-array java.nio.file.attribute.FileAttribute 0))
     (is (= :interoceptive/source-path-refused
            (refusal #(manifest/capture (.getPath linked) (.getPath repair-root) :test))))
-    (is (= :interoceptive/writer-participation-unverified
+    (is (= :interoceptive/activation-receipt-unavailable
            (refusal manifest/production-manifest!)))))
 
 (deftest partial-logical-publication-refuses
