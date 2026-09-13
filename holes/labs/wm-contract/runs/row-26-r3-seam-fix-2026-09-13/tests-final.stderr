@@ -1,0 +1,5 @@
+Syntax error compiling at (futon2/aif/full_loop_runner_test.clj:1812:20).
+Unable to resolve symbol: construction-events in this context
+
+Full report at:
+/tmp/clojure-5100588634232646537.edn

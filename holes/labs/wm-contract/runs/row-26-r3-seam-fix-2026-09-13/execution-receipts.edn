@@ -1,0 +1,44 @@
+{:packet :row-26-r3-construction-close-seam
+ :tested-tree "ca2169be668db6c310e7ffc94e47298b3d530125"
+ :source-pins
+ {:runner "4cb70c8bdadaf06c1ebc0c910927dc3bfc83eb678c0446ad9b844e544f08fec2"
+  :runner-test "2528d0f58409b49da2b8005b3807ae2f3c5b2f5178e5af3289953c746b4435d0"
+  :check-parens "f4556f1073a34470d2322c69e79d2e0d8e8909ac34a0fd14612c504f81b490c7"}
+ :gates
+ [{:gate :focused-clojure-tests
+   :command "clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'"
+   :exit 0 :tests 149 :assertions 766
+   :tree-sha "ca2169be668db6c310e7ffc94e47298b3d530125"
+   :at "2026-09-13T17:24:18Z"
+   :stdout "tests-passing.stdout" :stderr "tests-passing.stderr"
+   :stdout-sha256 "00ee09dad91094ec6e88d68a5c441f85d1af965b5baa2b6e3fdc3e6102e124a5"
+   :stderr-sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/full_loop_runner.clj test/futon2/aif/full_loop_runner_test.clj"
+   :exit 0 :tests 0 :assertions 0
+   :tree-sha "ca2169be668db6c310e7ffc94e47298b3d530125"
+   :at "2026-09-13T17:24:18Z"
+   :stdout "kondo.stdout" :stderr "kondo.stderr"
+   :stdout-sha256 "a9ec532103ce516a275f4ce1a077e9aee59c16471d712fd22713d5235a0759f2"
+   :stderr-sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/full_loop_runner.clj test/futon2/aif/full_loop_runner_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "ca2169be668db6c310e7ffc94e47298b3d530125"
+   :at "2026-09-13T17:24:18Z"
+   :stdout "parens-passing.stdout" :stderr "parens-passing.stderr"
+   :stdout-sha256 "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+   :stderr-sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]
+ :failed-attempts
+ [{:command "clojure -M:test -n futon2.aif.full-loop-runner-test"
+   :exit 1 :tree-sha "5abdc35836f695e45b3fb7e9bd20b083cd72ae5c"
+   :cause "wrong test-runner invocation; -n was treated as a file"
+   :stdout "tests.stdout" :stderr "tests.stderr"}
+  {:command "clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'"
+   :exit 1 :tree-sha "5abdc35836f695e45b3fb7e9bd20b083cd72ae5c"
+   :cause "test form placed the is message outside the macro call"
+   :stdout "tests-final.stdout" :stderr "tests-final.stderr"}
+  {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli \"src/futon2/aif/full_loop_runner.clj\" \"test/futon2/aif/full_loop_runner_test.clj\")'"
+   :exit 255 :tree-sha "ca2169be668db6c310e7ffc94e47298b3d530125"
+   :cause "CLI takes file arguments after --, not function arguments"
+   :stdout "parens.stdout" :stderr "parens.stderr"}]}

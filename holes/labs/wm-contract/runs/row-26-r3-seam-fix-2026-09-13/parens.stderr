@@ -1,0 +1,5 @@
+
+debug-early-backtrace...done
+Wrong number of arguments: #[nil ((let* ((opts (arxana-check-parens--parse-cli-args)) (files (plist-get opts :files)) (strategy (plist-get opts :strategy)) (json-out (plist-get opts :json)) (ctx (plist-get opts :context)) (no-defaults (plist-get opts :no-defaults)) (targets (or files (and (not no-defaults) (arxana-check-parens--default-files))))) (if (not targets) (progn (princ "No target files.
+") (kill-emacs 2)) (let ((problem (arxana-check-parens-run targets strategy ctx no-defaults))) (if (not problem) (progn (princ "OK
+") (kill-emacs 0)) (arxana-check-parens--print-problem problem json-out) (kill-emacs 1)))))) (t) nil "Batch entry point. Checks files and prints a concise report."], 2
