@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest Row24 record/connection review: 0f02c59e/ea750169 five pins/nine final axioms verified. Executed local Lean proofs show record causal references ignored and arbitrary nonempty edge causal record accepted. Exact actual/expected pin and family-specific causal joins remain unimplemented; no full certificate. See [review](runs/row-24-record-connection-binding-2026-09-13/lead-review.md).
+
 - Latest E3 canonical review: 069645d0/10f4646e three pins/raw3tests28 verified. Canonical checker executes, but executed late-review and borrowed-run/event controls still mechanism-authorize because canonical time/context and wrapper checks are disconnected. Exact canonical event/time and resolved field subject binding required. See [review](runs/row-22-e3-pre-enact-2026-09-13/lead-canonical-review.md).
 
 - Latest lifecycle snapshot review: eda31d97/57b6fe21 two pins/raw4tests10 verified; independent d090c0da review consumed. New isolated controls expose partial failed mutation recaptured at old generation and mutable resolver byte arrays. Failure-state/byte-ownership repair required; no atomic serving capture. See [review](runs/row-19-lifecycle-snapshot-2026-09-13/lead-review.md).

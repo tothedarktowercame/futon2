@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "lake",
+    "env",
+    "lean",
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-record-connection-binding-2026-09-13/LeadCausalReferences.lean"
+  ],
+  "cwd": "/home/joe/code/mathlib4",
+  "exit": 0,
+  "failed_attempt": "attempt1-lead-causal-receipt.json",
+  "scope": "local relational gap proofs, not full certificate"
+}

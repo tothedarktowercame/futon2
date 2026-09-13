@@ -1,0 +1,7 @@
+/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-record-connection-binding-2026-09-13/LeadCausalReferences.lean:13:39: error: Expected type must not contain free variables
+  { connectionId := s.connectionId, fromNode := s.fromNode, toNode := s.toNode, classification := s.classification,
+        run := s.run, evidenceSource := s.evidenceSource, sourcePin := s.sourcePin,
+        causalRecordId := "unrelated-old-record" }.causalRecordId ≠
+    ""
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
