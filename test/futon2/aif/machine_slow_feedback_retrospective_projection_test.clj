@@ -1,5 +1,6 @@
 (ns futon2.aif.machine-slow-feedback-retrospective-projection-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.machine-slow-feedback-capture :as capture]
             [futon2.aif.machine-slow-feedback-capture-test :as capture-test]
             [futon2.aif.machine-slow-feedback-retrospective-projection :as projection]
@@ -22,7 +23,7 @@
   {:bytes/base64 (:bytes/base64 artifact) :expected-sha256 (:sha256 artifact)})
 (defn- decode-descriptor [descriptor]
   (let [bs (.decode (Base64/getDecoder) ^String (:bytes/base64 descriptor))]
-    {:bytes bs :record (clojure.edn/read-string (String. bs StandardCharsets/UTF_8))
+    {:bytes bs :record (edn/read-string (String. bs StandardCharsets/UTF_8))
      :sha256 (#'projection/sha256 bs)}))
 
 (deftest deterministic-complete-projection-retains-distinct-evidence
