@@ -409,11 +409,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-selection-relation-and-authority.request.json",
       "dispatch": "accepted",
       "scope": "ordinary occurrence equality and cross-layer divergence authority; no certification"
+    },
+    {
+      "packet": "codex-22-e3-strict-canonical-evidence",
+      "job-id": "invoke-1789273488827-20630-3781e301",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789273488827-20630-3781e301",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e3-strict-canonical-evidence.request.json",
+      "dispatch": "accepted",
+      "scope": "E3 strict subject/scope and canonical R9 evidence; isolated only"
     }
   ],
   "current-awaiting": [
     "invoke-1789273186397-20627-87a22198",
-    "invoke-1789272964694-20626-939e1dfb",
+    "invoke-1789273488827-20630-3781e301",
     "invoke-1789273332919-20628-ad27e2f1"
   ]
 }
