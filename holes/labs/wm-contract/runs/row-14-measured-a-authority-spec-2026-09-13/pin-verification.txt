@@ -1,0 +1,22 @@
+Command:
+sha256sum -c holes/labs/wm-contract/runs/row-14-measured-a-authority-spec-2026-09-13/source-pins.sha256
+
+Exit: 0
+
+/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md: OK
+/home/joe/code/futon2/holes/labs/wm-contract/CONTRACT-machine-model-v1.md: OK
+/home/joe/code/futon2/src/futon2/aif/machine_model.clj: OK
+/home/joe/code/futon2/src/futon2/aif/belief.clj: OK
+/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj: OK
+/home/joe/code/futon2/src/futon2/aif/full_loop_cohort.clj: OK
+/home/joe/code/mathlib4/DarkTower/WarMachine/MachineModelSpec.lean: OK
+/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean: OK
+/home/joe/code/futon3/library/structure/interest-event-vocabulary.flexiarg: OK
+/home/joe/code/futon2/src/futon2/aif/adapters/interest_network.clj: OK
+/home/joe/code/futon5a/interest-scanning/interest-event-replay-v1.bb: OK
+/home/joe/code/futon5a/interest-scanning/interest-event-push-v1.bb: OK
+/home/joe/code/futon7/holes/M-interim-director.md: OK
+/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-current-capture-discovery-2026-09-13/discovery.md: OK
+/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-current-capture-discovery-2026-09-13/categorical-event-authority-discovery.md: OK
+/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-current-capture-discovery-2026-09-13/vocabulary-domain-finding.md: OK
+/home/joe/run4/F11-production-successor-20260912-v3/cohort/run4-f11-production-successor-20260912-v3/attempt-001/007-closed.edn: OK
