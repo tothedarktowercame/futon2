@@ -1,5 +1,5 @@
 {:command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -- src/futon2/aif/interoceptive_commitment.clj test/futon2/aif/interoceptive_commitment_test.clj"
  :exit 0 :tests 2 :assertions 2
- :tree-sha "18ef28877c3440b45a0af468b4005a5100eb42c6"
- :at "2026-09-13T01:51:07Z"
+ :tree-sha "cfac956474ff6e11b7648327dc55f6dc1335d3dd"
+ :at "2026-09-13T01:51:59Z"
  :transcript ""}
