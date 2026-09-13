@@ -1,15 +1,14 @@
 (ns futon2.aif.authority-buffer
   "Immutable, single-read authority acquisition. This helper authenticates a
   caller-configured path/digest pair; it grants no production authority."
-  (:require [clojure.edn :as edn]
-            [clojure.walk :as walk])
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn])
   (:import (java.io PushbackReader StringReader)
            (java.nio ByteBuffer)
            (java.nio.charset CodingErrorAction StandardCharsets)
            (java.nio.file Files Path)
            (java.security MessageDigest)
-           (com.fasterxml.jackson.core JsonFactory JsonParser$Feature)
-           (com.fasterxml.jackson.databind ObjectMapper)))
+           (com.fasterxml.jackson.core JsonFactory JsonParser$Feature JsonToken)))
 
 (defn- refuse! [reason data]
   (throw (ex-info (name reason) (assoc data :refusal reason))))
@@ -44,16 +43,23 @@
   (try
     (let [factory (doto (JsonFactory.)
                     (.enable JsonParser$Feature/STRICT_DUPLICATE_DETECTION))
-          mapper (ObjectMapper.)]
+          roots (atom 0)]
       (with-open [parser (.createParser factory ^String s)]
-        (when-not (.nextToken parser)
-          (refuse! :authority-malformed {:format :json :reason :empty}))
-        (let [v (.readValue mapper parser Object)]
-          (when (.nextToken parser)
-            (refuse! :authority-trailing-form {:format :json}))
-          (walk/postwalk
-           #(if (instance? java.util.Map %) (into {} %) %)
-           v))))
+        (loop [depth 0]
+          (if-let [token (.nextToken parser)]
+            (let [start? (or (= token JsonToken/START_OBJECT) (= token JsonToken/START_ARRAY))
+                  end? (or (= token JsonToken/END_OBJECT) (= token JsonToken/END_ARRAY))
+                  scalar? (.isScalarValue token)
+                  next-depth (+ depth (if start? 1 0) (if end? -1 0))]
+              (when (or (and scalar? (zero? depth)) (and end? (zero? next-depth)))
+                (swap! roots inc))
+              (recur next-depth))
+            (do
+              (when (zero? @roots)
+                (refuse! :authority-malformed {:format :json :reason :empty}))
+              (when-not (= 1 @roots)
+                (refuse! :authority-trailing-form {:format :json}))))))
+      (json/parse-string-strict s true))
     (catch Exception e
       (refuse! :authority-malformed {:format :json :cause (.getMessage e)}))))
 
