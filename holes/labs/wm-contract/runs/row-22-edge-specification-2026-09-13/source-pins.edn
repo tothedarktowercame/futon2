@@ -1,0 +1,36 @@
+{:schema/version :wm/row-22-edge-spec-source-pins-v1
+ :captured-at "2026-09-13T03:25:33Z"
+ :scope :declaration-edge-specification
+ :files
+ [{:path "holes/labs/wm-contract/aif-equations.edn"
+   :sha256 "2fed9f7c5d4a3c375807dab5e0e3f24c82852bbbd9cef949a2fac8d7c22479da"}
+  {:path "holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md"
+   :sha256 "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde"}
+  {:path "holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md"
+   :sha256 "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea"}
+  {:path "holes/labs/wm-contract/WORK-REMAINING.md"
+   :sha256 "e1455c4f8fb2eedef2bef4cbbfe62044e1ced93be22c83892712a2f9150675dc"}
+  {:path "../p4ng/empirics-futon/control-map-edges.edn"
+   :sha256 "0c7ee7579701a7bf4d413b54351deef527c7991644a62af801e43ac453b1595f"}
+  {:path "src/futon2/aif/hierarchical_budget_adapter.clj"
+   :sha256 "525bcb8aa4aad49c9cd02c22dfeabc7406aced8aacbb5731317e182eddb691e1"}
+  {:path "src/futon2/aif/hierarchical_budget.clj"
+   :sha256 "a0581c1d7135324b1190795ba56dfc9fa834869474a297155678d88d71e5216b"}
+  {:path "src/futon2/aif/temporal_hierarchy.clj"
+   :sha256 "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"}
+  {:path "src/futon2/aif/enact.clj"
+   :sha256 "13801b26cb67ae73c1a070a08e7bb3c2d257e4eeeab3cb6bb847e90c8a6f0c3e"}
+  {:path "src/futon2/aif/policy.clj"
+   :sha256 "b0dc9a1a440c18ec1464ee96abb9c76401a02295e8e3e7f0840b105242236628"}
+  {:path "src/futon2/aif/policy_precision.clj"
+   :sha256 "2e7164ecf965fe9553822a537fb543d212ec1641daeca6652b05a47a62ad094b"}
+  {:path "../mathlib4/DarkTower/WarMachine/MachinePolicySet.lean"
+   :sha256 "104fab58f500a7bad3b11de3cd482cd1f790d70d7cb976905561a5ca773b3d05"}
+  {:path "../mathlib4/DarkTower/WarMachine/MachineAction.lean"
+   :sha256 "473182ceb96aba566ff2803d1fbf6f13154d3713d3c95d314180a676574bc692"}
+  {:path "../mathlib4/DarkTower/WarMachine/MachineDepth.lean"
+   :sha256 "ba3b7ca7fb5eb8ba405db3c78d41a91a3f916b5c1e391b49387700a2e262871d"}
+  {:path "../mathlib4/DarkTower/WarMachine/MachineTemperature.lean"
+   :sha256 "6809fb9cac3d43092b0a8e9eefd8cde5a823a7ff072d56d878de71291453b6ba"}
+  {:path "../mathlib4/DarkTower/WarMachine/MachinePolicyFreeEnergy.lean"
+   :sha256 "be7de30b672bb937889f84d94b7e98d205066e788c4e922e32b019965a98eb57"}]}
