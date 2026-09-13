@@ -1,0 +1,12 @@
+{:reviewed-commit "6b35706e96106bbe67f2cb026c7799b5a5817cb1"
+ :source "ffc39c4d7aad228436d520cec6a93f92bfac3ba7f7da4722be3be3c82111327c"
+ :test "400d52cdc2e9be025c684798a96acc6dae51137bfad694c8a4c322c273b16bd2"
+ :retained-gates "de9f43e0f3cd55e3167d47564996fd3ae2902ddb3d541053b2e9a9dff48c6a41"
+ :retained-test-stdout "66279db6d3ce592096d27df633cb3478201d261fc197948ef3aecf907000881f"
+ :retained-kondo-stdout "9e5bba4c213179065f3a278c59d0ac373fa717a18ba646d53c151bb821627775"
+ :retained-parens-stdout "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+ :targeted-control
+ {:command "clojure -M:test holes/labs/wm-contract/runs/row-22-e6b-common-state-carrier-2026-09-13/codec-join-repair/independent-source-identity-control.clj"
+  :exit 0
+  :result :structurally-projected
+  :finding :decoded-source-identity-not-joined}}
