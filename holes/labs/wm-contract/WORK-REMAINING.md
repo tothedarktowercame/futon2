@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest Row 24 run-binding review: 1cfaf674/d43b755b seven source/olean/toolchain pins and both retained six-axiom gates match. Node/equation fixed-run joins accepted structurally only. Ordinary selection match still lacks occurrence/run subjects; divergence occurrence IDs are not joined to independently fixed events. Exact event-subject refinement remains required, as do record/connection joins and external byte authentication. No certificate. See [review](runs/row-24-run-binding-2026-09-13/lead-review.md).
+
 - Latest E2b review: b5b74344/3a9eedbe four pins/raw 5-test/18-assertion gates verified. Executed missing-cohort control still qualifies; witnesses also lack exact E2a source-pin subject binding. Cohort/event authority and exact field-subject repair required before same-event qualification. No actual enactment/R9 authorization. See [review](runs/row-22-e2b-correspondence-2026-09-13/lead-review.md).
 
 - Latest lifecycle review: 7309d81c/416e9b20 two source pins and retained 3-test/15-assertion gates verified. Executed omitted-source-fields control incorrectly yields complete-census/zero-in-flight; strict schemas/UTF-8/deferred joins and independently bound complete universe/scope remain required before drain evidence. No real reconciliation. See [review](runs/row-19-lifecycle-reconciliation-2026-09-13/lead-review.md).

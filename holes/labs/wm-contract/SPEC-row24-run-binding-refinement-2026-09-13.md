@@ -22,7 +22,7 @@ List alignment is occurrence-preserving and ordered; it does not turn the
 requirements into sets.
 
 A typed divergence additionally requires a `DivergenceAuthorityRecord` bound
-to the fixed run, distinct selected and enacted occurrence ids and action ids,
+to the fixed run, nonempty selected and enacted occurrence ids and differing action ids,
 the exact divergence class/grounds/evidence fields, and an external authority
 record pin.  An ordinary exact match requires the divergence authority slot to
 be empty.  The existing exact sole legacy-scalar retirement remains unchanged;
