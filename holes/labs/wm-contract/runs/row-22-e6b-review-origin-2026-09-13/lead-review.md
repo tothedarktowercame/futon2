@@ -1,0 +1,11 @@
+# Review-origin repair independent review
+
+Reviewed `79f3285f`, `9aa74597` and `cbc5f6a9`; four current/committed pins match. Retained focused output shows 12 tests / 59 assertions, zero failures/errors; parens reports OK; kondo stdout/stderr are empty and the retained receipt reports exit0. The deliberate runner output contains one failing assertion and receipt exit1. Passing gates were not rerun.
+
+Accept only the represented origin/chronology joins. Origin now binds raw commission, exact subject/artifact, reviewer job/trace, terminal status and finish. The code enforces started <= reviewed <= retained <= finished <= accepted; retained controls exercise late review/retention and equality. Expected origin is supplied outside role records, and production still refuses unconditionally.
+
+Coverage limitation: the older rebind-subject regression helper does not update the new review-origin record, so those old cases can now fail on stale origin before reaching the original store/generation checks. Those checks remain in source and were independently reviewed; future changes to them require refreshed coherent controls. No broad claim of adversarial completeness follows.
+
+Authority limit: matching an origin/provenance-review SHA supplied in external configuration does not resolve or authenticate the underlying real provenance review. Synthetic fixtures prove the configured equality mechanism only. Writer coverage, closed-generation acquisition/census and retained real reviewer-origin truth remain external and absent. No current positive is production completeness, retrospective success, installed-code identity, freshness, later-prior acquisition, runtime integration or full-certificate authority.
+
+This packet is consumed. No further synthetic role is commissioned merely to rename the missing real authority. The next authority-dependent packet must acquire independently owned writer/lease/census and exact retained review-origin/configuration evidence under the existing no-live-change constraints; it must first identify a concrete available source or remain blocked. The related requirements are recorded in CONTRACT-e6b-external-completeness-v1-2026-09-13.md. Historical commission20588 remains permanently absent and all other WM obligations remain open.

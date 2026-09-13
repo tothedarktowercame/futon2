@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest review-origin79f3285f/9aa74597/cbc5f6a9 four pins/raw12tests59 accepted isolated origin/chronology joins only. Real acquisition/census/origin/configuration authority remains absent; current synthetic join branch has no commissioned successor. Older subject controls need coherent origin refresh before future subject edits. See [review](runs/row-22-e6b-review-origin-2026-09-13/lead-review.md).
+
 - Latest completeness audit35981f16/a92540b6/1a7aa894 four audit pins+two lead pins verified, independent14999ca7 correction accepted narrowly. Raw two controls confirm review-after-terminal accepted and coherent unresolved job/trace labels accepted. Tenth configured origin plus retained-artifact chronology repair next; no real authority. See [review](runs/row-22-e6b-completeness-authority-audit-2026-09-13/lead-review.md).
 
 - Latest completeness d2b45b0c/ad16a57c six pins/raw9tests49 reviewed; coherent subject store/generation rewrite accepted under unchanged capture. Lead exact equality repair passes10tests51+kondo/parens. Independent correction review and acquisition/review-origin chronology audit next; no real completeness authority. See [review](runs/row-22-e6b-completeness-validator-2026-09-13/lead-review/review.md).

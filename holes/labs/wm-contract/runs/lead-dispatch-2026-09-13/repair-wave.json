@@ -859,9 +859,7 @@
       "scope": "pure tenth-role independently configured origin and retained-artifact chronology repair"
     }
   ],
-  "current-awaiting": [
-    "invoke-1789287380095-20732-7117cccc"
-  ],
+  "current-awaiting": [],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
     "completed-job": "invoke-1789275643187-20650-785a8c56",
@@ -873,5 +871,13 @@
     "completed-job": "invoke-1789276248223-20659-0c1e3903",
     "review": "holes/labs/wm-contract/runs/row-22-e5-e6-semantic-integration-2026-09-13/lead-review.md",
     "constraint": "No prior/G/temperature change; no runtime or edge retirement"
+  },
+  "codex23-next-boundary": {
+    "status": "real-authority-acquisition-blocked",
+    "completed-job": "invoke-1789287380095-20732-7117cccc",
+    "review": "holes/labs/wm-contract/runs/row-22-e6b-review-origin-2026-09-13/lead-review.md",
+    "next-packet": "Identify independently owned writer/lease/census and exact retained review-origin/configuration sources before any authority acquisition or retrospective integration.",
+    "blocker": "Current evidence is synthetic only; no real independently owned acquisition/census/review-origin/configuration acceptance.",
+    "constraints": "No live mutation, no fabricated acceptance, no production authority or retrospective success; no successor dispatched."
   }
 }

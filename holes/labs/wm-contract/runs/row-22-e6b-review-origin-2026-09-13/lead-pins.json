@@ -1,0 +1,27 @@
+{
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_completeness.clj",
+      "sha256": "5b96227cda5e11aba4d571444c0fdc351cf2d2b31354b52cfee773028746b24f",
+      "match": true
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_completeness_test.clj",
+      "sha256": "43d55d41c80a8eb51e8011efef7b995396fd4c26acfe42dea5001211868fd6ed",
+      "match": true
+    },
+    {
+      "path": "holes/labs/wm-contract/CONTRACT-e6b-external-completeness-v1-2026-09-13.md",
+      "sha256": "6a515b56b63245a3b29888b0edfe33a5df06975239d267d141d97c767c4b1203",
+      "match": true
+    },
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_retrospective_projection.clj",
+      "sha256": "7fcdf28c03e5e6efd4fcaa3900c8352613e46fe317b6deb5f6272125eafef300",
+      "match": true
+    }
+  ],
+  "job": "invoke-1789287380095-20732-7117cccc",
+  "state": "done",
+  "passing-reruns": false
+}
