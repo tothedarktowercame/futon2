@@ -785,10 +785,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-retrospective-contract.request.json",
       "dispatch": "accepted",
       "scope": "source-pinned read-only storage-to-retrospective contract; no adapter"
+    },
+    {
+      "packet": "codex-23-store-v2-head-buffer",
+      "job-id": "invoke-1789284189362-20716-a2ca39b4",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789284189362-20716-a2ca39b4",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-store-v2-head-buffer.request.json",
+      "dispatch": "accepted",
+      "scope": "independent ledger-mapping correction review and isolated validated HEAD-byte retention only"
     }
   ],
   "current-awaiting": [
-    "invoke-1789284017934-20714-528ac8c1"
+    "invoke-1789284189362-20716-a2ca39b4"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
