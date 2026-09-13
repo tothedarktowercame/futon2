@@ -80,7 +80,7 @@
     (is (= :e6b-provenance/closure-join-mismatch
            (refusal (assoc-in i [:canonical-outputs :e3]
                               {:bytes/base64 (.encodeToString (Base64/getEncoder) bs)
-                               :source-sha256 (sha256 bs) :value-sha256 (sha256 bs)})))))))
+                               :source-sha256 (sha256 bs) :value-sha256 (sha256 bs)}))))))
 
 (deftest carrier-head-and-interface-refusals
   (doseq [[label changed expected]
