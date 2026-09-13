@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Independent34fd00cd accepts lead6b35706e prior/context correction; six source/gate pins verified. Retained control still projects borrowed E2b/outcome identities under original context. Remaining decoded-source/lifecycle/review joins require bounded codec repair; no store work. See [follow-up](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-join-repair/lead-source-identity-followup.md).
+
 - Latest codecc102aafc/cd2ea001 four pins/raw15tests90 reviewed. Executed borrowed prior+next run still projects under unchanged context. Lead restored prior-to-context identity/tick join; changed-source16tests91/kondo/parens pass, independent review next. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-join-repair/lead-review.md).
 
 - Latest codec6097cad0/0cd37be8 raw14tests81 reviewed. Executed nil identity and borrowed occurrence still structurally project with original context unchanged. Full decoded-context/proposal joins required; no authority escalation claimed. See [review](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-gates/lead-review.md).
