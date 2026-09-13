@@ -545,11 +545,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6b-resolved-authority-ledger.request.json",
       "dispatch": "accepted",
       "scope": "pure E6b resolved authority and exact ledger universe; no runtime"
+    },
+    {
+      "packet": "codex-22-r6-scoring-correspondence-contract",
+      "job-id": "invoke-1789275888536-20655-71c132fb",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789275888536-20655-71c132fb",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-r6-scoring-correspondence-contract.request.json",
+      "dispatch": "accepted",
+      "scope": "read-only canonical R6 scoring correspondence contract; no field search"
     }
   ],
   "current-awaiting": [
     "invoke-1789275806231-20653-46354848",
     "invoke-1789275643187-20650-785a8c56",
-    "invoke-1789275481498-20647-0e31dc03"
+    "invoke-1789275888536-20655-71c132fb"
   ]
 }
