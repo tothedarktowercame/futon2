@@ -1,0 +1,27 @@
+{:id "joe-wm-delegation-host-origin-2026-09-13"
+ :schema :wm/host-process-origin-review-v1
+ :outcome :accepted
+ :reviewer "codex-26"
+ :authority-root-id "joe-wm-delegation-2026-09-12"
+ :delegate "codex-26"
+ :subject {:source "/home/joe/.codex/sessions/2026/09/12/rollout-2026-09-12T23-41-24-01a097ff-471a-72d3-b10b-54d01eaa14e0.jsonl"
+           :session-id "01a097ff-471a-72d3-b10b-54d01eaa14e0"
+           :line 50
+           :record-sha256 "84c30bfd3e12081e0e0eb774f38e931e18281f670301b475451b32d7c04b8a39"
+           :role "user" :from "joe" :to "codex-26" :origin "operator"}
+ :trust-model {:kind :trusted-operator-session-and-host-retention
+               :origin-authority :operator-user-messages-received-by-reviewer
+               :independent-corroboration :delegation-and-worker-authorization-in-this-conversation
+               :host-session-id "01a097ff-471a-72d3-b10b-54d01eaa14e0"
+               :host-filesystem-administrator "joe/root"
+               :assumption :operator-session-routing-and-host-retention-not-maliciously-forged
+               :integrity :exact-event-byte-pin-at-independent-review
+               :not-proved [:cryptographic-operator-signature
+                            :resistance-to-malicious-same-user-or-administrator-mutation]
+               :candidate-control :candidate-cannot-select-root-source-or-review-pin}
+ :corroborating-event {:line 279
+                       :record-sha256 "f690d10830932bb73988ddf200a403a171d710f9ec70706e6799244f799bb2f9"}
+ :observation "../row-19-genesis-verifier-2026-09-13/review-fixes/byte-hardening/lead-host-origin-observation.json"
+ :scope :external-delegation-event-origin-only
+ :not-an-anchor true
+ :not-checker-acceptance true}

@@ -205,6 +205,13 @@ is not yet a verified join to Agency's normalized request digest.
   scope. Next retained-field applicability and floating solved/held correspondence;
   prior response not adopted, no integration/admission.
 
+- Row19 byte adapters `futon3c/7b591a4e`, receipts `faaf909f`: four pins
+  verified and named byte/scope repairs accepted. Lead independently rechecked
+  both original user-event byte pins/session identity and retained external origin
+  review under explicit trusted operator-session/host-retention assumptions.
+  Origin-only review is not a signature, checker acceptance or anchor. Actual
+  cross-agent jobs/traces/exact canonical acceptance packet remains required.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
