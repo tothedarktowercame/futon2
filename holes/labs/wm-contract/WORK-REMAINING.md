@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest provenance18a35e0e/5c29c9e4 seven pins/raw21tests111 reviewed. Executed borrowed E3 pending run with coherently updated config pins still yields artifact under unchanged canonical outputs. Exact closure-input/output joins required; no store work. See [review](runs/row-22-e6b-provenance-2026-09-13/lead-review.md).
+
 - Latest canonical replay73ad4deb/ed9e8111 five output/receipt plus eight source pins verified; retained E3/E2b successes and two exact refusals accepted isolated test replay only. No constructors, production authority or installed-code proof. Pure provenance envelope next, no store-v2 publication. See [acceptance](runs/row-22-e6b-canonical-replay-2026-09-13/lead-acceptance.md).
 
 - Latest canonical fixture2146be99/9cc5fac0 six receipt pins/eight artifact hashes verified; retained readback accepted unauthenticated test bytes only. Canonical replay from retained config remains unchecked; no portable/archive/production authority. See [review](runs/row-22-e6b-canonical-fixture-2026-09-13/lead-acceptance.md).

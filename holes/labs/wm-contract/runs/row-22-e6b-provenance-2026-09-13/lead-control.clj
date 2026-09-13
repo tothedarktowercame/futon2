@@ -1,0 +1,11 @@
+(require '[clojure.edn :as edn] '[futon2.aif.machine-slow-feedback-provenance :as p] '[futon2.aif.machine-slow-feedback-provenance-test :as t])
+(defn decode [d] (edn/read-string (String. (.decode (java.util.Base64/getDecoder) (:bytes/base64 d)) "UTF-8")))
+(defn desc [x] (let [bs (.getBytes (pr-str x) "UTF-8") h (#'t/sha256 bs)] {:bytes/base64 (.encodeToString (java.util.Base64/getEncoder) bs) :source-sha256 h :value-sha256 h}))
+(let [i (#'t/input)
+      pending (desc (assoc (decode (get-in i [:canonical-closure :e3/pending])) :run/id "borrowed"))
+      config (assoc-in (decode (get-in i [:canonical-closure :config/e3])) [:evidence :pending :sha256] (:source-sha256 pending))
+      canonical (assoc (decode (get-in i [:canonical-closure :config/canonical])) :e3 config)
+      edited (-> i (assoc-in [:canonical-closure :e3/pending] pending) (assoc-in [:canonical-closure :config/e3] (desc config)) (assoc-in [:canonical-closure :config/canonical] (desc canonical)))
+      o (p/construct edited)]
+ (assert (= :structural-artifact (:status o)))
+ (prn {:status (:status o) :pending-run (get-in o [:record :canonical-closure :inputs :e3/pending :record :run/id]) :outputs-unchanged (= (:canonical-outputs i) (:canonical-outputs edited))}))
