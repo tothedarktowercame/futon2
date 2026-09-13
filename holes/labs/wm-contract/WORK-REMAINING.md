@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest completeness contract4e433fe9/c37d0ec8 nine dependency pins/retained parse reviewed design-only. Next pure rejecting validator must recompute projection and resolve separately pinned acquisition/writer census, exact schemas/origins/times; no candidate completeness flags, no production acceptance or verifier invocation. See [review](runs/row-22-e6b-external-completeness-contract-2026-09-13/lead-review.md).
+
 - Latest ledger envelope1e84a4a9/043f192e five pins/raw13tests54 accepted additive isolated full source bytes; row-vector/source digests distinct. Independent8db133b8 consumed with historical contract-pin qualification. External completeness acquisition/validation contract next; no acceptance or verifier invocation. See [review](runs/row-22-e6b-ledger-source-envelope-2026-09-13/lead-acceptance.md).
 
 - Latest retrospective projectionc3acc2d8/089e9d8e six pins/raw12tests45 accepted row/source retention draft only. Consumer needs schema/scope/entries ledger envelope; current row-vector digest is not full ledger-source digest. Lead contract clarification and bounded pure envelope addition next before completeness authority. See [review](runs/row-22-e6b-retrospective-projection-2026-09-13/lead-review.md).
