@@ -1,0 +1,49 @@
+{
+ "schema": "wm/execution-receipt-v1",
+ "fix": "review-20757 F1: typed :malformed-input refusals + stable CLI refusal output",
+ "author": "claude-15",
+ "review-source": "codex-24 independent review 962713f9 (job invoke-1789318071986-20757-f1be996f)",
+ "fix-commit": "71cb7ed5",
+ "at": "2026-09-13T16:51:44.940789+00:00",
+ "gates": [
+  {
+   "command": "bb holes/labs/wm-contract/typed_gap_census_controls.bb",
+   "exit": 0,
+   "tests": 2,
+   "assertions": 19,
+   "failures": 0
+  },
+  {
+   "command": "clj-kondo --lint typed_gap_census_to_lean.bb typed_gap_census_controls.bb",
+   "exit": 0,
+   "errors": 0,
+   "warnings": 0
+  },
+  {
+   "command": "emacs -Q --batch -l check-parens.el ... both files",
+   "exit": 0,
+   "stdout": "OK"
+  },
+  {
+   "command": "bb typed_gap_census_to_lean.bb /tmp/f1-dup.edn /tmp/f1-out.lean <sha>",
+   "exit": 1,
+   "stderr": "{:refusal :malformed-input, :data \"Duplicate key: :a\"}",
+   "lean-output-written": false
+  },
+  {
+   "command": "regenerate pinned input.edn and diff against pinned GeneratedTypedGap.lean",
+   "exit": 0,
+   "result": "byte-identical; generation path untouched"
+  }
+ ],
+ "source-pins": [
+  {
+   "path": "holes/labs/wm-contract/typed_gap_census_to_lean.bb",
+   "sha256": "1c0cf18011a118e0a2004832ccd287fd2dfc4a6b099a6f9925c5bd34ff67d106"
+  },
+  {
+   "path": "holes/labs/wm-contract/typed_gap_census_controls.bb",
+   "sha256": "a248c16f5dec01bbfb217af517c716eca9fd096edcce048c95141f6c051562fb"
+  }
+ ]
+}
