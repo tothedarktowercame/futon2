@@ -1,5 +1,6 @@
 (ns futon2.aif.machine-slow-feedback-store-v2-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-slow-feedback-provenance :as provenance]
             [futon2.aif.machine-slow-feedback-provenance-test :as provenance-test]
             [futon2.aif.machine-slow-feedback-store-v2 :as store]
@@ -35,6 +36,34 @@
 (defn- write-form! [path x]
   (Files/write path (.getBytes (pr-str x) "UTF-8")
                (into-array StandardOpenOption [StandardOpenOption/TRUNCATE_EXISTING])))
+
+(defn- decoded-head [capture]
+  (let [descriptor (:head-object capture)
+        bs (.decode (Base64/getDecoder) ^String (:bytes/base64 descriptor))]
+    {:bytes bs
+     :record (edn/read-string (String. bs "UTF-8"))
+     :sha256 (#'store/sha256 bs)}))
+
+(deftest capture-retains-exact-validated-head-buffer
+  (doseq [committed? [false true]]
+    (let [[_ s artifact] (setup)
+          _ (when committed? (store/commit! s (pin artifact)))
+          c (store/capture s)
+          {:keys [bytes record sha256]} (decoded-head c)
+          expected-generation (if committed? 1 0)]
+      (is (= sha256 (:head-digest c) (get-in c [:head-object :source-sha256])))
+      (is (= expected-generation (:generation c) (:generation record)))
+      (is (= (:store/id c) (:store/id record)))
+      (is (= (last (:chain-digests c)) (:transaction-sha256 record)))
+      (is (= (:application-universe c) (:application-index record)))
+      ;; Mutating decoded caller-owned bytes and replacing a returned map cannot
+      ;; alter the immutable descriptor retained by a subsequent capture.
+      (aset-byte bytes 0 (byte 0))
+      (let [changed (assoc-in c [:head-object :bytes/base64] "tampered")
+            again (store/capture s)]
+        (is (not= (:head-object changed) (:head-object again)))
+        (is (= (:head-object c) (:head-object again))))
+      (store/release! s))))
 
 (deftest publish-recover-capture-and-stable-retry
   (let [[root s artifact] (setup) tx (store/commit! s (pin artifact))

@@ -246,7 +246,14 @@
             (when-not (and (= digest (sha256 (form-bytes tx)))
                            (= (vec (reverse apps)) (:application-index head)))
               (refuse! :e6b-store-v2/chain-invalid {}))
-            {:head head :head-digest (:sha256 head-r) :current (first txs)
+            {:head head :head-digest (:sha256 head-r)
+             ;; This descriptor is made from the exact buffer read-object
+             ;; parsed and hashed above.  Capture must not reopen HEAD after
+             ;; validation and thereby attest a different generation.
+             :head-object {:bytes/base64 (.encodeToString (Base64/getEncoder)
+                                                           ^bytes (:bytes head-r))
+                           :source-sha256 (:sha256 head-r)}
+             :current (first txs)
              :applications (vec (reverse apps)) :transactions (vec (reverse txs))
              :provenance provs :state-revisions revisions
              :chain-digests (vec (reverse (conj (mapv :digest txs) digest)))})
@@ -355,6 +362,7 @@
                                [d (aclone ^bytes (:bytes (read-object (provenance-path store d))))]))]
       {:schema :wm/e6b-store-capture-v2 :scope :isolated-test :store/id (:store-id store)
        :generation (get-in r [:head :generation]) :head-digest (:head-digest r)
+       :head-object (:head-object r)
        :chain-digests (:chain-digests r) :application-universe (:applications r)
        :transaction-objects tx-objects :provenance-objects p-objects
        :completeness-authority :absent :rollback-freshness? :unproved

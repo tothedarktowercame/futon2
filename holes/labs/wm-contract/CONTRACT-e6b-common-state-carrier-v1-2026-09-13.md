@@ -229,12 +229,12 @@ mapping** above. It is pinned to the exact sources listed in
 `machine-slow-feedback-store-v2/capture` returns transaction bytes keyed by
 every ordered chain digest (including genesis), provenance bytes keyed by each
 reachable provenance digest, the ordered `:application-universe`, generation,
-and `:head-digest` (`machine_slow_feedback_store_v2.clj:348-362`). It does
-**not** return the HEAD bytes. Therefore a capture alone cannot reproduce and
-hash the HEAD record named by `:head-digest`; a pure read adapter must refuse
-`:e6b-retrospective/head-bytes-unavailable` until either capture adds the exact
-HEAD buffer or an independently pinned HEAD descriptor is supplied. A digest
-label is not a byte witness.
+and `:head-digest` (`machine_slow_feedback_store_v2.clj:355-370`). Capture now
+also returns `:head-object`, whose Base64 bytes are made from the exact single
+buffer that `recover*` parsed and hashed; it does not reopen HEAD after
+validation. Its `:source-sha256` must equal `:head-digest`, and decoding and
+hashing those bytes must reproduce both. A digest label without these bytes
+would not be a byte witness.
 
 For every non-genesis transaction, recovery has already followed its
 `:provenance-sha256`, hashed the exact provenance buffer, and invoked
@@ -254,7 +254,7 @@ provenance contains:
 
 ### Deterministic pure projection
 
-Given strict capture bytes, independently pinned HEAD bytes, and an external
+Given strict capture bytes (including the retained HEAD object) and an external
 completeness acceptance, the smallest future adapter has one behavior:
 `capture -> verify-feedback input`. It must, in this order:
 
@@ -303,8 +303,10 @@ or copied application index refuses. No such production acceptance exists.
 
 ### Remaining representation and authority gaps
 
-- HEAD bytes are absent from capture, so the pure adapter is not yet
-  implementable from capture alone.
+- HEAD bytes are retained from the validated recovery buffer. Their descriptor
+  is immutable data; transaction/provenance byte arrays still require explicit
+  encoding rather than `pr-str` object identities in any future canonical
+  complete-capture serialization.
 - No independently owned completeness/freshness acceptance exists; the store's
   `:absent` marker is honest and mandatory.
 - Provenance is structural isolated-fixture evidence (`:authority/status
@@ -316,8 +318,7 @@ or copied application index refuses. No such production acceptance exists.
 - Production store ownership, first-install fencing, runtime wiring, and the
   permanently absent historical 20588 commission remain outside this mapping.
 
-After review of this contract, the smallest executable packet is therefore
-not yet the full adapter: first add exact immutable HEAD bytes to isolated v2
-capture with digest/readback controls. Only then can a pure reconstruction
-adapter be commissioned, still requiring an externally supplied completeness
-acceptance and never synthesizing one.
+After review of this contract and the HEAD-buffer packet, a pure reconstruction
+adapter is the next separable executable behavior. It still cannot report a
+retrospective success without an externally supplied completeness acceptance,
+and it must never synthesize one.
