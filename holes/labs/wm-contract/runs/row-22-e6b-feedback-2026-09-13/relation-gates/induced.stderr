@@ -1,0 +1,5 @@
+Execution error at clojure.test/test-ns (test.clj:743).
+No namespace: futon2.aif.machine-slow-feedback-evidence-test found
+
+Full report at:
+/tmp/clojure-13544520223263573960.edn

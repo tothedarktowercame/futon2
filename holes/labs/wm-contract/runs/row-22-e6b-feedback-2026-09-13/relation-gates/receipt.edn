@@ -1,0 +1,33 @@
+{:schema :wm/execution-receipts-v1
+ :source-commit "078b8be9bb9c95c0691ef73812d537849ae4b33f"
+ :tree-sha "078b8be9bb9c95c0691ef73812d537849ae4b33f"
+ :at "2026-09-13T05:18:00Z"
+ :pins
+ {:source "a2a17bae923d4ab8e050040a6e591d107731857243b4eba9abd4447b8ed29511"
+  :test "643d97958598769e7ce6d81f78a511fdfe8fcb75ab58b210386ba79c11edd82b"
+  :spec "79096e9486e2e5b7cf6f33a1725d8f5bd4c5e774476ff7d56b16c62903ccd294"
+  :independent-review "1eade48ace3674a63e2913ab1b5e31aa0878414941ed4ec187c215fbcc2ed4e2"
+  :temporal-hierarchy "e3e532ae1b0b123730299bd7caa1105b074b7d27912c5508d29c395f21d34eef"
+  :intrinsic-values "ea07fb662fed93e801e613a102f35f7baa3c3053fd636d478d14e504a1be758b"}
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-feedback-evidence-test]'"
+   :exit 0 :tests 7 :assertions 41 :failures 0 :errors 0
+   :stdout "test2.stdout" :stderr "test2.stderr"}
+  {:gate :induced-failure
+   :command "clojure -M:test -e '(load-file \"holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/induced_failure.clj\")'"
+   :exit 1 :tests 1 :assertions 1 :failures 1 :errors 0
+   :stdout "induced2.stdout" :stderr "induced2.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_feedback_evidence.clj test/futon2/aif/machine_slow_feedback_evidence_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_feedback_evidence.clj test/futon2/aif/machine_slow_feedback_evidence_test.clj"
+   :exit 0 :stdout "parens2.stdout" :stderr "parens2.stderr"}]
+ :failed-history
+ [{:gate :focused-test :exit 1 :reason "Used futon3c-style -n against futon2 exec alias"
+   :stdout "test.stdout" :stderr "test.stderr"}
+  {:gate :induced-failure :exit 1 :reason "Namespace was not loaded; not a valid sensitivity result"
+   :stdout "induced.stdout" :stderr "induced.stderr"}
+  {:gate :check-parens :exit 255 :reason "Passed paths as function arguments instead of CLI arguments"
+   :stdout "parens.stdout" :stderr "parens.stderr"}]}
