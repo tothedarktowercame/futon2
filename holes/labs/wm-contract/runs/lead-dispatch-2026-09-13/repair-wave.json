@@ -313,10 +313,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-exact-close-annotation-join.request.json",
       "dispatch": "accepted",
       "scope": "offline exact close annotation join and read-only context discovery; no live attachment or counts"
+    },
+    {
+      "packet": "codex-23-deferred-store-ownership",
+      "job-id": "invoke-1789271308775-20617-e4c52270",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789271308775-20617-e4c52270",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-deferred-store-ownership.request.json",
+      "dispatch": "accepted",
+      "scope": "deferred payload validation, exclusive ownership and atomic initialization; no integration"
     }
   ],
   "current-awaiting": [
-    "invoke-1789270909238-20613-342acd92",
+    "invoke-1789271308775-20617-e4c52270",
     "invoke-1789270833872-20612-217afbfa",
     "invoke-1789271039934-20615-eb6ce892"
   ]
