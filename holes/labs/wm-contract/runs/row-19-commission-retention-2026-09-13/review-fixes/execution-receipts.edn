@@ -1,0 +1,32 @@
+{:schema :wm/execution-receipts-v1
+ :subject :row-19-invoke-commission-retention-review-fixes
+ :at "2026-09-13T01:57:29Z"
+ :source {:repo "futon3c"
+          :tree-sha "b12674f3f6f032a4e7b9221bc3b8b561d9d39c11"
+          :http-source-sha256 "c737e5bb32a5470bd15f42ddda7f3db6077b29ad5d6c7a70643665895bdbdd8e"
+          :runner-sha256 "7b835c2ddea540f85aaf7cd7bef721e3ccfc48c94e0bd3b70d15fabbd769864b"}
+ :receipts
+ [{:gate :focused-test
+   :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"scripts\" \"dev\"]}' -M -m row19-commission-retention-test"
+   :exit 0 :tests 1 :assertions 8 :failures 0 :errors 0
+   :tree-sha "b12674f3f6f032a4e7b9221bc3b8b561d9d39c11"
+   :transcript "positive-test.raw.txt"}
+  {:gate :focused-runner-induced-failure
+   :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"scripts\" \"dev\"]}' -M -m row19-commission-retention-test --induced-failure"
+   :exit 1 :expected-exit 1 :tests 1 :assertions 9 :failures 1 :errors 0
+   :tree-sha "b12674f3f6f032a4e7b9221bc3b8b561d9d39c11"
+   :transcript "induced-failure.raw.txt"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon3c/transport/http.clj test/futon3c/transport/http_test.clj scripts/row19_commission_retention_test.clj"
+   :exit 0 :tests 3 :assertions 3
+   :tree-sha "b12674f3f6f032a4e7b9221bc3b8b561d9d39c11"
+   :transcript "clj-kondo.raw.txt"}
+  {:gate :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/transport/http.clj test/futon3c/transport/http_test.clj scripts/row19_commission_retention_test.clj"
+   :exit 0 :tests 3 :assertions 3
+   :tree-sha "b12674f3f6f032a4e7b9221bc3b8b561d9d39c11"
+   :transcript "check-parens.raw.txt"}]
+ :scope {:hot-job-expiry-unchanged? true
+         :archive-lifetime :until-explicit-reviewed-removal
+         :external-operator-root-required-later? true
+         :anchor-created? false}}

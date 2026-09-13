@@ -1,0 +1,6 @@
+
+FAIL in () (row19_commission_retention_test.clj:15)
+induced runner exit control
+expected: :passing-run
+  actual: :induced-failure
+{:runner :row19-commission-retention, :tests 1, :assertions 9, :pass 8, :fail 1, :error 0, :exit 1, :induced-failure? "--induced-failure"}

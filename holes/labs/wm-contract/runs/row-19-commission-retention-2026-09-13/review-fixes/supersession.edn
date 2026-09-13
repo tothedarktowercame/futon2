@@ -1,0 +1,9 @@
+{:schema :wm/execution-receipt-supersession-v1
+ :at "2026-09-13T01:57:29Z"
+ :review "../lead-review.md"
+ :supersedes "../execution-receipts.edn"
+ :reason [:seven-day-hot-job-expiry :non-failure-sensitive-test-runner
+          :check-parens-entrypoint-not-invoked]
+ :replacement "execution-receipts.edn"
+ :old-receipts-retained? true
+ :anchor-created? false}
