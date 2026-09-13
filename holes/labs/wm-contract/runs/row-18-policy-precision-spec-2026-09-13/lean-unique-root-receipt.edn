@@ -3,7 +3,7 @@
  :packet :canonical-global-unique-root-criterion
  :at "2026-09-13"
  :cwd "/home/joe/code/mathlib4"
- :tree-sha "9c9b1f719d2a53aed25e7c329447517cf6819ea5"
+ :tree-sha "15712715fc1f1f531b9fc3cb4cbefcf0eb7be70d"
  :dependency-compilation
  {:command "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.olean DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.lean"
   :exit 0
@@ -13,12 +13,13 @@
   :sorryAx 0}
  :command "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.olean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean"
  :exit 0
- :printed-axiom-checks 3
+ :printed-axiom-checks 4
  :sorryAx 0
  :stdout ["'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.root_localisation' depends on axioms: [propext, Classical.choice, Quot.sound]"
           "'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.derivative_lt_one_above_half_range' depends on axioms: [propext, Classical.choice, Quot.sound]"
-          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.canonical_unique_positive_root' depends on axioms: [propext, Classical.choice, Quot.sound]"]
- :pins [{:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :sha256 "679d7681900242d8325dea77c938261bab15e9b004b286b7b533a2617b5bfb07" :olean-sha256 "2fb80aae1b738805ad015de25ec3cd02ef1d8efb12b8184816096749a5226589"}
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.canonical_unique_positive_root' depends on axioms: [propext, Classical.choice, Quot.sound]"
+          "'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.canonical_prior_rate_root_order' depends on axioms: [propext, Classical.choice, Quot.sound]"]
+ :pins [{:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :sha256 "bad1323f975ec6ed052de465e4caff1e086c32865737931d9cb90d4d515500b2" :olean-sha256 "ff03a969ea9745286aa1b56af8449de9b25eb2a8e3ec368db9234467ada100fc"}
         {:path "DarkTower/WarMachine/InteroceptivePolicyPosteriorFinite.lean" :sha256 "afbe1d5dfe9eb9192c2226c34220b4aa8fc345b833f88608cf42129f6341b77e" :olean-sha256 "0f5128639109766958bd4df3b651e4935aa1f223fe0e15147f0c48dd2018cdc7"}
         {:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionProposal.lean" :sha256 "779027d3eeaf887d67d0f29cb89e793e2ad95805880c9d04bb8beb6f164d0298" :olean-sha256 "fe1eea8c472833cf15b1c4674f0987e505c97455eba3c5eaaff44d0cbf5b5354"}
         {:path "DarkTower/WarMachine/InteroceptivePolicyPrecisionBounded.lean" :sha256 "b69f98d3b69535d07c09765d2d8dfecfcbb5905511676f0bf3ca08fd4c58a7e4" :olean-sha256 "a2511140fce621ded116bfe8282be842b5a486beb053f0592ba7175fe03734fc"}
@@ -29,13 +30,15 @@
  :failed-attempts
  [{:tree-sha "bb31e951d7" :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :exit 1 :finding :missing-accepted-prerequisite-olean}
   {:tree-sha "bb31e951d7" :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :exit 1 :finding :proof-obligations-in-division-convexity-and-equality-orientation}
-  {:tree-sha "9c9b1f719d" :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :exit 0 :finding :elaboration-green-before-owned-olean-output}]
+  {:tree-sha "9c9b1f719d" :command "lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :exit 0 :finding :elaboration-green-before-prior-rate-connection}
+  {:tree-sha "15712715fc" :command "lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.olean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean" :exit 0 :finding :final-elaboration-green}]
  :proved [:canonical-root-localisation
           :derivative-upper-bound-above-half-range
           :positive-root-existence-under-criterion
           :global-positive-root-uniqueness-under-certificate
           :zero-range-case-included
-          :positive-habit-exp-log]
+          :positive-habit-exp-log
+          :accepted-prior-rate-root-order-connection]
  :negative-signature
  {:canonical-derivative-certificate :still-premise
   :variance-bound-specialization :still-premise

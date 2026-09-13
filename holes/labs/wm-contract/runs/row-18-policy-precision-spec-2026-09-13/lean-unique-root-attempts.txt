@@ -36,10 +36,17 @@ DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean:125:4: error: T
 'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.derivative_lt_one_above_half_range' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
 'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.canonical_unique_positive_root' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
 
-FINAL — source commit 9c9b1f719d2a53aed25e7c329447517cf6819ea5
+INTERMEDIATE GREEN — source commit 9c9b1f719d2a53aed25e7c329447517cf6819ea5
+COMMAND: lake env lean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean
+EXIT: 0
+FINDING: the canonical uniqueness theorem elaborated before the additive
+prior-rate ordering connection was introduced.
+
+FINAL — source commit 15712715fc1f1f531b9fc3cb4cbefcf0eb7be70d
 COMMAND: lake env lean -o .lake/build/lib/lean/DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.olean DarkTower/WarMachine/InteroceptivePolicyPrecisionUniqueRoot.lean
 EXIT: 0
 OUTPUT:
 'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.root_localisation' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.derivative_lt_one_above_half_range' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.canonical_unique_positive_root' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.InteroceptivePolicyPrecisionUniqueRoot.canonical_prior_rate_root_order' depends on axioms: [propext, Classical.choice, Quot.sound]

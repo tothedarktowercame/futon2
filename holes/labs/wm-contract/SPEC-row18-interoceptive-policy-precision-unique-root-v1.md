@@ -64,7 +64,10 @@ selection, calibration, adoption, runtime integration, or admission.
 - `root_localisation`;
 - `derivative_lt_one_above_half_range`; and
 - `canonical_unique_positive_root`, specialized to the canonical finite
-  posterior's `evidenceDelta` and explicitly carrying positive habit.
+  posterior's `evidenceDelta` and explicitly carrying positive habit; and
+- `canonical_prior_rate_root_order`, which supplies the resulting uniqueness
+  to the already accepted `finiteFieldRootOrdering` theorem and obtains the
+  strictly larger beta / strictly smaller gamma conclusion.
 
 The module imports the accepted finite-posterior layer and changes no frozen
 carrier.
