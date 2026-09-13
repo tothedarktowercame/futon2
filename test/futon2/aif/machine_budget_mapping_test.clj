@@ -9,7 +9,7 @@
 
 (defn- fixture [] (edn/read-string (slurp (io/file fixture-path))))
 
-(def binding
+(def fixture-binding
   {:model/id :wm-test-model :model/revision "fixture-revision-1"
    :run/id "commissioned-e1-run" :tick/index 7})
 
@@ -22,7 +22,7 @@
   {:authority :declared-source
    :source/id id :source/revision "commissioned-fixture-v1"
    :artifact/path path :artifact/sha256 sha
-   :binding binding :values values})
+   :binding fixture-binding :values values})
 
 (defn- complete-input []
   (let [{:keys [ranked-support]} (fixture)
@@ -44,7 +44,7 @@
              :budgets
              (declared :commissioned-budget-table "first-max-tie-control.edn" pin-d
                        {:root 5 :fields {:mission-field 5 :idle-field 1}})}}
-           binding)))
+           fixture-binding)))
 
 (defn- refusal [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
