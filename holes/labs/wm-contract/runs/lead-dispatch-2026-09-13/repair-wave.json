@@ -697,10 +697,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-carrier-decoded-source-identity-repair.request.json",
       "dispatch": "accepted",
       "scope": "codec decoded source and lifecycle review identity joins; no store"
+    },
+    {
+      "packet": "codex-23-feedback-canonical-input-closure",
+      "job-id": "invoke-1789280646953-20694-20d1d504",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789280646953-20694-20d1d504",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-canonical-input-closure.request.json",
+      "dispatch": "accepted",
+      "scope": "read-only canonical transitive resolver input closure inventory"
     }
   ],
   "current-awaiting": [
-    "invoke-1789280435715-20692-6244fa95"
+    "invoke-1789280646953-20694-20d1d504"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
