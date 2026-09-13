@@ -1,0 +1,5 @@
+Execution error (ClassNotFoundException) at java.net.URLClassLoader/findClass (URLClassLoader.java:445).
+com.fasterxml.jackson.databind.ObjectMapper
+
+Full report at:
+/tmp/clojure-16945167862256541425.edn
