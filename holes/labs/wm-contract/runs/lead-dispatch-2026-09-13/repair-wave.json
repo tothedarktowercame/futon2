@@ -721,10 +721,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retained-canonical-replay.request.json",
       "dispatch": "accepted",
       "scope": "fresh isolated retained-config canonical replay; no fixture mutation"
+    },
+    {
+      "packet": "codex-23-feedback-pure-provenance-envelope",
+      "job-id": "invoke-1789281469455-20700-93a54cb7",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789281469455-20700-93a54cb7",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-feedback-pure-provenance-envelope.request.json",
+      "dispatch": "accepted",
+      "scope": "pure structural provenance envelope, no store publication or authority"
     }
   ],
   "current-awaiting": [
-    "invoke-1789281236714-20698-46a2e0ef"
+    "invoke-1789281469455-20700-93a54cb7"
   ],
   "codex24-next-boundary": {
     "status": "reader-reviewed-integration-unimplemented",
