@@ -14,11 +14,16 @@
                 :accepted-result (select-keys (completeness/validate config)
                                               [:status :authority/status])}))
     (let [fake-job "unresolved-fake-job" fake-trace "unresolved-fake-trace"
+          reviewed (#'fixtures/replace-record
+                    config :review-artifact
+                    (fn [x] (assoc x :job/id fake-job :trace/id fake-trace)))
+          review-pin (get-in reviewed [:roles :review-artifact :expected-sha256])
           changed (reduce
                    (fn [c role]
                      (#'fixtures/replace-record
-                      c role (fn [x] (assoc x :job/id fake-job :trace/id fake-trace))))
-                   config [:review-execution :review-artifact :acceptance])]
+                      c role (fn [x] (assoc x :job/id fake-job :trace/id fake-trace
+                                             :review-artifact/raw-sha256 review-pin))))
+                   reviewed [:review-execution :acceptance])]
       (println {:control :unresolved-job-trace-labels
                 :job/id fake-job :trace/id fake-trace
                 :accepted-result (select-keys (completeness/validate changed)
