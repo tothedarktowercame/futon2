@@ -209,10 +209,18 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-measured-a-state-authority.request.json",
       "dispatch": "accepted",
       "scope": "measured categorical variable and observed-authority specification; no counts/admission"
+    },
+    {
+      "packet": "codex-23-retention-loader-and-ingress",
+      "job-id": "invoke-1789269071839-20600-7064b994",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789269071839-20600-7064b994",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retention-loader-and-ingress.request.json",
+      "dispatch": "accepted",
+      "scope": "offline selective loader and actual ingress/quiescence procedure; no live changes"
     }
   ],
   "current-awaiting": [
-    "invoke-1789268785971-20597-9cdd4852",
+    "invoke-1789269071839-20600-7064b994",
     "invoke-1789268617553-20595-0ab8e81f",
     "invoke-1789268910077-20598-8865d1b8"
   ]
