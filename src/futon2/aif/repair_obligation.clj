@@ -11,6 +11,7 @@
             [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.c-fold-config :as digest]
+            [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.substrate :as substrate])
   (:import [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
@@ -109,14 +110,16 @@
     :spec-document (select-keys evidence [:path :git-sha])))
 
 (defn- write-new! [path value]
-  (let [file (io/file path)]
+  (store-lock/with-store-lock-for (.getParent (io/file path))
+   (fn []
+    (let [file (io/file path)]
     (io/make-parents file)
     (Files/write (.toPath file)
                  (.getBytes (with-out-str (pp/pprint value)) "UTF-8")
                  (into-array StandardOpenOption
                              [StandardOpenOption/CREATE_NEW
                               StandardOpenOption/WRITE]))
-    (.getPath file)))
+      (.getPath file)))))
 
 (defn- finding-directory! [root]
   (let [supplied (io/file root)
@@ -155,7 +158,9 @@
   unstable field (notably :opened-at); semantic-map equality is deliberately
   insufficient."
   [root record-id value]
-  (let [directory (finding-directory! root)
+  (store-lock/with-store-lock-for root
+   (fn []
+    (let [directory (finding-directory! root)
         file (io/file directory (str record-id ".edn"))
         file-path (.toPath file)
         lock-path (.toPath (io/file directory ".publication.lock"))
@@ -204,7 +209,7 @@
             (.getPath file)
               (throw (ex-info "Immutable repair finding conflicts with existing bytes"
                               {:reason :repair-finding-conflict
-                               :path (.getPath file)} e))))))))))
+                               :path (.getPath file)} e))))))))))))
 
 (defn- records [dir]
   (->> (or (.listFiles (io/file dir)) [])
@@ -334,8 +339,10 @@
     (when (.isDirectory directory) directory)))
 
 (defn- write-new-durable! [root child record-id value]
-  (when-not (safe-id? record-id) (throw (ex-info "Unsafe repair identity" {})))
-  (let [base (historical-directory! root child true)
+  (store-lock/with-store-lock-for root
+   (fn []
+    (when-not (safe-id? record-id) (throw (ex-info "Unsafe repair identity" {})))
+    (let [base (historical-directory! root child true)
         target (io/file base (str record-id ".edn"))
         bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")]
     (when-not (and (= base (.getCanonicalFile (.getParentFile target)))
@@ -351,8 +358,8 @@
     (with-open [parent (FileChannel/open (.toPath base)
                                          (make-array StandardOpenOption 0))]
       (.force parent true))
-    {:path (.getPath target)
-     :sha256 (digest/sha256 (String. bytes "UTF-8"))}))
+      {:path (.getPath target)
+       :sha256 (digest/sha256 (String. bytes "UTF-8"))}))))
 
 (defn- capture-under! [root path]
   (let [base (.getCanonicalFile (io/file root))

@@ -1,6 +1,7 @@
 (ns futon2.aif.interoceptive-manifest-test
   (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.interoceptive-manifest :as manifest])
+            [futon2.aif.interoceptive-manifest :as manifest]
+            [futon2.aif.interoceptive-store-lock :as store-lock])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -68,3 +69,15 @@
       (binding [manifest/*after-capture-hook* #(spit f "{}\n")]
         (is (= :interoceptive/store-changed-during-capture
                (refusal #(manifest/capture (.getPath trips) (.getPath repair) :test))))))))
+
+(deftest coordination-reentrancy-and-release
+  (let [[trips _] (roots)
+        lock-path (str (.getPath trips) "/coordination.lock")]
+    (binding [store-lock/*lock-path* lock-path]
+      (is (= :nested (store-lock/with-store-lock
+                      #(store-lock/with-store-lock (constantly :nested)))))
+      (is (thrown? Exception
+                   (store-lock/with-store-lock
+                    #(throw (Exception. "commissioned failure")))))
+      (is (= :released
+             (store-lock/with-store-lock (constantly :released)))))))

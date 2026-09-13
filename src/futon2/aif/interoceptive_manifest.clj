@@ -9,6 +9,7 @@
             [clojure.string :as str]
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.interoceptive-commitment :as commitment]
+            [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire])
   (:import [java.nio ByteBuffer]
@@ -137,16 +138,18 @@
     (assoc manifest :snapshot (commitment/confidence-snapshot (:constructor-input manifest)))))
 
 (defn production-manifest!
-  "Capture canonical production roots, retain the manifest in refusal data,
-  and refuse qualification because trip and repair writers share no lock or
-  generation marker spanning enumeration and publication."
+  "Capture canonical production roots while every authorized writer shares
+  the cross-process lock. Partial logical trip/finding publication still
+  refuses in the pure constructor."
   []
-  (let [audit (capture tripwire/default-trip-root repair/default-root :test)]
-    (refuse! :interoceptive/runtime-qualification-unavailable
-             {:manifest (assoc (dissoc audit :constructor-input)
-                               :authority-class :production-audit)
-              :writer-seam {:trip "tripwire/write-trip-report!"
-                            :repair ["repair-obligation/write-new!"
-                                     "repair-obligation/write-new-or-identical!"
-                                     "repair-obligation/write-new-durable!"]
-                            :missing :shared-generation-or-read-write-lock}})))
+  (store-lock/with-store-lock
+   (fn []
+     (let [audit (capture tripwire/default-trip-root repair/default-root :test)
+           input (-> (:constructor-input audit)
+                     (assoc-in [:trip-authority :authority-class] :production)
+                     (assoc-in [:repair-authority :authority-class] :production))]
+       {:schema :wm/interoceptive-production-snapshot-v1
+        :capture-boundary :cross-process-file-lock
+        :manifest (assoc (dissoc audit :constructor-input)
+                         :authority-class :production)
+        :snapshot (commitment/confidence-snapshot input)}))))

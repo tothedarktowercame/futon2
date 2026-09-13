@@ -14,6 +14,7 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.full-loop-cohort :as cohort]
+            [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.trace :as trace])
@@ -463,7 +464,9 @@
   "Durably create one append-only EDN trip report. CREATE_NEW forbids rewrite."
   ([report] (write-trip-report! default-trip-root report))
   ([root report]
-   (let [id (or (:trip/id report) (str "trip-" (UUID/randomUUID)))
+   (store-lock/with-store-lock-for root
+    (fn []
+     (let [id (or (:trip/id report) (str "trip-" (UUID/randomUUID)))
          path (io/file root (str id ".edn"))
          record (merge {:trip/id id :trip/schema-version 1
                         :trip/recorded-at (str (Instant/now))}
@@ -474,7 +477,7 @@
                   (into-array StandardOpenOption
                               [StandardOpenOption/CREATE_NEW
                                StandardOpenOption/WRITE]))
-     (.getPath path))))
+       (.getPath path))))))
 
 (defn- stderr! [message throwable]
   (binding [*out* *err*]
