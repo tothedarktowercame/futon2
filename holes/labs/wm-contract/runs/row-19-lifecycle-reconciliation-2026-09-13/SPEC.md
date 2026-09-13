@@ -25,3 +25,12 @@ snapshot taken atomically with the hot ledger. The current canonical hot file
 alone does not contain that simultaneous cross-source cut, and reading it does
 not prove which controller code is loaded. Therefore no real positive census
 is claimed in this packet.
+
+One read-only exact-byte observation of the canonical hot file found 8,307 jobs:
+6,862 done, 972 failed, 348 cancelled, 108 delivered, 14 deduped and 3 running.
+6,529 carried trace ids and none carried a request commission, consistent with
+the known pre-retention serving code. The same observation pinned the durable
+turn queue and roster files, but those files are not an atomic controller,
+execution, and final-delivery cut. Exact measurements are retained in
+real-source-discovery.out; their changing live nature makes them discovery,
+not resolver inputs for a positive witness.

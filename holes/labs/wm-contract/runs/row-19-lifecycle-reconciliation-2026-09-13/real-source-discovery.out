@@ -1,0 +1,6 @@
+java.security.MessageDigest
+{:path "/tmp/futon3c-invoke-jobs.edn", :bytes 21638269, :sha256 "a3d7b61fc5d0c488031bb9d377655a75ae3c5bc0c3d129a47698a44bf6742005", :jobs 8307, :states {"done" 6862, "failed" 972, "cancelled" 348, "delivered" 108, "deduped" 14, "running" 3}, :with-trace 6529, :with-request-commission 0}
+/home/joe/.local/state/futon3c/ams-turn-queue.edn 1356749 2026-09-13 04:02:03.214139775 +0000
+/home/joe/.local/state/futon3c/ams-agent-roster.edn 481287 2026-09-13 04:02:03.800134783 +0000
+c4932a403bf9d737ecc2d20e0c70dc8df7388966bab8419f874259d3603eebaf  /home/joe/.local/state/futon3c/ams-turn-queue.edn
+1deebb7175674cea749f4087d58090d4fc136316a0c87535d51a64a85364802d  /home/joe/.local/state/futon3c/ams-agent-roster.edn
