@@ -61,3 +61,34 @@
     (is (true? (:receipt-populations-identical? result)))
     (is (false? (:difference-is-line-coordinates-only? result)))
     (is (= 1 (get-in result [:differing-fields :warrant/if-text])))))
+
+(deftest certificate-carries-a-falsifiable-verdict-with-identity
+  (let [rep (assoc (reconciliation/report recorded recorded)
+                   :pin-path "futon3:checks/find-snatch.edn"
+                   :pin-sha256 "aa11" :live-path "runs/x.edn" :live-sha256 "bb22")
+        cert (reconciliation/certificate rep {:run-id "test-run" :generated-at "t0"})]
+    (is (= :wm/f2-reconciliation-certificate-v1 (:schema cert)))
+    (is (true? (:records-reconcile? cert)))
+    (is (= "bb22" (:live-sha256 cert)))
+    (is (= 96 (:receipts-compared cert)))
+    (is (zero? (:receipts-differing cert))))
+  (let [mutated (update-in recorded [:scenarios 0 :round-results 0 :find :receipts]
+                           (fn [receipts]
+                             (let [[id receipt] (first receipts)]
+                               (assoc receipts id
+                                      (assoc-in receipt [:warrant :if-text] "another clause")))))
+        rep (assoc (reconciliation/report recorded mutated)
+                   :pin-path "p" :pin-sha256 "aa11" :live-path "l" :live-sha256 "cc33")]
+    (is (false? (:records-reconcile?
+                 (reconciliation/certificate rep {:run-id "test-run" :generated-at "t0"})))
+        "a clause-text difference makes the certificate verdict false")))
+
+(deftest certificate-refuses-unverifiable-input
+  (let [rep (reconciliation/report recorded recorded)]
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"identity fields"
+                          (reconciliation/certificate rep {:run-id "r" :generated-at "t"}))
+        "a report without digests cannot certify")
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"run identity"
+                          (reconciliation/certificate
+                           (assoc rep :pin-sha256 "a" :live-sha256 "b" :pin-path "p" :live-path "l")
+                           {:generated-at "t"})))))

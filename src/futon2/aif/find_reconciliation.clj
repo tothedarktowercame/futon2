@@ -55,6 +55,45 @@
                   (for [k keys* :when (not= (get wp k) (get wl k))]
                     (keyword "warrant" (name k)))))))
 
+(defn certificate
+  "The certificate the original repair-attempt-001 submission promised and
+   never supplied (SPEC-run-certificate-v1.md, review-rejected 98d0dcb as
+   documentation-only).  A compact, schema-versioned verdict over one
+   reconciliation report, carrying the digests that make it checkable
+   against the exact records compared.  Fail-closed: refuses a report that
+   lacks the identity fields rather than emitting an unverifiable verdict."
+  [report {:keys [run-id generated-at]}]
+  (let [required [:pin-sha256 :live-sha256 :pin-path :live-path]
+        missing (vec (remove #(seq (str (get report %))) required))]
+    (when (seq missing)
+      (throw (ex-info "reconciliation report lacks certificate identity fields"
+                      {:error :certificate/unverifiable-report
+                       :missing missing})))
+    (when-not (seq (str run-id))
+      (throw (ex-info "certificate requires a run identity"
+                      {:error :certificate/run-id-missing})))
+    (sorted-map
+     :schema :wm/f2-reconciliation-certificate-v1
+     :certificate/run-id run-id
+     :certificate/generated-at generated-at
+     :pin-path (:pin-path report)
+     :pin-sha256 (:pin-sha256 report)
+     :live-path (:live-path report)
+     :live-sha256 (:live-sha256 report)
+     :as-of-pin (:as-of-pin report)
+     :as-of-live (:as-of-live report)
+     :receipts-compared (:receipts-compared report)
+     :receipts-differing (:receipts-differing report)
+     :structural-difference-count (count (:structural-differences report))
+     :laws-identical? (boolean (:laws-identical? report))
+     ;; The verdict, stated so it can be false: the pinned and live records
+     ;; carry identical receipt populations, no receipt differs, and the
+     ;; laws are byte-identical.
+     :records-reconcile?
+     (and (true? (:receipt-populations-identical? report))
+          (zero? (or (:receipts-differing report) -1))
+          (true? (:laws-identical? report))))))
+
 (defn report [pin live]
   (let [{:keys [pairs structural-differences]} (comparison pin live)
         diffs (remove (comp empty? classify) pairs)

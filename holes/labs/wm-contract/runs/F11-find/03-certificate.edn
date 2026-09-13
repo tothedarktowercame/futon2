@@ -1,0 +1,18 @@
+{:as-of-live "e58576cec0f14c3da4667ed452d522c561487ee8",
+ :as-of-pin "e58576cec0f14c3da4667ed452d522c561487ee8",
+ :laws-identical? true,
+ :live-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/runs/F11-find/01-find-snatch-live.edn",
+ :live-sha256
+ "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce",
+ :pin-path "futon3:checks/find-snatch.edn",
+ :pin-sha256
+ "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce",
+ :receipts-compared 96,
+ :receipts-differing 0,
+ :records-reconcile? true,
+ :schema :wm/f2-reconciliation-certificate-v1,
+ :structural-difference-count 0,
+ :certificate/generated-at "2026-09-13T22:22:13.715769077Z",
+ :certificate/run-id
+ "f11-f2-reconcile/c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce"}

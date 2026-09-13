@@ -71,6 +71,13 @@
                      :live-sha256 (sha256 live-path))]
         (io/make-parents out-path)
         (spit out-path (with-out-str (pprint/pprint r)))
+        (let [cert-path (str (io/file lab-dir "runs/F11-find/03-certificate.edn"))
+              cert (reconciliation/certificate
+                    r {:run-id (str "f11-f2-reconcile/" (:live-sha256 r))
+                       :generated-at (str (java.time.Instant/now))})]
+          (spit cert-path (with-out-str (pprint/pprint cert)))
+          (println (str "wrote " cert-path " records-reconcile? "
+                        (:records-reconcile? cert))))
         (println (format "f11-f2-reconcile: %d/%d receipts differ over %d/%d rounds; fields %s; lines-only? %s; live drift %d"
                          (:receipts-differing r) (:receipts-compared r)
                          (:rounds-differing r) (:rounds-total r)
