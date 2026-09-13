@@ -133,11 +133,10 @@ baseline root, so every point used by the proof remains positive. It also
 proves its local `appliedGamma` is definitionally equal to the imported
 canonical `MachineTemperature.machineGamma`.
 
-The locally restated `PosteriorRoot` is exactly the proposal definition
-`beta = priorRate + evidenceDelta beta`; it cannot currently be related by a
-Lean theorem without importing the proposal module, whose olean is deliberately
-not rebuilt in this packet. Correspondence is therefore source-text and hash
-pinned in the receipt, not claimed as compiled import correspondence.
+The owned proposal/refinement modules were compiled individually (no shared
+dependency or broad Mathlib build). The finite specialization now proves
+`posteriorRoot_correspondence` and `proposalGamma_correspondence`
+definitionally between the proposal and positive-domain carriers.
 
 ### Exact softmax instantiation boundary
 
@@ -151,11 +150,15 @@ beta. Consequently this packet cannot instantiate `FiniteWeights` or the
 positive-domain continuity premise from that frozen declaration without
 inventing assumptions.
 
-The exact missing lemma boundary is a canonical finite policy-indexed posterior
-using `Real.exp`, nonempty support and positive normalizer, with proofs of
-nonnegativity, normalization, unchanged support alignment, and continuity in
-`beta > 0` for both `pi` and `pi0` under the ruled `:both` placement. Once that
-exists, the finite expectation bound applies directly; global positive-root
+`InteroceptivePolicyPosteriorFinite.lean` now supplies that specialization over
+occurrence indices `Fin n`: exact canonical-list equality, length/order and
+multiplicity preservation, positive normalizer, nonnegative normalized weights,
+and positive-beta continuity for both `pi` and `pi0`. It proves the finite
+expectation bound and discharges boundedness/continuity into the conditional
+root-order theorem. `Real.log` is total in Lean, so normalization itself does
+not require positive habit values; `exp_log_habit` records the positivity
+premise required for `log(habit)` to mean the supplied probabilistic habit mass.
+Any application must refuse a nonpositive habit input. Global positive-root
 uniqueness remains a separate obligation.
 
 It does not prove the production solver converges, brackets uniquely, or moves
