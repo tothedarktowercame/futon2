@@ -1,0 +1,62 @@
+[
+  {
+    "path": "holes/labs/wm-contract/derive_certificate.bb",
+    "expected": "55cc537828e3a4890e268cb07e0590f3ccc1b4feeb7b2acb622baf69268b1c47",
+    "actual": "55cc537828e3a4890e268cb07e0590f3ccc1b4feeb7b2acb622baf69268b1c47",
+    "match": true
+  },
+  {
+    "path": "holes/labs/wm-contract/SPEC-run-certificate-v1.md",
+    "expected": "dbfdf6a7efbbbf7198202b2f2f26f10e1e7db6f22fe8d9957e0ce17b15207dec",
+    "actual": "dbfdf6a7efbbbf7198202b2f2f26f10e1e7db6f22fe8d9957e0ce17b15207dec",
+    "match": true
+  },
+  {
+    "path": "holes/labs/wm-contract/aif-equations.edn",
+    "expected": "2fed9f7c5d4a3c375807dab5e0e3f24c82852bbbd9cef949a2fac8d7c22479da",
+    "actual": "2fed9f7c5d4a3c375807dab5e0e3f24c82852bbbd9cef949a2fac8d7c22479da",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn",
+    "expected": "0c7ee7579701a7bf4d413b54351deef527c7991644a62af801e43ac453b1595f",
+    "actual": "0c7ee7579701a7bf4d413b54351deef527c7991644a62af801e43ac453b1595f",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificatePredicate.lean",
+    "expected": "b1055f6354e1335a9df219abaf606b88814f78249c97d891c2581436f22fef97",
+    "actual": "b1055f6354e1335a9df219abaf606b88814f78249c97d891c2581436f22fef97",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateRunBinding.lean",
+    "expected": "693d48ffa7acf285caea77e324e4895ee19b51eb23a05c0bf752668f7e3aef9e",
+    "actual": "693d48ffa7acf285caea77e324e4895ee19b51eb23a05c0bf752668f7e3aef9e",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateEventBinding.lean",
+    "expected": "783ead4723c6d9adb3e4d373a4d2c57ecae07d66383a35009e7c9d7aa599cff6",
+    "actual": "783ead4723c6d9adb3e4d373a4d2c57ecae07d66383a35009e7c9d7aa599cff6",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateRecordConnectionBinding.lean",
+    "expected": "8a8e8aef58160c0037369c690c82767046cbfda72f2d10dba67356327bcc9a67",
+    "actual": "8a8e8aef58160c0037369c690c82767046cbfda72f2d10dba67356327bcc9a67",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateResolvedEvidence.lean",
+    "expected": "70e4b40d577406cf87e127570c44e255ad5f27310290a7d60b9a95223d95e53e",
+    "actual": "70e4b40d577406cf87e127570c44e255ad5f27310290a7d60b9a95223d95e53e",
+    "match": true
+  },
+  {
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/FullCertificateCrossLayerBinding.lean",
+    "expected": "4b2124823e62aa1c68053d3be92e7a10a9f4c38ac19dccad16fe2fbbaab0f05e",
+    "actual": "4b2124823e62aa1c68053d3be92e7a10a9f4c38ac19dccad16fe2fbbaab0f05e",
+    "match": true
+  }
+]

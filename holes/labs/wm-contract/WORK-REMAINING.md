@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest F11 authority contract review: 6f0a5982 ten source pins verified. Lead corrected early same-buffer ownership, drawing-ledger versus corrected-edge authority, and lifecycle-specific chronology. Design only; no emitter/code or certificate. See [review](runs/row-24-f11-producer-authority-2026-09-13/lead-review.md).
+
 - Latest E5 fixed-context repair: 86b66bcc/06c11b65 five pins/raw5tests30 verified at repair and receipt commits; accepted isolated canonical replay only. Codex22 awaits reviewed E6 contract20644; no duplicate implementation dispatch. See [acceptance](runs/row-22-e5-slow-prior-2026-09-13/lead-strict-context-acceptance.md).
 
 - Latest E4 repair: 6b6a03e2/8e0936c7 three pins/raw6tests30 verified, accepted isolated evidence joins only. Real history completeness, production ownership and R8 numerical/arithmetic qualification remain open. See [acceptance](runs/row-22-e4-causal-evidence-2026-09-13/lead-repair-acceptance.md).

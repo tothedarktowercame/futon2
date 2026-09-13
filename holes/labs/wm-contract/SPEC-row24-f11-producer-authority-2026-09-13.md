@@ -12,7 +12,12 @@ files at 82-103 and their times at 105-108, then constructs the certificate at
 the map construction (lines 257-261): resolve all independent authority inputs,
 construct the typed subjects required by the additive Lean chain, and refuse
 before any EDN/JSON output. `emit!` at 303-309 must remain downstream of every
-refusal.
+refusal. This is the final semantic gate, not the start of byte ownership.
+The current implementation hashes paths and later reopens them with slurp,
+then rehashes some paths while constructing output. A future implementation
+must capture each source once before the initial digest loop, parse and resolve
+pointers from that retained buffer, and derive all emitted hashes from it.
+Adding only a validator at lines 257-261 would leave those races intact.
 
 Caller certificate/checkpoint values are observations, never expected
 authority. Expected run identity, node/connection/equation universes, allowed
@@ -29,9 +34,14 @@ candidate do not authenticate themselves.
 | seven record families | checkpoint files, route/trace, tick-run, close/cohort, dispatch/job, park/continuation, review/admission | strict byte read, SHA-256, schema validation, then exact ordered family summary and member expansion |
 | selected/enacted events | selection judgment at 236-242 and construction `:selection-enaction` | exact occurrence/action/source subject and pin; match requires one occurrence even when source records differ |
 | equation/declaration claims | registry, Holes bundle and manifest through 170-219 | exact node/equation/declaration/claim scope and registry/declaration/witness byte pins at the fixed run |
-| connections | route bytes and corrected `control-map-edges.edn` authority through 148-168 | configured corrected semantic-edge ID, endpoints, classification, evidence pin and typed causal record key |
+| connections | route bytes and existing drawing ledger `control-map-edges.edn` through 148-168 | configured corrected semantic-edge ID, endpoints, classification, evidence pin and typed causal record key |
 | deliverable pointers | construction judgment and pointer/value hashes at 271-289 | resolve pointer against the same pinned source bytes; reject absent, duplicate or value/hash mismatch |
 | review/admission | independent review/admission record | authorized distinct reviewer, exact claim/witness subject, timestamp and source pin; candidate status booleans are not authority |
+
+The pinned drawing ledger is discovery input, not the independently accepted
+corrected E1-E6 universe. Its own header disclaims running-edge status. The
+corrected universe must be constructed from the adopted declaration-edge
+specification and reviewed mappings without dropping required obligations.
 
 E1-E6 targets must be supplied as the corrected semantic-edge universe, not
 inferred by relabelling R numbers. Each target names a composite retained record
@@ -44,9 +54,14 @@ conflict is typed `:legacy-edge-identity-conflict`, not silently overwritten.
 
 The producer must resolve exact trace/tick IDs, checkpoint/close IDs,
 dispatch/park IDs, and review-claim/witness IDs from their respective bytes.
-Timestamp checks are causal, not merely sorted: selection precedes dispatch,
+For the F11 checkpoint lifecycle, timestamp checks are causal, not merely sorted: selection precedes dispatch,
 dispatch precedes build/adjudication, closure follows adjudication, and every
-joined event lies inside the fixed run interval. Missing timestamp precision,
+joined event lies inside its independently fixed lifecycle interval. This is
+not a global ordering imposed on all WM records: E3 review/admission must
+precede its pending authorization/enactment, E4 has dispatch-to-launch-to-tick
+relations, and E6 feedback follows the exact witnessed outcome. Each relation
+needs an explicitly identified event type and lifecycle; historical authorities
+may precede the candidate run. Missing timestamp precision,
 timezone, or occurrence identity refuses rather than borrowing a nearby row.
 
 One `RecordFamilySubject` is a summary. For each family, the authority bundle
@@ -90,7 +105,7 @@ commission 20588 remain unresolved; none is waived or reconstructible here.
 - `derive_certificate.bb`: `55cc537828e3a4890e268cb07e0590f3ccc1b4feeb7b2acb622baf69268b1c47`
 - `SPEC-run-certificate-v1.md`: `dbfdf6a7efbbbf7198202b2f2f26f10e1e7db6f22fe8d9957e0ce17b15207dec`
 - `aif-equations.edn`: `2fed9f7c5d4a3c375807dab5e0e3f24c82852bbbd9cef949a2fac8d7c22479da`
-- corrected edge source: `0c7ee7579701a7bf4d413b54351deef527c7991644a62af801e43ac453b1595f`
+- existing drawing-ledger source (not corrected E1-E6 authority): `0c7ee7579701a7bf4d413b54351deef527c7991644a62af801e43ac453b1595f`
 - additive Lean sources, oldest to newest: `b1055f63`, `693d48ff`,
   `783ead47`, `8a8e8aef`, `70e4b40d`, `4b212482` (full hashes retained in
   `source-pins.txt`).
