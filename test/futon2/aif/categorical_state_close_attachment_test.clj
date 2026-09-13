@@ -2,8 +2,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.categorical-state-close-attachment :as sut]
             [futon2.aif.categorical-state-observation :as observation]
-            [futon2.aif.categorical-state-observation-test :as fixture])
-  (:import (java.nio.file Files)))
+            [futon2.aif.categorical-state-observation-test :as fixture]))
 
 (defn refusal [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e)))))
