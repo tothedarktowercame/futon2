@@ -42,3 +42,8 @@ extra, borrowed, cross-scope or unauthenticated component. Output digests do
 not replace inputs; source declaration hashes do not prove installed code; and
 no candidate, store, adapter or current checkout may synthesize an anchor,
 review, commission, job/trace join or completeness acceptance.
+
+The source dependency inventory also includes the R11 adapter and hierarchical
+budget arbiter called by the E1 mapper. Neither source pins nor generated
+isolated fixture bytes establish installed code or external authentication.
+The refusal above is specified behavior, not a newly implemented resolver.

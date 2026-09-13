@@ -14,9 +14,13 @@
   [:e3 :r9/check-independence]
   [:e2b :e2a/restrict-portfolio]
   [:e2a :e1/resolve-and-map]
-  [:e1 :machine-budget-mapping/map-ranked-support]]
+  [:e1 :machine-budget-mapping/map-ranked-support]
+  [:e1-mapper :hierarchical-budget-adapter/select-ranked-proposal-fields]
+  [:r11-adapter :hierarchical-budget/arbitrate]]
  :source-declarations
- [{:role :e6b :path "src/futon2/aif/machine_slow_feedback_evidence.clj"
+ [{:role :r11-adapter :path "src/futon2/aif/hierarchical_budget_adapter.clj" :sha256 "525bcb8aa4aad49c9cd02c22dfeabc7406aced8aacbb5731317e182eddb691e1"}
+  {:role :r11-arbiter :path "src/futon2/aif/hierarchical_budget.clj" :sha256 "a0581c1d7135324b1190795ba56dfc9fa834869474a297155678d88d71e5216b"}
+  {:role :e6b :path "src/futon2/aif/machine_slow_feedback_evidence.clj"
    :sha256 "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"}
   {:role :e3 :path "src/futon2/aif/machine_pre_enact_authorization.clj"
    :sha256 "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260"}

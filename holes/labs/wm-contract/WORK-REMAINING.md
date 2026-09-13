@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest closureb00e6d35 listed pins verified; lead added missing R11 adapter/arbiter dependencies. E3 durable inputs remain absent; refusal is a contract, not executable resolver. New isolated fixture capture must remain unauthenticated test material, never historical20588 or production genesis. See [review](runs/row-22-e6b-canonical-closure-review-2026-09-13/lead-review.md).
+
 - Latest codeccbbee14e/02b8e8a3 four pins/raw18tests98 accepted structural-only: decoded source/lifecycle/review subject joins hold and distinct event IDs retained. Canonical transitive input closure inventory next; no store-v2/adapter or authority. See [acceptance](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-subject-joins/lead-acceptance.md).
 
 - Independent34fd00cd accepts lead6b35706e prior/context correction; six source/gate pins verified. Retained control still projects borrowed E2b/outcome identities under original context. Remaining decoded-source/lifecycle/review joins require bounded codec repair; no store work. See [follow-up](runs/row-22-e6b-common-state-carrier-2026-09-13/codec-join-repair/lead-source-identity-followup.md).

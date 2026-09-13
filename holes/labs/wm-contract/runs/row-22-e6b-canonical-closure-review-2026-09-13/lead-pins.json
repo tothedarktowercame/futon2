@@ -1,0 +1,74 @@
+[
+  {
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"
+  },
+  {
+    "path": "src/futon2/aif/machine_pre_enact_authorization.clj",
+    "sha256": "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260"
+  },
+  {
+    "path": "src/futon2/aif/machine_enactment_correspondence.clj",
+    "sha256": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933"
+  },
+  {
+    "path": "src/futon2/aif/machine_portfolio_restriction.clj",
+    "sha256": "316ddd364e2deaea98172558148fd770c2d5d4a930e32fb8e4825f454b6c51ab"
+  },
+  {
+    "path": "src/futon2/aif/machine_budget_authority.clj",
+    "sha256": "13c6fb05c2a75ff5c673ed2df49e9d555db210d9269588396ea71ce97964253e"
+  },
+  {
+    "path": "src/futon2/aif/machine_budget_mapping.clj",
+    "sha256": "5072c34fa55db6683faeef38ac2b8026107c9ef0c9d7174a9a4026ab3ec2110f"
+  },
+  {
+    "path": "src/futon2/aif/r9_checker.clj",
+    "sha256": "b3469b8027c36e2db17943efabb6b26878c1dee3d71b9eda809e50d602094722"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e1-authority-resolution-2026-09-13/fixtures/ranked-support.edn",
+    "sha256": "61cc2938f38a4c2ac5e3d7c48543db06c4b146cdf2239c33c2e8ee67e397ea79"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e1-authority-resolution-2026-09-13/fixtures/field-membership.edn",
+    "sha256": "95f9ae99de4ebac2eb5a873fe04d8cf7b1c0cf28c40de294c2807f1338dd56d6"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e1-authority-resolution-2026-09-13/fixtures/costs.edn",
+    "sha256": "14ecb59a96b5bb138e86338e008044d50acfd137918b891cb9974652e2da0231"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e1-authority-resolution-2026-09-13/fixtures/utilities.edn",
+    "sha256": "17a0e579dcd49cd80b0409b762e0c098928ab2c8fde2c049608e584a41b24bfd"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e1-authority-resolution-2026-09-13/fixtures/budgets.edn",
+    "sha256": "4a2e99503b5867f32458d7f4e029e2c4461aa52f1dd0d5f7e33b75f3751ce267"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/fixtures/context.edn",
+    "sha256": "ddbc82772282b985195a9734a912841cef63806e1bca06b59b248d5786d1591b"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/fixtures/selection.edn",
+    "sha256": "810e5d437cf62f3de6ef2c43b17e7b3693c5e801e299d89837cfc1c8ef9b245e"
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e2b-correspondence-2026-09-13/fixtures/enactment.edn",
+    "sha256": "adb640964313374ea3cd853147f501f900cbab6ca596e07b6793b4329a0e96b2"
+  },
+  {
+    "path": "test/futon2/aif/machine_pre_enact_authorization_test.clj",
+    "sha256": "50558cf363717c53cfb818a6db9d77814a8beb732e41549a2c66f478f7b45a12"
+  },
+  {
+    "path": "test/futon2/aif/machine_pre_enact_authorization_test.clj",
+    "sha256": "50558cf363717c53cfb818a6db9d77814a8beb732e41549a2c66f478f7b45a12"
+  },
+  {
+    "path": "test/futon2/aif/machine_enactment_correspondence_test.clj",
+    "sha256": "d1a8dec32437697d4905ed2e92f7701b5ef1d67f13cca6370e3ebae55b62aa6f"
+  }
+]
