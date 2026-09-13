@@ -1,0 +1,9 @@
+# Independent event-binding repair acceptance: job 20628
+
+Reviewed complete 4cbdfe0d diff against the previously reviewed event module and receipts7152fd27. Nine current source/olean/toolchain pins match. Retained targeted compiler output has eight axiom checks (propext, Classical.choice, Quot.sound), no sorryAx, two disclosed unused-variable warnings, exit0 and empty stderr. No passing gate rerun.
+
+Ordinary .match now requires expected selected/enacted occurrence identity equality in addition to action equality and actual-to-expected subject equality. Selection/enactment source records may differ, as required. The named selected-versus-enacted mismatch theorem directly extracts the new equality, closing the relation witnessed by lead counterexample508623f6; the earlier actual-versus-expected theorem remains separate.
+
+Divergence now equates the FullScopeEvidence authority pin to the EventBindingEvidence pin, and requires a RunBindingEvidence authority record with the exact same run, projected occurrence/action pair, class, grounds, evidence source, authority reference and pin. This closes the disconnected layers at the typed relation level. The inherited requirement that divergent action strings differ remains conservative; no new divergence class is adopted.
+
+Accepted only as structural refinement conditional on independently fixed subjects and authenticated bytes. Implications preserve both prior predicates and their rejection obligations. No actual run, immutable obligation-universe authority, F11 byte producer, record-family consistency or connection firing evidence is established. Next packet must add exact run-bound seven-family and required-connection joins, without changing frozen carriers or the F11-owned emitter. All Row14/18/19/22 and full qualifying-run obligations remain open.

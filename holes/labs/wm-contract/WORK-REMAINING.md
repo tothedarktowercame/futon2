@@ -14,6 +14,8 @@ and equations + 4 assurance nodes + 3 wiring + 5 certificate-and-run
 
 ## Execution leadership (delegated by Joe, 2026-09-12)
 
+- Latest Row24 event repair: 4cbdfe0d/7152fd27 nine pins/eight retained axiom checks verified. Ordinary occurrence equality and cross-layer divergence subject/authority joins accepted structurally only. Exact run-bound record-family/connection evidence and external producer/authentication remain open. See [acceptance](runs/row-24-event-binding-repair-2026-09-13/lead-acceptance.md).
+
 - Latest E3 review: 1842c900/31a40834 three pins/raw2tests17assertions verified. Executed nil subject/joins and mixed-scope controls still return mechanism-authorized. Strict typed subject/all-record scope and canonical R9 evidence correspondence remain required. Production refusal preserved; no authorization. See [review](runs/row-22-e3-pre-enact-2026-09-13/lead-review.md).
 
 - Latest Row24 event review: 8493dc2e/f83f5e93 nine pins/six retained axiom checks verified. Executed local Lean counterexample accepts ordinary match with different selected/enacted occurrences and equal action strings. Exact branch relation and cross-layer divergence authority agreement still required; no full certificate. See [review](runs/row-24-event-binding-2026-09-13/lead-review.md).
