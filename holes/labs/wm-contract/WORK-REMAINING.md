@@ -1352,3 +1352,7 @@ Row19 draft7ca8e617/10bcf636/77a04049 reviewed: four artifact pins plus checker 
 ## Lead review update — repaired fixed-field checker, 2026-09-13
 
 Row18 checker19c34cc9/3a6f56da/15f441b3 accepted at fixed-input scope after4pins and raw positive/induced-failure review. Four refusal expectations now asserted, induced wrong expectation exits1; no rerun. Retained145/2 field uses:none not:both; c1/c2 fail sufficient bound, uniqueness unknown. Lead corrected leftover contradictory bracket prose. No runtime or theorem-instance admission. Next independent packet moves to measured-A categorical state authority while retention deployment preparation remains pending.
+
+## Lead review update — retention deployment preparation, 2026-09-13
+
+TN69ff088c reviewed against complete retention diff and matching HTTP source hash. Proposed queue holds do not reject new bell acceptance; actual admission/quiescence boundary and selective loader artifact still owed. No executable deployment approved. Next bounded offline loader/procedure packet must address old function bodies blocked on writer lock and final archive joins; no live mutation. See runs/row-19-retention-deployment-preparation-2026-09-13/lead-review.md. Older20585/86/87 resume remains superseded by current manifest.
