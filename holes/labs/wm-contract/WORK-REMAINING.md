@@ -45,6 +45,33 @@ single task authority; the lead document records policy and findings.
   does not, and the gain floor can erase modulation. See
   runs/row-18-lead-audit-2026-09-12/ (review pending; not live-trip credit).
 
+## Active dispatch wave — 2026-09-13
+
+Joe explicitly authorized codex-22/23/24 to assist through dispatches. All
+three requests accepted and observed running; implementation/review results
+are pending. Full outbound commissions and accepted job IDs are retained in
+`runs/lead-dispatch-2026-09-13/dispatches.json`. Retaining an outbound request
+is not yet a verified join to Agency's normalized request digest.
+
+- **codex-22, row 18 packets 1/2:** pure trip/discharge snapshot, declared-law
+  controls, actual-reader-shaped input and refusing identity/source joins.
+  Controller/trace integration follows independent review.
+- **codex-23, row 19 retention prerequisite:** retain the exact commission
+  digest preimage at the Agency invoke boundary, persist/read it through
+  event trimming, commission missing/tampered input refusals. Authentication
+  and genesis admission remain a separate packet.
+- **codex-24, independent review:** commit 867565de decisions and row-18/24
+  probes, including policy conflicts and exact receipt/source bindings.
+- **codex-26:** shared tracker, review and sequencing. Measured-A follow-up
+  source check found 82 physical closes in the census's `data/wm-full-loop`
+  root, zero with either new `:entity-state-at-close` or `:outcome-entity`
+  field, latest close July 27. This is a narrow physical-file observation,
+  not a deduplicated estimator corpus or a serving-JVM deployment check.
+  The coverage reporter still derives status counts from its earlier pinned
+  census: simply rerunning it cannot establish new state authority or actual
+  deployment. Next measured-A packet must establish an observed-state
+  authority and the current capture path, preserving honest latent beliefs.
+
 ## Signature discipline (adopted by Joe 2026-09-12)
 
 Per the apex patterns (progress-is-a-witnessed-state-change,

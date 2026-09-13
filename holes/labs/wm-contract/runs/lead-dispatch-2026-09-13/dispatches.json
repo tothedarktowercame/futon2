@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-13",
+  "lead": "codex-26",
+  "authorization": "Joe to codex-26, emacs-repl: yes, codex 22 23 and 24 can help with any needed dispatches",
+  "jobs": [
+    {
+      "agent": "codex-22",
+      "job-id": "invoke-1789263928413-20558-55de9dfa",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789263928413-20558-55de9dfa",
+      "dispatch": "accepted",
+      "last-observed-state": "running",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22.request.json",
+      "request-file-sha256": "69adacc4c0eacbac77dce3bebaf147741056253dccc38e3b366022d14524f95f",
+      "request-digest-join": "not-yet-verified",
+      "completion": "pending"
+    },
+    {
+      "agent": "codex-23",
+      "job-id": "invoke-1789263929596-20559-97130a74",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789263929596-20559-97130a74",
+      "dispatch": "accepted",
+      "last-observed-state": "running",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23.request.json",
+      "request-file-sha256": "6ffe182c9cfafd2da996a402218b8b980e0a744922050ce8202ea0d945ed9420",
+      "request-digest-join": "not-yet-verified",
+      "completion": "pending"
+    },
+    {
+      "agent": "codex-24",
+      "job-id": "invoke-1789263930890-20560-81e207dc",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789263930890-20560-81e207dc",
+      "dispatch": "accepted",
+      "last-observed-state": "running",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24.request.json",
+      "request-file-sha256": "13e349b334a31a0e711ad047ca3af1075340afad91529831563f79e4d228753e",
+      "request-digest-join": "not-yet-verified",
+      "completion": "pending"
+    }
+  ]
+}
