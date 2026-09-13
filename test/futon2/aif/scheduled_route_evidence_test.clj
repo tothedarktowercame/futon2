@@ -12,12 +12,16 @@
 (def plan ["tick-0" "tick-1" "tick-2"])
 (def support ["candidate-a" "candidate-b"])
 (def common {:run/id "run-1" :model/id "wm" :model/revision "model-v1"})
+(def channels [{:channel/id "health" :value 0.25}
+               {:channel/id "latency" :value 0.75}])
+(def prediction {:mean {"health" 0.2 "latency" 0.8}
+                 :variance {"health" 0.1 "latency" 0.2}})
 (defn- at [id i m] (merge common {:tick/id id :tick/index i} m))
 (defn- rows [produced]
   [{:candidate/id "candidate-a" :action {:type :a} :action/model-revision "model-v1"
-    :produced-at/tick-id produced}
+    :produced-at/tick-id produced :prediction prediction}
    {:candidate/id "candidate-b" :action {:type :b} :action/model-revision "model-v1"
-    :produced-at/tick-id produced}])
+    :produced-at/tick-id produced :prediction prediction}])
 
 (def records
   {:commission {:schema :wm/e4-commission-v1 :node :R10 :commission/id "commission-1"
@@ -28,10 +32,15 @@
                 :dispatch/id "dispatch-1" :launch/id "launch-1"
                 :launch/semantics :idempotent :tick/plan plan
                 :run/id "run-1" :model/id "wm" :model/revision "model-v1"}
+   :launch-history [{:schema :wm/e4-launch-history-v1 :commission/id "commission-1"
+                     :dispatch/id "dispatch-1" :launch/id "launch-1" :run/id "run-1"}]
    :tick-entries (mapv (fn [i id] (at id i {:schema :wm/e4-tick-entry-v1
                                              :launch/id "launch-1"})) (range) plan)
    :observations (mapv (fn [i id] (at id i {:schema :wm/e4-r2-observation-v1
-                                             :observation/channels [0.1 0.2]})) (range) plan)
+                                             :observation/channels channels})) (range) plan)
+   :occurrence-universe
+   (mapv (fn [i id] (at id i {:schema :wm/e4-occurrence-universe-v1
+                               :candidate/support support})) (range) plan)
    :predecessor-predictions
    [(at "tick-0" 0 {:schema :wm/e4-predecessor-v1 :coverage :off :reason :initial-tick
                      :candidate/support support})
@@ -47,9 +56,37 @@
     (at "tick-2" 2 {:schema :wm/e4-r8-occurrences-v1 :coverage :complete
                      :candidate/support support :rows (rows "tick-1")})]})
 
+(defn- with-input-refs [rs]
+  (let [obs-by-id (into {} (map (juxt :tick/id identity)) (:observations rs))
+        pred-by-id (into {} (map (juxt :tick/id identity)) (:predecessor-predictions rs))
+        obs-bytes (.getBytes (str (pr-str (:observations rs)) "\n") "UTF-8")
+        pred-bytes (.getBytes (str (pr-str (:predecessor-predictions rs)) "\n") "UTF-8")]
+    (update rs :r8-occurrences
+            (fn [ticks]
+              (mapv (fn [tick]
+                      (if (= :complete (:coverage tick))
+                        (let [obs (obs-by-id (:tick/id tick))
+                              pred (pred-by-id (:tick/id tick))
+                              pmap (into {} (map (juxt :candidate/id identity)) (:rows pred))]
+                          (update tick :rows
+                                  (fn [rows]
+                                    (mapv (fn [row]
+                                            (let [cid (:candidate/id row)]
+                                              (assoc row
+                                                     :observation/ref {:source-role :observations
+                                                                       :tick/id (:tick/id tick)
+                                                                       :sha256 (sha obs-bytes)}
+                                                     :prediction/ref {:source-role :predecessor-predictions
+                                                                      :tick/id (:tick/id tick)
+                                                                      :candidate/id cid
+                                                                      :sha256 (sha pred-bytes)}
+                                                     :observation/input (:observation/channels obs)
+                                                     :prediction/input (:prediction (pmap cid))))) rows))))
+                        tick)) ticks)))))
+
 (defn- fixture [overrides]
   (let [dir (.toFile (Files/createTempDirectory "e4-route" (make-array java.nio.file.attribute.FileAttribute 0)))
-        rs (merge records overrides)
+        rs (with-input-refs (merge records overrides))
         entries (into {}
                       (for [role e4/source-roles
                             :let [f (io/file dir (str (name role) ".edn"))
@@ -128,3 +165,76 @@
   (is (= :e4/source-schema-mismatch
          (refusal (fixture {:observations
                             (assoc-in (:observations records) [1 :schema] :candidate/schema)})))))
+
+(deftest semantic-payload-and-independent-membership-controls
+  (testing "the three independently commissioned review counterexamples"
+    (is (= :e4/invalid-observation-payload
+           (refusal (fixture {:observations
+                              (mapv #(dissoc % :observation/channels) (:observations records))}))))
+    (is (= :e4/prediction-occurrence-mismatch
+           (refusal (fixture
+                     (into {} (for [role [:predecessor-predictions :r8-occurrences]]
+                                [role (mapv #(if (:rows %)
+                                               (update % :rows
+                                                       (fn [rs] (mapv (fn [r] (dissoc r :action)) rs))) %)
+                                            (get records role))]))))))
+    (is (= :e4/candidate-coverage-mismatch
+           (refusal (fixture
+                     (into {} (for [role [:predecessor-predictions :r8-occurrences]]
+                                [role (mapv #(cond-> (assoc % :candidate/support ["candidate-a"])
+                                              (:rows %) (update :rows (fn [rs] [(first rs)])))
+                                            (get records role))])))))))
+  (testing "a complete universe preserves duplicate semantic actions as occurrences"
+    (let [same-actions (mapv #(if (:rows %)
+                               (assoc % :rows
+                                      (mapv (fn [r] (assoc r :action {:type :same})) (:rows %))) %)
+                             (:predecessor-predictions records))
+          same-r8 (mapv #(if (:rows %)
+                           (assoc % :rows
+                                  (mapv (fn [r] (assoc r :action {:type :same})) (:rows %))) %)
+                         (:r8-occurrences records))]
+      (is (= :verified-causal-route
+             (:status (e4/verify-route! (fixture {:predecessor-predictions same-actions
+                                                  :r8-occurrences same-r8})))))))
+  (testing "an R8 occurrence cannot borrow another tick's observation reference"
+    (let [authority (fixture {})
+          original ((get-in authority [:sources :r8-occurrences :resolve]))
+          rows (read-string (String. original "UTF-8"))
+          changed (assoc-in rows [1 :rows 0 :observation/ref :tick/id] "tick-2")
+          bs (.getBytes (str (pr-str changed) "\n") "UTF-8")
+          authority' (-> authority
+                         (assoc-in [:sources :r8-occurrences :sha256] (sha bs))
+                         (assoc-in [:sources :r8-occurrences :resolve] (constantly bs)))]
+      (is (= :e4/prediction-occurrence-mismatch (refusal authority')))))
+  (testing "resolved prediction input mutation refuses"
+    (let [authority (fixture {})
+          original ((get-in authority [:sources :r8-occurrences :resolve]))
+          rows (read-string (String. original "UTF-8"))
+          changed (assoc-in rows [1 :rows 0 :prediction/input :mean "health"] 99.0)
+          bs (.getBytes (str (pr-str changed) "\n") "UTF-8")]
+      (is (= :e4/prediction-occurrence-mismatch
+             (refusal (-> authority
+                          (assoc-in [:sources :r8-occurrences :sha256] (sha bs))
+                          (assoc-in [:sources :r8-occurrences :resolve] (constantly bs))))))))
+  (testing "declared idempotence without a unique resolved launch is insufficient"
+    (is (= :e4/launch-uniqueness-unwitnessed
+           (refusal (fixture {:launch-history
+                              (conj (:launch-history records)
+                                    {:schema :wm/e4-launch-history-v1
+                                     :commission/id "commission-1" :dispatch/id "dispatch-1"
+                                     :launch/id "launch-2" :run/id "run-2"})}))))))
+
+(deftest strict-utf8-reporting-decoder
+  (let [authority (fixture {})
+        malformed (byte-array [(byte 0xc3) (byte 0x28)])]
+    (is (= :e4/invalid-utf8
+           (refusal (-> authority
+                        (assoc-in [:sources :commission :sha256] (sha malformed))
+                        (assoc-in [:sources :commission :resolve] (constantly malformed)))))))
+  (testing "a genuine replacement character is valid UTF-8, then fails only schema semantics"
+    (let [authority (fixture {})
+          valid (.getBytes (pr-str {:schema :wrong :text "\ufffd"}) "UTF-8")]
+      (is (= :e4/source-schema-mismatch
+             (refusal (-> authority
+                          (assoc-in [:sources :commission :sha256] (sha valid))
+                          (assoc-in [:sources :commission :resolve] (constantly valid)))))))))

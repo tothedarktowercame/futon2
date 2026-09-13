@@ -7,20 +7,24 @@
             [clojure.java.io :as io]
             [clojure.string :as str])
   (:import [java.io PushbackReader StringReader]
+           [java.nio ByteBuffer]
+           [java.nio.charset CharacterCodingException CodingErrorAction StandardCharsets]
            [java.nio.file Files]
            [java.math BigInteger]
            [java.security MessageDigest]))
 
 (def source-roles
-  [:commission :dispatch :run-launch :tick-entries :observations
-   :predecessor-predictions :r8-occurrences])
+  [:commission :dispatch :run-launch :launch-history :tick-entries :observations
+   :occurrence-universe :predecessor-predictions :r8-occurrences])
 
 (def ^:private schemas
   {:commission :wm/e4-commission-v1
    :dispatch :wm/e4-dispatch-v1
    :run-launch :wm/e4-run-launch-v1
+   :launch-history :wm/e4-launch-history-v1
    :tick-entries :wm/e4-tick-entry-v1
    :observations :wm/e4-r2-observation-v1
+   :occurrence-universe :wm/e4-occurrence-universe-v1
    :predecessor-predictions :wm/e4-predecessor-v1
    :r8-occurrences :wm/e4-r8-occurrences-v1})
 
@@ -34,16 +38,18 @@
 
 (defn- read-one-edn [^bytes bs role]
   (try
-    (let [s (String. bs java.nio.charset.StandardCharsets/UTF_8)
-          replacement "\ufffd"]
-      (when (.contains s replacement)
-        (refuse! :e4/invalid-utf8 {:role role}))
+    (let [decoder (doto (.newDecoder StandardCharsets/UTF_8)
+                    (.onMalformedInput CodingErrorAction/REPORT)
+                    (.onUnmappableCharacter CodingErrorAction/REPORT))
+          s (str (.decode decoder (ByteBuffer/wrap bs)))]
       (with-open [r (PushbackReader. (StringReader. s))]
         (let [v (edn/read {:eof ::eof} r)
               tail (edn/read {:eof ::eof} r)]
           (when (or (= ::eof v) (not= ::eof tail))
             (refuse! :e4/source-not-single-edn {:role role}))
           v)))
+    (catch CharacterCodingException _
+      (refuse! :e4/invalid-utf8 {:role role}))
     (catch clojure.lang.ExceptionInfo e (throw e))
     (catch Exception e
       (refuse! :e4/source-read-failed {:role role :cause (.getName (class e))}))))
@@ -103,7 +109,7 @@
 (defn- schemas! [resolved]
   (doseq [[role expected] schemas
           :let [record (get-in resolved [role :record])
-                records (if (#{:tick-entries :observations
+                records (if (#{:launch-history :tick-entries :observations :occurrence-universe
                                :predecessor-predictions :r8-occurrences} role)
                           record [record])]]
     (when-not (and (seq records) (every? #(= expected (:schema %)) records))
@@ -117,7 +123,8 @@
   (let [resolved (resolve-sources! authority)
         r #(get-in resolved [% :record])
         commission (r :commission) dispatch (r :dispatch) launch (r :run-launch)
-        ticks (r :tick-entries) observations (r :observations)
+        history (r :launch-history) ticks (r :tick-entries) observations (r :observations)
+        universes (r :occurrence-universe)
         predictions (r :predecessor-predictions) r8s (r :r8-occurrences)
         plan (:tick/plan commission)
         run-id (:run/id launch) model-id (:model/id launch) revision (:model/revision launch)]
@@ -143,29 +150,48 @@
                    (= plan (:tick/plan launch))
                    (= :idempotent (:launch/semantics launch)))
       (refuse! :e4/run-launch-unjoined {:run-launch launch}))
+    (let [matching (filterv #(and (= (:commission/id commission) (:commission/id %))
+                                  (= (:dispatch/id dispatch) (:dispatch/id %))) history)]
+      (when-not (and (= 1 (count matching))
+                     (= (:launch/id launch) (:launch/id (first matching)))
+                     (= run-id (:run/id (first matching))))
+        (refuse! :e4/launch-uniqueness-unwitnessed
+                 {:matching-launches (mapv #(select-keys % [:launch/id :run/id]) matching)})))
     (let [by-tick (indexed! ticks :tick/id :e4/duplicate-or-invalid-tick-entry)
           obs-by-tick (indexed! observations :tick/id :e4/duplicate-or-invalid-observation)
+          universe-by-tick (indexed! universes :tick/id :e4/duplicate-or-invalid-occurrence-universe)
           pred-by-tick (indexed! predictions :tick/id :e4/duplicate-or-invalid-prediction)
           r8-by-tick (indexed! r8s :tick/id :e4/duplicate-or-invalid-r8-occurrence)]
       (doseq [[label ks] [[:tick-entry (mapv :tick/id ticks)]
                           [:observation (mapv :tick/id observations)]
+                          [:occurrence-universe (mapv :tick/id universes)]
                           [:prediction (mapv :tick/id predictions)]
                           [:r8 (mapv :tick/id r8s)]]]
         (when-not (= plan ks)
           (refuse! :e4/tick-plan-coverage-mismatch {:role label :declared plan :actual ks})))
       (doseq [[idx tick-id] (map-indexed vector plan)]
         (let [tick (by-tick tick-id) obs (obs-by-tick tick-id)
+              universe (universe-by-tick tick-id)
               pred (pred-by-tick tick-id) r8 (r8-by-tick tick-id)
               common [run-id tick-id idx model-id revision]
               actual (fn [m] [(:run/id m) (:tick/id m) (:tick/index m)
                               (:model/id m) (:model/revision m)])]
-          (when-not (every? #(= common (actual %)) [tick obs pred r8])
+          (when-not (every? #(= common (actual %)) [tick obs universe pred r8])
             (refuse! :e4/run-tick-model-identity-mismatch {:tick/id tick-id}))
           (when-not (= (:launch/id launch) (:launch/id tick))
             (refuse! :e4/tick-entry-launch-mismatch {:tick/id tick-id}))
-          (let [support (unique-ordered! (:candidate/support r8)
+          (let [channels (:observation/channels obs)
+                channel-ids (mapv :channel/id channels)
+                _ (when-not (and (vector? channels) (seq channels)
+                                 (every? #(and (nonblank? (:channel/id %))
+                                               (number? (:value %))
+                                               (Double/isFinite (double (:value %)))) channels)
+                                 (= (count channel-ids) (count (distinct channel-ids))))
+                    (refuse! :e4/invalid-observation-payload {:tick/id tick-id}))
+                support (unique-ordered! (:candidate/support universe)
                                          :e4/invalid-candidate-support {:tick/id tick-id})]
-            (when-not (= support (:candidate/support pred))
+            (when-not (and (= support (:candidate/support pred))
+                           (= support (:candidate/support r8)))
               (refuse! :e4/candidate-coverage-mismatch {:tick/id tick-id}))
             (if (zero? idx)
               (when-not (and (= :off (:coverage r8)) (= :initial-tick (:reason r8))
@@ -183,12 +209,32 @@
                            {:tick/id tick-id :expected-predecessor previous}))
                 (doseq [cid support
                         :let [p (pmap cid) o (omap cid)]]
-                  (when-not (and (= previous (:produced-at/tick-id p))
+                  (let [action (:action p)
+                        prediction (:prediction p)
+                        observation-ref (:observation/ref o)
+                        prediction-ref (:prediction/ref o)]
+                  (when-not (and (map? action) (keyword? (:type action))
+                                 (map? prediction)
+                                 (= (set channel-ids) (set (keys (:mean prediction))))
+                                 (= (set channel-ids) (set (keys (:variance prediction))))
+                                 (every? number? (vals (:mean prediction)))
+                                 (every? #(and (number? %) (pos? (double %)))
+                                         (vals (:variance prediction)))
+                                 (= {:source-role :observations :tick/id tick-id
+                                     :sha256 (get-in resolved [:observations :sha256])}
+                                    observation-ref)
+                                 (= {:source-role :predecessor-predictions
+                                     :tick/id tick-id :candidate/id cid
+                                     :sha256 (get-in resolved [:predecessor-predictions :sha256])}
+                                    prediction-ref)
+                                 (= prediction (:prediction/input o))
+                                 (= (:observation/channels obs) (:observation/input o))
+                                 (= previous (:produced-at/tick-id p))
                                  (= (:action p) (:action o))
                                  (= (:action/model-revision p) (:action/model-revision o))
                                  (= revision (:action/model-revision p)))
                     (refuse! :e4/prediction-occurrence-mismatch
-                             {:tick/id tick-id :candidate/id cid}))))))))
+                             {:tick/id tick-id :candidate/id cid})))))))))
       {:status :verified-causal-route
        :scope (:scope authority)
        :scheduler-is-f-pi-operand? false
@@ -196,6 +242,8 @@
        :dispatch/id (:dispatch/id dispatch)
        :run/id run-id
        :tick/plan plan
+       :launch/uniqueness :witnessed-in-resolved-history
+       :r8-arithmetic-verified? false
        :source-pins (into {} (map (fn [[k v]] [k (:sha256 v)]) resolved))
        :restart-authorized false
        :production-edge-fired? (= :independently-retained-production (:scope authority))})))
