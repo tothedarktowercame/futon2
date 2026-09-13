@@ -897,17 +897,26 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-minimal-certificate-plan.request.json",
       "dispatch": "accepted",
       "scope": "convergence plan offline bounded preparation; no live run"
+    },
+    {
+      "packet": "codex-24-negative-certificate-bridge",
+      "job-id": "invoke-1789317305541-20746-c7f7105b",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789317305541-20746-c7f7105b",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-negative-certificate-bridge.request.json",
+      "dispatch": "accepted",
+      "scope": "Row24/25 isolated acquired typed census to existing Lean negative theorem, no live/emitter changes"
     }
   ],
   "current-awaiting": [
     "invoke-1789316853314-20739-fdf67bfd",
     "invoke-1789317125316-20741-fbc2431e",
-    "invoke-1789317126596-20742-9b6be75c"
+    "invoke-1789317305541-20746-c7f7105b"
   ],
   "codex24-next-boundary": {
     "status": "commissioned",
-    "job-id": "invoke-1789317126596-20742-9b6be75c",
-    "scope": "CONVERGENCE-PLAN-2026-09-13.md"
+    "job-id": "invoke-1789317305541-20746-c7f7105b",
+    "review": "cf5a5a81",
+    "closure-target": "Rows24/25 executable typed negative certificate bridge; no admission yet"
   },
   "codex22-next-boundary": {
     "status": "commissioned",

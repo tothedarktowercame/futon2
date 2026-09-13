@@ -454,3 +454,7 @@ Job20736 reviewed; four pins/raw gates checked without passing-suite rerun. Two 
 ## Joint convergence plan and paper exclusions
 
 See [plan of record](CONVERGENCE-PLAN-2026-09-13.md), including the named paper exclusion list. Row26 preparation pulled forward; real run restriction unresolved. Zero rows closed / zero new claims admitted; approximately six-day paper window, exact deadline unconfirmed.
+
+## F11 negative bridge review cf5a5a81
+
+Six source pins verified. Complete census may contain explicitly acquired typed gaps; existing theorem rejects full qualification without fabricated positive refinement evidence. New job20746 implements the isolated executable acquisition-to-Lean bridge. Missing universe/status acquisition still refuses. No production authority or row closure.
