@@ -2429,7 +2429,22 @@
                       {:outcome :grounded-no-change :implementation-id impl-id})))
     (substrate/put-doc! implementation opts)
     (substrate/put-doc! discharge opts)
-    (let [after (substrate/entity-by-id impl-id opts)]
+    ;; The substrate indexes asynchronously, so an immediate readback can
+    ;; miss a successful write: r5 attempt-001 (2026-09-13) grounded
+    ;; f9896cf6, the entity is durably present, but the instant readback saw
+    ;; nil and the witness reported {:resolved? false :dial-moved? false},
+    ;; refusing an actually-grounded repair.  Await visibility, bounded.
+    (let [after (loop [tries 0]
+                  (or (substrate/entity-by-id impl-id opts)
+                      (when (< tries 20)
+                        (Thread/sleep 500)
+                        (recur (inc tries)))))]
+      (when-not after
+        (throw (ex-info "Grounded implementation did not become visible"
+                        {:outcome :incomplete
+                         :failure-kind :grounding-not-visible
+                         :failure-stage :grounding
+                         :implementation-id impl-id})))
       {:before {:implementation-entity before}
        :after {:implementation-entity after}
        :resolved? (= commit (get-in after [:props :implementation/commit]))
