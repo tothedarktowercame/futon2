@@ -14,7 +14,8 @@
 
 (def ^:private required-roles
   [:capture-artifact :writer-inventory :complete-census :completeness-subject
-   :acquisition-boundary :review-commission :review-execution :review-artifact :acceptance])
+   :acquisition-boundary :review-commission :review-execution :review-artifact
+   :review-origin :acceptance])
 (def ^:private hex64 #"[0-9a-f]{64}")
 (defn- refuse! [kind data] (throw (ex-info (name kind) (assoc data :refusal kind))))
 (defn- sha256 [^bytes bs]
@@ -71,14 +72,24 @@
 (defn validate
   "Validate externally configured immutable completeness records. A positive
    isolated result proves the join mechanism only; production always refuses."
-  [{:keys [mode authority-root candidate/id target-application-id roles] :as config}]
-  (when-not (= #{:mode :authority-root :candidate/id :target-application-id :roles}
+  [{:keys [mode authority-root candidate/id target-application-id expected-review-origin roles]
+    :as config}]
+  (when-not (= #{:mode :authority-root :candidate/id :target-application-id
+                 :expected-review-origin :roles}
                (set (keys config)))
     (refuse! :e6b-completeness/config-schema-invalid {}))
   (when (= :production mode)
     (refuse! :e6b-completeness/production-authority-unavailable {}))
   (when-not (and (= :isolated-test mode) (nonblank? authority-root)
                  (nonblank? id) (nonblank? target-application-id)
+                 (= #{:origin/kind :origin/id :origin/owner
+                      :origin/provenance-review-sha256}
+                    (set (keys expected-review-origin)))
+                 (keyword? (:origin/kind expected-review-origin))
+                 (every? nonblank? ((juxt :origin/id :origin/owner)
+                                    expected-review-origin))
+                 (re-matches hex64 (:origin/provenance-review-sha256
+                                     expected-review-origin ""))
                  (= (set required-roles) (set (keys roles))))
     (refuse! :e6b-completeness/config-invalid {}))
   (let [resolved (into {} (map (fn [role] [role (resolve-role role (get roles role))]) required-roles))
@@ -128,6 +139,13 @@
                        #{:schema :scope :authority/root :reviewer/id :job/id :trace/id
                          :subject/raw-sha256 :boundary/id :outcome :reviewed-at}
                        (record :review-artifact))
+        origin (exact! :review-origin
+                       #{:schema :scope :authority/root :origin/kind :origin/id :origin/owner
+                         :origin/provenance-review-sha256 :reviewer/id :commission/id
+                         :commission/raw-sha256 :subject/raw-sha256 :job/id :trace/id
+                         :review-artifact/raw-sha256 :artifact/retained-at :terminal/status
+                         :finished-at}
+                       (record :review-origin))
         acceptance (exact! :acceptance
                            #{:schema :scope :authority/root :authority/owner :reviewer/id :job/id
                              :trace/id :commission/id :subject/raw-sha256
@@ -150,12 +168,13 @@
       (= [:wm/e6b-writer-inventory-v1 :wm/e6b-complete-census-v1
           :wm/e6b-acquisition-boundary-v1 :wm/e6b-completeness-subject-v1
           :wm/e6b-review-commission-v1 :wm/e6b-review-execution-v1
-          :wm/e6b-completeness-review-v1 :wm/e6b-completeness-acceptance-v1]
-         (mapv :schema [inventory census boundary subject commission execution review acceptance]))
+          :wm/e6b-completeness-review-v1 :wm/e6b-review-origin-v1
+          :wm/e6b-completeness-acceptance-v1]
+         (mapv :schema [inventory census boundary subject commission execution review origin acceptance]))
       (every? #(= mode (:scope %))
-              [inventory census boundary subject commission execution review acceptance])
+              [inventory census boundary subject commission execution review origin acceptance])
       (every? #(= authority-root (:authority/root %))
-              [inventory census boundary commission execution review acceptance])
+              [inventory census boundary commission execution review origin acceptance])
       (every? nonblank? [(:authority/owner inventory) (:authority/owner census)
                          (:owner/id boundary) (:authority/owner acceptance)
                          reviewer (:job/id execution) (:trace/id execution)
@@ -217,13 +236,25 @@
       (= (:commission/id commission) (:commission/id execution) (:commission/id acceptance))
       (= (:job/id execution) (:job/id review) (:job/id acceptance))
       (= (:trace/id execution) (:trace/id review) (:trace/id acceptance))
+      (= expected-review-origin
+         (select-keys origin [:origin/kind :origin/id :origin/owner
+                              :origin/provenance-review-sha256]))
+      (= reviewer (:reviewer/id origin))
+      (= (:commission/id commission) (:commission/id origin))
+      (= (pin :review-commission) (:commission/raw-sha256 origin))
+      (= subject-sha (:subject/raw-sha256 origin))
+      (= (:job/id execution) (:job/id origin))
+      (= (:trace/id execution) (:trace/id origin))
       (= (pin :review-artifact) (:review-artifact/raw-sha256 execution)
-         (:review-artifact/raw-sha256 acceptance))
-      (= :completed (:status execution)) (= :accepted (:outcome review) (:outcome acceptance))
+         (:review-artifact/raw-sha256 origin) (:review-artifact/raw-sha256 acceptance))
+      (= :completed (:status execution) (:terminal/status origin))
+      (= (:finished-at execution) (:finished-at origin))
+      (= :accepted (:outcome review) (:outcome acceptance))
       (<=time (:issued-at inventory) (:closed-at boundary) (:capture-started-at boundary)
               (:capture-finished-at boundary) (:issued-at commission)
-              (:started-at execution) (:finished-at execution)
-              (:reviewed-at review) (:accepted-at acceptance))
+              (:started-at execution) (:reviewed-at review)
+              (:artifact/retained-at origin) (:finished-at execution)
+              (:accepted-at acceptance))
       (= (:capture-finished-at boundary) (:acquired-at census))
       (= {:boundary/id (:boundary/id boundary)
           :owner/id (:owner/id boundary) :owner/generation (:owner/generation boundary)

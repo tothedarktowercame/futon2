@@ -93,7 +93,7 @@
                        :authority/root root :reviewer/id reviewer :job/id "review-job"
                        :trace/id "review-trace" :subject/raw-sha256 (:expected-sha256 subject)
                        :boundary/id boundary-id :outcome :accepted
-                       :reviewed-at "2026-09-13T01:07:00Z"}
+                       :reviewed-at "2026-09-13T01:06:00Z"}
         review (descriptor review-record)
         execution (descriptor {:schema :wm/e6b-review-execution-v1 :scope :isolated-test
                                :authority/root root :commission/id "commission-1"
@@ -101,7 +101,19 @@
                                :subject/raw-sha256 (:expected-sha256 subject)
                                :review-artifact/raw-sha256 (:expected-sha256 review)
                                :status :completed :started-at "2026-09-13T01:05:00Z"
-                               :finished-at "2026-09-13T01:06:00Z"})
+                               :finished-at "2026-09-13T01:08:00Z"})
+        origin-record {:schema :wm/e6b-review-origin-v1 :scope :isolated-test
+                       :authority/root root :origin/kind :synthetic-fixture-ledger
+                       :origin/id "fixture-review-origin" :origin/owner "fixture-host-owner"
+                       :origin/provenance-review-sha256 (apply str (repeat 64 "d"))
+                       :reviewer/id reviewer :commission/id "commission-1"
+                       :commission/raw-sha256 (:expected-sha256 commission)
+                       :subject/raw-sha256 (:expected-sha256 subject)
+                       :job/id "review-job" :trace/id "review-trace"
+                       :review-artifact/raw-sha256 (:expected-sha256 review)
+                       :artifact/retained-at "2026-09-13T01:07:00Z"
+                       :terminal/status :completed :finished-at "2026-09-13T01:08:00Z"}
+        origin (descriptor origin-record)
         acceptance (descriptor {:schema :wm/e6b-completeness-acceptance-v1
                                 :scope :isolated-test :authority/root root
                                 :authority/owner "fixture-acceptance-owner"
@@ -110,16 +122,27 @@
                                 :subject/raw-sha256 (:expected-sha256 subject)
                                 :review-artifact/raw-sha256 (:expected-sha256 review)
                                 :boundary/id boundary-id :outcome :accepted
-                                :accepted-at "2026-09-13T01:08:00Z"})
+                                :accepted-at "2026-09-13T01:09:00Z"})
         roles {:capture-artifact capture-pin :writer-inventory inventory :complete-census census
                :completeness-subject subject :acquisition-boundary boundary
                :review-commission commission :review-execution execution
-               :review-artifact review :acceptance acceptance}]
+               :review-artifact review :review-origin origin :acceptance acceptance}]
     {:store store :config {:mode :isolated-test :authority-root root :candidate/id candidate
-                           :target-application-id target :roles roles}}))
+                           :target-application-id target
+                           :expected-review-origin
+                           (select-keys origin-record [:origin/kind :origin/id :origin/owner
+                                                       :origin/provenance-review-sha256])
+                           :roles roles}}))
 (defn- replace-record [config role f]
   (assoc-in config [:roles role]
             (descriptor (f (:record (#'completeness/resolve-role role (get-in config [:roles role])))))))
+(defn- rebind-review-artifact [config review-f]
+  (let [reviewed (replace-record config :review-artifact review-f)
+        review-pin (get-in reviewed [:roles :review-artifact :expected-sha256])]
+    (reduce (fn [c role]
+              (replace-record c role
+                              (fn [x] (assoc x :review-artifact/raw-sha256 review-pin))))
+            reviewed [:review-execution :review-origin :acceptance])))
 
 (deftest synthetic-independent-role-mechanism-positive
   (let [{:keys [store config]} (fixture) result (completeness/validate config)]
@@ -186,6 +209,8 @@
         bad-bytes (byte-array [(unchecked-byte 0xc3) (byte 0x28)])]
     (is (= :e6b-completeness/config-invalid
            (refusal #(completeness/validate (update config :roles dissoc :acceptance)))))
+    (is (= :e6b-completeness/config-invalid
+           (refusal #(completeness/validate (update config :roles dissoc :review-origin)))))
     (is (= :e6b-completeness/invalid-edn
            (refusal #(completeness/validate
                       (assoc-in config [:roles :acceptance]
@@ -197,6 +222,55 @@
                         (assoc-in config [:roles :acceptance]
                                   {:bytes/base64 (.encodeToString (Base64/getEncoder) bs)
                                    :expected-sha256 (sha256 bs)}))))))
+    (store/release! store)))
+
+(deftest review-origin-and-chronology-controls
+  (let [{:keys [store config]} (fixture)]
+    (doseq [changed
+            [(replace-record config :review-origin
+                             (fn [x] (assoc x :commission/raw-sha256
+                                            (apply str (repeat 64 "f")))))
+             (replace-record config :review-origin
+                             (fn [x] (assoc x :artifact/retained-at
+                                            "2026-09-13T01:09:00Z")))
+             (rebind-review-artifact config
+                                     (fn [x] (assoc x :reviewed-at
+                                                    "2026-09-13T01:09:00Z")))
+             (replace-record config :review-origin
+                             (fn [x] (assoc x :scope :production)))
+             (assoc-in config [:expected-review-origin :origin/id] "borrowed-origin")]]
+      (is (= :e6b-completeness/authority-join-invalid
+             (refusal #(completeness/validate changed)))))
+    ;; Coherently rewrite review/execution/acceptance labels while leaving the
+    ;; independently configured origin unchanged: the origin join must refuse.
+    (let [reviewed (replace-record config :review-artifact
+                                  (fn [x] (assoc x :job/id "fake-job" :trace/id "fake-trace")))
+          review-pin (get-in reviewed [:roles :review-artifact :expected-sha256])
+          changed (reduce
+                   (fn [c role]
+                     (replace-record c role
+                                     (fn [x] (assoc x :job/id "fake-job" :trace/id "fake-trace"
+                                                    :review-artifact/raw-sha256 review-pin))))
+                   reviewed [:review-execution :acceptance])]
+      (is (= :e6b-completeness/authority-join-invalid
+             (refusal #(completeness/validate changed)))))
+    (store/release! store)))
+
+(deftest review-chronology-equality-boundary-is-valid
+  (let [{:keys [store config]} (fixture)
+        t "2026-09-13T01:07:00Z"
+        reviewed (replace-record config :review-artifact (fn [x] (assoc x :reviewed-at t)))
+        review-pin (get-in reviewed [:roles :review-artifact :expected-sha256])
+        executed (replace-record reviewed :review-execution
+                                 (fn [x] (assoc x :finished-at t
+                                                :review-artifact/raw-sha256 review-pin)))
+        originated (replace-record executed :review-origin
+                                   (fn [x] (assoc x :artifact/retained-at t :finished-at t
+                                                  :review-artifact/raw-sha256 review-pin)))
+        accepted (replace-record originated :acceptance
+                                 (fn [x] (assoc x :accepted-at t
+                                                :review-artifact/raw-sha256 review-pin)))]
+    (is (= :join-mechanism-validated (:status (completeness/validate accepted))))
     (store/release! store)))
 
 (defn- rebind-subject [config changes]
