@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest E6b61db346f/8d5c1550 five pins/raw10tests76 accepted isolated replay only: verified E3 review/admission < authorization <= enactment now joined. Live storage/authority remain open; separate store/ledger protocol next. See [acceptance](runs/row-22-e6b-feedback-2026-09-13/authorization-time-gates/lead-acceptance.md).
+
 - Latest E6b relation078b8be9/39e0f51b six pins/raw7tests41 reviewed. Executed baseline enacts04:15 before canonical authorization12:00 yet replays. Authorization-to-enactment join still required; lead terminal fix independently reviewed. See [review](runs/row-22-e6b-feedback-2026-09-13/lead-relation-review.md).
 
 - Latest semantic alternatives5af92246 eight pins reviewed, analysis-only. Policy-prior option B remains unadopted under standing no-prior-change constraint; identity regression clarified for normalization constants. E6a semantic decision remains open, codex22 idle. See [review](runs/row-22-e5-e6-semantic-integration-2026-09-13/lead-review.md).

@@ -1,0 +1,27 @@
+[
+  {
+    "path": "src/futon2/aif/machine_pre_enact_authorization.clj",
+    "sha256": "60d0187c34f12c70376a4aabe714ac71f87c1d1d1d3685e6bbbf69d934469260",
+    "matches_final_subject": true
+  },
+  {
+    "path": "src/futon2/aif/machine_slow_feedback_evidence.clj",
+    "sha256": "884c981b9c30af326ae674492a3ca84e2c628523b814b6ae584ad555282669ab",
+    "matches_final_subject": true
+  },
+  {
+    "path": "test/futon2/aif/machine_pre_enact_authorization_test.clj",
+    "sha256": "50558cf363717c53cfb818a6db9d77814a8beb732e41549a2c66f478f7b45a12",
+    "matches_final_subject": true
+  },
+  {
+    "path": "test/futon2/aif/machine_slow_feedback_evidence_test.clj",
+    "sha256": "ff0634310d58c4a463010513e502bb942ba57569fe6815a97a1b1d1efdb0b5b0",
+    "matches_final_subject": true
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/SPEC.md",
+    "sha256": "9b174dfa060eb935b3bdc28a239fbabec9f13496dc4cae0e69c29be52936dd11",
+    "matches_final_subject": true
+  }
+]
