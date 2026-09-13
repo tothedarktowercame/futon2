@@ -1,5 +1,6 @@
 (ns futon2.aif.interoceptive-manifest-test
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.interoceptive-commitment :as commitment]
             [futon2.aif.interoceptive-manifest :as manifest]
             [futon2.aif.interoceptive-store-lock :as store-lock]
             [futon2.aif.repair-obligation :as repair]
@@ -136,7 +137,14 @@
     (is (= :awaiting-validation (:repair/status implementation)))
     (is (= :resolved (:repair/status resolution)))
     (is (= 1 (get-in (manifest/test-snapshot (.getPath trips) (.getPath repairs))
-                     [:snapshot :machine-confidence])))))
+                     [:snapshot :machine-confidence])))
+    (let [input (:constructor-input
+                 (manifest/capture (.getPath trips) (.getPath repairs) :test))
+          production-input (-> input
+                               (assoc-in [:trip-authority :authority-class] :production)
+                               (assoc-in [:repair-authority :authority-class] :production))]
+      (is (= 1 (:machine-confidence
+                (commitment/confidence-snapshot production-input)))))))
 
 (deftest symlink-and-participation-refusals
   (let [[trips repair-root] (roots)
