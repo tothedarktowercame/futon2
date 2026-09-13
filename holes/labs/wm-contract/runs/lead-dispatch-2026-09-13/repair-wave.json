@@ -201,11 +201,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-retention-deployment-preparation.request.json",
       "dispatch": "accepted",
       "scope": "prepare exact serving retention deployment and verification; no live mutation"
+    },
+    {
+      "packet": "codex-24-measured-a-state-authority",
+      "job-id": "invoke-1789268910077-20598-8865d1b8",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789268910077-20598-8865d1b8",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-measured-a-state-authority.request.json",
+      "dispatch": "accepted",
+      "scope": "measured categorical variable and observed-authority specification; no counts/admission"
     }
   ],
   "current-awaiting": [
     "invoke-1789268785971-20597-9cdd4852",
     "invoke-1789268617553-20595-0ab8e81f",
-    "invoke-1789268523667-20593-7f23f6ff"
+    "invoke-1789268910077-20598-8865d1b8"
   ]
 }
