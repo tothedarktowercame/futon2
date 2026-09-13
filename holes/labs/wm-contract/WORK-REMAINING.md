@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest completeness audit35981f16/a92540b6/1a7aa894 four audit pins+two lead pins verified, independent14999ca7 correction accepted narrowly. Raw two controls confirm review-after-terminal accepted and coherent unresolved job/trace labels accepted. Tenth configured origin plus retained-artifact chronology repair next; no real authority. See [review](runs/row-22-e6b-completeness-authority-audit-2026-09-13/lead-review.md).
+
 - Latest completeness d2b45b0c/ad16a57c six pins/raw9tests49 reviewed; coherent subject store/generation rewrite accepted under unchanged capture. Lead exact equality repair passes10tests51+kondo/parens. Independent correction review and acquisition/review-origin chronology audit next; no real completeness authority. See [review](runs/row-22-e6b-completeness-validator-2026-09-13/lead-review/review.md).
 
 - Latest completeness contract4e433fe9/c37d0ec8 nine dependency pins/retained parse reviewed design-only. Next pure rejecting validator must recompute projection and resolve separately pinned acquisition/writer census, exact schemas/origins/times; no candidate completeness flags, no production acceptance or verifier invocation. See [review](runs/row-22-e6b-external-completeness-contract-2026-09-13/lead-review.md).

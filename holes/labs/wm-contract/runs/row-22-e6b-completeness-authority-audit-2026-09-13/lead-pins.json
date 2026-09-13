@@ -1,0 +1,27 @@
+{
+  "pins": [
+    {
+      "path": "src/futon2/aif/machine_slow_feedback_completeness.clj",
+      "sha256": "0c9f94a791f45348b75c54748f71c505ec0c024af585ad51c0e30480acdc0571",
+      "match": true
+    },
+    {
+      "path": "test/futon2/aif/machine_slow_feedback_completeness_test.clj",
+      "sha256": "d5325d94fb3f154fe3804f8ca400480849389d32a0bb38be956f70bbc099d750",
+      "match": true
+    },
+    {
+      "path": "holes/labs/wm-contract/CONTRACT-e6b-external-completeness-v1-2026-09-13.md",
+      "sha256": "1d959c2859f9a5fd0b602dda510b464e5221d89fe9a95877a0eee5a294be9a93",
+      "match": true
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/row-22-e6b-completeness-authority-audit-2026-09-13/audit-controls.clj",
+      "sha256": "122abd3974f45cbd68c4a1ad668022bf0b6f5599105dcf3817666bcaf831baf4",
+      "match": true
+    }
+  ],
+  "lead-correction-pins-verified": 2,
+  "job": "invoke-1789287133511-20730-975351f2",
+  "state": "done"
+}
