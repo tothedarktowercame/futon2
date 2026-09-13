@@ -1,0 +1,8 @@
+Read-only inspection only:
+rg -n "derive-certificate|derive_certificate|fixture-certificate|CertificateStates|FullCertificate|qualifyingRun|FullAttestation|lean" holes/labs/wm-contract -g '*.bb' -g '*.clj' -g '*.md'
+find holes/labs/wm-contract -maxdepth 3 -type f for certificate/Lean emitters
+rg -n "FullAttestation|CensusComplete|FullQualifyingRun|CertificateStates" . -g '*.bb' -g '*.clj' --glob '!runs/**'
+sha256sum named producer, control, authority-reader and Lean endpoint sources
+git rev-parse HEAD in futon2 and mathlib4
+
+No tests, emitter, Lean compiler, full-loop, runtime, or certificate generation ran.
