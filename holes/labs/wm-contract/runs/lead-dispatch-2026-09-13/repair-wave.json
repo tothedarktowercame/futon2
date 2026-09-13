@@ -505,11 +505,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-23-e6-forward-feedback-contract.request.json",
       "dispatch": "accepted",
       "scope": "E6 forward/feedback contract and read-only seams; no runtime"
+    },
+    {
+      "packet": "codex-24-authority-buffer-reader",
+      "job-id": "invoke-1789275396053-20646-184767dd",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789275396053-20646-184767dd",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-authority-buffer-reader.request.json",
+      "dispatch": "accepted",
+      "scope": "independent lead-doc review and isolated retained-buffer reader; no emitter edits"
     }
   ],
   "current-awaiting": [
     "invoke-1789275223688-20644-cfeb3e3a",
-    "invoke-1789275137982-20641-f684332b"
+    "invoke-1789275396053-20646-184767dd"
   ],
   "codex22-next-boundary": {
     "status": "awaiting-reviewed-e6-contract",
