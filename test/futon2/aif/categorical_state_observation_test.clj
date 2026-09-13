@@ -1,10 +1,10 @@
 (ns futon2.aif.categorical-state-observation-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is]]
             [futon2.aif.categorical-state-observation :as sut])
   (:import (java.nio.charset StandardCharsets)
            (java.nio.file Files)))
 
-(defn bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
+(defn edn-bytes [x] (.getBytes (pr-str x) StandardCharsets/UTF_8))
 (defn pointer [path bs] {:path (str path) :sha256 (sut/sha256-bytes bs)})
 
 (defn base-observation [evidence-pointer]
@@ -41,13 +41,13 @@
 
 (defn fixture []
   (let [dir (Files/createTempDirectory "categorical-state-test" (make-array java.nio.file.attribute.FileAttribute 0))
-        evidence-path (.resolve dir "evidence.edn") evidence-bytes (bytes {:fact :support-gained})
+        evidence-path (.resolve dir "evidence.edn") evidence-bytes (edn-bytes {:fact :support-gained})
         observation (base-observation (pointer evidence-path evidence-bytes))
         observer-path (.resolve dir "observer.edn")
-        observer-bytes (bytes {:schema sut/authority-schema
+        observer-bytes (edn-bytes {:schema sut/authority-schema
                                :role :categorical-state-observer
                                :principal/id "observer/test-a"})
-        review-path (.resolve dir "review.edn") review-bytes (bytes (review-for observation "observer/test-a"))]
+        review-path (.resolve dir "review.edn") review-bytes (edn-bytes (review-for observation "observer/test-a"))]
     (Files/write evidence-path evidence-bytes (make-array java.nio.file.OpenOption 0))
     (Files/write observer-path observer-bytes (make-array java.nio.file.OpenOption 0))
     (Files/write review-path review-bytes (make-array java.nio.file.OpenOption 0))
@@ -109,7 +109,7 @@
                                     (if (= kind :review)
                                       (let [record (assoc (review-for observation "observer/test-a")
                                                           :reviewer/id "observer/test-a")
-                                            bs (bytes record)
+                                            bs (edn-bytes record)
                                             path (Files/createTempFile "self-review" ".edn"
                                                                        (make-array java.nio.file.attribute.FileAttribute 0))]
                                         (Files/write path bs (make-array java.nio.file.OpenOption 0))
@@ -124,7 +124,7 @@
                                     (let [record {:schema sut/authority-schema
                                                   :role :categorical-state-observer
                                                   :principal/id "observer/other"}
-                                          bs (bytes record)
+                                          bs (edn-bytes record)
                                           path (Files/createTempFile "other-observer" ".edn"
                                                                      (make-array java.nio.file.attribute.FileAttribute 0))]
                                       (Files/write path bs (make-array java.nio.file.OpenOption 0))
@@ -161,7 +161,7 @@
                       authority))))))
 
 (deftest strict-source-and-mutation-controls-test
-  (let [good (bytes {:a 1})
+  (let [good (edn-bytes {:a 1})
         bad-utf8 (byte-array [(unchecked-byte 0xc3) (unchecked-byte 0x28)])
         ptr {:path "virtual" :sha256 (sut/sha256-bytes bad-utf8)}]
     (is (= :invalid-utf8
@@ -176,7 +176,7 @@
              (refusal #(sut/read-pinned-form!
                         {:path "virtual" :sha256 (sut/sha256-bytes good)}
                         {:read-bytes (fn [_]
-                                       (if (= 1 (swap! calls inc)) good (bytes {:a 2})))})))))))
+                                       (if (= 1 (swap! calls inc)) good (edn-bytes {:a 2})))})))))))
 
 (deftest exact-identity-and-conflict-controls-test
   (let [{:keys [observation authority]} (fixture)]
@@ -197,7 +197,7 @@
                     (assoc-in [:rubric :assertions] [:framing-sharpened])
                     (assoc-in [:authority :review/ref] :authority/review-b))
           dir (Files/createTempDirectory "categorical-conflict" (make-array java.nio.file.attribute.FileAttribute 0))
-          path (.resolve dir "review.edn") bs (bytes (review-for other "observer/test-a"))
+          path (.resolve dir "review.edn") bs (edn-bytes (review-for other "observer/test-a"))
           _ (Files/write path bs (make-array java.nio.file.OpenOption 0))
           resolve0 (:resolver authority)
           authority2 (assoc authority :resolver
