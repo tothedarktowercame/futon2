@@ -1,0 +1,24 @@
+{:schema :wm/execution-receipts-v1
+ :source-commit "cbbee14e782fc13e1bc70ae202c0f1f440c1c983"
+ :tree-sha "cbbee14e782fc13e1bc70ae202c0f1f440c1c983"
+ :at "2026-09-13T06:22:05Z"
+ :pins
+ {:source "80851f99189695643a730e16088862fa20c6b80f4eb699fdc72aabb0038ae965"
+  :test "ebbedaf54cfbeb083d88ce18df7d2ddbcb63d7b399d8fabb3910eaa3cb402e90"
+  :prospective-verifier "83dbdfc91149df8cb21674720ab683ddf61b1a2492f59e195941298100be3500"
+  :contract "e3d6e14895d297584a204b4f26e1e9c91a2e63fb1bc0d6d54b819ece4ff608de"}
+ :gates
+ [{:gate :focused-test
+   :command "clojure -X:test :nses '[futon2.aif.machine-slow-state-carrier-test futon2.aif.machine-slow-feedback-evidence-test]'"
+   :exit 0 :tests 18 :assertions 98 :failures 0 :errors 0
+   :stdout "test.stdout" :stderr "test.stderr"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/machine_slow_state_carrier.clj test/futon2/aif/machine_slow_state_carrier_test.clj"
+   :exit 0 :errors 0 :warnings 0 :stdout "kondo.stdout" :stderr "kondo.stderr"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/machine_slow_state_carrier.clj test/futon2/aif/machine_slow_state_carrier_test.clj"
+   :exit 0 :stdout "parens.stdout" :stderr "parens.stderr"}
+  {:gate :induced-failure
+   :command "clojure -M -e '(require (quote clojure.test)) (let [c (ref clojure.test/*initial-report-counters*) v (with-meta (fn [] nil) {:test (fn [] (clojure.test/is false \"induced carrier subject gate failure\")) :name (quote induced-carrier-subject-failure) :ns *ns*})] (binding [clojure.test/*report-counters* c] (clojure.test/test-vars [v])) (System/exit (if (zero? (+ (:fail @c) (:error @c))) 0 1)))'"
+   :exit 1 :tests 1 :assertions 1 :failures 1
+   :stdout "induced.stdout" :stderr "induced.stderr"}]}
