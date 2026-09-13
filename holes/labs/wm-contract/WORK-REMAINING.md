@@ -174,6 +174,12 @@ is not yet a verified join to Agency's normalized request digest.
   open->resolved, but physical live coherence is not established by reader lock
   alone. See coherent-snapshot/lead-review.md. No admission.
 
+- Row19 authority binding `futon3c/03f34fa0`, receipts `0bfa996a`: four
+  pins and retained15-pass gates verified. Earlier genesis joins repaired at
+  injected-resolver scope. Successor acceptance still omits kind/predecessor;
+  real authority adapters remain owed. See authority-binding/lead-review.md.
+  No production root authentication or admission.
+
 ### Second snapshot review and beta specification review — 2026-09-13
 
 - Row 18 snapshot repair `917986cc..9997e39d`: lead verified constructor,
