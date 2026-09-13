@@ -1,5 +1,7 @@
 # The work remaining — the single execution authority
 
+- Latest independent3cd0de95 accepts lead79c957a2 isolated revision identity; two current pins match, retained14tests39 gates consumed without rerun. Composition remains open: existing verify-feedback requires an already committed application, so cannot authorize its own first commit. Pre/postcommit contract next, no synthetic committed authority. See [boundary](runs/row-22-e6b-store-protocol-2026-09-13/schema-gates/lead-composition-boundary.md).
+
 - Latest store77adef59/7566bb79 six pins/raw13tests36 verified; HEAD/payload/chain repairs hold. Executed repeated revision commits then prevents continuation. Lead rejects historical destination revisions at publication and recovery; changed-source14tests39/kondo/parens pass, independent review next. See [review](runs/row-22-e6b-store-protocol-2026-09-13/schema-gates/lead-review.md).
 
 - Latest isolated store b97186c0/6e526b66 five pins/raw10tests27 reviewed. Executed HEAD/state mismatch still captures consistent, and unreadable application publishes successfully then fails recovery. Common strict publication/recovery schemas and complete chain joins required; no production acceptance. See [review](runs/row-22-e6b-store-protocol-2026-09-13/lead-store-review.md).

@@ -1,0 +1,14 @@
+{
+  "review-commit": "3cd0de95",
+  "pins": {
+    "src/futon2/aif/machine_slow_feedback_store.clj": {
+      "sha256": "d9ee5f848419567e41f328a6b9fe14951f2568efcff4ee2dccbcac87a6bcd1fd",
+      "expected": "d9ee5f848419567e41f328a6b9fe14951f2568efcff4ee2dccbcac87a6bcd1fd"
+    },
+    "test/futon2/aif/machine_slow_feedback_store_test.clj": {
+      "sha256": "10dd42bd1162ee2e1ddd75a131defd4d89a9ea799e52dc2101bec800cfe2175b",
+      "expected": "10dd42bd1162ee2e1ddd75a131defd4d89a9ea799e52dc2101bec800cfe2175b"
+    }
+  },
+  "passing-checks-rerun": false
+}
