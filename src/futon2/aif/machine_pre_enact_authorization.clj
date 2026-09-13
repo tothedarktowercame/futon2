@@ -96,8 +96,8 @@
         exact-subject-keys #{:candidate/occurrence-id :action :construction :field-pins
                             :producer/id :claim/id :artifact/ref :trace/id}]
     (when-not (and (= :isolated-test (:scope pending))
-                   (every? nonblank? ((juxt :model/id :model/revision :run/id
-                                           :cohort/id :event/id) pending))
+                   (or (keyword? (:model/id pending)) (nonblank? (:model/id pending)))
+                   (every? nonblank? ((juxt :model/revision :run/id :cohort/id :event/id) pending))
                    (nat-int? (:tick/index pending))
                    (= exact-subject-keys (set (keys subject)))
                    (valid-subject? subject))
