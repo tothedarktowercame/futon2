@@ -329,11 +329,19 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-e2a-portfolio-restriction.request.json",
       "dispatch": "accepted",
       "scope": "independent lead touch-up review and pure E2a portfolio restriction; no runtime wiring"
+    },
+    {
+      "packet": "codex-24-full-predicate-rejections",
+      "job-id": "invoke-1789271626448-20619-d2157ce9",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789271626448-20619-d2157ce9",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-full-predicate-rejections.request.json",
+      "dispatch": "accepted",
+      "scope": "additive full qualifying predicate rejection precursor; no certification or live run"
     }
   ],
   "current-awaiting": [
     "invoke-1789271308775-20617-e4c52270",
     "invoke-1789271480848-20618-2dfdb941",
-    "invoke-1789271039934-20615-eb6ce892"
+    "invoke-1789271626448-20619-d2157ce9"
   ]
 }
