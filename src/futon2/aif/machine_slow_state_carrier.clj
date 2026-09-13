@@ -182,6 +182,89 @@
                                      :canonical/field-subject) context)))
     (refuse! :e6b-carrier/context-invalid {})))
 
+(defn- outcome-subject [outcome]
+  (select-keys outcome
+               [:model/id :model/revision :run/id :tick/index
+                :candidate/occurrence-id :action :fast/action-class
+                :terminal/status :terminal/at :fast/witnessed? :fast/succeeded?
+                :outcome/evidence-id :outcome/producer-id]))
+
+(defn- validate-source-subjects! [sources context proposal]
+  (let [e2b (get-in sources [:e2b-subject :record])
+        outcome (get-in sources [:outcome :record])
+        relation (get-in sources [:lifecycle-relation :record])
+        review (get-in sources [:outcome-review :record])
+        artifact (get-in sources [:outcome-review-artifact :record])
+        common (select-keys context [:model/id :model/revision :run/id :tick/index])
+        out-subject (outcome-subject outcome)
+        relation-subject (:subject relation)]
+    (exact-keys! :e2b-subject
+                 #{:schema/version :scope :model/id :model/revision :run/id :tick/index
+                   :candidate/occurrence-id :action :fast/action-class
+                   :canonical/e3-digest :canonical/e2b-digest} e2b)
+    (exact-keys! :outcome
+                 #{:schema/version :scope :model/id :model/revision :run/id :tick/index
+                   :candidate/occurrence-id :action :terminal/status :fast/action-class
+                   :terminal/at :fast/witnessed? :fast/succeeded? :outcome/evidence-id
+                   :outcome/authority-ref :outcome/producer-id :outcome/reviewer-id} outcome)
+    (exact-keys! :lifecycle-relation
+                 #{:schema/version :scope :relation/id :relation/type :subject
+                   :enactment/at :observer/origin :observer/authority-ref
+                   :observer/subject} relation)
+    (exact-keys! :lifecycle-subject
+                 #{:e3/context :e2b/context :field/subject :e3/time :e3/digest
+                   :e2b/digest :candidate/occurrence-id :action :fast/action-class}
+                 relation-subject)
+    (exact-keys! :observer-subject
+                 #{:observer/id :observer/origin :observer/authority-ref :outcome/subject}
+                 (:observer/subject relation))
+    (exact-keys! :outcome-review
+                 #{:schema/version :scope :review/outcome :subject :reviewer/id :review/id
+                   :observer/id :reviewed-at :review/artifact-sha256} review)
+    (exact-keys! :outcome-review-artifact
+                 #{:schema/version :scope :subject :review/id :reviewer/id :observer/id
+                   :reviewed-at :executed?} artifact)
+    (when-not
+     (and (= common (select-keys e2b [:model/id :model/revision :run/id :tick/index]))
+          (= common (select-keys outcome [:model/id :model/revision :run/id :tick/index]))
+          (= :wm/e6b-e2b-subject-v1 (:schema/version e2b))
+          (= :wm/e6b-outcome-authority-v1 (:schema/version outcome))
+          (= :wm/e6b-lifecycle-relation-v1 (:schema/version relation))
+          (= :wm/e6b-outcome-review-v1 (:schema/version review))
+          (= :wm/e6b-outcome-review-artifact-v1 (:schema/version artifact))
+          (every? #(= :isolated-test (:scope %)) [e2b outcome relation review artifact])
+          (= :e3-authorizes-e2b-enactment (:relation/type relation))
+          (nonblank? (:relation/id relation))
+          (= (:canonical/e3-context context) (:e3/context relation-subject))
+          (= (:canonical/e2b-context context) (:e2b/context relation-subject))
+          (= (:canonical/field-subject context) (:field/subject relation-subject))
+          (= (:canonical/e3-digest e2b) (:e3/digest relation-subject)
+             (get-in proposal [:canonical/digests :e3]))
+          (= (:canonical/e2b-digest e2b) (:e2b/digest relation-subject)
+             (get-in proposal [:canonical/digests :e2b]))
+          (= (:candidate/occurrence-id context) (:candidate/occurrence-id relation-subject))
+          (= (:action context) (:action relation-subject))
+          (= (:fast/action-class context) (:fast/action-class relation-subject))
+          (map? (:e3/time relation-subject))
+          (instant? (:enactment/at relation))
+          (instant? (:terminal/at outcome))
+          (instant? (:reviewed-at review))
+          (= out-subject (:subject review) (:subject artifact)
+             (get-in relation [:observer/subject :outcome/subject]))
+          (= (:review/id review) (:review/id artifact) (:outcome/authority-ref outcome))
+          (= (:reviewer/id review) (:reviewer/id artifact) (:outcome/reviewer-id outcome))
+          (= (:observer/id review) (:observer/id artifact)
+             (get-in relation [:observer/subject :observer/id]))
+          (= (:reviewed-at review) (:reviewed-at artifact))
+          (= (:observer/origin relation)
+             (get-in relation [:observer/subject :observer/origin]))
+          (= (:observer/authority-ref relation)
+             (get-in relation [:observer/subject :observer/authority-ref]))
+          (= (:review/artifact-sha256 review)
+             (get-in proposal [:source/digests :outcome-review-artifact]))
+          (= :accepted (:review/outcome review)) (true? (:executed? artifact)))
+      (refuse! :e6b-carrier/source-subject-mismatch {}))))
+
 (defn- validate-structural-joins! [proposal sources prior next]
   (let [context (get-in sources [:context :record])
         subject (:transition/subject proposal)
@@ -192,6 +275,7 @@
         update (:update feedback)
         cls (:fast/action-class context)]
     (valid-context! context)
+    (validate-source-subjects! sources context proposal)
     (when-not (and
                (= identity {:model/id (:model/id context)
                             :model/revision (:model/revision context)

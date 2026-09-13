@@ -1,5 +1,6 @@
 (ns futon2.aif.machine-slow-state-carrier-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-slow-feedback-evidence :as evidence]
             [futon2.aif.machine-slow-feedback-evidence-test :as et]
@@ -144,6 +145,32 @@
             :e6b-carrier/transition-subject-mismatch]]]
     (testing (name label)
       (is (= expected (refusal (mutate (bundle))))))))
+
+(deftest decoded-source-identities-and-subjects-are-exactly-joined
+  (doseq [[label role edit]
+          [[:borrowed-e2b-run :e2b-subject #(assoc % :run/id "borrowed")]
+           [:borrowed-outcome-run :outcome #(assoc % :run/id "borrowed")]
+           [:mutated-lifecycle-subject :lifecycle-relation
+            #(assoc-in % [:subject :candidate/occurrence-id] "borrowed")]
+           [:mutated-review-subject :outcome-review
+            #(assoc-in % [:subject :run/id] "borrowed")]
+           [:mutated-artifact-subject :outcome-review-artifact
+            #(assoc-in % [:subject :run/id] "borrowed")]]]
+    (testing (name label)
+      (let [b (bundle)
+            record (edit (edn/read-string
+                          (String. (.decode (Base64/getDecoder)
+                                            (get-in b [:original-sources role :bytes/base64]))
+                                   "UTF-8")))]
+        (is (= :e6b-carrier/source-subject-mismatch
+               (refusal (replace-source b role record))))))))
+
+(deftest distinct-e3-and-e2b-lifecycle-identities-remain-valid
+  (let [out (carrier/project-transition (bundle))
+        relation (get-in out [:original-sources :lifecycle-relation :record :subject])]
+    (is (not= (get-in relation [:e3/context :event/id])
+              (get-in relation [:e2b/context :event/id])))
+    (is (= :structurally-projected (:status out)))))
 
 (deftest prior-and-next-cannot-borrow-another-run
   (let [b (bundle)
