@@ -921,12 +921,20 @@
       "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-24-typed-gap-generator.request.json",
       "dispatch": "accepted",
       "scope": "one executable isolated typed-gap Lean generator, acquisition remains external"
+    },
+    {
+      "packet": "codex-22-row26-status-and-run-preflight",
+      "job-id": "invoke-1789317792036-20755-10d84dd0",
+      "status-url": "/api/alpha/invoke/jobs/invoke-1789317792036-20755-10d84dd0",
+      "request": "holes/labs/wm-contract/runs/lead-dispatch-2026-09-13/codex-22-row26-status-and-run-preflight.request.json",
+      "dispatch": "accepted",
+      "scope": "Row26 client integrity/bounds and concrete read-only run preflight; no click"
     }
   ],
   "current-awaiting": [
-    "invoke-1789317125316-20741-fbc2431e",
     "invoke-1789317564390-20750-04477de9",
-    "invoke-1789317645010-20751-e5949e94"
+    "invoke-1789317645010-20751-e5949e94",
+    "invoke-1789317792036-20755-10d84dd0"
   ],
   "codex24-next-boundary": {
     "status": "commissioned-after-incomplete",
@@ -937,8 +945,9 @@
   },
   "codex22-next-boundary": {
     "status": "commissioned",
-    "job-id": "invoke-1789317125316-20741-fbc2431e",
-    "scope": "CONVERGENCE-PLAN-2026-09-13.md"
+    "job-id": "invoke-1789317792036-20755-10d84dd0",
+    "review": "fdf14c43",
+    "closure-target": "Row26 reviewed bounded machinery-test entrypoint"
   },
   "codex23-next-boundary": {
     "status": "commissioned",
