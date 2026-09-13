@@ -1,0 +1,8 @@
+{:schema :wm/execution-receipt-supersession-v1
+ :at "2026-09-13T02:06:49Z"
+ :review "../lead-review.md"
+ :supersedes "../execution-receipts.edn"
+ :reason [:archive-inside-hot-ledger :archived-id-reuse]
+ :replacement "execution-receipts.edn"
+ :retained-still-valid [:failure-sensitive-runner :check-parens-entrypoint]
+ :anchor-created? false}

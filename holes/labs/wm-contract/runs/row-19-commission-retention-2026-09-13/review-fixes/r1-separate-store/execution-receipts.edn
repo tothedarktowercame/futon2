@@ -1,0 +1,41 @@
+{:schema :wm/execution-receipts-v1
+ :subject :row-19-separate-commission-archive-review-fix
+ :at "2026-09-13T02:06:49Z"
+ :source {:repo "futon3c"
+          :tree-sha "2e4ed7efecc547897345517396de5d0bc246bbd7"
+          :http-source-sha256 "f367792e4d34702641a81a8c625fcd41ff4ee2a5a3d3d45f052f8fc32165d258"
+          :test-source-sha256 "d3f43ad62809e5e7d5029af73d9bd7ae5557558c58372eb615f1285d596acaec"
+          :runner-sha256 "7b835c2ddea540f85aaf7cd7bef721e3ccfc48c94e0bd3b70d15fabbd769864b"}
+ :receipts
+ [{:gate :focused-test
+   :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"scripts\" \"dev\"]}' -M -m row19-commission-retention-test"
+   :exit 0 :tests 1 :assertions 14 :failures 0 :errors 0
+   :tree-sha "2e4ed7efecc547897345517396de5d0bc246bbd7"
+   :transcript "positive-test.raw.txt"}
+  {:gate :induced-runner-failure
+   :command "clojure -Sdeps '{:paths [\"src\" \"resources\" \"library\" \"test\" \"scripts\" \"dev\"]}' -M -m row19-commission-retention-test --induced-failure"
+   :exit 1 :expected-exit 1 :tests 1 :assertions 15 :failures 1 :errors 0
+   :tree-sha "2e4ed7efecc547897345517396de5d0bc246bbd7"
+   :transcript "induced-failure.raw.txt"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon3c/transport/http.clj test/futon3c/transport/http_test.clj scripts/row19_commission_retention_test.clj"
+   :exit 0 :tests 3 :assertions 3
+   :tree-sha "2e4ed7efecc547897345517396de5d0bc246bbd7"
+   :transcript "clj-kondo.raw.txt"}
+  {:gate :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon3c/transport/http.clj test/futon3c/transport/http_test.clj scripts/row19_commission_retention_test.clj"
+   :exit 0 :tests 3 :assertions 3
+   :tree-sha "2e4ed7efecc547897345517396de5d0bc246bbd7"
+   :transcript "check-parens.raw.txt"}]
+ :controls {:archive-persist-failure-preserves-hot :passed
+            :idempotent-archive-retry :passed
+            :multiple-jobs-sentinel-distinct :passed
+            :restart-after-seven-days :passed
+            :hot-ledger-excludes-archive-bodies :passed
+            :archived-id-reuse-refuses :passed
+            :hot-archive-disagreement-refuses :passed
+            :missing-archive-refuses :passed
+            :tampered-archive-refuses :passed}
+ :scope {:archive-store :separate-keyed-files
+         :hot-expiry-unchanged? true
+         :anchor-created? false}}
