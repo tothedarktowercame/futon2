@@ -1,0 +1,2 @@
+test/futon2/aif/full_loop_runner_test.clj:4692:27: warning: unused binding binding
+linting took 126ms, errors: 0, warnings: 1
