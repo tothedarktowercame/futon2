@@ -1,0 +1,8 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-52-v1,
+ :attempt/id "attempt-001",
+ :attempt/ordinal 1,
+ :event/sequence 5,
+ :checkpoint/type :build,
+ :recorded-at "2026-09-14T19:51:16.628554202Z",
+ :payload {:sorry {:kind :not-reached-build}}}

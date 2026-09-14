@@ -1,0 +1,13 @@
+{:schema :wm/limb-receipt-v1,
+ :stdout-sha256
+ "14fcc08ea0c5882a499d730752f107743958bf37715bb1d3182ed5a5c0e145c7",
+ :stderr-sha256
+ "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ :exit 0,
+ :stdout-file "limb1.stdout",
+ :repair/id
+ "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-002-artifact-binding-mismatch",
+ :stderr-file "limb1.stderr",
+ :command "git -C /home/joe/code/futon2 rev-parse HEAD",
+ :recorded-at "2026-09-14T19:50:12Z",
+ :limb :distinct-repair-commit}
