@@ -1,33 +1,39 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~21:55Z (after Joe's visibility request)
+Updated: 2026-09-14 ~22:15Z (containment accepted; attempt-002 firing)
 
 ## IN FLIGHT
-- **close-containment packet** — codex-24, job `invoke-1789421829469-20865-d22954a6` (running),
-  park `park-e5c5c784`, deadline ≈22:20Z. Goal: a close-time refusal writes a typed 007
-  instead of orphaning the attempt (the cohort-53 attempt-001 crash).
-- Loop fallback wakeup armed for 22:03Z; the park bellback is the primary wake.
+- **cohort-53 attempt-002 measured click** — fires as this tick's last action, with
+  worker-only casting (author zai-5, reviewer codex-22, repair-reviewer codex-24)
+  per Joe's role instruction + CASTING-AMENDMENT-2026-09-14.md. Loop fallback
+  wakeup ≈25 min; the run writes cells under
+  `data/wm-full-loop-machinery-53/.../attempt-002/`.
 
 ## DONE (this sitting, newest first)
-- Role change (Joe): claude-15 leaves the loop cast; worker seats only. Memory recorded.
-- Pair-companion admission ACCEPTED: codex-24 `2ed49ee5` + receipt `714d9dd8`, acceptance `286d5967`.
-- Stale-claim freshness fix (in-lane, from the loop reviewer's finding): `94ce60fe`.
-- Diagnosis: cohort-53 attempt-001 close crashed on companion admission; attempt orphaned (no 007).
-- Cohort 53 minted/activated/rebound (`202e447a` / futon3c `cd88864f`); cohort 52 exhausted 2/2.
-- Exercise-4 blinded observation (codex-25) accepted `:evidence-insufficient` (`c9e033a9`).
+- Serving JVM reloaded from master: admission fix, close containment, stale-claim
+  freshness, and seat registration all live; cohort 53 confirmed bound.
+- zai-5's `386cfe33` independently reviewed — accepted with notes (`04267707`);
+  note: `wm-full-loop` is now a registered seat once this runs, so in-thread
+  bellbacks to it become routable.
+- Close-failure containment ACCEPTED: codex-24 `10090021..578ee155`, acceptance
+  `0198384c`. A close-time refusal or crash now writes a typed 007 + repair
+  obligation; the cohort-53 attempt-001 orphan stays as the retained counterexample.
+- Pair-companion admission ACCEPTED (`2ed49ee5`, acceptance `286d5967`).
+- Role change (Joe): claude-15 out of the loop cast; BOARD.md visibility format adopted.
 
 ## NEXT (in order)
-1. Review containment packet on bellback; acceptance record.
-2. My independent review of zai-5's `386cfe33` (seat registration; loop-rejected, sits on main).
-3. Reload serving JVM from master (reload, not restart — allowed).
-4. Fire cohort-53 attempt-002 measured click WITH worker-only casting (author zai-5,
-   reviewer codex-22, repair-reviewer codex-24) + dated casting-amendment note.
-5. Exercise-5 subject (pre-declared): first measured close whose build cell retains an approved review.
+1. On attempt-002 close: verify the 007 (typed or grounded, either is informative),
+   check B-prime standing-decision enforcement if it reaches approval.
+2. If the close's build cell retains an approved review → it is the pre-declared
+   exercise-5 subject: blinded view → codex-25 observation → my review →
+   annotation #1 if a status is proposed.
+3. Small cleanup packet sometime: dedupe the two containment sites; injectable
+   seat registration so tests stop touching the live mesh.
 
 ## BLOCKED ON JOE
 - Nothing.
 
 ## POLL HANDLES
 - Job: `GET localhost:7070/api/alpha/invoke/jobs/<job-id>` · Parks: `GET localhost:7070/api/alpha/parked`
-- Attempt cells: `futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-001/`
-- Machine ledger: `runs/outstanding-dag-2026-09-14/STATUS.edn` (15 entries)
+- Attempt cells: `futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/`
+- Machine ledger: `runs/outstanding-dag-2026-09-14/STATUS.edn` (16 entries after this commit)
