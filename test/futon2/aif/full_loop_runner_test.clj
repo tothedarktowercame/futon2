@@ -4856,13 +4856,13 @@
                     (fn [_ item]
                       (is (.delete construction-path))
                       {:morning-brief/addendum-id
-                       (str "qa-" (:attempt-id item))}))]
-    (let [result (runner/run-opportunity! opts)
-          close (cohort/read-edn close-path)]
-      (is (= :build-failed (:outcome result)))
-      (is (= :source-unavailable
-             (get-in close [:payload :judgment :sorry :kind])))
-      (is (.exists close-path)))))
+                       (str "qa-" (:attempt-id item))}))
+        result (runner/run-opportunity! opts)
+        close (cohort/read-edn close-path)]
+    (is (= :build-failed (:outcome result)))
+    (is (= :source-unavailable
+           (get-in close [:payload :judgment :sorry :kind])))
+    (is (.exists close-path))))
 
 (defn- write-attempt-evidence! [root filename value]
   (let [file (io/file root "test-cohort-exhaustion" "attempt-001"
@@ -5025,13 +5025,13 @@
                         (spit file "different bytes\n"))
                       (write-attempt-evidence! root "01-receipt.edn" bad-receipt)
                       {:morning-brief/addendum-id
-                       (str "qa-" (:attempt-id item))}))]
-    (let [result (runner/run-opportunity! opts)
-          close (cohort/read-edn close-path)]
-      (is (= :build-failed (:outcome result)))
-      (is (= :output-digest-mismatch
-             (get-in close [:payload :judgment :sorry :kind])))
-      (is (.exists close-path)))))
+                       (str "qa-" (:attempt-id item))}))
+        result (runner/run-opportunity! opts)
+        close (cohort/read-edn close-path)]
+    (is (= :build-failed (:outcome result)))
+    (is (= :output-digest-mismatch
+           (get-in close [:payload :judgment :sorry :kind])))
+    (is (.exists close-path))))
 
 (deftest invalid-attempt-evidence-refuses-close
   (doseq [[label filename content expected]
@@ -5059,12 +5059,12 @@
                           (io/make-parents file)
                           (spit file content))
                         {:morning-brief/addendum-id
-                         (str "qa-" (:attempt-id item))}))]
-      (let [result (runner/run-opportunity! opts)
-            close (cohort/read-edn close-path)]
-        (is (= :build-failed (:outcome result)))
-        (is (= expected (get-in close [:payload :judgment :sorry :kind])))
-        (is (.exists close-path))))))
+                         (str "qa-" (:attempt-id item))}))
+          result (runner/run-opportunity! opts)
+          close (cohort/read-edn close-path)]
+      (is (= :build-failed (:outcome result)))
+      (is (= expected (get-in close [:payload :judgment :sorry :kind])))
+      (is (.exists close-path)))))
 
 (deftest arbitrary-close-throwable-produces-typed-close
   (let [{:keys [root] :as c} (retention-cohort "runner-close-throwable")
