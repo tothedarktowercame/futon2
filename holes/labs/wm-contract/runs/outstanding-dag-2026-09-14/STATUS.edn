@@ -45,11 +45,12 @@
    :evidence "../../TN-a-pairs-discovery-2026-09-14.md (3cabc7bc + reviewer correction 43e4701b); ACCEPTANCE-a-pairs-discovery.md"
    :note "0/86 retained closes carry the Status+cutoff+post-action identity a licensed a-pair needs; 23 cross-root identity collisions make path-only joins unsafe. Converges with a-rubric acceptance: a-labels/a-pairs need NEW retention at live closes (cutoff, post-action point, action/transition ids, model revision, adjudicated Status), then byte-pinned joins. Reviewer correction: production outcome-kinds is now 14 values; licensed 7x12 support excludes the two historical-verification outcomes (typed out-of-support at a-estimate)."}
   {:node :close-retention
-   :status :discovery-in-flight
+   :status :in-flight
    :at "2026-09-14"
    :seat "codex-24"
-   :job-id "invoke-1789401861013-20792-c29de216"
-   :note "NEW node (discovered prerequisite of a-labels/a-pairs; fold into next DAG revision between a-rubric and a-labels). Read-only discovery: for each missing a-pair operand (post-action point, transition/action ids+time, immutable cutoff, model revision), locate where in the live tick it exists (in-hand/dropped/never-minted), cutoff-instant candidates enumerated not chosen, daemon-thread race hazards."}]}
+   :job-id "invoke-1789402139981-20793-5a82ab3d"
+   :evidence "../../TN-close-retention-discovery-2026-09-14.md (cffa43d1); ACCEPTANCE-close-retention-discovery.md (b452f71f)"
+   :note "NEW node (discovered prerequisite of a-labels/a-pairs; fold into next DAG revision between a-rubric and a-labels). Discovery accepted: state/transition-id/action-id/action-time/cutoff/model-revision never minted; closed-at minted but discarded by close!. Contract packet now in flight (r10 pattern: spec + pure mechanism + controls, no runner/cohort wiring) with four design anchors decided in-lane: occurrence minted post-discrimination pre-construction with fresh UUIDs; state port with typed absence; declared model identity or typed absence (provenance refuses as revision); closed-at = writer :recorded-at, cutoff = closed-at by declared equality with separate earlier per-observation freeze."}]}
   {:node :r10-commission-contract
    :status :accepted-built
    :at "2026-09-14"
