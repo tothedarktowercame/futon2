@@ -24,7 +24,12 @@
    :seat "codex-24"
    :job-id "invoke-1789399366909-20789-3de411b2"
    :evidence "futon3c holes/labs/wm-contract/runs/r10-wiring-2026-09-14/ACCEPTANCE.md (32e41dbb)"
-   :note "Wiring accepted (futon3c df0e47fb/a7a75861/7747d6e7 + reviewer fix 8331de51: refuse :r10-commissioned combined with :run4-pin-ref). Commissioned path live in code, NOT in the serving JVM yet. Downstream r10-record needs the operator-lane acceptance run: reload serving JVM from master, POST wm-click-start with ONLY {:r10-commissioned true}; spends single-use commission r10-click-commission-2026-09-14-01; pre-reserve refusals (busy/store-missing) do not burn it."}
+   :note "Wiring accepted (futon3c df0e47fb/a7a75861/7747d6e7 + reviewer fix 8331de51: refuse :r10-commissioned combined with :run4-pin-ref)."}
+  {:node :r10-record
+   :status :accepted
+   :at "2026-09-14"
+   :evidence "futon3c holes/labs/wm-contract/runs/r10-wiring-2026-09-14/ACCEPTANCE-RUN.md (fe333299); evidence e-af73b9b5-a164-4a18-9bb6-68eac432cf8c"
+   :note "Operator-lane run executed (Joe authorized reload+curl; claude-15 executed). Serving JVM reloaded from master; POST /api/alpha/wm/click {:r10-commissioned true} spent commission r10-click-commission-2026-09-14-01: click wm-click-a1100750-..., reservation :recorded, evidence in serving durable store via run-scheduled-dispatch! from the production HTTP caller. Second POST refused live with no second click. r10 branch DISCHARGED; future commissioned clicks need a fresh operator-committed commission + binding rebind."}]}
   {:node :r10-commission-contract
    :status :accepted-built
    :at "2026-09-14"
