@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~23:00Z (route A ruled + accepted; packet 1 with codex-24)
+Updated: 2026-09-14 ~23:15Z (packet 1 accepted + fixed; packet 2 with codex-24)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,13 +13,18 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **ruling packet 1: guidance + subject capture** — codex-24, job
-  `invoke-1789425762895-20894-0d03f008` (running), park `park-cca50d7e`.
-  T's obligation bytes become the subject pair; entity-mismatch and
-  pending-successor controls. Packets 2 (successor discharge/readback) and
-  3 (cohort-54 T/R/S/O prereg) queue behind its review.
+- **ruling packet 2: successor discharge + readback** — codex-24, job
+  `invoke-1789426402247-20904-237755dc` (running), park `park-a119b57f`.
+  Existing resolution writer + explicit T/R/S relation + five ruled negative
+  controls. Packet 3 (cohort-54 T/R/S/O prereg) is mine, right after.
 
 ## DONE (this sitting, newest first)
+- Ruling packet 1 ACCEPTED (`81ce8543`, acceptance `735c377e`) with one reviewer fix
+  in-lane (`d1ff5aab`): the pending-successor store annotation was computed then
+  DISCARDED — now ensure-standing-decision! returns the readback and the grounded
+  close persists :standing-readback. Subject pairs = T's obligation bytes
+  (subject-*.edn, exact id enforced); source pairs demoted to supporting-*.edn;
+  ambiguous names refuse.
 - **Route A RULED and ACCEPTED** (codex-26 `6bfe8750`, acceptance `ff323720`, 4/4 pins):
   the :addressed subject for repair entity T is a later predeclared observation
   boundary O — the repairing close never labels its own future; S may serve as O
