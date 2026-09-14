@@ -1,0 +1,20 @@
+{:schema :wm/execution-receipts-v1
+ :tree-sha "3dee9855c119bd238240a30d0fad0af92f5a8b54"
+ :at "2026-09-14T15:59:34Z"
+ :gates
+ [{:gate :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/rubric-authority-draft.edn"
+   :exit 0 :files 1
+   :stdout "check-parens.stdout" :stderr "check-parens.stderr"
+   :exit-file "check-parens.exit"}
+  {:gate :edn-parse
+   :command "clojure -M -e (read and assert rubric-authority-draft schema)"
+   :exit 0 :forms 1
+   :stdout "edn-parse.stdout" :stderr "edn-parse.stderr"
+   :exit-file "edn-parse.exit"}
+  {:gate :source-byte-pins
+   :command "sha256sum RUBRIC, authority draft, belief carrier, categorical spec, interest vocabulary, and retained CP-close source"
+   :exit 0 :files 6 :output "source-pins.sha256"}]
+ :grounding {:candidate-record-shapes 3
+             :typed-absent-exemplars 4
+             :qualifying-annotations 0}}
