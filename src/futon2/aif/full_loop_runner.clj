@@ -125,6 +125,32 @@
                      :throw false})
          (catch Throwable _ nil))))))
 
+(defn ensure-dispatch-seat!
+  "Register the wm-full-loop dispatch seat so child jobs can reply in-thread.
+
+  Attempt-002 of repair-ea1-3f4cac (2026-09-13) recorded TWO delivery losses
+  downstream of the same missing registration: the author job's terminal
+  delivery answered `caller-not-a-registered-seat`, and the reviewer's
+  in-thread reply 404'd with `agent-not-found` for wm-full-loop. The
+  build-loop precedent (wm-build-loop.sh ensure_seats) registers its two
+  seats at start for exactly this reason; registration is idempotent (a
+  duplicate answers 409 and is ignored). Fail-open with a stderr note only:
+  a registration outage must not consume the attempt it was protecting." 
+  [{:keys [agency-base]}]
+  (try
+    (http/post (str agency-base "/api/alpha/agents")
+               {:headers {"Content-Type" "application/json"}
+                :body (json/generate-string
+                       {:agent-id "wm-full-loop"
+                        :type "claude"
+                        :delivery-mode "inbox"})
+                :timeout 2000
+                :throw false})
+    (catch Throwable t
+      (binding [*out* *err*]
+        (println "[wm-full-loop] dispatch-seat registration failed:"
+                 (.getMessage t))))))
+
 (defn- report-wm-phase!
   [opts context event]
   (when-let [payload (wm-status-payload context event)]
@@ -4279,6 +4305,7 @@
   [raw-opts]
   (let [run-id (or (:run-id raw-opts) (str (UUID/randomUUID)))
         started-at (str (Instant/now))
+        _ (ensure-dispatch-seat! (config raw-opts))
         result
         (try
       (run-opportunity-core! (assoc raw-opts :run-id run-id))

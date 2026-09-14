@@ -4870,6 +4870,27 @@
              :captured-at "2026-09-14T12:00:00Z"}
      :dimensions [:implementation]}]])
 
+(deftest wm-full-loop-registers-its-dispatch-seat-before-running
+  ;; 2026-09-13 attempt-002 of repair-ea1-3f4cac: the author job's terminal
+  ;; delivery answered caller-not-a-registered-seat and the reviewer's
+  ;; in-thread reply 404'd for wm-full-loop — the dispatch seat was never
+  ;; registered. The run must register it (idempotently) before the core.
+  (let [core-ran (atom false)
+        registration-before-core? (atom nil)]
+    (with-redefs-fn
+      {#'runner/ensure-dispatch-seat!
+       (fn [_] (reset! registration-before-core? (not @core-ran)))
+       #'runner/run-opportunity-core!
+       (fn [_] (reset! core-ran true)
+              {:attempt-id "a" :outcome :no-op-change
+               :checkpoints {} :data {}})}
+      (fn []
+        (let [r (runner/run-opportunity! {:run-record-dir "/tmp/wm-seat-test"})]
+          (is (map? r))
+          (is @core-ran "the core actually ran")
+          (is (true? @registration-before-core?)
+              "seat registration happens before the core starts"))))))
+
 (deftest attempt-limb-evidence-follows-checkpoints-in-manifest
   (let [{:keys [root] :as c} (retention-cohort "runner-limb-evidence")
         opts (assoc (retention-success-opts c)
