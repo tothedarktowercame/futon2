@@ -5272,6 +5272,63 @@
             (.getAbsolutePath dir) "repair-target-1" "reviewer-1" "author-1"
             contract (constantly {:repair/status :resolved}))))))
 
+(deftest measured-close-persists-standing-readback
+  ;; Ruling packet 1 (reviewer fix d1ff5aab): the standing readback must be
+  ;; VISIBLE to later observers — this pins it end-to-end into the grounded
+  ;; 007 cell, as recorded in the packet-1 acceptance.
+  (let [{:keys [root] :as c} (retention-cohort "runner-standing-readback")
+        evidence-file (io/file root "test-cohort-exhaustion" "attempt-001"
+                               "evidence" "standing.edn")
+        decision {:schema :wm/target-standing-decision-v1
+                  :entity/id "M-selected" :decision :still-live
+                  :decided-by "codex-7" :implementation-author "zai-5"
+                  :decided-at "2026-09-14T18:00:00Z"
+                  :evidence ["subject-obligation.edn"]
+                  :explanation
+                  (str "This independent review explains how the cited records "
+                       "bear on whether the exact selected target remains live.")}
+        base (retention-success-opts c)
+        opts (assoc base
+                    :measured-acquisition? true
+                    :repair-resolution-read-fn (constantly nil)
+                    ;; the stock synthetic binding pins :repo "/repo", which
+                    ;; the T13 repo-consistency check (48dfa037) refuses
+                    ;; against the fixture's temp-root build — the other
+                    ;; retention tests never notice because they assert only
+                    ;; retention properties of the resulting typed close.
+                    ;; This test needs the GROUNDED path, so the observer
+                    ;; must echo the real target repo.
+                    :author-artifact-observer-fn
+                    (fn [repo before job]
+                      (assoc (synthetic-artifact-binding repo before job)
+                             :repo repo))
+                    :poll-fn
+                    (fn [o job-id]
+                      (cond-> ((:poll-fn base) o job-id)
+                        (= job-id "retention-author")
+                        (assoc :feature-card feature-card-claim)))
+                    ;; the stock ground-fn's :before nil refuses
+                    ;; :grounded-change at the cohort close validation
+                    :ground-fn
+                    (fn [& _] {:before {:id "pre-retained"}
+                               :after {:id "retained"}
+                               :resolved? true :dial-moved? true
+                               :implementation-id "retained"
+                               :discharge-id "retained-discharge"})
+                    :resolve-build-fn
+                    (fn [x]
+                      (io/make-parents evidence-file)
+                      (spit evidence-file (pr-str decision))
+                      ((:resolve-build-fn base) x)))
+        result (runner/run-opportunity! opts)
+        close (cohort/read-edn (io/file root "test-cohort-exhaustion"
+                                        "attempt-001" "007-closed.edn"))]
+    (is (= :grounded-change (:outcome result)))
+    (is (= {:entity/id "M-selected" :decision :still-live
+            :decided-by "codex-7"}
+           (get-in close [:payload :judgment :standing-readback]))
+        "the annotated readback is durably in the close for later observers")))
+
 (deftest measured-prompts-declare-required-completion
   (let [opts {:author "author-1" :reviewer "reviewer-1"
               :target-repository "/repo" :target-repository-head "base"

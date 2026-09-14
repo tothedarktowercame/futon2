@@ -3446,7 +3446,9 @@
                                             :duration-ms (- (System/currentTimeMillis) started)
                                             :resource-use
                                             {:agent-turns @dispatched-turns}}
-                                            (select-keys data [:witness]))
+                                            (select-keys data
+                                                         [:witness
+                                                          :standing-readback]))
                                      {:kind :full-loop-outcome :attempt-id attempt-id})
                                 (and cohort? @action-occurrence)
                                 (assoc :retention-inputs
