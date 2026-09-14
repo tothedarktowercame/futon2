@@ -1208,6 +1208,9 @@
     (is (= 2 (:tool-events gate)))
     (is (= {:executed true :tool-events 2 :command-events 1}
            (:reviewer validation)))
+    (is (= (str "FULL_LOOP_REVIEW: APPROVE\n"
+                "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")
+           (:review-text validation)))
     (is (= (:reviewer validation) (:execution gate)))
     (is (= :job-events (:execution-source gate)))
     (is (= :fully-grounded (get-in item [:achievement :tier])))))
@@ -4749,8 +4752,6 @@
     (is (= :absent (get-in retained [:state :status])))
     (is (= :absent (get-in retained [:model :status])))
     (is (= (:recorded-at close-event) (:closed-at retained)))
-    (is (= "FULL_LOOP_REVIEW: APPROVE"
-           (get-in result [:checkpoints :build :judgment :validation :review-text])))
     (is (= 1 (:closed-count (cohort/ledger path root))))
     (let [slot (atom nil)
           input {:run-id "run" :cohort-id "cohort" :attempt-id "attempt"
