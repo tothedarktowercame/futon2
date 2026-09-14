@@ -2256,6 +2256,35 @@
     (is (:corroborates? binding))
     (is (false? (:disagreement? binding)))))
 
+(deftest artifact-binding-takes-the-final-done-line-over-quoted-prior-rounds
+  ;; Revision prompts quote the previous round's findings verbatim, so a
+  ;; reply can carry an earlier round's DONE line (and prose shas such as
+  ;; "base head 2e5e7409") ahead of the author's own final declaration.
+  ;; The final DONE line is the authoritative claim; prose shas and quoted
+  ;; earlier DONE lines must not be corroborated.
+  (let [opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head "final789" :observed-at-ms 2000})
+              :resolve-commit-sha-fn
+              (fn [_ commit] (when (= commit "beadfeed") "final789"))
+              :ancestor-fn (fn [_ ancestor descendant]
+                             (and (= ancestor "2e5e7409") (= descendant "final789")))
+              :commit-time-ms-fn (fn [& _] 1500)}
+        before {:repo "/repo" :head "2e5e7409" :observed-at-ms 1000}
+        reply (str "Round 1 findings (quoted): committed at the target "
+                   "repository on base head 2e5e7409, reply ended\n"
+                   "FULL_LOOP_AUTHOR: DONE 9a6a012f\n"
+                   "Round 2: addressed findings in a follow-up commit.\n"
+                   "FULL_LOOP_AUTHOR: DONE beadfeed")
+        binding (runner/fresh-artifact-binding
+                 opts "/repo" before
+                 {:artifact-ref "2e5e7409"
+                  :events [{:type "text" :text reply}]})]
+    (is (= "beadfeed" (:text-artifact-ref binding))
+        "the last DONE line wins over quoted prior rounds and prose shas")
+    (is (= "final789" (:commit binding)))
+    (is (:corroborates? binding))
+    (is (false? (:disagreement? binding)))))
+
 (deftest artifact-binding-reads-a-done-line-surviving-only-in-the-full-result
   ;; attempt-003 round 2: Agency trims event text at ~2000 chars, so the DONE
   ;; line at the end of a long reply survives only in :result.

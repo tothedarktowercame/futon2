@@ -532,8 +532,13 @@
   base 2e5e7409, mismatch).  The text claim is the author's; the job field
   is only a fallback for jobs with no readable marker."
   [author-job]
+  ;; LAST match, not first: revision prompts quote prior findings verbatim,
+  ;; so an earlier round's DONE line can appear inside the reply body ahead
+  ;; of the author's own final declaration (repair-ea1-3f4cac attempt-002
+  ;; family). The final DONE line is the author's authoritative claim.
   (or (some->> (job-text author-job)
-               (re-find #"(?m)^FULL_LOOP_AUTHOR:\s*DONE\b[ \t]*([0-9a-fA-F]{7,40})")
+               (re-seq #"(?m)^FULL_LOOP_AUTHOR:\s*DONE\b[ \t]*([0-9a-fA-F]{7,40})")
+               last
                second)
       (:artifact-ref author-job)))
 
