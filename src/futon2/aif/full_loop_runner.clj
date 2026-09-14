@@ -3481,7 +3481,7 @@
                         :outcome :build-failed
                         :checkpoints @checkpoints
                         :data sorry-data
-                        :closed-event closed-event})))]
+                        :closed-event closed-event}))))]
     (try
       (when-let [e (:error roster-result)]
         (throw (ex-info "Agent readiness observation failed"
