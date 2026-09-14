@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~23:45Z (packet 2 accepted; cohort-54 prereg next)
+Updated: 2026-09-14 ~23:55Z (cohort 54 armed under the T/R/S/O contract; S-candidate click firing)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,11 +13,21 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- Nothing dispatched; next action is mine: **packet 3 — cohort-54 T/R/S/O
-  preregistration** (worker casting, finite observation rule, S-as-O condition
-  from the actual writer timing), then activate + rebind + reload + click.
+- **cohort-54 attempt-001** — ordinary (non-measured) click fires as this tick's
+  last action: the S-candidate. If it closes grounded-change, the runner's
+  stop-line-validation auto-discharges T through the authorized writer
+  (T carries 2 recorded implementations); then the NEXT click is measured = O,
+  the exercise-6 subject. Target 3 attempts; worker casting.
 
 ## DONE (this sitting, newest first)
+- **Packet 3 complete**: cohort-54 prereg `94b4272a` (T/R/S/O declared pre-outcome:
+  T = the artifact-binding repair; R = cohort-53 att-002; S = first grounded close
+  here; O = first measured close after the resolution exists; S-as-O declared
+  impossible — deposits precede grounding). Activated; futon3c rebound `28f97372`;
+  serving JVM reloaded (cohort echo 54, packet-2 seam + readback live). Discovery:
+  the runner ALREADY auto-resolves implemented obligations at the next grounded
+  close (stop-line-validation), and subject-pair companions carry arbitrary bytes,
+  so no new admission code was needed.
 - Ruling packet 2 ACCEPTED (`8f5bea11`): successor discharge through the existing
   writer with explicit T/R/S relation record; five ruled negative controls + the
   projection-pointer refusal; pure cutoff-aware derived-state readback. Carry-over
