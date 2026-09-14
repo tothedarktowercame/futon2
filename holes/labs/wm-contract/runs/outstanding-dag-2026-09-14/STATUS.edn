@@ -31,4 +31,10 @@
    :seat "codex-24"
    :job-id "invoke-1789393094306-20786-e21bf230"
    :evidence "futon3c holes/labs/wm-contract/runs/r10-commission-2026-09-14/ACCEPTANCE.md (00be139c); SPEC-r10-click-commission-v1.md"
-   :note "NEW node not in dag.edn ec09b980 (fold in at next DAG revision). Contract + mechanism + controls accepted (futon3c 8f844891/cde07d04/17639603). r10-caller wiring now needs: (1) the adoption packet (operator-committed commission file + server-owned binding), (2) the one-behaviour adapter in handle-wm-click-start, with the three integration notes from the acceptance."}]}
+   :note "NEW node not in dag.edn ec09b980 (fold in at next DAG revision). Contract + mechanism + controls accepted (futon3c 8f844891/cde07d04/17639603). r10-caller wiring now needs: (1) the adoption packet (operator-committed commission file + server-owned binding), (2) the one-behaviour adapter in handle-wm-click-start, with the three integration notes from the acceptance."}
+  {:node :r10-adoption
+   :status :in-flight
+   :at "2026-09-14"
+   :seat "codex-24"
+   :job-id "invoke-1789399097848-20788-f05531e2"
+   :note "NEW node (fold in with r10-commission-contract at next DAG revision). Adoption per SPEC v1: commission file r10-click-commission-2026-09-14-01.edn (content fixed verbatim in packet, issuer joe per operator instruction 2026-09-14, source-pin = sha256 of SPEC at 8f844891, single-use scope) + binding ns pinning path/sha/reservation-root, cohort-binding precedent. Wiring adapter packet follows this review."}]}
