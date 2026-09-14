@@ -2825,7 +2825,12 @@
                        :failure-kind :standing-evidence-insufficient
                        :failure-stage :standing-completion
                        :target target :reviewer reviewer :author author}))))
-  true)
+  ;; Return the annotated readback, not a bare boolean: the ruling
+  ;; (RULING-repair-subject-positive-status-2026-09-14 §5, packet 1)
+  ;; requires a :resolved claim with no store resolution to be VISIBLE to
+  ;; later observers, so the caller persists this into the close.
+  (standing-decision-readback evidence-dir target reviewer author
+                              discharge-contract resolution-read-fn))
 
 (defn- checkpoint-evidence-manifest
   [events data-root cohort-id attempt-id selected-target]
@@ -3155,6 +3160,7 @@
         pending-selection (atom nil)
         selection-persisted? (atom false)
         dispatched-turns (atom 0)
+        standing-readback-state (atom nil)
         reviewer-of-record (atom reviewer)
         closing? (atom false)
         roster-result (try
@@ -4286,7 +4292,9 @@
                                        :discharge-contract])
                               (:discharge-contract stop-line)
                               {:requires []})]
-                      (ensure-standing-decision!
+                      (reset! standing-readback-state
+                              (some->
+                               (ensure-standing-decision!
                        attempt-evidence-dir target reviewer author
                        discharge-contract
                        (or (:repair-resolution-read-fn opts)
@@ -4301,7 +4309,9 @@
                        (run-phase!
                        opts @phase-context :standing-completion-wait
                         #((or (:poll-fn opts) poll-job!)
-                          opts (:job-id response)))))))
+                          opts (:job-id response)))))
+                               (select-keys [:entity/id :decision :decided-by
+                                             :standing/store-annotation])))))
                   (when-not approved?
                     (let [failure-data
                           (cond->
@@ -4421,6 +4431,9 @@
                                 :author-job author-job :review-job review-job
                                 :artifact-binding artifact-binding
                                 :build-retries (vec build-retries)}
+                                @standing-readback-state
+                                (assoc :standing-readback
+                                       @standing-readback-state)
                                 (seq historical-validation-lines)
                                 (assoc :historical-validation-deferred
                                        (mapv #(select-keys

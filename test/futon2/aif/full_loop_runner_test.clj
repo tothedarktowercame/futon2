@@ -5197,10 +5197,17 @@
              (spit (io/file dir "standing.edn") (pr-str record)))))
       (is (= 1 (count @dispatches)))
       (is (= 1 @waits))
-      (is (#'runner/ensure-standing-decision!
-           (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
-           contract no-resolution
-           (fn [_] (throw (AssertionError. "must not redispatch"))) identity)))
+      (let [readback (#'runner/ensure-standing-decision!
+                      (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+                      contract no-resolution
+                      (fn [_] (throw (AssertionError. "must not redispatch")))
+                      identity)]
+        ;; the return is the annotated readback the caller persists into the
+        ;; close (ruling packet 1: store facts visible to later observers);
+        ;; a :still-live decision needs no store annotation.
+        (is (= "target-1" (:entity/id readback)))
+        (is (= :still-live (:decision readback)))
+        (is (nil? (:standing/store-annotation readback)))))
     (spit (io/file dir "standing.edn")
           (pr-str (assoc record :decided-by "wrong-reviewer")))
     (let [dispatches (atom 0)
