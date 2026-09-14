@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~22:35Z (record-audit accepted; 5 green)
+Updated: 2026-09-14 ~22:42Z (attempt-002 GROUNDED; exercise-5 observation dispatched)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -12,13 +12,21 @@ existing-record-audit),
 red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
-## IN FLIGHT (3 parallel lanes now)
-- **cohort-53 attempt-002** (measured, zai-5 author, cells through 004-dispatch)
-  — the a-labels critical path. On a close retaining an approved review →
-  exercise-5 → annotation #1.
-- Fallback wakeup ~22:33Z; no packet parks outstanding.
+## IN FLIGHT
+- **exercise-5 blinded observation** — codex-25, job `invoke-1789425309334-20886-38592d10`
+  (running), park `park-0bec2b77`. FIRST subject with an approved retained review,
+  a B-prime :resolved standing decision, and the full deposit set — the first real
+  shot at a proposed status → annotation #1 → a-labels closes.
 
 ## DONE (this sitting, newest first)
+- **cohort-53 attempt-002 CLOSED :grounded-change** (zai-5 author, codex-24 approved,
+  single round, commit `fba72d0f`: non-commit artifact claims classify as
+  :artifact-ref-malformed — composes with the freshness fix, my stale-claim test
+  survived adapted). Close carries retention + 15-entry manifest + limb receipts +
+  revision pair + the FIRST enforced standing decision (:resolved, codex-24).
+  The artifact-binding repair target that opened 2026-09-13 is now claimed resolved.
+- Exercise-5 declaration + blinded view committed `cecd6f7d` (17 files; companion
+  code-vocabulary nuance documented).
 - existing-record-audit ACCEPTED (TN `069b0c30`, codex-21; acceptance committed; pins
   re-verified, absence claim reproduced). Row 23: 12 usable byte-pinned joins. Rows
   13/15: typed insufficiency, named classes — downstream needs NEW production capture.
