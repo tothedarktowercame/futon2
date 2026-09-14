@@ -1,0 +1,31 @@
+{:packet :categorical-ambiguity-interface
+ :tested-tree "602ff8361dc2c8607956c4981a65ed9db21b9eee"
+ :source-pins
+ {:source "6ffef96acba3853b04d5357f4ebf2675774dc9a093487970823d46ccd67b4a4f"
+  :test "af1ff5dcc2ba77b1a19da20c131bfb3fa30cbf5bb04e469cf5cf18a9ddad2170"}
+ :gates
+ [{:gate :focused-tests
+   :command "clojure -X:test :nses '[futon2.aif.categorical-ambiguity-test]'"
+   :exit 0 :tests 3 :assertions 14
+   :tree-sha "602ff8361dc2c8607956c4981a65ed9db21b9eee"
+   :at "2026-09-14T13:33:24Z"
+   :stdout "tests.stdout" :stderr "tests.stderr"
+   :stdout-sha256 "ad0109a67b097553501f689b2275569fc0c4df47061a013bdc3d2ecb283f31d5"
+   :stderr-sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/categorical_ambiguity.clj test/futon2/aif/categorical_ambiguity_test.clj"
+   :exit 0 :tests 0 :assertions 0
+   :tree-sha "602ff8361dc2c8607956c4981a65ed9db21b9eee"
+   :at "2026-09-14T13:33:24Z"
+   :stdout "kondo.stdout" :stderr "kondo.stderr"
+   :stdout-sha256 "f13f202061a6a352366ef21c1abb77995de87fbf84554904c161d91df9d52084"
+   :stderr-sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+  {:gate :check-parens
+   :command "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/categorical_ambiguity.clj test/futon2/aif/categorical_ambiguity_test.clj"
+   :exit 0 :tests 2 :assertions 2
+   :tree-sha "602ff8361dc2c8607956c4981a65ed9db21b9eee"
+   :at "2026-09-14T13:33:24Z"
+   :stdout "parens.stdout" :stderr "parens.stderr"
+   :stdout-sha256 "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+   :stderr-sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]
+ :failed-attempts []}
