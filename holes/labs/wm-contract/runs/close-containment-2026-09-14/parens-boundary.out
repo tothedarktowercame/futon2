@@ -1,0 +1,3 @@
+Mark set
+src/futon2/aif/full_loop_runner.clj:3058:1: Unmatched bracket or quote
+src/futon2/aif/full_loop_runner.clj:292:24: read-scan: form #37 starts here; reader error at 297:54: Invalid read syntax: "#", 297, 53

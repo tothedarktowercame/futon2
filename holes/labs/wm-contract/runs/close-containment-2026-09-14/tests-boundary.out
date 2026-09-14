@@ -1,0 +1,7 @@
+
+Running tests in #{"test"}
+Syntax error reading source at (futon2/aif/full_loop_runner.clj:3484:56).
+Unmatched delimiter: ]
+
+Full report at:
+/tmp/clojure-5036191636137317921.edn
