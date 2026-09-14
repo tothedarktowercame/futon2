@@ -4766,3 +4766,88 @@
              (catch clojure.lang.ExceptionInfo e
                (:evidence-manifest/refusal (ex-data e))))))
     (is (not (.exists close-path)))))
+
+(defn- write-attempt-evidence! [root filename value]
+  (let [file (io/file root "test-cohort-exhaustion" "attempt-001"
+                      "evidence" filename)]
+    (io/make-parents file)
+    (spit file (pr-str value))
+    file))
+
+(def limb-sha-a (apply str (repeat 64 "a")))
+(def limb-sha-b (apply str (repeat 64 "b")))
+
+(def valid-attempt-evidence
+  [["01-receipt.edn"
+    {:schema :wm/limb-receipt-v1 :repair/id "repair-1"
+     :limb :distinct-repair-commit :command "git rev-parse HEAD" :exit 0
+     :stdout-sha256 limb-sha-a :stderr-sha256 limb-sha-b
+     :recorded-at "2026-09-14T12:00:00Z"}]
+   ["02-standing.edn"
+    {:schema :wm/target-standing-decision-v1 :entity/id "entity-1"
+     :decision :still-live :decided-by "reviewer"
+     :implementation-author "author" :decided-at "2026-09-14T12:01:00Z"
+     :evidence ["record-1"]}]
+   ["03-revision.edn"
+    {:schema :wm/entity-revision-pair-v1 :entity/id "entity-1"
+     :before {:source-path "/before.edn" :sha256 limb-sha-a
+              :captured-at "2026-09-14T11:00:00Z"}
+     :after {:source-path "/after.edn" :sha256 limb-sha-b
+             :captured-at "2026-09-14T12:00:00Z"}
+     :dimensions [:implementation]}]])
+
+(deftest attempt-limb-evidence-follows-checkpoints-in-manifest
+  (let [{:keys [root] :as c} (retention-cohort "runner-limb-evidence")
+        opts (assoc (retention-success-opts c)
+                    :delivery-qa-fn
+                    (fn [_ item]
+                      (doseq [[filename value] valid-attempt-evidence]
+                        (write-attempt-evidence! root filename value))
+                      {:morning-brief/addendum-id
+                       (str "qa-" (:attempt-id item))}))
+        result (runner/run-opportunity! opts)
+        manifest (:close-evidence-manifest result)
+        ids (mapv :evidence/id (:entries manifest))]
+    (is (= 9 (count ids)))
+    (is (= (mapv #(str "test-cohort-exhaustion/attempt-001/evidence/" (first %))
+                  valid-attempt-evidence)
+           (subvec ids 6)))
+    (is (= ids (get-in result [:close-retention :admitted-evidence])))
+    (doseq [entry (drop 6 (:entries manifest))]
+      (let [bytes (Files/readAllBytes (.toPath (io/file (:source-path entry))))
+            digest (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)
+            actual (apply str (map #(format "%02x" (bit-and 0xff %)) digest))]
+        (is (= actual (:sha256 entry)))))))
+
+(deftest invalid-attempt-evidence-refuses-close
+  (doseq [[label filename content expected]
+          [[:self-decided "01-standing.edn"
+            (pr-str {:schema :wm/target-standing-decision-v1
+                     :entity/id "entity-1" :decision :still-live
+                     :decided-by "author" :implementation-author "author"
+                     :decided-at "2026-09-14T12:01:00Z"
+                     :evidence ["record-1"]})
+            :standing-decision-not-independent]
+           [:two-forms "01-two-forms.edn" "{:schema :first}\n{:schema :second}\n"
+            :evidence-not-single-edn]
+           [:trailing-garbage "01-garbage.edn" "{:schema :first}\n#"
+            :evidence-edn-invalid]]]
+    (let [{:keys [root] :as c} (retention-cohort (str "runner-limb-" (name label)))
+          close-path (io/file root "test-cohort-exhaustion" "attempt-001"
+                              "007-closed.edn")
+          opts (assoc (retention-success-opts c)
+                      :delivery-qa-fn
+                      (fn [_ item]
+                        (let [file (io/file root "test-cohort-exhaustion"
+                                            "attempt-001" "evidence" filename)]
+                          (io/make-parents file)
+                          (spit file content))
+                        {:morning-brief/addendum-id
+                         (str "qa-" (:attempt-id item))}))]
+      (is (= expected
+             (try
+               (runner/run-opportunity! opts)
+               nil
+               (catch clojure.lang.ExceptionInfo e
+                 (:limb-evidence/refusal (ex-data e))))))
+      (is (not (.exists close-path))))))

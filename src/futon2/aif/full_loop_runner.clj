@@ -21,6 +21,7 @@
             [futon2.aif.fold :as fold]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
+            [futon2.aif.limb-evidence :as limb-evidence]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
@@ -2552,18 +2553,73 @@
   [events data-root cohort-id attempt-id]
   (let [cohort-name (name cohort-id)
         ordered-events (sort-by :event/sequence (vals events))
-        entries
+        checkpoint-entries
         (mapv (fn [{:keys [event/sequence checkpoint/type]}]
                 (let [filename (format "%03d-%s.edn" sequence (name type))]
                   {:evidence/id (str cohort-name "/" attempt-id "/" filename)
                    :source-path (.getAbsolutePath
                                  (io/file data-root cohort-name attempt-id filename))
                    :admitted-at (str (Instant/now))}))
-              ordered-events)]
+              ordered-events)
+        evidence-dir (io/file data-root cohort-name attempt-id "evidence")
+        evidence-files (if (.isDirectory evidence-dir)
+                         (sort-by #(.getName ^java.io.File %)
+                                  (seq (.listFiles evidence-dir)))
+                         [])
+        eof-marker (Object.)
+        captured (atom {})
+        evidence-entries
+        (mapv
+         (fn [^java.io.File file]
+           (let [path (.getAbsolutePath file)
+                 admitted-at (str (Instant/now))
+                 bytes (try
+                         (Files/readAllBytes (.toPath file))
+                         (catch Throwable e
+                           (throw (ex-info "Attempt evidence source unavailable"
+                                           {:evidence-manifest/refusal
+                                            :source-unavailable
+                                            :source-path path}
+                                           e))))
+                 record
+                 (try
+                   (let [decoder (doto (.newDecoder
+                                        java.nio.charset.StandardCharsets/UTF_8)
+                                   (.onMalformedInput
+                                    java.nio.charset.CodingErrorAction/REPORT)
+                                   (.onUnmappableCharacter
+                                    java.nio.charset.CodingErrorAction/REPORT))
+                         text (str (.decode decoder (java.nio.ByteBuffer/wrap bytes)))]
+                     (with-open [reader (java.io.PushbackReader.
+                                        (java.io.StringReader. text))]
+                       (let [value (edn/read {:eof eof-marker} reader)
+                             tail (edn/read {:eof eof-marker} reader)]
+                         (when (or (identical? eof-marker value)
+                                   (not (identical? eof-marker tail)))
+                           (throw (ex-info "Attempt evidence must contain one EDN form"
+                                           {:limb-evidence/refusal
+                                            :evidence-not-single-edn
+                                            :source-path path})))
+                         value)))
+                   (catch clojure.lang.ExceptionInfo e (throw e))
+                   (catch Throwable e
+                     (throw (ex-info "Attempt evidence EDN invalid"
+                                     {:limb-evidence/refusal :evidence-edn-invalid
+                                      :source-path path}
+                                     e))))]
+             (limb-evidence/validate-record record)
+             (swap! captured assoc path bytes)
+             {:evidence/id (str cohort-name "/" attempt-id "/evidence/"
+                                (.getName file))
+              :source-path path
+              :admitted-at admitted-at}))
+         evidence-files)
+        entries (into checkpoint-entries evidence-entries)]
     (evidence-manifest/build-manifest
      {:entries entries
       :read-bytes (fn [path]
-                    (Files/readAllBytes (.toPath (io/file path))))})))
+                    (or (get @captured path)
+                        (Files/readAllBytes (.toPath (io/file path)))))})))
 
 (def ^:private transport-failure-classes
   "Recognised transport conditions, matched by CLASS (most specific first), not
@@ -4053,7 +4109,8 @@
     (catch Throwable e
       (when (or (= :delivery-qa-gate-failed
                    (:failure-kind (ex-data e)))
-                (:evidence-manifest/refusal (ex-data e)))
+                (:evidence-manifest/refusal (ex-data e))
+                (:limb-evidence/refusal (ex-data e)))
         (throw e))
       ;; Cohort stopping rule is normal completion, not a machine failure.
       ;; Repair-initialization was caused by this being treated as an
