@@ -77,11 +77,13 @@
     (refuse! :shape-invalid [:mint-input]))
   (when-not (and (fn? now) (fn? uuid-fn))
     (refuse! :mint-capability-missing [:mint-input]))
-  (let [action-bytes (pr-str selected-action)
+  (let [transition-id (str "transition-" (uuid-fn))
+        action-id (str "action-" (uuid-fn))
+        action-bytes (pr-str selected-action)
         occurrence {:schema occurrence-schema
                     :run/id run-id :cohort/id cohort-id :attempt/id attempt-id
-                    :transition/id (str "transition-" (uuid-fn))
-                    :action/id (str "action-" (uuid-fn))
+                    :transition/id transition-id
+                    :action/id action-id
                     :action/value selected-action
                     :action/value-sha256 (sha256 action-bytes)
                     :action-at (str (now))}]
@@ -111,12 +113,12 @@
       (text! (:evidence/id state) [:state :evidence/id])
       (let [state-at (instant! (:state-at state) [:state :state-at])
             observed-at (instant! (:observed-at state) [:state :observed-at])]
-        (when (.isAfter observed-at state-at)
-          (refuse! :state-observation-after-state [:state]))
         (when-not (.isBefore observed-at cutoff)
           (refuse! (if (= observed-at cutoff) :collapsed-evidence-freezes
                        :evidence-after-cutoff)
-                   [:state :observed-at]))))
+                   [:state :observed-at]))
+        (when (.isAfter observed-at state-at)
+          (refuse! :state-observation-after-state [:state]))))
 
     (refuse! :state-port-invalid [:state :status])))
 

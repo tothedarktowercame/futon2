@@ -73,4 +73,5 @@
            (refusal #(block {:evidence-cutoff "2026-09-14T10:04:00Z"}))))
     (is (= :temporal-order-invalid
            (refusal #(block {:state (assoc observed
-                                      :state-at "2026-09-14T09:59:00Z")}))))))
+                                      :state-at "2026-09-14T09:59:00Z"
+                                      :observed-at "2026-09-14T09:58:00Z")}))))))
