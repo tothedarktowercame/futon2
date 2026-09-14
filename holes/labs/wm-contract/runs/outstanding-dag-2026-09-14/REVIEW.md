@@ -14,3 +14,5 @@ Every source was captured as exact original bytes and indexed by SHA-256. Copied
 Artifact validation is intentionally limited to the discovery output: strict EDN parse, check-parens, source/anchor integrity, complete flag enumeration, edge references, branch handling, reachability and cycle/longest-path checks. No application tests or Lean compilation are rerun. The validation script is committed before execution; the next receipt binds the exact commit.
 
 A preparation invocation used unavailable `python` (exit 127); it changed no generated artifact. Generation then used `python3`. This is a tooling correction, not a hidden system test failure.
+
+The first structural check failed in the JSON-mirror normalization: `name` discarded the `wm/` namespace from the schema keyword. The DAG was not at fault. The checker now strips only the leading colon; the exact failed output is retained. EDN parens passed at the initial commit.

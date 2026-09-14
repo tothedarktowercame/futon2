@@ -1,0 +1,21 @@
+----- Error --------------------------------------------------------------------
+Type:     java.lang.AssertionError
+Message:  Assert failed: (= (walk/postwalk (fn* [%1] (if (keyword? %1) (name %1) %1)) d) (json/parse-string (slurp (io/file root "dag.json"))))
+Location: /home/joe/code/futon2/holes/labs/wm-contract/runs/outstanding-dag-2026-09-14/verify_dag.bb:16:1
+
+----- Context ------------------------------------------------------------------
+12:   (format "%064x" (java.math.BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256") (Files/readAllBytes (.toPath (io/file f)))))))
+13: (def d (read-one (io/file root "dag.edn")))
+14: (def pins (read-one (io/file root "source-pins.edn")))
+15: (assert (= (:sources d) (:sources pins)))
+16: (assert (= (walk/postwalk #(if (keyword? %) (name %) %) d)
+    ^--- Assert failed: (= (walk/postwalk (fn* [%1] (if (keyword? %1) (name %1) %1)) d) (json/parse-string (slurp (io/file root "dag.json"))))
+17:            (json/parse-string (slurp (io/file root "dag.json")))))
+18: (def nodes (:nodes d))
+19: (def ids (set (map :id nodes)))
+20: (assert (= (count ids) (count nodes)))
+21: (doseq [n nodes]
+
+----- Stack trace --------------------------------------------------------------
+user - /home/joe/code/futon2/holes/labs/wm-contract/runs/outstanding-dag-2026-09-14/verify_dag.bb:16:1
+

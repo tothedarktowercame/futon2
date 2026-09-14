@@ -13,7 +13,7 @@
 (def d (read-one (io/file root "dag.edn")))
 (def pins (read-one (io/file root "source-pins.edn")))
 (assert (= (:sources d) (:sources pins)))
-(assert (= (walk/postwalk #(if (keyword? %) (name %) %) d)
+(assert (= (walk/postwalk #(if (keyword? %) (subs (str %) 1) %) d)
            (json/parse-string (slurp (io/file root "dag.json")))))
 (def nodes (:nodes d))
 (def ids (set (map :id nodes)))
