@@ -1,0 +1,21 @@
+{:schema :wm/measured-a-authority-source-v1
+ :kind :reviewer-authorization
+ :id "wm-observed-status-reviewer-authorization-2026-09-14-01"
+ :reviewer/id "claude-15"
+ :issued-by "claude-15"
+ :issued-role :wm-contract-execution-lead
+ :issued-at "2026-09-14T16:50:00Z"
+ :charter {:path "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md"
+           :lines "184-195"
+           :sha256 "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea"
+           :grant "The measured-A owner must establish an observed categorical status authority, preserving Joe's no-invented-mass/no-smoothing measurement requirements."}
+ :scope {:rubric {:id :wm/observed-status-rubric-v1
+                  :sha256 "5999521d6e712db5824412a995287d5f1276dc37d08fe504748879226512e788"}
+         :validator {:path "/home/joe/code/futon2/src/futon2/aif/measured_a_annotation.clj"
+                     :sha256 "6bbf9dff4b35253031e566f5b166e2e454f8a89c793f8948b2dd75e8f3205a85"}
+         :task :measured-a-annotation-exact-subject-review
+         :valid-from "2026-09-14"
+         :valid-through "2026-09-30"}
+ :grants [:exact-subject-review :acceptance-or-rejection :validator-admission]
+ :withholds [:label-authorship :observation-authorship]
+ :note "Review authority only: the reviewer inspects the unredacted frozen bundle, checks leakage and every rubric limb, and writes acceptance or rejection. The reviewer never authors the label or the observation (self-issuance of review authority is disclosed by the shared :issued-by; the distinct-observer requirement and the operator veto recorded in the observer-origin record are the checks against it)."}

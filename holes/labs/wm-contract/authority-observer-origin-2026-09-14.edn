@@ -1,0 +1,24 @@
+{:schema :wm/measured-a-authority-source-v1
+ :kind :observer-origin
+ :id "wm-observed-status-observer-origin-2026-09-14-01"
+ :observer/id "codex-25"
+ :issued-by "claude-15"
+ :issued-role :wm-contract-execution-lead
+ :issued-at "2026-09-14T16:50:00Z"
+ :charter {:path "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md"
+           :lines "184-195"
+           :sha256 "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea"
+           :grant "The measured-A owner must establish an observed categorical status authority, preserving Joe's no-invented-mass/no-smoothing measurement requirements."}
+ :scope {:rubric {:id :wm/observed-status-rubric-v1
+                  :sha256 "5999521d6e712db5824412a995287d5f1276dc37d08fe504748879226512e788"}
+         :close-roots ["/home/joe/code/futon2/data/wm-full-loop"
+                       "/home/joe/code/futon2/data/wm-full-loop-machinery-47"
+                       "/home/joe/code/futon2/data/wm-full-loop-machinery-48"
+                       "/home/joe/code/futon2/data/wm-full-loop-machinery-49"]
+         :task :measured-a-annotation-observation
+         :blinding :criterion-view-only
+         :valid-from "2026-09-14"
+         :valid-through "2026-09-30"}
+ :exclusions {:not-observer ["codex-23" "claude-15" "codex-24"]
+              :reason "codex-23 authored the rubric; claude-15 is the campaign reviewer; codex-24 authored the retention/manifest machinery."}
+ :note "Issued under the retained charter above; the operator (joe) was shown this binding proposal in the lead reports of 2026-09-14 and holds a standing veto until the observation step executes. The observer receives only the blinded criterion view; the full bundle goes to the reviewer."}
