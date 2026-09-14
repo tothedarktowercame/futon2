@@ -4286,7 +4286,59 @@
                                 (assoc :feature-card feature-card))))))))))))
       (catch Throwable e
         (if @closing?
-          (throw e)
+          ;; Cohort-53 attempt-001 is retained as the historical counterexample:
+          ;; a typed evidence refusal escaped this branch and orphaned the attempt
+          ;; after adjudication.  Closing is now a last-resort durable boundary.
+          (let [failure-data (if (instance? clojure.lang.ExceptionInfo e)
+                               (ex-data e) {})
+                refusal-kind (or (:limb-evidence/refusal failure-data)
+                                 (:evidence-manifest/refusal failure-data)
+                                 (:close-retention/refusal failure-data)
+                                 (:failure-kind failure-data)
+                                 :close-exception)
+                exception-class (.getName (class e))
+                finding ((or (:repair-system-record-fn opts)
+                             repair/record-system-failure!)
+                         {:attempt-id external-attempt-id
+                          :repair-class :machine-failure
+                          :machine-repo (:repo code-state)
+                          :target (get-in @checkpoints
+                                          [:selection :judgment :selected-mission])
+                          :failure-stage :close
+                          :outcome :build-failed
+                          :failure-kind refusal-kind
+                          :error (.getMessage e)
+                          :failure-data failure-data
+                          :opened-at (get-in time-cell
+                                             [:judgment :machine-state :started-at])
+                          :discharge-contract
+                          (discharge-contract :machine-failure)})
+                sorry-data {:outcome :build-failed
+                            :grounded? false
+                            :artifact-only? false
+                            :failure-kind refusal-kind
+                            :failure-stage :close
+                            :error (.getMessage e)
+                            :exception-class exception-class
+                            :refusal-data failure-data
+                            :repair-obligation finding
+                            :sorry {:kind refusal-kind
+                                    :refusal-data failure-data}}
+                closed (term sorry-data
+                             {:kind :full-loop-close-failure
+                              :attempt-id attempt-id})
+                closed-event (when cohort?
+                               (if cohort-source
+                                 (cohort/close-attempt!
+                                  cohort-source (:data-root execution-cohort)
+                                  attempt-id closed)
+                                 (cohort/close-attempt! attempt-id closed)))]
+            {:attempt-id attempt-id
+             :opportunity-id opportunity-id
+             :outcome :build-failed
+             :checkpoints @checkpoints
+             :data sorry-data
+             :closed-event closed-event})
           (if (identical? historical-verification-completion-token
                           (:historical-verification-completion-token (ex-data e)))
             (let [completion (ex-data e)]

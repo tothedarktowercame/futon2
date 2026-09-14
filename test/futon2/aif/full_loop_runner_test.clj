@@ -4857,13 +4857,12 @@
                       (is (.delete construction-path))
                       {:morning-brief/addendum-id
                        (str "qa-" (:attempt-id item))}))]
-    (is (= :source-unavailable
-           (try
-             (runner/run-opportunity! opts)
-             nil
-             (catch clojure.lang.ExceptionInfo e
-               (:evidence-manifest/refusal (ex-data e))))))
-    (is (not (.exists close-path)))))
+    (let [result (runner/run-opportunity! opts)
+          close (cohort/read-edn close-path)]
+      (is (= :build-failed (:outcome result)))
+      (is (= :source-unavailable
+             (get-in close [:payload :judgment :sorry :kind])))
+      (is (.exists close-path)))))
 
 (defn- write-attempt-evidence! [root filename value]
   (let [file (io/file root "test-cohort-exhaustion" "attempt-001"
@@ -5027,13 +5026,12 @@
                       (write-attempt-evidence! root "01-receipt.edn" bad-receipt)
                       {:morning-brief/addendum-id
                        (str "qa-" (:attempt-id item))}))]
-    (is (= :output-digest-mismatch
-           (try
-             (runner/run-opportunity! opts)
-             nil
-             (catch clojure.lang.ExceptionInfo e
-               (:limb-evidence/refusal (ex-data e))))))
-    (is (not (.exists close-path)))))
+    (let [result (runner/run-opportunity! opts)
+          close (cohort/read-edn close-path)]
+      (is (= :build-failed (:outcome result)))
+      (is (= :output-digest-mismatch
+             (get-in close [:payload :judgment :sorry :kind])))
+      (is (.exists close-path)))))
 
 (deftest invalid-attempt-evidence-refuses-close
   (doseq [[label filename content expected]
@@ -5062,13 +5060,25 @@
                           (spit file content))
                         {:morning-brief/addendum-id
                          (str "qa-" (:attempt-id item))}))]
-      (is (= expected
-             (try
-               (runner/run-opportunity! opts)
-               nil
-               (catch clojure.lang.ExceptionInfo e
-                 (:limb-evidence/refusal (ex-data e))))))
-      (is (not (.exists close-path))))))
+      (let [result (runner/run-opportunity! opts)
+            close (cohort/read-edn close-path)]
+        (is (= :build-failed (:outcome result)))
+        (is (= expected (get-in close [:payload :judgment :sorry :kind])))
+        (is (.exists close-path))))))
+
+(deftest arbitrary-close-throwable-produces-typed-close
+  (let [{:keys [root] :as c} (retention-cohort "runner-close-throwable")
+        close-path (io/file root "test-cohort-exhaustion" "attempt-001"
+                            "007-closed.edn")
+        opts (assoc (retention-success-opts c)
+                    :queue-fn (fn [_] (throw (IllegalStateException. "queue broke"))))
+        result (runner/run-opportunity! opts)
+        close (cohort/read-edn close-path)]
+    (is (= :build-failed (:outcome result)))
+    (is (= :close-exception (get-in close [:payload :judgment :sorry :kind])))
+    (is (= "java.lang.IllegalStateException"
+           (get-in close [:payload :judgment :exception-class])))
+    (is (.exists close-path))))
 
 (deftest refused-cell-appends-typed-sorry-and-rethrows
   ;; repair-initialization-a9177cab: an invalid construction cell must not
