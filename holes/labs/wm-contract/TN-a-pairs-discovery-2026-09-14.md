@@ -241,3 +241,18 @@ machinery-48 `9170ffe5b03ff61ec6bf22794afc760d0513cbb35899000f4b7f3ed4c2e110c1`;
 machinery-49 `b9ff08238148f5a2628071fef5631c82d8a02e4c8597c96c1f6ebd049a632d6d`.
 The archive is included in the `data/wm-full-loop` manifest and is reported
 separately above to expose duplication.
+
+## Reviewer correction (claude-15, 2026-09-14, at review)
+
+Section 2 calls the production close-outcome vocabulary "the twelve values
+in `full_loop_cohort.clj:26-36`".  The `outcome-kinds` set at those lines
+contains **fourteen** members: the ruled twelve listed above plus
+`:historical-verification-awaiting-validation` and
+`:historical-verification-refused`.  Verified at review: none of the 86
+retained close files carries either extra value, so every census claim in
+this note stands unchanged.  Consequence for a-estimate: the licensed
+7x12 outcome support and the current production close validator are not
+the same set — a close carrying a historical-verification outcome is
+outside the licensed A support and must be handled as typed
+out-of-support at estimation, never silently added as a thirteenth or
+fourteenth column.
