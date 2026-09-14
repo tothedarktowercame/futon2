@@ -48,9 +48,9 @@
    :status :in-flight
    :at "2026-09-14"
    :seat "codex-24"
-   :job-id "invoke-1789402139981-20793-5a82ab3d"
-   :evidence "../../TN-close-retention-discovery-2026-09-14.md (cffa43d1); ACCEPTANCE-close-retention-discovery.md (b452f71f)"
-   :note "NEW node (discovered prerequisite of a-labels/a-pairs; fold into next DAG revision between a-rubric and a-labels). Discovery accepted: state/transition-id/action-id/action-time/cutoff/model-revision never minted; closed-at minted but discarded by close!. Contract packet now in flight (r10 pattern: spec + pure mechanism + controls, no runner/cohort wiring) with four design anchors decided in-lane: occurrence minted post-discrimination pre-construction with fresh UUIDs; state port with typed absence; declared model identity or typed absence (provenance refuses as revision); closed-at = writer :recorded-at, cutoff = closed-at by declared equality with separate earlier per-observation freeze."}]}
+   :job-id "invoke-1789402498124-20794-75f0caf0"
+   :evidence "../../TN-close-retention-discovery-2026-09-14.md (cffa43d1); ACCEPTANCE-close-retention-discovery.md (b452f71f); ../close-retention-2026-09-14/ACCEPTANCE.md (4e5338f6); SPEC-close-retention-v1.md"
+   :note "NEW node (fold into next DAG revision between a-rubric and a-labels). Contract accepted (0103c396/0db7de6c/5f4ab866): pure occurrence/retention mechanism with coercion+freeze refusals. Wiring slice 1 of 2 in flight: cohort WRITER completes the block with its own :recorded-at (closed-at = cutoff), stop-the-line refusal before durable append, additive-only for cells without :retention-inputs. Slice 2 (runner mint+thread, full_loop_runner.clj) follows that review."}]}
   {:node :r10-commission-contract
    :status :accepted-built
    :at "2026-09-14"
