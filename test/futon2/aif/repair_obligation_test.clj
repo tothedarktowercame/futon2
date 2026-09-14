@@ -347,3 +347,31 @@
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (repair/supersede! root old successor
                                     :recovery-job-terminal)))))
+
+(deftest implementation-refusals-name-their-failed-conjuncts
+  ;; repair-ea1-7093...-untyped-failure: the stop-line refusal conflated
+  ;; eight conjuncts behind one message. The refusal must stay fail-closed
+  ;; and identical in kind, but name what failed.
+  (let [root (temp-root)
+        finding (repair/record-review-failure!
+                 root {:attempt-id "same-attempt" :target :target/a
+                       :commit "bad123" :selected-entry {:action {:type :x}}
+                       :reviewer "reviewer" :review-job "review-1"
+                       :review-verdict :request-changes
+                       :review-text "defective"})
+        refusal (fn [impl]
+                  (try (repair/record-implementation! root finding impl)
+                       nil
+                       (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (let [d (refusal {:attempt-id "same-attempt" :commit "good456"
+                      :reviewer "reviewer" :review-job "review-2"
+                      :witness {:resolved? true :dial-moved? true}})]
+      (is (= :machine-repair-lacks-grounded-review-evidence (:failure-kind d)))
+      (is (= :stop-line-resolution (:failure-stage d)))
+      (is (some #{:implementation-attempt-not-distinct} (:failure-detail d)))
+      (is (not-any? #{:witness-not-resolved} (:failure-detail d))))
+    (let [d (refusal {:attempt-id "repair-2" :commit "good456"
+                      :reviewer "reviewer" :review-job "review-2"
+                      :witness {:resolved? true :dial-moved? false}})]
+      (is (some #{:witness-dial-not-moved} (:failure-detail d)))
+      (is (not-any? #{:implementation-attempt-not-distinct} (:failure-detail d))))))

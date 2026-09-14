@@ -647,19 +647,37 @@
    (record-implementation! default-root obligation implementation))
   ([root obligation {:keys [attempt-id commit reviewer review-job witness]
                      :as implementation}]
-   (let [shape (artifact-shape obligation)]
-     (when-not (and (contains? artifact-shapes shape)
-                  (:repair/id obligation)
-                  (#{:machine-failure :independent-review-failure}
-                   (:repair/class obligation))
-                  attempt-id reviewer review-job
-                  (not= attempt-id (:attempt-id obligation))
-                  (artifact-evidence? obligation implementation true)
-                  (:resolved? witness) (:dial-moved? witness))
+   (let [shape (artifact-shape obligation)
+         ;; Every conjunct of the historical guard, refusing identically but
+         ;; NAMING what failed. The 2026-09-12 stop-line failure (repair-ea1-
+         ;; 7093...-untyped-failure) refused here on attempt-distinctness while
+         ;; the message claimed missing grounded review evidence; the conflated
+         ;; conjuncts made that undiagnosable from the retained record.
+         evidence-ok? (try (boolean (artifact-evidence? obligation
+                                                        implementation true))
+                           (catch Throwable _ false))
+         failed (cond-> []
+                  (not (contains? artifact-shapes shape))
+                  (conj :artifact-shape-unknown)
+                  (not (:repair/id obligation))
+                  (conj :obligation-id-missing)
+                  (not (#{:machine-failure :independent-review-failure}
+                        (:repair/class obligation)))
+                  (conj :repair-class-invalid)
+                  (not attempt-id) (conj :implementation-attempt-missing)
+                  (not reviewer) (conj :reviewer-missing)
+                  (not review-job) (conj :review-job-missing)
+                  (and attempt-id (= attempt-id (:attempt-id obligation)))
+                  (conj :implementation-attempt-not-distinct)
+                  (not evidence-ok?) (conj :artifact-evidence-invalid)
+                  (not (:resolved? witness)) (conj :witness-not-resolved)
+                  (not (:dial-moved? witness)) (conj :witness-dial-not-moved))]
+     (when (seq failed)
        (throw (ex-info "Machine repair implementation lacks grounded review evidence"
                        {:outcome :incomplete
                         :failure-kind :machine-repair-lacks-grounded-review-evidence
                         :failure-stage :stop-line-resolution
+                        :failure-detail failed
                         :obligation obligation
                         :implementation implementation})))
      (let [record (cond->
