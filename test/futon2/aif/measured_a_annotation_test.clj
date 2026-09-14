@@ -75,6 +75,19 @@
 (defn- reason [a au]
   (get-in (sut/validate a au) [:refusal :reason]))
 
+(defn- update-acceptance
+  "Mutate acceptance content and rebuild its retained artifact, so a test can
+   reach the intended post-artifact refusal branch."
+  [au f]
+  (let [updated (f (:acceptance au))
+        core (dissoc updated :artifact)
+        bytes (pr-str core)]
+    (assoc au :acceptance
+           (assoc updated :artifact
+                  (assoc (:artifact updated)
+                         :bytes bytes
+                         :sha256 (sut/sha256 bytes))))))
+
 (deftest accepts-structurally-complete-isolated-fixture
   (let [[a au] (fixture)
         result (sut/validate a au)]
@@ -103,7 +116,11 @@
         (is (= :acceptance-subject-mismatch (reason rewritten au)))))
     (testing "source bytes are recomputed"
       (is (= :source-byte-hash-mismatch
-             (reason a (assoc-in au [:observer :origin :bytes] "forged")))))))
+             (reason a (assoc-in au [:observer :origin :bytes] "forged")))))
+    (testing "acceptance identities must match configured authority"
+      (is (= :acceptance-identity-mismatch
+             (reason a (update-acceptance
+                        au #(assoc % :observer/id "borrowed-observer")))))))
 
 (deftest evidence-and-time-refusals
   (let [[a au] (fixture)]
@@ -117,7 +134,13 @@
     (is (= :label-derived-from-forbidden-source
            (reason (assoc-in a [:provenance :label/derived-from] :model-posterior) au)))
     (is (= :temporal-order-invalid
-           (reason (assoc-in a [:conditioning :action-at] "2026-09-13T12:00:03Z") au)))))
+           (reason (assoc-in a [:conditioning :action-at] "2026-09-13T12:00:03Z") au)))
+    (is (= :evidence-after-cutoff
+           (reason (assoc-in a [:evidence 0 :observed-at] "2026-09-13T12:00:04Z")
+                   au)))
+    (is (= :review-before-annotation
+           (reason a (update-acceptance
+                      au #(assoc % :reviewed-at "2026-09-13T12:00:03Z")))))))
 
 (deftest rubric-and-retrospective-refusals
   (let [[a au] (fixture)]
@@ -130,4 +153,12 @@
                        (assoc-in [:provenance :mode] :retrospective)
                        (assoc-in [:provenance :retrospective]
                                  {:status :not-applicable}))
+                   au)))
+    (is (= :retrospective-cutoff-mismatch
+           (reason (-> a
+                       (assoc-in [:provenance :mode] :retrospective)
+                       (assoc-in [:provenance :retrospective]
+                                 {:status :retrospective
+                                  :frozen-evidence-cutoff "2026-09-13T11:59:59Z"
+                                  :reason "isolated branch fixture"}))
                    au)))))
