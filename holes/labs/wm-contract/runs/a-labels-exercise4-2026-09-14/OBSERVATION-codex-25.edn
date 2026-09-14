@@ -1,0 +1,52 @@
+{:finding/type :evidence-insufficient
+ :observer/id "codex-25"
+ :observed-at #inst "2026-09-14T20:13:46.019Z"
+ :retrospective? true
+ :entity/id "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-002-artifact-binding-mismatch"
+ :cohort/id :wm-contract-machinery-52-v1
+ :attempt/id "attempt-001"
+ :checkpoint :post-action-close
+ :evidence-cutoff "2026-09-14T19:51:33.877447972Z"
+ :conditioning {:file "observer-view/close-conditioning.edn"
+                :fields [[:close-retention :occurrence] [:close-retention :evidence-cutoff] [:close-evidence-manifest]]
+                :run/id "b82e5f4a-0a82-4c2b-8a95-da1d1c10606c"
+                :action/id "action-03d6ac3f-beec-4793-8ce3-1472cf27a4b6"
+                :transition/id "transition-076d763c-d589-47d8-bebb-7d13ef92256d"
+                :action-at "2026-09-14T19:45:05.228687636Z"}
+ :argument "Zero complete rubric matches. Raw companion bytes are now observable and digest-verified, but a command reporting HEAD does not establish all repair limbs or a reviewed increase in support for the target. This finding describes the permitted view only."
+ :conflicts "Strengthened and addressed are the closest candidates. Strengthened lacks a semantic support-gain review and explicit post-action still-live boundary decision. Addressed lacks all-limbs receipts and independent closure review. Neither fully matches, so this is not ambiguity. The raw HEAD result and absent build/adjudication evidence answer different questions; they are not conflicting semantic observations. No qualifying same-point disagreement is established."
+ :evidence-discipline "Only the rubric and ten permitted view files were consulted; all ten view files matched 3e5ebb6f byte-for-byte and the rubric matched its requested SHA256. Consulted hashes bind blinded bytes; original redacted-source hashes are not claimed verified. Both raw companion hashes also match the receipt and their manifest entries. No referenced commit, job, store or source path was followed. Status keywords, flags, counts, disposition and posterior did not license a status. Historical nested targets were not substituted for this exact entity."
+ :raw-receipt-check {:stdout "cdf1f1eae568360e0078616a07da79c2087af0f3\n"
+                     :stderr ""
+                     :stdout-sha256 "14fcc08ea0c5882a499d730752f107743958bf37715bb1d3182ed5a5c0e145c7"
+                     :stderr-sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                     :receipt-recorded-at "2026-09-14T19:50:12Z"}
+ :supplementary-citations
+ [{:manifest/id "wm-contract-machinery-52-v1/attempt-001/001-time-step.edn" :field [:payload :judgment :code-state :repo-heads "/home/joe/code/futon2"]}
+  {:manifest/id "wm-contract-machinery-52-v1/attempt-001/evidence/01-distinct-repair-commit.edn" :fields [[:repair/id] [:limb] [:command] [:exit] [:stdout-file] [:stderr-file] [:stdout-sha256] [:stderr-sha256] [:recorded-at]]}
+  {:manifest/id "wm-contract-machinery-52-v1/attempt-001/evidence/limb1.stdout" :field :literal-bytes}
+  {:manifest/id "wm-contract-machinery-52-v1/attempt-001/evidence/limb1.stderr" :field :literal-bytes}
+  {:manifest/id "wm-contract-machinery-52-v1/attempt-001/005-build.edn" :field [:payload]}
+  {:manifest/id "wm-contract-machinery-52-v1/attempt-001/006-adjudication.edn" :field [:payload]}]
+ :criteria [
+ {:status :spawned :rubric/criterion-id :wm/observed-status-spawned-v1 :assessment :not-established :evidence [{:manifest/id "wm-contract-machinery-52-v1/attempt-001/002-selection.edn" :field [:payload :judgment :selected-action :repair-obligation :opened-at]}] :reason "The exact repair was opened 2026-09-13T17:51:37.300751267Z, before the action. No exact-namespace complete pinned pre-action inventory proving absence and post-action creation record are supplied. A new commit is not creation of this existing repair entity."}
+ {:status :refined :rubric/criterion-id :wm/observed-status-refined-v1 :assessment :not-established :evidence [{:manifest/id "wm-contract-machinery-52-v1/attempt-001/003-construction.edn" :field [:payload :judgment :cascade :repair-contract]}] :reason "The contract identifies the same repair, but there is no byte-pinned before/after artifact pair for that entity and no independent review naming narrowed, clarified or re-anchored dimensions while distinguishing refinement from editing, support gain, resolution or contradiction. Different repository HEADs do not establish semantic revision of the repair entity."}
+ {:status :strengthened :rubric/criterion-id :wm/observed-status-strengthened-v1 :assessment :not-established :evidence [{:manifest/id "wm-contract-machinery-52-v1/attempt-001/evidence/01-distinct-repair-commit.edn" :field [:repair/id]}] :reason "Prior standing is retained by the selected repair obligation in 002, including identity, opened-at, artifact-binding failure stage and contract. New raw output records HEAD cdf1f1eae568360e0078616a07da79c2087af0f3, different from the pre-action HEAD b62f366da841886f13a8ac9395e49ce1b3ac6d48 in 001. The receipt names this repair and precedes cutoff. This establishes a retained command result, but not its semantic support for the repair: commit contents and an independent review explaining increased support are absent. No post-action review-grade still-live versus resolved decision is retained. The copied prior open status cannot supply that decision."}
+ {:status :addressed :rubric/criterion-id :wm/observed-status-addressed-v1 :assessment :not-established :evidence [{:manifest/id "wm-contract-machinery-52-v1/attempt-001/003-construction.edn" :field [:payload :judgment :cascade :repair-contract :discharge :requires]}] :reason "The finite contract requires distinct-repair-commit, independent-review, grounded-repair and distinct-production-shaped-successor. The receipt and verified raw companions concern only the first limb. They record a different HEAD, not by themselves the authorship or repair content of that commit. Even granting that limb, the view supplies no complete receipts for the other limbs or independent semantic review recording no unresolved contradiction. Build and adjudication payloads contain only sorry records, not missing limb evidence. Their keywords are not a terminal-status license."}
+ {:status :falsified :rubric/criterion-id :wm/observed-status-falsified-v1 :assessment :not-established :evidence [{:manifest/id "wm-contract-machinery-52-v1/attempt-001/evidence/limb1.stdout" :field :literal-bytes}] :reason "The raw result is a commit identifier, not a decisive contradiction under a predeclared protocol. No exact pre-existing falsifiable proposition and independent contradiction explanation joined to that result are retained. Historical artifact-binding failure and the build/adjudication sorry records do not establish falsification."}
+ {:status :foreclosed :rubric/criterion-id :wm/observed-status-foreclosed-v1 :assessment :not-established :evidence [{:manifest/id "wm-contract-machinery-52-v1/attempt-001/004-dispatch.edn" :field [:payload :judgment]}] :reason "The dispatch record supplies no authorized deliberate no-go decision. No exact-target closure with alternatives, rationale, effective time and independently established authority in force at cutoff is retained. Incomplete work, missing checkpoints or historical rejection cannot substitute."}
+ {:status :reopened :rubric/criterion-id :wm/observed-status-reopened-v1 :assessment :not-established :evidence [{:manifest/id "wm-contract-machinery-52-v1/attempt-001/002-selection.edn" :field [:payload :judgment :selected-action :repair-obligation :repair/id]}] :reason "The record identifies an existing repair target. No prior independently accepted terminal annotation, later renewed-live evidence and explicit authorized reopening forming one ordered revision chain are retained. Selecting or attempting an existing repair again is insufficient."}
+]
+ :consulted [
+ {:path "holes/labs/wm-contract/RUBRIC-observed-status-v1.md" :sha256 "5999521d6e712db5824412a995287d5f1276dc37d08fe504748879226512e788"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/001-time-step.blinded.edn" :sha256 "47646afe4972c965c201ca595b1f567a0fe08e03184e66356899c889f1ee902c"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/002-selection.blinded.edn" :sha256 "2a7e29300f9b9d4424132fefad63107bcf40377fea27f4ebc229053b10735867"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/003-construction.blinded.edn" :sha256 "adfdfff7e63c8a80aee970c2e8f8a048b7df5f1c3d27205de9d48cb194b60648"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/004-dispatch.blinded.edn" :sha256 "9682dc70fa17c9e05f2022fd75923ad47696ac3902fb0289e777638af1869fa5"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/005-build.blinded.edn" :sha256 "3b901653a7167c722c03c9e007b9acf3ab519d3472893bf3c75ab16a82955f4a"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/006-adjudication.blinded.edn" :sha256 "ad19f61b8ad592a238d80405d92f324a8e605fa6d1e87b3365ceb96402df136e"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/close-conditioning.edn" :sha256 "17c880f024a6de982c75e1a9dd3e0322922bc6950530376502c7e5a4403c881a"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/evidence-01-distinct-repair-commit.blinded.edn" :sha256 "f55c3ec8eb7c1dcc014eb46786c9d58a4148adc8098ee3166b24c1e41d85dc6a"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/evidence-limb1.stderr" :sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+ {:path "holes/labs/wm-contract/runs/a-labels-exercise4-2026-09-14/observer-view/evidence-limb1.stdout" :sha256 "14fcc08ea0c5882a499d730752f107743958bf37715bb1d3182ed5a5c0e145c7"}
+]}
