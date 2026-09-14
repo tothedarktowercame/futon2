@@ -1,0 +1,36 @@
+{:schema :wm/execution-receipts-v1
+ :packet :measured-a-untested-refusal-branches
+ :tree-sha "257108713b9a46dbdb3ddbfc4fc45ea9ae303ef3"
+ :at "2026-09-14T12:00:29Z"
+ :gates
+ [{:gate :fresh-jvm-test
+   :command "clojure -X:test :nses '[futon2.aif.measured-a-annotation-test]'"
+   :exit 0 :tests 5 :assertions 22 :failures 0 :errors 0
+   :stdout "followup-test.stdout" :stderr "followup-test.stderr"
+   :exit-file "followup-test.exit"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint test/futon2/aif/measured_a_annotation_test.clj"
+   :exit 0 :errors 0 :warnings 0
+   :stdout "followup-kondo.stdout" :stderr "followup-kondo.stderr"
+   :exit-file "followup-kondo.exit"}
+  {:gate :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults test/futon2/aif/measured_a_annotation_test.clj"
+   :exit 0 :files 1
+   :stdout "followup-parens.stdout" :stderr "followup-parens.stderr"
+   :exit-file "followup-parens.exit"}]
+ :failed-history
+ [{:tree-sha "626fd97c6c22ab8f03c8f8591b10cc6b66a9430a"
+   :gate :fresh-jvm-test :exit 1 :finding :unmatched-test-form
+   :stdout "followup-test-attempt-1.stdout"
+   :stderr "followup-test-attempt-1.stderr"
+   :exit-file "followup-test-attempt-1.exit"}
+  {:tree-sha "626fd97c6c22ab8f03c8f8591b10cc6b66a9430a"
+   :gate :clj-kondo :exit 2 :finding :unmatched-test-form
+   :stdout "followup-kondo-attempt-1.stdout"
+   :stderr "followup-kondo-attempt-1.stderr"
+   :exit-file "followup-kondo-attempt-1.exit"}]
+ :source-pins
+ {"test/futon2/aif/measured_a_annotation_test.clj"
+  "59120192bff5c6bb0f210a7558511029c15593f4e015a6d79991ed5515a9a830"
+  "src/futon2/aif/measured_a_annotation.clj"
+  "6bbf9dff4b35253031e566f5b166e2e454f8a89c793f8948b2dd75e8f3205a85"}}

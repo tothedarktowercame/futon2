@@ -1,0 +1,5 @@
+test/futon2/aif/measured_a_annotation_test.clj:98:1: error: Found an opening ( with no matching )
+test/futon2/aif/measured_a_annotation_test.clj:125:1: warning: inline def
+test/futon2/aif/measured_a_annotation_test.clj:145:1: warning: inline def
+test/futon2/aif/measured_a_annotation_test.clj:165:1: error: Expected a ) to match ( from line 98
+linting took 9ms, errors: 2, warnings: 2
