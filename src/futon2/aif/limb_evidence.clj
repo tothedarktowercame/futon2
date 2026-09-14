@@ -1,7 +1,8 @@
 (ns futon2.aif.limb-evidence
   "Pure validation of pre-close limb evidence records and coverage bundles."
   (:require [clojure.string :as str])
-  (:import (java.time Instant)))
+  (:import (java.security MessageDigest)
+           (java.time Instant)))
 
 (def limb-receipt-schema :wm/limb-receipt-v1)
 (def standing-decision-schema :wm/target-standing-decision-v1)
@@ -38,11 +39,29 @@
     (catch clojure.lang.ExceptionInfo e (throw e))
     (catch Throwable _ (refuse! :timestamp-invalid path))))
 
+(defn- output-file! [x path]
+  (text! x path)
+  (when (or (#{"." ".."} x)
+            (str/includes? x "/")
+            (str/includes? x "\\"))
+    (refuse! :output-file-invalid path))
+  x)
+
+(defn- sha256-bytes [bytes]
+  (let [digest (.digest (MessageDigest/getInstance "SHA-256") bytes)]
+    (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
+
 (defn validate-limb-receipt [record]
-  (exact-map! record
-              #{:schema :repair/id :limb :command :exit :stdout-sha256
-                :stderr-sha256 :recorded-at}
-              [:limb-receipt])
+  (let [required #{:schema :repair/id :limb :command :exit :stdout-sha256
+                   :stderr-sha256 :recorded-at}
+        optional #{:stdout-file :stderr-file}
+        actual (set (keys record))]
+    (when-not (and (map? record)
+                   (every? actual required)
+                   (every? #(contains? (into required optional) %) actual))
+      (refuse! :shape-invalid [:limb-receipt]
+               {:expected-required required :expected-optional optional
+                :actual (some-> record keys set)})))
   (when-not (= limb-receipt-schema (:schema record))
     (refuse! :schema-mismatch [:limb-receipt :schema]))
   (text! (:repair/id record) [:limb-receipt :repair/id])
@@ -52,13 +71,45 @@
     (refuse! :exit-invalid [:limb-receipt :exit]))
   (sha256! (:stdout-sha256 record) [:limb-receipt :stdout-sha256])
   (sha256! (:stderr-sha256 record) [:limb-receipt :stderr-sha256])
+  (doseq [k [:stdout-file :stderr-file]
+          :when (contains? record k)]
+    (output-file! (get record k) [:limb-receipt k]))
   (instant! (:recorded-at record) [:limb-receipt :recorded-at])
   record)
 
+(defn validate-limb-receipt-outputs
+  "Verify any named companion output files through mandatory injected reads.
+  READ-BYTES receives the flat filename, not a caller-supplied path."
+  [receipt read-bytes]
+  (validate-limb-receipt receipt)
+  (when-not (fn? read-bytes)
+    (refuse! :output-file-invalid [:read-bytes]))
+  (doseq [[file-key digest-key] [[:stdout-file :stdout-sha256]
+                                 [:stderr-file :stderr-sha256]]
+          :when (contains? receipt file-key)]
+    (let [filename (get receipt file-key)
+          bytes (try
+                  (read-bytes filename)
+                  (catch Throwable e
+                    (refuse! :output-file-invalid [:limb-receipt file-key]
+                             {:cause (.getName (class e))})))
+          _ (when-not (instance? (Class/forName "[B") bytes)
+              (refuse! :output-file-invalid [:limb-receipt file-key]))
+          actual (sha256-bytes bytes)
+          expected (get receipt digest-key)]
+      (when-not (= expected actual)
+        (refuse! :output-digest-mismatch [:limb-receipt digest-key]
+                 {:filename filename :expected expected :actual actual}))))
+  receipt)
+
 (defn validate-standing-decision [record]
+  (when-not (map? record)
+    (refuse! :shape-invalid [:standing-decision]))
+  (when-not (contains? record :explanation)
+    (refuse! :explanation-invalid [:standing-decision :explanation]))
   (exact-map! record
               #{:schema :entity/id :decision :decided-by
-                :implementation-author :decided-at :evidence}
+                :implementation-author :decided-at :evidence :explanation}
               [:standing-decision])
   (when-not (= standing-decision-schema (:schema record))
     (refuse! :schema-mismatch [:standing-decision :schema]))
@@ -72,6 +123,10 @@
     (refuse! :standing-decision-not-independent
              [:standing-decision :decided-by]))
   (instant! (:decided-at record) [:standing-decision :decided-at])
+  (when-not (and (string? (:explanation record))
+                 (>= (count (:explanation record)) 80)
+                 (not (str/blank? (:explanation record))))
+    (refuse! :explanation-invalid [:standing-decision :explanation]))
   (when-not (and (vector? (:evidence record)) (seq (:evidence record)))
     (refuse! :standing-evidence-invalid [:standing-decision :evidence]))
   (doseq [[i evidence-id] (map-indexed vector (:evidence record))]

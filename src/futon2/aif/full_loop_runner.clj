@@ -1821,11 +1821,13 @@
            :author
            (str "AUTHOR " author " may deposit one actual-command receipt per discharged limb:\n"
                 ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at].\n"
+                "Write stdout/stderr bytes to flat companion files and reference them with :stdout-file/:stderr-file.\n"
                 "When the selected entity artifact changes, also deposit:\n"
                 ":wm/entity-revision-pair-v1 keys [:schema :entity/id :before :after :dimensions], with byte-pinned boundary captures.\n")
            :reviewer
            (str "REVIEWER " reviewer " (not author " author ") deposits the same-target standing decision:\n"
                 ":wm/target-standing-decision-v1 keys [:schema :entity/id :decision :decided-by :implementation-author :decided-at :evidence].\n"
+                "Include a review-grade :explanation of at least 80 characters.\n"
                 "Set :decided-by to your reviewer id and :implementation-author to " author "; a self-decided record refuses.\n"))
          "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n")))
 
@@ -2574,6 +2576,33 @@
                       {:close-retention/refusal :action-occurrence-already-minted})))
     occurrence))
 
+(def ^:private limb-record-schemas
+  #{:wm/limb-receipt-v1 :wm/target-standing-decision-v1
+    :wm/entity-revision-pair-v1})
+
+(defn- parse-attempt-evidence [bytes path]
+  (let [eof-marker (Object.)]
+    (try
+      (let [decoder (doto (.newDecoder java.nio.charset.StandardCharsets/UTF_8)
+                      (.onMalformedInput java.nio.charset.CodingErrorAction/REPORT)
+                      (.onUnmappableCharacter java.nio.charset.CodingErrorAction/REPORT))
+            text (str (.decode decoder (java.nio.ByteBuffer/wrap bytes)))]
+        (with-open [reader (java.io.PushbackReader. (java.io.StringReader. text))]
+          (let [value (edn/read {:eof eof-marker} reader)
+                tail (edn/read {:eof eof-marker} reader)]
+            (when (or (identical? eof-marker value)
+                      (not (identical? eof-marker tail)))
+              (throw (ex-info "Attempt evidence must contain one EDN form"
+                              {:limb-evidence/refusal :evidence-not-single-edn
+                               :source-path path})))
+            value)))
+      (catch clojure.lang.ExceptionInfo e (throw e))
+      (catch Throwable e
+        (throw (ex-info "Attempt evidence EDN invalid"
+                        {:limb-evidence/refusal :evidence-edn-invalid
+                         :source-path path}
+                        e))))))
+
 (defn- checkpoint-evidence-manifest
   [events data-root cohort-id attempt-id]
   (let [cohort-name (name cohort-id)
@@ -2591,9 +2620,8 @@
                          (sort-by #(.getName ^java.io.File %)
                                   (seq (.listFiles evidence-dir)))
                          [])
-        eof-marker (Object.)
         captured (atom {})
-        evidence-entries
+        captured-evidence
         (mapv
          (fn [^java.io.File file]
            (let [path (.getAbsolutePath file)
@@ -2605,40 +2633,42 @@
                                            {:evidence-manifest/refusal
                                             :source-unavailable
                                             :source-path path}
-                                           e))))
-                 record
-                 (try
-                   (let [decoder (doto (.newDecoder
-                                        java.nio.charset.StandardCharsets/UTF_8)
-                                   (.onMalformedInput
-                                    java.nio.charset.CodingErrorAction/REPORT)
-                                   (.onUnmappableCharacter
-                                    java.nio.charset.CodingErrorAction/REPORT))
-                         text (str (.decode decoder (java.nio.ByteBuffer/wrap bytes)))]
-                     (with-open [reader (java.io.PushbackReader.
-                                        (java.io.StringReader. text))]
-                       (let [value (edn/read {:eof eof-marker} reader)
-                             tail (edn/read {:eof eof-marker} reader)]
-                         (when (or (identical? eof-marker value)
-                                   (not (identical? eof-marker tail)))
-                           (throw (ex-info "Attempt evidence must contain one EDN form"
-                                           {:limb-evidence/refusal
-                                            :evidence-not-single-edn
-                                            :source-path path})))
-                         value)))
-                   (catch clojure.lang.ExceptionInfo e (throw e))
-                   (catch Throwable e
-                     (throw (ex-info "Attempt evidence EDN invalid"
-                                     {:limb-evidence/refusal :evidence-edn-invalid
-                                      :source-path path}
-                                     e))))]
-             (limb-evidence/validate-record record)
+                                           e))))]
              (swap! captured assoc path bytes)
-             {:evidence/id (str cohort-name "/" attempt-id "/evidence/"
-                                (.getName file))
-              :source-path path
-              :admitted-at admitted-at}))
+             {:filename (.getName file) :path path :bytes bytes
+              :admitted-at admitted-at
+              :parsed (try
+                        {:value (parse-attempt-evidence bytes path)}
+                        (catch clojure.lang.ExceptionInfo e {:error e}))}))
          evidence-files)
+        record-captures
+        (filterv #(contains? limb-record-schemas
+                             (get-in % [:parsed :value :schema]))
+                 captured-evidence)
+        records (mapv #(limb-evidence/validate-record
+                        (get-in % [:parsed :value]))
+                      record-captures)
+        companion-names
+        (into #{} (mapcat #(keep % [:stdout-file :stderr-file])) records)
+        captures-by-name (into {} (map (juxt :filename :bytes)) captured-evidence)
+        _ (doseq [{:keys [filename parsed]} captured-evidence
+                  :when (and (not (contains? companion-names filename))
+                             (not (contains? limb-record-schemas
+                                             (get-in parsed [:value :schema]))))]
+            (if-let [error (:error parsed)]
+              (throw error)
+              (throw (ex-info "Attempt evidence schema invalid"
+                              {:limb-evidence/refusal :schema-mismatch
+                               :filename filename}))))
+        _ (doseq [receipt (filter #(= :wm/limb-receipt-v1 (:schema %)) records)]
+            (limb-evidence/validate-limb-receipt-outputs
+             receipt #(get captures-by-name %)))
+        evidence-entries
+        (mapv (fn [{:keys [filename path admitted-at]}]
+                {:evidence/id (str cohort-name "/" attempt-id "/evidence/" filename)
+                 :source-path path
+                 :admitted-at admitted-at})
+              captured-evidence)
         entries (into checkpoint-entries evidence-entries)]
     (evidence-manifest/build-manifest
      {:entries entries
@@ -3928,6 +3958,7 @@
                                        {:author (:execution author-job)
                                         :reviewer (:execution review-gate)
                                         :review-job (:job-id review-job)
+                                        :review-text (job-text review-job)
                                         :approved? approved?
                                         :review-gate review-gate
                                         :artifact-binding artifact-binding}}

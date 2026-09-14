@@ -5,6 +5,10 @@
 (def sha-a (apply str (repeat 64 "a")))
 (def sha-b (apply str (repeat 64 "b")))
 
+(defn- sha256 [bytes]
+  (let [digest (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)]
+    (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
+
 (def receipt
   {:schema :wm/limb-receipt-v1
    :repair/id "repair-1"
@@ -22,6 +26,8 @@
    :decided-by "reviewer"
    :implementation-author "author"
    :decided-at "2026-09-14T12:01:00Z"
+   :explanation (str "The cited execution and review records show that the selected target "
+                     "still has an undischarged production-successor obligation.")
    :evidence ["record-1"]})
 
 (def revision
@@ -84,6 +90,36 @@
            (refusal #(limb/validate-revision-pair
                       (assoc-in revision [:before :sha256]
                                 (apply str (repeat 64 "A")))))))))
+
+(deftest receipt-companion-outputs-are-byte-verified
+  (let [stdout (.getBytes "actual stdout\n" "UTF-8")
+        stderr (.getBytes "actual stderr\n" "UTF-8")
+        with-files (assoc receipt
+                          :stdout-file "command.stdout"
+                          :stderr-file "command.stderr"
+                          :stdout-sha256 (sha256 stdout)
+                          :stderr-sha256 (sha256 stderr))
+        reads {"command.stdout" stdout "command.stderr" stderr}]
+    (is (= with-files
+           (limb/validate-limb-receipt-outputs with-files #(get reads %))))
+    (is (= :output-digest-mismatch
+           (refusal #(limb/validate-limb-receipt-outputs
+                      with-files
+                      (fn [filename]
+                        (if (= filename "command.stdout")
+                          (.getBytes "changed\n" "UTF-8")
+                          (get reads filename)))))))
+    (is (= :output-file-invalid
+           (refusal #(limb/validate-limb-receipt
+                      (assoc with-files :stdout-file "nested/command.stdout")))))))
+
+(deftest standing-decision-requires-review-grade-explanation
+  (is (= :explanation-invalid
+         (refusal #(limb/validate-standing-decision
+                    (dissoc standing :explanation)))))
+  (is (= :explanation-invalid
+         (refusal #(limb/validate-standing-decision
+                    (assoc standing :explanation "still live"))))))
 
 (deftest bundle-reports-covered-and-absent-limbs
   (let [review-receipt (assoc receipt

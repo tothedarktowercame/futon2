@@ -1120,9 +1120,11 @@
     (doseq [prompt [author revision-author]]
       (is (re-find #":wm/limb-receipt-v1" prompt))
       (is (re-find #":wm/entity-revision-pair-v1" prompt))
+      (is (re-find #"stdout/stderr bytes to flat companion files" prompt))
       (is (not (re-find #":wm/target-standing-decision-v1" prompt))))
     (doseq [prompt [reviewer revision-reviewer]]
       (is (re-find #":wm/target-standing-decision-v1" prompt))
+      (is (re-find #":explanation of at least 80 characters" prompt))
       (is (re-find #"a self-decided record refuses" prompt))
       (is (not (re-find #":wm/limb-receipt-v1" prompt))))))
 
@@ -4747,6 +4749,8 @@
     (is (= :absent (get-in retained [:state :status])))
     (is (= :absent (get-in retained [:model :status])))
     (is (= (:recorded-at close-event) (:closed-at retained)))
+    (is (= "FULL_LOOP_REVIEW: APPROVE"
+           (get-in result [:checkpoints :build :judgment :validation :review-text])))
     (is (= 1 (:closed-count (cohort/ledger path root))))
     (let [slot (atom nil)
           input {:run-id "run" :cohort-id "cohort" :attempt-id "attempt"
@@ -4805,16 +4809,27 @@
 (def limb-sha-a (apply str (repeat 64 "a")))
 (def limb-sha-b (apply str (repeat 64 "b")))
 
+(def limb-stdout-bytes (.getBytes "runner command stdout\n" "UTF-8"))
+(def limb-stderr-bytes (.getBytes "runner command stderr\n" "UTF-8"))
+
+(defn- runner-test-sha256 [bytes]
+  (let [digest (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)]
+    (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
+
 (def valid-attempt-evidence
   [["01-receipt.edn"
     {:schema :wm/limb-receipt-v1 :repair/id "repair-1"
      :limb :distinct-repair-commit :command "git rev-parse HEAD" :exit 0
-     :stdout-sha256 limb-sha-a :stderr-sha256 limb-sha-b
+     :stdout-sha256 (runner-test-sha256 limb-stdout-bytes)
+     :stderr-sha256 (runner-test-sha256 limb-stderr-bytes)
+     :stdout-file "00-command.stdout" :stderr-file "00-command.stderr"
      :recorded-at "2026-09-14T12:00:00Z"}]
    ["02-standing.edn"
     {:schema :wm/target-standing-decision-v1 :entity/id "entity-1"
      :decision :still-live :decided-by "reviewer"
      :implementation-author "author" :decided-at "2026-09-14T12:01:00Z"
+     :explanation (str "The cited execution and review records show that the selected target "
+                       "still has an undischarged production-successor obligation.")
      :evidence ["record-1"]}]
    ["03-revision.edn"
     {:schema :wm/entity-revision-pair-v1 :entity/id "entity-1"
@@ -4829,6 +4844,13 @@
         opts (assoc (retention-success-opts c)
                     :delivery-qa-fn
                     (fn [_ item]
+                      (spit (doto (io/file root "test-cohort-exhaustion" "attempt-001"
+                                          "evidence" "00-command.stdout")
+                              io/make-parents)
+                            (String. limb-stdout-bytes "UTF-8"))
+                      (spit (io/file root "test-cohort-exhaustion" "attempt-001"
+                                     "evidence" "00-command.stderr")
+                            (String. limb-stderr-bytes "UTF-8"))
                       (doseq [[filename value] valid-attempt-evidence]
                         (write-attempt-evidence! root filename value))
                       {:morning-brief/addendum-id
@@ -4836,16 +4858,41 @@
         result (runner/run-opportunity! opts)
         manifest (:close-evidence-manifest result)
         ids (mapv :evidence/id (:entries manifest))]
-    (is (= 9 (count ids)))
+    (is (= 11 (count ids)))
     (is (= (mapv #(str "test-cohort-exhaustion/attempt-001/evidence/" (first %))
                   valid-attempt-evidence)
-           (subvec ids 6)))
+           (subvec ids 8)))
     (is (= ids (get-in result [:close-retention :admitted-evidence])))
     (doseq [entry (drop 6 (:entries manifest))]
       (let [bytes (Files/readAllBytes (.toPath (io/file (:source-path entry))))
             digest (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)
             actual (apply str (map #(format "%02x" (bit-and 0xff %)) digest))]
         (is (= actual (:sha256 entry)))))))
+
+(deftest mismatched-receipt-companion-refuses-close
+  (let [{:keys [root] :as c} (retention-cohort "runner-limb-output-mismatch")
+        close-path (io/file root "test-cohort-exhaustion" "attempt-001"
+                            "007-closed.edn")
+        bad-receipt (assoc (second (first valid-attempt-evidence))
+                           :stdout-sha256 limb-sha-a
+                           :stdout-file "00-command.stdout")
+        opts (assoc (retention-success-opts c)
+                    :delivery-qa-fn
+                    (fn [_ item]
+                      (let [file (io/file root "test-cohort-exhaustion" "attempt-001"
+                                          "evidence" "00-command.stdout")]
+                        (io/make-parents file)
+                        (spit file "different bytes\n"))
+                      (write-attempt-evidence! root "01-receipt.edn" bad-receipt)
+                      {:morning-brief/addendum-id
+                       (str "qa-" (:attempt-id item))}))]
+    (is (= :output-digest-mismatch
+           (try
+             (runner/run-opportunity! opts)
+             nil
+             (catch clojure.lang.ExceptionInfo e
+               (:limb-evidence/refusal (ex-data e))))))
+    (is (not (.exists close-path)))))
 
 (deftest invalid-attempt-evidence-refuses-close
   (doseq [[label filename content expected]
@@ -4854,7 +4901,9 @@
                      :entity/id "entity-1" :decision :still-live
                      :decided-by "author" :implementation-author "author"
                      :decided-at "2026-09-14T12:01:00Z"
-                     :evidence ["record-1"]})
+                     :evidence ["record-1"]
+                     :explanation (str "This review-grade explanation describes how the cited evidence "
+                                       "bears on whether the exact selected target remains live.")})
             :standing-decision-not-independent]
            [:two-forms "01-two-forms.edn" "{:schema :first}\n{:schema :second}\n"
             :evidence-not-single-edn]
