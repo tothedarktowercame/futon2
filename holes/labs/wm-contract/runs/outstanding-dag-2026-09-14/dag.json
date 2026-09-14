@@ -600,7 +600,7 @@
       "flag": "hidden-prereq",
       "paper-anchor": "--",
       "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/execution-receipts.edn:1",
-      "state": "in-flight",
+      "state": "done",
       "evidence": [
         {
           "source": "annotation-receipt",
@@ -612,7 +612,7 @@
         }
       ],
       "work-kind": "code",
-      "state-note": "Commission calls codex-23 in flight. Retained author receipt now exists (4 tests/17 assertions); this discovery neither repeats it nor promotes it to independent acceptance. Do not duplicate dispatch."
+      "state-note": "DONE 2026-09-14: independent acceptance retained with follow-up execution receipts (runs/row-14-measured-a-validator-2026-09-14/ACCEPTANCE.md)."
     },
     {
       "id": "a-rubric",
@@ -620,7 +620,7 @@
       "flag": "hidden-prereq",
       "paper-anchor": "--",
       "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md:25",
-      "state": "unbuilt",
+      "state": "done",
       "evidence": [
         {
           "source": "annotation",
@@ -632,7 +632,7 @@
         }
       ],
       "work-kind": "evidence-acquisition",
-      "state-note": "Seven operational criteria remain OPEN; a parser is not permission to invent labels."
+      "state-note": "DONE 2026-09-14: rubric v1 accepted (runs/row-14-observed-status-rubric-2026-09-14/ACCEPTANCE.md, 8a6e5a5a); observer/reviewer authority bound (authority-observer-origin / reviewer-authorization records)."
     },
     {
       "id": "a-labels",
@@ -640,7 +640,7 @@
       "flag": "hidden-prereq",
       "paper-anchor": "--",
       "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:184",
-      "state": "blocked",
+      "state": "in-flight",
       "evidence": [
         {
           "source": "decisions",
@@ -1070,7 +1070,7 @@
       "flag": "hidden-prereq",
       "paper-anchor": "--",
       "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:214",
-      "state": "built-not-wired",
+      "state": "done",
       "evidence": [
         {
           "source": "inventory",
@@ -1082,7 +1082,7 @@
         }
       ],
       "work-kind": "code",
-      "state-note": "Existing row26 click is not a demonstrated run-scheduled-dispatch! production caller."
+      "state-note": "DONE 2026-09-14: wiring accepted and the operator-lane production run discharged the commission (futon3c runs/r10-wiring-2026-09-14/ACCEPTANCE-RUN.md fe333299; evidence e-af73b9b5-a164-4a18-9bb6-68eac432cf8c)."
     },
     {
       "id": "r10-record",

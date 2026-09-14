@@ -21,7 +21,9 @@
 (doseq [n nodes]
   (assert (every? #(contains? n %) [:id :title :flag :paper-anchor :tracker :state :evidence]))
   (assert (contains? #{:outstanding :staged :honest-absence :parked :hidden-prereq} (:flag n)))
-  (assert (contains? #{:unbuilt :built-not-wired :blocked :in-flight :ruled-parked} (:state n)))
+  ;; :done added 2026-09-14: the snapshot originally had no completion state,
+  ;; so finished nodes stayed rendered as open (Joe: "they are all still red").
+  (assert (contains? #{:unbuilt :built-not-wired :blocked :in-flight :ruled-parked :done} (:state n)))
   (assert (seq (:evidence n))))
 (def sources (into {} (map (juxt :id identity) (:sources d))))
 (doseq [s (:sources d)]
