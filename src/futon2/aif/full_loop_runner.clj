@@ -3185,7 +3185,7 @@
                   (swap! checkpoint-events assoc :selection event)))
               (reset! selection-persisted? true)))
           (get @checkpoints :selection))
-        close! (fn [outcome data]
+        close-core! (fn [outcome data]
                  (reset! closing? true)
                  (persist-selection! nil)
                  (doseq [cp required-checkpoints
@@ -3419,7 +3419,69 @@
                                   :reviewer-job (:review-job data)
                                   :grounding-witnesses
                                   (cond-> [] (:witness data) (conj (:witness data)))}})
-                   result))]
+                   result))
+        close! (fn [outcome data]
+                 (try
+                   (close-core! outcome data)
+                   (catch Throwable e
+                     ;; Cohort-53 attempt-001 is retained as the historical
+                     ;; counterexample: a close-time evidence refusal escaped
+                     ;; and left no 007.  This boundary must always attempt the
+                     ;; durable typed close before returning to the caller.
+                     (let [failure-data (if (instance? clojure.lang.ExceptionInfo e)
+                                          (ex-data e) {})
+                           refusal-kind (or (:limb-evidence/refusal failure-data)
+                                            (:evidence-manifest/refusal failure-data)
+                                            (:close-retention/refusal failure-data)
+                                            (:failure-kind failure-data)
+                                            :close-exception)
+                           exception-class (.getName (class e))
+                           finding ((or (:repair-system-record-fn opts)
+                                        repair/record-system-failure!)
+                                    {:attempt-id external-attempt-id
+                                     :repair-class :machine-failure
+                                     :machine-repo (:repo code-state)
+                                     :target (get-in @checkpoints
+                                                     [:selection :judgment
+                                                      :selected-mission])
+                                     :failure-stage :close
+                                     :outcome :build-failed
+                                     :failure-kind refusal-kind
+                                     :error (.getMessage e)
+                                     :failure-data failure-data
+                                     :opened-at (get-in time-cell
+                                                        [:judgment :machine-state
+                                                         :started-at])
+                                     :discharge-contract
+                                     (discharge-contract :machine-failure)})
+                           sorry-data {:outcome :build-failed
+                                       :grounded? false
+                                       :artifact-only? false
+                                       :failure-kind refusal-kind
+                                       :failure-stage :close
+                                       :error (.getMessage e)
+                                       :exception-class exception-class
+                                       :refusal-data failure-data
+                                       :repair-obligation finding
+                                       :sorry {:kind refusal-kind
+                                               :refusal-data failure-data}}
+                           closed (term sorry-data
+                                        {:kind :full-loop-close-failure
+                                         :attempt-id attempt-id})
+                           closed-event (when cohort?
+                                          (if cohort-source
+                                            (cohort/close-attempt!
+                                             cohort-source
+                                             (:data-root execution-cohort)
+                                             attempt-id closed)
+                                            (cohort/close-attempt!
+                                             attempt-id closed)))]
+                       {:attempt-id attempt-id
+                        :opportunity-id opportunity-id
+                        :outcome :build-failed
+                        :checkpoints @checkpoints
+                        :data sorry-data
+                        :closed-event closed-event})))]
     (try
       (when-let [e (:error roster-result)]
         (throw (ex-info "Agent readiness observation failed"

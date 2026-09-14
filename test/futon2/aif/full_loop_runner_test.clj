@@ -748,14 +748,16 @@
     (is (= :grounded-change (:outcome result)))))
 
 (deftest delivered-commit-cannot-close-without-field-desk-qa
-  (is (thrown-with-msg?
-       clojure.lang.ExceptionInfo
-       #"Delivery closed without Field Desk QA notes"
-       (run-feature-card-attempt
-        {:author-card feature-card-claim
-         :delivery-qa-fn
-         (fn [& _]
-           (throw (ex-info "Field Desk unavailable" {})))}))))
+  (let [{:keys [result]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :delivery-qa-fn
+          (fn [& _]
+            (throw (ex-info "Field Desk unavailable" {})))})]
+    (is (= :build-failed (:outcome result)))
+    (is (= :delivery-qa-gate-failed
+           (get-in result [:data :sorry :kind])))
+    (is (= :close (get-in result [:data :failure-stage])))))
 
 (deftest invoke-exception-author-job-is-retried-once
   ;; Replays attempt-043: Agency rejected transcript persistence after tool
