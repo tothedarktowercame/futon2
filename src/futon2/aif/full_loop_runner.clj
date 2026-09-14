@@ -550,7 +550,7 @@
     (boolean (f repo ancestor descendant))
     (zero? (:exit (git repo "merge-base" "--is-ancestor" ancestor descendant)))))
 
-(declare job-text)
+(declare job-text commit-ish?)
 
 (defn- author-claimed-ref
   "The sha the author's own FULL_LOOP_AUTHOR: DONE line claims.  The Agency
@@ -648,12 +648,24 @@
              :disagreement? (and observed-valid? (not corroborates?))
              :commit (when corroborates? (or text-sha observed-head))}))]
     (when (:disagreement? binding)
-      (throw (ex-info "Author commit claim disagrees with observed repository HEAD"
-                      {:outcome :build-failed
-                       :failure-kind :artifact-binding-mismatch
-                       :failure-stage :artifact-binding
-                       :author-job author-job
-                       :artifact-binding (assoc binding :commit nil)})))
+      ;; A claim that does not even LOOK like a commit is not a binding
+      ;; disagreement: it is upstream extraction handing us prose (the
+      ;; canary-de75cee9 shape -- a file path). unvalidated-artifact-failure
+      ;; already classifies this on the build-gate path; this boundary owed
+      ;; the same distinction (round-3 of repair-ea1-3f4cac).
+      (let [ref (:text-artifact-ref binding)
+            malformed? (and (string? ref) (not (commit-ish? ref)))
+            failure-kind (if malformed? :artifact-ref-malformed
+                                        :artifact-binding-mismatch)]
+        (throw (ex-info
+                (if malformed?
+                  "Author artifact claim is not a commit at all"
+                  "Author commit claim disagrees with observed repository HEAD")
+                {:outcome :build-failed
+                 :failure-kind failure-kind
+                 :failure-stage :artifact-binding
+                 :author-job author-job
+                 :artifact-binding (assoc binding :commit nil)}))))
     binding))
 
 (defn- primary-repos []

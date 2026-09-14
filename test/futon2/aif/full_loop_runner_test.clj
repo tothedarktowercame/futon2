@@ -2321,7 +2321,7 @@
               :commit-time-ms-fn (constantly 1500)
               :resolve-commit-sha-fn (fn [_ ref] (when (= ref "author-sha") "author-head"))}
         before {:head "base" :observed-at-ms 1000}]
-    (doseq [claim [nil "unresolvable"]]
+    (doseq [claim [nil "0badc0de"]]
       (let [failure (try
                       (runner/fresh-artifact-binding opts "/repo" before {:artifact-ref claim})
                       nil
@@ -2346,12 +2346,12 @@
               (fn [repo] {:repo repo :head "concurrent-head" :observed-at-ms 2000})
               :ancestor-fn (constantly true)
               :commit-time-ms-fn (fn [_ commit]
-                                   (if (= commit "stale-sha") 500000000 1500))
-              :resolve-commit-sha-fn (fn [_ ref] (when (= ref "stale-claim") "stale-sha"))}
+                                   (if (= commit "5ca1e000") 500000000 1500))
+              :resolve-commit-sha-fn (fn [_ ref] (when (= ref "5ca1e000") "5ca1e000"))}
         before {:head "base" :observed-at-ms 1000}
         failure (try
                   (runner/fresh-artifact-binding opts "/repo" before
-                                                 {:artifact-ref "stale-claim"})
+                                                 {:artifact-ref "5ca1e000"})
                   nil
                   (catch clojure.lang.ExceptionInfo e (ex-data e)))]
     (is (= :artifact-binding-mismatch (:failure-kind failure)))
@@ -4974,6 +4974,48 @@
                            opts "/repo" before
                            {:events [{:type "text" :text unrelated-reply}]}))
         "a claim outside the history never corroborates")))
+
+(deftest non-commit-artifact-claim-classifies-as-malformed-not-mismatch
+  ;; Round-3 of repair-ea1-3f4cac: the canary-de75cee9 shape -- the claimed
+  ;; artifact arriving as a file path scraped from prose -- still threw
+  ;; :artifact-binding-mismatch at the fresh-artifact-binding boundary,
+  ;; blaming the author's binding for an upstream extraction fault that
+  ;; unvalidated-artifact-failure already classifies elsewhere. A
+  ;; commit-SHAPED but unvalidated claim stays a mismatch.
+  (let [opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head "def5678" :observed-at-ms 2000})
+              :resolve-commit-sha-fn (fn [_ ref] (when (= ref "abc1234") "def5678"))
+              :ancestor-fn (fn [_ a d] (and (= a "000aaaa") (or (= d "def5678") (= d "bbb2222"))))
+              :commit-time-ms-fn (fn [& _] 1500)}
+        before {:repo "/repo" :head "000aaaa" :observed-at-ms 1000}
+        ;; The canary shape: no hex in the reply at all, and the scraped
+        ;; path lands in the job's :artifact-ref, which author-claimed-ref
+        ;; falls back to when no DONE sha exists.
+        path-reply "Edited the file and committed the parcel."
+        sha-reply "FULL_LOOP_AUTHOR: DONE ccc3333"]
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo #"not a commit at all"
+         (runner/fresh-artifact-binding
+          opts "/repo" before
+          {:artifact-ref "/eoi_network_test.clj"
+           :events [{:type "text" :text path-reply}]}))
+        "a path-shaped claim is :artifact-ref-malformed")
+    (let [failure (try
+                    (runner/fresh-artifact-binding
+                     opts "/repo" before
+                     {:artifact-ref "/eoi_network_test.clj"
+                      :events [{:type "text" :text path-reply}]})
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :artifact-ref-malformed (:failure-kind failure))))
+    (let [failure (try
+                    (runner/fresh-artifact-binding
+                     opts "/repo" before
+                     {:events [{:type "text" :text sha-reply}]})
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :artifact-binding-mismatch (:failure-kind failure))
+          "a commit-shaped but uncorroboratable claim stays a mismatch"))))
 
 (deftest attempt-limb-evidence-follows-checkpoints-in-manifest
   (let [{:keys [root] :as c} (retention-cohort "runner-limb-evidence")
