@@ -1,0 +1,54 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-51-v1,
+ :attempt/id "attempt-001",
+ :attempt/ordinal 1,
+ :event/sequence 5,
+ :checkpoint/type :build,
+ :recorded-at "2026-09-14T18:21:27.051271693Z",
+ :payload
+ {:judgment
+  {:artifacts
+   ["src/futon2/aif/full_loop_cohort.clj"
+    "test/futon2/aif/full_loop_cohort_test.clj"],
+   :generated-code
+   ["src/futon2/aif/full_loop_cohort.clj"
+    "test/futon2/aif/full_loop_cohort_test.clj"],
+   :commits ["5e7708da36dd5f157e97e8da7835bb080c91f650"],
+   :patterns-used
+   ["futon-theory/stop-the-line" "musn/pause-backtrace"],
+   :inline-improvements [],
+   :build-retries [],
+   :validation
+   {:author {:executed true, :tool-events 7, :command-events 6},
+    :reviewer {:executed true, :tool-events 6, :command-events 6},
+    :review-job "invoke-1789410019408-20809-8cc48df8",
+    :approved? true,
+    :review-gate
+    {:required? true,
+     :code-files
+     ["src/futon2/aif/full_loop_cohort.clj"
+      "test/futon2/aif/full_loop_cohort_test.clj"],
+     :executed? true,
+     :tool-events 6,
+     :execution {:executed true, :tool-events 6, :command-events 6},
+     :execution-source :job-summary,
+     :passed? true,
+     :failure-kind nil},
+    :artifact-binding
+    {:fresh-author? true,
+     :disagreement? false,
+     :descendant? true,
+     :text-artifact-ref "5e7708da",
+     :pre-dispatch-head "e616cd03b5bcd68f1a39da9fee026bf708347f6f",
+     :author-window-end-ms 1789410017142,
+     :author-window-start-ms 1789409921477,
+     :commit "5e7708da36dd5f157e97e8da7835bb080c91f650",
+     :in-author-window? true,
+     :observed-commit-time-ms 1789409989000,
+     :repo "/home/joe/code/futon2",
+     :text-artifact-sha "5e7708da36dd5f157e97e8da7835bb080c91f650",
+     :observed-head "5e7708da36dd5f157e97e8da7835bb080c91f650",
+     :corroborates? true}}},
+  :ground
+  {:kind :git-commit-and-independent-review,
+   :repository "/home/joe/code/futon2"}}}

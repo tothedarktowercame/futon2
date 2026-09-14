@@ -1,0 +1,11 @@
+{:schema :wm/limb-receipt-v1,
+ :repair/id
+ "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001-untyped-failure",
+ :limb :distinct-repair-commit,
+ :command "git rev-parse HEAD",
+ :exit 0,
+ :stdout-sha256
+ "2449020a65f367d7a9794c2a8284286bb233f82daa0031ae814e108872abd805",
+ :stderr-sha256
+ "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ :recorded-at "2026-09-14T18:19:57Z"}

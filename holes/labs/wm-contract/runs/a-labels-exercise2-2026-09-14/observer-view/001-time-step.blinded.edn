@@ -1,0 +1,227 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-51-v1,
+ :attempt/id "attempt-001",
+ :attempt/ordinal 1,
+ :event/sequence 1,
+ :checkpoint/type :time-step,
+ :recorded-at "2026-09-14T18:17:47.993677987Z",
+ :payload
+ {:judgment
+  {:opportunity-id
+   "duree-click-on-demand/2026-09-14T18:14:35.351628525Z/27532d59-27af-4fb7-aec8-d6d9a4e95b4f",
+   :trigger :duree-click-on-demand,
+   :machine-state {:started-at "2026-09-14T18:17:47.992098490Z"},
+   :agent-roster
+   {:claude-15
+    {:capabilities ["explore" "edit" "test" "coordination/execute"],
+     :session-id "9593f811-f96b-4582-a8f0-c462af80f0de",
+     :invoke-route "local",
+     :completion-bell-required? true,
+     :excursion-id nil,
+     :type "claude",
+     :invoke-ws-available? false,
+     :delivery-mode "push",
+     :invoke-local? true,
+     :status "idle",
+     :mission-id nil,
+     :id #:id{:value "claude-15", :type "continuity"},
+     :last-active "2026-09-14T18:14:41.961939669Z",
+     :invoke-diagnostic "local invoke-fn registered",
+     :registered-at "2026-09-12T14:02:42.712750460Z",
+     :ttl-ms nil,
+     :metadata
+     {:agency/contracts {:bell-on-complete? true},
+      :auto-registered? true,
+      :cwd "/home/joe/code/voxterm/",
+      :model "claude-fable-5",
+      :session-file "/tmp/futon-session-id-claude-15",
+      :emacs-socket "server"},
+     :campaign-id nil,
+     :invoke-ready? true},
+    :codex-22
+    {:capabilities ["edit" "test" "coordination/execute"],
+     :session-id "01a096e4-a8b8-75d2-a6ab-c1e490c32585",
+     :invoke-route "local",
+     :completion-bell-required? true,
+     :excursion-id nil,
+     :type "codex",
+     :invoke-ws-available? false,
+     :delivery-mode "push",
+     :invoke-local? true,
+     :status "idle",
+     :mission-id nil,
+     :id #:id{:value "codex-22", :type "continuity"},
+     :last-active "2026-09-14T16:31:24.329097384Z",
+     :invoke-diagnostic "local invoke-fn registered",
+     :registered-at "2026-09-12T18:32:01.560098370Z",
+     :ttl-ms nil,
+     :metadata
+     {:agency/contracts {:bell-on-complete? true},
+      :auto-registered? true,
+      :require-execution? true,
+      :cwd "/home/joe/code/",
+      :model "gpt-5.6-sol",
+      :session-file "/tmp/futon-codex-session-id-codex-22"},
+     :campaign-id nil,
+     :invoke-ready? true},
+    :codex-24
+    {:capabilities ["edit" "test" "coordination/execute"],
+     :session-id "01a096e5-99a3-7653-ab6c-0b04b723e980",
+     :invoke-route "local",
+     :completion-bell-required? true,
+     :excursion-id nil,
+     :type "codex",
+     :invoke-ws-available? false,
+     :delivery-mode "push",
+     :invoke-local? true,
+     :status "idle",
+     :mission-id nil,
+     :id #:id{:value "codex-24", :type "continuity"},
+     :last-active "2026-09-14T18:13:24.639482764Z",
+     :invoke-diagnostic "local invoke-fn registered",
+     :registered-at "2026-09-12T18:33:24.420096646Z",
+     :ttl-ms nil,
+     :metadata
+     {:agency/contracts {:bell-on-complete? true},
+      :auto-registered? true,
+      :require-execution? true,
+      :cwd "/home/joe/code/voxterm/",
+      :model "gpt-5.6-sol",
+      :session-file "/tmp/futon-codex-session-id-codex-24"},
+     :campaign-id nil,
+     :invoke-ready? true}},
+   :code-state
+   {:repo "/home/joe/code/futon2",
+    :git-sha "e616cd03b5bcd68f1a39da9fee026bf708347f6f",
+    :git-dirty? true,
+    :repo-heads
+    {"/home/joe/code/futon5a"
+     "e1a8c5252f45b8b7e7008943a397657ce80d8911",
+     "/home/joe/code/futon3c-http-test-ledger-isolation"
+     "7c98731930772ff14bd32eae324f372ccca30a02",
+     "/home/joe/code/futon3-L14-transform-review-v2"
+     "5704359975a41ff125ffa94f7ce227dcf5d53217",
+     "/home/joe/code/futon3c-library-loop-checkpoints"
+     "ac61975be5f338c47a1ff594215afcf5d49dcf45",
+     "/home/joe/code/futon2-L3-review-codex"
+     "f1ec9ac99a2dc333fed2cbddc975e4c7b5162bde",
+     "/home/joe/code/futon3c-v4-production"
+     "67eed81e8cbcd3487cb2fe040ddf03fd54f6d303",
+     "/home/joe/code/futon2-L15-review-codex"
+     "f8ee74473a8e06c94a88a03e730d89866109993b",
+     "/home/joe/code/futon2-l7-review"
+     "30f3183f8b33d11ee6c747a7211b563c9ef832e9",
+     "/home/joe/code/futon1a"
+     "9748a7d2d31d6ff22ad1171d4a247f2339bead1e",
+     "/home/joe/code/futon2-L16-review-codex"
+     "57296b21d1ba73d7685060f122d17ebdc6f64ceb",
+     "/home/joe/code/futon3c-store-warning-hold"
+     "d33d49fbd6359218bbcb0c328a6875e067756b5e",
+     "/home/joe/code/futon3b"
+     "9795feb546c2ca563797f2ed85614a7b94f73a12",
+     "/home/joe/code/futon7"
+     "c5b72885e99ef4a08a90b875ba7b6fe8e03bd934",
+     "/home/joe/code/futon2-L12-review-codex"
+     "237742696b0175dc13251d1ccc90cb8bd876dfbe",
+     "/home/joe/code/futon1bi"
+     "61cf8f88f5652fbe2a41c53e9cf712085dd48282",
+     "/home/joe/code/futon5"
+     "52341d2a6b688c9c3797a1866c770b3b4e92ad1c",
+     "/home/joe/code/futon2-L17-review-codex"
+     "680d4acf5157939b1e210259e1a564e0684e03fc",
+     "/home/joe/code/futon3-L15-pre-codex"
+     "64436d7efb815994b69d6c7d2b2b3ac28f406d68",
+     "/home/joe/code/futon2-L14-review-codex"
+     "a92877e39afd4438d274e0451f853823942c3c4d",
+     "/home/joe/code/futon3c-provenance-recovery"
+     "6ff2bc237288c3a3e700d9f50d4ca8e3c2065061",
+     "/home/joe/code/futon3c"
+     "bcca33b748eae5bacd4a46e397e58c2096d2e8fb",
+     "/home/joe/code/futon6"
+     "8dd08f49d351cc3808f9bb079db888847a1efb9a",
+     "/home/joe/code/futon0"
+     "fb1cfb0111d8caf6aa8c12e81c2d3bef7d009173",
+     "/home/joe/code/futon2-L10-review-codex"
+     "1f605f500b2f85aa7e3c3f06ce4400d7bb46e9a4",
+     "/home/joe/code/futon1b"
+     "14621cf328f0c8f439fd6f0c240e8a13b691b625",
+     "/home/joe/code/futon2-L6-review-codex"
+     "2554119f6ed7d29c41aa4f6dee7a9e2bcda699e9",
+     "/home/joe/code/futon1"
+     "26ab382e6721342483403e37d4e2ab59cea47e06",
+     "/home/joe/code/futon2-L14-review-codex-v2"
+     "8f8478d0976308e3a35120edf6450a05a31162d0",
+     "/home/joe/code/futon3c-library-loop-production"
+     "aec1e615fc616c00d9e64ea788710da93c9262e6",
+     "/home/joe/code/futon3c-library-loop-plan"
+     "c03586886b161c2e95c22b22d91b1832dae3cae8",
+     "/home/joe/code/futon3c-library-loop-core"
+     "d51473c95cc1b26f02950bf7a03ea0ba77677558",
+     "/home/joe/code/futon2-L18-review-codex"
+     "9b07a7c1b9a85d8f2cfbbd20257ec38b92c3f821",
+     "/home/joe/code/futon3c-codex10-f17"
+     "6a992f0db1d1d2e32339207f17d824d35f570e10",
+     "/home/joe/code/futon3c-codex10-campaign"
+     "f0286a796b262d004472fab04df0aeac096753ca",
+     "/home/joe/code/futon3c-frame18-control"
+     "0a1e47bcaf5f5e24c18dea00c8679cdceb8c02f9",
+     "/home/joe/code/futon7a"
+     "1a1e7ef513ddeda25bbc063d0cf02af047bf6b89",
+     "/home/joe/code/futon2-L8-review-codex-v2"
+     "f88234df57cb1b66df1b219f73a73dd8d95a6af5",
+     "/home/joe/code/futon2-L15-review-codex-b"
+     "f8ee74473a8e06c94a88a03e730d89866109993b",
+     "/home/joe/code/futon3a"
+     "58ea67a4f3f5614faa1144aa786c33c2ee17bea8",
+     "/home/joe/code/futon3"
+     "7c4cc87df04c2d217fc12de717007bf844d0fec5",
+     "/home/joe/code/futon2"
+     "e616cd03b5bcd68f1a39da9fee026bf708347f6f",
+     "/home/joe/code/futon4"
+     "e9bb43301da6ccf7bc13b3be6c87f1faa48461a5",
+     "/home/joe/code/futon3c-library-loop-executable"
+     "e1c36989b530626cb2479cd14d0fb3cdf6ac0bbd",
+     "/home/joe/code/futon3c-v4-teaching"
+     "93d4c2be65bcc7104259ad1ce27ea6c0f1e399b9",
+     "/home/joe/code/futon2-L8-review-codex"
+     "baa74c5ed7e28fd6739a58d45e8310e5b5961ed3",
+     "/home/joe/code/futon2-L3-review-codex2"
+     "ce9e994737710776a746a946dd6bd24adc23c2c2"},
+    :resolved-mode-flags
+    {:goal-outcome-mode :kl,
+     :belief-model-manifest
+     {:observation-model-hash "0x9f0e738a",
+      :transition-model-hash "0x5351a7ad",
+      :initial-prior-hash "0xfc317074"},
+     :strategic-selection-boundary :reviewed-reason-bearing-policy,
+     :structural-pressure-mode :habit-prior,
+     :c-temperature 0.1,
+     :ambiguity-mode :gaussian-entropy,
+     :homeostatic-control-mode :telemetry-only,
+     :salience-mode :separate,
+     :move-class-intensity-mode :off,
+     :predictability-control-mode :telemetry-only,
+     :habit-prior-source :learned-frequency,
+     :tau-mode :selection-gain-only,
+     :scheduler-habit-authority :counterfactual-only,
+     :risk-mode :kl,
+     :kl-channel-weights {},
+     :strategic-memory-authority :reviewed-live-chain-integrity,
+     :graph-feasibility-mode :policy-support,
+     :likelihood-mode :aif},
+    :configuration-digest
+    "a32972d07cd1889b4dbe6ac65cc0c186e5b1d8d07884fc1ad1dbc91e15fded8a"},
+   :semantic-epoch :full-loop-real-actuation-v6,
+   :execution-authority
+   {:schema :wm/cohort-execution-authority-v1,
+    :cohort-id :wm-contract-machinery-51-v1,
+    :preregistration-sha256
+    "ddf01b5589dd09573999b5eb8801d247992c0b23afd55507ea81090df86a0111",
+    :data-root-sha256
+    "628002abd5a8eefabd4a9af2d5f3291298805697e1ce2319aace921aacf89e68",
+    :authority-id
+    "8ae440e934f3fa2bbce6623211f6f4a2b34a85fe0ec93661da8304799ccdddc8"}},
+  :ground
+  {:kind :trigger-opportunity,
+   :id
+   "duree-click-on-demand/2026-09-14T18:14:35.351628525Z/27532d59-27af-4fb7-aec8-d6d9a4e95b4f"}}}

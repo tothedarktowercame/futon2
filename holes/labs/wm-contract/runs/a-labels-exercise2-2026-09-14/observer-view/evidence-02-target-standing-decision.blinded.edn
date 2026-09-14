@@ -1,0 +1,11 @@
+{:schema :wm/target-standing-decision-v1,
+ :entity/id
+ "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001-untyped-failure",
+ :decision :still-live,
+ :decided-by "codex-24",
+ :implementation-author "claude-15",
+ :decided-at "2026-09-14T18:21:00Z",
+ :evidence
+ ["commit:5e7708da36dd5f157e97e8da7835bb080c91f650"
+  "review-job:invoke-1789410019408-20809-8cc48df8"
+  "gate:futon2.aif.full-loop-cohort-test:22-tests:99-assertions"]}

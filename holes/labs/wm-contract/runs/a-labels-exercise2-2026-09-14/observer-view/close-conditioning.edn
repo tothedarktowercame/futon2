@@ -1,0 +1,1033 @@
+{:cohort/id :wm-contract-machinery-51-v1,
+ :attempt/id "attempt-001",
+ :event/sequence 7,
+ :recorded-at "2026-09-14T18:21:44.224375675Z",
+ :close-retention
+ {:occurrence
+  {:schema :wm/action-transition-occurrence-v1,
+   :attempt/id "attempt-001",
+   :run/id "3d9807e0-8292-4691-81d4-c96df6563471",
+   :action/value
+   {:type :repair-machine-failure,
+    :target
+    "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001-untyped-failure",
+    :repair-obligation
+    {:discharge-contract
+     {:requires
+      [:distinct-repair-commit
+       :independent-review
+       :grounded-repair
+       :distinct-production-shaped-successor],
+      :artifact-shape :code-commit},
+     :repair/status :open,
+     :opened-at "2026-09-13T17:11:05.086024700Z",
+     :repair/class :machine-failure,
+     :repair/id
+     "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001-untyped-failure",
+     :backtrace
+     {:phase-events
+      [{:at "2026-09-13T17:08:19.622240087Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :phase :opportunity,
+        :transition :start}
+       {:at "2026-09-13T17:11:02.469782860Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :phase :agent-readiness,
+        :transition :start}
+       {:transition :end,
+        :readiness/wake-result :not-needed,
+        :readiness/wake-attempted false,
+        :phase :agent-readiness,
+        :duration-ms 653,
+        :at "2026-09-13T17:11:03.122381445Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd"}
+       {:at "2026-09-13T17:11:03.700170001Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :start}
+       {:at "2026-09-13T17:11:04.488744724Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :end,
+        :duration-ms 788}
+       {:at "2026-09-13T17:11:05.090500659Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :phase :substrate-preflight,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :substrate-preflight,
+        :duration-ms 1544,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :at "2026-09-13T17:11:06.634616265Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"}
+       {:at "2026-09-13T17:11:07.202545784Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :phase :preference-refresh,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :preference-refresh,
+        :duration-ms 8826,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :at "2026-09-13T17:11:16.028962014Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"}
+       {:at "2026-09-13T17:11:16.650923707Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :phase :stop-line-memory,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :stop-line-memory,
+        :duration-ms 1130,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :at "2026-09-13T17:11:17.780173185Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"}
+       {:at "2026-09-13T17:11:18.386232938Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :phase :selection,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :selection,
+        :duration-ms 27298,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :at "2026-09-13T17:11:45.684207984Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"}
+       {:at "2026-09-13T17:11:46.394247601Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :phase :construction,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :construction,
+        :duration-ms 559,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+        :at "2026-09-13T17:11:46.953323580Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-13T17:08:19.622207706Z/9927199e-a997-4647-9b81-e8923bb2d8cd",
+        :external-attempt-id
+        "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"}],
+      :last-completed-checkpoint :adjudication,
+      :checkpoints
+      {:selection
+       {:judgment
+        {:selected-mission "repair-attempt-001",
+         :selected-action
+         {:type :repair-machine-failure,
+          :target "repair-attempt-001",
+          :repair-obligation
+          {:discharge-contract
+           {:requires
+            [:distinct-repair-commit
+             :independent-review
+             :grounded-repair
+             :distinct-production-shaped-successor],
+            :artifact-shape :code-commit},
+           :repair/status :open,
+           :opened-at "2026-09-12T17:34:21.100100303Z",
+           :repair/class :independent-review-failure,
+           :repair/id "repair-attempt-001",
+           :failure-kind :review-rejected,
+           :attempt-id "attempt-001",
+           :selected-entry
+           {:action
+            {:central 0.0,
+             :open-hole-count 2,
+             :structural-pressure-per-action 0.0,
+             :non-progress-decay 1.0,
+             :phase nil,
+             :type :advance-mission,
+             :operator-gate-factor 1.0,
+             :rationale
+             "mission substrate: M-f11-find-production-successor — OPEN — repair-024 successor [open; advance open holes]",
+             :non-progress-count 0,
+             :weight 1.0,
+             :completion-gate-factor 1.0,
+             :non-progress? false,
+             :mission-path
+             "/home/joe/code/futon2/holes/missions/M-f11-find-production-successor.md",
+             :strategic 0.0,
+             :target "M-f11-find-production-successor",
+             :mission-value-factor 0.09,
+             :doable 0.3}},
+           :failed-commit "98d0dcb115b18934b84a9992bfc48fcbba6b683f",
+           :review-verdict :reject,
+           :failure-stage :independent-review,
+           :review-job "invoke-1789234385934-20447-8c802427",
+           :review-text
+           "FULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved. FULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed...\nI’ll inspect the amendment and its delta from the prior SHA to check whether the implementation is now committed.\nFULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved.\nFULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed repository HEAD is not evidence of an authored amendment.\n\nThe entire delta adds `holes/labs/wm-contract/SPEC-run-certificate-v1.md`: 262 lines labelled **DISCOVERY / PROPOSED FOR REVIEW**. It explicitly supplies no certificate, selected run or Lean changes. The reconciliation implementation and tests remain uncommitted.\n\nExecuted in `/home/joe/code/futon2`, all exit 0:\n\n- `git show --stat --format=fuller 98d0dcb`\n- `git diff --stat 1166a832 98d0dcb`\n- `git diff 1166a832 98d0dcb`\n- `git diff --name-status 1166a832 98d0dcb`\n- `git show --check 98d0dcb` — PASS.\n- `git diff --check 1166a832 98d0dcb` — PASS.\n- `git status --short`\n\n**Code gates:** clj-kondo, check-parens, fresh-JVM tests and Lean checks were not run: zero code files changed. No implementation validation is claimed.\n\nProvide the actual gated implementation commit. No edits or commits made.\n\nIn-thread reply failed: HTTP 404, `agent-not-found` for `wm-full-loop`.",
+           :target "M-f11-find-production-successor",
+           :reviewer "codex-18",
+           :repair/schema-version 2},
+          :rationale
+          "stop-the-line: independent-review-failure from attempt-001"},
+         :stop-the-line-obligations
+         [{:repair/id "repair-attempt-001",
+           :attempt-id "attempt-001",
+           :failed-commit "98d0dcb115b18934b84a9992bfc48fcbba6b683f",
+           :review-verdict :reject}],
+         :selection-reasons
+         {:source :stop-the-line,
+          :repair-id "repair-attempt-001",
+          :repair-class :independent-review-failure},
+         :trace-persistence :after-construction,
+         :belief-source
+         #:run{:id "wm-machinery-test-2026-09-13-claude-15-r2"}},
+        :ground
+        {:kind :wm-judgement,
+         :decision
+         {:recommendation-authority :live,
+          :habit-prior-applied? false,
+          :selected-mission-ids
+          ["M-shared-memory-control-build-test"
+           "M-aif-policy-conditioned-eig"],
+          :tau-source :selection-gain-only,
+          :actuation-authorized? true,
+          :tau-spread 25.178882791964597,
+          :actuation-status :machine-authorized-bounded-autonomy,
+          :rank 1,
+          :selection-boundary :reason-bearing-strategic-policy,
+          :reason :reviewed-live-reason-bearing-policy,
+          :habit-authority :counterfactual-only,
+          :requires-operator-override? false,
+          :selection-law
+          {:requested :controller-head,
+           :applied :controller-head,
+           :refusal nil,
+           :controller-head-rank 1,
+           :chosen-rank 135,
+           :moved-from-controller-head? true,
+           :consulted-ranking :live-selector-id},
+          :no-op-comparison
+          {:controller-margin 0.94669256606349,
+           :blocks-recommendation? false},
+          :action
+          {:central 0.0,
+           :open-hole-count 0,
+           :structural-pressure-per-action 0.0,
+           :non-progress-decay 0.16666666666666666,
+           :phase "complete",
+           :type :advance-mission,
+           :operator-gate-factor 1.0,
+           :rationale
+           "mission substrate: Mission: Shared memory/control build-test regime [unknown; advance open holes]",
+           :non-progress-count 5,
+           :weight 1.0,
+           :completion-gate-factor 0.0,
+           :non-progress? true,
+           :mission-path
+           "/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md",
+           :strategic 0.0,
+           :target "M-shared-memory-control-build-test",
+           :mission-value-factor 0.0,
+           :doable 0.0},
+          :tau 1.0,
+          :selection-proof-input
+          {:schema :wm/selection-proof-input-v1,
+           :algorithm/revision
+           {:name :live-wm-selection/reason-bearing-v1, :revision 1},
+           :decision-id "phase7-shadow-2",
+           :temperature 0.5,
+           :candidate-domain
+           ["M-aif-policy-conditioned-eig"
+            "M-shared-memory-control-build-test"
+            "M-wm-aif-policy-grain-compliance"],
+           :policy-table
+           [{:policy-id "pi-s-9dbc2ceb3317bc38050c41ce",
+             :mission-ids
+             ["M-shared-memory-control-build-test"
+              "M-aif-policy-conditioned-eig"],
+             :E_S -0.7985076962177716,
+             :G_S 0.4,
+             :log-shadow-potential -1.5985076962177716,
+             :shadow-probability 0.5985265076600124,
+             :hard-support
+             {:admitted? true,
+              :frontier-statuses [:ready :ready],
+              :dependency-statuses [:ready :ready],
+              :support-relations
+              [{:control-pattern-id "p4ng/R5-policy-evaluation",
+                :relation :repairs-control,
+                :provenance
+                [{:kind :live-independent-review,
+                  :review-evidence-id
+                  "03f524fb-690f-4c11-8c10-a8b20bc73cc2",
+                  :reviewer "claude-4",
+                  :scope :frozen-replay-result-not-live-outcome}],
+                :memory-ids ["e-7782c5f4-2a2b-465e-afcf-6c8947b144ba"],
+                :memories
+                [#:memory{:id "e-7782c5f4-2a2b-465e-afcf-6c8947b144ba",
+                          :hook
+                          "Apply at most one separately witnessed outcome per update and keep the small-sample refusal visible.",
+                          :body
+                          {:kind :intervention,
+                           :why
+                           "R5 needs the actual bounded outcome update together with its limitation, not an unqualified success claim.",
+                           :name
+                           "R5 bootstrap: one-outcome six-sevenths replay update",
+                           :hook
+                           "Apply at most one separately witnessed outcome per update and keep the small-sample refusal visible.",
+                           :body
+                           {:training-observations 13,
+                            :update-fraction "6/7",
+                            :minimum-observations 20,
+                            :update-factor 0.8571428571428571,
+                            :claim-boundary
+                            "An independent reviewer can witness the frozen replay result; this is not live WM outcome evidence and is not calibrated probability.",
+                            :event :frozen-replay-update,
+                            :evidence-scope :frozen-replay-result,
+                            :live-wm-outcome? false,
+                            :promotion
+                            {:advance? false,
+                             :decision-reason
+                             :exploratory-sample-too-small}},
+                           :how-to-apply
+                           "Consume no more than one separately witnessed outcome, label the result exploratory, and retain the minimum-sample gate."},
+                          :witness-status :independently-witnessed,
+                          :mission-ids
+                          ["M-aif-policy-conditioned-eig"]}]}
+               {:control-pattern-id
+                "p4ng/R6-candidate-pattern-action-space",
+                :relation :repairs-control,
+                :provenance
+                [{:kind :live-independent-review,
+                  :review-evidence-id
+                  "b1cf276f-c4c0-4757-a00e-ae3f02e3ca00",
+                  :reviewer "claude-4"}],
+                :memory-ids ["e-d13a4076-feb0-4906-b2b3-6a1d9e275692"],
+                :memories
+                [#:memory{:id "e-d13a4076-feb0-4906-b2b3-6a1d9e275692",
+                          :hook
+                          "Populate the existing admissible control graph through reviewed shared-store episodes, without widening its mission set.",
+                          :body
+                          {:kind :observation,
+                           :why
+                           "R6 must represent the actual candidate-space construction seam rather than an injected fixture.",
+                           :name
+                           "R6 bootstrap: live endpoint corpus gap",
+                           :hook
+                           "Populate the existing admissible control graph through reviewed shared-store episodes, without widening its mission set.",
+                           :body
+                           {:event :live-integration-finding,
+                            :claim-boundary
+                            "This records an integration gap and its repair target; it does not assert a better mission selection.",
+                            :observed-at "2026-07-24T19:36:38Z",
+                            :endpoints
+                            ["p4ng/R9-independent-witness"
+                             "p4ng/R6-candidate-pattern-action-space"
+                             "p4ng/R5-policy-evaluation"
+                             "p4ng/R10-liveness"],
+                            :pre-write-component-counts [0 0 0 0],
+                            :projection-revision 6,
+                            :finding
+                            "The replay chain passed but all four live Phase-5 control endpoints were empty before this bootstrap write."},
+                           :how-to-apply
+                           "Use this reviewed memory only on the pre-existing R6-to-mission relation."},
+                          :witness-status :independently-witnessed,
+                          :mission-ids
+                          ["M-shared-memory-control-build-test"]}]}]},
+             :provenance
+             [{:kind :live-independent-review,
+               :review-evidence-id
+               "03f524fb-690f-4c11-8c10-a8b20bc73cc2",
+               :reviewer "claude-4",
+               :scope :frozen-replay-result-not-live-outcome}
+              {:kind :live-independent-review,
+               :review-evidence-id
+               "b1cf276f-c4c0-4757-a00e-ae3f02e3ca00",
+               :reviewer "claude-4"}]}
+            {:policy-id "pi-s-333889ba71ae67544d53f17a",
+             :mission-ids ["M-shared-memory-control-build-test"],
+             :E_S -0.5978370007556204,
+             :G_S 0.7,
+             :log-shadow-potential -1.9978370007556203,
+             :shadow-probability 0.4014734923399876,
+             :hard-support
+             {:admitted? true,
+              :frontier-statuses [:ready],
+              :dependency-statuses [:ready],
+              :support-relations
+              [{:control-pattern-id
+                "p4ng/R6-candidate-pattern-action-space",
+                :relation :repairs-control,
+                :provenance
+                [{:kind :live-independent-review,
+                  :review-evidence-id
+                  "b1cf276f-c4c0-4757-a00e-ae3f02e3ca00",
+                  :reviewer "claude-4"}],
+                :memory-ids ["e-d13a4076-feb0-4906-b2b3-6a1d9e275692"],
+                :memories
+                [#:memory{:id "e-d13a4076-feb0-4906-b2b3-6a1d9e275692",
+                          :hook
+                          "Populate the existing admissible control graph through reviewed shared-store episodes, without widening its mission set.",
+                          :body
+                          {:kind :observation,
+                           :why
+                           "R6 must represent the actual candidate-space construction seam rather than an injected fixture.",
+                           :name
+                           "R6 bootstrap: live endpoint corpus gap",
+                           :hook
+                           "Populate the existing admissible control graph through reviewed shared-store episodes, without widening its mission set.",
+                           :body
+                           {:event :live-integration-finding,
+                            :claim-boundary
+                            "This records an integration gap and its repair target; it does not assert a better mission selection.",
+                            :observed-at "2026-07-24T19:36:38Z",
+                            :endpoints
+                            ["p4ng/R9-independent-witness"
+                             "p4ng/R6-candidate-pattern-action-space"
+                             "p4ng/R5-policy-evaluation"
+                             "p4ng/R10-liveness"],
+                            :pre-write-component-counts [0 0 0 0],
+                            :projection-revision 6,
+                            :finding
+                            "The replay chain passed but all four live Phase-5 control endpoints were empty before this bootstrap write."},
+                           :how-to-apply
+                           "Use this reviewed memory only on the pre-existing R6-to-mission relation."},
+                          :witness-status :independently-witnessed,
+                          :mission-ids
+                          ["M-shared-memory-control-build-test"]}]}]},
+             :provenance
+             [{:kind :live-independent-review,
+               :review-evidence-id
+               "b1cf276f-c4c0-4757-a00e-ae3f02e3ca00",
+               :reviewer "claude-4"}]}],
+           :tie-break :ascending-policy-id,
+           :selected-policy-id "pi-s-9dbc2ceb3317bc38050c41ce"},
+          :selection-gain 1.0,
+          :selected-policy-id "pi-s-9dbc2ceb3317bc38050c41ce"}}},
+       :construction
+       {:judgment
+        {:fold-output
+         {:wiring
+          {:boxes [],
+           :terminals
+           {:in [{:port nil}],
+            :out [{:port "wiring-diagram", :type "Wiring"}]},
+           :for-sorry :sorry/fold-engine-cascade-to-wiring,
+           :discipline [],
+           :id :wiring/fold-engine-generated,
+           :policy-holes
+           [{:unfolded-pattern "futon-theory/stop-the-line"}
+            {:unfolded-pattern "musn/pause-backtrace"}],
+           :generated-by
+           "meme.fold/fold v1 (rule-table fold; THEN→rule encoded, NL-extraction = v2)",
+           :want-signature "MissionState -> {Wiring, PolicyHoles}",
+           :wires
+           [{:from :emit,
+             :to "wiring-diagram",
+             :type :wire/consequential}]},
+          :coverage-score-delta nil,
+          :policy-holes
+          [{:unfolded-pattern "futon-theory/stop-the-line"}
+           {:unfolded-pattern "musn/pause-backtrace"}]},
+         :trace-path nil,
+         :wiring nil,
+         :selection-enaction
+         {:verdict :match,
+          :selected
+          {:type :repair-machine-failure,
+           :target "repair-attempt-001",
+           :repair-obligation
+           {:discharge-contract
+            {:requires
+             [:distinct-repair-commit
+              :independent-review
+              :grounded-repair
+              :distinct-production-shaped-successor],
+             :artifact-shape :code-commit},
+            :repair/status :open,
+            :opened-at "2026-09-12T17:34:21.100100303Z",
+            :repair/class :independent-review-failure,
+            :repair/id "repair-attempt-001",
+            :failure-kind :review-rejected,
+            :attempt-id "attempt-001",
+            :selected-entry
+            {:action
+             {:central 0.0,
+              :open-hole-count 2,
+              :structural-pressure-per-action 0.0,
+              :non-progress-decay 1.0,
+              :phase nil,
+              :type :advance-mission,
+              :operator-gate-factor 1.0,
+              :rationale
+              "mission substrate: M-f11-find-production-successor — OPEN — repair-024 successor [open; advance open holes]",
+              :non-progress-count 0,
+              :weight 1.0,
+              :completion-gate-factor 1.0,
+              :non-progress? false,
+              :mission-path
+              "/home/joe/code/futon2/holes/missions/M-f11-find-production-successor.md",
+              :strategic 0.0,
+              :target "M-f11-find-production-successor",
+              :mission-value-factor 0.09,
+              :doable 0.3}},
+            :failed-commit "98d0dcb115b18934b84a9992bfc48fcbba6b683f",
+            :review-verdict :reject,
+            :failure-stage :independent-review,
+            :review-job "invoke-1789234385934-20447-8c802427",
+            :review-text
+            "FULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved. FULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed...\nI’ll inspect the amendment and its delta from the prior SHA to check whether the implementation is now committed.\nFULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved.\nFULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed repository HEAD is not evidence of an authored amendment.\n\nThe entire delta adds `holes/labs/wm-contract/SPEC-run-certificate-v1.md`: 262 lines labelled **DISCOVERY / PROPOSED FOR REVIEW**. It explicitly supplies no certificate, selected run or Lean changes. The reconciliation implementation and tests remain uncommitted.\n\nExecuted in `/home/joe/code/futon2`, all exit 0:\n\n- `git show --stat --format=fuller 98d0dcb`\n- `git diff --stat 1166a832 98d0dcb`\n- `git diff 1166a832 98d0dcb`\n- `git diff --name-status 1166a832 98d0dcb`\n- `git show --check 98d0dcb` — PASS.\n- `git diff --check 1166a832 98d0dcb` — PASS.\n- `git status --short`\n\n**Code gates:** clj-kondo, check-parens, fresh-JVM tests and Lean checks were not run: zero code files changed. No implementation validation is claimed.\n\nProvide the actual gated implementation commit. No edits or commits made.\n\nIn-thread reply failed: HTTP 404, `agent-not-found` for `wm-full-loop`.",
+            :target "M-f11-find-production-successor",
+            :reviewer "codex-18",
+            :repair/schema-version 2},
+           :rationale
+           "stop-the-line: independent-review-failure from attempt-001"},
+          :enacted
+          {:type :repair-machine-failure,
+           :target "repair-attempt-001",
+           :repair-obligation
+           {:discharge-contract
+            {:requires
+             [:distinct-repair-commit
+              :independent-review
+              :grounded-repair
+              :distinct-production-shaped-successor],
+             :artifact-shape :code-commit},
+            :repair/status :open,
+            :opened-at "2026-09-12T17:34:21.100100303Z",
+            :repair/class :independent-review-failure,
+            :repair/id "repair-attempt-001",
+            :failure-kind :review-rejected,
+            :attempt-id "attempt-001",
+            :selected-entry
+            {:action
+             {:central 0.0,
+              :open-hole-count 2,
+              :structural-pressure-per-action 0.0,
+              :non-progress-decay 1.0,
+              :phase nil,
+              :type :advance-mission,
+              :operator-gate-factor 1.0,
+              :rationale
+              "mission substrate: M-f11-find-production-successor — OPEN — repair-024 successor [open; advance open holes]",
+              :non-progress-count 0,
+              :weight 1.0,
+              :completion-gate-factor 1.0,
+              :non-progress? false,
+              :mission-path
+              "/home/joe/code/futon2/holes/missions/M-f11-find-production-successor.md",
+              :strategic 0.0,
+              :target "M-f11-find-production-successor",
+              :mission-value-factor 0.09,
+              :doable 0.3}},
+            :failed-commit "98d0dcb115b18934b84a9992bfc48fcbba6b683f",
+            :review-verdict :reject,
+            :failure-stage :independent-review,
+            :review-job "invoke-1789234385934-20447-8c802427",
+            :review-text
+            "FULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved. FULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed...\nI’ll inspect the amendment and its delta from the prior SHA to check whether the implementation is now committed.\nFULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved.\nFULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed repository HEAD is not evidence of an authored amendment.\n\nThe entire delta adds `holes/labs/wm-contract/SPEC-run-certificate-v1.md`: 262 lines labelled **DISCOVERY / PROPOSED FOR REVIEW**. It explicitly supplies no certificate, selected run or Lean changes. The reconciliation implementation and tests remain uncommitted.\n\nExecuted in `/home/joe/code/futon2`, all exit 0:\n\n- `git show --stat --format=fuller 98d0dcb`\n- `git diff --stat 1166a832 98d0dcb`\n- `git diff 1166a832 98d0dcb`\n- `git diff --name-status 1166a832 98d0dcb`\n- `git show --check 98d0dcb` — PASS.\n- `git diff --check 1166a832 98d0dcb` — PASS.\n- `git status --short`\n\n**Code gates:** clj-kondo, check-parens, fresh-JVM tests and Lean checks were not run: zero code files changed. No implementation validation is claimed.\n\nProvide the actual gated implementation commit. No edits or commits made.\n\nIn-thread reply failed: HTTP 404, `agent-not-found` for `wm-full-loop`.",
+            :target "M-f11-find-production-successor",
+            :reviewer "codex-18",
+            :repair/schema-version 2},
+           :rationale
+           "stop-the-line: independent-review-failure from attempt-001"},
+          :evidence
+          {:source :runner-selection, :operator-authority-ref nil}},
+         :cascade
+         {:psi
+          "repair and validate stop-the-line obligation repair-attempt-001",
+          :semilattice
+          [{:from :failure-backtrace, :to :repair-implementation}
+           {:from :repair-implementation, :to :independent-review}
+           {:from :independent-review, :to :successor-validation}],
+          :construction-kind :machine-stop-line-repair,
+          :selected-action
+          {:type :repair-machine-failure,
+           :target "repair-attempt-001",
+           :repair-obligation
+           {:discharge-contract
+            {:requires
+             [:distinct-repair-commit
+              :independent-review
+              :grounded-repair
+              :distinct-production-shaped-successor],
+             :artifact-shape :code-commit},
+            :repair/status :open,
+            :opened-at "2026-09-12T17:34:21.100100303Z",
+            :repair/class :independent-review-failure,
+            :repair/id "repair-attempt-001",
+            :failure-kind :review-rejected,
+            :attempt-id "attempt-001",
+            :selected-entry
+            {:action
+             {:central 0.0,
+              :open-hole-count 2,
+              :structural-pressure-per-action 0.0,
+              :non-progress-decay 1.0,
+              :phase nil,
+              :type :advance-mission,
+              :operator-gate-factor 1.0,
+              :rationale
+              "mission substrate: M-f11-find-production-successor — OPEN — repair-024 successor [open; advance open holes]",
+              :non-progress-count 0,
+              :weight 1.0,
+              :completion-gate-factor 1.0,
+              :non-progress? false,
+              :mission-path
+              "/home/joe/code/futon2/holes/missions/M-f11-find-production-successor.md",
+              :strategic 0.0,
+              :target "M-f11-find-production-successor",
+              :mission-value-factor 0.09,
+              :doable 0.3}},
+            :failed-commit "98d0dcb115b18934b84a9992bfc48fcbba6b683f",
+            :review-verdict :reject,
+            :failure-stage :independent-review,
+            :review-job "invoke-1789234385934-20447-8c802427",
+            :review-text
+            "FULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved. FULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed...\nI’ll inspect the amendment and its delta from the prior SHA to check whether the implementation is now committed.\nFULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved.\nFULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed repository HEAD is not evidence of an authored amendment.\n\nThe entire delta adds `holes/labs/wm-contract/SPEC-run-certificate-v1.md`: 262 lines labelled **DISCOVERY / PROPOSED FOR REVIEW**. It explicitly supplies no certificate, selected run or Lean changes. The reconciliation implementation and tests remain uncommitted.\n\nExecuted in `/home/joe/code/futon2`, all exit 0:\n\n- `git show --stat --format=fuller 98d0dcb`\n- `git diff --stat 1166a832 98d0dcb`\n- `git diff 1166a832 98d0dcb`\n- `git diff --name-status 1166a832 98d0dcb`\n- `git show --check 98d0dcb` — PASS.\n- `git diff --check 1166a832 98d0dcb` — PASS.\n- `git status --short`\n\n**Code gates:** clj-kondo, check-parens, fresh-JVM tests and Lean checks were not run: zero code files changed. No implementation validation is claimed.\n\nProvide the actual gated implementation commit. No edits or commits made.\n\nIn-thread reply failed: HTTP 404, `agent-not-found` for `wm-full-loop`.",
+            :target "M-f11-find-production-successor",
+            :reviewer "codex-18",
+            :repair/schema-version 2},
+           :rationale
+           "stop-the-line: independent-review-failure from attempt-001"},
+          :repair-contract
+          {:repair-id "repair-attempt-001",
+           :repair-class :independent-review-failure,
+           :failed-attempt "attempt-001",
+           :failure-stage :independent-review,
+           :failure-kind :review-rejected,
+           :discharge
+           {:requires
+            [:distinct-repair-commit
+             :independent-review
+             :grounded-repair
+             :distinct-production-shaped-successor],
+            :artifact-shape :code-commit}}},
+         :patterns
+         ["futon-theory/stop-the-line" "musn/pause-backtrace"],
+         :mission "repair-attempt-001",
+         :correspondence-validation
+         {:validator "futon2.aif.fold/validate-fold-correspondence",
+          :version 1,
+          :ok true,
+          :findings [],
+          :cascade-sha256
+          "bb276e57796f030aae69e7621eece665931aabbdd34bafc8f4c194f9f1e40672",
+          :fold-output-sha256
+          "c8d1f15175229b5b65c273d947b02fdcf971b2755bc13316a4e10e4b738ad723"},
+         :shape-validation
+         {:validator "futon2.aif.fold/validate-fold-output-v1",
+          :version 1,
+          :ok false,
+          :findings
+          [{:policy-hole/index 0, :finding :policy-hole-free-missing}
+           {:policy-hole/index 0, :finding :policy-hole-why-missing}
+           {:policy-hole/index 0,
+            :finding :policy-hole-obligation-id-missing}
+           {:policy-hole/index 1, :finding :policy-hole-free-missing}
+           {:policy-hole/index 1, :finding :policy-hole-why-missing}
+           {:policy-hole/index 1,
+            :finding :policy-hole-obligation-id-missing}],
+          :input-sha256
+          "c8d1f15175229b5b65c273d947b02fdcf971b2755bc13316a4e10e4b738ad723"},
+         :deposit nil,
+         :sorries
+         [{:unfolded-pattern "futon-theory/stop-the-line"}
+          {:unfolded-pattern "musn/pause-backtrace"}]},
+        :ground
+        {:kind :decision-pinned-construction,
+         :selected-action
+         {:type :repair-machine-failure,
+          :target "repair-attempt-001",
+          :repair-obligation
+          {:discharge-contract
+           {:requires
+            [:distinct-repair-commit
+             :independent-review
+             :grounded-repair
+             :distinct-production-shaped-successor],
+            :artifact-shape :code-commit},
+           :repair/status :open,
+           :opened-at "2026-09-12T17:34:21.100100303Z",
+           :repair/class :independent-review-failure,
+           :repair/id "repair-attempt-001",
+           :failure-kind :review-rejected,
+           :attempt-id "attempt-001",
+           :selected-entry
+           {:action
+            {:central 0.0,
+             :open-hole-count 2,
+             :structural-pressure-per-action 0.0,
+             :non-progress-decay 1.0,
+             :phase nil,
+             :type :advance-mission,
+             :operator-gate-factor 1.0,
+             :rationale
+             "mission substrate: M-f11-find-production-successor — OPEN — repair-024 successor [open; advance open holes]",
+             :non-progress-count 0,
+             :weight 1.0,
+             :completion-gate-factor 1.0,
+             :non-progress? false,
+             :mission-path
+             "/home/joe/code/futon2/holes/missions/M-f11-find-production-successor.md",
+             :strategic 0.0,
+             :target "M-f11-find-production-successor",
+             :mission-value-factor 0.09,
+             :doable 0.3}},
+           :failed-commit "98d0dcb115b18934b84a9992bfc48fcbba6b683f",
+           :review-verdict :reject,
+           :failure-stage :independent-review,
+           :review-job "invoke-1789234385934-20447-8c802427",
+           :review-text
+           "FULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved. FULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed...\nI’ll inspect the amendment and its delta from the prior SHA to check whether the implementation is now committed.\nFULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved.\nFULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed repository HEAD is not evidence of an authored amendment.\n\nThe entire delta adds `holes/labs/wm-contract/SPEC-run-certificate-v1.md`: 262 lines labelled **DISCOVERY / PROPOSED FOR REVIEW**. It explicitly supplies no certificate, selected run or Lean changes. The reconciliation implementation and tests remain uncommitted.\n\nExecuted in `/home/joe/code/futon2`, all exit 0:\n\n- `git show --stat --format=fuller 98d0dcb`\n- `git diff --stat 1166a832 98d0dcb`\n- `git diff 1166a832 98d0dcb`\n- `git diff --name-status 1166a832 98d0dcb`\n- `git show --check 98d0dcb` — PASS.\n- `git diff --check 1166a832 98d0dcb` — PASS.\n- `git status --short`\n\n**Code gates:** clj-kondo, check-parens, fresh-JVM tests and Lean checks were not run: zero code files changed. No implementation validation is claimed.\n\nProvide the actual gated implementation commit. No edits or commits made.\n\nIn-thread reply failed: HTTP 404, `agent-not-found` for `wm-full-loop`.",
+           :target "M-f11-find-production-successor",
+           :reviewer "codex-18",
+           :repair/schema-version 2},
+          :rationale
+          "stop-the-line: independent-review-failure from attempt-001"}}},
+       :dispatch {:sorry {:kind :not-reached-dispatch}},
+       :build {:sorry {:kind :not-reached-build}},
+       :adjudication {:sorry {:kind :not-reached-adjudication}}},
+      :code-state
+      {:repo "/home/joe/code/futon2",
+       :git-sha "f21f0d3fb5297c36ae777a550c11bc4c4e336685",
+       :git-dirty? true,
+       :repo-heads
+       {"/home/joe/code/futon5a"
+        "e1a8c5252f45b8b7e7008943a397657ce80d8911",
+        "/home/joe/code/futon3c-http-test-ledger-isolation"
+        "7c98731930772ff14bd32eae324f372ccca30a02",
+        "/home/joe/code/futon3-L14-transform-review-v2"
+        "5704359975a41ff125ffa94f7ce227dcf5d53217",
+        "/home/joe/code/futon3c-library-loop-checkpoints"
+        "ac61975be5f338c47a1ff594215afcf5d49dcf45",
+        "/home/joe/code/futon2-L3-review-codex"
+        "f1ec9ac99a2dc333fed2cbddc975e4c7b5162bde",
+        "/home/joe/code/futon3c-v4-production"
+        "67eed81e8cbcd3487cb2fe040ddf03fd54f6d303",
+        "/home/joe/code/futon2-L15-review-codex"
+        "f8ee74473a8e06c94a88a03e730d89866109993b",
+        "/home/joe/code/futon2-l7-review"
+        "30f3183f8b33d11ee6c747a7211b563c9ef832e9",
+        "/home/joe/code/futon1a"
+        "9748a7d2d31d6ff22ad1171d4a247f2339bead1e",
+        "/home/joe/code/futon2-L16-review-codex"
+        "57296b21d1ba73d7685060f122d17ebdc6f64ceb",
+        "/home/joe/code/futon3c-store-warning-hold"
+        "d33d49fbd6359218bbcb0c328a6875e067756b5e",
+        "/home/joe/code/futon3b"
+        "9795feb546c2ca563797f2ed85614a7b94f73a12",
+        "/home/joe/code/futon7"
+        "c5b72885e99ef4a08a90b875ba7b6fe8e03bd934",
+        "/home/joe/code/futon2-L12-review-codex"
+        "237742696b0175dc13251d1ccc90cb8bd876dfbe",
+        "/home/joe/code/futon1bi"
+        "61cf8f88f5652fbe2a41c53e9cf712085dd48282",
+        "/home/joe/code/futon5"
+        "2708b1412cdc6e64eebea792e184f3fb8001de6b",
+        "/home/joe/code/futon2-L17-review-codex"
+        "680d4acf5157939b1e210259e1a564e0684e03fc",
+        "/home/joe/code/futon3-L15-pre-codex"
+        "64436d7efb815994b69d6c7d2b2b3ac28f406d68",
+        "/home/joe/code/futon2-L14-review-codex"
+        "a92877e39afd4438d274e0451f853823942c3c4d",
+        "/home/joe/code/futon3c-provenance-recovery"
+        "6ff2bc237288c3a3e700d9f50d4ca8e3c2065061",
+        "/home/joe/code/futon3c"
+        "64fd8b394d8e7dbae34cd61bd73a5f0dc19ae78b",
+        "/home/joe/code/futon6"
+        "8dd08f49d351cc3808f9bb079db888847a1efb9a",
+        "/home/joe/code/futon0"
+        "fb1cfb0111d8caf6aa8c12e81c2d3bef7d009173",
+        "/home/joe/code/futon2-L10-review-codex"
+        "1f605f500b2f85aa7e3c3f06ce4400d7bb46e9a4",
+        "/home/joe/code/futon1b"
+        "14621cf328f0c8f439fd6f0c240e8a13b691b625",
+        "/home/joe/code/futon2-L6-review-codex"
+        "2554119f6ed7d29c41aa4f6dee7a9e2bcda699e9",
+        "/home/joe/code/futon1"
+        "26ab382e6721342483403e37d4e2ab59cea47e06",
+        "/home/joe/code/futon2-L14-review-codex-v2"
+        "8f8478d0976308e3a35120edf6450a05a31162d0",
+        "/home/joe/code/futon3c-library-loop-production"
+        "aec1e615fc616c00d9e64ea788710da93c9262e6",
+        "/home/joe/code/futon3c-library-loop-plan"
+        "c03586886b161c2e95c22b22d91b1832dae3cae8",
+        "/home/joe/code/futon3c-library-loop-core"
+        "d51473c95cc1b26f02950bf7a03ea0ba77677558",
+        "/home/joe/code/futon2-L18-review-codex"
+        "9b07a7c1b9a85d8f2cfbbd20257ec38b92c3f821",
+        "/home/joe/code/futon3c-codex10-f17"
+        "6a992f0db1d1d2e32339207f17d824d35f570e10",
+        "/home/joe/code/futon3c-codex10-campaign"
+        "f0286a796b262d004472fab04df0aeac096753ca",
+        "/home/joe/code/futon3c-frame18-control"
+        "0a1e47bcaf5f5e24c18dea00c8679cdceb8c02f9",
+        "/home/joe/code/futon7a"
+        "1a1e7ef513ddeda25bbc063d0cf02af047bf6b89",
+        "/home/joe/code/futon2-L8-review-codex-v2"
+        "f88234df57cb1b66df1b219f73a73dd8d95a6af5",
+        "/home/joe/code/futon2-L15-review-codex-b"
+        "f8ee74473a8e06c94a88a03e730d89866109993b",
+        "/home/joe/code/futon3a"
+        "58ea67a4f3f5614faa1144aa786c33c2ee17bea8",
+        "/home/joe/code/futon3"
+        "3db309c28025e1da56201da4480f1fcf7f965e2b",
+        "/home/joe/code/futon2"
+        "f21f0d3fb5297c36ae777a550c11bc4c4e336685",
+        "/home/joe/code/futon4"
+        "e9bb43301da6ccf7bc13b3be6c87f1faa48461a5",
+        "/home/joe/code/futon3c-library-loop-executable"
+        "e1c36989b530626cb2479cd14d0fb3cdf6ac0bbd",
+        "/home/joe/code/futon3c-v4-teaching"
+        "93d4c2be65bcc7104259ad1ce27ea6c0f1e399b9",
+        "/home/joe/code/futon2-L8-review-codex"
+        "baa74c5ed7e28fd6739a58d45e8310e5b5961ed3",
+        "/home/joe/code/futon2-L3-review-codex2"
+        "ce9e994737710776a746a946dd6bd24adc23c2c2"},
+       :resolved-mode-flags
+       {:goal-outcome-mode :kl,
+        :belief-model-manifest
+        {:observation-model-hash "0x9f0e738a",
+         :transition-model-hash "0x5351a7ad",
+         :initial-prior-hash "0xfc317074"},
+        :strategic-selection-boundary :reviewed-reason-bearing-policy,
+        :structural-pressure-mode :habit-prior,
+        :c-temperature 0.1,
+        :ambiguity-mode :gaussian-entropy,
+        :homeostatic-control-mode :telemetry-only,
+        :salience-mode :separate,
+        :move-class-intensity-mode :off,
+        :predictability-control-mode :telemetry-only,
+        :habit-prior-source :learned-frequency,
+        :tau-mode :selection-gain-only,
+        :scheduler-habit-authority :counterfactual-only,
+        :risk-mode :kl,
+        :kl-channel-weights {},
+        :strategic-memory-authority :reviewed-live-chain-integrity,
+        :graph-feasibility-mode :policy-support,
+        :likelihood-mode :aif},
+       :configuration-digest
+       "a32972d07cd1889b4dbe6ac65cc0c186e5b1d8d07884fc1ad1dbc91e15fded8a"}},
+     :failure-kind :untyped-failure,
+     :attempt-id
+     "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001",
+     :selected-entry
+     {:action
+      {:type :repair-machine-failure,
+       :target "repair-attempt-001",
+       :repair-obligation
+       {:discharge-contract
+        {:requires
+         [:distinct-repair-commit
+          :independent-review
+          :grounded-repair
+          :distinct-production-shaped-successor],
+         :artifact-shape :code-commit},
+        :repair/status :open,
+        :opened-at "2026-09-12T17:34:21.100100303Z",
+        :repair/class :independent-review-failure,
+        :repair/id "repair-attempt-001",
+        :failure-kind :review-rejected,
+        :attempt-id "attempt-001",
+        :selected-entry
+        {:action
+         {:central 0.0,
+          :open-hole-count 2,
+          :structural-pressure-per-action 0.0,
+          :non-progress-decay 1.0,
+          :phase nil,
+          :type :advance-mission,
+          :operator-gate-factor 1.0,
+          :rationale
+          "mission substrate: M-f11-find-production-successor — OPEN — repair-024 successor [open; advance open holes]",
+          :non-progress-count 0,
+          :weight 1.0,
+          :completion-gate-factor 1.0,
+          :non-progress? false,
+          :mission-path
+          "/home/joe/code/futon2/holes/missions/M-f11-find-production-successor.md",
+          :strategic 0.0,
+          :target "M-f11-find-production-successor",
+          :mission-value-factor 0.09,
+          :doable 0.3}},
+        :failed-commit "98d0dcb115b18934b84a9992bfc48fcbba6b683f",
+        :review-verdict :reject,
+        :failure-stage :independent-review,
+        :review-job "invoke-1789234385934-20447-8c802427",
+        :review-text
+        "FULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved. FULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed...\nI’ll inspect the amendment and its delta from the prior SHA to check whether the implementation is now committed.\nFULL_LOOP_REVIEW: REJECT 98d0dcb is another documentation-only commit; the original missing-implementation finding remains unresolved.\nFULL_LOOP_REVIEWER_NOTE: The author explicitly reported “No commit made”; observed repository HEAD is not evidence of an authored amendment.\n\nThe entire delta adds `holes/labs/wm-contract/SPEC-run-certificate-v1.md`: 262 lines labelled **DISCOVERY / PROPOSED FOR REVIEW**. It explicitly supplies no certificate, selected run or Lean changes. The reconciliation implementation and tests remain uncommitted.\n\nExecuted in `/home/joe/code/futon2`, all exit 0:\n\n- `git show --stat --format=fuller 98d0dcb`\n- `git diff --stat 1166a832 98d0dcb`\n- `git diff 1166a832 98d0dcb`\n- `git diff --name-status 1166a832 98d0dcb`\n- `git show --check 98d0dcb` — PASS.\n- `git diff --check 1166a832 98d0dcb` — PASS.\n- `git status --short`\n\n**Code gates:** clj-kondo, check-parens, fresh-JVM tests and Lean checks were not run: zero code files changed. No implementation validation is claimed.\n\nProvide the actual gated implementation commit. No edits or commits made.\n\nIn-thread reply failed: HTTP 404, `agent-not-found` for `wm-full-loop`.",
+        :target "M-f11-find-production-successor",
+        :reviewer "codex-18",
+        :repair/schema-version 2},
+       :rationale
+       "stop-the-line: independent-review-failure from attempt-001"}},
+     :machine-repo "/home/joe/code/futon2",
+     :failure-stage :construction,
+     :target "repair-attempt-001",
+     :repair/schema-version 3},
+    :rationale
+    "stop-the-line: machine-failure from ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001"},
+   :action-at "2026-09-14T18:18:40.055266827Z",
+   :action/value-sha256
+   "bc89c67b17f3c3afb4aaf47bdba290530fa8028be687eeeda499a196415bb11d",
+   :action/id "action-4f5c6f7c-0371-47d5-8316-ef3d25d8a0a7",
+   :transition/id "transition-cc730efe-91dc-49f2-9f57-3ac71208c7ed",
+   :cohort/id ":wm-contract-machinery-51-v1"},
+  :state
+  {:status :absent, :reason :independent-observation-unavailable},
+  :model
+  {:status :absent, :reason :declared-model-identity-unthreaded},
+  :admitted-evidence
+  ["wm-contract-machinery-51-v1/attempt-001/001-time-step.edn"
+   "wm-contract-machinery-51-v1/attempt-001/002-selection.edn"
+   "wm-contract-machinery-51-v1/attempt-001/003-construction.edn"
+   "wm-contract-machinery-51-v1/attempt-001/004-dispatch.edn"
+   "wm-contract-machinery-51-v1/attempt-001/005-build.edn"
+   "wm-contract-machinery-51-v1/attempt-001/006-adjudication.edn"
+   "wm-contract-machinery-51-v1/attempt-001/evidence/01-distinct-repair-commit.edn"
+   "wm-contract-machinery-51-v1/attempt-001/evidence/02-target-standing-decision.edn"],
+  :closed-at "2026-09-14T18:21:44.224375675Z",
+  :evidence-cutoff "2026-09-14T18:21:44.224375675Z",
+  :schema :wm/close-retention-v1},
+ :close-evidence-manifest
+ {:schema :wm/close-evidence-manifest-v1,
+  :entries
+  [{:evidence/id
+    "wm-contract-machinery-51-v1/attempt-001/001-time-step.edn",
+    :source-path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/001-time-step.edn",
+    :sha256
+    "d56e0e9557b642b3f6fdb371b082dfc22262ba31864e8580f26109d74bddd6b5",
+    :admitted-at "2026-09-14T18:21:44.084722061Z"}
+   {:evidence/id
+    "wm-contract-machinery-51-v1/attempt-001/002-selection.edn",
+    :source-path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/002-selection.edn",
+    :sha256
+    "63e64f6ba14de2a2f1537488546e3552ec1587cd1a42dc6e35634e622d8ccbb4",
+    :admitted-at "2026-09-14T18:21:44.084730697Z"}
+   {:evidence/id
+    "wm-contract-machinery-51-v1/attempt-001/003-construction.edn",
+    :source-path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/003-construction.edn",
+    :sha256
+    "205981199186576060a52672eb8eb03071da78bf6a92d3944f51a4fd756ce043",
+    :admitted-at "2026-09-14T18:21:44.084733052Z"}
+   {:evidence/id
+    "wm-contract-machinery-51-v1/attempt-001/004-dispatch.edn",
+    :source-path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/004-dispatch.edn",
+    :sha256
+    "96d77c5f249c33e55ba24fbe8ff328b639d5121984f766498be7ecd236768ff6",
+    :admitted-at "2026-09-14T18:21:44.084734875Z"}
+   {:evidence/id
+    "wm-contract-machinery-51-v1/attempt-001/005-build.edn",
+    :source-path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/005-build.edn",
+    :sha256
+    "4ff35e57ec9444714b7d452e15ac6908dd34d6b92ec7979b4b8ca7db1241cbc1",
+    :admitted-at "2026-09-14T18:21:44.084736949Z"}
+   {:evidence/id
+    "wm-contract-machinery-51-v1/attempt-001/006-adjudication.edn",
+    :source-path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/006-adjudication.edn",
+    :sha256
+    "2af11a12c8d8690b44e2ca22211180be109abd82b834b30482ea290962a8ba4c",
+    :admitted-at "2026-09-14T18:21:44.084738753Z"}
+   {:evidence/id
+    "wm-contract-machinery-51-v1/attempt-001/evidence/01-distinct-repair-commit.edn",
+    :source-path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/evidence/01-distinct-repair-commit.edn",
+    :sha256
+    "9052ac40e1983854ff3c1639842c9587bdc46823049440ec294d930253338a62",
+    :admitted-at "2026-09-14T18:21:44.084836055Z"}
+   {:evidence/id
+    "wm-contract-machinery-51-v1/attempt-001/evidence/02-target-standing-decision.edn",
+    :source-path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/evidence/02-target-standing-decision.edn",
+    :sha256
+    "e4e9c0f08269efb1e1c1d469919c1929825810b303a72c4dee21564e8a97452b",
+    :admitted-at "2026-09-14T18:21:44.085412253Z"}],
+  :manifest-sha256
+  "ddcbe35a3a6f14ab5eb4c073a05174b1ddc4cd317b47ab49d5299ea9c06833bf"}}
