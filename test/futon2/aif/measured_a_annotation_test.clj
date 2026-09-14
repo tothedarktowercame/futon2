@@ -59,10 +59,11 @@
                          :bytes artifact-bytes :sha256 (sut/sha256 artifact-bytes)})}))
 
 (defn- fixture []
-  (let [a (annotation)
-        au (authority a)
-        criterion (get-in au [:rubric :criteria (:label a)])]
-    [(assoc-in a [:rubric :criterion/id] criterion) au]))
+  (let [a0 (annotation)
+        provisional (authority a0)
+        criterion (get-in provisional [:rubric :criteria (:label a0)])
+        a (assoc-in a0 [:rubric :criterion/id] criterion)]
+    [a (authority a)]))
 
 (defn- reason [a au]
   (get-in (sut/validate a au) [:refusal :reason]))

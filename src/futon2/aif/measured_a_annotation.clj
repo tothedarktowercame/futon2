@@ -151,10 +151,10 @@
     (exact-map! (:source-shape p) #{:scope :record-type :based-on}
                 [:provenance :source-shape])
     (if (= :retrospective (:mode p))
-      (do (exact-map! retro #{:status :frozen-evidence-cutoff :reason}
-                      [:provenance :retrospective])
-          (when-not (= :retrospective (:status retro))
+      (do (when-not (and (map? retro) (= :retrospective (:status retro)))
             (refuse! :retrospective-provenance-missing [:provenance :retrospective]))
+          (exact-map! retro #{:status :frozen-evidence-cutoff :reason}
+                      [:provenance :retrospective])
           (when-not (= (get-in a [:conditioning :evidence-cutoff])
                        (:frozen-evidence-cutoff retro))
             (refuse! :retrospective-cutoff-mismatch
