@@ -120,7 +120,7 @@
     (testing "acceptance identities must match configured authority"
       (is (= :acceptance-identity-mismatch
              (reason a (update-acceptance
-                        au #(assoc % :observer/id "borrowed-observer")))))))
+                        au #(assoc % :observer/id "borrowed-observer"))))))))
 
 (deftest evidence-and-time-refusals
   (let [[a au] (fixture)]
