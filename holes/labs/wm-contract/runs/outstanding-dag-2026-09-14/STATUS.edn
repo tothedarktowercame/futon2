@@ -19,8 +19,14 @@
    :evidence "runs/categorical-ambiguity-2026-09-14/ACCEPTANCE.md"
    :note "Estimator built and accepted (602ff836/a796f6df); downstream risk-ambiguity-witness still blocked on a-estimate and q-witness-flip."}
   {:node :r10-caller
-   :status :discovery-in-flight
+   :status :discovery-complete-blocked
    :at "2026-09-14"
    :seat "codex-24"
    :job-id "invoke-1789392678103-20785-1c3a7b39"
-   :note "Discovery only, row-14-style: enumerate callers, hidden authorities, refusal-control coverage before any wiring packet."}]}
+   :evidence "../../TN-r10-caller-discovery-2026-09-14.md (94bb4126); ACCEPTANCE-r10-discovery.md"
+   :note "Wiring impossible as caller-only edit: dispatch-then-record ordering can refuse after an async click started. Blocked on new node below."}
+  {:node :r10-commission-contract
+   :status :discovered-prerequisite
+   :at "2026-09-14"
+   :evidence "../../TN-r10-caller-discovery-2026-09-14.md §3, §Smallest valid next packet"
+   :note "NEW node not in dag.edn ec09b980: versioned R10 click-commission/dispatch-identity contract with durable pre-dispatch reservation and recovery semantics; hard prerequisite of r10-caller wiring. Fold into the DAG at its next revision."}]}
