@@ -1,0 +1,101 @@
+
+There are three boundaries in that description.  The existing coding agents are
+clients of the harness: they author and review work, but they do not carry the
+control model in their prompts.  Around them, the harness maintains the belief
+state, constructs and scores the candidate actions, imposes the act-gates, and
+records why a choice was made.  Outside both sits the shared substrate --- the
+files, commits, job events, and typed graph records against which a claim can be
+checked.  A claim of success closes the loop only when the substrate is changed
+and re-observed through a path that the author of the claim does not control.
+
+Conceptually, one cycle has six stages.  \emph{Perceive} turns heterogeneous
+artifacts into a structured observation.  \emph{Believe} updates operational
+hypotheses and the trust placed in each evidence channel.  \emph{Evaluate}
+predicts the consequences of candidate moves and keeps the active-inference
+score separate from engineering augmentations.  \emph{Select} constructs a
+bounded action space, may abstain, and records which term governed the choice.
+\emph{Act} is not a single model utterance: it includes construction, authoring,
+bounded repair, independent review, a grounded write, and re-observation.
+\emph{Learn} uses the independently witnessed outcomes to recalibrate later
+choices and, between runs, to revise the structures from which future
+candidates are proposed.  The six names describe the control cycle; the
+timestamped phases in Section~\ref{sec:catalog} show how that cycle expands in a
+real execution.
+
+Figure~\ref{fig:aif-brain} is a control map rather than a deployment diagram.
+Its five columns give the main cycle room to read from left to right: perceive,
+believe, evaluate, select, act, and re-observe.  The band below shows the
+assurance and learning apparatus that makes a decision independently checkable
+rather than a well-organised opinion.  Prior preferences (the model's C
+vector) are not a drawn node and carry no pattern number.
+
+The figure is generated at build time from the same wiring registries the
+harness is checked against, and its footer pins the registry revisions it was
+drawn from.  Its edge classes separate three kinds of claim that a
+hand-maintained diagram would conflate: wiring that is \emph{drawn} (including
+wiring drawn but carrying no data, and wiring retired by a recorded decision),
+routes that are \emph{measured} in recorded runs and anchored in the trace
+store, and edges the \emph{theory} expects, classed by whether the code
+realises them.  Agreement between the drawing and the running system is
+therefore a checked property of the build, not an illustration.  The
+R-numbers align directly with the catalogue in Section~\ref{sec:catalog}.
+
+R10's scheduled entrypoint has an unattended, reviewed, grounded witness on
+record and was subsequently operator-disabled; that records an operator
+choice, not a lower maturity grade.  Table~\ref{tab:code-audit} records how
+Campaign~S closed the code-audit items (R11, R12, R15, R17).
+These are maturity claims about the named paths, not claims that their models
+are generally effective.
+
+\begin{center}
+\begin{minipage}{\linewidth}
+\captionsetup{font=footnotesize,skip=3pt}
+\captionof{table}{Closure of the code-audit items by Campaign S.}
+\label{tab:code-audit}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.96}
+\begin{tabular}{@{}lp{2.4cm}p{10.9cm}@{}}
+\toprule
+\textbf{R-\#} & \textbf{Status} & \textbf{Live evidence} \\
+\midrule
+R12 & Run-evidenced & Both separately recorded layers passed on both ticks; independent review and grounded re-observation supplied Layer~2. \\
+R11 & Run-evidenced & Both ticks selected one item from each live field at feasible total cost 7; replay reproduced both portfolios. \\
+R17 & Run-evidenced & The inter-tick pass reduced a frozen 26-observation model in 20~ms, replayed exactly, and fed Tick B. \\
+R15 & Run-evidenced & Tick A's witnessed success changed Beta(1,1) to Beta(2,1) and exploration to consolidation before Tick B. \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\end{center}
+
+\hypertarget{pat-r19}{}
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{aif-control-map-live}
+\caption{Checked topology of the active-inference harness, generated at build
+time from the wiring registries and pinned to their source revisions in the
+footer.  Nodes carry the catalogue's R-numbers; R3a is the prediction-error projection
+that measured routes pass through between structured observation (R2) and
+evidence-channel precision (R7) --- no direct R2-to-R7 call exists, so the
+measured path is R2$\rightarrow$R3a$\rightarrow$R7.  Edges are wiring claims of
+stated standing: solid edges are drawn wiring (transition, constraint, or
+unclassified), faint dotted edges are drawn but carry no data, and dash-dot
+edges are retired by a recorded decision; purple, teal, and orange edges are
+added by decision --- found in code, intended by a ruling, or conditional on a
+guard; amber, crimson, and olive edges are theory classes from the conformance
+registry --- realised in code but undrawn, not realised, and path-dependent;
+green edges were observed in recorded routes, anchored in the trace store.}
+\label{fig:aif-brain}
+\end{figure}
+\FloatBarrier
+
+The map also has a model-side incompleteness layer that a topology drawing
+alone cannot show.  In particular, a generic Lean carrier or a formula that
+accepts a caller-supplied predictive distribution does not establish that the
+running machine constructs that distribution from its beliefs, model, and
+policy.  Table~\ref{tab:q-interface-gaps} is regenerated from the checked
+interface registry on every paper build, keeping the missing constructor,
+underpowered deliveries, and next wiring actions visible alongside the map.
+
+\input{sec-q-interface-generated}

@@ -1,0 +1,42 @@
+\section{What It Is Good For: The War-Room Spine}\label{sec:wr-spine}
+
+\subsection*{The Factoring: Mechanisms Against Constraints}\label{sec:factoring}
+
+%% Source of truth: empirics-futon/r-wr-factoring.edn (WR-8).
+%% Regenerate:  bb empirics-futon/gen_factoring_table.bb table  > empirics-futon/factoring-table.tex
+%%              bb empirics-futon/gen_factoring_table.bb macros > empirics-futon/factoring-counts.tex
+
+The recorded factoring map presents \FactoringEdges{} mechanisms as
+steps in a single attempt. The factoring asks which constraints govern them
+across attempts; several mechanism entries state their constraint inline.
+
+Two numbering schemes meet here and they name different kinds of thing. The
+factoring registry retains its implementation \emph{mechanism} identifiers; this paper numbers the governing \emph{constraints}
+recovered from the bulletin record \texttt{WR-0}, \texttt{WR-4}, and so on. A
+mechanism is a step somebody built; a ruling is a constraint that step has to
+satisfy.
+
+Mechanism \Rpp{17}, the separation of whatever proposes a merge from whatever
+accepts it, is the clearest instance --- its own text carries ``Invariant to preserve: whatever proposes the
+merges must not also be what accepts them,'' which is the separation of
+proposer from acceptor that \texttt{WR-25} rules on generally.
+
+The factoring below therefore \emph{recovers} structure rather than imposing
+it. \FactoringEdges{} mechanisms map onto \FactoringWRCovered{} constraints;
+\FactoringUnmapped{} do not map, for three different reasons the table
+records, of which one --- the preference organ terminates at an operator who
+is not in the model --- is structural and is the subject of
+\S\ref{sec:operator}.
+
+\input{empirics-futon/factoring-table}
+
+\paragraph{A note on where the catalogue ends.} Of the \FactoringEdges{}
+mechanisms factored here, the historical factoring scheme names \wmR{18}, which is not a
+canonical assignment in the current control-map registry. Here it is the \emph{faithfulness audit}: it classifies every named quantity in
+the loop as derived from the free-energy principle, a principled approximation,
+analogical --- ``a heuristic wearing the name'' --- or an engineering control
+that makes no theoretical claim, and attaches to each a plain-language
+truth-in-labelling of the form \emph{claims to be\ldots{} / actually
+computes\ldots{}}. The small dots along the top edge of every node in
+Figure~\ref{fig:wr-overlay} are its output. This historical identifier must not be joined to the current catalogue by
+number alone. The issue board retains that numbering distinction.

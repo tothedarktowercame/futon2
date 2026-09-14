@@ -1,0 +1,103 @@
+\section{The Operator Is Already Traceable}\label{sec:turn-chain}
+
+%% Numbers: empirics-futon/gen_turn_chain.py emits BOTH this section's macros
+%% and the figure, from one live join, so prose and figure cannot drift (WR-8).
+
+The closure argued in \S\ref{sec:operator} needs the operator to be
+\emph{observable} before it can be modelled. That is an empirical claim about
+this stack, not a design intention, so it is established separately and first.
+
+Agent-authored commits record system output; they do not by themselves
+measure operator attention. What records the operator is the evidence landscape, and it records
+him at the granularity of the \emph{turn}.
+
+Three mechanisms, built for unrelated reasons, bear on the same question.
+
+\noindent\textbf{Route A: clock-in.} A turn taken while a mission is clocked carries
+that mission on the turn record. This is not fully reliable --- the clock is
+sometimes not set, and the gap is visible rather than hidden.
+
+\noindent\textbf{Route B: retrieval.} The retrieval route embeds turns and matches them against
+the pattern library, and the result is deposited as a \texttt{context-retrieval}
+evidence event carrying pattern ids and cosine scores. Each recorded event carries \ChainCandidates{} ranked candidates, but the
+operator's interface commits to the top one --- it resolves that pattern's sigil
+and shows it beside the turn. The counts and the figure below therefore use rank
+\ChainTopK{} only. Counting all \ChainCandidates{} would inflate every figure in
+this section by roughly threefold while describing something no one ever saw.
+
+\noindent\textbf{Route C: mention.} A mission document may simply name a
+pattern in its text. This needs no turn and no clock at all; it is a property of
+the corpus, and \ChainMissionDocs{} mission documents were scanned for it.
+
+Each route was built independently; none was designed to supply the relation
+measured by either of the others. Route~A answers \emph{what was being worked
+under}; route~B answers \emph{what is this turn about}; route~C answers
+\emph{where is this pattern written down}. As typed edges:
+
+\begin{itemize}\itemsep0pt\parskip0pt
+\item \textbf{A}: turn $\rightarrow$ clocked mission
+\item \textbf{B}: turn $\rightarrow$ retrieved pattern
+\item \textbf{C}: pattern $\rightarrow$ mentioning mission
+\end{itemize}
+
+\noindent A and B meet on the turn id, and that
+coincidence supplies a derived association between a pattern and a mission.
+It is not the authored citation used in the cascade of \S\ref{sec:factoring}. C reaches the same relation from
+the other end, without needing the operator to have been clocked in correctly ---
+or at all.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{turn-pattern-mission-chain}
+  \caption{Four turns, each with its three answers. Route~B (solid, coloured)
+  goes through the pattern; route~C (brown) continues from that pattern to the
+  missions whose documents name it; route~A (dashed) goes straight from the turn
+  to the mission the operator was clocked into. A and C reach the same kind of node through different relations. Green marks a pattern the curated layer already
+  cites, blue one it never has. The following prose gives the generated full-window counts.}
+  \label{fig:turn-chain}
+\end{figure}
+
+In the window measured for Figure~\ref{fig:turn-chain}, \ChainTurns{} operator
+turns carried both annotations, yielding \ChainEdges{} turn$\rightarrow$pattern
+edges over \ChainPatterns{} patterns and \ChainMissions{} missions. Of those
+edges, \ChainAgree{} name a pattern the curated layer already cites; \ChainNew{}
+do not.
+
+Route C then reaches \ChainMentioned{} of those \ChainPatterns{} patterns,
+adding \ChainMentionEdges{} pattern$\rightarrow$mission edges across
+\ChainMentionMissions{} missions --- against the \ChainMissions{} that clock-in
+alone supplies. And the two disagree completely: of the patterns route C
+reaches, \ChainMentionAgree{} are mentioned in the mission the operator was
+actually clocked into.
+
+The routes answer different questions: clocked session context and textual
+mention. Their disagreement does not identify an incorrect clock, cross-mission
+work or an omitted citation without further evidence. Likewise, the
+\ChainNew{} retrieved associations absent from the curated set of
+\ChainCurated{} patterns identify candidates for inspection, not demonstrated
+attention or missing warranted citations.
+
+Three cautions, stated here because they bound what the figure supports.
+
+First, retrieval is not use. Embedding proximity proposes a topical association; it does not establish
+that the pattern was applied. An application receipt would need separate evidence; nothing in this
+section supplies it.
+
+Second, routes~A and~B overlap only where both fire. Route~A's coverage is
+partial, so \ChainTurns{} is a floor set by the weaker mechanism, not a measure
+of how much of the operator's attention is traceable in principle. Improving the
+clock raises it directly --- and route~C sidesteps it, which is much of the point
+of having a third route rather than a better second one.
+
+Third, and most important for what may be built on this: these derived edges
+must not be merged into the curated layer. Their provenance is different --- a
+cosine score, not a human citation --- and merging them would destroy the
+distinction that makes the gap measurable at all. They belong in a separate
+relation carrying score and turn id, where agreement with a curated citation is
+a cross-check rather than an assumption.
+
+With those caveats the claim is modest and checkable: the operator is not
+outside the record. He is in it, per turn, at a rate that can be counted, and
+the chain from a turn he took to a mission he was working on runs through the
+pattern library. \S\ref{sec:operator} argues what to do with that; this section
+establishes only that there is something to do it with.

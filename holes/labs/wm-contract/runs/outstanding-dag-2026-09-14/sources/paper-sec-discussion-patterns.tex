@@ -1,0 +1,143 @@
+\section{Discussion}\label{sec:discussion-patterns}
+
+The thirteen-minute attempt shows the loop working once from selection to a
+grounded change.  A later seventy-two-minute campaign shows the four newly
+integrated mechanisms working together across two ticks.  Two slower histories
+show how the catalogue itself changes: a recurring hole can become a candidate
+pattern, and a recurring machine failure can become a new sense for the
+harness.  All three histories are useful because none ends with the system
+simply declaring that it has learned.
+
+\subsection{The running example under an instrumented campaign}
+
+Attempt-061 remains the compact running example.  Campaign S is
+the more demanding, complete example: it preregistered two live proposal
+fields, local and shared budgets, an exploration-to-consolidation feedback
+rule, separate internal and external calibration records, and an offline
+structure-learning pass.  It completed in 4,324,602~ms (72:05), including two
+independently reviewed and grounded changes in different repositories.
+
+Tick A took 57:30.  R11 selected one inside-Futon3c and one rest-of-stack
+proposal at total cost 7, exactly exhausting but not exceeding the shared
+budget.  The external FrontierMath action initially introduced an independent
+SAT-encoding cross-check.  Review found that a run with no valid samples could
+pass vacuously; the amendment refused non-positive and zero-valid-sample runs,
+passed a real five-sample replay and the full suite, and was approved and
+grounded as Futon6 commit \texttt{e72f7f3}.  Layer~1 and the independent
+Layer~2 both passed.  That witnessed success moved R15's slow state from
+\texttt{:exploration} to \texttt{:consolidation}, changing the capability
+posterior from Beta(1,1) to Beta(2,1) before the second tick.
+
+Between ticks, R17 froze 26 capability--mission observations, evaluated 21
+candidate reductions among seven concepts in 20~ms, accepted 21, and collapsed
+the concepts to one.  Exact replay reproduced the R11, R12, R15, and R17
+records.  The reduction is evidence that the mechanism executes and feeds the
+later field, not that this aggressively merged model should be deployed.
+
+Tick B then ran under consolidation and took 14:34.  R11 again selected a
+feasible cost-7 cross-field portfolio.  The Expressions of Interest action
+repaired prior-reference parsing; review caught substring matching that could
+fabricate edges, and the amendment restricted matches to whole identifiers.
+It passed re-review and grounded Futon5a commit \texttt{ded366e}.  Both
+calibration layers passed again.  The campaign closed
+\texttt{:two-tick-evidence-complete} with receipt
+\texttt{e-8ae4e209-f13b-4722-80de-a7fc7d5d68fe}.  The long wall time is part of
+the result: independent production work and correction dominate the 20~ms
+offline reduction, so the campaign demonstrates an auditable control loop,
+not a fast scheduler.\worknote{Campaign S remains the R11/R12/R15/R17
+evidence base; its records were re-used, not re-run, when the 2026-09
+witness admissions checked the R15 slow-state and R17 reduction claims
+against pins. No newer campaign exists; the next candidate is the staged
+machinery-run cohort once r2 reaches construction.}
+
+\subsection{From a policy-hole to a candidate pattern}
+
+The first case began with a citation to a pattern that did not yet exist.
+Rather than treating the plausible name as evidence that the pattern was
+already available, the system recorded the reference as a policy-hole, minted
+\pid{structure/two-projections-of-one-quantity}, and used the resulting
+candidate to discharge the originating hole.  This is the smallest complete
+instance of R17$^{\prime\prime\prime}$: an observed gap enlarged the policy
+vocabulary, but did not by itself promote the new entry.
+
+A larger failure family produced the pair
+\pid{process-coherence/status-refresh-before-work} and
+\pid{process-coherence/is-this-even-a-problem}.  Hundreds of expensive ticks
+had worked from stale banners instead of consulting the primary record.  Here
+the recurring evidence justified two more specific moves rather than one broad
+instruction to ``check status.''
+
+The Zai memory pilot supplies the next test of the boundary.  Several Lean
+episodes fit existing tactic patterns only loosely, so the Librarian must be
+able to return ``no adequate pattern'' and propose a narrower candidate instead
+of forcing every memory into its nearest neighbour.  Conversely, a volatile
+fact such as tool availability remains a reference memory rather than becoming
+a pattern.  Across the three cases the rule is the same: a hole warrants a
+candidate, not its promotion.\footnote{The older live route is recorded as
+\texttt{library-gap-findings $\rightarrow$ authoring $\rightarrow$
+authored-seeds $\rightarrow$ pattern-library} in
+\srcref{futon2/holes/wm-pipeline-wiring.edn}; the generalised mint lane and the
+two-projections precedent are in
+\srcref{futon2/holes/labs/slush-demo/SPEC-full-loop-gfn.md}; typed-memory
+evidence and pattern-conditioned recall are developed in
+\srcref{futon3c/holes/missions/M-typed-memories.md}.}
+
+\subsection{From incidents to interoceptive tripwires}
+
+R20 followed the same progression at the level of the harness itself.  Eleven
+wires specified from the loop's fix-ledgers retro-tripped all four cases in
+the reconstructed incident corpus: a late-author artifact from the real phase
+ledger, plus synthetic terminal-wedge, rejection-livelock, and mixed-image
+cases.  The full set --- thirteen catalogued wires, twelve enabled ---
+retro-trips all five catalogued incidents.
+
+The first live catch was, as No Self-Certification predicts, about the new
+instrument itself.  One wire fired fifteen times in shadow mode because its
+composition baseline had been captured mid-load: an observation of emptiness
+had been mistaken for an empty observation.  The likelihood mapping was
+repaired so that a missing baseline admits the first real observation exactly
+once.  Shadow mode made that calibration error free to observe.  Two subsequent
+armed runs, including a full author--review--reject cycle and an operator
+sequencing error typed as an environmental hold, produced no trips and no false
+alarms.
+
+The next armed runs exercised more of the design.  A three-week adversarial
+repair lineage used a Claude author and Codex reviewer.  Four strictly narrowing
+rejections identified a missing reader boundary, a reader-retention race, and a
+publisher-interleaving race that the reviewer reproduced deterministically.
+The lineage terminated in a grounded change.  It also left a new
+author--artifact-binding wire, chartered after an earlier incident in which the
+pipeline reviewed a commit hash that had been narrated rather than measured.
+
+During the grounding run the wedge detector fired on a lineage that was one run
+from convergence.  Its reading was factually correct but carried the wrong
+precision.  The summon path then failed its roster check and degraded one rung
+down its fail-safe ladder without losing the report.  Both findings went through
+the contract's own \emph{revise-the-model} route that afternoon: the detector
+learned to exempt convergence, where every round produces a fresh commit, while
+retaining the true no-work wedge; the discharge was recorded with independent
+review evidence.  The proposed link from a trip to R14's commitment dial --- a
+wire firing should make the system less sure of itself --- remains explicitly
+chartered rather than implemented.\worknote{STILL TRUE, now with the
+design fixed: the decay constants are ruled (2026-09-13), a
+147-candidate sensitivity probe is retained, and the integration
+constraint is documented --- the modulation must act through an applicable
+gain mode and report saturation or inapplicability as non-qualifying
+rather than as firing evidence. Implementation packets are queued behind
+the qualifying-run critical path.}
+
+These histories expose the same discipline at two scales.  Embedding nearness
+or a policy-hole may \emph{propose} a pattern, but witnessed enactment and review
+must decide whether it earns standing.  A tripwire may \emph{propose} that the
+machine is failing, but replay, shadow operation, and independent discharge must
+decide whether the wire or the machine needs revision.  In both cases the
+generator is prevented from certifying its own proposal.
+
+\paragraph{Boundaries of the catalogue.}
+Eight load-bearing limits govern the catalogue and are stated here rather than left only in its review graph.  Composition requires typed ports and witnessed compatibility; adjacency is not composition.  A catalogue entry, an implemented move, a repeatedly enacted candidate, and a promoted design pattern occupy distinct rungs of a claim ladder.  Failed attempts remain repair debt and may not disappear from the measured population.  The observed stabilization claim is migration of failure families upward through the stack, not an improving success rate.  Model-relative validity says an update follows the declared model; environmental validity requires evidence outside that model.  Candidate-set adequacy is independently testable and cannot be inferred from the selector's choice.  Transfer of a mechanism across domains does not transfer either domain's preferences or outcome validity.  Finally, an external witness establishes auditability, not value: an independently recorded author-chosen proxy can still be the wrong quantity.\worknote{OPERATIONALIZED: these limits are now
+certificate discipline --- a full-scope certificate must attest the
+complete typed census, and anything excluded needs a written rule-out by
+exact bytes. The current rule-out list is empty except one
+obligation-specific retirement (the legacy free-energy producer, under its
+original ruling); seventeen inventory items remain to close or rule out
+before the qualifying run.}

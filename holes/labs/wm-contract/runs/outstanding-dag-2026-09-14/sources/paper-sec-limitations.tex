@@ -1,0 +1,33 @@
+\section{Limitations}\label{sec:limitations}
+
+\paragraph{Empirical scope: proof of life, not proof of work.}  This is the
+limitation that governs the others, and it should be read before the results
+are.  What the Field Desk ledger and the specimen trace establish is that the
+loop \emph{runs}: that a scheduled click selects work against a declared model,
+constructs a cascade, dispatches it, obtains an externally adjudicated verdict,
+writes a typed witness the model did not manufacture, and carries its failures
+forward as first-class records rather than discarding them.  Every number
+reported here is a number about that machinery.  None of them is evidence that
+the machinery \emph{helps} --- that a stack governed this way improves faster,
+more reliably, or more cheaply than the same stack under a hand-ranked backlog
+and the same underlying coding agents.  The preregistered experiment is the only
+comparison in this paper with a control arm at all, and its headline result was
+negative: the learned proposer did not beat the retrieval-prior incumbent on
+success rate, winning only on proposal diversity.  We report it because a
+preregistration that is abandoned when it disappoints is not a preregistration.
+
+The missing study is not subtle, and naming it is more useful than approximating
+it.  It requires a comparison arm in which the same agents work the same stack
+without active-inference-governed selection, an outcome measure adjudicated by
+someone with no stake in the harness, and enough attempts for the comparison to
+mean anything --- which, at a label rate of dozens per day rather than millions
+per hour, is the binding constraint rather than an implementation detail.  Until
+that study exists, the honest status of the architecture is: a working,
+inspectable, externally grounded control loop whose benefit is unmeasured.
+Claims in this paper are scoped accordingly, and readers should treat any
+sentence that appears to exceed that scope as an error rather than a hedge.
+
+\paragraph{Theoretical scope.} The system is AIF-backed, not a pure Expected-Free-Energy minimizer.  Its canonical core computes $G(a)=\mathrm{risk}+\mathrm{ambiguity}$ under the declared outcome model.  The controller score adds the active engineering objectives identified in Box~\ref{tab:aif-retract}; the same table also records mechanisms outside value scoring, including policy-support restrictions and telemetry-only diagnostics.  For active controls, the retract explains the recognizable AIF role without turning the control into a variational quantity.  For telemetry-only rows, the table asserts only diagnostic correspondence and no causal AIF role in selection.  Production belief updating executes the categorical Bayes filter $q^- = Bq$, $q \propto A(o\mid\cdot)q^-$ under an explicit, normalised A, identity B, and uniform D, with likelihood mode and A/B/D hashes recorded in the trace.  This gives exact inference under the declared model, but A's entries are hand-set and the audited real corpus contains only one event type, so it cannot identify or validate the off-diagonal structure.  B is an explicit identity assumption rather than a learned dynamics model.  R3's green status consequently means model-relative conformance, not that A/B/D have been shown to be the best model of the operating environment.
+
+\paragraph{Verification scope.} The inner-loop gates establish progressively stronger but typed claims. Replay pins establish provenance, arming, and score recomputability; CLean and Lean establish structural well-formedness; A3 build-match establishes that reviewed bindings are inhabited in the external substrate; and the operational witness establishes one closure behaviour --- a recorded discharge produces the specified ranking inversion.  The ordinary replay loader accepts deposits without CLean, whereas A3/build-match requires it, so formal structural verification is not a universal precondition of every replayed fold.  More importantly, none of these checks proves semantic adequacy, beneficial effect, or optimality. Those claims require independent adjudication of the realised outcome, and a winner-changing ablation or ranking inversion establishes causal activity only.
+

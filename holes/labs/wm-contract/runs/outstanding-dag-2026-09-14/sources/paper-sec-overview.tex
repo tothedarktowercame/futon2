@@ -1,0 +1,24 @@
+\section{Overview}\label{sec:overview}
+
+The system we describe is an active-inference harness around existing agentic coding systems.  It reads a body of research work (a stack of missions, code, and open questions) and, each cycle, \textbf{recommends what to work on next and, when armed, acts on it} --- committing the chosen work to a real substrate and re-observing the changed world.  In everyday terms, it is something like a project manager combined with a cautious junior engineer, wrapped around the coding agents rather than replacing them: it does not just say ``work on ticket X,'' but records why X was chosen over the alternatives, checks whether it is actually allowed to act, writes a real artifact (a file, a test result, or a code change), and then looks back to see what changed in the world as a result.\worknote{
+IMPROVED: ``when armed, acts on it'' has a working on-demand arm again ---
+a reviewed thin client over the single-flight click service (2026-09-13);
+the r1--r8 machinery series then ran the whole loop to ground: r8
+(2026-09-14, preregistered cohort 49, durable checkpoints) closed
+grounded-change --- selection, construction, dispatch, authored commit,
+independent review approval, grounded adjudication, and stop-line
+resolution all in one attempt. Machinery evidence, not the qualifying
+run. \wkflag{OUTSTANDING}: effective horizon at least 2 and the two
+policy-detail flags are declared run-configuration requirements not yet
+enabled in the serving process.}
+\ifdefined\plopearlyoverview
+\input{sec-overview-plop}
+\fi
+% It is a \emph{full} active-inference loop, not only a recommender: the same conceptual machinery that ranks candidates also gates a grounded actuator that writes a typed, checkable result and feeds it back as evidence. Given a candidate, it scores possible \emph{courses of action} by a single quantity, \emph{Expected Free Energy} ($G$), that balances getting closer to what is wanted against resolving what is uncertain, and it prefers the one that minimises $G$.  Think of $G$ as a structured cost-benefit score with three jobs at once: it asks whether the move gets us closer to what we want, whether it avoids likely trouble, and whether it teaches us something useful.  Lower is better; unlike a simple cost-benefit analysis, uncertainty is included as a first-class term, so the system can value an action partly because it would resolve an open question.  Every recommendation --- and every act --- carries a reason that can be inspected.
+
+% The control cycle elaborates ideas presented in the predecessor FuLab system \cite{corneli2026patternsnewgenerationai}: believe, score by $\mathrm{softmax}(-G/\tau)$, act, observe, update, repeat. In words, the scoring step turns the candidate scores into a preference for the lowest-$G$ (lowest-cost) option, subject to a temperature $\tau$ that says how decisive we can be to be: a low $\tau$ commits to the front-runner, a high $\tau$ keeps the field open.
+
+
+% \section{Definition}\label{sec:def}
+
+% In ordinary terms, a pattern is not just an instruction or a rule.  It is a reusable judgment: ``In this recurring situation, this kind of move usually helps, because\dots''  What makes patterns more than commands is that they carry their own rationale and have been tested across many situations.  In this system, patterns become \emph{operational}: pattern text can be selected, arranged into a cascade (a sequence where one pattern's result creates the conditions for the next), and checked as a typed construction called a \emph{fold} (see below).

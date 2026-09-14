@@ -1,0 +1,92 @@
+\section{Methods: one certificate, end to end}\label{sec:methods}
+
+%% Added 2026-09-14 under the 2026-09-13 ruling (decision sheet:
+%% futon2 holes/labs/wm-contract/DECISION-SHEET-companion-reference-2026-09-13.md):
+%% the companion promises resolve to futon-2026, and this paper gains a
+%% Methods section carrying the Lean certificate once the relevant
+%% certificate exists. It exists; this is it.
+
+Where this paper's claims are validated, they are validated by
+machine-checked certificate over pinned records, not by narrative.  This
+section records one complete certificate chain --- for the machine's
+pattern-retrieval act (\texttt{find}), the operation that selects catalog
+patterns from the recorded library and must warrant each selection ---
+so the reader can see concretely what is checked, over what record, and
+on whose authority.  The companion paper owns the formal treatment and
+the preregistered experimental report; what belongs here is the
+certificate for the specimen this paper describes.\worknote{ADDED
+2026-09-14: the certificate ruled for (2026-09-13) exists and is pinned
+here --- the F1--F4 Lean closures plus the
+\texttt{:wm/f2-reconciliation-certificate-v1} chain. Rows P001--P005
+close.}
+
+\paragraph{The record.}  The subject is a fixed, transcribed record of
+retrieval behaviour: \texttt{futon3:checks/find-snatch.edn}, thirty-four
+recorded rounds across six scenarios of \texttt{find} calls against an
+eighteen-member recorded pattern repository, each selection carrying its
+receipt, with one empty selection (scenario \texttt{g2/snatcher}, round
+11) recorded as a typed absence.  The file's SHA-256 is
+\texttt{c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce}.
+
+\paragraph{The Lean leg.}  Four properties of that record are theorems in
+\texttt{DarkTower/WarMachine/Holes.lean}: every selection lies inside the
+recorded repository, with empty selection carried as typed absence
+(\texttt{wmFindSnatchF1Containment}); every selected pattern carries a
+receipt in the same recorded row (\texttt{wmFindSnatchF2Receipted});
+every receipt is a structured antecedent with a warrant file rather than
+a bare score (\texttt{wmFindSnatchF3NonSelfCertifying}); and each
+scenario's declared zero-mass pattern is a repository member absent from
+that scenario's selected union, so the selection claim is falsifiable in
+principle and was not falsified (\texttt{wmFindSnatchF4Falsifiable}).
+Each is proved by \texttt{decide} over the transcribed table --- the
+kernel evaluates the predicate on all rows --- and none depends on
+\texttt{sorry}.  The theorems closed under the J9 criterion on
+2026-09-03; the file re-elaborated cleanly on 2026-09-14, its only two
+\texttt{sorry} declarations being the deliberately open external
+attestation holes H3 and H4 (theory-alignment claims about policy
+precision that Lean cannot decide from a transcript), which do not touch
+these four.  Each theorem has a rejecting negative control in
+\texttt{futon3:checks/find\_snatch.clj} (\texttt{--negative-f1} through
+\texttt{--negative-f4}): a corrupted counterpart record is refused, so
+the checks are detectors, not constants.
+
+\paragraph{The transcription leg.}  A \texttt{decide} proof is only as
+good as the transcription it evaluates, so the chain's second leg binds
+the transcribed table to the pinned file and the pinned file to history
+that the transcriber does not control.  A committed expectation record
+(\texttt{00-pin-expectation.edn}) declares the pin path and digest and
+binds them to the futon3 repository's own git history --- commit
+\texttt{e63eaef8}, 2026-09-08, authored five days before the
+transcription and not by the transcriber, with the blob identity and a
+re-derivation command any reader can run.  The verifier
+(\texttt{f11\_f2\_reconcile.bb --check}) validates that expectation
+fail-closed (exactly one EDN form, exact key set, declared path equal to
+the path actually hashed, digest format, non-blank authority provenance
+--- each with a refusing control), refuses any drift between the pinned
+digest and the file on disk, then recomputes the full reconciliation
+report and refuses field-level drift from the committed certificate
+(\texttt{:wm/f2-reconciliation-certificate-v1}).  On 2026-09-14 the check
+passes: the committed certificate describes exactly what recomputation
+observes, and the records reconcile.
+
+\paragraph{How the chain itself was built.}  The expectation-and-verifier
+chain was authored inside the machine's own gated loop, not beside it.
+An independent reviewer rejected the first version outright --- the
+expectation was self-authored, so the digest check was reflexive --- and
+returned a second round of findings against the repair (declared-path
+and provenance validation gaps) before approving the amended chain; the
+closing run then recorded a grounded change in a preregistered
+machinery-test cohort with durable checkpoints (cohort 49, attempt 002,
+2026-09-14).  Those runs are machinery evidence: they demonstrate the
+loop that produced this certificate under review and refusal, and none
+of them is, or is presented as, the preregistered qualifying run, which
+remains outstanding (tracker row 28) and belongs to the companion
+paper's experimental report.
+
+\paragraph{Scope.}  This certificate establishes recorded-row invariants
+of one pinned record and the integrity of the pin; it does not establish
+runtime behaviour beyond that record, and on this record F3's
+discrimination beyond F2 rests on its rejecting control, since every
+recorded receipt is already a structured antecedent.  The open
+theory-alignment holes (H3, H4) remain open by design and are reported,
+not smoothed.

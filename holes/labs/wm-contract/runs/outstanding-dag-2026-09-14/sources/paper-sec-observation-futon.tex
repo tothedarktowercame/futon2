@@ -1,0 +1,42 @@
+\xobservationheading\label{sec:observation}
+
+This investigation began while revisiting the PLoP paper. We had described
+an active-inference system, but close examination showed that we had not
+established that the implementation was the system the account implied.
+The difficulty was not only whether its parts worked. It was whether the
+claimed operations occurred, whether their outputs reached the stated consumers,
+and whether the resulting evidence warranted the larger claims. The deep dives
+reported here turned that discrepancy into an explicit programme of work.
+
+A working model needs two kinds of test: whether it still describes the world,
+and whether acting on it achieves its purpose. The distinction is visible in a
+war-room plotting table. Counters show a situation; their age tells the reader
+how much confidence to place in it. A replay tests a proposed response. Neither
+an up-to-date picture nor a successful rehearsal establishes that the response
+has worked outside the room.
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[height=5.4cm]{plotting-table.jpg}\hfill
+  \includegraphics[height=5.4cm]{war-machine-caravans.jpg}
+\end{center}
+\caption{Two images behind the project's vocabulary: the plotting table at
+Uxbridge, and van Gogh's \emph{Encampment of Gypsies with Caravans} (1888).
+They suggest maintained situational knowledge and an organisation that can
+move beyond its own representation. These are analogies, not validation of the
+software. Left: Danielstirland, CC0; right: public domain, both via Wikimedia
+Commons.}\label{fig:room-and-machine}
+\end{figure}
+
+The War Machine is an active-inference harness around coding agents. Its
+founding pattern, \texttt{WR-0}, asks for an open model, an available exit and a
+verdict the apparatus cannot issue to itself. Auditing the implementation made
+that last requirement concrete: recording a selection, producing an artifact
+and verifying the intended outcome are separate achievements.
+
+Our PLoP paper prompted this audit. Re-examining its claims revealed broken
+handoffs and gaps between the architecture and recorded execution. This paper
+reports the investigation and its consequences. It does not claim that the
+repair programme has already produced a validated whole system. The issue
+board records the current obligations; the following sections explain why they
+matter and what evidence could discharge them.

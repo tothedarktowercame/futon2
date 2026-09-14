@@ -1,0 +1,96 @@
+\section{The audit prompted by the PLoP paper}\label{sec:case-vetting}
+
+%% Provenance for the numbers in this section, which are NOT paper macros:
+%% every figure is quoted from a dated internal record rather than regenerated
+%% by a script in empirics-futon/ -- a departure from WR-8, flagged as in
+%% sec-boundary. The records:
+%%   futon2/holes/labs/wm-contract/NOTE-cascade-consumers-census.md   (07-05/06/09 dates)
+%%   futon2/holes/labs/wm-contract/claude-15-repl-buffer-snapshot-2026-08-31.txt
+%%   vetting/OBLIGATIONS-REVERIFY-2026-08-31.md                        (24 obligations)
+%%   futon2/holes/problems/P-defect-classes.md                         (9 classes)
+%%   futon2/holes/problems/BUILD-ledger.md, WM-RUN2 gate 2026-08-30    (3 of 9 hops)
+%%   futon3 library harvest be8c707 review ad0b004                     (spider counts)
+%% These are frozen historical facts about one episode, not live joins; freezing
+%% them by hand and naming the record is the honest form here.
+
+
+The PLoP catalogue was treated as finished on 2026-08-21. On 2026-08-30,
+asking who consumed the output of its Learn stage reopened the implementation
+question. The census found that Learn's input had stopped arriving on July~6,
+the nightly observer had last run on July~5, and writeback deposits had stopped
+that week. The operator's question detected the failure; no standing monitor
+had reported the producer and consumer falling silent.
+
+The following day's vetting checked a twenty-four-row obligation ledger against
+published PDFs and found two unsupported closures. The rows were subsequently
+resolved by corrections, new evidence or explicit withdrawals. That was a
+repair of the paper's obligations, not proof that the machine worked. An
+instrumented run separately agreed with the described wiring on only three of
+nine hops. These dated findings began the repair programme now represented by
+the issue board.
+
+\subsection*{What the audit checks}
+
+The investigation separates five questions. \emph{Nouns}: do the records denote
+the objects the claim requires? \emph{Verbs}: do producers and consumers perform
+the claimed operations? \emph{Organisation}: do their handoffs compose, with
+compatible types and a responsible owner? \emph{Evidence}: can a check reject
+a false claim, and does its receipt refer to the artifact being discussed?
+Finally, who is present to act on a refusal or supply the required judgement?
+A missing answer is an obligation, not permission to substitute a nearby one.
+
+This decomposition explained how passing checks could coexist with a broken
+loop. A theorem about an object does not establish that a live caller supplies
+that object. A generated artifact is not evidence that its consumer runs.
+Likewise, resolving a documentation defect does not resolve the implementation
+defect it describes. Independent review must check the asserted behaviour and
+its evidence, not merely the summary's status.
+
+The record also made the investigation resumable when its original agent
+session became unavailable. Another agent could continue from dated ledgers
+and problem records. This supports a practical requirement: an unfinished task
+must retain its current evidence, next step and owner outside the conversation
+that happened to discover it.
+
+\subsection*{Apparatus patterns and their limits}\label{sec:apparatus-quality}
+
+The new \texttt{futon3/library/apparatus/} collection describes mechanisms for
+keeping the investigative machinery answerable to its work. Three are
+especially relevant here. \emph{Done is observed running} requires evidence
+that a change is loaded, connected and producing its intended effect.
+\emph{Monitors measure the work} checks durable progress of the actual task,
+not the coordinator's heartbeat, and calls for commissioning against both a
+stall and healthy progress. \emph{Evidence to disposition once} requires a
+shared interpretation of raw observations before different consumers derive
+their own decisions.
+
+Other entries address authority, pin updates, deadlines and repair citations.
+Their context matters: the collection's field trial is the APM apparatus repair
+programme, documented in
+\path{futon3c/holes/technotes/TN-apm-principle-scoring-ledger.md}.
+That ledger records principles that helped, misled their users or needed
+revision. It is evidence about those episodes, not a guarantee that every
+pattern is installed in the War Machine. A transfer claim needs its own
+consumer, failure control and witnessed result. In particular, keeping a pin
+current must include the required independent review; it does not authorise
+an implementer to approve their own evidence.
+
+These patterns are candidates for a focused addition to the PLoP paper. Their
+value is to explain concrete failures and repairs, rather than add a second
+catalogue of desirable practices. The paper's existing component witnesses
+remain useful, but the larger claim awaits an integrated run at an explicit
+contract and source basis.
+
+\subsection*{From audit to action}
+
+The board below is the current work view. It preserves disagreements among
+sources instead of resolving them by presentation, distinguishes unowned work
+from an absent carrying packet, and displays evidence age. A readiness result
+admits an attempt; a run-gated obligation needs that attempt's evidence.
+Neither a green readiness line nor a completed repair count is a completed,
+compliant run. The narrative explains the audit; the board owns its changing
+status.
+
+\clearpage
+\input{sec-issue-board-generated}
+\clearpage

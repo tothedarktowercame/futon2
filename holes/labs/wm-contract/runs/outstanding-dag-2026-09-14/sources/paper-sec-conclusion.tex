@@ -1,0 +1,41 @@
+\section{Conclusion}\label{sec:conclusion}
+
+The moves catalogued here were not designed and then implemented.  They were
+extracted from a system while it was being built, broken and repaired, and
+several carry the scar of the particular failure that forced them --- a
+scheduler that fired into a sealed loop, an enactor that measured how faithfully
+it had reproduced its own output, a reviewer whose claim to have reviewed was
+taken at its word.  That is the sense in which they are offered as patterns
+rather than as an architecture.  What we think generalises is not the system but
+the invariants: record the decision together with the reasons that produced it;
+keep the principled quantities separate from the engineering ones so a reader can
+tell which moved a choice; never let a component certify its own output; require
+a witness the system could not have manufactured before believing the world has
+changed; and treat a failure as terrain to be crossed later rather than as
+something to roll back.\worknote{The invariants listed here are now
+partially machine-attested: 35 admitted witness claims bind named
+quantities to Lean propositions at pinned records, and
+``never let a component certify its own output'' is enforced to the point
+that the R9 checker currently refuses its own admission pending an
+external anchor. The certificate that would attest the whole set at once
+is built to the honest-false stage only (rows 24--28).}
+
+A pattern earns its name through repeated enactment and review, and one
+implementation in one stack is one enactment; no entrywise promotion census
+exists, so this paper makes no numerical or majority claim about which entries
+have earned it.
+
+The formal apparatus behind all of this --- the generative model, the scoring
+quantities, the structure-learning operator, an audit of where the
+implementation departs from the theory, and a preregistered experiment whose
+headline result was negative --- is in the companion paper, which shares this
+one's system and its specimen run.\worknote{RULED (2026-09-13, repeated from the opening): the companion is
+futon-2026 --- formal and preregistered experimental material both.
+RESOLVED (2026-09-14): the Methods section (\S\ref{sec:methods}) carries
+the Lean certificate.}
+
+For the pattern reader, the test we cannot run is the one worth running.  If
+these invariants are real, they should be recognisable in harnesses built for
+entirely different reasons by people who have never read this paper.  Where they
+are, the entry has earned its promotion; where they are not, it was a description
+of our system all along, and we would rather find that out than not.

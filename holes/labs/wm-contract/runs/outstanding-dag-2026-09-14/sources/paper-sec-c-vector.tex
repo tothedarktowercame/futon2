@@ -1,0 +1,78 @@
+%% Measurements below are dated demonstrations, not a live authority census.
+\section{Preferences over problems: making $C$ compute}\label{sec:c-vector}
+
+\subsection{Outcome preferences}\label{sec:c-intro}
+
+Here $C$ denotes a declared distribution over outcomes. It is distinct from
+epistemic value, which concerns what the model may learn, and from the policy
+prior $E$. The risk term compares a predicted distribution with $C$:
+$\mathrm{risk}(\pi)=D_{\mathrm{KL}}[Q(o\mid\pi)\|C]$.
+The comparison requires a common outcome domain; compatible numerical shapes
+are insufficient.
+
+The project's tetrahedral outcome model distinguishes nouns, verbs,
+organisation and evidence. Its signature excludes preferences over evidence
+content: it requires $v\neq\mathsf{evidence}$. Wanting a communicable witness
+to exist is a different requirement from wanting that witness to report a
+particular answer. That distinction must survive any richer outcome encoding.
+
+Preferences may be indexed by horizon step, $C_\tau$. This permits preferences
+about intermediate operation as well as terminal outcomes. It does not prove
+that the implementation represents both. Consultation during scoring and
+revision by an operator ruling are also separate operations: an extractor may
+propose a revision with provenance, but cannot adopt it.
+
+\subsection{What the channel model demonstrates}\label{sec:c-simple}
+
+The recorded implementation uses thirteen per-channel healthy ranges, including
+\texttt{sorry-count-norm} and \texttt{mission-health}. A demonstration dated
+2026-09-08, with predicted variance $\sigma^2=0.01$, compares a stressed state
+($0.85$, $0.2$) with a repaired state ($0.25$, $0.6$). Their two channel risks
+are respectively $5.502+3.395$ and $0.194+0.455$ nats: a difference of $8.25$
+nats favouring repair.
+
+This establishes discrimination on those channel readings. It does not identify
+which problem was solved or its value to the operator. Two problems with the
+same readings receive the same channel risk. Preferences over problem identity,
+solvability or benefit therefore require additional modelling and evidence.
+
+\subsection{The disposition bridge and its unresolved domain}\label{sec:c-bridge}
+
+A proposed bridge uses a conditional disposition model $P(d\mid o)$:
+\[
+Q(d\mid\pi)=\textstyle\sum_o P(d\mid o)Q(o\mid\pi),\qquad
+\mathrm{disposition\mbox{-}risk}(\pi)=D_{\mathrm{KL}}[Q(d\mid\pi)\|C].
+\]
+This construction requires the predictor and kernel to mean the same thing by
+$o$. It also retains the risk theorem's support conditions; an unobserved kind
+cannot acquire invented mass just to make an evaluation finite.
+
+The fit reported on 2026-09-08 contains one observed trajectory shape and one
+outcome kind: three closed attempts, all \texttt{grounded-change}. Against the
+ruled seed mass $\tfrac12$ for that kind, the calculation yields
+$\ln 2=0.6931$ nats. It is constant across policies on that record and supplies
+no selection discrimination.
+
+A source check on 2026-09-09 found a separate problem. The fitted kernel reads
+checkpoint trajectories; its cohort ledger contains no channel-valued
+observation vector (\texttt{futon2/checks/disposition\_kernel.clj:20--27}).
+The scorer supplies a channel-valued predicted mean
+(\texttt{futon2/src/futon2/aif/efe.clj:701--703}). The constant fit masks this
+mismatch. A justified relation between those observation domains is required
+before the composition can support the intended claim. Merely substituting one
+carrier for the other would change the question, not repair it.
+
+\input{sec-snatch-mini-c-generated}
+
+\subsection{A proposed problem-level preference}\label{sec:c-problems}
+
+Problem-indexed outcomes would let the operator distinguish which problems
+should be solved, alongside how attempts end and how the process runs.
+The declared axes include solvability, monetary benefit and societal benefit.
+An evidence extractor could propose masses along those axes, citing its basis
+in rulings, missions and recorded statements. A ruling would still be required
+to adopt the proposal.
+
+This is a design direction. It needs justified observations, support handling
+and consumers before it can change a live selection. The existing channel
+demonstration and constant disposition fit do not establish those obligations.

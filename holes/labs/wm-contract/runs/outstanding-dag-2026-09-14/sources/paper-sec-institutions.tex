@@ -1,0 +1,168 @@
+\section{From stated requirements to governed commons: the workshop
+transformation}\label{sec:institutions}
+
+This section walks one instance of the paper's title question end to
+end: a high-level problem framing is broken into design requirements, the
+requirements are restated as patterns, and the patterns are interpreted
+into Ostrom-style institutions---normative wiring that the same
+infrastructure can carry as data. The instance is small (one live
+standard repaired) but every step is real and on the record.
+
+\subsection{The apex framing and its requirements}
+
+The cascade-live view states its problem at the top, re-statable from
+data
+(\texttt{futon3c/holes/excursions/apex-thesis.json:1--66},
+\texttt{status: in-force}): \emph{can a community of humans and machines
+doing open-ended work leave an account of itself structured enough that
+the work can steer itself---so that activity becomes inference rather
+than motion?} The apex decomposes into four requirement clusters:
+A, records carry warrant (``an assertion severed from its derivation
+cannot be checked, learned from, or recovered''); B, one queryable
+self-account; C, feedback reaches every participant; D, accountable
+next-action choice. Independently, the view checks five live standards
+against its substrate
+(\texttt{futon3c/src/futon3c/logic/cascade\_real\_live.clj:242--259}):
+regenerates, evidence, reconstitution, honest holes, composed.
+
+The standards are design requirements in executable form---and on the
+day of this writing one of them was false. \texttt{s4-honest-holes}
+evaluated to \texttt{false} because the honest-holes dimension (O5)
+held zero rows, while \texttt{s5-composed} was true: the composition
+published with no hole record at all. An empty set is not evidence of
+absence; it may simply be an unread dimension.
+
+\subsection{Requirements as patterns (verbatim)}
+
+The transformation pipeline begins by restating requirements as
+\emph{flexiargs}---the library's pattern carrier, whose fields
+(conclusion, context, IF/HOWEVER/THEN/BECAUSE, next-steps) will matter
+in the next step. Two were minted from the framing above, in a new
+\texttt{workshop/} family. They are reproduced verbatim so their
+admission can be judged on their face.
+
+\begin{footnotesize}
+\begin{verbatim}
+@flexiarg workshop/records-carry-warrant
+@title Records Carry Warrant
+@provenance apex-thesis cluster A ... restated as a workshop flexiarg
+  by zai-7 with Joe, 2026-09-12 ... Not mined from transcripts; derived
+  from the stated design requirement.
+
+! conclusion:
+  Every claim a crew member emits must travel with the derivation that
+  warrants it — the query, the input digest, the witness — such that any
+  other participant can re-derive or refute it from the record alone.
+
+  + HOWEVER:
+    ... In those cases the warrant is a STATED ASSUMPTION with a version
+    stamp, never silence (the witness-status precedent).
+
+  + BECAUSE:
+    An assertion severed from its derivation cannot be checked, learned
+    from, or recovered (cluster A's ground, verbatim) — and a crew whose
+    members cannot check each other's claims has no separation of
+    powers, only manners.
+\end{verbatim}
+\end{footnotesize}
+
+\begin{footnotesize}
+\begin{verbatim}
+@flexiarg workshop/honest-holes-gate-composed-claims
+@title Honest Holes Gate Composed Claims
+@provenance The cascade-live standards s1-s5 ..., where s4-honest-holes
+  = boolean(seq o5) is TODAY FALSE (O5 has zero rows) while s5-composed
+  is true — the composition publishes with no honest-hole record.
+
+! conclusion:
+  A composed claim (a cascade, a page, a report) may not present itself
+  as complete while its honest holes are unrecorded: every composition
+  step that could have holes must either carry them or carry a typed
+  statement that none were found.
+
+  + THEN:
+    Before publish: for each composed dimension, emit either the hole
+    list or a typed none {:checked-dimensions [...] :holes-found 0};
+    s4 becomes true only on typed evidence.
+
+  + BECAUSE:
+    ... Honesty about gaps is a precondition for the apex thesis: work
+    steers itself only if it can see where it isn't.
+\end{verbatim}
+\end{footnotesize}
+
+(Full text with all fields:
+\texttt{futon3c/data/pattern-staging/workshop/records-carry-warrant.flexiarg:1--47}
+and
+\texttt{futon3c/data/pattern-staging/workshop/honest-holes-gate-composed-claims.flexiarg:1--46}.
+Both are process patterns, out of the mathematics retrieval pool by
+construction, and both are pending the operator's read---this section is
+that read.)
+
+\subsection{Patterns as institutions: the interpretation is the work}
+
+The library's patterns admit multiple interpretations, and the crew
+design assigns each interpretation its consumer: the informal
+Alexander-style reading feeds the map; a production-rule reading (guard
+$\to$ action, chainable) is what the Workshop---the board-authoring
+role---consumes to write wiring diagrams. The third reading is the one
+this section exercises: a pattern read as a \emph{proto-institution},
+combining it with preferences and deontic aspects
+(\texttt{futon2/holes/labs/wm-contract/NOTE-pattern-interpretations.md}).
+
+The transformation of \texttt{honest-holes-gate-composed-claims} onto
+Ostrom's IAD rule types is nearly mechanical, which is the finding
+(\texttt{futon2/holes/labs/wm-contract/EXPERIMENT-flexiarg-to-institution.md}):
+
+\begin{itemize}
+\item \textbf{Boundary rules} $\leftarrow$ the pattern's \emph{context}
+  and \emph{THEN}: a composition enters the regime when it aggregates
+  more than one dimension into a publishable claim, and leaves it when
+  each composed dimension carries either its hole list or a typed none.
+  \emph{Circumstances of application}---which requirements bind which
+  artifacts---are exactly the boundary rules.
+\item \textbf{Choice rule} $\leftarrow$ \emph{IF/THEN}: the compositor
+  may publish at any time; it must not publish with an untyped-absent
+  hole dimension.
+\item \textbf{Aggregation rule} $\leftarrow$ \emph{HOWEVER}: the census
+  is scope-limited to the composition's own dimensions---a cost bound
+  inside the norm, not an exception to it.
+\item \textbf{Payoff rule} $\leftarrow$ \emph{BECAUSE}: fogless maps
+  are debt the whole commons pays, not savings for the compositor.
+\item \textbf{Monitoring} $\leftarrow$ \emph{next-steps} plus the
+  register: graduated from a named counterexample carried on the
+  pattern itself, to a register disagreement on the verifier's channel.
+  The monitor is an existing crew role (the verifier), not a new
+  institution---Ostrom's monitoring-by-participants.
+\end{itemize}
+
+The institution adds what the pattern lacked: positions (the pattern
+says \emph{should}; the institution says \emph{the compositor must}),
+graduated sanctions, and a named monitor. The deontic vocabulary is
+already runtime-native: a must-not is a typed refusal on a wire, not an
+absence of wiring.
+
+\subsection{The first compliance act}
+
+The experiment's first finding was live: \texttt{s4=false} meant the
+substrate violated the information rule (the page complied by rendering
+the falsity in-band). The repair followed the institution's own
+prescription
+(\texttt{futon3c/src/futon3c/logic/cascade\_real\_live.clj:242--259},
+commit \texttt{d0741b04}): \texttt{fetch-edges} is loud on transport
+failure, so an empty O5 at summary time already means the authoritative
+query succeeded and found zero hole-target edges---a checked none, not
+an unread dimension. The standard now flips on typed evidence, with the
+evidence riding in-band as an \texttt{:s4-evidence} record (checked
+dimension, holes-found count, basis, as-of).
+
+Two honesty notes attach. First, the pattern's status field tracks the
+repair's progress: until the running JVM reloads, the live page still
+shows \texttt{s4=false}, which is now a stale rendering rather than an
+untyped absence---the two-wire discipline applied to its own
+counterexample. Second, the institution text itself remains a proposal
+at Workshop precision; it was minted by no one but the operator. The
+Workshop that authors boards and the Workshop that studies institutions
+turn out to be the same room: in both, the rules are authored before
+the run, and the participants---not an external regulator---monitor
+them.

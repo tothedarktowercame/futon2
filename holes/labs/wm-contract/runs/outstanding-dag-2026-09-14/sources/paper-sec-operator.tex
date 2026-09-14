@@ -1,0 +1,95 @@
+\section{Modelling the operator's response}\label{sec:operator}
+
+Section~\ref{sec:turn-chain} establishes partial traceability. It does not
+establish what the operator attended to, why a proposal went unanswered or
+whether the proposal was useful. These distinctions matter when the harness
+uses follow-through to adjust future proposals.
+
+In the audited outer-loop record, one action class received 108 unanswered
+proposals, as recorded in \texttt{WR-0} (\texttt{futon3/library/war-room/}
+\texttt{wr-0-organise-without-apparatus.flexiarg}). Its learned credit fell.
+The record showed emissions
+without a judgement, so the decrease could not distinguish rejection from
+absence. The notification interface offered \texttt{nag}, \texttt{brief} and
+\texttt{silent}; these describe the system's communication, not the operator's
+alternative activities. A better notification policy alone would not identify
+the missing response.
+
+The proposed remedy is to record considered-and-accepted,
+considered-and-declined and no-response separately, with an explicit basis for
+any claim that a proposal was considered. Traces may help decide when to ask,
+but cannot supply that judgement. Whether such a model improves selection
+remains an intervention to test, not a result of finding the traces.
+
+\subsection*{Reading the mechanism maps}
+
+The following drawings answer different questions. The war-room overlay relates
+constraints to mechanisms in its recorded census. The registry-generated map
+shows wiring claims and recorded routes; the equation graph shows dependencies
+between symbols. A dependency edge is not evidence that a call occurred.
+Historical marks must be read at their source dates; current repair status is
+on the issue board.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{aif-control-map-futon}
+\caption{War-room constraints over the control map. Rings report the census in \texttt{empirics-futon/wr-overlay.edn}, including its recorded July cadence failures. They identify interfaces to investigate, not a fresh census of live execution.}\label{fig:wr-overlay}
+\end{figure}
+\begingroup
+\addtocounter{figure}{-1}
+\renewcommand{\thefigure}{\arabic{figure}A}
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{aif-control-map-live}
+\caption{Registry-generated wiring and recorded routes. The legend distinguishes observed, conditional, undrawn and retired relations; the footer pins the source. A route is an instrumented call sequence, not the dependency graph in Figure~\ref{fig:aif-dag}.}\label{fig:wr-overlay-live}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{aif-equation-dag}
+\caption{Equation dependencies. An edge identifies a symbol imported by its target; blue edges also appear in the wiring map, amber dashed edges do not. Grey nodes define no equation. This compares representations, without declaring either a witnessed execution.}\label{fig:aif-dag}
+\end{figure}
+\input{sec-aif-conformance-generated}
+\endgroup
+
+\subsection*{From traceability to a tested response model}
+
+Clock-in already supplies some turn-to-mission links. The unresolved questions
+are its coverage and interpretation, not the absence of every such link.
+Retrieval adds candidate associations; mission prose supplies authored
+citations. None of these records proves attention or pattern use. An explicit
+application receipt would need to identify the actor, pattern, action and
+witness, while retaining unknown or disputed attribution.
+
+A useful experiment would compare a declared response model with the current
+interpretation on the same recorded proposals, then test the effect of any
+changed selection rule. It would preserve unanswered cases as such, record the
+cost of eliciting a response, and distinguish a confirmed decline from an
+unseen proposal. It must not infer success from a higher response rate alone.
+
+The historical backlog map illustrates why a proposed repair also needs a
+named implementation. Overlaying a mechanism gap on a mission deposit exposed
+places where no mission supplied the missing behaviour. That is a comparison
+of scopes, not evidence that a planned mission later ran.
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{aif-cascade-map}
+\caption{Historical mission-deposit overlay, from \texttt{empirics-futon/cascade-map.edn}. Blue rings connect proposed work to mechanism gaps. The recorded live mark is a bounded probe; it does not establish the other missions or present-day operation.}\label{fig:cascade}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=6.2cm]{register-key}
+\caption{Evidence strength and age are separate dimensions. A record of a plan, build, run or live probe must retain when and how it was obtained. The issue board uses its own workflow columns and preserves these evidential distinctions.}\label{fig:register-key}
+\end{figure}
+
+\subsection*{What would consume the traces?}\label{tab:consumers}
+
+Three candidate consumers need different evidence: retrieval can use textual
+similarity; correction detection needs a relation between a statement and its
+revision; attribution of work needs an actor's confirmation or an equivalent
+witness. Joining their records is useful only if those differences survive the
+join. A retrieved neighbour cannot silently become an applied pattern, and an
+agent's commit cannot silently become an observation of operator attention.
+
+The per-node dossiers that follow expose the corresponding implementation and
+receipt basis. They are a way to locate and test these obligations, not a
+claim that the operator-feedback loop has been closed.

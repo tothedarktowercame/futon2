@@ -1,0 +1,22 @@
+\section{Dated corrections to empirical claims}
+
+\paragraph{Cohort denominator (2026-08-31).}
+Attempts 038 and 040 were never deposited.  The glossary's universal claim that ``every failure stays in the denominator'' is withdrawn: deposited failures remain in the denominator, while those two loud absences bound the census.
+
+\paragraph{A-matrix accuracy (2026-08-31).}
+The simulation reports lower raw accuracy for AIF than for the legacy comparison ($.386$ versus $.410$).  The glossary's inference from redistribution and contradiction suppression to R3 green is withdrawn: those measures show that the matrix is behaviourally active, not that it is accurate or environmentally faithful.
+
+\paragraph{Correction routing (2026-08-31).}
+All 18 operator gold routes in the sample were gamma.  The future-work claim of essentially-always-right three-way routing is withdrawn: the reported 1.0 establishes correct gamma routing in this sample and supplies no evidence of discrimination among plan-, communication-, and world-directed corrections.
+
+\paragraph{Equation-code referents (2026-08-31).}
+Two tutorial code pointers are corrected against the current implementation: per-tick variational free energy is computed by declaration \texttt{compute-variational-free-energy} in \srcref{futon2/src/futon2/aif/free_energy.clj} (line 184 as dated provenance on 2026-08-31), while softmax selection is implemented by declaration \texttt{softmax-weights} in \srcref{futon2/src/futon2/aif/policy.clj}.  Declaration names are the durable identities; the line number records only where the first declaration was when re-verified. Earlier source pointed both descriptions at \texttt{efe.clj}; that file remains the risk/ambiguity locus but is not the implementation of either operator.
+
+\paragraph{Per-tick $F$ retired (2026-09-01).}
+The equation-code referent corrected above no longer exists: \texttt{compute-variational-free-energy} and the per-tick \texttt{:variational-free-energy} trace field were removed from futon2 on 2026-09-01.  The reason is not that the quantity was wrong but that nothing consumed it --- no equation in the war machine's registry imported $F$, and its only reader was the checker that verified the field was written.  The tutorial entry for $F$ now points at the two declarations that survive on either side of it, \texttt{compute-prediction-error} and \texttt{f-pi-for-candidate}.  The 2026-08-31 correction above is left as written: it records what was true when it was made.
+
+\paragraph{Audit-adjudication boundary (2026-08-31).}
+Independent closure verification now opens each cited artefact and requires a changing commit and hunk.  Reviewer findings nevertheless do not enter the ledger automatically: a finding is an observation, while ledger mutation is an accountable adjudication.  The deliberate flow is reviewer emission, human consumption and disposition, then independent verification; automatically copying a reviewer label would erase the accountable reader.  The audit therefore claims an argumentation/adjudication apparatus, not an automatic belief update.
+
+\paragraph{Audit-yardstick disposition (2026-08-31).}
+The audit-apparatus score remains one pass, two partial and nine fail.  Successful use and machinery belonging to the War Machine do not raise it.  Moving the failures would require the audit itself to gain belief distributions, predictive updating, a forward model, softmax with abstention, adaptive precision, a complete executable property suite, unattended recurrence, budget-conserving coordination and a slower hyperparameter loop.  The obligation to build that duplicate controller here is withdrawn; the external score remains a diagnostic, and this paper does not call the audit an active-inference implementation.

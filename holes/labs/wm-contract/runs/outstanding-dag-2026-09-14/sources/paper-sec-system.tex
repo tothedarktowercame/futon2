@@ -1,0 +1,59 @@
+
+\clearpage
+\newcommand{\stepmark}[1]{\textcircled{\scriptsize #1}}
+
+\clearpage
+\section{System Description}
+
+Straightened out into one cycle, here is how the system works.  Circled markers
+\stepmark{1}--\stepmark{34} index the logical steps; Box~\ref{tab:trace-061} (facing) lays one
+complete attempt beside them (notes: \srcref{p4ng/empirics/TRACE-061-cross-correlation.md}).
+
+\begin{Verbatim}[fontsize=\footnotesize,commandchars=\\\{\}]
+every scheduled invocation ("tick") or on-demand click (in-process, single-flight):
+  READ   \stepmark{1} verify the cast is invocable (roster probe; wake restored agents); \stepmark{2}
+         record the code state (revisions, dirty flags) into provenance; \stepmark{3} prove the
+         authoritative substrate route with escalating-patience probes, claiming the attempt only when it
+         answers. \stepmark{4} scan the file-backed registries and stack annotations; load the previous
+         trace; \stepmark{5} refresh/cache the preference vector and its durable relation join from the
+         authoritative Futon1b substrate. \stepmark{6} Reconcile the entity domain, then \stepmark{7} run
+         up to three categorical-filter micro-steps with declared, normalised \(A\), identity \(B\), and
+         uniform \(D\); \stepmark{8} update per-channel precision. \stepmark{9} Fold any new realized
+         fold outcome into the engineering selection gain \(g\), and \stepmark{10} derive the learned
+         action-frequency habit prior \(E(\pi)\).
+  EVAL   \stepmark{11} propose candidate actions (\wmR{6}); \stepmark{12} remove graph-infeasible
+         policies; \stepmark{13} enrich each open-mission candidate with a named three-factor mission
+         value (centrality + strategic fit + phase doability, completion-gated and decayed by
+         non-progress) inside the engineering augmentation; \stepmark{14} compute
+         \(G_{\mathrm{efe}}=G_{\mathrm{risk}}+G_{\mathrm{ambiguity}}\), then \stepmark{15} add the named
+         engineering augmentation to obtain \texttt{controller-score}. \stepmark{16} Select with the
+         learned \(\ln E(\pi)\) prior at the policy-selection seam and \(\tau_{\mathrm{eff}}=1/g\);
+         \stepmark{17} abstain when no action meaningfully beats no-op. \stepmark{18} Emit a decision
+         explanation recording the finalists' per-term contributions and which term governed. <- AIF core
+  PRINT  \stepmark{19} report the strategic decision, \texttt{G-efe}, \texttt{controller-score}, and
+         provenance. \stepmark{20} The report surface may build advisory cascades for the ranked head and
+         leading open missions; the real full-loop surface omits that preview and constructs once, for
+         the selected target. \stepmark{21} Its cascade is bounded build context, not by itself
+         permission to act. \stepmark{22} The flown-fold surface separately gates enactment on
+         \texttt{cascade-score}>0 and \texttt{coverage-score-delta}<0; both legs are engineering
+         quantities, not a second Expected Free Energy. <- typed boundary
+  LOOP   \stepmark{23} before ordinary selection, read any open independent-review repair obligation.
+         \stepmark{24} Such an obligation is stop-the-line: pin its failed target and reviewer finding
+         ahead of unrelated work. \stepmark{25} Dispatch a configured author, \stepmark{26} resolve its
+         substantive commit; \stepmark{27} if the build gate rejects the resolution, dispatch one bounded
+         cure turn to the same author before any review. \stepmark{28} Then dispatch a distinct reviewer.
+         \stepmark{29} A findings-bearing rejection first earns one bounded in-attempt amendment,
+         re-reviewed by the same reviewer. \stepmark{30} Only an approved commit is written as a typed
+         Futon1b implementation/discharge; \stepmark{31} queue the outcome for Morning Brief QA.
+         \stepmark{32} A twice-rejected obligation remains open across runs and is supplied verbatim to
+         the next author and reviewer. \stepmark{33} Close it only after a successor full run is
+         independently approved and its external discharge both resolves and moves the recorded substrate
+         dial, validating the stop-line ledger. \stepmark{34} Persist the phase trace, beliefs,
+         precisions, model/config hashes, code revision, cohort checkpoints, and an operator-adjudicable
+         Morning Brief item.
+\end{Verbatim}
+\input{empirics/trace-061-page}
+\FloatBarrier
+
+% \input{empirics}  % long-form empirics, superseded by the generated ledger section:
+\input{empirics/field-desk-empirics}

@@ -1,0 +1,343 @@
+\section{Discussion: turning the paper into one of its own agents}\label{sec:discussion}
+
+While this paper was being revised, we applied its catalogue to the paper
+itself.  The exercise is reported here because what it cost us is more
+informative than the fact that we ran it.
+
+\paragraph{The form.}  The manuscript was zipped into a claim graph in the
+stack's AIF+ representation --- the same typed node/edge vocabulary used to
+represent the research stack to itself --- with each claim carrying an external
+referent: a source file, a commit, a cohort record, a citation.  A second,
+mechanically generated ledger paired every file reference in the text with the
+sentence making a claim about it, stamped with the referent's content hash.  The
+graph was then vetted by three reviewing agents under the catalogue's own
+discipline:
+
+\begin{itemize}\tightlist
+\item \emph{Author is not reviewer} (R9).  The author of the prose and of the
+  claim graph was disqualified from issuing verdicts on either.  The reviewers
+  were from a different model family, as the system's own author--reviewer
+  separation requires.
+\item \emph{Verdicts come from the referent, not the manuscript} (R12).  A claim
+  checked by finding it restated elsewhere in the paper is Layer~1 --- internal
+  consistency --- and was barred in advance from being reported as clearance.
+\item \emph{Refute, do not confirm.}  Reviewers were instructed to default to
+  \emph{unsupported} under uncertainty, on the grounds that a reviewer who finds
+  support for everything has reported nothing.
+\item \emph{Refutations become obligations, not edits} (the stop-line rule).  A
+  refuted claim may not be resolved by softening the sentence until it is
+  defensible; it enters a repair queue that the next revision must clear first.
+\item \emph{Independent extraction.}  One reviewer was required to derive its own
+  list of the papers' load-bearing claims \emph{before} being shown the author's,
+  so that claims the author had not noticed could surface.  Reviewers can only
+  refute what is listed; that asymmetry is the author's, not theirs.
+\end{itemize}
+
+\paragraph{What transferred, and what did not.}  This is the part that bears on
+whether the catalogue generalises, and the answer is only half flattering.  Six
+entries transferred to a non-code artifact without modification: typed
+observation records (R2) became the referent ledger; no-self-certification (R9)
+became the author's disqualification; two-layer calibration (R12) became the ban
+on manuscript-internal verdicts; grounded actuation (R16) became the requirement
+that a verdict touch the referent; interoceptive tripwires (R20) became content-hash
+drift detection over the paper's own representation; and the stop-line rule
+became the handling of refutations.
+
+The scoring machinery did not transfer at all.  Nothing computed an expected
+free energy over which claim to check next; the claims were enumerated and split
+by topic.  R5, R6, R13, and R14 --- the canonical inference core --- played no
+part.  So the \emph{apparatus} half of the catalogue carried over to a new kind
+of artifact and the \emph{active-inference} half did not, which separates the
+entries that are portable design moves from those that are descriptions of one
+implementation, and does so by evidence rather than by our own maturity
+labelling.
+
+Asked why, we found a better answer than our own inattention: the target
+representation has no slot for a policy.  It carries claims, conflicts,
+preferences, a spine, and drift detection, and it ends each document with a
+hand-authored \emph{next move} whose reasoning is nowhere recorded.  Across
+fifty-two such files there is no scoring step of any kind.  An
+active-inference-shaped audit could not have used the inference half of the
+catalogue, because there was nothing there to put it in.  We have since
+specified the missing layer and prototyped it over this paper's own repair
+queue: declared preferences, a risk leg denominated in them, and an
+outcome-uncertainty leg kept carefully unnamed as anything more.
+
+The prototype disagrees with us.  Ranking the eight outstanding repairs, it
+moved seven of them, and the disagreement is systematic rather than noisy: we
+had put the cheap certain corrections first, and it puts them last, on the
+grounds that their outcome is already known and doing them teaches nothing.  It
+promotes instead the one piece of work whose result nobody can predict --- an
+entry-by-entry census of which catalogue items have actually earned promotion
+--- because the answer could change what this paper is entitled to call itself.
+That is the exploration axis a severity sort cannot express, and it is the
+argument our own capability-zones pattern makes about a codebase, arriving back
+at us about a manuscript.
+
+We report the prototype as a proposal and not a result.  Its inputs are
+hand-set by the same author whose ranking it overturned, so what improved is
+that the judgement is declared and split into two axes, not that it became
+measured; and its ordering is a prediction that we are specifically not entitled
+to confirm by re-reading it.
+
+\paragraph{What mechanisation saw that reading could not.}  Every one of the
+paper's file references resolves; there is no rot.  But the exercise could not
+at first build a working drift detector, because the notation the paper used for
+a file reference was also used for pattern identifiers, for named code
+quantities, and for one path template containing a placeholder.  A checker built
+on that notation would have reported eleven false failures and been correctly
+ignored within a week.  The defect is invisible to a proofreader and was
+invisible to us across several revisions; it became obvious the moment something
+had to \emph{consume} the references rather than read past them.  We take the
+general point to be that mechanising a claim changes what is knowable about it,
+and that the change is not only in rigour but in what is \emph{visible}.
+
+The repair was to split one macro into three --- a checkable file referent, a
+pattern identifier, a named quantity --- which render identically and differ
+only in what a machine may assume about them.  Sixty-eight referents now carry
+content hashes, and a detector reports which of them have changed since the
+manuscript last described them, naming the sections that must be re-checked.
+That closes a loop the audit had just demonstrated was open: of the nineteen
+adverse measurement verdicts, eight were pure staleness, prose that had been
+true when written and had quietly stopped being so.  It also has a limit worth
+stating in the same breath, because it is the same limit the whole exercise
+keeps running into: a detector reports only that a referent \emph{changed}.  It
+cannot report that a claim was wrong from the beginning.  The mis-cited test
+file above sat unchanged throughout --- stable, and stably the wrong file.
+
+\paragraph{What the independent extraction found.}  The reviewer tasked with
+deriving its own spine produced a statement of the papers' central tension that
+we prefer to our own.  Where we had named two conflicts --- that the work can
+claim a running system but not a beneficial one, and that by the paper's own
+promotion criterion most of the catalogue is still \emph{candidate} --- the
+reviewer identified these as one boundary policed in two places: \emph{working}
+must not become \emph{beneficial}, and \emph{implemented design move} must not
+become \emph{promoted pattern}.  If either slips, the central claims become
+self-certifying in precisely the way R9 prohibits.  It further identified six
+claims doing load-bearing work in the argument without being stated outright ---
+among them that independent evidence is not automatically independent
+\emph{value} evidence, since a record can be external to the model that predicted
+it while still measuring a proxy chosen by the system's authors --- and it
+recommended that the thesis be narrowed accordingly.  We have adopted that
+reading, and its reformulation of the thesis verbatim: what is demonstrated is
+that catalogue entries, \emph{individually labelled candidate or promoted}, can
+serve as inspectable control schemas in an AIF-backed harness --- operational
+closure and auditability, not comparative benefit or generality.  The same
+reviewer found four of our support edges to be rhetorical rather than load-bearing,
+including the one carrying this paper's own title: since embeddings are by our own
+account inessential to the live loop, their proposed future roles at the learning
+frontier cannot support a thesis about the loop as it currently runs.  That
+obligation is open rather than discharged.
+
+\paragraph{The defect that reading could not have found.}  The single most
+useful result was a mis-citation.  This paper's R-numbers are its own; they do
+not align with the R-numbers of the implementation's separate AIF-completeness
+contract, where R9 denotes named validation properties and R6 denotes softmax
+action selection.  The footnote supporting \emph{No Self-Certification} --- the
+pattern this paper describes as the one it would keep if it could keep only one
+--- cited the implementation's \srcref{futon2/test/futon2/aif/r9_named_validation_test.clj} on the
+strength of the matching numeral.  That file tests belief-variance shrinkage,
+free-energy decrease, scoring stress, and abstention: the other scheme's R9.  It
+contains no test of the mechanism our R9 actually specifies, which lives in a
+different repository entirely.
+
+The citation survived several revisions because it is perfectly plausible to a
+reader: the pattern is R9, the file is named for R9.  Only something that had to
+\emph{resolve} the reference, rather than read past it, could notice.  We regard
+this as the exercise's clearest single justification, and as a caution that
+generalises past this paper: two numbering schemes over the same subject matter,
+maintained by the same people, will silently cross-contaminate citations, and
+prose review will not catch it.
+
+\paragraph{Findings from the claim-by-claim vetting.}
+%% HOLE: to be filled from vetting/lens1-mechanism.md and lens2-numbers.md when
+%% those reviewers report.  Per the reporting discipline this section describes,
+%% the expectations below were written BEFORE the verdicts arrived and must not
+%% be revised to match them; where a verdict contradicts an expectation, the
+%% expectation stands as written and the contradiction is reported.
+Before the verdicts arrived we recorded two expected refutations: the title
+claim that embeddings are fundamental \emph{twice}, and the retention of a
+learned proposer that had failed its preregistered comparison.  Both were
+refuted, by two reviewers working independently on different lenses.  Of the
+eight mechanism claims submitted, two were confirmed, five were judged
+overstated, and one was refuted outright; the reviewer executed fifty-four tests
+and regenerated the empirical ledger in the course of deciding.
+
+The confirmations are worth stating because they were not foregone.  The claim
+that the formalism lives outside the model was upheld against the actual prompt
+construction: the belief map, the observation model, the ranked field and the
+score decomposition are demonstrably absent from what the coding agent is sent.
+The claim that the canonical scoring core is persisted separately from the
+engineering controller was upheld against both the calculator and the trace
+compactor.  Those are the two claims the architecture most depends on, and they
+held.
+
+What we did not anticipate is where the real damage was, and the pattern in it
+is instructive.  The claim that an act's witness feeds the next belief --- the
+conjunct that makes the loop a loop --- is not implemented: the actuator
+snapshots, dispatches, logs and returns without ever calling the belief update,
+and the path that does close that circuit runs through a human reading a morning
+report.  The claim that the empirical section is generated from typed records
+was refuted: the figure and ledger are, the surrounding prose is hand-maintained,
+and two attempts were never deposited at all, so the census has holes where the
+paper claimed completeness.  And the system was described throughout in a
+present tense it had not earned --- see above.
+
+The measurement review, arriving last, was the most punishing and the most
+mechanical.  Working artifact-first --- treating agreement between two parts of
+the manuscript as no evidence whatsoever --- it returned fifty-one verdicts, of
+which nineteen were not confirmations.  The load-bearing experimental scores
+mostly reproduced: the preregistered metrics, the simulation figures, and the
+correction-probe numbers all recomputed from their generators.  What did not
+survive were the counts around them.  Three were hard factual errors, two of
+those in sentences the present authors had written during this revision,
+including a wrong elapsed time in a \emph{section heading} and the wrong name
+for the reviewing agent in the specimen run.  Seven further counts turned out to
+be untraceable to any primary record --- not unchecked, but unsupported, and now
+withdrawn from the paper rather than restated more carefully.  Eight were merely
+stale, the empirical prose having drifted from the figure it stands beside while
+the figure itself regenerated exactly.
+
+One detail of that staleness is worth reporting because it cuts against us in a
+useful direction: the outdated sentence was \emph{more pessimistic} than the
+truth.  It said the last four attempts had all failed; the current ledger shows
+one failure and three grounded successes.  We note this not to claim credit for
+an accident but because a drift that had run the other way would have been the
+more suspicious finding, and a reader has no way to tell which kind they are
+looking at unless the direction is stated.
+
+We draw a conclusion from that distribution which is uncomfortable and which we
+think generalises.  We told the reviewers what we suspected, and they confirmed
+what we suspected; that part of the exercise returned our own priors with a
+citation attached.  Everything that changed the paper came from the parts we did
+not point at.  Commissioning an adversary is not the same as being subjected to
+one, and the difference showed up precisely at the boundary of our own
+attention.
+
+\paragraph{The audit as a faithfulness ledger.}  Everything above is narrative,
+and narrative is where residuals go to hide.  Table~\ref{tab:audit-retract}
+therefore does for the audit what \xretract{} does for the system: for each catalogue pattern, it names the mechanism that actually stood
+in for it, the role that mechanism retracts toward, and the \emph{residual} that
+stops us saying the mechanism \emph{is} the pattern.  Two rows are
+self-implicating, and they are the two that matter most.
+
+\begin{table*}[t]
+\caption{Faithfulness ledger for the self-audit.  Each row names what actually
+ran in place of a catalogue pattern and what prevents the substitution from
+being clean.  Rows marked \textsc{absent} record patterns that had no
+counterpart at all --- the missing half of the composition, not an
+approximation of it.}
+\label{tab:audit-retract}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{0.055\textwidth}p{0.215\textwidth}p{0.20\textwidth}p{0.46\textwidth}}
+\toprule
+\textbf{Pattern} & \textbf{What actually ran} & \textbf{Role it retracts toward} & \textbf{Epistemic status / typed residual} \\
+\midrule
+R2 & Referent ledger: 112 rows pairing a file reference with the sentence claiming something about it & Typed observation record & \textbf{Faithful in kind, lossy in extraction.}  The ``claim'' is the enclosing sentence recovered by pattern-matching over source, not a parsed proposition.  A claim spanning two sentences, or asserted by a table, is not in the ledger at all. \\
+R9 & Author disqualified from issuing verdicts; reviewers from a different model family & No self-certification & \textbf{Partial, and breached at the close step.}  Independence is real at \emph{did not write the prose} and absent at \emph{chose what would be attacked}: the author commissioned the reviewers, wrote their briefs, and named two suspicions in advance.  Worse, the repair ledger's own rule says the author may not close a row on its own reading --- and the author then closed thirteen.  No independent close-verification exists. \\
+R12 & Manuscript-internal checks barred in advance from counting as clearance & Two-layer calibration & \textbf{Faithful where executed; one lens is Layer 1 by its own admission.}  Two reviewers ran code and regenerated artifacts.  The argument review states plainly that its graph-versus-manuscript judgements are internal-consistency only; its external checks are separately named. \\
+R16 & Verdicts required to touch the referent; 54 tests executed, empirical ledger regenerated & Grounded actuation & \textbf{Witness real; the belief update is manual.}  Verdicts reached the claim graph because the author transcribed them by hand.  This is the same defect the audit found in the system itself --- the witness does not feed the next belief --- reproduced exactly in the apparatus built to detect it. \\
+R20 & Content-hash drift detection over 68 checkable referents & Interoceptive tripwire & \textbf{Faithful, with a stated blind spot and an unguarded control.}  It reports that a referent \emph{changed}, never that a claim was wrong; the mis-cited test sat unchanged throughout.  Re-stamping the baseline is a single unaudited operator action that silences every outstanding report. \\
+--- & Refuted claims enter a typed repair queue rather than being reworded & Stop-line repair debt & \textbf{Faithful in form.}  Twenty obligations, each closing only by evidence, correction or withdrawal.  Seven counts were withdrawn rather than restated, which is the behaviour the rule exists to force. \\
+\midrule
+R5, R6 & \textsc{absent} & Policy scoring over candidate moves & \textbf{No counterpart ran.}  The three lines of attack were fixed by hand in advance.  Nothing scored which claim to check next, so the audit's own coverage is unexplained. \\
+R13, R14 & \textsc{absent} & Horizon and commitment temperature & \textbf{No counterpart ran.}  Single-step, single-round; no notion of a cheaper attack now against a more informative one later. \\
+R11 & \textsc{absent} & Budget-aware selection & \textbf{No counterpart ran.}  Reviewer effort was unpriced, and the prototype scorer that came out of this still does not price it. \\
+R17 & \textsc{absent} & Structure learning & \textbf{No counterpart ran.}  Nothing merged, pruned or minted a claim; the graph the audit finished with has the shape the author gave it. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\emph{Disposition of the two self-implicating residuals (2026-08-31).}  The R9 close-step residual is now discharged by an independent closure-history audit that opened every cited artefact, found two false closures, and requires an artefact-changing commit and hunk for every closure.  The R16 residual is corrected rather than automated: a reviewer finding is an observation, while changing the obligation ledger is an adjudication.  The deliberate boundary is reviewer emission, accountable human consumption and disposition, then independent verification.  Automatically copying a reviewer label into the ledger would erase the accountable reader; this audit therefore does not claim an automatic belief update.
+
+\emph{Yardstick disposition (2026-08-31).}  The score remains one pass, two partial and nine fail.  It is not raised by successful use of the audit, by War Machine declarations the audit does not call, or by surrounding registries and checks.  Moving the nine failures would require the audit itself to gain belief distributions, predictive updating, a forward model, softmax with abstention, adaptive reviewer precision, a complete executable property suite, unattended recurrence, budget-conserving reviewer coordination and a slower hyperparameter loop.  We withdraw the obligation to build that second controller here: the score remains an external diagnostic and the paper continues to refuse an active-inference label for the audit apparatus.
+
+Read as a whole the ledger says something the narrative above softens: the
+audit implemented the apparatus half of the catalogue with real but named
+residuals, and implemented none of the inference half.  Its coverage was
+therefore a matter of authorial choice throughout --- which is precisely the
+property the missing half exists to remove.
+
+\paragraph{Measured against a yardstick we did not write.}  There is an obvious
+objection to the table above: it scores the audit against this paper's own
+catalogue, which is the same circularity the audit exists to break.  The stack
+happens to contain the right instrument for that.  Predating this work sits a
+generic \emph{AIF completeness contract} --- twelve numbered requirements,
+derived by diffing an implementation against the canonical literature rather
+than against anything of ours, and written for a different project entirely.  It
+exists for exactly our situation: its opening observation is that the
+framework's vocabulary is ``evocative enough that it can be borrowed by code
+which implements only a fraction of the apparatus,'' and each requirement is
+stated so that it can be checked from the code rather than from the prose around
+it.  Nine of the twelve are declared necessary for an honest active-inference
+claim.
+
+Scored against that contract, the audit apparatus satisfies \textbf{one} of the
+twelve.  Its observation schema is genuine --- a fixed, named, normalised record
+shape, the same at every row.  Two more are partial: the scoring prototype has
+two terms, though only one of them is derived from anything, and the audit
+leaves a reconstructible trail without that trail being a per-tick trace.
+Everything else is absent.  There is no belief state carrying uncertainty rather
+than a point label; no prediction, error, or update; no forward model, so the
+scoring is exactly the heuristic the contract warns collapses out of its
+absence; no temperature and no abstain; no adaptive precision, so the reviewer
+that declared its own findings internal-consistency-only was weighted the same
+as the two that executed code; no named validation properties of its own; no
+scheduled operation; no coordination between three reviewers who duplicated each
+other on the title claim; no second loop over its own preference weights.
+
+We think that number is the single most useful output of the exercise.  It says
+that what we built to audit this paper is an argumentation apparatus with typed
+records and an honest attack discipline --- and that calling it active inference
+would be borrowing the vocabulary for a fraction of the apparatus, which is the
+practice the contract was written to stop.  The catalogue in this paper is a set
+of design patterns; the contract is a set of requirements; and one of the
+audit's incidental findings was that those two senses of ``R'' have been
+colliding in our citations for months.
+
+\paragraph{A second implementation, and one date that matters.}  The
+representation used for the audit is not an apparatus built for it.  It is a
+composition of two things that share an acronym --- the Argument Interchange
+Format and the Active Inference Framework --- developed in this stack for an
+unrelated purpose: representing the research programme to itself as an argument,
+so that claims, conflicts and preferences could be inspected as data.  Its
+design intent is an \emph{arena}, in which an argument competes against
+counter-arguments; and it was built when this catalogue had far fewer entries
+than it now has, which is why the active-inference half of the composition is
+the half that never got built out.
+
+We therefore looked at whether it independently instantiates any of the patterns
+here, and one result is worth reporting because of its date.  That system carries
+a drift detector which describes itself, in its own header comment, as an
+\emph{interoception readout}: it compares each representation against the source
+it was derived from and reports what has gone stale, so the apparatus notices its
+own decay rather than having it discovered later by archaeology.  It was written
+on 2026-05-03.  The pattern in this catalogue that describes that move ---
+interoceptive tripwires, the machinery watching its own machinery --- was first
+written down on 2026-07-16, ten weeks afterwards.  The instantiation precedes the
+articulation, so it cannot have been built to fit the pattern, and the pattern
+was not written to describe it.
+
+That is the shape of evidence the promotion criterion actually asks for, and it
+is worth being precise about how much of it we have.  It is one pattern, not the
+catalogue; a second implementation, not a second author; a different language,
+substrate and purpose, which is the part that gives it force.  It does not
+promote anything on its own.  What it does is make the census we cannot yet
+supply look tractable rather than hypothetical --- and, in the other direction,
+that formalism already carries a per-claim evidence tally intended for exactly
+this weighting, which is the mechanism this paper lacks and has been describing
+as future work.
+
+\paragraph{What this does not establish.}  The exercise is one application, in
+one stack, by the same authors, using reviewing agents that we configured and
+prompted --- including prompting them toward the two claims we already
+suspected, which lowers the independence of those particular verdicts even as it
+raises their yield.  It is a second \emph{domain}, not a second \emph{party}.  It
+therefore does not discharge the candidate-versus-pattern conflict above: the
+promotion criterion this paper endorses asks for repeated witnessed enactment
+and review, and self-application supplies one further enactment by the same
+hand.  What it does supply is a worked demonstration that the catalogue is
+applicable to something other than the system it was derived from, an
+identification of which half of it travelled, and a defect list we did not have
+before.
