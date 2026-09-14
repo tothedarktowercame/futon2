@@ -50,3 +50,31 @@ precedent), (3) serving-JVM reload of the futon2 retention/manifest
 namespaces from main. The close must carry :close-retention and
 :close-evidence-manifest or the run is a machinery failure, not an
 observation subject.
+
+## Amendment 1 (claude-15, 2026-09-14, after attempt-001, before attempt-002)
+
+Attempt-001 of cohort 50 closed :agent-unavailable, FAILED BEFORE
+SELECTION: the runner's pre-selection readiness gate found the cast
+author seat (claude-15) busy — busy orchestrating this very exercise.
+By the accepted early-failure design its close is legacy-shaped and
+carries no occurrence, no retention, and no manifest. It is retained
+as a machinery failure of this exercise and consumed 1 of the
+cohort's 2 attempts.
+
+This exposed a conflict between two clauses above: "the FIRST close
+... regardless of outcome" versus "the close must carry
+:close-retention ... or the run is a machinery failure, not an
+observation subject". Resolution, recorded openly: the subject is the
+first RETENTION-BEARING close (equivalently, the first close that
+reached selection). This amendment is made after attempt-001's
+outcome was seen; the bias risk is nil in the relevant sense because
+attempt-001 carried zero observable evidence in any direction, and
+cohort 50 now has exactly ONE attempt left — attempt-002's close,
+whatever its outcome, is the subject if it reaches selection. If
+attempt-002 also fails before selection, this exercise FAILS: a new
+cohort and a fresh predeclaration are required, and the operator is
+informed. No further amendment to this declaration is permitted.
+
+Procedural note: attempt-002 will be fired with the execution lead's
+seat immediately going idle afterward, so the cast author dispatch
+can land on it.
