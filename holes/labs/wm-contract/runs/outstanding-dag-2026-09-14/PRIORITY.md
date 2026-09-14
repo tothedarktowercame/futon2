@@ -120,3 +120,5 @@ All 17 negative-scope inventory entries are mapped below. This is an obligation-
 | 15 | r9-serving-retention/r9-genesis/r9-real-pair |
 | 16 | r11-method/r11-lifecycle/r15-lifecycle and explicit optional Joe fork |
 | 17 | continuations/e1-e2-runtime/e3-runtime/r10-record/slow-prior-runtime/e6a/e6b/edge-classification/edge-positive |
+
+Validation receipt: `receipt.json`. Committed-input strict EDN/graph/pin checks and explicit-path check-parens passed. The initial checker-only namespace normalization failure is retained; no DAG content or system behavior changed to make it pass. All 73 current source hashes still matched the captured bytes at validation.

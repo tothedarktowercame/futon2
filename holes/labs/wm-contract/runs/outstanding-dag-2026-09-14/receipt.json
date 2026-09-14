@@ -1,0 +1,72 @@
+{
+  "schema": "wm/discovery-validation-receipt-v1",
+  "at": "2026-09-14T12:09:55.050363+00:00",
+  "scope": "discovery-artifacts-only",
+  "dag-commit": "ec09b980",
+  "checker-commit": "23ce63ec",
+  "independent-review": "pending-claude-15",
+  "checks": [
+    {
+      "name": "strict-EDN/source-pins/flag-coverage/graph-metrics",
+      "command": "bb holes/labs/wm-contract/runs/outstanding-dag-2026-09-14/verify_dag.bb",
+      "input-commit": "23ce63ec",
+      "exit": 0,
+      "stdout": "checks/structural.stdout",
+      "stderr": "checks/structural.stderr"
+    },
+    {
+      "name": "explicit-path-check-parens",
+      "command": "emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/runs/outstanding-dag-2026-09-14/dag.edn holes/labs/wm-contract/runs/outstanding-dag-2026-09-14/source-pins.edn",
+      "input-commit": "ec09b980",
+      "exit": 0,
+      "stdout": "checks/parens.stdout",
+      "stderr": "checks/parens.stderr"
+    }
+  ],
+  "failed-attempts": [
+    {
+      "name": "first-mirror-check",
+      "input-commit": "ec09b980",
+      "exit": 1,
+      "reason": "Checker name removed wm/ keyword namespace; fixed checker only.",
+      "stderr": "checks/structural-attempt-1.stderr"
+    },
+    {
+      "name": "preparation",
+      "exit": 127,
+      "reason": "python unavailable; python3 used. No generated artifact existed at that failure."
+    }
+  ],
+  "results": {
+    "nodes": 76,
+    "work-nodes": 63,
+    "edges": 101,
+    "flags": {
+      "outstanding": 11,
+      "staged": 1,
+      "honest-absence": 1
+    },
+    "source-snapshots": 73,
+    "source-drift": [],
+    "detailed-dependency-cycles": [],
+    "maximum-chain-edges": 12
+  },
+  "pins": {
+    "dag.edn": "0883f2336d1f12f882a72d17ed65e172017f4b81b6685d23dfeb109276a9d061",
+    "dag.json": "a558dcd7b5d031c51f621b9b918ead1e68e3a07ff3376299080f16cce26541fe",
+    "source-pins.edn": "e4dbd4e92eff5b57faadea266e8d9f61b79f01b33cf88e40c3c1d8f8187743c1",
+    "verify_dag.bb": "0038d4da32dd79ab73e7fcc474319bee96d8a4552d70d50aa76f4a46df24d67f",
+    "checks/parens.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "checks/parens.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/parens.stdout": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "checks/structural-attempt-1.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "checks/structural-attempt-1.stderr": "a75a7280f3d05f4f226b20cc1f3803e503fed1b0820df51d90a25d1e14b94dee",
+    "checks/structural-attempt-1.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/structural.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "checks/structural.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/structural.stdout": "70e11a79cc97153eb8f82e7982fa66aff56cce316c1182dcd6d2156930c5cde2"
+  },
+  "system-tests-rerun": false,
+  "registry-or-tracker-changed": false,
+  "dispatches": 0
+}
