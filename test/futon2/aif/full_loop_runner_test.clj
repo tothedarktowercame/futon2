@@ -4689,7 +4689,7 @@
                            :discharge-id "retained-discharge"})}))
 
 (deftest selected-runner-action-is-minted-once-and-returned-from-writer
-  (let [{:keys [root path binding] :as c} (retention-cohort "runner-retention-success")
+  (let [{:keys [root path] :as c} (retention-cohort "runner-retention-success")
         result (runner/run-opportunity! (retention-success-opts c))
         close-event (cohort/read-edn (io/file root "test-cohort-exhaustion"
                                               (:attempt-id result) "007-closed.edn"))
