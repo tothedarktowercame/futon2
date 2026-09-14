@@ -4900,7 +4900,7 @@
      :explanation (str "The cited execution and review records show that the selected target "
                        "still has an undischarged production-successor obligation.")
      :evidence ["record-1"]}]
-   ["03-revision.edn"
+   ["supporting-03-revision.edn"
     {:schema :wm/entity-revision-pair-v1 :entity/id "entity-1"
      :before {:file "00-revision.before"
               :sha256 (runner-test-sha256 revision-before-bytes)
@@ -5091,7 +5091,14 @@
            [:two-forms "01-two-forms.edn" "{:schema :first}\n{:schema :second}\n"
             :evidence-not-single-edn]
            [:trailing-garbage "01-garbage.edn" "{:schema :first}\n#"
-            :evidence-edn-invalid]]]
+            :evidence-edn-invalid]
+           [:wrong-subject "subject-wrong.edn"
+            (pr-str {:schema :wm/entity-revision-pair-v1
+                     :entity/id "not-the-selected-target"
+                     :before {:file "before.bin" :sha256 limb-sha-a :bytes 1}
+                     :after {:file "after.bin" :sha256 limb-sha-b :bytes 1}
+                     :dimensions {:standing :open}})
+            :subject-entity-mismatch]]]
     (let [{:keys [root] :as c} (retention-cohort (str "runner-limb-" (name label)))
           close-path (io/file root "test-cohort-exhaustion" "attempt-001"
                               "007-closed.edn")
@@ -5159,6 +5166,8 @@
                       (make-array java.nio.file.attribute.FileAttribute 0)))
         explanation (str "This independent review explains how the cited records bear "
                          "on whether this exact selected target remains live or resolved.")
+        contract {:requires [:distinct-production-shaped-successor]}
+        no-resolution (constantly nil)
         record {:schema :wm/target-standing-decision-v1
                 :entity/id "target-1" :decision :still-live
                 :decided-by "reviewer-1" :implementation-author "author-1"
@@ -5166,18 +5175,23 @@
                 :evidence ["checkpoint-1"] :explanation explanation}]
     (spit (io/file dir "standing.edn") (pr-str record))
     (is (#'runner/valid-standing-decision?
-         (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"))
+         (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+         contract no-resolution))
     (is (not (#'runner/valid-standing-decision?
-              (.getAbsolutePath dir) "target-1" "other-reviewer" "author-1")))
+              (.getAbsolutePath dir) "target-1" "other-reviewer" "author-1"
+              contract no-resolution)))
     (is (not (#'runner/valid-standing-decision?
-              (.getAbsolutePath dir) "other-target" "reviewer-1" "author-1")))
+              (.getAbsolutePath dir) "other-target" "reviewer-1" "author-1"
+              contract no-resolution)))
     (spit (io/file dir "standing.edn")
           (pr-str (assoc record :explanation "too short")))
     (is (not (#'runner/valid-standing-decision?
-              (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1")))
+              (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+              contract no-resolution)))
     (let [dispatches (atom []) waits (atom 0)]
       (is (#'runner/ensure-standing-decision!
            (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+           contract no-resolution
            (fn [prompt] (swap! dispatches conj prompt) {:job-id "completion"})
            (fn [_] (swap! waits inc)
              (spit (io/file dir "standing.edn") (pr-str record)))))
@@ -5185,6 +5199,7 @@
       (is (= 1 @waits))
       (is (#'runner/ensure-standing-decision!
            (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+           contract no-resolution
            (fn [_] (throw (AssertionError. "must not redispatch"))) identity)))
     (spit (io/file dir "standing.edn")
           (pr-str (assoc record :decided-by "wrong-reviewer")))
@@ -5192,6 +5207,7 @@
           failure (try
                     (#'runner/ensure-standing-decision!
                      (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+                     contract no-resolution
                      (fn [_] (swap! dispatches inc) {:job-id "completion"})
                      identity)
                     nil
@@ -5199,6 +5215,55 @@
       (is (= 1 @dispatches))
       (is (= :standing-evidence-insufficient (:failure-kind failure)))
       (is (= :incomplete (:outcome failure))))))
+
+(deftest repair-subject-pairs-are-distinct-from-supporting-pairs
+  (let [pair (second (nth valid-attempt-evidence 2))
+        target "repair-target-1"
+        subject (assoc pair :entity/id target)]
+    (is (= subject
+           (runner/validate-revision-evidence-role
+            "subject-obligation.edn" target subject)))
+    (let [failure (try
+                    (runner/validate-revision-evidence-role
+                     "subject-source.edn" target pair)
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :subject-entity-mismatch (:limb-evidence/refusal failure))))
+    (is (= pair
+           (runner/validate-revision-evidence-role
+            "supporting-source.edn" target pair)))
+    (let [failure (try
+                    (runner/validate-revision-evidence-role
+                     "source.edn" target pair)
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :revision-role-ambiguous (:limb-evidence/refusal failure))))))
+
+(deftest resolved-standing-readback-exposes-pending-successor
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "standing-resolution-readback-"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        record {:schema :wm/target-standing-decision-v1
+                :entity/id "repair-target-1" :decision :resolved
+                :decided-by "reviewer-1" :implementation-author "author-1"
+                :decided-at "2026-09-14T18:00:00Z"
+                :evidence ["subject-obligation.edn"]
+                :explanation
+                (str "The admitted subject records and execution evidence support this "
+                     "independent decision about the complete repair obligation.")}
+        contract {:requires [:distinct-repair-commit :independent-review
+                             :grounded-repair
+                             :distinct-production-shaped-successor]}]
+    (spit (io/file dir "standing.edn") (pr-str record))
+    (is (= :resolution-unsupported-by-store
+           (:standing/store-annotation
+            (runner/standing-decision-readback
+             (.getAbsolutePath dir) "repair-target-1" "reviewer-1" "author-1"
+             contract (constantly nil)))))
+    (is (= record
+           (runner/standing-decision-readback
+            (.getAbsolutePath dir) "repair-target-1" "reviewer-1" "author-1"
+            contract (constantly {:repair/status :resolved}))))))
 
 (deftest measured-prompts-declare-required-completion
   (let [opts {:author "author-1" :reviewer "reviewer-1"

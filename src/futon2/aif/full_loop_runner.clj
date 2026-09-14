@@ -1911,8 +1911,9 @@
            (str "AUTHOR " author " may deposit one actual-command receipt per discharged limb:\n"
                 ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at].\n"
                 "Write stdout/stderr bytes to flat companion files and reference them with :stdout-file/:stderr-file.\n"
-                "When the selected entity artifact changes, also deposit:\n"
-                ":wm/entity-revision-pair-v1 keys [:schema :entity/id :before :after :dimensions], with byte-pinned boundary captures.\n")
+                "For a repair target, capture its immutable ORIGINAL obligation record bytes under data/wm-repair-obligations/ as :before and its state-at-this-attempt readback (honestly still :open) as :after.\n"
+                "Name that :wm/entity-revision-pair-v1 file subject-*.edn and set :entity/id to the exact selected repair id.\n"
+                "Source-file revision pairs are supporting evidence: name them supporting-*.edn and use the source artifact id. Both roles use keys [:schema :entity/id :before :after :dimensions].\n")
            :reviewer
            (str "REVIEWER " reviewer " (not author " author ") deposits the same-target standing decision:\n"
                 ":wm/target-standing-decision-v1 keys [:schema :entity/id :decision :decided-by :implementation-author :decided-at :evidence].\n"
@@ -2729,25 +2730,80 @@
                          :source-path path}
                         e))))))
 
+(defn standing-decision-readback
+  "Read the exact-seat standing decision and annotate, without changing its
+  verdict, a resolved claim whose required production successor has no
+  resolution record. RESOLUTION-READ-FN is the store authority seam and
+  receives the exact repair id."
+  [evidence-dir target reviewer author discharge-contract resolution-read-fn]
+  (when (and evidence-dir (.isDirectory (io/file evidence-dir)))
+    (some
+     (fn [^java.io.File file]
+       (try
+         (let [record (parse-attempt-evidence
+                       (Files/readAllBytes (.toPath file))
+                       (.getAbsolutePath file))
+               record (when (= :wm/target-standing-decision-v1 (:schema record))
+                        (limb-evidence/validate-standing-decision record))]
+           (when (and record (= target (:entity/id record))
+                      (= reviewer (:decided-by record))
+                      (= author (:implementation-author record)))
+             (if (and (= :resolved (:decision record))
+                      (some #{:distinct-production-shaped-successor}
+                            (:requires discharge-contract)))
+               (let [resolution (try
+                                  {:record (resolution-read-fn target)}
+                                  (catch Throwable e {:error e}))]
+                 (cond
+                   (:error resolution)
+                   (assoc record :standing/store-annotation
+                          :resolution-store-unreadable)
+
+                   (nil? (:record resolution))
+                   (assoc record :standing/store-annotation
+                          :resolution-unsupported-by-store)
+
+                   :else record))
+               record)))
+         (catch Throwable _ nil)))
+     (sort-by #(.getName ^java.io.File %)
+              (filter #(.isFile ^java.io.File %)
+                      (seq (.listFiles (io/file evidence-dir))))))))
+
+(defn- retained-resolution-record
+  [repair-id]
+  (let [file (io/file repair/default-root "resolutions" (str repair-id ".edn"))]
+    (when (.isFile file)
+      (parse-attempt-evidence (Files/readAllBytes (.toPath file))
+                              (.getAbsolutePath file)))))
+
 (defn- valid-standing-decision?
-  [evidence-dir target reviewer author]
-  (boolean
-   (when (and evidence-dir (.isDirectory (io/file evidence-dir)))
-     (some
-      (fn [^java.io.File file]
-        (try
-          (let [record (parse-attempt-evidence
-                        (Files/readAllBytes (.toPath file))
-                        (.getAbsolutePath file))]
-            (and (= :wm/target-standing-decision-v1 (:schema record))
-                 (= target (:entity/id
-                            (limb-evidence/validate-standing-decision record)))
-                 (= reviewer (:decided-by record))
-                 (= author (:implementation-author record))))
-          (catch Throwable _ false)))
-      (sort-by #(.getName ^java.io.File %)
-               (filter #(.isFile ^java.io.File %)
-                       (seq (.listFiles (io/file evidence-dir)))))))))
+  [evidence-dir target reviewer author discharge-contract resolution-read-fn]
+  (boolean (standing-decision-readback evidence-dir target reviewer author
+                                       discharge-contract resolution-read-fn)))
+
+(defn validate-revision-evidence-role
+  "Validate the filename-declared role of a revision pair. `subject-*.edn`
+  names the selected repair obligation itself and must use its exact id;
+  `supporting-*.edn` may name a source artifact. Any other name is ambiguous
+  and refuses before companion bytes are admitted."
+  [filename selected-target record]
+  (cond
+    (str/starts-with? filename "subject-")
+    (when-not (= selected-target (:entity/id record))
+      (throw (ex-info "Subject revision pair names another entity"
+                      {:limb-evidence/refusal :subject-entity-mismatch
+                       :selected-target selected-target
+                       :entity/id (:entity/id record)
+                       :filename filename})))
+
+    (str/starts-with? filename "supporting-") nil
+
+    :else
+    (throw (ex-info "Revision pair role is ambiguous"
+                    {:limb-evidence/refusal :revision-role-ambiguous
+                     :filename filename})))
+  record)
 
 (defn- standing-completion-prompt [target evidence-dir]
   (str "Deposit the standing decision for " (pr-str target) " in "
@@ -2755,12 +2811,15 @@
        "implementation nor suggests a decision."))
 
 (defn- ensure-standing-decision!
-  [evidence-dir target reviewer author dispatch-completion! wait-completion!]
-  (when-not (valid-standing-decision? evidence-dir target reviewer author)
+  [evidence-dir target reviewer author discharge-contract resolution-read-fn
+   dispatch-completion! wait-completion!]
+  (when-not (valid-standing-decision? evidence-dir target reviewer author
+                                      discharge-contract resolution-read-fn)
     (let [response (dispatch-completion!
                     (standing-completion-prompt target evidence-dir))]
       (try (wait-completion! response) (catch Throwable _ nil)))
-    (when-not (valid-standing-decision? evidence-dir target reviewer author)
+    (when-not (valid-standing-decision? evidence-dir target reviewer author
+                                        discharge-contract resolution-read-fn)
       (throw (ex-info "Standing evidence insufficient"
                       {:outcome :incomplete
                        :failure-kind :standing-evidence-insufficient
@@ -2769,7 +2828,7 @@
   true)
 
 (defn- checkpoint-evidence-manifest
-  [events data-root cohort-id attempt-id]
+  [events data-root cohort-id attempt-id selected-target]
   (let [cohort-name (name cohort-id)
         ordered-events (sort-by :event/sequence (vals events))
         checkpoint-entries
@@ -2813,6 +2872,10 @@
         records (mapv #(limb-evidence/validate-record
                         (get-in % [:parsed :value]))
                       record-captures)
+        _ (doseq [[capture record] (map vector record-captures records)
+                  :when (= :wm/entity-revision-pair-v1 (:schema record))]
+            (validate-revision-evidence-role (:filename capture)
+                                             selected-target record))
         companion-names
         (into #{}
               (mapcat (fn [record]
@@ -3362,7 +3425,9 @@
                                    (or (:data-root execution-cohort)
                                        cohort/default-data-root)
                                    (:cohort/id start-event)
-                                   attempt-id))
+                                   attempt-id
+                                   (or (:target data)
+                                       (:selected-mission selection-judgment))))
                        admitted-ids (mapv :evidence/id (:entries manifest))
                        closed (cond->
                                (term (merge {:outcome outcome
@@ -4215,8 +4280,17 @@
                                       :repository repo}))
                   (when (and approved? (:measured-acquisition? opts)
                              attempt-evidence-dir)
-                    (ensure-standing-decision!
-                     attempt-evidence-dir target reviewer author
+                    (let [discharge-contract
+                          (or (get-in construction
+                                      [:selected-action :repair-obligation
+                                       :discharge-contract])
+                              (:discharge-contract stop-line)
+                              {:requires []})]
+                      (ensure-standing-decision!
+                       attempt-evidence-dir target reviewer author
+                       discharge-contract
+                       (or (:repair-resolution-read-fn opts)
+                           retained-resolution-record)
                      (fn [prompt]
                        (run-phase!
                         opts @phase-context :standing-completion-dispatch
@@ -4225,9 +4299,9 @@
                               opts reviewer "wm-full-loop" target prompt))))
                      (fn [response]
                        (run-phase!
-                        opts @phase-context :standing-completion-wait
+                       opts @phase-context :standing-completion-wait
                         #((or (:poll-fn opts) poll-job!)
-                          opts (:job-id response))))))
+                          opts (:job-id response)))))))
                   (when-not approved?
                     (let [failure-data
                           (cond->
