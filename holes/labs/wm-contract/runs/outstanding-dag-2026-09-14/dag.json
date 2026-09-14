@@ -890,7 +890,7 @@
         }
       ],
       "work-kind": "evidence-acquisition",
-      "state-note": "Requirement is settled. Read loaded values and enable through reviewed serving procedure if absent; paper says not live. No config mutation in discovery."
+      "state-note": "Readback complete (TN-existing-record-audit-2026-09-14.md): FPI-posterior observably :flag-off in selections, but NO retained record of effective horizon/detail/FPI-dark \u2014 missing artifact class :effective-horizon-detail-fpi-configuration-record. Remaining work: retain that record via a reviewed serving procedure; no config mutation in discovery."
     },
     {
       "id": "configured-machinery-records",
@@ -917,7 +917,7 @@
       "flag": "hidden-prereq",
       "paper-anchor": "--",
       "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:32",
-      "state": "unbuilt",
+      "state": "done",
       "evidence": [
         {
           "source": "tracker",
@@ -929,7 +929,7 @@
         }
       ],
       "work-kind": "evidence-acquisition",
-      "state-note": "Row26 is DONE, so discovery over existing records is available now. Audit may return typed insufficiency; it does not guarantee positive closure."
+      "state-note": "DONE 2026-09-14: audit TN committed 069b0c30 (codex-21), accepted (ACCEPTANCE-existing-record-audit.md). Row 23 :usable-exact-joins-retained (12 byte-pinned construction checkpoints, all :match); rows 13/15 :insufficient-retention with named missing artifact classes \u2014 downstream nodes need NEW production capture, not archaeology."
     },
     {
       "id": "belief-update",

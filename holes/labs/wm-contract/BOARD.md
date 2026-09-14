@@ -1,11 +1,12 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~22:12Z (categorical-ambiguity turned out DONE)
+Updated: 2026-09-14 ~22:35Z (record-audit accepted; 5 green)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
 snapshot format had NO "done" state, so nothing could ever turn green.
-Now: **4 done** (a-rubric, a-validator, r10-caller, categorical-ambiguity),
+Now: **5 done** (a-rubric, a-validator, r10-caller, categorical-ambiguity,
+existing-record-audit),
 **1 in-flight** (a-labels), 52 blocked / 7 unbuilt / 9 built-not-wired /
 4 ruled-parked. The a-estimate → q-witness-flip chain Joe named is genuinely
 red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
@@ -15,11 +16,13 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 - **cohort-53 attempt-002** (measured, zai-5 author, cells through 004-dispatch)
   — the a-labels critical path. On a close retaining an approved review →
   exercise-5 → annotation #1.
-- **existing-record-audit** — codex-21, job `invoke-1789423558330-20873-40385e48`
-  (running). Rows 13/15/23 evidence discovery. Unlocks 4 nodes.
-- Park `park-a638e62c` covers both packets; fallback wakeup ~25 min.
+- Fallback wakeup ~22:33Z; no packet parks outstanding.
 
 ## DONE (this sitting, newest first)
+- existing-record-audit ACCEPTED (TN `069b0c30`, codex-21; acceptance committed; pins
+  re-verified, absence claim reproduced). Row 23: 12 usable byte-pinned joins. Rows
+  13/15: typed insufficiency, named classes — downstream needs NEW production capture.
+  effective-config sharpened: missing class :effective-horizon-detail-fpi-configuration-record.
 - categorical-ambiguity: ALREADY DONE this morning (codex-22 `602ff836`, my acceptance
   pre-compaction); codex-23 correctly detected the duplicate dispatch, zero edits;
   node flipped done (`354eba57`). risk-ambiguity-witness now waits only on q-risk inputs.
