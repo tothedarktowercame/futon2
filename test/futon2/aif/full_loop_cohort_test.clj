@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.close-retention :as close-retention]
             [futon2.aif.full-loop-cohort :as cohort])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -34,6 +35,93 @@
   (doseq [checkpoint [:selection :construction :dispatch :build :adjudication]]
     (cohort/append-checkpoint! prereg-path root attempt checkpoint
                                {:sorry {:kind (keyword (str "test-" (name checkpoint)))}})))
+
+(defn retention-occurrence []
+  (let [ids (atom ["00000000-0000-4000-8000-000000000011"
+                   "00000000-0000-4000-8000-000000000012"])]
+    (close-retention/mint-occurrence
+     {:run-id "writer-run" :cohort-id "wm-full-loop-40-v1"
+      :attempt-id "writer-attempt" :selected-action {:type :writer-test}
+      :now (constantly "2026-09-14T00:00:00Z")
+      :uuid-fn #(let [id (first @ids)] (swap! ids subvec 1) id)})))
+
+(defn retention-close [inputs]
+  (assoc (term {:outcome :agent-unavailable :grounded? false
+                :artifact-only? false :duration-ms 1
+                :resource-use {:agent-turns 0}})
+         :retention-inputs inputs))
+
+(defn close-path [root attempt]
+  (io/file root (name (:cohort/id (cohort/read-edn prereg-path)))
+           attempt "007-closed.edn"))
+
+(deftest close-writer-optionally-completes-retention
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        absent-inputs {:occurrence (retention-occurrence)
+                       :state {:status :absent
+                               :reason :independent-observation-unavailable}
+                       :model {:status :absent
+                               :reason :declared-model-identity-unthreaded}
+                       :admitted-evidence []}
+        legacy-attempt (:attempt/id (open! root "clock/legacy-close"))
+        absent-attempt (:attempt/id (open! root "clock/retained-close"))
+        observed-attempt (:attempt/id (open! root "clock/observed-close"))]
+    (doseq [attempt [legacy-attempt absent-attempt observed-attempt]]
+      (append-required! root attempt))
+    (let [legacy (cohort/close-attempt!
+                  prereg-path root legacy-attempt
+                  (term {:outcome :agent-unavailable :grounded? false
+                         :artifact-only? false :duration-ms 1
+                         :resource-use {:agent-turns 0}}))]
+      (is (not (contains? (:payload legacy) :close-retention)))
+      (is (= #{:judgment :ground} (set (keys (:payload legacy))))))
+    (let [event (cohort/close-attempt! prereg-path root absent-attempt
+                                       (retention-close absent-inputs))
+          retained (get-in event [:payload :close-retention])]
+      (is (= (:recorded-at event) (:closed-at retained)))
+      (is (= (:recorded-at event) (:evidence-cutoff retained)))
+      (is (= :absent (get-in retained [:state :status])))
+      (is (= :absent (get-in retained [:model :status])))
+      (is (not (contains? (:payload event) :retention-inputs)))
+      (is (= event (cohort/read-edn (close-path root absent-attempt)))))
+    (let [observed (assoc absent-inputs
+                          :state {:status :observed
+                                  :method :independent-categorical-observation
+                                  :state :refined
+                                  :state-at "2026-09-14T00:02:00Z"
+                                  :observed-at "2026-09-14T00:01:00Z"
+                                  :evidence/id "e-observed"}
+                          :admitted-evidence ["e-observed"])
+          event (cohort/close-attempt! prereg-path root observed-attempt
+                                       (retention-close observed))]
+      (is (= :observed (get-in event [:payload :close-retention :state :status])))
+      (is (= ["e-observed"]
+             (get-in event [:payload :close-retention :admitted-evidence]))))))
+
+(deftest close-writer-refuses-invalid-retention-before-append
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        base {:occurrence (retention-occurrence)
+              :state {:status :absent :reason :independent-observation-unavailable}
+              :model {:status :absent :reason :declared-model-identity-unthreaded}
+              :admitted-evidence []}
+        cases [[:caller-cutoff (assoc base :closed-at "2026-09-14T00:03:00Z")]
+               [:unadmitted-state
+                (assoc base :state {:status :observed
+                                    :method :independent-categorical-observation
+                                    :state :refined
+                                    :state-at "2026-09-14T00:02:00Z"
+                                    :observed-at "2026-09-14T00:01:00Z"
+                                    :evidence/id "e-missing"})]
+               [:duplicate-evidence (assoc base :admitted-evidence ["e" "e"])]]]
+    (doseq [[label inputs] cases]
+      (let [attempt (:attempt/id (open! root (str "clock/invalid-" (name label))))]
+        (append-required! root attempt)
+        (is (thrown? clojure.lang.ExceptionInfo
+                     (cohort/close-attempt! prereg-path root attempt
+                                            (retention-close inputs))))
+        (is (not (.exists (close-path root attempt))))))))
 
 (deftest preregistration-is-valid
   (let [p (edn/read-string (slurp prereg-path))]

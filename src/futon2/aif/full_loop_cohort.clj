@@ -8,6 +8,7 @@
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.string :as str]
+            [futon2.aif.close-retention :as close-retention]
             [futon2.aif.fold :as fold])
   (:import [java.nio.channels FileChannel]
            [java.nio.charset StandardCharsets]
@@ -315,14 +316,26 @@
        inc))
 
 (defn- event-record [p attempt-id ordinal sequence checkpoint payload]
-  {:event/schema-version 1
-   :cohort/id (:cohort/id p)
-   :attempt/id attempt-id
-   :attempt/ordinal ordinal
-   :event/sequence sequence
-   :checkpoint/type checkpoint
-   :recorded-at (str (Instant/now))
-   :payload payload})
+  (let [recorded-at (str (Instant/now))
+        payload (if (and (= :closed checkpoint)
+                         (contains? payload :retention-inputs))
+                  (let [inputs (:retention-inputs payload)
+                        retention (close-retention/build-retention-block
+                                   (assoc inputs
+                                          :closed-at recorded-at
+                                          :evidence-cutoff recorded-at))]
+                    (-> payload
+                        (dissoc :retention-inputs)
+                        (assoc :close-retention retention)))
+                  payload)]
+    {:event/schema-version 1
+     :cohort/id (:cohort/id p)
+     :attempt/id attempt-id
+     :attempt/ordinal ordinal
+     :event/sequence sequence
+     :checkpoint/type checkpoint
+     :recorded-at recorded-at
+     :payload payload}))
 
 (defn start-attempt!
   "Claim one natural scheduler opportunity. `cell` must ground the recorded
