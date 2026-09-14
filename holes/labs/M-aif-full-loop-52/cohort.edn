@@ -1,0 +1,77 @@
+{:cohort/id :wm-contract-machinery-52-v1
+ :protocol/version 4
+ :status :preregistered
+ :registered-on "2026-09-14"
+ :purpose "Build-phase MACHINERY-TEST cohort for the wm-contract qualifying-run build (WORK-REMAINING row 26). Every attempt in this cohort is machinery evidence only: no attempt is a qualifying candidate and no result may be presented as a qualifying run. Fresh successor to exhausted :wm-contract-machinery-51-v1 (2/2 consumed 2026-09-14; both attempts grounded-change, exercising deposit-bearing and inspectable-receipt closes). This cohort hosts the first fully-armed measured-acquisition attempts: clicks may set the measured-acquisition flag, enforcing the reviewer standing decision per RULING-standing-decision-reliability-2026-09-14.md. The FIRST measured-acquisition close of this cohort is annotation exercise 4 subject regardless of outcome. Casting commissioned by claude-15: author claude-15, reviewer codex-22, repair-reviewer codex-24, passed per click payload. Target 2."
+ :casting {:author "claude-15" :reviewer "codex-22" :repair-reviewer "codex-24"}
+ :activation :separate-append-only-marker
+ :population "Reviewed on-demand build-phase machinery-test opportunities for the wm-contract qualifying-run build"
+ :stopping-rule
+ {:unit :trigger-opportunity
+  :target 2
+  :rule "Count the first 2 distinct eligible trigger opportunities after activation, in order."
+  :counts-as-attempt
+  [:selected-and-dispatched
+   :abstained
+   :no-selection
+   :agent-unavailable
+   :substrate-unavailable
+   :guardrail-refusal
+   :dispatch-failed
+   :build-failed
+   :grounded-no-change
+   :grounded-change]
+  :excluded
+  [:manual-test :replay :duplicate-opportunity :pre-activation]
+  :replacement "None. Failed, unavailable, abstaining, and no-change opportunities remain in the denominator."}
+ :allowed-triggers #{:duree-click-on-demand
+                     :duree-click-continuous}
+ :checkpoint-order
+ [:time-step :selection :construction :dispatch :build :adjudication :closed]
+ :required-before-close
+ #{:selection :construction :dispatch :build :adjudication}
+ :checkpoint-contract
+ {:cell-shape "Every checkpoint payload is either {:judgment ... :ground ...} or {:sorry {:kind keyword ...}}."
+  :time-step [:opportunity-id :trigger :machine-state :agent-roster :code-state :semantic-epoch]
+  :selection [:selected-mission :selected-action :ranked-candidates :selection-reasons]
+  :construction [:mission :cascade :sorries :wiring :patterns :deposit]
+  :dispatch [:agent :availability :job-id :prompt-ref]
+  :build [:artifacts :generated-code :commits :patterns-used :inline-improvements :validation]
+  :adjudication [:before :after :witness :build-match :dial]
+  :closed [:outcome :grounded? :artifact-only? :duration-ms :resource-use]
+  :revision-note "A revision round nests inside the :build payload as :revision {:round 2 :commits [...] :review {...}} with both review records under :reviews; checkpoint order and schema unchanged from protocol 4."}
+ :grounded-success
+ {:outcome :grounded-change
+  :requires [:independent-before-witness
+             :independent-after-witness
+             :resolved-adjudication
+             :dial-moved]
+  :artifact-only-counts? false}
+ :machine-evolution
+ {:allowed? true
+  :rule "Normal machine development may continue during collection; it never permits dropping, replacing, relabelling, or promoting a machinery-test opportunity into a qualifying candidate."
+  :per-attempt-provenance [:semantic-epoch :git-sha :git-dirty? :resolved-mode-flags :configuration-digest]
+  :epoch-boundary "This cohort begins after the r6 findings-naming repair (44014e04) and uses the fresh wm-full-loop-machinery-52 root."
+  :analysis "Report attempts chronologically and as machinery tests only; do not pool them with qualifying-run candidates."}
+ :analysis
+ {:primary
+  [:attempt-count
+   :grounded-change-rate
+   :grounded-no-change-rate
+   :dispatch-rate
+   :completion-rate
+   :revision-round-conversion-rate]
+  :secondary
+  [:mission-selection-frequency
+   :selection-reason-frequency
+   :expected-versus-realized-calibration
+   :agent-availability
+   :elapsed-time
+   :resource-use
+   :patterns-used
+   :inline-improvement-frequency
+   :semantic-epoch-results
+   :code-version-trajectory
+   :substrate-state-distribution
+   :selection-transient-frequency]
+  :reporting "Report attempts and all typed sorries; identify every record as machinery-test evidence and never as a qualifying candidate."}}
