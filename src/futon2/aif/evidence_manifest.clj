@@ -1,7 +1,7 @@
 (ns futon2.aif.evidence-manifest
   "Pure construction and validation of the close-evidence manifest v1."
   (:require [clojure.string :as str])
-  (:import (java.nio.file InvalidPathException Paths)
+  (:import (java.nio.file Paths)
            (java.security MessageDigest)
            (java.time Instant)))
 
@@ -34,7 +34,9 @@
     (when-not (.isAbsolute (Paths/get x (make-array String 0)))
       (refuse! :source-path-invalid path))
     (catch clojure.lang.ExceptionInfo e (throw e))
-    (catch InvalidPathException _ (refuse! :source-path-invalid path)))
+    ;; InvalidPathException, by its superclass: babashka cannot resolve the
+    ;; subclass, and u39_selection_retrospective.bb loads this namespace.
+    (catch IllegalArgumentException _ (refuse! :source-path-invalid path)))
   x)
 
 (defn- sha256-format! [x path]
