@@ -4851,15 +4851,15 @@
   (let [{:keys [root] :as c} (retention-cohort "runner-manifest-unreadable")
         close-path (io/file root "test-cohort-exhaustion" "attempt-001"
                             "007-closed.edn")
-        construction-path (io/file root "test-cohort-exhaustion" "attempt-001"
-                                   "003-construction.edn")
-        opts (assoc (retention-success-opts c)
-                    :delivery-qa-fn
-                    (fn [_ item]
-                      (is (.delete construction-path))
-                      {:morning-brief/addendum-id
-                       (str "qa-" (:attempt-id item))}))
-        result (runner/run-opportunity! opts)
+        opts (retention-success-opts c)
+        result (with-redefs-fn
+                 {#'runner/checkpoint-evidence-manifest
+                  (fn [& _]
+                    (throw (ex-info "Sibling checkpoint unreadable"
+                                    {:evidence-manifest/refusal
+                                     :source-unavailable
+                                     :source-path "003-construction.edn"})))}
+                 #(runner/run-opportunity! opts))
         close (cohort/read-edn close-path)]
     (is (= :build-failed (:outcome result)))
     (is (= :source-unavailable
