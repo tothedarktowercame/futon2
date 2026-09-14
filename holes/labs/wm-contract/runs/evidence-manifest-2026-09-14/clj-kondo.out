@@ -1,0 +1,2 @@
+test/futon2/aif/evidence_manifest_test.clj:6:1: warning: bytes already refers to #'clojure.core/bytes
+linting took 12ms, errors: 0, warnings: 1

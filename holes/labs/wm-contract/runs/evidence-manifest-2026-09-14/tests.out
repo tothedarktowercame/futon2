@@ -1,0 +1,8 @@
+
+Running tests in #{"test"}
+WARNING: bytes already refers to: #'clojure.core/bytes in namespace: futon2.aif.evidence-manifest-test, being replaced by: #'futon2.aif.evidence-manifest-test/bytes
+
+Testing futon2.aif.evidence-manifest-test
+
+Ran 4 tests containing 19 assertions.
+0 failures, 0 errors.

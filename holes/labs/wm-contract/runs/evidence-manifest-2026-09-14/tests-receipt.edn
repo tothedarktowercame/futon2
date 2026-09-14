@@ -1,0 +1,10 @@
+{:command "clojure -X:test :nses '[futon2.aif.evidence-manifest-test]'"
+ :exit 0
+ :tests 4
+ :assertions 19
+ :failures 0
+ :errors 0
+ :tree-sha "9b916f1878c9d4c6a5968685a0d18d288d6cb7eb"
+ :at "2026-09-14T16:36:01Z"
+ :stdout "tests-final.out"
+ :fresh-jvm true}
