@@ -109,8 +109,30 @@
                                          :count-after :deposit-run-id])
     :spec-document (select-keys evidence [:path :git-sha])))
 
+(defn- with-contended-store-lock
+  "Bounded retry around the deliberately NON-BLOCKING store lock: the lock
+  layer refuses same-instant acquisition as :interoceptive/lock-contention
+  (a contract other stores pin), while this store's writes are replay-safe
+  and must serialize under concurrent identical findings (the race-safe
+  contract of this namespace's tests). Exhausted contention still propagates
+  the typed refusal — bounded wait, never an escape hatch."
+  [root f]
+  (loop [attempt 1]
+    (let [outcome (try
+                    {:ok (store-lock/with-store-lock-for root f)}
+                    (catch clojure.lang.ExceptionInfo e
+                      (if (and (= :interoceptive/lock-contention
+                                  (:refusal (ex-data e)))
+                               (< attempt 40))
+                        {:retry true}
+                        (throw e))))]
+      (if (contains? outcome :ok)
+        (:ok outcome)
+        (do (Thread/sleep 25)
+            (recur (inc attempt)))))))
+
 (defn- write-new! [path value]
-  (store-lock/with-store-lock-for (.getParent (io/file path))
+  (with-contended-store-lock (.getParent (io/file path))
    (fn []
     (let [file (io/file path)]
     (io/make-parents file)
@@ -158,7 +180,7 @@
   unstable field (notably :opened-at); semantic-map equality is deliberately
   insufficient."
   [root record-id value]
-  (store-lock/with-store-lock-for root
+  (with-contended-store-lock root
    (fn []
     (let [directory (finding-directory! root)
         file (io/file directory (str record-id ".edn"))
@@ -339,7 +361,7 @@
     (when (.isDirectory directory) directory)))
 
 (defn- write-new-durable! [root child record-id value]
-  (store-lock/with-store-lock-for root
+  (with-contended-store-lock root
    (fn []
     (when-not (safe-id? record-id) (throw (ex-info "Unsafe repair identity" {})))
     (let [base (historical-directory! root child true)

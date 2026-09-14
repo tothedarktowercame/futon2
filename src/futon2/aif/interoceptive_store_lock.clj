@@ -33,47 +33,62 @@
           (recur candidate (next names)))))
     file))
 
+(defn- io-guard*
+  "Run one lock ACQUISITION step, converting its non-refusal failures to the
+  typed io refusal. Never wraps the caller's critical-section body: a typed
+  exception thrown inside the locked section must reach the caller unaltered
+  (2026-09-14: a body FileAlreadyExistsException was being laundered into
+  :interoceptive/lock-io-failure, hiding the body's own typed semantics)."
+  [lock-path step]
+  (try
+    (step)
+    (catch OverlappingFileLockException e
+      (refuse! :interoceptive/lock-contention {:path lock-path} e))
+    (catch clojure.lang.ExceptionInfo e (throw e))
+    (catch Throwable e
+      (refuse! :interoceptive/lock-io-failure {:path lock-path} e))))
+
 (defn- with-lock-path* [lock-path create? f]
   (let [path (safe-parent! lock-path)
         identity (str path)
-        held (.get held-locks)]
-  (if (contains? held identity)
-    (f)
-    (let [file (.toFile path)]
-      (try
-        (with-open [channel (FileChannel/open
-                             (.toPath file)
-                             (into-array OpenOption
-                                         (cond-> [StandardOpenOption/WRITE
-                                                  LinkOption/NOFOLLOW_LINKS]
-                                           create? (conj StandardOpenOption/CREATE))))]
-          (when-not (Files/isRegularFile path
-                                         (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+        held (.get held-locks)
+        nofollow (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])]
+    (if (contains? held identity)
+      (f)
+      (let [file (.toFile path)
+            channel ^FileChannel
+            (io-guard* lock-path
+                       #(FileChannel/open
+                         (.toPath file)
+                         (into-array OpenOption
+                                     (cond-> [StandardOpenOption/WRITE
+                                              LinkOption/NOFOLLOW_LINKS]
+                                       create? (conj StandardOpenOption/CREATE)))))]
+        (try
+          (when-not (Files/isRegularFile path nofollow)
             (refuse! :interoceptive/lock-path-refused {:path lock-path} nil))
-          (let [acquired (try (.tryLock channel)
-                              (catch OverlappingFileLockException e
-                                (refuse! :interoceptive/lock-contention
-                                         {:path lock-path} e)))]
+          (let [acquired (io-guard* lock-path #(.tryLock channel))]
             (when-not acquired
               (refuse! :interoceptive/lock-contention {:path lock-path} nil))
-          (with-open [_lock acquired]
-            (let [before (Files/getAttribute path "basic:fileKey"
-                                             (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))]
-              (.set held-locks (conj held identity))
-              (try
-                (let [result (f)
-                      after (Files/getAttribute path "basic:fileKey"
-                                                (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))]
-                  (when-not (= before after)
-                    (refuse! :interoceptive/lock-identity-changed
-                             {:path lock-path :before before :after after} nil))
-                  result)
-                (finally (.set held-locks held)))))))
-        (catch OverlappingFileLockException e
-          (refuse! :interoceptive/lock-contention {:path lock-path} e))
-        (catch clojure.lang.ExceptionInfo e (throw e))
-        (catch Throwable e
-          (refuse! :interoceptive/lock-io-failure {:path lock-path} e)))))))
+            (try
+              (let [before (io-guard* lock-path
+                                      #(Files/getAttribute path "basic:fileKey"
+                                                           nofollow))]
+                (.set held-locks (conj held identity))
+                (try
+                  (let [result (f)
+                        after (io-guard* lock-path
+                                         #(Files/getAttribute path
+                                                              "basic:fileKey"
+                                                              nofollow))]
+                    (when-not (= before after)
+                      (refuse! :interoceptive/lock-identity-changed
+                               {:path lock-path :before before :after after}
+                               nil))
+                    result)
+                  (finally (.set held-locks held))))
+              (finally (.release ^java.nio.channels.FileLock acquired))))
+          (finally (.close channel)))))))
 
 (defn- with-lock-path [lock-path f]
   (with-lock-path* lock-path true f))
