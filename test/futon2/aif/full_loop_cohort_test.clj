@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.close-retention :as close-retention]
+            [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.full-loop-cohort :as cohort])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -133,6 +134,97 @@
                            prereg-path root attempt :selection
                            {:sorry {:kind :test-selection}
                             :retention-inputs {}})))
+    (is (not (.exists (io/file root (name (:cohort/id (cohort/read-edn prereg-path)))
+                               attempt "002-selection.edn"))))))
+
+(defn evidence-manifest [ids admitted-at]
+  (evidence-manifest/build-manifest
+   {:entries (mapv (fn [id]
+                     {:evidence/id id
+                      :source-path (str "/evidence/" id ".edn")
+                      :admitted-at admitted-at})
+                   ids)
+    :read-bytes #(.getBytes ^String (str "literal:" %) "UTF-8")}))
+
+(deftest close-writer-retains-agreeing-evidence-manifest
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        attempt (:attempt/id (open! root "clock/manifest-close"))
+        ids ["evidence-one" "evidence-two"]
+        inputs {:occurrence (retention-occurrence)
+                :state {:status :absent :reason :independent-observation-unavailable}
+                :model {:status :absent :reason :declared-model-identity-unthreaded}
+                :admitted-evidence ids}
+        manifest (evidence-manifest ids "2026-09-14T00:01:00Z")]
+    (append-required! root attempt)
+    (let [event (cohort/close-attempt!
+                 prereg-path root attempt
+                 (assoc (retention-close inputs) :evidence-manifest manifest))
+          payload (:payload event)]
+      (is (= manifest (:close-evidence-manifest payload)))
+      (is (= ids (get-in payload [:close-retention :admitted-evidence])))
+      (is (= ids (mapv :evidence/id
+                       (get-in payload [:close-evidence-manifest :entries]))))
+      (is (not (contains? payload :retention-inputs)))
+      (is (not (contains? payload :evidence-manifest)))
+      (is (= event (cohort/read-edn (close-path root attempt)))))))
+
+(deftest close-writer-refuses-invalid-manifest-before-append
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        occurrence (retention-occurrence)
+        inputs (fn [ids]
+                 {:occurrence occurrence
+                  :state {:status :absent :reason :independent-observation-unavailable}
+                  :model {:status :absent :reason :declared-model-identity-unthreaded}
+                  :admitted-evidence ids})
+        good (evidence-manifest ["evidence-one" "evidence-two"]
+                                "2026-09-14T00:01:00Z")
+        cases [[:without-retention
+                (assoc (term {:outcome :agent-unavailable :grounded? false
+                              :artifact-only? false :duration-ms 1
+                              :resource-use {:agent-turns 0}})
+                       :evidence-manifest good)
+                :manifest-without-retention]
+               [:reordered
+                (assoc (retention-close (inputs ["evidence-two" "evidence-one"]))
+                       :evidence-manifest good)
+                :retention-evidence-mismatch]
+               [:future-admission
+                (assoc (retention-close (inputs ["evidence-one"]))
+                       :evidence-manifest
+                       (evidence-manifest ["evidence-one"] "9999-01-01T00:00:00Z"))
+                :evidence-admitted-after-close]
+               [:invalid-sha
+                (assoc (retention-close (inputs ["evidence-one" "evidence-two"]))
+                       :evidence-manifest
+                       (assoc good :manifest-sha256 (apply str (repeat 64 "0"))))
+                :manifest-sha256-mismatch]]]
+    (doseq [[label cell expected] cases]
+      (let [attempt (:attempt/id (open! root (str "clock/manifest-" (name label))))]
+        (append-required! root attempt)
+        (is (= expected
+               (try
+                 (cohort/close-attempt! prereg-path root attempt cell)
+                 nil
+                 (catch clojure.lang.ExceptionInfo e
+                   (or (:evidence-manifest/refusal (ex-data e))
+                       (:close-retention/refusal (ex-data e)))))))
+        (is (not (.exists (close-path root attempt))))))))
+
+(deftest evidence-manifest-on-non-close-checkpoint-refuses
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        attempt (:attempt/id (open! root "clock/misplaced-manifest"))]
+    (is (= :retention-marker-misplaced
+           (try
+             (cohort/append-checkpoint!
+              prereg-path root attempt :selection
+              {:sorry {:kind :test-selection}
+               :evidence-manifest (evidence-manifest [] "2026-09-14T00:00:00Z")})
+             nil
+             (catch clojure.lang.ExceptionInfo e
+               (:evidence-manifest/refusal (ex-data e))))))
     (is (not (.exists (io/file root (name (:cohort/id (cohort/read-edn prereg-path)))
                                attempt "002-selection.edn"))))))
 

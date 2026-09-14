@@ -9,6 +9,7 @@
             [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.close-retention :as close-retention]
+            [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold :as fold])
   (:import [java.nio.channels FileChannel]
            [java.nio.charset StandardCharsets]
@@ -317,11 +318,22 @@
 
 (defn- event-record [p attempt-id ordinal sequence checkpoint payload]
   (let [recorded-at (str (Instant/now))
-        _ (when (and (not= :closed checkpoint)
+        _ (when (and (not= :closed checkpoint) (map? payload)
+                     (or (contains? payload :retention-inputs)
+                         (contains? payload :evidence-manifest)))
+            (if (contains? payload :evidence-manifest)
+              (throw (ex-info "Evidence manifest marker on non-close checkpoint"
+                              {:evidence-manifest/refusal :retention-marker-misplaced
+                               :checkpoint/type checkpoint}))
+              (throw (ex-info "Close retention marker on non-close checkpoint"
+                              {:close-retention/refusal :retention-marker-misplaced
+                               :checkpoint/type checkpoint}))))
+        _ (when (and (= :closed checkpoint)
                      (map? payload)
-                     (contains? payload :retention-inputs))
-            (throw (ex-info "Close retention marker on non-close checkpoint"
-                            {:close-retention/refusal :retention-marker-misplaced
+                     (contains? payload :evidence-manifest)
+                     (not (contains? payload :retention-inputs)))
+            (throw (ex-info "Evidence manifest requires close retention inputs"
+                            {:evidence-manifest/refusal :manifest-without-retention
                              :checkpoint/type checkpoint})))
         payload (if (and (= :closed checkpoint)
                          (contains? payload :retention-inputs))
@@ -340,10 +352,29 @@
                         retention (close-retention/build-retention-block
                                    (assoc inputs
                                           :closed-at recorded-at
-                                          :evidence-cutoff recorded-at))]
-                    (-> payload
-                        (dissoc :retention-inputs)
-                        (assoc :close-retention retention)))
+                                          :evidence-cutoff recorded-at))
+                        manifest (when (contains? payload :evidence-manifest)
+                                   (evidence-manifest/validate-manifest
+                                    (:evidence-manifest payload)))
+                        _ (when manifest
+                            (evidence-manifest/verify-retention-agreement
+                             manifest retention))
+                        closed-instant (Instant/parse recorded-at)
+                        _ (doseq [[i entry] (map-indexed vector (:entries manifest))]
+                            (let [admitted-at (Instant/parse (:admitted-at entry))]
+                              (when (.isAfter admitted-at closed-instant)
+                                (throw
+                                 (ex-info "Evidence admitted after close"
+                                          {:evidence-manifest/refusal
+                                           :evidence-admitted-after-close
+                                           :path [:entries i :admitted-at]
+                                           :admitted-at (:admitted-at entry)
+                                           :closed-at recorded-at})))))
+                        completed (-> payload
+                                      (dissoc :retention-inputs :evidence-manifest)
+                                      (assoc :close-retention retention))]
+                    (cond-> completed
+                      manifest (assoc :close-evidence-manifest manifest)))
                   payload)]
     {:event/schema-version 1
      :cohort/id (:cohort/id p)
