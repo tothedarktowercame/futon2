@@ -1,0 +1,44 @@
+{:schema :wm/measured-a-annotation-authority-v1
+ :scope :production
+ :rubric
+ {:id :wm/observed-status-rubric-v1-sha256-5999521d6e712db5824412a995287d5f1276dc37d08fe504748879226512e788
+  :version 1
+  :status-support
+  [:spawned :refined :strengthened :addressed :falsified :foreclosed :reopened]
+  :criteria
+  {:spawned :wm/observed-status-spawned-v1
+   :refined :wm/observed-status-refined-v1
+   :strengthened :wm/observed-status-strengthened-v1
+   :addressed :wm/observed-status-addressed-v1
+   :falsified :wm/observed-status-falsified-v1
+   :foreclosed :wm/observed-status-foreclosed-v1
+   :reopened :wm/observed-status-reopened-v1}}
+ :observer
+ {:id "TO-BE-BOUND-BY-A-LABELS-OBSERVER-SEAT"
+  :origin
+  {:schema :wm/measured-a-authority-source-v1
+   :kind :to-be-bound
+   :id "TO-BE-BOUND-INDEPENDENT-OBSERVER-ORIGIN"
+   :bytes "TO-BE-BOUND"
+   :sha256 :to-be-bound}}
+ :reviewer
+ {:id "TO-BE-BOUND-BY-DISTINCT-REVIEWER-SEAT"
+  :authorization
+  {:schema :wm/measured-a-authority-source-v1
+   :kind :to-be-bound
+   :id "TO-BE-BOUND-INDEPENDENT-REVIEWER-AUTHORIZATION"
+   :bytes "TO-BE-BOUND"
+   :sha256 :to-be-bound}}
+ :acceptance
+ {:status :to-be-bound
+  :subject :to-be-bound
+  :subject-sha256 :to-be-bound
+  :observer/id "TO-BE-BOUND-BY-A-LABELS-OBSERVER-SEAT"
+  :reviewer/id "TO-BE-BOUND-BY-DISTINCT-REVIEWER-SEAT"
+  :reviewed-at :to-be-bound
+  :artifact
+  {:schema :wm/measured-a-authority-source-v1
+   :kind :to-be-bound
+   :id "TO-BE-BOUND-EXACT-SUBJECT-ACCEPTANCE"
+   :bytes "TO-BE-BOUND"
+   :sha256 :to-be-bound}}}
