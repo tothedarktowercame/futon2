@@ -19,12 +19,12 @@
    :evidence "runs/categorical-ambiguity-2026-09-14/ACCEPTANCE.md"
    :note "Estimator built and accepted (602ff836/a796f6df); downstream risk-ambiguity-witness still blocked on a-estimate and q-witness-flip."}
   {:node :r10-caller
-   :status :discovery-complete-blocked
+   :status :in-flight
    :at "2026-09-14"
    :seat "codex-24"
-   :job-id "invoke-1789392678103-20785-1c3a7b39"
+   :job-id "invoke-1789399366909-20789-3de411b2"
    :evidence "../../TN-r10-caller-discovery-2026-09-14.md (94bb4126); ACCEPTANCE-r10-discovery.md"
-   :note "Wiring impossible as caller-only edit: dispatch-then-record ordering can refuse after an async click started. Blocked on new node below."}
+   :note "Wiring packet dispatched: commissioned-click! adapter (binding commission -> config evidence store -> busy pre-check -> run-scheduled-dispatch! wrapping dispatch-reserved! wrapping click!) + :r10-commissioned opt-in flag in handle-wm-click-start + reservation-invalid vocabulary fix. No real click; acceptance run spending the commission is operator-lane, after review."}
   {:node :r10-commission-contract
    :status :accepted-built
    :at "2026-09-14"
@@ -33,8 +33,9 @@
    :evidence "futon3c holes/labs/wm-contract/runs/r10-commission-2026-09-14/ACCEPTANCE.md (00be139c); SPEC-r10-click-commission-v1.md"
    :note "NEW node not in dag.edn ec09b980 (fold in at next DAG revision). Contract + mechanism + controls accepted (futon3c 8f844891/cde07d04/17639603). r10-caller wiring now needs: (1) the adoption packet (operator-committed commission file + server-owned binding), (2) the one-behaviour adapter in handle-wm-click-start, with the three integration notes from the acceptance."}
   {:node :r10-adoption
-   :status :in-flight
+   :status :accepted
    :at "2026-09-14"
    :seat "codex-24"
    :job-id "invoke-1789399097848-20788-f05531e2"
-   :note "NEW node (fold in with r10-commission-contract at next DAG revision). Adoption per SPEC v1: commission file r10-click-commission-2026-09-14-01.edn (content fixed verbatim in packet, issuer joe per operator instruction 2026-09-14, source-pin = sha256 of SPEC at 8f844891, single-use scope) + binding ns pinning path/sha/reservation-root, cohort-binding precedent. Wiring adapter packet follows this review."}]}
+   :evidence "futon3c holes/labs/wm-contract/runs/r10-adoption-2026-09-14/ACCEPTANCE.md (1c00f937)"
+   :note "NEW node (fold in with r10-commission-contract at next DAG revision). Commission r10-click-commission-2026-09-14-01 (issuer joe, single-use) + binding ns accepted (futon3c f5b4ceee/d0335fb3). Pinned sha 7c501849... independently recomputed. Commission is live single-use authority; only the wiring acceptance run may spend it."}]}
