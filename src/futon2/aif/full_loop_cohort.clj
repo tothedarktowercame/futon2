@@ -465,8 +465,12 @@
      (when (= :time-step checkpoint)
        (throw (ex-info "time-step is created only by start-attempt!" {})))
      (when-let [errors (seq (checkpoint-cell-errors p checkpoint cell))]
+       ;; :failure-kind types this refusal for the runner's classifier;
+       ;; repair-class-for keeps it :machine-failure (the 2026-09-13
+       ;; fold policy-hole failure landed here as :untyped-failure).
        (throw (ex-info "invalid checkpoint cell"
-                       {:checkpoint checkpoint :errors errors :cell cell})))
+                       {:failure-kind :invalid-checkpoint-cell
+                        :checkpoint checkpoint :errors errors :cell cell})))
      (with-cohort-lock dir
        (fn []
          (when-not (.isDirectory attempt-dir)
@@ -513,9 +517,12 @@
                   (into (checkpoint-cell-errors p :closed cell)
                         (grounded-close-errors cell)))]
      (when-not (grounded-term? cell)
-       (throw (ex-info "close must be a grounded outcome term" {:cell cell})))
+       (throw (ex-info "close must be a grounded outcome term"
+                       {:failure-kind :invalid-close-cell :cell cell})))
      (when (seq missing)
-       (throw (ex-info "required checkpoints missing" {:missing (vec missing)})))
+       (throw (ex-info "required checkpoints missing"
+                       {:failure-kind :required-checkpoints-missing
+                        :missing (vec missing)})))
      (when (seq errors)
        (throw (ex-info "invalid close outcome" {:errors errors})))
      (append-checkpoint! prereg-path data-root attempt-id :closed cell))))

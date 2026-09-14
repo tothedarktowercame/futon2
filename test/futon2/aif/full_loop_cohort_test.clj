@@ -561,3 +561,30 @@
     (spit path (str raw "\n"))
     (is (thrown? clojure.lang.ExceptionInfo (cohort/execution-preflight binding false))))
 )
+
+(deftest invalid-cell-refusals-carry-failure-kind
+  ;; repair-ea1-3f4cac...-untyped-failure: the 2026-09-13 construction
+  ;; failure refused here without :failure-kind and was classified
+  ;; :untyped-failure. Same refusal, now typed; contract unchanged.
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        attempt (:attempt/id (open! root "clock/typed-invalid-cell"))
+        data (fn [f]
+               (try (f) nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (is (= :invalid-checkpoint-cell
+           (:failure-kind
+            (data #(cohort/append-checkpoint!
+                    prereg-path root attempt :construction
+                    {:judgment {:not :a-valid-construction} :ground {:k 1}})))))
+    (is (= :invalid-close-cell
+           (:failure-kind
+            (data #(cohort/close-attempt! prereg-path root attempt
+                                          {:not-a-term true})))))
+    (is (= :required-checkpoints-missing
+           (:failure-kind
+            (data #(cohort/close-attempt!
+                    prereg-path root attempt
+                    (term {:outcome :agent-unavailable :grounded? false
+                           :artifact-only? false :duration-ms 1
+                           :resource-use {:agent-turns 0}}))))))))
