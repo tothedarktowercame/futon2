@@ -4653,3 +4653,78 @@
     (doseq [k [:shape-validation :correspondence-validation]]
       (is (false? (get-in result [k :ok])))
       (is (seq (get-in result [k :findings]))))))
+
+(defn- retention-cohort [prefix]
+  (let [root (.getPath (.toFile
+                        (Files/createTempDirectory prefix (make-array FileAttribute 0))))
+        path (str root "/cohort.edn")]
+    (tiny-target-prereg path)
+    (cohort/activate! path root)
+    {:root root :path path
+     :binding {:preregistration path :data-root root
+               :cohort-id :test-cohort-exhaustion
+               :sha256 (digest/sha256 (slurp path))}}))
+
+(defn- retention-success-opts [{:keys [root binding]}]
+  (merge
+   (isolated-runner-opts)
+   {:cohort? true :execution-cohort binding
+    :run-id "close-retention-success"
+    :repair-open-fn (constantly [])
+    :target-repo-fn (fn [& _] root)
+    :trace-fn (constantly (str root "/trace.edn"))
+    :dispatch-fn (fn [_ agent _ _ _]
+                   {:job-id (if (= agent "zai-5") "retention-author"
+                                "retention-review")})
+    :poll-fn (fn [_ job-id]
+               (if (= job-id "retention-author")
+                 {:job-id job-id :state "done" :artifact-ref "abc123"
+                  :execution successful-execution}
+                 {:job-id job-id :state "done" :execution successful-execution
+                  :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
+    :resolve-build-fn (fn [_] {:repo root :files ["src/retained.clj"]})
+    :ground-fn (fn [& _] {:before nil :after {:id "retained"}
+                           :resolved? true :dial-moved? true
+                           :implementation-id "retained"
+                           :discharge-id "retained-discharge"})}))
+
+(deftest selected-runner-action-is-minted-once-and-returned-from-writer
+  (let [{:keys [root path binding] :as c} (retention-cohort "runner-retention-success")
+        result (runner/run-opportunity! (retention-success-opts c))
+        close-event (cohort/read-edn (io/file root "test-cohort-exhaustion"
+                                              (:attempt-id result) "007-closed.edn"))
+        retained (:close-retention result)
+        occurrence (:occurrence retained)
+        selected (get-in result [:checkpoints :selection :judgment :selected-action])]
+    (is (= selected (:action/value occurrence)))
+    (is (= occurrence
+           (get-in close-event [:payload :close-retention :occurrence])))
+    (is (= retained (get-in close-event [:payload :close-retention])))
+    (is (= :absent (get-in retained [:state :status])))
+    (is (= :absent (get-in retained [:model :status])))
+    (is (= (:recorded-at close-event) (:closed-at retained)))
+    (is (= 1 (:closed-count (cohort/ledger path root))))
+    (let [slot (atom nil)
+          input {:run-id "run" :cohort-id "cohort" :attempt-id "attempt"
+                 :selected-action selected :now #(java.time.Instant/now)
+                 :uuid-fn #(java.util.UUID/randomUUID)}]
+      (is (map? (#'runner/mint-action-occurrence-once! slot input)))
+      (is (= :action-occurrence-already-minted
+             (:close-retention/refusal
+              (try (#'runner/mint-action-occurrence-once! slot input) nil
+                   (catch clojure.lang.ExceptionInfo e (ex-data e)))))))))
+
+(deftest preselection-failure-close-remains-legacy
+  (let [{:keys [root] :as c} (retention-cohort "runner-retention-early")
+        opts (merge (retention-success-opts c)
+                    {:run-id "close-retention-early"
+                     :roster-fn (constantly {})
+                     :repair-system-record-fn
+                     (fn [finding] (assoc finding :repair/id "early-failure"))})
+        result (runner/run-opportunity! opts)
+        close-event (cohort/read-edn (io/file root "test-cohort-exhaustion"
+                                              (:attempt-id result) "007-closed.edn"))]
+    (is (= :agent-unavailable (:outcome result)))
+    (is (not (contains? result :close-retention)))
+    (is (not (contains? (:payload close-event) :close-retention)))
+    (is (not (contains? (:payload close-event) :retention-inputs)))))

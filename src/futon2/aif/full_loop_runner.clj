@@ -15,6 +15,7 @@
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.close-loop :as close-loop]
+            [futon2.aif.close-retention :as close-retention]
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold :as fold]
             [futon2.aif.delivery-qa :as delivery-qa]
@@ -2537,6 +2538,14 @@
          :policy-nondiscrimination :incomplete} raw) :incomplete
       :else raw)))
 
+(defn- mint-action-occurrence-once!
+  [occurrence-atom inputs]
+  (let [occurrence (close-retention/mint-occurrence inputs)]
+    (when-not (compare-and-set! occurrence-atom nil occurrence)
+      (throw (ex-info "Action occurrence already minted for this attempt"
+                      {:close-retention/refusal :action-occurrence-already-minted})))
+    occurrence))
+
 (def ^:private transport-failure-classes
   "Recognised transport conditions, matched by CLASS (most specific first), not
   by exact class name. Name-keyed lookup missed every subclass: it is why
@@ -2769,6 +2778,7 @@
         _ (emit-phase! opts @phase-context {:phase :opportunity :transition :start})
         checkpoints (atom {})
         selected-entity-belief (atom nil)
+        action-occurrence (atom nil)
         pending-selection (atom nil)
         selection-persisted? (atom false)
         dispatched-turns (atom 0)
@@ -3016,7 +3026,8 @@
                                       (str (Instant/now))))
                        outcome-entity (outcome-entity-at-close
                                        @selected-entity-belief close-state)
-                       closed (term (merge {:outcome outcome
+                       closed (cond->
+                               (term (merge {:outcome outcome
                                             :grounded? (= :grounded-change outcome)
                                             :artifact-only? (= :artifact-only outcome)
                                             :outcome-entity outcome-entity
@@ -3026,8 +3037,16 @@
                                             :duration-ms (- (System/currentTimeMillis) started)
                                             :resource-use
                                             {:agent-turns @dispatched-turns}}
-                                           (select-keys data [:witness]))
-                                    {:kind :full-loop-outcome :attempt-id attempt-id})
+                                            (select-keys data [:witness]))
+                                     {:kind :full-loop-outcome :attempt-id attempt-id})
+                                (and cohort? @action-occurrence)
+                                (assoc :retention-inputs
+                                       {:occurrence @action-occurrence
+                                        :state {:status :absent
+                                                :reason :independent-observation-unavailable}
+                                        :model {:status :absent
+                                                :reason :declared-model-identity-unthreaded}
+                                        :admitted-evidence []}))
                        run-route (packet-run-route selection-judgment
                                                    (get-in @checkpoints
                                                            [:selection :ground])
@@ -3036,7 +3055,7 @@
                                                    {:selected-action selected-action
                                                     :requested-pin
                                                     (:run4/requested-pin opts)})
-                       result (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
+                       result-base (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
@@ -3045,11 +3064,16 @@
                                :data data}
                                 execution-identity
                                 (assoc :execution-identity execution-identity
-                                       :execution-provenance execution-provenance))]
-                   (when cohort?
-                     (if cohort-source
-                       (cohort/close-attempt! cohort-source (:data-root execution-cohort) attempt-id closed)
-                       (cohort/close-attempt! attempt-id closed)))
+                                       :execution-provenance execution-provenance))
+                       closed-event
+                       (when cohort?
+                         (if cohort-source
+                           (cohort/close-attempt! cohort-source
+                                                  (:data-root execution-cohort)
+                                                  attempt-id closed)
+                           (cohort/close-attempt! attempt-id closed)))
+                       retained (get-in closed-event [:payload :close-retention])
+                       result (cond-> result-base retained (assoc :close-retention retained))]
                    (if-let [path (:canary-out opts)]
                      (do (io/make-parents path)
                          (spit path (with-out-str (pp/pprint result))))
@@ -3313,6 +3337,16 @@
                            :target target
                            :selected-entry entry
                            :discrimination discrimination})))
+        (mint-action-occurrence-once!
+         action-occurrence
+         {:run-id (:run-id opts)
+          :cohort-id (str (or (:cohort/id start-event)
+                              (:cohort-id execution-cohort)
+                              "non-cohort"))
+          :attempt-id attempt-id
+          :selected-action (:action entry)
+          :now #(Instant/now)
+          :uuid-fn #(UUID/randomUUID)})
         (let [{:keys [mission construction]}
               (run-phase! opts @phase-context :construction
                           #(hash-map
