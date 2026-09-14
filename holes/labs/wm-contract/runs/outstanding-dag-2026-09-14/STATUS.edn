@@ -66,8 +66,9 @@
    :evidence "../../TN-close-retention-discovery-2026-09-14.md (cffa43d1); ACCEPTANCE-close-retention-discovery.md (b452f71f); ../close-retention-2026-09-14/ACCEPTANCE.md (4e5338f6); ../close-retention-writer-2026-09-14/ACCEPTANCE.md (88776683); ../close-retention-runner-2026-09-14/ACCEPTANCE.md (33754463)"
    :note "NEW node (fold into next DAG revision between a-rubric and a-labels). COMPLETE: contract (0103c396/0db7de6c), writer slice (8864fecf/febc8930 + reviewer fix b0da1087), runner slice (2b1f7af3/9c877fbd). Every new cohort close after successful selection carries a validated conditioning block (occurrence + typed-absent state/model + closed-at = cutoff); post-selection failures retain too; pre-selection failures stay legacy. Production pickup when loop JVMs restart from current main. Status arm still needs a-labels; retained cutoff makes retrospective annotation on NEW closes possible."}
   {:node :a-labels
-   :status :discovery-in-flight
+   :status :design-accepted-in-progress
    :at "2026-09-14"
    :seat "codex-22"
    :job-id "invoke-1789403285979-20796-9332ef6c"
-   :note "Design discovery: retrospective annotation route on new retention-bearing closes (per-status feasibility for the 3 grounded statuses), admitted-evidence candidates, observer/reviewer/acceptance binding order, smallest workflow to annotation #1, leakage hazards. Rubric author codex-23 excluded from observing; claude-15 reviews."}]}
+   :evidence "../../TN-a-labels-design-2026-09-14.md (1bfb6b89); ACCEPTANCE-a-labels-design.md (a17b55fa)"
+   :note "Design accepted: retrospective route, :addressed is annotation-#1 target, observer blinding + pre-reveal eligibility discipline, six-step workflow adopted. Step 1 in flight (evidence-manifest spec+mechanism, codex-24, invoke-1789403590926-20797-d23452d9); then runner/writer seam; then authority packet (lead drafts observer-origin + reviewer-authorization citing LEAD-DECISIONS-2026-09-12.md:184-195 as charter; proposed observer codex-25; Joe veto point); then one-close preparation, one authorized run, blind observation, exact-subject review."}]}
