@@ -4053,7 +4053,7 @@
                               ((or (:dispatch-fn opts) dispatch!)
                                opts reviewer "wm-full-loop" target
                                (standing-completion-prompt
-                                target attempt-evidence-dir))))) ]
+                                target attempt-evidence-dir))))]
                       (try
                         (run-phase!
                          opts @phase-context :standing-completion-wait
