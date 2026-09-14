@@ -16,6 +16,7 @@
             [futon2.aif.c-vector :as cv]
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
+            [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold :as fold]
             [futon2.aif.delivery-qa :as delivery-qa]
@@ -30,7 +31,8 @@
             [futon2.aif.tripwire :as tripwire]
             [futon2.report.cascade-lane :as cascade]
             [futon2.report.war-machine :as wm])
-  (:import [java.security MessageDigest]
+  (:import [java.nio.file Files]
+           [java.security MessageDigest]
            [java.time Instant]
            [java.util UUID]
            [java.util.concurrent Executors ThreadFactory]))
@@ -2546,6 +2548,23 @@
                       {:close-retention/refusal :action-occurrence-already-minted})))
     occurrence))
 
+(defn- checkpoint-evidence-manifest
+  [events data-root cohort-id attempt-id]
+  (let [cohort-name (name cohort-id)
+        ordered-events (sort-by :event/sequence (vals events))
+        entries
+        (mapv (fn [{:keys [event/sequence checkpoint/type]}]
+                (let [filename (format "%03d-%s.edn" sequence (name type))]
+                  {:evidence/id (str cohort-name "/" attempt-id "/" filename)
+                   :source-path (.getAbsolutePath
+                                 (io/file data-root cohort-name attempt-id filename))
+                   :admitted-at (str (Instant/now))}))
+              ordered-events)]
+    (evidence-manifest/build-manifest
+     {:entries entries
+      :read-bytes (fn [path]
+                    (Files/readAllBytes (.toPath (io/file path))))})))
+
 (def ^:private transport-failure-classes
   "Recognised transport conditions, matched by CLASS (most specific first), not
   by exact class name. Name-keyed lookup missed every subclass: it is why
@@ -2777,6 +2796,7 @@
         phase-context (atom {:opportunity-id opportunity-id :trigger trigger})
         _ (emit-phase! opts @phase-context {:phase :opportunity :transition :start})
         checkpoints (atom {})
+        checkpoint-events (atom {})
         selected-entity-belief (atom nil)
         action-occurrence (atom nil)
         pending-selection (atom nil)
@@ -2830,6 +2850,8 @@
                       (if cohort-source
                         (cohort/start-attempt! cohort-source (:data-root execution-cohort) time-cell)
                         (cohort/start-attempt! time-cell)))
+        _ (when start-event
+            (swap! checkpoint-events assoc :time-step start-event))
         attempt-id (or (:attempt/id start-event)
                        (str "canary-" (UUID/randomUUID)))
         execution-identity (when execution-authority
@@ -2845,10 +2867,13 @@
                       ;; event as the durable cohort.  Never publish it before
                       ;; an enabled durable append has succeeded.
                       (when cohort?
-                        (if cohort-source
-                          (cohort/append-checkpoint! cohort-source (:data-root execution-cohort)
-                                                     attempt-id checkpoint cell)
-                          (cohort/append-checkpoint! attempt-id checkpoint cell)))
+                        (let [event (if cohort-source
+                                      (cohort/append-checkpoint!
+                                       cohort-source (:data-root execution-cohort)
+                                       attempt-id checkpoint cell)
+                                      (cohort/append-checkpoint!
+                                       attempt-id checkpoint cell))]
+                          (swap! checkpoint-events assoc checkpoint event)))
                       (swap! checkpoints assoc checkpoint cell)
                       cell)
         persist-selection!
@@ -2860,11 +2885,13 @@
                                  trace-path (assoc :trace-path trace-path)))]
               (swap! checkpoints assoc :selection cell)
               (when cohort?
-                (if cohort-source
-                  (cohort/append-checkpoint! cohort-source
-                                             (:data-root execution-cohort)
-                                             attempt-id :selection cell)
-                  (cohort/append-checkpoint! attempt-id :selection cell)))
+                (let [event (if cohort-source
+                              (cohort/append-checkpoint!
+                               cohort-source (:data-root execution-cohort)
+                               attempt-id :selection cell)
+                              (cohort/append-checkpoint!
+                               attempt-id :selection cell))]
+                  (swap! checkpoint-events assoc :selection event)))
               (reset! selection-persisted? true)))
           (get @checkpoints :selection))
         close! (fn [outcome data]
@@ -3026,6 +3053,14 @@
                                       (str (Instant/now))))
                        outcome-entity (outcome-entity-at-close
                                        @selected-entity-belief close-state)
+                       manifest (when (and cohort? @action-occurrence)
+                                  (checkpoint-evidence-manifest
+                                   @checkpoint-events
+                                   (or (:data-root execution-cohort)
+                                       cohort/default-data-root)
+                                   (:cohort/id start-event)
+                                   attempt-id))
+                       admitted-ids (mapv :evidence/id (:entries manifest))
                        closed (cond->
                                (term (merge {:outcome outcome
                                             :grounded? (= :grounded-change outcome)
@@ -3046,7 +3081,8 @@
                                                 :reason :independent-observation-unavailable}
                                         :model {:status :absent
                                                 :reason :declared-model-identity-unthreaded}
-                                        :admitted-evidence []}))
+                                        :admitted-evidence admitted-ids}
+                                       :evidence-manifest manifest))
                        run-route (packet-run-route selection-judgment
                                                    (get-in @checkpoints
                                                            [:selection :ground])
@@ -3073,7 +3109,12 @@
                                                   attempt-id closed)
                            (cohort/close-attempt! attempt-id closed)))
                        retained (get-in closed-event [:payload :close-retention])
-                       result (cond-> result-base retained (assoc :close-retention retained))]
+                       retained-manifest
+                       (get-in closed-event [:payload :close-evidence-manifest])
+                       result (cond-> result-base
+                                retained (assoc :close-retention retained)
+                                retained-manifest
+                                (assoc :close-evidence-manifest retained-manifest))]
                    (if-let [path (:canary-out opts)]
                      (do (io/make-parents path)
                          (spit path (with-out-str (pp/pprint result))))

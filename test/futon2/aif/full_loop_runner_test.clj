@@ -4694,12 +4694,28 @@
         close-event (cohort/read-edn (io/file root "test-cohort-exhaustion"
                                               (:attempt-id result) "007-closed.edn"))
         retained (:close-retention result)
+        manifest (:close-evidence-manifest result)
         occurrence (:occurrence retained)
         selected (get-in result [:checkpoints :selection :judgment :selected-action])]
     (is (= selected (:action/value occurrence)))
     (is (= occurrence
            (get-in close-event [:payload :close-retention :occurrence])))
     (is (= retained (get-in close-event [:payload :close-retention])))
+    (is (= manifest (get-in close-event [:payload :close-evidence-manifest])))
+    (let [expected-ids (mapv #(format "test-cohort-exhaustion/%s/%03d-%s.edn"
+                                      (:attempt-id result) %1 (name %2))
+                             (range 1 7)
+                             [:time-step :selection :construction
+                              :dispatch :build :adjudication])]
+      (is (= expected-ids (mapv :evidence/id (:entries manifest))))
+      (is (= expected-ids (:admitted-evidence retained))))
+    (doseq [entry (:entries manifest)]
+      (let [bytes (Files/readAllBytes (.toPath (io/file (:source-path entry))))
+            digest (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)
+            actual (apply str (map #(format "%02x" (bit-and 0xff %)) digest))]
+        (is (= actual (:sha256 entry)))
+        (is (not (.isAfter (java.time.Instant/parse (:admitted-at entry))
+                           (java.time.Instant/parse (:recorded-at close-event)))))))
     (is (= :absent (get-in retained [:state :status])))
     (is (= :absent (get-in retained [:model :status])))
     (is (= (:recorded-at close-event) (:closed-at retained)))
@@ -4726,5 +4742,27 @@
                                               (:attempt-id result) "007-closed.edn"))]
     (is (= :agent-unavailable (:outcome result)))
     (is (not (contains? result :close-retention)))
+    (is (not (contains? result :close-evidence-manifest)))
     (is (not (contains? (:payload close-event) :close-retention)))
+    (is (not (contains? (:payload close-event) :close-evidence-manifest)))
     (is (not (contains? (:payload close-event) :retention-inputs)))))
+
+(deftest unreadable-sibling-refuses-retained-close
+  (let [{:keys [root] :as c} (retention-cohort "runner-manifest-unreadable")
+        close-path (io/file root "test-cohort-exhaustion" "attempt-001"
+                            "007-closed.edn")
+        construction-path (io/file root "test-cohort-exhaustion" "attempt-001"
+                                   "003-construction.edn")
+        opts (assoc (retention-success-opts c)
+                    :delivery-qa-fn
+                    (fn [_ item]
+                      (is (.delete construction-path))
+                      {:morning-brief/addendum-id
+                       (str "qa-" (:attempt-id item))}))]
+    (is (= :source-unavailable
+           (try
+             (runner/run-opportunity! opts)
+             nil
+             (catch clojure.lang.ExceptionInfo e
+               (:evidence-manifest/refusal (ex-data e))))))
+    (is (not (.exists close-path)))))
