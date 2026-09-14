@@ -2308,20 +2308,30 @@
     (is (false? (:disagreement? binding)))))
 
 (deftest artifact-binding-requires-a-resolvable-matching-claim
+  ;; Round-2 contract change (repair-ea1-3f4cac): a claim that resolves as a
+  ;; fresh descendant of the base and lies in the observed history
+  ;; CORROBORATES even when concurrent commits moved HEAD past it -- that is
+  ;; the author's genuine artifact. Only unresolvable or absent claims
+  ;; mismatch; the concurrent-head shape itself no longer fails the author.
   (let [opts {:repo-head-observation-fn
               (fn [repo] {:repo repo :head "concurrent-head" :observed-at-ms 2000})
               :ancestor-fn (constantly true)
               :commit-time-ms-fn (constantly 1500)
               :resolve-commit-sha-fn (fn [_ ref] (when (= ref "author-sha") "author-head"))}
         before {:head "base" :observed-at-ms 1000}]
-    (doseq [claim [nil "unresolvable" "author-sha"]]
+    (doseq [claim [nil "unresolvable"]]
       (let [failure (try
                       (runner/fresh-artifact-binding opts "/repo" before {:artifact-ref claim})
                       nil
                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
         (is (= :artifact-binding-mismatch (:failure-kind failure)))
         (is (= "concurrent-head" (get-in failure [:artifact-binding :observed-head])))
-        (is (nil? (get-in failure [:artifact-binding :commit])))))))
+        (is (nil? (get-in failure [:artifact-binding :commit])))))
+    (let [binding (runner/fresh-artifact-binding
+                   opts "/repo" before {:artifact-ref "author-sha"})]
+      (is (:corroborates? binding)
+          "a resolvable in-history claim corroborates despite a moved HEAD")
+      (is (= "author-head" (:commit binding))))))
 
 (deftest narrated-artifact-without-new-repo-head-stops-before-review
   (let [dispatches (atom [])
@@ -4890,6 +4900,50 @@
           (is @core-ran "the core actually ran")
           (is (true? @registration-before-core?)
               "seat registration happens before the core starts"))))))
+
+(deftest authors-claimed-commit-corroborates-when-later-commits-move-head
+  ;; Round-2 review of repair-ea1-3f4cac: the mismatch guard was unchanged,
+  ;; so an author's genuine commit still mismatched whenever anything moved
+  ;; HEAD past it (concurrent machinery deposits, revision bookkeeping).
+  ;; The claim corroborates when it resolves as a fresh descendant of the
+  ;; pre-dispatch head AND is an ancestor of the observed head; a claim of
+  ;; the base, or a sha unrelated to the history, never corroborates.
+  (let [ancestor-relations #{["aaa1111" "bbb2222"]
+                             ["aaa1111" "ccc3333"]
+                             ["bbb2222" "ccc3333"]}
+        opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head "ccc3333" :observed-at-ms 2000})
+              :resolve-commit-sha-fn
+              (fn [_ commit] (when (#{"bbb2222" "aaa1111" "ccc3333"} commit) commit))
+              :ancestor-fn (fn [_ a d] (contains? ancestor-relations [a d]))
+              :commit-time-ms-fn (fn [_ _] 1500)}
+        before {:repo "/repo" :head "aaa1111" :observed-at-ms 1000}
+        claim-reply (str "Parcel committed as the author's amendment.\n"
+                         "FULL_LOOP_AUTHOR: DONE bbb2222")
+        base-reply (str "Prose mentioning the base.\n"
+                        "FULL_LOOP_AUTHOR: DONE aaa1111")
+        unrelated-reply (str "An unrelated sha.\n"
+                             "FULL_LOOP_AUTHOR: DONE dead444")
+        claimed (runner/fresh-artifact-binding
+                 opts "/repo" before
+                 {:events [{:type "text" :text claim-reply}]})]
+    (is (:corroborates? claimed)
+        "the author's own commit corroborates even when HEAD moved past it")
+    (is (= "bbb2222" (:commit claimed))
+        "the corroborated commit is the claim, not the moved HEAD")
+    (is (not (:disagreement? claimed)))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"disagrees with observed repository HEAD"
+                          (runner/fresh-artifact-binding
+                           opts "/repo" before
+                           {:events [{:type "text" :text base-reply}]}))
+        "claiming the pre-dispatch base never corroborates")
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"disagrees with observed repository HEAD"
+                          (runner/fresh-artifact-binding
+                           opts "/repo" before
+                           {:events [{:type "text" :text unrelated-reply}]}))
+        "a claim outside the history never corroborates")))
 
 (deftest attempt-limb-evidence-follows-checkpoints-in-manifest
   (let [{:keys [root] :as c} (retention-cohort "runner-limb-evidence")

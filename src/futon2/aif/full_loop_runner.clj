@@ -146,10 +146,12 @@
                         :delivery-mode "inbox"})
                 :timeout 2000
                 :throw false})
-    (catch Throwable t
-      (binding [*out* *err*]
-        (println "[wm-full-loop] dispatch-seat registration failed:"
-                 (.getMessage t))))))
+    (catch Throwable _
+      ;; A connection failure is the normal condition of a lap or test
+      ;; without a live Agency (round-2 review: the port-1 run printed one
+      ;; line per test); only a REACHABLE endpoint answering badly is
+      ;; worth stderr.
+      nil)))
 
 (defn- report-wm-phase!
   [opts context event]
@@ -593,7 +595,22 @@
                                     (+ end-ms artifact-window-tolerance-ms)))
                 observed-valid? (and changed? descendant? in-window?)
                 text-sha (resolve-commit-sha opts repo text-ref)
-                corroborates? (and observed-valid? text-sha (= observed-head text-sha))]
+                ;; A claimed commit corroborates when it IS the observed
+                ;; head, or when it is the author's own commit that later
+                ;; commits (concurrent machinery deposits, revision-round
+                ;; bookkeeping) have moved HEAD past. The claim must still
+                ;; be a fresh descendant of the pre-dispatch head -- a claim
+                ;; naming the base or an unrelated sha never corroborates,
+                ;; so the guard stays fail-closed (review round 2 of
+                ;; repair-ea1-3f4cac: the unchanged guard was the finding).
+                claim-descendant?
+                (and text-sha
+                     (not= text-sha before-head)
+                     (ancestor? opts repo before-head text-sha))
+                corroborates? (and observed-valid? claim-descendant?
+                                    (or (= observed-head text-sha)
+                                        (ancestor? opts repo text-sha
+                                                  observed-head)))]
             {:fresh-author? true
              :repo repo
              :pre-dispatch-head before-head
@@ -607,7 +624,7 @@
              :in-author-window? (boolean in-window?)
              :corroborates? (boolean corroborates?)
              :disagreement? (and observed-valid? (not corroborates?))
-             :commit (when corroborates? observed-head)}))]
+             :commit (when corroborates? (or text-sha observed-head))}))]
     (when (:disagreement? binding)
       (throw (ex-info "Author commit claim disagrees with observed repository HEAD"
                       {:outcome :build-failed
