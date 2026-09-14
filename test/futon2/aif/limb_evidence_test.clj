@@ -121,6 +121,35 @@
          (refusal #(limb/validate-standing-decision
                     (assoc standing :explanation "still live"))))))
 
+(deftest revision-pair-companion-bytes-are-pinned
+  (let [before (.getBytes "before bytes" "UTF-8")
+        after (.getBytes "after bytes changed" "UTF-8")
+        pair {:schema :wm/entity-revision-pair-v1 :entity/id "entity-1"
+              :before {:file "runner.before" :sha256 (sha256 before)
+                       :bytes (alength before)}
+              :after {:file "runner.after" :sha256 (sha256 after)
+                      :bytes (alength after)}
+              :dimensions {:insertions 1 :deletions 0 :commit "abc123"}}
+        reads {"runner.before" before "runner.after" after}]
+    (is (= pair (limb/validate-revision-pair-files pair reads)))
+    (is (= :output-digest-mismatch
+           (refusal #(limb/validate-revision-pair-files
+                      pair (assoc reads "runner.after"
+                                  (.getBytes "tampered" "UTF-8"))))))
+    (is (= :output-file-invalid
+           (refusal #(limb/validate-revision-pair-files
+                      (assoc-in pair [:before :file] "nested/runner.before")
+                      reads))))))
+
+(deftest cohort-53-revision-companion-live-pins
+  (let [root "/home/joe/code/futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-001/evidence"
+        pinned {"runner.before" "cdfef17652ee498875b846bf39e0a95ef892df22f48ed166303927a1715ff995"
+                "runner.after" "f6238a7da08bde85e37f12490e0a1202eaccc139bbf5fd1f69942076e4bc4115"}]
+    (doseq [[filename expected] pinned]
+      (is (= expected
+             (sha256 (java.nio.file.Files/readAllBytes
+                      (.toPath (java.io.File. root filename)))))))))
+
 (deftest bundle-reports-covered-and-absent-limbs
   (let [review-receipt (assoc receipt
                               :limb :independent-review

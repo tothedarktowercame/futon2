@@ -134,10 +134,19 @@
   record)
 
 (defn- validate-capture [capture path]
-  (exact-map! capture #{:source-path :sha256 :captured-at} path)
-  (text! (:source-path capture) (conj path :source-path))
-  (sha256! (:sha256 capture) (conj path :sha256))
-  (instant! (:captured-at capture) (conj path :captured-at))
+  (cond
+    (= #{:source-path :sha256 :captured-at} (set (keys capture)))
+    (do (text! (:source-path capture) (conj path :source-path))
+        (sha256! (:sha256 capture) (conj path :sha256))
+        (instant! (:captured-at capture) (conj path :captured-at)))
+
+    (= #{:file :sha256 :bytes} (set (keys capture)))
+    (do (output-file! (:file capture) (conj path :file))
+        (sha256! (:sha256 capture) (conj path :sha256))
+        (when-not (and (int? (:bytes capture)) (not (neg? (:bytes capture))))
+          (refuse! :output-file-invalid (conj path :bytes))))
+
+    :else (refuse! :shape-invalid path))
   capture)
 
 (defn validate-revision-pair [record]
@@ -153,16 +162,40 @@
     (refuse! :revision-unchanged [:revision-pair]))
   ;; The rubric requires the after revision to FOLLOW the before revision;
   ;; equal or inverted capture instants would let a stale pair pose as one.
-  (let [before-at (Instant/parse (get-in record [:before :captured-at]))
-        after-at (Instant/parse (get-in record [:after :captured-at]))]
-    (when-not (.isBefore before-at after-at)
-      (refuse! :revision-order-invalid [:revision-pair :after :captured-at]
-               {:before (str before-at) :after (str after-at)})))
-  (when-not (and (vector? (:dimensions record)) (seq (:dimensions record)))
+  (when (and (get-in record [:before :captured-at])
+             (get-in record [:after :captured-at]))
+    (let [before-at (Instant/parse (get-in record [:before :captured-at]))
+          after-at (Instant/parse (get-in record [:after :captured-at]))]
+      (when-not (.isBefore before-at after-at)
+        (refuse! :revision-order-invalid [:revision-pair :after :captured-at]
+                 {:before (str before-at) :after (str after-at)}))))
+  (when-not (or (and (vector? (:dimensions record)) (seq (:dimensions record)))
+                (and (map? (:dimensions record)) (seq (:dimensions record))))
     (refuse! :dimensions-invalid [:revision-pair :dimensions]))
-  (doseq [[i dimension] (map-indexed vector (:dimensions record))]
-    (keyword! dimension [:revision-pair :dimensions i]))
+  (when (vector? (:dimensions record))
+    (doseq [[i dimension] (map-indexed vector (:dimensions record))]
+      (keyword! dimension [:revision-pair :dimensions i])))
   record)
+
+(defn validate-revision-pair-files
+  "Verify companion bytes named by a file-backed entity revision pair."
+  [pair read-bytes]
+  (validate-revision-pair pair)
+  (doseq [side [:before :after]]
+    (let [{:keys [file sha256 bytes]} (get pair side)]
+      (when-not file
+        (refuse! :output-file-invalid [:revision-pair side :file]))
+      (let [actual-bytes (try (read-bytes file)
+                              (catch Throwable _ nil))]
+        (when-not (instance? (Class/forName "[B") actual-bytes)
+          (refuse! :output-file-invalid [:revision-pair side :file]))
+        (let [actual-sha (sha256-bytes actual-bytes)
+              actual-count (alength ^bytes actual-bytes)]
+          (when-not (and (= sha256 actual-sha) (= bytes actual-count))
+            (refuse! :output-digest-mismatch [:revision-pair side]
+                     {:expected-sha256 sha256 :actual-sha256 actual-sha
+                      :expected-bytes bytes :actual-bytes actual-count}))))))
+  pair)
 
 (defn validate-record [record]
   (case (:schema record)

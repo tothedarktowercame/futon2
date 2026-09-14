@@ -2802,7 +2802,14 @@
                         (get-in % [:parsed :value]))
                       record-captures)
         companion-names
-        (into #{} (mapcat #(keep % [:stdout-file :stderr-file])) records)
+        (into #{}
+              (mapcat (fn [record]
+                        (concat (keep record [:stdout-file :stderr-file])
+                                (when (= :wm/entity-revision-pair-v1
+                                         (:schema record))
+                                  (keep #(get-in record [% :file])
+                                        [:before :after])))))
+              records)
         captures-by-name (into {} (map (juxt :filename :bytes)) captured-evidence)
         _ (doseq [{:keys [filename parsed]} captured-evidence
                   :when (and (not (contains? companion-names filename))
@@ -2816,6 +2823,9 @@
         _ (doseq [receipt (filter #(= :wm/limb-receipt-v1 (:schema %)) records)]
             (limb-evidence/validate-limb-receipt-outputs
              receipt #(get captures-by-name %)))
+        _ (doseq [pair (filter #(= :wm/entity-revision-pair-v1 (:schema %)) records)]
+            (limb-evidence/validate-revision-pair-files
+             pair #(get captures-by-name %)))
         evidence-entries
         (mapv (fn [{:keys [filename path admitted-at]}]
                 {:evidence/id (str cohort-name "/" attempt-id "/evidence/" filename)

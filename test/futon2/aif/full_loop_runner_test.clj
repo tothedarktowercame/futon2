@@ -4877,6 +4877,8 @@
 
 (def limb-stdout-bytes (.getBytes "runner command stdout\n" "UTF-8"))
 (def limb-stderr-bytes (.getBytes "runner command stderr\n" "UTF-8"))
+(def revision-before-bytes (.getBytes "revision before\n" "UTF-8"))
+(def revision-after-bytes (.getBytes "revision after changed\n" "UTF-8"))
 
 (defn- runner-test-sha256 [bytes]
   (let [digest (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)]
@@ -4899,11 +4901,13 @@
      :evidence ["record-1"]}]
    ["03-revision.edn"
     {:schema :wm/entity-revision-pair-v1 :entity/id "entity-1"
-     :before {:source-path "/before.edn" :sha256 limb-sha-a
-              :captured-at "2026-09-14T11:00:00Z"}
-     :after {:source-path "/after.edn" :sha256 limb-sha-b
-             :captured-at "2026-09-14T12:00:00Z"}
-     :dimensions [:implementation]}]])
+     :before {:file "00-revision.before"
+              :sha256 (runner-test-sha256 revision-before-bytes)
+              :bytes (alength revision-before-bytes)}
+     :after {:file "00-revision.after"
+             :sha256 (runner-test-sha256 revision-after-bytes)
+             :bytes (alength revision-after-bytes)}
+     :dimensions {:insertions 1 :deletions 0 :commit "abc123"}}]])
 
 (deftest wm-full-loop-registers-its-dispatch-seat-before-running
   ;; 2026-09-13 attempt-002 of repair-ea1-3f4cac: the author job's terminal
@@ -4982,6 +4986,12 @@
                       (spit (io/file root "test-cohort-exhaustion" "attempt-001"
                                      "evidence" "00-command.stderr")
                             (String. limb-stderr-bytes "UTF-8"))
+                      (spit (io/file root "test-cohort-exhaustion" "attempt-001"
+                                     "evidence" "00-revision.before")
+                            (String. revision-before-bytes "UTF-8"))
+                      (spit (io/file root "test-cohort-exhaustion" "attempt-001"
+                                     "evidence" "00-revision.after")
+                            (String. revision-after-bytes "UTF-8"))
                       (doseq [[filename value] valid-attempt-evidence]
                         (write-attempt-evidence! root filename value))
                       {:morning-brief/addendum-id
@@ -4989,10 +4999,10 @@
         result (runner/run-opportunity! opts)
         manifest (:close-evidence-manifest result)
         ids (mapv :evidence/id (:entries manifest))]
-    (is (= 11 (count ids)))
+    (is (= 13 (count ids)))
     (is (= (mapv #(str "test-cohort-exhaustion/attempt-001/evidence/" (first %))
                   valid-attempt-evidence)
-           (subvec ids 8)))
+           (subvec ids 10)))
     (is (= ids (get-in result [:close-retention :admitted-evidence])))
     (doseq [entry (drop 6 (:entries manifest))]
       (let [bytes (Files/readAllBytes (.toPath (io/file (:source-path entry))))
