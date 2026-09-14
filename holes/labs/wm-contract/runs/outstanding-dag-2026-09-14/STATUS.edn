@@ -50,7 +50,7 @@
    :seat "codex-24"
    :job-id "invoke-1789402498124-20794-75f0caf0"
    :evidence "../../TN-close-retention-discovery-2026-09-14.md (cffa43d1); ACCEPTANCE-close-retention-discovery.md (b452f71f); ../close-retention-2026-09-14/ACCEPTANCE.md (4e5338f6); SPEC-close-retention-v1.md"
-   :note "NEW node (fold into next DAG revision between a-rubric and a-labels). Contract accepted (0103c396/0db7de6c/5f4ab866): pure occurrence/retention mechanism with coercion+freeze refusals. Wiring slice 1 of 2 in flight: cohort WRITER completes the block with its own :recorded-at (closed-at = cutoff), stop-the-line refusal before durable append, additive-only for cells without :retention-inputs. Slice 2 (runner mint+thread, full_loop_runner.clj) follows that review."}]}
+   :note "NEW node (fold into next DAG revision between a-rubric and a-labels). Contract accepted (0103c396/0db7de6c/5f4ab866). Writer slice accepted (8864fecf/febc8930 + reviewer fix b0da1087 refusing misplaced markers; ACCEPTANCE 88776683): writer completes block with its own :recorded-at, refuses before durable append, additive for legacy cells. Runner slice 2 of 2 in flight (job invoke-1789402815232-20795-2ab3f63b): mint occurrence at selection boundary, thread :retention-inputs with typed-absent state/model to close!, early-failure closes stay legacy, stop discarding writer return."}]}
   {:node :r10-commission-contract
    :status :accepted-built
    :at "2026-09-14"
