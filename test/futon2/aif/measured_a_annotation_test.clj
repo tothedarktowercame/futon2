@@ -79,7 +79,7 @@
     (testing "missing authority stays absent"
       (is (= :authority-missing (reason a nil))))
     (testing "borrowed acceptance"
-      (let [[other other-au] (fixture)
+      (let [[other _] (fixture)
             borrowed (assoc other :annotation/id "other-annotation")]
         (is (= :acceptance-subject-mismatch (reason a (authority borrowed))))))
     (testing "candidate-forged identity"
@@ -92,7 +92,7 @@
                           (assoc-in [:rubric :criterion/id]
                                     (get-in au [:rubric :criteria :refined]))
                           (assoc-in [:evidence 0 :supports] [:refined]))]
-        (is (= :acceptance-subject-mismatch (reason rewritten au))))
+        (is (= :acceptance-subject-mismatch (reason rewritten au)))))
     (testing "source bytes are recomputed"
       (is (= :source-byte-hash-mismatch
              (reason a (assoc-in au [:observer :origin :bytes] "forged")))))))
