@@ -820,7 +820,7 @@
       "flag": "hidden-prereq",
       "paper-anchor": "--",
       "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:196",
-      "state": "unbuilt",
+      "state": "done",
       "evidence": [
         {
           "source": "decisions",
@@ -832,7 +832,7 @@
         }
       ],
       "work-kind": "code",
-      "state-note": "Categorical choice is already ruled; Gaussian remains a separate diagnostic. Interface/code work is unblocked, production witness is downstream."
+      "state-note": "DONE 2026-09-14: categorical R5 ambiguity estimator implemented (codex-22, 602ff836: sum_s Q(s)*H[A(o|s)], fail-closed refusals incl. :authority-unlicensed) and independently accepted by claude-15 (runs/categorical-ambiguity-2026-09-14/ACCEPTANCE.md; receipts a796f6df). Landed after this snapshot was cut; the 22:05 re-dispatch was detected as a duplicate by codex-23 with zero edits."
     },
     {
       "id": "risk-ambiguity-witness",
