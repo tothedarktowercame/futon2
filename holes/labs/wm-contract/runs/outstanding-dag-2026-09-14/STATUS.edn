@@ -1,0 +1,25 @@
+;; Node-status ledger over dag.edn (ec09b980). Records only CHANGES since
+;; the DAG snapshot; a node absent here has the :state recorded in dag.edn.
+;; Updated by the execution lead (claude-15) at each durable acceptance or
+;; dispatch. This is the orchestration state a future DAG-walker resumes
+;; from (Joe's ruling 2026-09-14: manual dispatches for now, walker later).
+{:schema :wm/dag-status-ledger-v1
+ :dag-commit "ec09b980"
+ :entries
+ [{:node :a-validator
+   :status :accepted
+   :at "2026-09-14"
+   :evidence "runs/row-14-measured-a-validator-2026-09-14/ACCEPTANCE.md"
+   :note "Both codex-23 parcels reviewed and accepted; frontier item 1 discharged."}
+  {:node :categorical-ambiguity
+   :status :in-flight
+   :at "2026-09-14"
+   :seat "codex-22"
+   :job-id "invoke-1789392677113-20784-4024e143"
+   :note "Implementation packet: pure estimator, interface only, no wiring, no A content."}
+  {:node :r10-caller
+   :status :discovery-in-flight
+   :at "2026-09-14"
+   :seat "codex-24"
+   :job-id "invoke-1789392678103-20785-1c3a7b39"
+   :note "Discovery only, row-14-style: enumerate callers, hidden authorities, refusal-control coverage before any wiring packet."}]}
