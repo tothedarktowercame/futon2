@@ -19,12 +19,12 @@
    :evidence "runs/categorical-ambiguity-2026-09-14/ACCEPTANCE.md"
    :note "Estimator built and accepted (602ff836/a796f6df); downstream risk-ambiguity-witness still blocked on a-estimate and q-witness-flip."}
   {:node :r10-caller
-   :status :in-flight
+   :status :accepted-built
    :at "2026-09-14"
    :seat "codex-24"
    :job-id "invoke-1789399366909-20789-3de411b2"
-   :evidence "../../TN-r10-caller-discovery-2026-09-14.md (94bb4126); ACCEPTANCE-r10-discovery.md"
-   :note "Wiring packet dispatched: commissioned-click! adapter (binding commission -> config evidence store -> busy pre-check -> run-scheduled-dispatch! wrapping dispatch-reserved! wrapping click!) + :r10-commissioned opt-in flag in handle-wm-click-start + reservation-invalid vocabulary fix. No real click; acceptance run spending the commission is operator-lane, after review."}
+   :evidence "futon3c holes/labs/wm-contract/runs/r10-wiring-2026-09-14/ACCEPTANCE.md (32e41dbb)"
+   :note "Wiring accepted (futon3c df0e47fb/a7a75861/7747d6e7 + reviewer fix 8331de51: refuse :r10-commissioned combined with :run4-pin-ref). Commissioned path live in code, NOT in the serving JVM yet. Downstream r10-record needs the operator-lane acceptance run: reload serving JVM from master, POST wm-click-start with ONLY {:r10-commissioned true}; spends single-use commission r10-click-commission-2026-09-14-01; pre-reserve refusals (busy/store-missing) do not burn it."}
   {:node :r10-commission-contract
    :status :accepted-built
    :at "2026-09-14"
