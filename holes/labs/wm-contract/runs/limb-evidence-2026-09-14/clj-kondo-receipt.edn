@@ -1,0 +1,8 @@
+{:command "clj-kondo --lint src/futon2/aif/limb_evidence.clj test/futon2/aif/limb_evidence_test.clj"
+ :exit 0
+ :tests 0
+ :assertions 0
+ :tree-sha "9e99d9010b825e52ec97447b9d5ca836de1e252a"
+ :at "2026-09-14T18:03:05Z"
+ :stdout "clj-kondo.out"
+ :findings {:errors 0 :warnings 0}}
