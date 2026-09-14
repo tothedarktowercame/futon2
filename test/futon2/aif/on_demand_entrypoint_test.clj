@@ -1,5 +1,6 @@
 (ns futon2.aif.on-demand-entrypoint-test
   (:require [cheshire.core :as json]
+            [clojure.edn]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.on-demand-entrypoint :as entry]))
 
@@ -96,6 +97,47 @@
                :now-ms (constantly 0) :sleep! (fn [_])})
              (catch clojure.lang.ExceptionInfo e
                (get-in (ex-data e) [:refusal :kind])))))))
+
+(deftest typed-service-failure-terminal-is-returned-not-refused
+  ;; r7 (2026-09-13, wm-click-7f97d7ac): the runner-service's typed
+  ;; boundary-failure terminal -- :error/:error-data, no :click-id, no
+  ;; :run-id-observation -- was refused as :on-demand/malformed-terminal,
+  ;; so the interoceptive lock diagnosis survived only in the journal.
+  (let [terminal (clojure.edn/read-string
+                  (slurp (str "holes/labs/wm-contract/runs/"
+                              "row-26-r3-seam-fix-2026-09-13/"
+                              "r7-service-failed-terminal.edn")))
+        run! (fn [last-result]
+               (entry/run-on-demand!
+                valid-config
+                {:post! (fn [_ _] {:status 200 :body "{\"click-id\":\"ours\",\"started-at\":\"now\"}"})
+                 :get! (fn [_ _]
+                         {:status 200
+                          :body (json/generate-string
+                                 {:running? false :click-id "ours"
+                                  :last-result last-result})})
+                 :now-ms (constantly 0) :sleep! (fn [_])}))
+        result (run! terminal)]
+    (is (= :service-failed (:outcome result)))
+    (is (= "Interoceptive store coordination refused"
+           (get-in result [:terminal :error])))
+    (is (= "interoceptive/lock-path-refused"
+           (get-in result [:terminal :error-data :refusal]))
+        "the typed diagnosis survives to the caller unchanged")
+    (is (= {:status "absent" :source "service-failure-terminal"}
+           (:run/observation result)))
+    (is (not (contains? result :run/id))
+        "no run identity is invented for a service failure")
+    (testing "a service-failed terminal claiming another click still refuses"
+      (is (= :on-demand/terminal-click-mismatch
+             (try (run! (assoc terminal :click-id "borrowed")) nil
+                  (catch clojure.lang.ExceptionInfo e
+                    (get-in (ex-data e) [:refusal :kind]))))))
+    (testing "service-failed without a typed :error stays malformed"
+      (is (= :on-demand/malformed-terminal
+             (try (run! (dissoc terminal :error)) nil
+                  (catch clojure.lang.ExceptionInfo e
+                    (get-in (ex-data e) [:refusal :kind]))))))))
 
 (deftest whole-client-timeout-does-not-claim-worker-cancellation
   (let [clock (atom 0)

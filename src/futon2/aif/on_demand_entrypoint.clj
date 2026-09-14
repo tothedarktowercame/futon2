@@ -121,26 +121,50 @@
                    outcome (:outcome terminal)
                    observation (:run-id-observation terminal)]
                (when-not (and (map? terminal)
-                              (nonblank-string? outcome)
-                              (= click-id (:click-id terminal)))
+                              (nonblank-string? outcome))
                  (refuse! :on-demand/malformed-terminal
                           {:click/id click-id :terminal terminal}))
-               (when-not (and (map? observation)
-                              (contains? #{"present" "absent"}
-                                         (:status observation))
-                              (or (= "absent" (:status observation))
-                                  (nonblank-string? (:value observation))))
-                 (refuse! :on-demand/malformed-run-id-observation
-                          {:click/id click-id :observation observation}))
-               (cond->
-                {:schema/version :wm/on-demand-whole-loop-result-v1
-                 :run/requested-id id
-                 :run/observation observation
-                 :click/id click-id
-                 :outcome (keyword outcome)
-                 :terminal terminal}
-                 (= "present" (:status observation))
-                 (assoc :run/id (:value observation)))))))))))
+               (if (and (= "service-failed" outcome)
+                        (nonblank-string? (:error terminal)))
+                 ;; The runner-service's typed boundary-failure terminal
+                 ;; carries :error/:error-data but no :click-id and no
+                 ;; :run-id-observation (r7, 2026-09-13: the interoceptive
+                 ;; lock refusal arrived in this shape and was discarded as
+                 ;; malformed).  The enclosing status body's :click-id is
+                 ;; already verified above, so return the failure typed and
+                 ;; unchanged rather than refusing away its diagnosis.
+                 (do
+                   (when-let [terminal-click (:click-id terminal)]
+                     (when-not (= click-id terminal-click)
+                       (refuse! :on-demand/terminal-click-mismatch
+                                {:expected click-id :actual terminal-click})))
+                   {:schema/version :wm/on-demand-whole-loop-result-v1
+                    :run/requested-id id
+                    :run/observation {:status "absent"
+                                      :source "service-failure-terminal"}
+                    :click/id click-id
+                    :outcome :service-failed
+                    :terminal terminal})
+                 (do
+                   (when-not (= click-id (:click-id terminal))
+                     (refuse! :on-demand/malformed-terminal
+                              {:click/id click-id :terminal terminal}))
+                   (when-not (and (map? observation)
+                                  (contains? #{"present" "absent"}
+                                             (:status observation))
+                                  (or (= "absent" (:status observation))
+                                      (nonblank-string? (:value observation))))
+                     (refuse! :on-demand/malformed-run-id-observation
+                              {:click/id click-id :observation observation}))
+                   (cond->
+                    {:schema/version :wm/on-demand-whole-loop-result-v1
+                     :run/requested-id id
+                     :run/observation observation
+                     :click/id click-id
+                     :outcome (keyword outcome)
+                     :terminal terminal}
+                     (= "present" (:status observation))
+                     (assoc :run/id (:value observation)))))))))))))
 
 (defn- read-one-config [path]
   (with-open [reader (java.io.PushbackReader. (io/reader path :encoding "UTF-8"))]

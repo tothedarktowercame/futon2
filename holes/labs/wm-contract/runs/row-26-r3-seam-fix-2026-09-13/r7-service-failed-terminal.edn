@@ -1,0 +1,15 @@
+;; r7's live service-failed terminal, verbatim from the entrypoint crash
+;; report (/tmp/clojure-1605612954572586850.edn, 2026-09-13T23:37:57Z, click
+;; wm-click-7f97d7ac-dddb-4bb6-bd7b-cf837032cbb6, run
+;; wm-machinery-test-2026-09-13-claude-15-r7): the runner-service's typed
+;; boundary-failure shape, which run-on-demand! refused as malformed-terminal,
+;; discarding the run record. Pinned here as the live fixture for the
+;; service-failed terminal contract; the :click-id and :run-id-observation
+;; fields are genuinely absent in this shape.
+{:attempt-id "attempt-001",
+       :outcome "service-failed",
+       :error "Interoceptive store coordination refused",
+       :error-data
+       {:path "/run/futon2/wm-interoceptive-snapshot.lock",
+        :phase "parent",
+        :refusal "interoceptive/lock-path-refused"}}
