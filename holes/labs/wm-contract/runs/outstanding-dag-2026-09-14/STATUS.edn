@@ -38,11 +38,12 @@
    :evidence "runs/row-14-observed-status-rubric-2026-09-14/ACCEPTANCE.md (8a6e5a5a); RUBRIC-observed-status-v1.md; rubric-authority-draft.edn"
    :note "Rubric v1 accepted (3dee9855/4e8b303e): 3 statuses with grounded candidate shapes (:refined :strengthened :addressed), 4 typed-absent, 0/7 currently qualifying annotations. Consequence: a-labels needs NEW qualifying observation acquisition (retained CP-close events cannot be promoted as-is; no literal bytes, no independent acceptance); :reopened cannot be first by construction. Observer seat must differ from codex-23; claude-15 reviewer."}
   {:node :a-pairs
-   :status :discovery-in-flight
+   :status :discovery-complete-blocked
    :at "2026-09-14"
    :seat "codex-22"
    :job-id "invoke-1789401417020-20791-e2df4372"
-   :note "Read-only inventory of retained closes/outcomes/join-keys (TN-a-pairs-discovery-2026-09-14.md) run in parallel with a-rubric: grounds the join spec and the 12-outcome axis, independent of labels."}]}
+   :evidence "../../TN-a-pairs-discovery-2026-09-14.md (3cabc7bc + reviewer correction 43e4701b); ACCEPTANCE-a-pairs-discovery.md"
+   :note "0/86 retained closes carry the Status+cutoff+post-action identity a licensed a-pair needs; 23 cross-root identity collisions make path-only joins unsafe. Converges with a-rubric acceptance: a-labels/a-pairs need NEW retention at live closes (cutoff, post-action point, action/transition ids, model revision, adjudicated Status), then byte-pinned joins. Reviewer correction: production outcome-kinds is now 14 values; licensed 7x12 support excludes the two historical-verification outcomes (typed out-of-support at a-estimate)."}]}
   {:node :r10-commission-contract
    :status :accepted-built
    :at "2026-09-14"
