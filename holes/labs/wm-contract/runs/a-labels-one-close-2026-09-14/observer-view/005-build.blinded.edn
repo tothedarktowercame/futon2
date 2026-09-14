@@ -1,0 +1,115 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-50-v1,
+ :attempt/id "attempt-002",
+ :attempt/ordinal 2,
+ :event/sequence 5,
+ :checkpoint/type :build,
+ :recorded-at "2026-09-14T17:13:49.848760392Z",
+ :payload
+ {:judgment
+  {:revision
+   {:round 2,
+    :commits
+    ["3d9c553f9443eab50a02806b67dd28918705692b"
+     "642ab3eb77179117a2f2916f68b23cafd7920ade"],
+    :author-job "invoke-1789405661509-20802-8138ecee",
+    :review
+    {:round 2,
+     :commit "642ab3eb77179117a2f2916f68b23cafd7920ade",
+     :job-id "invoke-1789405980746-20803-a81ce2de",
+     :verdict :approve,
+     :text
+     "FULL_LOOP_REVIEW: APPROVE FULL_LOOP_REVIEWER_NOTE: Amendment resolves both observed lock failures without weakening the global nonblocking contention contract. `642ab3eb` scopes lock-error conversion to acquisition op...\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves both observed lock failures without weakening the global nonblocking contention contract.\n\n`642ab3eb` scopes lock-error conversion to acquisition operations, preserves critical-section exceptions, and adds bounded retries only around replay-safe repair-store writes.\n\nExecuted:\n\n- `git show --check 642ab3eb` — PASS.\n- clj-kondo on both changed source files — PASS, 0/0 each.\n- Full `check-parens.el` driver on both files — PASS.\n- Fresh JVM `repair-obligation-test` — PASS, 12 tests / 49 assertions.\n- Fresh JVM `interoceptive-activation-test` — PASS, 7/26.\n- Fresh JVM `interoceptive-manifest-test` — PASS, 10/32.\n\nNo edits or commits made.\nI’ll review only `642ab3eb` against the two observed lock failures, check that it preserves the lock’s contention contract rather than weakening it, and rerun static checks plus the same fresh-JVM repair-obligation namespace.\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves both observed lock failures without weakening the global nonblocking contention contract.\n\n`642ab3eb` scopes lock-error conversion to acquisition operations, preserves critical-section exceptions, and adds bounded retries only around replay-safe repair-store writes.\n\nExecuted:\n\n- `git show --check 642ab3eb` — PASS.\n- clj-kondo on both changed source files — PASS, 0/0 each.\n- Full `check-parens.el` driver on both files — PASS.\n- Fresh JVM `repair-obligation-test` — PASS, 12 tests / 49 assertions.\n- Fresh JVM `interoceptive-activation-test` — PASS, 7/26.\n- Fresh JVM `interoceptive-manifest-test` — PASS, 10/32.\n\nNo edits or commits made.",
+     :gate
+     {:required? true,
+      :code-files
+      ["src/futon2/aif/interoceptive_store_lock.clj"
+       "src/futon2/aif/repair_obligation.clj"],
+      :executed? true,
+      :tool-events 10,
+      :execution {:executed true, :tool-events 10, :command-events 10},
+      :execution-source :job-summary,
+      :passed? true,
+      :failure-kind nil}}},
+   :generated-code
+   ["src/futon2/aif/interoceptive_store_lock.clj"
+    "src/futon2/aif/repair_obligation.clj"],
+   :build-retries [],
+   :inline-improvements [],
+   :patterns-used
+   ["futon-theory/stop-the-line" "musn/pause-backtrace"],
+   :commits
+   ["3d9c553f9443eab50a02806b67dd28918705692b"
+    "642ab3eb77179117a2f2916f68b23cafd7920ade"],
+   :reviews
+   [{:round 1,
+     :commit "3d9c553f9443eab50a02806b67dd28918705692b",
+     :job-id "invoke-1789405605646-20801-0a9b02eb",
+     :verdict :request-changes,
+     :text
+     "FULL_LOOP_REVIEW: REQUEST_CHANGES relevant fresh-JVM suite fails with 2 store-lock errors FULL_LOOP_REVIEWER_NOTE: The conjunct diagnostics are substantive, but the required suite is not green. Commit `3d9c553f` chang...\nFULL_LOOP_REVIEW: REQUEST_CHANGES relevant fresh-JVM suite fails with 2 store-lock errors\nFULL_LOOP_REVIEWER_NOTE: The conjunct diagnostics are substantive, but the required suite is not green.\n\nCommit `3d9c553f` changes only `repair_obligation.clj` and its test. The new test does verify the original opacity defect: same-attempt evidence now retains the refusal kind/stage while adding `:implementation-attempt-not-distinct`.\n\nExecuted:\n\n- `git show --check 3d9c553f` — PASS.\n- `clj-kondo --lint src/futon2/aif/repair_obligation.clj` — PASS, 0/0.\n- `clj-kondo --lint test/futon2/aif/repair_obligation_test.clj` — PASS, 0/0.\n- Full `check-parens.el` driver on both changed files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — FAIL: 12 tests, 46 assertions, 0 failures, 2 errors.\n\nBoth errors originate in the pre-existing interoceptive store-lock layer: one expected `FileAlreadyExistsException` is wrapped as `:interoceptive/lock-io-failure`; the concurrency control receives `:interoceptive/lock-contention`. No edits or commits made.\nI’ll inspect the exact commit and its parent delta, trace the changed refusal field through the stop-line resolution path, then run kondo, the mandated paren driver, and the narrow fresh-JVM test namespace for every changed code file.\nFULL_LOOP_REVIEW: REQUEST_CHANGES relevant fresh-JVM suite fails with 2 store-lock errors\nFULL_LOOP_REVIEWER_NOTE: The conjunct diagnostics are substantive, but the required suite is not green.\n\nCommit `3d9c553f` changes only `repair_obligation.clj` and its test. The new test does verify the original opacity defect: same-attempt evidence now retains the refusal kind/stage while adding `:implementation-attempt-not-distinct`.\n\nExecuted:\n\n- `git show --check 3d9c553f` — PASS.\n- `clj-kondo --lint src/futon2/aif/repair_obligation.clj` — PASS, 0/0.\n- `clj-kondo --lint test/futon2/aif/repair_obligation_test.clj` — PASS, 0/0.\n- Full `check-parens.el` driver on both changed files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — FAIL: 12 tests, 46 assertions, 0 failures, 2 errors.\n\nBoth errors originate in the pre-existing interoceptive store-lock layer: one expected `FileAlreadyExistsException` is wrapped as `:interoceptive/lock-io-failure`; the concurrency control receives `:interoceptive/lock-contention`. No edits or commits made.",
+     :gate
+     {:required? true,
+      :code-files
+      ["src/futon2/aif/repair_obligation.clj"
+       "test/futon2/aif/repair_obligation_test.clj"],
+      :executed? true,
+      :tool-events 10,
+      :execution {:executed true, :tool-events 10, :command-events 10},
+      :execution-source :job-summary,
+      :passed? true,
+      :failure-kind nil}}
+    {:round 2,
+     :commit "642ab3eb77179117a2f2916f68b23cafd7920ade",
+     :job-id "invoke-1789405980746-20803-a81ce2de",
+     :verdict :approve,
+     :text
+     "FULL_LOOP_REVIEW: APPROVE FULL_LOOP_REVIEWER_NOTE: Amendment resolves both observed lock failures without weakening the global nonblocking contention contract. `642ab3eb` scopes lock-error conversion to acquisition op...\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves both observed lock failures without weakening the global nonblocking contention contract.\n\n`642ab3eb` scopes lock-error conversion to acquisition operations, preserves critical-section exceptions, and adds bounded retries only around replay-safe repair-store writes.\n\nExecuted:\n\n- `git show --check 642ab3eb` — PASS.\n- clj-kondo on both changed source files — PASS, 0/0 each.\n- Full `check-parens.el` driver on both files — PASS.\n- Fresh JVM `repair-obligation-test` — PASS, 12 tests / 49 assertions.\n- Fresh JVM `interoceptive-activation-test` — PASS, 7/26.\n- Fresh JVM `interoceptive-manifest-test` — PASS, 10/32.\n\nNo edits or commits made.\nI’ll review only `642ab3eb` against the two observed lock failures, check that it preserves the lock’s contention contract rather than weakening it, and rerun static checks plus the same fresh-JVM repair-obligation namespace.\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves both observed lock failures without weakening the global nonblocking contention contract.\n\n`642ab3eb` scopes lock-error conversion to acquisition operations, preserves critical-section exceptions, and adds bounded retries only around replay-safe repair-store writes.\n\nExecuted:\n\n- `git show --check 642ab3eb` — PASS.\n- clj-kondo on both changed source files — PASS, 0/0 each.\n- Full `check-parens.el` driver on both files — PASS.\n- Fresh JVM `repair-obligation-test` — PASS, 12 tests / 49 assertions.\n- Fresh JVM `interoceptive-activation-test` — PASS, 7/26.\n- Fresh JVM `interoceptive-manifest-test` — PASS, 10/32.\n\nNo edits or commits made.",
+     :gate
+     {:required? true,
+      :code-files
+      ["src/futon2/aif/interoceptive_store_lock.clj"
+       "src/futon2/aif/repair_obligation.clj"],
+      :executed? true,
+      :tool-events 10,
+      :execution {:executed true, :tool-events 10, :command-events 10},
+      :execution-source :job-summary,
+      :passed? true,
+      :failure-kind nil}}],
+   :validation
+   {:author {:executed true, :tool-events 19, :command-events 15},
+    :reviewer {:executed true, :tool-events 10, :command-events 10},
+    :review-job "invoke-1789405980746-20803-a81ce2de",
+    :approved? true,
+    :review-gate
+    {:required? true,
+     :code-files
+     ["src/futon2/aif/interoceptive_store_lock.clj"
+      "src/futon2/aif/repair_obligation.clj"],
+     :executed? true,
+     :tool-events 10,
+     :execution {:executed true, :tool-events 10, :command-events 10},
+     :execution-source :job-summary,
+     :passed? true,
+     :failure-kind nil},
+    :artifact-binding
+    {:fresh-author? true,
+     :disagreement? false,
+     :descendant? true,
+     :text-artifact-ref "642ab3eb",
+     :pre-dispatch-head "3d9c553f9443eab50a02806b67dd28918705692b",
+     :author-window-end-ms 1789405979424,
+     :author-window-start-ms 1789405660867,
+     :commit "642ab3eb77179117a2f2916f68b23cafd7920ade",
+     :in-author-window? true,
+     :observed-commit-time-ms 1789405963000,
+     :repo "/home/joe/code/futon2",
+     :text-artifact-sha "642ab3eb77179117a2f2916f68b23cafd7920ade",
+     :observed-head "642ab3eb77179117a2f2916f68b23cafd7920ade",
+     :corroborates? true}},
+   :artifacts
+   ["src/futon2/aif/interoceptive_store_lock.clj"
+    "src/futon2/aif/repair_obligation.clj"]},
+  :ground
+  {:kind :git-commit-and-independent-review,
+   :repository "/home/joe/code/futon2"}}}

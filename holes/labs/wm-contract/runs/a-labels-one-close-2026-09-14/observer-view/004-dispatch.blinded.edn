@@ -1,0 +1,27 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-50-v1,
+ :attempt/id "attempt-002",
+ :attempt/ordinal 2,
+ :event/sequence 4,
+ :checkpoint/type :dispatch,
+ :recorded-at "2026-09-14T17:03:06.107088805Z",
+ :payload
+ {:judgment
+  {:agent "claude-15",
+   :availability :invoke-ready,
+   :job-id "invoke-1789405384839-20800-ba244c45",
+   :prompt-ref "agency-job:invoke-1789405384839-20800-ba244c45",
+   :recovers nil},
+  :ground
+  {:kind :agency-dispatch,
+   :response
+   {:status-url
+    "/api/alpha/invoke/jobs/invoke-1789405384839-20800-ba244c45",
+    :job-id "invoke-1789405384839-20800-ba244c45",
+    :ref nil,
+    :accepted true,
+    :mode "work",
+    :state "queued",
+    :arse nil,
+    :ok true,
+    :bell-type "request"}}}}
