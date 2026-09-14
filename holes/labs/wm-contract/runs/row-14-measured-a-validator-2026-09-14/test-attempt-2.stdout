@@ -1,0 +1,23 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.measured-a-annotation-test
+
+FAIL in (rubric-and-retrospective-refusals) (measured_a_annotation_test.clj:120)
+expected: (= :retrospective-provenance-missing (reason (-> a (assoc-in [:provenance :mode] :retrospective) (assoc-in [:provenance :retrospective] {:status :not-applicable})) au))
+  actual: (not (= :retrospective-provenance-missing :missing-field))
+
+FAIL in (accepts-structurally-complete-isolated-fixture) (measured_a_annotation_test.clj:73)
+expected: (:ok result)
+  actual: false
+
+FAIL in (accepts-structurally-complete-isolated-fixture) (measured_a_annotation_test.clj:74)
+expected: (= :addressed (:status result))
+  actual: (not (= :addressed nil))
+
+FAIL in (accepts-structurally-complete-isolated-fixture) (measured_a_annotation_test.clj:75)
+expected: (= :isolated-test (:authority/scope result))
+  actual: (not (= :isolated-test nil))
+
+Ran 4 tests containing 17 assertions.
+4 failures, 0 errors.

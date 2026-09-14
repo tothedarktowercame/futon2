@@ -1,0 +1,40 @@
+{:schema :wm/execution-receipts-v1
+ :tree-sha "3cea94148e1a0770c3f60c61071e1aa5c85fa8b9"
+ :at "2026-09-14T11:53:06Z"
+ :scope :isolated-test
+ :gates
+ [{:gate :fresh-jvm-test
+   :command "clojure -X:test :nses '[futon2.aif.measured-a-annotation-test]'"
+   :exit 0 :tests 4 :assertions 17 :failures 0 :errors 0
+   :stdout "test.stdout" :stderr "test.stderr" :exit-file "test.exit"}
+  {:gate :clj-kondo
+   :command "clj-kondo --lint src/futon2/aif/measured_a_annotation.clj test/futon2/aif/measured_a_annotation_test.clj"
+   :exit 0 :errors 0 :warnings 0
+   :stdout "kondo.stdout" :stderr "kondo.stderr" :exit-file "kondo.exit"}
+  {:gate :check-parens
+   :command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/measured_a_annotation.clj test/futon2/aif/measured_a_annotation_test.clj holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md"
+   :exit 0 :files 3
+   :stdout "parens.stdout" :stderr "parens.stderr" :exit-file "parens.exit"}]
+ :failed-history
+ [{:attempt 1 :tree-sha "0bac9adf" :exit 1
+   :finding :test-source-unmatched-form
+   :stdout "test-attempt-1.stdout" :stderr "test-attempt-1.stderr"
+   :exit-file "test-attempt-1.exit"}
+  {:attempt 2 :tree-sha "55614bc5" :exit 1 :tests 4 :assertions 17
+   :failures 4 :errors 0
+   :finding :fixture-subject-and-retrospective-expectation-mismatch
+   :stdout "test-attempt-2.stdout" :stderr "test-attempt-2.stderr"
+   :exit-file "test-attempt-2.exit"}]
+ :source-pins
+ {"src/futon2/aif/measured_a_annotation.clj"
+  "6bbf9dff4b35253031e566f5b166e2e454f8a89c793f8948b2dd75e8f3205a85"
+  "test/futon2/aif/measured_a_annotation_test.clj"
+  "d3a2a130ebed716c49ca6e4be109d0f183ca5cbef1e49b7488e978b1d6e71e56"
+  "holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md"
+  "6815b48da949ee9b3b1aa87b5f4221f5852602910ac241ffcbc39454810522ec"
+  "src/futon2/aif/belief.clj"
+  "39c1dabaf7be878b638ee1f14f22e4d54f2b5b9ed1a2cc09bdd7b63d1b27a595"
+  "src/futon2/aif/machine_model.clj"
+  "203d1fb6942a898bfbbe05d174fd9deecb94e1bcd5dc2901a19a9fc46c15b6a1"
+  "holes/labs/wm-contract/runs/row-14-measured-a-authority-spec-2026-09-13/lead-review.md"
+  "1381ce9572bc632fabc85b761c3b6e1d96daed004acfb85a30ae98da4bfc1767"}}
