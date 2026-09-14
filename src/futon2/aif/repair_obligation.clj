@@ -799,8 +799,140 @@
                          (or (:replacement-artifact implementation)
                              (artifact-record shape resolution))
                          :validation-artifact
-                         (artifact-record shape resolution)))]
+                         (artifact-record shape resolution))
+                  (:successor-relation resolution)
+                  (assoc :successor-relation (:successor-relation resolution)))]
      (write-new! (io/file root "resolutions"
                           (str (:repair/id obligation) ".edn"))
                  record)
      record))))
+
+(def ^:private successor-relation-schema :wm/repair-successor-relation-v1)
+
+(defn- successor-refuse! [reason data]
+  (throw (ex-info "Repair successor evidence refused"
+                  (assoc data :repair-successor/refusal reason))))
+
+(defn- strict-keys? [m ks]
+  (and (map? m) (= ks (set (keys m)))))
+
+(defn- sha256-string? [x]
+  (and (string? x) (boolean (re-matches #"[0-9a-f]{64}" x))))
+
+(defn- parsed-instant [x]
+  (try (when (string? x) (Instant/parse x)) (catch Throwable _ nil)))
+
+(defn successor-resolution!
+  "Validate retained repairing-close R and later grounded successor-close S,
+  then delegate to the existing authorized resolution writer. The injected
+  readers/writer make the boundary testable without touching the live store.
+  A pre-existing resolution is returned as a stable no-op."
+  [{:keys [obligation repair-close successor-close authority
+           resolution-read-fn resolve-fn]}]
+  (when-not successor-close
+    (successor-refuse! :successor-missing {:repair/id (:repair/id obligation)}))
+  (let [repair-keys #{:attempt/id :run/id :repair/id :closed-at :commit
+                      :review-receipt-ids :review-sha256 :grounded?}
+        successor-keys #{:attempt/id :run/id :repair/id :closed-at
+                         :witness-ref :witness-sha256 :grounded?
+                         :production-shaped? :witness}
+        authority-keys #{:decided-by :review-job}
+        repair-at (parsed-instant (:closed-at repair-close))
+        successor-at (parsed-instant (:closed-at successor-close))
+        repair-id (:repair/id obligation)]
+    (when-not (and (strict-keys? repair-close repair-keys)
+                   (= true (:grounded? repair-close))
+                   (string? (:attempt/id repair-close))
+                   (string? (:run/id repair-close))
+                   (string? (:commit repair-close))
+                   (vector? (:review-receipt-ids repair-close))
+                   (seq (:review-receipt-ids repair-close))
+                   (every? #(and (string? %) (not (str/blank? %)))
+                           (:review-receipt-ids repair-close))
+                   (sha256-string? (:review-sha256 repair-close)) repair-at)
+      (successor-refuse! :repair-evidence-invalid {:repair-close repair-close}))
+    (when-not (and (strict-keys? successor-close successor-keys)
+                   (= true (:grounded? successor-close))
+                   (= true (:production-shaped? successor-close))
+                   (string? (:attempt/id successor-close))
+                   (string? (:run/id successor-close))
+                   (string? (:witness-ref successor-close))
+                   (sha256-string? (:witness-sha256 successor-close))
+                   (true? (get-in successor-close [:witness :resolved?]))
+                   (true? (get-in successor-close [:witness :dial-moved?]))
+                   successor-at)
+      (successor-refuse! :successor-evidence-invalid
+                         {:successor-close successor-close}))
+    (when-not (and (strict-keys? authority authority-keys)
+                   (every? #(and (string? %) (not (str/blank? %)))
+                           [(:decided-by authority) (:review-job authority)]))
+      (successor-refuse! :resolution-authority-invalid {:authority authority}))
+    (when-not (and (= repair-id (:repair/id repair-close))
+                   (= repair-id (:repair/id successor-close)))
+      (successor-refuse! :successor-lineage-mismatch
+                         {:repair/id repair-id
+                          :repair-close/id (:repair/id repair-close)
+                          :successor-close/id (:repair/id successor-close)}))
+    (when (or (= (:attempt/id repair-close) (:attempt/id successor-close))
+              (= (:run/id repair-close) (:run/id successor-close)))
+      (successor-refuse! :self-successor
+                         {:repair-attempt (:attempt/id repair-close)
+                          :successor-attempt (:attempt/id successor-close)}))
+    (when-not (.isBefore repair-at successor-at)
+      (successor-refuse! :successor-not-later
+                         {:repair-closed-at (:closed-at repair-close)
+                          :successor-closed-at (:closed-at successor-close)}))
+    (if-let [existing (resolution-read-fn repair-id)]
+      {:status :already-resolved :resolution existing}
+      (let [relation {:schema successor-relation-schema
+                      :repair/id repair-id
+                      :repair-attempt/id (:attempt/id repair-close)
+                      :repair-run/id (:run/id repair-close)
+                      :repair-closed-at (:closed-at repair-close)
+                      :repair-commit (:commit repair-close)
+                      :repair-review-receipt-ids (:review-receipt-ids repair-close)
+                      :repair-review-sha256 (:review-sha256 repair-close)
+                      :successor-attempt/id (:attempt/id successor-close)
+                      :successor-run/id (:run/id successor-close)
+                      :successor-closed-at (:closed-at successor-close)
+                      :successor-witness-ref (:witness-ref successor-close)
+                      :successor-witness-sha256 (:witness-sha256 successor-close)
+                      :decided-by (:decided-by authority)
+                      :authority-review-job (:review-job authority)}
+            resolution (resolve-fn
+                        obligation
+                        {:attempt-id (:attempt/id successor-close)
+                         :commit (:commit repair-close)
+                         :reviewer (:decided-by authority)
+                         :review-job (:review-job authority)
+                         :witness (:witness successor-close)
+                         :validation {:kind :production-shaped-successor
+                                      :production-shaped? true}
+                         :successor-relation relation})]
+        {:status :resolved :resolution resolution :relation relation}))))
+
+(defn repair-derived-state
+  "Pure cutoff readback of immutable finding plus optional resolution. A
+  resolution after CUTOFF is excluded rather than projected backward."
+  [repair-id cutoff finding resolution]
+  (let [cutoff-at (parsed-instant cutoff)]
+    (when-not (and cutoff-at (= repair-id (:repair/id finding)))
+      (successor-refuse! :finding-readback-invalid
+                         {:repair/id repair-id :cutoff cutoff}))
+    (when (and resolution (not= repair-id (:repair/id resolution)))
+      (successor-refuse! :resolution-readback-invalid
+                         {:repair/id repair-id
+                          :resolution-repair-id (:repair/id resolution)}))
+    (let [resolution-at (some-> resolution :resolved-at parsed-instant)
+          admitted? (and resolution
+                         (= repair-id (:repair/id resolution))
+                         resolution-at
+                         (not (.isAfter resolution-at cutoff-at)))]
+      {:schema :wm/repair-derived-state-v1
+       :repair/id repair-id
+       :cutoff cutoff
+       :derived-status (if admitted? :resolved :open)
+       :finding finding
+       :resolution (when admitted? resolution)
+       :derived-from (cond-> [:finding]
+                       admitted? (conj :resolution))})))

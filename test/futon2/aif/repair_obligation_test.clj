@@ -1,5 +1,6 @@
 (ns futon2.aif.repair-obligation-test
-  (:require [clojure.java.shell :as shell]
+  (:require [clojure.edn :as edn]
+            [clojure.java.shell :as shell]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
@@ -22,6 +23,101 @@
           :attempt-id "failed-attempt"
           :discharge-contract {:artifact-shape shape}}
          extra))
+
+(def successor-sha (apply str (repeat 64 "a")))
+
+(defn- successor-fixture []
+  (let [repair-id "repair-successor-fixture"]
+    {:obligation
+     (shaped-obligation
+      :code-commit
+      {:repair/id repair-id
+       :discharge-contract
+       {:artifact-shape :code-commit
+        :requires [:distinct-repair-commit :independent-review
+                   :grounded-repair :distinct-production-shaped-successor]}
+       :repair/implementation
+       {:implementation-attempt "repair-attempt"
+        :replacement-commit "abc1234"}})
+     :repair-close
+     {:attempt/id "repair-attempt" :run/id "repair-run"
+      :repair/id repair-id :closed-at "2026-09-14T20:00:00Z"
+      :commit "abc1234" :review-receipt-ids ["review-r.edn"]
+      :review-sha256 successor-sha :grounded? true}
+     :successor-close
+     {:attempt/id "successor-attempt" :run/id "successor-run"
+      :repair/id repair-id :closed-at "2026-09-14T21:00:00Z"
+      :witness-ref "successor-witness.edn" :witness-sha256 successor-sha
+      :grounded? true :production-shaped? true
+      :witness {:resolved? true :dial-moved? true :implementation-id "impl-1"}}
+     :authority {:decided-by "reviewer-2" :review-job "review-job-2"}}))
+
+(defn- successor-refusal [inputs]
+  (try (repair/successor-resolution! inputs) nil
+       (catch clojure.lang.ExceptionInfo e
+         (:repair-successor/refusal (ex-data e)))))
+
+(deftest successor-discharge-retains-explicit-r-s-relation
+  (let [root (temp-root)
+        fixture (successor-fixture)
+        result (repair/successor-resolution!
+                (assoc fixture
+                       :resolution-read-fn (constantly nil)
+                       :resolve-fn (partial repair/resolve! root)))
+        stored (edn/read-string
+                (slurp (io/file root "resolutions"
+                                "repair-successor-fixture.edn")))]
+    (is (= :resolved (:status result)))
+    (is (= (:relation result) (:successor-relation stored)))
+    (is (= "repair-attempt"
+           (get-in stored [:successor-relation :repair-attempt/id])))
+    (is (= "successor-attempt"
+           (get-in stored [:successor-relation :successor-attempt/id])))
+    (is (= successor-sha
+           (get-in stored [:successor-relation :successor-witness-sha256])))))
+
+(deftest successor-discharge-refuses-missing-borrowed-self-and-projection
+  (let [fixture (assoc (successor-fixture)
+                       :resolution-read-fn (constantly nil)
+                       :resolve-fn (fn [& _]
+                                     (throw (AssertionError. "must not write"))))]
+    (is (= :successor-missing
+           (successor-refusal (assoc fixture :successor-close nil))))
+    (is (= :successor-lineage-mismatch
+           (successor-refusal
+            (assoc-in fixture [:successor-close :repair/id] "borrowed-repair"))))
+    (is (= :self-successor
+           (successor-refusal
+            (-> fixture
+                (assoc-in [:successor-close :attempt/id] "repair-attempt")
+                (assoc-in [:successor-close :run/id] "repair-run")))))
+    (is (= :successor-evidence-invalid
+           (successor-refusal
+            (assoc fixture :successor-close
+                   {:delivery-projection "not-a-successor-witness"}))))))
+
+(deftest existing-resolution-is-stable-and-cutoff-readback-is-temporal
+  (let [{:keys [obligation] :as fixture} (successor-fixture)
+        existing {:repair/id (:repair/id obligation) :repair/status :resolved
+                  :resolved-at "2026-09-14T21:30:00Z"}
+        writes (atom 0)
+        result (repair/successor-resolution!
+                (assoc fixture
+                       :resolution-read-fn (constantly existing)
+                       :resolve-fn (fn [& _] (swap! writes inc))))
+        before (repair/repair-derived-state
+                (:repair/id obligation) "2026-09-14T21:00:00Z"
+                obligation existing)
+        after (repair/repair-derived-state
+               (:repair/id obligation) "2026-09-14T22:00:00Z"
+               obligation existing)]
+    (is (= :already-resolved (:status result)))
+    (is (zero? @writes))
+    (is (= :open (:derived-status before)))
+    (is (nil? (:resolution before)))
+    (is (= :resolved (:derived-status after)))
+    (is (= existing (:resolution after)))
+    (is (= [:finding :resolution] (:derived-from after)))))
 
 (deftest finding-remains-open-until-grounded-successor-resolution
   (let [root (temp-root)
