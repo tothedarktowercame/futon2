@@ -1,12 +1,5 @@
 # Residual questions for Joe — 2026-09-12
 
-**Superseded as an operator queue.** Joe delegated completion leadership to
-codex-26 in the subsequent emacs-repl turn. Technical decisions and required
-implementation follow-ups are in [LEAD-DECISIONS-2026-09-12.md](LEAD-DECISIONS-2026-09-12.md).
-The questions below remain historical context; they are no longer requests
-for Joe to choose constants, certificate semantics, or bookkeeping details.
-No implementation or evidence credit follows merely from that delegation.
-
 Everything else on WORK-REMAINING.md is either done, accruing live
 evidence, or owned by another lane. These are the open rulings, in
 the order the queued packets want them. Each section says what is
