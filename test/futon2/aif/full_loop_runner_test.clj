@@ -4959,3 +4959,43 @@
                   (fn [c] (swap! appended conj c) (throw other))
                   identity :dispatch {:sorry {:kind :x}})))
     (is (= 1 (count @appended)))))
+
+(deftest measured-standing-decision-is-bound-to-dispatched-seats
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "standing-completion-"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        explanation (str "This independent review explains how the cited records bear "
+                         "on whether this exact selected target remains live or resolved.")
+        record {:schema :wm/target-standing-decision-v1
+                :entity/id "target-1" :decision :still-live
+                :decided-by "reviewer-1" :implementation-author "author-1"
+                :decided-at "2026-09-14T18:00:00Z"
+                :evidence ["checkpoint-1"] :explanation explanation}]
+    (spit (io/file dir "standing.edn") (pr-str record))
+    (is (#'runner/valid-standing-decision?
+         (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"))
+    (is (not (#'runner/valid-standing-decision?
+              (.getAbsolutePath dir) "target-1" "other-reviewer" "author-1")))
+    (is (not (#'runner/valid-standing-decision?
+              (.getAbsolutePath dir) "other-target" "reviewer-1" "author-1")))
+    (spit (io/file dir "standing.edn")
+          (pr-str (assoc record :explanation "too short")))
+    (is (not (#'runner/valid-standing-decision?
+              (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1")))))
+
+(deftest measured-prompts-declare-required-completion
+  (let [opts {:author "author-1" :reviewer "reviewer-1"
+              :target-repository "/repo" :target-repository-head "base"
+              :attempt-evidence-dir "/tmp/attempt/evidence"
+              :measured-acquisition? true}
+        author (#'runner/author-prompt opts "target" {:id "m"} {} [])
+        reviewer (#'runner/reviewer-prompt opts "target" {} "/repo" "abc123"
+                                           {:job-id "author-job"} [])]
+    (is (str/includes? author "REQUIRED FOR THIS MEASURED ATTEMPT"))
+    (is (str/includes? author "DECLARED MEASURED-ACQUISITION ATTEMPT"))
+    (is (str/includes? reviewer "REQUIRED FOR THIS MEASURED ATTEMPT"))
+    (is (= (str "Deposit the standing decision for \"target\" in "
+                "/tmp/attempt/evidence. Decision content is yours; this request "
+                "neither repeats implementation nor suggests a decision.")
+           (#'runner/standing-completion-prompt
+            "target" "/tmp/attempt/evidence")))))

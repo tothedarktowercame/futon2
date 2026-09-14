@@ -1812,9 +1812,16 @@
     (assoc :selected-action
            (prompt-selected-action (:selected-action construction)))))
 
-(defn- evidence-deposit-instruction [role evidence-dir author reviewer]
+(defn- evidence-deposit-instruction
+  ([role evidence-dir author reviewer]
+   (evidence-deposit-instruction role evidence-dir author reviewer false))
+  ([role evidence-dir author reviewer measured-acquisition?]
   (when evidence-dir
-    (str "\nDEPOSIT INSTRUCTION (optional for ordinary attempts; required for a close intended for measured-A observation):\n"
+    (str "\nDEPOSIT INSTRUCTION ("
+         (if measured-acquisition?
+           "REQUIRED FOR THIS MEASURED ATTEMPT"
+           "optional for ordinary attempts; required for a close intended for measured-A observation")
+         "):\n"
          "DIRECTORY: " evidence-dir "\n"
          "Use flat one-form EDN files only; create no subdirectories. Files are the records; do not echo them in your reply.\n"
          (case role
@@ -1829,10 +1836,11 @@
                 ":wm/target-standing-decision-v1 keys [:schema :entity/id :decision :decided-by :implementation-author :decided-at :evidence].\n"
                 "Include a review-grade :explanation of at least 80 characters.\n"
                 "Set :decided-by to your reviewer id and :implementation-author to " author "; a self-decided record refuses.\n"))
-         "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n")))
+         "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n"))))
 
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
-                             target-repository-head attempt-evidence-dir]}
+                             target-repository-head attempt-evidence-dir
+                             measured-acquisition?]}
                       target mission cascade-entry stop-lines]
   (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
        reviewer " is the independent reviewer.\n\n"
@@ -1867,7 +1875,10 @@
               "Do not alter War Machine ranking, policy support, dispatch, build, "
               "adjudication, grounding semantics, or the semantic epoch in this parcel. "
               "If the selected work requires such a change, refuse with a typed reason.\n"))
-       (evidence-deposit-instruction :author attempt-evidence-dir author reviewer)
+       (when measured-acquisition?
+         "THIS ATTEMPT IS A DECLARED MEASURED-ACQUISITION ATTEMPT.\n")
+       (evidence-deposit-instruction :author attempt-evidence-dir author reviewer
+                                     measured-acquisition?)
        "\n"
        "Requirements:\n"
        "1. Inspect the mission and repository state; choose a bounded implementation parcel "
@@ -1915,7 +1926,8 @@
        "requires a substantive commit; card cure usually needs no new commit "
        "— re-emitting the card with the existing sha is valid)."))
 
-(defn- reviewer-prompt [{:keys [reviewer author attempt-evidence-dir]}
+(defn- reviewer-prompt [{:keys [reviewer author attempt-evidence-dir
+                                measured-acquisition?]}
                         target construction repo commit
                         author-job stop-lines]
   (str reviewer ": FULL-LOOP INDEPENDENT REVIEW. " author " authored commit " commit
@@ -1930,7 +1942,8 @@
        (when (seq stop-lines)
          (str "Prior STOP-THE-LINE findings to discharge explicitly: "
               (pr-str (prompt-findings stop-lines)) "\n"))
-       (evidence-deposit-instruction :reviewer attempt-evidence-dir author reviewer)
+       (evidence-deposit-instruction :reviewer attempt-evidence-dir author reviewer
+                                     measured-acquisition?)
        "\n"
        "Inspect the commit rather than trusting the summary. Verify that it is substantive "
        "rather than artifact-only, is in scope for the selected target, preserves invariants, "
@@ -1968,7 +1981,8 @@
    :gate review-gate})
 
 (defn- revision-author-prompt
-  [author reviewer evidence-dir target construction prior-commits findings]
+  [author reviewer evidence-dir measured-acquisition?
+   target construction prior-commits findings]
   (str author ": FULL-LOOP REVISION ROUND 2. The independent reviewer requested "
        "changes to your implementation. Amend the same selected target using new "
        "commits in the existing repository.\n\n"
@@ -1977,7 +1991,10 @@
        "YOUR PRIOR COMMIT SHAS: " (pr-str prior-commits) "\n"
        "REVIEWER VERDICT AND FINDINGS (VERBATIM):\n"
        findings "\n\n"
-       (evidence-deposit-instruction :author evidence-dir author reviewer)
+       (when measured-acquisition?
+         "THIS ATTEMPT IS A DECLARED MEASURED-ACQUISITION ATTEMPT.\n")
+       (evidence-deposit-instruction :author evidence-dir author reviewer
+                                     measured-acquisition?)
        "Address the findings without widening scope. Preserve existing history: "
        "make new commits only; do not force-push, reset, amend, rebase, rewrite, "
        "or otherwise replace prior commits. Run the repository-required gates.\n"
@@ -1986,7 +2003,7 @@
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
 
 (defn- revision-reviewer-prompt
-  [{:keys [reviewer author attempt-evidence-dir]}
+  [{:keys [reviewer author attempt-evidence-dir measured-acquisition?]}
    target construction repo prior-commit revision-commit
    revision-author-job initial-review-job stop-lines]
   (str reviewer ": FULL-LOOP AMENDMENT RE-REVIEW. You are the same independent "
@@ -2007,7 +2024,8 @@
        (when (seq stop-lines)
          (str "Prior STOP-THE-LINE findings remain in force: "
               (pr-str (prompt-findings stop-lines)) "\n"))
-       (evidence-deposit-instruction :reviewer attempt-evidence-dir author reviewer)
+       (evidence-deposit-instruction :reviewer attempt-evidence-dir author reviewer
+                                     measured-acquisition?)
        "\nInspect the amendment commit and its delta from the prior reviewed commit. "
        "Do not edit or commit. Execute the repository-required static checks and "
        "relevant tests yourself; an APPROVE without executed tool evidence is invalid.\n\n"
@@ -2076,6 +2094,7 @@
                  "wm-full-loop" target
                  (revision-author-prompt author reviewer
                                          (:attempt-evidence-dir opts)
+                                         (:measured-acquisition? opts)
                                          target construction
                                          prior-commits findings))))
             revision-author-job
@@ -2625,6 +2644,31 @@
                          :source-path path}
                         e))))))
 
+(defn- valid-standing-decision?
+  [evidence-dir target reviewer author]
+  (boolean
+   (when (and evidence-dir (.isDirectory (io/file evidence-dir)))
+     (some
+      (fn [^java.io.File file]
+        (try
+          (let [record (parse-attempt-evidence
+                        (Files/readAllBytes (.toPath file))
+                        (.getAbsolutePath file))]
+            (and (= :wm/target-standing-decision-v1 (:schema record))
+                 (= target (:entity/id
+                            (limb-evidence/validate-standing-decision record)))
+                 (= reviewer (:decided-by record))
+                 (= author (:implementation-author record))))
+          (catch Throwable _ false)))
+      (sort-by #(.getName ^java.io.File %)
+               (filter #(.isFile ^java.io.File %)
+                       (seq (.listFiles (io/file evidence-dir)))))))))
+
+(defn- standing-completion-prompt [target evidence-dir]
+  (str "Deposit the standing decision for " (pr-str target) " in "
+       evidence-dir ". Decision content is yours; this request neither repeats "
+       "implementation nor suggests a decision."))
+
 (defn- checkpoint-evidence-manifest
   [events data-root cohort-id attempt-id]
   (let [cohort-name (name cohort-id)
@@ -2923,6 +2967,10 @@
          :as opts} (assoc (config raw-opts)
                          :phase-events phase-events
                          :wm-phase-state (atom nil))
+        _ (when (and (contains? raw-opts :measured-acquisition?)
+                     (not (boolean? (:measured-acquisition? raw-opts))))
+            (throw (ex-info "measured-acquisition? must be boolean"
+                            {:failure-kind :measured-acquisition-option-invalid})))
         started (System/currentTimeMillis)
         opportunity-id (or (:opportunity-id opts)
                            (str (name trigger) "/" (Instant/now) "/" (UUID/randomUUID)))
@@ -3994,6 +4042,34 @@
                                               :reviews reviews))
                                      {:kind :git-commit-and-independent-review
                                       :repository repo}))
+                  (when (and approved? (:measured-acquisition? opts)
+                             (not (valid-standing-decision?
+                                   attempt-evidence-dir target reviewer author)))
+                    (let [completion-response
+                          (run-phase!
+                           opts @phase-context :standing-completion-dispatch
+                           #(do
+                              (swap! dispatched-turns inc)
+                              ((or (:dispatch-fn opts) dispatch!)
+                               opts reviewer "wm-full-loop" target
+                               (standing-completion-prompt
+                                target attempt-evidence-dir))))) ]
+                      (try
+                        (run-phase!
+                         opts @phase-context :standing-completion-wait
+                         #((or (:poll-fn opts) poll-job!)
+                           opts (:job-id completion-response)))
+                        (catch Throwable _ nil)))
+                    (when-not (valid-standing-decision?
+                               attempt-evidence-dir target reviewer author)
+                      (throw
+                       (ex-info "Standing evidence insufficient"
+                                {:outcome :incomplete
+                                 :failure-kind :standing-evidence-insufficient
+                                 :failure-stage :standing-completion
+                                 :target target
+                                 :reviewer reviewer
+                                 :author author}))))
                   (when-not approved?
                     (let [failure-data
                           (cond->
