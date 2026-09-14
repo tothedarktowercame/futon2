@@ -317,6 +317,12 @@
 
 (defn- event-record [p attempt-id ordinal sequence checkpoint payload]
   (let [recorded-at (str (Instant/now))
+        _ (when (and (not= :closed checkpoint)
+                     (map? payload)
+                     (contains? payload :retention-inputs))
+            (throw (ex-info "Close retention marker on non-close checkpoint"
+                            {:close-retention/refusal :retention-marker-misplaced
+                             :checkpoint/type checkpoint})))
         payload (if (and (= :closed checkpoint)
                          (contains? payload :retention-inputs))
                   (let [inputs (:retention-inputs payload)

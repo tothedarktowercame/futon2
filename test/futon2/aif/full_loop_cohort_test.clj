@@ -123,6 +123,19 @@
                                             (retention-close inputs))))
         (is (not (.exists (close-path root attempt))))))))
 
+(deftest retention-marker-on-non-close-checkpoint-refuses
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        attempt (:attempt/id (open! root "clock/misplaced-marker"))]
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"non-close checkpoint"
+                          (cohort/append-checkpoint!
+                           prereg-path root attempt :selection
+                           {:sorry {:kind :test-selection}
+                            :retention-inputs {}})))
+    (is (not (.exists (io/file root (name (:cohort/id (cohort/read-edn prereg-path)))
+                               attempt "002-selection.edn"))))))
+
 (deftest preregistration-is-valid
   (let [p (edn/read-string (slurp prereg-path))]
     (is (cohort/valid-preregistration? p))
