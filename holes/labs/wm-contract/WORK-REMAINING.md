@@ -292,7 +292,20 @@ operator workflow conversation (standdown 2026-09-12).
     + retention), opt-in and not yet live-wired. Remaining:
     packet 1 (A-content, awaits Joe's decision above), packets
     2/6 behind it, live wiring in the judge behind
-    retention+evidence per the TN. Serving JVM reloaded from
+    retention+evidence per the TN. LIVE WIRING BLOCKED
+    (2026-09-14, TN-row14-live-wiring-blocker-2026-09-14.md,
+    357348ec, reviewed by claude-15 against source): the flip
+    needs, beyond packets 1/2, TWO authorities the TN's six
+    packets never listed — the controlled-transition action
+    vocabulary covers only [:advance-mission :apply-cascade]
+    (row-8 production-match) while the live ranked domain is
+    wider (:open-mission, :no-op, :address-sorry, :fire-pattern,
+    :learn-action-class in retained records), and no pinned
+    candidate-occurrence-to-full-policy-plan artifact exists.
+    Wiring order therefore inverts: measured-A validator ->
+    packet 1/2 -> action-domain authority + plan artifact ->
+    :machine-q-enabled? resolver + witnesses + flip (the
+    resolver contract is named in the blocker TN). Serving JVM reloaded from
     master (2026-09-12 post-packet-5: machine-q-risk, efe, trace
     schema 28, war-machine; bottom-up after a stale
     ruled-outcome-c dep surfaced) — next live tick performs the
