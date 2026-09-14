@@ -4981,7 +4981,31 @@
     (spit (io/file dir "standing.edn")
           (pr-str (assoc record :explanation "too short")))
     (is (not (#'runner/valid-standing-decision?
-              (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1")))))
+              (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1")))
+    (let [dispatches (atom []) waits (atom 0)]
+      (is (#'runner/ensure-standing-decision!
+           (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+           (fn [prompt] (swap! dispatches conj prompt) {:job-id "completion"})
+           (fn [_] (swap! waits inc)
+             (spit (io/file dir "standing.edn") (pr-str record)))))
+      (is (= 1 (count @dispatches)))
+      (is (= 1 @waits))
+      (is (#'runner/ensure-standing-decision!
+           (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+           (fn [_] (throw (AssertionError. "must not redispatch"))) identity)))
+    (spit (io/file dir "standing.edn")
+          (pr-str (assoc record :decided-by "wrong-reviewer")))
+    (let [dispatches (atom 0)
+          failure (try
+                    (#'runner/ensure-standing-decision!
+                     (.getAbsolutePath dir) "target-1" "reviewer-1" "author-1"
+                     (fn [_] (swap! dispatches inc) {:job-id "completion"})
+                     identity)
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= 1 @dispatches))
+      (is (= :standing-evidence-insufficient (:failure-kind failure)))
+      (is (= :incomplete (:outcome failure))))))
 
 (deftest measured-prompts-declare-required-completion
   (let [opts {:author "author-1" :reviewer "reviewer-1"

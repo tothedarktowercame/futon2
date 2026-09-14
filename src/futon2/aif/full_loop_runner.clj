@@ -2672,6 +2672,20 @@
        evidence-dir ". Decision content is yours; this request neither repeats "
        "implementation nor suggests a decision."))
 
+(defn- ensure-standing-decision!
+  [evidence-dir target reviewer author dispatch-completion! wait-completion!]
+  (when-not (valid-standing-decision? evidence-dir target reviewer author)
+    (let [response (dispatch-completion!
+                    (standing-completion-prompt target evidence-dir))]
+      (try (wait-completion! response) (catch Throwable _ nil)))
+    (when-not (valid-standing-decision? evidence-dir target reviewer author)
+      (throw (ex-info "Standing evidence insufficient"
+                      {:outcome :incomplete
+                       :failure-kind :standing-evidence-insufficient
+                       :failure-stage :standing-completion
+                       :target target :reviewer reviewer :author author}))))
+  true)
+
 (defn- checkpoint-evidence-manifest
   [events data-root cohort-id attempt-id]
   (let [cohort-name (name cohort-id)
@@ -4046,33 +4060,20 @@
                                      {:kind :git-commit-and-independent-review
                                       :repository repo}))
                   (when (and approved? (:measured-acquisition? opts)
-                             (not (valid-standing-decision?
-                                   attempt-evidence-dir target reviewer author)))
-                    (let [completion-response
-                          (run-phase!
-                           opts @phase-context :standing-completion-dispatch
-                           #(do
-                              (swap! dispatched-turns inc)
-                              ((or (:dispatch-fn opts) dispatch!)
-                               opts reviewer "wm-full-loop" target
-                               (standing-completion-prompt
-                                target attempt-evidence-dir))))]
-                      (try
-                        (run-phase!
-                         opts @phase-context :standing-completion-wait
-                         #((or (:poll-fn opts) poll-job!)
-                           opts (:job-id completion-response)))
-                        (catch Throwable _ nil)))
-                    (when-not (valid-standing-decision?
-                               attempt-evidence-dir target reviewer author)
-                      (throw
-                       (ex-info "Standing evidence insufficient"
-                                {:outcome :incomplete
-                                 :failure-kind :standing-evidence-insufficient
-                                 :failure-stage :standing-completion
-                                 :target target
-                                 :reviewer reviewer
-                                 :author author}))))
+                             attempt-evidence-dir)
+                    (ensure-standing-decision!
+                     attempt-evidence-dir target reviewer author
+                     (fn [prompt]
+                       (run-phase!
+                        opts @phase-context :standing-completion-dispatch
+                        #(do (swap! dispatched-turns inc)
+                             ((or (:dispatch-fn opts) dispatch!)
+                              opts reviewer "wm-full-loop" target prompt))))
+                     (fn [response]
+                       (run-phase!
+                        opts @phase-context :standing-completion-wait
+                        #((or (:poll-fn opts) poll-job!)
+                          opts (:job-id response))))))
                   (when-not approved?
                     (let [failure-data
                           (cond->
