@@ -26,7 +26,9 @@
    :evidence "../../TN-r10-caller-discovery-2026-09-14.md (94bb4126); ACCEPTANCE-r10-discovery.md"
    :note "Wiring impossible as caller-only edit: dispatch-then-record ordering can refuse after an async click started. Blocked on new node below."}
   {:node :r10-commission-contract
-   :status :discovered-prerequisite
+   :status :in-flight
    :at "2026-09-14"
+   :seat "codex-24"
+   :job-id "invoke-1789393094306-20786-e21bf230"
    :evidence "../../TN-r10-caller-discovery-2026-09-14.md §3, §Smallest valid next packet"
-   :note "NEW node not in dag.edn ec09b980: versioned R10 click-commission/dispatch-identity contract with durable pre-dispatch reservation and recovery semantics; hard prerequisite of r10-caller wiring. Fold into the DAG at its next revision."}]}
+   :note "NEW node not in dag.edn ec09b980 (fold in at next DAG revision): spec + pure mechanism + hermetic controls for the versioned commission/dispatch-identity contract; genesis follows the server-owned sha-pinned authority pattern; CREATE_NEW reservation; typed :reserved/:dispatched/:recorded/:dangling states. Hard prerequisite of r10-caller wiring."}]}
