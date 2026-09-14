@@ -4051,8 +4051,9 @@
         (try
       (run-opportunity-core! (assoc raw-opts :run-id run-id))
     (catch Throwable e
-      (when (= :delivery-qa-gate-failed
-               (:failure-kind (ex-data e)))
+      (when (or (= :delivery-qa-gate-failed
+                   (:failure-kind (ex-data e)))
+                (:evidence-manifest/refusal (ex-data e)))
         (throw e))
       ;; Cohort stopping rule is normal completion, not a machine failure.
       ;; Repair-initialization was caused by this being treated as an
