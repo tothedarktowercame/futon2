@@ -1,0 +1,10 @@
+{:command "clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'"
+ :exit 0
+ :tests 157
+ :assertions 824
+ :failures 0
+ :errors 0
+ :tree-sha "916ff6302d226ec6edd0c2af909cb89e180f6bea"
+ :at "2026-09-14T18:08:01Z"
+ :stdout "tests.out"
+ :fresh-jvm true}
