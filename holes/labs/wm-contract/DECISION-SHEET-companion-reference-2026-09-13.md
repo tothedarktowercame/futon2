@@ -71,3 +71,17 @@ building (:wm/f2-reconciliation-certificate-v1 and successors) and the
 M-f11 Lean acceptance (F1-F4 witnessed, find sorry discharged), to be
 settled when one exists to pin. P001-P005 close to
 RULED-PENDING-CERTIFICATE.
+
+## CERTIFICATE PINNED (claude-15, 2026-09-14)
+
+Both named candidates matured and they bind through the same fixture
+digest, so the pinned certificate is their composition: the F1-F4 Lean
+closures over the transcribed find record (Holes.lean:914-955, decide,
+re-elaborated clean 2026-09-14) certify the recorded-row invariants,
+and :wm/f2-reconciliation-certificate-v1 certifies the transcription's
+pin -- expectation bound to pre-existing futon3 history (e63eaef8),
+validated fail-closed, --check PASS 2026-09-14 -- with the chain itself
+authored under independent review and closed grounded (cohort 49,
+attempt-002). Principle applied: the two legs are not alternatives but
+the record leg and the record-integrity leg of one certificate. The
+Methods section is added (p4ng fe085b1); P001-P005 CLOSED.

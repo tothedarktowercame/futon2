@@ -29,6 +29,20 @@ only when the relevant certificate exists. Rows P001-P005 are
 RULED-PENDING-CERTIFICATE; full ruling in
 DECISION-SHEET-companion-reference-2026-09-13.md.
 
+**CLOSED 2026-09-14 (P001-P005):** the relevant certificate exists and
+the ruled Methods section is added (p4ng `sec-methods-plop.tex`, wired
+into `plop-2026.tex`, published). The pinned certificate is two-legged:
+the F1-F4 find closures (`DarkTower/WarMachine/Holes.lean:914-955`,
+`decide` over the pinned record `futon3:checks/find-snatch.edn`, sha256
+`c11673ea...2430ce`, re-elaborated clean 2026-09-14 with only the
+intentional H3/H4 attestation holes) and the transcription leg
+(`:wm/f2-reconciliation-certificate-v1`, expectation bound to futon3
+commit `e63eaef8` with fail-closed validation, `f11_f2_reconcile.bb
+--check` PASS 2026-09-14, chain reviewed in-loop and closed
+grounded-change in cohort 49 attempt-002). The companion macros resolve
+to futon-2026 (`plop-2026.tex:11-12`, commit 7b1b586); both paper
+worknotes flip to RESOLVED (p4ng commit fe085b1).
+
 
 | ID | Claim (short verbatim quote; source) | State | Evidence and exact limit | What closes the gap | futon-2026 echo |
 | --- | --- | --- | --- | --- | --- |
