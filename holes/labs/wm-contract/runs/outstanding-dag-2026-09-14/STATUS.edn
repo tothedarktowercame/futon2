@@ -18,6 +18,20 @@
    :job-id "invoke-1789392677113-20784-4024e143"
    :evidence "runs/categorical-ambiguity-2026-09-14/ACCEPTANCE.md"
    :note "Estimator built and accepted (602ff836/a796f6df); downstream risk-ambiguity-witness still blocked on a-estimate and q-witness-flip."}
+  {:node :r10-commission-contract
+   :status :accepted-built
+   :at "2026-09-14"
+   :seat "codex-24"
+   :job-id "invoke-1789393094306-20786-e21bf230"
+   :evidence "futon3c holes/labs/wm-contract/runs/r10-commission-2026-09-14/ACCEPTANCE.md (00be139c); SPEC-r10-click-commission-v1.md"
+   :note "NEW node not in dag.edn ec09b980 (fold in at next DAG revision). Contract + mechanism + controls accepted (futon3c 8f844891/cde07d04/17639603)."}
+  {:node :r10-adoption
+   :status :accepted
+   :at "2026-09-14"
+   :seat "codex-24"
+   :job-id "invoke-1789399097848-20788-f05531e2"
+   :evidence "futon3c holes/labs/wm-contract/runs/r10-adoption-2026-09-14/ACCEPTANCE.md (1c00f937)"
+   :note "NEW node (fold in with r10-commission-contract at next DAG revision). Commission r10-click-commission-2026-09-14-01 (issuer joe, single-use) + binding ns accepted (futon3c f5b4ceee/d0335fb3). Pinned sha 7c501849... independently recomputed. Commission SPENT by the r10-record acceptance run."}
   {:node :r10-caller
    :status :accepted-built
    :at "2026-09-14"
@@ -36,32 +50,24 @@
    :seat "codex-23"
    :job-id "invoke-1789401413728-20790-30ebc84a"
    :evidence "runs/row-14-observed-status-rubric-2026-09-14/ACCEPTANCE.md (8a6e5a5a); RUBRIC-observed-status-v1.md; rubric-authority-draft.edn"
-   :note "Rubric v1 accepted (3dee9855/4e8b303e): 3 statuses with grounded candidate shapes (:refined :strengthened :addressed), 4 typed-absent, 0/7 currently qualifying annotations. Consequence: a-labels needs NEW qualifying observation acquisition (retained CP-close events cannot be promoted as-is; no literal bytes, no independent acceptance); :reopened cannot be first by construction. Observer seat must differ from codex-23; claude-15 reviewer."}
+   :note "Rubric v1 accepted (3dee9855/4e8b303e): 3 statuses with grounded candidate shapes (:refined :strengthened :addressed), 4 typed-absent, 0/7 currently qualifying annotations. Consequence: a-labels needs NEW qualifying observation acquisition (retained CP-close events cannot be promoted as-is); :reopened cannot be first by construction. Observer seat must differ from codex-23; claude-15 reviewer."}
   {:node :a-pairs
    :status :discovery-complete-blocked
    :at "2026-09-14"
    :seat "codex-22"
    :job-id "invoke-1789401417020-20791-e2df4372"
    :evidence "../../TN-a-pairs-discovery-2026-09-14.md (3cabc7bc + reviewer correction 43e4701b); ACCEPTANCE-a-pairs-discovery.md"
-   :note "0/86 retained closes carry the Status+cutoff+post-action identity a licensed a-pair needs; 23 cross-root identity collisions make path-only joins unsafe. Converges with a-rubric acceptance: a-labels/a-pairs need NEW retention at live closes (cutoff, post-action point, action/transition ids, model revision, adjudicated Status), then byte-pinned joins. Reviewer correction: production outcome-kinds is now 14 values; licensed 7x12 support excludes the two historical-verification outcomes (typed out-of-support at a-estimate)."}
+   :note "0/86 retained closes carry the Status+cutoff+post-action identity a licensed a-pair needs; 23 cross-root identity collisions make path-only joins unsafe. a-labels/a-pairs need NEW retention at live closes, then byte-pinned joins. Reviewer correction: production outcome-kinds is now 14 values; licensed 7x12 support excludes the two historical-verification outcomes (typed out-of-support at a-estimate)."}
   {:node :close-retention
    :status :accepted-built
    :at "2026-09-14"
    :seat "codex-24"
    :job-id "invoke-1789402815232-20795-2ab3f63b"
-   :evidence "../../TN-close-retention-discovery-2026-09-14.md (cffa43d1); ACCEPTANCE-close-retention-discovery.md (b452f71f); ../close-retention-2026-09-14/ACCEPTANCE.md (4e5338f6); SPEC-close-retention-v1.md"
-   :note "NEW node (fold into next DAG revision between a-rubric and a-labels). COMPLETE: contract (0103c396/0db7de6c), writer slice (8864fecf/febc8930 + reviewer fix b0da1087), runner slice (2b1f7af3/9c877fbd; ACCEPTANCE 33754463). Every new cohort close after successful selection carries a validated conditioning block (occurrence + typed-absent state/model + closed-at = cutoff); post-selection failures retain too; pre-selection failures stay legacy. Production pickup when loop JVMs restart from current main. Status arm still needs a-labels; retained cutoff makes retrospective annotation on NEW closes possible."}]}
-  {:node :r10-commission-contract
-   :status :accepted-built
+   :evidence "../../TN-close-retention-discovery-2026-09-14.md (cffa43d1); ACCEPTANCE-close-retention-discovery.md (b452f71f); ../close-retention-2026-09-14/ACCEPTANCE.md (4e5338f6); ../close-retention-writer-2026-09-14/ACCEPTANCE.md (88776683); ../close-retention-runner-2026-09-14/ACCEPTANCE.md (33754463)"
+   :note "NEW node (fold into next DAG revision between a-rubric and a-labels). COMPLETE: contract (0103c396/0db7de6c), writer slice (8864fecf/febc8930 + reviewer fix b0da1087), runner slice (2b1f7af3/9c877fbd). Every new cohort close after successful selection carries a validated conditioning block (occurrence + typed-absent state/model + closed-at = cutoff); post-selection failures retain too; pre-selection failures stay legacy. Production pickup when loop JVMs restart from current main. Status arm still needs a-labels; retained cutoff makes retrospective annotation on NEW closes possible."}
+  {:node :a-labels
+   :status :discovery-in-flight
    :at "2026-09-14"
-   :seat "codex-24"
-   :job-id "invoke-1789393094306-20786-e21bf230"
-   :evidence "futon3c holes/labs/wm-contract/runs/r10-commission-2026-09-14/ACCEPTANCE.md (00be139c); SPEC-r10-click-commission-v1.md"
-   :note "NEW node not in dag.edn ec09b980 (fold in at next DAG revision). Contract + mechanism + controls accepted (futon3c 8f844891/cde07d04/17639603). r10-caller wiring now needs: (1) the adoption packet (operator-committed commission file + server-owned binding), (2) the one-behaviour adapter in handle-wm-click-start, with the three integration notes from the acceptance."}
-  {:node :r10-adoption
-   :status :accepted
-   :at "2026-09-14"
-   :seat "codex-24"
-   :job-id "invoke-1789399097848-20788-f05531e2"
-   :evidence "futon3c holes/labs/wm-contract/runs/r10-adoption-2026-09-14/ACCEPTANCE.md (1c00f937)"
-   :note "NEW node (fold in with r10-commission-contract at next DAG revision). Commission r10-click-commission-2026-09-14-01 (issuer joe, single-use) + binding ns accepted (futon3c f5b4ceee/d0335fb3). Pinned sha 7c501849... independently recomputed. Commission is live single-use authority; only the wiring acceptance run may spend it."}]}
+   :seat "codex-22"
+   :job-id "invoke-1789403285979-20796-9332ef6c"
+   :note "Design discovery: retrospective annotation route on new retention-bearing closes (per-status feasibility for the 3 grounded statuses), admitted-evidence candidates, observer/reviewer/acceptance binding order, smallest workflow to annotation #1, leakage hazards. Rubric author codex-23 excluded from observing; claude-15 reviews."}]}
