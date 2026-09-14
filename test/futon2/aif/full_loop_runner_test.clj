@@ -1209,7 +1209,8 @@
     (is (= {:executed true :tool-events 2 :command-events 1}
            (:reviewer validation)))
     (is (= (str "FULL_LOOP_REVIEW: APPROVE\n"
-                "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")
+                "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.\n"
+                "Inspecting.")
            (:review-text validation)))
     (is (= (:reviewer validation) (:execution gate)))
     (is (= :job-events (:execution-source gate)))
