@@ -1,0 +1,8 @@
+{:command "clj-kondo --lint test/futon2/aif/full_loop_runner_test.clj"
+ :exit 0
+ :tests 0
+ :assertions 0
+ :tree-sha "09cc0d5bda46fcb06b71c243f89e64aba7700cab"
+ :at "2026-09-14T16:46:38Z"
+ :stdout "test-kondo-final.out"
+ :findings {:errors 0 :warnings 0}}
