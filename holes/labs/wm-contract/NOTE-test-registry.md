@@ -72,3 +72,13 @@ discipline); a results claim without matching shas does not register.
 3. Sampling rate for routine reviews (default proposal: spot-check one
    test per review; full rerun stays mandatory for pre-push and
    invariant-relevant lanes)?
+
+## RULINGS (Joe, 2026-09-14)
+
+1. Scope: wherever tests and handoffs are run — not repo-limited.
+2. Env fingerprint: as proposed — toolchain, JVM, dependency hashes
+   included, so results are comparable across machines.
+3. Sampling: spot-check one test per review by default; adjust when
+   evidence says otherwise (the threshold rule again: declared, then
+   re-priced on measurement — full rerun stays mandatory pre-push and
+   on invariant-relevant lanes).
