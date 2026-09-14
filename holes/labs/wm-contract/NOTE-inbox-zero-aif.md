@@ -115,3 +115,23 @@ never from the loop itself.
 Row links: SPEC-chip-boards-v0 §3½ (hierarchy), §4 task 0; C446, C448,
 U59 (case numbers); SPEC-zaif-harness-v1 (node table); README-inbox-zero
 (the measured substrate).
+
+## RULING: batch-dispatch cadence (Joe, 2026-09-14)
+
+Inbox-zero cleanup is OPERATOR-DISPATCHED BATCH, not autonomous
+continuous: wait until a reasonable number of dirty files accumulate
+(~10), then the operator tells the agent to package them into nice
+commits and push. Consequences:
+
+- the trigger is a threshold + operator cue (the 🕒 pattern; EX-1
+  territory), matching the constellation cadence: pressure builds,
+  releases in batches;
+- nice commits = grouped by concern/repo, message-described,
+  certificate-bearing; push included in the dispatch;
+- T2's atomicity requirement is UNCHANGED — operator dispatch changes
+  who AUTHORIZES, not the physics; the execution-time in-flight
+  recheck stays, in-flight repos are typed-refused out of the batch,
+  and the autonomous-mode :atomic-feel-commit-unavailable guard is
+  not weakened by dispatch (if the guard refuses during a batch, the
+  agent reports and asks);
+- the threshold (~10) is a tunable constant, declared not tuned.
