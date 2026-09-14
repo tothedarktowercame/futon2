@@ -45,12 +45,12 @@
    :evidence "../../TN-a-pairs-discovery-2026-09-14.md (3cabc7bc + reviewer correction 43e4701b); ACCEPTANCE-a-pairs-discovery.md"
    :note "0/86 retained closes carry the Status+cutoff+post-action identity a licensed a-pair needs; 23 cross-root identity collisions make path-only joins unsafe. Converges with a-rubric acceptance: a-labels/a-pairs need NEW retention at live closes (cutoff, post-action point, action/transition ids, model revision, adjudicated Status), then byte-pinned joins. Reviewer correction: production outcome-kinds is now 14 values; licensed 7x12 support excludes the two historical-verification outcomes (typed out-of-support at a-estimate)."}
   {:node :close-retention
-   :status :in-flight
+   :status :accepted-built
    :at "2026-09-14"
    :seat "codex-24"
-   :job-id "invoke-1789402498124-20794-75f0caf0"
+   :job-id "invoke-1789402815232-20795-2ab3f63b"
    :evidence "../../TN-close-retention-discovery-2026-09-14.md (cffa43d1); ACCEPTANCE-close-retention-discovery.md (b452f71f); ../close-retention-2026-09-14/ACCEPTANCE.md (4e5338f6); SPEC-close-retention-v1.md"
-   :note "NEW node (fold into next DAG revision between a-rubric and a-labels). Contract accepted (0103c396/0db7de6c/5f4ab866). Writer slice accepted (8864fecf/febc8930 + reviewer fix b0da1087 refusing misplaced markers; ACCEPTANCE 88776683): writer completes block with its own :recorded-at, refuses before durable append, additive for legacy cells. Runner slice 2 of 2 in flight (job invoke-1789402815232-20795-2ab3f63b): mint occurrence at selection boundary, thread :retention-inputs with typed-absent state/model to close!, early-failure closes stay legacy, stop discarding writer return."}]}
+   :note "NEW node (fold into next DAG revision between a-rubric and a-labels). COMPLETE: contract (0103c396/0db7de6c), writer slice (8864fecf/febc8930 + reviewer fix b0da1087), runner slice (2b1f7af3/9c877fbd; ACCEPTANCE 33754463). Every new cohort close after successful selection carries a validated conditioning block (occurrence + typed-absent state/model + closed-at = cutoff); post-selection failures retain too; pre-selection failures stay legacy. Production pickup when loop JVMs restart from current main. Status arm still needs a-labels; retained cutoff makes retrospective annotation on NEW closes possible."}]}
   {:node :r10-commission-contract
    :status :accepted-built
    :at "2026-09-14"
