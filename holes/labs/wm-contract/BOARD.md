@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~23:15Z (packet 1 accepted + fixed; packet 2 with codex-24)
+Updated: 2026-09-14 ~23:45Z (packet 2 accepted; cohort-54 prereg next)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,12 +13,18 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **ruling packet 2: successor discharge + readback** — codex-24, job
-  `invoke-1789426402247-20904-237755dc` (running), park `park-a119b57f`.
-  Existing resolution writer + explicit T/R/S relation + five ruled negative
-  controls. Packet 3 (cohort-54 T/R/S/O prereg) is mine, right after.
+- Nothing dispatched; next action is mine: **packet 3 — cohort-54 T/R/S/O
+  preregistration** (worker casting, finite observation rule, S-as-O condition
+  from the actual writer timing), then activate + rebind + reload + click.
 
 ## DONE (this sitting, newest first)
+- Ruling packet 2 ACCEPTED (`8f5bea11`): successor discharge through the existing
+  writer with explicit T/R/S relation record; five ruled negative controls + the
+  projection-pointer refusal; pure cutoff-aware derived-state readback. Carry-over
+  completed in-lane (`eec07f38`): :standing-readback now pinned END-TO-END into the
+  written 007 (a second dropped-thread in close!'s judgment assembly found+fixed).
+  Fixture insight recorded: the retention-test family closes :build-failed silently
+  since 48dfa037; tests pass on retention-only assertions — cleanup queued.
 - Ruling packet 1 ACCEPTED (`81ce8543`, acceptance `735c377e`) with one reviewer fix
   in-lane (`d1ff5aab`): the pending-successor store annotation was computed then
   DISCARDED — now ensure-standing-decision! returns the readback and the grounded
