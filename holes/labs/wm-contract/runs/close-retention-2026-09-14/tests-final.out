@@ -1,0 +1,32 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.close-retention-test
+
+FAIL in (mint-and-typed-absence-happy-path) (close_retention_test.clj:31)
+expected: (= "transition-00000000-0000-4000-8000-000000000001" (:transition/id o))
+  actual: (not (= "transition-00000000-0000-4000-8000-000000000001" "transition-00000000-0000-4000-8000-000000000002"))
+
+FAIL in (mint-and-typed-absence-happy-path) (close_retention_test.clj:32)
+expected: (= "action-00000000-0000-4000-8000-000000000002" (:action/id o))
+  actual: (not (= "action-00000000-0000-4000-8000-000000000002" "action-00000000-0000-4000-8000-000000000001"))
+
+FAIL in (temporal-and-freeze-controls) (close_retention_test.clj:66)
+expected: (= :collapsed-evidence-freezes (refusal (fn* [] (block {:state (assoc observed :observed-at "2026-09-14T10:03:00Z")}))))
+  actual: (not (= :collapsed-evidence-freezes :state-observation-after-state))
+
+FAIL in (temporal-and-freeze-controls) (close_retention_test.clj:69)
+expected: (= :evidence-after-cutoff (refusal (fn* [] (block {:state (assoc observed :observed-at "2026-09-14T10:04:00Z")}))))
+  actual: (not (= :evidence-after-cutoff :state-observation-after-state))
+
+FAIL in (temporal-and-freeze-controls) (close_retention_test.clj:74)
+expected: (= :temporal-order-invalid (refusal (fn* [] (block {:state (assoc observed :state-at "2026-09-14T09:59:00Z")}))))
+  actual: (not (= :temporal-order-invalid :state-observation-after-state))
+
+Ran 4 tests containing 16 assertions.
+5 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-18438945690619406602.edn

@@ -1,0 +1,5 @@
+Execution error (FileNotFoundException) at java.io.FileInputStream/open0 (FileInputStream.java:-2).
+-n (No such file or directory)
+
+Full report at:
+/tmp/clojure-10243895095834923979.edn
