@@ -2333,6 +2333,31 @@
           "a resolvable in-history claim corroborates despite a moved HEAD")
       (is (= "author-head" (:commit binding))))))
 
+(deftest artifact-binding-rejects-a-stale-out-of-window-claim
+  ;; Round-2 review finding (repair-ea1-3f4cac, job invoke-1789420253972):
+  ;; the moved-HEAD amendment validated only the observed head's timestamp,
+  ;; so a pre-existing side-branch commit merged during the window -- a
+  ;; descendant of the base, an ancestor of head, authored long before the
+  ;; dispatch -- corroborated as the author's artifact. The returned commit
+  ;; itself must lie in the author window.
+  (let [opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head "concurrent-head" :observed-at-ms 2000})
+              :ancestor-fn (constantly true)
+              :commit-time-ms-fn (fn [_ commit]
+                                   (if (= commit "stale-sha") 500000000 1500))
+              :resolve-commit-sha-fn (fn [_ ref] (when (= ref "stale-claim") "stale-sha"))}
+        before {:head "base" :observed-at-ms 1000}
+        failure (try
+                  (runner/fresh-artifact-binding opts "/repo" before
+                                                 {:artifact-ref "stale-claim"})
+                  nil
+                  (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (= :artifact-binding-mismatch (:failure-kind failure)))
+    (is (get-in failure [:artifact-binding :in-author-window?])
+        "the observed head is fresh; it is the CLAIM that is stale")
+    (is (= 500000000 (get-in failure [:artifact-binding :claim-commit-time-ms])))
+    (is (nil? (get-in failure [:artifact-binding :commit])))))
+
 (deftest narrated-artifact-without-new-repo-head-stops-before-review
   (let [dispatches (atom [])
         author-prompts (atom [])

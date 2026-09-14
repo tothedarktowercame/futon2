@@ -607,7 +607,28 @@
                 (and text-sha
                      (not= text-sha before-head)
                      (ancestor? opts repo before-head text-sha))
+                ;; Freshness applies to the RETURNED commit, not only the
+                ;; observed head: a pre-existing side-branch commit merged
+                ;; during the window is a descendant of the base and an
+                ;; ancestor of head, yet was not authored by this dispatch.
+                ;; Round-2 review of repair-ea1-3f4cac (job
+                ;; invoke-1789420253972) reproduced exactly that: an
+                ;; out-of-window claim reported :in-author-window? true
+                ;; because only HEAD's timestamp was ever read.
+                claim-time-ms (when (and text-sha
+                                         (not= text-sha observed-head))
+                                (commit-time-ms opts repo text-sha))
+                claim-in-window? (if (or (nil? text-sha)
+                                         (= text-sha observed-head))
+                                   in-window?
+                                   (and claim-time-ms start-ms end-ms
+                                        (<= (- start-ms
+                                               artifact-window-tolerance-ms)
+                                            claim-time-ms
+                                            (+ end-ms
+                                               artifact-window-tolerance-ms))))
                 corroborates? (and observed-valid? claim-descendant?
+                                    claim-in-window?
                                     (or (= observed-head text-sha)
                                         (ancestor? opts repo text-sha
                                                   observed-head)))]
@@ -620,6 +641,7 @@
              :author-window-end-ms end-ms
              :text-artifact-ref text-ref
              :text-artifact-sha text-sha
+             :claim-commit-time-ms claim-time-ms
              :descendant? (boolean descendant?)
              :in-author-window? (boolean in-window?)
              :corroborates? (boolean corroborates?)
