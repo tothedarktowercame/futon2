@@ -1,0 +1,8 @@
+{:command "emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/full_loop_runner.clj test/futon2/aif/full_loop_runner_test.clj"
+ :exit 0
+ :tests 0
+ :assertions 0
+ :tree-sha "9b2d905ffec7a68b96a266df62334a04b128db6c"
+ :at "2026-09-14T18:12:46Z"
+ :stdout "check-parens.out"
+ :result :ok}
