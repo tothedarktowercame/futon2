@@ -54,7 +54,16 @@
   (testing "a revision must change selected-entity bytes"
     (is (= :revision-unchanged
            (refusal #(limb/validate-revision-pair
-                      (assoc-in revision [:after :sha256] sha-a)))))))
+                      (assoc-in revision [:after :sha256] sha-a))))))
+  (testing "the after capture must follow the before capture"
+    (is (= :revision-order-invalid
+           (refusal #(limb/validate-revision-pair
+                      (assoc-in revision [:after :captured-at]
+                                "2026-09-14T10:59:00Z")))))
+    (is (= :revision-order-invalid
+           (refusal #(limb/validate-revision-pair
+                      (assoc-in revision [:after :captured-at]
+                                "2026-09-14T11:00:00Z")))))))
 
 (deftest receipt-and-common-field-refusals
   (testing "a prose-only receipt lacks the byte digests"

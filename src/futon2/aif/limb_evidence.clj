@@ -96,6 +96,13 @@
   (validate-capture (:after record) [:revision-pair :after])
   (when (= (get-in record [:before :sha256]) (get-in record [:after :sha256]))
     (refuse! :revision-unchanged [:revision-pair]))
+  ;; The rubric requires the after revision to FOLLOW the before revision;
+  ;; equal or inverted capture instants would let a stale pair pose as one.
+  (let [before-at (Instant/parse (get-in record [:before :captured-at]))
+        after-at (Instant/parse (get-in record [:after :captured-at]))]
+    (when-not (.isBefore before-at after-at)
+      (refuse! :revision-order-invalid [:revision-pair :after :captured-at]
+               {:before (str before-at) :after (str after-at)})))
   (when-not (and (vector? (:dimensions record)) (seq (:dimensions record)))
     (refuse! :dimensions-invalid [:revision-pair :dimensions]))
   (doseq [[i dimension] (map-indexed vector (:dimensions record))]
