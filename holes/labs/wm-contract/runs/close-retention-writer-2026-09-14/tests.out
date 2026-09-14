@@ -1,0 +1,20 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.full-loop-cohort-test
+
+FAIL in (close-writer-refuses-invalid-retention-before-append) (full_loop_cohort_test.clj:121)
+expected: (thrown? clojure.lang.ExceptionInfo (cohort/close-attempt! prereg-path root attempt (retention-close inputs)))
+  actual: nil
+
+FAIL in (close-writer-refuses-invalid-retention-before-append) (full_loop_cohort_test.clj:124)
+expected: (not (.exists (close-path root attempt)))
+  actual: (not (not true))
+
+Ran 17 tests containing 78 assertions.
+2 failures, 0 errors.
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-248651597062483832.edn
