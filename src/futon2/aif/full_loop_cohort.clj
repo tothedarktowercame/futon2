@@ -320,6 +320,17 @@
         payload (if (and (= :closed checkpoint)
                          (contains? payload :retention-inputs))
                   (let [inputs (:retention-inputs payload)
+                        _ (when-not (and (map? inputs)
+                                         (= #{:occurrence :state :model
+                                              :admitted-evidence}
+                                            (set (keys inputs))))
+                            (throw
+                             (ex-info "Invalid close retention input marker"
+                                      {:close-retention/refusal
+                                       :retention-input-shape-invalid
+                                       :expected #{:occurrence :state :model
+                                                   :admitted-evidence}
+                                       :actual (some-> inputs keys set)})))
                         retention (close-retention/build-retention-block
                                    (assoc inputs
                                           :closed-at recorded-at
