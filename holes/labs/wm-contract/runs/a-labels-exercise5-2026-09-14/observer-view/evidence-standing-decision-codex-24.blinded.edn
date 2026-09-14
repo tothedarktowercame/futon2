@@ -1,0 +1,13 @@
+{:schema :wm/target-standing-decision-v1,
+ :entity/id
+ "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-002-artifact-binding-mismatch",
+ :decision :resolved,
+ :decided-by "codex-24",
+ :implementation-author "zai-5",
+ :decided-at "2026-09-14T22:15:30Z",
+ :evidence
+ ["wm-contract-machinery-53-v1/attempt-002/evidence/entity-runner.edn"
+  "wm-contract-machinery-53-v1/attempt-002/evidence/limb-kondo.edn"
+  "wm-contract-machinery-53-v1/attempt-002/evidence/limb-tests.edn"],
+ :explanation
+ "The byte-pinned runner revision implements the missing boundary distinction: path-shaped artifact claims now refuse as artifact-ref-malformed, while commit-shaped but uncorroborated claims remain artifact-binding-mismatch; independent static and fresh-JVM checks passed."}

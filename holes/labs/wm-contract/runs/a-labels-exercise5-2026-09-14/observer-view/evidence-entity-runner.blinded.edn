@@ -1,0 +1,18 @@
+{:schema :wm/entity-revision-pair-v1,
+ :entity/id "futon2/src/futon2/aif/full_loop_runner.clj",
+ :before
+ {:file "runner.before",
+  :sha256
+  "28b559ab3e9676f757d3b82de2b35800e185040ff49c61a6b617589f24885254",
+  :bytes 239959},
+ :after
+ {:file "runner.after",
+  :sha256
+  "d421eb4259bc486ae002d64038e3ad90735468dfa3fb890c2d55b6ab27283b60",
+  :bytes 240648},
+ :dimensions
+ {:commit "fba72d0f0683caee55be599874d6550bf2f77244",
+  :round 3,
+  :prior-rounds
+  ["386cfe33da6b7bff21f81e46f2eb36f1c5889731"
+   "69e1062e4c591a59d23328590983fc502c71d132"]}}
