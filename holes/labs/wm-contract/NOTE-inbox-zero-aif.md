@@ -135,3 +135,44 @@ commits and push. Consequences:
   not weakened by dispatch (if the guard refuses during a batch, the
   agent reports and asks);
 - the threshold (~10) is a tunable constant, declared not tuned.
+
+## The batch model as integrate-and-fire AIF (Joe, 2026-09-14)
+
+The ruled cadence (threshold ~10, operator dispatch, batch release) is
+a textbook integrate-and-fire loop, and that makes it theorizable with
+almost no machinery:
+
+- **Integration**: each dirty file is an undischarged prediction
+  error — a host-record disagreement (R8) the belief state carries.
+  Pressure P(t) = the count (or, weighted, the clause count) of
+  undischarged errors. Between dispatches P is non-decreasing absent
+  new evidence (the monotonicity theorem T3, restated as dP/dt >= 0
+  between events).
+- **Firing**: at P >= threshold, the operator's dispatch is the
+  trigger — NOT an autonomous crossing (strategy received, not
+  computed; the loop does not fire itself). The batch is the action:
+  grouped commits discharging the accumulated errors in one policy.
+- **Reset**: successful push discharges P to 0 (T4's fixed point);
+  in-flight and held-back files are residual P, typed — the neuron
+  that doesn't fully reset says so, with reasons.
+- **Refractory period**: post-push, the loop is quiet by construction
+  (nothing dirty until new edits arrive) — the natural refractory
+  phase, requiring no imposed cooldown.
+
+AIF reading of the parts: integration = R3 belief accumulation of
+unreconciled evidence; firing = R16 action under operator-scheduled
+policy selection (R6's decision arrives from outside the loop);
+discharge = precision recovery — committed-and-pushed work carries
+warrant, so channel precision (R7) restores; the threshold is a
+DECLARED preference constant (the operator's tolerance for visible
+dirt, the C of this little loop); and the whole thing is one neuron of
+the crew brain, connected to the rest through the cue synapse (🕒).
+
+What the formalism buys: the cadence questions become parameter
+questions with types — threshold too low churns (tiny batches, high
+operator dispatch cost); too high and the dirty tree's three measured
+costs (forgotten work, double payment, unreliable narration) reassert.
+The threshold is thus priced against the README's own measured damage
+curves, not tuned in the dark. And T1-T4 remain the safety envelope:
+the neuron may only fire through the guarded boundary, and every
+undischarged unit stays typed.
