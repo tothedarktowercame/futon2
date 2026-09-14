@@ -4930,3 +4930,32 @@
                (catch clojure.lang.ExceptionInfo e
                  (:limb-evidence/refusal (ex-data e))))))
       (is (not (.exists close-path))))))
+
+(deftest refused-cell-appends-typed-sorry-and-rethrows
+  ;; repair-initialization-a9177cab: an invalid construction cell must not
+  ;; leave the chain incomplete (dooming the failure-path close) — the
+  ;; refusal appends a typed sorry, records it, and still stops the line.
+  (let [appended (atom []) recorded (atom [])
+        refusal (ex-info "invalid checkpoint cell"
+                         {:failure-kind :invalid-checkpoint-cell
+                          :errors [[:invalid-fold-output :x]]})
+        append-refusing (fn [cell]
+                          (swap! appended conj cell)
+                          (if (:sorry cell) {:event :sorry-event}
+                              (throw refusal)))]
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (#'runner/append-checkpoint-or-refusal-sorry!
+                  append-refusing #(swap! recorded conj %) :construction
+                  {:judgment {:bad true} :ground {:k 1}})))
+    (is (= 2 (count @appended)))
+    (is (= :invalid-checkpoint-cell (get-in (second @appended) [:sorry :kind])))
+    (is (= [[:invalid-fold-output :x]]
+           (get-in (second @appended) [:sorry :cell-errors])))
+    (is (= [{:event :sorry-event}] @recorded)))
+  (let [other (ex-info "unknown attempt" {})
+        appended (atom [])]
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (#'runner/append-checkpoint-or-refusal-sorry!
+                  (fn [c] (swap! appended conj c) (throw other))
+                  identity :dispatch {:sorry {:kind :x}})))
+    (is (= 1 (count @appended)))))
