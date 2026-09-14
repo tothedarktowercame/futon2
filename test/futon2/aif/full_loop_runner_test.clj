@@ -1098,6 +1098,34 @@
     (is (re-find #"at most 200 characters" prompt))
     (is (re-find #"closing brace is inside the 200-character limit" prompt))))
 
+(deftest prompts-name-role-specific-limb-evidence-deposits
+  (let [dir "/tmp/cohort/attempt-001/evidence"
+        opts {:author "author" :reviewer "reviewer"
+              :target-repository "/repo" :target-repository-head "base123"
+              :attempt-evidence-dir dir}
+        author (#'runner/author-prompt opts "target" {:id "target"} {} [])
+        reviewer (#'runner/reviewer-prompt opts "target" {} "/repo" "abc123"
+                  {:job-id "author-job"} [])
+        revision-author (#'runner/revision-author-prompt
+                         "author" "reviewer" dir "target" {} ["abc123"]
+                         "requested changes")
+        revision-reviewer (#'runner/revision-reviewer-prompt
+                           opts "target" {} "/repo" "abc123" "def456"
+                           {:job-id "revision-author"}
+                           {:job-id "initial-review" :result "finding"} [])]
+    (doseq [prompt [author reviewer revision-author revision-reviewer]]
+      (is (str/includes? prompt dir))
+      (is (re-find #"flat one-form EDN files only" prompt))
+      (is (re-find #"invalid deposit refuses the whole close" prompt)))
+    (doseq [prompt [author revision-author]]
+      (is (re-find #":wm/limb-receipt-v1" prompt))
+      (is (re-find #":wm/entity-revision-pair-v1" prompt))
+      (is (not (re-find #":wm/target-standing-decision-v1" prompt))))
+    (doseq [prompt [reviewer revision-reviewer]]
+      (is (re-find #":wm/target-standing-decision-v1" prompt))
+      (is (re-find #"a self-decided record refuses" prompt))
+      (is (not (re-find #":wm/limb-receipt-v1" prompt))))))
+
 (deftest author-contract-binds-work-to-the-observed-target-repository
   (let [prompt (#'runner/author-prompt
                 {:author "author" :reviewer "reviewer"

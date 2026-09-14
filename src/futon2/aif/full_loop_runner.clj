@@ -1812,8 +1812,25 @@
     (assoc :selected-action
            (prompt-selected-action (:selected-action construction)))))
 
+(defn- evidence-deposit-instruction [role evidence-dir author reviewer]
+  (when evidence-dir
+    (str "\nDEPOSIT INSTRUCTION (optional for ordinary attempts; required for a close intended for measured-A observation):\n"
+         "DIRECTORY: " evidence-dir "\n"
+         "Use flat one-form EDN files only; create no subdirectories. Files are the records; do not echo them in your reply.\n"
+         (case role
+           :author
+           (str "AUTHOR " author " may deposit one actual-command receipt per discharged limb:\n"
+                ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at].\n"
+                "When the selected entity artifact changes, also deposit:\n"
+                ":wm/entity-revision-pair-v1 keys [:schema :entity/id :before :after :dimensions], with byte-pinned boundary captures.\n")
+           :reviewer
+           (str "REVIEWER " reviewer " (not author " author ") deposits the same-target standing decision:\n"
+                ":wm/target-standing-decision-v1 keys [:schema :entity/id :decision :decided-by :implementation-author :decided-at :evidence].\n"
+                "Set :decided-by to your reviewer id and :implementation-author to " author "; a self-decided record refuses.\n"))
+         "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n")))
+
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
-                             target-repository-head]}
+                             target-repository-head attempt-evidence-dir]}
                       target mission cascade-entry stop-lines]
   (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
        reviewer " is the independent reviewer.\n\n"
@@ -1848,6 +1865,7 @@
               "Do not alter War Machine ranking, policy support, dispatch, build, "
               "adjudication, grounding semantics, or the semantic epoch in this parcel. "
               "If the selected work requires such a change, refuse with a typed reason.\n"))
+       (evidence-deposit-instruction :author attempt-evidence-dir author reviewer)
        "\n"
        "Requirements:\n"
        "1. Inspect the mission and repository state; choose a bounded implementation parcel "
@@ -1895,7 +1913,8 @@
        "requires a substantive commit; card cure usually needs no new commit "
        "— re-emitting the card with the existing sha is valid)."))
 
-(defn- reviewer-prompt [{:keys [reviewer author]} target construction repo commit
+(defn- reviewer-prompt [{:keys [reviewer author attempt-evidence-dir]}
+                        target construction repo commit
                         author-job stop-lines]
   (str reviewer ": FULL-LOOP INDEPENDENT REVIEW. " author " authored commit " commit
        " for selected target " (pr-str target) ".\n\n"
@@ -1909,6 +1928,7 @@
        (when (seq stop-lines)
          (str "Prior STOP-THE-LINE findings to discharge explicitly: "
               (pr-str (prompt-findings stop-lines)) "\n"))
+       (evidence-deposit-instruction :reviewer attempt-evidence-dir author reviewer)
        "\n"
        "Inspect the commit rather than trusting the summary. Verify that it is substantive "
        "rather than artifact-only, is in scope for the selected target, preserves invariants, "
@@ -1946,7 +1966,7 @@
    :gate review-gate})
 
 (defn- revision-author-prompt
-  [author target construction prior-commits findings]
+  [author reviewer evidence-dir target construction prior-commits findings]
   (str author ": FULL-LOOP REVISION ROUND 2. The independent reviewer requested "
        "changes to your implementation. Amend the same selected target using new "
        "commits in the existing repository.\n\n"
@@ -1955,6 +1975,7 @@
        "YOUR PRIOR COMMIT SHAS: " (pr-str prior-commits) "\n"
        "REVIEWER VERDICT AND FINDINGS (VERBATIM):\n"
        findings "\n\n"
+       (evidence-deposit-instruction :author evidence-dir author reviewer)
        "Address the findings without widening scope. Preserve existing history: "
        "make new commits only; do not force-push, reset, amend, rebase, rewrite, "
        "or otherwise replace prior commits. Run the repository-required gates.\n"
@@ -1963,7 +1984,8 @@
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
 
 (defn- revision-reviewer-prompt
-  [{:keys [reviewer author]} target construction repo prior-commit revision-commit
+  [{:keys [reviewer author attempt-evidence-dir]}
+   target construction repo prior-commit revision-commit
    revision-author-job initial-review-job stop-lines]
   (str reviewer ": FULL-LOOP AMENDMENT RE-REVIEW. You are the same independent "
        "reviewer. " author " authored the bounded amendment. Review only that "
@@ -1983,6 +2005,7 @@
        (when (seq stop-lines)
          (str "Prior STOP-THE-LINE findings remain in force: "
               (pr-str (prompt-findings stop-lines)) "\n"))
+       (evidence-deposit-instruction :reviewer attempt-evidence-dir author reviewer)
        "\nInspect the amendment commit and its delta from the prior reviewed commit. "
        "Do not edit or commit. Execute the repository-required static checks and "
        "relevant tests yourself; an APPROVE without executed tool evidence is invalid.\n\n"
@@ -2049,7 +2072,9 @@
                 (swap! dispatched-turns inc)
                 ((or (:dispatch-fn opts) dispatch!) opts author
                  "wm-full-loop" target
-                 (revision-author-prompt author target construction
+                 (revision-author-prompt author reviewer
+                                         (:attempt-evidence-dir opts)
+                                         target construction
                                          prior-commits findings))))
             revision-author-job
             (run-phase!
@@ -2910,6 +2935,14 @@
             (swap! checkpoint-events assoc :time-step start-event))
         attempt-id (or (:attempt/id start-event)
                        (str "canary-" (UUID/randomUUID)))
+        attempt-evidence-dir
+        (when cohort?
+          (.getAbsolutePath
+           (io/file (or (:data-root execution-cohort) cohort/default-data-root)
+                    (name (:cohort/id start-event)) attempt-id "evidence")))
+        prompt-opts (cond-> opts
+                      attempt-evidence-dir
+                      (assoc :attempt-evidence-dir attempt-evidence-dir))
         execution-identity (when execution-authority
                              (cohort/execution-identity execution-authority attempt-id))
         execution-provenance (when execution-authority
@@ -3674,7 +3707,7 @@
                                   (observe-repo-head opts author-repo))
                 prompt-for-head
                 (fn [head-observation]
-                  (author-prompt (assoc opts
+                  (author-prompt (assoc prompt-opts
                                         :reviewer reviewer
                                         :target-repository author-repo
                                         :target-repository-head
@@ -3839,7 +3872,7 @@
                             (swap! dispatched-turns inc)
                             ((or (:dispatch-fn opts) dispatch!) opts reviewer
                              "wm-full-loop" target
-                             (reviewer-prompt (assoc opts :reviewer reviewer)
+                             (reviewer-prompt (assoc prompt-opts :reviewer reviewer)
                                               target construction repo commit
                                               author-job stop-lines)))))
                       review-job
@@ -3866,7 +3899,7 @@
                       initial-commit commit
                       revision-state
                       (run-revision-round
-                       opts @phase-context author reviewer dispatched-turns
+                       prompt-opts @phase-context author reviewer dispatched-turns
                        target construction repo commit files author-job
                        artifact-binding review-job review-gate stop-lines)
                       commit (:commit revision-state)
