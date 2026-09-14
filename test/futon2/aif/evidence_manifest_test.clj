@@ -3,14 +3,14 @@
             [futon2.aif.evidence-manifest :as manifest])
   (:import (java.security MessageDigest)))
 
-(defn- bytes [s] (.getBytes ^String s "UTF-8"))
+(defn- utf8-bytes [s] (.getBytes ^String s "UTF-8"))
 
 (defn- sha256 [bs]
   (let [digest (.digest (MessageDigest/getInstance "SHA-256") bs)]
     (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
 
-(def source-a (bytes "literal evidence A\n"))
-(def source-b (bytes "literal evidence B\n"))
+(def source-a (utf8-bytes "literal evidence A\n"))
+(def source-b (utf8-bytes "literal evidence B\n"))
 (def sources {"/evidence/a.edn" source-a "/evidence/b.edn" source-b})
 
 (defn- input-entry
