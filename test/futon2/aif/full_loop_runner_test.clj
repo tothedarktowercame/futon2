@@ -5017,6 +5017,38 @@
       (is (= :artifact-binding-mismatch (:failure-kind failure))
           "a commit-shaped but uncorroboratable claim stays a mismatch"))))
 
+(deftest run-opportunity-reports-runner-source-drift
+  ;; Attempt-003 of repair-ea1-3f4cac: a stale serving JVM compared the
+  ;; dispatch-time job stamp instead of the DONE line and produced a FALSE
+  ;; artifact-binding mismatch although the repairs were already in git.
+  ;; Every run now records which runner source produced it; drift is loud
+  ;; (stderr) and durable (on the result), never silent.
+  (let [core-ran (atom false)]
+    (with-redefs-fn
+      {#'runner/warn-on-runner-source-drift!
+       (fn [] {:runner/source-check :drift
+               :runner/loaded-sha256 "aaa1111"
+               :runner/canonical-sha256 "bbb2222"})
+       #'runner/run-opportunity-core!
+       (fn [_] (reset! core-ran true)
+              {:attempt-id "a" :outcome :no-op-change
+               :checkpoints {} :data {}})}
+      (fn []
+        (let [r (runner/run-opportunity! {:run-record-dir "/tmp/wm-drift-test"})]
+          (is @core-ran)
+          (is (= :drift (get-in r [:runner/source :runner/source-check]))
+              "the run records that its JVM is stale, loudly")))))
+  (with-redefs-fn
+    {#'runner/warn-on-runner-source-drift!
+     (fn [] {:runner/source-check :current :runner/sha256 "ccc3333"})
+     #'runner/run-opportunity-core!
+     (fn [_] {:attempt-id "b" :outcome :no-op-change
+              :checkpoints {} :data {}})}
+    (fn []
+      (let [r (runner/run-opportunity! {:run-record-dir "/tmp/wm-drift-test2"})]
+        (is (= :current (get-in r [:runner/source :runner/source-check]))
+            "a current JVM records identity, not drift")))))
+
 (deftest attempt-limb-evidence-follows-checkpoints-in-manifest
   (let [{:keys [root] :as c} (retention-cohort "runner-limb-evidence")
         opts (assoc (retention-success-opts c)

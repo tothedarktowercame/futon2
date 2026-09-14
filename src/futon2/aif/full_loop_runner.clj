@@ -406,6 +406,66 @@
      {:node :FULL_LOOP_CLOSE :via (or (:outcome result) :unknown)
       :at (str (Instant/now))}]))
 
+(defn- resource-bytes
+  "The loaded full_loop_runner.clj as the JVM actually compiled it."
+  []
+  (try
+    (when-let [res (.getResource (ClassLoader/getSystemClassLoader)
+                    "futon2/aif/full_loop_runner.clj")]
+      (with-open [in (.openStream res)]
+        (.readAllBytes in)))
+    (catch Throwable _ nil)))
+
+(def ^:private canonical-runner-path
+  "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj")
+
+(defn runner-source-drift
+  "Compare the loaded runner bytecode source against the canonical checkout.
+
+  Attempt-003 of repair-ea1-3f4cac (2026-09-13 22:22) was a FALSE
+  artifact-binding mismatch: the reply's DONE line named the observed head
+  exactly (33ca99b0), but the serving JVM was running runner code older than
+  the corroboration fix merged hours earlier, so the stale dispatch-time job
+  stamp (decea980) was compared instead. The repairs lived in git; the JVM
+  never reloaded them, and nothing said so. This check makes that condition
+  loud: when the loaded classpath source and the canonical checkout disagree,
+  the run records it. Fail-open with a durable marker -- a stale JVM must not
+  consume the attempt it misjudged, but its verdicts must be visibly
+  suspect." 
+  ([]
+   (runner-source-drift (fn [path] (try (java.nio.file.Files/readAllBytes
+                                          (java.nio.file.Path/of
+                                           path (make-array String 0)))
+                                         (catch Throwable _ nil)))))
+  ([canonical-read]
+   (let [loaded (resource-bytes)
+         canonical (canonical-read canonical-runner-path)]
+     (cond
+       (or (nil? loaded) (nil? canonical))
+       {:runner/source-check :unavailable
+        :runner/loaded-present? (some? loaded)
+        :runner/canonical-present? (some? canonical)}
+
+       (= (sha256 loaded) (sha256 canonical))
+       {:runner/source-check :current
+        :runner/sha256 (sha256 loaded)}
+
+       :else
+       {:runner/source-check :drift
+        :runner/loaded-sha256 (sha256 loaded)
+        :runner/canonical-sha256 (sha256 canonical)}))))
+
+(defn- warn-on-runner-source-drift!
+  []
+  (let [check (runner-source-drift)]
+    (when (= :drift (:runner/source-check check))
+      (binding [*out* *err*]
+        (println "[wm-full-loop] WARNING: serving runner source drifts from"
+                 (str canonical-runner-path "; verdicts this run may repeat"
+                      " already-repaired faults. Reload the namespace from"
+                      " the canonical checkout."))))
+    check))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -4668,5 +4728,8 @@
         (post-wm-status! (config raw-opts)
                          {:source "wm-full-loop" :status "idle"})))]
     (merge result
-           {:run/id run-id}
+           {:run/id run-id
+            ;; Loud and durable: a stale serving JVM produced attempt-003's
+            ;; false mismatch; the record must show the code identity.
+            :runner/source (warn-on-runner-source-drift!)}
            (persist-run-record! raw-opts run-id started-at result))))
