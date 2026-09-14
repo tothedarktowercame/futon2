@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~22:50Z (exercise-5 accepted-insufficient; route ruling with codex-26)
+Updated: 2026-09-14 ~23:00Z (route A ruled + accepted; packet 1 with codex-24)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,13 +13,19 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **addressed-route ruling** — codex-26 (delegated lead), job
-  `invoke-1789425605605-20892-b4c2c410` (running), park `park-028ee7b7`.
-  Question: where do the repair-entity revision pair and the successor-limb
-  evidence enter the record, and which close is the :addressed subject.
-  Exercise budget held until it lands.
+- **ruling packet 1: guidance + subject capture** — codex-24, job
+  `invoke-1789425762895-20894-0d03f008` (running), park `park-cca50d7e`.
+  T's obligation bytes become the subject pair; entity-mismatch and
+  pending-successor controls. Packets 2 (successor discharge/readback) and
+  3 (cohort-54 T/R/S/O prereg) queue behind its review.
 
 ## DONE (this sitting, newest first)
+- **Route A RULED and ACCEPTED** (codex-26 `6bfe8750`, acceptance `ff323720`, 4/4 pins):
+  the :addressed subject for repair entity T is a later predeclared observation
+  boundary O — the repairing close never labels its own future; S may serve as O
+  only if everything (successor evidence, actual resolution, after-state, standing
+  review) beats O's single cutoff; pending S at the boundary = typed insufficiency.
+  Three bounded packets authorized.
 - Exercise-5 observation ACCEPTED :evidence-insufficient (`1744f829`): 18/18 pins,
   both gaps verified real (revision pair names the artifact, not the repair entity;
   no successor-limb evidence — the "discharge" id is a projection pointer, repair
