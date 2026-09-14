@@ -1,11 +1,11 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~22:06Z (DAG revision + parallel lanes opened)
+Updated: 2026-09-14 ~22:12Z (categorical-ambiguity turned out DONE)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
 snapshot format had NO "done" state, so nothing could ever turn green.
-Now: **3 done** (a-rubric, a-validator, r10-caller — committed acceptances),
+Now: **4 done** (a-rubric, a-validator, r10-caller, categorical-ambiguity),
 **1 in-flight** (a-labels), 52 blocked / 7 unbuilt / 9 built-not-wired /
 4 ruled-parked. The a-estimate → q-witness-flip chain Joe named is genuinely
 red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
@@ -15,13 +15,14 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 - **cohort-53 attempt-002** (measured, zai-5 author, cells through 004-dispatch)
   — the a-labels critical path. On a close retaining an approved review →
   exercise-5 → annotation #1.
-- **categorical-ambiguity** — codex-23, job `invoke-1789423557292-20872-803ce400`
-  (running). Pure estimator per LEAD-DECISIONS:196-201. Unlocks risk-ambiguity-witness.
 - **existing-record-audit** — codex-21, job `invoke-1789423558330-20873-40385e48`
   (running). Rows 13/15/23 evidence discovery. Unlocks 4 nodes.
 - Park `park-a638e62c` covers both packets; fallback wakeup ~25 min.
 
 ## DONE (this sitting, newest first)
+- categorical-ambiguity: ALREADY DONE this morning (codex-22 `602ff836`, my acceptance
+  pre-compaction); codex-23 correctly detected the duplicate dispatch, zero edits;
+  node flipped done (`354eba57`). risk-ambiguity-witness now waits only on q-risk inputs.
 - DAG completion revision `714822b6` (verify :status :pass, mirror equality held).
 - Close containment accepted `0198384c`; pair-companion admission accepted `286d5967`;
   stale-claim freshness fix `94ce60fe`; zai-5 386cfe33 reviewed `04267707`.
