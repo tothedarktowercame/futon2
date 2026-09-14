@@ -1,6 +1,13 @@
 (ns futon2.aif.measured-a-annotation-test
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.belief :as belief]
             [futon2.aif.measured-a-annotation :as sut]))
+
+(deftest status-support-is-pinned-to-the-machine-vocabulary
+  ;; The validator keeps its own status set so the module stays
+  ;; dependency-free; this assertion is the drift guard the source
+  ;; comment ("kept equal to futon2.aif.belief/status-set") promises.
+  (is (= (set belief/status-set) sut/status-support)))
 
 (defn- annotation []
   (let [bytes (pr-str {:schema :wm/close-evidence-v1
