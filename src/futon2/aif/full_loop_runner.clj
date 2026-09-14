@@ -1981,9 +1981,12 @@
    :gate review-gate})
 
 (defn- revision-author-prompt
-  [author reviewer evidence-dir measured-acquisition?
-   target construction prior-commits findings]
-  (str author ": FULL-LOOP REVISION ROUND 2. The independent reviewer requested "
+  ([author reviewer evidence-dir target construction prior-commits findings]
+   (revision-author-prompt author reviewer evidence-dir false target construction
+                           prior-commits findings))
+  ([author reviewer evidence-dir measured-acquisition?
+    target construction prior-commits findings]
+   (str author ": FULL-LOOP REVISION ROUND 2. The independent reviewer requested "
        "changes to your implementation. Amend the same selected target using new "
        "commits in the existing repository.\n\n"
        "SELECTED TARGET: " (pr-str target) "\n"
@@ -1999,8 +2002,8 @@
        "make new commits only; do not force-push, reset, amend, rebase, rewrite, "
        "or otherwise replace prior commits. Run the repository-required gates.\n"
        "Finish with FULL_LOOP_AUTHOR: DONE <new-commit-sha> and list validations. "
-       "If no safe correction is possible, make no commit and finish with "
-       "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
+        "If no safe correction is possible, make no commit and finish with "
+        "FULL_LOOP_AUTHOR: REFUSE <typed reason>.")))
 
 (defn- revision-reviewer-prompt
   [{:keys [reviewer author attempt-evidence-dir measured-acquisition?]}
