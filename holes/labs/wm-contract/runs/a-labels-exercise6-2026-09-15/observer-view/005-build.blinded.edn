@@ -1,0 +1,126 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-55-v1,
+ :attempt/id "attempt-003",
+ :attempt/ordinal 3,
+ :event/sequence 5,
+ :checkpoint/type :build,
+ :recorded-at "2026-09-15T02:27:04.018718446Z",
+ :payload
+ {:judgment
+  {:revision
+   {:round 2,
+    :commits
+    ["ae0c95fd831794940a2c825ea197218504a3dcfb"
+     "76c7088b11d4e8d97952ace8cf67eef48a5c5289"],
+    :author-job "invoke-1789439141596-20939-661b807f",
+    :review
+    {:round 2,
+     :commit "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+     :job-id "invoke-1789439196947-20941-2521d9c0",
+     :verdict :approve,
+     :text
+     "FULL_LOOP_REVIEW: APPROVE FULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior. `76c7088b` renames both source snapshots to `.snapshot` with 100% si...\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior.\n\n`76c7088b` renames both source snapshots to `.snapshot` with 100% similarity and updates only their filenames in the revision-pair record. Recomputed SHA-256 digests still match the retained pins.\n\nExecuted independently:\n\n- `git show --check 76c7088b` — PASS.\n- `clj-kondo --lint src/.../repair_obligation.clj test/.../repair_obligation_test.clj` — PASS, 0/0.\n- Full `check-parens.el` driver on both Clojure files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — PASS, 17 tests/76 assertions, 0 failures/errors.\n\nNo edits or commits made.\nI’ll verify that the amendment is limited to renaming the two evidence companions and updating their references without altering pinned bytes. Then I’ll rerun the exact static gates and narrow fresh-JVM suite required by the original review.\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior.\n\n`76c7088b` renames both source snapshots to `.snapshot` with 100% similarity and updates only their filenames in the revision-pair record. Recomputed SHA-256 digests still match the retained pins.\n\nExecuted independently:\n\n- `git show --check 76c7088b` — PASS.\n- `clj-kondo --lint src/.../repair_obligation.clj test/.../repair_obligation_test.clj` — PASS, 0/0.\n- Full `check-parens.el` driver on both Clojure files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — PASS, 17 tests/76 assertions, 0 failures/errors.\n\nNo edits or commits made.",
+     :gate
+     {:required? true,
+      :code-files
+      ["data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.clj"
+       "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.clj"],
+      :executed? true,
+      :tool-events 4,
+      :execution {:executed true, :tool-events 4, :command-events 4},
+      :execution-source :job-summary,
+      :passed? true,
+      :failure-kind nil}}},
+   :generated-code
+   ["data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.clj"
+    "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.snapshot"
+    "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.clj"
+    "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.snapshot"
+    "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/supporting-repair-source.edn"],
+   :build-retries [],
+   :inline-improvements [],
+   :patterns-used
+   ["futon-theory/stop-the-line" "musn/pause-backtrace"],
+   :commits
+   ["ae0c95fd831794940a2c825ea197218504a3dcfb"
+    "76c7088b11d4e8d97952ace8cf67eef48a5c5289"],
+   :reviews
+   [{:round 1,
+     :commit "ae0c95fd831794940a2c825ea197218504a3dcfb",
+     :job-id "invoke-1789439062400-20937-4a2a801c",
+     :verdict :request-changes,
+     :text
+     "FULL_LOOP_REVIEW: REQUEST_CHANGES two changed .clj evidence snapshots fail mandatory clj-kondo FULL_LOOP_REVIEWER_NOTE: The production fix is substantive, but the commit does not clear all required static checks. The ...\nFULL_LOOP_REVIEW: REQUEST_CHANGES two changed .clj evidence snapshots fail mandatory clj-kondo\nFULL_LOOP_REVIEWER_NOTE: The production fix is substantive, but the commit does not clear all required static checks.\n\nThe finding ID now includes the typed review outcome, preventing `:request-changes` and `:reject` records for the same attempt from colliding. The test confirms both immutable findings survive readback.\n\nBlocking issue: the committed evidence companions `source-before.clj` and `source-after.clj` are treated as changed Clojure files, but their namespace does not match their evidence-directory paths. Rename them to a non-Clojure companion extension and update their revision-pair filenames/digests, or otherwise make every changed `.clj` pass the mandated gate.\n\nExecuted independently:\n\n- `git show --check ae0c95fd` — PASS.\n- `clj-kondo --lint src/.../repair_obligation.clj test/.../repair_obligation_test.clj` — PASS, 0/0.\n- `clj-kondo --lint` on all four changed `.clj` files — FAIL, 2 namespace/path mismatch errors from the two evidence snapshots.\n- Full `check-parens.el` driver on all four changed `.clj` files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — PASS, 17 tests/76 assertions, 0 failures/errors.\n\nNo edits or commits made.\nI’ll inspect the exact commit and collision semantics, including how the new finding ID is derived and whether retries remain stable. Then I’ll run kondo, the mandated paren driver, and the relevant fresh-JVM test namespace.\nThe code fixes the observed collision class by including the typed review outcome in the immutable finding ID; the control writes both outcomes for one attempt and reads both back. Because the commit also contains two `.clj` evidence snapshots, I’m applying the required static gates to those changed Clojure files as well, not just `src` and `test`.\nFULL_LOOP_REVIEW: REQUEST_CHANGES two changed .clj evidence snapshots fail mandatory clj-kondo\nFULL_LOOP_REVIEWER_NOTE: The production fix is substantive, but the commit does not clear all required static checks.\n\nThe finding ID now includes the typed review outcome, preventing `:request-changes` and `:reject` records for the same attempt from colliding. The test confirms both immutable findings survive readback.\n\nBlocking issue: the committed evidence companions `source-before.clj` and `source-after.clj` are treated as changed Clojure files, but their namespace does not match their evidence-directory paths. Rename them to a non-Clojure companion extension and update their revision-pair filenames/digests, or otherwise make every changed `.clj` pass the mandated gate.\n\nExecuted independently:\n\n- `git show --check ae0c95fd` — PASS.\n- `clj-kondo --lint src/.../repair_obligation.clj test/.../repair_obligation_test.clj` — PASS, 0/0.\n- `clj-kondo --lint` on all four changed `.clj` files — FAIL, 2 namespace/path mismatch errors from the two evidence snapshots.\n- Full `check-parens.el` driver on all four changed `.clj` files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — PASS, 17 tests/76 assertions, 0 failures/errors.\n\nNo edits or commits made.",
+     :gate
+     {:required? true,
+      :code-files
+      ["data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.clj"
+       "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.clj"
+       "src/futon2/aif/repair_obligation.clj"
+       "test/futon2/aif/repair_obligation_test.clj"],
+      :executed? true,
+      :tool-events 12,
+      :execution {:executed true, :tool-events 12, :command-events 12},
+      :execution-source :job-summary,
+      :passed? true,
+      :failure-kind nil}}
+    {:round 2,
+     :commit "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+     :job-id "invoke-1789439196947-20941-2521d9c0",
+     :verdict :approve,
+     :text
+     "FULL_LOOP_REVIEW: APPROVE FULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior. `76c7088b` renames both source snapshots to `.snapshot` with 100% si...\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior.\n\n`76c7088b` renames both source snapshots to `.snapshot` with 100% similarity and updates only their filenames in the revision-pair record. Recomputed SHA-256 digests still match the retained pins.\n\nExecuted independently:\n\n- `git show --check 76c7088b` — PASS.\n- `clj-kondo --lint src/.../repair_obligation.clj test/.../repair_obligation_test.clj` — PASS, 0/0.\n- Full `check-parens.el` driver on both Clojure files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — PASS, 17 tests/76 assertions, 0 failures/errors.\n\nNo edits or commits made.\nI’ll verify that the amendment is limited to renaming the two evidence companions and updating their references without altering pinned bytes. Then I’ll rerun the exact static gates and narrow fresh-JVM suite required by the original review.\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior.\n\n`76c7088b` renames both source snapshots to `.snapshot` with 100% similarity and updates only their filenames in the revision-pair record. Recomputed SHA-256 digests still match the retained pins.\n\nExecuted independently:\n\n- `git show --check 76c7088b` — PASS.\n- `clj-kondo --lint src/.../repair_obligation.clj test/.../repair_obligation_test.clj` — PASS, 0/0.\n- Full `check-parens.el` driver on both Clojure files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — PASS, 17 tests/76 assertions, 0 failures/errors.\n\nNo edits or commits made.",
+     :gate
+     {:required? true,
+      :code-files
+      ["data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.clj"
+       "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.clj"],
+      :executed? true,
+      :tool-events 4,
+      :execution {:executed true, :tool-events 4, :command-events 4},
+      :execution-source :job-summary,
+      :passed? true,
+      :failure-kind nil}}],
+   :validation
+   {:author {:executed true, :tool-events 10, :command-events 10},
+    :reviewer {:executed true, :tool-events 4, :command-events 4},
+    :review-job "invoke-1789439196947-20941-2521d9c0",
+    :review-text
+    "FULL_LOOP_REVIEW: APPROVE FULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior. `76c7088b` renames both source snapshots to `.snapshot` with 100% si...\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior.\n\n`76c7088b` renames both source snapshots to `.snapshot` with 100% similarity and updates only their filenames in the revision-pair record. Recomputed SHA-256 digests still match the retained pins.\n\nExecuted independently:\n\n- `git show --check 76c7088b` — PASS.\n- `clj-kondo --lint src/.../repair_obligation.clj test/.../repair_obligation_test.clj` — PASS, 0/0.\n- Full `check-parens.el` driver on both Clojure files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — PASS, 17 tests/76 assertions, 0 failures/errors.\n\nNo edits or commits made.\nI’ll verify that the amendment is limited to renaming the two evidence companions and updating their references without altering pinned bytes. Then I’ll rerun the exact static gates and narrow fresh-JVM suite required by the original review.\nFULL_LOOP_REVIEW: APPROVE\nFULL_LOOP_REVIEWER_NOTE: Amendment resolves the static-gate defect without changing evidence bytes or production behavior.\n\n`76c7088b` renames both source snapshots to `.snapshot` with 100% similarity and updates only their filenames in the revision-pair record. Recomputed SHA-256 digests still match the retained pins.\n\nExecuted independently:\n\n- `git show --check 76c7088b` — PASS.\n- `clj-kondo --lint src/.../repair_obligation.clj test/.../repair_obligation_test.clj` — PASS, 0/0.\n- Full `check-parens.el` driver on both Clojure files — PASS.\n- `clojure -X:test :nses '[futon2.aif.repair-obligation-test]'` — PASS, 17 tests/76 assertions, 0 failures/errors.\n\nNo edits or commits made.",
+    :approved? true,
+    :review-gate
+    {:required? true,
+     :code-files
+     ["data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.clj"
+      "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.clj"],
+     :executed? true,
+     :tool-events 4,
+     :execution {:executed true, :tool-events 4, :command-events 4},
+     :execution-source :job-summary,
+     :passed? true,
+     :failure-kind nil},
+    :artifact-binding
+    {:fresh-author? true,
+     :disagreement? false,
+     :descendant? true,
+     :text-artifact-ref "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+     :pre-dispatch-head "ae0c95fd831794940a2c825ea197218504a3dcfb",
+     :author-window-end-ms 1789439194891,
+     :author-window-start-ms 1789439140588,
+     :commit "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+     :in-author-window? true,
+     :observed-commit-time-ms 1789439182000,
+     :repo "/home/joe/code/futon2",
+     :text-artifact-sha "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+     :observed-head "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+     :corroborates? true,
+     :claim-commit-time-ms nil}},
+   :artifacts
+   ["data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.clj"
+    "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.snapshot"
+    "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.clj"
+    "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.snapshot"
+    "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/supporting-repair-source.edn"]},
+  :ground
+  {:kind :git-commit-and-independent-review,
+   :repository "/home/joe/code/futon2"}}}

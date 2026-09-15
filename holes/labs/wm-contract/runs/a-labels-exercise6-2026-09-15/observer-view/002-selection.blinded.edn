@@ -1,0 +1,263 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-55-v1,
+ :attempt/id "attempt-003",
+ :attempt/ordinal 3,
+ :event/sequence 2,
+ :checkpoint/type :selection,
+ :recorded-at "2026-09-15T02:19:32.521570281Z",
+ :payload
+ {:judgment
+  {:selected-mission
+   "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+   :selected-action
+   {:type :repair-machine-failure,
+    :target
+    "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+    :repair-obligation
+    {:discharge-contract
+     {:requires
+      [:distinct-repair-commit
+       :independent-review
+       :grounded-repair
+       :distinct-production-shaped-successor],
+      :artifact-shape :code-commit},
+     :repair/status :open,
+     :opened-at "2026-09-13T22:59:01.768226247Z",
+     :repair/class :machine-failure,
+     :repair/id
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :backtrace
+     {:error-class "java.nio.file.FileAlreadyExistsException"},
+     :failure-kind :initialization-failed,
+     :attempt-id "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+     :selected-entry nil,
+     :machine-repo nil,
+     :failure-stage :initialization,
+     :target nil,
+     :repair/schema-version 3},
+    :rationale
+    "stop-the-line: machine-failure from initialization-a3e2319f-9562-4182-b651-54f409b90e39"},
+   :stop-the-line-obligations
+   [{:repair/id
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :attempt-id
+     "initialization-a3e2319f-9562-4182-b651-54f409b90e39"}],
+   :selection-reasons
+   {:source :stop-the-line,
+    :repair-id
+    "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+    :repair-class :machine-failure},
+   :trace-persistence :repair-action-not-traced,
+   :belief-source #:run{:id "2da7d386-a31a-4152-ba13-3335625190b9"}},
+  :ground
+  {:kind :wm-judgement,
+   :decision
+   {:recommendation-authority :live,
+    :habit-prior-applied? false,
+    :selected-mission-ids
+    ["M-shared-memory-control-build-test"
+     "M-aif-policy-conditioned-eig"],
+    :tau-source :selection-gain-only,
+    :actuation-authorized? true,
+    :tau-spread 25.178882791964597,
+    :actuation-status :machine-authorized-bounded-autonomy,
+    :rank 1,
+    :selection-boundary :reason-bearing-strategic-policy,
+    :reason :reviewed-live-reason-bearing-policy,
+    :habit-authority :counterfactual-only,
+    :requires-operator-override? false,
+    :selection-law
+    {:requested :controller-head,
+     :applied :controller-head,
+     :refusal nil,
+     :controller-head-rank 1,
+     :chosen-rank 136,
+     :moved-from-controller-head? true,
+     :consulted-ranking :live-selector-id},
+    :no-op-comparison
+    {:controller-margin 0.94669256606349,
+     :blocks-recommendation? false},
+    :action
+    {:central 0.0,
+     :open-hole-count 0,
+     :structural-pressure-per-action 0.0,
+     :non-progress-decay 0.16666666666666666,
+     :phase "complete",
+     :type :advance-mission,
+     :operator-gate-factor 1.0,
+     :rationale
+     "mission substrate: Mission: Shared memory/control build-test regime [unknown; advance open holes]",
+     :non-progress-count 5,
+     :weight 1.0,
+     :completion-gate-factor 0.0,
+     :non-progress? true,
+     :mission-path
+     "/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md",
+     :strategic 0.0,
+     :target "M-shared-memory-control-build-test",
+     :mission-value-factor 0.0,
+     :doable 0.0},
+    :tau 1.0,
+    :selection-proof-input
+    {:schema :wm/selection-proof-input-v1,
+     :algorithm/revision
+     {:name :live-wm-selection/reason-bearing-v1, :revision 1},
+     :decision-id "phase7-shadow-2",
+     :temperature 0.5,
+     :candidate-domain
+     ["M-aif-policy-conditioned-eig"
+      "M-shared-memory-control-build-test"
+      "M-wm-aif-policy-grain-compliance"],
+     :policy-table
+     [{:policy-id "pi-s-9dbc2ceb3317bc38050c41ce",
+       :mission-ids
+       ["M-shared-memory-control-build-test"
+        "M-aif-policy-conditioned-eig"],
+       :E_S -0.7985076962177716,
+       :G_S 0.4,
+       :log-shadow-potential -1.5985076962177716,
+       :shadow-probability 0.5985265076600124,
+       :hard-support
+       {:admitted? true,
+        :frontier-statuses [:ready :ready],
+        :dependency-statuses [:ready :ready],
+        :support-relations
+        [{:control-pattern-id "p4ng/R5-policy-evaluation",
+          :relation :repairs-control,
+          :provenance
+          [{:kind :live-independent-review,
+            :review-evidence-id "03f524fb-690f-4c11-8c10-a8b20bc73cc2",
+            :reviewer "claude-4",
+            :scope :frozen-replay-result-not-live-outcome}],
+          :memory-ids ["e-7782c5f4-2a2b-465e-afcf-6c8947b144ba"],
+          :memories
+          [#:memory{:id "e-7782c5f4-2a2b-465e-afcf-6c8947b144ba",
+                    :hook
+                    "Apply at most one separately witnessed outcome per update and keep the small-sample refusal visible.",
+                    :body
+                    {:kind :intervention,
+                     :why
+                     "R5 needs the actual bounded outcome update together with its limitation, not an unqualified success claim.",
+                     :name
+                     "R5 bootstrap: one-outcome six-sevenths replay update",
+                     :hook
+                     "Apply at most one separately witnessed outcome per update and keep the small-sample refusal visible.",
+                     :body
+                     {:training-observations 13,
+                      :update-fraction "6/7",
+                      :minimum-observations 20,
+                      :update-factor 0.8571428571428571,
+                      :claim-boundary
+                      "An independent reviewer can witness the frozen replay result; this is not live WM outcome evidence and is not calibrated probability.",
+                      :event :frozen-replay-update,
+                      :evidence-scope :frozen-replay-result,
+                      :live-wm-outcome? false,
+                      :promotion
+                      {:advance? false,
+                       :decision-reason
+                       :exploratory-sample-too-small}},
+                     :how-to-apply
+                     "Consume no more than one separately witnessed outcome, label the result exploratory, and retain the minimum-sample gate."},
+                    :witness-status :independently-witnessed,
+                    :mission-ids ["M-aif-policy-conditioned-eig"]}]}
+         {:control-pattern-id "p4ng/R6-candidate-pattern-action-space",
+          :relation :repairs-control,
+          :provenance
+          [{:kind :live-independent-review,
+            :review-evidence-id "b1cf276f-c4c0-4757-a00e-ae3f02e3ca00",
+            :reviewer "claude-4"}],
+          :memory-ids ["e-d13a4076-feb0-4906-b2b3-6a1d9e275692"],
+          :memories
+          [#:memory{:id "e-d13a4076-feb0-4906-b2b3-6a1d9e275692",
+                    :hook
+                    "Populate the existing admissible control graph through reviewed shared-store episodes, without widening its mission set.",
+                    :body
+                    {:kind :observation,
+                     :why
+                     "R6 must represent the actual candidate-space construction seam rather than an injected fixture.",
+                     :name "R6 bootstrap: live endpoint corpus gap",
+                     :hook
+                     "Populate the existing admissible control graph through reviewed shared-store episodes, without widening its mission set.",
+                     :body
+                     {:event :live-integration-finding,
+                      :claim-boundary
+                      "This records an integration gap and its repair target; it does not assert a better mission selection.",
+                      :observed-at "2026-07-24T19:36:38Z",
+                      :endpoints
+                      ["p4ng/R9-independent-witness"
+                       "p4ng/R6-candidate-pattern-action-space"
+                       "p4ng/R5-policy-evaluation"
+                       "p4ng/R10-liveness"],
+                      :pre-write-component-counts [0 0 0 0],
+                      :projection-revision 6,
+                      :finding
+                      "The replay chain passed but all four live Phase-5 control endpoints were empty before this bootstrap write."},
+                     :how-to-apply
+                     "Use this reviewed memory only on the pre-existing R6-to-mission relation."},
+                    :witness-status :independently-witnessed,
+                    :mission-ids
+                    ["M-shared-memory-control-build-test"]}]}]},
+       :provenance
+       [{:kind :live-independent-review,
+         :review-evidence-id "03f524fb-690f-4c11-8c10-a8b20bc73cc2",
+         :reviewer "claude-4",
+         :scope :frozen-replay-result-not-live-outcome}
+        {:kind :live-independent-review,
+         :review-evidence-id "b1cf276f-c4c0-4757-a00e-ae3f02e3ca00",
+         :reviewer "claude-4"}]}
+      {:policy-id "pi-s-333889ba71ae67544d53f17a",
+       :mission-ids ["M-shared-memory-control-build-test"],
+       :E_S -0.5978370007556204,
+       :G_S 0.7,
+       :log-shadow-potential -1.9978370007556203,
+       :shadow-probability 0.4014734923399876,
+       :hard-support
+       {:admitted? true,
+        :frontier-statuses [:ready],
+        :dependency-statuses [:ready],
+        :support-relations
+        [{:control-pattern-id "p4ng/R6-candidate-pattern-action-space",
+          :relation :repairs-control,
+          :provenance
+          [{:kind :live-independent-review,
+            :review-evidence-id "b1cf276f-c4c0-4757-a00e-ae3f02e3ca00",
+            :reviewer "claude-4"}],
+          :memory-ids ["e-d13a4076-feb0-4906-b2b3-6a1d9e275692"],
+          :memories
+          [#:memory{:id "e-d13a4076-feb0-4906-b2b3-6a1d9e275692",
+                    :hook
+                    "Populate the existing admissible control graph through reviewed shared-store episodes, without widening its mission set.",
+                    :body
+                    {:kind :observation,
+                     :why
+                     "R6 must represent the actual candidate-space construction seam rather than an injected fixture.",
+                     :name "R6 bootstrap: live endpoint corpus gap",
+                     :hook
+                     "Populate the existing admissible control graph through reviewed shared-store episodes, without widening its mission set.",
+                     :body
+                     {:event :live-integration-finding,
+                      :claim-boundary
+                      "This records an integration gap and its repair target; it does not assert a better mission selection.",
+                      :observed-at "2026-07-24T19:36:38Z",
+                      :endpoints
+                      ["p4ng/R9-independent-witness"
+                       "p4ng/R6-candidate-pattern-action-space"
+                       "p4ng/R5-policy-evaluation"
+                       "p4ng/R10-liveness"],
+                      :pre-write-component-counts [0 0 0 0],
+                      :projection-revision 6,
+                      :finding
+                      "The replay chain passed but all four live Phase-5 control endpoints were empty before this bootstrap write."},
+                     :how-to-apply
+                     "Use this reviewed memory only on the pre-existing R6-to-mission relation."},
+                    :witness-status :independently-witnessed,
+                    :mission-ids
+                    ["M-shared-memory-control-build-test"]}]}]},
+       :provenance
+       [{:kind :live-independent-review,
+         :review-evidence-id "b1cf276f-c4c0-4757-a00e-ae3f02e3ca00",
+         :reviewer "claude-4"}]}],
+     :tie-break :ascending-policy-id,
+     :selected-policy-id "pi-s-9dbc2ceb3317bc38050c41ce"},
+    :selection-gain 1.0,
+    :selected-policy-id "pi-s-9dbc2ceb3317bc38050c41ce"}}}}

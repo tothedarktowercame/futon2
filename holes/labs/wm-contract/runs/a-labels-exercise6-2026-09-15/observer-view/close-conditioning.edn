@@ -1,0 +1,6 @@
+{:schema :wm/observer-close-conditioning-v1,
+ :close-retention :absent,
+ :close-evidence-manifest :absent,
+ :reason :close-refused-evidence-admission,
+ :note
+ "The close is typed (no grounded outcome term); evidence admission refused before any manifest was built, so NO deposits were admitted before the cutoff. The refusal itself is close-disposition and is withheld from this view."}

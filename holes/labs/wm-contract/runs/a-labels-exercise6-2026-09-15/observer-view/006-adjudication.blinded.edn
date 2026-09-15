@@ -1,0 +1,161 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-55-v1,
+ :attempt/id "attempt-003",
+ :attempt/ordinal 3,
+ :event/sequence 6,
+ :checkpoint/type :adjudication,
+ :recorded-at "2026-09-15T02:31:19.517307533Z",
+ :payload
+ {:judgment
+  {:before {:implementation-entity nil},
+   :after
+   {:implementation-entity
+    {:id
+     "full-loop/implementation/76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+     :name
+     "Reviewed implementation 76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+     :type :implementation/commit,
+     :external-id nil,
+     :source "wm-full-loop",
+     :props
+     #:implementation{:files
+                      ["data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.clj"
+                       "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.snapshot"
+                       "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.clj"
+                       "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.snapshot"
+                       "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/supporting-repair-source.edn"],
+                      :review-job
+                      "invoke-1789439196947-20941-2521d9c0",
+                      :target
+                      "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+                      :selected-action
+                      {:type :repair-machine-failure,
+                       :target
+                       "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+                       :repair-obligation
+                       {:discharge-contract
+                        {:requires
+                         [:distinct-repair-commit
+                          :independent-review
+                          :grounded-repair
+                          :distinct-production-shaped-successor],
+                         :artifact-shape :code-commit},
+                        :repair/status :open,
+                        :opened-at "2026-09-13T22:59:01.768226247Z",
+                        :repair/class :machine-failure,
+                        :repair/id
+                        "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+                        :backtrace
+                        {:error-class
+                         "java.nio.file.FileAlreadyExistsException"},
+                        :failure-kind :initialization-failed,
+                        :attempt-id
+                        "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+                        :failure-stage :initialization,
+                        :repair/schema-version 3},
+                       :rationale
+                       "stop-the-line: machine-failure from initialization-a3e2319f-9562-4182-b651-54f409b90e39"},
+                      :repair-contract
+                      {:repair-id
+                       "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+                       :repair-class :machine-failure,
+                       :failed-attempt
+                       "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+                       :failure-stage :initialization,
+                       :failure-kind :initialization-failed,
+                       :discharge
+                       {:requires
+                        [:distinct-repair-commit
+                         :independent-review
+                         :grounded-repair
+                         :distinct-production-shaped-successor],
+                        :artifact-shape :code-commit}},
+                      :reviewer "codex-24",
+                      :construction-kind :machine-stop-line-repair,
+                      :commit
+                      "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+                      :repository "/home/joe/code/futon2",
+                      :author "codex-23"}}},
+   :witness
+   {:before {:implementation-entity nil},
+    :after
+    {:implementation-entity
+     {:id
+      "full-loop/implementation/76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+      :name
+      "Reviewed implementation 76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+      :type :implementation/commit,
+      :external-id nil,
+      :source "wm-full-loop",
+      :props
+      #:implementation{:files
+                       ["data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.clj"
+                        "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-after.snapshot"
+                        "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.clj"
+                        "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/source-before.snapshot"
+                        "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/supporting-repair-source.edn"],
+                       :review-job
+                       "invoke-1789439196947-20941-2521d9c0",
+                       :target
+                       "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+                       :selected-action
+                       {:type :repair-machine-failure,
+                        :target
+                        "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+                        :repair-obligation
+                        {:discharge-contract
+                         {:requires
+                          [:distinct-repair-commit
+                           :independent-review
+                           :grounded-repair
+                           :distinct-production-shaped-successor],
+                          :artifact-shape :code-commit},
+                         :repair/status :open,
+                         :opened-at "2026-09-13T22:59:01.768226247Z",
+                         :repair/class :machine-failure,
+                         :repair/id
+                         "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+                         :backtrace
+                         {:error-class
+                          "java.nio.file.FileAlreadyExistsException"},
+                         :failure-kind :initialization-failed,
+                         :attempt-id
+                         "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+                         :failure-stage :initialization,
+                         :repair/schema-version 3},
+                        :rationale
+                        "stop-the-line: machine-failure from initialization-a3e2319f-9562-4182-b651-54f409b90e39"},
+                       :repair-contract
+                       {:repair-id
+                        "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+                        :repair-class :machine-failure,
+                        :failed-attempt
+                        "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+                        :failure-stage :initialization,
+                        :failure-kind :initialization-failed,
+                        :discharge
+                        {:requires
+                         [:distinct-repair-commit
+                          :independent-review
+                          :grounded-repair
+                          :distinct-production-shaped-successor],
+                         :artifact-shape :code-commit}},
+                       :reviewer "codex-24",
+                       :construction-kind :machine-stop-line-repair,
+                       :commit
+                       "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+                       :repository "/home/joe/code/futon2",
+                       :author "codex-23"}}},
+    :resolved? true,
+    :dial-moved? true,
+    :implementation-id
+    "full-loop/implementation/76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+    :discharge-id "full-loop/discharge/attempt-003"},
+   :build-match
+   {:commit "76c7088b11d4e8d97952ace8cf67eef48a5c5289",
+    :review-approved? true},
+   :dial
+   {:moved? true,
+    :implementation-id
+    "full-loop/implementation/76c7088b11d4e8d97952ace8cf67eef48a5c5289"}},
+  :ground {:kind :authoritative-substrate-discharge}}}

@@ -1,0 +1,234 @@
+{:event/schema-version 1,
+ :cohort/id :wm-contract-machinery-55-v1,
+ :attempt/id "attempt-003",
+ :attempt/ordinal 3,
+ :event/sequence 3,
+ :checkpoint/type :construction,
+ :recorded-at "2026-09-15T02:19:32.530974017Z",
+ :payload
+ {:judgment
+  {:fold-output
+   {:wiring
+    {:boxes [],
+     :terminals
+     {:in [{:port nil}],
+      :out [{:port "wiring-diagram", :type "Wiring"}]},
+     :for-sorry :sorry/fold-engine-cascade-to-wiring,
+     :discipline [],
+     :id :wiring/fold-engine-generated,
+     :policy-holes
+     [{:unfolded-pattern "futon-theory/stop-the-line"}
+      {:unfolded-pattern "musn/pause-backtrace"}],
+     :generated-by
+     "meme.fold/fold v1 (rule-table fold; THEN→rule encoded, NL-extraction = v2)",
+     :want-signature "MissionState -> {Wiring, PolicyHoles}",
+     :wires
+     [{:from :emit, :to "wiring-diagram", :type :wire/consequential}]},
+    :coverage-score-delta nil,
+    :policy-holes
+    [{:unfolded-pattern "futon-theory/stop-the-line",
+      :free "Unfolded repair pattern futon-theory/stop-the-line",
+      :why
+      "Required by stop-line obligation repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+      :obligation/id
+      "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed"}
+     {:unfolded-pattern "musn/pause-backtrace",
+      :free "Unfolded repair pattern musn/pause-backtrace",
+      :why
+      "Required by stop-line obligation repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+      :obligation/id
+      "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed"}]},
+   :trace-path nil,
+   :wiring
+   {:boxes [],
+    :terminals
+    {:in [{:port nil}],
+     :out [{:port "wiring-diagram", :type "Wiring"}]},
+    :for-sorry :sorry/fold-engine-cascade-to-wiring,
+    :discipline [],
+    :id :wiring/fold-engine-generated,
+    :policy-holes
+    [{:unfolded-pattern "futon-theory/stop-the-line"}
+     {:unfolded-pattern "musn/pause-backtrace"}],
+    :generated-by
+    "meme.fold/fold v1 (rule-table fold; THEN→rule encoded, NL-extraction = v2)",
+    :want-signature "MissionState -> {Wiring, PolicyHoles}",
+    :wires
+    [{:from :emit, :to "wiring-diagram", :type :wire/consequential}]},
+   :selection-enaction
+   {:verdict :match,
+    :selected
+    {:type :repair-machine-failure,
+     :target
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :repair-obligation
+     {:discharge-contract
+      {:requires
+       [:distinct-repair-commit
+        :independent-review
+        :grounded-repair
+        :distinct-production-shaped-successor],
+       :artifact-shape :code-commit},
+      :repair/status :open,
+      :opened-at "2026-09-13T22:59:01.768226247Z",
+      :repair/class :machine-failure,
+      :repair/id
+      "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+      :backtrace
+      {:error-class "java.nio.file.FileAlreadyExistsException"},
+      :failure-kind :initialization-failed,
+      :attempt-id
+      "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+      :selected-entry nil,
+      :machine-repo nil,
+      :failure-stage :initialization,
+      :target nil,
+      :repair/schema-version 3},
+     :rationale
+     "stop-the-line: machine-failure from initialization-a3e2319f-9562-4182-b651-54f409b90e39"},
+    :enacted
+    {:type :repair-machine-failure,
+     :target
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :repair-obligation
+     {:discharge-contract
+      {:requires
+       [:distinct-repair-commit
+        :independent-review
+        :grounded-repair
+        :distinct-production-shaped-successor],
+       :artifact-shape :code-commit},
+      :repair/status :open,
+      :opened-at "2026-09-13T22:59:01.768226247Z",
+      :repair/class :machine-failure,
+      :repair/id
+      "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+      :backtrace
+      {:error-class "java.nio.file.FileAlreadyExistsException"},
+      :failure-kind :initialization-failed,
+      :attempt-id
+      "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+      :selected-entry nil,
+      :machine-repo nil,
+      :failure-stage :initialization,
+      :target nil,
+      :repair/schema-version 3},
+     :rationale
+     "stop-the-line: machine-failure from initialization-a3e2319f-9562-4182-b651-54f409b90e39"},
+    :evidence
+    {:source :runner-selection, :operator-authority-ref nil}},
+   :cascade
+   {:psi
+    "repair and validate stop-the-line obligation repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+    :semilattice
+    [{:from :failure-backtrace, :to :repair-implementation}
+     {:from :repair-implementation, :to :independent-review}
+     {:from :independent-review, :to :successor-validation}],
+    :construction-kind :machine-stop-line-repair,
+    :selected-action
+    {:type :repair-machine-failure,
+     :target
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :repair-obligation
+     {:discharge-contract
+      {:requires
+       [:distinct-repair-commit
+        :independent-review
+        :grounded-repair
+        :distinct-production-shaped-successor],
+       :artifact-shape :code-commit},
+      :repair/status :open,
+      :opened-at "2026-09-13T22:59:01.768226247Z",
+      :repair/class :machine-failure,
+      :repair/id
+      "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+      :backtrace
+      {:error-class "java.nio.file.FileAlreadyExistsException"},
+      :failure-kind :initialization-failed,
+      :attempt-id
+      "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+      :selected-entry nil,
+      :machine-repo nil,
+      :failure-stage :initialization,
+      :target nil,
+      :repair/schema-version 3},
+     :rationale
+     "stop-the-line: machine-failure from initialization-a3e2319f-9562-4182-b651-54f409b90e39"},
+    :repair-contract
+    {:repair-id
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :repair-class :machine-failure,
+     :failed-attempt
+     "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+     :failure-stage :initialization,
+     :failure-kind :initialization-failed,
+     :discharge
+     {:requires
+      [:distinct-repair-commit
+       :independent-review
+       :grounded-repair
+       :distinct-production-shaped-successor],
+      :artifact-shape :code-commit}}},
+   :patterns ["futon-theory/stop-the-line" "musn/pause-backtrace"],
+   :mission
+   "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+   :correspondence-validation
+   {:validator "futon2.aif.fold/validate-fold-correspondence",
+    :version 1,
+    :ok true,
+    :findings [],
+    :cascade-sha256
+    "bb276e57796f030aae69e7621eece665931aabbdd34bafc8f4c194f9f1e40672",
+    :fold-output-sha256
+    "fb21d4b5c40fb42d20b8f890ae8b7f8e9f94fadfe0613466d26f017c9c86c2a8"},
+   :shape-validation
+   {:validator "futon2.aif.fold/validate-fold-output-v1",
+    :version 1,
+    :ok true,
+    :findings [],
+    :input-sha256
+    "fb21d4b5c40fb42d20b8f890ae8b7f8e9f94fadfe0613466d26f017c9c86c2a8"},
+   :deposit nil,
+   :sorries
+   [{:unfolded-pattern "futon-theory/stop-the-line",
+     :free "Unfolded repair pattern futon-theory/stop-the-line",
+     :why
+     "Required by stop-line obligation repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :obligation/id
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed"}
+    {:unfolded-pattern "musn/pause-backtrace",
+     :free "Unfolded repair pattern musn/pause-backtrace",
+     :why
+     "Required by stop-line obligation repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :obligation/id
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed"}]},
+  :ground
+  {:kind :decision-pinned-construction,
+   :selected-action
+   {:type :repair-machine-failure,
+    :target
+    "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+    :repair-obligation
+    {:discharge-contract
+     {:requires
+      [:distinct-repair-commit
+       :independent-review
+       :grounded-repair
+       :distinct-production-shaped-successor],
+      :artifact-shape :code-commit},
+     :repair/status :open,
+     :opened-at "2026-09-13T22:59:01.768226247Z",
+     :repair/class :machine-failure,
+     :repair/id
+     "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+     :backtrace
+     {:error-class "java.nio.file.FileAlreadyExistsException"},
+     :failure-kind :initialization-failed,
+     :attempt-id "initialization-a3e2319f-9562-4182-b651-54f409b90e39",
+     :selected-entry nil,
+     :machine-repo nil,
+     :failure-stage :initialization,
+     :target nil,
+     :repair/schema-version 3},
+    :rationale
+    "stop-the-line: machine-failure from initialization-a3e2319f-9562-4182-b651-54f409b90e39"}}}}
