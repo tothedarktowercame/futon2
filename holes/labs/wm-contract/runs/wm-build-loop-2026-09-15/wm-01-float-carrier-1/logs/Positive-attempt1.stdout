@@ -1,0 +1,8 @@
+/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/Positive.lean:18:78: error: unsolved goals
+⊢ (¬2 = 0 ∧ ¬2 = 1) ∧ (if 2 = 0 then 1 / 3 else if 2 = 1 then 2 / 3 else 0) = 0
+'FloatCarrierControls.sparse' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.sparse_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.exactKernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.unequal_coordinates' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.outside_is_zero' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'FloatCarrierControls.exact_normalised' depends on axioms: [propext, Classical.choice, Quot.sound]

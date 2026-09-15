@@ -1,0 +1,44 @@
+'DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow.support_ne_nil' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow.toProbabilityKernel' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow.toProbabilityKernel_coordinate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow.toProbabilityKernel_normalised' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.MachineModelSpec.exact_row_admissible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retainedMass' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retainedRow' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_not_exact' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_spawned' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_refined' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_strengthened' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_addressed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_falsified' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_foreclosed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_reopened' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

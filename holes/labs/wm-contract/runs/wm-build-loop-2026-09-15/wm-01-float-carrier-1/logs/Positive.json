@@ -1,0 +1,14 @@
+{
+  "command": [
+    "env",
+    "LEAN_NUM_THREADS=1",
+    "lake",
+    "env",
+    "lean",
+    "-j",
+    "1",
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/Positive.lean"
+  ],
+  "cwd": "/tmp/wm-float-carrier-u567g4by",
+  "exit": 0
+}

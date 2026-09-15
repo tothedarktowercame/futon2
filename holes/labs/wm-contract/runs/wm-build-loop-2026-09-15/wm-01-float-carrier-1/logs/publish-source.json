@@ -1,0 +1,8 @@
+{
+  "command": [
+    "python3",
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/publish-source.py"
+  ],
+  "cwd": "/home/joe/code",
+  "exit": 0
+}

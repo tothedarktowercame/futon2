@@ -1,0 +1,8 @@
+{
+  "command": [
+    "lean",
+    "--version"
+  ],
+  "cwd": "/home/joe/code/mathlib4",
+  "exit": 0
+}

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "env",
+    "LEAN_NUM_THREADS=1",
+    "lake",
+    "build",
+    "DarkTower.WarMachine.MachineModelSpec",
+    "DarkTower.WarMachine.MachineBeliefDistribution",
+    "DarkTower.WarMachine.MachineForwardModelWitness",
+    "DarkTower.WarMachine.MachineParameters",
+    "DarkTower.WarMachine.MachinePredictiveOutcome",
+    "DarkTower.WarMachine.MachinePreferenceDistribution",
+    "DarkTower.WarMachine.Row16ForwardModelAxiomCheck",
+    "DarkTower.WarMachine.FloatCarriedRowCorrespondence"
+  ],
+  "cwd": "/home/joe/code/mathlib4",
+  "exit": 0
+}

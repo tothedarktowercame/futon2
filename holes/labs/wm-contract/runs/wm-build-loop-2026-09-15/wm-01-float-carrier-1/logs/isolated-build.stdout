@@ -1,0 +1,51 @@
+ℹ [2701/2708] Replayed DarkTower.WarMachine.CascadeOrder
+info: DarkTower/WarMachine/CascadeOrder.lean:143:0: 'attempt001_2026_07_14_two_cycle_is_refused' depends on axioms: [propext]
+info: DarkTower/WarMachine/CascadeOrder.lean:144:0: 'dropping_reverse_edge_is_acyclic_but_not_a_semilattice' depends on axioms: [propext]
+info: DarkTower/WarMachine/CascadeOrder.lean:145:0: 'attempt008_2026_07_16_descent_is_accepted' depends on axioms: [propext]
+⚠ [2703/2708] Replayed DarkTower.WarMachine.Holes
+warning: DarkTower/WarMachine/Holes.lean:157:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:999:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7403:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7426:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7437:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7965:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7968:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7971:4: declaration uses `sorry`
+warning: DarkTower/WarMachine/Holes.lean:7974:4: declaration uses `sorry`
+✔ [2705/2709] Built DarkTower.WarMachine.MachineModelSpec (1.5s)
+✔ [2706/2713] Built DarkTower.WarMachine.MachineForwardModelWitness (1.0s)
+✔ [2707/2716] Built DarkTower.WarMachine.MachineBeliefDistribution (1.5s)
+✔ [2713/2717] Built DarkTower.WarMachine.MachinePredictiveOutcome (1.4s)
+ℹ [2714/2717] Built DarkTower.WarMachine.Row16ForwardModelAxiomCheck (1.2s)
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:3:0: 'DarkTower.WarMachine.Holes.PredictiveOutcomeKernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:4:0: 'DarkTower.WarMachine.MachineForwardModelWitness.advanceTwiceRow' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:5:0: 'DarkTower.WarMachine.MachineForwardModelWitness.cascadeRow' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:6:0: 'DarkTower.WarMachine.MachineForwardModelWitness.advanceTwiceComposition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:7:0: 'DarkTower.WarMachine.MachineForwardModelWitness.cascadeComposition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:8:0: 'DarkTower.WarMachine.MachineForwardModelWitness.repeatedComposition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:9:0: 'DarkTower.WarMachine.MachineForwardModelWitness.inheritedExcess' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: DarkTower/WarMachine/Row16ForwardModelAxiomCheck.lean:10:0: 'DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+⚠ [2715/2717] Built DarkTower.WarMachine.MachinePreferenceDistribution (1.9s)
+warning: DarkTower/WarMachine/MachinePreferenceDistribution.lean:34:138: This simp argument is unused:
+  seed
+
+Hint: Omit it from the simp argument list.
+  simp_all [machineSupport,
+  ̲  ̲ ̲ ̲organisationOutcome,̵ ̵s̵e̵e̵d̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+✔ [2716/2717] Built DarkTower.WarMachine.MachineParameters (1.7s)
+✔ [2717/2717] Built DarkTower.WarMachine.FloatCarriedRowCorrespondence (1.5s)
+Build completed successfully (2717 jobs).

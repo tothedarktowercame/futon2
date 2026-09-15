@@ -1,0 +1,11 @@
+{
+  "command": [
+    "env",
+    "LEAN_NUM_THREADS=1",
+    "lake",
+    "build",
+    "DarkTower.WarMachine.MachineModelSpec"
+  ],
+  "cwd": "/tmp/wm-float-carrier-u567g4by",
+  "exit": 1
+}

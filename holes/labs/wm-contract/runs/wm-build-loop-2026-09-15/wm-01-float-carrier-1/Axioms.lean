@@ -1,0 +1,21 @@
+import DarkTower.WarMachine.FloatCarriedRowCorrespondence
+open DarkTower.WarMachine.MachineModelSpec
+open DarkTower.WarMachine.FloatCarriedRowCorrespondence
+namespace FloatCarrierControls
+#print axioms DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow
+#print axioms DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow.support_ne_nil
+#print axioms DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow.toProbabilityKernel
+#print axioms DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow.toProbabilityKernel_coordinate
+#print axioms DarkTower.WarMachine.MachineModelSpec.FloatCarriedRow.toProbabilityKernel_normalised
+#print axioms DarkTower.WarMachine.MachineModelSpec.exact_row_admissible
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retainedMass
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retainedRow
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_not_exact
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_spawned
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_refined
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_strengthened
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_addressed
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_falsified
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_foreclosed
+#print axioms DarkTower.WarMachine.FloatCarriedRowCorrespondence.retained_reopened
+end FloatCarrierControls

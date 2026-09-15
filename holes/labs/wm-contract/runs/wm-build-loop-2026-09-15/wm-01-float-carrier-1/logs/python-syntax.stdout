@@ -1,0 +1,1 @@
+PASS ['canonical-build.py', 'controls.py', 'finish.py', 'implement.py', 'publish-source.py', 'run.py', 'setup.py']

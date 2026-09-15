@@ -1,0 +1,10 @@
+{
+  "command": [
+    "clojure",
+    "-X:test",
+    ":nses",
+    "[futon2.aif.machine-model-test]"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "exit": 0
+}

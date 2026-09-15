@@ -1,0 +1,48 @@
+{
+  "head": "2b22eeef3102b3b48c8c12df66aaded459c36819",
+  "before": {
+    "MachineModelSpec": "854ee13082542b52d8f6fe88a72fcfaacaf0878bc3253e31a64c60896d6e8960",
+    "MachineForwardModelWitness": "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c"
+  },
+  "dependents": [
+    "DarkTower.WarMachine.MachineBeliefDistribution",
+    "DarkTower.WarMachine.MachineForwardModelWitness",
+    "DarkTower.WarMachine.MachineParameters",
+    "DarkTower.WarMachine.MachinePredictiveOutcome",
+    "DarkTower.WarMachine.MachinePreferenceDistribution",
+    "DarkTower.WarMachine.Row16ForwardModelAxiomCheck"
+  ],
+  "predictive-wrapper-closures": {
+    "PredictiveOutcomeKernelWitness": [
+      "DarkTower.Contract.Emit",
+      "DarkTower.WarMachine.CascadeOrder",
+      "DarkTower.WarMachine.Holes",
+      "DarkTower.WarMachine.PredictiveOutcomeKernelWitness",
+      "Lean.Data.Json",
+      "Mathlib.Analysis.SpecialFunctions.Gamma.Basic",
+      "Mathlib.Data.Real.Basic"
+    ],
+    "PredictiveOutcomeKernelUnconditionalNegative": [
+      "DarkTower.Contract.Emit",
+      "DarkTower.WarMachine.CascadeOrder",
+      "DarkTower.WarMachine.Holes",
+      "DarkTower.WarMachine.PredictiveOutcomeKernelUnconditionalNegative",
+      "DarkTower.WarMachine.PredictiveOutcomeKernelWitness",
+      "Lean.Data.Json",
+      "Mathlib.Analysis.SpecialFunctions.Gamma.Basic",
+      "Mathlib.Data.Real.Basic"
+    ],
+    "PredictiveOutcomeKernelSoftmaxNegative": [
+      "DarkTower.Contract.Emit",
+      "DarkTower.WarMachine.CascadeOrder",
+      "DarkTower.WarMachine.Holes",
+      "DarkTower.WarMachine.PredictiveOutcomeKernelSoftmaxNegative",
+      "DarkTower.WarMachine.PredictiveOutcomeKernelWitness",
+      "Lean.Data.Json",
+      "Mathlib.Analysis.SpecialFunctions.Gamma.Basic",
+      "Mathlib.Data.Real.Basic"
+    ]
+  },
+  "wrapper-text": "#!/usr/bin/env bb\n(ns checks.predictive-outcome-kernel-witness\n  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt] [clojure.edn :as edn]))\n\n(def fixture-path \"holes/labs/wm-contract/predictive-outcome-kernel-reference.edn\")\n(def receipt-path \"holes/labs/wm-contract/predictive-outcome-kernel-positive-receipt.edn\")\n(def mathlib \"/home/joe/code/mathlib4\")\n(def expected\n  {:schema :predictive-outcome-kernel-reference/v1\n   :basis \"sec-glossary.tex:21-29 \u2014 Q(o|pi) is a normalized outcome distribution for each policy\"\n   :kind :hand-derived-deterministic-policy-rows\n   :policies [:inspect :repair]\n   :rows {:inspect {:support [:clear] :mass {:clear 1}}\n          :repair {:support [:fixed] :mass {:fixed 1}}}\n   :excluded {:unconditional-outcome-distribution true\n              :softmax-policy-vector true}})\n\n(defn lean-exit [file]\n  (:exit (p/shell {:dir mathlib :continue true :out :string :err :string}\n                  \"lake\" \"env\" \"lean\" file)))\n\n(def negative-files\n  {\"--negative-unconditional\" \"DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean\"\n   \"--negative-softmax\" \"DarkTower/WarMachine/PredictiveOutcomeKernelSoftmaxNegative.lean\"})\n\n(defn -main [& args]\n  (let [negative-flag (some (set (keys negative-files)) args)\n        fixture (edn/read-string (slurp fixture-path))\n        positive? (and (:pass? (receipt/validate (edn/read-string (slurp receipt-path)))) (= expected fixture)\n                       (zero? (lean-exit \"DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean\")))\n        rejected? (if negative-flag\n                    (zero? (lean-exit (get negative-files negative-flag)))\n                    true)\n        ok? (and positive? rejected?)\n        exit (if ok? 0 (if negative-flag 2 1))]\n    (println \"predictive-outcome-kernel-witness:\"\n             (cond\n               (and negative-flag ok?) (str \"negative-control PASS (\" (subs negative-flag 11) \" rejected)\")\n               negative-flag \"mutation slipped\"\n               ok? \"PASS\"\n               :else \"FAIL\")\n             \"exit-convention=0-pass/1-fail/2-mutation-slipped\")\n    (System/exit exit)))\n\n(apply -main *command-line-args*)\n",
+  "workspace": "/tmp/wm-float-carrier-u567g4by"
+}

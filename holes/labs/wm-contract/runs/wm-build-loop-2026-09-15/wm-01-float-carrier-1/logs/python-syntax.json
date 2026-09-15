@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "-c",
+    "import pathlib; r=pathlib.Path(\"futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1\"); files=sorted(r.glob(\"*.py\")); [compile(p.read_bytes(),str(p),\"exec\") for p in files]; print(\"PASS\", [p.name for p in files])"
+  ],
+  "cwd": "/home/joe/code",
+  "exit": 0
+}

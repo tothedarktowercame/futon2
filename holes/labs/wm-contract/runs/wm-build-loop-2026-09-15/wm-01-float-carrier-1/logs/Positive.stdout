@@ -1,0 +1,6 @@
+'FloatCarrierControls.sparse' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.sparse_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.exactKernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.unequal_coordinates' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.outside_is_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FloatCarrierControls.exact_normalised' depends on axioms: [propext, Classical.choice, Quot.sound]

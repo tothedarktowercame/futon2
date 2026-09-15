@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "show",
+    "--stat",
+    "--oneline",
+    "HEAD"
+  ],
+  "cwd": "/home/joe/code/mathlib4",
+  "exit": 0
+}
