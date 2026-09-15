@@ -8,6 +8,13 @@
     :revisit-cost 0.5,
     :source :constructed,
     :expected-recovery 0.125}
+   {:name "linode.com-2026-04-13",
+    :kind :file-stale,
+    :decisiveness :uncertain,
+    :prior-needed-later 0.4,
+    :revisit-cost 5.0,
+    :source :constructed,
+    :expected-recovery 2.0}
    {:name " *server*",
     :kind :temp,
     :decisiveness :uncertain,
@@ -25,9 +32,9 @@
   :dry-run :dry-run,
   :execute :refused-until-gated},
  :meters
- {:scanned 137,
-  :kills-proposed 3,
+ {:scanned 138,
+  :kills-proposed 4,
   :remaining 134,
-  :expected-recovery 0.22499999999999998,
-  :fuel-charged 1.6700000000000002},
+  :expected-recovery 2.2249999999999996,
+  :fuel-charged 1.7800000000000002},
  :sources [nil :constructed]}

@@ -2,9 +2,9 @@
  :receipts
  {:kills [], :dry-run :dry-run, :execute :refused-until-gated},
  :meters
- {:scanned 137,
+ {:scanned 138,
   :kills-proposed 0,
-  :remaining 137,
+  :remaining 138,
   :expected-recovery 0,
-  :fuel-charged 1.37},
+  :fuel-charged 1.3800000000000001},
  :sources [nil :constructed]}

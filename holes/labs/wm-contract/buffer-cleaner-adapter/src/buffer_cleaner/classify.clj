@@ -28,7 +28,7 @@
 
 (defn classify-buffer
   "One buffer row -> classification map. Pure."
-  [{:keys [name kind file modified has-process visible display-age-seconds] :as row}
+  [{:keys [name kind file modified has-process visible active-agent server-clients display-age-seconds] :as row}
    wiring categories]
   (let [kind-k (if (and (= "file" kind)
                          (truthy? file)
@@ -41,8 +41,8 @@
                     (truthy? visible) :visible
                     (truthy? has-process) :has-process
                     (truthy? modified) :modified
-                    (and (truthy? file) (not (contains? (:eligible-kinds wiring #{}) :file)))
-                    :kind-not-eligible
+                    (truthy? active-agent) :active-agent
+                    (truthy? server-clients) :server-clients
                     :else nil)
         eligible (and (nil? preserved)
                       (contains? (:eligible-kinds wiring #{}) kind-k)

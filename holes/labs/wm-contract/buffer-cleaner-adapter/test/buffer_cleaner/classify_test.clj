@@ -74,3 +74,31 @@
         m (:meters r)]
     (is (= 7 (:scanned m)))
     (is (= (+ (* 0.01 7) (* 0.1 (:kills-proposed m))) (:fuel-charged m)))))
+
+(deftest named-protections-checked
+  (let [base {:name "x" :kind "temp" :file "false" :modified "false"
+              :has-process "false" :visible "false" :display-age-seconds 9999}]
+    (testing "active-agent buffer is preserved even when otherwise eligible"
+      (let [r (c/classify-buffer (assoc base :active-agent true) aggressive categories)]
+        (is (= :keep (:action r)))
+        (is (= :active-agent (:preservation-reason r)))))
+    (testing "server-clients buffer is preserved"
+      (let [r (c/classify-buffer (assoc base :server-clients true) aggressive categories)]
+        (is (= :keep (:action r)))
+        (is (= :server-clients (:preservation-reason r)))))
+    (testing "codex-26 control 1: stale file exercises the age wiring"
+      (let [f {:name "old.org" :kind "file" :file "true" :modified "false"
+               :has-process "false" :visible "false" :active-agent "false"
+               :server-clients "false" :display-age-seconds 90000}
+            r (c/classify-buffer f aggressive categories)]
+        (is (= :file-stale (:kind r)))
+        (is (= :kill (:action r)))
+        (is (nil? (:preservation-reason r)))))
+    (testing "fresh file kept by non-eligibility, not preservation"
+      (let [f {:name "new.org" :kind "file" :file "true" :modified "false"
+               :has-process "false" :visible "false" :active-agent "false"
+               :server-clients "false" :display-age-seconds 7200}
+            r (c/classify-buffer f aggressive categories)]
+        (is (= :file (:kind r)))
+        (is (= :keep (:action r)))
+        (is (nil? (:preservation-reason r)))))))

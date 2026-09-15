@@ -41,6 +41,11 @@
              (t "other"))))
       (error "error"))))
 
+(defun bc--active-agent-p (buf)
+  (and (fboundp 'futon-buffer-cleaner--active-agent-buffer-p)
+       (ignore-errors
+         (futon-buffer-cleaner--active-agent-buffer-p (buffer-name buf)))))
+
 (defun bc--row (buf)
   (list (cons 'name (buffer-name buf))
         (cons 'kind (bc--kind buf))
@@ -48,6 +53,10 @@
         (cons 'modified (with-current-buffer buf (buffer-modified-p)))
         (cons 'has-process (if (get-buffer-process buf) t :json-false))
         (cons 'visible (if (bc--visible-p buf) t :json-false))
+        (cons 'active-agent (if (bc--active-agent-p buf) t :json-false))
+        (cons 'server-clients (if (with-current-buffer buf
+                                    (bound-and-true-p server-buffer-clients))
+                                  t :json-false))
         (cons 'display-age-seconds (bc--age buf))))
 
 (defun bc--state ()
