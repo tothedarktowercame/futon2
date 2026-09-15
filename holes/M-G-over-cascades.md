@@ -856,3 +856,44 @@ Durable ack of claude-5's boundary-sync + defect bell (M-evaluate-policies §6.6
   (`futon2/data/r18-badges.edn`, `E-r18-faithfulness-audit.md`, commit `dcbe021`). Reuse that faithfulness
   layer rather than re-deriving it. **C10** (closure as M-evaluate-policies exit criterion) noted; mission-close
   stays Joe's call.
+
+## Lean definition landed — specification direction (2026-09-15, claude-15)
+
+Commissioned by Joe directly (emacs-repl, 2026-09-15: "Lean is meant to
+define the core concepts, from the glossary, from the equations, and from
+the effort I put in to clarify what was meant by policy, G, cascades").
+Context: a session post-mortem established that the formal corpus held
+every ingredient — `Holes.G` polymorphic over its PolicyIndex,
+`Holes.Cascade` closed-by-record (P-validated-R5 §3e, 2026-08-30),
+`softmaxWithFPi` for "distributions over" — and no declaration joining
+them; the Machine* witness modules cite implementation .clj lines 118
+times and this mission zero times.
+
+**Landed: mathlib4 `DarkTower/WarMachine/GOverCascades.lean` (a43440ab61),**
+built FROM the concept records (§Sortie-12 ruling verbatim, this mission's
+§1/§2, the glossary's π/cascade/control-schema paragraphs) with zero
+implementation citations:
+
+- `CascadePolicy P := Cascade P` and `cascadeGrainG` — the join: `G`
+  instantiated at the ratified grain (risk/eig legs take the whole
+  cascade).
+- `cascadePolicyPosterior` — Q(π) ∝ exp(ln E − G/τ − F_π) at
+  `PolicyIndex := Cascade P`: §362's "distributions over CASCADES".
+- `singletonCascade` — §1's degenerate length-1 case, as the embedding.
+- **§2 made formal and proved**: `CompositionBlind` (score factors through
+  `nodes` alone) cannot separate an equal-bag pair (`sameBagFirst/Second`)
+  that `cascadeGrainG` provably separates — "per-pattern scoring
+  marginalises out the interaction terms" is now a pair of theorems
+  (axioms: propext/choice/Quot.sound only; `#print axioms` in-file).
+- **The HOLE, house style**: the production seam is owed. Evidence named:
+  aif-equations.edn `:policy-set` binds `:lean machinePolicySet` over flat
+  `Candidate` (id/score/noOp); defect-dG-nil-for-cascades (`:G-total 0.0`
+  on 293/293 rows). Falsifier: a production seam presenting Cascade-typed
+  policies to G with a witness citing this module. Until retired, no
+  production quantity may be reported at the name G(π) at policy grade.
+
+Registered as worklist **:F13** (fundamentals class — per Joe's 2026-09-05
+rule this row outranks non-F work until the seam lands). This entry
+corrects the formalisation *direction* only; the §7 stop-the-line on
+INSTANTIATE-ing the coupled tension-discharge G stands untouched — the
+module defines the domain and conformance, not the grounding.
