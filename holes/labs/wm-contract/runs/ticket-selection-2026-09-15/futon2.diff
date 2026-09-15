@@ -1,0 +1,480 @@
+commit a24cb621e2f1a6e8cf6567f8784a9d8b2aed5c70
+Author:     Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+AuthorDate: Tue Sep 15 13:52:43 2026 +0000
+Commit:     Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+CommitDate: Tue Sep 15 13:52:43 2026 +0000
+
+    Make live tickets selectable using declared one-item prediction prior
+
+diff --git a/scripts/futon2/report/cascade_lane.clj b/scripts/futon2/report/cascade_lane.clj
+index c674345d..0fff248b 100644
+--- a/scripts/futon2/report/cascade_lane.clj
++++ b/scripts/futon2/report/cascade_lane.clj
+@@ -15,6 +15,7 @@
+             [clojure.java.io :as io]
+             [clojure.string :as str]
+             [futon2.aif.lane-futility :as futility]
++            [futon2.aif.mission-registry :as registry]
+             [futon2.aif.rollout :as rollout])
+   (:import [java.util.concurrent TimeUnit]))
+ 
+@@ -161,10 +162,12 @@
+       (str home "/code/" repo "/" sub))))
+ 
+ (defn- mission-doc-file [target]
+-  (->> mission-doc-roots
++  (if (str/starts-with? (str target) "T-")
++    (some-> (registry/ticket-entry target) :path io/file)
++    (->> mission-doc-roots
+        (map #(io/file % (str target ".md")))
+        (filter #(.exists ^java.io.File %))
+-       first))
++       first)))
+ 
+ ;; ---------------------------------------------------------------------------
+ ;; L2 (E-live-loop-3, 2026-07-05): sorry-grain ψ from the held-work ledger.
+@@ -324,11 +327,13 @@
+                                              first
+                                              (re-find #"^#\s*(?:Mission:)?\s*(.*)")
+                                              second)
+-                              status (some->> lines
++                              status (or (when (str/starts-with? (str target) "T-")
++                                           (registry/ticket-status-text lines))
++                                         (some->> lines
+                                               (filter #(re-find #"(?i)^(?:\*\*)?Status:?(?:\*\*)?" %))
+                                               first
+                                               (re-find #"(?i)^(?:\*\*)?Status:?(?:\*\*)?:?\s*(.*)")
+-                                              second)]
++                                              second))]
+                           (when title
+                             (str stem " — want: " (clip title 160)
+                                  (when (seq (str status)) (str ". have: " (clip status 160))))))
+diff --git a/scripts/futon2/report/war_machine.clj b/scripts/futon2/report/war_machine.clj
+index 56394085..818763e7 100644
+--- a/scripts/futon2/report/war_machine.clj
++++ b/scripts/futon2/report/war_machine.clj
+@@ -3476,15 +3476,25 @@
+ ;; ---------------------------------------------------------------------------
+ 
+ (defn scan-mission-triage
+-  "Scan mission inventory for strategic health.
++  "Scan missions plus tickets for strategic health. Tickets map complete to
++   complete, inactive to inactive, not-actionable to not-actionable, live to
++   open; they never enter abandoned-in-progress or blocked penalties.
+ 
+    Queries GET /api/alpha/missions, cross-references with git activity
+    to detect abandoned-in-progress missions.
+ 
+    Returns {:total :by-status :by-repo :abandoned-missions :health}."
+   ([days] (scan-mission-triage days (or (fetch-missions) [])))
+-  ([days missions]
+-  (let [since (since-str days)
++  ([days missions] (scan-mission-triage days missions (:tickets (mission-registry/load-tickets))))
++  ([days missions tickets]
++  (let [missions (into (vec missions)
++                       (map (fn [t] {:mission/status (case (:status-class t)
++                                                      :complete "complete"
++                                                      :inactive "inactive"
++                                                      :not-actionable "not-actionable"
++                                                      "open")
++                                     :mission/repo "ticket-registry"}) tickets))
++        since (since-str days)
+         ;; Classify by status
+         by-status (frequencies (map #(or (:mission/status %) "unknown") missions))
+         ;; Classify by repo
+@@ -3510,6 +3520,7 @@
+         blocked (get by-status "blocked" 0)
+         active (reduce + (map #(get by-status % 0) active-mission-statuses))]
+     {:total total
++     :ticket-count (count tickets)
+      :by-status by-status
+      :by-repo by-repo
+      :active active
+@@ -6130,6 +6141,7 @@
+         wm-entity-repos (belief/classify-entity-repos-from-stack-annotations)
+         wm-entity-ticks (belief/classify-entity-ticks-from-stack-annotations)
+         wm-missions (try (mission-registry/open-missions) (catch Exception _ []))
++        wm-tickets (:tickets (mission-registry/load-tickets))
+         ;; v0.10/v0.11/v0.13/R3a/R3b/R3d wiring: compute prediction-errors
+         ;; for every channel with a likelihood model. All errors record into
+         ;; the trace's :prediction-errors map.
+@@ -6346,6 +6358,7 @@
+         wm-patterns (try (pattern-registry/open-patterns) (catch Exception _ []))
+         wm-state {:observation observation :belief wm-belief :sorrys wm-sorrys
+                   :missions wm-missions
++                  :tickets wm-tickets
+                   :patterns wm-patterns
+                   :anticipation anticipation-snapshot
+                   :wm/route route3
+@@ -6357,6 +6370,7 @@
+                        [ap/bootstrap-proposer
+                         pattern-registry/pattern-enumerator-proposer
+                         mission-registry/mission-enumerator-proposer
++                        mission-registry/ticket-enumerator-proposer
+                         sorry-registry/sorry-enumerator-proposer
+                         ;; M-aif2 slice-1: credited + admissibility-gated
+                         ;; tension-proposer — emits existing S2 classes via κ at
+diff --git a/src/futon2/aif/controller_authority.clj b/src/futon2/aif/controller_authority.clj
+index 6e59e7a4..0a4b2c91 100644
+--- a/src/futon2/aif/controller_authority.clj
++++ b/src/futon2/aif/controller_authority.clj
+@@ -26,7 +26,10 @@
+         score (:controller-score decision)
+         law (:selection-law decision)
+         mission-action? (contains? mission-action-types (:type action))
++        ticket-action? (= :advance-ticket (:type action))
+         reason (cond
++                 (and ticket-action? (not (:open? (missions/ticket-status (:target action)))))
++                 :target-not-open
+                  (and mission-action?
+                       (not (true? (:open? (missions/mission-status (:target action))))))
+                  :target-not-open
+@@ -47,11 +50,14 @@
+            :authorized? true :executed? false :authority :machine-determined
+            :operator-confirmation-required? false
+            :operator-decision-evidence-id operator-decision-evidence-id
+-           :admissible-set :all-open-missions :scope-authority scope-authority
++           :admissible-set :all-open-missions-and-tickets
++           :ticket-scope-authority "invoke-1789479853453-21033-f928800f (Joe / claude-20 2026-09-15)" :scope-authority scope-authority
+            :machine-gates {:open-mission (if mission-action?
+                                            {:status :passed}
+                                            {:status :not-applicable
+                                             :reason :not-a-mission-action})
++                           :live-ticket (if ticket-action? {:status :passed}
++                                           {:status :not-applicable :reason :not-a-ticket-action})
+                            :admissible-action {:status :passed}
+                            :controller-score-and-law {:status :passed}
+                            :serving-cache no-recall :query-bounds no-recall
+@@ -65,5 +71,5 @@
+       (assoc decision :actuation actuation
+              :actuation-status (:status actuation) :actuation-authorized? true
+              :requires-operator-override? false
+-             :strategic-selection-boundary :controller-over-all-open-missions
++             :strategic-selection-boundary :controller-over-all-open-missions-and-tickets
+              :scope-authority scope-authority :rollback (:rollback actuation)))))
+diff --git a/src/futon2/aif/enumeration_completeness.clj b/src/futon2/aif/enumeration_completeness.clj
+index 0f9dc071..a29ddf82 100644
+--- a/src/futon2/aif/enumeration_completeness.clj
++++ b/src/futon2/aif/enumeration_completeness.clj
+@@ -100,10 +100,11 @@
+    :ticket
+    {:dir "tickets"
+     :file-pattern #".*/holes/tickets/(T-[^/]+)\.md$"
+-    :contract-source :declared-by-this-check
+-    :contract-pointer nil
+-    :candidate-types #{}
+-    :enumerator nil}})
++    :contract-source :code
++    :contract-pointer "src/futon2/aif/mission_registry.clj:load-tickets"
++    :candidate-types #{:advance-ticket}
++    :enumerator {:proposer :ticket-enumerator
++                 :pointer "src/futon2/aif/mission_registry.clj:ticket-enumerator-proposer"}}})
+ 
+ (def proposer-list-pointer
+   "Where the tick's proposer list is composed. A kind absent from that vector
+@@ -148,6 +149,18 @@
+                      (some #(str/starts-with? head %) terminal-leads) :terminal
+                      :else :live)}))
+ 
++(defn- classify-ticket-doc-status
++  "Independent reading of the ticket status table (lead packet 21033)."
++  [text]
++  (let [status (some #(second (re-find #"(?i)^\s*\*\*Status(?:\s*\([^)]*\))?\s*:\s*(.*)$" %))
++                     (str/split-lines text))
++        lead (-> (or status "") str/upper-case (str/replace #"^[\s*_]+" ""))]
++    {:status-line status
++     :status-class (cond
++                     (re-find #"JOE['’]S CALL|AWAIT[^.]*JOE|^(WATCH|FINDING|DESIGN CONSTRAINT)\b" lead) :draft
++                     (re-find #"^(DONE|SUPERSEDED|DEFERRED|PARKED|ARCHIVED)" lead) :terminal
++                     :else :live)}))
++
+ ;; ---------------------------------------------------------------------------
+ ;; The scan
+ ;; ---------------------------------------------------------------------------
+@@ -199,7 +212,7 @@
+                  (merge {:kind kind
+                          :id (second (re-matches file-pattern path))
+                          :path path}
+-                        (classify-doc-status (slurp path))))
++                        ((if (= kind :ticket) classify-ticket-doc-status classify-doc-status) (slurp path))))
+          ;; Shortest path first, so the primary checkout of a duplicated id is
+          ;; the copy that survives dedupe and the copies are what get typed.
+          ordered (sort-by (juxt count identity) matched)
+@@ -208,7 +221,7 @@
+                     (let [id (second (re-matches file-pattern path))
+                           reason (or (fence-reason path)
+                                      (cond
+-                                       (str/includes? (or id "") ".") :derived-id
++                                       (and (not= kind :ticket) (str/includes? (or id "") ".")) :derived-id
+                                        (contains? (:seen acc) id) :duplicate-id))]
+                       (if reason
+                         (update acc :excluded conj {:kind kind :id id :path path
+diff --git a/src/futon2/aif/forward_model.clj b/src/futon2/aif/forward_model.clj
+index 2b9e8530..01e3c0df 100644
+--- a/src/futon2/aif/forward_model.clj
++++ b/src/futon2/aif/forward_model.clj
+@@ -28,7 +28,7 @@
+    set means adding both a `predict-effects` multimethod arm (below)
+    and a `can-propose?` arm if the action requires substrate
+    addressability."
+-  #{:no-op :address-sorry :open-mission :advance-mission :close :close-mission
++  #{:no-op :address-sorry :open-mission :advance-mission :advance-ticket :close :close-mission
+     :close-hole :survey :survey-mission :apply-cascade :fire-pattern
+     :learn-action-class :pursue :decompose})
+ 
+@@ -166,6 +166,16 @@
+                     :sorry-count-norm 0.01}
+      :events [{:entity-id target :type :addressed :weight (* weight f)}]}))
+ 
++(defmethod predict-effects :advance-ticket
++  ;; Declared prior shared with :advance-mission (lead decision 21033):
++  ;; one-item factor, no sorry term, not calibrated. Mission-health now
++  ;; measures tickets as well as missions; tickets do not enter sorry census.
++  [_state {:keys [target weight] :or {weight 1.0}}]
++  (let [f (advance-mission-ordinal-factor 1)]
++    {:obs-delta {:mission-health (* 0.04 f)}
++     :obs-variance {:mission-health 0.015}
++     :events [{:entity-id target :type :addressed :weight (* weight f)}]}))
++
+ (defmethod predict-effects :close
+   [_state {:keys [target weight] :or {weight 1.0}}]
+   {:obs-delta {:mission-health 0.02}
+diff --git a/src/futon2/aif/full_loop_runner.clj b/src/futon2/aif/full_loop_runner.clj
+index 1168fb6a..83ec756a 100644
+--- a/src/futon2/aif/full_loop_runner.clj
++++ b/src/futon2/aif/full_loop_runner.clj
+@@ -1636,6 +1636,7 @@
+        {:from :not-addressable
+         :to :proposable-and-executable}}
+ 
++      (= :advance-ticket (:type action)) (missions/ticket-entry target)
+       :else (mission-entry target))))
+ 
+ (defn- job-text [job]
+diff --git a/src/futon2/aif/mission_registry.clj b/src/futon2/aif/mission_registry.clj
+index dcf10494..ba9d69c3 100644
+--- a/src/futon2/aif/mission_registry.clj
++++ b/src/futon2/aif/mission_registry.clj
+@@ -347,3 +347,80 @@
+                          " [" (name (:status-class m))
+                          "; advance open holes]")}))
+     (proposer-id [_] :mission-enumerator)))
++
++;; Ticket status table (Joe / claude-20, packet 21033, 2026-09-15):
++;; DONE* -> complete; SUPERSEDED/DEFERRED/PARKED/ARCHIVED -> inactive;
++;; WATCH/FINDING/DESIGN CONSTRAINT or awaiting Joe/Joe's call -> not-actionable;
++;; PARTIAL/OPEN/STILL-OPEN/SCOPED/DESIGNED/RECLASSIFY and unknown -> live.
++(defn ticket-status-text [lines]
++  (some #(second (re-find #"(?i)^\s*\*\*Status(?:\s*\([^)]*\))?\s*:\s*(.*)$" %)) lines))
++
++(defn classify-ticket-status [text]
++  (let [s (-> (or text "") str/upper-case (str/replace #"^[\s*_]+" ""))]
++    (cond
++      (re-find #"JOE['’]S CALL|AWAIT[^.]*JOE" s) :not-actionable
++      (str/starts-with? s "DONE") :complete
++      (re-find #"^(SUPERSEDED|DEFERRED|PARKED|ARCHIVED)\b" s) :inactive
++      (re-find #"^(WATCH|FINDING|DESIGN CONSTRAINT)\b" s) :not-actionable
++      :else :live)))
++
++(defn live-ticket? [ticket] (= :live (:status-class ticket)))
++
++(defn load-tickets
++  "Immediate primary-checkout holes/tickets/T-*.md only. Same mission scan
++   fences before ID deduplication; bare holes/T-* discovery notes excluded."
++  ([] (load-tickets default-code-root))
++  ([code-root]
++   {:tickets
++    (->> (or (.listFiles (io/file code-root)) (make-array File 0))
++         (filter #(.isDirectory ^File %))
++         (map #(io/file % "holes" "tickets"))
++         (mapcat #(or (.listFiles ^File %) (make-array File 0)))
++         (filter #(.isFile ^File %))
++         (map #(.getAbsolutePath ^File %))
++         (filter #(re-matches #".*/holes/tickets/T-[^/]+\.md$" %))
++         (remove sandbox-path?)
++         (remove #(non-primary-path? (str/replace % "/holes/tickets/" "/holes/missions/")))
++         (sort-by (juxt count identity))
++         (map (fn [path]
++                (let [id (str/replace (.getName (io/file path)) #"\.md$" "")
++                      lines (str/split-lines (slurp path))
++                      status (ticket-status-text lines)]
++                  {:id id :kind :ticket :path path
++                   :title (mission-title-from-lines id lines)
++                   :status-line status :status-class (classify-ticket-status status)
++                   :parent (some #(when (re-find #"(?i)parent" %)
++                                    (re-find #"M-[A-Za-z0-9_-]+" %)) lines)})))
++         dedupe-by-id vec)}))
++
++(defn ticket-entry [target]
++  (when (and (string? target) (str/starts-with? target "T-"))
++    (some #(when (= target (:id %)) %) (:tickets (load-tickets)))))
++
++(defn live-ticket-target? [tickets target]
++  (boolean (some #(and (= target (:id %)) (live-ticket? %)) tickets)))
++
++(defn ticket-status [target]
++  (let [live? (boolean (some-> (ticket-entry target) live-ticket?))]
++    {:open? live? :open-hole-count (if live? 1 0)}))
++
++(defn work-target-status
++  "Mission semantics unchanged; T- identities resolve only in the ticket registry."
++  [target]
++  (if (and (string? target) (str/starts-with? target "T-"))
++    (ticket-status target)
++    (mission-status target)))
++
++(defmethod fm/can-propose? :advance-ticket [state _]
++  (boolean (some live-ticket? (:tickets state))))
++(defmethod fm/can-execute? :advance-ticket [state action]
++  (live-ticket-target? (:tickets state) (:target action)))
++
++(def ticket-enumerator-proposer
++  (reify ap/ActionProposer
++    (propose [_ state]
++      (for [t (:tickets state) :when (live-ticket? t)]
++        {:type :advance-ticket :target (:id t) :weight 1.0
++         :ticket-path (:path t) :open-hole-count 1
++         :rationale (str "ticket substrate: " (:title t))}))
++    (proposer-id [_] :ticket-enumerator)))
+diff --git a/test/futon2/aif/controller_authority_test.clj b/test/futon2/aif/controller_authority_test.clj
+index 44ce7c43..34200d54 100644
+--- a/test/futon2/aif/controller_authority_test.clj
++++ b/test/futon2/aif/controller_authority_test.clj
+@@ -15,7 +15,7 @@
+       (is (= (:selection-law decision) (:selection-law result)))
+       (is (true? (:actuation-authorized? result)))
+       (is (false? (get-in result [:actuation :executed?])))
+-      (is (= :all-open-missions (get-in result [:actuation :admissible-set])))
++      (is (= :all-open-missions-and-tickets (get-in result [:actuation :admissible-set])))
+       (is (= authority/scope-authority (:scope-authority result)))
+       (is (= "futon3c e74c7e7" (get-in result [:rollback :recorded-fallback])))
+       (is (= :not-applicable (get-in result [:actuation :machine-gates :serving-cache :status])))
+diff --git a/test/futon2/aif/enumeration_completeness_test.clj b/test/futon2/aif/enumeration_completeness_test.clj
+index c2ba41ff..d6219f4b 100644
+--- a/test/futon2/aif/enumeration_completeness_test.clj
++++ b/test/futon2/aif/enumeration_completeness_test.clj
+@@ -130,7 +130,7 @@
+         "an unreadable or absent status keeps the item in the queue")))
+ 
+ (deftest kind-without-a-proposer-is-a-typed-absence-test
+-  (testing "excursions and tickets have no proposer, so their whole population
++  (testing "excursions have no proposer, so their whole population
+             is outside the selector's view -- typed, with the pointer to the
+             proposer list that omits them, and never counted as agreement"
+     (spit (doto (io/file *root* "repo" "holes" "excursions" "E-one.md")
+@@ -151,13 +151,13 @@
+     (spit (doto (io/file *root* "repo" "holes" "tickets" "T-one.md")
+             io/make-parents)
+           "# T-one\n")
+-    (let [r (ec/completeness-record [(candidate "M-live")] {:code-root *root*})]
++    (let [r (ec/completeness-record [(candidate "M-live") {:action {:type :advance-ticket :target "T-one"}}] {:code-root *root*})]
+       (is (= :complete (:verdict r))
+           "the one kind that HAS a proposer agrees with its scan")
+-      (is (= #{:excursion :ticket} (set (map :kind (:typed-kind-absences r)))))
+-      (is (= 1 (some #(when (= :ticket (:kind %)) (:available-count %))
+-                     (:typed-kind-absences r)))
+-          "and the absence carries the size of what is unseen"))))
++      (is (= #{:excursion} (set (map :kind (:typed-kind-absences r)))))
++      (is (= :complete (some #(when (= :ticket (:kind %)) (:verdict %))
++                             (:kinds r)))
++          "tickets now participate in completeness"))))
+ 
+ (deftest assertion-flag-defaults-off-test
+   (testing "the live assertion is opt-in: nothing scans unless the flag is set"
+diff --git a/test/futon2/aif/ticket_test.clj b/test/futon2/aif/ticket_test.clj
+new file mode 100644
+index 00000000..ec918548
+--- /dev/null
++++ b/test/futon2/aif/ticket_test.clj
+@@ -0,0 +1,91 @@
++(ns futon2.aif.ticket-test
++  (:require [clojure.test :refer [deftest is]]
++            [clojure.java.io :as io]
++            [futon2.aif.mission-registry :as registry]
++            [futon2.aif.action-proposer :as ap]
++            [futon2.aif.forward-model :as fm]
++            [futon2.aif.controller-authority :as authority]
++            [futon2.aif.full-loop-runner :as runner]
++            [futon2.report.cascade-lane :as cascade]
++            [futon2.report.war-machine :as wm])
++  (:import [java.nio.file Files]
++           [java.nio.file.attribute FileAttribute]))
++
++(deftest ticket-status-table
++  ;; Actual leading status phrases from the 34-ticket census at 8dd24499.
++  (doseq [[text expected]
++          [["DONE-IN-FACT, widened." :complete]
++           ["SUPERSEDED." :inactive] ["DEFERRED / parked 2026-06-10." :inactive]
++           ["PARKED" :inactive] ["ARCHIVED" :inactive]
++           ["WATCH — not a defect, no action" :not-actionable]
++           ["FINDING, not a defect. Do not hotfix." :not-actionable]
++           ["DESIGN CONSTRAINT. Blocked on a prior question" :not-actionable]
++           ["DESIGNED, NOT STARTED. Joe's call: ticket it rather than deep-dive" :not-actionable]
++           ["PARTIAL -- shipped, one contract delta." :live]
++           ["STILL-OPEN, deferred by design." :live]
++           ["** open. Diagnosis complete and reduced" :live]
++           ["SCOPED, NOT STARTED." :live] ["RECLASSIFY CANDIDATE." :live]
++           ["Unrecognised lead" :live]]]
++    (is (= expected (registry/classify-ticket-status text)))))
++
++(defn fixture-root []
++  (.toFile (Files/createTempDirectory "ticket-registry-" (make-array FileAttribute 0))))
++(defn write-ticket [root path text]
++  (let [f (io/file root path)] (io/make-parents f) (spit f text) f))
++
++(deftest ticket-root-fences-and-documents
++  (let [root (fixture-root)
++        live-file (write-ticket root "futon3c/holes/tickets/T-live.md"
++                                "# Fix retained delivery\n\n**Status (triaged 2026-09-01): PARTIAL -- still work.**\nParent: M-parent\n")]
++    (write-ticket root "futon3c/holes/tickets/T-done.md" "# Done\n**Status: DONE-IN-FACT.**")
++    (write-ticket root "futon3c/holes/T-note.md" "# Not a ticket\n**Status: OPEN**")
++    (write-ticket root "futon3c-index-check/holes/tickets/T-copy.md" "# Copy\n**Status: OPEN**")
++    (write-ticket root "futon3c/holes/tickets/nested/T-nested.md" "# Nested\n**Status: OPEN**")
++    (let [doc (registry/load-tickets (.getPath root))
++          tickets (:tickets doc)
++          state {:tickets tickets}
++          actions (vec (ap/propose registry/ticket-enumerator-proposer state))
++          live (first (filter registry/live-ticket? tickets))]
++      (is (= #{"T-live" "T-done"} (set (map :id tickets))))
++      (is (= :ticket (:kind live)))
++      (is (= "M-parent" (:parent live)))
++      (is (= ["T-live"] (mapv :target actions)))
++      (is (fm/can-propose? state :advance-ticket))
++      (is (fm/can-execute? state (first actions)))
++      (is (false? (fm/can-execute? state {:type :advance-ticket :target "T-done"})))
++      (with-redefs [registry/load-tickets (constantly doc)]
++        (is (= {:open? true :open-hole-count 1} (registry/work-target-status "T-live")))
++        (is (false? (:open? (registry/work-target-status "T-done"))))
++        (is (= (.getPath live-file) (:path (#'runner/mission-for-decision
++                                          {:action (first actions)} "T-live"))))
++        (cascade/clear-psi-cache!)
++        (let [psi (cascade/mission->psi "T-live")]
++          (is (.contains psi "Fix retained delivery"))
++          (is (.contains psi "PARTIAL")))
++        (let [decision {:action (first actions) :controller-score 0.2
++                        :selection-law {:applied :controller-head}}]
++          (is (true? (:actuation-authorized? (authority/authorize decision [{:action (first actions)}]))))
++        (is (= :target-not-open
++               (try (authority/authorize {:action {:type :advance-ticket :target "T-done"}} [])
++                    (catch clojure.lang.ExceptionInfo e (:reason (ex-data e))))))))))
++
++)
++
++(deftest excluded-statuses-never-propose-or-execute
++  (doseq [status [:complete :inactive :not-actionable]]
++    (let [state {:tickets [{:id "T-held" :status-class status}]}]
++      (is (empty? (ap/propose registry/ticket-enumerator-proposer state)))
++      (is (false? (fm/can-propose? state :advance-ticket)))
++      (is (false? (fm/can-execute? state {:type :advance-ticket :target "T-held"}))))))
++
++(deftest ticket-prior-and-observation-channel
++  (let [f (fm/advance-mission-ordinal-factor 1)
++        prediction (#'fm/predict-effects {} {:type :advance-ticket :target "T-live" :weight 1.0})]
++    (is (= {:mission-health (* 0.04 f)} (:obs-delta prediction)))
++    (is (= {:mission-health 0.015} (:obs-variance prediction)))
++    (is (= [{:entity-id "T-live" :type :addressed :weight f}] (:events prediction))))
++  (let [open (wm/scan-mission-triage 1 [] [{:status-class :live}])
++        done (wm/scan-mission-triage 1 [] [{:status-class :complete}])]
++    (is (= 1 (:ticket-count open)))
++    (is (= 0 (:blocked open) (:abandoned-count open) (:active open)))
++    (is (< (:health open) (:health done)))))

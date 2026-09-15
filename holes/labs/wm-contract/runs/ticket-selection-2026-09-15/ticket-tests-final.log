@@ -1,0 +1,5 @@
+Syntax error (IllegalStateException) compiling fm/predict-effects at (futon2/aif/ticket_test.clj:83:20).
+var: #'futon2.aif.forward-model/predict-effects is not public
+
+Full report at:
+/tmp/clojure-17682318876040850752.edn

@@ -1,0 +1,7 @@
+
+Testing futon2.report.war-machine-test
+War Machine selection clock write failed: substrate down
+War Machine mission clock unreadable: offline
+
+Ran 95 tests containing 544 assertions.
+0 failures, 0 errors.

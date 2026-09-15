@@ -1,0 +1,5 @@
+Syntax error reading source at (futon2/aif/ticket_test.clj:90:1).
+EOF while reading, starting at line 36
+
+Full report at:
+/tmp/clojure-821515724755371026.edn

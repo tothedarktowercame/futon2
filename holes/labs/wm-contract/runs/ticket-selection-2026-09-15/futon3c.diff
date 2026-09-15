@@ -1,0 +1,93 @@
+commit 35022e4273aedf39365a4672b2e4648b3704b5aa
+Author:     Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+AuthorDate: Tue Sep 15 13:52:43 2026 +0000
+Commit:     Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+CommitDate: Tue Sep 15 13:52:43 2026 +0000
+
+    Allow live tickets through shared selection and actuation guardrails
+
+diff --git a/src/futon3c/peripheral/live_wm_selection.clj b/src/futon3c/peripheral/live_wm_selection.clj
+index 98246717..c9a00349 100644
+--- a/src/futon3c/peripheral/live_wm_selection.clj
++++ b/src/futon3c/peripheral/live_wm_selection.clj
+@@ -431,13 +431,13 @@
+            :scope :phase8-experiment)))
+ 
+ (defn open-mission?
+-  "Resolve current mission status for every transport; unknown targets refuse."
++  "Resolve current mission or ticket status for every transport; unknown targets refuse."
+   [target]
+-  (true? (:open? ((requiring-resolve 'futon2.aif.mission-registry/mission-status)
++  (true? (:open? ((requiring-resolve 'futon2.aif.mission-registry/work-target-status)
+                   target))))
+ 
+ (defn validated-selection
+-  "Validate up to three currently open missions, then run the Phase 8
++  "Validate up to three currently open missions or live tickets, then run the Phase 8
+   experiment (which does not grant live actuation authority). Throws ex-info with
+   {:err :invalid-strategic-selection-request} on violation so the HTTP 400
+   and the in-process rejection are the same decision."
+diff --git a/src/futon3c/wm/guardrails.clj b/src/futon3c/wm/guardrails.clj
+index 7b3ca0a0..a366afe0 100644
+--- a/src/futon3c/wm/guardrails.clj
++++ b/src/futon3c/wm/guardrails.clj
+@@ -7,7 +7,7 @@
+   (:require [clojure.string :as str]))
+ 
+ (def autonomous-action-types
+-  #{:address-sorry :fire-pattern :open-mission :advance-mission})
++  #{:address-sorry :fire-pattern :open-mission :advance-mission :advance-ticket})
+ 
+ (def mission-action-types
+   "Mission-targeting action types sharing the bounded-advancement guardrail:
+@@ -15,7 +15,7 @@
+    :advance-mission is the enumerator's type for already-open missions
+    (pilot cycle #1, 2026-06-10); :open-mission retained for
+    genuinely-unopened targets."
+-  #{:open-mission :advance-mission})
++  #{:open-mission :advance-mission :advance-ticket})
+ 
+ (def operator-only-action-types
+   #{:learn-action-class})
+@@ -126,10 +126,10 @@
+       false)))
+ 
+ (defn default-mission-status
+-  "Default mission status lookup through the futon2 registry."
++  "Default mission/ticket status lookup through the futon2 registry."
+   [target]
+   (try
+-    (if-let [mission-status-fn (requiring-resolve 'futon2.aif.mission-registry/mission-status)]
++    (if-let [mission-status-fn (requiring-resolve 'futon2.aif.mission-registry/work-target-status)]
+       (mission-status-fn target)
+       {:open? (registry-live-mission? target)
+        :open-hole-count 0})
+diff --git a/test/futon3c/transport/morning_brief_http_test.clj b/test/futon3c/transport/morning_brief_http_test.clj
+index a41efb26..e67b4705 100644
+--- a/test/futon3c/transport/morning_brief_http_test.clj
++++ b/test/futon3c/transport/morning_brief_http_test.clj
+@@ -247,3 +247,24 @@
+         (is (= :invalid-strategic-selection-request
+                (try (live/validated-selection request)
+                     (catch clojure.lang.ExceptionInfo e (:err (ex-data e))))))))))
++
++(deftest ticket-status-is-shared-by-http-and-in-process
++  (with-redefs-fn
++    {(requiring-resolve 'futon2.aif.mission-registry/load-tickets)
++     (constantly {:tickets [{:id "T-live" :status-class :live}
++                           {:id "T-done" :status-class :complete}]})
++     #'live/current-selection (constantly {:status :experiment-only})}
++    (fn []
++      (is (= 200 (:status (post-strategic-selection {:scheduler-habit-ranking ["T-live"]}))))
++      (is (= :experiment-only (:status (live/validated-selection {:scheduler-habit-ranking ["T-live"]}))))
++      (is (= 400 (:status (post-strategic-selection {:scheduler-habit-ranking ["T-done"]}))))
++      (is (= :invalid-strategic-selection-request
++             (try (live/validated-selection {:scheduler-habit-ranking ["T-done"]})
++                  (catch clojure.lang.ExceptionInfo e (:err (ex-data e))))))
++      (is (= {:open? true :open-hole-count 1}
++             ((requiring-resolve 'futon3c.wm.guardrails/default-mission-status) "T-live")))
++      (is (nil? ((requiring-resolve 'futon3c.wm.guardrails/guardrail-rule)
++                 {:type :advance-ticket :target "T-live"} {})))
++      (is (= :open-mission-no-holes
++             ((requiring-resolve 'futon3c.wm.guardrails/guardrail-rule)
++              {:type :advance-ticket :target "T-done"} {}))))))

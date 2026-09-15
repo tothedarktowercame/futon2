@@ -1,0 +1,48 @@
+{
+  "source_commits": {
+    "futon2": "a24cb621",
+    "futon3c": "35022e42"
+  },
+  "source_pins": {
+    "/home/joe/code/futon2/scripts/futon2/report/cascade_lane.clj": "a1494e4de3eade3523d201efc3e0470de228627d2caa8247e25431ab03c06c2b",
+    "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj": "07a2a4581efd1911dc92c54c9d5a342402967738fb732975a572bc31f122b8c9",
+    "/home/joe/code/futon2/src/futon2/aif/controller_authority.clj": "5e232785e67822bbb2d7f1b887d311ee0d4fdc875691aedeb3ece3beee6f2ff0",
+    "/home/joe/code/futon2/src/futon2/aif/enumeration_completeness.clj": "179370701311d8945fa26f3cbae72e349fffcb93917b7a290218be037e3a4dbd",
+    "/home/joe/code/futon2/src/futon2/aif/forward_model.clj": "12811110829e787917f9014c533d2fa5bb17814cf6690dfcabc66fc79aaa1893",
+    "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj": "88f47ac81a2053718b59c1b69e51241ee4d52e1ebbdd9e9e8d7d75d0158d9658",
+    "/home/joe/code/futon2/src/futon2/aif/mission_registry.clj": "a060ed1384e6bd0a699c1efedc244b6f2b68316292b61b22d3a25a435b47cfc4",
+    "/home/joe/code/futon2/test/futon2/aif/controller_authority_test.clj": "7e6d4ad120759ee1140cc351e9214ac92d989d0f2c78e0875bdabd330b80c11e",
+    "/home/joe/code/futon2/test/futon2/aif/enumeration_completeness_test.clj": "9558ac20a141736df16556d305f80052994b7cc1d4b29a10e8aa13a137dee46d",
+    "/home/joe/code/futon2/test/futon2/aif/ticket_test.clj": "cf2ae62edfda257852faad72e0cd1cf786d95d9999d1c46b8ff45cfb952fbd88",
+    "/home/joe/code/futon3c/src/futon3c/peripheral/live_wm_selection.clj": "4172394b05ac0f7468cc9befd1d8142140b02367335d0f16fcf0c6cbbbbd83b6",
+    "/home/joe/code/futon3c/src/futon3c/wm/guardrails.clj": "fdb521dd230aa9b895071a8fa2a8c2ea91a7e3f96df28892a6626d2ec17a0c5e",
+    "/home/joe/code/futon3c/test/futon3c/transport/morning_brief_http_test.clj": "828fb305d8020646bfbdf70cd9bf1305e60b65404bb6cfc5edb51ea3d2731c90"
+  },
+  "artifacts": {
+    "registry-readback.json": "4f592051ed34fa2143e32723ef39fee40d35d95f669f34f16c1fbf9bf3234c19",
+    "ticket-f2-parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "ticket-authority-regression.log": "988358172421f9ccfb72b6c1ae51b37f5a440a792e8dbf5b390e3dd2eab44109",
+    "ticket-mission-regression.log": "e26e4fcde1c825ea9022c3c6656a59f46d4d233b0d9fad90182a339e8d80e9b1",
+    "ticket-authority-kondo-final.log": "d052f4bdddffe419432fb9020aa262ef4d85aa3b639c5565dd71fbb3d378bf04",
+    "ticket-tests-final.log": "d1d35fcd465de42a4247a0f4f8dd84ec141658e480c0bab2e216b981fa7f9f1c",
+    "ticket-guardrail-tests.log": "00e0b4a0deaf8ee92de20f59a302c6c4a01c04e0233fb7705351b0440151b136",
+    "ticket-http-tests.log": "66d81a0d49fc86313845499af3cf1ac890bc477e1c86ab6e303665c998877a82",
+    "ticket-f3-parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "ticket-forward-regression.log": "617102d7c3dbcd09a903a1f7c803f2bc01fee95f2fcd81585a24d09a7ce2bd4b",
+    "ticket-wm-regression.log": "d3a21207bcc115dc6f2aa40b1da92f710857683fb814edacd51e29bd96a6c7ef",
+    "ticket-kondo-initial.log": "88a1c3cad66f8c6d0e22b4a996ee2fc90a3359e7ed51cb8babeecdb4f290b85f",
+    "ticket-kondo-final.log": "21db517b16b615f5a7a739288a4c631aea0fecb19bff01d14d292bdebeace55e",
+    "ticket-selector-regression.log": "14083ad115e84fd819aeebc4f6f307975e03fcb8bae23d67f7af8e62384b8609",
+    "ticket-tests-third.log": "348dc3a00bc309e47615f7e591f295a5793ad7287e3c002ec1ed0907f5d2bad7",
+    "ticket-authority-parens-final.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "ticket-tests.log": "0b19cf223714297712e731c26a8c8d42068870e8243e5d5fffad0046ce3eb52f",
+    "IMPLEMENTATION.md": "60f0afe6333ee70582fb11825f5a8358b7606731d46115aab2cc41f2bc093bc7",
+    "completeness-readback.json": "be35103b477c2a2bed8bb2b14cdb7fcab5511fc8eac830277e3774bef8f06056",
+    "ticket-enumeration-tests.log": "64f97fea5b2bfb7ee91692f2c7ccf0db4fdaaee93134f661e5769596988b2fa0",
+    "futon2.diff": "60010380e2c058544324c1a4ed38ade7a583d83b11e1cf4ddbf28841adcabd8e",
+    "futon3c.diff": "44d8dc1fc2d9665b395b3fad2408b2ea169484ff123c7e78d390e813f76f4b6e",
+    "ticket-f3-kondo.log": "42bdff3ed944028ba2a4b5b205e8c1fbcf6640d9d87ee4b8f55796dde0f87de8",
+    "ticket-http-final.log": "d991299f58ba405fc57d609d8ce6535aa2fe3fed87eacd96eacb827b365e93a3"
+  },
+  "scope": "source implementation; no reload/click"
+}
