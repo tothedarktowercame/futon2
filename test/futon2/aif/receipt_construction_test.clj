@@ -151,3 +151,19 @@
         (is (= (evidence/sha256 (Files/readAllBytes (.toPath (io/file dir "003-construction.edn"))))
                (get-in previous [:provenance :construction-sha256]))))
       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
+
+(deftest before-arm-reuses-the-recorded-acting-order
+  ;; The previous precedence names a pattern this receipt never interprets.
+  ;; Re-simulating it would refuse (:previous-or-admitted-interpretation-missing);
+  ;; the before arm must use the previous attempt's recorded acting order.
+  (let [{:keys [record captured id]} (fixture/sample)
+        prev {:cascade {:nodes #{:other/pattern} :edges #{} :precedence [:other/pattern]}
+              :acting-order [:other/pattern]
+              :admitted {}
+              :provenance {:status :fixture}
+              :admission-reason :carried-from-previous-occurrence}
+        c (construction/construct record captured fixture/root prev nil)
+        d (get-in c [:receipted-construction :cascade-diff])]
+    (is (= [:other/pattern] (:acting-order-before d)))
+    (is (= [:other/pattern] (:precedence-before d)))
+    (is (= [id] (:acting-order-after d)))))

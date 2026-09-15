@@ -135,10 +135,14 @@
                :previous-occurrence-mismatch {:file (str construction-file)})
         (need! (= (:cascade-diff-sha256 retained) (evidence/value-digest d)) :previous-diff-digest-mismatch {})
         (need! (and (set? (:nodes d)) (vector? (:precedence-after d))
+                     (vector? (:acting-order-after d))
                      (map? (get-in d [:provenance :admissions]))
                      (= (:admitted-by d) (set (keys (get-in d [:provenance :admissions])))))
                :previous-admission-carrier-invalid {})
         {:cascade {:nodes (:nodes d) :edges (:organised-edges d) :precedence (:precedence-after d)}
+         ;; The acting order the previous attempt actually recorded; reused as
+         ;; this attempt's before arm instead of being re-simulated.
+         :acting-order (:acting-order-after d)
          :admitted (get-in d [:provenance :admissions])
          :admission-reason :carried-from-previous-occurrence
          :provenance {:identity prior-id :searched-roots roots :construction-file (.getCanonicalPath construction-file)
@@ -164,7 +168,14 @@
         order (precedence carrier (:stands-on repository))
         interpretations (:interpretations ctx)
         q0 (into {} (map (juxt :id :value)) (:facts record))
-        acting (fn [c] (acting-order interpretations q0 (:precedence c)))
+        ;; Before arm: the previous attempt's recorded acting order (organise
+        ;; calls this port with the very previous-cascade object it was given),
+        ;; so this receipt need not re-interpret every earlier pattern. A first
+        ;; attempt or legacy reset has none. After arm: simulated from q0.
+        acting (fn [c]
+                 (if (identical? c (:cascade previous))
+                   (vec (:acting-order previous []))
+                   (acting-order interpretations q0 (:precedence c))))
         diff (policy/organise (:cascade previous) selected repository admitted
                               {:temperament (assoc policy/up-closure-temperament :precedence order)
                                :acting-order-fn acting
