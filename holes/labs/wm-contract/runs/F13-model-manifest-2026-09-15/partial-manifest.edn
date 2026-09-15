@@ -1,0 +1,5885 @@
+{:scoring-permitted? false,
+ :findings
+ [{:kind :unclassified-clause,
+   :line 4,
+   :text "**Status:** INSTANTIATE"}
+  {:kind :missing-coverage-preference-map, :input :C_tau}
+  {:kind :admissible-precedence-not-yet-commissioned}
+  {:kind :missing-pattern-interpretation,
+   :pattern "gauntlet/modeline-persists-across-worlds",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/gauntlet/modeline-persists-across-worlds.flexiarg",
+    :sha256
+    "d2d0dc868c75030b3db03010abe9b4591ff4d45c57341e67015c49599803e9ab",
+    :authority :source-document}}
+  {:kind :missing-pattern-interpretation,
+   :pattern "gauntlet/aif-as-environment-not-instruction",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/gauntlet/aif-as-environment-not-instruction.flexiarg",
+    :sha256
+    "f5806f54dec5be0f27830f71312b47622bc6e63f111c3474a37a8fd1693b9535",
+    :authority :source-document}}
+  {:kind :missing-pattern-interpretation,
+   :pattern "aif/policy-precision-commitment-temperature",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/aif/policy-precision-commitment-temperature.flexiarg",
+    :sha256
+    "6d27db7ee7b7d3c859fb5d57e99bdbaadf707709dee39b88f2635f02428b2777",
+    :authority :source-document}}
+  {:kind :missing-pattern-interpretation,
+   :pattern "futon-theory/structural-tension-as-observation",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/futon-theory/structural-tension-as-observation.flexiarg",
+    :sha256
+    "344228d4ac54927d93b691b695fb533a576a7dc8a926c857438d450749b0877a",
+    :authority :source-document}}
+  {:kind :missing-pattern-interpretation,
+   :pattern "war-machine/ideal-actual-gap",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/war-machine/ideal-actual-gap.flexiarg",
+    :sha256
+    "cf9368aa42a4d5cc096edca6d085a6b0314ed446638e10b8a3e9ab2c2d2d67b0",
+    :authority :source-document}}
+  {:kind :missing-pattern-interpretation,
+   :pattern "structure/interest-event-vocabulary",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/structure/interest-event-vocabulary.flexiarg",
+    :sha256
+    "b51296613be9c61bddf9b58d082eaaecbad91ef139373f73438762b2e0943405",
+    :authority :source-document}}
+  {:kind :missing-pattern-interpretation,
+   :pattern "ants/baseline-cyber-ant",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/ants/baseline-cyber-ant.flexiarg",
+    :sha256
+    "7f65024c6e11139c3cc9442b4ce54c466ddfc4570279d1d39d17fd1fdae79728",
+    :authority :source-document}}
+  {:kind :missing-pattern-interpretation,
+   :pattern "futon-theory/all-or-nothing",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/futon-theory/all-or-nothing.flexiarg",
+    :sha256
+    "b2bdcb3397c0cf50c8919ccedf4eb5ba488c297b73895ef6875b298a4106dd87",
+    :authority :source-document}}
+  {:kind :guard-unreachable-in-declared-universe,
+   :pattern "storage/open-world-velocity-validation",
+   :required-outside-universe
+   #{"coherent" "quickly" "knowledge" "mirrorable" "background"},
+   :source
+   {:path
+    "/home/joe/code/futon3/library/storage/open-world-velocity-validation.flexiarg",
+    :sha256
+    "2454676e3845cb09919f30c1cea4e872b8e8e6d1f6a9524c6f47ade986da93a4",
+    :authority :source-document},
+   :action :review-interpretation-without-widening-carrier}
+  {:kind :pattern-success-history-availability,
+   :authority :inspection-only,
+   :sources
+   [{:path
+     "/home/joe/code/futon6/data/pattern_posteriors.grounded.json",
+     :sha256
+     "785915bc1d7ff105b14568e745060bdfa2cdaf25f8093483d8336ef566c6a9f3",
+     :authority :source-document}
+    {:path
+     "/home/joe/code/futon3a/resources/notions/pattern_posteriors.self_graded.json",
+     :sha256
+     "9a9b5a273746fdb09c17a0b0584048bdf2ed1a54e21e6e36497642f0bfeb9232",
+     :authority :source-document}],
+   :qualification
+   "Aggregate pattern posteriors exist; these rows are not mission-conditioned success statistics or stochastic transition warrants. No stochastic rows implemented.",
+   :patterns
+   [{:id "gauntlet/modeline-persists-across-worlds",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing, :reason :not-established-by-aggregate-tables}}
+    {:id "gauntlet/aif-as-environment-not-instruction",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing, :reason :not-established-by-aggregate-tables}}
+    {:id "aif/policy-precision-commitment-temperature",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing, :reason :not-established-by-aggregate-tables}}
+    {:id "futon-theory/structural-tension-as-observation",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing, :reason :not-established-by-aggregate-tables}}
+    {:id "war-machine/ideal-actual-gap",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing, :reason :not-established-by-aggregate-tables}}
+    {:id "structure/interest-event-vocabulary",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing, :reason :not-established-by-aggregate-tables}}
+    {:id "ants/baseline-cyber-ant",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing, :reason :not-established-by-aggregate-tables}}
+    {:id "futon-theory/all-or-nothing",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing, :reason :not-established-by-aggregate-tables}}
+    {:id "storage/open-world-velocity-validation",
+     :grounded-aggregate nil,
+     :self-graded
+     {"label" "self-graded", "n" 0, "alpha" 1.0, "beta" 1.0},
+     :mission-conditioned
+     {:status :missing,
+      :reason :not-established-by-aggregate-tables}}]}
+  {:kind :documented-observation-validator-contract-unreviewed,
+   :action :separate-reviewed-change,
+   :bypassed? false}],
+ :schema :wm/cascade-model-manifest-v1,
+ :comparison
+ [{:target
+   {:findings
+    [{:kind :unclassified-clause, :line 112, :text "unwired |"}
+     {:kind :unclassified-clause,
+      :line 115,
+      :text
+      "| Policy forward model | `src/futon2/aif/forward_model.clj` | Predicts operational effects"}
+     {:kind :unclassified-clause,
+      :line 116,
+      :text
+      "| Categorical belief A/B/D | `src/futon2/aif/belief.clj` | Useful model-coherence precedent"}
+     {:kind :unclassified-clause,
+      :line 116,
+      :text "different latent object |"}
+     {:kind :unclassified-clause,
+      :line 117,
+      :text
+      "| Existing engineering proxy | `model-uncertainty-bonus` in `efe.clj` | Honest controller augmentation |"}],
+    :have
+    #{"a4a"
+      "aif"
+      "built"
+      "checked"
+      "clj"
+      "coherence"
+      "eig"
+      "epistemic"
+      "finite"
+      "futon2"
+      "kernel"
+      "live"
+      "parameters"
+      "posterior"
+      "source"
+      "spread"
+      "src"
+      "substrate"
+      "tested"
+      "uncertainty"
+      "value"},
+    :authority :documented-interpretation,
+    :source
+    {:path
+     "/home/joe/code/futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+     :sha256
+     "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+     :authority :source-document},
+    :selection-rule :prefer-status-table,
+    :id "M-aif-policy-conditioned-eig",
+    :ok true,
+    :want
+    #{"aif"
+      "bmr"
+      "candidate"
+      "clj"
+      "conditioned"
+      "dirichlet"
+      "does"
+      "eig"
+      "expected"
+      "futon2"
+      "gain"
+      "information"
+      "learning"
+      "m"
+      "machinery"
+      "model"
+      "no"
+      "not"
+      "observation"
+      "observations"
+      "operations"
+      "parameter"
+      "policy"
+      "posterior"
+      "predict"
+      "src"
+      "yet"},
+    :clauses
+    [{:line 112,
+      :text
+      "| Coherence-checked finite EIG kernel | `src/futon2/aif/epistemic_value.clj` | Built and tested",
+      :classification :built-not-live,
+      :tokens
+      #{"aif"
+        "built"
+        "checked"
+        "clj"
+        "coherence"
+        "eig"
+        "epistemic"
+        "finite"
+        "futon2"
+        "kernel"
+        "src"
+        "tested"
+        "value"}}
+     {:line 112,
+      :text "unwired |",
+      :classification :unclassified,
+      :tokens #{"unwired"}}
+     {:line 113,
+      :text
+      "| Dirichlet/BMR operations | `src/futon2/aif/bmr.clj` | Candidate posterior machinery |",
+      :classification :outstanding,
+      :tokens
+      #{"aif"
+        "bmr"
+        "candidate"
+        "clj"
+        "dirichlet"
+        "futon2"
+        "machinery"
+        "operations"
+        "posterior"
+        "src"}}
+     {:line 114,
+      :text
+      "| A4a posterior parameters/spread | `src/futon2/aif/a4a.clj`, `a4a_substrate.clj` | Live uncertainty source",
+      :classification :available,
+      :tokens
+      #{"a4a"
+        "aif"
+        "clj"
+        "futon2"
+        "live"
+        "parameters"
+        "posterior"
+        "source"
+        "spread"
+        "src"
+        "substrate"
+        "uncertainty"}}
+     {:line 114,
+      :text "no policy observation model |",
+      :classification :outstanding,
+      :tokens #{"model" "no" "observation" "policy"}}
+     {:line 115,
+      :text
+      "| Policy forward model | `src/futon2/aif/forward_model.clj` | Predicts operational effects",
+      :classification :unclassified,
+      :tokens
+      #{"aif"
+        "clj"
+        "effects"
+        "forward"
+        "futon2"
+        "model"
+        "operational"
+        "policy"
+        "predicts"
+        "src"}}
+     {:line 115,
+      :text "does not yet predict parameter-learning observations |",
+      :classification :outstanding,
+      :tokens
+      #{"does"
+        "learning"
+        "not"
+        "observations"
+        "parameter"
+        "predict"
+        "yet"}}
+     {:line 116,
+      :text
+      "| Categorical belief A/B/D | `src/futon2/aif/belief.clj` | Useful model-coherence precedent",
+      :classification :unclassified,
+      :tokens
+      #{"a"
+        "aif"
+        "b"
+        "belief"
+        "categorical"
+        "clj"
+        "coherence"
+        "d"
+        "futon2"
+        "model"
+        "precedent"
+        "src"
+        "useful"}}
+     {:line 116,
+      :text "different latent object |",
+      :classification :unclassified,
+      :tokens #{"different" "latent" "object"}}
+     {:line 117,
+      :text
+      "| Existing engineering proxy | `model-uncertainty-bonus` in `efe.clj` | Honest controller augmentation |",
+      :classification :unclassified,
+      :tokens
+      #{"augmentation"
+        "bonus"
+        "clj"
+        "controller"
+        "efe"
+        "engineering"
+        "existing"
+        "honest"
+        "in"
+        "model"
+        "proxy"
+        "uncertainty"}}],
+    :status-lines
+    [[4
+      "**Status:** **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**"]]},
+   :patterns
+   [{:id "gauntlet/aif-as-environment-not-instruction",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/gauntlet/aif-as-environment-not-instruction.flexiarg",
+      :sha256
+      "f5806f54dec5be0f27830f71312b47622bc6e63f111c3474a37a8fd1693b9535",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "active"
+       "agent"
+       "aif"
+       "an"
+       "as"
+       "asked"
+       "but"
+       "change"
+       "comply"
+       "confidence"
+       "does"
+       "emergent"
+       "energy"
+       "failing"
+       "free"
+       "if"
+       "in"
+       "instruction"
+       "is"
+       "it"
+       "loop"
+       "make"
+       "mana"
+       "modeline"
+       "naturally"
+       "never"
+       "not"
+       "observation"
+       "of"
+       "part"
+       "pattern"
+       "perceives"
+       "peripheral"
+       "prescribed"
+       "prompt"
+       "response"
+       "rising"
+       "s"
+       "shows"
+       "simply"
+       "state"
+       "strategy"
+       "to"
+       "up"
+       "what"
+       "world"},
+     :clauses
+     {:if
+      "You want agents to self-regulate — sensing when a strategy is failing, adjusting exploration, backing off to planning mode when confidence drops — without requiring human intervention.",
+      :however
+      "The naive implementation adds AIF as instructions: \"here is your suggested pattern (G=0.12, τ=0.72, p=68%), please select it or justify deviation.\" This makes compliant agents worse at their actual job. Codex, told to produce PSRs and follow pattern suggestions, became overly compliant rather than writing code — which is what Codex is good at. The AIF layer became an RPC that the agent dutifully served, not an environment it inhabited.\n\n    + FAILURE-MODES:\n      - Compliance capture: agent spends more tokens on AIF bookkeeping than on its actual task\n      - Instruction-shaped feedback: \"your τ is 0.72, consider exploring\" is an instruction wearing an AIF hat\n      - Modeline blindness: agent ignores the modeline entirely because it has no affordance (information present but not actionable)",
+      :then
+      "Make AIF state part of the observation, not the prompt. The modeline shows free energy, confidence, mana, active pattern — but the agent is never asked to \"comply\" with it. The agent does what it naturally does in its peripheral; the AIF state is simply part of what it perceives. If the agent's free energy is rising (strategy failing), that shows up as a change in the world, not as an instruction to change strategy. What the agent does in response IS the AIF loop — emergent, not prescribed."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want agents to self-regulate — sensing when a strategy is failing, adjusting exploration, backing off to planning mode when confidence drops — without requiring human intervention."}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "the naive implementation adds aif as instructions: \"here is your suggested pattern (g=0.12, τ=0.72, p=68%), please select it or justify deviation.\" this makes compliant agents worse at their actual job. codex, told to produce psrs and follow pattern suggestions, became overly compliant rather than writing code — which is what codex is good at. the aif layer became an rpc that the agent dutifully served, not an environment it inhabited.\n\n    + failure-modes:\n      - compliance capture: agent spends more tokens on aif bookkeeping than on its actual task\n      - instruction-shaped feedback: \"your τ is 0.72, consider exploring\" is an instruction wearing an aif hat\n      - modeline blindness: agent ignores the modeline entirely because it has no affordance (information present but not actionable)"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "gauntlet/modeline-persists-across-worlds",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/gauntlet/modeline-persists-across-worlds.flexiarg",
+      :sha256
+      "d2d0dc868c75030b3db03010abe9b4591ff4d45c57341e67015c49599803e9ab",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "across"
+       "active"
+       "agent"
+       "agents"
+       "aif"
+       "alfworld"
+       "am"
+       "as"
+       "budget"
+       "buffers"
+       "but"
+       "carries"
+       "channel"
+       "co"
+       "commitment"
+       "continuous"
+       "current"
+       "emacs"
+       "energy"
+       "every"
+       "free"
+       "hops"
+       "i"
+       "implement"
+       "in"
+       "is"
+       "it"
+       "like"
+       "mana"
+       "mode"
+       "modeline"
+       "naturally"
+       "not"
+       "observation"
+       "of"
+       "optionally"
+       "p"
+       "par"
+       "part"
+       "pattern"
+       "perceives"
+       "peripheral"
+       "persistent"
+       "persists"
+       "present"
+       "reflect"
+       "reflection"
+       "remaining"
+       "renders"
+       "separate"
+       "sigil"
+       "so"
+       "state"
+       "status"
+       "surface"
+       "surprised"
+       "temperature"
+       "to"
+       "updates"
+       "when"
+       "τ"},
+     :clauses
+     {:if
+      "You want the agent to maintain continuity of self-regulation across world changes — carrying its confidence, mana, active pattern, and free energy state from one peripheral to the next.",
+      :however
+      "Each peripheral hop replaces the agent's world (P-1). Without a persistent surface, AIF state resets at each transition: the agent enters a new peripheral with no memory of how confident it was, how much budget remains, or what pattern it was carrying. The backpack metaphor preserves some items (pattern card, walkie-talkie) but not the dynamic state (how am I doing?).",
+      :then
+      "Implement the AIF modeline as a persistent status surface that renders in every peripheral mode, like the Emacs modeline that persists across buffers. The modeline carries: current peripheral mode, free energy (am I surprised?), mana/budget remaining, active pattern and its sigil, τ (commitment temperature), and optionally co-present agents. The modeline is part of the observation — not a separate channel — so the agent perceives it naturally. When the agent hops from ALFWorld to a PAR reflection, the modeline updates (P:alfworld → P:reflect) but the AIF state is continuous."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"across"
+          "active"
+          "agent"
+          "carrying"
+          "changes"
+          "confidence"
+          "continuity"
+          "energy"
+          "free"
+          "maintain"
+          "mana"
+          "next"
+          "of"
+          "one"
+          "pattern"
+          "peripheral"
+          "regulation"
+          "self"
+          "state"
+          "to"
+          "world"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "each peripheral hop replaces the agent's world (p-1). without a persistent surface, aif state resets at each transition: the agent enters a new peripheral with no memory of how confident it was, how much budget remains, or what pattern it was carrying. the backpack metaphor preserves some items (pattern card, walkie-talkie) but not the dynamic state (how am i doing?)."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/expected-free-energy-scorecard",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/expected-free-energy-scorecard.flexiarg",
+      :sha256
+      "ff82d6c0ef5ec8450d72575fc37d8e0c42809f59e89c3c6ecb12af0a149b7e56",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "ambiguity"
+       "as"
+       "breakdown"
+       "candidate"
+       "compute"
+       "constraint"
+       "coordination"
+       "cost"
+       "each"
+       "g"
+       "gain"
+       "information"
+       "named"
+       "of"
+       "pressure"
+       "risk"
+       "store"
+       "sum"
+       "term"
+       "terms"
+       "violation"
+       "weighted"},
+     :clauses
+     {:if
+      "You want pattern selection to balance delivery risk, ambiguity, information value, and cost in a way you can tune and audit.",
+      :however
+      "A single opaque score encourages post-hoc rationalization and makes tuning indistinguishable from storytelling.",
+      :then
+      "Compute G(a) as a weighted sum of named terms (risk, ambiguity, information gain, constraint violation, cost, coordination pressure), and store the term breakdown for each candidate."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want pattern selection to balance delivery risk, ambiguity, information value, and cost in a way you can tune and audit."}
+       {:status :interpreted,
+        :present
+        #{"a"
+          "encourages"
+          "hoc"
+          "indistinguishable"
+          "makes"
+          "opaque"
+          "post"
+          "rationalization"
+          "score"
+          "single"
+          "storytelling"
+          "tuning"},
+        :absent #{}}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/belief-state-operational-hypotheses",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/belief-state-operational-hypotheses.flexiarg",
+      :sha256
+      "7f12e343b0c6878235a996680062f43014a827c10fcb01cc9e6fac69f861983f",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "as"
+       "at"
+       "belief"
+       "blockers"
+       "current"
+       "each"
+       "example"
+       "expected"
+       "fit"
+       "goal"
+       "hypotheses"
+       "hypothesis"
+       "map"
+       "mu"
+       "next"
+       "observation"
+       "of"
+       "operational"
+       "outcomes"
+       "pattern"
+       "represent"
+       "step"
+       "subgoals"
+       "uncertainty"
+       "updated"
+       "using"},
+     :clauses
+     {:if
+      "You want decisions to depend on tractable hypotheses (progress, blockers, pattern fit, uncertainty) rather than raw conversation history.",
+      :however
+      "If the belief state is just the conversation, the agent cannot cleanly update, compare, or falsify its own assumptions.",
+      :then
+      "Represent (mu) as a belief map of operational hypotheses (for example: :goal, :subgoals, :current-hypothesis, :blockers, :pattern-fit, :expected-next-observation, :uncertainty), updated at each step using observation and outcomes."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want decisions to depend on tractable hypotheses (progress, blockers, pattern fit, uncertainty) rather than raw conversation history."}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "if the belief state is just the conversation, the agent cannot cleanly update, compare, or falsify its own assumptions."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/policy-precision-commitment-temperature",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/policy-precision-commitment-temperature.flexiarg",
+      :sha256
+      "6d27db7ee7b7d3c859fb5d57e99bdbaadf707709dee39b88f2635f02428b2777",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "as"
+       "commitment"
+       "contradiction"
+       "coupled"
+       "diagnostic"
+       "failures"
+       "g"
+       "in"
+       "maintain"
+       "modulates"
+       "mu"
+       "over"
+       "pressure"
+       "rate"
+       "recent"
+       "regressions"
+       "repeated"
+       "signals"
+       "softmax"
+       "tau"
+       "temperature"
+       "test"
+       "time"
+       "to"
+       "uncertainty"},
+     :clauses
+     {:if
+      "You want exploration versus exploitation to depend on operational pressure (deadlines, repeated failures, user impatience, instability), not on randomness alone.",
+      :however
+      "Without an explicit (tau), the agent either thrashes or tunnels with no controllable dial.",
+      :then
+      "Maintain (tau) as a commitment temperature that modulates softmax over (-G/tau), coupled to diagnostic signals (recent regressions, uncertainty in (mu), contradiction rate, time pressure, repeated test failures)."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want exploration versus exploitation to depend on operational pressure (deadlines, repeated failures, user impatience, instability), not on randomness alone."}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "without an explicit (tau), the agent either thrashes or tunnels with no controllable dial."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/candidate-pattern-action-space",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/candidate-pattern-action-space.flexiarg",
+      :sha256
+      "dc221cd3304cdd998309a06623b22ab594ff725d46111a1c0687c9b561a6a49e",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "as"
+       "bounded"
+       "by"
+       "candidate"
+       "constructed"
+       "define"
+       "exclusion"
+       "explicit"
+       "gating"
+       "ids"
+       "inclusion"
+       "of"
+       "pattern"
+       "plus"
+       "produced"
+       "reasons"
+       "retrieval"
+       "rules"
+       "set"
+       "size"},
+     :clauses
+     {:if
+      "You want pattern choice to be legible and comparable, and you want to avoid collapse into one habitual pattern.",
+      :however
+      "If the action space is any pattern at any time, evaluation becomes unstructured and selection becomes arbitrary or dominated by recency.",
+      :then
+      "Define (a) as a constructed candidate set of pattern IDs produced by retrieval plus gating rules, with bounded size and explicit reasons for inclusion and exclusion."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"avoid"
+          "be"
+          "choice"
+          "collapse"
+          "comparable"
+          "habitual"
+          "legible"
+          "one"
+          "pattern"
+          "to"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "if the action space is any pattern at any time, evaluation becomes unstructured and selection becomes arbitrary or dominated by recency."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/free-energy-as-tick-scalar",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/free-energy-as-tick-scalar.flexiarg",
+      :sha256
+      "7c2b9cc16996715d742fd1591f441489854f37cb32da586d021f42ef8b940107",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "all"
+       "alongside"
+       "applying"
+       "as"
+       "be"
+       "by"
+       "channels"
+       "construction"
+       "emit"
+       "exactly"
+       "f"
+       "formula"
+       "function"
+       "implement"
+       "it"
+       "k"
+       "k²"
+       "matches"
+       "mean"
+       "mu"
+       "negative"
+       "non"
+       "observation"
+       "of"
+       "opts"
+       "over"
+       "part"
+       "per"
+       "precision"
+       "pure"
+       "scalar"
+       "should"
+       "tick"
+       "trace"
+       "when"
+       "zero"
+       "ε"
+       "μ"
+       "π"},
+     :clauses
+     {:if
+      "You want a single, comparable-across-time scalar that says \"how badly is the agent's current belief explaining what it just observed?\" — useful for validation (F should decrease on average as the agent learns), diagnostics (F-spikes flag surprise events worth investigating), and operational triggers (F-above-threshold can signal hyperparameter adjustment).",
+      :however
+      "Without an explicit F-per-tick, the agent's belief evolution becomes opaque — there's no scalar to plot, no acceptance criterion to test, no operational alarm to trigger. And G-per-candidate is not a substitute: G is about the future; F is about the present.",
+      :then
+      "Implement F as a pure function (mu, observation, precision-opts) → non-negative scalar, applying the formula F = 0.5 × mean(Π_k · ε_k²) over all observation channels k. Emit it as part of the per-tick trace alongside μ and ε. When μ matches observation exactly, F should be zero by construction."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want a single, comparable-across-time scalar that says \"how badly is the agent's current belief explaining what it just observed?\" — useful for validation (f should decrease on average as the agent learns), diagnostics (f-spikes flag surprise events worth investigating), and operational triggers (f-above-threshold can signal hyperparameter adjustment)."}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "without an explicit f-per-tick, the agent's belief evolution becomes opaque — there's no scalar to plot, no acceptance criterion to test, no operational alarm to trigger. and g-per-candidate is not a substitute: g is about the future; f is about the present."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/predictive-entropy-as-ambiguity",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/predictive-entropy-as-ambiguity.flexiarg",
+      :sha256
+      "36da0f0ec55c020f5f717750f19f961c83553832bd875d23b62ee5c88f902f85",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "across"
+       "action"
+       "additive"
+       "ambiguity"
+       "candidate"
+       "candidates"
+       "channels"
+       "comparable"
+       "comparing"
+       "constants"
+       "covariance"
+       "d"
+       "det"
+       "diagonal"
+       "differential"
+       "dimension"
+       "dimensions"
+       "distribution"
+       "drop"
+       "entropy"
+       "h"
+       "in"
+       "independent"
+       "is"
+       "k"
+       "leaving"
+       "log"
+       "n"
+       "o"
+       "observation"
+       "of"
+       "out"
+       "predicted"
+       "producing"
+       "two"
+       "vector"
+       "where"
+       "μ"
+       "π"
+       "πe"
+       "σ"
+       "σ²"},
+     :clauses
+     {:if
+      "You want the ambiguity term to be the *true predictive entropy* of the observation distribution under each candidate. Candidates that produce sharper predictions (lower predictive variance) get lower ambiguity; candidates that produce diffuse predictions (high predictive variance, near-threshold predictions, etc.) get higher ambiguity. The agent prefers ambiguity-reducing candidates because they're information-gaining.",
+      :however
+      "Substituting a heuristic for the actual entropy makes the agent's \"epistemic\" preferences correlated-with-but-not-equal-to information theory. The agent may prefer actions that have many sub-options but produce nothing informative; or avoid actions that look unambiguous in heuristic terms but produce truly precise observations. Heuristic-based epistemic terms are common but not AIF-canonical.",
+      :then
+      "For a candidate action producing predicted observation distribution `o ∼ N(μ, Σ)`, the differential entropy of `o` is:\n      `H[o] = 0.5 × log((2πe)^k × det(Σ))`\n    where k is the dimension of the observation vector. For diagonal-covariance (independent channels), `det(Σ) = Π_k σ²_k`. For comparing across candidates, the additive constants (`0.5 × k × log(2πe)`) drop out, leaving:\n      `ambiguity-comparable(candidate) = 0.5 × log(Π_k σ²_k)`\n    In two dimensions (D, A): `ambiguity-comparable = 0.5 × log(σ²_D × σ²_A)`."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"agent"
+          "ambiguity"
+          "be"
+          "because"
+          "candidate"
+          "candidates"
+          "diffuse"
+          "distribution"
+          "each"
+          "entropy"
+          "etc"
+          "gaining"
+          "get"
+          "high"
+          "higher"
+          "information"
+          "lower"
+          "near"
+          "observation"
+          "of"
+          "predictions"
+          "predictive"
+          "prefers"
+          "produce"
+          "re"
+          "reducing"
+          "sharper"
+          "term"
+          "they"
+          "threshold"
+          "to"
+          "true"
+          "under"
+          "variance"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "substituting a heuristic for the actual entropy makes the agent's \"epistemic\" preferences correlated-with-but-not-equal-to information theory. the agent may prefer actions that have many sub-options but produce nothing informative; or avoid actions that look unambiguous in heuristic terms but produce truly precise observations. heuristic-based epistemic terms are common but not aif-canonical."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/predictive-coding-belief-update",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/predictive-coding-belief-update.flexiarg",
+      :sha256
+      "cd7a7483cf0bcb3ee2cd71eb4b58039c8ab97db0d60025725cf2575ca7a62473",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"against"
+       "approximation"
+       "bayesian"
+       "channel"
+       "coupled"
+       "ewma"
+       "floor"
+       "gaussian"
+       "implement"
+       "informs"
+       "intrinsic"
+       "is"
+       "learning"
+       "likelihood"
+       "matched"
+       "matches"
+       "mean"
+       "moment"
+       "new"
+       "not"
+       "observation"
+       "of"
+       "old"
+       "per"
+       "precision"
+       "rate"
+       "residual"
+       "s"
+       "sensor"
+       "tick"
+       "two"
+       "under"
+       "update"
+       "updates"
+       "var"
+       "variance"
+       "what"
+       "where"
+       "α"
+       "ε"
+       "μ"
+       "π"
+       "σ²"},
+     :clauses
+     {:if
+      "You want belief updates to be principled (Bayesian-shaped under Gaussian approximation), tunable (single learning rate; per-channel precision), and operationally robust (variance doesn't collapse to zero; doesn't blow up).",
+      :however
+      "Without an explicit update rule the agent either slams beliefs to each observation (over-trusts) or never moves them (over-anchors). Variance with no sensor-variance floor decays toward zero under any informative-observation history, killing the predictive-entropy term in EFE for later ticks.",
+      :then
+      "Implement two coupled updates per tick:\n      - Mean: μ ← μ + α · Π · ε, where ε = observation − μ, Π is per-channel precision, α is learning rate.\n      - Variance: var ← (1−α)·var + α·(observation − new-μ)² + σ²_sensor, where σ²_sensor is the sensor's intrinsic variance floor.\n    The residual against the *new* mean (not the old mean) is what informs the variance update — this matches the moment-matched EWMA approximation of Bayesian update under Gaussian likelihood."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want belief updates to be principled (bayesian-shaped under gaussian approximation), tunable (single learning rate; per-channel precision), and operationally robust (variance doesn't collapse to zero; doesn't blow up)."}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "without an explicit update rule the agent either slams beliefs to each observation (over-trusts) or never moves them (over-anchors). variance with no sensor-variance floor decays toward zero under any informative-observation history, killing the predictive-entropy term in efe for later ticks."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/belief-aware-risk-term",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/belief-aware-risk-term.flexiarg",
+      :sha256
+      "b7ed35ece50d7d592cf1915a7716ffab2a8c928dbea4f153a8cc58288ad43f62",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "additively"
+       "as"
+       "average"
+       "band"
+       "bias²"
+       "both"
+       "compute"
+       "configurable"
+       "contribute"
+       "d"
+       "deviation"
+       "i"
+       "in"
+       "instance"
+       "instances"
+       "institution"
+       "level"
+       "mean"
+       "opts"
+       "or"
+       "over"
+       "per"
+       "predictive"
+       "prior"
+       "priors"
+       "risk"
+       "squared"
+       "state"
+       "term"
+       "to"
+       "var"
+       "variance"},
+     :clauses
+     {:if
+      "You want the risk term to penalise both:\n      - **bias**: predicted state is far from preferred state (the candidate is unlikely to land near preference)\n      - **variance**: high predictive uncertainty about where the state will land (even if the predicted mean is at preference, the agent isn't confident it'll get there)\n    A candidate with low bias and low variance is preferred over a candidate with low bias and high variance, all else equal.",
+      :however
+      "A risk term that uses only `(mean - prior)²` ignores predictive uncertainty. Two candidates with identical means but different variances rank equal under bias-only risk — which is wrong: the high-variance candidate carries higher operational risk of missing preference even though it has the same expected outcome.",
+      :then
+      "Compute the risk term per institution (or per state-instance) as:\n      `risk[i] = (mean-D[i] - prior-D)² + (mean-A[i] - prior-A)² + var-D[i] + var-A[i]`\n    Both the squared-deviation (bias²) and the predictive variance contribute additively to the per-instance risk. Average over instances in the band for the band-level risk-term. Configurable priors per opts."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want the risk term to penalise both:\n      - **bias**: predicted state is far from preferred state (the candidate is unlikely to land near preference)\n      - **variance**: high predictive uncertainty about where the state will land (even if the predicted mean is at preference, the agent isn't confident it'll get there)\n    a candidate with low bias and low variance is preferred over a candidate with low bias and high variance, all else equal."}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "a risk term that uses only `(mean - prior)²` ignores predictive uncertainty. two candidates with identical means but different variances rank equal under bias-only risk — which is wrong: the high-variance candidate carries higher operational risk of missing preference even though it has the same expected outcome."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/shared-kernel-predictive-forward-model",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/shared-kernel-predictive-forward-model.flexiarg",
+      :sha256
+      "0b2d4b2b0cd2c61d61265ee878e160e2c624bc4f235ba59ca1a683b397a67e24",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "action"
+       "actions"
+       "add"
+       "admits"
+       "api"
+       "arity"
+       "around"
+       "b"
+       "becomes"
+       "by"
+       "call"
+       "callable"
+       "calls"
+       "candidate"
+       "defaults"
+       "deterministic"
+       "distribution"
+       "explicit"
+       "factor"
+       "forward"
+       "gaussian"
+       "in"
+       "kernel"
+       "live"
+       "model"
+       "next"
+       "noise"
+       "operation"
+       "opts"
+       "or"
+       "orchestration"
+       "other"
+       "predictive"
+       "preserves"
+       "principled"
+       "probabilistic"
+       "produce"
+       "pure"
+       "representation"
+       "returning"
+       "same"
+       "scoring"
+       "second"
+       "seed"
+       "selection"
+       "skips"
+       "state"
+       "step"
+       "supplied"
+       "taking"
+       "then"
+       "thin"
+       "threads"
+       "typically"
+       "uncertainty"
+       "via"
+       "wrapper"},
+     :clauses
+     {:if
+      "You want the predictive forward model's outputs to be principled (the agent's beliefs about candidate actions match what the live dynamics would actually do under those actions), maintainable (one set of dynamics rules to update), and verifiable (a single regression-test surface that catches accidental divergence).",
+      :however
+      "Two implementations of the same dynamics is two implementations to maintain, two places for bugs to hide, two surfaces where the forward model's predictions can disagree with what the live step actually does. The cost of maintaining bit-equivalent shadows grows quadratically with the dynamics complexity.",
+      :then
+      "Factor the live step into (a) a *pure deterministic kernel* taking explicit (state, action, seed, opts) and returning a next state, and (b) a *thin orchestration wrapper* that threads defaults and calls the kernel. The wrapper preserves the live API; the kernel becomes callable by:\n      - The wrapper, in live operation.\n      - The predictive forward model, for candidate scoring — typically via a second arity that admits supplied candidate actions and skips the live action-selection step.\n    The predictive forward model then becomes a thin probabilistic wrapper around the same kernel: call kernel with candidate, add Gaussian noise (or other principled uncertainty representation), produce next-state distribution."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"a"
+          "about"
+          "accidental"
+          "actions"
+          "actually"
+          "agent"
+          "be"
+          "beliefs"
+          "candidate"
+          "catches"
+          "divergence"
+          "do"
+          "dynamics"
+          "forward"
+          "live"
+          "maintainable"
+          "match"
+          "model"
+          "of"
+          "one"
+          "outputs"
+          "predictive"
+          "principled"
+          "regression"
+          "rules"
+          "s"
+          "set"
+          "single"
+          "surface"
+          "test"
+          "those"
+          "to"
+          "under"
+          "update"
+          "verifiable"
+          "what"
+          "would"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "two implementations of the same dynamics is two implementations to maintain, two places for bugs to hide, two surfaces where the forward model's predictions can disagree with what the live step actually does. the cost of maintaining bit-equivalent shadows grows quadratically with the dynamics complexity."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "structure/interest-event-vocabulary",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/structure/interest-event-vocabulary.flexiarg",
+      :sha256
+      "b51296613be9c61bddf9b58d082eaaecbad91ef139373f73438762b2e0943405",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "above"
+       "acceptance"
+       "addressed"
+       "after"
+       "against"
+       "always"
+       "an"
+       "anchor"
+       "annotation"
+       "append"
+       "arrow"
+       "artefacts"
+       "as"
+       "asserted"
+       "at"
+       "authored"
+       "authoritative"
+       "avoid"
+       "back"
+       "basin"
+       "bearing"
+       "because"
+       "been"
+       "before"
+       "block"
+       "blocks"
+       "boundaries"
+       "boundary"
+       "but"
+       "by"
+       "cadence"
+       "carries"
+       "checkpoint"
+       "checkpoints"
+       "class"
+       "closed"
+       "composite"
+       "contradicted"
+       "corrected"
+       "counts"
+       "created"
+       "cross"
+       "current"
+       "daily"
+       "days"
+       "degrade"
+       "deleted"
+       "deliberately"
+       "delta"
+       "derives"
+       "destination"
+       "discipline"
+       "drafts"
+       "drift"
+       "dst"
+       "each"
+       "edited"
+       "edn"
+       "eight"
+       "emission"
+       "emit"
+       "emitted"
+       "emitting"
+       "empty"
+       "entity"
+       "eoi"
+       "errors"
+       "essay"
+       "etc"
+       "even"
+       "event"
+       "events"
+       "evidence"
+       "exists"
+       "extracted"
+       "falsified"
+       "field"
+       "fields"
+       "fine"
+       "first"
+       "fixes"
+       "forbidden"
+       "foreclosed"
+       "framing"
+       "gained"
+       "go"
+       "granularity"
+       "had"
+       "happen"
+       "has"
+       "id"
+       "in"
+       "inferred"
+       "institution"
+       "interview"
+       "is"
+       "isn"
+       "just"
+       "keys"
+       "keyword"
+       "land"
+       "language"
+       "let"
+       "link"
+       "live"
+       "load"
+       "log"
+       "malformed"
+       "memos"
+       "mistakes"
+       "never"
+       "new"
+       "newly"
+       "no"
+       "nogo"
+       "noise"
+       "non"
+       "not"
+       "notes"
+       "object"
+       "of"
+       "off"
+       "omitted"
+       "on"
+       "one"
+       "only"
+       "op"
+       "operator"
+       "optional"
+       "or"
+       "out"
+       "overloading"
+       "payload"
+       "plain"
+       "plan"
+       "pointer"
+       "pointers"
+       "pollute"
+       "posterior"
+       "pre"
+       "prior"
+       "processor"
+       "projection"
+       "prose"
+       "provenance"
+       "rationale"
+       "re"
+       "real"
+       "reason"
+       "record"
+       "ref"
+       "refined"
+       "refs"
+       "relation"
+       "reopened"
+       "replay"
+       "required"
+       "reset"
+       "resolved"
+       "retraction"
+       "rhythm"
+       "runs"
+       "s"
+       "satisfy"
+       "schema"
+       "scope"
+       "scoped"
+       "section"
+       "sections"
+       "separate"
+       "sharpened"
+       "signal"
+       "silent"
+       "single"
+       "so"
+       "source"
+       "spawned"
+       "src"
+       "standing"
+       "state"
+       "strawman"
+       "strengthened"
+       "string"
+       "support"
+       "synthetic"
+       "t"
+       "target"
+       "targets"
+       "tension"
+       "terminal"
+       "there"
+       "these"
+       "they"
+       "to"
+       "traces"
+       "type"
+       "types"
+       "typically"
+       "unique"
+       "updates"
+       "v1"
+       "validation"
+       "vector"
+       "vocabulary"
+       "warns"
+       "was"
+       "when"
+       "within"
+       "would"},
+     :clauses
+     {:if nil,
+      :however
+      "Three design choices the vocabulary makes, and why each\n    beats its alternative.\n\n    + EIGHT-EVENTS-NOT-FREE-FORM:\n      A free-form rationale field per checkpoint would be simpler\n      but loses the structure that lets the projection compute\n      coverage, detect inconsistencies, and render the network\n      without re-parsing prose. Eight types is enough to\n      discriminate (a) entity-lifecycle moves (spawned / refined /\n      strengthened) from (b) closure moves (addressed / falsified /\n      foreclosed / reopened) from (c) relational moves\n      (link/asserted), while staying small enough that an operator\n      can hold them in mind without consulting a sheet.\n\n    + STATE-SLASH-PREFIX-NEUTRAL:\n      Namespace is `state/*` — not `eoi/*`, `essay/*`, `basin/*` —\n      so the same events apply to essay annotations,\n      institution-objects, basins, and composite-arrow edges.\n      Granularity is a separate field (`:target/granularity`), not\n      part of the event-type. Cross-entity-class queries work\n      naturally (\"show me every entity that got addressed this\n      week\"); per-entity-class queries filter by granularity.\n\n    + LINK-AS-SEPARATE-EVENT:\n      `link/asserted` is its own event type, not a special case of\n      `state/spawned`, because \"new relation exists\" and \"new entity\n      exists\" have different downstream uses (relation surfaces as\n      edge in the network view; entity surfaces as node).\n      Overloading `state/spawned` would force the projection to\n      discriminate by `:target/granularity` to know whether to\n      render as node or edge — fine for the projection, opaque to\n      the operator authoring the checkpoint.",
+      :then
+      "The eight event types, the payload schema, and the\n    emission discipline.\n\n    + EVENT-VOCABULARY-V1:\n      - `state/spawned`     — Target entity is newly created.\n      - `state/refined`     — Target entity's framing has been\n        sharpened (re-anchor, scoped).\n      - `state/strengthened` — Target entity's standing has gained\n        support from evidence.\n      - `state/addressed`   — Target entity (typically a tension)\n        has been resolved by evidence; not falsified.\n      - `state/falsified`   — Target entity has been contradicted by\n        evidence.\n      - `state/foreclosed`  — Target entity (typically a basin) has\n        been deliberately closed off.\n      - `state/reopened`    — Target entity that was\n        addressed/falsified/foreclosed has had its standing reset\n        to `:live`. First-class so retraction isn't terminal.\n      - `link/asserted`     — A new cross-essay relation exists.\n        Separate from `state/spawned` to avoid overloading \"new\n        target\" with \"new relation\".\n\n    + PAYLOAD-SCHEMA:\n      Each event record carries these fields (EDN, keyword keys):\n      - `:event/id`           — unique within checkpoint\n      - `:event/type`         — keyword; one of the eight above\n      - `:checkpoint/ref`     — back-pointer to the checkpoint\n      - `:target/entity-id`   — the EoI entity this event targets\n      - `:target/granularity` — keyword; one of `:essay`, `:section`,\n        `:annotation`, `:institution-object`, `:basin`,\n        `:composite-arrow`\n      - `:prior-state`        — keyword; standing before this event.\n        Required for `state/*` events; optional/omitted for\n        `link/asserted`.\n      - `:posterior-state`    — keyword; standing after this event.\n        Required for `state/*` events; optional/omitted for\n        `link/asserted`.\n      - `:evidence/refs`      — `[String]`; pointers to evidence\n        artefacts (interview notes, go/nogo memos, plan drafts,\n        EoI strawman sections, etc.)\n      - `:operator/rationale` — `String`; the operator's\n        plain-language reason. This is the load-bearing\n        provenance field; the projection's posterior always\n        traces back to an operator-asserted *because*.\n      - `:link/src`           — `String`; source entity. Only for\n        `link/asserted` events.\n      - `:link/dst`           — `String`; destination entity. Only\n        for `link/asserted` events.\n\n    + EMISSION-DISCIPLINE:\n      - APPEND-ONLY. Events are never edited or deleted. Mistakes\n        are corrected by emitting a new event (typically\n        `state/refined` or `state/reopened`) that updates the\n        target's standing. The log is the authoritative source;\n        the projection derives current state from log replay.\n      - NO-OP DAYS EMIT NO CHECKPOINT. Daily cadence is fine when\n        there's a real state delta — even a single `state/refined`\n        on a single annotation counts. But synthetic checkpoints\n        (an empty `:emitted-events` vector emitted just to satisfy\n        a daily rhythm) are forbidden: they pollute the log with\n        non-events and degrade the projection's signal-to-noise.\n      - OPERATOR-ASSERTED BOUNDARY. Events are emitted at\n        checkpoint boundaries by an operator, not inferred from\n        prose by a processor. The event log is authored, not\n        extracted. (Pre-checkpoint events — interview notes, go/nogo\n        memos as they happen — are out of scope for v1.)\n      - VALIDATION BLOCKS, NOT WARNS. Validation errors against\n        this vocabulary block the checkpoint; the operator fixes\n        the EDN and re-runs. Silent acceptance of malformed events\n        would let drift land in the projection."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing, :kind :missing-guard-clause}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "three design choices the vocabulary makes, and why each\n    beats its alternative.\n\n    + eight-events-not-free-form:\n      a free-form rationale field per checkpoint would be simpler\n      but loses the structure that lets the projection compute\n      coverage, detect inconsistencies, and render the network\n      without re-parsing prose. eight types is enough to\n      discriminate (a) entity-lifecycle moves (spawned / refined /\n      strengthened) from (b) closure moves (addressed / falsified /\n      foreclosed / reopened) from (c) relational moves\n      (link/asserted), while staying small enough that an operator\n      can hold them in mind without consulting a sheet.\n\n    + state-slash-prefix-neutral:\n      namespace is `state/*` — not `eoi/*`, `essay/*`, `basin/*` —\n      so the same events apply to essay annotations,\n      institution-objects, basins, and composite-arrow edges.\n      granularity is a separate field (`:target/granularity`), not\n      part of the event-type. cross-entity-class queries work\n      naturally (\"show me every entity that got addressed this\n      week\"); per-entity-class queries filter by granularity.\n\n    + link-as-separate-event:\n      `link/asserted` is its own event type, not a special case of\n      `state/spawned`, because \"new relation exists\" and \"new entity\n      exists\" have different downstream uses (relation surfaces as\n      edge in the network view; entity surfaces as node).\n      overloading `state/spawned` would force the projection to\n      discriminate by `:target/granularity` to know whether to\n      render as node or edge — fine for the projection, opaque to\n      the operator authoring the checkpoint."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}],
+   :constructed-count 12,
+   :interpretable-count 0}
+  {:target
+   {:findings
+    [{:kind :unclassified-clause,
+      :line 4,
+      :text "**Status:** INSTANTIATE"}],
+    :have #{"a" "dark" "kernel" "slices"},
+    :authority :documented-interpretation,
+    :source
+    {:path
+     "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+     :sha256
+     "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e",
+     :authority :source-document},
+    :selection-rule :status-with-continuations,
+    :id "M-wm-aif-policy-grain-compliance",
+    :ok true,
+    :want
+    #{"aif"
+      "compliance"
+      "grain"
+      "live"
+      "machine"
+      "open"
+      "persistence"
+      "policy"
+      "remain"
+      "seams"
+      "war"},
+    :clauses
+    [{:line 4,
+      :text "**Status:** INSTANTIATE",
+      :classification :unclassified,
+      :tokens #{"instantiate" "status"}}
+     {:line 4,
+      :text "Slices 0, 1a, and 2 kernel dark",
+      :classification :built-not-live,
+      :tokens #{"a" "dark" "kernel" "slices"}}
+     {:line 4,
+      :text "persistence/live seams remain open",
+      :classification :outstanding,
+      :tokens #{"live" "open" "persistence" "remain" "seams"}}],
+    :status-lines
+    [[4
+      "**Status:** INSTANTIATE — Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open  "]]},
+   :patterns
+   [{:id "gauntlet/modeline-persists-across-worlds",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/gauntlet/modeline-persists-across-worlds.flexiarg",
+      :sha256
+      "d2d0dc868c75030b3db03010abe9b4591ff4d45c57341e67015c49599803e9ab",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "across"
+       "active"
+       "agent"
+       "agents"
+       "aif"
+       "alfworld"
+       "am"
+       "as"
+       "budget"
+       "buffers"
+       "but"
+       "carries"
+       "channel"
+       "co"
+       "commitment"
+       "continuous"
+       "current"
+       "emacs"
+       "energy"
+       "every"
+       "free"
+       "hops"
+       "i"
+       "implement"
+       "in"
+       "is"
+       "it"
+       "like"
+       "mana"
+       "mode"
+       "modeline"
+       "naturally"
+       "not"
+       "observation"
+       "of"
+       "optionally"
+       "p"
+       "par"
+       "part"
+       "pattern"
+       "perceives"
+       "peripheral"
+       "persistent"
+       "persists"
+       "present"
+       "reflect"
+       "reflection"
+       "remaining"
+       "renders"
+       "separate"
+       "sigil"
+       "so"
+       "state"
+       "status"
+       "surface"
+       "surprised"
+       "temperature"
+       "to"
+       "updates"
+       "when"
+       "τ"},
+     :clauses
+     {:if
+      "You want the agent to maintain continuity of self-regulation across world changes — carrying its confidence, mana, active pattern, and free energy state from one peripheral to the next.",
+      :however
+      "Each peripheral hop replaces the agent's world (P-1). Without a persistent surface, AIF state resets at each transition: the agent enters a new peripheral with no memory of how confident it was, how much budget remains, or what pattern it was carrying. The backpack metaphor preserves some items (pattern card, walkie-talkie) but not the dynamic state (how am I doing?).",
+      :then
+      "Implement the AIF modeline as a persistent status surface that renders in every peripheral mode, like the Emacs modeline that persists across buffers. The modeline carries: current peripheral mode, free energy (am I surprised?), mana/budget remaining, active pattern and its sigil, τ (commitment temperature), and optionally co-present agents. The modeline is part of the observation — not a separate channel — so the agent perceives it naturally. When the agent hops from ALFWorld to a PAR reflection, the modeline updates (P:alfworld → P:reflect) but the AIF state is continuous."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"across"
+          "active"
+          "agent"
+          "carrying"
+          "changes"
+          "confidence"
+          "continuity"
+          "energy"
+          "free"
+          "maintain"
+          "mana"
+          "next"
+          "of"
+          "one"
+          "pattern"
+          "peripheral"
+          "regulation"
+          "self"
+          "state"
+          "to"
+          "world"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "each peripheral hop replaces the agent's world (p-1). without a persistent surface, aif state resets at each transition: the agent enters a new peripheral with no memory of how confident it was, how much budget remains, or what pattern it was carrying. the backpack metaphor preserves some items (pattern card, walkie-talkie) but not the dynamic state (how am i doing?)."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "gauntlet/aif-as-environment-not-instruction",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/gauntlet/aif-as-environment-not-instruction.flexiarg",
+      :sha256
+      "f5806f54dec5be0f27830f71312b47622bc6e63f111c3474a37a8fd1693b9535",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "active"
+       "agent"
+       "aif"
+       "an"
+       "as"
+       "asked"
+       "but"
+       "change"
+       "comply"
+       "confidence"
+       "does"
+       "emergent"
+       "energy"
+       "failing"
+       "free"
+       "if"
+       "in"
+       "instruction"
+       "is"
+       "it"
+       "loop"
+       "make"
+       "mana"
+       "modeline"
+       "naturally"
+       "never"
+       "not"
+       "observation"
+       "of"
+       "part"
+       "pattern"
+       "perceives"
+       "peripheral"
+       "prescribed"
+       "prompt"
+       "response"
+       "rising"
+       "s"
+       "shows"
+       "simply"
+       "state"
+       "strategy"
+       "to"
+       "up"
+       "what"
+       "world"},
+     :clauses
+     {:if
+      "You want agents to self-regulate — sensing when a strategy is failing, adjusting exploration, backing off to planning mode when confidence drops — without requiring human intervention.",
+      :however
+      "The naive implementation adds AIF as instructions: \"here is your suggested pattern (G=0.12, τ=0.72, p=68%), please select it or justify deviation.\" This makes compliant agents worse at their actual job. Codex, told to produce PSRs and follow pattern suggestions, became overly compliant rather than writing code — which is what Codex is good at. The AIF layer became an RPC that the agent dutifully served, not an environment it inhabited.\n\n    + FAILURE-MODES:\n      - Compliance capture: agent spends more tokens on AIF bookkeeping than on its actual task\n      - Instruction-shaped feedback: \"your τ is 0.72, consider exploring\" is an instruction wearing an AIF hat\n      - Modeline blindness: agent ignores the modeline entirely because it has no affordance (information present but not actionable)",
+      :then
+      "Make AIF state part of the observation, not the prompt. The modeline shows free energy, confidence, mana, active pattern — but the agent is never asked to \"comply\" with it. The agent does what it naturally does in its peripheral; the AIF state is simply part of what it perceives. If the agent's free energy is rising (strategy failing), that shows up as a change in the world, not as an instruction to change strategy. What the agent does in response IS the AIF loop — emergent, not prescribed."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want agents to self-regulate — sensing when a strategy is failing, adjusting exploration, backing off to planning mode when confidence drops — without requiring human intervention."}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "the naive implementation adds aif as instructions: \"here is your suggested pattern (g=0.12, τ=0.72, p=68%), please select it or justify deviation.\" this makes compliant agents worse at their actual job. codex, told to produce psrs and follow pattern suggestions, became overly compliant rather than writing code — which is what codex is good at. the aif layer became an rpc that the agent dutifully served, not an environment it inhabited.\n\n    + failure-modes:\n      - compliance capture: agent spends more tokens on aif bookkeeping than on its actual task\n      - instruction-shaped feedback: \"your τ is 0.72, consider exploring\" is an instruction wearing an aif hat\n      - modeline blindness: agent ignores the modeline entirely because it has no affordance (information present but not actionable)"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "aif/policy-precision-commitment-temperature",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/aif/policy-precision-commitment-temperature.flexiarg",
+      :sha256
+      "6d27db7ee7b7d3c859fb5d57e99bdbaadf707709dee39b88f2635f02428b2777",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "as"
+       "commitment"
+       "contradiction"
+       "coupled"
+       "diagnostic"
+       "failures"
+       "g"
+       "in"
+       "maintain"
+       "modulates"
+       "mu"
+       "over"
+       "pressure"
+       "rate"
+       "recent"
+       "regressions"
+       "repeated"
+       "signals"
+       "softmax"
+       "tau"
+       "temperature"
+       "test"
+       "time"
+       "to"
+       "uncertainty"},
+     :clauses
+     {:if
+      "You want exploration versus exploitation to depend on operational pressure (deadlines, repeated failures, user impatience, instability), not on randomness alone.",
+      :however
+      "Without an explicit (tau), the agent either thrashes or tunnels with no controllable dial.",
+      :then
+      "Maintain (tau) as a commitment temperature that modulates softmax over (-G/tau), coupled to diagnostic signals (recent regressions, uncertainty in (mu), contradiction rate, time pressure, repeated test failures)."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "you want exploration versus exploitation to depend on operational pressure (deadlines, repeated failures, user impatience, instability), not on randomness alone."}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "without an explicit (tau), the agent either thrashes or tunnels with no controllable dial."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "futon-theory/structural-tension-as-observation",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/futon-theory/structural-tension-as-observation.flexiarg",
+      :sha256
+      "344228d4ac54927d93b691b695fb533a576a7dc8a926c857438d450749b0877a",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "accumulate"
+       "accumulated"
+       "accumulating"
+       "accumulation"
+       "across"
+       "act"
+       "action"
+       "actually"
+       "ad"
+       "addresses"
+       "adds"
+       "adequacy"
+       "after"
+       "against"
+       "agency"
+       "agent"
+       "agents"
+       "aif"
+       "among"
+       "an"
+       "analogy"
+       "ancestors"
+       "appearing"
+       "appears"
+       "apply"
+       "arbitrary"
+       "argument"
+       "around"
+       "arrow"
+       "arrows"
+       "artifacts"
+       "as"
+       "at"
+       "auditable"
+       "axis"
+       "baldwin"
+       "be"
+       "because"
+       "before"
+       "below"
+       "between"
+       "bhk"
+       "both"
+       "boundary"
+       "but"
+       "by"
+       "can"
+       "canalization"
+       "candidate"
+       "candidates"
+       "cannot"
+       "canonicalization"
+       "canonicalize"
+       "canonization"
+       "capabilities"
+       "certification"
+       "changes"
+       "chapter"
+       "checkable"
+       "choosing"
+       "citable"
+       "cleanly"
+       "closure"
+       "codebase"
+       "coincidence"
+       "compared"
+       "components"
+       "composes"
+       "compresses"
+       "concludes"
+       "confidence"
+       "connection"
+       "constrain"
+       "constrains"
+       "contains"
+       "contexts"
+       "contingent"
+       "converge"
+       "convergence"
+       "conversation"
+       "coordination"
+       "could"
+       "cover"
+       "criteria"
+       "critical"
+       "current"
+       "currently"
+       "cycle"
+       "declarations"
+       "declared"
+       "decrease"
+       "default"
+       "deliberate"
+       "detection"
+       "development"
+       "diagram"
+       "did"
+       "different"
+       "difficulty"
+       "direct"
+       "directly"
+       "discipline"
+       "discovered"
+       "divergence"
+       "does"
+       "drives"
+       "each"
+       "edges"
+       "edn"
+       "emerge"
+       "energy"
+       "env"
+       "environment"
+       "equivalent"
+       "error"
+       "errors"
+       "established"
+       "event"
+       "evidence"
+       "evolution"
+       "exchange"
+       "execute"
+       "execution"
+       "executions"
+       "existing"
+       "exogeneity"
+       "expand"
+       "expansion"
+       "experience"
+       "explains"
+       "explicit"
+       "express"
+       "expressing"
+       "extract"
+       "failure"
+       "fast"
+       "feel"
+       "felt"
+       "fix"
+       "fixes"
+       "follows"
+       "force"
+       "free"
+       "frequency"
+       "futon1a"
+       "futon3"
+       "futon3a"
+       "future"
+       "g1"
+       "g3"
+       "g5"
+       "gap"
+       "gate"
+       "gates"
+       "generated"
+       "generative"
+       "giving"
+       "glacial"
+       "govern"
+       "governed"
+       "graph"
+       "graphs"
+       "guide"
+       "hard"
+       "has"
+       "history"
+       "hitting"
+       "hoc"
+       "how"
+       "i1"
+       "i2"
+       "i3"
+       "i4"
+       "i5"
+       "i6"
+       "identifiable"
+       "if"
+       "in"
+       "independently"
+       "inference"
+       "insufficient"
+       "inter"
+       "invariant"
+       "invariants"
+       "irritation"
+       "is"
+       "it"
+       "itself"
+       "kinds"
+       "level"
+       "library"
+       "loop"
+       "loops"
+       "low"
+       "machine"
+       "many"
+       "mapping"
+       "match"
+       "meme"
+       "metaphor"
+       "missions"
+       "mode"
+       "model"
+       "modify"
+       "more"
+       "move"
+       "multiple"
+       "must"
+       "name"
+       "named"
+       "naming"
+       "necessary"
+       "needs"
+       "negotiate"
+       "nesting"
+       "new"
+       "no"
+       "noise"
+       "none"
+       "not"
+       "now"
+       "obs"
+       "observation"
+       "observations"
+       "observe"
+       "of"
+       "on"
+       "one"
+       "operate"
+       "operates"
+       "or"
+       "organizational"
+       "out"
+       "over"
+       "overfit"
+       "parameter"
+       "path"
+       "pattern"
+       "patterns"
+       "perceive"
+       "perception"
+       "phylogeny"
+       "pipeline"
+       "plan"
+       "policies"
+       "policy"
+       "practice"
+       "pre"
+       "predicted"
+       "prediction"
+       "pressure"
+       "prevention"
+       "previous"
+       "problem"
+       "problems"
+       "process"
+       "produce"
+       "produced"
+       "produces"
+       "project"
+       "promote"
+       "promoting"
+       "prompted"
+       "proof"
+       "providing"
+       "psr"
+       "psrs"
+       "publish"
+       "pur"
+       "pushes"
+       "raw"
+       "read"
+       "reading"
+       "reality"
+       "reappearance"
+       "reappears"
+       "recognise"
+       "record"
+       "records"
+       "recurring"
+       "replayable"
+       "repos"
+       "representable"
+       "required"
+       "requirements"
+       "reshaping"
+       "retroactive"
+       "rewrite"
+       "role"
+       "running"
+       "s"
+       "same"
+       "says"
+       "scope"
+       "scored"
+       "see"
+       "select"
+       "selected"
+       "selecting"
+       "selection"
+       "selections"
+       "seriously"
+       "serve"
+       "shape"
+       "share"
+       "shared"
+       "should"
+       "showing"
+       "situational"
+       "six"
+       "solving"
+       "specification"
+       "specs"
+       "state"
+       "status"
+       "step"
+       "steward"
+       "stop"
+       "storage"
+       "structural"
+       "structurally"
+       "structure"
+       "struggles"
+       "style"
+       "sub"
+       "subgraphs"
+       "substructure"
+       "sustain"
+       "sustains"
+       "symbol"
+       "symbolic"
+       "system"
+       "systematic"
+       "t"
+       "take"
+       "taken"
+       "task"
+       "tasks"
+       "tension"
+       "tensions"
+       "them"
+       "theme"
+       "therefore"
+       "these"
+       "they"
+       "those"
+       "three"
+       "through"
+       "time"
+       "timescale"
+       "timescales"
+       "to"
+       "track"
+       "trans"
+       "turns"
+       "tweak"
+       "two"
+       "typed"
+       "unrelated"
+       "up"
+       "update"
+       "updates"
+       "validate"
+       "vector"
+       "vocabulary"
+       "vsm"
+       "wall"
+       "was"
+       "what"
+       "which"
+       "why"
+       "wireheading"
+       "wiring"
+       "within"
+       "without"
+       "work"
+       "workaround"
+       "works"
+       "world"
+       "would"
+       "written"
+       "前符号压力"
+       "结构刺激"
+       "跨情境复现"},
+     :clauses
+     {:if nil,
+      :however nil,
+      :then
+      "Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline.\n    + FREE-ENERGY-AND-CANONICALIZATION:\n      In AIF, free energy is the divergence between the agent's model and\n      reality. In library evolution:\n\n      - Free energy = accumulated structural irritation. The gap between\n        what the library says should work and what actually works in\n        practice.\n      - Perception = NAMING. Giving an irritation a citable name compresses\n        raw tension into a representable observation. Before naming, the\n        tension is sub-symbolic. After naming, it can be scored and compared.\n      - Inference = SELECTION. Among named tensions, selecting those that\n        are auditable, replayable, and machine-checkable. This updates\n        the model (library) by choosing which observations to take\n        seriously.\n      - Action = CANALIZATION. Promoting a selected pattern to invariant\n        status. This changes the world — future tasks are now governed by\n        the new invariant. The free energy should decrease: the irritation\n        that prompted canonicalization should stop recurring.\n\n      The Baldwin cycle IS the policy for the glacial AIF loop. And the\n      canonization event (from retroactive-canonicalization) is the proof\n      path record for that policy — the evidence that the action was taken\n      and why.\n\n    + INVARIANT-MAPPING:\n      The six Chapter 0 invariants apply to both loops:\n\n      | Invariant | Level 0 (Task) | Level 1 (Library) |\n      | I1 Boundary | Gate pipeline | Library publish/promote boundary |\n      | I2 Obs-Action | Read env / produce artifacts | Observe tensions / canonicalize |\n      | I3 Timescale | Gates fast, patterns glacial | Tasks fast, canonicalization glacial |\n      | I4 Exogeneity | Agents can't rewrite patterns | Fast tensions can't force canonicalization |\n      | I5 Adequacy | Library must guide tasks | Library must track recurring tensions |\n      | I6 Closure | Default mode sustains agents | Gap-PSRs sustain library evolution |\n\n      I4 is critical for both loops. At Level 0: agents cannot rewrite the\n      patterns that guide them (wireheading prevention). At Level 1: the\n      accumulation of structural tensions cannot force canonicalization\n      without the deliberate three-step process (NAMING → SELECTION →\n      CANALIZATION). If tensions could directly modify the library, the\n      library would overfit to noise — the glacial equivalent of\n      wireheading.\n\n    + THE-DIRECT-AIF-CONNECTION:\n      The coordination rewrite argument (coordination/ARGUMENT) concludes\n      that pattern phylogeny, development history, and conversation graphs\n      are one structure. The AIF connection explains WHY they converge:\n\n      - The pattern phylogeny is the glacial loop's model evolution —\n        how the generative model (library) changes over time.\n      - The development history is the fast loop's action record —\n        what the agent did at each step.\n      - The conversation graph is the inter-agent coordination record —\n        how multiple agents running the fast loop exchange observations\n        and negotiate policies.\n\n      These three records are generated by the same diagram at different\n      timescales and between different components. They converge because\n      they are produced by one system, not three.\n\n      The AIF wiring diagram is therefore not an organizational metaphor\n      for the coordination rewrite. It is the structural specification.\n      The futon3-coordination.edn diagram IS the Level 0 loop. The\n      retroactive canonicalization process IS the Level 1 loop. The gate\n      pipeline IS the shared boundary. The pattern library IS the\n      generative model. And structural tension IS free energy.\n\n    + THE-OBSERVATION-VECTOR:\n      What does the glacial loop observe? Three kinds of structural tension\n      serve as its observation vector:\n\n      1. STRUCTURAL IRRITATION (结构刺激):\n         A recurring problem shape that the current symbol system cannot\n         cleanly express. The same difficulty appears across multiple tasks,\n         but no existing pattern addresses it directly. Agents work around it\n         with ad-hoc fixes. Each workaround is a prediction error: the\n         generative model (library) predicted its patterns would cover the\n         work, but reality produced a gap.\n\n         Detection: gap-PSRs accumulating around the same structural theme.\n         Frequency across tasks. Multiple agents hitting the same wall.\n\n      2. PRE-SYMBOLIC PRESSURE (前符号压力):\n         A force that pushes the symbol system to expand before the expansion\n         has a name. The pressure is felt as difficulty — not the difficulty\n         of a hard task, but the difficulty of expressing what the task IS.\n         The existing vocabulary is insufficient. This is the force that\n         drives NAMING: giving structure to experience that currently has\n         none.\n\n         Detection: tasks that are hard to scope (G5 struggles), hard to\n         match to patterns (G3 produces low-confidence PSRs), hard to\n         validate (G1 criteria feel arbitrary). The difficulty is not in\n         the work but in the coordination of the work.\n\n      3. TRANS-SITUATIONAL REAPPEARANCE (跨情境复现):\n         The same structural role showing up across unrelated contexts.\n         A pattern that was written for storage reappears in coordination.\n         A fix that was ad-hoc in futon1a turns out to be necessary in\n         futon3. The reappearance is evidence that the pattern is not\n         contingent but structurally required — the prediction error is\n         systematic, not noise. The model needs a structural update\n         (canonicalization), not a parameter tweak (one more ad-hoc fix).\n\n         Detection: patterns or fixes independently discovered in different\n         repos, missions, or agent contexts. futon3a's meme.arrow typed\n         edges appearing in different subgraphs. The same gate pattern\n         solving problems in both the agency reading and the pattern reading.\n\n    + THE-TWO-LOOPS:\n      The coordination system contains two AIF loops at different timescales:\n\n      LEVEL 0 — Task Execution (fast):\n      - Observe: read environment (codebase, project state)\n      - Perceive: extract task requirements, match against capabilities\n      - Policy: select pattern (PSR), plan execution\n      - Act: execute through gates, produce artifacts\n      - Generative model: current pattern selections\n      - Free energy: task failure, gap declarations, PUR prediction errors\n\n      LEVEL 1 — Library Evolution (glacial):\n      - Observe: accumulate structural tensions across many task executions\n      - Perceive: recognise recurring tensions as candidate ancestors\n      - Policy: select candidates for canonicalization (NAMING → SELECTION)\n      - Act: canonicalize — promote pattern to invariant (CANALIZATION)\n      - Generative model: the pattern library itself\n      - Free energy: accumulated structural irritation\n\n      These loops share the same boundary: the gate pipeline. Level 0\n      operates within the pipeline (one task at a time). Level 1 operates\n      on the pipeline (reshaping the patterns that govern future tasks).\n      This is VSM-style nesting (Chapter 0 §3.2): the glacial loop contains\n      and constrains the fast loop.\n\n    + WHAT-THIS-ADDS:\n      Previous patterns established:\n      - Tasks are BHK arrows (task-as-arrow)\n      - Specs emerge from ancestors (retroactive-canonicalization)\n      - The rewrite composes components through a pipeline into a graph\n        (coordination/ARGUMENT)\n\n      This pattern adds:\n      - The two-loop structure is not analogy but direct AIF specification\n      - Structural tension has three identifiable components that serve as\n        the glacial loop's observation vector\n      - The graph convergence follows from the diagram structure, not from\n        coincidence\n      - The six Chapter 0 invariants constrain both loops, providing\n        checkable certification criteria for the rewrite"},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing, :kind :missing-guard-clause}
+       {:status :missing, :kind :missing-guard-clause}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "war-machine/ideal-actual-gap",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/war-machine/ideal-actual-gap.flexiarg",
+      :sha256
+      "cf9368aa42a4d5cc096edca6d085a6b0314ed446638e10b8a3e9ab2c2d2d67b0",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "actual"
+       "against"
+       "as"
+       "class"
+       "compare"
+       "components"
+       "compute"
+       "devmap"
+       "discrepancy"
+       "first"
+       "gap"
+       "ideal"
+       "implementation"
+       "inventory"
+       "mission"
+       "report"
+       "sorry"
+       "state"
+       "surface"
+       "topology"},
+     :clauses
+     {:if
+      "The system maintains both aspirational specifications and evidence about its current implementation and coverage.",
+      :however
+      "Self-representation without self-comparison turns into portraiture rather than correction. Some ideals remain only partly measurable, but the raw discrepancy still needs to be machine-detectable.",
+      :then
+      "Compute the ideal/actual gap: compare devmap components against mission inventory, compare sorry topology against implementation state, and surface the discrepancy as a first-class report."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"about"
+          "aspirational"
+          "both"
+          "coverage"
+          "current"
+          "evidence"
+          "implementation"
+          "maintains"
+          "specifications"
+          "system"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "self-representation without self-comparison turns into portraiture rather than correction. some ideals remain only partly measurable, but the raw discrepancy still needs to be machine-detectable."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "structure/interest-event-vocabulary",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/structure/interest-event-vocabulary.flexiarg",
+      :sha256
+      "b51296613be9c61bddf9b58d082eaaecbad91ef139373f73438762b2e0943405",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "above"
+       "acceptance"
+       "addressed"
+       "after"
+       "against"
+       "always"
+       "an"
+       "anchor"
+       "annotation"
+       "append"
+       "arrow"
+       "artefacts"
+       "as"
+       "asserted"
+       "at"
+       "authored"
+       "authoritative"
+       "avoid"
+       "back"
+       "basin"
+       "bearing"
+       "because"
+       "been"
+       "before"
+       "block"
+       "blocks"
+       "boundaries"
+       "boundary"
+       "but"
+       "by"
+       "cadence"
+       "carries"
+       "checkpoint"
+       "checkpoints"
+       "class"
+       "closed"
+       "composite"
+       "contradicted"
+       "corrected"
+       "counts"
+       "created"
+       "cross"
+       "current"
+       "daily"
+       "days"
+       "degrade"
+       "deleted"
+       "deliberately"
+       "delta"
+       "derives"
+       "destination"
+       "discipline"
+       "drafts"
+       "drift"
+       "dst"
+       "each"
+       "edited"
+       "edn"
+       "eight"
+       "emission"
+       "emit"
+       "emitted"
+       "emitting"
+       "empty"
+       "entity"
+       "eoi"
+       "errors"
+       "essay"
+       "etc"
+       "even"
+       "event"
+       "events"
+       "evidence"
+       "exists"
+       "extracted"
+       "falsified"
+       "field"
+       "fields"
+       "fine"
+       "first"
+       "fixes"
+       "forbidden"
+       "foreclosed"
+       "framing"
+       "gained"
+       "go"
+       "granularity"
+       "had"
+       "happen"
+       "has"
+       "id"
+       "in"
+       "inferred"
+       "institution"
+       "interview"
+       "is"
+       "isn"
+       "just"
+       "keys"
+       "keyword"
+       "land"
+       "language"
+       "let"
+       "link"
+       "live"
+       "load"
+       "log"
+       "malformed"
+       "memos"
+       "mistakes"
+       "never"
+       "new"
+       "newly"
+       "no"
+       "nogo"
+       "noise"
+       "non"
+       "not"
+       "notes"
+       "object"
+       "of"
+       "off"
+       "omitted"
+       "on"
+       "one"
+       "only"
+       "op"
+       "operator"
+       "optional"
+       "or"
+       "out"
+       "overloading"
+       "payload"
+       "plain"
+       "plan"
+       "pointer"
+       "pointers"
+       "pollute"
+       "posterior"
+       "pre"
+       "prior"
+       "processor"
+       "projection"
+       "prose"
+       "provenance"
+       "rationale"
+       "re"
+       "real"
+       "reason"
+       "record"
+       "ref"
+       "refined"
+       "refs"
+       "relation"
+       "reopened"
+       "replay"
+       "required"
+       "reset"
+       "resolved"
+       "retraction"
+       "rhythm"
+       "runs"
+       "s"
+       "satisfy"
+       "schema"
+       "scope"
+       "scoped"
+       "section"
+       "sections"
+       "separate"
+       "sharpened"
+       "signal"
+       "silent"
+       "single"
+       "so"
+       "source"
+       "spawned"
+       "src"
+       "standing"
+       "state"
+       "strawman"
+       "strengthened"
+       "string"
+       "support"
+       "synthetic"
+       "t"
+       "target"
+       "targets"
+       "tension"
+       "terminal"
+       "there"
+       "these"
+       "they"
+       "to"
+       "traces"
+       "type"
+       "types"
+       "typically"
+       "unique"
+       "updates"
+       "v1"
+       "validation"
+       "vector"
+       "vocabulary"
+       "warns"
+       "was"
+       "when"
+       "within"
+       "would"},
+     :clauses
+     {:if nil,
+      :however
+      "Three design choices the vocabulary makes, and why each\n    beats its alternative.\n\n    + EIGHT-EVENTS-NOT-FREE-FORM:\n      A free-form rationale field per checkpoint would be simpler\n      but loses the structure that lets the projection compute\n      coverage, detect inconsistencies, and render the network\n      without re-parsing prose. Eight types is enough to\n      discriminate (a) entity-lifecycle moves (spawned / refined /\n      strengthened) from (b) closure moves (addressed / falsified /\n      foreclosed / reopened) from (c) relational moves\n      (link/asserted), while staying small enough that an operator\n      can hold them in mind without consulting a sheet.\n\n    + STATE-SLASH-PREFIX-NEUTRAL:\n      Namespace is `state/*` — not `eoi/*`, `essay/*`, `basin/*` —\n      so the same events apply to essay annotations,\n      institution-objects, basins, and composite-arrow edges.\n      Granularity is a separate field (`:target/granularity`), not\n      part of the event-type. Cross-entity-class queries work\n      naturally (\"show me every entity that got addressed this\n      week\"); per-entity-class queries filter by granularity.\n\n    + LINK-AS-SEPARATE-EVENT:\n      `link/asserted` is its own event type, not a special case of\n      `state/spawned`, because \"new relation exists\" and \"new entity\n      exists\" have different downstream uses (relation surfaces as\n      edge in the network view; entity surfaces as node).\n      Overloading `state/spawned` would force the projection to\n      discriminate by `:target/granularity` to know whether to\n      render as node or edge — fine for the projection, opaque to\n      the operator authoring the checkpoint.",
+      :then
+      "The eight event types, the payload schema, and the\n    emission discipline.\n\n    + EVENT-VOCABULARY-V1:\n      - `state/spawned`     — Target entity is newly created.\n      - `state/refined`     — Target entity's framing has been\n        sharpened (re-anchor, scoped).\n      - `state/strengthened` — Target entity's standing has gained\n        support from evidence.\n      - `state/addressed`   — Target entity (typically a tension)\n        has been resolved by evidence; not falsified.\n      - `state/falsified`   — Target entity has been contradicted by\n        evidence.\n      - `state/foreclosed`  — Target entity (typically a basin) has\n        been deliberately closed off.\n      - `state/reopened`    — Target entity that was\n        addressed/falsified/foreclosed has had its standing reset\n        to `:live`. First-class so retraction isn't terminal.\n      - `link/asserted`     — A new cross-essay relation exists.\n        Separate from `state/spawned` to avoid overloading \"new\n        target\" with \"new relation\".\n\n    + PAYLOAD-SCHEMA:\n      Each event record carries these fields (EDN, keyword keys):\n      - `:event/id`           — unique within checkpoint\n      - `:event/type`         — keyword; one of the eight above\n      - `:checkpoint/ref`     — back-pointer to the checkpoint\n      - `:target/entity-id`   — the EoI entity this event targets\n      - `:target/granularity` — keyword; one of `:essay`, `:section`,\n        `:annotation`, `:institution-object`, `:basin`,\n        `:composite-arrow`\n      - `:prior-state`        — keyword; standing before this event.\n        Required for `state/*` events; optional/omitted for\n        `link/asserted`.\n      - `:posterior-state`    — keyword; standing after this event.\n        Required for `state/*` events; optional/omitted for\n        `link/asserted`.\n      - `:evidence/refs`      — `[String]`; pointers to evidence\n        artefacts (interview notes, go/nogo memos, plan drafts,\n        EoI strawman sections, etc.)\n      - `:operator/rationale` — `String`; the operator's\n        plain-language reason. This is the load-bearing\n        provenance field; the projection's posterior always\n        traces back to an operator-asserted *because*.\n      - `:link/src`           — `String`; source entity. Only for\n        `link/asserted` events.\n      - `:link/dst`           — `String`; destination entity. Only\n        for `link/asserted` events.\n\n    + EMISSION-DISCIPLINE:\n      - APPEND-ONLY. Events are never edited or deleted. Mistakes\n        are corrected by emitting a new event (typically\n        `state/refined` or `state/reopened`) that updates the\n        target's standing. The log is the authoritative source;\n        the projection derives current state from log replay.\n      - NO-OP DAYS EMIT NO CHECKPOINT. Daily cadence is fine when\n        there's a real state delta — even a single `state/refined`\n        on a single annotation counts. But synthetic checkpoints\n        (an empty `:emitted-events` vector emitted just to satisfy\n        a daily rhythm) are forbidden: they pollute the log with\n        non-events and degrade the projection's signal-to-noise.\n      - OPERATOR-ASSERTED BOUNDARY. Events are emitted at\n        checkpoint boundaries by an operator, not inferred from\n        prose by a processor. The event log is authored, not\n        extracted. (Pre-checkpoint events — interview notes, go/nogo\n        memos as they happen — are out of scope for v1.)\n      - VALIDATION BLOCKS, NOT WARNS. Validation errors against\n        this vocabulary block the checkpoint; the operator fixes\n        the EDN and re-runs. Silent acceptance of malformed events\n        would let drift land in the projection."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing, :kind :missing-guard-clause}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "three design choices the vocabulary makes, and why each\n    beats its alternative.\n\n    + eight-events-not-free-form:\n      a free-form rationale field per checkpoint would be simpler\n      but loses the structure that lets the projection compute\n      coverage, detect inconsistencies, and render the network\n      without re-parsing prose. eight types is enough to\n      discriminate (a) entity-lifecycle moves (spawned / refined /\n      strengthened) from (b) closure moves (addressed / falsified /\n      foreclosed / reopened) from (c) relational moves\n      (link/asserted), while staying small enough that an operator\n      can hold them in mind without consulting a sheet.\n\n    + state-slash-prefix-neutral:\n      namespace is `state/*` — not `eoi/*`, `essay/*`, `basin/*` —\n      so the same events apply to essay annotations,\n      institution-objects, basins, and composite-arrow edges.\n      granularity is a separate field (`:target/granularity`), not\n      part of the event-type. cross-entity-class queries work\n      naturally (\"show me every entity that got addressed this\n      week\"); per-entity-class queries filter by granularity.\n\n    + link-as-separate-event:\n      `link/asserted` is its own event type, not a special case of\n      `state/spawned`, because \"new relation exists\" and \"new entity\n      exists\" have different downstream uses (relation surfaces as\n      edge in the network view; entity surfaces as node).\n      overloading `state/spawned` would force the projection to\n      discriminate by `:target/granularity` to know whether to\n      render as node or edge — fine for the projection, opaque to\n      the operator authoring the checkpoint."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "ants/baseline-cyber-ant",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/ants/baseline-cyber-ant.flexiarg",
+      :sha256
+      "7f65024c6e11139c3cc9442b4ce54c466ddfc4570279d1d39d17fd1fdae79728",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"action"
+       "affect"
+       "canonically"
+       "choose"
+       "describe"
+       "deterministic"
+       "doc"
+       "futon5"
+       "g"
+       "goldens"
+       "harness"
+       "has"
+       "loop"
+       "material"
+       "observe"
+       "perceive"
+       "policy"
+       "referencing"
+       "single"
+       "so"
+       "source"
+       "tau"
+       "tick"
+       "trace"
+       "update"},
+     :clauses
+     {:if
+      "You want a generated agent to behave exactly like today’s handcrafted AIF\n    ants, including mode hysteresis, hunger/tau coupling, and softmax tilts.",
+      :however
+      "The implementation currently lives as code and tests inside Futon2; none of\n    those behaviours are catalogued as pattern data Futon5 can compile.",
+      :then
+      "Canonically describe the loop from `g-observe` → `perceive/perceive` →\n    `affect/update-tau` → `policy/choose-action`, referencing the single-tick\n    trace (`doc/trace/single_tick.*`) and policy harness goldens so Futon5 has\n    deterministic source material."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"a"
+          "agent"
+          "aif"
+          "ants"
+          "behave"
+          "coupling"
+          "exactly"
+          "generated"
+          "handcrafted"
+          "hunger"
+          "hysteresis"
+          "including"
+          "like"
+          "mode"
+          "s"
+          "softmax"
+          "tau"
+          "tilts"
+          "to"
+          "today"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "the implementation currently lives as code and tests inside futon2; none of\n    those behaviours are catalogued as pattern data futon5 can compile."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "futon-theory/all-or-nothing",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/futon-theory/all-or-nothing.flexiarg",
+      :sha256
+      "b2bdcb3397c0cf50c8919ccedf4eb5ba488c297b73895ef6875b298a4106dd87",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"against"
+       "all"
+       "an"
+       "axis"
+       "below"
+       "blocked"
+       "clj"
+       "completely"
+       "core"
+       "data"
+       "declared"
+       "deserialize"
+       "details"
+       "discipline"
+       "enforcement"
+       "entities"
+       "entity"
+       "every"
+       "existing"
+       "explicit"
+       "integrity"
+       "layer"
+       "load"
+       "missing"
+       "move"
+       "must"
+       "named"
+       "on"
+       "operate"
+       "pattern"
+       "reference"
+       "references"
+       "rehydrate"
+       "relation"
+       "see"
+       "startup"
+       "steward"
+       "substructure"
+       "until"
+       "validates"
+       "violation"},
+     :clauses
+     {:if
+      "The applicability scope of the pattern (see substructure).\n    + REQUIREMENTS:\n      - Rehydration loads all entities or throws\n      - No silent stubs, no placeholder values\n      - No partial loads, no \"best effort\" recovery\n      - Failure reports: what entity, what field, what was expected, what found\n      - Relations verified to have valid endpoints",
+      :however
+      "The structural tension above manifests in the following concrete shapes (see substructure).\n    + FAILURE-MODES:\n      Corrupt entity -> 500 ENTITY_CORRUPT (details: entity-id, field, error)\n      Dangling relation -> 500 DANGLING_REFERENCE (details: relation-id, missing-target)\n      Schema mismatch -> 500 SCHEMA_MISMATCH (details: entity-id, expected, found)\n\n    + ANTI-PATTERNS:\n      - Loading what we can, logging warnings for the rest\n      - Creating stub entities for missing references\n      - \"Recovering\" by skipping corrupt data\n      - Async background rehydration that might fail silently",
+      :then
+      "Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline.\n    + ENFORCEMENT:\n      Layer 2 (core/rehydrate.clj) validates on load:\n      - Every entity must deserialize completely\n      - Every relation must reference existing entities\n      - Missing references -> 500 INTEGRITY_VIOLATION with details\n      - Startup blocked until all data validates"},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "the applicability scope of the pattern (see substructure).\n    + requirements:\n      - rehydration loads all entities or throws\n      - no silent stubs, no placeholder values\n      - no partial loads, no \"best effort\" recovery\n      - failure reports: what entity, what field, what was expected, what found\n      - relations verified to have valid endpoints"}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "the structural tension above manifests in the following concrete shapes (see substructure).\n    + failure-modes:\n      corrupt entity -> 500 entity_corrupt (details: entity-id, field, error)\n      dangling relation -> 500 dangling_reference (details: relation-id, missing-target)\n      schema mismatch -> 500 schema_mismatch (details: entity-id, expected, found)\n\n    + anti-patterns:\n      - loading what we can, logging warnings for the rest\n      - creating stub entities for missing references\n      - \"recovering\" by skipping corrupt data\n      - async background rehydration that might fail silently"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "storage/open-world-velocity-validation",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/storage/open-world-velocity-validation.flexiarg",
+      :sha256
+      "2454676e3845cb09919f30c1cea4e872b8e8e6d1f6a9524c6f47ade986da93a4",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"backfill"
+       "enforce"
+       "ingest"
+       "on"
+       "recovery"
+       "repair"
+       "scripts"
+       "strict"
+       "supply"
+       "validation"},
+     :clauses
+     {:if "you want to ingest background knowledge quickly",
+      :however
+      "you also need open-world data to remain coherent and mirrorable",
+      :then
+      "enforce strict validation on ingest and supply repair/backfill scripts for recovery"},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present #{"background" "ingest" "knowledge" "quickly" "to"},
+        :absent #{}}
+       {:status :interpreted,
+        :present
+        #{"coherent" "data" "mirrorable" "open" "remain" "to" "world"},
+        :absent #{}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{"backfill"
+        "enforce"
+        "ingest"
+        "on"
+        "recovery"
+        "repair"
+        "scripts"
+        "strict"
+        "supply"
+        "validation"},
+      :authority :documented-interpretation}}],
+   :constructed-count 9,
+   :interpretable-count 1}
+  {:target
+   {:findings [],
+    :have
+    #{"accepted"
+      "advice"
+      "dark"
+      "enactment"
+      "gated"
+      "live"
+      "only"
+      "operator"
+      "phase"
+      "phases"
+      "replay"
+      "rungs"
+      "shadow"
+      "status"},
+    :authority :documented-interpretation,
+    :source
+    {:path
+     "/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md",
+     :sha256
+     "a33ff99b33677ae93c64a7b20a0618d07e68f563b10e9732dd828d0053ef26fe",
+     :authority :source-document},
+    :selection-rule :status-with-continuations,
+    :id "M-shared-memory-control-build-test",
+    :ok true,
+    :want #{"build" "control" "memory" "regime" "shared" "test"},
+    :clauses
+    [{:line 4,
+      :text "**Status:** Phases 1–3 ACCEPTED live",
+      :classification :built-not-live,
+      :tokens #{"accepted" "live" "phases" "status"}}
+     {:line 4,
+      :text "Phases 4–7 ACCEPTED dark/shadow",
+      :classification :built-not-live,
+      :tokens #{"accepted" "dark" "phases" "shadow"}}
+     {:line 5,
+      :text
+      "Phase 8 advice-only ACCEPTED replay, enactment rungs operator-gated",
+      :classification :available,
+      :tokens
+      #{"accepted"
+        "advice"
+        "enactment"
+        "gated"
+        "only"
+        "operator"
+        "phase"
+        "replay"
+        "rungs"}}],
+    :status-lines
+    [[4
+      "**Status:** Phases 1–3 ACCEPTED live; Phases 4–7 ACCEPTED dark/shadow;"]
+     [5
+      "Phase 8 advice-only ACCEPTED replay, enactment rungs operator-gated"]]},
+   :patterns
+   [{:id "devmap-coherence/prototype-alignment-tension",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/devmap-coherence/prototype-alignment-tension.flexiarg",
+      :sha256
+      "4b571feabea82a8ae09fd60355d851c69312fb7bd228541d9740a2882e851af2",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "at"
+       "clauses"
+       "context"
+       "criteria"
+       "emit"
+       "follow"
+       "however"
+       "if"
+       "inspect"
+       "least"
+       "markers"
+       "missing"
+       "named"
+       "obligations"
+       "one"
+       "or"
+       "readiness"
+       "tension"
+       "those"
+       "timing"
+       "up"
+       "when"
+       "window"},
+     :clauses
+     {:if
+      "a prototype names risks, frictions, or unknowns in its context",
+      :however
+      "many devmap entries fail to mark the tension explicitly or to state when the prototype will be “ready” for handoff",
+      :then
+      "inspect the context/if/however clauses for at least one named tension and a readiness window (criteria or timing); emit follow-up obligations when those markers are missing"},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "a prototype names risks, frictions, or unknowns in its context"}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "many devmap entries fail to mark the tension explicitly or to state when the prototype will be “ready” for handoff"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "stack-coherence/maturity-evidence-audit",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/stack-coherence/maturity-evidence-audit.flexiarg",
+      :sha256
+      "1116322c08771211ef85f4186475b620938895935a91f32143f9d7a1788ddcfd",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "actions"
+       "active"
+       "attention"
+       "audit"
+       "but"
+       "claimed"
+       "claims"
+       "classification"
+       "code"
+       "criteria"
+       "demote"
+       "demotion"
+       "e"
+       "each"
+       "emit"
+       "end"
+       "evidence"
+       "exists"
+       "flag"
+       "g"
+       "greenfield"
+       "has"
+       "if"
+       "implementation"
+       "in"
+       "level"
+       "logged"
+       "maturity"
+       "mismatch"
+       "mismatches"
+       "missing"
+       "no"
+       "or"
+       "over"
+       "passing"
+       "promotion"
+       "prototype"
+       "psr"
+       "pur"
+       "rate"
+       "recommend"
+       "recommendations"
+       "regressions"
+       "runnable"
+       "runs"
+       "settled"
+       "stub"
+       "success"
+       "supports"
+       "tag"
+       "test"
+       "tests"
+       "to"
+       "under"
+       "uses"
+       "valid"
+       "verify"
+       "weeks"},
+     :clauses
+     {:if
+      "devmap prototypes carry :maturity tags indicating their readiness level",
+      :however
+      "maturity claims are often aspirational — a prototype tagged :active may have failing tests, and one tagged :stub may actually be running in production",
+      :then
+      "for each prototype with a :maturity tag, verify that evidence supports the claimed level; flag mismatches and emit promotion or demotion recommendations\n\n    + AUDIT-CRITERIA:\n      :stub claims valid if: no runnable implementation exists\n      :greenfield claims valid if: code exists but no end-to-end test evidence\n      :active claims valid if: runs end-to-end, has 3+ logged uses, PSR/PUR evidence\n      :settled claims valid if: 10+ uses, >80% success rate, no regressions in 2 weeks\n\n    + MISMATCH-ACTIONS:\n      over-claimed (e.g., :active but no evidence) → demote and flag for attention\n      under-claimed (e.g., :stub but has passing tests) → recommend promotion\n      no-tag (missing :maturity) → flag for classification"},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"carry"
+          "devmap"
+          "indicating"
+          "level"
+          "maturity"
+          "prototypes"
+          "readiness"
+          "tags"
+          "their"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "maturity claims are often aspirational — a prototype tagged :active may have failing tests, and one tagged :stub may actually be running in production"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "stack-coherence/ready-blocked-triage",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/stack-coherence/ready-blocked-triage.flexiarg",
+      :sha256
+      "676da31a6a133cacba222e9ea46715d5e32dbb5b6d3a93c13c36493a1950471f",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "blocked"
+       "blockers"
+       "by"
+       "clause"
+       "commits"
+       "done"
+       "drift"
+       "each"
+       "emit"
+       "evidence"
+       "inspect"
+       "links"
+       "readme"
+       "ready"
+       "report"
+       "status"
+       "tests"},
+     :clauses
+     {:if
+      "every devmap clause should be either ready, blocked, drifting, or done",
+      :however "we rarely log that status explicitly",
+      :then
+      "for each clause, inspect evidence (README links, commits, tests) and blockers; emit a status report `status[done|ready|blocked|drift] blocked-by[...] evidence[...]`"},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "every devmap clause should be either ready, blocked, drifting, or done"}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text "we rarely log that status explicitly"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "stack-coherence/stack-blocker-detection",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/stack-coherence/stack-blocker-detection.flexiarg",
+      :sha256
+      "a680ba35f026cf5ab2735312e066d324391e5cea7dfb9447d7ac2d3d0e62767e",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "blocked"
+       "blocker"
+       "by"
+       "clause"
+       "commits"
+       "declared"
+       "dependencies"
+       "devmaps"
+       "dirs"
+       "each"
+       "emit"
+       "evidence"
+       "inspect"
+       "not"
+       "ready"
+       "referenced"
+       "report"
+       "scan"
+       "status"
+       "tests"},
+     :clauses
+     {:if
+      "a futon layer or prototype declares prerequisites (“requires futon3 prototype 8”, “needs graph-memory adapter”), yet the downstream directory/README is still empty",
+      :however
+      "without explicit blocker reports, emptiness reads as “nobody cares” instead of “waiting on X/Y”",
+      :then
+      "scan devmaps for declared dependencies, inspect referenced dirs/tests/commits, and emit a blocker report for each clause: `blocked-by[...]`, `evidence[...]`, `status[ready/not-ready]`"},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "a futon layer or prototype declares prerequisites (“requires futon3 prototype 8”, “needs graph-memory adapter”), yet the downstream directory/readme is still empty"}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "without explicit blocker reports, emptiness reads as “nobody cares” instead of “waiting on x/y”"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "contributing/stack-scan-logging-protocol",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/contributing/stack-scan-logging-protocol.flexiarg",
+      :sha256
+      "3d30d2fd5b0d3a9cdb292b45dd698dc3734c3f77e7811142e829f8b019b54b82",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"a"
+       "agents"
+       "alongside"
+       "append"
+       "applied"
+       "blocker"
+       "capture"
+       "coherence"
+       "commit"
+       "commits"
+       "declare"
+       "detection"
+       "devmap"
+       "diffs"
+       "during"
+       "e"
+       "entry"
+       "every"
+       "evidence"
+       "file"
+       "findings"
+       "fixes"
+       "flagged"
+       "follow"
+       "futons"
+       "g"
+       "hash"
+       "in"
+       "issues"
+       "ledger"
+       "log"
+       "made"
+       "new"
+       "next"
+       "note"
+       "obligations"
+       "or"
+       "outstanding"
+       "path"
+       "patterns"
+       "plus"
+       "protocol"
+       "raw"
+       "readme"
+       "record"
+       "references"
+       "repo"
+       "resolved"
+       "revisit"
+       "scan"
+       "scope"
+       "session"
+       "short"
+       "stack"
+       "sync"
+       "tatami"
+       "they"
+       "timestamp"
+       "to"
+       "trail"
+       "updates"
+       "whether"},
+     :clauses
+     {:if
+      "we run stack-coherence scans (patterns, devmap reviews, sigil checks) to keep the futons honest",
+      :however
+      "without a repeatable logging protocol we cannot compare progress between scans or prove that obligations moved forward",
+      :then
+      "follow this protocol for every scan session\n      1. Declare scope (futons/patterns) and timestamp in the log (Tatami trail, repo note, or AGENTS entry).\n      2. Record the stack-coherence patterns applied (e.g. `stack-coherence/readme-devmap-sync`, `stack-coherence/evidence-ledger`, `stack-coherence/stack-blocker-detection`) and capture raw findings alongside file references.\n      3. Note the diffs or fixes made during the scan (commits, README updates, new patterns) and whether they resolved the flagged obligations.\n      4. Append a short `next-scan` note: outstanding issues to revisit plus the evidence path (log file, commit hash, Tatami trail)."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"checks"
+          "coherence"
+          "devmap"
+          "futons"
+          "honest"
+          "keep"
+          "patterns"
+          "reviews"
+          "run"
+          "scans"
+          "sigil"
+          "stack"
+          "to"
+          "we"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "without a repeatable logging protocol we cannot compare progress between scans or prove that obligations moved forward"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "stack-coherence/readme-devmap-sync",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/stack-coherence/readme-devmap-sync.flexiarg",
+      :sha256
+      "6b7bf965866d149fd141acd10d864625749f6c97c0a9c913ed85d417eba09ec9",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"clauses"
+       "devmap"
+       "diff"
+       "emit"
+       "evidence"
+       "is"
+       "lying"
+       "mismatch"
+       "names"
+       "readme"
+       "refreshes"
+       "reports"
+       "sections"
+       "side"
+       "so"
+       "someone"
+       "statuses"
+       "vs"
+       "whichever"},
+     :clauses
+     {:if "top-level READMEs tell the stack story",
+      :however
+      "they often drift away from the actual devmaps (missing prototypes, stale statuses)",
+      :then
+      "diff README sections vs devmap clauses—names, statuses, evidence—and emit `mismatch[...]` reports so someone refreshes whichever side is lying"},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present #{"level" "readmes" "stack" "story" "tell" "top"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "they often drift away from the actual devmaps (missing prototypes, stale statuses)"}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}
+    {:id "devmap-coherence/ifr-state-convergence",
+     :source
+     {:path
+      "/home/joe/code/futon3/library/devmap-coherence/ifr-state-convergence.flexiarg",
+      :sha256
+      "1593496802f5a579f2eca152fc1c7c5c37461af7319daaf95bf57b04562d93d4",
+      :authority :source-document},
+     :authority :documented-interpretation,
+     :produces
+     #{"against"
+       "blockers"
+       "can"
+       "clause"
+       "close"
+       "compare"
+       "consciously"
+       "cosmetic"
+       "each"
+       "evidence"
+       "flag"
+       "gaps"
+       "if"
+       "ifr"
+       "it"
+       "or"
+       "pause"
+       "prototypes"
+       "readme"
+       "route"
+       "so"
+       "stack"
+       "structural"
+       "they"
+       "triage"
+       "truths"
+       "work"},
+     :clauses
+     {:if
+      "every futon carries an Ideal Final Result plus a current-state description.",
+      :however
+      "mature layers can sound “done” even when structural gaps remain, while\n    truly complete layers linger as open obligations.",
+      :then
+      "compare each IFR against README truths, prototypes, and evidence. If the\n    gaps are cosmetic, close the clause; if they are structural, flag blockers so\n    stack triage can route the work or consciously pause it."},
+     :guard
+     {:status :missing,
+      :kind :missing-pattern-interpretation,
+      :details
+      [{:status :interpreted,
+        :present
+        #{"a"
+          "an"
+          "carries"
+          "current"
+          "description"
+          "every"
+          "final"
+          "futon"
+          "ideal"
+          "plus"
+          "result"
+          "state"},
+        :absent #{}}
+       {:status :missing,
+        :kind :uninterpretable-guard,
+        :text
+        "mature layers can sound “done” even when structural gaps remain, while\n    truly complete layers linger as open obligations."}]},
+     :transition
+     {:status :missing, :kind :missing-pattern-interpretation}}],
+   :constructed-count 7,
+   :interpretable-count 0}],
+ :patterns
+ [{:id "gauntlet/modeline-persists-across-worlds",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/gauntlet/modeline-persists-across-worlds.flexiarg",
+    :sha256
+    "d2d0dc868c75030b3db03010abe9b4591ff4d45c57341e67015c49599803e9ab",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"a"
+     "across"
+     "active"
+     "agent"
+     "agents"
+     "aif"
+     "alfworld"
+     "am"
+     "as"
+     "budget"
+     "buffers"
+     "but"
+     "carries"
+     "channel"
+     "co"
+     "commitment"
+     "continuous"
+     "current"
+     "emacs"
+     "energy"
+     "every"
+     "free"
+     "hops"
+     "i"
+     "implement"
+     "in"
+     "is"
+     "it"
+     "like"
+     "mana"
+     "mode"
+     "modeline"
+     "naturally"
+     "not"
+     "observation"
+     "of"
+     "optionally"
+     "p"
+     "par"
+     "part"
+     "pattern"
+     "perceives"
+     "peripheral"
+     "persistent"
+     "persists"
+     "present"
+     "reflect"
+     "reflection"
+     "remaining"
+     "renders"
+     "separate"
+     "sigil"
+     "so"
+     "state"
+     "status"
+     "surface"
+     "surprised"
+     "temperature"
+     "to"
+     "updates"
+     "when"
+     "τ"},
+   :clauses
+   {:if
+    "You want the agent to maintain continuity of self-regulation across world changes — carrying its confidence, mana, active pattern, and free energy state from one peripheral to the next.",
+    :however
+    "Each peripheral hop replaces the agent's world (P-1). Without a persistent surface, AIF state resets at each transition: the agent enters a new peripheral with no memory of how confident it was, how much budget remains, or what pattern it was carrying. The backpack metaphor preserves some items (pattern card, walkie-talkie) but not the dynamic state (how am I doing?).",
+    :then
+    "Implement the AIF modeline as a persistent status surface that renders in every peripheral mode, like the Emacs modeline that persists across buffers. The modeline carries: current peripheral mode, free energy (am I surprised?), mana/budget remaining, active pattern and its sigil, τ (commitment temperature), and optionally co-present agents. The modeline is part of the observation — not a separate channel — so the agent perceives it naturally. When the agent hops from ALFWorld to a PAR reflection, the modeline updates (P:alfworld → P:reflect) but the AIF state is continuous."},
+   :guard
+   {:status :missing,
+    :kind :missing-pattern-interpretation,
+    :details
+    [{:status :interpreted,
+      :present
+      #{"across"
+        "active"
+        "agent"
+        "carrying"
+        "changes"
+        "confidence"
+        "continuity"
+        "energy"
+        "free"
+        "maintain"
+        "mana"
+        "next"
+        "of"
+        "one"
+        "pattern"
+        "peripheral"
+        "regulation"
+        "self"
+        "state"
+        "to"
+        "world"},
+      :absent #{}}
+     {:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "each peripheral hop replaces the agent's world (p-1). without a persistent surface, aif state resets at each transition: the agent enters a new peripheral with no memory of how confident it was, how much budget remains, or what pattern it was carrying. the backpack metaphor preserves some items (pattern card, walkie-talkie) but not the dynamic state (how am i doing?)."}]},
+   :transition
+   {:status :missing, :kind :missing-pattern-interpretation}}
+  {:id "gauntlet/aif-as-environment-not-instruction",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/gauntlet/aif-as-environment-not-instruction.flexiarg",
+    :sha256
+    "f5806f54dec5be0f27830f71312b47622bc6e63f111c3474a37a8fd1693b9535",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"a"
+     "active"
+     "agent"
+     "aif"
+     "an"
+     "as"
+     "asked"
+     "but"
+     "change"
+     "comply"
+     "confidence"
+     "does"
+     "emergent"
+     "energy"
+     "failing"
+     "free"
+     "if"
+     "in"
+     "instruction"
+     "is"
+     "it"
+     "loop"
+     "make"
+     "mana"
+     "modeline"
+     "naturally"
+     "never"
+     "not"
+     "observation"
+     "of"
+     "part"
+     "pattern"
+     "perceives"
+     "peripheral"
+     "prescribed"
+     "prompt"
+     "response"
+     "rising"
+     "s"
+     "shows"
+     "simply"
+     "state"
+     "strategy"
+     "to"
+     "up"
+     "what"
+     "world"},
+   :clauses
+   {:if
+    "You want agents to self-regulate — sensing when a strategy is failing, adjusting exploration, backing off to planning mode when confidence drops — without requiring human intervention.",
+    :however
+    "The naive implementation adds AIF as instructions: \"here is your suggested pattern (G=0.12, τ=0.72, p=68%), please select it or justify deviation.\" This makes compliant agents worse at their actual job. Codex, told to produce PSRs and follow pattern suggestions, became overly compliant rather than writing code — which is what Codex is good at. The AIF layer became an RPC that the agent dutifully served, not an environment it inhabited.\n\n    + FAILURE-MODES:\n      - Compliance capture: agent spends more tokens on AIF bookkeeping than on its actual task\n      - Instruction-shaped feedback: \"your τ is 0.72, consider exploring\" is an instruction wearing an AIF hat\n      - Modeline blindness: agent ignores the modeline entirely because it has no affordance (information present but not actionable)",
+    :then
+    "Make AIF state part of the observation, not the prompt. The modeline shows free energy, confidence, mana, active pattern — but the agent is never asked to \"comply\" with it. The agent does what it naturally does in its peripheral; the AIF state is simply part of what it perceives. If the agent's free energy is rising (strategy failing), that shows up as a change in the world, not as an instruction to change strategy. What the agent does in response IS the AIF loop — emergent, not prescribed."},
+   :guard
+   {:status :missing,
+    :kind :missing-pattern-interpretation,
+    :details
+    [{:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "you want agents to self-regulate — sensing when a strategy is failing, adjusting exploration, backing off to planning mode when confidence drops — without requiring human intervention."}
+     {:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "the naive implementation adds aif as instructions: \"here is your suggested pattern (g=0.12, τ=0.72, p=68%), please select it or justify deviation.\" this makes compliant agents worse at their actual job. codex, told to produce psrs and follow pattern suggestions, became overly compliant rather than writing code — which is what codex is good at. the aif layer became an rpc that the agent dutifully served, not an environment it inhabited.\n\n    + failure-modes:\n      - compliance capture: agent spends more tokens on aif bookkeeping than on its actual task\n      - instruction-shaped feedback: \"your τ is 0.72, consider exploring\" is an instruction wearing an aif hat\n      - modeline blindness: agent ignores the modeline entirely because it has no affordance (information present but not actionable)"}]},
+   :transition
+   {:status :missing, :kind :missing-pattern-interpretation}}
+  {:id "aif/policy-precision-commitment-temperature",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/aif/policy-precision-commitment-temperature.flexiarg",
+    :sha256
+    "6d27db7ee7b7d3c859fb5d57e99bdbaadf707709dee39b88f2635f02428b2777",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"a"
+     "as"
+     "commitment"
+     "contradiction"
+     "coupled"
+     "diagnostic"
+     "failures"
+     "g"
+     "in"
+     "maintain"
+     "modulates"
+     "mu"
+     "over"
+     "pressure"
+     "rate"
+     "recent"
+     "regressions"
+     "repeated"
+     "signals"
+     "softmax"
+     "tau"
+     "temperature"
+     "test"
+     "time"
+     "to"
+     "uncertainty"},
+   :clauses
+   {:if
+    "You want exploration versus exploitation to depend on operational pressure (deadlines, repeated failures, user impatience, instability), not on randomness alone.",
+    :however
+    "Without an explicit (tau), the agent either thrashes or tunnels with no controllable dial.",
+    :then
+    "Maintain (tau) as a commitment temperature that modulates softmax over (-G/tau), coupled to diagnostic signals (recent regressions, uncertainty in (mu), contradiction rate, time pressure, repeated test failures)."},
+   :guard
+   {:status :missing,
+    :kind :missing-pattern-interpretation,
+    :details
+    [{:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "you want exploration versus exploitation to depend on operational pressure (deadlines, repeated failures, user impatience, instability), not on randomness alone."}
+     {:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "without an explicit (tau), the agent either thrashes or tunnels with no controllable dial."}]},
+   :transition
+   {:status :missing, :kind :missing-pattern-interpretation}}
+  {:id "futon-theory/structural-tension-as-observation",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/futon-theory/structural-tension-as-observation.flexiarg",
+    :sha256
+    "344228d4ac54927d93b691b695fb533a576a7dc8a926c857438d450749b0877a",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"a"
+     "accumulate"
+     "accumulated"
+     "accumulating"
+     "accumulation"
+     "across"
+     "act"
+     "action"
+     "actually"
+     "ad"
+     "addresses"
+     "adds"
+     "adequacy"
+     "after"
+     "against"
+     "agency"
+     "agent"
+     "agents"
+     "aif"
+     "among"
+     "an"
+     "analogy"
+     "ancestors"
+     "appearing"
+     "appears"
+     "apply"
+     "arbitrary"
+     "argument"
+     "around"
+     "arrow"
+     "arrows"
+     "artifacts"
+     "as"
+     "at"
+     "auditable"
+     "axis"
+     "baldwin"
+     "be"
+     "because"
+     "before"
+     "below"
+     "between"
+     "bhk"
+     "both"
+     "boundary"
+     "but"
+     "by"
+     "can"
+     "canalization"
+     "candidate"
+     "candidates"
+     "cannot"
+     "canonicalization"
+     "canonicalize"
+     "canonization"
+     "capabilities"
+     "certification"
+     "changes"
+     "chapter"
+     "checkable"
+     "choosing"
+     "citable"
+     "cleanly"
+     "closure"
+     "codebase"
+     "coincidence"
+     "compared"
+     "components"
+     "composes"
+     "compresses"
+     "concludes"
+     "confidence"
+     "connection"
+     "constrain"
+     "constrains"
+     "contains"
+     "contexts"
+     "contingent"
+     "converge"
+     "convergence"
+     "conversation"
+     "coordination"
+     "could"
+     "cover"
+     "criteria"
+     "critical"
+     "current"
+     "currently"
+     "cycle"
+     "declarations"
+     "declared"
+     "decrease"
+     "default"
+     "deliberate"
+     "detection"
+     "development"
+     "diagram"
+     "did"
+     "different"
+     "difficulty"
+     "direct"
+     "directly"
+     "discipline"
+     "discovered"
+     "divergence"
+     "does"
+     "drives"
+     "each"
+     "edges"
+     "edn"
+     "emerge"
+     "energy"
+     "env"
+     "environment"
+     "equivalent"
+     "error"
+     "errors"
+     "established"
+     "event"
+     "evidence"
+     "evolution"
+     "exchange"
+     "execute"
+     "execution"
+     "executions"
+     "existing"
+     "exogeneity"
+     "expand"
+     "expansion"
+     "experience"
+     "explains"
+     "explicit"
+     "express"
+     "expressing"
+     "extract"
+     "failure"
+     "fast"
+     "feel"
+     "felt"
+     "fix"
+     "fixes"
+     "follows"
+     "force"
+     "free"
+     "frequency"
+     "futon1a"
+     "futon3"
+     "futon3a"
+     "future"
+     "g1"
+     "g3"
+     "g5"
+     "gap"
+     "gate"
+     "gates"
+     "generated"
+     "generative"
+     "giving"
+     "glacial"
+     "govern"
+     "governed"
+     "graph"
+     "graphs"
+     "guide"
+     "hard"
+     "has"
+     "history"
+     "hitting"
+     "hoc"
+     "how"
+     "i1"
+     "i2"
+     "i3"
+     "i4"
+     "i5"
+     "i6"
+     "identifiable"
+     "if"
+     "in"
+     "independently"
+     "inference"
+     "insufficient"
+     "inter"
+     "invariant"
+     "invariants"
+     "irritation"
+     "is"
+     "it"
+     "itself"
+     "kinds"
+     "level"
+     "library"
+     "loop"
+     "loops"
+     "low"
+     "machine"
+     "many"
+     "mapping"
+     "match"
+     "meme"
+     "metaphor"
+     "missions"
+     "mode"
+     "model"
+     "modify"
+     "more"
+     "move"
+     "multiple"
+     "must"
+     "name"
+     "named"
+     "naming"
+     "necessary"
+     "needs"
+     "negotiate"
+     "nesting"
+     "new"
+     "no"
+     "noise"
+     "none"
+     "not"
+     "now"
+     "obs"
+     "observation"
+     "observations"
+     "observe"
+     "of"
+     "on"
+     "one"
+     "operate"
+     "operates"
+     "or"
+     "organizational"
+     "out"
+     "over"
+     "overfit"
+     "parameter"
+     "path"
+     "pattern"
+     "patterns"
+     "perceive"
+     "perception"
+     "phylogeny"
+     "pipeline"
+     "plan"
+     "policies"
+     "policy"
+     "practice"
+     "pre"
+     "predicted"
+     "prediction"
+     "pressure"
+     "prevention"
+     "previous"
+     "problem"
+     "problems"
+     "process"
+     "produce"
+     "produced"
+     "produces"
+     "project"
+     "promote"
+     "promoting"
+     "prompted"
+     "proof"
+     "providing"
+     "psr"
+     "psrs"
+     "publish"
+     "pur"
+     "pushes"
+     "raw"
+     "read"
+     "reading"
+     "reality"
+     "reappearance"
+     "reappears"
+     "recognise"
+     "record"
+     "records"
+     "recurring"
+     "replayable"
+     "repos"
+     "representable"
+     "required"
+     "requirements"
+     "reshaping"
+     "retroactive"
+     "rewrite"
+     "role"
+     "running"
+     "s"
+     "same"
+     "says"
+     "scope"
+     "scored"
+     "see"
+     "select"
+     "selected"
+     "selecting"
+     "selection"
+     "selections"
+     "seriously"
+     "serve"
+     "shape"
+     "share"
+     "shared"
+     "should"
+     "showing"
+     "situational"
+     "six"
+     "solving"
+     "specification"
+     "specs"
+     "state"
+     "status"
+     "step"
+     "steward"
+     "stop"
+     "storage"
+     "structural"
+     "structurally"
+     "structure"
+     "struggles"
+     "style"
+     "sub"
+     "subgraphs"
+     "substructure"
+     "sustain"
+     "sustains"
+     "symbol"
+     "symbolic"
+     "system"
+     "systematic"
+     "t"
+     "take"
+     "taken"
+     "task"
+     "tasks"
+     "tension"
+     "tensions"
+     "them"
+     "theme"
+     "therefore"
+     "these"
+     "they"
+     "those"
+     "three"
+     "through"
+     "time"
+     "timescale"
+     "timescales"
+     "to"
+     "track"
+     "trans"
+     "turns"
+     "tweak"
+     "two"
+     "typed"
+     "unrelated"
+     "up"
+     "update"
+     "updates"
+     "validate"
+     "vector"
+     "vocabulary"
+     "vsm"
+     "wall"
+     "was"
+     "what"
+     "which"
+     "why"
+     "wireheading"
+     "wiring"
+     "within"
+     "without"
+     "work"
+     "workaround"
+     "works"
+     "world"
+     "would"
+     "written"
+     "前符号压力"
+     "结构刺激"
+     "跨情境复现"},
+   :clauses
+   {:if nil,
+    :however nil,
+    :then
+    "Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline.\n    + FREE-ENERGY-AND-CANONICALIZATION:\n      In AIF, free energy is the divergence between the agent's model and\n      reality. In library evolution:\n\n      - Free energy = accumulated structural irritation. The gap between\n        what the library says should work and what actually works in\n        practice.\n      - Perception = NAMING. Giving an irritation a citable name compresses\n        raw tension into a representable observation. Before naming, the\n        tension is sub-symbolic. After naming, it can be scored and compared.\n      - Inference = SELECTION. Among named tensions, selecting those that\n        are auditable, replayable, and machine-checkable. This updates\n        the model (library) by choosing which observations to take\n        seriously.\n      - Action = CANALIZATION. Promoting a selected pattern to invariant\n        status. This changes the world — future tasks are now governed by\n        the new invariant. The free energy should decrease: the irritation\n        that prompted canonicalization should stop recurring.\n\n      The Baldwin cycle IS the policy for the glacial AIF loop. And the\n      canonization event (from retroactive-canonicalization) is the proof\n      path record for that policy — the evidence that the action was taken\n      and why.\n\n    + INVARIANT-MAPPING:\n      The six Chapter 0 invariants apply to both loops:\n\n      | Invariant | Level 0 (Task) | Level 1 (Library) |\n      | I1 Boundary | Gate pipeline | Library publish/promote boundary |\n      | I2 Obs-Action | Read env / produce artifacts | Observe tensions / canonicalize |\n      | I3 Timescale | Gates fast, patterns glacial | Tasks fast, canonicalization glacial |\n      | I4 Exogeneity | Agents can't rewrite patterns | Fast tensions can't force canonicalization |\n      | I5 Adequacy | Library must guide tasks | Library must track recurring tensions |\n      | I6 Closure | Default mode sustains agents | Gap-PSRs sustain library evolution |\n\n      I4 is critical for both loops. At Level 0: agents cannot rewrite the\n      patterns that guide them (wireheading prevention). At Level 1: the\n      accumulation of structural tensions cannot force canonicalization\n      without the deliberate three-step process (NAMING → SELECTION →\n      CANALIZATION). If tensions could directly modify the library, the\n      library would overfit to noise — the glacial equivalent of\n      wireheading.\n\n    + THE-DIRECT-AIF-CONNECTION:\n      The coordination rewrite argument (coordination/ARGUMENT) concludes\n      that pattern phylogeny, development history, and conversation graphs\n      are one structure. The AIF connection explains WHY they converge:\n\n      - The pattern phylogeny is the glacial loop's model evolution —\n        how the generative model (library) changes over time.\n      - The development history is the fast loop's action record —\n        what the agent did at each step.\n      - The conversation graph is the inter-agent coordination record —\n        how multiple agents running the fast loop exchange observations\n        and negotiate policies.\n\n      These three records are generated by the same diagram at different\n      timescales and between different components. They converge because\n      they are produced by one system, not three.\n\n      The AIF wiring diagram is therefore not an organizational metaphor\n      for the coordination rewrite. It is the structural specification.\n      The futon3-coordination.edn diagram IS the Level 0 loop. The\n      retroactive canonicalization process IS the Level 1 loop. The gate\n      pipeline IS the shared boundary. The pattern library IS the\n      generative model. And structural tension IS free energy.\n\n    + THE-OBSERVATION-VECTOR:\n      What does the glacial loop observe? Three kinds of structural tension\n      serve as its observation vector:\n\n      1. STRUCTURAL IRRITATION (结构刺激):\n         A recurring problem shape that the current symbol system cannot\n         cleanly express. The same difficulty appears across multiple tasks,\n         but no existing pattern addresses it directly. Agents work around it\n         with ad-hoc fixes. Each workaround is a prediction error: the\n         generative model (library) predicted its patterns would cover the\n         work, but reality produced a gap.\n\n         Detection: gap-PSRs accumulating around the same structural theme.\n         Frequency across tasks. Multiple agents hitting the same wall.\n\n      2. PRE-SYMBOLIC PRESSURE (前符号压力):\n         A force that pushes the symbol system to expand before the expansion\n         has a name. The pressure is felt as difficulty — not the difficulty\n         of a hard task, but the difficulty of expressing what the task IS.\n         The existing vocabulary is insufficient. This is the force that\n         drives NAMING: giving structure to experience that currently has\n         none.\n\n         Detection: tasks that are hard to scope (G5 struggles), hard to\n         match to patterns (G3 produces low-confidence PSRs), hard to\n         validate (G1 criteria feel arbitrary). The difficulty is not in\n         the work but in the coordination of the work.\n\n      3. TRANS-SITUATIONAL REAPPEARANCE (跨情境复现):\n         The same structural role showing up across unrelated contexts.\n         A pattern that was written for storage reappears in coordination.\n         A fix that was ad-hoc in futon1a turns out to be necessary in\n         futon3. The reappearance is evidence that the pattern is not\n         contingent but structurally required — the prediction error is\n         systematic, not noise. The model needs a structural update\n         (canonicalization), not a parameter tweak (one more ad-hoc fix).\n\n         Detection: patterns or fixes independently discovered in different\n         repos, missions, or agent contexts. futon3a's meme.arrow typed\n         edges appearing in different subgraphs. The same gate pattern\n         solving problems in both the agency reading and the pattern reading.\n\n    + THE-TWO-LOOPS:\n      The coordination system contains two AIF loops at different timescales:\n\n      LEVEL 0 — Task Execution (fast):\n      - Observe: read environment (codebase, project state)\n      - Perceive: extract task requirements, match against capabilities\n      - Policy: select pattern (PSR), plan execution\n      - Act: execute through gates, produce artifacts\n      - Generative model: current pattern selections\n      - Free energy: task failure, gap declarations, PUR prediction errors\n\n      LEVEL 1 — Library Evolution (glacial):\n      - Observe: accumulate structural tensions across many task executions\n      - Perceive: recognise recurring tensions as candidate ancestors\n      - Policy: select candidates for canonicalization (NAMING → SELECTION)\n      - Act: canonicalize — promote pattern to invariant (CANALIZATION)\n      - Generative model: the pattern library itself\n      - Free energy: accumulated structural irritation\n\n      These loops share the same boundary: the gate pipeline. Level 0\n      operates within the pipeline (one task at a time). Level 1 operates\n      on the pipeline (reshaping the patterns that govern future tasks).\n      This is VSM-style nesting (Chapter 0 §3.2): the glacial loop contains\n      and constrains the fast loop.\n\n    + WHAT-THIS-ADDS:\n      Previous patterns established:\n      - Tasks are BHK arrows (task-as-arrow)\n      - Specs emerge from ancestors (retroactive-canonicalization)\n      - The rewrite composes components through a pipeline into a graph\n        (coordination/ARGUMENT)\n\n      This pattern adds:\n      - The two-loop structure is not analogy but direct AIF specification\n      - Structural tension has three identifiable components that serve as\n        the glacial loop's observation vector\n      - The graph convergence follows from the diagram structure, not from\n        coincidence\n      - The six Chapter 0 invariants constrain both loops, providing\n        checkable certification criteria for the rewrite"},
+   :guard
+   {:status :missing,
+    :kind :missing-pattern-interpretation,
+    :details
+    [{:status :missing, :kind :missing-guard-clause}
+     {:status :missing, :kind :missing-guard-clause}]},
+   :transition
+   {:status :missing, :kind :missing-pattern-interpretation}}
+  {:id "war-machine/ideal-actual-gap",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/war-machine/ideal-actual-gap.flexiarg",
+    :sha256
+    "cf9368aa42a4d5cc096edca6d085a6b0314ed446638e10b8a3e9ab2c2d2d67b0",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"a"
+     "actual"
+     "against"
+     "as"
+     "class"
+     "compare"
+     "components"
+     "compute"
+     "devmap"
+     "discrepancy"
+     "first"
+     "gap"
+     "ideal"
+     "implementation"
+     "inventory"
+     "mission"
+     "report"
+     "sorry"
+     "state"
+     "surface"
+     "topology"},
+   :clauses
+   {:if
+    "The system maintains both aspirational specifications and evidence about its current implementation and coverage.",
+    :however
+    "Self-representation without self-comparison turns into portraiture rather than correction. Some ideals remain only partly measurable, but the raw discrepancy still needs to be machine-detectable.",
+    :then
+    "Compute the ideal/actual gap: compare devmap components against mission inventory, compare sorry topology against implementation state, and surface the discrepancy as a first-class report."},
+   :guard
+   {:status :missing,
+    :kind :missing-pattern-interpretation,
+    :details
+    [{:status :interpreted,
+      :present
+      #{"about"
+        "aspirational"
+        "both"
+        "coverage"
+        "current"
+        "evidence"
+        "implementation"
+        "maintains"
+        "specifications"
+        "system"},
+      :absent #{}}
+     {:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "self-representation without self-comparison turns into portraiture rather than correction. some ideals remain only partly measurable, but the raw discrepancy still needs to be machine-detectable."}]},
+   :transition
+   {:status :missing, :kind :missing-pattern-interpretation}}
+  {:id "structure/interest-event-vocabulary",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/structure/interest-event-vocabulary.flexiarg",
+    :sha256
+    "b51296613be9c61bddf9b58d082eaaecbad91ef139373f73438762b2e0943405",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"a"
+     "above"
+     "acceptance"
+     "addressed"
+     "after"
+     "against"
+     "always"
+     "an"
+     "anchor"
+     "annotation"
+     "append"
+     "arrow"
+     "artefacts"
+     "as"
+     "asserted"
+     "at"
+     "authored"
+     "authoritative"
+     "avoid"
+     "back"
+     "basin"
+     "bearing"
+     "because"
+     "been"
+     "before"
+     "block"
+     "blocks"
+     "boundaries"
+     "boundary"
+     "but"
+     "by"
+     "cadence"
+     "carries"
+     "checkpoint"
+     "checkpoints"
+     "class"
+     "closed"
+     "composite"
+     "contradicted"
+     "corrected"
+     "counts"
+     "created"
+     "cross"
+     "current"
+     "daily"
+     "days"
+     "degrade"
+     "deleted"
+     "deliberately"
+     "delta"
+     "derives"
+     "destination"
+     "discipline"
+     "drafts"
+     "drift"
+     "dst"
+     "each"
+     "edited"
+     "edn"
+     "eight"
+     "emission"
+     "emit"
+     "emitted"
+     "emitting"
+     "empty"
+     "entity"
+     "eoi"
+     "errors"
+     "essay"
+     "etc"
+     "even"
+     "event"
+     "events"
+     "evidence"
+     "exists"
+     "extracted"
+     "falsified"
+     "field"
+     "fields"
+     "fine"
+     "first"
+     "fixes"
+     "forbidden"
+     "foreclosed"
+     "framing"
+     "gained"
+     "go"
+     "granularity"
+     "had"
+     "happen"
+     "has"
+     "id"
+     "in"
+     "inferred"
+     "institution"
+     "interview"
+     "is"
+     "isn"
+     "just"
+     "keys"
+     "keyword"
+     "land"
+     "language"
+     "let"
+     "link"
+     "live"
+     "load"
+     "log"
+     "malformed"
+     "memos"
+     "mistakes"
+     "never"
+     "new"
+     "newly"
+     "no"
+     "nogo"
+     "noise"
+     "non"
+     "not"
+     "notes"
+     "object"
+     "of"
+     "off"
+     "omitted"
+     "on"
+     "one"
+     "only"
+     "op"
+     "operator"
+     "optional"
+     "or"
+     "out"
+     "overloading"
+     "payload"
+     "plain"
+     "plan"
+     "pointer"
+     "pointers"
+     "pollute"
+     "posterior"
+     "pre"
+     "prior"
+     "processor"
+     "projection"
+     "prose"
+     "provenance"
+     "rationale"
+     "re"
+     "real"
+     "reason"
+     "record"
+     "ref"
+     "refined"
+     "refs"
+     "relation"
+     "reopened"
+     "replay"
+     "required"
+     "reset"
+     "resolved"
+     "retraction"
+     "rhythm"
+     "runs"
+     "s"
+     "satisfy"
+     "schema"
+     "scope"
+     "scoped"
+     "section"
+     "sections"
+     "separate"
+     "sharpened"
+     "signal"
+     "silent"
+     "single"
+     "so"
+     "source"
+     "spawned"
+     "src"
+     "standing"
+     "state"
+     "strawman"
+     "strengthened"
+     "string"
+     "support"
+     "synthetic"
+     "t"
+     "target"
+     "targets"
+     "tension"
+     "terminal"
+     "there"
+     "these"
+     "they"
+     "to"
+     "traces"
+     "type"
+     "types"
+     "typically"
+     "unique"
+     "updates"
+     "v1"
+     "validation"
+     "vector"
+     "vocabulary"
+     "warns"
+     "was"
+     "when"
+     "within"
+     "would"},
+   :clauses
+   {:if nil,
+    :however
+    "Three design choices the vocabulary makes, and why each\n    beats its alternative.\n\n    + EIGHT-EVENTS-NOT-FREE-FORM:\n      A free-form rationale field per checkpoint would be simpler\n      but loses the structure that lets the projection compute\n      coverage, detect inconsistencies, and render the network\n      without re-parsing prose. Eight types is enough to\n      discriminate (a) entity-lifecycle moves (spawned / refined /\n      strengthened) from (b) closure moves (addressed / falsified /\n      foreclosed / reopened) from (c) relational moves\n      (link/asserted), while staying small enough that an operator\n      can hold them in mind without consulting a sheet.\n\n    + STATE-SLASH-PREFIX-NEUTRAL:\n      Namespace is `state/*` — not `eoi/*`, `essay/*`, `basin/*` —\n      so the same events apply to essay annotations,\n      institution-objects, basins, and composite-arrow edges.\n      Granularity is a separate field (`:target/granularity`), not\n      part of the event-type. Cross-entity-class queries work\n      naturally (\"show me every entity that got addressed this\n      week\"); per-entity-class queries filter by granularity.\n\n    + LINK-AS-SEPARATE-EVENT:\n      `link/asserted` is its own event type, not a special case of\n      `state/spawned`, because \"new relation exists\" and \"new entity\n      exists\" have different downstream uses (relation surfaces as\n      edge in the network view; entity surfaces as node).\n      Overloading `state/spawned` would force the projection to\n      discriminate by `:target/granularity` to know whether to\n      render as node or edge — fine for the projection, opaque to\n      the operator authoring the checkpoint.",
+    :then
+    "The eight event types, the payload schema, and the\n    emission discipline.\n\n    + EVENT-VOCABULARY-V1:\n      - `state/spawned`     — Target entity is newly created.\n      - `state/refined`     — Target entity's framing has been\n        sharpened (re-anchor, scoped).\n      - `state/strengthened` — Target entity's standing has gained\n        support from evidence.\n      - `state/addressed`   — Target entity (typically a tension)\n        has been resolved by evidence; not falsified.\n      - `state/falsified`   — Target entity has been contradicted by\n        evidence.\n      - `state/foreclosed`  — Target entity (typically a basin) has\n        been deliberately closed off.\n      - `state/reopened`    — Target entity that was\n        addressed/falsified/foreclosed has had its standing reset\n        to `:live`. First-class so retraction isn't terminal.\n      - `link/asserted`     — A new cross-essay relation exists.\n        Separate from `state/spawned` to avoid overloading \"new\n        target\" with \"new relation\".\n\n    + PAYLOAD-SCHEMA:\n      Each event record carries these fields (EDN, keyword keys):\n      - `:event/id`           — unique within checkpoint\n      - `:event/type`         — keyword; one of the eight above\n      - `:checkpoint/ref`     — back-pointer to the checkpoint\n      - `:target/entity-id`   — the EoI entity this event targets\n      - `:target/granularity` — keyword; one of `:essay`, `:section`,\n        `:annotation`, `:institution-object`, `:basin`,\n        `:composite-arrow`\n      - `:prior-state`        — keyword; standing before this event.\n        Required for `state/*` events; optional/omitted for\n        `link/asserted`.\n      - `:posterior-state`    — keyword; standing after this event.\n        Required for `state/*` events; optional/omitted for\n        `link/asserted`.\n      - `:evidence/refs`      — `[String]`; pointers to evidence\n        artefacts (interview notes, go/nogo memos, plan drafts,\n        EoI strawman sections, etc.)\n      - `:operator/rationale` — `String`; the operator's\n        plain-language reason. This is the load-bearing\n        provenance field; the projection's posterior always\n        traces back to an operator-asserted *because*.\n      - `:link/src`           — `String`; source entity. Only for\n        `link/asserted` events.\n      - `:link/dst`           — `String`; destination entity. Only\n        for `link/asserted` events.\n\n    + EMISSION-DISCIPLINE:\n      - APPEND-ONLY. Events are never edited or deleted. Mistakes\n        are corrected by emitting a new event (typically\n        `state/refined` or `state/reopened`) that updates the\n        target's standing. The log is the authoritative source;\n        the projection derives current state from log replay.\n      - NO-OP DAYS EMIT NO CHECKPOINT. Daily cadence is fine when\n        there's a real state delta — even a single `state/refined`\n        on a single annotation counts. But synthetic checkpoints\n        (an empty `:emitted-events` vector emitted just to satisfy\n        a daily rhythm) are forbidden: they pollute the log with\n        non-events and degrade the projection's signal-to-noise.\n      - OPERATOR-ASSERTED BOUNDARY. Events are emitted at\n        checkpoint boundaries by an operator, not inferred from\n        prose by a processor. The event log is authored, not\n        extracted. (Pre-checkpoint events — interview notes, go/nogo\n        memos as they happen — are out of scope for v1.)\n      - VALIDATION BLOCKS, NOT WARNS. Validation errors against\n        this vocabulary block the checkpoint; the operator fixes\n        the EDN and re-runs. Silent acceptance of malformed events\n        would let drift land in the projection."},
+   :guard
+   {:status :missing,
+    :kind :missing-pattern-interpretation,
+    :details
+    [{:status :missing, :kind :missing-guard-clause}
+     {:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "three design choices the vocabulary makes, and why each\n    beats its alternative.\n\n    + eight-events-not-free-form:\n      a free-form rationale field per checkpoint would be simpler\n      but loses the structure that lets the projection compute\n      coverage, detect inconsistencies, and render the network\n      without re-parsing prose. eight types is enough to\n      discriminate (a) entity-lifecycle moves (spawned / refined /\n      strengthened) from (b) closure moves (addressed / falsified /\n      foreclosed / reopened) from (c) relational moves\n      (link/asserted), while staying small enough that an operator\n      can hold them in mind without consulting a sheet.\n\n    + state-slash-prefix-neutral:\n      namespace is `state/*` — not `eoi/*`, `essay/*`, `basin/*` —\n      so the same events apply to essay annotations,\n      institution-objects, basins, and composite-arrow edges.\n      granularity is a separate field (`:target/granularity`), not\n      part of the event-type. cross-entity-class queries work\n      naturally (\"show me every entity that got addressed this\n      week\"); per-entity-class queries filter by granularity.\n\n    + link-as-separate-event:\n      `link/asserted` is its own event type, not a special case of\n      `state/spawned`, because \"new relation exists\" and \"new entity\n      exists\" have different downstream uses (relation surfaces as\n      edge in the network view; entity surfaces as node).\n      overloading `state/spawned` would force the projection to\n      discriminate by `:target/granularity` to know whether to\n      render as node or edge — fine for the projection, opaque to\n      the operator authoring the checkpoint."}]},
+   :transition
+   {:status :missing, :kind :missing-pattern-interpretation}}
+  {:id "ants/baseline-cyber-ant",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/ants/baseline-cyber-ant.flexiarg",
+    :sha256
+    "7f65024c6e11139c3cc9442b4ce54c466ddfc4570279d1d39d17fd1fdae79728",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"action"
+     "affect"
+     "canonically"
+     "choose"
+     "describe"
+     "deterministic"
+     "doc"
+     "futon5"
+     "g"
+     "goldens"
+     "harness"
+     "has"
+     "loop"
+     "material"
+     "observe"
+     "perceive"
+     "policy"
+     "referencing"
+     "single"
+     "so"
+     "source"
+     "tau"
+     "tick"
+     "trace"
+     "update"},
+   :clauses
+   {:if
+    "You want a generated agent to behave exactly like today’s handcrafted AIF\n    ants, including mode hysteresis, hunger/tau coupling, and softmax tilts.",
+    :however
+    "The implementation currently lives as code and tests inside Futon2; none of\n    those behaviours are catalogued as pattern data Futon5 can compile.",
+    :then
+    "Canonically describe the loop from `g-observe` → `perceive/perceive` →\n    `affect/update-tau` → `policy/choose-action`, referencing the single-tick\n    trace (`doc/trace/single_tick.*`) and policy harness goldens so Futon5 has\n    deterministic source material."},
+   :guard
+   {:status :missing,
+    :kind :missing-pattern-interpretation,
+    :details
+    [{:status :interpreted,
+      :present
+      #{"a"
+        "agent"
+        "aif"
+        "ants"
+        "behave"
+        "coupling"
+        "exactly"
+        "generated"
+        "handcrafted"
+        "hunger"
+        "hysteresis"
+        "including"
+        "like"
+        "mode"
+        "s"
+        "softmax"
+        "tau"
+        "tilts"
+        "to"
+        "today"},
+      :absent #{}}
+     {:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "the implementation currently lives as code and tests inside futon2; none of\n    those behaviours are catalogued as pattern data futon5 can compile."}]},
+   :transition
+   {:status :missing, :kind :missing-pattern-interpretation}}
+  {:id "futon-theory/all-or-nothing",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/futon-theory/all-or-nothing.flexiarg",
+    :sha256
+    "b2bdcb3397c0cf50c8919ccedf4eb5ba488c297b73895ef6875b298a4106dd87",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"against"
+     "all"
+     "an"
+     "axis"
+     "below"
+     "blocked"
+     "clj"
+     "completely"
+     "core"
+     "data"
+     "declared"
+     "deserialize"
+     "details"
+     "discipline"
+     "enforcement"
+     "entities"
+     "entity"
+     "every"
+     "existing"
+     "explicit"
+     "integrity"
+     "layer"
+     "load"
+     "missing"
+     "move"
+     "must"
+     "named"
+     "on"
+     "operate"
+     "pattern"
+     "reference"
+     "references"
+     "rehydrate"
+     "relation"
+     "see"
+     "startup"
+     "steward"
+     "substructure"
+     "until"
+     "validates"
+     "violation"},
+   :clauses
+   {:if
+    "The applicability scope of the pattern (see substructure).\n    + REQUIREMENTS:\n      - Rehydration loads all entities or throws\n      - No silent stubs, no placeholder values\n      - No partial loads, no \"best effort\" recovery\n      - Failure reports: what entity, what field, what was expected, what found\n      - Relations verified to have valid endpoints",
+    :however
+    "The structural tension above manifests in the following concrete shapes (see substructure).\n    + FAILURE-MODES:\n      Corrupt entity -> 500 ENTITY_CORRUPT (details: entity-id, field, error)\n      Dangling relation -> 500 DANGLING_REFERENCE (details: relation-id, missing-target)\n      Schema mismatch -> 500 SCHEMA_MISMATCH (details: entity-id, expected, found)\n\n    + ANTI-PATTERNS:\n      - Loading what we can, logging warnings for the rest\n      - Creating stub entities for missing references\n      - \"Recovering\" by skipping corrupt data\n      - Async background rehydration that might fail silently",
+    :then
+    "Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline.\n    + ENFORCEMENT:\n      Layer 2 (core/rehydrate.clj) validates on load:\n      - Every entity must deserialize completely\n      - Every relation must reference existing entities\n      - Missing references -> 500 INTEGRITY_VIOLATION with details\n      - Startup blocked until all data validates"},
+   :guard
+   {:status :missing,
+    :kind :missing-pattern-interpretation,
+    :details
+    [{:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "the applicability scope of the pattern (see substructure).\n    + requirements:\n      - rehydration loads all entities or throws\n      - no silent stubs, no placeholder values\n      - no partial loads, no \"best effort\" recovery\n      - failure reports: what entity, what field, what was expected, what found\n      - relations verified to have valid endpoints"}
+     {:status :missing,
+      :kind :uninterpretable-guard,
+      :text
+      "the structural tension above manifests in the following concrete shapes (see substructure).\n    + failure-modes:\n      corrupt entity -> 500 entity_corrupt (details: entity-id, field, error)\n      dangling relation -> 500 dangling_reference (details: relation-id, missing-target)\n      schema mismatch -> 500 schema_mismatch (details: entity-id, expected, found)\n\n    + anti-patterns:\n      - loading what we can, logging warnings for the rest\n      - creating stub entities for missing references\n      - \"recovering\" by skipping corrupt data\n      - async background rehydration that might fail silently"}]},
+   :transition
+   {:status :missing, :kind :missing-pattern-interpretation}}
+  {:id "storage/open-world-velocity-validation",
+   :source
+   {:path
+    "/home/joe/code/futon3/library/storage/open-world-velocity-validation.flexiarg",
+    :sha256
+    "2454676e3845cb09919f30c1cea4e872b8e8e6d1f6a9524c6f47ade986da93a4",
+    :authority :source-document},
+   :authority :documented-interpretation,
+   :produces
+   #{"backfill"
+     "enforce"
+     "ingest"
+     "on"
+     "recovery"
+     "repair"
+     "scripts"
+     "strict"
+     "supply"
+     "validation"},
+   :clauses
+   {:if "you want to ingest background knowledge quickly",
+    :however
+    "you also need open-world data to remain coherent and mirrorable",
+    :then
+    "enforce strict validation on ingest and supply repair/backfill scripts for recovery"},
+   :guard
+   {:status :interpreted,
+    :operator :and,
+    :clauses
+    [{:status :interpreted,
+      :present #{"background" "ingest" "knowledge" "quickly" "to"},
+      :absent #{}}
+     {:status :interpreted,
+      :present
+      #{"coherent" "data" "mirrorable" "open" "remain" "to" "world"},
+      :absent #{}}]},
+   :transition
+   {:status :interpreted,
+    :operator :union,
+    :produces
+    #{"backfill"
+      "enforce"
+      "ingest"
+      "on"
+      "recovery"
+      "repair"
+      "scripts"
+      "strict"
+      "supply"
+      "validation"},
+    :authority :documented-interpretation}}],
+ :construction-source
+ {:path
+  "holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/construction-comparison.json",
+  :sha256
+  "e8d2fb4aa9c75bae2e0e4ee360a2cd00ca0d2083c3f0ee1818fb5f762cc0d506",
+  :authority :source-document},
+ :authority :documented-interpretation,
+ :observation
+ {:authority :documented-interpretation,
+  :kind :deterministic-want-coverage,
+  :label "token-level proxy for true discharge",
+  :want
+  #{"aif"
+    "compliance"
+    "grain"
+    "live"
+    "machine"
+    "open"
+    "persistence"
+    "policy"
+    "remain"
+    "seams"
+    "war"},
+  :source
+  {:path
+   "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+   :sha256
+   "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e",
+   :authority :source-document},
+  :alphabet [0 1/11 2/11 3/11 4/11 5/11 6/11 7/11 8/11 9/11 10/11 1],
+  :ambiguity 0,
+  :consequence :risk-only},
+ :horizon
+ {:authority :documented-interpretation,
+  :rule :firing-pattern-count,
+  :value 9},
+ :state
+ {:universe
+  #{"a"
+    "above"
+    "acceptance"
+    "accumulate"
+    "accumulated"
+    "accumulating"
+    "accumulation"
+    "across"
+    "act"
+    "action"
+    "active"
+    "actual"
+    "actually"
+    "ad"
+    "addressed"
+    "addresses"
+    "adds"
+    "adequacy"
+    "affect"
+    "after"
+    "against"
+    "agency"
+    "agent"
+    "agents"
+    "aif"
+    "alfworld"
+    "all"
+    "always"
+    "am"
+    "among"
+    "an"
+    "analogy"
+    "ancestors"
+    "anchor"
+    "annotation"
+    "appearing"
+    "appears"
+    "append"
+    "apply"
+    "arbitrary"
+    "argument"
+    "around"
+    "arrow"
+    "arrows"
+    "artefacts"
+    "artifacts"
+    "as"
+    "asked"
+    "asserted"
+    "at"
+    "auditable"
+    "authored"
+    "authoritative"
+    "avoid"
+    "axis"
+    "back"
+    "backfill"
+    "baldwin"
+    "basin"
+    "be"
+    "bearing"
+    "because"
+    "been"
+    "before"
+    "below"
+    "between"
+    "bhk"
+    "block"
+    "blocked"
+    "blocks"
+    "both"
+    "boundaries"
+    "boundary"
+    "budget"
+    "buffers"
+    "but"
+    "by"
+    "cadence"
+    "can"
+    "canalization"
+    "candidate"
+    "candidates"
+    "cannot"
+    "canonicalization"
+    "canonicalize"
+    "canonically"
+    "canonization"
+    "capabilities"
+    "carries"
+    "certification"
+    "change"
+    "changes"
+    "channel"
+    "chapter"
+    "checkable"
+    "checkpoint"
+    "checkpoints"
+    "choose"
+    "choosing"
+    "citable"
+    "class"
+    "cleanly"
+    "clj"
+    "closed"
+    "closure"
+    "co"
+    "codebase"
+    "coincidence"
+    "commitment"
+    "compare"
+    "compared"
+    "completely"
+    "compliance"
+    "comply"
+    "components"
+    "composes"
+    "composite"
+    "compresses"
+    "compute"
+    "concludes"
+    "confidence"
+    "connection"
+    "constrain"
+    "constrains"
+    "contains"
+    "contexts"
+    "contingent"
+    "continuous"
+    "contradicted"
+    "contradiction"
+    "converge"
+    "convergence"
+    "conversation"
+    "coordination"
+    "core"
+    "corrected"
+    "could"
+    "counts"
+    "coupled"
+    "cover"
+    "created"
+    "criteria"
+    "critical"
+    "cross"
+    "current"
+    "currently"
+    "cycle"
+    "daily"
+    "dark"
+    "data"
+    "days"
+    "declarations"
+    "declared"
+    "decrease"
+    "default"
+    "degrade"
+    "deleted"
+    "deliberate"
+    "deliberately"
+    "delta"
+    "derives"
+    "describe"
+    "deserialize"
+    "destination"
+    "details"
+    "detection"
+    "deterministic"
+    "development"
+    "devmap"
+    "diagnostic"
+    "diagram"
+    "did"
+    "different"
+    "difficulty"
+    "direct"
+    "directly"
+    "discipline"
+    "discovered"
+    "discrepancy"
+    "divergence"
+    "doc"
+    "does"
+    "drafts"
+    "drift"
+    "drives"
+    "dst"
+    "each"
+    "edges"
+    "edited"
+    "edn"
+    "eight"
+    "emacs"
+    "emerge"
+    "emergent"
+    "emission"
+    "emit"
+    "emitted"
+    "emitting"
+    "empty"
+    "energy"
+    "enforce"
+    "enforcement"
+    "entities"
+    "entity"
+    "env"
+    "environment"
+    "eoi"
+    "equivalent"
+    "error"
+    "errors"
+    "essay"
+    "established"
+    "etc"
+    "even"
+    "event"
+    "events"
+    "every"
+    "evidence"
+    "evolution"
+    "exchange"
+    "execute"
+    "execution"
+    "executions"
+    "existing"
+    "exists"
+    "exogeneity"
+    "expand"
+    "expansion"
+    "experience"
+    "explains"
+    "explicit"
+    "express"
+    "expressing"
+    "extract"
+    "extracted"
+    "failing"
+    "failure"
+    "failures"
+    "falsified"
+    "fast"
+    "feel"
+    "felt"
+    "field"
+    "fields"
+    "fine"
+    "first"
+    "fix"
+    "fixes"
+    "follows"
+    "forbidden"
+    "force"
+    "foreclosed"
+    "framing"
+    "free"
+    "frequency"
+    "futon1a"
+    "futon3"
+    "futon3a"
+    "futon5"
+    "future"
+    "g"
+    "g1"
+    "g3"
+    "g5"
+    "gained"
+    "gap"
+    "gate"
+    "gates"
+    "generated"
+    "generative"
+    "giving"
+    "glacial"
+    "go"
+    "goldens"
+    "govern"
+    "governed"
+    "grain"
+    "granularity"
+    "graph"
+    "graphs"
+    "guide"
+    "had"
+    "happen"
+    "hard"
+    "harness"
+    "has"
+    "history"
+    "hitting"
+    "hoc"
+    "hops"
+    "how"
+    "i"
+    "i1"
+    "i2"
+    "i3"
+    "i4"
+    "i5"
+    "i6"
+    "id"
+    "ideal"
+    "identifiable"
+    "if"
+    "implement"
+    "implementation"
+    "in"
+    "independently"
+    "inference"
+    "inferred"
+    "ingest"
+    "institution"
+    "instruction"
+    "insufficient"
+    "integrity"
+    "inter"
+    "interview"
+    "invariant"
+    "invariants"
+    "inventory"
+    "irritation"
+    "is"
+    "isn"
+    "it"
+    "itself"
+    "just"
+    "kernel"
+    "keys"
+    "keyword"
+    "kinds"
+    "land"
+    "language"
+    "layer"
+    "let"
+    "level"
+    "library"
+    "like"
+    "link"
+    "live"
+    "load"
+    "log"
+    "loop"
+    "loops"
+    "low"
+    "machine"
+    "maintain"
+    "make"
+    "malformed"
+    "mana"
+    "many"
+    "mapping"
+    "match"
+    "material"
+    "meme"
+    "memos"
+    "metaphor"
+    "missing"
+    "mission"
+    "missions"
+    "mistakes"
+    "mode"
+    "model"
+    "modeline"
+    "modify"
+    "modulates"
+    "more"
+    "move"
+    "mu"
+    "multiple"
+    "must"
+    "name"
+    "named"
+    "naming"
+    "naturally"
+    "necessary"
+    "needs"
+    "negotiate"
+    "nesting"
+    "never"
+    "new"
+    "newly"
+    "no"
+    "nogo"
+    "noise"
+    "non"
+    "none"
+    "not"
+    "notes"
+    "now"
+    "object"
+    "obs"
+    "observation"
+    "observations"
+    "observe"
+    "of"
+    "off"
+    "omitted"
+    "on"
+    "one"
+    "only"
+    "op"
+    "open"
+    "operate"
+    "operates"
+    "operator"
+    "optional"
+    "optionally"
+    "or"
+    "organizational"
+    "out"
+    "over"
+    "overfit"
+    "overloading"
+    "p"
+    "par"
+    "parameter"
+    "part"
+    "path"
+    "pattern"
+    "patterns"
+    "payload"
+    "perceive"
+    "perceives"
+    "perception"
+    "peripheral"
+    "persistence"
+    "persistent"
+    "persists"
+    "phylogeny"
+    "pipeline"
+    "plain"
+    "plan"
+    "pointer"
+    "pointers"
+    "policies"
+    "policy"
+    "pollute"
+    "posterior"
+    "practice"
+    "pre"
+    "predicted"
+    "prediction"
+    "prescribed"
+    "present"
+    "pressure"
+    "prevention"
+    "previous"
+    "prior"
+    "problem"
+    "problems"
+    "process"
+    "processor"
+    "produce"
+    "produced"
+    "produces"
+    "project"
+    "projection"
+    "promote"
+    "promoting"
+    "prompt"
+    "prompted"
+    "proof"
+    "prose"
+    "provenance"
+    "providing"
+    "psr"
+    "psrs"
+    "publish"
+    "pur"
+    "pushes"
+    "rate"
+    "rationale"
+    "raw"
+    "re"
+    "read"
+    "reading"
+    "real"
+    "reality"
+    "reappearance"
+    "reappears"
+    "reason"
+    "recent"
+    "recognise"
+    "record"
+    "records"
+    "recovery"
+    "recurring"
+    "ref"
+    "reference"
+    "references"
+    "referencing"
+    "refined"
+    "reflect"
+    "reflection"
+    "refs"
+    "regressions"
+    "rehydrate"
+    "relation"
+    "remain"
+    "remaining"
+    "renders"
+    "reopened"
+    "repair"
+    "repeated"
+    "replay"
+    "replayable"
+    "report"
+    "repos"
+    "representable"
+    "required"
+    "requirements"
+    "reset"
+    "reshaping"
+    "resolved"
+    "response"
+    "retraction"
+    "retroactive"
+    "rewrite"
+    "rhythm"
+    "rising"
+    "role"
+    "running"
+    "runs"
+    "s"
+    "same"
+    "satisfy"
+    "says"
+    "schema"
+    "scope"
+    "scoped"
+    "scored"
+    "scripts"
+    "seams"
+    "section"
+    "sections"
+    "see"
+    "select"
+    "selected"
+    "selecting"
+    "selection"
+    "selections"
+    "separate"
+    "seriously"
+    "serve"
+    "shape"
+    "share"
+    "shared"
+    "sharpened"
+    "should"
+    "showing"
+    "shows"
+    "sigil"
+    "signal"
+    "signals"
+    "silent"
+    "simply"
+    "single"
+    "situational"
+    "six"
+    "slices"
+    "so"
+    "softmax"
+    "solving"
+    "sorry"
+    "source"
+    "spawned"
+    "specification"
+    "specs"
+    "src"
+    "standing"
+    "startup"
+    "state"
+    "status"
+    "step"
+    "steward"
+    "stop"
+    "storage"
+    "strategy"
+    "strawman"
+    "strengthened"
+    "strict"
+    "string"
+    "structural"
+    "structurally"
+    "structure"
+    "struggles"
+    "style"
+    "sub"
+    "subgraphs"
+    "substructure"
+    "supply"
+    "support"
+    "surface"
+    "surprised"
+    "sustain"
+    "sustains"
+    "symbol"
+    "symbolic"
+    "synthetic"
+    "system"
+    "systematic"
+    "t"
+    "take"
+    "taken"
+    "target"
+    "targets"
+    "task"
+    "tasks"
+    "tau"
+    "temperature"
+    "tension"
+    "tensions"
+    "terminal"
+    "test"
+    "them"
+    "theme"
+    "there"
+    "therefore"
+    "these"
+    "they"
+    "those"
+    "three"
+    "through"
+    "tick"
+    "time"
+    "timescale"
+    "timescales"
+    "to"
+    "topology"
+    "trace"
+    "traces"
+    "track"
+    "trans"
+    "turns"
+    "tweak"
+    "two"
+    "type"
+    "typed"
+    "types"
+    "typically"
+    "uncertainty"
+    "unique"
+    "unrelated"
+    "until"
+    "up"
+    "update"
+    "updates"
+    "v1"
+    "validate"
+    "validates"
+    "validation"
+    "vector"
+    "violation"
+    "vocabulary"
+    "vsm"
+    "wall"
+    "war"
+    "warns"
+    "was"
+    "what"
+    "when"
+    "which"
+    "why"
+    "wireheading"
+    "wiring"
+    "within"
+    "without"
+    "work"
+    "workaround"
+    "works"
+    "world"
+    "would"
+    "written"
+    "τ"
+    "前符号压力"
+    "结构刺激"
+    "跨情境复现"},
+  :carrier
+  {:kind :powerset,
+   :of
+   #{"a"
+     "above"
+     "acceptance"
+     "accumulate"
+     "accumulated"
+     "accumulating"
+     "accumulation"
+     "across"
+     "act"
+     "action"
+     "active"
+     "actual"
+     "actually"
+     "ad"
+     "addressed"
+     "addresses"
+     "adds"
+     "adequacy"
+     "affect"
+     "after"
+     "against"
+     "agency"
+     "agent"
+     "agents"
+     "aif"
+     "alfworld"
+     "all"
+     "always"
+     "am"
+     "among"
+     "an"
+     "analogy"
+     "ancestors"
+     "anchor"
+     "annotation"
+     "appearing"
+     "appears"
+     "append"
+     "apply"
+     "arbitrary"
+     "argument"
+     "around"
+     "arrow"
+     "arrows"
+     "artefacts"
+     "artifacts"
+     "as"
+     "asked"
+     "asserted"
+     "at"
+     "auditable"
+     "authored"
+     "authoritative"
+     "avoid"
+     "axis"
+     "back"
+     "backfill"
+     "baldwin"
+     "basin"
+     "be"
+     "bearing"
+     "because"
+     "been"
+     "before"
+     "below"
+     "between"
+     "bhk"
+     "block"
+     "blocked"
+     "blocks"
+     "both"
+     "boundaries"
+     "boundary"
+     "budget"
+     "buffers"
+     "but"
+     "by"
+     "cadence"
+     "can"
+     "canalization"
+     "candidate"
+     "candidates"
+     "cannot"
+     "canonicalization"
+     "canonicalize"
+     "canonically"
+     "canonization"
+     "capabilities"
+     "carries"
+     "certification"
+     "change"
+     "changes"
+     "channel"
+     "chapter"
+     "checkable"
+     "checkpoint"
+     "checkpoints"
+     "choose"
+     "choosing"
+     "citable"
+     "class"
+     "cleanly"
+     "clj"
+     "closed"
+     "closure"
+     "co"
+     "codebase"
+     "coincidence"
+     "commitment"
+     "compare"
+     "compared"
+     "completely"
+     "compliance"
+     "comply"
+     "components"
+     "composes"
+     "composite"
+     "compresses"
+     "compute"
+     "concludes"
+     "confidence"
+     "connection"
+     "constrain"
+     "constrains"
+     "contains"
+     "contexts"
+     "contingent"
+     "continuous"
+     "contradicted"
+     "contradiction"
+     "converge"
+     "convergence"
+     "conversation"
+     "coordination"
+     "core"
+     "corrected"
+     "could"
+     "counts"
+     "coupled"
+     "cover"
+     "created"
+     "criteria"
+     "critical"
+     "cross"
+     "current"
+     "currently"
+     "cycle"
+     "daily"
+     "dark"
+     "data"
+     "days"
+     "declarations"
+     "declared"
+     "decrease"
+     "default"
+     "degrade"
+     "deleted"
+     "deliberate"
+     "deliberately"
+     "delta"
+     "derives"
+     "describe"
+     "deserialize"
+     "destination"
+     "details"
+     "detection"
+     "deterministic"
+     "development"
+     "devmap"
+     "diagnostic"
+     "diagram"
+     "did"
+     "different"
+     "difficulty"
+     "direct"
+     "directly"
+     "discipline"
+     "discovered"
+     "discrepancy"
+     "divergence"
+     "doc"
+     "does"
+     "drafts"
+     "drift"
+     "drives"
+     "dst"
+     "each"
+     "edges"
+     "edited"
+     "edn"
+     "eight"
+     "emacs"
+     "emerge"
+     "emergent"
+     "emission"
+     "emit"
+     "emitted"
+     "emitting"
+     "empty"
+     "energy"
+     "enforce"
+     "enforcement"
+     "entities"
+     "entity"
+     "env"
+     "environment"
+     "eoi"
+     "equivalent"
+     "error"
+     "errors"
+     "essay"
+     "established"
+     "etc"
+     "even"
+     "event"
+     "events"
+     "every"
+     "evidence"
+     "evolution"
+     "exchange"
+     "execute"
+     "execution"
+     "executions"
+     "existing"
+     "exists"
+     "exogeneity"
+     "expand"
+     "expansion"
+     "experience"
+     "explains"
+     "explicit"
+     "express"
+     "expressing"
+     "extract"
+     "extracted"
+     "failing"
+     "failure"
+     "failures"
+     "falsified"
+     "fast"
+     "feel"
+     "felt"
+     "field"
+     "fields"
+     "fine"
+     "first"
+     "fix"
+     "fixes"
+     "follows"
+     "forbidden"
+     "force"
+     "foreclosed"
+     "framing"
+     "free"
+     "frequency"
+     "futon1a"
+     "futon3"
+     "futon3a"
+     "futon5"
+     "future"
+     "g"
+     "g1"
+     "g3"
+     "g5"
+     "gained"
+     "gap"
+     "gate"
+     "gates"
+     "generated"
+     "generative"
+     "giving"
+     "glacial"
+     "go"
+     "goldens"
+     "govern"
+     "governed"
+     "grain"
+     "granularity"
+     "graph"
+     "graphs"
+     "guide"
+     "had"
+     "happen"
+     "hard"
+     "harness"
+     "has"
+     "history"
+     "hitting"
+     "hoc"
+     "hops"
+     "how"
+     "i"
+     "i1"
+     "i2"
+     "i3"
+     "i4"
+     "i5"
+     "i6"
+     "id"
+     "ideal"
+     "identifiable"
+     "if"
+     "implement"
+     "implementation"
+     "in"
+     "independently"
+     "inference"
+     "inferred"
+     "ingest"
+     "institution"
+     "instruction"
+     "insufficient"
+     "integrity"
+     "inter"
+     "interview"
+     "invariant"
+     "invariants"
+     "inventory"
+     "irritation"
+     "is"
+     "isn"
+     "it"
+     "itself"
+     "just"
+     "kernel"
+     "keys"
+     "keyword"
+     "kinds"
+     "land"
+     "language"
+     "layer"
+     "let"
+     "level"
+     "library"
+     "like"
+     "link"
+     "live"
+     "load"
+     "log"
+     "loop"
+     "loops"
+     "low"
+     "machine"
+     "maintain"
+     "make"
+     "malformed"
+     "mana"
+     "many"
+     "mapping"
+     "match"
+     "material"
+     "meme"
+     "memos"
+     "metaphor"
+     "missing"
+     "mission"
+     "missions"
+     "mistakes"
+     "mode"
+     "model"
+     "modeline"
+     "modify"
+     "modulates"
+     "more"
+     "move"
+     "mu"
+     "multiple"
+     "must"
+     "name"
+     "named"
+     "naming"
+     "naturally"
+     "necessary"
+     "needs"
+     "negotiate"
+     "nesting"
+     "never"
+     "new"
+     "newly"
+     "no"
+     "nogo"
+     "noise"
+     "non"
+     "none"
+     "not"
+     "notes"
+     "now"
+     "object"
+     "obs"
+     "observation"
+     "observations"
+     "observe"
+     "of"
+     "off"
+     "omitted"
+     "on"
+     "one"
+     "only"
+     "op"
+     "open"
+     "operate"
+     "operates"
+     "operator"
+     "optional"
+     "optionally"
+     "or"
+     "organizational"
+     "out"
+     "over"
+     "overfit"
+     "overloading"
+     "p"
+     "par"
+     "parameter"
+     "part"
+     "path"
+     "pattern"
+     "patterns"
+     "payload"
+     "perceive"
+     "perceives"
+     "perception"
+     "peripheral"
+     "persistence"
+     "persistent"
+     "persists"
+     "phylogeny"
+     "pipeline"
+     "plain"
+     "plan"
+     "pointer"
+     "pointers"
+     "policies"
+     "policy"
+     "pollute"
+     "posterior"
+     "practice"
+     "pre"
+     "predicted"
+     "prediction"
+     "prescribed"
+     "present"
+     "pressure"
+     "prevention"
+     "previous"
+     "prior"
+     "problem"
+     "problems"
+     "process"
+     "processor"
+     "produce"
+     "produced"
+     "produces"
+     "project"
+     "projection"
+     "promote"
+     "promoting"
+     "prompt"
+     "prompted"
+     "proof"
+     "prose"
+     "provenance"
+     "providing"
+     "psr"
+     "psrs"
+     "publish"
+     "pur"
+     "pushes"
+     "rate"
+     "rationale"
+     "raw"
+     "re"
+     "read"
+     "reading"
+     "real"
+     "reality"
+     "reappearance"
+     "reappears"
+     "reason"
+     "recent"
+     "recognise"
+     "record"
+     "records"
+     "recovery"
+     "recurring"
+     "ref"
+     "reference"
+     "references"
+     "referencing"
+     "refined"
+     "reflect"
+     "reflection"
+     "refs"
+     "regressions"
+     "rehydrate"
+     "relation"
+     "remain"
+     "remaining"
+     "renders"
+     "reopened"
+     "repair"
+     "repeated"
+     "replay"
+     "replayable"
+     "report"
+     "repos"
+     "representable"
+     "required"
+     "requirements"
+     "reset"
+     "reshaping"
+     "resolved"
+     "response"
+     "retraction"
+     "retroactive"
+     "rewrite"
+     "rhythm"
+     "rising"
+     "role"
+     "running"
+     "runs"
+     "s"
+     "same"
+     "satisfy"
+     "says"
+     "schema"
+     "scope"
+     "scoped"
+     "scored"
+     "scripts"
+     "seams"
+     "section"
+     "sections"
+     "see"
+     "select"
+     "selected"
+     "selecting"
+     "selection"
+     "selections"
+     "separate"
+     "seriously"
+     "serve"
+     "shape"
+     "share"
+     "shared"
+     "sharpened"
+     "should"
+     "showing"
+     "shows"
+     "sigil"
+     "signal"
+     "signals"
+     "silent"
+     "simply"
+     "single"
+     "situational"
+     "six"
+     "slices"
+     "so"
+     "softmax"
+     "solving"
+     "sorry"
+     "source"
+     "spawned"
+     "specification"
+     "specs"
+     "src"
+     "standing"
+     "startup"
+     "state"
+     "status"
+     "step"
+     "steward"
+     "stop"
+     "storage"
+     "strategy"
+     "strawman"
+     "strengthened"
+     "strict"
+     "string"
+     "structural"
+     "structurally"
+     "structure"
+     "struggles"
+     "style"
+     "sub"
+     "subgraphs"
+     "substructure"
+     "supply"
+     "support"
+     "surface"
+     "surprised"
+     "sustain"
+     "sustains"
+     "symbol"
+     "symbolic"
+     "synthetic"
+     "system"
+     "systematic"
+     "t"
+     "take"
+     "taken"
+     "target"
+     "targets"
+     "task"
+     "tasks"
+     "tau"
+     "temperature"
+     "tension"
+     "tensions"
+     "terminal"
+     "test"
+     "them"
+     "theme"
+     "there"
+     "therefore"
+     "these"
+     "they"
+     "those"
+     "three"
+     "through"
+     "tick"
+     "time"
+     "timescale"
+     "timescales"
+     "to"
+     "topology"
+     "trace"
+     "traces"
+     "track"
+     "trans"
+     "turns"
+     "tweak"
+     "two"
+     "type"
+     "typed"
+     "types"
+     "typically"
+     "uncertainty"
+     "unique"
+     "unrelated"
+     "until"
+     "up"
+     "update"
+     "updates"
+     "v1"
+     "validate"
+     "validates"
+     "validation"
+     "vector"
+     "violation"
+     "vocabulary"
+     "vsm"
+     "wall"
+     "war"
+     "warns"
+     "was"
+     "what"
+     "when"
+     "which"
+     "why"
+     "wireheading"
+     "wiring"
+     "within"
+     "without"
+     "work"
+     "workaround"
+     "works"
+     "world"
+     "would"
+     "written"
+     "τ"
+     "前符号压力"
+     "结构刺激"
+     "跨情境复现"}},
+  :representation :symbolic-finite-powerset,
+  :authority :documented-interpretation},
+ :extraction
+ {:rule
+  "a. Source: the mission's Status line INCLUDING its continuation line(s) (fix the adapter's omission you found), plus any structured status/component table in the same document (e.g. M-aif-policy-conditioned-eig.md:112-115 built/unwired, candidate, absent). Prefer the table where it exists; cite the lines used.\nb. Split into clauses at \";\", \"—\", sentence ends, and table rows.\nc. A clause contributes its salient tokens to q0 only if it affirms the capability exists, via declared affirmative markers (e.g. instantiated, accepted, done, landed, live, built, merged, agreed). Built-but-not-live clauses (\"dark\", \"shadow\", \"built/unwired\") count as available for construction and are tagged :built-not-live, so the distinction is kept.\nd. A clause with an outstanding marker (open, remain open, owed, absent, missing, pending, candidate, not yet) contributes its tokens to WANT, never to q0.\ne. A clause with neither marker is excluded and recorded as an :unclassified-clause finding.\nf. Negation words are never dropped in any of this. Declare both marker lists in the manifest. If q0 comes out empty for a mission, that is a finding, not a default.",
+  :affirmative-markers
+  ["instantiated"
+   "accepted"
+   "done"
+   "landed"
+   "live"
+   "built"
+   "merged"
+   "agreed"
+   "dark"
+   "shadow"],
+  :outstanding-markers
+  ["open"
+   "remain open"
+   "owed"
+   "absent"
+   "missing"
+   "pending"
+   "candidate"
+   "not yet"
+   "no"
+   "not"
+   "never"],
+  :priority :outstanding-first,
+  :stopwords
+  #{"are"
+    "this"
+    "also"
+    "you"
+    "its"
+    "than"
+    "for"
+    "need"
+    "that"
+    "and"
+    "from"
+    "want"
+    "with"
+    "into"
+    "the"}},
+ :implementation-source
+ {:path "src/futon2/aif/cascade_model_manifest.clj",
+  :sha256
+  "794defe2599a5fdccb79e5166704d32eae1a134f9cb5e54141e396eecd28deec",
+  :authority :source-document},
+ :preference
+ {:status :missing,
+  :kind :missing-coverage-preference-map,
+  :source
+  {:path "src/futon2/aif/ruled_outcome_c.clj",
+   :sha256
+   "bf8784090906d19b0f7a5700e9c148dc2cdd40762e5a624e49e6a70cf995519c",
+   :authority :source-document}},
+ :status :partial,
+ :initial-belief
+ {:authority :documented-interpretation,
+  :source
+  {:path
+   "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+   :sha256
+   "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e",
+   :authority :source-document},
+  :mass {#{"a" "dark" "kernel" "slices"} 1}},
+ :ruling
+ {:authority :owner-dispatch,
+  :author "claude-20",
+  :reference "invoke-1789457902962-21000-0d50b14a"},
+ :firing
+ ["gauntlet/modeline-persists-across-worlds"
+  "gauntlet/aif-as-environment-not-instruction"
+  "aif/policy-precision-commitment-temperature"
+  "futon-theory/structural-tension-as-observation"
+  "war-machine/ideal-actual-gap"
+  "structure/interest-event-vocabulary"
+  "ants/baseline-cyber-ant"
+  "futon-theory/all-or-nothing"
+  "storage/open-world-velocity-validation"],
+ :notes
+ {:precedence
+  :construction-order-provisional-not-admissibility-witness,
+  :future-precedence
+  "Enumerate linear extensions v before u when u stands on v, transitively; declare cap, refuse overflow, no sampling.",
+  :future-prior
+  {:habit :uniform,
+   :authority :cold-start,
+   :gamma 1,
+   :form :B.7,
+   :choice :argmax,
+   :ties :canonical-pair-identity},
+  :H1b "Must genuinely select rank one and pass its gate.",
+  :observation-validator
+  "Documented A is not submitted to categorical-ambiguity observed-estimate admission; contract change remains separate."},
+ :target-choice
+ {:rule :most-interpretable-firing-patterns,
+  :tie-break :canonical-mission-id,
+  :scope :existing-three-mission-allow-list},
+ :target
+ {:findings
+  [{:kind :unclassified-clause,
+    :line 4,
+    :text "**Status:** INSTANTIATE"}],
+  :have #{"a" "dark" "kernel" "slices"},
+  :authority :documented-interpretation,
+  :source
+  {:path
+   "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+   :sha256
+   "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e",
+   :authority :source-document},
+  :selection-rule :status-with-continuations,
+  :id "M-wm-aif-policy-grain-compliance",
+  :ok true,
+  :want
+  #{"aif"
+    "compliance"
+    "grain"
+    "live"
+    "machine"
+    "open"
+    "persistence"
+    "policy"
+    "remain"
+    "seams"
+    "war"},
+  :clauses
+  [{:line 4,
+    :text "**Status:** INSTANTIATE",
+    :classification :unclassified,
+    :tokens #{"instantiate" "status"}}
+   {:line 4,
+    :text "Slices 0, 1a, and 2 kernel dark",
+    :classification :built-not-live,
+    :tokens #{"a" "dark" "kernel" "slices"}}
+   {:line 4,
+    :text "persistence/live seams remain open",
+    :classification :outstanding,
+    :tokens #{"live" "open" "persistence" "remain" "seams"}}],
+  :status-lines
+  [[4
+    "**Status:** INSTANTIATE — Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open  "]]},
+ :guard-interpretation
+ {:authority :documented-interpretation,
+  :positive
+  "Conjunctive presence of all lexical tokens in IF and HOWEVER after the declared function-word removal; a token-level interpretation, not natural-language truth.",
+  :negative
+  "Exact literal conjunctions such as ready and not blocked compile to presence and absence; other negation scopes, disjunctions, nested conditionals, modalities and substructures are MISSING.",
+  :stopwords
+  #{"are"
+    "this"
+    "also"
+    "you"
+    "its"
+    "than"
+    "for"
+    "need"
+    "that"
+    "and"
+    "from"
+    "want"
+    "with"
+    "into"
+    "the"}}}

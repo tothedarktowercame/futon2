@@ -1,3 +1,29 @@
+# Follow-up: partial manifest built after q0 ruling
+
+Owner resolution: `invoke-1789457902962-21000-0d50b14a`. The historical admission refusal below is retained; its q0 extraction question is now resolved by the verbatim rule in `partial-manifest.edn`.
+
+`futon2.aif.cascade-model-manifest` implements that rule, preferring tables with a Status column, retaining full Status continuation lines, giving outstanding markers precedence and tagging built/unwired availability. Both marker lists and lexical stopwords are in the manifest. Bare id-stem inputs refuse. The implementation does not change the existing live adapter.
+
+| Mission | HAVE tokens | Constructed firing list | Interpreted guards + transitions |
+|---|---:|---:|---:|
+| M-aif-policy-conditioned-eig | 21 | 12 | 0 |
+| M-wm-aif-policy-grain-compliance | 4 | 9 | 1 |
+| M-shared-memory-control-build-test | 14 | 7 | 0 |
+
+Selected **M-wm-aif-policy-grain-compliance**, by most interpreted patterns, canonical mission ID for ties. The only interpreted member is `storage/open-world-velocity-validation`. The guard interpreter is deliberately partial: positive clauses mean conjunction of lexical-token presence; exact literal conjunctions support negation as absence; complex scopes, disjunction, modalities and substructures are missing, not permissive guards. All source clauses remain available for review.
+
+**This is a partial model, not an executable/scored candidate family.** The one interpreted guard requires `background`, `knowledge`, `quickly`, `coherent`, and `mirrorable`, which lie outside the ruled universe. It is therefore false throughout that universe. This is a typed `:guard-unreachable-in-declared-universe` finding, not evidence of successful composition; no tokens were added to make it work. The eight other patterns have missing interpretations. Future interpretation review must resolve this before any production witness can qualify.
+
+The finite state carrier is represented symbolically as the complete powerset of its explicit token universe, not enumerated or truncated. q0 and deterministic transition/observation rows use exact integer/ratio masses. A observes want coverage, explicitly a “token-level proxy for true discharge”; ambiguity is zero. C is missing and scoring is prohibited. T is 9, the construction-order firing count; legal stands-on orders and their cap remain a future packet, not an admissibility claim about the current order.
+
+Findings: unclassified clause; missing C coverage mapping; eight missing pattern interpretations; unreachable interpreted guard; uncommissioned admissible precedence; success-history availability; separate documented-A validator contract. Aggregate grounded and self-graded posterior tables exist and selected-pattern rows are retained, but do not establish mission-conditioned stochastic transition statistics. No stochastic rows are implemented.
+
+Reproduce from futon2: `clojure -M holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/build_manifest.clj`. This reads the retained construction results and verifies their mission digests before applying the new extraction. It does not select via the fixture chooser or contact a serving JVM.
+
+Validation: `clj-kondo --lint` on the new namespace, focused test namespace and build script: 0 errors/0 warnings; `futon4/dev/check-parens.el` on those files plus the EDN: OK; `clojure -M:test -m cognitect.test-runner -n futon2.aif.cascade-model-manifest-test`: 4 tests, 31 assertions, 0 failures/errors, fresh short-lived JVM. EDN round-trip and exact q0 normalization also checked during manifest construction. No reload, click, configuration/environment change or scoring.
+
+---
+
 # F13 packet 1 — model admission stopped at q0
 
 Status: **blocked; no model admitted and no implementation claimed**. Author: codex-27, 2026-09-15. This is the explicit source-admission stop requested in the dispatch, not a successful packet-1 manifest.
